@@ -1,0 +1,5 @@
+--require test/support
+--reporter spec
+--check-leaks
+--slow 100
+--growl

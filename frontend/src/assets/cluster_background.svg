@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="720px" height="150px" viewBox="0 0 720 150" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="background: #000000;">
+    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+    <title>cluster_background</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <polygon id="path-1" points="734.007812 -26.1289062 734.007812 150 125.015625 -26.1289062"></polygon>
+        <filter x="-4.0%" y="-21.9%" width="111.7%" height="140.3%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="11" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="10" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <polygon id="path-3" points="731.917969 19.8203125 716.516501 204 158 172.855469"></polygon>
+        <filter x="-4.3%" y="-20.9%" width="112.4%" height="138.5%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="11" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="10" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+        <polygon id="path-5" points="766.109375 34 754.191406 218.179688 322 187.035156"></polygon>
+        <filter x="-5.5%" y="-20.9%" width="116.0%" height="138.5%" filterUnits="objectBoundingBox" id="filter-6">
+            <feOffset dx="11" dy="-3" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="10" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="cluster_background">
+            <rect id="Rectangle-2" fill="#0097A7" x="0" y="0" width="752" height="177"></rect>
+            <g id="Triangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                <use fill="#84FFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+            </g>
+            <g id="Triangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
+                <use fill="#26C6DA" fill-rule="evenodd" xlink:href="#path-3"></use>
+            </g>
+            <g id="Triangle">
+                <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
+                <use fill="#00ACC1" fill-rule="evenodd" xlink:href="#path-5"></use>
+            </g>
+        </g>
+    </g>
+</svg>
