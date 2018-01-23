@@ -40,7 +40,7 @@ limitations under the License.
           </v-card-title>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0"></v-divider>
-            <v-card-actions v-key="index">
+            <v-card-actions :key="index">
               <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" target="_blank" :title="item.title">
                 <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>
                 {{item.title}}
