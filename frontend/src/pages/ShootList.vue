@@ -441,6 +441,9 @@ limitations under the License.
           header.checked = header.checkedDefault
         }
         this.saveColumnsChecked()
+
+        this.pagination.sortBy = 'name'
+        this.pagination.descending = false
       },
       loadColumnsChecked () {
         const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
