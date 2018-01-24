@@ -2,7 +2,7 @@ ORGANIZATION := gardener
 PROJECT      := dashboard
 VERSION      ?= $(shell ./scripts/git-version)
 
-REGISTRY := gcr.io/to/be/defined
+REGISTRY := eu.gcr.io/sap-cloud-platform-dev1
 IMAGE    := $(REGISTRY)/$(ORGANIZATION)/$(PROJECT)
 TAG      := $(VERSION)
 
