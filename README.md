@@ -1,6 +1,6 @@
 # Gardener Dashboard
 
-![Gardener Logo](/frontend/static/favicon-96x96.png)
+<img src="https://user-images.githubusercontent.com/5526658/35324536-4447618c-00f1-11e8-8cb7-70b0ad193593.gif" alt="Gardener Demo" width="600"/>
 
 ## Development Setup
 
