@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+
+if [ -z "$SOURCE_PATH" ]; then
+  export SOURCE_PATH="$(readlink -f $(dirname ${0})/..)"
+else
+  export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
+fi
+
+if [ ! -z "$BINARY_PATH" ]; then
+  BINARY_PATH="$(readlink -f ${BINARY_PATH})"
+fi
+
+# not every environment has pushd
+old_pwd=$PWD
+cd "${SOURCE_PATH}"
+
+npm install --prefix frontend
+npm run --prefix frontend -s build
+
+cd "${old_pwd}"
+
+if [ ! -z "$BINARY_PATH" ]; then
+  cp -r "${SOURCE_PATH}/frontend" "${BINARY_PATH}/"
+fi
