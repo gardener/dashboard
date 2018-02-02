@@ -18,9 +18,11 @@
 
 const _ = require('lodash')
 const nock = require('nock')
+const yaml = require('js-yaml')
 
-const { clientConfig } = require('../../../lib/kubernetes')
-
+const { credentials } = require('../../../lib/kubernetes')
+const { encodeBase64 } = require('../../../lib/utils')
+const clientConfig = credentials()
 const url = clientConfig.url
 const auth = clientConfig.auth
 
@@ -36,21 +38,41 @@ const projectList = [
   getProject('secret', 'admin@example.org', 'admin@example.org', 'secret-description', 'secret-purpose')
 ]
 
+const shootList = [
+  getShoot({name: 'fooShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', infrastructureSecretName: 'fooSecretName'}),
+  getShoot({name: 'barShoot', project: 'fooProject', createdBy: 'barCreator', purpose: 'barPurpose', infrastructureSecretName: 'barSecretName'}),
+  getShoot({name: 'dummyShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', infrastructureSecretName: 'barSecretName'})
+]
+
+const infrastructureSecretsList = [
+  getInfrastructureSecret('foo', 'secret1', 'infra1'),
+  getInfrastructureSecret('foo', 'secret2', 'infra1'),
+  getInfrastructureSecret('foo', 'secret3', 'infra2')
+]
+
 const projectMembersList = [
   getProjectMembers('garden-foo', ['foo@example.org', 'bar@example.org']),
   getProjectMembers('garden-bar', ['bar@example.org', 'foo@example.org']),
   getProjectMembers('garden-secret', ['admin@example.org'])
 ]
 
-function getSeed (kind, region) {
+const certificateAuthorityData = encodeBase64('certificate-authority-data')
+const clientCertificateData = encodeBase64('client-certificate-data')
+const clientKeyData = encodeBase64('client-key-data')
+
+function getSeed (kind, region, data = {}) {
   return {
     metadata: {
       name: `${kind}---${region}`,
       labels: {
         'infrastructure.garden.sapcloud.io/kind': kind,
         'infrastructure.garden.sapcloud.io/region': region
+      },
+      annotations: {
+        'dns.garden.sapcloud.io/domain': `${region}.${kind}.example.org`
       }
-    }
+    },
+    data
   }
 }
 
@@ -79,6 +101,20 @@ function getProjectMembers (namespace, users) {
   }
 }
 
+function getInfrastructureSecret (project, name, kind, data = {}) {
+  return {
+    metadata: {
+      labels: {
+        'garden.sapcloud.io/role': 'infrastructure',
+        'infrastructure.garden.sapcloud.io/kind': kind
+      },
+      name,
+      namespace: `garden-${project}`
+    },
+    data
+  }
+}
+
 function getProject (name, owner, createdBy, description, purpose) {
   return {
     metadata: {
@@ -97,6 +133,64 @@ function getProject (name, owner, createdBy, description, purpose) {
   }
 }
 
+function getShoot ({
+  name,
+  project,
+  createdBy,
+  purpose = 'foo-purpose',
+  kind = 'fooInfra',
+  region = 'foo-west',
+  infrastructureSecretName = 'foo-secret'
+}) {
+  const shoot = {
+    metadata: {
+      name,
+      namespace: `garden-${project}`,
+      annotations: {
+        'garden.sapcloud.io/purpose': purpose
+      }
+    },
+    spec: {
+      infrastructure: {
+        kind,
+        region,
+        secret: infrastructureSecretName
+      }
+    }
+  }
+  if (createdBy) {
+    shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
+  }
+  return shoot
+}
+
+function getKubeconfig ({server, name}) {
+  const cluster = {
+    'certificate-authority-data': certificateAuthorityData,
+    server
+  }
+  const user = {
+    'client-certificate-data': clientCertificateData,
+    'client-key-data': clientKeyData
+  }
+  const context = {
+    cluster: name,
+    user: name
+  }
+  return yaml.safeDump({
+    kind: 'Config',
+    clusters: [{cluster, name}],
+    contexts: [{context, name}],
+    users: [{user, name}],
+    'current-context': name
+  })
+}
+
+function authorizationHeader (bearer) {
+  const authorization = `Bearer ${bearer}`
+  return {authorization}
+}
+
 const stub = {
   getSeeds ({bearer = auth.bearer} = {}) {
     return nock(url)
@@ -107,6 +201,179 @@ const stub = {
       })
       .reply(200, {
         items: seedList
+      })
+  },
+  getShoots ({bearer, namespace}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .reply(200, {
+        items: shootList
+      })
+  },
+  getShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, infrastructureSecretName}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, getShoot({name, project, createdBy, purpose, kind, region, infrastructureSecretName}))
+  },
+  createShoot ({bearer, namespace, spec, resourceVersion = 42}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const metadata = {
+      resourceVersion,
+      namespace
+    }
+    const result = {metadata, spec}
+
+    return nock(url, {reqheaders})
+      .post(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`, body => {
+        _.assign(metadata, body.metadata)
+        return true
+      })
+      .reply(200, () => result)
+  },
+  deleteShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, infrastructureSecretName, deletionTimestamp, resourceVersion = 42}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+
+    const metadata = {
+      resourceVersion,
+      namespace
+    }
+    const shoot = getShoot({name, project, createdBy, purpose, kind, region, infrastructureSecretName, deletionTimestamp})
+    shoot.metadata.deletionTimestamp = deletionTimestamp
+    const result = {metadata}
+    return nock(url, {reqheaders})
+      .delete(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200)
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, shoot)
+      .patch(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`, body => {
+        _.assign(metadata, body.metadata)
+        return true
+      })
+      .reply(200, () => result)
+  },
+  getShootInfo ({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const adminReqheaders = {
+      authorization: `Bearer ${auth.bearer}`
+    }
+
+    const seedServerUrl = 'https://seed.foo.bar:443'
+    const seedData = {
+      kubeconfig: encodeBase64(getKubeconfig({
+        server: seedServerUrl,
+        name: seedClusterName
+      }))
+    }
+    const shootData = {
+      kubeconfig: encodeBase64(getKubeconfig({
+        server: shootServerUrl,
+        name: 'shoot.foo.bar'
+      })),
+      username: encodeBase64(shootUser),
+      password: encodeBase64(shootPassword)
+    }
+    nock(url, {reqheaders})
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, getShoot({name, project, kind, region}))
+
+    nock(url, {reqheaders: adminReqheaders})
+      .get('/api/v1/namespaces/garden/secrets')
+      .query({
+        labelSelector: [
+          'garden.sapcloud.io/role=seed',
+          `infrastructure.garden.sapcloud.io/kind=${kind}`,
+          `infrastructure.garden.sapcloud.io/region=${region}`
+        ].join(',')
+      })
+      .reply(200, {items: [getSeed(kind, region, seedData)]})
+
+    return nock(seedServerUrl)
+      .get(`/api/v1/namespaces/shoot-${namespace}-${name}/secrets/kubecfg`)
+      .reply(200, {data: shootData})
+  },
+  getInfrastructureSecrets ({bearer, namespace}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/api/v1/namespaces/${namespace}/secrets`)
+      .query({
+        labelSelector: 'garden.sapcloud.io/role=infrastructure'
+      })
+      .reply(200, {
+        items: infrastructureSecretsList
+      })
+  },
+  getInfrastructureSecret ({bearer, namespace, project, kind, name, data}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/api/v1/namespaces/${namespace}/secrets/${name}`)
+      .reply(200, getInfrastructureSecret(project, name, kind, data))
+  },
+  createInfrastructureSecret ({bearer, namespace, data, resourceVersion = 42}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const metadata = {
+      resourceVersion,
+      namespace
+    }
+    const result = {metadata, data}
+
+    return nock(url, {reqheaders})
+      .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
+        _.assign(metadata, body.metadata)
+        return true
+      })
+      .reply(200, () => result)
+  },
+  patchInfrastructureSecret ({bearer, namespace, project, kind, name, data}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`)
+      .reply(200, getInfrastructureSecret(project, name, kind, data))
+  },
+  deleteInfrastructureSecret ({bearer, namespace, project, name}) {
+    const fooShoot = getShoot({name: 'fooShoot', project, infrastructureSecretName: 'someOtherSecretName'})
+
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .reply(200, {
+        items: [fooShoot]
+      })
+      .delete(`/api/v1/namespaces/${namespace}/secrets/${name}`)
+      .reply(200)
+  },
+  deleteInfrastructureSecretReferencedByShoot ({bearer, namespace, project, infrastructureSecretName}) {
+    const referencingShoot = getShoot({name: 'referencingShoot', project, infrastructureSecretName})
+    const fooShoot = getShoot({name: 'fooShoot', project, infrastructureSecretName: 'someOtherSecretName'})
+
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .reply(200, {
+        items: [fooShoot, referencingShoot]
       })
   },
   getProjects () {
@@ -188,20 +455,69 @@ const stub = {
       })
       .reply(200, () => result)
   },
-  deleteProject ({namespace, username}) {
-    const bearer = auth.bearer
-    const reqheaders = {
-      authorization: `Bearer ${bearer}`
-    }
-    return nock(url, {reqheaders})
+  deleteProject ({bearer, namespace, username}) {
+    nock(url, {reqheaders: authorizationHeader(bearer)})
       .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: []
       })
       .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
       .reply(200, getProjectMembers(namespace, [username, 'foo@example.org']))
+    return nock(url, {reqheaders: authorizationHeader(auth.bearer)})
       .delete(`/api/v1/namespaces/${namespace}`)
       .reply(200)
+  },
+  getMembers ({bearer, namespace, members}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    return nock(url, {reqheaders})
+      .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, getProjectMembers(namespace, members))
+  },
+  addMember ({bearer, namespace, newMember, members}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const oldProjectMembers = getProjectMembers(namespace, members)
+    const newProjectMembers = getProjectMembers(namespace, _.concat(members, newMember))
+
+    const result = newProjectMembers
+    return nock(url, {reqheaders})
+      .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, oldProjectMembers)
+      .patch(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
+        result.metadata = body.metadata
+        return true
+      })
+      .reply(200, () => result)
+  },
+  notAddMember ({bearer, namespace, members}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const projectMembers = getProjectMembers(namespace, members)
+
+    return nock(url, {reqheaders})
+      .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, projectMembers)
+  },
+  removeMember ({bearer, namespace, removeMember, members}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+    const oldProjectMembers = getProjectMembers(namespace, members)
+    const newProjectMembers = getProjectMembers(namespace, _.without(members, removeMember))
+
+    const result = newProjectMembers
+    return nock(url, {reqheaders})
+      .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, oldProjectMembers)
+      .patch(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
+        result.metadata = body.metadata
+        return true
+      })
+      .reply(200, () => result)
   }
 }
 module.exports = {

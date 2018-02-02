@@ -17,45 +17,55 @@
 'use strict'
 
 const express = require('express')
+const { projects } = require('../services')
 
 const router = module.exports = express.Router()
 
 router.route('/')
-  .get((req, res, next) => {
-    const username = req.user.email
-    const client = req.client.getServiceAccountClient()
-    return client
-      .readProjects({username})
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      res.send(await projects.list({user}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .post((req, res, next) => {
-    const username = req.user.email
-    const body = req.body
-    const client = req.client.getServiceAccountClient()
-    return client
-      .createProject({username}, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const body = req.body
+      res.send(await projects.create({user, body}))
+    } catch (err) {
+      next(err)
+    }
   })
 
 router.route('/:namespace')
-  .put((req, res, next) => {
-    const username = req.user.email
-    const name = req.params.namespace
-    const body = req.body
-    const client = req.client.getServiceAccountClient()
-    return client
-      .patchProject({name, username}, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.namespace
+      res.send(await projects.read({user, name}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .delete((req, res, next) => {
-    const username = req.user.email
-    const name = req.params.namespace
-    const client = req.client.getServiceAccountClient()
-    return client
-      .deleteProject({name, username})
-      .then(body => res.send(body))
-      .catch(next)
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.namespace
+      const body = req.body
+      res.send(await projects.patch({user, name, body}))
+    } catch (err) {
+      next(err)
+    }
+  })
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.namespace
+      res.send(await projects.remove({user, name}))
+    } catch (err) {
+      next(err)
+    }
   })

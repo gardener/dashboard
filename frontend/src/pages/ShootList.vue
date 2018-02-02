@@ -178,7 +178,7 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <dashboard-info class="dashboard" :dashboardUrl="currentUrl" :dashboardUrlText="currentUrlText" :username="currentUsername" :password="currentPassword"></dashboard-info>
+          <cluster-access :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
       <confirm-input-dialog :confirm="currentName" v-model="deleteDialog" :cancel="hideDialog" :ok="deletionConfirmed">
@@ -226,7 +226,7 @@ limitations under the License.
   import ShootStatus from '@/components/ShootStatus'
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
-  import DashboardInfo from '@/components/DashboardInfo'
+  import ClusterAccess from '@/components/ClusterAccess'
   import { getDateFormatted, getTimeAgo } from '@/utils'
 
   export default {
@@ -238,7 +238,7 @@ limitations under the License.
       StatusTag,
       PurposeTag,
       ConfirmInputDialog,
-      DashboardInfo,
+      ClusterAccess,
       InfraIcon,
       ShootStatus
     },
@@ -520,23 +520,11 @@ limitations under the License.
       currentInfo () {
         return this.currentItem.info || {}
       },
-      currentUsername () {
-        return this.currentInfo.username || ''
-      },
-      currentPassword () {
-        return this.currentInfo.password || ''
-      },
       currentKubeconfig () {
         return this.currentInfo.kubeconfig || ''
       },
       currentLog () {
         return this.currentOperation.description || ''
-      },
-      currentUrl () {
-        return this.currentInfo.dashboardUrl || ''
-      },
-      currentUrlText () {
-        return this.currentInfo.dashboardUrlText || ''
       },
       rows () {
         return this.items.map(({ metadata, spec, status }) => {

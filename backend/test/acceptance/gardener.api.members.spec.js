@@ -20,49 +20,29 @@ const app = require('../../lib/app')
 
 describe('gardener', function () {
   describe('api', function () {
-    describe('projects', function () {
+    describe('members', function () {
       /* eslint no-unused-expressions: 0 */
       const oidc = nocks.oidc
       const k8s = nocks.k8s
-      const name = 'foo'
-      const namespace = `garden-${name}`
-      const metadata = {name}
+      const name = 'bar'
+      const project = 'foo'
+      const namespace = `garden-${project}`
+      const members = ['foo@example.org', 'bar@example.org', 'foobar@example.org']
+      const metadata = {}
       const username = `${name}@example.org`
       const email = username
       const bearer = oidc.sign({email})
-      const adminBearer = oidc.sign({email: 'admin@example.org'})
-      const role = 'project'
-      const owner = 'owner'
-      const createdBy = 'createdBy'
-      const description = 'description'
-      const purpose = 'purpose'
-      const data = {createdBy, owner, description, purpose}
 
       afterEach(function () {
         nocks.reset()
       })
 
-      it('should return two projects', function () {
+      it('should return three project members', function () {
         oidc.stub.getKeys()
-        k8s.stub.getProjects()
+        k8s.stub.getMembers({bearer, namespace, members})
         return chai.request(app)
-          .get('/api/namespaces')
+          .get(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body).to.have.length(2)
-          })
-          .finally(() => nocks.verify())
-      })
-
-      it('should return all projects', function () {
-        oidc.stub.getKeys()
-        k8s.stub.getProjects()
-        return chai.request(app)
-          .get('/api/namespaces')
-          .set('authorization', `Bearer ${adminBearer}`)
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
@@ -72,55 +52,52 @@ describe('gardener', function () {
           .finally(() => nocks.verify())
       })
 
-      it('should create a project', function () {
-        const createdBy = username
-        const resourceVersion = 42
+      it('should add a project member', function () {
+        const newMember = 'newmember@example.org'
         oidc.stub.getKeys()
-        k8s.stub.createProject({namespace, username, resourceVersion})
+        k8s.stub.addMember({bearer, namespace, newMember, members})
         return chai.request(app)
-          .post('/api/namespaces')
+          .post(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, data})
+          .send({metadata, name: newMember})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-            expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+            expect(res.body).to.have.length(4)
           })
           .finally(() => nocks.verify())
       })
 
-      it('should patch a project', function () {
-        const createdBy = 'bar@example.org'
-        const resourceVersion = 43
+      it('should not add member that is already a project member', function () {
+        const newMember = 'foo@example.org'
         oidc.stub.getKeys()
-        k8s.stub.patchProject({namespace, username, resourceVersion})
+        k8s.stub.notAddMember({bearer, namespace, members})
         return chai.request(app)
-          .put(`/api/namespaces/${namespace}`)
+          .post(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, data})
+          .send({metadata, name: newMember})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-            expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+            expect(res.body).to.have.length(3)
           })
           .finally(() => nocks.verify())
       })
 
-      it('should delete a project', function () {
+      it('should delete a project member', function () {
+        const removeMember = 'bar@example.org'
         oidc.stub.getKeys()
-        k8s.stub.deleteProject({bearer, namespace, username})
+        k8s.stub.removeMember({bearer, namespace, removeMember, members})
         return chai.request(app)
-          .delete(`/api/namespaces/${namespace}`)
+          .delete(`/api/namespaces/${namespace}/members/${removeMember}`)
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.eql({metadata})
+            expect(res.body).to.have.length(2)
           })
           .finally(() => nocks.verify())
       })

@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-list two-line>
+  <v-list>
 
     <v-list-tile>
       <v-list-tile-action>
@@ -26,8 +26,24 @@ limitations under the License.
         <v-list-tile-title><a :href="dashboardUrl" target="_blank">{{dashboardUrlText}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
+    <v-list-tile>
+      <v-list-tile-action>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
+        <v-list-tile-title><a :href="grafanaUrl" target="_blank">{{grafanaUrlText}}</a></v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
+    <v-list-tile>
+      <v-list-tile-action>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
+        <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrlText}}</a></v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
 
-    <v-divider inset></v-divider>
+    <v-divider class="my-2" inset></v-divider>
 
     <v-list-tile>
       <v-list-tile-action>
@@ -70,20 +86,8 @@ limitations under the License.
       Clipboard
     },
     props: {
-      dashboardUrl: {
-        type: String,
-        required: true
-      },
-      dashboardUrlText: {
-        type: String,
-        required: true
-      },
-      username: {
-        type: String,
-        required: true
-      },
-      password: {
-        type: String,
+      info: {
+        type: Object,
         required: true
       }
     },
@@ -104,6 +108,30 @@ limitations under the License.
       }
     },
     computed: {
+      grafanaUrl () {
+        return this.info.grafanaUrl || ''
+      },
+      grafanaUrlText () {
+        return this.info.grafanaUrlText || ''
+      },
+      prometheusUrl () {
+        return this.info.prometheusUrl || ''
+      },
+      prometheusUrlText () {
+        return this.info.prometheusUrlText || ''
+      },
+      dashboardUrl () {
+        return this.info.dashboardUrl || ''
+      },
+      dashboardUrlText () {
+        return this.info.dashboardUrlText || ''
+      },
+      username () {
+        return this.info.username || ''
+      },
+      password () {
+        return this.info.password || ''
+      },
       passwordText () {
         if (this.showPassword) {
           return this.password

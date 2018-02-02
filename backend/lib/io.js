@@ -21,7 +21,7 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { client } = require('./kubernetes')
+const { projects } = require('./services')
 const watches = require('./watches')
 
 module.exports = () => {
@@ -72,9 +72,9 @@ module.exports = () => {
         .commit()
       /* join current room */
       if (namespace) {
-        const username = _.get(socket, ['client', 'user', 'email'])
-        client
-          .readProjects({username})
+        const user = _.get(socket, 'client.user')
+        user.id = user['email']
+        projects.list({user})
           .then(projects => {
             const predicate = item => item.metadata.namespace === namespace
             const project = _.find(projects, predicate)
@@ -90,7 +90,7 @@ module.exports = () => {
   // start watches
   _.forEach(watches, (watch, resourceName) => {
     try {
-      watch(client, io)
+      watch(io)
     } catch (err) {
       logger.error(`watch ${resourceName} error`, err)
     }

@@ -16,20 +16,19 @@
 
 'use strict'
 
-const Promise = require('bluebird')
 const express = require('express')
 const { version } = require('../../package')
 
 const router = module.exports = express.Router()
 
 router.route('/')
-  .get((req, res, next) => {
-    return Promise
-      .try(() => {
-        const user = req.user
-        res.send({version, user})
-      })
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      res.send({version, user})
+    } catch (err) {
+      next(err)
+    }
   })
 
 module.exports = {

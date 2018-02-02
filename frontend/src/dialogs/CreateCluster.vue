@@ -683,7 +683,7 @@ limitations under the License.
           errors.push('Name is required')
         }
         if (!this.$v.shootDefinition.metadata.name.valid) {
-          errors.push('use only [a-z0-9-] for the cluster name')
+          errors.push('Name must only be lowercase letters, numbers, and hyphens')
         }
         if (!this.$v.shootDefinition.metadata.name.maxLength) {
           errors.push('name ist too long')

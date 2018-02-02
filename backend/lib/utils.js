@@ -20,12 +20,10 @@ const path = require('path')
 const express = require('express')
 const { isProd } = require('./config')
 
-exports.resolve = resolve
-exports.serveStatic = serveStatic
-
 function resolve (pathname) {
   return path.resolve(__dirname, '..', pathname)
 }
+exports.resolve = resolve
 
 function serveStatic (pathname, cache) {
   const maxAge = cache && isProd ? 60 * 60 * 24 * 30 : 0
@@ -33,3 +31,20 @@ function serveStatic (pathname, cache) {
     maxAge
   })
 }
+exports.serveStatic = serveStatic
+
+function decodeBase64 (value) {
+  if (!value) {
+    return
+  }
+  return Buffer.from(value, 'base64').toString('utf8')
+}
+exports.decodeBase64 = decodeBase64
+
+function encodeBase64 (value) {
+  if (!value) {
+    return
+  }
+  return Buffer.from(value, 'utf8').toString('base64')
+}
+exports.encodeBase64 = encodeBase64

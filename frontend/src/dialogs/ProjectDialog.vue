@@ -118,7 +118,7 @@ limitations under the License.
     projectName: {
       required: 'Name is required',
       maxLength: 'Name exceeds the maximum length',
-      resourceName: 'Must be a valid resource name',
+      resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
       unique: 'Name is already in use'
     }
   }

@@ -16,11 +16,12 @@
 
 'use strict'
 
+const garden = require('../kubernetes').garden()
 const { registerHandler } = require('./common')
 
-module.exports = (client, io) => {
-  const watch = client.watchShoots()
-  registerHandler(watch, event => {
+module.exports = io => {
+  const emitter = garden.shoots.watch()
+  registerHandler(emitter, event => {
     const namespace = event.object.metadata.namespace
     io.to(namespace).emit('event', event)
   })

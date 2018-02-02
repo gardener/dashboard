@@ -17,16 +17,13 @@
 'use strict'
 
 const _ = require('lodash')
-const Promise = require('bluebird')
 const request = require('request')
-const requestAsync = Promise.promisify(request)
 const expressJwt = require('express-jwt')
 const jwks = require('jwks-rsa')
 const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
 const { HttpError, NotFound, Unauthorized } = require('./errors')
-const { Client, client, baseClientConfig } = require('./kubernetes')
 
 const secretProvider = jwtSecret(config.jwks)
 
@@ -34,15 +31,14 @@ function frontendConfig (req, res, next) {
   res.json(config.frontend)
 }
 
-function attachKubernetesClient (req, res, next) {
+function attachAuthorization (req, res, next) {
   const [scheme, bearer] = req.headers.authorization.split(' ')
   if (!/bearer/i.test(scheme)) {
     return next(new Unauthorized('No authorization header with bearer'))
   }
-  const auth = {bearer}
-  req.client = Client.create({auth, ...baseClientConfig})
-  req.client.setServiceAccountClient(client)
-  req.username = req.user.email
+  req.user.auth = {bearer}
+  req.user.id = req.user['email']
+
   next()
 }
 
@@ -60,21 +56,20 @@ function getKeysMonkeyPatch (cb) {
   const ca = this.options.ca
   const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
   this.logger(`Fetching keys from '${uri}'`)
-  requestAsync({json, uri, headers, strictSSL, ca, rejectUnauthorized})
-    .then(res => {
-      const statusCode = res.statusCode
-      if (_.inRange(statusCode, 200, 300)) {
-        this.logger('Keys:', res.body.keys)
-        return cb(null, res.body.keys)
-      }
-      const statusMessage = res.statusMessage || `Http Error ${statusCode}`
-      this.logger('Http Error:', res.body)
-      cb(new JwksError(_.get(res, 'body.message', statusMessage)))
-    })
-    .catch(err => {
+  request({json, uri, headers, strictSSL, ca, rejectUnauthorized}, (err, res) => {
+    if (err) {
       this.logger('Failure:', err)
-      cb(err)
-    })
+      return cb(err)
+    }
+    const statusCode = res.statusCode
+    if (_.inRange(statusCode, 200, 300)) {
+      this.logger('Keys:', res.body.keys)
+      return cb(null, res.body.keys)
+    }
+    const statusMessage = res.statusMessage || `Http Error ${statusCode}`
+    this.logger('Http Error:', res.body)
+    cb(new JwksError(_.get(res, 'body.message', statusMessage)))
+  })
 }
 
 function jwtSecret (options) {
@@ -162,7 +157,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 module.exports = {
   jwt,
   jwtSecret,
-  attachKubernetesClient,
+  attachAuthorization,
   frontendConfig,
   notFound,
   sendError,

@@ -17,51 +17,63 @@
 'use strict'
 
 const express = require('express')
+const { shoots } = require('../services')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
 router.route('/')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readShoots(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      res.send(await shoots.list({user, namespace}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .post((req, res, next) => {
-    const namespace = req.params.namespace
-    const username = req.user.email
-    const body = req.body
-    const client = req.client
-    return client
-      .createShoot({username, namespace}, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const body = req.body
+      res.send(await shoots.create({user, namespace, body}))
+    } catch (err) {
+      next(err)
+    }
   })
 
 router.route('/:name')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readShoot(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.read({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .delete((req, res, next) => {
-    const client = req.client
-    return client
-      .deleteShoot(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.remove({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })
 
 router.route('/:name/info')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readShootSeedKubeconfig(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.info({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })

@@ -25,7 +25,7 @@ const logger = require('./logger')
 const routes = require('./routes')
 const io = require('./io')
 
-const { jwt, attachKubernetesClient, frontendConfig, notFound, sendError } = require('./middleware')
+const { jwt, attachAuthorization, frontendConfig, notFound, sendError } = require('./middleware')
 
 // configure router
 const router = express.Router()
@@ -37,7 +37,7 @@ router.use(bodyParser.urlencoded({
 router.use(bodyParser.json())
 router.use(cors())
 router.use(jwt())
-router.use(attachKubernetesClient)
+router.use(attachAuthorization)
 _.each(routes, (value, key) => router.use(key, value))
 router.use(notFound)
 router.use(sendError)

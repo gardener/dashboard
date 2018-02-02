@@ -130,7 +130,7 @@ limitations under the License.
     text-align: left;
     min-width: 250px;
     max-width: 800px;
-    max-height: 150px;
+    max-height: 300px;
     white-space: pre-wrap;
     overflow-y: auto;
   }

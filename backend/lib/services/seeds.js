@@ -16,7 +16,8 @@
 
 'use strict'
 
-const _ = require('lodash')
+const {map, pick, assign} = require('lodash')
+const core = require('../kubernetes').core()
 
 function fromResource ({metadata}) {
   const role = 'seed'
@@ -25,11 +26,15 @@ function fromResource ({metadata}) {
     kind: labels['infrastructure.garden.sapcloud.io/kind'],
     region: labels['infrastructure.garden.sapcloud.io/region']
   }
-  metadata = _
-    .chain(metadata)
-    .pick(['name', 'resourceVersion'])
-    .assign({role, infrastructure})
-    .value()
+  metadata = assign(pick(metadata, ['name', 'resourceVersion']), {role, infrastructure})
   return {metadata}
 }
-exports.fromResource = fromResource
+
+exports.list = async function () {
+  const qs = {
+    labelSelector: 'garden.sapcloud.io/role=seed'
+  }
+  const namespace = 'garden'
+  const {items} = await core.namespaces(namespace).secrets.get({qs})
+  return map(items, fromResource)
+}

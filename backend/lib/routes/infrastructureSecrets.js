@@ -17,48 +17,62 @@
 'use strict'
 
 const express = require('express')
+const { infrastructureSecrets } = require('../services')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
 router.route('/')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readInfrastructureSecrets(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      res.send(await infrastructureSecrets.list({user, namespace}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .post((req, res, next) => {
-    const body = req.body
-    const client = req.client
-    return client
-      .createInfrastructureSecret(req.params, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const body = req.body
+      res.send(await infrastructureSecrets.create({user, namespace, body}))
+    } catch (err) {
+      next(err)
+    }
   })
 
 router.route('/:name')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readInfrastructureSecret(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await infrastructureSecrets.read({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .put((req, res, next) => {
-    const body = req.body
-    const client = req.client
-    return client
-      .patchInfrastructureSecret(req.params, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await infrastructureSecrets.patch({user, namespace, name, body}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .delete((req, res, next) => {
-    const client = req.client
-    return client
-      .deleteInfrastructureSecret(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await infrastructureSecrets.remove({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })

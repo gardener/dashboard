@@ -14,13 +14,17 @@
 // limitations under the License.
 //
 
-'use strict'
-
 const _ = require('lodash')
-const { UnprocessableEntity } = require('../errors')
+const { UnprocessableEntity, PreconditionFailed } = require('../errors')
 const Resources = require('../kubernetes/Resources')
-const { decodeBase64, encodeBase64 } = require('./common')
+const { decodeBase64, encodeBase64 } = require('../utils')
+const kubernetes = require('../kubernetes')
+const shoots = require('./shoots')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl']
+
+function Core ({auth}) {
+  return kubernetes.core({auth})
+}
 
 function fromResource ({metadata, data}) {
   const role = 'infrastructure'
@@ -43,7 +47,6 @@ function fromResource ({metadata, data}) {
   data = _.mapValues(data, iteratee)
   return {metadata, data}
 }
-exports.fromResource = fromResource
 
 function toResource ({metadata, data}) {
   const resource = Resources.Secret
@@ -66,4 +69,39 @@ function toResource ({metadata, data}) {
   }
   return {apiVersion, kind, metadata, data}
 }
-exports.toResource = toResource
+
+exports.list = async function ({user, namespace}) {
+  const qs = {
+    labelSelector: 'garden.sapcloud.io/role=infrastructure'
+  }
+  const {items} = await Core(user).namespaces(namespace).secrets.get({qs})
+  return _.map(items, fromResource)
+}
+
+exports.create = async function ({user, namespace, body}) {
+  body = toResource(body)
+  body = await Core(user).namespaces(namespace).secrets.post({body})
+  return fromResource(body)
+}
+
+exports.read = async function ({user, namespace, name}) {
+  const body = await Core(user).namespaces(namespace).secrets(name).get()
+  return fromResource(body)
+}
+
+exports.patch = async function ({user, namespace, name, body}) {
+  body = toResource(body)
+  body = await Core(user).namespaces(namespace).secrets(name).mergePatch({body})
+  return fromResource(body)
+}
+
+exports.remove = async function ({user, namespace, name}) {
+  const {items: shootList} = await shoots.list({user, namespace})
+  const predicate = item => _.get(item, 'spec.infrastructure.secret') === name
+  const secretReferencedByShoot = _.find(shootList, predicate)
+  if (secretReferencedByShoot) {
+    throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
+  }
+  await Core(user).namespaces(namespace).secrets(name).delete()
+  return {metadata: {name, namespace}}
+}

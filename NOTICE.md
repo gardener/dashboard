@@ -7,10 +7,6 @@ Copyright 2018 The Gardener Authors.
 ### Backend
 The Gardener Dashboard backend depends on the following packages:
 
-[bluebird](https://github.com/petkaantonov/bluebird)
-Copyright (c) 2013-2018 Petka Antonov
-[MIT License](https://github.com/petkaantonov/bluebird/blob/master/LICENSE)
-
 [body-parser](https://github.com/expressjs/body-parser)
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
@@ -48,6 +44,10 @@ Copyright (C) 2011-2015 by Vitaly Puzrin
 Copyright (c) 2016 Sandrino Di Mattia
 [MIT License](https://github.com/auth0/node-jwks-rsa/blob/master/LICENSE)
 
+[kubernetes-client](https://github.com/godaddy/kubernetes-client)
+Copyright (c) 2016 GoDaddy Operating Company, LLC.
+[MIT License](https://github.com/godaddy/kubernetes-client/blob/master/LICENSE)
+
 [lodash](https://github.com/lodash/lodash)
 Copyright JS Foundation and other contributors <https://js.foundation/>
 [MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
@@ -75,6 +75,10 @@ Copyright (c) Facundo Olano and Martín Paulucci
 [winston](https://github.com/winstonjs/winston)
 Copyright (c) 2010 Charlie Robbins
 [MIT License](https://github.com/winstonjs/winston/blob/master/LICENSE)
+
+[ws](https://github.com/websockets/ws)
+Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
+[MIT License](https://github.com/websockets/ws/blob/master/LICENSE)
 
 ### Frontend
 The Gardener Dashboard frontend depends on the following packages:

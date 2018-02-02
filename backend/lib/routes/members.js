@@ -17,33 +17,41 @@
 'use strict'
 
 const express = require('express')
+const { members } = require('../services')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
 router.route('/')
-  .get((req, res, next) => {
-    const client = req.client
-    return client
-      .readMembers(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      res.send(await members.list({user, namespace}))
+    } catch (err) {
+      next(err)
+    }
   })
-  .post((req, res, next) => {
-    const body = req.body
-    const client = req.client
-    return client
-      .addMember(req.params, {body})
-      .then(body => res.send(body))
-      .catch(next)
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const body = req.body
+      res.send(await members.create({user, namespace, body}))
+    } catch (err) {
+      next(err)
+    }
   })
 
 router.route('/:name')
-  .delete((req, res, next) => {
-    const client = req.client
-    return client
-      .deleteMember(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await members.remove({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
   })

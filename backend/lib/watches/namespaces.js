@@ -16,34 +16,16 @@
 
 'use strict'
 
-const _ = require('lodash')
+const core = require('../kubernetes').core()
 const { registerHandler } = require('./common')
 
-const labelSelector = 'garden.sapcloud.io/role=project'
-const qs = {labelSelector}
-
-module.exports = (client, io) => {
-  client
-    .readNamespaces({qs})
-    .then(({items}) => {
-      initializeNamespaces(io, items)
-    })
-    .then(() => {
-      const watch = client.watchNamespaces({qs})
-      registerHandler(watch, event => {
-        if (event.type === 'ADDED') {
-          initializeNamespace(io, event.object.metadata.name)
-        }
-      })
-    })
-}
-
-function initializeNamespaces (io, items) {
-  _.forEach(items, item => {
-    initializeNamespace(io, item.metadata.name)
+module.exports = io => {
+  const labelSelector = 'garden.sapcloud.io/role=project'
+  const emitter = core.namespaces.watch({qs: {labelSelector}})
+  registerHandler(emitter, event => {
+    if (event.type === 'ADDED') {
+      const namespace = event.object.metadata.name
+      io.to(namespace).emit('ping')
+    }
   })
-}
-
-function initializeNamespace (io, namespace) {
-  io.to(namespace).emit('ready')
 }

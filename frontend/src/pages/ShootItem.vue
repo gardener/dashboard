@@ -39,7 +39,7 @@ limitations under the License.
               <v-card-title class="subheading white--text">
                 Details
               </v-card-title>
-              <v-list two-line>
+              <v-list>
 
                 <v-list-tile>
                   <v-list-tile-action>
@@ -51,7 +51,7 @@ limitations under the License.
                   </v-list-tile-content>
                 </v-list-tile>
 
-                <v-divider inset></v-divider>
+                <v-divider class="my-2" inset></v-divider>
                 <v-list-tile>
                   <v-list-tile-action>
                     <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
@@ -77,7 +77,7 @@ limitations under the License.
                 </v-list-tile>
 
                 <template v-if="!!purpose">
-                  <v-divider inset></v-divider>
+                  <v-divider class="my-2" inset></v-divider>
                   <v-list-tile>
                     <v-list-tile-action>
                       <v-icon class="cyan--text text--darken-2">label_outline</v-icon>
@@ -96,7 +96,7 @@ limitations under the License.
               <v-card-title class="subheading white--text">
                 Infrastructure
               </v-card-title>
-              <v-list two-line>
+              <v-list>
 
                 <v-list-tile>
                   <v-list-tile-action>
@@ -123,7 +123,7 @@ limitations under the License.
                   </v-list-tile-content>
                 </v-list-tile>
 
-                <v-divider inset></v-divider>
+                <v-divider class="my-2" inset></v-divider>
                 <v-list-tile>
                   <v-list-tile-action>
                     <v-icon class="cyan--text text--darken-2">settings_ethernet</v-icon>
@@ -141,7 +141,7 @@ limitations under the License.
               <v-card-title class="subheading white--text" >
                 Addons provided by Gardener
               </v-card-title>
-              <v-list two-line>
+              <v-list>
 
                 <v-list-tile avatar v-for="item in addonList" :key="item.name" v-if="addon(item.name).enabled">
                   <v-list-tile-avatar>
@@ -170,8 +170,8 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2">
                 Kube-Cluster Access
               </v-card-title>
-              <dashboard-info :dashboardUrl="dashboardUrl" :dashboardUrlText="dashboardUrlText" :username="username" :password="password"></dashboard-info>
-              <v-divider inset></v-divider>
+              <cluster-access :info="info"></cluster-access>
+              <v-divider class="my-2" inset></v-divider>
               <v-expansion-panel>
                 <v-expansion-panel-content>
                   <div slot="header" class="kubeconfig-title">
@@ -203,7 +203,7 @@ limitations under the License.
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import CodeBlock from '@/components/CodeBlock'
-  import DashboardInfo from '@/components/DashboardInfo'
+  import ClusterAccess from '@/components/ClusterAccess'
   import get from 'lodash/get'
   import { safeDump } from 'js-yaml'
   import { getDateFormatted, getTimeAgo } from '@/utils'
@@ -212,7 +212,7 @@ limitations under the License.
     name: 'shoot-list',
     components: {
       CodeBlock,
-      DashboardInfo
+      ClusterAccess
     },
     data () {
       return {
@@ -323,18 +323,6 @@ limitations under the License.
       },
       isInfoAvailable () {
         return !!this.item.info
-      },
-      dashboardUrl () {
-        return this.info.dashboardUrl || ''
-      },
-      dashboardUrlText () {
-        return this.info.dashboardUrlText || ''
-      },
-      username () {
-        return this.info.username || ''
-      },
-      password () {
-        return this.info.password || ''
       },
       metadata () {
         return this.item.metadata || {}

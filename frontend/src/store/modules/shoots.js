@@ -18,6 +18,7 @@ import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
 import assign from 'lodash/assign'
 import pick from 'lodash/pick'
+import get from 'lodash/get'
 import replace from 'lodash/replace'
 import { getShoots, getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
@@ -94,13 +95,23 @@ const actions = {
     return getShootInfo({namespace, name, user})
       .then(res => res.data)
       .then(info => {
+        const credentials = `${info.username}:${info.password}`
+
         const [, scheme, host] = uriPattern.exec(info.serverUrl)
-        const authority = `//${info.username}:${info.password}@${replace(host, /^\/\//, '')}`
+        const authority = `//${credentials}@${replace(host, /^\/\//, '')}`
         const pathnameAlias = '/ui'
-        const dashboardUrl = rootState.cfg.dashboardUrl || {}
-        const pathname = dashboardUrl.pathname || pathnameAlias
+        const pathname = get(rootState.cfg, 'dashboardUrl.pathname', pathnameAlias)
         info.dashboardUrl = [scheme, authority, pathname].join('')
         info.dashboardUrlText = [scheme, host, pathnameAlias].join('')
+
+        const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
+        const grafanaHost = `g.${info.shootIngressDomain}`
+        info.grafanaUrl = `https://${credentials}@${grafanaHost}${grafanaPathname}`
+        info.grafanaUrlText = `https://${grafanaHost}`
+
+        const prometheusHost = `p.${info.shootIngressDomain}`
+        info.prometheusUrl = `https://${credentials}@${prometheusHost}`
+        info.prometheusUrlText = `https://${prometheusHost}`
         return info
       })
       .then(info => {

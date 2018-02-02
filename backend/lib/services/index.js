@@ -14,15 +14,10 @@
 // limitations under the License.
 //
 
-'use strict'
-
-const _ = require('lodash')
-
-function fromResource ({metadata, subjects}) {
-  return _
-    .chain(subjects)
-    .filter(['kind', 'User'])
-    .map(subject => subject.name)
-    .value()
+module.exports = {
+  seeds: require('./seeds'),
+  projects: require('./projects'),
+  shoots: require('./shoots'),
+  infrastructureSecrets: require('./infrastructureSecrets'),
+  members: require('./members')
 }
-exports.fromResource = fromResource

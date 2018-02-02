@@ -17,14 +17,16 @@
 'use strict'
 
 const express = require('express')
+const { seeds } = require('../services')
 
 const router = module.exports = express.Router()
 
 router.route('/')
-  .get((req, res, next) => {
-    const client = req.client.getServiceAccountClient()
-    return client
-      .readSeeds(req.params)
-      .then(body => res.send(body))
-      .catch(next)
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      res.send(await seeds.list({user}))
+    } catch (err) {
+      next(err)
+    }
   })
