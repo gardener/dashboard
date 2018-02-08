@@ -20,5 +20,6 @@ npm run --prefix frontend -s build
 cd "${old_pwd}"
 
 if [ ! -z "$BINARY_PATH" ]; then
-  cp -r "${SOURCE_PATH}/frontend" "${BINARY_PATH}/"
+  TARGET_PATH="${BINARY_PATH}/frontend/dist/"
+  test -d "${TARGET_PATH}" || mkdir -p "${TARGET_PATH}" && cp -r "${SOURCE_PATH}/frontend/dist/" "${TARGET_PATH}"
 fi

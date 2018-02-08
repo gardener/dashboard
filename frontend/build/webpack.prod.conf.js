@@ -1,9 +1,9 @@
 'use strict'
 const path = require('path')
+const fs = require('fs')
 const utils = require('./utils')
 const webpack = require('webpack')
 const config = require('../config')
-const VERSION = require('../package').version
 const merge = require('webpack-merge')
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -15,13 +15,15 @@ const env = process.env.NODE_ENV === 'testing'
   ? require('../config/test.env')
   : require('../config/prod.env')
 
+const VERSION = fs.readFileSync(path.resolve(__dirname, '../../VERSION'), 'utf8').toString('utf8').trim()
+
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({
-        sourceMap: config.build.productionSourceMap,
-        extract: true,
-        usePostCSS: true
-      })
+      sourceMap: config.build.productionSourceMap,
+      extract: true,
+      usePostCSS: true
+    })
   },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
@@ -49,7 +51,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       // set the following option to `true` if you want to extract CSS from
       // codesplit chunks into this main css file as well.
       // This will result in *all* of your app's CSS being loaded upfront.
-      allChunks: false,
+      allChunks: false
     }),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
