@@ -1,0 +1,2 @@
+scan_collectors: npm, yarn
+scope: production
