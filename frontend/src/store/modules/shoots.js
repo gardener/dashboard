@@ -112,6 +112,10 @@ const actions = {
         const prometheusHost = `p.${info.shootIngressDomain}`
         info.prometheusUrl = `https://${credentials}@${prometheusHost}`
         info.prometheusUrlText = `https://${prometheusHost}`
+
+        const alertmanagerHost = `a.${info.shootIngressDomain}`
+        info.alertmanagerUrl = `https://${credentials}@${alertmanagerHost}`
+        info.alertmanagerUrlText = `https://${alertmanagerHost}`
         return info
       })
       .then(info => {
