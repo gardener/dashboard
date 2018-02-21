@@ -136,9 +136,9 @@ exports.list = async function ({user, namespace}) {
     {items: secretList}
   ] = await Promise.all([
     cloudprofiles.list(),
-    Garden(user).namespaces(namespace).privatesecretbindings.get(),
-    Garden(user).namespaces(namespace).crosssecretbindings.get(),
-    Core(user).namespaces(namespace).secrets.get()
+    Garden(user).namespaces(namespace).privatesecretbindings.get({}),
+    Garden(user).namespaces(namespace).crosssecretbindings.get({}),
+    Core(user).namespaces(namespace).secrets.get({})
   ])
 
   return _.concat(
@@ -165,11 +165,11 @@ exports.patch = async function ({user, namespace, bindingName, kind, body}) {
     throw new MethodNotAllowed('Patch allowed only for secrets of kind private')
   }
 
-  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).get()
+  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.get({name: bindingName})
   const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
 
   const secret = toSecretResource(body)
-  const bodySecret = await Core(user).namespaces(namespace).secrets(secretName).mergePatch({body: secret})
+  const bodySecret = await Core(user).namespaces(namespace).secrets.mergePatch({name: secretName, body: secret})
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
@@ -192,12 +192,12 @@ exports.remove = async function ({user, namespace, bindingName, kind}) {
     throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
   }
 
-  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).get()
+  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.get({name: bindingName})
   const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
 
   await Promise.all([
-    await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).delete(),
-    await Core(user).namespaces(namespace).secrets(secretName).delete()
+    await Garden(user).namespaces(namespace).privatesecretbindings.delete({name: bindingName}),
+    await Core(user).namespaces(namespace).secrets.delete({name: secretName})
   ])
   return {metadata: {name: secretName, bindingName, bindingKind: Resources.PrivateSecretBinding.kind, namespace}}
 }

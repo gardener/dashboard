@@ -27,7 +27,7 @@ function Garden ({auth}) {
 }
 
 exports.list = async function ({user, namespace}) {
-  return Garden(user).namespaces(namespace).shoots.get()
+  return Garden(user).namespaces(namespace).shoots.get({})
 }
 
 exports.create = async function ({user, namespace, body}) {
@@ -41,15 +41,15 @@ exports.create = async function ({user, namespace, body}) {
 }
 
 exports.read = async function ({user, namespace, name}) {
-  return Garden(user).namespaces(namespace).shoots(name).get()
+  return Garden(user).namespaces(namespace).shoots.get({name})
 }
 
 function patch ({user, namespace, name, body}) {
-  return Garden(user).namespaces(namespace).shoots(name).mergePatch({body})
+  return Garden(user).namespaces(namespace).shoots.mergePatch({name, body})
 }
 
 exports.remove = async function ({user, namespace, name}) {
-  await Garden(user).namespaces(namespace).shoots(name).delete()
+  await Garden(user).namespaces(namespace).shoots.delete({name})
   const {metadata} = await this.read({user, namespace, name})
   const body = {
     metadata: {
@@ -69,10 +69,10 @@ exports.info = async function ({user, namespace, name}) {
 
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await core.ns(seedSecretNamespace).secrets(seedSecretName).get()
+  const seedSecret = await core.ns(seedSecretNamespace).secrets.get({name: seedSecretName})
 
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets('kubecfg').get()
+  const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets.get({name: 'kubecfg'})
 
   const data = _
     .chain(secret)

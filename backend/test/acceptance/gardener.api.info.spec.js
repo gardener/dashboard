@@ -28,10 +28,11 @@ describe('gardener', function () {
       const email = 'john.doe@example.org'
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
       })
 
-      it('should reject requests without authorization header', function () {
+      it('should reject requests without authorization header', async function () {
         return chai.request(app)
           .get('/api/info')
           .catch(err => err.response)
@@ -41,7 +42,6 @@ describe('gardener', function () {
             expect(res.body.error).to.have.property('name').that.is.equal('UnauthorizedError')
             expect(res.body.message).to.include('authorization token')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should reject requests with invalid signature', function () {
@@ -57,7 +57,6 @@ describe('gardener', function () {
             expect(res.body.error).to.have.property('name').that.is.equal('SigningKeyNotFoundError')
             expect(res.body.message).to.include('signing key')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should reject requests with invalid audience', function () {
@@ -74,7 +73,6 @@ describe('gardener', function () {
             expect(res.body.error).to.have.property('name').that.is.equal('UnauthorizedError')
             expect(res.body.message).to.include('audience invalid')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should reject requests with invalid issuer', function () {
@@ -91,7 +89,6 @@ describe('gardener', function () {
             expect(res.body.error).to.have.property('name').that.is.equal('UnauthorizedError')
             expect(res.body.message).to.include('issuer invalid')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should accept requests with valid bearer', function () {
@@ -108,7 +105,6 @@ describe('gardener', function () {
             expect(res.body).to.have.property('user').that.is.an('object')
             expect(res.body.user).to.have.property('email').that.is.equal(email)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

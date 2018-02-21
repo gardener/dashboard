@@ -34,6 +34,7 @@ describe('gardener', function () {
       const bearer = oidc.sign({email})
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
       })
 
@@ -49,7 +50,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should add a project member', function () {
@@ -66,7 +66,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(4)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should not add member that is already a project member', function () {
@@ -83,7 +82,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should delete a project member', function () {
@@ -99,7 +97,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(2)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

@@ -29,6 +29,7 @@ describe('gardener', function () {
       const email = 'john.doe@example.org'
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
         sandbox.restore()
       })
@@ -52,7 +53,6 @@ describe('gardener', function () {
             predicate = item => item.metadata.name === 'infra3-profileName2'
             expect(_.find(res.body, predicate).data.seeds).to.have.length(1)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

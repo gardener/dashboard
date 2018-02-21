@@ -39,6 +39,7 @@ describe('gardener', function () {
       const data = {createdBy, owner, description, purpose}
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
       })
 
@@ -54,7 +55,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(2)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should return all projects', function () {
@@ -69,7 +69,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should create a project', function () {
@@ -88,7 +87,6 @@ describe('gardener', function () {
             expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
             expect(res.body.data).to.eql({createdBy, owner, description, purpose})
           })
-          .finally(() => nocks.verify())
       })
 
       it('should patch a project', function () {
@@ -107,7 +105,6 @@ describe('gardener', function () {
             expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
             expect(res.body.data).to.eql({createdBy, owner, description, purpose})
           })
-          .finally(() => nocks.verify())
       })
 
       it('should delete a project', function () {
@@ -122,7 +119,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.eql({metadata})
           })
-          .finally(() => nocks.verify())
       })
     })
   })

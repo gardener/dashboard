@@ -32,10 +32,11 @@ function init () {
 
 function verify () {
   /* eslint no-unused-expressions: 0 */
-  if (!nock.isDone()) {
+  const isDone = nock.isDone()
+  if (!isDone) {
     console.error('pending mocks: %j', nock.pendingMocks())
   }
-  expect(nock.isDone()).to.be.true
+  expect(isDone).to.be.true
 }
 
 function reset () {

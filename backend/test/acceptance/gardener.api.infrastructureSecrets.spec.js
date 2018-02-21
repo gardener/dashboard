@@ -43,6 +43,7 @@ describe('gardener', function () {
       const sandbox = sinon.sandbox.create()
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
         sandbox.restore()
       })
@@ -60,7 +61,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should return no infrastructure secrets', function () {
@@ -76,7 +76,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(0)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should create a infrastructure secret', function () {
@@ -95,7 +94,6 @@ describe('gardener', function () {
             expect(res.body.data).to.have.own.property('key')
             expect(res.body.data).to.have.own.property('secret')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should patch a private infrastructure secret', function () {
@@ -114,7 +112,6 @@ describe('gardener', function () {
             expect(res.body.data).to.have.own.property('key')
             expect(res.body.data).to.have.own.property('secret')
           })
-          .finally(() => nocks.verify())
       })
 
       it('should not patch a cross infrastructure secret', function () {
@@ -127,7 +124,6 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(405)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should delete a private infrastructure secret', function () {
@@ -142,7 +138,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body.metadata).to.eql({name, bindingName, bindingKind, namespace})
           })
-          .finally(() => nocks.verify())
       })
 
       it('should not delete a cross infrastructure secret', function () {
@@ -154,7 +149,6 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(405)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should not delete infrastructure secret if referenced by shoot', function () {
@@ -167,7 +161,6 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(412)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

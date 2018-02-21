@@ -33,7 +33,8 @@ limitations under the License.
         Ensure that the service account has at least the roles below.
         <ul>
           <li>Service Account Admin</li>
-          <li>Service Account Actor</li>
+          <li>Service Account Token Creator</li>
+          <li>Service Account User</li>
           <li>Compute Admin</li>
         </ul>
 
