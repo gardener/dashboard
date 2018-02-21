@@ -19,6 +19,7 @@
 const kubernetes = require('../kubernetes')
 const core = require('../kubernetes').core()
 const { decodeBase64 } = require('../utils')
+const { getSeeds } = require('../cache')
 const _ = require('lodash')
 
 function Garden ({auth}) {
@@ -31,7 +32,7 @@ exports.list = async function ({user, namespace}) {
 
 exports.create = async function ({user, namespace, body}) {
   const username = user.id
-  const finalizers = ['garden.sapcloud.io/operator']
+  const finalizers = ['gardener']
   const annotations = {
     'garden.sapcloud.io/createdBy': username
   }
@@ -43,7 +44,7 @@ exports.read = async function ({user, namespace, name}) {
   return Garden(user).namespaces(namespace).shoots(name).get()
 }
 
-exports.patch = async function ({user, namespace, name, body}) {
+function patch ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots(name).mergePatch({body})
 }
 
@@ -58,19 +59,18 @@ exports.remove = async function ({user, namespace, name}) {
       }
     }
   }
-  return this.patch({user, namespace, name, body})
+  return patch({user, namespace, name, body})
 }
 
 exports.info = async function ({user, namespace, name}) {
   const shoot = await this.read({user, namespace, name})
-  const {kind, region} = shoot.spec.infrastructure
-  const labelSelector = [
-    'garden.sapcloud.io/role=seed',
-    `infrastructure.garden.sapcloud.io/kind=${kind}`,
-    `infrastructure.garden.sapcloud.io/region=${region}`
-  ].join(',')
-  const secrets = await core.ns('garden').secrets.get({qs: {labelSelector}})
-  const seedSecret = _.first(secrets.items)
+
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+
+  const seedSecretName = _.get(seed, 'spec.secretRef.name')
+  const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
+  const seedSecret = await core.ns(seedSecretNamespace).secrets(seedSecretName).get()
+
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
   const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets('kubecfg').get()
 
@@ -82,8 +82,8 @@ exports.info = async function ({user, namespace, name}) {
     .fromPairs()
     .value()
   data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
-  const seedDomain = seedSecret.metadata.annotations['dns.garden.sapcloud.io/domain']
+  const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projectName = namespace.replace(/^garden-/, '')
-  data.shootIngressDomain = `${name}.${projectName}.ingress.${seedDomain}`
+  data.shootIngressDomain = `${name}.${projectName}.${ingressDomain}`
   return data
 }

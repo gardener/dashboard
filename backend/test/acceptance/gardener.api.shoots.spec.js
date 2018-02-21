@@ -17,6 +17,7 @@
 'use strict'
 
 const app = require('../../lib/app')
+const common = require('../support/common')
 
 describe('gardener', function () {
   describe('api', function () {
@@ -39,12 +40,27 @@ describe('gardener', function () {
       const kind = 'infra1'
       const region = 'foo-east'
       const secret = 'fooSecretName'
-      const infrastructure = {kind, region, secret}
-      const spec = {infrastructure}
+      const seedName = 'infra1-seed'
+      const seedSecretName = `seedsecret-${seedName}`
+      const profile = 'infra1-profileName'
+      const spec = {
+        cloud: {
+          profile,
+          region,
+          seed: seedName,
+          secretBindingRef: {
+            name: secret,
+            kind: 'PrivateSecretBinding'
+          }
+        }
+      }
+      spec.cloud[kind] = {}
       const resourceVersion = 42
+      const sandbox = sinon.sandbox.create()
 
       afterEach(function () {
         nocks.reset()
+        sandbox.restore()
       })
 
       it('should return three shoots', function () {
@@ -63,7 +79,7 @@ describe('gardener', function () {
       })
 
       it('should create a shoot', function () {
-        const finalizers = ['garden.sapcloud.io/operator']
+        const finalizers = ['gardener']
         oidc.stub.getKeys()
         k8s.stub.createShoot({bearer, namespace, name, spec, resourceVersion})
         return chai.request(app)
@@ -88,7 +104,7 @@ describe('gardener', function () {
 
       it('should return a shoot', function () {
         oidc.stub.getKeys()
-        k8s.stub.getShoot({bearer, namespace, name, project, createdBy, purpose, kind, region, infrastructureSecretName: secret})
+        k8s.stub.getShoot({bearer, namespace, name, project, createdBy, purpose, kind, profile, region, bindingName: secret})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/shoots/${name}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -130,8 +146,9 @@ describe('gardener', function () {
         const shootServerUrl = 'https://seed.foo.bar:443'
         const shootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
 
+        common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.getShootInfo({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword})
+        k8s.stub.getShootInfo({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, seedSecretName, seedName})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
           .set('authorization', `Bearer ${bearer}`)

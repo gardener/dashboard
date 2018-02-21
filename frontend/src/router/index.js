@@ -240,12 +240,20 @@ export default function createRouter ({store, userManager}) {
     return store.dispatch('fetchProjects')
   }
 
-  function ensureSeedsLoaded () {
-    const seedList = store.getters.seedList
-    if (seedList && seedList.length) {
+  function ensureCloudProfilesLoaded () {
+    const cloudProfileList = store.getters.cloudProfileList
+    if (cloudProfileList && cloudProfileList.length) {
       return Promise.resolve()
     }
-    return store.dispatch('fetchSeeds')
+    return store.dispatch('fetchCloudProfiles')
+  }
+
+  function ensureDomainsLoaded () {
+    const domainList = store.getters.domainList
+    if (domainList && domainList.length) {
+      return Promise.resolve()
+    }
+    return store.dispatch('fetchDomains')
   }
 
   function ensureDataLoaded (to, from, next) {
@@ -258,8 +266,9 @@ export default function createRouter ({store, userManager}) {
     }
     Promise
       .all([
-        ensureSeedsLoaded(),
-        ensureProjectsLoaded()
+        ensureCloudProfilesLoaded(),
+        ensureProjectsLoaded(),
+        ensureDomainsLoaded()
       ])
       .then(() => {
         const params = to.params || {}

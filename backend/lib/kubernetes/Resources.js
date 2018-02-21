@@ -27,6 +27,21 @@ module.exports = {
     kind: 'Secret',
     apiVersion: 'v1'
   },
+  CloudProfile: {
+    name: 'cloudprofiles',
+    kind: 'CloudProfile',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  PrivateSecretBinding: {
+    name: 'privatesecretbindings',
+    kind: 'PrivateSecretBinding',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  CrossSecretBinding: {
+    name: 'crosssecretbindings',
+    kind: 'CrossSecretBinding',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
   RoleBinding: {
     name: 'rolebindings',
     kind: 'RoleBinding',
@@ -55,6 +70,11 @@ module.exports = {
   Shoot: {
     name: 'shoots',
     kind: 'Shoot',
-    apiVersion: 'garden.sapcloud.io/v1'
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  Seed: {
+    name: 'seeds',
+    kind: 'Seed',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
   }
 }

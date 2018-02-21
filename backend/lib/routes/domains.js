@@ -17,7 +17,7 @@
 'use strict'
 
 const express = require('express')
-const { version } = require('../../package')
+const { domains } = require('../services')
 
 const router = module.exports = express.Router()
 
@@ -25,18 +25,8 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send({version, user})
+      res.send(await domains.list({user}))
     } catch (err) {
       next(err)
     }
   })
-
-module.exports = {
-  '/info': router,
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/domains': require('./domains'),
-  '/namespaces': require('./namespaces'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
-}

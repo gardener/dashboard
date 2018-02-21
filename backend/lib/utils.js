@@ -19,6 +19,7 @@
 const path = require('path')
 const express = require('express')
 const { isProd } = require('./config')
+const _ = require('lodash')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '..', pathname)
@@ -48,3 +49,9 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 exports.encodeBase64 = encodeBase64
+
+function getCloudProviderKind (object) {
+  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack']
+  return _.head(_.intersection(_.keys(object), cloudProviderKinds))
+}
+exports.getCloudProviderKind = getCloudProviderKind

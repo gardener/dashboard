@@ -16,17 +16,11 @@
 
 'use strict'
 
-const express = require('express')
-const { seeds } = require('../services')
+const garden = require('../kubernetes').garden()
+const { cacheResource } = require('./common')
+const { getCloudProfiles } = require('../cache')
 
-const router = module.exports = express.Router()
-
-router.route('/')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      res.send(await seeds.list({user}))
-    } catch (err) {
-      next(err)
-    }
-  })
+module.exports = io => {
+  const emitter = garden.cloudprofiles.watch()
+  cacheResource(emitter, getCloudProfiles(), 'metadata.name', 'cloudProfiles')
+}

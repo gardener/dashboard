@@ -63,31 +63,7 @@ function toResource ({metadata, data}) {
   return {apiVersion, kind, metadata}
 }
 
-function createTerraformersClusterRole ({namespace}) {
-  const ClusterRole = Resources.ClusterRole
-  const body = {
-    metadata: {
-      name: 'garden-terraformers',
-      namespace,
-      labels: {
-        'garden.sapcloud.io/role': 'terraformers'
-      }
-    },
-    roleRef: {
-      apiGroup: ClusterRole.apiGroup,
-      kind: ClusterRole.kind,
-      name: 'garden-terraformer'
-    },
-    subjects: [{
-      kind: 'ServiceAccount',
-      name: 'default',
-      namespace
-    }]
-  }
-  return rbac.namespaces(namespace).rolebindings.post({body})
-}
-
-function createMembersClusterRole ({namespace, username}) {
+async function createMembersClusterRole ({namespace, username}) {
   const ClusterRole = Resources.ClusterRole
   const body = {
     metadata: {
@@ -109,14 +85,6 @@ function createMembersClusterRole ({namespace, username}) {
     }]
   }
   return rbac.namespaces(namespace).rolebindings.post({body})
-}
-
-function initializeProject ({namespace, username}) {
-  return Promise
-    .all([
-      createTerraformersClusterRole({namespace}),
-      createMembersClusterRole({namespace, username})
-    ])
 }
 
 exports.list = async function ({user}) {
@@ -171,7 +139,7 @@ exports.create = async function ({user, body}) {
   body = toResource(body)
   const namespace = body.metadata.name
   body = await core.namespaces.post({body})
-  await initializeProject({namespace, username})
+  await createMembersClusterRole({namespace, username})
   return fromResource(body)
 }
 

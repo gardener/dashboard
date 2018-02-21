@@ -14,10 +14,30 @@
 // limitations under the License.
 //
 
-'use strict'
+const cloudProfiles = []
+const seeds = []
+const domains = []
+const cache = {
+  getCloudProfiles () {
+    return cloudProfiles
+  },
+  getSeeds () {
+    return seeds
+  },
+  getDomains () {
+    return domains
+  }
+}
 
-exports.namespaces = require('./namespaces')
-exports.shoots = require('./shoots')
-exports.seeds = require('./seeds')
-exports.cloudprofiles = require('./cloudprofiles')
-exports.domains = require('./domains')
+module.exports = {
+  _cache: cache,
+  getCloudProfiles () {
+    return cache.getCloudProfiles()
+  },
+  getSeeds () {
+    return cache.getSeeds()
+  },
+  getDomains () {
+    return cache.getDomains()
+  }
+}

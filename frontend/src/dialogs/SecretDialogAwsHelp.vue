@@ -14,60 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
-<!--
-Copyright 2018 by The Gardener Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- -->
-
 <template>
-  <v-dialog v-model="visible" max-width="750">
-    <v-card>
-      <v-card-title class="orange white--text darken-2">
-        <v-icon large class="white--text ml-3">mdi-help-circle-outline</v-icon>
-        <span>About AWS Secrets</span>
-      </v-card-title>
-      <v-card-text class="helpContent">
-        <p>
-          Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
-          credentials for AWS Identity and Access Management (IAM), use the
-          <a href="https://console.aws.amazon.com/iam/home" target="_blank" class="orange--text  text--darken-2">IAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
-          The Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
-        </p>
-        <p>
-          Copy the AWS IAM policy document below and attach it to the IAM user
-          (<a class="orange--text text--darken-2" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
-          documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
-        </p>
-        <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
-
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn class="orange--text" flat  @click.native.stop="visible = false">
-          Got it
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <secret-dialog-help
+    title="About AWS Secrets"
+    color="orange"
+    backgroundSrc="/static/background_aws.svg"
+    :value="value"
+    @input="onInput">
+    <div slot="help-content" class="helpContent">
+      <p>
+        Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
+        credentials for AWS Identity and Access Management (IAM), use the
+        <a href="https://console.aws.amazon.com/iam/home" target="_blank" class="orange--text  text--darken-2">IAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
+        The Gardener needs the credentials to provision and operate the AWS infrastructure for your Kubernetes cluster.
+      </p>
+      <p>
+        Copy the AWS IAM policy document below and attach it to the IAM user
+        (<a class="orange--text text--darken-2" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
+        documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
+      </p>
+      <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+    </div>
+  </secret-dialog-help>
 </template>
 
 <script>
+  import SecretDialogHelp from '@/dialogs/SecretDialogHelp'
   import CodeBlock from '@/components/CodeBlock'
 
   export default {
     components: {
+      SecretDialogHelp,
       CodeBlock
     },
     props: {
@@ -139,17 +116,10 @@ limitations under the License.
         }
       }
     },
-    computed: {
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      }
-    },
     methods: {
+      onInput (value) {
+        this.$emit('input', value)
+      }
     }
   }
 </script>
@@ -158,17 +128,6 @@ limitations under the License.
 
 <style lang="styl" scoped>
 
-  .card__title{
-    background-image: url(../assets/aws_background.svg);
-    background-size: cover;
-    color:white;
-    height:90px;
-    span{
-      font-size:24px
-      padding-left:10px
-      font-weight:400
-    }
-  }
   .helpContent {
     a {
       text-decoration: none;

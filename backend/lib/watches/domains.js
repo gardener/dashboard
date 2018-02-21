@@ -16,25 +16,13 @@
 
 'use strict'
 
-const {map, pick, assign} = require('lodash')
 const core = require('../kubernetes').core()
+const { cacheResource } = require('./common')
+const { getDomains } = require('../cache')
 
-function fromResource ({metadata}) {
-  const role = 'seed'
-  const labels = metadata.labels || {}
-  const infrastructure = {
-    kind: labels['infrastructure.garden.sapcloud.io/kind'],
-    region: labels['infrastructure.garden.sapcloud.io/region']
-  }
-  metadata = assign(pick(metadata, ['name', 'resourceVersion']), {role, infrastructure})
-  return {metadata}
-}
-
-exports.list = async function () {
-  const qs = {
-    labelSelector: 'garden.sapcloud.io/role=seed'
-  }
-  const namespace = 'garden'
-  const {items} = await core.namespaces(namespace).secrets.get({qs})
-  return map(items, fromResource)
+module.exports = io => {
+  const emitter = core.namespaces('garden').secrets.watch({
+    qs: {labelSelector: 'garden.sapcloud.io/role=default-domain'}
+  })
+  cacheResource(emitter, getDomains(), 'metadata.name', 'domains')
 }

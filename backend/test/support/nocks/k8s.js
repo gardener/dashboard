@@ -26,10 +26,13 @@ const clientConfig = credentials()
 const url = clientConfig.url
 const auth = clientConfig.auth
 
-const seedList = [
-  getSeed('aws', 'eu-west-1'),
-  getSeed('aws', 'eu-central-1'),
-  getSeed('google', 'europe-west1')
+const privateSecretBindingList = [
+  getSecretBinding('foo-infra1', 'foo', 'PrivateSecretBinding', 'infra1-profileName', 'secret1', undefined),
+  getSecretBinding('foo-infra3', 'foo', 'PrivateSecretBinding', 'infra3-profileName', 'secret2', undefined)
+]
+
+const crossSecretBindingList = [
+  getSecretBinding('trial-infra1', 'foo', 'CrossSecretBinding', 'infra1-profileName', 'trial-secret', 'trial-namespace')
 ]
 
 const projectList = [
@@ -39,15 +42,14 @@ const projectList = [
 ]
 
 const shootList = [
-  getShoot({name: 'fooShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', infrastructureSecretName: 'fooSecretName'}),
-  getShoot({name: 'barShoot', project: 'fooProject', createdBy: 'barCreator', purpose: 'barPurpose', infrastructureSecretName: 'barSecretName'}),
-  getShoot({name: 'dummyShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', infrastructureSecretName: 'barSecretName'})
+  getShoot({name: 'fooShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', bindingName: 'fooSecretName'}),
+  getShoot({name: 'barShoot', project: 'fooProject', createdBy: 'barCreator', purpose: 'barPurpose', bindingName: 'barSecretName'}),
+  getShoot({name: 'dummyShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', bindingName: 'barSecretName'})
 ]
 
-const infrastructureSecretsList = [
-  getInfrastructureSecret('foo', 'secret1', 'infra1'),
-  getInfrastructureSecret('foo', 'secret2', 'infra1'),
-  getInfrastructureSecret('foo', 'secret3', 'infra2')
+const infrastructureSecretList = [
+  getInfrastructureSecret('foo', 'secret1', 'infra1-profileName', {fooKey: 'fooKey', fooSecret: 'fooSecret'}),
+  getInfrastructureSecret('foo', 'secret2', 'infra2-profileName', {fooKey: 'fooKey', fooSecret: 'fooSecret'})
 ]
 
 const projectMembersList = [
@@ -60,20 +62,25 @@ const certificateAuthorityData = encodeBase64('certificate-authority-data')
 const clientCertificateData = encodeBase64('client-certificate-data')
 const clientKeyData = encodeBase64('client-key-data')
 
-function getSeed (kind, region, data = {}) {
-  return {
+function getSecretBinding (name, project, kind, profileName, secretRefName, secretRefProject, quotas = {}) {
+  const secretBinding = {
+    kind,
     metadata: {
-      name: `${kind}---${region}`,
+      name,
+      namespace: `garden-${project}`,
       labels: {
-        'infrastructure.garden.sapcloud.io/kind': kind,
-        'infrastructure.garden.sapcloud.io/region': region
-      },
-      annotations: {
-        'dns.garden.sapcloud.io/domain': `${region}.${kind}.example.org`
+        'cloudprofile.garden.sapcloud.io/name': profileName
       }
     },
-    data
+    secretRef: {
+      name: secretRefName
+    },
+    quotas
   }
+  if (secretRefProject) {
+    secretBinding.secretRef.namespace = `garden-${secretRefProject}`
+  }
+  return secretBinding
 }
 
 function getProjectMembers (namespace, users) {
@@ -101,15 +108,14 @@ function getProjectMembers (namespace, users) {
   }
 }
 
-function getInfrastructureSecret (project, name, kind, data = {}) {
+function getInfrastructureSecret (project, name, profileName, data = {}) {
   return {
     metadata: {
-      labels: {
-        'garden.sapcloud.io/role': 'infrastructure',
-        'infrastructure.garden.sapcloud.io/kind': kind
-      },
       name,
-      namespace: `garden-${project}`
+      namespace: `garden-${project}`,
+      labels: {
+        'cloudprofile.garden.sapcloud.io/name': profileName
+      }
     },
     data
   }
@@ -139,8 +145,11 @@ function getShoot ({
   createdBy,
   purpose = 'foo-purpose',
   kind = 'fooInfra',
+  profile = 'infra1-profileName',
   region = 'foo-west',
-  infrastructureSecretName = 'foo-secret'
+  bindingName = 'foo-secret',
+  secretBindingKind = 'PrivateSecretBinding',
+  seed = 'infra1-seed'
 }) {
   const shoot = {
     metadata: {
@@ -151,13 +160,19 @@ function getShoot ({
       }
     },
     spec: {
-      infrastructure: {
-        kind,
+      cloud: {
+        profile,
         region,
-        secret: infrastructureSecretName
+        seed,
+        secretBindingRef: {
+          name: bindingName,
+          kind: secretBindingKind
+        }
       }
     }
   }
+  shoot.spec.cloud[kind] = {}
+
   if (createdBy) {
     shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
   }
@@ -192,34 +207,23 @@ function authorizationHeader (bearer) {
 }
 
 const stub = {
-  getSeeds ({bearer = auth.bearer} = {}) {
-    return nock(url)
-      .matchHeader('authorization', new RegExp(`bearer ${bearer}`, 'i'))
-      .get('/api/v1/namespaces/garden/secrets')
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=seed'
-      })
-      .reply(200, {
-        items: seedList
-      })
-  },
   getShoots ({bearer, namespace}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
     return nock(url, {reqheaders})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: shootList
       })
   },
-  getShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, infrastructureSecretName}) {
+  getShoot ({bearer, namespace, name, project, createdBy, purpose, kind, profile, region, bindingName}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
     return nock(url, {reqheaders})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
-      .reply(200, getShoot({name, project, createdBy, purpose, kind, region, infrastructureSecretName}))
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, getShoot({name, project, createdBy, purpose, kind, profile, region, bindingName}))
   },
   createShoot ({bearer, namespace, spec, resourceVersion = 42}) {
     const reqheaders = {
@@ -232,13 +236,13 @@ const stub = {
     const result = {metadata, spec}
 
     return nock(url, {reqheaders})
-      .post(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`, body => {
+      .post(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
       .reply(200, () => result)
   },
-  deleteShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, infrastructureSecretName, deletionTimestamp, resourceVersion = 42}) {
+  deleteShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, bindingName, deletionTimestamp, resourceVersion = 42}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
@@ -247,21 +251,34 @@ const stub = {
       resourceVersion,
       namespace
     }
-    const shoot = getShoot({name, project, createdBy, purpose, kind, region, infrastructureSecretName, deletionTimestamp})
+    const shoot = getShoot({name, project, createdBy, purpose, kind, region, bindingName, deletionTimestamp})
     shoot.metadata.deletionTimestamp = deletionTimestamp
     const result = {metadata}
     return nock(url, {reqheaders})
-      .delete(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200)
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, shoot)
-      .patch(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
       .reply(200, () => result)
   },
-  getShootInfo ({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword}) {
+  getShootInfo ({
+    bearer,
+    namespace,
+    name,
+    project,
+    kind,
+    region,
+    shootServerUrl,
+    shootUser,
+    shootPassword,
+    seedClusterName,
+    seedSecretName,
+    seedName
+  }) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
@@ -270,7 +287,7 @@ const stub = {
     }
 
     const seedServerUrl = 'https://seed.foo.bar:443'
-    const seedData = {
+    const seedSecretData = {
       kubeconfig: encodeBase64(getKubeconfig({
         server: seedServerUrl,
         name: seedClusterName
@@ -285,93 +302,175 @@ const stub = {
       password: encodeBase64(shootPassword)
     }
     nock(url, {reqheaders})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots/${name}`)
-      .reply(200, getShoot({name, project, kind, region}))
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, getShoot({name, project, kind, region, seed: seedName}))
 
     nock(url, {reqheaders: adminReqheaders})
-      .get('/api/v1/namespaces/garden/secrets')
-      .query({
-        labelSelector: [
-          'garden.sapcloud.io/role=seed',
-          `infrastructure.garden.sapcloud.io/kind=${kind}`,
-          `infrastructure.garden.sapcloud.io/region=${region}`
-        ].join(',')
-      })
-      .reply(200, {items: [getSeed(kind, region, seedData)]})
+      .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)
+      .reply(200, {data: seedSecretData})
 
     return nock(seedServerUrl)
       .get(`/api/v1/namespaces/shoot-${namespace}-${name}/secrets/kubecfg`)
       .reply(200, {data: shootData})
   },
   getInfrastructureSecrets ({bearer, namespace}) {
+    this.stubInfrastructureSecrets({bearer, namespace, privateSecretBindingList, crossSecretBindingList, infrastructureSecretList})
+  },
+  getNoInfrastructureSecrets ({bearer, namespace}) {
+    const privateSecretBindingList = []
+    const crossSecretBindingList = []
+    const infrastructureSecretList = []
+    this.stubInfrastructureSecrets({bearer, namespace, privateSecretBindingList, crossSecretBindingList, infrastructureSecretList})
+  },
+  stubInfrastructureSecrets ({bearer, namespace, privateSecretBindingList, crossSecretBindingList, infrastructureSecretList}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
+
     return nock(url, {reqheaders})
-      .get(`/api/v1/namespaces/${namespace}/secrets`)
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=infrastructure'
-      })
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/privatesecretbindings`)
       .reply(200, {
-        items: infrastructureSecretsList
+        items: privateSecretBindingList
+      })
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/crosssecretbindings`)
+      .reply(200, {
+        items: crossSecretBindingList
+      })
+      .get(`/api/v1/namespaces/${namespace}/secrets`)
+      .reply(200, {
+        items: infrastructureSecretList
       })
   },
-  getInfrastructureSecret ({bearer, namespace, project, kind, name, data}) {
+  createInfrastructureSecret ({bearer, namespace, data, cloudProfileName, resourceVersion = 42}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
-    return nock(url, {reqheaders})
-      .get(`/api/v1/namespaces/${namespace}/secrets/${name}`)
-      .reply(200, getInfrastructureSecret(project, name, kind, data))
-  },
-  createInfrastructureSecret ({bearer, namespace, data, resourceVersion = 42}) {
-    const reqheaders = {
-      authorization: `Bearer ${bearer}`
+    const metadataPrivateSecretBinding = {
+      resourceVersion,
+      namespace,
+      labels: {
+        'cloudprofile.garden.sapcloud.io/name': cloudProfileName
+      }
     }
-    const metadata = {
+    const secretRef = {}
+    const resultPrivateSecretBinding = {
+      metadata: metadataPrivateSecretBinding,
+      secretRef
+    }
+
+    const metadataSecret = {
       resourceVersion,
       namespace
     }
-    const result = {metadata, data}
+    const resultSecret = {
+      metadata: metadataSecret,
+      data
+    }
 
     return nock(url, {reqheaders})
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
-        _.assign(metadata, body.metadata)
+        _.assign(metadataSecret, body.metadata)
         return true
       })
-      .reply(200, () => result)
+      .reply(200, () => resultSecret)
+      .post(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/privatesecretbindings`, body => {
+        _.assign(metadataPrivateSecretBinding, body.metadata)
+        _.assign(secretRef, body.secretRef)
+        return true
+      })
+      .reply(200, () => {
+        return resultPrivateSecretBinding
+      })
   },
-  patchInfrastructureSecret ({bearer, namespace, project, kind, name, data}) {
+  patchInfrastructureSecret ({bearer, namespace, name, bindingName, data, cloudProfileName, resourceVersion = 42}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
+
+    const metadataPrivateSecretBinding = {
+      resourceVersion,
+      name: bindingName,
+      namespace,
+      labels: {
+        'cloudprofile.garden.sapcloud.io/name': cloudProfileName
+      }
+    }
+    const secretRef = {
+      name,
+      namespace
+    }
+    const resultPrivateSecretBinding = {
+      metadata: metadataPrivateSecretBinding,
+      secretRef
+    }
+
+    const metadataSecret = {
+      resourceVersion,
+      namespace
+    }
+    const resultSecret = {
+      metadata: metadataSecret,
+      data
+    }
+
     return nock(url, {reqheaders})
-      .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`)
-      .reply(200, getInfrastructureSecret(project, name, kind, data))
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/privatesecretbindings/${bindingName}`)
+      .reply(200, () => {
+        return resultPrivateSecretBinding
+      })
+      .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`, body => {
+        _.assign(metadataSecret, body.metadata)
+        return true
+      })
+      .reply(200, () => resultSecret)
   },
-  deleteInfrastructureSecret ({bearer, namespace, project, name}) {
-    const fooShoot = getShoot({name: 'fooShoot', project, infrastructureSecretName: 'someOtherSecretName'})
+  deleteInfrastructureSecret ({bearer, namespace, project, name, bindingName, cloudProfileName, resourceVersion = 42}) {
+    const fooShoot = getShoot({name: 'fooShoot', project, bindingName: 'someOtherSecretName'})
 
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
+
+    const metadataPrivateSecretBinding = {
+      resourceVersion,
+      name: bindingName,
+      namespace,
+      labels: {
+        'cloudprofile.garden.sapcloud.io/name': cloudProfileName
+      }
+    }
+    const secretRef = {
+      name,
+      namespace
+    }
+    const resultPrivateSecretBinding = {
+      metadata: metadataPrivateSecretBinding,
+      secretRef
+    }
+
     return nock(url, {reqheaders})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: [fooShoot]
       })
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/privatesecretbindings/${bindingName}`)
+      .reply(200, () => {
+        return resultPrivateSecretBinding
+      })
+      .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/privatesecretbindings/${bindingName}`)
+      .reply(200)
       .delete(`/api/v1/namespaces/${namespace}/secrets/${name}`)
       .reply(200)
   },
-  deleteInfrastructureSecretReferencedByShoot ({bearer, namespace, project, infrastructureSecretName}) {
-    const referencingShoot = getShoot({name: 'referencingShoot', project, infrastructureSecretName})
-    const fooShoot = getShoot({name: 'fooShoot', project, infrastructureSecretName: 'someOtherSecretName'})
+  deleteInfrastructureSecretReferencedByShoot ({bearer, namespace, project, bindingName}) {
+    const referencingShoot = getShoot({name: 'referencingShoot', project, bindingName})
+    const fooShoot = getShoot({name: 'fooShoot', project, bindingName: 'someOtherSecretName'})
 
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
     return nock(url, {reqheaders})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: [fooShoot, referencingShoot]
       })
@@ -420,16 +519,8 @@ const stub = {
         subject.name === username
     }
 
-    function matchRolebindingTerraformers ({metadata, roleRef, subjects: [subject]}) {
-      return metadata.name === 'garden-terraformers' &&
-        roleRef.name === 'garden-terraformer' &&
-        subject.namespace === namespace
-    }
-
     return nock(url, {reqheaders})
       .post(roleBindingsUrl, matchRolebindingProjectMembers)
-      .reply(200)
-      .post(roleBindingsUrl, matchRolebindingTerraformers)
       .reply(200)
       .post('/api/v1/namespaces', body => {
         _.assign(metadata, body.metadata)
@@ -457,7 +548,7 @@ const stub = {
   },
   deleteProject ({bearer, namespace, username}) {
     nock(url, {reqheaders: authorizationHeader(bearer)})
-      .get(`/apis/garden.sapcloud.io/v1/namespaces/${namespace}/shoots`)
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, {
         items: []
       })
@@ -524,7 +615,6 @@ module.exports = {
   url,
   projectList,
   projectMembersList,
-  seedList,
   auth,
   stub
 }

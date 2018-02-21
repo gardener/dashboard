@@ -17,31 +17,40 @@
 'use strict'
 
 const app = require('../../lib/app')
+const _ = require('lodash')
+const common = require('../support/common')
 
 describe('gardener', function () {
   describe('api', function () {
-    describe('seeds', function () {
+    describe('domains', function () {
     /* eslint no-unused-expressions: 0 */
       const oidc = nocks.oidc
-      const k8s = nocks.k8s
+      const sandbox = sinon.sandbox.create()
       const email = 'john.doe@example.org'
 
       afterEach(function () {
         nocks.reset()
+        sandbox.restore()
       })
 
-      it('should return all seeds', function () {
+      it('should return all domains', function () {
+        common.stub.getDomains(sandbox)
         const bearer = oidc.sign({email})
         oidc.stub.getKeys()
-        k8s.stub.getSeeds()
         return chai.request(app)
-          .get('/api/seeds')
+          .get('/api/domains')
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(3)
+            expect(res.body).to.have.length(2)
+            let predicate = item => item.metadata.name === 'provider1-default-domain'
+            expect(_.find(res.body, predicate).data.domain).to.eql('domain1')
+            expect(_.find(res.body, predicate).data.provider).to.eql('provider1')
+            predicate = item => item.metadata.name === 'provider2-default-domain'
+            expect(_.find(res.body, predicate).data.domain).to.eql('domain2')
+            expect(_.find(res.body, predicate).data.provider).to.eql('provider2')
           })
           .finally(() => nocks.verify())
       })

@@ -20,6 +20,8 @@ import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
+import keys from 'lodash/keys'
+import intersection from 'lodash/intersection'
 import md5 from 'md5'
 import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
@@ -172,4 +174,13 @@ export function getTimeAgo (time) {
   } else {
     return moment(time).fromNow()
   }
+}
+
+export function getCloudProviderKind (object) {
+  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack']
+  return head(intersection(keys(object), cloudProviderKinds))
+}
+
+export function isPrivateSecretBinding (secret) {
+  return get(secret, 'metadata.bindingKind') === 'PrivateSecretBinding'
 }

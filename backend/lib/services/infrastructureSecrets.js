@@ -15,93 +15,189 @@
 //
 
 const _ = require('lodash')
-const { UnprocessableEntity, PreconditionFailed } = require('../errors')
+const logger = require('../logger')
 const Resources = require('../kubernetes/Resources')
-const { decodeBase64, encodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
-const shoots = require('./shoots')
+const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
+const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl']
+const cloudprofiles = require('./cloudprofiles')
+const shoots = require('./shoots')
 
 function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
-function fromResource ({metadata, data}) {
-  const role = 'infrastructure'
-  const labels = metadata.labels || {}
-  const infrastructure = {
-    kind: labels['infrastructure.garden.sapcloud.io/kind']
-  }
-  metadata = _
-    .chain(metadata)
-    .pick(['namespace', 'name', 'resourceVersion'])
-    .assign({role, infrastructure})
-    .value()
-  const iteratee = (value, key) => {
-    value = decodeBase64(value)
-    if (!_.includes(whitelistedPropertyKeys, key)) {
-      value = '****************'
-    }
-    return value
-  }
-  data = _.mapValues(data, iteratee)
-  return {metadata, data}
+function Garden ({auth}) {
+  return kubernetes.garden({auth})
 }
 
-function toResource ({metadata, data}) {
+function fromResource ({secretBinding, bindingKind, cloudProviderKind, secret}) {
+  const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
+
+  const infrastructureSecret = {}
+  infrastructureSecret.metadata = _
+    .chain(secretBinding.secretRef)
+    .pick(['namespace', 'name'])
+    .assign({
+      cloudProviderKind,
+      cloudProfileName,
+      bindingKind,
+      bindingName: _.get(secretBinding, 'metadata.name')
+    })
+    .value()
+  if (secret) {
+    infrastructureSecret.metadata = _
+      .chain(secret.metadata)
+      .pick(['resourceVersion'])
+      .assign(infrastructureSecret.metadata)
+      .value()
+
+    const iteratee = (value, key) => {
+      value = decodeBase64(value)
+      if (!_.includes(whitelistedPropertyKeys, key)) {
+        value = '****************'
+      }
+      return value
+    }
+    infrastructureSecret.data = _.mapValues(secret.data, iteratee)
+  }
+
+  return infrastructureSecret
+}
+
+function toSecretResource ({metadata, data}) {
   const resource = Resources.Secret
   const apiVersion = resource.apiVersion
   const kind = resource.kind
-  const infrastructure = metadata.infrastructure || {}
-  const labels = {
-    'garden.sapcloud.io/role': 'infrastructure',
-    'infrastructure.garden.sapcloud.io/kind': infrastructure.kind
-  }
+  const type = 'Opaque'
   metadata = _
     .chain(metadata)
     .pick(['namespace', 'name', 'resourceVersion'])
-    .assign({labels})
     .value()
   try {
     data = _.mapValues(data, encodeBase64)
   } catch (err) {
     throw new UnprocessableEntity('Failed to encode "base64" secret data')
   }
-  return {apiVersion, kind, metadata, data}
+  return {apiVersion, kind, metadata, type, data}
+}
+
+function toPrivateSecretBindingResource ({metadata}) {
+  const resource = Resources.PrivateSecretBinding
+  const apiVersion = resource.apiVersion
+  const kind = resource.kind
+  const name = metadata.bindingName
+  const secretRef = {
+    name: metadata.name
+  }
+  const labels = {
+    'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
+  }
+
+  metadata = _
+    .chain(metadata)
+    .pick(['namespace', 'resourceVersion'])
+    .assign({name, labels})
+    .value()
+  return {apiVersion, kind, metadata, secretRef}
+}
+
+function getInfrastructureSecrets ({secretBindings, bindingKind, cloudProfileList, secretList}) {
+  let infrastructureSecrets = []
+
+  for (const secretBinding of secretBindings) {
+    const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
+    const cloudProviderKind = _.get(_.find(cloudProfileList, ['metadata.name', cloudProfileName]), 'metadata.cloudProviderKind')
+    const secretName = secretBinding.secretRef.name
+    const secret = _.find(secretList, ['metadata.name', secretName])
+    if (!cloudProviderKind) {
+      logger.error('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName)
+    } else if (secretBinding.kind === Resources.PrivateSecretBinding.kind && !secret) {
+      logger.error('Secret missing for PrivateSecretBinding. Skipping infrastructure secret with name %s', secretName)
+    } else {
+      infrastructureSecrets.push(fromResource({secretBinding, bindingKind, cloudProviderKind, secret}))
+    }
+  }
+  return infrastructureSecrets
+}
+
+async function getCloudProviderKind (cloudProfileName) {
+  const cloudProfile = await cloudprofiles.read({name: cloudProfileName})
+  const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
+  return cloudProviderKind
 }
 
 exports.list = async function ({user, namespace}) {
-  const qs = {
-    labelSelector: 'garden.sapcloud.io/role=infrastructure'
-  }
-  const {items} = await Core(user).namespaces(namespace).secrets.get({qs})
-  return _.map(items, fromResource)
+  const [
+    cloudProfileList,
+    {items: privateSecretBindingList},
+    {items: crossSecretBindingList},
+    {items: secretList}
+  ] = await Promise.all([
+    cloudprofiles.list(),
+    Garden(user).namespaces(namespace).privatesecretbindings.get(),
+    Garden(user).namespaces(namespace).crosssecretbindings.get(),
+    Core(user).namespaces(namespace).secrets.get()
+  ])
+
+  return _.concat(
+    getInfrastructureSecrets({secretBindings: privateSecretBindingList, bindingKind: Resources.PrivateSecretBinding.kind, cloudProfileList, secretList}),
+    getInfrastructureSecrets({secretBindings: crossSecretBindingList, bindingKind: Resources.CrossSecretBinding.kind, cloudProfileList, secretList: []})
+  )
 }
 
 exports.create = async function ({user, namespace, body}) {
-  body = toResource(body)
-  body = await Core(user).namespaces(namespace).secrets.post({body})
-  return fromResource(body)
+  const secret = toSecretResource(body)
+  const bodySecret = await Core(user).namespaces(namespace).secrets.post({body: secret})
+
+  const privateSecretBinding = toPrivateSecretBindingResource(body)
+  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.post({body: privateSecretBinding})
+
+  const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
+  const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
+
+  return fromResource({secretBinding: bodyPrivateSecretBinding, bindingKind: Resources.PrivateSecretBinding.kind, secret: bodySecret, cloudProviderKind})
 }
 
-exports.read = async function ({user, namespace, name}) {
-  const body = await Core(user).namespaces(namespace).secrets(name).get()
-  return fromResource(body)
+exports.patch = async function ({user, namespace, bindingName, kind, body}) {
+  if (kind !== 'private') {
+    throw new MethodNotAllowed('Patch allowed only for secrets of kind private')
+  }
+
+  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).get()
+  const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
+
+  const secret = toSecretResource(body)
+  const bodySecret = await Core(user).namespaces(namespace).secrets(secretName).mergePatch({body: secret})
+
+  const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
+  const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
+
+  return fromResource({secretBinding: bodyPrivateSecretBinding, bindingKind: Resources.PrivateSecretBinding.kind, secret: bodySecret, cloudProviderKind})
 }
 
-exports.patch = async function ({user, namespace, name, body}) {
-  body = toResource(body)
-  body = await Core(user).namespaces(namespace).secrets(name).mergePatch({body})
-  return fromResource(body)
-}
-
-exports.remove = async function ({user, namespace, name}) {
+exports.remove = async function ({user, namespace, bindingName, kind}) {
+  if (kind !== 'private') {
+    throw new MethodNotAllowed('Patch allowed only for secrets of kind private')
+  }
   const {items: shootList} = await shoots.list({user, namespace})
-  const predicate = item => _.get(item, 'spec.infrastructure.secret') === name
+  const predicate = (item) => {
+    const secretBindingRef = _.get(item, 'spec.cloud.secretBindingRef')
+    return secretBindingRef.name === bindingName &&
+      secretBindingRef.kind === Resources.PrivateSecretBinding.kind
+  }
   const secretReferencedByShoot = _.find(shootList, predicate)
   if (secretReferencedByShoot) {
     throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
   }
-  await Core(user).namespaces(namespace).secrets(name).delete()
-  return {metadata: {name, namespace}}
+
+  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).get()
+  const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
+
+  await Promise.all([
+    await Garden(user).namespaces(namespace).privatesecretbindings(bindingName).delete(),
+    await Core(user).namespaces(namespace).secrets(secretName).delete()
+  ])
+  return {metadata: {name: secretName, bindingName, bindingKind: Resources.PrivateSecretBinding.kind, namespace}}
 }
