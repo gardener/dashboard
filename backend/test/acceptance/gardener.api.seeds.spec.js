@@ -27,6 +27,7 @@ describe('gardener', function () {
       const email = 'john.doe@example.org'
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
       })
 
@@ -43,7 +44,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

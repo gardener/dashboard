@@ -44,6 +44,7 @@ describe('gardener', function () {
       const resourceVersion = 42
 
       afterEach(function () {
+        nocks.verify()
         nocks.reset()
       })
 
@@ -59,7 +60,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body.items).to.have.length(3)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should create a shoot', function () {
@@ -83,7 +83,6 @@ describe('gardener', function () {
             expect(res.body.metadata).to.eql({name, namespace, resourceVersion, annotations, finalizers})
             expect(res.body.spec).to.eql(spec)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should return a shoot', function () {
@@ -99,7 +98,6 @@ describe('gardener', function () {
             expect(res.body.metadata).to.eql({name, namespace, annotations})
             expect(res.body.spec).to.eql(spec)
           })
-          .finally(() => nocks.verify())
       })
 
       it('should delete a shoot', function () {
@@ -120,7 +118,6 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body.metadata).to.eql({namespace, annotations: deleteAnnotations, resourceVersion})
           })
-          .finally(() => nocks.verify())
       })
 
       it('should return shoot info', function () {
@@ -145,7 +142,6 @@ describe('gardener', function () {
             expect(res.body.serverUrl).to.eql(shootServerUrl)
             expect(res.body.shootIngressDomain).to.eql(shootIngressDomain)
           })
-          .finally(() => nocks.verify())
       })
     })
   })

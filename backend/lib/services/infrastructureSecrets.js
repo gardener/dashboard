@@ -85,13 +85,13 @@ exports.create = async function ({user, namespace, body}) {
 }
 
 exports.read = async function ({user, namespace, name}) {
-  const body = await Core(user).namespaces(namespace).secrets(name).get()
+  const body = await Core(user).namespaces(namespace).secrets.get({name})
   return fromResource(body)
 }
 
 exports.patch = async function ({user, namespace, name, body}) {
   body = toResource(body)
-  body = await Core(user).namespaces(namespace).secrets(name).mergePatch({body})
+  body = await Core(user).namespaces(namespace).secrets.mergePatch({name, body})
   return fromResource(body)
 }
 
@@ -102,6 +102,6 @@ exports.remove = async function ({user, namespace, name}) {
   if (secretReferencedByShoot) {
     throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
   }
-  await Core(user).namespaces(namespace).secrets(name).delete()
+  await Core(user).namespaces(namespace).secrets.delete({name})
   return {metadata: {name, namespace}}
 }

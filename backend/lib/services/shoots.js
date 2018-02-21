@@ -40,15 +40,15 @@ exports.create = async function ({user, namespace, body}) {
 }
 
 exports.read = async function ({user, namespace, name}) {
-  return Garden(user).namespaces(namespace).shoots(name).get()
+  return Garden(user).namespaces(namespace).shoots.get({name})
 }
 
 exports.patch = async function ({user, namespace, name, body}) {
-  return Garden(user).namespaces(namespace).shoots(name).mergePatch({body})
+  return Garden(user).namespaces(namespace).shoots.mergePatch({name, body})
 }
 
 exports.remove = async function ({user, namespace, name}) {
-  await Garden(user).namespaces(namespace).shoots(name).delete()
+  await Garden(user).namespaces(namespace).shoots.delete({name})
   const {metadata} = await this.read({user, namespace, name})
   const body = {
     metadata: {
@@ -72,7 +72,7 @@ exports.info = async function ({user, namespace, name}) {
   const secrets = await core.ns('garden').secrets.get({qs: {labelSelector}})
   const seedSecret = _.first(secrets.items)
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets('kubecfg').get()
+  const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets.get({name: 'kubecfg'})
 
   const data = _
     .chain(secret)
