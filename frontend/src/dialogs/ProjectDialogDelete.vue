@@ -15,37 +15,30 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="800">
-    <v-card class="delete_project">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-alert-outline</v-icon><span>Confirm Delete</span>
-      </v-card-title>
-
-      <v-card-text>
-        <v-container fluid>
-
-          <div slot="message">
-            Are you sure to delete the project <b>{{name}}</b>? <span class="red--text">The operation
-            can not be undone.</span>
-          </div>
-
-        </v-container>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click.native="hide">Cancel</v-btn>
-        <v-btn flat @click.native="onDeleteProject" class="blue--text">Delete Project</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <confirm-dialog
+    :value="value"
+    @confirmed="onDeleteProject"
+    @aborted="hide">
+    <div slot="caption">
+      Confirm Delete
+    </div>
+    <div slot="message">
+      Are you sure to delete the project <b>{{name}}</b>?
+      <br />
+      <i class="red--text text--darken-2">The operation can not be undone.</i>
+    </div>
+  </confirm-dialog>
 </template>
 
 
 <script>
   import { mapActions, mapGetters } from 'vuex'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
 
   export default {
+    components: {
+      ConfirmDialog
+    },
     props: {
       value: {
         type: Boolean,
@@ -102,24 +95,3 @@ limitations under the License.
   }
 </script>
 
-
-<style lang="styl">
-  .delete_project {
-    .card__title{
-      background-image: url(../assets/aws_background.svg);
-      background-size: cover;
-      color:white;
-      height:130px;
-    span{
-      font-size:30px !important
-      padding-left:30px
-      font-weight:400 !important
-      padding-top:30px !important
-    }
-    .icon {
-      font-size:90px !important;
-    }
-
-    }
-  }
-</style>

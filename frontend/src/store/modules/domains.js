@@ -14,10 +14,41 @@
 // limitations under the License.
 //
 
-'use strict'
+import { getDomains } from '@/utils/api'
 
-exports.namespaces = require('./namespaces')
-exports.shoots = require('./shoots')
-exports.seeds = require('./seeds')
-exports.cloudprofiles = require('./cloudprofiles')
-exports.domains = require('./domains')
+// initial state
+const state = {
+  all: []
+}
+
+// getters
+const getters = {
+  items: state => state.all
+}
+
+// actions
+const actions = {
+  getAll: ({ commit, rootState }) => {
+    const user = rootState.user
+    return getDomains({user})
+      .then(res => {
+        commit('RECEIVE', res.data)
+        return state.all
+      })
+  }
+}
+
+// mutations
+const mutations = {
+  RECEIVE (state, items) {
+    state.all = items
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
+}

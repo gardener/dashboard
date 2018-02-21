@@ -44,24 +44,15 @@ router.route('/')
     }
   })
 
-router.route('/:name')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      res.send(await infrastructureSecrets.read({user, namespace, name}))
-    } catch (err) {
-      next(err)
-    }
-  })
+router.route('/:kind/:name')
   .put(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
-      const name = req.params.name
+      const bindingName = req.params.name
+      const kind = req.params.kind
       const body = req.body
-      res.send(await infrastructureSecrets.patch({user, namespace, name, body}))
+      res.send(await infrastructureSecrets.patch({user, namespace, bindingName, kind, body}))
     } catch (err) {
       next(err)
     }
@@ -70,8 +61,9 @@ router.route('/:name')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      const name = req.params.name
-      res.send(await infrastructureSecrets.remove({user, namespace, name}))
+      const bindingName = req.params.name
+      const kind = req.params.kind
+      res.send(await infrastructureSecrets.remove({user, namespace, bindingName, kind}))
     } catch (err) {
       next(err)
     }

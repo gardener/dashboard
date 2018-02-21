@@ -28,7 +28,7 @@ limitations under the License.
             return 'mdi-microsoft'
           case 'aws':
             return 'mdi-amazon'
-          case 'gce':
+          case 'gcp':
             return 'mdi-google'
           case 'openstack':
             return 'mdi-server-network'
@@ -44,7 +44,7 @@ limitations under the License.
           case 'aws':
             kindColor = 'orange'
             break
-          case 'gce':
+          case 'gcp':
             kindColor = 'green'
             break
           case 'azure':

@@ -15,85 +15,84 @@ limitations under the License.
 -->
 
 <template>
-      <v-layout row>
-        <v-flex xs1 class="mt-1"><v-avatar class="cyan"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
-        <v-flex xs2 class="ml-2">
-          <v-text-field
-            color="cyan"
-            :error-messages="getErrorMessages('worker.name')"
-            @input="$v.worker.name.$touch()"
-            @blur="$v.worker.name.$touch()"
-            v-model="worker.name"
-            label="Group Name">
-          </v-text-field>
-        </v-flex>
+  <v-layout row>
+    <v-flex xs1 class="mt-1"><v-avatar class="cyan"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
+    <v-flex xs2 class="ml-2">
+      <v-text-field
+        color="cyan"
+        :error-messages="getErrorMessages('worker.name')"
+        @input="$v.worker.name.$touch()"
+        @blur="$v.worker.name.$touch()"
+        v-model="worker.name"
+        label="Group Name">
+      </v-text-field>
+    </v-flex>
 
-        <v-flex xs2  class="ml-3">
-          <v-select
-            color="cyan"
-            :items="machineTypes"
-            v-model="worker.machineType"
-            label="Machine Types"
-          ></v-select>
-        </v-flex>
+    <v-flex xs2  class="ml-3">
+      <machine-type
+      :machineTypes="machineTypes"
+      :worker="worker">
+      </machine-type>
+    </v-flex>
 
-        <v-flex xs1  class="ml-3">
-          <v-select
-            color="cyan"
-            :items="volumeTypes"
-            v-model="worker.volumeType"
-            label="Volume Type"></v-select>
-        </v-flex>
+    <v-flex xs2  class="ml-5">
+      <volume-type
+      :volumeTypes="volumeTypes"
+      :worker="worker">
+      </volume-type>
+    </v-flex>
 
-        <v-flex xs1  class="ml-3">
-          <size-input
-            min="1"
-            color="cyan"
-            :error-messages="getErrorMessages('worker.volumeSize')"
-            @input="$v.worker.volumeSize.$touch()"
-            @blur="$v.worker.volumeSize.$touch()"
-            label="Volume Size"
-            v-model="worker.volumeSize"
-          ></size-input>
-        </v-flex>
+    <v-flex xs1  class="ml-3">
+      <size-input
+        min="1"
+        color="cyan"
+        :error-messages="getErrorMessages('worker.volumeSize')"
+        @input="$v.worker.volumeSize.$touch()"
+        @blur="$v.worker.volumeSize.$touch()"
+        label="Volume Size"
+        v-model="worker.volumeSize"
+      ></size-input>
+    </v-flex>
 
-        <v-flex xs1 class="ml-3">
-          <v-text-field
-            min="1"
-            color="cyan"
-            :error-messages="getErrorMessages('worker.autoScalerMin')"
-            @input="$v.worker.autoScalerMin.$touch()"
-            @blur="$v.worker.autoScalerMin.$touch()"
-            type="number"
-            v-model="innerMin"
-            label="Autoscaler Min."></v-text-field>
-        </v-flex>
+    <v-flex xs1 class="ml-3">
+      <v-text-field
+        min="1"
+        color="cyan"
+        :error-messages="getErrorMessages('worker.autoScalerMin')"
+        @input="$v.worker.autoScalerMin.$touch()"
+        @blur="$v.worker.autoScalerMin.$touch()"
+        type="number"
+        v-model="innerMin"
+        label="Autoscaler Min."></v-text-field>
+    </v-flex>
 
-        <v-flex xs1 class="ml-3">
-          <v-text-field
-            min="1"
-            color="cyan"
-            :error-messages="getErrorMessages('worker.autoScalerMax')"
-            @input="$v.worker.autoScalerMax.$touch()"
-            @blur="$v.worker.autoScalerMax.$touch()"
-            type="number"
-            v-model="innerMax"
-            label="Max."
-          ></v-text-field>
-        </v-flex>
+    <v-flex xs1 class="ml-3">
+      <v-text-field
+        min="1"
+        color="cyan"
+        :error-messages="getErrorMessages('worker.autoScalerMax')"
+        @input="$v.worker.autoScalerMax.$touch()"
+        @blur="$v.worker.autoScalerMax.$touch()"
+        type="number"
+        v-model="innerMax"
+        label="Max."
+      ></v-text-field>
+    </v-flex>
 
 
-        <v-flex xs1 class="ml-2 mt-2">
-        <slot name="action">
-        </slot>
-        </v-flex>
+    <v-flex xs1 class="ml-2 mt-2">
+    <slot name="action">
+    </slot>
+    </v-flex>
 
-      </v-layout>
+  </v-layout>
 </template>
 
 <script>
   import { mapGetters } from 'vuex'
   import SizeInput from '@/components/VolumeSizeInput'
+  import MachineType from '@/components/MachineType'
+  import VolumeType from '@/components/VolumeType'
   import { required, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
   import { uniqueWorkerName, minVolumeSize } from '@/utils/validators'
@@ -136,7 +135,9 @@ limitations under the License.
 
   export default {
     components: {
-      SizeInput
+      SizeInput,
+      MachineType,
+      VolumeType
     },
     props: {
       worker: {
@@ -146,6 +147,9 @@ limitations under the License.
       workers: {
         type: Array,
         required: true
+      },
+      cloudProfileName: {
+        type: String
       }
     },
     data () {
@@ -156,15 +160,15 @@ limitations under the License.
     validations,
     computed: {
       ...mapGetters([
-        'machineTypesByInfrastructureKind',
-        'volumeTypesByInfrastructureKind'
+        'machineTypesByCloudProfileName',
+        'volumeTypesByCloudProfileName'
       ]),
 
       machineTypes () {
-        return this.machineTypesByInfrastructureKind('aws')
+        return this.machineTypesByCloudProfileName(this.cloudProfileName)
       },
       volumeTypes () {
-        return this.volumeTypesByInfrastructureKind('aws')
+        return this.volumeTypesByCloudProfileName(this.cloudProfileName)
       },
 
       innerMin: {

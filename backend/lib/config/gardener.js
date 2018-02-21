@@ -53,10 +53,6 @@ module.exports = {
         },
         dashboardUrl: {
           pathname: '/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/'
-        },
-        kubernetesVersions: [ '1.6.10', '1.7.6' ],
-        cloudProviders: {
-          aws: {}
         }
       }
     }

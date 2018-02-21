@@ -14,139 +14,81 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
-<!--
-Copyright 2018 by The Gardener Authors.
+ <template>
+  <secret-dialog
+    :value=value
+    :data="secretData"
+    :dataValid="valid"
+    :secret="secret"
+    cloudProviderKind="azure"
+    color="blue"
+    infraIcon="mdi-microsoft"
+    backgroundSrc="/static/background_azure.svg"
+    createTitle="Add new Azure Secret"
+    replaceTitle="Replace Azure Secret"
+    @input="onInput">
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+    <template slot="data-slot">
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            ref="clientId"
+            v-model="clientId"
+            :label="clientIdLabel"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            v-model="clientSecret"
+            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+            :append-icon-cb="() => (hideSecret = !hideSecret)"
+            :type="hideSecret ? 'password' : 'text'"
+            :label="clientSecretLabel"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- -->
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            v-model="tenantId"
+            :label="tenantIdLabel"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-<!--
-Copyright 2018 by The Gardener Authors.
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            v-model="subscriptionId"
+            :label="subscriptionIdLabel"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
+    </template>
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+  </secret-dialog>
 
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
- -->
-
-<template>
-  <v-dialog v-model="visible" max-width="800">
-    <v-card class="azure_credential">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-microsoft</v-icon><span>{{title}}</span>
-      </v-card-title>
-
-      <v-card-text>
-        <v-container fluid>
-          <v-layout row>
-            <v-flex xs5>
-              <template v-if="isCreateMode">
-                <v-text-field
-                  color="blue"
-                  ref="secretName"
-                  v-model="secretName"
-                  label="Secret Name"
-                  :error-messages="getErrorMessages('secretName')"
-                  @input="$v.secretName.$touch()"
-                  @blur="$v.secretName.$touch()"
-                ></v-text-field>
-              </template>
-              <template v-else>
-                 <div class="title pb-3">{{secretName}}</div>
-              </template>
-            </v-flex>
-          </v-layout>
-
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                ref="clientId"
-                v-model="clientId"
-                :label="clientIdLabel"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
-
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                v-model="clientSecret"
-                :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-                :append-icon-cb="() => (hideSecret = !hideSecret)"
-                :type="hideSecret ? 'password' : 'text'"
-                :label="clientSecretLabel"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
-
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                v-model="tenantId"
-                :label="tenantIdLabel"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
-
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                v-model="subscriptionId"
-                :label="subscriptionIdLabel"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click.native="cancel">Cancel</v-btn>
-        <v-btn flat @click.native="submit" class="blue--text" :disabled="!valid">{{submitButtonText}}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 
 <script>
-  import { mapActions, mapState, mapGetters } from 'vuex'
-  import { getValidationErrors, setInputFocus } from '@/utils'
-  import { required, maxLength } from 'vuelidate/lib/validators'
-  import { unique, resourceName } from '@/utils/validators'
-  import cloneDeep from 'lodash/cloneDeep'
+  import SecretDialog from '@/dialogs/SecretDialog'
+  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
-  const validationErrors = {
-    secretName: {
-      required: 'You can\'t leave this empty.',
-      maxLength: 'It exceeds the maximum length of 128 characters.',
-      resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-      unique: 'Name is taken. Try another.'
-    }
-  }
+  const validationErrors = {}
 
   export default {
+    components: {
+      SecretDialog
+    },
     props: {
       value: {
         type: Boolean,
@@ -158,7 +100,6 @@ limitations under the License.
     },
     data () {
       return {
-        secretName: undefined,
         clientId: undefined,
         clientSecret: undefined,
         tenantId: undefined,
@@ -172,37 +113,20 @@ limitations under the License.
       return this.validators
     },
     computed: {
-      ...mapState([
-        'namespace'
-      ]),
-      ...mapGetters([
-        'infrastructureSecretList'
-      ]),
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
       valid () {
         return !this.$v.$invalid
       },
+      secretData () {
+        return {
+          clientID: this.clientId,
+          clientSecret: this.clientSecret,
+          subscriptionID: this.subscriptionId,
+          tenantID: this.tenantId
+        }
+      },
       validators () {
         const validators = {}
-        if (this.isCreateMode) {
-          validators.secretName = {
-            required,
-            maxLength: maxLength(128),
-            resourceName,
-            unique: unique('infrastructureSecretNames')
-          }
-        }
         return validators
-      },
-      infrastructureSecretNames () {
-        return this.infrastructureSecretList.map(item => item.metadata.name)
       },
       isCreateMode () {
         return !this.secret
@@ -218,58 +142,11 @@ limitations under the License.
       },
       subscriptionIdLabel () {
         return this.isCreateMode ? 'Subscription Id' : 'New Subscription Id'
-      },
-      submitButtonText () {
-        return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
-      },
-      title () {
-        return this.isCreateMode ? 'Add new Azure Secret' : 'Replace Azure Secret'
       }
     },
     methods: {
-      ...mapActions([
-        'createInfrastructureSecret',
-        'updateInfrastructureSecret'
-      ]),
-      hide () {
-        this.visible = false
-      },
-      cancel () {
-        this.hide()
-        this.$emit('cancel')
-      },
-      submit () {
-        this.$v.$touch()
-        if (this.valid) {
-          this.save()
-            .then(secret => {
-              this.hide()
-              this.$emit('submit', secret)
-            })
-        }
-      },
-      save () {
-        const data = {
-          clientID: this.clientId,
-          clientSecret: this.clientSecret,
-          subscriptionID: this.subscriptionId,
-          tenantID: this.tenantId
-        }
-
-        if (this.isCreateMode) {
-          const namespace = this.namespace
-          const name = this.secretName
-          const infrastructure = {
-            kind: 'azure'
-          }
-          const metadata = {name, namespace, infrastructure}
-
-          return this.createInfrastructureSecret({metadata, data})
-        } else {
-          const metadata = cloneDeep(this.secret.metadata)
-
-          return this.updateInfrastructureSecret({metadata, data})
-        }
+      onInput (value) {
+        this.$emit('input', value)
       },
       reset () {
         this.$v.$reset()
@@ -279,12 +156,8 @@ limitations under the License.
         this.subscriptionId = ''
         this.tenantId = ''
 
-        if (this.isCreateMode) {
-          this.secretName = 'my-azure-secret'
-          setInputFocus(this, 'secretName')
-        } else {
-          this.secretName = this.secret.metadata ? this.secret.metadata.name : ''
-          setInputFocus(this, 'clientId')
+        if (!this.isCreateMode) {
+          setDelayedInputFocus(this, 'clientId')
         }
       },
       getErrorMessages (field) {
@@ -300,24 +173,3 @@ limitations under the License.
     }
   }
 </script>
-
-
-<style lang="styl">
-  .azure_credential {
-    .card__title{
-      background-image: url(../assets/azure_background.svg);
-      background-size: cover;
-      color:white;
-      height:130px;
-      span{
-        font-size:30px !important
-        padding-left:30px
-        font-weight:400 !important
-        padding-top:30px !important
-      }
-      .icon {
-        font-size:90px !important;
-      }
-    }
-  }
-</style>

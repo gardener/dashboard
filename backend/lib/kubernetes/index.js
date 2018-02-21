@@ -22,6 +22,7 @@ BaseObject.prototype.watch = require('./watch')
 BaseObject.prototype.mergePatch = mergePatch
 const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
+const Resources = require('./Resources')
 
 const {
   Api,
@@ -115,8 +116,14 @@ module.exports = {
   garden (options) {
     options = assign(options, {
       group: 'garden.sapcloud.io',
-      version: 'v1',
-      resources: ['shoots']
+      version: 'v1beta1',
+      resources: [
+        Resources.Shoot.name,
+        Resources.CloudProfile.name,
+        Resources.Seed.name,
+        Resources.PrivateSecretBinding.name,
+        Resources.CrossSecretBinding.name
+      ]
     })
     return new CustomResourceDefinitions(credentials(options))
   }

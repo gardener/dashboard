@@ -56,16 +56,16 @@ export function getInfrastructureSecrets ({namespace, user}) {
   return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`, user)
 }
 
-export function updateInfrastructureSecret ({namespace, name, user, data}) {
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`, user, data)
+export function updateInfrastructureSecret ({namespace, bindingName, user, data}) {
+  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`, user, data)
 }
 
 export function createInfrastructureSecret ({namespace, user, data}) {
   return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, user, data)
 }
 
-export function deleteInfrastructureSecret ({namespace, name, user}) {
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${name}`, user)
+export function deleteInfrastructureSecret ({namespace, bindingName, user}) {
+  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`, user)
 }
 
 /* Shoot Clusters */
@@ -90,10 +90,20 @@ export function getShootInfo ({namespace, name, user}) {
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`, user)
 }
 
-/* Seed Clusters */
+/* Cloud Profiles */
 
-export function getSeeds ({user}) {
-  return getResource(`/api/seeds`, user)
+export function getCloudprofiles ({user}) {
+  return getResource(`/api/cloudprofiles`, user)
+}
+
+export function getSeedsForCloudprofile ({user, cloudProfileName}) {
+  return getResource(`/api/cloudprofiles/${cloudProfileName}/seeds`, user)
+}
+
+/* Domains */
+
+export function getDomains ({user}) {
+  return getResource(`/api/domains`, user)
 }
 
 /* Projects */

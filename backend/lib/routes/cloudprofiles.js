@@ -14,41 +14,19 @@
 // limitations under the License.
 //
 
-import { getSeeds } from '@/utils/api'
+'use strict'
 
-// initial state
-const state = {
-  all: []
-}
+const express = require('express')
+const { cloudprofiles } = require('../services')
 
-// getters
-const getters = {
-  items: state => state.all
-}
+const router = module.exports = express.Router()
 
-// actions
-const actions = {
-  getAll: ({ commit, rootState }) => {
-    const user = rootState.user
-    return getSeeds({user})
-      .then(res => {
-        commit('RECEIVE', res.data)
-        return state.all
-      })
-  }
-}
-
-// mutations
-const mutations = {
-  RECEIVE (state, items) {
-    state.all = items
-  }
-}
-
-export default {
-  namespaced: true,
-  state,
-  getters,
-  actions,
-  mutations
-}
+router.route('/')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      res.send(await cloudprofiles.list({user}))
+    } catch (err) {
+      next(err)
+    }
+  })

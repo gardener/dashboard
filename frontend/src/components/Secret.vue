@@ -39,22 +39,28 @@ limitations under the License.
     <v-list two-line v-else>
       <v-list-tile v-for="row in rows" :key="row.metadata.name">
         <v-list-tile-content>
-          <v-list-tile-title>{{row.metadata.name}} <span style="opacity:0.5">({{relatedShootCountLabel(row)}})</span> </v-list-tile-title>
+          <v-list-tile-title>
+            {{row.metadata.name}}
+            <v-icon v-if="!isPrivateSecretBinding(row)">mdi-share</v-icon>
+            <span style="opacity:0.5">({{relatedShootCountLabel(row)}})</span>
+          </v-list-tile-title>
           <v-list-tile-sub-title>
-            <slot name="rowSubTitle" :data="row.data">{{row.data[secretDescriptorKey]}}</slot>
+            <slot name="rowSubTitle" :data="row.data">{{secretDescriptor(row)}}</slot>
           </v-list-tile-sub-title>
         </v-list-tile-content>
-        <v-list-tile-action v-if="relatedShootCount(row)===0">
+
+        <v-list-tile-action v-if="relatedShootCount(row)===0 && isPrivateSecretBinding(row)">
           <v-btn icon @click.native.stop="onDelete(row)">
             <v-icon class="red--text">delete</v-icon>
           </v-btn>
         </v-list-tile-action>
 
-        <v-list-tile-action>
+        <v-list-tile-action v-if="isPrivateSecretBinding(row)">
           <v-btn icon @click.native.stop="onUpdate(row)">
             <v-icon class="blue--text">edit</v-icon>
           </v-btn>
         </v-list-tile-action>
+
       </v-list-tile>
     </v-list>
 
@@ -63,6 +69,8 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex'
+  import get from 'lodash/get'
+  import { isPrivateSecretBinding } from '@/utils'
 
   export default {
     props: {
@@ -118,8 +126,15 @@ limitations under the License.
       }
     },
     methods: {
+      secretDescriptor (secret) {
+        if (this.isPrivateSecretBinding(secret)) {
+          return secret.data[this.secretDescriptorKey]
+        } else {
+          return get(secret, 'metadata.namespace')
+        }
+      },
       relatedShootCount (secret) {
-        return this.shootsByInfrastructureSecret(secret.metadata.name).length
+        return this.shootsByInfrastructureSecret(secret.metadata.name, secret.metadata.namespace).length
       },
       relatedShootCountLabel (secret) {
         const count = this.relatedShootCount(secret)
@@ -128,6 +143,9 @@ limitations under the License.
         } else {
           return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
         }
+      },
+      isPrivateSecretBinding (secret) {
+        return isPrivateSecretBinding(secret)
       },
       onAdd () {
         this.$emit('add', this.infrastructureKey)

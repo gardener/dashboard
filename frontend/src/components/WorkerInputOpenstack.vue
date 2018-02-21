@@ -29,20 +29,10 @@ limitations under the License.
     </v-flex>
 
     <v-flex xs2  class="ml-3">
-      <v-select
-        color="cyan"
-        :items="machineTypes"
-        v-model="worker.machineType"
-        label="Machine Types"
-      ></v-select>
-    </v-flex>
-
-    <v-flex xs2  class="ml-5">
-      <v-select
-        color="cyan"
-        :items="volumeTypes"
-        v-model="worker.volumeType"
-        label="Volume Type"></v-select>
+      <machine-type
+      :machineTypes="machineTypes"
+      :worker="worker">
+      </machine-type>
     </v-flex>
 
     <v-flex xs1 class="ml-5">
@@ -69,6 +59,7 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex'
+  import MachineType from '@/components/MachineType'
   import { required, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
   import { uniqueWorkerName } from '@/utils/validators'
@@ -98,6 +89,9 @@ limitations under the License.
   }
 
   export default {
+    components: {
+      MachineType
+    },
     props: {
       worker: {
         type: Object,
@@ -106,6 +100,9 @@ limitations under the License.
       workers: {
         type: Array,
         required: true
+      },
+      cloudProfileName: {
+        type: String
       }
     },
     validations,
@@ -116,15 +113,11 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'machineTypesByInfrastructureKind',
-        'volumeTypesByInfrastructureKind'
+        'machineTypesByCloudProfileName'
       ]),
 
       machineTypes () {
-        return this.machineTypesByInfrastructureKind('openstack')
-      },
-      volumeTypes () {
-        return this.volumeTypesByInfrastructureKind('openstack')
+        return this.machineTypesByCloudProfileName(this.cloudProfileName)
       },
 
       innerMax: {

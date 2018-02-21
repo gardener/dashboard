@@ -26,7 +26,8 @@ import get from 'lodash/get'
 import find from 'lodash/find'
 
 import shoots from './modules/shoots'
-import seeds from './modules/seeds'
+import cloudProfiles from './modules/cloudProfiles'
+import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
@@ -56,8 +57,34 @@ const state = {
 
 // getters
 const getters = {
-  seedList (state) {
-    return state.seeds.all
+  domainList (state) {
+    return state.domains.all
+  },
+  cloudProfileList (state) {
+    return state.cloudProfiles.all
+  },
+  cloudProfileByName (state, getters) {
+    return (name) => {
+      return getters['cloudProfiles/cloudProfileByName'](name)
+    }
+  },
+  cloudProfilesByCloudProviderKind (state) {
+    return (cloudProviderKind) => {
+      const predicate = item => item.metadata.cloudProviderKind === cloudProviderKind
+      return filter(state.cloudProfiles.all, predicate)
+    }
+  },
+  machineTypesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      return get(cloudProfile, 'data.machineTypes')
+    }
+  },
+  volumeTypesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      return get(cloudProfile, 'data.volumeTypes')
+    }
   },
   shootList (state) {
     return state.shoots.all
@@ -78,38 +105,24 @@ const getters = {
     const iteratee = item => item.metadata.namespace
     return map(state.projects.all, iteratee)
   },
-  infrastructureKindList (state) {
-    const iteratee = item => item.metadata.infrastructure.kind
-    return uniq(map(state.seeds.all, iteratee))
+  cloudProviderKindList (state) {
+    const iteratee = item => item.metadata.cloudProviderKind
+    return uniq(map(state.cloudProfiles.all, iteratee))
   },
-  regionsByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      const predicate = item => item.metadata.infrastructure.kind === infrastructureKind
-      const iteratee = item => item.metadata.infrastructure.region
-      return uniq(map(filter(state.seeds.all, predicate), iteratee))
-    }
-  },
-  infrastructureSecretNamesByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      const predicate = item => item.metadata.infrastructure.kind === infrastructureKind
-      const iteratee = item => item.metadata.name
-      return uniq(map(filter(state.infrastructureSecrets.all, predicate), iteratee))
+  regionsByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const iteratee = item => item.data.region
+      return uniq(map(get(cloudProfile, 'data.seeds'), iteratee))
     }
   },
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
-      const predicate = item => item.metadata.infrastructure.kind === infrastructureKind
-      return filter(state.infrastructureSecrets.all, predicate)
-    }
-  },
-  volumeTypesByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      return get(state.cfg, `cloudProviders.${infrastructureKind}.volumeTypes`)
-    }
-  },
-  machineTypesByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      return get(state.cfg, `cloudProviders.${infrastructureKind}.machineTypes`)
+      const predicate = item => {
+        return item.metadata.cloudProviderKind === infrastructureKind
+      }
+      const filtered = filter(state.infrastructureSecrets.all, predicate)
+      return filtered
     }
   },
   shootByNamespaceAndName (state) {
@@ -119,13 +132,19 @@ const getters = {
     }
   },
   shootsByInfrastructureSecret (state) {
-    return (secretName) => {
-      const predicate = item => item.spec.infrastructure.secret === secretName
+    return (secretName, namespace) => {
+      const predicate = item => {
+        const secretBindingRef = get(item, 'spec.cloud.secretBindingRef')
+        return get(secretBindingRef, 'name') === secretName && get(secretBindingRef, 'namespace') === namespace
+      }
       return filter(state.shoots.all, predicate)
     }
   },
-  kubernetesVersions (state) {
-    return get(state.cfg, 'kubernetesVersions')
+  kubernetesVersions (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      return get(cloudProfile, 'data.kubernetes.versions', [])
+    }
   },
   username (state) {
     return get(state, 'user.profile.name')
@@ -134,7 +153,7 @@ const getters = {
     return !!state.error
   },
   errorMessage () {
-    return state.error ? state.error.message || '' : ''
+    return get(state, 'error.message', '')
   }
 }
 
@@ -148,8 +167,14 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchSeeds ({ dispatch }) {
-    return dispatch('seeds/getAll')
+  fetchCloudProfiles ({ dispatch }) {
+    return dispatch('cloudProfiles/getAll')
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  fetchDomains ({ dispatch }) {
+    return dispatch('domains/getAll')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -222,9 +247,6 @@ const actions = {
   },
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
-      .catch(err => {
-        dispatch('setError', err)
-      })
   },
   deleteShoot ({ dispatch, commit }, name) {
     return dispatch('shoots/delete', name)
@@ -309,7 +331,8 @@ const store = new Vuex.Store({
   modules: {
     projects,
     members,
-    seeds,
+    cloudProfiles,
+    domains,
     shoots,
     infrastructureSecrets
   },
