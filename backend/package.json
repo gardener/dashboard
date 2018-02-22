@@ -52,7 +52,7 @@
     "socket.io": "^2.0.4",
     "socketio-auth": "^0.1.0",
     "winston": "^2.4.0",
-    "ws": "^4.0.0"
+    "ws": "^4.1.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
