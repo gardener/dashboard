@@ -16,8 +16,6 @@
 
 'use strict'
 
-const app = require('../../lib/app')
-
 describe('gardener', function () {
   describe('api', function () {
     describe('members', function () {
@@ -32,6 +30,15 @@ describe('gardener', function () {
       const username = `${name}@example.org`
       const email = username
       const bearer = oidc.sign({email})
+      let app
+
+      before(function () {
+        app = global.createServer()
+      })
+
+      after(function () {
+        app.close()
+      })
 
       afterEach(function () {
         nocks.verify()

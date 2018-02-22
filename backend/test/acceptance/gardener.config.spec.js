@@ -16,11 +16,18 @@
 
 'use strict'
 
-const app = require('../../lib/app')
-
 describe('gardener', function () {
   describe('config.json', function () {
     /* eslint no-unused-expressions: 0 */
+    let app
+
+    before(function () {
+      app = global.createServer()
+    })
+
+    after(function () {
+      app.close()
+    })
 
     it('should return the frontend configuration', function () {
       return chai.request(app)

@@ -41,3 +41,10 @@ global.expect = global.chai.expect
  */
 global.chai.use(require('sinon-chai'))
 global.chai.use(require('chai-http'))
+
+/*!
+ * HTTP server object for testing to allow closing
+ */
+const http = require('http')
+const app = require('../../lib/app')
+global.createServer = () => http.createServer(app)

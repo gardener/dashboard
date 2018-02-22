@@ -2,4 +2,3 @@
 --reporter spec
 --check-leaks
 --slow 100
---exit

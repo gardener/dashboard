@@ -16,8 +16,6 @@
 
 'use strict'
 
-const app = require('../../lib/app')
-
 describe('gardener', function () {
   describe('api', function () {
     describe('shoots', function () {
@@ -42,6 +40,15 @@ describe('gardener', function () {
       const infrastructure = {kind, region, secret}
       const spec = {infrastructure}
       const resourceVersion = 42
+      let app
+
+      before(function () {
+        app = global.createServer()
+      })
+
+      after(function () {
+        app.close()
+      })
 
       afterEach(function () {
         nocks.verify()
@@ -75,7 +82,7 @@ describe('gardener', function () {
               'garden.sapcloud.io/purpose': purpose
             }
           },
-            spec})
+          spec})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)

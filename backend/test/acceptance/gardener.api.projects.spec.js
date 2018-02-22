@@ -16,8 +16,6 @@
 
 'use strict'
 
-const app = require('../../lib/app')
-
 describe('gardener', function () {
   describe('api', function () {
     describe('projects', function () {
@@ -37,6 +35,15 @@ describe('gardener', function () {
       const description = 'description'
       const purpose = 'purpose'
       const data = {createdBy, owner, description, purpose}
+      let app
+
+      before(function () {
+        app = global.createServer()
+      })
+
+      after(function () {
+        app.close()
+      })
 
       afterEach(function () {
         nocks.verify()

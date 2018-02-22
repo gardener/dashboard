@@ -16,7 +16,6 @@
 
 'use strict'
 
-const app = require('../../lib/app')
 const { version } = require('../../package')
 
 describe('gardener', function () {
@@ -26,6 +25,15 @@ describe('gardener', function () {
 
       const oidc = nocks.oidc
       const email = 'john.doe@example.org'
+      let app
+
+      before(function () {
+        app = global.createServer()
+      })
+
+      after(function () {
+        app.close()
+      })
 
       afterEach(function () {
         nocks.verify()
