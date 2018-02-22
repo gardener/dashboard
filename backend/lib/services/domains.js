@@ -16,8 +16,23 @@
 
 'use strict'
 
-exports.namespaces = require('./namespaces')
-exports.shoots = require('./shoots')
-exports.seeds = require('./seeds')
-exports.cloudprofiles = require('./cloudprofiles')
-exports.domains = require('./domains')
+const { map, pick, get } = require('lodash')
+const { getDomains } = require('../cache')
+
+function fromResource ({metadata}) {
+  const domain = get(metadata, ['annotations', 'dns.garden.sapcloud.io/domain'])
+  const provider = get(metadata, ['annotations', 'dns.garden.sapcloud.io/provider'])
+  const data = {
+    domain,
+    provider
+  }
+
+  metadata = pick(metadata, ['name', 'namespace'])
+  return {metadata, data}
+}
+
+exports.list = async function () {
+  const domains = getDomains()
+
+  return Promise.resolve(map(domains, fromResource))
+}

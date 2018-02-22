@@ -19,6 +19,7 @@ limitations under the License.
   <v-container fluid class="secrets">
 
     <secret
+    v-if="hasCloudProfileForCloudProviderKind('aws')"
     infrastructureKey="aws"
     infrastructureName="Amazon Web Services"
     icon="mdi-amazon"
@@ -32,6 +33,7 @@ limitations under the License.
     ></secret>
 
     <secret
+    v-if="hasCloudProfileForCloudProviderKind('azure')"
     class="mt-3"
     infrastructureKey="azure"
     infrastructureName="Microsoft Azure Cloud"
@@ -46,12 +48,13 @@ limitations under the License.
     ></secret>
 
     <secret
+    v-if="hasCloudProfileForCloudProviderKind('gcp')"
     class="mt-3"
-    infrastructureKey="gce"
+    infrastructureKey="gcp"
     infrastructureName="Google Cloud Platform"
     icon="mdi-google"
     secretDescriptorKey="project"
-    description="Make sure that the new credentials have the correct permission on GCE."
+    description="Make sure that the new credentials have the correct permission on GCP."
     color="green"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
@@ -60,6 +63,7 @@ limitations under the License.
     ></secret>
 
     <secret
+    v-if="hasCloudProfileForCloudProviderKind('openstack')"
     class="mt-3"
     infrastructureKey="openstack"
     infrastructureName="Openstack"
@@ -76,50 +80,35 @@ limitations under the License.
       </template>
     </secret>
 
-    <secret
-    class="mt-3"
-    infrastructureKey="alibaba"
-    infrastructureName="Alibaba Cloud Platform"
-    icon="mdi-code-brackets"
-    secretDescriptorKey="accessKeyID"
-    description="Make sure that the new credentials have the correct permission on Alibaba Cloud."
-    color="black"
-    :disabled="true"
-    @add="onAdd"
-    @toogleHelp="onToogleHelp"
-    @update="onUpdate"
-    @delete="onDelete"
-    ></secret>
-
     <aws-dialog v-model="aws.visible" :secret="selectedSecret"></aws-dialog>
     <aws-help-dialog v-model="aws.help"></aws-help-dialog>
 
     <azure-dialog v-model="azure.visible" :secret="selectedSecret"></azure-dialog>
     <azure-help-dialog v-model="azure.help"></azure-help-dialog>
 
-    <gce-dialog v-model="gce.visible" :secret="selectedSecret"></gce-dialog>
-    <gce-help-dialog v-model="gce.help"></gce-help-dialog>
+    <gcp-dialog v-model="gcp.visible" :secret="selectedSecret"></gcp-dialog>
+    <gcp-help-dialog v-model="gcp.help"></gcp-help-dialog>
 
     <openstack-dialog v-model="openstack.visible" :secret="selectedSecret"></openstack-dialog>
     <openstack-help-dialog v-model="openstack.help"></openstack-help-dialog>
 
-    <delete-dialog v-if="selectedSecret" v-model="deleteConfirm" :secret="selectedSecret"></delete-dialog>
+    <delete-dialog v-if="selectedSecret" v-model="deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
     <v-speed-dial fixed bottom right fab dark v-show="floatingButton" direction="top" transition="scale-transition">
       <v-btn slot="activator" class="blue darken-2" dark fab v-model="speedDial">
         <v-icon>add</v-icon>
         <v-icon>close</v-icon>
       </v-btn>
-      <v-btn fab dark small class="orange" @click.native.stop="onAdd('openstack')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="orange" @click.native.stop="onAdd('openstack')">
         <v-icon>mdi-server-network</v-icon>
       </v-btn>
-      <v-btn fab dark small class="green" @click.stop="onAdd('gce')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click.stop="onAdd('gcp')">
         <v-icon>mdi-google</v-icon>
       </v-btn>
-      <v-btn fab dark small class="blue" @click.native.stop="onAdd('azure')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="blue" @click.native.stop="onAdd('azure')">
         <v-icon>mdi-microsoft</v-icon>
       </v-btn>
-      <v-btn fab dark small class="orange darken-2" @click.native.stop="onAdd('aws')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="orange darken-2" @click.native.stop="onAdd('aws')">
         <v-icon>mdi-amazon</v-icon>
       </v-btn>
     </v-speed-dial>
@@ -127,9 +116,10 @@ limitations under the License.
 </template>
 
 <script>
-  import ConfirmDialog from '@/dialogs/ConfirmDialog'
-  import GceDialog from '@/dialogs/SecretDialogGce'
-  import GceHelpDialog from '@/dialogs/SecretDialogGceHelp'
+  import { mapGetters } from 'vuex'
+  import get from 'lodash/get'
+  import GcpDialog from '@/dialogs/SecretDialogGcp'
+  import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
   import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
   import AwsDialog from '@/dialogs/SecretDialogAws'
   import AzureDialog from '@/dialogs/SecretDialogAzure'
@@ -138,13 +128,13 @@ limitations under the License.
   import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
   import DeleteDialog from '@/dialogs/SecretDialogDelete'
   import Secret from '@/components/Secret'
+  import isEmpty from 'lodash/isEmpty'
 
   export default {
     name: 'secrets',
     components: {
-      ConfirmDialog,
-      GceDialog,
-      GceHelpDialog,
+      GcpDialog,
+      GcpHelpDialog,
       AzureHelpDialog,
       AzureDialog,
       AwsDialog,
@@ -165,7 +155,7 @@ limitations under the License.
           visible: false,
           help: false
         },
-        gce: {
+        gcp: {
           visible: false,
           help: false
         },
@@ -173,13 +163,18 @@ limitations under the License.
           visible: false,
           help: false
         },
-        alibaba: {
-          visible: false,
-          help: false
-        },
         speedDial: false,
         deleteConfirm: false,
         floatingButton: false
+      }
+    },
+    computed: {
+      ...mapGetters([
+        'cloudProfilesByCloudProviderKind'
+      ]),
+      backgroundForSelectedSecret () {
+        const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
+        return this.backgroundForCloudProviderKind(kind)
       }
     },
     methods: {
@@ -190,18 +185,34 @@ limitations under the License.
       onHideHelp (infrastructureKind) {
         this[infrastructureKind].help = false
       },
-      onAdd (infrastructureKind, dummy) {
+      onAdd (infrastructureKind) {
         this.selectedSecret = undefined
         this[infrastructureKind].visible = true
       },
       onUpdate (row) {
-        const kind = row.metadata.infrastructure.kind
+        const kind = row.metadata.cloudProviderKind
         this.selectedSecret = row
         this[kind].visible = true
       },
       onDelete (row) {
         this.selectedSecret = row
         this.deleteConfirm = true
+      },
+      hasCloudProfileForCloudProviderKind (kind) {
+        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
+      },
+      backgroundForCloudProviderKind (kind) {
+        switch (kind) {
+          case 'azure':
+            return '/static/background_azure.svg'
+          case 'aws':
+            return '/static/background_aws.svg'
+          case 'gcp':
+            return '/static/background_gcp.svg'
+          case 'openstack':
+            return '/static/background_openstack.svg'
+        }
+        return '/static/background_aws.svg'
       }
     },
     mounted () {

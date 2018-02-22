@@ -17,6 +17,7 @@
 'use strict'
 
 const logger = require('../logger')
+const { findIndex, set, remove, get } = require('lodash')
 
 const events = [
   'ADDED',
@@ -60,3 +61,34 @@ function registerHandler (emitter, handler) {
   })
 }
 exports.registerHandler = registerHandler
+
+function cacheResource (resourceEmitter, cache, keyPath, cacheName, filter = () => false) {
+  resourceEmitter.on('connect', () => {
+    remove(cache, () => true)
+  })
+  registerHandler(resourceEmitter, event => {
+    let eventType = event.type
+    if (filter(event)) {
+      eventType = 'DELETED'
+      logger.debug(`${cacheName}: filtered object`)
+    }
+    if (eventType === 'ADDED' || eventType === 'MODIFIED') {
+      const key = get(event.object, keyPath)
+      const index = findIndex(cache, [keyPath, key])
+      if (index !== -1) {
+        set(cache, index, event.object)
+      } else {
+        cache.push(event.object)
+      }
+    } else if (eventType === 'DELETED') {
+      const key = get(event.object, keyPath)
+      const predicate = item => get(item, keyPath) === key
+      const index = findIndex(cache, predicate)
+      if (index !== -1) {
+        cache.splice(index, 1)
+      }
+    }
+    logger.debug(cacheName, cache.length)
+  })
+}
+exports.cacheResource = cacheResource

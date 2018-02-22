@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-import filter from 'lodash/filter'
 import assign from 'lodash/assign'
 import findIndex from 'lodash/findIndex'
 import { getInfrastructureSecrets, updateInfrastructureSecret, createInfrastructureSecret, deleteInfrastructureSecret } from '@/utils/api'
@@ -26,12 +25,6 @@ const state = {
 
 // getters
 const getters = {
-  itemsByInfrastructureKind (state) {
-    return (infrastructureKind) => {
-      const predicate = item => item.metadata.infrastructure.kind === infrastructureKind
-      return filter(state.all, predicate)
-    }
-  }
 }
 
 // actions
@@ -48,8 +41,8 @@ const actions = {
   update: ({ commit, rootState }, {metadata, data}) => {
     const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
-    const name = metadata.name
-    return updateInfrastructureSecret({user, namespace, name, data: {metadata, data}})
+    const bindingName = metadata.bindingName
+    return updateInfrastructureSecret({user, namespace, bindingName, data: {metadata, data}})
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
@@ -58,17 +51,16 @@ const actions = {
   create: ({ commit, rootState }, {metadata, data}) => {
     const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
-    const name = metadata.name
-    return createInfrastructureSecret({user, namespace, name, data: {metadata, data}})
+    return createInfrastructureSecret({user, namespace, data: {metadata, data}})
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
       })
   },
-  delete ({ dispatch, commit, rootState }, name) {
+  delete ({ dispatch, commit, rootState }, bindingName) {
     const namespace = rootState.namespace
     const user = rootState.user
-    return deleteInfrastructureSecret({namespace, name, user})
+    return deleteInfrastructureSecret({namespace, bindingName, user})
       .then(res => {
         commit('ITEM_DELETED', res.data)
         return res.data

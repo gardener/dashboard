@@ -15,67 +15,58 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="800">
+  <v-dialog v-model="visible" max-width="750">
     <v-card>
+
       <v-card-media
         class="white--text"
-        height="130px"
+        height="90px"
         :src="backgroundSrc"
       >
         <v-container>
           <v-layout>
-            <v-flex xs2>
-              <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
+            <v-flex xs1>
+              <v-icon large class="white--text ml-3">mdi-help-circle-outline</v-icon>
             </v-flex>
             <v-flex>
-              <div class="credential_title">Confirm Delete</div>
+              <div class="credential_title">{{title}}</div>
             </v-flex>
           </v-layout>
         </v-container>
       </v-card-media>
 
       <v-card-text>
-        <v-container fluid>
-
-          <div slot="message">
-            Are you sure to delete the secret <b>{{name}}</b>? <span class="red--text">The operation
-            can not be undone.</span>
-          </div>
-
-        </v-container>
+        <slot name="help-content"></slot>
       </v-card-text>
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.native="hide">Cancel</v-btn>
-        <v-btn flat @click.native="onDeleteSecret" class="blue--text">Delete Secret</v-btn>
+        <v-btn :class="`${color}--text`" flat  @click.native.stop="visible = false">
+          Got it
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-
 <script>
-  import { mapActions } from 'vuex'
-  import get from 'lodash/get'
-
   export default {
     props: {
+      title: {
+        type: String,
+        required: true
+      },
       value: {
         type: Boolean,
         required: true
       },
-      secret: {
-        type: Object,
+      color: {
+        type: String,
         required: true
       },
       backgroundSrc: {
         type: String,
         required: true
-      }
-    },
-    data () {
-      return {
       }
     },
     computed: {
@@ -86,38 +77,22 @@ limitations under the License.
         set (value) {
           this.$emit('input', value)
         }
-      },
-      name () {
-        return get(this.secret, 'metadata.name', '')
-      }
-    },
-    methods: {
-      ...mapActions('infrastructureSecrets', {
-        deleteSecret: 'delete'
-      }),
-      hide () {
-        this.visible = false
-      },
-      onDeleteSecret () {
-        const bindingName = get(this.secret, 'metadata.bindingName')
-        this
-          .deleteSecret(bindingName)
-          .then(() => this.hide())
-          .catch(err => console.error(err))
       }
     }
   }
 </script>
 
 
+
 <style lang="styl" scoped>
-  .icon {
-    font-size:90px
+
+  .infra_icon {
+    font-size:90px !important;
   }
 
   .credential_title {
-    font-size:30px
-    padding-top:40px
+    font-size:24px
     font-weight:400
   }
+
 </style>

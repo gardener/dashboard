@@ -15,131 +15,103 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="800">
-    <v-card class="openstack_credential">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-server-network</v-icon><span>{{title}}</span>
-      </v-card-title>
+  <secret-dialog
+    :value=value
+    :data="secretData"
+    :dataValid="valid"
+    :secret="secret"
+    cloudProviderKind="openstack"
+    color="orange"
+    infraIcon="mdi-server-network"
+    backgroundSrc="/static/background_openstack.svg"
+    createTitle="Add new Openstack Secret"
+    replaceTitle="Replace Openstack Secret"
+    @input="onInput">
 
-      <v-card-text>
-        <v-container fluid>
-          <v-layout row>
-            <v-flex xs5>
-              <template v-if="isCreateMode">
-                <v-text-field
-                  color="blue"
-                  ref="secretName"
-                  v-model="secretName"
-                  label="Secret Name"
-                  :error-messages="getErrorMessages('secretName')"
-                  @input="$v.secretName.$touch()"
-                  @blur="$v.secretName.$touch()"
-                ></v-text-field>
-              </template>
-              <template v-else>
-                 <div class="title pb-3">{{secretName}}</div>
-              </template>
-            </v-flex>
-          </v-layout>
+    <template slot="data-slot">
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            ref="domainName"
+            v-model="domainName"
+            label="Domain Name"
+            :error-messages="getErrorMessages('domainName')"
+            @input="$v.domainName.$touch()"
+            @blur="$v.domainName.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                ref="domainName"
-                v-model="domainName"
-                :label="domainNameLabel"
-                :error-messages="getErrorMessages('domainName')"
-                @input="$v.domainName.$touch()"
-                @blur="$v.domainName.$touch()"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            ref="tenantName"
+            v-model="tenantName"
+            label="Tenant Name"
+            :error-messages="getErrorMessages('tenantName')"
+            @input="$v.tenantName.$touch()"
+            @blur="$v.tenantName.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                ref="tenantName"
-                v-model="tenantName"
-                :label="tenantNameLabel"
-                :error-messages="getErrorMessages('tenantName')"
-                @input="$v.tenantName.$touch()"
-                @blur="$v.tenantName.$touch()"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            ref="authUrl"
+            v-model="authUrl"
+            label="Auth URL"
+            :error-messages="getErrorMessages('authUrl')"
+            @input="$v.authUrl.$touch()"
+            @blur="$v.authUrl.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                ref="authUrl"
-                v-model="authUrl"
-                :label="authUrlLabel"
-                :error-messages="getErrorMessages('authUrl')"
-                @input="$v.authUrl.$touch()"
-                @blur="$v.authUrl.$touch()"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+          color="blue"
+          v-model="username"
+          :label="usernameLabel"
+          :error-messages="getErrorMessages('username')"
+          @input="$v.username.$touch()"
+          @blur="$v.username.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
 
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-              color="blue"
-              v-model="username"
-              :label="usernameLabel"
-              :error-messages="getErrorMessages('username')"
-              @input="$v.username.$touch()"
-              @blur="$v.username.$touch()"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            v-model="password"
+            :label="passwordLabel"
+            :error-messages="getErrorMessages('password')"
+            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+            :append-icon-cb="() => (hideSecret = !hideSecret)"
+            :type="hideSecret ? 'password' : 'text'"
+            @input="$v.password.$touch()"
+            @blur="$v.password.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
+    </template>
 
-          <v-layout row>
-            <v-flex xs8>
-              <v-text-field
-                color="blue"
-                v-model="password"
-                :label="passwordLabel"
-                :error-messages="getErrorMessages('password')"
-                :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-                :append-icon-cb="() => (hideSecret = !hideSecret)"
-                :type="hideSecret ? 'password' : 'text'"
-                @input="$v.password.$touch()"
-                @blur="$v.password.$touch()"
-              ></v-text-field>
-            </v-flex>
-          </v-layout>
+  </secret-dialog>
 
-        </v-container>
-      </v-card-text>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click.native="cancel">Cancel</v-btn>
-        <v-btn flat @click.native="submit" class="blue--text" :disabled="!valid">{{submitButtonText}}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 
 <script>
-  import { mapActions, mapState, mapGetters } from 'vuex'
-  import { getValidationErrors, setInputFocus } from '@/utils'
-  import { required, maxLength, url } from 'vuelidate/lib/validators'
-  import { unique, resourceName } from '@/utils/validators'
-  import cloneDeep from 'lodash/cloneDeep'
+  import SecretDialog from '@/dialogs/SecretDialog'
+  import { required, url } from 'vuelidate/lib/validators'
+  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
   const validationErrors = {
-    secretName: {
-      required: 'You can\'t leave this empty.',
-      maxLength: 'It exceeds the maximum length of 128 characters.',
-      resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-      unique: 'Name is taken. Try another.'
-    },
     domainName: {
       required: 'You can\'t leave this empty.'
     },
@@ -159,6 +131,9 @@ limitations under the License.
   }
 
   export default {
+    components: {
+      SecretDialog
+    },
     props: {
       value: {
         type: Boolean,
@@ -170,16 +145,12 @@ limitations under the License.
     },
     data () {
       return {
-        secretName: undefined,
         domainName: undefined,
         tenantName: undefined,
         authUrl: undefined,
         username: undefined,
         password: undefined,
         hideSecret: true,
-        domainNameLabel: 'Domain Name',
-        tenantNameLabel: 'Tenant Name',
-        authUrlLabel: 'Auth URL',
         validationErrors
       }
     },
@@ -188,22 +159,17 @@ limitations under the License.
       return this.validators
     },
     computed: {
-      ...mapState([
-        'namespace'
-      ]),
-      ...mapGetters([
-        'infrastructureSecretList'
-      ]),
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
       valid () {
         return !this.$v.$invalid
+      },
+      secretData () {
+        return {
+          domainName: this.domainName,
+          tenantName: this.tenantName,
+          authUrl: this.authUrl,
+          username: this.username,
+          password: this.password
+        }
       },
       validators () {
         const validators = {
@@ -224,18 +190,7 @@ limitations under the License.
             required
           }
         }
-        if (this.isCreateMode) {
-          validators.secretName = {
-            required,
-            maxLength: maxLength(128),
-            resourceName,
-            unique: unique('infrastructureSecretNames')
-          }
-        }
         return validators
-      },
-      infrastructureSecretNames () {
-        return this.infrastructureSecretList.map(item => item.metadata.name)
       },
       isCreateMode () {
         return !this.secret
@@ -245,59 +200,11 @@ limitations under the License.
       },
       passwordLabel () {
         return this.isCreateMode ? 'Password' : 'New Password'
-      },
-      submitButtonText () {
-        return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
-      },
-      title () {
-        return this.isCreateMode ? 'Add new Openstack Secret' : 'Replace Openstack Secret'
       }
     },
     methods: {
-      ...mapActions([
-        'createInfrastructureSecret',
-        'updateInfrastructureSecret'
-      ]),
-      hide () {
-        this.visible = false
-      },
-      cancel () {
-        this.hide()
-        this.$emit('cancel')
-      },
-      submit () {
-        this.$v.$touch()
-        if (this.valid) {
-          this.save()
-            .then(secret => {
-              this.hide()
-              this.$emit('submit', secret)
-            })
-        }
-      },
-      save () {
-        const data = {
-          domainName: this.domainName,
-          tenantName: this.tenantName,
-          authUrl: this.authUrl,
-          username: this.username,
-          password: this.password
-        }
-
-        if (this.isCreateMode) {
-          const namespace = this.namespace
-          const name = this.secretName
-          const infrastructure = {
-            kind: 'openstack'
-          }
-          const metadata = {name, namespace, infrastructure}
-
-          return this.createInfrastructureSecret({metadata, data})
-        } else {
-          const metadata = cloneDeep(this.secret.metadata)
-
-          return this.updateInfrastructureSecret({metadata, data})
-        }
+      onInput (value) {
+        this.$emit('input', value)
       },
       reset () {
         this.$v.$reset()
@@ -308,17 +215,13 @@ limitations under the License.
         this.username = ''
         this.password = ''
 
-        if (this.isCreateMode) {
-          this.secretName = 'my-openstack-secret'
-          setInputFocus(this, 'secretName')
-        } else {
-          this.secretName = this.secret.metadata ? this.secret.metadata.name : ''
+        if (!this.isCreateMode) {
           if (this.secret.data) {
             this.domainName = this.secret.data.domainName
             this.tenantName = this.secret.data.tenantName
             this.authUrl = this.secret.data.authUrl
           }
-          setInputFocus(this, 'domainName')
+          setDelayedInputFocus(this, 'domainName')
         }
       },
       getErrorMessages (field) {
@@ -335,23 +238,3 @@ limitations under the License.
   }
 </script>
 
-
-<style lang="styl">
-  .openstack_credential {
-    .card__title{
-      background-image: url(../assets/openstack_background.svg);
-      background-size: cover;
-      color:white;
-      height:130px;
-      span{
-        font-size:30px !important
-        padding-left:30px
-        font-weight:400 !important
-        padding-top:30px !important
-      }
-      .icon {
-        font-size:90px !important;
-      }
-    }
-  }
-</style>

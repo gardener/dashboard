@@ -29,20 +29,17 @@ limitations under the License.
     </v-flex>
 
     <v-flex xs2  class="ml-3">
-      <v-select
-        color="cyan"
-        :items="machineTypes"
-        v-model="worker.machineType"
-        label="Machine Types"
-      ></v-select>
+      <machine-type
+      :machineTypes="machineTypes"
+      :worker="worker">
+      </machine-type>
     </v-flex>
 
     <v-flex xs2  class="ml-5">
-      <v-select
-        color="cyan"
-        :items="volumeTypes"
-        v-model="worker.volumeType"
-        label="Volume Type"></v-select>
+      <volume-type
+      :volumeTypes="volumeTypes"
+      :worker="worker">
+      </volume-type>
     </v-flex>
 
     <v-flex xs1  class="ml-3">
@@ -82,6 +79,8 @@ limitations under the License.
 <script>
   import { mapGetters } from 'vuex'
   import SizeInput from '@/components/VolumeSizeInput'
+  import MachineType from '@/components/MachineType'
+  import VolumeType from '@/components/VolumeType'
   import { required, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
   import { uniqueWorkerName, minVolumeSize } from '@/utils/validators'
@@ -118,7 +117,9 @@ limitations under the License.
 
   export default {
     components: {
-      SizeInput
+      SizeInput,
+      MachineType,
+      VolumeType
     },
     props: {
       worker: {
@@ -128,6 +129,9 @@ limitations under the License.
       workers: {
         type: Array,
         required: true
+      },
+      cloudProfileName: {
+        type: String
       }
     },
     validations,
@@ -138,15 +142,15 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'machineTypesByInfrastructureKind',
-        'volumeTypesByInfrastructureKind'
+        'machineTypesByCloudProfileName',
+        'volumeTypesByCloudProfileName'
       ]),
 
       machineTypes () {
-        return this.machineTypesByInfrastructureKind('azure')
+        return this.machineTypesByCloudProfileName(this.cloudProfileName)
       },
       volumeTypes () {
-        return this.volumeTypesByInfrastructureKind('azure')
+        return this.volumeTypesByCloudProfileName(this.cloudProfileName)
       },
 
       innerMax: {

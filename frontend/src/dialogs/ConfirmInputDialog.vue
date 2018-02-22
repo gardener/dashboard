@@ -61,7 +61,7 @@ limitations under the License.
       },
       confirm: {
         type: String,
-        required: true
+        default: ''
       }
     },
     data () {

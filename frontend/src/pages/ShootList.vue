@@ -71,9 +71,9 @@ limitations under the License.
             <v-tooltip top>
               <div slot="activator">
                 <infra-icon v-model="props.item.kind"></infra-icon>
-                {{ props.item.infrastructureRegion }}
+                {{ props.item.region }}
               </div>
-              <span>{{ props.item.infrastructure }} [{{ props.item.infrastructureRegion }}]</span>
+              <span>{{ props.item.kind }} [{{ props.item.region }}]</span>
             </v-tooltip>
           </td>
           <td class="nowrap" v-show="columnVisible('createdBy')">
@@ -227,7 +227,7 @@ limitations under the License.
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getDateFormatted, getTimeAgo } from '@/utils'
+  import { getDateFormatted, getTimeAgo, getCloudProviderKind } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -365,13 +365,13 @@ limitations under the License.
         const predicate = item => item.value === headerVal && item.checked === true
         return find(this.allHeaders, predicate)
       },
-      getPurpose (row) {
-        const annotations = row.annotations || {}
-        return annotations['garden.sapcloud.io/purpose']
+      getPurpose (metadata) {
+        // eslint-disable-next-line
+        return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
       },
-      getCreatedBy (row) {
-        const annotations = row.annotations || {}
-        return annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
+      getCreatedBy (metadata) {
+        // eslint-disable-next-line
+        return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
       },
       getSortVal (row, column) {
         switch (column) {
@@ -499,49 +499,42 @@ limitations under the License.
           }
         }
       },
-      currentItem () {
-        return this.selectedItem || {}
-      },
       currentMetadata () {
-        return this.currentItem.metadata || {}
+        return get(this.selectedItem, 'metadata')
       },
       currentStatus () {
-        return this.currentItem.status || {}
-      },
-      currentOperation () {
-        return this.currentStatus.lastOperation || {}
+        return get(this.selectedItem, 'status')
       },
       currentName () {
-        return this.currentMetadata.name || ''
+        return get(this.selectedItem, 'metadata.name')
       },
       currentCreatedBy () {
         return this.getCreatedBy(this.currentMetadata)
       },
       currentInfo () {
-        return this.currentItem.info || {}
+        return get(this.selectedItem, 'info', {})
       },
       currentKubeconfig () {
-        return this.currentInfo.kubeconfig || ''
+        return get(this.selectedItem, 'info.kubeconfig')
       },
       currentLog () {
-        return this.currentOperation.description || ''
+        return get(this.selectedItem, 'spec.status.lastOperation.description')
       },
       rows () {
         return this.items.map(({ metadata, spec, status }) => {
-          status = status || {}
+          const kind = getCloudProviderKind(spec.cloud)
           return {
             name: metadata.name,
             createdBy: this.getCreatedBy(metadata),
             creationTimestamp: metadata.creationTimestamp,
             namespace: metadata.namespace,
-            annotations: metadata.annotations || {},
+            annotations: metadata.annotations,
             deletionTimestamp: metadata.deletionTimestamp,
-            lastOperation: status.lastOperation || {},
-            lastError: status.lastError || undefined,
-            tags: this.mapConditionsToStatusTags(status.conditions),
-            kind: spec.infrastructure.kind,
-            infrastructure: `${spec.infrastructure.kind}`,
-            infrastructureRegion: `${spec.infrastructure.region}`
+            lastOperation: get(status, 'lastOperation', {}),
+            lastError: get(status, 'lastError.description', ''),
+            tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
+            kind,
+            region: get(spec, 'cloud.region')
           }
         })
       },

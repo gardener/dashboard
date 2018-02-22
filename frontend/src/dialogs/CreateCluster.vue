@@ -46,8 +46,10 @@ limitations under the License.
                           color="cyan"
                           label="Cluster Name"
                           counter="10"
-                          :error-messages="nameErrors()"
-                          v-model="shootDefinition.metadata.name"
+                          v-model="clusterName"
+                          :error-messages="getErrorMessages('shootDefinition.metadata.name')"
+                          @input="$v.shootDefinition.metadata.name.$touch()"
+                          @blur="$v.shootDefinition.metadata.name.$touch()"
                           ></v-text-field>
                       </v-flex>
                     </v-layout>
@@ -57,7 +59,7 @@ limitations under the License.
                         <v-select
                           color="cyan"
                           label="Infrastructure"
-                          :items="infrastructureKinds"
+                          :items="sortedCloudProviderKindList"
                           v-model="infrastructureKind"
                           >
                           <template slot="item" slot-scope="data">
@@ -84,10 +86,24 @@ limitations under the License.
                         <v-select
                           color="cyan"
                           label="Secrets"
-                          :items="infrastructureSecretNames"
-                          :error-messages="secretErrors()"
-                          v-model="shootDefinition.spec.infrastructure.secret"
-                          ></v-select>
+                          :items="infrastructureSecrets"
+                          item-value="metadata"
+                          v-model="secret"
+                          :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
+                          @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
+                          @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
+                          >
+                          <template slot="item" slot-scope="data">
+                            {{get(data.item, 'metadata.name')}}
+                            <v-icon v-if="!isPrivateSecretBinding(data.item)">mdi-share</v-icon>
+                          </template>
+                          <template slot="selection" slot-scope="data">
+                            <span class="black--text">
+                              {{get(data.item, 'metadata.name')}}
+                            </span>
+                            <v-icon v-if="!isPrivateSecretBinding(data.item)">mdi-share</v-icon>
+                          </template>
+                        </v-select>
                       </v-flex>
                     </v-layout>
 
@@ -96,23 +112,38 @@ limitations under the License.
                         <v-select
                           color="cyan"
                           label="Region"
-                          :items="infrastructureRegions"
-                          :error-messages="regionErrors()"
+                          :items="regions"
                           v-model="region"
+                          :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
+                          @input="$v.shootDefinition.spec.cloud.region.$touch()"
+                          @blur="$v.shootDefinition.spec.cloud.region.$touch()"
+                          ></v-select>
+                      </v-flex>
+                      <v-flex xs1>
+                      </v-flex>
+                      <v-flex xs2 v-if="infrastructureKind !== 'azure'">
+                        <v-select
+                          color="cyan"
+                          label="Zone"
+                          :items="zones"
+                          :error-messages="getErrorMessages('infrastructureData.zones')"
+                          v-model="zone"
+                          @input="$v.infrastructureData.zones.$touch()"
+                          @blur="$v.infrastructureData.zones.$touch()"
                           ></v-select>
                       </v-flex>
                     </v-layout>
 
                     <v-layout row>
-                      <v-flex xs1>
+                      <v-flex xs2>
                         <v-select
                           color="cyan"
                           label="Kubernetes"
                           :items="sortedKubernetesVersions"
-                          v-model="shootDefinition.spec.kubernetesVersion"
+                          v-model="shootDefinition.spec.kubernetes.version"
                           ></v-select>
                       </v-flex>
-                      <v-flex xs2>
+                      <v-flex xs1>
                       </v-flex>
                       <v-flex xs2>
                         <v-select
@@ -136,61 +167,65 @@ limitations under the License.
               <v-card flat>
                 <v-container fluid >
                   <transition-group name="list-complete">
-                    <v-layout row v-for="(worker, index) in shootDefinition.spec.workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
+                    <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
                       <v-flex pa-1 >
 
                         <worker-input-aws :worker.sync="worker" ref="workerInput"
-                          :workers.sync="shootDefinition.spec.workers"
+                          :workers.sync="workers"
+                          :cloudProfileName="cloudProfileName"
                           v-if="infrastructureKind === 'aws'">
-                          <v-btn v-show="index>0 || shootDefinition.spec.workers.length>1"
+                          <v-btn v-show="index>0 || workers.length>1"
                             small
                             slot="action"
                             outline
                             icon
                             class="grey--text lighten-2"
-                            @click.native.stop="shootDefinition.spec.workers.splice(index, 1)">
+                            @click.native.stop="workers.splice(index, 1)">
                             <v-icon>mdi-close</v-icon>
                           </v-btn>
                         </worker-input-aws>
 
                         <worker-input-azure :worker.sync="worker" ref="workerInput"
-                          :workers.sync="shootDefinition.spec.workers"
+                          :workers.sync="workers"
+                          :cloudProfileName="cloudProfileName"
                           v-if="infrastructureKind === 'azure'">
-                          <v-btn v-show="index>0 || shootDefinition.spec.workers.length>1"
+                          <v-btn v-show="index>0 || workers.length>1"
                             small
                             slot="action"
                             outline
                             icon
                             class="grey--text lighten-2"
-                            @click.native.stop="shootDefinition.spec.workers.splice(index, 1)">
+                            @click.native.stop="workers.splice(index, 1)">
                             <v-icon>mdi-close</v-icon>
                           </v-btn>
                         </worker-input-azure>
 
                         <worker-input-gce :worker.sync="worker" ref="workerInput"
-                          :workers.sync="shootDefinition.spec.workers"
-                          v-if="infrastructureKind === 'gce'">
-                          <v-btn v-show="index>0 || shootDefinition.spec.workers.length>1"
+                          :workers.sync="workers"
+                          :cloudProfileName="cloudProfileName"
+                          v-if="infrastructureKind === 'gcp'">
+                          <v-btn v-show="index>0 || workers.length>1"
                             small
                             slot="action"
                             outline
                             icon
                             class="grey--text lighten-2"
-                            @click.native.stop="shootDefinition.spec.workers.splice(index, 1)">
+                            @click.native.stop="workers.splice(index, 1)">
                             <v-icon>mdi-close</v-icon>
                           </v-btn>
                         </worker-input-gce>
 
                         <worker-input-openstack :worker.sync="worker" ref="workerInput"
-                          :workers.sync="shootDefinition.spec.workers"
+                          :workers.sync="workers"
+                          :cloudProfileName="cloudProfileName"
                           v-if="infrastructureKind === 'openstack'">
-                          <v-btn v-show="index>0 || shootDefinition.spec.workers.length>1"
+                          <v-btn v-show="index>0 || workers.length>1"
                             small
                             slot="action"
                             outline
                             icon
                             class="grey--text lighten-2"
-                            @click.native.stop="shootDefinition.spec.workers.splice(index, 1)">
+                            @click.native.stop="workers.splice(index, 1)">
                             <v-icon>mdi-close</v-icon>
                           </v-btn>
                         </worker-input-openstack>
@@ -265,16 +300,9 @@ limitations under the License.
 
             </v-tabs-content>
 
-            <v-tabs-content key="network" id="tab-network">
-              <v-card flat>
-                <v-card-text>
-                  <code-block height="100%" lang="json" :content="jsonDump"></code-block>
-                </v-card-text>
-              </v-card>
-            </v-tabs-content>
-
           </v-tabs-items>
         </v-tabs>
+        <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
       </v-card-text>
 
       <v-card-actions>
@@ -293,14 +321,19 @@ limitations under the License.
   import WorkerInputAws from '@/components/WorkerInputAws'
   import WorkerInputAzure from '@/components/WorkerInputAzure'
   import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
+  import Alert from '@/components/Alert'
   import find from 'lodash/find'
+  import get from 'lodash/get'
+  import head from 'lodash/head'
+  import sortBy from 'lodash/sortBy'
   import cloneDeep from 'lodash/cloneDeep'
   import every from 'lodash/every'
   import noop from 'lodash/noop'
+  import isEmpty from 'lodash/isEmpty'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
-  import { setInputFocus } from '@/utils'
+  import { setInputFocus, isPrivateSecretBinding, getValidationErrors } from '@/utils'
 
   var semSort = require('semver-sort')
 
@@ -314,8 +347,38 @@ limitations under the License.
     return text
   }
 
+  const validationErrors = {
+    shootDefinition: {
+      metadata: {
+        name: {
+          required: 'Name is required',
+          maxLength: 'name ist too long',
+          valid: 'Name must only be lowercase letters, numbers, and hyphens',
+          unique: 'cluster name must be unique'
+        }
+      },
+      spec: {
+        cloud: {
+          secretBindingRef: {
+            name: {
+              required: 'secret is required'
+            }
+          },
+          region: {
+            required: 'region is required'
+          }
+        }
+      }
+    },
+    infrastructureData: {
+      zones: {
+        zonesNotEmpty: 'zone is required'
+      }
+    }
+  }
+
   const defaultShootDefinition = {
-    apiVersion: 'garden.sapcloud.io/v1',
+    apiVersion: 'garden.sapcloud.io/v1beta1',
     kind: 'Shoot',
     metadata: {
       name: null,
@@ -325,53 +388,35 @@ limitations under the License.
       }
     },
     spec: {
+      cloud: {
+        profile: null,
+        region: null,
+        secretBindingRef: {}
+      },
+      kubernetes: {
+        version: null
+      },
       dns: {
-        kind: 'aws'
+        provider: null,
+        domain: null
       },
       addons: {
         'cluster-autoscaler': {
           enabled: true
         },
-        'heapster': {
+        heapster: {
           enabled: true
         },
-        'kube-lego': {},
-        'kube2iam': {},
         'kubernetes-dashboard': {
           enabled: true
         },
-        'monocular': {
+        monocular: {
           enabled: false
         },
         'nginx-ingress': {
           enabled: true
         }
-      },
-      infrastructure: {
-        kind: 'aws',
-        region: null,
-        secret: null
-      },
-      kubernetesVersion: null,
-      networks: {
-        workers: [
-          '10.250.0.0/19'
-        ],
-        public: [],
-        internal: []
-      },
-      workers: [
-        {
-          id: shortRandomString(10),
-          name: 'cpu-worker',
-          autoScalerMax: 5,
-          autoScalerMin: 1,
-          machineType: '',
-          volumeSize: '50Gi',
-          volumeType: ''
-        }
-      ],
-      zones: []
+      }
     }
   }
 
@@ -383,7 +428,8 @@ limitations under the License.
       WorkerInputGce,
       WorkerInputOpenstack,
       CodeBlock,
-      InfraIcon
+      InfraIcon,
+      Alert
     },
     props: {
       value: {
@@ -393,10 +439,16 @@ limitations under the License.
     },
     data () {
       return {
-        shootDefinition: null,
+        shootDefinition: undefined,
+        infrastructureData: undefined,
+        selectedSecret: undefined,
+        selectedInfrastructureKind: undefined,
         activeTab: 'tab-infra',
         purpose: ['evaluation', 'development', 'production'],
-        refs_: {}
+        refs_: {},
+        validationErrors,
+        errorMessage: undefined,
+        detailedErrorMessage: undefined
       }
     },
     validations: {
@@ -414,13 +466,25 @@ limitations under the License.
           }
         },
         spec: {
-          infrastructure: {
-            secret: {
-              required
+          cloud: {
+            secretBindingRef: {
+              name: {
+                required
+              }
             },
             region: {
               required
             }
+          }
+        }
+      },
+      infrastructureData: {
+        zones: {
+          zonesNotEmpty () {
+            if (this.infrastructureKind === 'azure') {
+              return true
+            }
+            return !isEmpty(this.infrastructureData.zones)
           }
         }
       }
@@ -431,13 +495,16 @@ limitations under the License.
         'namespace'
       ]),
       ...mapGetters([
-        'infrastructureKindList',
+        'cloudProfileByName',
+        'machineTypesByCloudProfileName',
+        'volumeTypesByCloudProfileName',
+        'cloudProfilesByCloudProviderKind',
+        'regionsByCloudProfileName',
+        'cloudProviderKindList',
         'kubernetesVersions',
-        'infrastructureSecretNamesByInfrastructureKind',
-        'regionsByInfrastructureKind',
-        'machineTypesByInfrastructureKind',
-        'volumeTypesByInfrastructureKind',
-        'projectList'
+        'infrastructureSecretsByInfrastructureKind',
+        'projectList',
+        'domainList'
       ]),
       ...mapState('shoots', {
         shoots: 'all'
@@ -450,47 +517,94 @@ limitations under the License.
           this.$emit('input', value)
         }
       },
-      region: {
+      clusterName: {
         get () {
-          return this.shootDefinition.spec.infrastructure.region
+          return this.shootDefinition.metadata.name
         },
-        set (value) {
-          this.shootDefinition.spec.infrastructure.region = value
-          this.infraHandler.calcZone()
+        set (name) {
+          this.shootDefinition.metadata.name = name
+
+          this.setDefaultDomain()
         }
-      },
-      shootDefinitionData () {
-        return this.shootDefinition.spec || {}
-      },
-      infrastructure () {
-        return this.shootDefinitionData.infrastructure || {}
-      },
-      addons () {
-        return this.shootDefinitionData.addons || {}
       },
       infrastructureKind: {
         get () {
-          return this.infrastructure.kind
+          return this.selectedInfrastructureKind
         },
-        set (value) {
-          this.infrastructure.kind = value
+        set (infrastructureKind) {
+          this.selectedInfrastructureKind = infrastructureKind
           this.infraHandler.setDefaults()
+
+          this.setDefaultSecret()
         }
       },
+      secret: {
+        get () {
+          return this.selectedSecret
+        },
+        set (metadata) {
+          const cloudProfileName = get(metadata, 'cloudProfileName')
+
+          const secretBindingRef = {
+            kind: get(metadata, 'bindingKind'),
+            name: get(metadata, 'bindingName'),
+            namespace: get(metadata, 'namespace')
+          }
+          this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
+          this.shootDefinition.spec.cloud.profile = cloudProfileName
+          this.selectedSecret = metadata
+
+          this.setDefaultRegion()
+          this.setDefaultKubernetesVersion()
+          this.setDefaultWorker()
+        }
+      },
+      region: {
+        get () {
+          return get(this.shootDefinition, 'spec.cloud.region')
+        },
+        set (region) {
+          this.shootDefinition.spec.cloud.region = region
+
+          this.infraHandler.setDefaultZone()
+        }
+      },
+      zone: {
+        get () {
+          return head(this.infrastructureData.zones)
+        },
+        set (zone) {
+          this.infrastructureData.zones = [zone]
+        }
+      },
+      infrastructure () {
+        return this.infrastructureData
+      },
+      workers () {
+        return get(this.infrastructureData, 'workers', [])
+      },
+      addons () {
+        return get(this.shootDefinition, 'spec.addons', {})
+      },
       machineTypes () {
-        return this.machineTypesByInfrastructureKind(this.infrastructureKind)
+        return this.machineTypesByCloudProfileName(this.cloudProfileName)
       },
       volumeTypes () {
-        return this.volumeTypesByInfrastructureKind(this.infrastructureKind)
+        return this.volumeTypesByCloudProfileName(this.cloudProfileName)
       },
-      infrastructureKinds () {
-        return this.infrastructureKindList
+      cloudProfileName () {
+        return this.shootDefinition.spec.cloud.profile
       },
-      infrastructureRegions () {
-        return this.regionsByInfrastructureKind(this.infrastructureKind)
+      regions () {
+        return this.regionsByCloudProfileName(this.cloudProfileName)
       },
-      infrastructureSecretNames () {
-        return this.infrastructureSecretNamesByInfrastructureKind(this.infrastructureKind)
+      zones () {
+        const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
+        const predicate = item => item.region === this.region
+        return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+      },
+      infrastructureSecrets () {
+        return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKind)
       },
       valid () {
         const workerInput = this.refs_.workerInput
@@ -505,121 +619,96 @@ limitations under the License.
         return workersValid && !this.$v.$invalid
       },
       sortedKubernetesVersions () {
-        return semSort.desc(this.kubernetesVersions.slice(0))
+        return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
       },
-      jsonDump () {
-        return JSON.stringify({infra: this.infrastructure, zones: this.shootDefinition.spec.zones}, undefined, 2)
+      sortedCloudProviderKindList () {
+        return sortBy(this.cloudProviderKindList)
       },
       infraHandler () {
         switch (this.infrastructureKind) {
           case 'aws':
             return {
-              calcZone: () => {
-                const spec = this.shootDefinitionData
-                spec.zones = [spec.infrastructure.region + 'a']
-              },
+              setDefaultZone: this.setDefaultZone,
               setDefaults: () => {
-                const spec = this.shootDefinitionData
-                // infrastructure
-                delete spec.infrastructure.vnet
-                delete spec.infrastructure.countUpdateDomains
-                delete spec.infrastructure.countFaultDomains
-                spec.infrastructure.secret = this.infrastructureSecretNames[0]
-                spec.infrastructure.region = this.infrastructureRegions.slice(-1)[0]
-                spec.infrastructure.vpc = { cidr: '10.250.0.0/16' }
-                // zones
-                spec.zones = [spec.infrastructure.region + 'a']
-                // networks
-                spec.networks.public = [
-                  '10.250.96.0/22'
-                ]
-                spec.networks.internal = [
-                  '10.250.112.0/22'
-                ]
-                // workers
-                spec.workers.forEach(worker => {
-                  worker.machineType = this.machineTypes[0]
-                  worker.autoScalerMin = 1
-                  worker.volumeType = this.volumeTypes[0]
-                })
+                this.infrastructureData = {
+                  networks: {
+                    vpc: {
+                      cidr: '10.250.0.0/16'
+                    },
+                    internal: [
+                      '10.250.112.0/22'
+                    ],
+                    nodes: '10.250.0.0/16',
+                    pods: '100.96.0.0/11',
+                    public: [
+                      '10.250.96.0/22'
+                    ],
+                    services: '100.64.0.0/13',
+                    workers: [
+                      '10.250.0.0/19'
+                    ]
+                  },
+                  workers: null,
+                  zones: null
+                }
               }
             }
           case 'azure':
             return {
-              calcZone: noop,
+              setDefaultZone: noop,
               setDefaults: () => {
-                const spec = this.shootDefinitionData
-                // infrastructure
-                delete spec.infrastructure.vpc
-                spec.infrastructure.secret = this.infrastructureSecretNames[0]
-                spec.infrastructure.region = this.infrastructureRegions.slice(-1)[0]
-                spec.infrastructure.vnet = { cidr: '10.250.0.0/16' }
-                spec.infrastructure.countUpdateDomains = 5
-                spec.infrastructure.countFaultDomains = 2
-                // zones
-                spec.zones = []
-                // networks
-                delete spec.networks.public
-                delete spec.networks.internal
-                // workers
-                spec.workers.forEach(worker => {
-                  worker.machineType = this.machineTypes[0]
-                  worker.autoScalerMin = worker.autoScalerMax
-                  worker.volumeType = this.volumeTypes[0]
-                })
+                this.infrastructureData = {
+                  networks: {
+                    vnet: {
+                      cidr: '10.250.0.0/16'
+                    },
+                    nodes: '10.250.0.0/19',
+                    pods: '100.96.0.0/11',
+                    services: '100.64.0.0/13',
+                    public: '10.250.96.0/22',
+                    workers: '10.250.0.0/19'
+                  },
+                  workers: null
+                }
               }
             }
-          case 'gce':
+          case 'gcp':
             return {
-              calcZone: () => {
-                const spec = this.shootDefinitionData
-                spec.zones = [spec.infrastructure.region + '-b']
-              },
+              setDefaultZone: this.setDefaultZone,
               setDefaults: () => {
-                const spec = this.shootDefinitionData
-                // infrastructure
-                delete spec.infrastructure.vpc
-                delete spec.infrastructure.vnet
-                delete spec.infrastructure.countUpdateDomains
-                delete spec.infrastructure.countFaultDomains
-                spec.infrastructure.secret = this.infrastructureSecretNames[0]
-                spec.infrastructure.region = this.infrastructureRegions.slice(-1)[0]
-                // zones
-                spec.zones = [spec.infrastructure.region + '-b']
-                // networks
-                delete spec.networks.public
-                delete spec.networks.internal
-                // workers
-                spec.workers.forEach(worker => {
-                  worker.machineType = this.machineTypes[0]
-                  worker.autoScalerMin = 1
-                  worker.volumeType = this.volumeTypes[0]
-                })
+                this.infrastructureData = {
+                  networks: {
+                    nodes: '10.250.0.0/19',
+                    pods: '100.96.0.0/11',
+                    services: '100.64.0.0/13',
+                    workers: [
+                      '10.250.0.0/19'
+                    ]
+                  },
+                  workers: null,
+                  zones: null
+                }
               }
             }
           case 'openstack':
             return {
-              calcZone: noop,
+              setDefaultZone: this.setDefaultZone,
               setDefaults: () => {
-                const spec = this.shootDefinitionData
-                // infrastructure
-                delete spec.infrastructure.vpc
-                delete spec.infrastructure.vnet
-                delete spec.infrastructure.countUpdateDomains
-                delete spec.infrastructure.countFaultDomains
-                spec.infrastructure.secret = this.infrastructureSecretNames[0]
-                spec.infrastructure.region = this.infrastructureRegions.slice(-1)[0]
-                // zones
-                spec.zones = ['rot_1']
-                // networks
-                delete spec.networks.public
-                delete spec.networks.internal
-                // workers
-                spec.workers.forEach(worker => {
-                  worker.machineType = this.machineTypes[0]
-                  worker.autoScalerMin = worker.autoScalerMax = 2
-                  worker.volumeType = this.volumeTypes[0]
-                })
+                this.infrastructureData = {
+                  networks: {
+                    router: {
+                      id: 1234
+                    },
+                    nodes: '10.250.0.0/19',
+                    pods: '100.96.0.0/11',
+                    services: '100.64.0.0/13',
+                    workers: [
+                      '10.250.0.0/19'
+                    ]
+                  },
+                  workers: null,
+                  zones: null
+                }
               }
             }
         }
@@ -627,85 +716,102 @@ limitations under the License.
       projectName () {
         const predicate = item => item.metadata.namespace === this.namespace
         const project = find(this.projectList, predicate)
-        return project ? project.metadata.name : ''
+        return get(project, 'metadata.name')
       }
     },
     methods: {
       ...mapActions([
         'createShoot'
       ]),
+      get (object, path, defaultValue) {
+        return get(object, path, defaultValue)
+      },
       createShootResource () {
         const data = cloneDeep(this.shootDefinition)
-        data.spec.workers.forEach(worker => {
+        const infrastructureData = cloneDeep(this.infrastructureData)
+        infrastructureData.workers.forEach(worker => {
           delete worker.id
         })
-        this
-          .createShoot(data)
-          .then(() => this.$emit('created'))
-          .catch(err => console.error('Failed to create Shoot Cluster', err))
+        data.spec.cloud[this.infrastructureKind] = infrastructureData
+        return this.createShoot(data)
       },
       addWorker () {
         const id = shortRandomString(5)
-        this.shootDefinition.spec.workers.push({
+        this.infrastructureData.workers.push({
           id,
           name: `worker-${id}`,
-          autoScalerMax: 5,
-          autoScalerMin: 5,
-          machineType: this.machineTypes[0],
+          machineType: get(head(this.machineTypes), 'name'),
+          volumeType: get(head(this.volumeTypes), 'name'),
           volumeSize: '50Gi',
-          volumeType: this.volumeTypes[0]
+          autoScalerMin: 2,
+          autoScalerMax: 2
         })
       },
       createClicked () {
-        this.shootDefinition.spec.dns.domain = this.shootDefinition.metadata.name + '.' + this.projectName + '.k8s.sapcloud.io'
         this.createShootResource()
-        this.$emit('close', false)
+          .then(() => {
+            this.$emit('created')
+            this.$emit('close', false)
+          })
+          .catch(err => {
+            const errorCode = get(err, 'response.data.error.code')
+            const detailedMessage = get(err, 'response.data.message')
+            console.error('Failed to create shoot cluster.', errorCode, detailedMessage, err)
+            this.errorMessage = `Failed to create cluster.`
+            this.detailedErrorMessage = detailedMessage
+          })
       },
       cancelClicked () {
         this.$emit('close', true)
       },
       reset () {
+        this.$v.$touch()
+
         this.activeTab = 'tab-infra'
 
+        this.selectedSecret = undefined
         this.shootDefinition = cloneDeep(defaultShootDefinition)
-        this.shootDefinition.spec.kubernetesVersion = this.sortedKubernetesVersions[0]
-        this.infraHandler.setDefaults()
+        this.setDefaultInfrastructureKind()
 
-        const metadata = this.shootDefinition.metadata
-        metadata.name = shortRandomString(10)
-        metadata.namespace = this.namespace
+        this.clusterName = shortRandomString(10)
+        this.shootDefinition.metadata.namespace = this.namespace
 
         setInputFocus(this, 'name')
       },
-      nameErrors () {
-        const errors = []
-        if (!this.$v.shootDefinition.metadata.name.required) {
-          errors.push('Name is required')
-        }
-        if (!this.$v.shootDefinition.metadata.name.valid) {
-          errors.push('Name must only be lowercase letters, numbers, and hyphens')
-        }
-        if (!this.$v.shootDefinition.metadata.name.maxLength) {
-          errors.push('name ist too long')
-        }
-        if (!this.$v.shootDefinition.metadata.name.unique) {
-          errors.push('cluster name must be unique')
-        }
-        return errors
+      setDefaultDomain () {
+        const domain = head(this.domainList)
+        this.shootDefinition.spec.dns.domain = `${this.clusterName}.${this.projectName}.${domain.data.domain}`
+        this.shootDefinition.spec.dns.provider = domain.data.provider
       },
-      secretErrors () {
-        const errors = []
-        if (!this.$v.shootDefinition.spec.infrastructure.secret.required) {
-          errors.push('secret is required')
-        }
-        return errors
+      setDefaultInfrastructureKind () {
+        this.infrastructureKind = head(this.sortedCloudProviderKindList)
       },
-      regionErrors () {
-        const errors = []
-        if (!this.$v.shootDefinition.spec.infrastructure.region.required) {
-          errors.push('region is required')
+      setDefaultSecret () {
+        this.secret = get(head(this.infrastructureSecrets), 'metadata')
+      },
+      setDefaultWorker () {
+        this.infrastructureData.workers = []
+        this.addWorker()
+      },
+      setDefaultRegion () {
+        this.region = head(this.regions)
+      },
+      setDefaultKubernetesVersion () {
+        this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
+      },
+      setDefaultZone () {
+        const zoneName = head(this.zones)
+        if (zoneName) {
+          this.infrastructureData.zones = [zoneName]
+        } else {
+          this.infrastructureData.zones = []
         }
-        return errors
+      },
+      isPrivateSecretBinding (secret) {
+        return isPrivateSecretBinding(secret)
+      },
+      getErrorMessages (field) {
+        return getValidationErrors(this, field)
       }
     },
     watch: {
@@ -783,6 +889,7 @@ limitations under the License.
     .list-complete-leave-active {
       position: absolute;
     }
+
   }
 
 </style>

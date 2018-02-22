@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" persistent max-width="500">
     <v-card>
-      <v-card-title>
+      <v-card-title class="red darken-2 grey--text text--lighten-4">
         <div class="headline">
           <slot name="caption">
             Confirm Dialog
@@ -41,6 +41,7 @@ limitations under the License.
 
 <script>
   export default {
+    name: 'ConfirmDialog',
     props: {
       value: {
         type: Boolean,
