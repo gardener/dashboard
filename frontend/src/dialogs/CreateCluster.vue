@@ -909,6 +909,9 @@ limitations under the License.
         randomMoment.add(1, 'h')
         this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
 
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
+
         setInputFocus(this, 'name')
       },
       setDefaultDomain () {
