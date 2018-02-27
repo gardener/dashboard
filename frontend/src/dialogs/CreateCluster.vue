@@ -29,6 +29,7 @@ limitations under the License.
               <v-tabs-item key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tabs-item>
               <v-tabs-item key="worker" href="#tab-worker" ripple>Worker</v-tabs-item>
               <v-tabs-item key="addons" href="#tab-addons" ripple>Addons</v-tabs-item>
+              <v-tabs-item key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tabs-item>
             </v-tabs-bar>
           </v-toolbar>
 
@@ -156,7 +157,6 @@ limitations under the License.
                           ></v-select>
                       </v-flex>
                     </v-layout>
-
                   </v-card-text>
                 </v-container>
               </v-card>
@@ -300,6 +300,61 @@ limitations under the License.
 
             </v-tabs-content>
 
+            <v-tabs-content key="maintenance" id="tab-maintenance">
+
+              <v-card flat>
+                <v-container>
+                  <v-layout row>
+                    <v-flex xs2>
+                      <v-text-field
+                       color="cyan"
+                       label="Maintenance Window Start"
+                       v-model="maintenanceWindowBegin"
+                       :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
+                       @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
+                       @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
+                       type="time"
+                       suffix="UTC"
+                     ></v-text-field>
+                    </v-flex>
+                    <v-flex xs1>
+                    </v-flex>
+                    <v-flex xs2>
+                      <v-text-field
+                       color="cyan"
+                       label="Maintenance Window End"
+                       v-model="maintenanceWindowEnd"
+                       :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.end')"
+                       @input="$v.shootDefinition.spec.maintenance.timeWindow.end.$touch()"
+                       @blur="$v.shootDefinition.spec.maintenance.timeWindow.end.$touch()"
+                       type="time"
+                       suffix="UTC"
+                     ></v-text-field>
+                    </v-flex>
+                  </v-layout>
+                  <v-layout row>
+                    <v-card-title>
+                      <span class="subheading">Auto Update</span>
+                    </v-card-title>
+                  </v-layout>
+                  <v-list class="mr-extra">
+                    <v-list-tile avatar class="list-complete-item">
+                      <v-list-tile-action>
+                        <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title >Kubernetes version</v-list-tile-title>
+                        <v-list-tile-sub-title>
+                          Automatically update Kubernetes to latest version during maintenance.
+                        </v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                  </v-list>
+                </v-container>
+              </v-card>
+
+            </v-tabs-content>
+
           </v-tabs-items>
         </v-tabs>
         <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
@@ -323,6 +378,7 @@ limitations under the License.
   import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
   import Alert from '@/components/Alert'
   import find from 'lodash/find'
+  import random from 'lodash/random'
   import get from 'lodash/get'
   import head from 'lodash/head'
   import sortBy from 'lodash/sortBy'
@@ -334,6 +390,7 @@ limitations under the License.
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setInputFocus, isPrivateSecretBinding, getValidationErrors } from '@/utils'
+  import moment from 'moment'
 
   var semSort = require('semver-sort')
 
@@ -367,6 +424,16 @@ limitations under the License.
           region: {
             required: 'region is required'
           }
+        },
+        maintenance: {
+          timeWindow: {
+            begin: {
+              required: 'Maintenance start time is required'
+            },
+            end: {
+              required: 'Maintenance end time is required'
+            }
+          }
         }
       }
     },
@@ -399,6 +466,15 @@ limitations under the License.
       dns: {
         provider: null,
         domain: null
+      },
+      maintenance: {
+        timeWindow: {
+          begin: null,
+          end: null
+        },
+        autoUpdate: {
+          kubernetesVersion: true
+        }
       },
       addons: {
         'cluster-autoscaler': {
@@ -474,6 +550,16 @@ limitations under the License.
             },
             region: {
               required
+            }
+          },
+          maintenance: {
+            timeWindow: {
+              begin: {
+                required
+              },
+              end: {
+                required
+              }
             }
           }
         }
@@ -575,6 +661,46 @@ limitations under the License.
         },
         set (zone) {
           this.infrastructureData.zones = [zone]
+        }
+      },
+      maintenanceWindowBegin: {
+        get () {
+          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
+          if (momentObj.isValid()) {
+            return momentObj.format('HH:mm:00')
+          }
+          this.shootDefinition.spec.maintenance.timeWindow.begin = null
+          return null
+        },
+        set (time) {
+          const newMoment = moment.utc(time, 'HHmmZ')
+          this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
+
+          const endMoment = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.end, 'HHmmZ')
+          if (newMoment >= endMoment) {
+            newMoment.add(1, 'h')
+            this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
+          }
+        }
+      },
+      maintenanceWindowEnd: {
+        get () {
+          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.end, 'HHmmZ')
+          if (momentObj.isValid()) {
+            return momentObj.format('HH:mm:00')
+          }
+          this.shootDefinition.spec.maintenance.timeWindow.end = null
+          return null
+        },
+        set (time) {
+          const newMoment = moment.utc(time, 'HHmmZ')
+          this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
+
+          const beginMoment = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
+          if (newMoment <= beginMoment) {
+            newMoment.subtract(1, 'h')
+            this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
+          }
         }
       },
       infrastructure () {
@@ -775,6 +901,13 @@ limitations under the License.
 
         this.clusterName = shortRandomString(10)
         this.shootDefinition.metadata.namespace = this.namespace
+
+        const hours = [22, 23, 0, 1, 2, 3, 4, 5]
+        const randomHour = get(hours, random(0, hours.length - 1))
+        const randomMoment = moment.utc(randomHour, 'HH')
+        this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
+        randomMoment.add(1, 'h')
+        this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
 
         this.errorMessage = undefined
         this.detailedMessage = undefined
