@@ -776,6 +776,9 @@ limitations under the License.
         this.clusterName = shortRandomString(10)
         this.shootDefinition.metadata.namespace = this.namespace
 
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
+
         setInputFocus(this, 'name')
       },
       setDefaultDomain () {
