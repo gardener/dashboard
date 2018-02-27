@@ -282,17 +282,7 @@ const stub = {
     const reqheaders = {
       authorization: `Bearer ${bearer}`
     }
-    const adminReqheaders = {
-      authorization: `Bearer ${auth.bearer}`
-    }
 
-    const seedServerUrl = 'https://seed.foo.bar:443'
-    const seedSecretData = {
-      kubeconfig: encodeBase64(getKubeconfig({
-        server: seedServerUrl,
-        name: seedClusterName
-      }))
-    }
     const shootData = {
       kubeconfig: encodeBase64(getKubeconfig({
         server: shootServerUrl,
@@ -305,12 +295,8 @@ const stub = {
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, getShoot({name, project, kind, region, seed: seedName}))
 
-    nock(url, {reqheaders: adminReqheaders})
-      .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)
-      .reply(200, {data: seedSecretData})
-
-    return nock(seedServerUrl)
-      .get(`/api/v1/namespaces/shoot-${namespace}-${name}/secrets/kubecfg`)
+    return nock(url, {reqheaders})
+      .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, {data: shootData})
   },
   getInfrastructureSecrets ({bearer, namespace}) {

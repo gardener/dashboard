@@ -17,13 +17,16 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const core = require('../kubernetes').core()
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
 const _ = require('lodash')
 
 function Garden ({auth}) {
   return kubernetes.garden({auth})
+}
+
+function Core ({auth}) {
+  return kubernetes.core({auth})
 }
 
 exports.list = async function ({user, namespace}) {
@@ -63,16 +66,15 @@ exports.remove = async function ({user, namespace, name}) {
 }
 
 exports.info = async function ({user, namespace, name}) {
-  const shoot = await this.read({user, namespace, name})
+  const [
+    shoot,
+    secret
+  ] = await Promise.all([
+    this.read({user, namespace, name}),
+    Core(user).ns(namespace).secrets.get({name: `${name}.kubeconfig`})
+  ])
 
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
-
-  const seedSecretName = _.get(seed, 'spec.secretRef.name')
-  const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await core.ns(seedSecretNamespace).secrets.get({name: seedSecretName})
-
-  const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  const secret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(`shoot-${namespace}-${name}`).secrets.get({name: 'kubecfg'})
 
   const data = _
     .chain(secret)
