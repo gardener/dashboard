@@ -106,17 +106,17 @@ limitations under the License.
                     <v-list-tile-sub-title>Provider</v-list-tile-sub-title>
                     <v-list-tile-title>
                       <v-tooltip top open-delay="500">
-                        <span slot="activator"> {{infrastructure.kind}} </span>
+                        <span slot="activator"> {{getCloudProviderKind}} </span>
                         <span>Provider</span>
                       </v-tooltip>
                       /
                       <v-tooltip top open-delay="500">
-                        <span slot="activator"> {{infrastructure.region}} </span>
+                        <span slot="activator"> {{region}} </span>
                         <span>Region</span>
                       </v-tooltip>
                       /
                       <v-tooltip top open-delay="500">
-                        <span slot="activator">{{infrastructure.secret}} </span>
+                        <span slot="activator">{{secret}} </span>
                         <span>Used Credential</span>
                       </v-tooltip>
                     </v-list-tile-title>
@@ -206,7 +206,7 @@ limitations under the License.
   import ClusterAccess from '@/components/ClusterAccess'
   import get from 'lodash/get'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getTimeAgo } from '@/utils'
+  import { getDateFormatted, getTimeAgo, getCloudProviderKind } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -262,23 +262,8 @@ limitations under the License.
       ])
     },
     computed: {
-      stateClass () {
-        switch (this.lastOperation.state) {
-          case 'Succeeded':
-            return 'green--text text--darken-2'
-          case 'Failed':
-            return 'red--text text--darken-2'
-          case 'Processing':
-            return 'orange--text text--darken-2'
-          default:
-            return 'white--text'
-        }
-      },
-      stateText () {
-        if (!this.lastOperation.type) {
-          return '...'
-        }
-        return `${this.lastOperation.type} ${this.lastOperation.state}`
+      getCloudProviderKind () {
+        return getCloudProviderKind(get(this.item, 'spec.cloud'))
       },
       ...mapGetters([
         'shootByNamespaceAndName'
@@ -297,7 +282,7 @@ limitations under the License.
         if (userinfo) {
           url += `${userinfo}@`
         }
-        url += `monocular.ingress.${this.dns.domain}`
+        url += `monocular.ingress.${this.domain}`
         return url
       },
       rawItem () {
@@ -339,38 +324,23 @@ limitations under the License.
       timeAgo (time) {
         return getTimeAgo(this.metadata.creationTimestamp)
       },
-      status () {
-        return this.item.status || {}
-      },
-      spec () {
-        return this.item.spec || {}
-      },
-      dns () {
-        return this.spec.dns || {}
-      },
-      lastOperation () {
-        return this.status.lastOperation || {}
-      },
       domain () {
-        return this.spec.domain || ''
+        return get(this.item, 'spec.dns.domain')
       },
-      infrastructure () {
-        return this.spec.infrastructure || {}
+      region () {
+        return get(this.item, 'spec.cloud.region')
       },
-      vpc () {
-        return this.infrastructure.vpc || {}
-      },
-      vnet () {
-        return this.infrastructure.vnet || {}
+      secret () {
+        return get(this.item, 'spec.cloud.secretBindingRef.name')
       },
       cidr () {
-        return get(this, 'spec.networks.nodes')
+        return get(this.item, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
       },
       purpose () {
         return this.annotations['garden.sapcloud.io/purpose']
       },
       addons () {
-        return this.spec.addons || {}
+        return get(this.item, 'spec.addons', {})
       },
       addon () {
         return (name) => {
