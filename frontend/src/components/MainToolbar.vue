@@ -41,7 +41,7 @@ limitations under the License.
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0"></v-divider>
             <v-card-actions :key="index">
-              <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" target="_blank" :title="item.title">
+              <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
                 <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>
                 {{item.title}}
                 <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
@@ -91,6 +91,7 @@ limitations under the License.
 
 <script>
   import { mapState, mapGetters, mapActions } from 'vuex'
+  import get from 'lodash/get'
   import { gravatar } from '@/utils'
   import Breadcrumb from '@/components/Breadcrumb'
 
@@ -111,6 +112,9 @@ limitations under the License.
       ]),
       handleLogout () {
         this.$router.push({name: 'Logout'})
+      },
+      helpTarget (item) {
+        return get(item, 'target', '_blank')
       }
     },
     computed: {
