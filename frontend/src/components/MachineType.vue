@@ -10,7 +10,7 @@
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
         <v-list-tile-title>{{data.item.name}}</v-list-tile-title>
-        <v-list-tile-sub-title>CPUs: {{data.item.cpus}} | GPUs: {{data.item.gpus}} | Memory: {{data.item.memory}}</v-list-tile-sub-title>
+        <v-list-tile-sub-title>CPU: {{data.item.cpu}} | GPU: {{data.item.gpu}} | Memory: {{data.item.memory}}</v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
   </v-select>
