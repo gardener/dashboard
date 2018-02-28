@@ -113,7 +113,7 @@ function getInfrastructureSecrets ({secretBindings, bindingKind, cloudProfileLis
     const secret = _.find(secretList, ['metadata.name', secretName])
     if (!cloudProviderKind) {
       logger.error('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName)
-    } else if (secretBinding.kind === Resources.PrivateSecretBinding.kind && !secret) {
+    } else if (bindingKind === Resources.PrivateSecretBinding.kind && !secret) {
       logger.error('Secret missing for PrivateSecretBinding. Skipping infrastructure secret with name %s', secretName)
     } else {
       infrastructureSecrets.push(fromResource({secretBinding, bindingKind, cloudProviderKind, secret}))
