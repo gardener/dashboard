@@ -18,7 +18,7 @@
 const {_cache: cache} = require('../../lib/cache')
 const { _config: config } = require('../../lib/utils')
 
-const getSeed = (name, profileName, region, kind) => {
+const getSeed = (name, profileName, region, kind, seedProtected = false, seedVisible = true) => {
   return {
     metadata: {
       name
@@ -32,7 +32,9 @@ const getSeed = (name, profileName, region, kind) => {
         name: `seedsecret-${name}`,
         namespace: 'garden'
       },
-      ingressDomain: `ingress.${region}.${kind}.example.org`
+      ingressDomain: `ingress.${region}.${kind}.example.org`,
+      protected: seedProtected,
+      visible: seedVisible
     }
   }
 }

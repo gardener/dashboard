@@ -94,7 +94,7 @@ limitations under the License.
 
 <script>
   import SecretDialog from '@/dialogs/SecretDialog'
-  import { required, url } from 'vuelidate/lib/validators'
+  import { required } from 'vuelidate/lib/validators'
   import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
   const validationErrors = {
