@@ -50,8 +50,15 @@ function encodeBase64 (value) {
 }
 exports.encodeBase64 = encodeBase64
 
+const config = {
+  getCloudProviderKindList () {
+    return ['aws', 'azure', 'gcp', 'openstack']
+  }
+}
+exports._config = config
+
 function getCloudProviderKind (object) {
-  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack']
+  const cloudProviderKinds = config.getCloudProviderKindList()
   return _.head(_.intersection(_.keys(object), cloudProviderKinds))
 }
 exports.getCloudProviderKind = getCloudProviderKind

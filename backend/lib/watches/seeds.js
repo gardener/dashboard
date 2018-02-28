@@ -17,20 +17,10 @@
 'use strict'
 
 const garden = require('../kubernetes').garden()
-const _ = require('lodash')
 const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
 
 module.exports = io => {
   const emitter = garden.seeds.watch()
-  cacheResource(emitter, getSeeds(), 'metadata.name', 'seeds', event => {
-    if (event.type === 'ADDED' || event.type === 'MODIFIED') {
-      const seedProtected = _.get(event.object, 'spec.protected', true)
-      const seedVisible = _.get(event.object, 'spec.visible', false)
-      if (!seedProtected && seedVisible) {
-        return false
-      }
-    }
-    return true
-  })
+  cacheResource(emitter, getSeeds(), 'metadata.name', 'seeds')
 }

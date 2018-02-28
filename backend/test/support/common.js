@@ -16,6 +16,7 @@
 
 'use strict'
 const {_cache: cache} = require('../../lib/cache')
+const { _config: config } = require('../../lib/utils')
 
 const getSeed = (name, profileName, region, kind) => {
   return {
@@ -88,6 +89,9 @@ const domainList = [
 
 const stub = {
   getCloudProfiles (sandbox) {
+    const getcloudProviderKindListStub = sandbox.stub(config, 'getCloudProviderKindList')
+    getcloudProviderKindListStub.returns(['infra1', 'infra2', 'infra3'])
+
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
     getCloudProfilesStub.returns(cloudProfileList)
 

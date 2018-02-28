@@ -14,6 +14,8 @@
 // limitations under the License.
 //
 
+const _ = require('lodash')
+
 const cloudProfiles = []
 const seeds = []
 const domains = []
@@ -36,6 +38,15 @@ module.exports = {
   },
   getSeeds () {
     return cache.getSeeds()
+  },
+  getVisibleAndNotProtectedSeeds () {
+    const predicate = item => {
+      const seedProtected = _.get(item, 'spec.protected', true)
+      const seedVisible = _.get(item, 'spec.visible', false)
+      const filter = seedProtected && !seedVisible
+      return filter
+    }
+    return _.filter(cache.getSeeds(), predicate)
   },
   getDomains () {
     return cache.getDomains()

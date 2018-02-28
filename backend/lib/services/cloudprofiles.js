@@ -17,11 +17,12 @@
 'use strict'
 
 const { NotFound } = require('../errors')
-const { map, pick, assign, first, keys, get, findIndex, find, filter } = require('lodash')
-const { getCloudProfiles, getSeeds } = require('../cache')
+const { map, pick, assign, get, findIndex, find, filter } = require('lodash')
+const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
+const { getCloudProviderKind } = require('../utils')
 
 function fromResource ({cloudProfile: {metadata, spec}, seeds}) {
-  const cloudProviderKind = first(keys(spec))
+  const cloudProviderKind = getCloudProviderKind(spec)
   metadata = assign(pick(metadata, ['name', 'resourceVersion']), {cloudProviderKind})
   const data = assign(get(spec, `${cloudProviderKind}.constraints`), {seeds})
   return {metadata, data}
@@ -33,22 +34,22 @@ function fromSeedResource ({metadata, spec}) {
   return {metadata, data}
 }
 
-async function getSeedsForCloudProfileName ({cloudProfileName}) {
+async function getSeedsForCloudProfileName ({seeds, cloudProfileName}) {
   const predicate = item => get(item, 'spec.cloud.profile') === cloudProfileName
-  const seedsForCloudProfileName = filter(getSeeds(), predicate)
+  const seedsForCloudProfileName = filter(seeds, predicate)
 
   return Promise.resolve(map(seedsForCloudProfileName, fromSeedResource))
 }
 
 exports.list = async function () {
-  const seeds = getSeeds()
+  const seeds = getVisibleAndNotProtectedSeeds()
 
   const predicate = item => findIndex(seeds, ['spec.cloud.profile', item.metadata.name]) !== -1
   const filteredCloudProfileList = filter(getCloudProfiles(), predicate)
 
   const cloudProfiles = []
   for (const cloudProfile of filteredCloudProfileList) {
-    const seedsForCloudProfile = await getSeedsForCloudProfileName({cloudProfileName: cloudProfile.metadata.name})
+    const seedsForCloudProfile = await getSeedsForCloudProfileName({seeds, cloudProfileName: cloudProfile.metadata.name})
     cloudProfiles.push(fromResource({cloudProfile, seeds: seedsForCloudProfile}))
   }
 
@@ -56,7 +57,7 @@ exports.list = async function () {
 }
 
 exports.read = async function ({name}) {
-  const seeds = getSeeds()
+  const seeds = getVisibleAndNotProtectedSeeds()
 
   const seedWithNameExists = findIndex(seeds, ['spec.cloud.profile', name]) !== -1
   if (!seedWithNameExists) {
@@ -67,6 +68,6 @@ exports.read = async function ({name}) {
   if (!cloudProfile) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
-  const seedsForCloudProfile = await getSeedsForCloudProfileName({cloudProfileName: name})
+  const seedsForCloudProfile = await getSeedsForCloudProfileName({seeds, cloudProfileName: name})
   return Promise.resolve(fromResource({cloudProfile, seeds: seedsForCloudProfile}))
 }
