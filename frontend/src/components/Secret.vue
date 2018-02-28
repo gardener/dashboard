@@ -128,7 +128,7 @@ limitations under the License.
     methods: {
       secretDescriptor (secret) {
         if (this.isPrivateSecretBinding(secret)) {
-          return get(secret, ['data', this.secretDescriptorKey])
+          return get(secret, `data.${this.secretDescriptorKey}`)
         } else {
           return get(secret, 'metadata.namespace')
         }

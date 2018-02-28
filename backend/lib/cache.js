@@ -43,8 +43,7 @@ module.exports = {
     const predicate = item => {
       const seedProtected = _.get(item, 'spec.protected', true)
       const seedVisible = _.get(item, 'spec.visible', false)
-      const filter = seedProtected && !seedVisible
-      return filter
+      return !seedProtected && seedVisible
     }
     return _.filter(cache.getSeeds(), predicate)
   },
