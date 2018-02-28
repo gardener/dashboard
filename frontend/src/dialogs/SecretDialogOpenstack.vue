@@ -60,20 +60,6 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="blue"
-            ref="authUrl"
-            v-model="authUrl"
-            label="Auth URL"
-            :error-messages="getErrorMessages('authUrl')"
-            @input="$v.authUrl.$touch()"
-            @blur="$v.authUrl.$touch()"
-          ></v-text-field>
-        </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
-          <v-text-field
           color="blue"
           v-model="username"
           :label="usernameLabel"
@@ -118,10 +104,6 @@ limitations under the License.
     tenantName: {
       required: 'You can\'t leave this empty.'
     },
-    authUrl: {
-      required: 'You can\'t leave this empty.',
-      url: 'Must be a valid URL'
-    },
     username: {
       required: 'You can\'t leave this empty.'
     },
@@ -147,7 +129,6 @@ limitations under the License.
       return {
         domainName: undefined,
         tenantName: undefined,
-        authUrl: undefined,
         username: undefined,
         password: undefined,
         hideSecret: true,
@@ -166,7 +147,6 @@ limitations under the License.
         return {
           domainName: this.domainName,
           tenantName: this.tenantName,
-          authUrl: this.authUrl,
           username: this.username,
           password: this.password
         }
@@ -178,10 +158,6 @@ limitations under the License.
           },
           tenantName: {
             required
-          },
-          authUrl: {
-            required,
-            url
           },
           username: {
             required
@@ -211,7 +187,6 @@ limitations under the License.
 
         this.domainName = ''
         this.tenantName = ''
-        this.authUrl = ''
         this.username = ''
         this.password = ''
 
@@ -219,7 +194,6 @@ limitations under the License.
           if (this.secret.data) {
             this.domainName = this.secret.data.domainName
             this.tenantName = this.secret.data.tenantName
-            this.authUrl = this.secret.data.authUrl
           }
           setDelayedInputFocus(this, 'domainName')
         }
