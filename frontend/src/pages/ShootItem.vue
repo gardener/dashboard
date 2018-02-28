@@ -171,18 +171,20 @@ limitations under the License.
                 Kube-Cluster Access
               </v-card-title>
               <cluster-access :info="info"></cluster-access>
-              <v-divider class="my-2" inset></v-divider>
-              <v-expansion-panel>
-                <v-expansion-panel-content>
-                  <div slot="header" class="kubeconfig-title">
-                    <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-                    <span>KUBECONFIG</span>
-                  </div>
-                  <v-card>
-                    <code-block lang="yaml" :content="info.kubeconfig"></code-block>
-                  </v-card>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
+              <template v-if="!!info.kubeconfig">
+                <v-divider class="my-2" inset></v-divider>
+                <v-expansion-panel>
+                  <v-expansion-panel-content>
+                    <div slot="header" class="kubeconfig-title">
+                      <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
+                      <span>KUBECONFIG</span>
+                    </div>
+                    <v-card>
+                      <code-block lang="yaml" :content="info.kubeconfig"></code-block>
+                    </v-card>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </template>
             </v-card>
 
           </v-flex>

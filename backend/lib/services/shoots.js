@@ -66,26 +66,44 @@ exports.remove = async function ({user, namespace, name}) {
 }
 
 exports.info = async function ({user, namespace, name}) {
+  const readKubeConfig = new Promise(async (resolve, reject) => {
+    try {
+      resolve(await Core(user).ns(namespace).secrets.get({name: `${name}.kubeconfig`}))
+    } catch (err) {
+      if (err.code === 404) {
+        resolve(undefined)
+      } else {
+        reject(err)
+      }
+    }
+  })
   const [
     shoot,
     secret
   ] = await Promise.all([
     this.read({user, namespace, name}),
-    Core(user).ns(namespace).secrets.get({name: `${name}.kubeconfig`})
+    readKubeConfig
   ])
 
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
-  const data = _
-    .chain(secret)
-    .get('data')
-    .pick('kubeconfig', 'username', 'password')
-    .map((value, key) => [key, decodeBase64(value)])
-    .fromPairs()
-    .value()
-  data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projectName = namespace.replace(/^garden-/, '')
-  data.shootIngressDomain = `${name}.${projectName}.${ingressDomain}`
-  return data
+  const shootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+
+  if (secret) {
+    const data = _
+      .chain(secret)
+      .get('data')
+      .pick('kubeconfig', 'username', 'password')
+      .map((value, key) => [key, decodeBase64(value)])
+      .fromPairs()
+      .value()
+    data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
+    data.shootIngressDomain = shootIngressDomain
+    return data
+  } else {
+    const data = { shootIngressDomain }
+    return data
+  }
 }

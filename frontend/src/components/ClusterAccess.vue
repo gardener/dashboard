@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-list>
 
-    <v-list-tile>
+    <v-list-tile v-if="!!dashboardUrl">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
       </v-list-tile-action>
@@ -26,59 +26,62 @@ limitations under the License.
         <v-list-tile-title><a :href="dashboardUrl" target="_blank">{{dashboardUrlText}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="grafanaUrl" target="_blank">{{grafanaUrlText}}</a></v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrlText}}</a></v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="alertmanagerUrl" target="_blank">{{alertmanagerUrlText}}</a></v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+    <template v-if="!!info.shootIngressDomain">
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
+          <v-list-tile-title><a :href="grafanaUrl" target="_blank">{{grafanaUrlText}}</a></v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
+          <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrlText}}</a></v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
+          <v-list-tile-title><a :href="alertmanagerUrl" target="_blank">{{alertmanagerUrlText}}</a></v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+    </template>
 
-    <v-divider class="my-2" inset></v-divider>
-
-    <v-list-tile>
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>User</v-list-tile-sub-title>
-        <v-list-tile-title>{{username}}</v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Password</v-list-tile-sub-title>
-        <v-list-tile-title ref="password">{{passwordText}}</v-list-tile-title>
-        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout.number="2000">
-          Copied to clipboard!
-        </v-snackbar>
-      </v-list-tile-content>
-      <v-btn v-show="showPassword" icon ref="copy" title="copy to clipboard">
-        <v-icon>content_copy</v-icon>
-      </v-btn>
-      <v-btn icon :title="passwordVisibilityTitle" @click.native.stop="showPassword = !showPassword">
-        <v-icon>{{visibilityIcon}}</v-icon>
-      </v-btn>
-    </v-list-tile>
+    <template v-if="!!username && !!password">
+      <v-divider class="my-2" inset></v-divider>
+      <v-list-tile>
+        <v-list-tile-action>
+          <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>User</v-list-tile-sub-title>
+          <v-list-tile-title>{{username}}</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>Password</v-list-tile-sub-title>
+          <v-list-tile-title ref="password">{{passwordText}}</v-list-tile-title>
+          <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout.number="2000">
+            Copied to clipboard!
+          </v-snackbar>
+        </v-list-tile-content>
+        <v-btn v-show="showPassword" icon ref="copy" title="copy to clipboard">
+          <v-icon>content_copy</v-icon>
+        </v-btn>
+        <v-btn icon :title="passwordVisibilityTitle" @click.native.stop="showPassword = !showPassword">
+          <v-icon>{{visibilityIcon}}</v-icon>
+        </v-btn>
+      </v-list-tile>
+    </template>
 
   </v-list>
 </template>
@@ -107,12 +110,15 @@ limitations under the License.
     },
     methods: {
       enableCopy () {
-        const pwdClipboard = new Clipboard(this.$refs.copy.$el, {
-          target: () => this.$refs.password
-        })
-        pwdClipboard.on('success', (event) => {
-          this.snackbar = true
-        })
+        const copyRef = this.$refs.copy
+        if (copyRef) {
+          const pwdClipboard = new Clipboard(copyRef.$el, {
+            target: () => this.$refs.password
+          })
+          pwdClipboard.on('success', (event) => {
+            this.snackbar = true
+          })
+        }
       }
     },
     computed: {

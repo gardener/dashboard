@@ -95,27 +95,34 @@ const actions = {
     return getShootInfo({namespace, name, user})
       .then(res => res.data)
       .then(info => {
-        const credentials = `${info.username}:${info.password}`
+        let credentials = ''
+        if (!!info.username && !!info.password) {
+          credentials = `${info.username}:${info.password}@`
+        }
 
-        const [, scheme, host] = uriPattern.exec(info.serverUrl)
-        const authority = `//${credentials}@${replace(host, /^\/\//, '')}`
-        const pathnameAlias = '/ui'
-        const pathname = get(rootState.cfg, 'dashboardUrl.pathname', pathnameAlias)
-        info.dashboardUrl = [scheme, authority, pathname].join('')
-        info.dashboardUrlText = [scheme, host, pathnameAlias].join('')
+        if (info.serverUrl) {
+          const [, scheme, host] = uriPattern.exec(info.serverUrl)
+          const authority = `//${credentials}${replace(host, /^\/\//, '')}`
+          const pathnameAlias = '/ui'
+          const pathname = get(rootState.cfg, 'dashboardUrl.pathname', pathnameAlias)
+          info.dashboardUrl = [scheme, authority, pathname].join('')
+          info.dashboardUrlText = [scheme, host, pathnameAlias].join('')
+        }
 
-        const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
-        const grafanaHost = `g.${info.shootIngressDomain}`
-        info.grafanaUrl = `https://${credentials}@${grafanaHost}${grafanaPathname}`
-        info.grafanaUrlText = `https://${grafanaHost}`
+        if (info.shootIngressDomain) {
+          const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
+          const grafanaHost = `g.${info.shootIngressDomain}`
+          info.grafanaUrl = `https://${credentials}${grafanaHost}${grafanaPathname}`
+          info.grafanaUrlText = `https://${grafanaHost}`
 
-        const prometheusHost = `p.${info.shootIngressDomain}`
-        info.prometheusUrl = `https://${credentials}@${prometheusHost}`
-        info.prometheusUrlText = `https://${prometheusHost}`
+          const prometheusHost = `p.${info.shootIngressDomain}`
+          info.prometheusUrl = `https://${credentials}${prometheusHost}`
+          info.prometheusUrlText = `https://${prometheusHost}`
 
-        const alertmanagerHost = `a.${info.shootIngressDomain}`
-        info.alertmanagerUrl = `https://${credentials}@${alertmanagerHost}`
-        info.alertmanagerUrlText = `https://${alertmanagerHost}`
+          const alertmanagerHost = `a.${info.shootIngressDomain}`
+          info.alertmanagerUrl = `https://${credentials}${alertmanagerHost}`
+          info.alertmanagerUrlText = `https://${alertmanagerHost}`
+        }
         return info
       })
       .then(info => {
