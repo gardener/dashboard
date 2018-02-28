@@ -39,7 +39,7 @@ limitations under the License.
             :error-messages="getErrorMessages('accessKeyId')"
             @input="$v.accessKeyId.$touch()"
             @blur="$v.accessKeyId.$touch()"
-            counter="20"
+            counter="128"
             hint="e.g. AKIAIOSFODNN7EXAMPLE"
           ></v-text-field>
         </v-flex>
@@ -85,7 +85,7 @@ limitations under the License.
     secretAccessKey: {
       required: 'You can\'t leave this empty.',
       minLength: 'It must contain at least 40 characters.',
-      base64: 'Please enter a valid base64 string.'
+      base64: 'Invalid secret access key.'
     }
   }
 
