@@ -81,7 +81,7 @@ const createMembersClusterRole = async function ({namespace, username}) {
     roleRef: {
       apiGroup: ClusterRole.apiGroup,
       kind: ClusterRole.kind,
-      name: 'garden-project-member'
+      name: 'garden.sapcloud.io:system:project-member'
     },
     subjects
   }

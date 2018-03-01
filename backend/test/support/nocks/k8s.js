@@ -96,7 +96,7 @@ function getProjectMembers (namespace, users) {
     roleRef: {
       apiGroup,
       kind: 'ClusterRole',
-      name: 'garden-project-member'
+      name: 'garden.sapcloud.io:system:project-member'
     },
     subjects: _.map(users, name => {
       return {
@@ -501,7 +501,7 @@ const stub = {
 
     function matchRolebindingProjectMembers ({metadata, roleRef, subjects: [subject]}) {
       return metadata.name === 'garden-project-members' &&
-        roleRef.name === 'garden-project-member' &&
+        roleRef.name === 'garden.sapcloud.io:system:project-member' &&
         subject.name === username
     }
 
