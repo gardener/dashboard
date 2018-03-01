@@ -552,6 +552,22 @@ const stub = {
       .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
       .reply(200, getProjectMembers(namespace, members))
   },
+  getMembersNoRolebinding ({bearer, namespace}) {
+    const reqheaders = {
+      authorization: `Bearer ${bearer}`
+    }
+
+    const adminReqheaders = {
+      authorization: `Bearer ${auth.bearer}`
+    }
+
+    nock(url, {reqheaders})
+      .get(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(404, {})
+    return nock(url, {reqheaders: adminReqheaders})
+      .post(`/apis/rbac.authorization.k8s.io/v1beta1/namespaces/${namespace}/rolebindings`)
+      .reply(200, getProjectMembers(namespace, []))
+  },
   addMember ({bearer, namespace, newMember, members}) {
     const reqheaders = {
       authorization: `Bearer ${bearer}`

@@ -59,6 +59,20 @@ describe('gardener', function () {
           })
       })
 
+      it('should create rolebinding and return empty member list', function () {
+        oidc.stub.getKeys()
+        k8s.stub.getMembersNoRolebinding({bearer, namespace})
+        return chai.request(app)
+          .get(`/api/namespaces/${namespace}/members`)
+          .set('authorization', `Bearer ${bearer}`)
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body).to.have.length(0)
+          })
+      })
+
       it('should add a project member', function () {
         const newMember = 'newmember@example.org'
         oidc.stub.getKeys()
