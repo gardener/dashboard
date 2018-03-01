@@ -822,9 +822,6 @@ limitations under the License.
               setDefaults: () => {
                 this.infrastructureData = {
                   networks: {
-                    router: {
-                      id: 1234
-                    },
                     nodes: '10.250.0.0/19',
                     pods: '100.96.0.0/11',
                     services: '100.64.0.0/13',
