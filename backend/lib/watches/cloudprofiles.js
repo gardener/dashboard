@@ -22,5 +22,5 @@ const { getCloudProfiles } = require('../cache')
 
 module.exports = io => {
   const emitter = garden.cloudprofiles.watch()
-  cacheResource(emitter, getCloudProfiles(), 'metadata.name', 'cloudProfiles')
+  cacheResource(emitter, getCloudProfiles(), 'metadata.name')
 }

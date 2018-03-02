@@ -62,7 +62,7 @@ function registerHandler (emitter, handler) {
 }
 exports.registerHandler = registerHandler
 
-function cacheResource (resourceEmitter, cache, keyPath, cacheName) {
+function cacheResource (resourceEmitter, cache, keyPath) {
   resourceEmitter.on('connect', () => {
     remove(cache, () => true)
   })
@@ -83,7 +83,7 @@ function cacheResource (resourceEmitter, cache, keyPath, cacheName) {
         cache.splice(index, 1)
       }
     }
-    logger.debug(cacheName, cache.length)
+    logger.debug(resourceEmitter.resourceName, cache.length)
   })
 }
 exports.cacheResource = cacheResource

@@ -24,5 +24,5 @@ module.exports = io => {
   const emitter = core.namespaces('garden').secrets.watch({
     qs: {labelSelector: 'garden.sapcloud.io/role=default-domain'}
   })
-  cacheResource(emitter, getDomains(), 'metadata.name', 'domains')
+  cacheResource(emitter, getDomains(), 'metadata.name')
 }

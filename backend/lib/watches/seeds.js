@@ -22,5 +22,5 @@ const { getSeeds } = require('../cache')
 
 module.exports = io => {
   const emitter = garden.seeds.watch()
-  cacheResource(emitter, getSeeds(), 'metadata.name', 'seeds')
+  cacheResource(emitter, getSeeds(), 'metadata.name')
 }
