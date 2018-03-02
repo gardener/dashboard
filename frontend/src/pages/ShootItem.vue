@@ -58,7 +58,7 @@ limitations under the License.
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                    <v-list-tile-title>{{createdBy}}</v-list-tile-title>
+                    <v-list-tile-title><a :href="`mailto:${createdBy}`">{{createdBy}}</a></v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
 
