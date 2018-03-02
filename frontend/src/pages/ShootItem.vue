@@ -170,7 +170,7 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2">
                 Kube-Cluster Access
               </v-card-title>
-              <cluster-access :info="info"></cluster-access>
+              <cluster-access v-model="mounted" :info="info"></cluster-access>
               <template v-if="!!info.kubeconfig">
                 <v-divider class="my-2" inset></v-divider>
                 <v-expansion-panel>
@@ -180,7 +180,7 @@ limitations under the License.
                       <span>KUBECONFIG</span>
                     </div>
                     <v-card>
-                      <code-block lang="yaml" :content="info.kubeconfig"></code-block>
+                      <code-block v-model="mounted" lang="yaml" :content="info.kubeconfig"></code-block>
                     </v-card>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -194,7 +194,7 @@ limitations under the License.
 
     <v-tabs-content id="yaml">
       <v-card>
-        <code-block height="100%" lang="yaml" :content="rawItem"></code-block>
+        <code-block v-model="mounted" height="100%" lang="yaml" :content="rawItem"></code-block>
       </v-card>
     </v-tabs-content>
 
@@ -249,7 +249,8 @@ limitations under the License.
             title: 'Nginx Ingress',
             description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
           }
-        ]
+        ],
+        mounted: false
       }
     },
     methods: {
@@ -360,6 +361,9 @@ limitations under the License.
           }
         }
       }
+    },
+    mounted () {
+      this.mounted = true
     }
   }
 </script>

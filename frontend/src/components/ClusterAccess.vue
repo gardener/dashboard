@@ -97,6 +97,10 @@ limitations under the License.
       Clipboard
     },
     props: {
+      value: {
+        type: Boolean,
+        required: true
+      },
       info: {
         type: Object,
         required: true
@@ -105,20 +109,31 @@ limitations under the License.
     data () {
       return {
         snackbar: false,
-        showPassword: false
+        showPassword: false,
+        clipboard: undefined
       }
     },
     methods: {
       enableCopy () {
+        if (this.clipboard) {
+          this.clipboard.destroy()
+        }
+
         const copyRef = this.$refs.copy
         if (copyRef) {
-          const pwdClipboard = new Clipboard(copyRef.$el, {
-            text: () => this.password
+          this.clipboard = new Clipboard(copyRef.$el, {
+            text: () => {
+              return this.password
+            }
           })
-          pwdClipboard.on('success', (event) => {
+          this.clipboard.on('success', (event) => {
             this.snackbar = true
           })
         }
+      },
+      reset () {
+        this.snackbar = false
+        this.showPassword = false
       }
     },
     computed: {
@@ -174,8 +189,16 @@ limitations under the License.
         }
       }
     },
-    mounted () {
-      this.enableCopy()
+    watch: {
+      value (value) {
+        if (value) {
+          this.$nextTick(() => {
+            this.enableCopy()
+          })
+        } else {
+          this.reset()
+        }
+      }
     }
   }
 </script>

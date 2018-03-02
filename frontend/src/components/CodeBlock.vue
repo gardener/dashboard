@@ -50,23 +50,36 @@ limitations under the License.
       content: {
         type: String,
         default: ''
+      },
+      value: {
+        type: Boolean,
+        required: true
       }
     },
     data: () => ({
-      showMessage: false
+      showMessage: false,
+      clipboard: undefined
     }),
     methods: {
       enableCopy () {
-        const clipboard = new Clipboard(this.$refs.copy.$el, {
+        if (this.clipboard) {
+          this.clipboard.destroy()
+        }
+
+        this.clipboard = new Clipboard(this.$refs.copy.$el, {
           target: () => this.$refs.block
         })
-        clipboard.on('success', (event) => {
+        this.clipboard.on('success', (event) => {
           event.clearSelection()
           this.showMessage = true
           window.setTimeout(() => {
             this.showMessage = false
           }, 2000)
         })
+      },
+      reset () {
+        this.snackbar = false
+        this.showPassword = false
       },
       prettyPrint (textContent) {
         const block = this.$refs.block
@@ -92,12 +105,20 @@ limitations under the License.
       }
     },
     mounted () {
-      this.enableCopy()
       this.prettyPrint(this.content)
     },
     watch: {
       content (textContent) {
         this.prettyPrint(textContent)
+      },
+      value (value) {
+        if (value) {
+          this.$nextTick(() => {
+            this.enableCopy()
+          })
+        } else {
+          this.reset()
+        }
       }
     }
   }

@@ -165,7 +165,7 @@ limitations under the License.
             </v-btn>
           </v-card-title>
           <v-card-text>
-            <code-block lang="yaml" :content="currentKubeconfig"></code-block>
+            <code-block v-model="kubeconfigDialog" lang="yaml" :content="currentKubeconfig"></code-block>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -178,7 +178,7 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <cluster-access :info="currentInfo"></cluster-access>
+          <cluster-access v-model="dashboardDialog" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
       <confirm-input-dialog :confirm="currentName" v-model="deleteDialog" :cancel="hideDialog" :ok="deletionConfirmed">

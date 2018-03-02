@@ -33,7 +33,7 @@ limitations under the License.
         (<a class="orange--text text--darken-2" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
         documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
       </p>
-      <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
+      <code-block v-model="value" height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
     </div>
   </secret-dialog-help>
 </template>

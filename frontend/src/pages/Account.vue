@@ -95,7 +95,6 @@ limitations under the License.
       const clipboard = new Clipboard(this.$refs.copy.$el)
       clipboard.on('success', event => {
         event.clearSelection()
-        console.log('event', event)
         this.showMessage = true
         window.setTimeout(() => {
           this.showMessage = false
