@@ -24,8 +24,8 @@ limitations under the License.
     color="orange"
     infraIcon="mdi-server-network"
     backgroundSrc="/static/background_openstack.svg"
-    createTitle="Add new Openstack Secret"
-    replaceTitle="Replace Openstack Secret"
+    createTitle="Add new OpenStack Secret"
+    replaceTitle="Replace OpenStack Secret"
     @input="onInput">
 
     <template slot="data-slot">
