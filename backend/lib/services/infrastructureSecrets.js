@@ -61,9 +61,24 @@ function fromResource ({secretBinding, bindingKind, cloudProviderKind, secret}) 
       return value
     }
     infrastructureSecret.data = _.mapValues(secret.data, iteratee)
+
+    const secretAccountKey = _.get(secret.data, 'serviceaccount.json')
+    if (secretAccountKey) {
+      infrastructureSecret.data.project = projectId(secretAccountKey)
+    }
   }
 
   return infrastructureSecret
+}
+
+function projectId (serviceAccountKey) {
+  try {
+    const key = JSON.parse(decodeBase64(serviceAccountKey))
+    const projectId = _.get(key, 'project_id', '')
+    return projectId
+  } catch (err) {
+    return ''
+  }
 }
 
 function toSecretResource ({metadata, data}) {
