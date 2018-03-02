@@ -95,7 +95,6 @@ limitations under the License.
       },
       secretData () {
         return {
-          project: this.projectId,
           'serviceaccount.json': this.serviceAccountKey
         }
       },
@@ -110,15 +109,6 @@ limitations under the License.
       },
       isCreateMode () {
         return !this.secret
-      },
-      projectId () {
-        try {
-          const key = JSON.parse(this.serviceAccountKey)
-          const projectId = key.project_id ? key.project_id : ''
-          return projectId
-        } catch (err) {
-          return ''
-        }
       },
       serviceAccountKeyLabel () {
         return this.isCreateMode ? 'Service Account Key' : 'New Service Account Key'

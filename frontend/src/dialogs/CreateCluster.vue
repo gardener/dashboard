@@ -41,7 +41,7 @@ limitations under the License.
                   <v-card-text>
 
                     <v-layout row>
-                      <v-flex xs5>
+                      <v-flex xs3>
                         <v-text-field
                           ref="name"
                           color="cyan"
@@ -56,7 +56,7 @@ limitations under the License.
                     </v-layout>
 
                     <v-layout row class="mt-2">
-                      <v-flex xs2>
+                      <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Infrastructure"
@@ -83,7 +83,7 @@ limitations under the License.
                       </v-flex>
                       <v-flex xs1>
                       </v-flex>
-                      <v-flex xs2>
+                      <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Secrets"
@@ -109,7 +109,7 @@ limitations under the License.
                     </v-layout>
 
                     <v-layout row>
-                      <v-flex xs2>
+                      <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Region"
@@ -122,7 +122,7 @@ limitations under the License.
                       </v-flex>
                       <v-flex xs1>
                       </v-flex>
-                      <v-flex xs2 v-if="infrastructureKind !== 'azure'">
+                      <v-flex xs3 v-if="infrastructureKind !== 'azure'">
                         <v-select
                           color="cyan"
                           label="Zone"
@@ -136,7 +136,7 @@ limitations under the License.
                     </v-layout>
 
                     <v-layout row>
-                      <v-flex xs2>
+                      <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Kubernetes"
@@ -146,7 +146,7 @@ limitations under the License.
                       </v-flex>
                       <v-flex xs1>
                       </v-flex>
-                      <v-flex xs2>
+                      <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Purpose"
@@ -157,6 +157,30 @@ limitations under the License.
                           ></v-select>
                       </v-flex>
                     </v-layout>
+
+                    <template v-if="infrastructureKind === 'openstack'">
+                      <v-layout row>
+                        <v-flex xs3>
+                          <v-select
+                          color="cyan"
+                          label="Floating Pools"
+                          :items="floatingPoolNames"
+                          v-model="infrastructureData.floatingPoolName"
+                          ></v-select>
+                        </v-flex>
+                        <v-flex xs1>
+                        </v-flex>
+                        <v-flex xs3>
+                          <v-select
+                          color="cyan"
+                          label="Load Balancer Providers"
+                          :items="loadBalancerProviderNames"
+                          v-model="infrastructureData.loadBalancerProvider"
+                          persistent-hint
+                          ></v-select>
+                        </v-flex>
+                      </v-layout>
+                    </template>
                   </v-card-text>
                 </v-container>
               </v-card>
@@ -586,6 +610,8 @@ limitations under the License.
         'volumeTypesByCloudProfileName',
         'cloudProfilesByCloudProviderKind',
         'regionsByCloudProfileName',
+        'loadBalancerProviderNamesByCloudProfileName',
+        'floatingPoolNamesByCloudProfileName',
         'cloudProviderKindList',
         'kubernetesVersions',
         'infrastructureSecretsByInfrastructureKind',
@@ -640,9 +666,7 @@ limitations under the License.
           this.shootDefinition.spec.cloud.profile = cloudProfileName
           this.selectedSecret = metadata
 
-          this.setDefaultRegion()
-          this.setDefaultKubernetesVersion()
-          this.setDefaultWorker()
+          this.setCloudProfileDefaults()
         }
       },
       region: {
@@ -723,6 +747,12 @@ limitations under the License.
       },
       regions () {
         return this.regionsByCloudProfileName(this.cloudProfileName)
+      },
+      loadBalancerProviderNames () {
+        return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
+      },
+      floatingPoolNames () {
+        return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
       },
       zones () {
         const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
@@ -822,9 +852,6 @@ limitations under the License.
               setDefaults: () => {
                 this.infrastructureData = {
                   networks: {
-                    router: {
-                      id: 1234
-                    },
                     nodes: '10.250.0.0/19',
                     pods: '100.96.0.0/11',
                     services: '100.64.0.0/13',
@@ -925,6 +952,22 @@ limitations under the License.
       setDefaultSecret () {
         this.secret = get(head(this.infrastructureSecrets), 'metadata')
       },
+      setCloudProfileDefaults () {
+        this.setDefaultRegion()
+        this.setDefaultKubernetesVersion()
+        this.setDefaultWorker()
+
+        if (this.infrastructureKind === 'openstack') {
+          this.setDefaultFloatingPoolName()
+          this.setDefaultLoadBalancerProvider()
+        }
+      },
+      setDefaultFloatingPoolName () {
+        this.infrastructureData.floatingPoolName = head(this.floatingPoolNames)
+      },
+      setDefaultLoadBalancerProvider () {
+        this.infrastructureData.loadBalancerProvider = head(this.loadBalancerProviderNames)
+      },
       setDefaultWorker () {
         this.infrastructureData.workers = []
         this.addWorker()
@@ -995,7 +1038,7 @@ limitations under the License.
 
     .tabs__items {
       margin: 10px;
-      height:350px !important;
+      height:410px !important;
       .tabs__content {
         height:100%;
         overflow:auto;

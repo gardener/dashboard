@@ -16,15 +16,15 @@ limitations under the License.
 
  <template>
    <secret-dialog-help
-     title="About Openstack Secrets"
+     title="About OpenStack Secrets"
      color="orange"
      backgroundSrc="/static/background_openstack.svg"
      :value="value"
      @input="onInput">
      <div slot="help-content" class="helpContent">
       <p>
-        Before you can provision and access a Kubernetes cluster on Openstack, you need to add account credentials.
-        The Gardener needs the credentials to provision and operate the Openstack infrastructure for your Kubernetes cluster.
+        Before you can provision and access a Kubernetes cluster on OpenStack, you need to add account credentials.
+        The Gardener needs the credentials to provision and operate the OpenStack infrastructure for your Kubernetes cluster.
       </p>
       <p>
         Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
@@ -34,7 +34,7 @@ limitations under the License.
         <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
            target="_blank"
            class="orange--text text--darken-2">
-          Openstack help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
+          OpenStack help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
       </p>
     </div>
   </secret-dialog-help>

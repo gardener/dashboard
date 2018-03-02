@@ -116,6 +116,20 @@ const getters = {
       return uniq(map(get(cloudProfile, 'data.seeds'), iteratee))
     }
   },
+  loadBalancerProviderNamesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const iteratee = item => item.name
+      return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), iteratee))
+    }
+  },
+  floatingPoolNamesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const iteratee = item => item.name
+      return uniq(map(get(cloudProfile, 'data.floatingPools'), iteratee))
+    }
+  },
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
       const predicate = item => {

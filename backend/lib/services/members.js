@@ -17,8 +17,8 @@
 'use strict'
 
 const { map, filter, find, remove } = require('lodash')
-
 const kubernetes = require('../kubernetes')
+const projects = require('./projects')
 
 function Rbac ({auth}) {
   return kubernetes.rbac({auth})
@@ -39,14 +39,25 @@ function fromResource ({subjects}) {
 
 exports.list = async function ({user, namespace}) {
   const rbac = Rbac(user)
-  const body = await readMemberRoleBinding(rbac, namespace)
-  return fromResource(body)
+  try {
+    const body = await readMemberRoleBinding(rbac, namespace)
+    return fromResource(body)
+  } catch (e) {
+    if (e.code === 404) {
+      const body = await projects._createMembersClusterRole({namespace})
+      return fromResource(body)
+    }
+    throw e
+  }
 }
 
 exports.create = async function ({user, namespace, body: {name}}) {
   const rbac = Rbac(user)
   let body = await readMemberRoleBinding(rbac, namespace)
   if (!find(body.subjects, ['name', name])) {
+    if (!body.subjects) {
+      body.subjects = []
+    }
     body.subjects.push({
       kind: 'User',
       name: name,

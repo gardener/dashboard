@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row class="openstackWorkerRow">
+  <v-layout row>
     <v-flex xs1 class="mt-1"><v-avatar class="cyan"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
     <v-flex xs2 class="ml-2">
       <v-text-field
@@ -126,7 +126,7 @@ limitations under the License.
         },
         set: function (value) {
           this.worker.autoScalerMax = Math.max(1, parseInt(value))
-          // min/max must be the same in Openstack
+          // min/max must be the same in OpenStack
           this.worker.autoScalerMin = this.worker.autoScalerMax
         }
       }

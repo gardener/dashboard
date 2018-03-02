@@ -42,12 +42,6 @@ limitations under the License.
 
       <p>
         The Service Account has to be enabled for the Google Identity and Access Management API.
-        Currently also the Service Account of the Gardener
-        <code>kubeoperator@sap-cloud-platform-dev1.iam.gserviceaccount.com</code>
-        needs the following role in your GCP project:
-        <ul>
-          <li>Compute Admin</li>
-        </ul>
       </p>
 
       <p>

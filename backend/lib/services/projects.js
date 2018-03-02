@@ -63,8 +63,13 @@ function toResource ({metadata, data}) {
   return {apiVersion, kind, metadata}
 }
 
-async function createMembersClusterRole ({namespace, username}) {
+const createMembersClusterRole = async function ({namespace, username}) {
   const ClusterRole = Resources.ClusterRole
+  const subjects = username ? [{
+    kind: 'User',
+    name: username,
+    apiGroup: 'rbac.authorization.k8s.io'
+  }] : []
   const body = {
     metadata: {
       name: 'garden-project-members',
@@ -76,16 +81,14 @@ async function createMembersClusterRole ({namespace, username}) {
     roleRef: {
       apiGroup: ClusterRole.apiGroup,
       kind: ClusterRole.kind,
-      name: 'garden-project-member'
+      name: 'garden.sapcloud.io:system:project-member'
     },
-    subjects: [{
-      kind: 'User',
-      name: username,
-      apiGroup: 'rbac.authorization.k8s.io'
-    }]
+    subjects
   }
   return rbac.namespaces(namespace).rolebindings.post({body})
 }
+
+exports._createMembersClusterRole = createMembersClusterRole
 
 exports.list = async function ({user}) {
   const emptyClusterRoleBinding = {
@@ -103,12 +106,12 @@ exports.list = async function ({user}) {
       qs: {labelSelector: 'garden.sapcloud.io/role=members'}
     }),
     rbac.clusterrolebindings('garden-administrators').get()
-        .catch(err => {
-          if (err.code === 404) {
-            return emptyClusterRoleBinding
-          }
-          throw err
-        })
+      .catch(err => {
+        if (err.code === 404) {
+          return emptyClusterRoleBinding
+        }
+        throw err
+      })
   ])
   const username = user.id
   const isMemberOf = (roleBindings, subject) => {
@@ -124,13 +127,13 @@ exports.list = async function ({user}) {
     name: username
   }
   const predicate = _.findIndex(gardenAdministrators.subjects, subject) === -1
-      ? isMemberOf(roleBindings, subject)
-      : _.identity
+    ? isMemberOf(roleBindings, subject)
+    : _.identity
   return _
-      .chain(namespaces.items)
-      .filter(predicate)
-      .map(fromResource)
-      .value()
+    .chain(namespaces.items)
+    .filter(predicate)
+    .map(fromResource)
+    .value()
 }
 
 exports.create = async function ({user, body}) {
