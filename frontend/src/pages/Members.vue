@@ -66,7 +66,7 @@ limitations under the License.
           <v-divider
             v-if="index > 0"
             inset
-            :key="name"
+            :key="`${name}-dividerKey`"
           ></v-divider>
           <v-list-tile
             avatar
