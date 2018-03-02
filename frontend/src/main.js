@@ -18,6 +18,7 @@
  * The Vue build version to load with the `import` command
  * (runtime-only or standalone) has been set in webpack.base.conf with an alias.
  */
+import { parse as parseUrl } from 'url'
 import includes from 'lodash/includes'
 
 import 'mdi/css/materialdesignicons.css'
@@ -52,6 +53,14 @@ if (version === false) {
         Oidc.Log.logger = console
         Oidc.Log.level = Oidc.Log.ERROR
         const userStore = new Oidc.WebStorageStateStore()
+        try {
+          const redirectUri = parseUrl(cfg.oidc.redirect_uri)
+          if (redirectUri) {
+            cfg.oidc.redirect_uri = window.location.origin + redirectUri.path
+          }
+        } catch (err) {
+          console.error('Invalid redirect URI in OIDC config', err)
+        }
         const userManager = new Oidc.UserManager(Object.assign({userStore}, cfg.oidc))
         const bus = new Vue({})
         Storage.prototype.setObject = function (key, value) {

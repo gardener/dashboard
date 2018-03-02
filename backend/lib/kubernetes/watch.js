@@ -18,6 +18,7 @@ const { assign, cloneDeep, isFunction, isString, isPlainObject, replace, join, c
 const { parse, format } = require('url')
 const { EventEmitter } = require('events')
 const WebSocket = require('ws')
+const logger = require('../logger')
 const inject = require('reconnect-core')
 
 function encodeBase64Url (input) {
@@ -56,8 +57,34 @@ function createErrorEvent ({message, error}) {
 }
 
 function wrap (emitter, ws) {
+  const state = {
+    name: emitter.resourceName,
+    isAlive: false
+  }
+
+  function healthCheck () {
+    if (state.isAlive === true) {
+      state.isAlive = false
+      ws.ping()
+    } else {
+      if (state.intervalId) {
+        clearInterval(state.intervalId)
+      }
+      logger.debug(`healthCheck-${state.timestamp} stopped for watch ${state.name}`)
+      ws.terminate()
+    }
+  }
+
   function onOpen () {
     emitter.emit('connect')
+    state.isAlive = true
+    state.timestamp = Date.now()
+    state.intervalId = setInterval(healthCheck, 15000)
+    logger.debug(`healthCheck-${state.timestamp} started for watch ${state.name}`)
+  }
+
+  function onPong () {
+    state.isAlive = true
   }
 
   function onError (err) {
@@ -77,14 +104,17 @@ function wrap (emitter, ws) {
   }
 
   function onClose (code, reason) {
+    logger.debug('watch closed', code, reason)
     ws.removeListener('close', onClose)
     ws.removeListener('message', onMessage)
+    ws.removeListener('pong', onPong)
     emitter.emit('close', createError(code, reason))
   }
 
   ws
     .once('open', onOpen)
     .on('message', onMessage)
+    .on('pong', onPong)
     .on('error', onError)
     .on('close', onClose)
 
@@ -158,6 +188,7 @@ async function wrapConnectionAsync (emitter, resource, options) {
 
 function createConnection (resource, options) {
   const emitter = new EventEmitter()
+  emitter.resourceName = resource._name
   const {qs = {}} = options
   if (!isFunction(qs.resourceVersion)) {
     wrapConnection(emitter, resource, options)
