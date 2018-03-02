@@ -82,9 +82,9 @@ limitations under the License.
           <td class="nowrap" v-show="columnVisible('createdAt')">
             <v-tooltip top>
               <div slot="activator">
-                {{ createdAt(props.item) }}
+                {{ createdTimeAgo(props.item) }}
               </div>
-              {{ createdTimeAgo(props.item) }}
+              {{ createdAt(props.item) }}
             </v-tooltip>
           </td>
           <td class="nowrap text-xs-center" v-show="columnVisible('purpose')">
