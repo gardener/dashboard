@@ -69,12 +69,12 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Password</v-list-tile-sub-title>
-          <v-list-tile-title ref="password">{{passwordText}}</v-list-tile-title>
+          <v-list-tile-title>{{passwordText}}</v-list-tile-title>
           <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout.number="2000">
             Copied to clipboard!
           </v-snackbar>
         </v-list-tile-content>
-        <v-btn v-show="showPassword" icon ref="copy" title="copy to clipboard">
+        <v-btn icon ref="copy" title="copy to clipboard">
           <v-icon>content_copy</v-icon>
         </v-btn>
         <v-btn icon :title="passwordVisibilityTitle" @click.native.stop="showPassword = !showPassword">
@@ -113,7 +113,7 @@ limitations under the License.
         const copyRef = this.$refs.copy
         if (copyRef) {
           const pwdClipboard = new Clipboard(copyRef.$el, {
-            target: () => this.$refs.password
+            text: () => this.password
           })
           pwdClipboard.on('success', (event) => {
             this.snackbar = true
