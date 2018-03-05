@@ -332,25 +332,11 @@ limitations under the License.
                     <v-flex xs2>
                       <v-text-field
                        color="cyan"
-                       label="Maintenance Window Start"
-                       v-model="maintenanceWindowBegin"
+                       label="Maintenance Start Time"
+                       v-model="maintenanceBegin"
                        :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
                        @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
                        @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
-                       type="time"
-                       suffix="UTC"
-                     ></v-text-field>
-                    </v-flex>
-                    <v-flex xs1>
-                    </v-flex>
-                    <v-flex xs2>
-                      <v-text-field
-                       color="cyan"
-                       label="Maintenance Window End"
-                       v-model="maintenanceWindowEnd"
-                       :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.end')"
-                       @input="$v.shootDefinition.spec.maintenance.timeWindow.end.$touch()"
-                       @blur="$v.shootDefinition.spec.maintenance.timeWindow.end.$touch()"
                        type="time"
                        suffix="UTC"
                      ></v-text-field>
@@ -453,9 +439,6 @@ limitations under the License.
           timeWindow: {
             begin: {
               required: 'Maintenance start time is required'
-            },
-            end: {
-              required: 'Maintenance end time is required'
             }
           }
         }
@@ -687,44 +670,21 @@ limitations under the License.
           this.infrastructureData.zones = [zone]
         }
       },
-      maintenanceWindowBegin: {
+      maintenanceBegin: {
         get () {
           const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
           if (momentObj.isValid()) {
             return momentObj.format('HH:mm:00')
           }
           this.shootDefinition.spec.maintenance.timeWindow.begin = null
-          return null
-        },
-        set (time) {
-          const newMoment = moment.utc(time, 'HHmmZ')
-          this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
-
-          const endMoment = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.end, 'HHmmZ')
-          if (newMoment >= endMoment) {
-            newMoment.add(1, 'h')
-            this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
-          }
-        }
-      },
-      maintenanceWindowEnd: {
-        get () {
-          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.end, 'HHmmZ')
-          if (momentObj.isValid()) {
-            return momentObj.format('HH:mm:00')
-          }
           this.shootDefinition.spec.maintenance.timeWindow.end = null
           return null
         },
         set (time) {
           const newMoment = moment.utc(time, 'HHmmZ')
+          this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
+          newMoment.add(1, 'h')
           this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
-
-          const beginMoment = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
-          if (newMoment <= beginMoment) {
-            newMoment.subtract(1, 'h')
-            this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
-          }
         }
       },
       infrastructure () {
