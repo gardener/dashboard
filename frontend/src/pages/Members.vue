@@ -23,7 +23,7 @@ limitations under the License.
           Main Contact
         </v-toolbar-title>
       </v-toolbar>
-      <v-list two-line subheader>
+      <v-list v-if="!!owner" two-line subheader>
         <v-list-tile avatar>
           <v-list-tile-avatar>
             <img :src="avatar(owner)" />
@@ -31,6 +31,14 @@ limitations under the License.
           <v-list-tile-content>
             <v-list-tile-title>{{displayName(owner)}}</v-list-tile-title>
             <v-list-tile-sub-title><a :href="'mailto:'+owner">{{owner}}</a></v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+      <v-list v-else two-line subheader>
+        <v-list-tile avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>This project has no main contact configured.</v-list-tile-title>
+            <v-list-tile-sub-title>You can set a main contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the members from the list below.</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
