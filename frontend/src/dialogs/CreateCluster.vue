@@ -364,12 +364,23 @@ limitations under the License.
                   <v-list class="mr-extra">
                     <v-list-tile avatar class="list-complete-item">
                       <v-list-tile-action>
+                        <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title >Operating System</v-list-tile-title>
+                        <v-list-tile-sub-title>
+                          Schedule operating system updates of the workers during the maintenance window.
+                        </v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile avatar class="list-complete-item">
+                      <v-list-tile-action>
                         <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
                       </v-list-tile-action>
                       <v-list-tile-content>
-                        <v-list-tile-title >Kubernetes version</v-list-tile-title>
+                        <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
                         <v-list-tile-sub-title>
-                          Automatically update Kubernetes to latest version during maintenance.
+                          Automatically update Kubernetes to latest patch version during maintenance.
                         </v-list-tile-sub-title>
                       </v-list-tile-content>
                     </v-list-tile>
@@ -548,7 +559,8 @@ limitations under the License.
         refs_: {},
         validationErrors,
         errorMessage: undefined,
-        detailedErrorMessage: undefined
+        detailedErrorMessage: undefined,
+        osUpdates: true
       }
     },
     validations: {
