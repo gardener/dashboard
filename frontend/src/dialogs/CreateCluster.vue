@@ -355,7 +355,7 @@ limitations under the License.
                       <v-list-tile-content>
                         <v-list-tile-title >Operating System</v-list-tile-title>
                         <v-list-tile-sub-title>
-                          Schedule operating system updates of the workers during the maintenance window.
+                          Schedule operating system updates of the workers during maintenance.
                         </v-list-tile-sub-title>
                       </v-list-tile-content>
                     </v-list-tile>
@@ -574,9 +574,6 @@ limitations under the License.
           maintenance: {
             timeWindow: {
               begin: {
-                required
-              },
-              end: {
                 required
               }
             }
