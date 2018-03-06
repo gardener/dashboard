@@ -71,7 +71,7 @@ limitations under the License.
                         <v-list-tile-sub-title>Created at</v-list-tile-sub-title>
                         <v-list-tile-title>{{created}}</v-list-tile-title>
                       </template>
-                      {{timeAgo}}
+                      <time-ago :dateTime="metadata.creationTimestamp"></time-ago>
                     </v-tooltip>
                   </v-list-tile-content>
                 </v-list-tile>
@@ -206,15 +206,17 @@ limitations under the License.
   import { mapGetters, mapActions } from 'vuex'
   import CodeBlock from '@/components/CodeBlock'
   import ClusterAccess from '@/components/ClusterAccess'
+  import TimeAgo from '@/components/TimeAgo'
   import get from 'lodash/get'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getTimeAgo, getCloudProviderKind } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind } from '@/utils'
 
   export default {
     name: 'shoot-list',
     components: {
       CodeBlock,
-      ClusterAccess
+      ClusterAccess,
+      TimeAgo
     },
     data () {
       return {
@@ -254,12 +256,6 @@ limitations under the License.
       }
     },
     methods: {
-      componentUrl (name) {
-        switch (name) {
-          case 'monocular':
-            return this.monocularUrl
-        }
-      },
       ...mapActions([
         'setSelectedShoot'
       ])
@@ -271,6 +267,16 @@ limitations under the License.
       ...mapGetters([
         'shootByNamespaceAndName'
       ]),
+      componentUrl () {
+        return (name) => {
+          switch (name) {
+            case 'monocular':
+              return this.monocularUrl
+            default:
+              return undefined
+          }
+        }
+      },
       userinfo () {
         if (this.info.username && this.info.password) {
           const username = encodeURIComponent(this.info.username)
@@ -323,9 +329,6 @@ limitations under the License.
       },
       created () {
         return getDateFormatted(this.metadata.creationTimestamp)
-      },
-      timeAgo (time) {
-        return getTimeAgo(this.metadata.creationTimestamp)
       },
       domain () {
         return get(this.item, 'spec.dns.domain')

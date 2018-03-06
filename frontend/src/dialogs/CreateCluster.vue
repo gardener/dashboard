@@ -882,6 +882,11 @@ limitations under the License.
         const predicate = item => item.metadata.namespace === this.namespace
         const project = find(this.projectList, predicate)
         return get(project, 'metadata.name')
+      },
+      isPrivateSecretBinding () {
+        return (secret) => {
+          return isPrivateSecretBinding(secret)
+        }
       }
     },
     methods: {
@@ -997,9 +1002,6 @@ limitations under the License.
         } else {
           this.infrastructureData.zones = []
         }
-      },
-      isPrivateSecretBinding (secret) {
-        return isPrivateSecretBinding(secret)
       },
       getErrorMessages (field) {
         return getValidationErrors(this, field)

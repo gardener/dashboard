@@ -76,13 +76,13 @@ const getters = {
   },
   machineTypesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.machineTypes')
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.volumeTypes')
     }
   },
@@ -111,21 +111,21 @@ const getters = {
   },
   regionsByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const iteratee = item => item.data.region
       return uniq(map(get(cloudProfile, 'data.seeds'), iteratee))
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const iteratee = item => item.name
       return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), iteratee))
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const iteratee = item => item.name
       return uniq(map(get(cloudProfile, 'data.floatingPools'), iteratee))
     }
@@ -156,7 +156,7 @@ const getters = {
   },
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
-      const cloudProfile = getters['cloudProfiles/cloudProfileByName'](cloudProfileName)
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.kubernetes.versions', [])
     }
   },

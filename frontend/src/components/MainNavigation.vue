@@ -222,6 +222,16 @@ limitations under the License.
           return includes(name, filter) || includes(owner, filter)
         }
         return sortBy(filter(this.projectList, predicate))
+      },
+      getProjectOwner () {
+        return (project) => {
+          return emailToDisplayName(project.data.owner)
+        }
+      },
+      namespacedRoute () {
+        return (route) => {
+          return namespacedRoute(route, this.namespace)
+        }
       }
     },
     methods: {
@@ -229,12 +239,6 @@ limitations under the License.
         'setSidebar',
         'setNamespace'
       ]),
-      getProjectOwner (project) {
-        return emailToDisplayName(project.data.owner)
-      },
-      namespacedRoute (route) {
-        return namespacedRoute(route, this.namespace)
-      },
       onProjectSelect (project) {
         this.projectMenu = false
         this.project = project

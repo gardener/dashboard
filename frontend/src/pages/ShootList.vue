@@ -82,7 +82,7 @@ limitations under the License.
           <td class="nowrap" v-show="columnVisible('createdAt')">
             <v-tooltip top>
               <div slot="activator">
-                {{ createdTimeAgo(props.item) }}
+                <time-ago :date-time="props.item.creationTimestamp"></time-ago>
               </div>
               {{ createdAt(props.item) }}
             </v-tooltip>
@@ -227,7 +227,8 @@ limitations under the License.
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getDateFormatted, getTimeAgo, getCloudProviderKind } from '@/utils'
+  import TimeAgo from '@/components/TimeAgo'
+  import { getDateFormatted, getCloudProviderKind } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -240,7 +241,8 @@ limitations under the License.
       ConfirmInputDialog,
       ClusterAccess,
       InfraIcon,
-      ShootStatus
+      ShootStatus,
+      TimeAgo
     },
     data () {
       return {
@@ -276,52 +278,9 @@ limitations under the License.
             this.showDialog('dashboard')
           })
       },
-      isDashboardDialogDisabled (row) {
-        const item = this.item(row) || {}
-        const itemInfo = item.info || {}
-
-        if (itemInfo.dashboardUrl) {
-          return false
-        }
-
-        // disabled if info is NOT available
-        return !this.isInfoAvailable(row)
-      },
-      isKubeconfigDialogDisabled (row) {
-        const item = this.item(row) || {}
-        const itemInfo = item.info || {}
-
-        if (itemInfo.kubeconfig) {
-          return false
-        }
-
-        // disabled if info is NOT available
-        return !this.isInfoAvailable(row)
-      },
-      isInfoAvailable (row) {
-        const lastOperation = row.lastOperation || {}
-        // operator not yet updated shoot resource
-        if (lastOperation.type === undefined || lastOperation.state === undefined) {
-          return false
-        }
-        return !this.isCreateOrDeleteInProcess(row)
-      },
-      isCreateOrDeleteInProcess (row) {
-        const lastOperation = row.lastOperation || {}
-        // create or delete in process
-        if (includes(['Create', 'Delete'], lastOperation.type) && lastOperation.state === 'Processing') {
-          return true
-        }
-        return false
-      },
       showDeleteDialog (row) {
         this.setSelectedShoot(row)
           .then(() => this.showDialog('delete'))
-      },
-      isDeleteDialogDisabled (row) {
-        const annotations = row.annotations
-        const confirmation = annotations['confirmation.garden.sapcloud.io/deletionTimestamp']
-        return !!row.deletionTimestamp && row.deletionTimestamp === confirmation
       },
       showCreateDialog () {
         this.showDialog('create')
@@ -360,18 +319,6 @@ limitations under the License.
             }
             return {id, text, message, lastTransitionTime, status}
           })
-      },
-      columnVisible (headerVal) {
-        const predicate = item => item.value === headerVal && item.checked === true
-        return find(this.allHeaders, predicate)
-      },
-      getPurpose (metadata) {
-        // eslint-disable-next-line
-        return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
-      },
-      getCreatedBy (metadata) {
-        // eslint-disable-next-line
-        return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
       },
       getSortVal (row, column) {
         switch (column) {
@@ -418,12 +365,6 @@ limitations under the License.
           }
           return comp * (desc ? -1 : 1)
         })
-      },
-      createdAt (row) {
-        return getDateFormatted(row.creationTimestamp)
-      },
-      createdTimeAgo (row) {
-        return getTimeAgo(row.creationTimestamp)
       },
       setColumnChecked (header) {
         header.checked = !header.checked
@@ -497,6 +438,82 @@ limitations under the License.
           if (!value) {
             this.dialog = null
           }
+        }
+      },
+      createdAt () {
+        return (row) => {
+          return getDateFormatted(row.creationTimestamp)
+        }
+      },
+      columnVisible () {
+        return (headerVal) => {
+          const predicate = item => item.value === headerVal && item.checked === true
+          return find(this.allHeaders, predicate)
+        }
+      },
+      isInfoAvailable () {
+        return (row) => {
+          const lastOperation = row.lastOperation || {}
+          // operator not yet updated shoot resource
+          if (lastOperation.type === undefined || lastOperation.state === undefined) {
+            return false
+          }
+          return !this.isCreateOrDeleteInProcess(row)
+        }
+      },
+      isCreateOrDeleteInProcess () {
+        return (row) => {
+          const lastOperation = row.lastOperation || {}
+          // create or delete in process
+          if (includes(['Create', 'Delete'], lastOperation.type) && lastOperation.state === 'Processing') {
+            return true
+          }
+          return false
+        }
+      },
+      isDeleteDialogDisabled () {
+        return (row) => {
+          const annotations = row.annotations
+          const confirmation = annotations['confirmation.garden.sapcloud.io/deletionTimestamp']
+          return !!row.deletionTimestamp && row.deletionTimestamp === confirmation
+        }
+      },
+      isDashboardDialogDisabled () {
+        return (row) => {
+          const item = this.item(row) || {}
+          const itemInfo = item.info || {}
+
+          if (itemInfo.dashboardUrl) {
+            return false
+          }
+
+          // disabled if info is NOT available
+          return !this.isInfoAvailable(row)
+        }
+      },
+      isKubeconfigDialogDisabled () {
+        return (row) => {
+          const item = this.item(row) || {}
+          const itemInfo = item.info || {}
+
+          if (itemInfo.kubeconfig) {
+            return false
+          }
+
+          // disabled if info is NOT available
+          return !this.isInfoAvailable(row)
+        }
+      },
+      getPurpose () {
+        return (metadata) => {
+          // eslint-disable-next-line
+          return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+        }
+      },
+      getCreatedBy () {
+        return (metadata) => {
+          // eslint-disable-next-line
+          return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
         }
       },
       currentMetadata () {

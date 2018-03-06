@@ -112,9 +112,6 @@ limitations under the License.
       ]),
       handleLogout () {
         this.$router.push({name: 'Logout'})
-      },
-      helpTarget (item) {
-        return get(item, 'target', '_blank')
       }
     },
     computed: {
@@ -141,6 +138,11 @@ limitations under the License.
       },
       avatarTitle () {
         return `${this.username} (${this.email})`
+      },
+      helpTarget () {
+        return (item) => {
+          return get(item, 'target', '_blank')
+        }
       }
     }
   }

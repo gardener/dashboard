@@ -65,14 +65,14 @@ limitations under the License.
       },
       routes () {
         return routes(this.$router)
-      }
-    },
-    methods: {
-      textClass (item) {
-        if (item.currentRoute) {
-          return 'breadcrumb title'
-        } else {
-          return 'breadcrumb subheading pointer'
+      },
+      textClass () {
+        return (item) => {
+          if (item.currentRoute) {
+            return 'breadcrumb title'
+          } else {
+            return 'breadcrumb subheading pointer'
+          }
         }
       }
     }
