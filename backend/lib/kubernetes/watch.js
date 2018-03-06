@@ -62,25 +62,40 @@ function wrap (emitter, ws) {
     isAlive: false
   }
 
-  function healthCheck () {
+  function startPingPong () {
+    ws.on('pong', onPong)
+    state.isAlive = true
+    state.timestamp = Date.now()
+    state.intervalId = setInterval(ping, 15000)
+    logger.debug(`ping-${state.timestamp} started for watch ${state.name}`)
+  }
+
+  function stopPingPong () {
+    if (state.intervalId) {
+      clearInterval(state.intervalId)
+      state.intervalId = undefined
+      logger.debug(`ping-${state.timestamp} stopped for watch ${state.name}`)
+    }
+    ws.removeListener('pong', onPong)
+  }
+
+  function ping () {
     if (state.isAlive === true) {
       state.isAlive = false
-      ws.ping()
-    } else {
-      if (state.intervalId) {
-        clearInterval(state.intervalId)
+      try {
+        ws.ping()
+      } catch (err) {
+        logger.error(`ping-${state.timestamp} ping error for watch ${state.name}`, err.message)
       }
-      logger.debug(`healthCheck-${state.timestamp} stopped for watch ${state.name}`)
+    } else {
+      stopPingPong()
       ws.terminate()
     }
   }
 
   function onOpen () {
     emitter.emit('connect')
-    state.isAlive = true
-    state.timestamp = Date.now()
-    state.intervalId = setInterval(healthCheck, 15000)
-    logger.debug(`healthCheck-${state.timestamp} started for watch ${state.name}`)
+    startPingPong()
   }
 
   function onPong () {
@@ -107,14 +122,14 @@ function wrap (emitter, ws) {
     logger.debug('watch closed', code, reason)
     ws.removeListener('close', onClose)
     ws.removeListener('message', onMessage)
-    ws.removeListener('pong', onPong)
+    stopPingPong()
     emitter.emit('close', createError(code, reason))
   }
 
   ws
     .once('open', onOpen)
     .on('message', onMessage)
-    .on('pong', onPong)
+
     .on('error', onError)
     .on('close', onClose)
 
