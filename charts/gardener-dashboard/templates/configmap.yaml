@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gardener-dashboard-configmap
+  namespace: garden
+  labels:
+    app: gardener-dashboard
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+data:
+  config.yaml: |
+    ---
+    port: {{ .Values.containerPort }}
+    logLevel: {{ .Values.logLevel }}
+    logFormat: text
+    jwt:
+      audience: {{ .Values.oidc.clientId }}
+      issuer: {{ .Values.oidc.issuerUrl }}
+      algorithms:
+      - RS256
+    jwks:
+{{- if .Values.oidc.ca }}
+      ca: |
+{{ toYaml . | indent 8 }}
+{{- end }}
+      strictSsl: false
+      rejectUnauthorized: true
+      cache: false
+      rateLimit: false
+      jwksUri: "{{ .Values.oidc.issuerUrl }}/keys"
+    frontend:
+{{- if .Values.frontendConfig.landingPageUrl }}
+      landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
+{{- end }}
+{{- if .Values.frontendConfig.helpMenuItems }}
+      helpMenuItems:
+      {{- range .Values.frontendConfig.helpMenuItems }}
+      - title: {{ .title }}{{- if .icon }}
+        icon: {{ .icon }}{{- end }}
+        url: {{ .url }}{{- if .target }}
+        target: {{ .target }}{{- end }}
+      {{- end }}
+{{- end }}
+      dashboardUrl:
+        pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
+      oidc:
+        authority: {{ .Values.oidc.issuerUrl }}
+        client_id: {{ .Values.oidc.clientId }}
+        redirect_uri: "{{ .Values.oidc.issuerUrl }}/callback"
+        response_type: "token id_token"
+        scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
+        loadUserInfo: false
