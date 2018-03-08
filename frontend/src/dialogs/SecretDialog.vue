@@ -56,13 +56,13 @@ limitations under the License.
               </v-flex>
             </v-layout>
 
-            <v-layout row>
+            <v-layout row v-show="cloudProfiles.length !== 1">
               <v-flex xs5>
                 <cloud-profile
                   ref="cloudProfile"
                   v-model="cloudProfileName"
                   :isCreateMode="isCreateMode"
-                  :cloudProfileNames="cloudProfileNames"
+                  :cloudProfiles="cloudProfiles"
                   :color="color">
                 </cloud-profile>
               </v-flex>
@@ -93,7 +93,6 @@ limitations under the License.
   import cloneDeep from 'lodash/cloneDeep'
   import get from 'lodash/get'
   import head from 'lodash/head'
-  import map from 'lodash/map'
   import sortBy from 'lodash/sortBy'
 
   const validationErrors = {
@@ -152,7 +151,7 @@ limitations under the License.
     },
     data () {
       return {
-        cloudProfileName: undefined,
+        selectedCloudProfile: undefined,
         secretName: undefined,
         validationErrors
       }
@@ -169,8 +168,17 @@ limitations under the License.
         'infrastructureSecretList',
         'cloudProfilesByCloudProviderKind'
       ]),
-      cloudProfileNames () {
-        return sortBy(map(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), 'metadata.name'))
+      cloudProfileName: {
+        get () {
+          return this.selectedCloudProfile
+        },
+        set (cloudProfileName) {
+          this.selectedCloudProfile = cloudProfileName
+          this.$emit('cloudProfileName', cloudProfileName)
+        }
+      },
+      cloudProfiles () {
+        return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
       },
       bindingName () {
         if (this.isCreateMode) {
@@ -277,8 +285,8 @@ limitations under the License.
         if (this.isCreateMode) {
           this.secretName = `my-${this.cloudProviderKind}-secret`
 
-          if (this.cloudProfileNames.length === 1) {
-            this.cloudProfileName = head(this.cloudProfileNames)
+          if (this.cloudProfiles.length === 1) {
+            this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
           } else {
             this.cloudProfileName = undefined
           }

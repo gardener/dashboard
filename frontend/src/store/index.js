@@ -139,6 +139,15 @@ const getters = {
       return filtered
     }
   },
+  infrastructureSecretsByCloudProfileName (state) {
+    return (cloudProfileName) => {
+      const predicate = item => {
+        return item.metadata.cloudProfileName === cloudProfileName
+      }
+      const filtered = filter(state.infrastructureSecrets.all, predicate)
+      return filtered
+    }
+  },
   shootByNamespaceAndName (state) {
     return ({namespace, name}) => {
       const predicate = item => item.metadata.name === name && item.metadata.namespace === namespace

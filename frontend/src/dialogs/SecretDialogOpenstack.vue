@@ -26,7 +26,8 @@ limitations under the License.
     backgroundSrc="/static/background_openstack.svg"
     createTitle="Add new OpenStack Secret"
     replaceTitle="Replace OpenStack Secret"
-    @input="onInput">
+    @input="onInput"
+    @cloudProfileName="onCloudProfileNameUpdate">
 
     <template slot="data-slot">
       <v-layout row>
@@ -53,6 +54,17 @@ limitations under the License.
             :error-messages="getErrorMessages('tenantName')"
             @input="$v.tenantName.$touch()"
             @blur="$v.tenantName.$touch()"
+          ></v-text-field>
+        </v-flex>
+      </v-layout>
+
+      <v-layout row>
+        <v-flex xs8>
+          <v-text-field
+            color="blue"
+            v-model="keystoneUrl"
+            label="Keystone URL"
+            disabled
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -93,9 +105,11 @@ limitations under the License.
 
 
 <script>
+  import { mapGetters } from 'vuex'
   import SecretDialog from '@/dialogs/SecretDialog'
   import { required } from 'vuelidate/lib/validators'
   import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+  import get from 'lodash/get'
 
   const validationErrors = {
     domainName: {
@@ -132,7 +146,8 @@ limitations under the License.
         username: undefined,
         password: undefined,
         hideSecret: true,
-        validationErrors
+        validationErrors,
+        keystoneUrl: undefined
       }
     },
     validations () {
@@ -140,6 +155,9 @@ limitations under the License.
       return this.validators
     },
     computed: {
+      ...mapGetters([
+        'cloudProfileByName'
+      ]),
       valid () {
         return !this.$v.$invalid
       },
@@ -182,6 +200,10 @@ limitations under the License.
       onInput (value) {
         this.$emit('input', value)
       },
+      onCloudProfileNameUpdate (cloudProfileName) {
+        const cloudProfile = this.cloudProfileByName(cloudProfileName)
+        this.keystoneUrl = get(cloudProfile, 'data.keyStoneURL')
+      },
       reset () {
         this.$v.$reset()
 
@@ -189,6 +211,7 @@ limitations under the License.
         this.tenantName = ''
         this.username = ''
         this.password = ''
+        this.keyStoneUrl = ''
 
         if (!this.isCreateMode) {
           if (this.secret.data) {
