@@ -1,0 +1,51 @@
+# Default values for gardener-dashboard.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+
+image:
+  repository: quay.io/coreos/dex
+  tag: 2.10.0
+  pullPolicy: IfNotPresent
+
+containerPort: 5556
+servicePort: 5556
+hosts:
+  - identity.ingress.example.org
+  - identity.example.org
+issuerUrl: https://identity.ingress.example.org
+
+dashboardOrigins:
+  - 'https://dashboard.ingress.example.org'
+  - 'https://dashboard.example.org'
+  - 'http://localhost:8080'
+dashboardClientSecret: sHq4vLoiQcIWbO3h
+kubectlClientSecret: if6ji0dTFE4rQfj8
+
+connectors:
+- type: saml
+  id: saml
+  name: SAML
+  config:
+    ssoURL: https://saml.example.org/sso
+    caData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
+    redirectURI: https://identity.ingress.example.org/callback
+    usernameAttr: name
+    emailAttr: email
+    groupsAttr: groups
+    entityIssuer: identity.ingress.example.org
+    ssoIssuer: saml.example.org
+    nameIDPolicyFormat: unspecified
+
+tls:
+  crt: |
+    -----BEGIN CERTIFICATE-----
+    Li4u
+    -----END CERTIFICATE-----
+    -----BEGIN CERTIFICATE-----
+    Li4u
+    -----END CERTIFICATE-----
+  key: |
+    -----BEGIN RSA PRIVATE KEY-----
+    Li4u
+    -----END RSA PRIVATE KEY-----

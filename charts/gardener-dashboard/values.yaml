@@ -16,6 +16,7 @@ hosts:
   - dashboard.ingress.example.org
   - dashboard.example.org
 
+connectors:
 tls:
   crt: |
     -----BEGIN CERTIFICATE-----
@@ -24,11 +25,10 @@ tls:
     -----BEGIN CERTIFICATE-----
     Li4u
     -----END CERTIFICATE-----
-  key:
+  key: |
     -----BEGIN RSA PRIVATE KEY-----
     Li4u
     -----END RSA PRIVATE KEY-----
-
 
 oidc:
   issuerUrl: https://identity.ingress.example.org

@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: identity-configmap
+  namespace: kube-system
+data:
+  config.yaml: |
+    issuer: {{ .Values.issuerUrl }}
+    storage:
+      type: kubernetes
+      config:
+        inCluster: true
+    web:
+      http: "0.0.0.0:{{ .Values.containerPort }}"
+      allowedOrigins:
+      {{- range .Values.dashboardOrigins }}
+        - {{ . }}
+      {{- end }}
+    oauth2:
+      skipApprovalScreen: true
+      responseTypes:
+      - token
+      - code
+      - id_token
+    staticClients:
+    - id: dashboard
+      redirectURIs:
+      {{- range .Values.dashboardOrigins }}
+        - "{{ . }}/callback"
+      {{- end }}
+      name: Gardener Dashboard
+      secret: {{ .Values.dashboardClientSecret }}
+    - id: kube-kubectl
+      public: true
+      trustedPeers:
+      - dashboard
+      name: Kubectl
+      secret: {{ .Values.kubectlClientSecret }}
+{{- if .Values.staticPasswords }}
+    enablePasswordDB: true
+    staticPasswords:
+{{ toYaml .Values.staticPasswords | indent 6 }}
+{{ else }}
+    enablePasswordDB: false
+    staticPasswords: []
+{{- end -}}
+{{- if .Values.connectors }}
+    connectors:
+{{ toYaml .Values.connectors | indent 6 }}
+{{ else }}
+    connectors: []
+{{- end -}}
