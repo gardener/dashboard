@@ -72,7 +72,7 @@ const actions = {
         const item = res.data
         commit('ITEM_PUT', item)
       })
-      .then(() => dispatch('getInfo', name))
+      .then(() => dispatch('getInfo', {name, namespace}))
       .then(() => find(state.all, eql({namespace, name})))
   },
   create ({ dispatch, commit, rootState }, data) {
@@ -80,8 +80,7 @@ const actions = {
     const user = rootState.user
     return createShoot({namespace, user, data})
   },
-  delete ({ dispatch, commit, rootState }, name) {
-    const namespace = rootState.namespace
+  delete ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
     return deleteShoot({namespace, name, user})
   },
@@ -89,9 +88,8 @@ const actions = {
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
-  getInfo ({ commit, rootState }, name) {
+  getInfo ({ commit, rootState }, {name, namespace}) {
     const user = rootState.user
-    const namespace = rootState.namespace
     return getShootInfo({namespace, name, user})
       .then(res => res.data)
       .then(info => {
@@ -146,7 +144,7 @@ const actions = {
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
-        return dispatch('getInfo', metadata.name)
+        return dispatch('getInfo', {name: metadata.name, namespace: metadata.namespace})
       }
     }
   }

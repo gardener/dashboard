@@ -24,6 +24,7 @@ import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import includes from 'lodash/includes'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -262,8 +263,8 @@ const actions = {
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
   },
-  deleteShoot ({ dispatch, commit }, name) {
-    return dispatch('shoots/delete', name)
+  deleteShoot ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/delete', {name, namespace})
       .catch(err => {
         dispatch('setError', err)
       })
@@ -319,7 +320,7 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    Emitter.setNamespace(value)
+    Emitter.setNamespace(value, this.getters.namespaces)
     state.namespace = value
   },
   SET_USER (state, value) {
@@ -357,7 +358,7 @@ const store = new Vuex.Store({
 Emitter.on('shoot', ({type, object}) => {
   switch (type) {
     case 'put':
-      if (object.metadata.namespace === state.namespace) {
+      if ((state.namespace === '_all' && includes(store.getters.namespaces, object.metadata.namespace)) || object.metadata.namespace === state.namespace) {
         store.commit('shoots/ITEM_PUT', object)
       }
       break

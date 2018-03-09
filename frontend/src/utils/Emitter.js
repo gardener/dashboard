@@ -63,10 +63,14 @@ const emitter = Emitter({
       socket.disconnect()
     }
   },
-  setNamespace (namespace) {
+  setNamespace (namespace, allNamespaces) {
     this.namespace = namespace
     if (this.namespace && this.authenticated) {
-      socket.emit('subscribe', {namespace})
+      if (namespace === '_all') {
+        socket.emit('subscribe', {namespaces: allNamespaces})
+      } else {
+        socket.emit('subscribe', {namespaces: [namespace]})
+      }
     }
   },
   authenticate () {
@@ -100,7 +104,7 @@ function onAuthenticated () {
   })
   const namespace = emitter.namespace
   if (namespace) {
-    socket.emit('subscribe', {namespace})
+    socket.emit('subscribe', {namespaces: [namespace]})
   }
 }
 

@@ -30,7 +30,11 @@ function Core ({auth}) {
 }
 
 exports.list = async function ({user, namespace}) {
-  return Garden(user).namespaces(namespace).shoots.get({})
+  if (!namespace) {
+    return Garden(user).shoots.get({})
+  } else {
+    return Garden(user).namespaces(namespace).shoots.get({})
+  }
 }
 
 exports.create = async function ({user, namespace, body}) {

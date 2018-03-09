@@ -28,7 +28,7 @@ const Default = () => import('@/layouts/Default')
 /* Pages */
 const Home = () => import('@/pages/Home')
 const ShootList = () => import('@/pages/ShootList')
-const Shoot = { template: '<router-view></router-view>' }
+const PlaceholderComponent = { template: '<router-view></router-view>' }
 const ShootItem = () => import('@/pages/ShootItem')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
@@ -96,7 +96,6 @@ export default function createRouter ({store, userManager}) {
           component: Home,
           meta: {
             public: false,
-            projectScope: false,
             title: 'Home'
           }
         },
@@ -106,19 +105,20 @@ export default function createRouter ({store, userManager}) {
           component: Account,
           meta: {
             public: false,
-            projectScope: false,
             title: 'Account',
             breadcrumb: true
           }
         },
         {
           path: 'namespace/:namespace/shoots',
-          component: Shoot,
+          component: PlaceholderComponent,
           meta: {
             menu: {
               title: 'Clusters',
               icon: 'mdi-hexagon-multiple'
             },
+            namespaced: true,
+            projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
             breadcrumb: true
@@ -130,7 +130,8 @@ export default function createRouter ({store, userManager}) {
               component: ShootList,
               meta: {
                 public: false,
-                projectScope: true,
+                namespaced: true,
+                projectScope: false,
                 title: 'Project Clusters'
               }
             },
@@ -140,7 +141,8 @@ export default function createRouter ({store, userManager}) {
               component: ShootItem,
               meta: {
                 public: false,
-                projectScope: true,
+                namespaced: true,
+                projectScope: false,
                 title: 'Cluster Details',
                 toRouteName: 'ShootList',
                 breadcrumb: true
@@ -154,6 +156,7 @@ export default function createRouter ({store, userManager}) {
           component: Secrets,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Secrets',
             menu: {
@@ -169,6 +172,7 @@ export default function createRouter ({store, userManager}) {
           component: Members,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Members',
             menu: {
@@ -184,6 +188,7 @@ export default function createRouter ({store, userManager}) {
           component: Administration,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Administration',
             menu: {
@@ -275,7 +280,7 @@ export default function createRouter ({store, userManager}) {
         const query = to.query || {}
         const namespaces = store.getters.namespaces
         const namespace = params.namespace || query.namespace
-        if (namespace !== store.state.namespace && includes(namespaces, namespace)) {
+        if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
           return store.dispatch('setNamespace', namespace)
         }
       })

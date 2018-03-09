@@ -155,7 +155,8 @@ limitations under the License.
         copyright: `© ${new Date().getFullYear()}`,
         projectDialog: false,
         projectFilter: '',
-        projectMenu: false
+        projectMenu: false,
+        allProjectsItem: {metadata: {name: 'All Projects', namespace: '_all'}}
       }
     },
     computed: {
@@ -184,6 +185,9 @@ limitations under the License.
       },
       project: {
         get () {
+          if (this.namespace === this.allProjectsItem.metadata.namespace) {
+            return this.allProjectsItem
+          }
           const predicate = item => item.metadata.namespace === this.namespace
           return find(this.projectList, predicate)
         },
@@ -196,13 +200,14 @@ limitations under the License.
         return this.$route.meta || {}
       },
       namespaced () {
-        return !!this.routeMeta.projectScope
+        return !!this.routeMeta.namespaced
       },
       hasNoProjects () {
         return !this.projectList.length
       },
       routes () {
-        return routes(this.$router)
+        const hasProjectScope = this.project.metadata.namespace !== this.allProjectsItem.metadata.namespace
+        return routes(this.$router, hasProjectScope)
       },
       projectMenuIcon () {
         return this.projectMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
@@ -221,7 +226,9 @@ limitations under the License.
           const owner = toLower(replace(item.data.owner, /@.*$/, ''))
           return includes(name, filter) || includes(owner, filter)
         }
-        return sortBy(filter(this.projectList, predicate))
+        const sortedList = sortBy(filter(this.projectList, predicate))
+        sortedList.unshift(this.allProjectsItem)
+        return sortedList
       }
     },
     methods: {
@@ -230,7 +237,10 @@ limitations under the License.
         'setNamespace'
       ]),
       getProjectOwner (project) {
-        return emailToDisplayName(project.data.owner)
+        if (project.metadata.namespace !== this.allProjectsItem.metadata.namespace) {
+          return emailToDisplayName(project.data.owner)
+        }
+        return null
       },
       namespacedRoute (route) {
         return namespacedRoute(route, this.namespace)

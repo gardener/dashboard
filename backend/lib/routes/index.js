@@ -35,6 +35,7 @@ module.exports = {
   '/info': router,
   '/cloudprofiles': require('./cloudprofiles'),
   '/domains': require('./domains'),
+  '/shoots': require('./shoots'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),

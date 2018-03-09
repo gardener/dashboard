@@ -62,7 +62,7 @@ module.exports = () => {
     socket.on('disconnect', (reason) => {
       logger.debug('Socket %s disconnected', socket.id)
     })
-    socket.on('subscribe', ({namespace} = {}) => {
+    socket.on('subscribe', ({namespaces} = []) => {
       /* leave previous rooms */
       _
         .chain(socket.rooms)
@@ -70,18 +70,21 @@ module.exports = () => {
         .filter(key => key !== socket.id)
         .each(key => socket.leave(key))
         .commit()
-      /* join current room */
-      if (namespace) {
+
+      /* join current rooms */
+      if (_.isArray(namespaces)) {
         const user = _.get(socket, 'client.user')
         user.id = user['email']
         projects.list({user})
           .then(projects => {
-            const predicate = item => item.metadata.namespace === namespace
-            const project = _.find(projects, predicate)
-            if (project) {
-              logger.debug('Socket %s subscribed to %s', socket.id, namespace)
-              socket.join(namespace)
-            }
+            _.forEach(namespaces, (ns) => {
+              const predicate = item => item.metadata.namespace === ns
+              const project = _.find(projects, predicate)
+              if (project) {
+                logger.debug('Socket %s subscribed to %s', socket.id, ns)
+                socket.join(ns)
+              }
+            })
           })
       }
     })
