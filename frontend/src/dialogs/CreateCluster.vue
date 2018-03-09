@@ -81,13 +81,28 @@ limitations under the License.
                           </template>
                         </v-select>
                       </v-flex>
+
+                      <v-flex xs1 v-show="cloudProfiles.length !== 1">
+                      </v-flex>
+
+                      <v-flex xs3 v-show="cloudProfiles.length !== 1">
+                        <cloud-profile
+                          ref="cloudProfile"
+                          v-model="cloudProfileName"
+                          :isCreateMode="true"
+                          :cloudProfiles="cloudProfiles"
+                          color="cyan">
+                        </cloud-profile>
+                      </v-flex>
+
                       <v-flex xs1>
                       </v-flex>
+
                       <v-flex xs3>
                         <v-select
                           color="cyan"
                           label="Secrets"
-                          :items="infrastructureSecrets"
+                          :items="infrastructureSecretsByProfileName"
                           item-value="metadata"
                           v-model="secret"
                           :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
@@ -355,7 +370,7 @@ limitations under the License.
                       <v-list-tile-content>
                         <v-list-tile-title >Operating System</v-list-tile-title>
                         <v-list-tile-sub-title>
-                          Schedule operating system updates of the workers during the maintenance window.
+                          Schedule operating system updates of the workers during maintenance.
                         </v-list-tile-sub-title>
                       </v-list-tile-content>
                     </v-list-tile>
@@ -397,12 +412,14 @@ limitations under the License.
   import WorkerInputAws from '@/components/WorkerInputAws'
   import WorkerInputAzure from '@/components/WorkerInputAzure'
   import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
+  import CloudProfile from '@/components/CloudProfile'
   import Alert from '@/components/Alert'
   import find from 'lodash/find'
   import random from 'lodash/random'
   import get from 'lodash/get'
   import head from 'lodash/head'
   import sortBy from 'lodash/sortBy'
+  import map from 'lodash/map'
   import cloneDeep from 'lodash/cloneDeep'
   import every from 'lodash/every'
   import noop from 'lodash/noop'
@@ -523,7 +540,8 @@ limitations under the License.
       WorkerInputOpenstack,
       CodeBlock,
       InfraIcon,
-      Alert
+      Alert,
+      CloudProfile
     },
     props: {
       value: {
@@ -575,9 +593,6 @@ limitations under the License.
             timeWindow: {
               begin: {
                 required
-              },
-              end: {
-                required
               }
             }
           }
@@ -610,6 +625,7 @@ limitations under the License.
         'cloudProviderKindList',
         'kubernetesVersions',
         'infrastructureSecretsByInfrastructureKind',
+        'infrastructureSecretsByCloudProfileName',
         'projectList',
         'domainList'
       ]),
@@ -642,6 +658,16 @@ limitations under the License.
           this.selectedInfrastructureKind = infrastructureKind
           this.infraHandler.setDefaults()
 
+          this.setDefaultCloudProfileName()
+        }
+      },
+      cloudProfileName: {
+        get () {
+          return this.shootDefinition.spec.cloud.profile
+        },
+        set (cloudProfileName) {
+          this.shootDefinition.spec.cloud.profile = cloudProfileName
+
           this.setDefaultSecret()
         }
       },
@@ -650,15 +676,13 @@ limitations under the License.
           return this.selectedSecret
         },
         set (metadata) {
-          const cloudProfileName = get(metadata, 'cloudProfileName')
-
           const secretBindingRef = {
             kind: get(metadata, 'bindingKind'),
             name: get(metadata, 'bindingName'),
             namespace: get(metadata, 'namespace')
           }
           this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
-          this.shootDefinition.spec.cloud.profile = cloudProfileName
+
           this.selectedSecret = metadata
 
           this.setCloudProfileDefaults()
@@ -702,6 +726,12 @@ limitations under the License.
       infrastructure () {
         return this.infrastructureData
       },
+      cloudProfiles () {
+        return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
+      },
+      cloudProfileNames () {
+        return map(this.cloudProfiles, 'metadata.name')
+      },
       workers () {
         return get(this.infrastructureData, 'workers', [])
       },
@@ -713,9 +743,6 @@ limitations under the License.
       },
       volumeTypes () {
         return this.volumeTypesByCloudProfileName(this.cloudProfileName)
-      },
-      cloudProfileName () {
-        return this.shootDefinition.spec.cloud.profile
       },
       regions () {
         return this.regionsByCloudProfileName(this.cloudProfileName)
@@ -731,8 +758,11 @@ limitations under the License.
         const predicate = item => item.region === this.region
         return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
       },
-      infrastructureSecrets () {
+      infrastructureSecretsByKind () {
         return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKind)
+      },
+      infrastructureSecretsByProfileName () {
+        return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
       },
       valid () {
         const workerInput = this.refs_.workerInput
@@ -842,6 +872,11 @@ limitations under the License.
         const predicate = item => item.metadata.namespace === this.namespace
         const project = find(this.projectList, predicate)
         return get(project, 'metadata.name')
+      },
+      isPrivateSecretBinding () {
+        return (secret) => {
+          return isPrivateSecretBinding(secret)
+        }
       }
     },
     methods: {
@@ -921,8 +956,15 @@ limitations under the License.
       setDefaultInfrastructureKind () {
         this.infrastructureKind = head(this.sortedCloudProviderKindList)
       },
+      setDefaultCloudProfileName () {
+        let cloudProfileName = get(head(this.infrastructureSecretsByKind), 'metadata.cloudProfileName')
+        if (!cloudProfileName) {
+          cloudProfileName = head(this.cloudProfileNames)
+        }
+        this.cloudProfileName = cloudProfileName
+      },
       setDefaultSecret () {
-        this.secret = get(head(this.infrastructureSecrets), 'metadata')
+        this.secret = get(head(this.infrastructureSecretsByProfileName), 'metadata')
       },
       setCloudProfileDefaults () {
         this.setDefaultRegion()
@@ -957,9 +999,6 @@ limitations under the License.
         } else {
           this.infrastructureData.zones = []
         }
-      },
-      isPrivateSecretBinding (secret) {
-        return isPrivateSecretBinding(secret)
       },
       getErrorMessages (field) {
         return getValidationErrors(this, field)

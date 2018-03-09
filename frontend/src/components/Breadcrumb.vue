@@ -62,14 +62,14 @@ limitations under the License.
         crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
 
         return crumbs
-      }
-    },
-    methods: {
-      textClass (item) {
-        if (item.currentRoute) {
-          return 'breadcrumb title'
-        } else {
-          return 'breadcrumb subheading pointer'
+      },
+      textClass () {
+        return (item) => {
+          if (item.currentRoute) {
+            return 'breadcrumb title'
+          } else {
+            return 'breadcrumb subheading pointer'
+          }
         }
       }
     }

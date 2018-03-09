@@ -18,8 +18,10 @@ limitations under the License.
   <div>
     <template v-if="isCreateMode">
       <v-select
-      :items="cloudProfileNames"
+      :items="cloudProfiles"
       :value="value"
+      item-value="metadata.name"
+      item-text="metadata.displayName"
       label="Cloud Profile"
       :error-messages="getErrorMessages('value')"
       :color="color"
@@ -57,7 +59,7 @@ limitations under the License.
         type: Boolean,
         required: true
       },
-      cloudProfileNames: {
+      cloudProfiles: {
         type: Array,
         required: true
       },

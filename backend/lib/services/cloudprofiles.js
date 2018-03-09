@@ -23,8 +23,11 @@ const { getCloudProviderKind } = require('../utils')
 
 function fromResource ({cloudProfile: {metadata, spec}, seeds}) {
   const cloudProviderKind = getCloudProviderKind(spec)
-  metadata = assign(pick(metadata, ['name', 'resourceVersion']), {cloudProviderKind})
-  const data = assign(get(spec, `${cloudProviderKind}.constraints`), {seeds})
+  const keyStoneURL = get(spec, `${cloudProviderKind}.keystoneURL`)
+  const name = get(metadata, 'name')
+  const displayName = get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
+  metadata = assign(pick(metadata, 'resourceVersion'), {name, cloudProviderKind, displayName})
+  const data = assign(get(spec, `${cloudProviderKind}.constraints`), {seeds, keyStoneURL})
   return {metadata, data}
 }
 

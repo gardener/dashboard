@@ -168,11 +168,11 @@ export function getDateFormatted (timestamp) {
   }
 }
 
-export function getTimeAgo (time) {
+export function getTimeAgoFrom (time, fromTime) {
   if (!time) {
     return undefined
   } else {
-    return moment(time).fromNow()
+    return moment(time).from(fromTime)
   }
 }
 

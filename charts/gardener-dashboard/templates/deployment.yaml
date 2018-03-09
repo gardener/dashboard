@@ -1,0 +1,55 @@
+apiVersion: {{ include "deploymentversion" . }}
+kind: Deployment
+metadata:
+  name: gardener-dashboard
+  namespace: garden
+  labels:
+    app: gardener-dashboard
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: gardener-dashboard
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: gardener-dashboard
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: gardener-dashboard-config
+        configMap:
+          name: gardener-dashboard-configmap
+          items:
+          - key: config.yaml
+            path: config.yaml
+          defaultMode: 420
+      serviceAccountName: gardener-dashboard
+      containers:
+        - name: gardener-dashboard
+          command:
+            - node
+            - server.js
+            - /etc/gardener-dashboard/config.yaml
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 200m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 50Mi
+          volumeMounts:
+          - name: gardener-dashboard-config
+            mountPath: /etc/gardener-dashboard
+      restartPolicy: Always
+

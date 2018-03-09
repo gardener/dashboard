@@ -229,6 +229,19 @@ limitations under the License.
         const sortedList = sortBy(filter(this.projectList, predicate))
         sortedList.unshift(this.allProjectsItem)
         return sortedList
+      },
+      getProjectOwner () {
+        return (project) => {
+          if (project.metadata.namespace !== this.allProjectsItem.metadata.namespace) {
+            return emailToDisplayName(project.data.owner)
+          }
+          return null
+        }
+      },
+      namespacedRoute () {
+        return (route) => {
+          return namespacedRoute(route, this.namespace)
+        }
       }
     },
     methods: {
@@ -236,15 +249,6 @@ limitations under the License.
         'setSidebar',
         'setNamespace'
       ]),
-      getProjectOwner (project) {
-        if (project.metadata.namespace !== this.allProjectsItem.metadata.namespace) {
-          return emailToDisplayName(project.data.owner)
-        }
-        return null
-      },
-      namespacedRoute (route) {
-        return namespacedRoute(route, this.namespace)
-      },
       onProjectSelect (project) {
         this.projectMenu = false
         this.project = project

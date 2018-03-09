@@ -36,7 +36,7 @@ limitations under the License.
           <pre class="message">{{message}}</pre>
           <slot name="content-after"></slot>
           <div v-if="!!time">
-            <div class="timestamp grey--text">{{timeAgo}}</div>
+            <div class="timestamp grey--text"><time-ago :dateTime="time"></time-ago></div>
           </div>
         </v-card-text>
       </v-card>
@@ -49,13 +49,14 @@ limitations under the License.
 
 <script>
   import Popper from 'vue-popperjs'
-  import moment from 'moment'
+  import TimeAgo from '@/components/TimeAgo'
   import { closePopover } from '@/utils'
   import 'vue-popperjs/dist/css/vue-popper.css'
 
   export default {
     components: {
-      Popper
+      Popper,
+      TimeAgo
     },
     props: {
       popperKey: {
@@ -79,9 +80,6 @@ limitations under the License.
       }
     },
     computed: {
-      timeAgo () {
-        return moment(this.time).fromNow()
-      },
       popperOptions () {
         const options = {
           placement: 'top',

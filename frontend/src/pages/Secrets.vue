@@ -175,6 +175,11 @@ limitations under the License.
       backgroundForSelectedSecret () {
         const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
         return this.backgroundForCloudProviderKind(kind)
+      },
+      hasCloudProfileForCloudProviderKind () {
+        return (kind) => {
+          return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
+        }
       }
     },
     methods: {
@@ -197,9 +202,6 @@ limitations under the License.
       onDelete (row) {
         this.selectedSecret = row
         this.deleteConfirm = true
-      },
-      hasCloudProfileForCloudProviderKind (kind) {
-        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
       },
       backgroundForCloudProviderKind (kind) {
         switch (kind) {

@@ -123,30 +123,38 @@ limitations under the License.
       },
       toolbarClass () {
         return `${this.color} elevation-0`
+      },
+      secretDescriptor () {
+        return (secret) => {
+          if (this.isPrivateSecretBinding(secret)) {
+            return get(secret, `data.${this.secretDescriptorKey}`)
+          } else {
+            return get(secret, 'metadata.namespace')
+          }
+        }
+      },
+      relatedShootCount () {
+        return (secret) => {
+          return this.shootsByInfrastructureSecret(secret.metadata.name, secret.metadata.namespace).length
+        }
+      },
+      relatedShootCountLabel () {
+        return (secret) => {
+          const count = this.relatedShootCount(secret)
+          if (count === 0) {
+            return 'currently unused'
+          } else {
+            return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
+          }
+        }
+      },
+      isPrivateSecretBinding () {
+        return (secret) => {
+          return isPrivateSecretBinding(secret)
+        }
       }
     },
     methods: {
-      secretDescriptor (secret) {
-        if (this.isPrivateSecretBinding(secret)) {
-          return get(secret, `data.${this.secretDescriptorKey}`)
-        } else {
-          return get(secret, 'metadata.namespace')
-        }
-      },
-      relatedShootCount (secret) {
-        return this.shootsByInfrastructureSecret(secret.metadata.name, secret.metadata.namespace).length
-      },
-      relatedShootCountLabel (secret) {
-        const count = this.relatedShootCount(secret)
-        if (count === 0) {
-          return 'currently unused'
-        } else {
-          return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
-        }
-      },
-      isPrivateSecretBinding (secret) {
-        return isPrivateSecretBinding(secret)
-      },
       onAdd () {
         this.$emit('add', this.infrastructureKey)
       },
