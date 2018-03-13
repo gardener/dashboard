@@ -32,7 +32,7 @@ limitations under the License.
           v-model="search"
           @keyup.esc="search=''"
         ></v-text-field>
-        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableSortMenu" absolute full-width>
+        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute full-width>
           <div slot="activator">
             <v-tooltip open-delay="500" top>
               <v-btn slot="activator" icon>
@@ -57,6 +57,13 @@ limitations under the License.
               </v-list-tile-action>
               <span>Reset to Defaults</span>
             </v-tooltip>
+            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
+            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+              <v-list-tile-action>
+                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click></v-checkbox>
+              </v-list-tile-action>
+              <v-list-tile-sub-title>Show only Shoots with Issues</v-list-tile-sub-title>
+            </v-list-tile>
           </v-list>
         </v-menu>
       </v-toolbar>
@@ -263,8 +270,9 @@ limitations under the License.
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
+        showOnlyShootsWithIssues: true,
         dialog: null,
-        tableSortMenu: false,
+        tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
       }
     },

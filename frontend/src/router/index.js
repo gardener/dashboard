@@ -305,15 +305,15 @@ export default function createRouter ({store, userManager}) {
           case 'Secrets':
             return Promise
               .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('fetchShoots')
+                store.dispatch('fetchInfrastructureSecrets')
+                // store.dispatch('fetchShoots')
               ])
               .then(() => undefined)
           case 'ShootList':
             return Promise
               .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('fetchShoots')
+                store.dispatch('fetchInfrastructureSecrets')
+                // store.dispatch('fetchShoots')
               ])
               .then(() => undefined)
           case 'ShootItem':
@@ -326,8 +326,8 @@ export default function createRouter ({store, userManager}) {
           case 'Administration':
             return Promise
               .all([
-                store.dispatch('fetchMembers'),
-                store.dispatch('fetchShoots')
+                store.dispatch('fetchMembers')
+                // store.dispatch('fetchShoots')
               ])
               .then(() => undefined)
           case 'Account':

@@ -70,14 +70,6 @@ export function deleteInfrastructureSecret ({namespace, bindingName, user}) {
 
 /* Shoot Clusters */
 
-export function getShoots ({namespace, user}) {
-  if (namespace === '_all') {
-    return getResource(`/api/shoots`, user)
-  } else {
-    return getResource(`/api/namespaces/${namespace}/shoots`, user)
-  }
-}
-
 export function createShoot ({namespace, user, data}) {
   return createResource(`/api/namespaces/${namespace}/shoots`, user, data)
 }

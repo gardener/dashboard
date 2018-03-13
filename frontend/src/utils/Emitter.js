@@ -16,7 +16,9 @@
 
 import io from 'socket.io-client'
 import toLower from 'lodash/toLower'
+import forEach from 'lodash/forEach'
 import Emitter from 'component-emitter'
+import store from '../store'
 
 const socket = io(window.location.origin, {
   path: '/api/events',
@@ -85,7 +87,7 @@ function onAuthenticated () {
   emitter.authenticated = true
   emitter.emit('authenticated')
   console.log('socket connection authenticated')
-  socket.on('event', ({type, object}) => {
+  const handleEvent = ({type, object}) => {
     const {kind} = object
     const objectKind = toLower(kind)
     switch (type) {
@@ -101,6 +103,11 @@ function onAuthenticated () {
         console.error('Kubernetes error', object)
         break
     }
+  }
+  socket.on('event', handleEvent)
+  socket.on('batchEvent', async (events) => {
+    await store.dispatch('clearShoots')
+    forEach(events, handleEvent)
   })
   const namespace = emitter.namespace
   if (namespace) {

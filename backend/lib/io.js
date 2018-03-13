@@ -21,7 +21,7 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects } = require('./services')
+const { projects, shoots } = require('./services')
 const watches = require('./watches')
 
 module.exports = () => {
@@ -62,7 +62,7 @@ module.exports = () => {
     socket.on('disconnect', (reason) => {
       logger.debug('Socket %s disconnected', socket.id)
     })
-    socket.on('subscribe', ({namespaces} = []) => {
+    socket.on('subscribe', async ({namespaces} = []) => {
       /* leave previous rooms */
       _
         .chain(socket.rooms)
@@ -75,17 +75,27 @@ module.exports = () => {
       if (_.isArray(namespaces)) {
         const user = _.get(socket, 'client.user')
         user.id = user['email']
-        projects.list({user})
-          .then(projects => {
-            _.forEach(namespaces, (ns) => {
-              const predicate = item => item.metadata.namespace === ns
-              const project = _.find(projects, predicate)
-              if (project) {
-                logger.debug('Socket %s subscribed to %s', socket.id, ns)
-                socket.join(ns)
-              }
-            })
-          })
+        const projectList = await projects.list({user})
+        const shootsPromises = []
+        _.forEach(namespaces, (ns) => {
+          const predicate = item => item.metadata.namespace === ns
+          const project = _.find(projectList, predicate)
+          if (project) {
+            logger.debug('Socket %s subscribed to %s', socket.id, ns)
+            socket.join(ns)
+            const shootListPromise = shoots.list({user, ns})
+            shootsPromises.push(new Promise(async () => {
+              const shootList = await Promise.resolve(shootListPromise)
+              const events = []
+              _.forEach(shootList.items, (shoot) => {
+                shoot.kind = 'Shoot'
+                events.push({type: 'ADDED', object: shoot})
+              })
+              socket.emit('batchEvent', events)
+            }))
+          }
+        })
+        await Promise.all(shootsPromises)
       }
     })
   })

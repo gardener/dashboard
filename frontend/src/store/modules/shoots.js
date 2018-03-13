@@ -20,7 +20,7 @@ import assign from 'lodash/assign'
 import pick from 'lodash/pick'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
-import { getShoots, getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -54,15 +54,9 @@ const actions = {
    * Return all shoots in the given namespace.
    * This ends always in a server/backend call.
    */
-  getAll ({ commit, dispatch, rootState }) {
-    const namespace = rootState.namespace
-    const user = rootState.user
-    return getShoots({namespace, user})
-      .then(res => {
-        const list = res.data
-        commit('RECEIVE', list)
-        return state.all
-      })
+  clearAll ({ commit, dispatch }) {
+    commit('CLEAR_ALL')
+    return state.all
   },
   get ({ dispatch, commit, rootState }, name) {
     const namespace = rootState.namespace
@@ -181,6 +175,9 @@ const mutations = {
     if (index !== -1) {
       state.all.splice(index, 1)
     }
+  },
+  CLEAR_ALL (state) {
+    state.all = []
   }
 }
 
