@@ -179,9 +179,6 @@ const getters = {
   },
   errorMessage () {
     return get(state, 'error.message', '')
-  },
-  shootsLoading () {
-    return state.shootsLoading
   }
 }
 

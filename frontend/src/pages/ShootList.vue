@@ -221,7 +221,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters, mapActions, mapState } from 'vuex'
   import replace from 'lodash/replace'
   import includes from 'lodash/includes'
   import find from 'lodash/find'
@@ -416,9 +416,11 @@ limitations under the License.
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot',
-        shootsLoading: 'shootsLoading'
+        selectedItem: 'selectedShoot'
       }),
+      ...mapState([
+        'shootsLoading'
+      ]),
       createDialog: {
         get () {
           return this.dialog === 'create'

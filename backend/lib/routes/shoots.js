@@ -24,15 +24,6 @@ const router = module.exports = express.Router({
 })
 
 router.route('/')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      res.send(await shoots.list({user, namespace}))
-    } catch (err) {
-      next(err)
-    }
-  })
   .post(async (req, res, next) => {
     try {
       const user = req.user
