@@ -53,7 +53,8 @@ const state = {
   color: 'green',
   user: null,
   loading: false,
-  error: null
+  error: null,
+  shootsLoading: false
 }
 
 // getters
@@ -178,6 +179,9 @@ const getters = {
   },
   errorMessage () {
     return get(state, 'error.message', '')
+  },
+  shootsLoading () {
+    return state.shootsLoading
   }
 }
 
@@ -314,6 +318,14 @@ const actions = {
     commit('SET_LOADING', false)
     return state.loading
   },
+  setShootsLoading ({ commit }) {
+    commit('SET_SHOOTS_LOADING', true)
+    return state.shootsLoading
+  },
+  unsetShootsLoading ({ commit }) {
+    commit('SET_SHOOTS_LOADING', false)
+    return state.shootsLoading
+  },
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
@@ -341,6 +353,9 @@ const mutations = {
   },
   SET_LOADING (state, value) {
     state.loading = value
+  },
+  SET_SHOOTS_LOADING (state, value) {
+    state.shootsLoading = value
   },
   SET_ERROR (state, value) {
     state.error = value

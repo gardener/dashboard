@@ -67,7 +67,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort>
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <td class="nowrap" v-if="columnVisible('project')">
               {{ projectName(props.item) }}
@@ -416,7 +416,8 @@ limitations under the License.
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot'
+        selectedItem: 'selectedShoot',
+        shootsLoading: 'shootsLoading'
       }),
       createDialog: {
         get () {
