@@ -325,18 +325,6 @@ limitations under the License.
             return {id, text, message, lastTransitionTime, status}
           })
       },
-      columnVisible (headerVal) {
-        const predicate = item => isMatch(item, { value: headerVal, checked: true, hidden: false })
-        return find(this.allHeaders, predicate)
-      },
-      getPurpose (metadata) {
-        // eslint-disable-next-line
-        return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
-      },
-      getCreatedBy (metadata) {
-        // eslint-disable-next-line
-        return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
-      },
       getSortVal (row, column) {
         switch (column) {
           case 'purpose':
@@ -469,7 +457,7 @@ limitations under the License.
       },
       columnVisible () {
         return (headerVal) => {
-          const predicate = item => item.value === headerVal && item.checked === true
+          const predicate = item => isMatch(item, { value: headerVal, checked: true, hidden: false })
           return find(this.allHeaders, predicate)
         }
       },

@@ -142,6 +142,7 @@ limitations under the License.
   import toLower from 'lodash/toLower'
   import includes from 'lodash/includes'
   import replace from 'lodash/replace'
+  import get from 'lodash/get'
   import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
   import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -232,10 +233,7 @@ limitations under the License.
       },
       getProjectOwner () {
         return (project) => {
-          if (project.metadata.namespace !== this.allProjectsItem.metadata.namespace) {
-            return emailToDisplayName(project.data.owner)
-          }
-          return null
+          return emailToDisplayName(get(project, 'data.owner'))
         }
       },
       namespacedRoute () {
