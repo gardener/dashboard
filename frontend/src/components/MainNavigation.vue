@@ -256,7 +256,14 @@ limitations under the License.
         this.projectDialog = true
       },
       getProjectMenuTargetRoute (namespace) {
-        const name = routeName(this.$route)
+        let name = routeName(this.$route)
+        const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
+        if (!nsHasProjectScope) {
+          const thisProjectScoped = this.routeMeta.projectScope
+          if (thisProjectScoped) {
+            name = 'ShootList'
+          }
+        }
         return !this.namespaced ? {name, query: {namespace}} : {name, params: {namespace}}
       }
     },

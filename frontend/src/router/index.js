@@ -96,7 +96,9 @@ export default function createRouter ({store, userManager}) {
           component: Home,
           meta: {
             public: false,
-            title: 'Home'
+            title: 'Home',
+            namespaced: false,
+            projectScope: false
           }
         },
         {
@@ -106,7 +108,9 @@ export default function createRouter ({store, userManager}) {
           meta: {
             public: false,
             title: 'Account',
-            breadcrumb: true
+            breadcrumb: true,
+            namespaced: false,
+            projectScope: false
           }
         },
         {
