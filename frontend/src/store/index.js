@@ -348,7 +348,7 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    Emitter.setNamespace(value, this.getters.namespaces)
+    Emitter.setNamespace(value)
     state.namespace = value
   },
   SET_USER (state, value) {

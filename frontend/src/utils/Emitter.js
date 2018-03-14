@@ -65,16 +65,13 @@ const emitter = Emitter({
       socket.disconnect()
     }
   },
-  setNamespace (namespace, allNamespaces) {
+  setNamespace (namespace) {
     this.namespace = namespace
     if (this.namespace && this.authenticated) {
       store.dispatch('setShootsLoading')
       store.dispatch('clearShoots')
-      if (namespace === '_all') {
-        socket.emit('subscribe', {namespaces: allNamespaces})
-      } else {
-        socket.emit('subscribe', {namespaces: [namespace]})
-      }
+
+      subscribe(namespace)
     }
   },
   authenticate () {
@@ -84,6 +81,15 @@ const emitter = Emitter({
     }
   }
 })
+
+async function subscribe (namespace) {
+  if (namespace === '_all') {
+    const namespaces = await store.getters.namespaces
+    socket.emit('subscribe', {namespaces})
+  } else if (namespace) {
+    socket.emit('subscribe', {namespaces: [namespace]})
+  }
+}
 
 function onAuthenticated () {
   emitter.authenticated = true
@@ -113,9 +119,7 @@ function onAuthenticated () {
     store.dispatch('unsetShootsLoading')
   })
   const namespace = emitter.namespace
-  if (namespace) {
-    socket.emit('subscribe', {namespaces: [namespace]})
-  }
+  subscribe(namespace)
 }
 
 function onConnect (attempt) {
