@@ -94,16 +94,17 @@ exports._createMembersClusterRole = createMembersClusterRole
 exports.list = async function ({user}) {
   const [
     namespaces,
-    roleBindings
+    roleBindings,
+    isAdmin
   ] = await Promise.all([
     core.namespaces.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=project'}
     }),
     rbac.rolebindings.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=members'}
-    })
+    }),
+    userInfo.isAdmin({user})
   ])
-  const isAdmin = await userInfo.isAdmin({user})
   const isMemberOf = (roleBindings, subject) => {
     const userNamespaces = _
       .chain(roleBindings.items)
@@ -118,7 +119,7 @@ exports.list = async function ({user}) {
     name: user.id
   }
 
-  const predicate = isAdmin
+  const predicate = !isAdmin
     ? isMemberOf(roleBindings, subject)
     : _.identity
   return _
