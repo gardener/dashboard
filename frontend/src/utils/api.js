@@ -134,6 +134,12 @@ export function deleteMember ({namespace, name, user}) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`, user)
 }
 
+/* User */
+
+export function getUserInfo ({user}) {
+  return getResource(`/api/user`, user)
+}
+
 /* Utilities */
 
 export function findItem (items, {namespace, name}) {

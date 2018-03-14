@@ -69,6 +69,7 @@ const emitter = Emitter({
     this.namespace = namespace
     if (this.namespace && this.authenticated) {
       store.dispatch('setShootsLoading')
+      store.dispatch('clearShoots')
       if (namespace === '_all') {
         socket.emit('subscribe', {namespaces: allNamespaces})
       } else {
@@ -107,7 +108,7 @@ function onAuthenticated () {
   }
   socket.on('event', handleEvent)
   socket.on('batchEvent', async (events) => {
-    await store.dispatch('clearShoots')
+    store.dispatch('clearShoots')
     forEach(events, handleEvent)
     store.dispatch('unsetShootsLoading')
   })

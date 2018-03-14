@@ -33,6 +33,8 @@ import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 
+import { getUserInfo } from '@/utils/api'
+
 Vue.use(Vuex)
 
 const debug = process.env.NODE_ENV !== 'production'
@@ -299,9 +301,17 @@ const actions = {
     commit('SET_NAMESPACE', value)
     return state.namespace
   },
-  setUser ({ commit }, value) {
-    commit('SET_USER', value)
-    return state.user
+  setUser ({ dispatch, commit }, value) {
+    return getUserInfo({user: value})
+      .then(res => {
+        value.info = res.data
+        commit('SET_USER', value)
+      }).catch(err => {
+        commit('SET_USER', value)
+        dispatch('setError', err)
+      }).then(() => {
+        return state.user
+      })
   },
   setSidebar ({ commit }, value) {
     commit('SET_SIDEBAR', value)

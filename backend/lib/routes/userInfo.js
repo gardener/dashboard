@@ -17,28 +17,18 @@
 'use strict'
 
 const express = require('express')
-const { version } = require('../../package')
 
-const router = module.exports = express.Router()
+const { userInfo } = require('../services')
+const router = module.exports = express.Router({
+  mergeParams: true
+})
 
 router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send({version, user})
+      res.send(await userInfo.info({user}))
     } catch (err) {
       next(err)
     }
   })
-
-module.exports = {
-  '/info': router,
-  '/user': require('./userInfo'),
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/domains': require('./domains'),
-  '/shoots': require('./shoots'),
-  '/namespaces': require('./namespaces'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
-}

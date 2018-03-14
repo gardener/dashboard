@@ -57,8 +57,8 @@ limitations under the License.
               </v-list-tile-action>
               <span>Reset to Defaults</span>
             </v-tooltip>
-            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
-            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+            <v-subheader v-if="!projectScope && user.info.isAdmin">Filter Table</v-subheader>
+            <v-list-tile v-if="!projectScope && user.info.isAdmin" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click></v-checkbox>
               </v-list-tile-action>
@@ -67,6 +67,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
+      <v-subheader>Currently only showing Clusters with Issues</v-subheader>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <td class="nowrap" v-if="columnVisible('project')">
@@ -270,7 +271,7 @@ limitations under the License.
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
-        showOnlyShootsWithIssues: true,
+        showOnlyShootsWithIssues: false,
         dialog: null,
         tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
@@ -419,7 +420,8 @@ limitations under the License.
         selectedItem: 'selectedShoot'
       }),
       ...mapState([
-        'shootsLoading'
+        'shootsLoading',
+        'user'
       ]),
       createDialog: {
         get () {
@@ -591,6 +593,7 @@ limitations under the License.
     },
     mounted () {
       this.floatingButton = true
+      this.showOnlyShootsWithIssues = get(this.user, 'info.isAdmin', false)
       this.loadColumnsChecked()
     },
     beforeUpdate () {

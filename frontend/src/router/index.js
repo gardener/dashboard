@@ -231,12 +231,13 @@ export default function createRouter ({store, userManager}) {
     userManager
       .getUser()
       .then(user => {
-        store.dispatch('setUser', user)
-        if (isUserLoggedIn(user)) {
-          return next()
-        }
-        return next({
-          name: 'Login'
+        store.dispatch('setUser', user).then(() => {
+          if (isUserLoggedIn(user)) {
+            return next()
+          }
+          return next({
+            name: 'Login'
+          })
         })
       })
   }
