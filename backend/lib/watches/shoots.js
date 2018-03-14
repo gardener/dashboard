@@ -23,6 +23,6 @@ module.exports = io => {
   const emitter = garden.shoots.watch()
   registerHandler(emitter, event => {
     const namespace = event.object.metadata.namespace
-    io.to(namespace).emit('event', event)
+    io.of('/shoots').to(namespace).emit('event', event)
   })
 }

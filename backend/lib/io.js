@@ -36,31 +36,13 @@ module.exports = () => {
       return req.auth.bearer
     }
   })
-  socketIOAuth(io, {
-    timeout: 5000,
-    authenticate (socket, data, cb) {
-      logger.debug('Socket %s authenticating', socket.id)
-      const bearer = data.bearer || data.token
-      const auth = {bearer}
-      const req = {auth}
-      const res = {}
-      const next = (err) => {
-        if (err) {
-          logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-          return cb(err)
-        }
-        logger.debug('Socket %s authenticated (user %s)', socket.id, res.user.email)
-        socket.client.user = res.user
-        cb(null, true)
-      }
-      jwtIO(req, res, next)
-    }
-  })
+
   // handle socket connections
-  io.on('connection', socket => {
+  const nsp = io.of('/shoots')
+  nsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
     socket.on('disconnect', (reason) => {
-      logger.debug('Socket %s disconnected', socket.id)
+      logger.debug('Socket %s disconnected. Reason: %s', socket.id, reason)
     })
     socket.on('subscribe', async ({namespaces} = []) => {
       /* leave previous rooms */
@@ -98,6 +80,35 @@ module.exports = () => {
         await Promise.all(shootsPromises)
       }
     })
+  })
+
+  socketIOAuth(nsp, {
+    timeout: 5000,
+    authenticate (socket, data, cb) {
+      logger.debug('Socket %s authenticating', socket.id)
+      const bearer = data.bearer || data.token
+      const auth = {bearer}
+      const req = {auth}
+      const res = {}
+      const next = (err) => {
+        if (err) {
+          logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
+          return cb(err)
+        }
+        logger.debug('Socket %s authenticated (user %s)', socket.id, res.user.email)
+        socket.client.user = res.user
+
+        var packet = socket.packet
+        socket.packet = function () {
+          if (!socket.filter) { // TODO check data for filter value
+            packet.apply(socket, arguments)
+          }
+        }
+
+        cb(null, true)
+      }
+      jwtIO(req, res, next)
+    }
   })
 
   // start watches

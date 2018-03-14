@@ -20,7 +20,8 @@ import forEach from 'lodash/forEach'
 import Emitter from 'component-emitter'
 import store from '../store'
 
-const socket = io(window.location.origin, {
+const url = `${window.location.origin}/shoots`
+const socket = io(url, {
   path: '/api/events',
   transports: ['websocket'],
   autoConnect: false
