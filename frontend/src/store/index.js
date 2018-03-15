@@ -396,16 +396,31 @@ const store = new Vuex.Store({
   plugins
 })
 
+const isCurrentNamespace = namespace => {
+  return (state.namespace === '_all' && includes(store.getters.namespaces, namespace)) || namespace === state.namespace
+}
 Emitter.on('shoot', ({type, object}) => {
   switch (type) {
     case 'put':
-      if ((state.namespace === '_all' && includes(store.getters.namespaces, object.metadata.namespace)) || object.metadata.namespace === state.namespace) {
+      if (isCurrentNamespace(object.metadata.namespace)) {
         store.commit('shoots/ITEM_PUT', object)
       }
       break
     case 'delete':
       store.commit('shoots/ITEM_DEL', object)
       break
+  }
+})
+
+Emitter.on('shoots', ({type, namespace, objects}) => {
+  switch (type) {
+    case 'put':
+      if (isCurrentNamespace(namespace)) {
+        store.commit('shoots/ITEMS_PUT', objects)
+      }
+      break
+    default:
+      console.error('unhandled type', type)
   }
 })
 

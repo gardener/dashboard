@@ -16,7 +16,6 @@
 
 import io from 'socket.io-client'
 import toLower from 'lodash/toLower'
-import forEach from 'lodash/forEach'
 import map from 'lodash/map'
 import Emitter from 'component-emitter'
 import store from '../store'
@@ -117,10 +116,21 @@ function onAuthenticated () {
         break
     }
   }
+  const handleBatchEvents = ({type, kind, namespace, objects}) => {
+    const objectKind = toLower(kind)
+    switch (type) {
+      case 'ADDED':
+        emitter.emit(objectKind, {type: 'put', namespace, objects})
+        break
+      default:
+        console.error('handleBatchEvents: unhandled type', type)
+        break
+    }
+  }
   socket.on('event', handleEvent)
-  socket.on('batchEvent', async (events) => {
+  socket.on('batchEvent', async (batchEvent) => {
     store.dispatch('clearShoots')
-    forEach(events, handleEvent)
+    handleBatchEvents(batchEvent)
     store.dispatch('unsetShootsLoading')
   })
   const namespace = emitter.namespace

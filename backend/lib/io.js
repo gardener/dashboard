@@ -60,7 +60,6 @@ module.exports = () => {
         user.id = user['email']
         const projectList = await projects.list({user})
         const shootsPromises = []
-        const events = []
         _.forEach(namespaces, (nsObj) => {
           const namespace = _.get(nsObj, 'namespace')
           const filter = _.get(nsObj, 'filter')
@@ -71,28 +70,28 @@ module.exports = () => {
             socket.join(room)
             logger.debug('Socket %s subscribed to %s', socket.id, room)
             shootsPromises.push(new Promise(async (resolve, reject) => {
+              const objects = []
               const shootList = await shoots.list({user, namespace})
               _.forEach(shootList.items, (shoot) => {
                 if (filter !== 'issues' || shootHasIssue(shoot)) {
-                  shoot.kind = 'Shoot'
-                  events.push({type: 'ADDED', object: shoot})
+                  objects.push(shoot)
                 }
               })
+              let sentEvent = false
+              _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
+                socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', namespace, objects: chunkedObjects})
+                sentEvent = true
+              })
+              if (!sentEvent) {
+                socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', namespace, objects: []})
+              }
               resolve()
             }))
           }
         })
 
         await Promise.all(shootsPromises)
-        let sentEvent = false
-        _.forEach(_.chunk(events, 50), (chunkedEvents) => {
-          socket.emit('batchEvent', chunkedEvents)
-          sentEvent = true
-        })
-        if (!sentEvent) {
-          socket.emit('batchEvent', [])
-        }
-        logger.debug('Emitted %s events to socket %s', events.length, socket.id)
+        logger.debug('Emitted batch events to socket %s', socket.id)
       }
     })
   })

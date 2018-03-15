@@ -17,6 +17,7 @@
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
 import assign from 'lodash/assign'
+import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
@@ -144,6 +145,18 @@ const actions = {
   }
 }
 
+const putItem = (state, newItem) => {
+  const index = findIndex(state.all, eql(newItem.metadata))
+  if (index !== -1) {
+    const item = state.all[index]
+    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
+      state.all.splice(index, 1, assign({}, item, newItem))
+    }
+  } else {
+    state.all.push(newItem)
+  }
+}
+
 // mutations
 const mutations = {
   RECEIVE (state, { items }) {
@@ -160,15 +173,10 @@ const mutations = {
     state.selection = metadata
   },
   ITEM_PUT (state, newItem) {
-    const index = findIndex(state.all, eql(newItem.metadata))
-    if (index !== -1) {
-      const item = state.all[index]
-      if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-        state.all.splice(index, 1, assign({}, item, newItem))
-      }
-    } else {
-      state.all.push(newItem)
-    }
+    putItem(state, newItem)
+  },
+  ITEMS_PUT (state, newItems) {
+    forEach(newItems, newItem => putItem(state, newItem))
   },
   ITEM_DEL (state, deletedItem) {
     const index = findIndex(state.all, eql(deletedItem.metadata))
