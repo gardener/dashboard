@@ -23,6 +23,7 @@ const logger = require('./logger')
 const { jwt } = require('./middleware')
 const { projects, shoots } = require('./services')
 const watches = require('./watches')
+const { shootHasIssue } = require('./utils')
 
 module.exports = () => {
   const io = socketIO({
@@ -44,7 +45,7 @@ module.exports = () => {
     socket.on('disconnect', (reason) => {
       logger.debug('Socket %s disconnected. Reason: %s', socket.id, reason)
     })
-    socket.on('subscribe', async ({namespaces} = []) => {
+    socket.on('subscribe', async ({namespaces}) => {
       /* leave previous rooms */
       _
         .chain(socket.rooms)
@@ -59,29 +60,42 @@ module.exports = () => {
         user.id = user['email']
         const projectList = await projects.list({user})
         const shootsPromises = []
-        _.forEach(namespaces, (ns) => {
-          const predicate = item => item.metadata.namespace === ns
+        const events = []
+        _.forEach(namespaces, (nsObj) => {
+          const namespace = _.get(nsObj, 'namespace')
+          const filter = _.get(nsObj, 'filter')
+          const predicate = item => item.metadata.namespace === namespace
           const project = _.find(projectList, predicate)
           if (project) {
-            logger.debug('Socket %s subscribed to %s', socket.id, ns)
-            socket.join(ns)
-            const shootListPromise = shoots.list({user, ns})
-            shootsPromises.push(new Promise(async () => {
-              const shootList = await Promise.resolve(shootListPromise)
-              const events = []
+            const room = filter ? `${namespace}_${filter}` : namespace
+            socket.join(room)
+            logger.debug('Socket %s subscribed to %s', socket.id, room)
+            shootsPromises.push(new Promise(async (resolve, reject) => {
+              const shootList = await shoots.list({user, namespace})
               _.forEach(shootList.items, (shoot) => {
-                shoot.kind = 'Shoot'
-                events.push({type: 'ADDED', object: shoot})
+                if (filter !== 'issues' || shootHasIssue(shoot)) {
+                  shoot.kind = 'Shoot'
+                  events.push({type: 'ADDED', object: shoot})
+                }
               })
-              socket.emit('batchEvent', events)
+              resolve()
             }))
           }
         })
+
         await Promise.all(shootsPromises)
+        let sentEvent = false
+        _.forEach(_.chunk(events, 50), (chunkedEvents) => {
+          socket.emit('batchEvent', chunkedEvents)
+          sentEvent = true
+        })
+        if (!sentEvent) {
+          socket.emit('batchEvent', [])
+        }
+        logger.debug('Emitted %s events to socket %s', events.length, socket.id)
       }
     })
   })
-
   socketIOAuth(nsp, {
     timeout: 5000,
     authenticate (socket, data, cb) {
@@ -97,13 +111,6 @@ module.exports = () => {
         }
         logger.debug('Socket %s authenticated (user %s)', socket.id, res.user.email)
         socket.client.user = res.user
-
-        var packet = socket.packet
-        socket.packet = function () {
-          if (!socket.filter) { // TODO check data for filter value
-            packet.apply(socket, arguments)
-          }
-        }
 
         cb(null, true)
       }

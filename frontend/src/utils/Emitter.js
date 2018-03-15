@@ -17,6 +17,7 @@
 import io from 'socket.io-client'
 import toLower from 'lodash/toLower'
 import forEach from 'lodash/forEach'
+import map from 'lodash/map'
 import Emitter from 'component-emitter'
 import store from '../store'
 
@@ -31,6 +32,7 @@ const socket = io(url, {
 const emitter = Emitter({
   authenticated: false,
   namespace: undefined,
+  filter: undefined,
   auth: {
     bearer: undefined
   },
@@ -66,13 +68,14 @@ const emitter = Emitter({
       socket.disconnect()
     }
   },
-  setNamespace (namespace) {
+  setNamespace (namespace, filter) {
     this.namespace = namespace
+    this.filter = filter
     if (this.namespace && this.authenticated) {
       store.dispatch('setShootsLoading')
       store.dispatch('clearShoots')
 
-      subscribe(namespace)
+      subscribe(namespace, filter)
     }
   },
   authenticate () {
@@ -83,12 +86,13 @@ const emitter = Emitter({
   }
 })
 
-async function subscribe (namespace) {
+async function subscribe (namespace, filter) {
   if (namespace === '_all') {
-    const namespaces = await store.getters.namespaces
+    const allNamespaces = await store.getters.namespaces
+    const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
     socket.emit('subscribe', {namespaces})
   } else if (namespace) {
-    socket.emit('subscribe', {namespaces: [namespace]})
+    socket.emit('subscribe', {namespaces: [{namespace, filter}]})
   }
 }
 

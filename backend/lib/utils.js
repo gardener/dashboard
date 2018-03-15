@@ -62,3 +62,30 @@ function getCloudProviderKind (object) {
   return _.head(_.intersection(_.keys(object), cloudProviderKinds))
 }
 exports.getCloudProviderKind = getCloudProviderKind
+
+function shootHasIssue (shoot) {
+  let healthy = true
+  let hasIssue = true
+
+  const status = _.get(shoot, 'status')
+  if (status.lastOperation) {
+    if (status.conditions && status.conditions.length > 0) {
+      _.forEach(status.conditions, (condition) => {
+        if (condition.status === 'False') {
+          healthy = false
+        }
+      })
+    }
+    const lastOperation = _.get(status, 'lastOperation')
+    if (lastOperation.progress === 100 && lastOperation.state === 'Succeeded' && (lastOperation.type === 'Create' || lastOperation.type === 'Reconcile')) {
+      hasIssue = false
+    }
+
+    if (!healthy) {
+      hasIssue = true
+    }
+  }
+  return hasIssue
+}
+
+exports.shootHasIssue = shootHasIssue

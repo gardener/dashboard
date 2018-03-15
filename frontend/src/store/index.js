@@ -50,6 +50,7 @@ const state = {
   cfg: null,
   ready: false,
   namespace: null,
+  filter: null,
   sidebar: true,
   title: 'Gardener',
   color: 'green',
@@ -301,6 +302,10 @@ const actions = {
     commit('SET_NAMESPACE', value)
     return state.namespace
   },
+  setFilter ({ commit }, value) {
+    commit('SET_FILTER', value)
+    return state.filter
+  },
   setUser ({ dispatch, commit }, value) {
     return getUserInfo({user: value})
       .then(res => {
@@ -348,8 +353,13 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    Emitter.setNamespace(value)
     state.namespace = value
+    state.filter = value === '_all' ? 'issues' : null
+    Emitter.setNamespace(value, state.filter)
+  },
+  SET_FILTER (state, value) {
+    state.filter = value
+    Emitter.setNamespace(state.namespace, value)
   },
   SET_USER (state, value) {
     Emitter.setUser(value)

@@ -271,7 +271,6 @@ limitations under the License.
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
-        showOnlyShootsWithIssues: false,
         dialog: null,
         tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
@@ -280,7 +279,8 @@ limitations under the License.
     methods: {
       ...mapActions([
         'deleteShoot',
-        'setSelectedShoot'
+        'setSelectedShoot',
+        'setFilter'
       ]),
       showKubeconfigDialog (row) {
         this.setSelectedShoot(row)
@@ -421,7 +421,8 @@ limitations under the License.
       }),
       ...mapState([
         'shootsLoading',
-        'user'
+        'user',
+        'filter'
       ]),
       createDialog: {
         get () {
@@ -589,11 +590,19 @@ limitations under the License.
       },
       projectScope () {
         return this.$route.params.namespace !== '_all'
+      },
+      showOnlyShootsWithIssues: {
+        get () {
+          return this.filter === 'issues'
+        },
+        set (value) {
+          this.setFilter(value ? 'issues' : null)
+        }
       }
     },
     mounted () {
       this.floatingButton = true
-      this.showOnlyShootsWithIssues = get(this.user, 'info.isAdmin', false)
+      this.showOnlyShootsWithIssues = this.filter === 'issues'
       this.loadColumnsChecked()
     },
     beforeUpdate () {

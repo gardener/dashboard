@@ -244,8 +244,7 @@ limitations under the License.
     },
     methods: {
       ...mapActions([
-        'setSidebar',
-        'setNamespace'
+        'setSidebar'
       ]),
       onProjectSelect (project) {
         this.projectMenu = false
