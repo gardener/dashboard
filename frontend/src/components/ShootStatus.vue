@@ -23,6 +23,7 @@ limitations under the License.
           <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error">!</v-progress-circular>
           <v-icon v-else-if="isError" class="cursor-pointer status-icon" color="error">mdi-alert-outline</v-icon>
           <v-progress-circular v-else-if="operationState==='Pending'" class="cursor-pointer" :size="27" :width="3" indeterminate color="cyan darken-2"></v-progress-circular>
+          <v-icon v-else-if="isHibernating" class="cursor-pointer status-icon" color="cyan darken-2">mdi-sleep</v-icon>
           <v-icon v-else class="cursor-pointer status-icon" color="success">mdi-check-circle-outline</v-icon>
         </template>
         <span>{{ tooltipText }}</span>
@@ -58,6 +59,10 @@ limitations under the License.
       popperKey: {
         type: String,
         required: true
+      },
+      isHibernating: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
@@ -71,7 +76,11 @@ limitations under the License.
         return `shootStatus_${this.popperKey}`
       },
       popperTitle () {
-        return `${this.operationType} ${this.operationState}`
+        let popperTitle = ''
+        if (this.isHibernating) {
+          popperTitle = popperTitle.concat('Hibernating; ')
+        }
+        return popperTitle.concat(`${this.operationType} ${this.operationState}`)
       },
       tooltipText () {
         return this.showProgress ? `${this.popperTitle} (${this.operation.progress}%)` : this.popperTitle
