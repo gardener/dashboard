@@ -65,7 +65,7 @@ exports.getCloudProviderKind = getCloudProviderKind
 
 function shootHasIssue (shoot) {
   let healthy = true
-  let hasIssue = true
+  let hasIssue = false
 
   const status = _.get(shoot, 'status')
   if (status.lastOperation) {
@@ -77,11 +77,7 @@ function shootHasIssue (shoot) {
       })
     }
     const lastOperation = _.get(status, 'lastOperation')
-    if (lastOperation.progress === 100 && lastOperation.state === 'Succeeded' && (lastOperation.type === 'Create' || lastOperation.type === 'Reconcile')) {
-      hasIssue = false
-    }
-
-    if (!healthy) {
+    if (!healthy || lastOperation.state === 'Failed' || _.get(status, 'lastError.description')) {
       hasIssue = true
     }
   }

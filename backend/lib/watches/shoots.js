@@ -29,13 +29,18 @@ module.exports = io => {
     const namespace = event.object.metadata.namespace
     io.of('/shoots').to(namespace).emit('event', event)
     const shootIdentifier = `${namespace}_${event.object.metadata.name}`
+    console.log('shootIdentifier', shootIdentifier)
     if (shootHasIssue(event.object)) {
       io.of('/shoots').to(`${namespace}_issues`).emit('event', event)
-      if (_.includes(shootsWithIssues, shootIdentifier)) {
+      if (!_.includes(shootsWithIssues, shootIdentifier)) {
         shootsWithIssues.push(shootIdentifier)
       }
     } else {
+      console.log('shootsWithIssues', shootsWithIssues)
+
       const idx = _.indexOf(shootsWithIssues, shootIdentifier)
+      console.log('idx', idx)
+
       if (idx !== -1) {
         _.pullAt(shootsWithIssues, idx)
         event.type = 'DELETED'

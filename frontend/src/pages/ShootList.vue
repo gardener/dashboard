@@ -67,7 +67,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-subheader>Currently only showing Clusters with Issues</v-subheader>
+      <v-alert type="info" :value="showOnlyShootsWithIssues">Currently only showing Clusters with Issues</v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <td class="nowrap" v-if="columnVisible('project')">
