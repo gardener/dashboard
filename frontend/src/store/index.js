@@ -50,7 +50,7 @@ const state = {
   cfg: null,
   ready: false,
   namespace: null,
-  filter: null,
+  onlyShootsWithIssues: true,
   sidebar: true,
   title: 'Gardener',
   color: 'green',
@@ -58,6 +58,10 @@ const state = {
   loading: false,
   error: null,
   shootsLoading: false
+}
+
+const getFilterValue = (state) => {
+  return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
 // getters
@@ -302,9 +306,9 @@ const actions = {
     commit('SET_NAMESPACE', value)
     return state.namespace
   },
-  setFilter ({ commit }, value) {
-    commit('SET_FILTER', value)
-    return state.filter
+  setOnlyShootsWithIssues ({ commit }, value) {
+    commit('SET_ONLYSHOOTSWITHISSUES', value)
+    return state.onlyShootsWithIssues
   },
   setUser ({ dispatch, commit }, value) {
     return getUserInfo({user: value})
@@ -353,13 +357,14 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    state.namespace = value
-    state.filter = value === '_all' ? 'issues' : null
-    Emitter.setNamespace(value, state.filter)
+    if (value !== state.namespace) {
+      state.namespace = value
+      Emitter.setNamespace(value, getFilterValue(state))
+    }
   },
-  SET_FILTER (state, value) {
-    state.filter = value
-    Emitter.setNamespace(state.namespace, value)
+  SET_ONLYSHOOTSWITHISSUES (state, value) {
+    state.onlyShootsWithIssues = value
+    Emitter.setNamespace(state.namespace, getFilterValue(state))
   },
   SET_USER (state, value) {
     Emitter.setUser(value)

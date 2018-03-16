@@ -280,7 +280,7 @@ limitations under the License.
       ...mapActions([
         'deleteShoot',
         'setSelectedShoot',
-        'setFilter'
+        'setOnlyShootsWithIssues'
       ]),
       showKubeconfigDialog (row) {
         this.setSelectedShoot(row)
@@ -422,7 +422,7 @@ limitations under the License.
       ...mapState([
         'shootsLoading',
         'user',
-        'filter'
+        'onlyShootsWithIssues'
       ]),
       createDialog: {
         get () {
@@ -593,16 +593,15 @@ limitations under the License.
       },
       showOnlyShootsWithIssues: {
         get () {
-          return this.filter === 'issues'
+          return this.onlyShootsWithIssues
         },
         set (value) {
-          this.setFilter(value ? 'issues' : null)
+          this.setOnlyShootsWithIssues(value)
         }
       }
     },
     mounted () {
       this.floatingButton = true
-      this.showOnlyShootsWithIssues = this.filter === 'issues'
       this.loadColumnsChecked()
     },
     beforeUpdate () {
