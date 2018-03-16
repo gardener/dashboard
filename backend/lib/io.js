@@ -60,6 +60,10 @@ module.exports = () => {
         user.id = user['email']
         const projectList = await projects.list({user})
         const shootsPromises = []
+
+        let postponedData = {}
+        const postponedObjectsCount = () => _.sum(_.map(postponedData, objects => objects.length))
+
         _.forEach(namespaces, (nsObj) => {
           const namespace = _.get(nsObj, 'namespace')
           const filter = _.get(nsObj, 'filter')
@@ -70,27 +74,26 @@ module.exports = () => {
             socket.join(room)
             logger.debug('Socket %s subscribed to %s', socket.id, room)
             shootsPromises.push(new Promise(async (resolve, reject) => {
-              const objects = []
               const shootList = await shoots.list({user, namespace})
-              _.forEach(shootList.items, (shoot) => {
-                if (filter !== 'issues' || shootHasIssue(shoot)) {
-                  objects.push(shoot)
+              const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
+              _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
+                postponedData[namespace] = chunkedObjects
+                if (postponedObjectsCount() >= 10) {
+                  socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
+                  postponedData = {}
                 }
               })
-              let sentEvent = false
-              _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
-                socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', namespace, objects: chunkedObjects})
-                sentEvent = true
-              })
-              if (!sentEvent) {
-                socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', namespace, objects: []})
-              }
+
               resolve()
             }))
           }
         })
 
         await Promise.all(shootsPromises)
+        if (postponedObjectsCount() !== 0) {
+          socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
+        }
+        socket.emit('batchEventDone', {kind: 'shoots', namespaces})
         logger.debug('Emitted batch events to socket %s', socket.id)
       }
     })

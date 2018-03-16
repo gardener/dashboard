@@ -25,6 +25,8 @@ import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import includes from 'lodash/includes'
+import mapKeys from 'lodash/mapKeys'
+import some from 'lodash/some'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -338,8 +340,11 @@ const actions = {
     commit('SET_SHOOTS_LOADING', true)
     return state.shootsLoading
   },
-  unsetShootsLoading ({ commit }) {
-    commit('SET_SHOOTS_LOADING', false)
+  unsetShootsLoading ({ commit }, namespaces) {
+    const currentNamespace = some(namespaces, namespace => !isCurrentNamespace(namespace))
+    if (currentNamespace) {
+      commit('SET_SHOOTS_LOADING', false)
+    }
     return state.shootsLoading
   },
   setError ({ commit }, value) {
@@ -417,12 +422,14 @@ Emitter.on('shoot', ({type, object}) => {
   }
 })
 
-Emitter.on('shoots', ({type, namespace, objects}) => {
+Emitter.on('shoots', ({type, namespace, data}) => {
   switch (type) {
     case 'put':
-      if (isCurrentNamespace(namespace)) {
-        store.commit('shoots/ITEMS_PUT', objects)
-      }
+      mapKeys(data, (objects, namespace) => {
+        if (isCurrentNamespace(namespace)) {
+          store.commit('shoots/ITEMS_PUT', objects)
+        }
+      })
       break
     default:
       console.error('unhandled type', type)

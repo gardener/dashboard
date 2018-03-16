@@ -99,7 +99,7 @@ function onAuthenticated () {
   emitter.authenticated = true
   emitter.emit('authenticated')
   console.log('socket connection authenticated')
-  const handleEvent = ({type, object}) => {
+  socket.on('event', ({type, object}) => {
     const {kind} = object
     const objectKind = toLower(kind)
     switch (type) {
@@ -115,22 +115,22 @@ function onAuthenticated () {
         console.error('Kubernetes error', object)
         break
     }
-  }
-  const handleBatchEvents = ({type, kind, namespace, objects}) => {
+  })
+  socket.on('batchEvent', ({type, kind, data}) => {
     const objectKind = toLower(kind)
     switch (type) {
       case 'ADDED':
-        emitter.emit(objectKind, {type: 'put', namespace, objects})
+        emitter.emit(objectKind, {type: 'put', data})
         break
       default:
         console.error('handleBatchEvents: unhandled type', type)
         break
     }
-  }
-  socket.on('event', handleEvent)
-  socket.on('batchEvent', async (batchEvent) => {
-    handleBatchEvents(batchEvent)
-    store.dispatch('unsetShootsLoading')
+  })
+  socket.on('batchEventDone', ({kind, namespaces}) => {
+    if (kind === 'shoots') {
+      store.dispatch('unsetShootsLoading', namespaces)
+    }
   })
   const namespace = emitter.namespace
   subscribe(namespace)
