@@ -129,7 +129,6 @@ function onAuthenticated () {
   }
   socket.on('event', handleEvent)
   socket.on('batchEvent', async (batchEvent) => {
-    store.dispatch('clearShoots')
     handleBatchEvents(batchEvent)
     store.dispatch('unsetShootsLoading')
   })

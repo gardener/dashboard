@@ -28,19 +28,20 @@ module.exports = io => {
   registerHandler(emitter, event => {
     const namespace = event.object.metadata.namespace
     io.of('/shoots').to(namespace).emit('event', event)
+
     const shootIdentifier = `${namespace}_${event.object.metadata.name}`
-    console.log('shootIdentifier', shootIdentifier)
+    const idx = _.indexOf(shootsWithIssues, shootIdentifier)
+
     if (shootHasIssue(event.object)) {
       io.of('/shoots').to(`${namespace}_issues`).emit('event', event)
-      if (!_.includes(shootsWithIssues, shootIdentifier)) {
+      if (idx === -1) {
         shootsWithIssues.push(shootIdentifier)
+      } else {
+        if (event.type === 'DELETED') {
+          _.pullAt(shootsWithIssues, idx)
+        }
       }
     } else {
-      console.log('shootsWithIssues', shootsWithIssues)
-
-      const idx = _.indexOf(shootsWithIssues, shootIdentifier)
-      console.log('idx', idx)
-
       if (idx !== -1) {
         _.pullAt(shootsWithIssues, idx)
         event.type = 'DELETED'
