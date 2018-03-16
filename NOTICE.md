@@ -1,5 +1,5 @@
 # Gardener Dashboard
-Copyright 2018 The Gardener Authors.  
+Copyright (c) 2017-2018 SAP SE or an SAP affiliate company. All rights reserved.      
 [Apache License 2.0](LICENSE.md).
 
 ## Dependencies

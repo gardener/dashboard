@@ -102,7 +102,7 @@ limitations under the License.
             <purpose-tag :purpose="getPurpose(props.item)"></purpose-tag>
           </td>
           <td class="nowrap text-xs-center" v-if="columnVisible('lastOperation')">
-            <shoot-status :operation="props.item.lastOperation" :lastError="props.item.lastError" :popperKey="props.item.name"></shoot-status>
+            <shoot-status :operation="props.item.lastOperation" :lastError="props.item.lastError" :popperKey="props.item.name" :isHibernated="props.item.isHibernated"></shoot-status>
           </td>
           <td class="nowrap text-xs-center" v-if="columnVisible('readiness')">
             <template v-for="tag in props.item.tags">
@@ -226,6 +226,7 @@ limitations under the License.
   import replace from 'lodash/replace'
   import includes from 'lodash/includes'
   import find from 'lodash/find'
+  import some from 'lodash/some'
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
@@ -351,14 +352,17 @@ limitations under the License.
             const operation = row.lastOperation
             const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
             const isError = operation.state === 'Failed' || row.lastError
+            const isHibernated = row.isHibernated
             if (isError && !inProgress) {
               return 0
             } else if (isError && inProgress) {
               return 1
             } else if (inProgress) {
+              return 3
+            } else if (isHibernated) {
               return 2
             }
-            return 3
+            return 4
           case 'createdAt':
             return row.creationTimestamp
           case 'project':
@@ -567,6 +571,11 @@ limitations under the License.
       rows () {
         return this.items.map(({ metadata, spec, status }) => {
           const kind = getCloudProviderKind(spec.cloud)
+          const isHibernated = spec => {
+            // eslint-disable-next-line
+            const workers = get(spec, ['cloud', kind, 'workers'])
+            return some(workers, worker => get(worker, 'autoScalerMax') === 0)
+          }
           return {
             name: metadata.name,
             createdBy: this.getCreatedBy(metadata),
@@ -578,7 +587,8 @@ limitations under the License.
             lastError: get(status, 'lastError.description', ''),
             tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
             kind,
-            region: get(spec, 'cloud.region')
+            region: get(spec, 'cloud.region'),
+            isHibernated: isHibernated(spec)
           }
         })
       },
