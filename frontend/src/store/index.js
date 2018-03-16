@@ -235,8 +235,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchShoot ({ dispatch, commit }, name) {
-    return dispatch('shoots/get', name)
+  fetchShoot ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/get', {name, namespace})
       .catch(err => {
         dispatch('setError', err)
       })

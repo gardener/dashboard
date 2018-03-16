@@ -59,8 +59,7 @@ const actions = {
     commit('CLEAR_ALL')
     return state.all
   },
-  get ({ dispatch, commit, rootState }, name) {
-    const namespace = rootState.namespace
+  get ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
     return getShoot({namespace, name, user})
       .then(res => {
