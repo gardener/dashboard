@@ -25,7 +25,7 @@ module.exports = io => {
   registerHandler(emitter, event => {
     if (event.type === 'ADDED') {
       const namespace = event.object.metadata.name
-      io.to(namespace).emit('ping')
+      io.of('/shoots').to(namespace).emit('ping')
     }
   })
 }

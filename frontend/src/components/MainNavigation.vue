@@ -142,6 +142,7 @@ limitations under the License.
   import toLower from 'lodash/toLower'
   import includes from 'lodash/includes'
   import replace from 'lodash/replace'
+  import get from 'lodash/get'
   import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
   import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -155,7 +156,8 @@ limitations under the License.
         copyright: `© ${new Date().getFullYear()}`,
         projectDialog: false,
         projectFilter: '',
-        projectMenu: false
+        projectMenu: false,
+        allProjectsItem: {metadata: {name: 'All Projects', namespace: '_all'}}
       }
     },
     computed: {
@@ -184,6 +186,9 @@ limitations under the License.
       },
       project: {
         get () {
+          if (this.namespace === this.allProjectsItem.metadata.namespace) {
+            return this.allProjectsItem
+          }
           const predicate = item => item.metadata.namespace === this.namespace
           return find(this.projectList, predicate)
         },
@@ -196,13 +201,14 @@ limitations under the License.
         return this.$route.meta || {}
       },
       namespaced () {
-        return !!this.routeMeta.projectScope
+        return !!this.routeMeta.namespaced
       },
       hasNoProjects () {
         return !this.projectList.length
       },
       routes () {
-        return routes(this.$router)
+        const hasProjectScope = this.project.metadata.namespace !== this.allProjectsItem.metadata.namespace
+        return routes(this.$router, hasProjectScope)
       },
       projectMenuIcon () {
         return this.projectMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
@@ -221,11 +227,13 @@ limitations under the License.
           const owner = toLower(replace(item.data.owner, /@.*$/, ''))
           return includes(name, filter) || includes(owner, filter)
         }
-        return sortBy(filter(this.projectList, predicate))
+        const sortedList = sortBy(filter(this.projectList, predicate))
+        sortedList.unshift(this.allProjectsItem)
+        return sortedList
       },
       getProjectOwner () {
         return (project) => {
-          return emailToDisplayName(project.data.owner)
+          return emailToDisplayName(get(project, 'data.owner'))
         }
       },
       namespacedRoute () {
@@ -236,8 +244,7 @@ limitations under the License.
     },
     methods: {
       ...mapActions([
-        'setSidebar',
-        'setNamespace'
+        'setSidebar'
       ]),
       onProjectSelect (project) {
         this.projectMenu = false
@@ -248,7 +255,14 @@ limitations under the License.
         this.projectDialog = true
       },
       getProjectMenuTargetRoute (namespace) {
-        const name = routeName(this.$route)
+        let name = routeName(this.$route)
+        const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
+        if (!nsHasProjectScope) {
+          const thisProjectScoped = this.routeMeta.projectScope
+          if (thisProjectScoped) {
+            name = 'ShootList'
+          }
+        }
         return !this.namespaced ? {name, query: {namespace}} : {name, params: {namespace}}
       }
     },

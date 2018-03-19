@@ -70,10 +70,6 @@ export function deleteInfrastructureSecret ({namespace, bindingName, user}) {
 
 /* Shoot Clusters */
 
-export function getShoots ({namespace, user}) {
-  return getResource(`/api/namespaces/${namespace}/shoots`, user)
-}
-
 export function createShoot ({namespace, user, data}) {
   return createResource(`/api/namespaces/${namespace}/shoots`, user, data)
 }
@@ -136,6 +132,12 @@ export function addMember ({namespace, user, data}) {
 
 export function deleteMember ({namespace, name, user}) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`, user)
+}
+
+/* User */
+
+export function getUserInfo ({user}) {
+  return getResource(`/api/user`, user)
 }
 
 /* Utilities */

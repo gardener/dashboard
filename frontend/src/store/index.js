@@ -24,6 +24,9 @@ import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import includes from 'lodash/includes'
+import mapKeys from 'lodash/mapKeys'
+import some from 'lodash/some'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -31,6 +34,8 @@ import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
+
+import { getUserInfo } from '@/utils/api'
 
 Vue.use(Vuex)
 
@@ -47,12 +52,18 @@ const state = {
   cfg: null,
   ready: false,
   namespace: null,
+  onlyShootsWithIssues: true,
   sidebar: true,
   title: 'Gardener',
   color: 'green',
   user: null,
   loading: false,
-  error: null
+  error: null,
+  shootsLoading: false
+}
+
+const getFilterValue = (state) => {
+  return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
 // getters
@@ -220,14 +231,14 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchShoots ({ dispatch, commit }) {
-    return dispatch('shoots/getAll')
+  clearShoots ({ dispatch, commit }) {
+    return dispatch('shoots/clearAll')
       .catch(err => {
         dispatch('setError', err)
       })
   },
-  fetchShoot ({ dispatch, commit }, name) {
-    return dispatch('shoots/get', name)
+  fetchShoot ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/get', {name, namespace})
       .catch(err => {
         dispatch('setError', err)
       })
@@ -271,8 +282,8 @@ const actions = {
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
   },
-  deleteShoot ({ dispatch, commit }, name) {
-    return dispatch('shoots/delete', name)
+  deleteShoot ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/delete', {name, namespace})
       .catch(err => {
         dispatch('setError', err)
       })
@@ -297,9 +308,21 @@ const actions = {
     commit('SET_NAMESPACE', value)
     return state.namespace
   },
-  setUser ({ commit }, value) {
-    commit('SET_USER', value)
-    return state.user
+  setOnlyShootsWithIssues ({ commit }, value) {
+    commit('SET_ONLYSHOOTSWITHISSUES', value)
+    return state.onlyShootsWithIssues
+  },
+  setUser ({ dispatch, commit }, value) {
+    return getUserInfo({user: value})
+      .then(res => {
+        value.info = res.data
+        commit('SET_USER', value)
+      }).catch(err => {
+        commit('SET_USER', value)
+        dispatch('setError', err)
+      }).then(() => {
+        return state.user
+      })
   },
   setSidebar ({ commit }, value) {
     commit('SET_SIDEBAR', value)
@@ -312,6 +335,17 @@ const actions = {
   unsetLoading ({ commit }) {
     commit('SET_LOADING', false)
     return state.loading
+  },
+  setShootsLoading ({ commit }) {
+    commit('SET_SHOOTS_LOADING', true)
+    return state.shootsLoading
+  },
+  unsetShootsLoading ({ commit }, namespaces) {
+    const currentNamespace = some(namespaces, namespace => !isCurrentNamespace(namespace))
+    if (currentNamespace) {
+      commit('SET_SHOOTS_LOADING', false)
+    }
+    return state.shootsLoading
   },
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
@@ -328,8 +362,14 @@ const mutations = {
     state.ready = value
   },
   SET_NAMESPACE (state, value) {
-    Emitter.setNamespace(value)
-    state.namespace = value
+    if (value !== state.namespace) {
+      state.namespace = value
+      Emitter.setNamespace(value, getFilterValue(state))
+    }
+  },
+  SET_ONLYSHOOTSWITHISSUES (state, value) {
+    state.onlyShootsWithIssues = value
+    Emitter.setNamespace(state.namespace, getFilterValue(state))
   },
   SET_USER (state, value) {
     Emitter.setUser(value)
@@ -340,6 +380,9 @@ const mutations = {
   },
   SET_LOADING (state, value) {
     state.loading = value
+  },
+  SET_SHOOTS_LOADING (state, value) {
+    state.shootsLoading = value
   },
   SET_ERROR (state, value) {
     state.error = value
@@ -363,16 +406,33 @@ const store = new Vuex.Store({
   plugins
 })
 
+const isCurrentNamespace = namespace => {
+  return (state.namespace === '_all' && includes(store.getters.namespaces, namespace)) || namespace === state.namespace
+}
 Emitter.on('shoot', ({type, object}) => {
   switch (type) {
     case 'put':
-      if (object.metadata.namespace === state.namespace) {
+      if (isCurrentNamespace(object.metadata.namespace)) {
         store.commit('shoots/ITEM_PUT', object)
       }
       break
     case 'delete':
       store.commit('shoots/ITEM_DEL', object)
       break
+  }
+})
+
+Emitter.on('shoots', ({type, namespace, data}) => {
+  switch (type) {
+    case 'put':
+      mapKeys(data, (objects, namespace) => {
+        if (isCurrentNamespace(namespace)) {
+          store.commit('shoots/ITEMS_PUT', objects)
+        }
+      })
+      break
+    default:
+      console.error('unhandled type', type)
   }
 })
 

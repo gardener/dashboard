@@ -20,5 +20,6 @@ module.exports = {
   projects: require('./projects'),
   shoots: require('./shoots'),
   infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members')
+  members: require('./members'),
+  userInfo: require('./userInfo')
 }

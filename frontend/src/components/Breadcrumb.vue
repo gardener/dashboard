@@ -32,7 +32,7 @@ limitations under the License.
 
 <script>
   import { mapState } from 'vuex'
-  import { routes, namespacedRoute } from '@/utils'
+  import { namespacedRoute } from '@/utils'
   import get from 'lodash/get'
   import last from 'lodash/last'
   import size from 'lodash/size'
@@ -62,9 +62,6 @@ limitations under the License.
         crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
 
         return crumbs
-      },
-      routes () {
-        return routes(this.$router)
       },
       textClass () {
         return (item) => {

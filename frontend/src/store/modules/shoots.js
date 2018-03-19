@@ -17,10 +17,11 @@
 import find from 'lodash/find'
 import findIndex from 'lodash/findIndex'
 import assign from 'lodash/assign'
+import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
-import { getShoots, getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -54,25 +55,18 @@ const actions = {
    * Return all shoots in the given namespace.
    * This ends always in a server/backend call.
    */
-  getAll ({ commit, dispatch, rootState }) {
-    const namespace = rootState.namespace
-    const user = rootState.user
-    return getShoots({namespace, user})
-      .then(res => {
-        const list = res.data
-        commit('RECEIVE', list)
-        return state.all
-      })
+  clearAll ({ commit, dispatch }) {
+    commit('CLEAR_ALL')
+    return state.all
   },
-  get ({ dispatch, commit, rootState }, name) {
-    const namespace = rootState.namespace
+  get ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
     return getShoot({namespace, name, user})
       .then(res => {
         const item = res.data
         commit('ITEM_PUT', item)
       })
-      .then(() => dispatch('getInfo', name))
+      .then(() => dispatch('getInfo', {name, namespace}))
       .then(() => find(state.all, eql({namespace, name})))
   },
   create ({ dispatch, commit, rootState }, data) {
@@ -80,8 +74,7 @@ const actions = {
     const user = rootState.user
     return createShoot({namespace, user, data})
   },
-  delete ({ dispatch, commit, rootState }, name) {
-    const namespace = rootState.namespace
+  delete ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
     return deleteShoot({namespace, name, user})
   },
@@ -89,9 +82,8 @@ const actions = {
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
-  getInfo ({ commit, rootState }, name) {
+  getInfo ({ commit, rootState }, {name, namespace}) {
     const user = rootState.user
-    const namespace = rootState.namespace
     return getShootInfo({namespace, name, user})
       .then(res => res.data)
       .then(info => {
@@ -146,9 +138,21 @@ const actions = {
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
-        return dispatch('getInfo', metadata.name)
+        return dispatch('getInfo', {name: metadata.name, namespace: metadata.namespace})
       }
     }
+  }
+}
+
+const putItem = (state, newItem) => {
+  const index = findIndex(state.all, eql(newItem.metadata))
+  if (index !== -1) {
+    const item = state.all[index]
+    if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
+      state.all.splice(index, 1, assign({}, item, newItem))
+    }
+  } else {
+    state.all.push(newItem)
   }
 }
 
@@ -168,21 +172,19 @@ const mutations = {
     state.selection = metadata
   },
   ITEM_PUT (state, newItem) {
-    const index = findIndex(state.all, eql(newItem.metadata))
-    if (index !== -1) {
-      const item = state.all[index]
-      if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-        state.all.splice(index, 1, assign({}, item, newItem))
-      }
-    } else {
-      state.all.push(newItem)
-    }
+    putItem(state, newItem)
+  },
+  ITEMS_PUT (state, newItems) {
+    forEach(newItems, newItem => putItem(state, newItem))
   },
   ITEM_DEL (state, deletedItem) {
     const index = findIndex(state.all, eql(deletedItem.metadata))
     if (index !== -1) {
       state.all.splice(index, 1)
     }
+  },
+  CLEAR_ALL (state) {
+    state.all = []
   }
 }
 

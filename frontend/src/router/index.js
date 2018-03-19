@@ -28,7 +28,7 @@ const Default = () => import('@/layouts/Default')
 /* Pages */
 const Home = () => import('@/pages/Home')
 const ShootList = () => import('@/pages/ShootList')
-const Shoot = { template: '<router-view></router-view>' }
+const PlaceholderComponent = { template: '<router-view></router-view>' }
 const ShootItem = () => import('@/pages/ShootItem')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
@@ -96,8 +96,9 @@ export default function createRouter ({store, userManager}) {
           component: Home,
           meta: {
             public: false,
-            projectScope: false,
-            title: 'Home'
+            title: 'Home',
+            namespaced: false,
+            projectScope: false
           }
         },
         {
@@ -106,19 +107,22 @@ export default function createRouter ({store, userManager}) {
           component: Account,
           meta: {
             public: false,
-            projectScope: false,
             title: 'Account',
-            breadcrumb: true
+            breadcrumb: true,
+            namespaced: false,
+            projectScope: false
           }
         },
         {
           path: 'namespace/:namespace/shoots',
-          component: Shoot,
+          component: PlaceholderComponent,
           meta: {
             menu: {
               title: 'Clusters',
               icon: 'mdi-hexagon-multiple'
             },
+            namespaced: true,
+            projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
             breadcrumb: true
@@ -130,7 +134,8 @@ export default function createRouter ({store, userManager}) {
               component: ShootList,
               meta: {
                 public: false,
-                projectScope: true,
+                namespaced: true,
+                projectScope: false,
                 title: 'Project Clusters'
               }
             },
@@ -140,7 +145,8 @@ export default function createRouter ({store, userManager}) {
               component: ShootItem,
               meta: {
                 public: false,
-                projectScope: true,
+                namespaced: true,
+                projectScope: false,
                 title: 'Cluster Details',
                 toRouteName: 'ShootList',
                 breadcrumb: true
@@ -154,6 +160,7 @@ export default function createRouter ({store, userManager}) {
           component: Secrets,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Secrets',
             menu: {
@@ -169,6 +176,7 @@ export default function createRouter ({store, userManager}) {
           component: Members,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Members',
             menu: {
@@ -184,6 +192,7 @@ export default function createRouter ({store, userManager}) {
           component: Administration,
           meta: {
             public: false,
+            namespaced: true,
             projectScope: true,
             title: 'Administration',
             menu: {
@@ -222,12 +231,13 @@ export default function createRouter ({store, userManager}) {
     userManager
       .getUser()
       .then(user => {
-        store.dispatch('setUser', user)
-        if (isUserLoggedIn(user)) {
-          return next()
-        }
-        return next({
-          name: 'Login'
+        store.dispatch('setUser', user).then(() => {
+          if (isUserLoggedIn(user)) {
+            return next()
+          }
+          return next({
+            name: 'Login'
+          })
         })
       })
   }
@@ -258,6 +268,7 @@ export default function createRouter ({store, userManager}) {
 
   function ensureDataLoaded (to, from, next) {
     const meta = to.meta || {}
+    let itemNamespace
     if (meta.public) {
       return next()
     }
@@ -275,8 +286,12 @@ export default function createRouter ({store, userManager}) {
         const query = to.query || {}
         const namespaces = store.getters.namespaces
         const namespace = params.namespace || query.namespace
-        if (namespace !== store.state.namespace && includes(namespaces, namespace)) {
-          return store.dispatch('setNamespace', namespace)
+        if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
+          if (store.state.namespace === '_all' && to.name === 'ShootItem') {
+            itemNamespace = params.namespace
+          } else {
+            return store.dispatch('setNamespace', namespace)
+          }
         }
       })
       .then(() => {
@@ -300,29 +315,27 @@ export default function createRouter ({store, userManager}) {
           case 'Secrets':
             return Promise
               .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('fetchShoots')
+                store.dispatch('fetchInfrastructureSecrets')
               ])
               .then(() => undefined)
           case 'ShootList':
-            return Promise
-              .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('fetchShoots')
-              ])
-              .then(() => undefined)
+            if (namespace !== '_all') {
+              return Promise.resolve(store.dispatch('fetchInfrastructureSecrets'))
+                .then(() => undefined)
+            }
+            return undefined
           case 'ShootItem':
+            itemNamespace = itemNamespace || namespace
             return Promise
               .all([
-                store.dispatch('fetchShoot', params.name)
+                store.dispatch('fetchShoot', {name: params.name, namespace: itemNamespace})
               ])
               .then(() => undefined)
           case 'Members':
           case 'Administration':
             return Promise
               .all([
-                store.dispatch('fetchMembers'),
-                store.dispatch('fetchShoots')
+                store.dispatch('fetchMembers')
               ])
               .then(() => undefined)
           case 'Account':

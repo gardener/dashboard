@@ -129,11 +129,11 @@ export function gravatar (email) {
   return `//www.gravatar.com/avatar/${md5(toLower(email))}?d=identicon&s=128`
 }
 
-export function routes (router) {
+export function routes (router, includeRoutesWithProjectScope) {
   const hasChildren = route => route.children && route.children.length
   const routes = router.options.routes
   const defaultRoute = find(routes, hasChildren)
-  const hasMenu = route => route.meta && route.meta.menu
+  const hasMenu = route => route.meta && route.meta.menu && (includeRoutesWithProjectScope || (!includeRoutesWithProjectScope && !route.meta.projectScope))
   return filter(defaultRoute.children, hasMenu)
 }
 

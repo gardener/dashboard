@@ -23,6 +23,7 @@ const rbac = require('../kubernetes').rbac()
 const { Forbidden, PreconditionFailed } = require('../errors')
 const members = require('./members')
 const shoots = require('./shoots')
+const userInfo = require('./userInfo')
 
 function fromResource ({metadata}) {
   const annotations = metadata.annotations || {}
@@ -91,13 +92,10 @@ const createMembersClusterRole = async function ({namespace, username}) {
 exports._createMembersClusterRole = createMembersClusterRole
 
 exports.list = async function ({user}) {
-  const emptyClusterRoleBinding = {
-    subjects: []
-  }
   const [
     namespaces,
     roleBindings,
-    gardenAdministrators
+    isAdmin
   ] = await Promise.all([
     core.namespaces.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=project'}
@@ -105,15 +103,8 @@ exports.list = async function ({user}) {
     rbac.rolebindings.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=members'}
     }),
-    rbac.clusterrolebindings('garden-administrators').get()
-      .catch(err => {
-        if (err.code === 404) {
-          return emptyClusterRoleBinding
-        }
-        throw err
-      })
+    userInfo.isAdmin({user})
   ])
-  const username = user.id
   const isMemberOf = (roleBindings, subject) => {
     const userNamespaces = _
       .chain(roleBindings.items)
@@ -122,11 +113,13 @@ exports.list = async function ({user}) {
       .value()
     return item => _.includes(userNamespaces, item.metadata.name)
   }
+
   const subject = {
     kind: 'User',
-    name: username
+    name: user.id
   }
-  const predicate = _.findIndex(gardenAdministrators.subjects, subject) === -1
+
+  const predicate = !isAdmin
     ? isMemberOf(roleBindings, subject)
     : _.identity
   return _

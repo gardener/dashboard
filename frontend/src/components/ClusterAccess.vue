@@ -92,7 +92,6 @@ limitations under the License.
   import Clipboard from 'clipboard'
 
   export default {
-    name: 'shoot-list',
     components: {
       Clipboard
     },

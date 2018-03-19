@@ -32,7 +32,7 @@ limitations under the License.
           v-model="search"
           @keyup.esc="search=''"
         ></v-text-field>
-        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableSortMenu" absolute full-width>
+        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute full-width>
           <div slot="activator">
             <v-tooltip open-delay="500" top>
               <v-btn slot="activator" icon>
@@ -43,7 +43,7 @@ limitations under the License.
           </div>
           <v-list dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-tile v-for="item in allHeaders" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
+            <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
               <v-list-tile-action>
                 <v-checkbox v-model="item.checked" color="cyan darken-2" @click></v-checkbox>
               </v-list-tile-action>
@@ -57,17 +57,28 @@ limitations under the License.
               </v-list-tile-action>
               <span>Reset to Defaults</span>
             </v-tooltip>
+            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
+            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+              <v-list-tile-action>
+                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click></v-checkbox>
+              </v-list-tile-action>
+              <v-list-tile-sub-title>Show only Shoots with Issues</v-list-tile-sub-title>
+            </v-list-tile>
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="headers" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort>
+      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
-          <td class="nowrap" v-show="columnVisible('name')">
+          <td class="nowrap" v-if="columnVisible('project')">
+              {{ projectName(props.item) }}
+          </td>
+          <td class="nowrap" v-if="columnVisible('name')">
             <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: props.item.name, namespace:props.item.namespace } }">
               {{ props.item.name }}
             </router-link>
           </td>
-          <td class="nowrap" v-show="columnVisible('infrastructure')">
+          <td class="nowrap" v-if="columnVisible('infrastructure')">
             <v-tooltip top>
               <div slot="activator">
                 <infra-icon v-model="props.item.kind"></infra-icon>
@@ -76,10 +87,10 @@ limitations under the License.
               <span>{{ props.item.kind }} [{{ props.item.region }}]</span>
             </v-tooltip>
           </td>
-          <td class="nowrap" v-show="columnVisible('createdBy')">
+          <td class="nowrap" v-if="columnVisible('createdBy')">
             {{ props.item.createdBy }}
           </td>
-          <td class="nowrap" v-show="columnVisible('createdAt')">
+          <td class="nowrap" v-if="columnVisible('createdAt')">
             <v-tooltip top>
               <div slot="activator">
                 <time-ago :date-time="props.item.creationTimestamp"></time-ago>
@@ -87,18 +98,18 @@ limitations under the License.
               {{ createdAt(props.item) }}
             </v-tooltip>
           </td>
-          <td class="nowrap text-xs-center" v-show="columnVisible('purpose')">
+          <td class="nowrap text-xs-center" v-if="columnVisible('purpose')">
             <purpose-tag :purpose="getPurpose(props.item)"></purpose-tag>
           </td>
-          <td class="nowrap text-xs-center" v-show="columnVisible('lastOperation')">
+          <td class="nowrap text-xs-center" v-if="columnVisible('lastOperation')">
             <shoot-status :operation="props.item.lastOperation" :lastError="props.item.lastError" :popperKey="props.item.name" :isHibernated="props.item.isHibernated"></shoot-status>
           </td>
-          <td class="nowrap text-xs-center" v-show="columnVisible('readiness')">
+          <td class="nowrap text-xs-center" v-if="columnVisible('readiness')">
             <template v-for="tag in props.item.tags">
               <status-tag :tag="tag" :popper-key="`${props.item.name}_${tag.text}`"></status-tag>
             </template>
           </td>
-          <td class="action-button-group text-xs-right" v-show="columnVisible('actions')">
+          <td class="action-button-group text-xs-right" v-if="columnVisible('actions')">
             <div class="hidden-md-and-down">
               <v-tooltip top>
                 <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled(props.item)" @click.native.stop="showDashboardDialog(props.item)">
@@ -200,10 +211,10 @@ limitations under the License.
           <i class="red--text text--darken-2">This action cannot be undone.</i>
         </template>
       </confirm-input-dialog>
-      <create-cluster v-model="createDialog" @close="hideDialog"></create-cluster>
+      <create-cluster v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster>
     </v-card>
     <v-fab-transition>
-      <v-btn class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showCreateDialog()">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showCreateDialog()">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -211,7 +222,7 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters, mapActions, mapState } from 'vuex'
   import replace from 'lodash/replace'
   import includes from 'lodash/includes'
   import find from 'lodash/find'
@@ -219,6 +230,7 @@ limitations under the License.
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
+  import isMatch from 'lodash/isMatch'
   import InfraIcon from '@/components/InfrastructureIcon'
   import CodeBlock from '@/components/CodeBlock'
   import GPopper from '@/components/GPopper'
@@ -250,24 +262,26 @@ limitations under the License.
         floatingButton: false,
         search: '',
         allHeaders: [
-          { text: 'NAME', value: 'name', align: 'left', checked: true },
-          { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: true },
-          { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false },
-          { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false },
-          { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false },
-          { text: 'STATUS', value: 'lastOperation', align: 'center', checked: true },
-          { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true },
-          { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true }
+          { text: 'PROJECT', value: 'project', align: 'left', checked: true, hidden: false },
+          { text: 'NAME', value: 'name', align: 'left', checked: true, hidden: false },
+          { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: true, hidden: false },
+          { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, hidden: false },
+          { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, hidden: false },
+          { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, hidden: false },
+          { text: 'STATUS', value: 'lastOperation', align: 'center', checked: true, hidden: false },
+          { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
+          { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
         dialog: null,
-        tableSortMenu: false,
+        tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
       }
     },
     methods: {
       ...mapActions([
         'deleteShoot',
-        'setSelectedShoot'
+        'setSelectedShoot',
+        'setOnlyShootsWithIssues'
       ]),
       showKubeconfigDialog (row) {
         this.setSelectedShoot(row)
@@ -287,7 +301,7 @@ limitations under the License.
         this.showDialog('create')
       },
       deletionConfirmed () {
-        this.deleteShoot(this.currentName)
+        this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
           .catch((err) => console.error('Delete shoot failed with error:', err))
           .then(() => this.hideDialog())
       },
@@ -351,6 +365,8 @@ limitations under the License.
             return 4
           case 'createdAt':
             return row.creationTimestamp
+          case 'project':
+            return row.namespace
           default:
             return row[column]
         }
@@ -369,6 +385,9 @@ limitations under the License.
           }
           return comp * (desc ? -1 : 1)
         })
+      },
+      projectName (row) {
+        return replace(row.namespace, /^garden-/, '')
       },
       setColumnChecked (header) {
         header.checked = !header.checked
@@ -404,6 +423,10 @@ limitations under the License.
         item: 'shootByNamespaceAndName',
         selectedItem: 'selectedShoot'
       }),
+      ...mapState([
+        'shootsLoading',
+        'onlyShootsWithIssues'
+      ]),
       createDialog: {
         get () {
           return this.dialog === 'create'
@@ -451,7 +474,7 @@ limitations under the License.
       },
       columnVisible () {
         return (headerVal) => {
-          const predicate = item => item.value === headerVal && item.checked === true
+          const predicate = item => isMatch(item, { value: headerVal, checked: true, hidden: false })
           return find(this.allHeaders, predicate)
         }
       },
@@ -529,6 +552,9 @@ limitations under the License.
       currentName () {
         return get(this.selectedItem, 'metadata.name')
       },
+      currentNamespace () {
+        return get(this.selectedItem, 'metadata.namespace')
+      },
       currentCreatedBy () {
         return this.getCreatedBy(this.currentMetadata)
       },
@@ -566,12 +592,31 @@ limitations under the License.
         })
       },
       headers () {
-        return this.allHeaders.filter(e => e.checked === true)
+        return this.allHeaders.filter(e => e.hidden === false)
+      },
+      visibleHeaders () {
+        return this.headers.filter(e => e.checked === true)
+      },
+      projectScope () {
+        return this.$route.params.namespace !== '_all'
+      },
+      showOnlyShootsWithIssues: {
+        get () {
+          return this.onlyShootsWithIssues
+        },
+        set (value) {
+          this.setOnlyShootsWithIssues(value)
+        }
       }
     },
     mounted () {
       this.floatingButton = true
       this.loadColumnsChecked()
+    },
+    beforeUpdate () {
+      const predicate = item => item.value === 'project'
+      const projectHeader = find(this.allHeaders, predicate)
+      projectHeader.hidden = this.projectScope
     }
   }
 </script>

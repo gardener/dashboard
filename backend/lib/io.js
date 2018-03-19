@@ -21,8 +21,9 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects } = require('./services')
+const { projects, shoots } = require('./services')
 const watches = require('./watches')
+const { shootHasIssue } = require('./utils')
 
 module.exports = () => {
   const io = socketIO({
@@ -36,7 +37,68 @@ module.exports = () => {
       return req.auth.bearer
     }
   })
-  socketIOAuth(io, {
+
+  // handle socket connections
+  const nsp = io.of('/shoots')
+  nsp.on('connection', socket => {
+    logger.debug('Socket %s connected', socket.id)
+    socket.on('disconnect', (reason) => {
+      logger.debug('Socket %s disconnected. Reason: %s', socket.id, reason)
+    })
+    socket.on('subscribe', async ({namespaces}) => {
+      /* leave previous rooms */
+      _
+        .chain(socket.rooms)
+        .keys()
+        .filter(key => key !== socket.id)
+        .each(key => socket.leave(key))
+        .commit()
+
+      /* join current rooms */
+      if (_.isArray(namespaces)) {
+        const user = _.get(socket, 'client.user')
+        user.id = user['email']
+        const projectList = await projects.list({user})
+        const shootsPromises = []
+
+        let postponedData = {}
+        const postponedObjectsCount = () => _.sum(_.map(postponedData, objects => objects.length))
+
+        _.forEach(namespaces, (nsObj) => {
+          const namespace = _.get(nsObj, 'namespace')
+          const filter = _.get(nsObj, 'filter')
+          const predicate = item => item.metadata.namespace === namespace
+          const project = _.find(projectList, predicate)
+          if (project) {
+            const room = filter ? `${namespace}_${filter}` : namespace
+            socket.join(room)
+            logger.debug('Socket %s subscribed to %s', socket.id, room)
+            shootsPromises.push(new Promise(async (resolve, reject) => {
+              const shootList = await shoots.list({user, namespace})
+              const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
+              _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
+                postponedData[namespace] = chunkedObjects
+                if (postponedObjectsCount() >= 10) {
+                  socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
+                  postponedData = {}
+                }
+              })
+
+              resolve()
+            }))
+          }
+        })
+
+        await Promise.all(shootsPromises)
+        if (postponedObjectsCount() !== 0) {
+          socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
+        }
+        socket.emit('batchEventDone', {kind: 'shoots', namespaces})
+        logger.debug('Emitted batch events to socket %s', socket.id)
+      }
+    })
+  })
+  socketIOAuth(nsp, {
     timeout: 5000,
     authenticate (socket, data, cb) {
       logger.debug('Socket %s authenticating', socket.id)
@@ -51,40 +113,11 @@ module.exports = () => {
         }
         logger.debug('Socket %s authenticated (user %s)', socket.id, res.user.email)
         socket.client.user = res.user
+
         cb(null, true)
       }
       jwtIO(req, res, next)
     }
-  })
-  // handle socket connections
-  io.on('connection', socket => {
-    logger.debug('Socket %s connected', socket.id)
-    socket.on('disconnect', (reason) => {
-      logger.debug('Socket %s disconnected', socket.id)
-    })
-    socket.on('subscribe', ({namespace} = {}) => {
-      /* leave previous rooms */
-      _
-        .chain(socket.rooms)
-        .keys()
-        .filter(key => key !== socket.id)
-        .each(key => socket.leave(key))
-        .commit()
-      /* join current room */
-      if (namespace) {
-        const user = _.get(socket, 'client.user')
-        user.id = user['email']
-        projects.list({user})
-          .then(projects => {
-            const predicate = item => item.metadata.namespace === namespace
-            const project = _.find(projects, predicate)
-            if (project) {
-              logger.debug('Socket %s subscribed to %s', socket.id, namespace)
-              socket.join(namespace)
-            }
-          })
-      }
-    })
   })
 
   // start watches

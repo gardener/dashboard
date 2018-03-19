@@ -16,9 +16,12 @@
 
 import io from 'socket.io-client'
 import toLower from 'lodash/toLower'
+import map from 'lodash/map'
 import Emitter from 'component-emitter'
+import store from '../store'
 
-const socket = io(window.location.origin, {
+const url = `${window.location.origin}/shoots`
+const socket = io(url, {
   path: '/api/events',
   transports: ['websocket'],
   autoConnect: false
@@ -28,6 +31,7 @@ const socket = io(window.location.origin, {
 const emitter = Emitter({
   authenticated: false,
   namespace: undefined,
+  filter: undefined,
   auth: {
     bearer: undefined
   },
@@ -63,10 +67,14 @@ const emitter = Emitter({
       socket.disconnect()
     }
   },
-  setNamespace (namespace) {
+  setNamespace (namespace, filter) {
     this.namespace = namespace
+    this.filter = filter
     if (this.namespace && this.authenticated) {
-      socket.emit('subscribe', {namespace})
+      store.dispatch('setShootsLoading')
+      store.dispatch('clearShoots')
+
+      subscribe(namespace, filter)
     }
   },
   authenticate () {
@@ -76,6 +84,16 @@ const emitter = Emitter({
     }
   }
 })
+
+async function subscribe (namespace, filter) {
+  if (namespace === '_all') {
+    const allNamespaces = await store.getters.namespaces
+    const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
+    socket.emit('subscribe', {namespaces})
+  } else if (namespace) {
+    socket.emit('subscribe', {namespaces: [{namespace, filter}]})
+  }
+}
 
 function onAuthenticated () {
   emitter.authenticated = true
@@ -98,10 +116,24 @@ function onAuthenticated () {
         break
     }
   })
+  socket.on('batchEvent', ({type, kind, data}) => {
+    const objectKind = toLower(kind)
+    switch (type) {
+      case 'ADDED':
+        emitter.emit(objectKind, {type: 'put', data})
+        break
+      default:
+        console.error('handleBatchEvents: unhandled type', type)
+        break
+    }
+  })
+  socket.on('batchEventDone', ({kind, namespaces}) => {
+    if (kind === 'shoots') {
+      store.dispatch('unsetShootsLoading', namespaces)
+    }
+  })
   const namespace = emitter.namespace
-  if (namespace) {
-    socket.emit('subscribe', {namespace})
-  }
+  subscribe(namespace)
 }
 
 function onConnect (attempt) {
