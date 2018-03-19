@@ -57,8 +57,8 @@ limitations under the License.
               </v-list-tile-action>
               <span>Reset to Defaults</span>
             </v-tooltip>
-            <v-subheader v-if="!projectScope && user.info.isAdmin">Filter Table</v-subheader>
-            <v-list-tile v-if="!projectScope && user.info.isAdmin" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
+            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click></v-checkbox>
               </v-list-tile-action>
@@ -67,7 +67,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-alert type="info" :value="showOnlyShootsWithIssues">Currently only showing Clusters with Issues</v-alert>
+      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <td class="nowrap" v-if="columnVisible('project')">
@@ -425,7 +425,6 @@ limitations under the License.
       }),
       ...mapState([
         'shootsLoading',
-        'user',
         'onlyShootsWithIssues'
       ]),
       createDialog: {
