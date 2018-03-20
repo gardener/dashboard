@@ -41,7 +41,7 @@ limitations under the License.
         <v-list-tile-content>
           <v-list-tile-title>
             {{row.metadata.name}}
-            <v-icon v-if="!isPrivateSecretBinding(row)">mdi-share</v-icon>
+            <v-icon v-if="!isOwnSecretBinding(row)">mdi-share</v-icon>
             <span style="opacity:0.5">({{relatedShootCountLabel(row)}})</span>
           </v-list-tile-title>
           <v-list-tile-sub-title>
@@ -49,13 +49,13 @@ limitations under the License.
           </v-list-tile-sub-title>
         </v-list-tile-content>
 
-        <v-list-tile-action v-if="relatedShootCount(row)===0 && isPrivateSecretBinding(row)">
+        <v-list-tile-action v-if="relatedShootCount(row)===0 && isOwnSecretBinding(row)">
           <v-btn icon @click.native.stop="onDelete(row)">
             <v-icon class="red--text">delete</v-icon>
           </v-btn>
         </v-list-tile-action>
 
-        <v-list-tile-action v-if="isPrivateSecretBinding(row)">
+        <v-list-tile-action v-if="isOwnSecretBinding(row)">
           <v-btn icon @click.native.stop="onUpdate(row)">
             <v-icon class="blue--text">edit</v-icon>
           </v-btn>
@@ -70,7 +70,7 @@ limitations under the License.
 <script>
   import { mapGetters } from 'vuex'
   import get from 'lodash/get'
-  import { isPrivateSecretBinding } from '@/utils'
+  import { isOwnSecretBinding } from '@/utils'
 
   export default {
     props: {
@@ -126,7 +126,7 @@ limitations under the License.
       },
       secretDescriptor () {
         return (secret) => {
-          if (this.isPrivateSecretBinding(secret)) {
+          if (this.isOwnSecretBinding(secret)) {
             return get(secret, `data.${this.secretDescriptorKey}`)
           } else {
             return get(secret, 'metadata.namespace')
@@ -148,9 +148,9 @@ limitations under the License.
           }
         }
       },
-      isPrivateSecretBinding () {
+      isOwnSecretBinding () {
         return (secret) => {
-          return isPrivateSecretBinding(secret)
+          return isOwnSecretBinding(secret)
         }
       }
     },

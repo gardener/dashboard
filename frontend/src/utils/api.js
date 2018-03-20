@@ -57,7 +57,7 @@ export function getInfrastructureSecrets ({namespace, user}) {
 }
 
 export function updateInfrastructureSecret ({namespace, bindingName, user, data}) {
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`, user, data)
+  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, user, data)
 }
 
 export function createInfrastructureSecret ({namespace, user, data}) {
@@ -65,7 +65,7 @@ export function createInfrastructureSecret ({namespace, user, data}) {
 }
 
 export function deleteInfrastructureSecret ({namespace, bindingName, user}) {
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`, user)
+  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, user)
 }
 
 /* Shoot Clusters */

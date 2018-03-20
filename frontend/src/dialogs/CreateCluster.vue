@@ -114,13 +114,13 @@ limitations under the License.
                           >
                           <template slot="item" slot-scope="data">
                             {{get(data.item, 'metadata.name')}}
-                            <v-icon v-if="!isPrivateSecretBinding(data.item)">mdi-share</v-icon>
+                            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
                           </template>
                           <template slot="selection" slot-scope="data">
                             <span class="black--text">
                               {{get(data.item, 'metadata.name')}}
                             </span>
-                            <v-icon v-if="!isPrivateSecretBinding(data.item)">mdi-share</v-icon>
+                            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
                           </template>
                         </v-select>
                       </v-flex>
@@ -437,7 +437,7 @@ limitations under the License.
   import { required, maxLength } from 'vuelidate/lib/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
-  import { setInputFocus, isPrivateSecretBinding, getValidationErrors } from '@/utils'
+  import { setInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
   import moment from 'moment'
 
   var semSort = require('semver-sort')
@@ -883,9 +883,9 @@ limitations under the License.
         const project = find(this.projectList, predicate)
         return get(project, 'metadata.name')
       },
-      isPrivateSecretBinding () {
+      isOwnSecretBinding () {
         return (secret) => {
-          return isPrivateSecretBinding(secret)
+          return isOwnSecretBinding(secret)
         }
       }
     },

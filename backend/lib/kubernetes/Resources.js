@@ -32,14 +32,9 @@ module.exports = {
     kind: 'CloudProfile',
     apiVersion: 'garden.sapcloud.io/v1beta1'
   },
-  PrivateSecretBinding: {
-    name: 'privatesecretbindings',
-    kind: 'PrivateSecretBinding',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
-  },
-  CrossSecretBinding: {
-    name: 'crosssecretbindings',
-    kind: 'CrossSecretBinding',
+  SecretBinding: {
+    name: 'secretbindings',
+    kind: 'SecretBinding',
     apiVersion: 'garden.sapcloud.io/v1beta1'
   },
   RoleBinding: {

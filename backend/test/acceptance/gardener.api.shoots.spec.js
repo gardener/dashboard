@@ -49,7 +49,7 @@ describe('gardener', function () {
           seed: seedName,
           secretBindingRef: {
             name: secret,
-            kind: 'PrivateSecretBinding'
+            namespace
           }
         }
       }

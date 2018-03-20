@@ -44,15 +44,14 @@ router.route('/')
     }
   })
 
-router.route('/:kind/:name')
+router.route('/:name')
   .put(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const bindingName = req.params.name
-      const kind = req.params.kind
       const body = req.body
-      res.send(await infrastructureSecrets.patch({user, namespace, bindingName, kind, body}))
+      res.send(await infrastructureSecrets.patch({user, namespace, bindingName, body}))
     } catch (err) {
       next(err)
     }
@@ -62,8 +61,7 @@ router.route('/:kind/:name')
       const user = req.user
       const namespace = req.params.namespace
       const bindingName = req.params.name
-      const kind = req.params.kind
-      res.send(await infrastructureSecrets.remove({user, namespace, bindingName, kind}))
+      res.send(await infrastructureSecrets.remove({user, namespace, bindingName}))
     } catch (err) {
       next(err)
     }

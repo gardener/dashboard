@@ -121,8 +121,7 @@ module.exports = {
         Resources.Shoot.name,
         Resources.CloudProfile.name,
         Resources.Seed.name,
-        Resources.PrivateSecretBinding.name,
-        Resources.CrossSecretBinding.name
+        Resources.SecretBinding.name
       ]
     })
     return new CustomResourceDefinitions(credentials(options))

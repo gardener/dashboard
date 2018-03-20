@@ -261,7 +261,6 @@ limitations under the License.
             namespace: this.namespace,
             cloudProviderKind: this.cloudProviderKind,
             cloudProfileName: this.cloudProfileName,
-            bindingKind: 'PrivateSecretBinding',
             bindingName: this.bindingName
           }
 

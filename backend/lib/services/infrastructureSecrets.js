@@ -32,7 +32,7 @@ function Garden ({auth}) {
   return kubernetes.garden({auth})
 }
 
-function fromResource ({secretBinding, bindingKind, cloudProviderKind, secret}) {
+function fromResource ({secretBinding, cloudProviderKind, secret}) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
   const infrastructureSecret = {}
@@ -42,7 +42,7 @@ function fromResource ({secretBinding, bindingKind, cloudProviderKind, secret}) 
     .assign({
       cloudProviderKind,
       cloudProfileName,
-      bindingKind,
+      bindingNamespace: _.get(secretBinding, 'metadata.namespace'),
       bindingName: _.get(secretBinding, 'metadata.name')
     })
     .value()
@@ -98,13 +98,14 @@ function toSecretResource ({metadata, data}) {
   return {apiVersion, kind, metadata, type, data}
 }
 
-function toPrivateSecretBindingResource ({metadata}) {
-  const resource = Resources.PrivateSecretBinding
+function toSecretBindingResource ({metadata}) {
+  const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
   const name = metadata.bindingName
   const secretRef = {
-    name: metadata.name
+    name: metadata.name,
+    namespace: metadata.namespace
   }
   const labels = {
     'cloudprofile.garden.sapcloud.io/name': metadata.cloudProfileName
@@ -118,7 +119,7 @@ function toPrivateSecretBindingResource ({metadata}) {
   return {apiVersion, kind, metadata, secretRef}
 }
 
-function getInfrastructureSecrets ({secretBindings, bindingKind, cloudProfileList, secretList}) {
+function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
   let infrastructureSecrets = []
 
   for (const secretBinding of secretBindings) {
@@ -128,10 +129,10 @@ function getInfrastructureSecrets ({secretBindings, bindingKind, cloudProfileLis
     const secret = _.find(secretList, ['metadata.name', secretName])
     if (!cloudProviderKind) {
       logger.error('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName)
-    } else if (bindingKind === Resources.PrivateSecretBinding.kind && !secret) {
-      logger.error('Secret missing for PrivateSecretBinding. Skipping infrastructure secret with name %s', secretName)
+    } else if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
+      logger.error('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName)
     } else {
-      infrastructureSecrets.push(fromResource({secretBinding, bindingKind, cloudProviderKind, secret}))
+      infrastructureSecrets.push(fromResource({secretBinding, cloudProviderKind, secret}))
     }
   }
   return infrastructureSecrets
@@ -146,19 +147,16 @@ async function getCloudProviderKind (cloudProfileName) {
 exports.list = async function ({user, namespace}) {
   const [
     cloudProfileList,
-    {items: privateSecretBindingList},
-    {items: crossSecretBindingList},
+    {items: secretBindingList},
     {items: secretList}
   ] = await Promise.all([
     cloudprofiles.list(),
-    Garden(user).namespaces(namespace).privatesecretbindings.get({}),
-    Garden(user).namespaces(namespace).crosssecretbindings.get({}),
+    Garden(user).namespaces(namespace).secretbindings.get({}),
     Core(user).namespaces(namespace).secrets.get({})
   ])
 
   return _.concat(
-    getInfrastructureSecrets({secretBindings: privateSecretBindingList, bindingKind: Resources.PrivateSecretBinding.kind, cloudProfileList, secretList}),
-    getInfrastructureSecrets({secretBindings: crossSecretBindingList, bindingKind: Resources.CrossSecretBinding.kind, cloudProfileList, secretList: []})
+    getInfrastructureSecrets({secretBindings: secretBindingList, cloudProfileList, secretList})
   )
 }
 
@@ -166,22 +164,29 @@ exports.create = async function ({user, namespace, body}) {
   const secret = toSecretResource(body)
   const bodySecret = await Core(user).namespaces(namespace).secrets.post({body: secret})
 
-  const privateSecretBinding = toPrivateSecretBindingResource(body)
-  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.post({body: privateSecretBinding})
+  const secretBinding = toSecretBindingResource(body)
+  const bodysecretBinding = await Garden(user).namespaces(namespace).secretbindings.post({body: secretBinding})
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
 
-  return fromResource({secretBinding: bodyPrivateSecretBinding, bindingKind: Resources.PrivateSecretBinding.kind, secret: bodySecret, cloudProviderKind})
+  return fromResource({secretBinding: bodysecretBinding, secret: bodySecret, cloudProviderKind})
 }
 
-exports.patch = async function ({user, namespace, bindingName, kind, body}) {
-  if (kind !== 'private') {
-    throw new MethodNotAllowed('Patch allowed only for secrets of kind private')
-  }
+function checkIfOwnSecret (bodySecretBinding) {
+  const secretNamespace = _.get(bodySecretBinding, 'secretRef.namespace')
+  const secretBindingNamespace = _.get(bodySecretBinding, 'metadata.namespace')
 
-  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.get({name: bindingName})
-  const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
+  if (secretNamespace !== secretBindingNamespace) {
+    throw new MethodNotAllowed('Patch allowed only for secrets in own namespace')
+  }
+}
+
+exports.patch = async function ({user, namespace, bindingName, body}) {
+  const bodySecretBinding = await Garden(user).namespaces(namespace).secretbindings.get({name: bindingName})
+  const secretName = _.get(bodySecretBinding, 'secretRef.name')
+
+  checkIfOwnSecret(bodySecretBinding)
 
   const secret = toSecretResource(body)
   const bodySecret = await Core(user).namespaces(namespace).secrets.mergePatch({name: secretName, body: secret})
@@ -189,30 +194,28 @@ exports.patch = async function ({user, namespace, bindingName, kind, body}) {
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
 
-  return fromResource({secretBinding: bodyPrivateSecretBinding, bindingKind: Resources.PrivateSecretBinding.kind, secret: bodySecret, cloudProviderKind})
+  return fromResource({secretBinding: bodySecretBinding, secret: bodySecret, cloudProviderKind})
 }
 
-exports.remove = async function ({user, namespace, bindingName, kind}) {
-  if (kind !== 'private') {
-    throw new MethodNotAllowed('Patch allowed only for secrets of kind private')
-  }
+exports.remove = async function ({user, namespace, bindingName}) {
+  const bodySecretBinding = await Garden(user).namespaces(namespace).secretbindings.get({name: bindingName})
+  const secretName = _.get(bodySecretBinding, 'secretRef.name')
+
+  checkIfOwnSecret(bodySecretBinding)
+
   const {items: shootList} = await shoots.list({user, namespace})
   const predicate = (item) => {
     const secretBindingRef = _.get(item, 'spec.cloud.secretBindingRef')
-    return secretBindingRef.name === bindingName &&
-      secretBindingRef.kind === Resources.PrivateSecretBinding.kind
+    return secretBindingRef.name === bindingName
   }
   const secretReferencedByShoot = _.find(shootList, predicate)
   if (secretReferencedByShoot) {
     throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
   }
 
-  const bodyPrivateSecretBinding = await Garden(user).namespaces(namespace).privatesecretbindings.get({name: bindingName})
-  const secretName = _.get(bodyPrivateSecretBinding, 'secretRef.name')
-
   await Promise.all([
-    await Garden(user).namespaces(namespace).privatesecretbindings.delete({name: bindingName}),
+    await Garden(user).namespaces(namespace).secretbindings.delete({name: bindingName}),
     await Core(user).namespaces(namespace).secrets.delete({name: secretName})
   ])
-  return {metadata: {name: secretName, bindingName, bindingKind: Resources.PrivateSecretBinding.kind, namespace}}
+  return {metadata: {name: secretName, bindingName, namespace}}
 }

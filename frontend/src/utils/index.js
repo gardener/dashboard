@@ -181,6 +181,7 @@ export function getCloudProviderKind (object) {
   return head(intersection(keys(object), cloudProviderKinds))
 }
 
-export function isPrivateSecretBinding (secret) {
-  return get(secret, 'metadata.bindingKind') === 'PrivateSecretBinding'
+export function isOwnSecretBinding (secret) {
+  console.log(secret)
+  return get(secret, 'namespace') === get(secret, 'bindingNamespace')
 }

@@ -28,7 +28,6 @@ describe('gardener', function () {
       const project = 'foo'
       const namespace = `garden-${project}`
       const bindingName = `${name}-sb`
-      const bindingKind = 'PrivateSecretBinding'
       const cloudProfileName = 'infra1-profileName'
       const cloudProviderKind = 'infra1'
       const metadata = {name, bindingName, cloudProfileName}
@@ -98,34 +97,37 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, resourceVersion, bindingName, bindingKind, cloudProfileName, cloudProviderKind})
+            expect(res.body.metadata).to.eql({name, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind})
             expect(res.body.data).to.have.own.property('key')
             expect(res.body.data).to.have.own.property('secret')
           })
       })
 
-      it('should patch a private infrastructure secret', function () {
+      it('should patch an own infrastructure secret', function () {
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.patchInfrastructureSecret({bearer, namespace, name, bindingName, data, cloudProfileName, resourceVersion})
+        k8s.stub.patchInfrastructureSecret({bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
         return chai.request(app)
-          .put(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`)
+          .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
           .send({metadata, data})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, bindingName, bindingKind, cloudProfileName, cloudProviderKind, resourceVersion})
+            expect(res.body.metadata).to.eql({name, namespace, bindingName, cloudProfileName, bindingNamespace: namespace, cloudProviderKind, resourceVersion})
             expect(res.body.data).to.have.own.property('key')
             expect(res.body.data).to.have.own.property('secret')
           })
       })
 
-      it('should not patch a cross infrastructure secret', function () {
+      it('should not patch a shared infrastructure secret', function () {
+        const otherNamespace = 'garden-bar'
+        common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
+        k8s.stub.patchSharedInfrastructureSecret({bearer, namespace: otherNamespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
         return chai.request(app)
-          .put(`/api/namespaces/${namespace}/infrastructure-secrets/cross/${bindingName}`)
+          .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
           .send({metadata, data})
           .catch(err => err.response)
@@ -134,24 +136,28 @@ describe('gardener', function () {
           })
       })
 
-      it('should delete a private infrastructure secret', function () {
+      it('should delete an own infrastructure secret', function () {
+        common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.deleteInfrastructureSecret({bearer, namespace, project, name, bindingName, cloudProfileName, resourceVersion})
+        k8s.stub.deleteInfrastructureSecret({bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
         return chai.request(app)
-          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`)
+          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, bindingName, bindingKind, namespace})
+            expect(res.body.metadata).to.eql({name, bindingName, namespace})
           })
       })
 
-      it('should not delete a cross infrastructure secret', function () {
+      it('should not delete a shared infrastructure secret', function () {
+        const otherNamespace = 'garden-bar'
+        common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
+        k8s.stub.deleteSharedInfrastructureSecret({bearer, namespace: otherNamespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
         return chai.request(app)
-          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/cross/${bindingName}`)
+          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
@@ -161,9 +167,9 @@ describe('gardener', function () {
 
       it('should not delete infrastructure secret if referenced by shoot', function () {
         oidc.stub.getKeys()
-        k8s.stub.deleteInfrastructureSecretReferencedByShoot({bearer, namespace, project, bindingName})
+        k8s.stub.deleteInfrastructureSecretReferencedByShoot({bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
         return chai.request(app)
-          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/private/${bindingName}`)
+          .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
