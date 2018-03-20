@@ -228,7 +228,9 @@ limitations under the License.
           return includes(name, filter) || includes(owner, filter)
         }
         const sortedList = sortBy(filter(this.projectList, predicate))
-        sortedList.unshift(this.allProjectsItem)
+        if (sortedList.length > 1) {
+          sortedList.unshift(this.allProjectsItem)
+        }
         return sortedList
       },
       getProjectOwner () {
