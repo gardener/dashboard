@@ -182,6 +182,5 @@ export function getCloudProviderKind (object) {
 }
 
 export function isOwnSecretBinding (secret) {
-  console.log(secret)
   return get(secret, 'namespace') === get(secret, 'bindingNamespace')
 }
