@@ -107,12 +107,14 @@ module.exports = () => {
       const req = {auth}
       const res = {}
       const next = (err) => {
+        const user = res.user
+        user.auth = auth
         if (err) {
           logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
           return cb(err)
         }
-        logger.debug('Socket %s authenticated (user %s)', socket.id, res.user.email)
-        socket.client.user = res.user
+        logger.debug('Socket %s authenticated (user %s)', socket.id, user.email)
+        socket.client.user = user
 
         cb(null, true)
       }
