@@ -503,7 +503,9 @@ limitations under the License.
       cloud: {
         profile: null,
         region: null,
-        secretBindingRef: {}
+        secretBindingRef: {
+          name: null
+        }
       },
       kubernetes: {
         version: null
@@ -687,9 +689,7 @@ limitations under the License.
         },
         set (metadata) {
           const secretBindingRef = {
-            kind: get(metadata, 'bindingKind'),
-            name: get(metadata, 'bindingName'),
-            namespace: get(metadata, 'namespace')
+            name: get(metadata, 'bindingName')
           }
           this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
 
