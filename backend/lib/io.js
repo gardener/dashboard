@@ -108,7 +108,9 @@ module.exports = () => {
       const res = {}
       const next = (err) => {
         const user = res.user
-        user.auth = auth
+        if (user) {
+          user.auth = auth
+        }
         if (err) {
           logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
           return cb(err)

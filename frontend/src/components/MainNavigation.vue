@@ -207,7 +207,7 @@ limitations under the License.
         return !this.projectList.length
       },
       routes () {
-        const hasProjectScope = this.project.metadata.namespace !== this.allProjectsItem.metadata.namespace
+        const hasProjectScope = get(this.project, 'metadata.namespace') !== this.allProjectsItem.metadata.namespace
         return routes(this.$router, hasProjectScope)
       },
       projectMenuIcon () {
