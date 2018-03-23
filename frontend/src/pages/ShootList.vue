@@ -104,6 +104,21 @@ limitations under the License.
           <td class="nowrap text-xs-center" v-if="columnVisible('lastOperation')">
             <shoot-status :operation="props.item.lastOperation" :lastError="props.item.lastError" :popperKey="props.item.name" :isHibernated="props.item.isHibernated"></shoot-status>
           </td>
+          <td class="nowrap text-xs-center" v-if="columnVisible('k8sVersion')">
+            <v-tooltip top>
+              <v-btn slot="activator" class="update_btn" small round
+                :to="{ name: 'ShootItem', params: { name: props.item.name, namespace:props.item.namespace } }"
+                :outline="!k8sPatchAvailable(props.item)"
+                :dark="k8sPatchAvailable(props.item)"
+                color="cyan darken-2">
+                  <v-icon small v-if="props.item.availableK8sUpdates">arrow_drop_up</v-icon>
+                  {{props.item.k8sVersion}}
+              </v-btn>
+              <span v-if="k8sPatchAvailable(props.item)">Kubernetes patch available</span>
+              <span v-else-if="props.item.availableK8sUpdates">Kubernetes update available</span>
+              <span v-else>Kubernetes version up to date</span>
+            </v-tooltip>
+          </td>
           <td class="nowrap text-xs-center" v-if="columnVisible('readiness')">
             <template v-for="tag in props.item.tags">
               <status-tag :tag="tag" :popper-key="`${props.item.name}_${tag.text}`"></status-tag>
@@ -241,7 +256,7 @@ limitations under the License.
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
   import TimeAgo from '@/components/TimeAgo'
-  import { getDateFormatted, getCloudProviderKind } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -269,6 +284,7 @@ limitations under the License.
           { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, hidden: false },
           { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, hidden: false },
           { text: 'STATUS', value: 'lastOperation', align: 'center', checked: true, hidden: false },
+          { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, hidden: false },
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
@@ -367,6 +383,9 @@ limitations under the License.
             return row.creationTimestamp
           case 'project':
             return row.namespace
+          case 'k8sVersion':
+            const sortPrefix = row.availableK8sUpdates ? '_' : ''
+            return `${sortPrefix}${row.k8sVersion}`
           default:
             return row[column]
         }
@@ -415,13 +434,19 @@ limitations under the License.
           header.checkedDefault = header.checked
           header.checked = get(checkedColumns, header.value, header.checked)
         }
+      },
+      k8sPatchAvailable (row) {
+        if (get(row, 'availableK8sUpdates.patch')) {
+          return true
+        }
       }
     },
     computed: {
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot'
+        selectedItem: 'selectedShoot',
+        kubernetesVersions: 'kubernetesVersions'
       }),
       ...mapState([
         'shootsLoading',
@@ -507,8 +532,7 @@ limitations under the License.
       },
       isDashboardDialogDisabled () {
         return (row) => {
-          const item = this.item(row) || {}
-          const itemInfo = item.info || {}
+          const itemInfo = row.info || {}
 
           if (itemInfo.dashboardUrl) {
             return false
@@ -520,8 +544,7 @@ limitations under the License.
       },
       isKubeconfigDialogDisabled () {
         return (row) => {
-          const item = this.item(row) || {}
-          const itemInfo = item.info || {}
+          const itemInfo = row.info || {}
 
           if (itemInfo.kubeconfig) {
             return false
@@ -568,7 +591,7 @@ limitations under the License.
         return get(this.selectedItem, 'spec.status.lastOperation.description')
       },
       rows () {
-        return this.items.map(({ metadata, spec, status }) => {
+        return this.items.map(({ metadata, spec, status, info }) => {
           const kind = getCloudProviderKind(spec.cloud)
           const isHibernated = spec => {
             // eslint-disable-next-line
@@ -587,7 +610,12 @@ limitations under the License.
             tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
             kind,
             region: get(spec, 'cloud.region'),
-            isHibernated: isHibernated(spec)
+            isHibernated: isHibernated(spec),
+            info,
+            availableK8sUpdates: availableK8sUpdatesForShoot(
+              get(spec, 'kubernetes.version'),
+              this.kubernetesVersions(get(spec, 'cloud.profile'))),
+            k8sVersion: get(spec, 'kubernetes.version')
           }
         })
       },
@@ -664,5 +692,11 @@ limitations under the License.
     }
   }
 
+  .update_btn {
+    min-width: 0px;
+  }
 
+  .update_btn >>> i {
+    margin-left: -8px;
+  }
 </style>

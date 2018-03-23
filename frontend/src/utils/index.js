@@ -25,8 +25,10 @@ import intersection from 'lodash/intersection'
 import md5 from 'md5'
 import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
+import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import moment from 'moment'
+import semver from 'semver'
 
 export function emailToDisplayName (email) {
   if (email) {
@@ -183,4 +185,22 @@ export function getCloudProviderKind (object) {
 
 export function isOwnSecretBinding (secret) {
   return get(secret, 'namespace') === get(secret, 'bindingNamespace')
+}
+
+export function availableK8sUpdatesForShoot (shootVersion, allVersions) {
+  const newerVersions = {}
+  let newerVersion = false
+
+  forEach(allVersions, (version) => {
+    if (semver.gt(version, shootVersion)) {
+      newerVersion = true
+      const diff = semver.diff(version, shootVersion)
+      if (!newerVersions[diff]) {
+        newerVersions[diff] = []
+      }
+      newerVersions[diff].push(version)
+    }
+  })
+
+  return newerVersion ? newerVersions : undefined
 }
