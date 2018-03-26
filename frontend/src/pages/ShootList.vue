@@ -23,7 +23,7 @@ limitations under the License.
           <div class="headline">Kubernetes Clusters</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="rows.length > 3"
+        <v-text-field v-if="items.length > 3"
           prepend-icon="search"
           color="cyan darken-2"
           label="Search"
@@ -68,9 +68,9 @@ limitations under the License.
         </v-menu>
       </v-toolbar>
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
-          <shoot-list-row :rowData="props.item" :visibleHeaders="visibleHeaders" v-on:showDialog="showDialog"></shoot-list-row>
+          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" v-on:showDialog="showDialog"></shoot-list-row>
         </template>
       </v-data-table>
       <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -130,9 +130,7 @@ limitations under the License.
 
 <script>
   import { mapGetters, mapActions, mapState } from 'vuex'
-  import replace from 'lodash/replace'
   import find from 'lodash/find'
-  import some from 'lodash/some'
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
@@ -142,7 +140,7 @@ limitations under the License.
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getCloudProviderKind, availableK8sUpdatesForShoot } from '@/utils'
+  import { getCreatedBy } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -191,7 +189,7 @@ limitations under the License.
           case 'kubeconfig':
           case 'dashboard':
           case 'delete':
-            this.setSelectedShoot(args.row)
+            this.setSelectedShoot(args.shootItem.metadata)
               .then(() => {
                 this.dialog = args.action
               })
@@ -203,29 +201,6 @@ limitations under the License.
       hideDialog () {
         this.dialog = null
         this.setSelectedShoot(null)
-      },
-      mapConditionsToStatusTags (conditions) {
-        if (!conditions || !conditions.length) {
-          return []
-        }
-        return conditions
-          .filter(condition => !!condition.lastTransitionTime)
-          .map(({lastTransitionTime, message, status, type}) => {
-            const id = type
-            let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
-            switch (type) {
-              case 'ControlPlaneHealthy':
-                text = 'Control Plane'
-                break
-              case 'SystemComponentsHealthy':
-                text = 'System Components'
-                break
-              case 'EveryNodeReady':
-                text = 'Nodes'
-                break
-            }
-            return {id, text, message, lastTransitionTime, status}
-          })
       },
       getSortVal (row, column) {
         switch (column) {
@@ -313,8 +288,7 @@ limitations under the License.
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot',
-        kubernetesVersions: 'kubernetesVersions'
+        selectedItem: 'selectedShoot'
       }),
       ...mapState([
         'shootsLoading',
@@ -373,7 +347,7 @@ limitations under the License.
         return get(this.selectedItem, 'metadata.namespace')
       },
       currentCreatedBy () {
-        return this.getCreatedBy(this.currentMetadata)
+        return getCreatedBy(this.currentMetadata)
       },
       currentInfo () {
         return get(this.selectedItem, 'info', {})
@@ -383,35 +357,6 @@ limitations under the License.
       },
       currentLog () {
         return get(this.selectedItem, 'spec.status.lastOperation.description')
-      },
-      rows () {
-        return this.items.map(({ metadata, spec, status, info }) => {
-          const kind = getCloudProviderKind(spec.cloud)
-          const isHibernated = spec => {
-            // eslint-disable-next-line
-            const workers = get(spec, ['cloud', kind, 'workers'])
-            return some(workers, worker => get(worker, 'autoScalerMax') === 0)
-          }
-          return {
-            name: metadata.name,
-            createdBy: this.getCreatedBy(metadata),
-            creationTimestamp: metadata.creationTimestamp,
-            namespace: metadata.namespace,
-            annotations: metadata.annotations,
-            deletionTimestamp: metadata.deletionTimestamp,
-            lastOperation: get(status, 'lastOperation', {}),
-            lastError: get(status, 'lastError.description', ''),
-            tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
-            kind,
-            region: get(spec, 'cloud.region'),
-            isHibernated: isHibernated(spec),
-            info,
-            availableK8sUpdates: availableK8sUpdatesForShoot(
-              get(spec, 'kubernetes.version'),
-              this.kubernetesVersions(get(spec, 'cloud.profile'))),
-            k8sVersion: get(spec, 'kubernetes.version')
-          }
-        })
       },
       headers () {
         return this.allHeaders.filter(e => e.hidden === false)
@@ -428,12 +373,6 @@ limitations under the License.
         },
         set (value) {
           this.setOnlyShootsWithIssues(value)
-        }
-      },
-      getCreatedBy () {
-        return (metadata) => {
-          // eslint-disable-next-line
-          return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
         }
       }
     },

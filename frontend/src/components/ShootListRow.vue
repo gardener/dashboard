@@ -20,26 +20,26 @@ limitations under the License.
         {{ projectName }}
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: rowData.name, namespace:rowData.namespace } }">
-        {{ rowData.name }}
+      <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+        {{ row.name }}
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
         <div slot="activator">
-          <infra-icon v-model="rowData.kind"></infra-icon>
-          {{ rowData.region }}
+          <infra-icon v-model="row.kind"></infra-icon>
+          {{ row.region }}
         </div>
-        <span>{{ rowData.kind }} [{{ rowData.region }}]</span>
+        <span>{{ row.kind }} [{{ row.region }}]</span>
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
-      {{ rowData.createdBy }}
+      {{ row.createdBy }}
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
         <div slot="activator">
-          <time-ago :date-time="rowData.creationTimestamp"></time-ago>
+          <time-ago :date-time="row.creationTimestamp"></time-ago>
         </div>
         {{ createdAt }}
       </v-tooltip>
@@ -48,26 +48,26 @@ limitations under the License.
       <purpose-tag :purpose="getPurpose"></purpose-tag>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['lastOperation']">
-      <shoot-status :operation="rowData.lastOperation" :lastError="rowData.lastError" :popperKey="rowData.name" :isHibernated="rowData.isHibernated"></shoot-status>
+      <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated"></shoot-status>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
       <v-tooltip top>
         <v-btn slot="activator" class="update_btn" small round
-          :to="{ name: 'ShootItem', params: { name: rowData.name, namespace:rowData.namespace } }"
+          :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }"
           :outline="!k8sPatchAvailable"
           :dark="k8sPatchAvailable"
           color="cyan darken-2">
-            <v-icon small v-if="rowData.availableK8sUpdates">arrow_drop_up</v-icon>
-            {{rowData.k8sVersion}}
+            <v-icon small v-if="row.availableK8sUpdates">arrow_drop_up</v-icon>
+            {{row.k8sVersion}}
         </v-btn>
         <span v-if="k8sPatchAvailable">Kubernetes patch available</span>
-        <span v-else-if="rowData.availableK8sUpdates">Kubernetes update available</span>
+        <span v-else-if="row.availableK8sUpdates">Kubernetes update available</span>
         <span v-else>Kubernetes version up to date</span>
       </v-tooltip>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
-      <template v-for="tag in rowData.tags">
-        <status-tag :tag="tag" :popper-key="`${rowData.name}_${tag.text}`"></status-tag>
+      <template v-for="tag in row.tags">
+        <status-tag :tag="tag" :popper-key="`${row.name}_${tag.text}`"></status-tag>
       </template>
     </td>
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
@@ -129,6 +129,7 @@ limitations under the License.
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import InfraIcon from '@/components/InfrastructureIcon'
   import ShootStatus from '@/components/ShootStatus'
   import StatusTag from '@/components/StatusTag'
@@ -137,8 +138,9 @@ limitations under the License.
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
   import get from 'lodash/get'
+  import some from 'lodash/some'
   import includes from 'lodash/includes'
-  import { getDateFormatted } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy } from '@/utils'
 
   export default {
     components: {
@@ -149,7 +151,7 @@ limitations under the License.
       TimeAgo
     },
     props: {
-      rowData: {
+      shootItem: {
         type: Object,
         required: true
       },
@@ -159,6 +161,40 @@ limitations under the License.
       }
     },
     computed: {
+      ...mapGetters({
+        kubernetesVersions: 'kubernetesVersions'
+      }),
+      row () {
+        const spec = this.shootItem.spec
+        const metadata = this.shootItem.metadata
+        const status = this.shootItem.status
+        const info = this.shootItem.info
+        const kind = getCloudProviderKind(spec.cloud)
+        const isHibernated = spec => {
+          // eslint-disable-next-line
+          const workers = get(spec, ['cloud', kind, 'workers'])
+          return some(workers, worker => get(worker, 'autoScalerMax') === 0)
+        }
+        return {
+          name: metadata.name,
+          createdBy: getCreatedBy(metadata),
+          creationTimestamp: metadata.creationTimestamp,
+          namespace: metadata.namespace,
+          annotations: metadata.annotations,
+          deletionTimestamp: metadata.deletionTimestamp,
+          lastOperation: get(status, 'lastOperation', {}),
+          lastError: get(status, 'lastError.description', ''),
+          tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
+          kind,
+          region: get(spec, 'cloud.region'),
+          isHibernated: isHibernated(spec),
+          info,
+          availableK8sUpdates: availableK8sUpdatesForShoot(
+            get(spec, 'kubernetes.version'),
+            this.kubernetesVersions(get(spec, 'cloud.profile'))),
+          k8sVersion: get(spec, 'kubernetes.version')
+        }
+      },
       headerVisible () {
         const headerVisible = {}
         forEach(this.visibleHeaders, (header) => {
@@ -167,14 +203,14 @@ limitations under the License.
         return headerVisible
       },
       projectName () {
-        return replace(this.rowData.namespace, /^garden-/, '')
+        return replace(this.row.namespace, /^garden-/, '')
       },
       createdAt () {
-        return getDateFormatted(this.rowData.creationTimestamp)
+        return getDateFormatted(this.row.creationTimestamp)
       },
       getPurpose () {
         // eslint-disable-next-line
-        return get(this.rowData.metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+        return get(this.row.metadata, ['annotations', 'garden.sapcloud.io/purpose'])
       },
       k8sPatchAvailable () {
         if (get(this.row, 'availableK8sUpdates.patch')) {
@@ -183,7 +219,7 @@ limitations under the License.
         return false
       },
       isInfoAvailable () {
-        const lastOperation = this.rowData.lastOperation || {}
+        const lastOperation = this.row.lastOperation || {}
         // operator not yet updated shoot resource
         if (lastOperation.type === undefined || lastOperation.state === undefined) {
           return false
@@ -191,7 +227,7 @@ limitations under the License.
         return !this.isCreateOrDeleteInProcess
       },
       isCreateOrDeleteInProcess () {
-        const lastOperation = this.rowData.lastOperation || {}
+        const lastOperation = this.row.lastOperation || {}
         // create or delete in process
         if (includes(['Create', 'Delete'], lastOperation.type) && lastOperation.state === 'Processing') {
           return true
@@ -199,12 +235,12 @@ limitations under the License.
         return false
       },
       isDeleteDialogDisabled () {
-        const annotations = this.rowData.annotations
+        const annotations = this.row.annotations
         const confirmation = annotations['confirmation.garden.sapcloud.io/deletionTimestamp']
-        return !!this.rowData.deletionTimestamp && this.rowData.deletionTimestamp === confirmation
+        return !!this.row.deletionTimestamp && this.row.deletionTimestamp === confirmation
       },
       isDashboardDialogDisabled () {
-        const itemInfo = this.rowData.info || {}
+        const itemInfo = this.row.info || {}
 
         if (itemInfo.dashboardUrl) {
           return false
@@ -214,7 +250,7 @@ limitations under the License.
         return !this.isInfoAvailable
       },
       isKubeconfigDialogDisabled () {
-        const itemInfo = this.rowData.info || {}
+        const itemInfo = this.row.info || {}
 
         if (itemInfo.kubeconfig) {
           return false
@@ -226,8 +262,31 @@ limitations under the License.
     },
     methods: {
       showDialog: function (action) {
-        const row = this.rowData
-        this.$emit('showDialog', { action, row })
+        const shootItem = this.shootItem
+        this.$emit('showDialog', { action, shootItem })
+      },
+      mapConditionsToStatusTags (conditions) {
+        if (!conditions || !conditions.length) {
+          return []
+        }
+        return conditions
+          .filter(condition => !!condition.lastTransitionTime)
+          .map(({lastTransitionTime, message, status, type}) => {
+            const id = type
+            let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
+            switch (type) {
+              case 'ControlPlaneHealthy':
+                text = 'Control Plane'
+                break
+              case 'SystemComponentsHealthy':
+                text = 'System Components'
+                break
+              case 'EveryNodeReady':
+                text = 'Nodes'
+                break
+            }
+            return {id, text, message, lastTransitionTime, status}
+          })
       }
     }
   }
