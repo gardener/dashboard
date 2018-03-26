@@ -70,115 +70,7 @@ limitations under the License.
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="rows" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
-          <td class="nowrap" v-if="columnVisible('project')">
-              {{ projectName(props.item) }}
-          </td>
-          <td class="nowrap" v-if="columnVisible('name')">
-            <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: props.item.name, namespace:props.item.namespace } }">
-              {{ props.item.name }}
-            </router-link>
-          </td>
-          <td class="nowrap" v-if="columnVisible('infrastructure')">
-            <v-tooltip top>
-              <div slot="activator">
-                <infra-icon v-model="props.item.kind"></infra-icon>
-                {{ props.item.region }}
-              </div>
-              <span>{{ props.item.kind }} [{{ props.item.region }}]</span>
-            </v-tooltip>
-          </td>
-          <td class="nowrap" v-if="columnVisible('createdBy')">
-            {{ props.item.createdBy }}
-          </td>
-          <td class="nowrap" v-if="columnVisible('createdAt')">
-            <v-tooltip top>
-              <div slot="activator">
-                <time-ago :date-time="props.item.creationTimestamp"></time-ago>
-              </div>
-              {{ createdAt(props.item) }}
-            </v-tooltip>
-          </td>
-          <td class="nowrap text-xs-center" v-if="columnVisible('purpose')">
-            <purpose-tag :purpose="getPurpose(props.item)"></purpose-tag>
-          </td>
-          <td class="nowrap text-xs-center" v-if="columnVisible('lastOperation')">
-            <shoot-status :operation="props.item.lastOperation" :lastError="props.item.lastError" :popperKey="props.item.name" :isHibernated="props.item.isHibernated"></shoot-status>
-          </td>
-          <td class="nowrap text-xs-center" v-if="columnVisible('k8sVersion')">
-            <v-tooltip top>
-              <v-btn slot="activator" class="update_btn" small round
-                :to="{ name: 'ShootItem', params: { name: props.item.name, namespace:props.item.namespace } }"
-                :outline="!k8sPatchAvailable(props.item)"
-                :dark="k8sPatchAvailable(props.item)"
-                color="cyan darken-2">
-                  <v-icon small v-if="props.item.availableK8sUpdates">arrow_drop_up</v-icon>
-                  {{props.item.k8sVersion}}
-              </v-btn>
-              <span v-if="k8sPatchAvailable(props.item)">Kubernetes patch available</span>
-              <span v-else-if="props.item.availableK8sUpdates">Kubernetes update available</span>
-              <span v-else>Kubernetes version up to date</span>
-            </v-tooltip>
-          </td>
-          <td class="nowrap text-xs-center" v-if="columnVisible('readiness')">
-            <template v-for="tag in props.item.tags">
-              <status-tag :tag="tag" :popper-key="`${props.item.name}_${tag.text}`"></status-tag>
-            </template>
-          </td>
-          <td class="action-button-group text-xs-right" v-if="columnVisible('actions')">
-            <div class="hidden-md-and-down">
-              <v-tooltip top>
-                <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled(props.item)" @click.native.stop="showDashboardDialog(props.item)">
-                  <v-icon>dashboard</v-icon>
-                </v-btn>
-                <span>Open Dashboard</span>
-              </v-tooltip>
-              <v-tooltip top>
-                <v-btn small icon class="blue--text" slot="activator" :disabled="isKubeconfigDialogDisabled(props.item)" @click.native.stop="showKubeconfigDialog(props.item)">
-                  <v-icon>settings</v-icon>
-                </v-btn>
-                <span>Show Kubeconfig</span>
-              </v-tooltip>
-              <v-tooltip top>
-                <v-btn small icon class="red--text" slot="activator" :disabled="isDeleteDialogDisabled(props.item)" @click.native.stop="showDeleteDialog(props.item)">
-                  <v-icon>delete</v-icon>
-                </v-btn>
-                <span>Delete Cluster</span>
-              </v-tooltip>
-            </div>
-            <div class="hidden-lg-and-up">
-              <v-menu left origin="center center" transition="scale-transition">
-                <v-btn icon slot="activator">
-                  <v-icon>more_vert</v-icon>
-                </v-btn>
-                <v-list>
-                  <v-list-tile :disabled="isDashboardDialogDisabled(props.item)" @click.native="showDashboardDialog(props.item)">
-                    <v-list-tile-action>
-                      <v-icon class="green--text">dashboard</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-title>
-                      <v-list-tile-content>Open Dashboard</v-list-tile-content>
-                    </v-list-tile-title>
-                  </v-list-tile>
-                  <v-list-tile @click.native="showKubeconfigDialog(props.item)">
-                    <v-list-tile-action>
-                      <v-icon class="blue--text">settings</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-title>
-                      <v-list-tile-content>Show Kubeconfig</v-list-tile-content>
-                    </v-list-tile-title>
-                  </v-list-tile>
-                  <v-list-tile :disabled="isDeleteDialogDisabled(props.item)" @click.native="showDeleteDialog(props.item)">
-                    <v-list-tile-action>
-                      <v-icon class="red--text">delete</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-title>
-                      <v-list-tile-content>Delete Cluster</v-list-tile-content>
-                    </v-list-tile-title>
-                  </v-list-tile>
-                </v-list>
-              </v-menu>
-            </div>
-          </td>
+          <shoot-list-row :rowData="props.item" :visibleHeaders="visibleHeaders" v-on:showDialog="showDialog"></shoot-list-row>
         </template>
       </v-data-table>
       <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -229,7 +121,7 @@ limitations under the License.
       <create-cluster v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster>
     </v-card>
     <v-fab-transition>
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showCreateDialog()">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showDialog({action: 'create'})">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -239,24 +131,18 @@ limitations under the License.
 <script>
   import { mapGetters, mapActions, mapState } from 'vuex'
   import replace from 'lodash/replace'
-  import includes from 'lodash/includes'
   import find from 'lodash/find'
   import some from 'lodash/some'
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
-  import isMatch from 'lodash/isMatch'
-  import InfraIcon from '@/components/InfrastructureIcon'
   import CodeBlock from '@/components/CodeBlock'
   import GPopper from '@/components/GPopper'
-  import StatusTag from '@/components/StatusTag'
-  import PurposeTag from '@/components/PurposeTag'
-  import ShootStatus from '@/components/ShootStatus'
+  import ShootListRow from '@/components/ShootListRow'
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import TimeAgo from '@/components/TimeAgo'
-  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot } from '@/utils'
+  import { getCloudProviderKind, availableK8sUpdatesForShoot } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -264,13 +150,9 @@ limitations under the License.
       CodeBlock,
       CreateCluster,
       GPopper,
-      StatusTag,
-      PurposeTag,
+      ShootListRow,
       ConfirmInputDialog,
-      ClusterAccess,
-      InfraIcon,
-      ShootStatus,
-      TimeAgo
+      ClusterAccess
     },
     data () {
       return {
@@ -299,30 +181,24 @@ limitations under the License.
         'setSelectedShoot',
         'setOnlyShootsWithIssues'
       ]),
-      showKubeconfigDialog (row) {
-        this.setSelectedShoot(row)
-          .then(() => this.showDialog('kubeconfig'))
-      },
-      showDashboardDialog (row) {
-        this.setSelectedShoot(row)
-          .then(() => {
-            this.showDialog('dashboard')
-          })
-      },
-      showDeleteDialog (row) {
-        this.setSelectedShoot(row)
-          .then(() => this.showDialog('delete'))
-      },
-      showCreateDialog () {
-        this.showDialog('create')
-      },
       deletionConfirmed () {
         this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
           .catch((err) => console.error('Delete shoot failed with error:', err))
           .then(() => this.hideDialog())
       },
-      showDialog (action) {
-        this.dialog = action
+      showDialog (args) {
+        switch (args.action) {
+          case 'kubeconfig':
+          case 'dashboard':
+          case 'delete':
+            this.setSelectedShoot(args.row)
+              .then(() => {
+                this.dialog = args.action
+              })
+            break
+          case 'create':
+            this.dialog = args.action
+        }
       },
       hideDialog () {
         this.dialog = null
@@ -405,9 +281,6 @@ limitations under the License.
           return comp * (desc ? -1 : 1)
         })
       },
-      projectName (row) {
-        return replace(row.namespace, /^garden-/, '')
-      },
       setColumnChecked (header) {
         header.checked = !header.checked
         this.saveColumnsChecked()
@@ -433,11 +306,6 @@ limitations under the License.
         for (const header of this.allHeaders) {
           header.checkedDefault = header.checked
           header.checked = get(checkedColumns, header.value, header.checked)
-        }
-      },
-      k8sPatchAvailable (row) {
-        if (get(row, 'availableK8sUpdates.patch')) {
-          return true
         }
       }
     },
@@ -490,80 +358,6 @@ limitations under the License.
           if (!value) {
             this.dialog = null
           }
-        }
-      },
-      createdAt () {
-        return (row) => {
-          return getDateFormatted(row.creationTimestamp)
-        }
-      },
-      columnVisible () {
-        return (headerVal) => {
-          const predicate = item => isMatch(item, { value: headerVal, checked: true, hidden: false })
-          return find(this.allHeaders, predicate)
-        }
-      },
-      isInfoAvailable () {
-        return (row) => {
-          const lastOperation = row.lastOperation || {}
-          // operator not yet updated shoot resource
-          if (lastOperation.type === undefined || lastOperation.state === undefined) {
-            return false
-          }
-          return !this.isCreateOrDeleteInProcess(row)
-        }
-      },
-      isCreateOrDeleteInProcess () {
-        return (row) => {
-          const lastOperation = row.lastOperation || {}
-          // create or delete in process
-          if (includes(['Create', 'Delete'], lastOperation.type) && lastOperation.state === 'Processing') {
-            return true
-          }
-          return false
-        }
-      },
-      isDeleteDialogDisabled () {
-        return (row) => {
-          const annotations = row.annotations
-          const confirmation = annotations['confirmation.garden.sapcloud.io/deletionTimestamp']
-          return !!row.deletionTimestamp && row.deletionTimestamp === confirmation
-        }
-      },
-      isDashboardDialogDisabled () {
-        return (row) => {
-          const itemInfo = row.info || {}
-
-          if (itemInfo.dashboardUrl) {
-            return false
-          }
-
-          // disabled if info is NOT available
-          return !this.isInfoAvailable(row)
-        }
-      },
-      isKubeconfigDialogDisabled () {
-        return (row) => {
-          const itemInfo = row.info || {}
-
-          if (itemInfo.kubeconfig) {
-            return false
-          }
-
-          // disabled if info is NOT available
-          return !this.isInfoAvailable(row)
-        }
-      },
-      getPurpose () {
-        return (metadata) => {
-          // eslint-disable-next-line
-          return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
-        }
-      },
-      getCreatedBy () {
-        return (metadata) => {
-          // eslint-disable-next-line
-          return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
         }
       },
       currentMetadata () {
@@ -635,6 +429,12 @@ limitations under the License.
         set (value) {
           this.setOnlyShootsWithIssues(value)
         }
+      },
+      getCreatedBy () {
+        return (metadata) => {
+          // eslint-disable-next-line
+          return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
+        }
       }
     },
     mounted () {
@@ -650,19 +450,6 @@ limitations under the License.
 </script>
 <style lang="styl" scoped >
   @import '../stylus/main'
-
-  .action-button-group {
-    white-space: nowrap;
-
-    button[type=button] {
-      margin: 0 4px;
-    }
-
-  }
-
-  .nowrap {
-    white-space: nowrap;
-  }
 
   .dashboard {
     padding-top: 10px;
@@ -690,13 +477,5 @@ limitations under the License.
         padding-right: 24px;
       }
     }
-  }
-
-  .update_btn {
-    min-width: 0px;
-  }
-
-  .update_btn >>> i {
-    margin-left: -8px;
   }
 </style>
