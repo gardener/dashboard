@@ -73,19 +73,19 @@ limitations under the License.
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
-          <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled" @click.native.stop="showDialog('dashboard')">
+          <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard')">
             <v-icon>dashboard</v-icon>
           </v-btn>
           <span>Open Dashboard</span>
         </v-tooltip>
         <v-tooltip top>
-          <v-btn small icon class="blue--text" slot="activator" :disabled="isKubeconfigDialogDisabled" @click.native.stop="showDialog('kubeconfig')">
+          <v-btn small icon class="blue--text" slot="activator" :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig')">
             <v-icon>settings</v-icon>
           </v-btn>
           <span>Show Kubeconfig</span>
         </v-tooltip>
         <v-tooltip top>
-          <v-btn small icon class="red--text" slot="activator" :disabled="isDeleteDialogDisabled" @click.native.stop="showDialog('delete')">
+          <v-btn small icon class="red--text" slot="activator" :disabled="isDeleteDialogDisabled" @click="showDialog('delete')">
             <v-icon>delete</v-icon>
           </v-btn>
           <span>Delete Cluster</span>
@@ -97,29 +97,23 @@ limitations under the License.
             <v-icon>more_vert</v-icon>
           </v-btn>
           <v-list>
-            <v-list-tile :disabled="isDashboardDialogDisabled" @click.native="showDialog('dashboard')">
+            <v-list-tile :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard', isDashboardDialogDisabled)">
               <v-list-tile-action>
                 <v-icon class="green--text">dashboard</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>
-                <v-list-tile-content>Open Dashboard</v-list-tile-content>
-              </v-list-tile-title>
+              <v-list-tile-title>Open Dashboard</v-list-tile-title>
             </v-list-tile>
-            <v-list-tile :disabled="isKubeconfigDialogDisabled" @click.native="showDialog('kubeconfig')">
+            <v-list-tile :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig', isKubeconfigDialogDisabled)">
               <v-list-tile-action>
                 <v-icon class="blue--text">settings</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>
-                <v-list-tile-content>Show Kubeconfig</v-list-tile-content>
-              </v-list-tile-title>
+              <v-list-tile-title>Show Kubeconfig</v-list-tile-title>
             </v-list-tile>
-            <v-list-tile :disabled="isDeleteDialogDisabled" @click.native="showDialog('delete')">
+            <v-list-tile :disabled="isDeleteDialogDisabled" @click="showDialog('delete', isDeleteDialogDisabled)">
               <v-list-tile-action>
                 <v-icon class="red--text">delete</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>
-                <v-list-tile-content>Delete Cluster</v-list-tile-content>
-              </v-list-tile-title>
+              <v-list-tile-title>Delete Cluster</v-list-tile-title>
             </v-list-tile>
           </v-list>
         </v-menu>
@@ -261,9 +255,12 @@ limitations under the License.
       }
     },
     methods: {
-      showDialog: function (action) {
-        const shootItem = this.shootItem
-        this.$emit('showDialog', { action, shootItem })
+      showDialog: function (action, disabled = false) {
+        if (disabled !== true) {
+          // disabled check required as v-list-tile disabled=true does not prevent click action
+          const shootItem = this.shootItem
+          this.$emit('showDialog', { action, shootItem })
+        }
       },
       mapConditionsToStatusTags (conditions) {
         if (!conditions || !conditions.length) {
@@ -291,7 +288,6 @@ limitations under the License.
     }
   }
 </script>
-
 <style lang="styl" scoped>
 
 .action-button-group {
