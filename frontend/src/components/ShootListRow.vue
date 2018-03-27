@@ -45,7 +45,7 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
-      <purpose-tag :purpose="getPurpose"></purpose-tag>
+      <purpose-tag :purpose="row.purpose"></purpose-tag>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['lastOperation']">
       <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated"></shoot-status>
@@ -186,7 +186,9 @@ limitations under the License.
           availableK8sUpdates: availableK8sUpdatesForShoot(
             get(spec, 'kubernetes.version'),
             this.kubernetesVersions(get(spec, 'cloud.profile'))),
-          k8sVersion: get(spec, 'kubernetes.version')
+          k8sVersion: get(spec, 'kubernetes.version'),
+          // eslint-disable-next-line
+          purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
         }
       },
       headerVisible () {
@@ -201,10 +203,6 @@ limitations under the License.
       },
       createdAt () {
         return getDateFormatted(this.row.creationTimestamp)
-      },
-      getPurpose () {
-        // eslint-disable-next-line
-        return get(this.row.metadata, ['annotations', 'garden.sapcloud.io/purpose'])
       },
       k8sPatchAvailable () {
         if (get(this.row, 'availableK8sUpdates.patch')) {

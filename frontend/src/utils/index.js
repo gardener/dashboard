@@ -205,9 +205,7 @@ export function availableK8sUpdatesForShoot (shootVersion, allVersions) {
   return newerVersion ? newerVersions : undefined
 }
 
-export function getCreatedBy () {
-  return (metadata) => {
-    // eslint-disable-next-line
-    return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
-  }
+export function getCreatedBy (metadata) {
+  // eslint-disable-next-line
+  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
 }
