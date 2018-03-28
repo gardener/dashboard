@@ -23,6 +23,7 @@ const { serveStatic } = require('./utils')
 const logger = require('./logger')
 const { notFound, renderError } = require('./middleware')
 const api = require('./api')
+const githubWebhook = require('./github/webhook')
 const port = config.port
 
 // configure app
@@ -33,6 +34,7 @@ app.set('io', api.io)
 app.set('trust proxy', 1)
 app.use('/static', serveStatic('static', true))
 app.use('/api', api.router)
+app.use('/webhook', githubWebhook.router)
 app.use('/config.json', api.frontendConfig)
 app.use(history())
 app.use(serveStatic('public', true))

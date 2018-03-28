@@ -16,170 +16,225 @@
 
 import io from 'socket.io-client'
 import toLower from 'lodash/toLower'
+import forEach from 'lodash/forEach'
 import map from 'lodash/map'
 import Emitter from 'component-emitter'
 import store from '../store'
 
-const url = `${window.location.origin}/shoots`
-const socket = io(url, {
+const url = window.location.origin
+const socketConfig = {
   path: '/api/events',
   transports: ['websocket'],
   autoConnect: false
-})
+}
+const shootsSocket = io(`${url}/shoots`, socketConfig)
+const journalsSocket = io(`${url}/journals`, socketConfig)
 
-/* Event Emitter */
-const emitter = Emitter({
-  authenticated: false,
-  namespace: undefined,
-  filter: undefined,
-  auth: {
-    bearer: undefined
-  },
-  get socket () {
-    return socket
-  },
-  setUser (user) {
-    user = user || {}
-    const id_token = user.id_token
-    /* eslint camelcase: off */
-    if (!id_token) {
-      console.log(`Disconnect socket because ID token is empty`)
-      this.auth.bearer = undefined
-      socket.disconnect()
-    } else if (!socket.connected) {
-      console.log(`Socket not connected.`)
-      this.auth.bearer = id_token
-      socket.connect()
-    } else if (this.auth.bearer !== id_token) {
-      console.log(`Socket ${socket.id} connected but has different ID token`)
-      this.auth.bearer = id_token
-      const onDisconnect = (reason) => {
-        if (reason === 'io client disconnect') {
-          clearTimeout(timeoutId)
-          socket.connect()
+/* Event Emitters */
+const emitterObjForSocket = (socket) => {
+  return {
+    authenticated: false,
+    namespace: undefined,
+    filter: undefined,
+    auth: {
+      bearer: undefined
+    },
+    socket,
+    setUser (user) {
+      // could be overwritten
+      this._setUser(user)
+    },
+    _setUser (user) {
+      user = user || {}
+      const id_token = user.id_token
+        /* eslint camelcase: off */
+      if (!id_token) {
+        console.log(`Disconnect socket ${this.socket.id} because ID token is empty`)
+        this.auth.bearer = undefined
+        this.socket.disconnect()
+      } else if (!this.socket.connected) {
+        console.log(`Socket ${this.socket.id} not connected.`)
+        this.auth.bearer = id_token
+        this.socket.connect()
+      } else if (this.auth.bearer !== id_token) {
+        console.log(`Socket ${this.socket.id} connected but has different ID token`)
+        this.auth.bearer = id_token
+        const onDisconnect = (reason) => {
+          console.log('ON DISCONNECT')
+          if (reason === 'io client disconnect') {
+            clearTimeout(timeoutId)
+            this.socket.connect()
+          }
         }
+        const onTimeout = () => {
+          this.socket.off('disconnect', onDisconnect)
+        }
+        const timeoutId = setTimeout(onTimeout, 1000)
+        this.socket.once('disconnect', onDisconnect)
+        this.socket.disconnect()
       }
-      const onTimeout = () => {
-        socket.off('disconnect', onDisconnect)
+    },
+    setNamespace (namespace, filter) {
+      this.namespace = namespace
+      this.filter = filter
+      if (this.namespace && this.authenticated) {
+        store.dispatch('setShootsLoading')
+        store.dispatch('clearShoots')
+
+        this.subscribe({namespace, filter})
       }
-      const timeoutId = setTimeout(onTimeout, 1000)
-      socket.once('disconnect', onDisconnect)
-      socket.disconnect()
+    },
+    authenticate () {
+      console.log(`socket connection ${this.socket.id} authenticating`)
+      if (this.auth.bearer) {
+        this.socket.emit('authentication', this.auth)
+      }
+    },
+    subscribe () {
+      console.log('should be overwritten..', this.socket.id)
     }
-  },
-  setNamespace (namespace, filter) {
-    this.namespace = namespace
-    this.filter = filter
-    if (this.namespace && this.authenticated) {
-      store.dispatch('setShootsLoading')
-      store.dispatch('clearShoots')
-
-      subscribe(namespace, filter)
-    }
-  },
-  authenticate () {
-    console.log('socket connection authenticating')
-    if (this.auth.bearer) {
-      socket.emit('authentication', this.auth)
-    }
-  }
-})
-
-async function subscribe (namespace, filter) {
-  if (namespace === '_all') {
-    const allNamespaces = await store.getters.namespaces
-    const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
-    socket.emit('subscribe', {namespaces})
-  } else if (namespace) {
-    socket.emit('subscribe', {namespaces: [{namespace, filter}]})
   }
 }
 
+const shootsEmitterObj = emitterObjForSocket(shootsSocket)
+shootsEmitterObj.subscribe = async function ({namespace, filter}) {
+  if (namespace === '_all') {
+    const allNamespaces = await store.getters.namespaces
+    const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
+    this.socket.emit('subscribe', {namespaces})
+  } else if (namespace) {
+    this.socket.emit('subscribe', {namespaces: [{namespace, filter}]})
+  }
+}
+
+const journalsEmitterObj = emitterObjForSocket(journalsSocket)
+journalsEmitterObj.setUser = function (user) {
+  if (!store.getters.isAdmin) {
+    return
+  }
+  this._setUser(user)
+}
+journalsEmitterObj.subscribe = function () {
+  if (store.getters.isAdmin) {
+    this.socket.emit('subscribeIssues')
+  }
+}
+journalsEmitterObj.subscribeComments = function ({name, namespace}) {
+  if (store.getters.isAdmin) {
+    this.socket.emit('subscribeComments', {name, namespace})
+    this.subscribedComments = true
+  }
+}
+journalsEmitterObj.unsubscribeComments = function () {
+  if (store.getters.isAdmin) {
+    if (this.subscribedComments) {
+      this.socket.emit('unsubscribeComments')
+      this.subscribedComments = false
+    }
+  }
+}
+
+const shootsEmitter = Emitter(shootsEmitterObj)
+const journalsEmitter = Emitter(journalsEmitterObj)
+
+const emitters = [shootsEmitter, journalsEmitter]
+
 function onAuthenticated () {
-  emitter.authenticated = true
-  emitter.emit('authenticated')
-  console.log('socket connection authenticated')
-  socket.on('event', ({type, object}) => {
+  this.authenticated = true
+  this.emit('authenticated')
+  console.log(`socket connection ${this.socket.id} authenticated`)
+  this.socket.on('event', ({type, object}) => {
     const {kind} = object
     const objectKind = toLower(kind)
     switch (type) {
       case 'ADDED':
       case 'MODIFIED':
-        emitter.emit(objectKind, {type: 'put', object})
+        this.emit(objectKind, {type: 'put', object})
         break
       case 'DELETED':
-        emitter.emit(objectKind, {type: 'delete', object})
+        this.emit(objectKind, {type: 'delete', object})
         break
       case 'ERROR':
-        emitter.emit('error', object)
+        this.emit('error', object)
         console.error('Kubernetes error', object)
         break
     }
   })
-  socket.on('batchEvent', ({type, kind, data}) => {
+  this.socket.on('batchEvent', ({type, kind, data}) => {
     const objectKind = toLower(kind)
     switch (type) {
       case 'ADDED':
-        emitter.emit(objectKind, {type: 'put', data})
+        this.emit(objectKind, {type: 'put', data})
         break
       default:
         console.error('handleBatchEvents: unhandled type', type)
         break
     }
   })
-  socket.on('batchEventDone', ({kind, namespaces}) => {
+  this.socket.on('batchEventDone', ({kind, namespaces}) => {
     if (kind === 'shoots') {
       store.dispatch('unsetShootsLoading', namespaces)
     }
   })
-  const namespace = emitter.namespace
-  subscribe(namespace)
+  const namespace = this.namespace
+  const filter = undefined
+  this.subscribe({namespace, filter})
 }
 
 function onConnect (attempt) {
   if (attempt) {
-    console.log(`socket connection established after '${attempt}' attempt(s)`)
+    console.log(`socket connection ${this.socket.id} established after '${attempt}' attempt(s)`)
   } else {
-    console.log('socket connection established')
+    console.log(`socket connection ${this.socket.id} established`)
   }
-  emitter.authenticate()
+  this.authenticate()
 }
 
 function onDisconnect (reason) {
-  console.error(`socket connection lost because '${reason}'`)
-  emitter.authenticated = false
-  socket.off('event')
-  emitter.emit('disconnect', reason)
+  console.error(`socket connection lost because`, reason)
+  this.authenticated = false
+  this.socket.off('event')
+  this.emit('disconnect', reason)
 }
 
 /* Web Socket Connection */
 
-socket.on('connect', onConnect)
-socket.on('reconnect', onConnect)
-socket.on('authenticated', onAuthenticated)
-socket.on('disconnect', onDisconnect)
-socket.on('connect_error', err => {
-  console.error('socket connection error', err)
-})
-socket.on('connect_timeout', () => {
-  console.error('socket connection timeout')
-})
-socket.on('reconnect_attempt', () => {
-  console.log('socket reconnect attempt')
-})
-socket.on('reconnecting', attempt => {
-  console.log(`socket reconnecting attempt number '${attempt}'`)
-})
-socket.on('reconnect_error', err => {
-  console.error('socket reconnect error', err)
-})
-socket.on('reconnect_failed', () => {
-  console.error('socket couldn\'t reconnect')
-})
-socket.on('error', err => {
-  console.error('socket socket error', err)
+forEach(emitters, emitter => {
+  emitter.socket.on('connect', attempt => onConnect.call(emitter, attempt))
+  emitter.socket.on('reconnect', attempt => onConnect.call(emitter, attempt))
+  emitter.socket.on('authenticated', () => onAuthenticated.call(emitter))
+  emitter.socket.on('disconnect', reason => onDisconnect.call(emitter, reason))
+  emitter.socket.on('connect_error', err => {
+    console.error(`socket connection error ${err}`)
+  })
+  emitter.socket.on('connect_timeout', () => {
+    console.error(`socket ${emitter.socket.id} connection timeout`)
+  })
+  emitter.socket.on('reconnect_attempt', () => {
+    console.log(`socket ${emitter.socket.id} reconnect attempt`)
+  })
+  emitter.socket.on('reconnecting', attempt => {
+    console.log(`socket ${emitter.socket.id} reconnecting attempt number '${attempt}'`)
+  })
+  emitter.socket.on('reconnect_error', err => {
+    console.error(`socket ${emitter.socket.id} reconnect error ${err}`)
+  })
+  emitter.socket.on('reconnect_failed', () => {
+    console.error(`socket ${emitter.socket.id} couldn't reconnect`)
+  })
+  emitter.socket.on('error', err => {
+    console.error(`socket ${emitter.socket.id} error ${err}`)
+  })
 })
 
-window.GARDEN = {emitter}
+const wrapper = {
+  setUser (user) {
+    forEach(emitters, emitter => emitter.setUser(user))
+  },
+  shootsEmitter,
+  journalsEmitter
+}
 
-export default emitter
+window.GARDEN = {emitter: shootsEmitter}
+
+export default wrapper

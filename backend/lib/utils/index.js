@@ -1,3 +1,4 @@
+
 //
 // Copyright 2018 by The Gardener Authors.
 //
@@ -18,7 +19,7 @@
 
 const path = require('path')
 const express = require('express')
-const { isProd } = require('./config')
+const { isProd } = require('../config')
 const _ = require('lodash')
 
 function resolve (pathname) {

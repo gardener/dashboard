@@ -51,3 +51,18 @@ data:
         response_type: "token id_token"
         scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
         loadUserInfo: false
+{{- if .Values.frontendConfig.gitHubRepoUrl }}
+      gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
+{{- end }}
+{{- if .Values.gitHub }}
+    gitHub:
+      apiUrl: {{ .Values.gitHub.apiUrl }}
+      org: {{ .Values.gitHub.org }}
+      repository: {{ .Values.gitHub.repository }}
+      webhookSecret: {{ .Values.gitHub.webhookSecret }}
+      {{- if .Values.gitHub.authentication }}
+      authentication:
+        username: {{ .Values.gitHub.authentication.username }}
+        token: {{ .Values.gitHub.authentication.token }}
+      {{- end }}
+{{- end }}

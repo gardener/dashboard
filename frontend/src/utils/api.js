@@ -139,9 +139,3 @@ export function deleteMember ({namespace, name, user}) {
 export function getUserInfo ({user}) {
   return getResource(`/api/user`, user)
 }
-
-/* Utilities */
-
-export function findItem (items, {namespace, name}) {
-  return items.find(item => item.metadata.namespace === namespace && item.metadata.name === name)
-}

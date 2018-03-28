@@ -166,3 +166,11 @@ Copyright (c) 2013-present Evan You
 
 [The Roboto family of fonts](https://github.com/google/roboto)
 [Apache License 2.0](https://github.com/google/roboto/blob/master/LICENSE)
+
+[marked](https://github.com/markedjs/marked)
+Copyright (c) 2011-2018, Christopher Jeffrey. (MIT License)
+[MIT License](https://github.com/markedjs/marked/blob/master/LICENSE.md)
+
+[parse-link-header](https://github.com/thlorenz/parse-link-header)
+Copyright 2013 Thorsten Lorenz.
+[MIT License](https://github.com/thlorenz/parse-link-header/blob/master/LICENSE)
