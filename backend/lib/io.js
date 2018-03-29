@@ -67,6 +67,7 @@ module.exports = () => {
         _.forEach(namespaces, (nsObj) => {
           const namespace = _.get(nsObj, 'namespace')
           const filter = _.get(nsObj, 'filter')
+          const shootsWithIssuesOnly = !!filter
           const predicate = item => item.metadata.namespace === namespace
           const project = _.find(projectList, predicate)
           if (project) {
@@ -74,7 +75,7 @@ module.exports = () => {
             socket.join(room)
             logger.debug('Socket %s subscribed to %s', socket.id, room)
             shootsPromises.push(new Promise(async (resolve, reject) => {
-              const shootList = await shoots.list({user, namespace})
+              const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
               const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
               _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
                 postponedData[namespace] = chunkedObjects
