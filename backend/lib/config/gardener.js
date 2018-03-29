@@ -17,7 +17,6 @@
 'use strict'
 
 const _ = require('lodash')
-const logger = require('../logger')
 const yaml = require('js-yaml')
 const { existsSync, readFileSync } = require('fs')
 const { homedir } = require('os')
@@ -82,7 +81,6 @@ module.exports = {
     } catch (err) { /* ignore */ }
 
     if (!config.gitHub && _.get(config, 'frontend.gitHubRepoUrl')) {
-      logger.info('removing property frontend.gitHubRepoUrl from config as the gitHub property is not set')
       _.unset(config, 'frontend.gitHubRepoUrl')
     }
     return config
