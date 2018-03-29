@@ -29,8 +29,12 @@ function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
-exports.list = async function ({user, namespace}) {
-  return Garden(user).namespaces(namespace).shoots.get({})
+exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) {
+  let qs
+  if (shootsWithIssuesOnly) {
+    qs = {labelSelector: 'shoot.garden.sapcloud.io/unhealthy=true'}
+  }
+  return Garden(user).namespaces(namespace).shoots.get({qs})
 }
 
 exports.create = async function ({user, namespace, body}) {
