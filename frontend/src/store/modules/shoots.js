@@ -75,7 +75,7 @@ const actions = {
         commit('ITEM_PUT', item)
       })
       .then(() => dispatch('getInfo', {name, namespace}))
-      .then(() => findItem(state.selection))
+      .then(() => findItem({name, namespace}))
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
