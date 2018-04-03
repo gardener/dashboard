@@ -23,7 +23,6 @@ import map from 'lodash/map'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
-import find from 'lodash/find'
 import includes from 'lodash/includes'
 import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
@@ -97,8 +96,8 @@ const getters = {
       return get(cloudProfile, 'data.volumeTypes')
     }
   },
-  shootList (state) {
-    return state.shoots.all
+  shootList (state, getters) {
+    return getters['shoots/items']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -159,19 +158,18 @@ const getters = {
       return filtered
     }
   },
-  shootByNamespaceAndName (state) {
+  shootByNamespaceAndName (state, getters) {
     return ({namespace, name}) => {
-      const predicate = item => item.metadata.name === name && item.metadata.namespace === namespace
-      return find(state.shoots.all, predicate)
+      return getters['shoots/itemByNameAndNamespace']({namespace, name})
     }
   },
-  shootsByInfrastructureSecret (state) {
+  shootsByInfrastructureSecret (state, getters) {
     return (secretName, namespace) => {
       const predicate = item => {
         const secretBindingRef = get(item, 'spec.cloud.secretBindingRef')
         return get(secretBindingRef, 'name') === secretName && get(secretBindingRef, 'namespace') === namespace
       }
-      return filter(state.shoots.all, predicate)
+      return filter(getters['shoots/items'], predicate)
     }
   },
   kubernetesVersions (state, getters) {

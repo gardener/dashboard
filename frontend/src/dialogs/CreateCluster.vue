@@ -586,7 +586,7 @@ limitations under the License.
               return /^([a-z][a-z0-9-]*)$/.test(value)
             },
             unique (value) {
-              return this.shoots.filter(shoot => shoot.metadata.name === value).length === 0
+              return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
             }
           }
         },
@@ -639,11 +639,9 @@ limitations under the License.
         'infrastructureSecretsByInfrastructureKind',
         'infrastructureSecretsByCloudProfileName',
         'projectList',
-        'domainList'
+        'domainList',
+        'shootByNamespaceAndName'
       ]),
-      ...mapState('shoots', {
-        shoots: 'all'
-      }),
       visible: {
         get () {
           return this.value

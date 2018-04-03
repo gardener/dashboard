@@ -14,11 +14,11 @@
 // limitations under the License.
 //
 
-import find from 'lodash/find'
-import findIndex from 'lodash/findIndex'
+import Vue from 'vue'
 import assign from 'lodash/assign'
 import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
+import map from 'lodash/map'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -26,25 +26,33 @@ import { isNotFound } from '@/utils/error'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
-const eql = ({namespace, name}) => {
-  return item => item.metadata.namespace === namespace && item.metadata.name === name
+const keyForShoot = ({name, namespace}) => {
+  return `${name}_${namespace}`
+}
+
+const findItem = ({name, namespace}) => {
+  return state.shoots[keyForShoot({name, namespace})]
 }
 
 // initial state
 const state = {
-  all: [],
+  shoots: {},
   selection: undefined
 }
 
 // getters
 const getters = {
   items (state) {
-    return state.all
+    return map(Object.keys(state.shoots), (key) => state.shoots[key])
+  },
+  itemByNameAndNamespace () {
+    return ({namespace, name}) => {
+      return findItem({name, namespace})
+    }
   },
   selectedItem () {
     if (state.selection) {
-      const predicate = eql(state.selection)
-      return find(state.all, predicate)
+      return findItem(state.selection)
     }
   }
 }
@@ -57,7 +65,7 @@ const actions = {
    */
   clearAll ({ commit, dispatch }) {
     commit('CLEAR_ALL')
-    return state.all
+    return getters.items
   },
   get ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
@@ -67,7 +75,7 @@ const actions = {
         commit('ITEM_PUT', item)
       })
       .then(() => dispatch('getInfo', {name, namespace}))
-      .then(() => find(state.all, eql({namespace, name})))
+      .then(() => findItem(state.selection))
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -133,8 +141,7 @@ const actions = {
     if (!metadata) {
       return commit('SET_SELECTION', null)
     }
-    const predicate = eql(metadata)
-    const item = find(state.all, predicate)
+    const item = findItem(metadata)
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
@@ -145,27 +152,22 @@ const actions = {
 }
 
 const putItem = (state, newItem) => {
-  const index = findIndex(state.all, eql(newItem.metadata))
-  if (index !== -1) {
-    const item = state.all[index]
+  const item = findItem(newItem.metadata)
+  if (item !== undefined) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      state.all.splice(index, 1, assign({}, item, newItem))
+      Vue.set(state.shoots, keyForShoot(item.metadata), assign({}, item, newItem))
     }
   } else {
-    state.all.push(newItem)
+    Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
   }
 }
 
 // mutations
 const mutations = {
-  RECEIVE (state, { items }) {
-    state.all = items
-  },
   RECEIVE_INFO (state, { namespace, name, info }) {
-    const index = findIndex(state.all, eql({namespace, name}))
-    if (index !== -1) {
-      const item = state.all[index]
-      state.all.splice(index, 1, assign({}, item, {info}))
+    const item = findItem({namespace, name})
+    if (item !== undefined) {
+      state.shoots[keyForShoot(item.metadata)] = assign({}, item, {info})
     }
   },
   SET_SELECTION (state, metadata) {
@@ -178,13 +180,14 @@ const mutations = {
     forEach(newItems, newItem => putItem(state, newItem))
   },
   ITEM_DEL (state, deletedItem) {
-    const index = findIndex(state.all, eql(deletedItem.metadata))
-    if (index !== -1) {
-      state.all.splice(index, 1)
+    const item = findItem(deletedItem.metadata)
+    if (item !== undefined) {
+      // use undefined instead of delete for performance reasons
+      state.shoots[keyForShoot(item.metadata)] = undefined
     }
   },
   CLEAR_ALL (state) {
-    state.all = []
+    state.shoots = {}
   }
 }
 
