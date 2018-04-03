@@ -16,40 +16,46 @@ limitations under the License.
 
 <template>
   <span>
-    {{timeAgo}}
+    <span v-for="label in labels" :key="label.id" class="label-color" :style="labelStyle(label)">
+      {{ label.name }}
+    </span>
   </span>
+
 </template>
 
+
+
 <script>
-  import {getTimeAgoFrom} from '@/utils'
-
-  const state = {
-    current: new Date(),
-    intervalId: undefined
-  }
-
-  function run () {
-    if (!state.intervalId) {
-      state.intervalId = setInterval(() => {
-        state.current = new Date()
-      }, 1000)
-    }
-  }
+  import get from 'lodash/get'
 
   export default {
-    props: ['dateTime'],
-    data () {
-      return {
-        state: state
+    props: {
+      labels: {
+        type: Array,
+        required: true
       }
     },
     computed: {
-      timeAgo () {
-        return getTimeAgoFrom(this.dateTime, this.state.current)
+      labelStyle () {
+        return (label) => {
+          const color = `#${get(label, 'color')}`
+
+          return `background-color: ${color}`
+        }
       }
-    },
-    mounted () {
-      run()
     }
   }
 </script>
+
+<style lang="styl" scoped>
+
+  .label-color {
+      margin-left: 4px;
+      padding: 2px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 2px;
+      box-shadow: inset 0 -1px 0 rgba(27,31,35,0.12);
+  }
+
+</style>

@@ -21,5 +21,6 @@ module.exports = {
   shoots: require('./shoots'),
   infrastructureSecrets: require('./infrastructureSecrets'),
   members: require('./members'),
-  userInfo: require('./userInfo')
+  userInfo: require('./userInfo'),
+  journals: require('./journals')
 }

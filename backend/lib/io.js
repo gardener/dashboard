@@ -21,9 +21,11 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects, shoots } = require('./services')
+const { projects, shoots, journals, userInfo } = require('./services')
 const watches = require('./watches')
 const { shootHasIssue } = require('./utils')
+const { ArrayBatchEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
+const { getJournalCache } = require('./cache')
 
 module.exports = () => {
   const io = socketIO({
@@ -38,32 +40,78 @@ module.exports = () => {
     }
   })
 
-  // handle socket connections
-  const nsp = io.of('/shoots')
-  nsp.on('connection', socket => {
-    logger.debug('Socket %s connected', socket.id)
-    socket.on('disconnect', (reason) => {
-      logger.debug('Socket %s disconnected. Reason: %s', socket.id, reason)
+  const onDisconnect = function (reason) {
+    logger.debug('Socket %s disconnected. Reason: %s', this.id, reason)
+  }
+
+  const leavePreviousRooms = (socket, filterFn) => {
+    _
+      .chain(socket.rooms)
+      .keys()
+      .filter(filterFn)
+      .each(key => {
+        logger.debug('Socket %s leaving room %s', socket.id, key)
+        socket.leave(key)
+      })
+      .commit()
+  }
+
+  const socketAuthentication = nsp => {
+    socketIOAuth(nsp, {
+      timeout: 5000,
+      authenticate (socket, data, cb) {
+        logger.debug('Socket %s authenticating', socket.id)
+        const bearer = data.bearer || data.token
+        const auth = {bearer}
+        const req = {auth}
+        const res = {}
+        const next = (err) => {
+          const user = res.user
+          if (user) {
+            user.auth = auth
+          }
+          if (err) {
+            logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
+            return cb(err)
+          }
+          logger.debug('Socket %s authenticated (user %s)', socket.id, _.get(user, 'email'))
+          socket.client.user = user
+
+          cb(null, true)
+        }
+        jwtIO(req, res, next)
+      }
     })
+  }
+
+  const getUserFromSocket = socket => {
+    const user = _.get(socket, 'client.user')
+    user.id = user['email']
+    return user
+  }
+
+  const joinRoom = (socket, room) => {
+    socket.join(room)
+    logger.debug('Socket %s subscribed to %s', socket.id, room)
+  }
+
+  // handle socket connections
+  const shootsNsp = io.of('/shoots')
+  shootsNsp.on('connection', socket => {
+    logger.debug('Socket %s connected', socket.id)
+    socket.on('disconnect', onDisconnect)
     socket.on('subscribe', async ({namespaces}) => {
-      /* leave previous rooms */
-      _
-        .chain(socket.rooms)
-        .keys()
-        .filter(key => key !== socket.id)
-        .each(key => socket.leave(key))
-        .commit()
+      const filterFn = key => key !== socket.id
+      leavePreviousRooms(socket, filterFn)
 
       /* join current rooms */
       if (_.isArray(namespaces)) {
-        const user = _.get(socket, 'client.user')
-        user.id = user['email']
+        const kind = 'shoots'
+        const user = getUserFromSocket(socket)
         const projectList = await projects.list({user})
         const shootsPromises = []
 
-        let postponedData = {}
-        const postponedObjectsCount = () => _.sum(_.map(postponedData, objects => objects.length))
-
+        const batchEmitter = new NamespacedBatchEmitter(kind, socket)
         _.forEach(namespaces, (nsObj) => {
           const namespace = _.get(nsObj, 'namespace')
           const filter = _.get(nsObj, 'filter')
@@ -72,18 +120,12 @@ module.exports = () => {
           const project = _.find(projectList, predicate)
           if (project) {
             const room = filter ? `${namespace}_${filter}` : namespace
-            socket.join(room)
-            logger.debug('Socket %s subscribed to %s', socket.id, room)
+            joinRoom(socket, room)
+
             shootsPromises.push(new Promise(async (resolve, reject) => {
               const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
               const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-              _.forEach(_.chunk(objects, 50), (chunkedObjects) => {
-                postponedData[namespace] = chunkedObjects
-                if (postponedObjectsCount() >= 10) {
-                  socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
-                  postponedData = {}
-                }
-              })
+              batchEmitter.batchEmitObjects(objects, namespace)
 
               resolve()
             }))
@@ -91,39 +133,60 @@ module.exports = () => {
         })
 
         await Promise.all(shootsPromises)
-        if (postponedObjectsCount() !== 0) {
-          socket.emit('batchEvent', {kind: 'shoots', type: 'ADDED', data: postponedData})
-        }
-        socket.emit('batchEventDone', {kind: 'shoots', namespaces})
-        logger.debug('Emitted batch events to socket %s', socket.id)
+        batchEmitter.flush()
+        socket.emit('batchEventDone', {kind, namespaces})
       }
     })
   })
-  socketIOAuth(nsp, {
-    timeout: 5000,
-    authenticate (socket, data, cb) {
-      logger.debug('Socket %s authenticating', socket.id)
-      const bearer = data.bearer || data.token
-      const auth = {bearer}
-      const req = {auth}
-      const res = {}
-      const next = (err) => {
-        const user = res.user
-        if (user) {
-          user.auth = auth
-        }
-        if (err) {
-          logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-          return cb(err)
-        }
-        logger.debug('Socket %s authenticated (user %s)', socket.id, user.email)
-        socket.client.user = user
+  const journalsNsp = io.of('/journals')
+  const leaveCommentRooms = (socket) => {
+    const filterFn = key => key !== socket.id && key !== 'issues'
+    leavePreviousRooms(socket, filterFn)
+  }
+  journalsNsp.on('connection', socket => {
+    logger.debug('Socket %s connected', socket.id)
+    socket.on('disconnect', onDisconnect)
+    socket.on('subscribeIssues', async () => {
+      const filterFn = key => key !== socket.id && _.startsWith(key, 'comments_')
+      leavePreviousRooms(socket, filterFn)
 
-        cb(null, true)
+      const user = getUserFromSocket(socket)
+      if (userInfo.isAdmin({user})) {
+        joinRoom(socket, 'issues')
+
+        const objects = getJournalCache().getIssues()
+
+        const batchEmitter = new ArrayBatchEmitter('issues', socket)
+        batchEmitter.batchEmitObjectsAndFlush(objects)
+      } else {
+        logger.warn('user %s tried to fetch journal but is no admin', _.get(user, 'email'))
       }
-      jwtIO(req, res, next)
-    }
+    })
+    socket.on('subscribeComments', async ({name, namespace}) => {
+      leaveCommentRooms(socket)
+
+      const user = getUserFromSocket(socket)
+      if (userInfo.isAdmin({user})) {
+        joinRoom(socket, `comments_${namespace}/${name}`)
+
+        const batchEmitter = new ArrayBatchEmitter('comments', socket)
+        await journals.commentsForNameAndNamespace({name,
+          namespace,
+          batchFn: comments => {
+            batchEmitter.batchEmitObjects(comments)
+          }})
+        batchEmitter.flush()
+      } else {
+        logger.warn('user %s tried to fetch journal comments but is no admin', _.get(user, 'email'))
+      }
+    })
+    socket.on('unsubscribeComments', () => {
+      leaveCommentRooms(socket)
+    })
   })
+
+  socketAuthentication(shootsNsp)
+  socketAuthentication(journalsNsp)
 
   // start watches
   _.forEach(watches, (watch, resourceName) => {

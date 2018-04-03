@@ -18,7 +18,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
-import Emitter from '@/utils/Emitter'
+import EmitterWrapper from '@/utils/Emitter'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
@@ -34,6 +34,7 @@ import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
+import journals from './modules/journals'
 
 import { getUserInfo } from '@/utils/api'
 
@@ -165,6 +166,16 @@ const getters = {
       return find(state.shoots.all, predicate)
     }
   },
+  journalsByNamespaceAndName (state, getters) {
+    return ({namespace, name}) => {
+      return getters['journals/issues']({namespace, name})
+    }
+  },
+  journalCommentsByIssueNumber (state, getters) {
+    return ({issueNumber}) => {
+      return getters['journals/comments']({issueNumber})
+    }
+  },
   shootsByInfrastructureSecret (state) {
     return (secretName, namespace) => {
       const predicate = item => {
@@ -179,6 +190,12 @@ const getters = {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.kubernetes.versions', [])
     }
+  },
+  isAdmin (state) {
+    return get(state.user, 'info.isAdmin', false)
+  },
+  journalList (state) {
+    return state.journals.all
   },
   username (state) {
     return get(state, 'user.profile.name')
@@ -242,6 +259,19 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  subscribeComments ({ dispatch, commit }, {name, namespace}) {
+    return new Promise((resolve, reject) => {
+      commit('journals/CLEAR_COMMENTS')
+      EmitterWrapper.journalsEmitter.subscribeComments({name, namespace})
+      resolve()
+    })
+  },
+  unsubscribeComments ({ dispatch, commit }) {
+    return new Promise((resolve, reject) => {
+      EmitterWrapper.journalsEmitter.unsubscribeComments()
+      resolve()
+    })
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
@@ -364,16 +394,16 @@ const mutations = {
   SET_NAMESPACE (state, value) {
     if (value !== state.namespace) {
       state.namespace = value
-      Emitter.setNamespace(value, getFilterValue(state))
+      EmitterWrapper.shootsEmitter.setNamespace(value, getFilterValue(state))
     }
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value
-    Emitter.setNamespace(state.namespace, getFilterValue(state))
+    EmitterWrapper.shootsEmitter.setNamespace(state.namespace, getFilterValue(state))
   },
   SET_USER (state, value) {
-    Emitter.setUser(value)
     state.user = value
+    EmitterWrapper.setUser(value)
   },
   SET_SIDEBAR (state, value) {
     state.sidebar = value
@@ -400,39 +430,94 @@ const store = new Vuex.Store({
     cloudProfiles,
     domains,
     shoots,
-    infrastructureSecrets
+    infrastructureSecrets,
+    journals
   },
   strict: debug,
   plugins
 })
 
+const addListener = ({emitter, eventName, itemKey, mutationMapping = {}, eventHandlerFn = {}}) => {
+  emitter.on(eventName, (event) => {
+    if (eventHandlerFn[event.type]) {
+      eventHandlerFn[event.type](event[itemKey])
+    } else if (mutationMapping[event.type]) {
+      store.commit(mutationMapping[event.type], event[itemKey])
+    } else {
+      console.error('unhandled type', event.type)
+    }
+  })
+}
+
+/* Shoots */
 const isCurrentNamespace = namespace => {
   return (state.namespace === '_all' && includes(store.getters.namespaces, namespace)) || namespace === state.namespace
 }
-Emitter.on('shoot', ({type, object}) => {
-  switch (type) {
-    case 'put':
+addListener({
+  emitter: EmitterWrapper.shootsEmitter,
+  eventName: 'shoot',
+  itemKey: 'object',
+  eventHandlerFn: {
+    put: object => {
       if (isCurrentNamespace(object.metadata.namespace)) {
         store.commit('shoots/ITEM_PUT', object)
       }
-      break
-    case 'delete':
-      store.commit('shoots/ITEM_DEL', object)
-      break
+    }
+  },
+  mutationMapping: {
+    delete: 'shoots/ITEM_DEL'
   }
 })
-
-Emitter.on('shoots', ({type, namespace, data}) => {
-  switch (type) {
-    case 'put':
+addListener({
+  emitter: EmitterWrapper.shootsEmitter,
+  eventName: 'shoots',
+  itemKey: 'data',
+  eventHandlerFn: {
+    put: data => {
       mapKeys(data, (objects, namespace) => {
         if (isCurrentNamespace(namespace)) {
           store.commit('shoots/ITEMS_PUT', objects)
         }
       })
-      break
-    default:
-      console.error('unhandled type', type)
+    }
+  }
+})
+
+/* Journal Issues */
+addListener({
+  emitter: EmitterWrapper.journalsEmitter,
+  eventName: 'issue',
+  itemKey: 'object',
+  mutationMapping: {
+    put: 'journals/ITEM_PUT',
+    delete: 'journals/ITEM_DEL'
+  }
+})
+addListener({
+  emitter: EmitterWrapper.journalsEmitter,
+  eventName: 'issues',
+  itemKey: 'data',
+  mutationMapping: {
+    put: 'journals/ITEMS_PUT'
+  }
+})
+
+/* Journal Comments */
+addListener({
+  emitter: EmitterWrapper.journalsEmitter,
+  eventName: 'comment',
+  itemKey: 'object',
+  mutationMapping: {
+    put: 'journals/COMMENT_PUT',
+    delete: 'journals/COMMENT_DEL'
+  }
+})
+addListener({
+  emitter: EmitterWrapper.journalsEmitter,
+  eventName: 'comments',
+  itemKey: 'data',
+  mutationMapping: {
+    put: 'journals/COMMENTS_PUT'
   }
 })
 
