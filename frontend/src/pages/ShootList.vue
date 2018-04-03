@@ -140,7 +140,7 @@ limitations under the License.
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getCreatedBy } from '@/utils'
+  import { getCreatedBy, availableK8sUpdatesForShoot, isHibernated } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -203,9 +203,12 @@ limitations under the License.
         this.setSelectedShoot(null)
       },
       getSortVal (row, column) {
+        const metadata = row.metadata
+        const spec = row.spec
         switch (column) {
           case 'purpose':
-            switch (this.getPurpose(row)) {
+            // eslint-disable-next-line
+            switch (get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])) {
               case 'production':
                 return 0
               case 'development':
@@ -216,27 +219,30 @@ limitations under the License.
                 return 3
             }
           case 'lastOperation':
-            const operation = row.lastOperation
+            const operation = get(status, 'lastOperation', {})
             const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
             const isError = operation.state === 'Failed' || row.lastError
-            const isHibernated = row.isHibernated
             if (isError && !inProgress) {
               return 0
             } else if (isError && inProgress) {
               return 1
             } else if (inProgress) {
               return 3
-            } else if (isHibernated) {
+            } else if (isHibernated(spec)) {
               return 2
             }
             return 4
           case 'createdAt':
-            return row.creationTimestamp
+            return metadata.creationTimestamp
           case 'project':
-            return row.namespace
+            return metadata.namespace
           case 'k8sVersion':
-            const sortPrefix = row.availableK8sUpdates ? '_' : ''
-            return `${sortPrefix}${row.k8sVersion}`
+            const k8sVersion = get(spec, 'kubernetes.version')
+            const availableK8sUpdates = availableK8sUpdatesForShoot(
+              k8sVersion,
+              this.kubernetesVersions(get(spec, 'cloud.profile')))
+            const sortPrefix = availableK8sUpdates ? '_' : ''
+            return `${sortPrefix}${k8sVersion}`
           default:
             return row[column]
         }
@@ -288,7 +294,8 @@ limitations under the License.
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot'
+        selectedItem: 'selectedShoot',
+        kubernetesVersions: 'kubernetesVersions'
       }),
       ...mapState([
         'shootsLoading',

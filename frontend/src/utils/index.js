@@ -29,6 +29,7 @@ import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import moment from 'moment'
 import semver from 'semver'
+import some from 'lodash/some'
 
 export function emailToDisplayName (email) {
   if (email) {
@@ -208,4 +209,11 @@ export function availableK8sUpdatesForShoot (shootVersion, allVersions) {
 export function getCreatedBy (metadata) {
   // eslint-disable-next-line
   return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
+}
+
+export function isHibernated (spec) {
+  const kind = getCloudProviderKind(spec.cloud)
+  // eslint-disable-next-line
+  const workers = get(spec, ['cloud', kind, 'workers'])
+  return some(workers, worker => get(worker, 'autoScalerMax') === 0)
 }

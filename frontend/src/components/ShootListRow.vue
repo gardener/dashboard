@@ -132,9 +132,8 @@ limitations under the License.
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
   import get from 'lodash/get'
-  import some from 'lodash/some'
   import includes from 'lodash/includes'
-  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
 
   export default {
     components: {
@@ -164,11 +163,6 @@ limitations under the License.
         const status = this.shootItem.status
         const info = this.shootItem.info
         const kind = getCloudProviderKind(spec.cloud)
-        const isHibernated = spec => {
-          // eslint-disable-next-line
-          const workers = get(spec, ['cloud', kind, 'workers'])
-          return some(workers, worker => get(worker, 'autoScalerMax') === 0)
-        }
         return {
           name: metadata.name,
           createdBy: getCreatedBy(metadata),
