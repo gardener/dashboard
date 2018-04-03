@@ -43,3 +43,12 @@ frontendConfig:
   - title: Issues
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
+  gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+gitHub:
+  apiUrl: https://api.foo-github.com
+  org: dummyorg
+  repository: dummyrepo
+  webhookSecret: foobar
+  authentication:
+    username: dashboard
+    token: dummytoken

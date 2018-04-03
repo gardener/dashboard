@@ -1,3 +1,4 @@
+
 //
 // Copyright 2018 by The Gardener Authors.
 //
@@ -18,7 +19,7 @@
 
 const path = require('path')
 const express = require('express')
-const { isProd } = require('./config')
+const { isProd } = require('../config')
 const _ = require('lodash')
 
 function resolve (pathname) {
@@ -64,24 +65,7 @@ function getCloudProviderKind (object) {
 exports.getCloudProviderKind = getCloudProviderKind
 
 function shootHasIssue (shoot) {
-  let healthy = true
-  let hasIssue = false
-
-  const status = _.get(shoot, 'status')
-  if (status.lastOperation) {
-    if (status.conditions && status.conditions.length > 0) {
-      _.forEach(status.conditions, (condition) => {
-        if (condition.status === 'False') {
-          healthy = false
-        }
-      })
-    }
-    const lastOperation = _.get(status, 'lastOperation')
-    if (!healthy || lastOperation.state === 'Failed' || _.get(status, 'lastError.description')) {
-      hasIssue = true
-    }
-  }
-  return hasIssue
+  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'], false)
 }
 
 exports.shootHasIssue = shootHasIssue

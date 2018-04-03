@@ -164,8 +164,8 @@ limitations under the License.
             </v-card>
 
           </v-flex>
-          <v-flex md6 v-show="isInfoAvailable">
 
+          <v-flex md6 v-show="isInfoAvailable">
             <v-card>
               <v-card-title class="subheading white--text cyan darken-2">
                 Kube-Cluster Access
@@ -187,6 +187,8 @@ limitations under the License.
               </template>
             </v-card>
 
+            <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
+
           </v-flex>
         </v-layout>
       </v-container>
@@ -206,6 +208,7 @@ limitations under the License.
   import { mapGetters, mapActions } from 'vuex'
   import CodeBlock from '@/components/CodeBlock'
   import ClusterAccess from '@/components/ClusterAccess'
+  import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import get from 'lodash/get'
   import { safeDump } from 'js-yaml'
@@ -216,6 +219,7 @@ limitations under the License.
     components: {
       CodeBlock,
       ClusterAccess,
+      Journals,
       TimeAgo
     },
     data () {
@@ -261,12 +265,14 @@ limitations under the License.
       ])
     },
     computed: {
+      ...mapGetters([
+        'shootByNamespaceAndName',
+        'journalsByNamespaceAndName',
+        'isAdmin'
+      ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.item, 'spec.cloud'))
       },
-      ...mapGetters([
-        'shootByNamespaceAndName'
-      ]),
       componentUrl () {
         return (name) => {
           switch (name) {
@@ -317,6 +323,10 @@ limitations under the License.
       },
       isInfoAvailable () {
         return !!this.item.info
+      },
+      journals () {
+        const params = this.$route.params
+        return this.journalsByNamespaceAndName(params)
       },
       metadata () {
         return this.item.metadata || {}

@@ -52,7 +52,7 @@ module.exports = {
           loadUserInfo: false
         },
         dashboardUrl: {
-          pathname: '/api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/'
+          pathname: '/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy'
         }
       }
     }
@@ -79,6 +79,10 @@ module.exports = {
         _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
       }
     } catch (err) { /* ignore */ }
+
+    if (!config.gitHub && _.get(config, 'frontend.gitHubRepoUrl')) {
+      _.unset(config, 'frontend.gitHubRepoUrl')
+    }
     return config
   },
   existsSync,

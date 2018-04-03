@@ -15,6 +15,7 @@
 //
 
 const _ = require('lodash')
+const journals = require('./journals')
 
 const cloudProfiles = []
 const seeds = []
@@ -28,6 +29,9 @@ const cache = {
   },
   getDomains () {
     return domains
+  },
+  getJournalCache () {
+    return journals
   }
 }
 
@@ -49,5 +53,8 @@ module.exports = {
   },
   getDomains () {
     return cache.getDomains()
+  },
+  getJournalCache () {
+    return cache.getJournalCache()
   }
 }
