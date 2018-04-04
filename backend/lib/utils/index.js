@@ -23,9 +23,8 @@ const { isProd } = require('../config')
 const _ = require('lodash')
 
 function resolve (pathname) {
-  return path.resolve(__dirname, '..', pathname)
+  return path.resolve(__dirname, '../..', pathname)
 }
-exports.resolve = resolve
 
 function serveStatic (pathname, cache) {
   const maxAge = cache && isProd ? 60 * 60 * 24 * 30 : 0
@@ -33,7 +32,6 @@ function serveStatic (pathname, cache) {
     maxAge
   })
 }
-exports.serveStatic = serveStatic
 
 function decodeBase64 (value) {
   if (!value) {
@@ -41,7 +39,6 @@ function decodeBase64 (value) {
   }
   return Buffer.from(value, 'base64').toString('utf8')
 }
-exports.decodeBase64 = decodeBase64
 
 function encodeBase64 (value) {
   if (!value) {
@@ -49,23 +46,28 @@ function encodeBase64 (value) {
   }
   return Buffer.from(value, 'utf8').toString('base64')
 }
-exports.encodeBase64 = encodeBase64
 
 const config = {
   getCloudProviderKindList () {
     return ['aws', 'azure', 'gcp', 'openstack']
   }
 }
-exports._config = config
 
 function getCloudProviderKind (object) {
   const cloudProviderKinds = config.getCloudProviderKindList()
   return _.head(_.intersection(_.keys(object), cloudProviderKinds))
 }
-exports.getCloudProviderKind = getCloudProviderKind
 
 function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'], false)
 }
 
-exports.shootHasIssue = shootHasIssue
+module.exports = {
+  resolve,
+  serveStatic,
+  decodeBase64,
+  encodeBase64,
+  getCloudProviderKind,
+  shootHasIssue,
+  _config: config
+}

@@ -34,7 +34,7 @@ module.exports = async io => {
   getJournalCache().subscribeComments(event => {
     const name = event.object.metadata.name
     const namespace = event.object.metadata.namespace
-    logger.warn(`emitting event to room comments_${namespace}/${name}`)
+    logger.debug(`emitting event to room comments_${namespace}/${name}`)
     io.of('/journals').to(`comments_${namespace}/${name}`).emit('event', event)
   })
 
