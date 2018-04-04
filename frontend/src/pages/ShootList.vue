@@ -134,13 +134,14 @@ limitations under the License.
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
+  import orderBy from 'lodash/orderBy'
   import CodeBlock from '@/components/CodeBlock'
   import GPopper from '@/components/GPopper'
   import ShootListRow from '@/components/ShootListRow'
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getCreatedBy, availableK8sUpdatesForShoot, isHibernated } from '@/utils'
+  import { getCreatedBy, availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -219,7 +220,7 @@ limitations under the License.
                 return 3
             }
           case 'lastOperation':
-            const operation = get(status, 'lastOperation', {})
+            const operation = get(row, 'status.lastOperation', {})
             const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
             const isError = operation.state === 'Failed' || row.lastError
             if (isError && !inProgress) {
@@ -243,24 +244,16 @@ limitations under the License.
               this.kubernetesVersions(get(spec, 'cloud.profile')))
             const sortPrefix = availableK8sUpdates ? '_' : ''
             return `${sortPrefix}${k8sVersion}`
+          case 'infrastructure':
+            const kind = getCloudProviderKind(spec.cloud)
+            return kind
           default:
-            return row[column]
+            return row.metadata[column]
         }
       },
       sortTable (rows, column, desc) {
         this.$localStorage.setObject('dataTable_sortBy', {sortBy: this.pagination.sortBy, descending: this.pagination.descending, rowsPerPage: Number.MAX_SAFE_INTEGER})
-
-        return rows.sort((a, b) => {
-          let comp = 0
-          const sortValA = this.getSortVal(a, column)
-          const sortValB = this.getSortVal(b, column)
-          if (sortValA > sortValB) {
-            comp = 1
-          } else if (sortValB > sortValA) {
-            comp = -1
-          }
-          return comp * (desc ? -1 : 1)
-        })
+        return orderBy(rows, [row => { return this.getSortVal(row, column) }], [desc ? 'desc' : 'asc'])
       },
       setColumnChecked (header) {
         header.checked = !header.checked
