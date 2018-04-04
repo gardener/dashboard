@@ -41,7 +41,7 @@ limitations under the License.
 <script>
   import get from 'lodash/get'
   import forEach from 'lodash/forEach'
-  import { mapState } from 'vuex'
+  import { mapState, mapGetters } from 'vuex'
   import Journal from '@/components/Journal'
   import { getDateFormatted, getCloudProviderKind } from '@/utils'
 
@@ -61,6 +61,9 @@ limitations under the License.
     computed: {
       ...mapState([
         'cfg'
+      ]),
+      ...mapGetters([
+        'canLinkToSeedWithName'
       ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.shoot, 'spec.cloud'))
@@ -84,8 +87,13 @@ limitations under the License.
 
         const url = `${window.location.origin}/namespace/${namespace}/shoots/${name}`
 
-        const dashboardShootLink = `**Garden Dashboard:** [${namespace}/${name}](${url})`
+        const dashboardShootLink = `**Shoot:** [${namespace}/${name}](${url})`
         const kind = `**Kind:** ${this.getCloudProviderKind} / ${this.region}`
+
+        const seedName = get(this.shoot, 'spec.cloud.seed')
+        const seedLinkOrName = this.canLinkToSeedWithName({name: seedName}) ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
+        const seed = `**Seed:** ${seedLinkOrName}`
+
         const createdAt = `**Created At:** ${getDateFormatted(get(this.shoot, 'metadata.creationTimestamp', ''))}`
         const lastOperation = `**Last Op:** ${get(this.shoot, 'status.lastOperation.description', '')}`
         const lastError = `**Last Error:** ${get(this.shoot, 'status.lastError.description', '-')}`
@@ -94,6 +102,7 @@ limitations under the License.
         const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}
+${seed}
 ${createdAt}
 ${lastOperation}
 ${lastError}

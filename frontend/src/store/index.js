@@ -203,6 +203,27 @@ const getters = {
   },
   errorMessage () {
     return get(state, 'error.message', '')
+  },
+  isCurrentNamespace (state, getters) {
+    return (namespace) => {
+      return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
+    }
+  },
+  canLinkToSeedWithName (state, getters) {
+    return ({namespace, name}) => {
+      /*
+      * Soils cannot be linked currently as they have no shoot representation.
+      * Currently there is only the secret available.
+      * If we are not in the garden namespace we expect a seed to be present
+      * TODO refactor once we have an owner ref on the shoot pointing to the seed
+      */
+      if (getters.isCurrentNamespace('garden')) {
+        if (!getters.shootByNamespaceAndName({namespace: 'garden', name})) {
+          return false
+        }
+      }
+      return true
+    }
   }
 }
 
@@ -368,8 +389,8 @@ const actions = {
     commit('SET_SHOOTS_LOADING', true)
     return state.shootsLoading
   },
-  unsetShootsLoading ({ commit }, namespaces) {
-    const currentNamespace = some(namespaces, namespace => !isCurrentNamespace(namespace))
+  unsetShootsLoading ({ commit, getters }, namespaces) {
+    const currentNamespace = some(namespaces, namespace => !getters.isCurrentNamespace(namespace))
     if (currentNamespace) {
       commit('SET_SHOOTS_LOADING', false)
     }
@@ -448,16 +469,13 @@ const addListener = ({emitter, eventName, itemKey, mutationMapping = {}, eventHa
 }
 
 /* Shoots */
-const isCurrentNamespace = namespace => {
-  return (state.namespace === '_all' && includes(store.getters.namespaces, namespace)) || namespace === state.namespace
-}
 addListener({
   emitter: EmitterWrapper.shootsEmitter,
   eventName: 'shoot',
   itemKey: 'object',
   eventHandlerFn: {
     put: object => {
-      if (isCurrentNamespace(object.metadata.namespace)) {
+      if (getters.isCurrentNamespace(object.metadata.namespace)) {
         store.commit('shoots/ITEM_PUT', object)
       }
     }
@@ -473,7 +491,7 @@ addListener({
   eventHandlerFn: {
     put: data => {
       mapKeys(data, (objects, namespace) => {
-        if (isCurrentNamespace(namespace)) {
+        if (getters.isCurrentNamespace(namespace)) {
           store.commit('shoots/ITEMS_PUT', objects)
         }
       })
