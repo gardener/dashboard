@@ -16,7 +16,6 @@
 
 'use strict'
 
-const logger = require('../logger')
 const github = require('../github')
 const _ = require('lodash')
 const { getJournalCache } = require('../cache')
@@ -108,16 +107,9 @@ const commentsForNameAndNamespace = async function ({name, namespace, batchFn = 
 exports.commentsForNameAndNamespace = commentsForNameAndNamespace
 
 const commentsForIssueNumber = async function ({issueNumber, name, namespace, batchFn = comments => {}}) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      resolve(await github.comments({issueNumber,
-        batchFn: data => {
-          const commentsBatch = _.map(data, (item) => fromComment(issueNumber, name, namespace, item))
-          batchFn(commentsBatch)
-        }}))
-    } catch (err) {
-      logger.error(`failed to fetch comments: ${err}`)
-      reject(err)
-    }
-  })
+  return github.comments({issueNumber,
+    batchFn: data => {
+      const commentsBatch = _.map(data, (item) => fromComment(issueNumber, name, namespace, item))
+      batchFn(commentsBatch)
+    }})
 }

@@ -32,6 +32,9 @@ const verifySignature = function (req, res, next) {
     hmac.update(payloadBody)
   }
   const requestSignature = _.get(req.headers, 'x-hub-signature')
+  if (!requestSignature) {
+    throw new Forbidden('x-hub-signature header not provided')
+  }
 
   const signature = 'sha1=' + hmac.digest('hex')
 

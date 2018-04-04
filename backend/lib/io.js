@@ -86,7 +86,7 @@ module.exports = () => {
 
   const getUserFromSocket = socket => {
     const user = _.get(socket, 'client.user')
-    user.id = user['email']
+    user.id = _.get(user, 'email')
     return user
   }
 
@@ -170,12 +170,16 @@ module.exports = () => {
         joinRoom(socket, `comments_${namespace}/${name}`)
 
         const batchEmitter = new ArrayBatchEmitter('comments', socket)
-        await journals.commentsForNameAndNamespace({name,
-          namespace,
-          batchFn: comments => {
-            batchEmitter.batchEmitObjects(comments)
-          }})
-        batchEmitter.flush()
+        try {
+          await journals.commentsForNameAndNamespace({name,
+            namespace,
+            batchFn: comments => {
+              batchEmitter.batchEmitObjects(comments)
+            }})
+          batchEmitter.flush()
+        } catch (e) {
+          logger.error('failed to fetch comments for %s/%s', namespace, name, e)
+        }
       } else {
         logger.warn('user %s tried to fetch journal comments but is no admin', _.get(user, 'email'))
       }
