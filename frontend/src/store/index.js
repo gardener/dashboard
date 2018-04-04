@@ -212,12 +212,12 @@ const getters = {
   canLinkToSeedWithName (state, getters) {
     return ({namespace, name}) => {
       /*
-      * Soils cannot be linked currently as they have no shoot representation.
+      * Soils cannot be linked currently as they have representation as "shoot".
       * Currently there is only the secret available.
       * If we are not in the garden namespace we expect a seed to be present
       * TODO refactor once we have an owner ref on the shoot pointing to the seed
       */
-      if (getters.isCurrentNamespace('garden')) {
+      if (getters.isCurrentNamespace('garden') && getFilterValue(state) !== 'issues') {
         if (!getters.shootByNamespaceAndName({namespace: 'garden', name})) {
           return false
         }
