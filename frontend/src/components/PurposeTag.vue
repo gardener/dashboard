@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-tooltip top>
-    <v-chip slot="activator" v-if="!!shortPurpose" :outline="isProduction" :text-color="textColor" color="cyan darken-2" small>{{ shortPurpose }}</v-chip>
+    <v-chip slot="activator" v-if="!!shortPurpose" :outline="!isCritical" :text-color="textColor" color="cyan darken-2" small>{{ shortPurpose }}</v-chip>
     <span>{{ purpose }}</span>
   </v-tooltip>
 </template>
@@ -43,11 +43,11 @@ limitations under the License.
             return toUpper(this.purpose)
         }
       },
-      isProduction () {
-        return this.purpose !== 'production'
+      isCritical () {
+        return this.purpose === 'production' || this.purpose === 'infrastructure'
       },
       textColor () {
-        if (this.isProduction) {
+        if (!this.isCritical) {
           return 'cyan darken-2'
         } else {
           return 'white'
