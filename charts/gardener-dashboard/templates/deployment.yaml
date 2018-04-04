@@ -16,6 +16,8 @@ spec:
       release: "{{ .Release.Name }}"
   template:
     metadata:
+      annotations:
+        checksum/configmap-gardener-dashboard-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         app: gardener-dashboard
         release: {{ .Release.Name }}
