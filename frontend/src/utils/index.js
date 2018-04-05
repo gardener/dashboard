@@ -189,25 +189,34 @@ export function isOwnSecretBinding (secret) {
   return get(secret, 'namespace') === get(secret, 'bindingNamespace')
 }
 
+const availableK8sUpdatesCache = {}
 export function availableK8sUpdatesForShoot (spec) {
   const shootVersion = get(spec, 'kubernetes.version')
-  const allVersions = store.getters.kubernetesVersions(get(spec, 'cloud.profile'))
+  const cloudProfileName = get(spec, 'cloud.profile')
 
-  const newerVersions = {}
-  let newerVersion = false
+  let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)
+  if (newerVersions !== undefined) {
+    return newerVersions
+  } else {
+    newerVersions = {}
+    const allVersions = store.getters.kubernetesVersions(cloudProfileName)
 
-  forEach(allVersions, (version) => {
-    if (semver.gt(version, shootVersion)) {
-      newerVersion = true
-      const diff = semver.diff(version, shootVersion)
-      if (!newerVersions[diff]) {
-        newerVersions[diff] = []
+    let newerVersion = false
+    forEach(allVersions, (version) => {
+      if (semver.gt(version, shootVersion)) {
+        newerVersion = true
+        const diff = semver.diff(version, shootVersion)
+        if (!newerVersions[diff]) {
+          newerVersions[diff] = []
+        }
+        newerVersions[diff].push(version)
       }
-      newerVersions[diff].push(version)
-    }
-  })
+    })
+    newerVersions = newerVersion ? newerVersions : null
+    availableK8sUpdatesCache[`${shootVersion}_${cloudProfileName}`] = newerVersions
 
-  return newerVersion ? newerVersions : undefined
+    return newerVersions
+  }
 }
 
 export function getCreatedBy (metadata) {
