@@ -20,7 +20,13 @@ limitations under the License.
       <v-tooltip top>
         <template slot="activator">
           <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" color="cyan darken-2" :rotate="-90">{{operation.progress}}</v-progress-circular>
-          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error" :rotate="-90">!</v-progress-circular>
+          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error" :rotate="-90">
+            <v-icon v-if="isUserError" class="cursor-pointer progress-icon" color="error">mdi-account-alert</v-icon>
+            <template v-else>
+              !
+            </template>
+          </v-progress-circular>
+          <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" color="error">mdi-account-alert</v-icon>
           <v-icon v-else-if="isError" class="cursor-pointer status-icon" color="error">mdi-alert-outline</v-icon>
           <v-progress-circular v-else-if="operationState==='Pending'" class="cursor-pointer" :size="27" :width="3" indeterminate color="cyan darken-2"></v-progress-circular>
           <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" color="cyan darken-2">mdi-sleep</v-icon>
@@ -47,6 +53,7 @@ limitations under the License.
   import GPopper from '@/components/GPopper'
   import get from 'lodash/get'
   import map from 'lodash/map'
+  import { isUserError } from '@/utils'
 
   export default {
     components: {
@@ -77,11 +84,17 @@ limitations under the License.
       isError () {
         return this.operation.state === 'Failed' || this.lastErrorDescription
       },
+      isUserError () {
+        return isUserError(this.errorCodes)
+      },
       lastErrorDescription () {
         return get(this.lastError, 'description')
       },
+      errorCodes () {
+        return get(this.lastError, 'codes', [])
+      },
       errorCodeDescriptions () {
-        const errorCodeDescriptions = map(get(this.lastError, 'codes'), code => {
+        const errorCodeDescriptions = map(this.errorCodes, code => {
           let description
           switch (code) {
             case 'ERR_INFRA_UNAUTHORIZED':
@@ -147,6 +160,12 @@ limitations under the License.
 
   .progress-circular {
     font-size: 12px;
+  }
+
+  .progress-icon {
+    font-size: 1.1em;
+    padding-left: 2px;
+    padding-bottom: 3px;
   }
 
   .progress-circular-error {

@@ -29,7 +29,7 @@ import toLower from 'lodash/toLower'
 import padStart from 'lodash/padStart'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind } from '@/utils'
+import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -220,18 +220,25 @@ const getSortVal = (item, sortBy) => {
       const operation = value || {}
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const isError = operation.state === 'Failed' || get(item, 'status.lastError')
-      if (isError && !inProgress) {
+      const userError = isUserError(get(item, 'status.lastError.codes', []))
+
+      if (userError && !inProgress) {
+        return 200
+      } else if (userError && inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `3${progress}`
+      } else if (isError && !inProgress) {
         return 0
       } else if (isError && inProgress) {
         const progress = padStart(operation.progress, 2, '0')
         return `1${progress}`
       } else if (inProgress) {
         const progress = padStart(operation.progress, 2, '0')
-        return `3${progress}`
+        return `5${progress}`
       } else if (isHibernated(spec)) {
-        return 200
+        return 400
       }
-      return 400
+      return 600
     case 'k8sVersion':
       const k8sVersion = value
       const availableK8sUpdates = availableK8sUpdatesForShoot(spec)

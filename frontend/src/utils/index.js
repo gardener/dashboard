@@ -27,6 +27,9 @@ import toLower from 'lodash/toLower'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
+import isEmpty from 'lodash/isEmpty'
+import includes from 'lodash/includes'
+import every from 'lodash/every'
 import moment from 'moment'
 import semver from 'semver'
 import some from 'lodash/some'
@@ -239,4 +242,18 @@ export function canLinkToSeed ({shootNamespace}) {
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
   return shootNamespace !== 'garden'
+}
+
+export function isUserError (errorCodes) {
+  if (isEmpty(errorCodes)) {
+    return false
+  }
+
+  const userErrorCodes = [
+    'ERR_INFRA_UNAUTHORIZED',
+    'ERR_INFRA_INSUFFICIENT_PRIVILEGES',
+    'ERR_INFRA_QUOTA_EXCEEDED',
+    'ERR_INFRA_DEPENDENCIES'
+  ]
+  return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
 }
