@@ -22,8 +22,8 @@ limitations under the License.
 
     <v-container>
       <span style="font-weight: 700">{{login}}</span> created this
-      <a :href="htmlUrl" target="_blank">journal</a>
-      <a :href="htmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
+      <a :href="journalHtmlUrl" target="_blank">journal</a>
+      <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-ago :dateTime="journal.metadata.created_at"></time-ago>
     </v-list-tile-title>
     </v-container>
@@ -79,7 +79,7 @@ limitations under the License.
       login () {
         return get(this.journal, 'data.user.login')
       },
-      htmlUrl () {
+      journalHtmlUrl () {
         return get(this.journal, 'data.html_url')
       },
       commentsForJournal () {
@@ -90,8 +90,7 @@ limitations under the License.
         return this.cfg.gitHubRepoUrl
       },
       addCommentLink () {
-        const issueNumber = get(this.journal, 'metadata.number')
-        return `${this.gitHubRepoUrl}/issues/${issueNumber}#new_comment_field`
+        return `${this.journalHtmlUrl}#new_comment_field`
       }
     }
   }

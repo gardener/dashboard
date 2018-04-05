@@ -34,7 +34,10 @@ limitations under the License.
       <template v-if="isError">
         <v-divider class="my-2"></v-divider>
         <h3 class="error--text text-xs-left">Last Error</h3>
-        <pre class="alert-message error--text" color="error">{{ lastError }}</pre>
+        <template v-for="errorCodeDescription in errorCodeDescriptions">
+          <h4 class="error--text text-xs-left">{{errorCodeDescription}}</h4>
+        </template>
+        <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
       </template>
   </template>>
   </g-popper>
@@ -42,6 +45,8 @@ limitations under the License.
 
 <script>
   import GPopper from '@/components/GPopper'
+  import get from 'lodash/get'
+  import map from 'lodash/map'
 
   export default {
     components: {
@@ -53,7 +58,7 @@ limitations under the License.
         required: true
       },
       lastError: {
-        type: String,
+        type: Object,
         required: false
       },
       popperKey: {
@@ -70,7 +75,30 @@ limitations under the License.
         return this.operation.progress !== 100 && this.operation.state !== 'Failed' && !!this.operation.progress
       },
       isError () {
-        return this.operation.state === 'Failed' || this.lastError
+        return this.operation.state === 'Failed' || this.lastErrorDescription
+      },
+      lastErrorDescription () {
+        return get(this.lastError, 'description')
+      },
+      errorCodeDescriptions () {
+        const errorCodeDescriptions = map(get(this.lastError, 'codes'), code => {
+          let description
+          switch (code) {
+            case 'ERR_INFRA_UNAUTHORIZED':
+              description = 'Invalid infrastructure secret'
+              break
+            case 'ERR_INFRA_INSUFFICIENT_PRIVILEGES':
+              description = 'Infrastructure secret has insufficient privileges'
+              break
+            case 'ERR_INFRA_QUOTA_EXCEEDED':
+              description = 'Infrastructure secret quota exceeded'
+              break
+            default:
+              description = code
+          }
+          return description
+        })
+        return errorCodeDescriptions
       },
       popperKeyWithType () {
         return `shootStatus_${this.popperKey}`
@@ -88,7 +116,7 @@ limitations under the License.
       popperMessage () {
         let message = this.operation.description
         message = message || 'No description'
-        if (message === this.lastError) {
+        if (message === this.lastErrorDescription) {
           return undefined
         }
         return message

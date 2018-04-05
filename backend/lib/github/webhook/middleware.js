@@ -26,12 +26,16 @@ const verifySignature = function (req, res, next) {
   if (!webhookSecret) {
     throw new InternalServerError('gitHub.webhookSecret not configured on dashboard backend')
   }
-  const hmac = crypto.createHmac('sha1', webhookSecret)
+  const requestSignature = _.get(req.headers, 'x-hub-signature')
+  if (!requestSignature) {
+    throw new Forbidden('x-hub-signature header not provided')
+  }
+
+  const hmac = crypto.createHmac('sha1', webhookSecret.toString())
   if (req.body) {
     const payloadBody = req.body
     hmac.update(payloadBody)
   }
-  const requestSignature = _.get(req.headers, 'x-hub-signature')
 
   const signature = 'sha1=' + hmac.digest('hex')
 

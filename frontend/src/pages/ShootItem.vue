@@ -123,6 +123,26 @@ limitations under the License.
                   </v-list-tile-content>
                 </v-list-tile>
 
+                <template v-if="showSeedInfo">
+                  <v-divider class="my-2" inset></v-divider>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon class="cyan--text text--darken-2">spa</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                      <v-list-tile-sub-title>Seed</v-list-tile-sub-title>
+                      <v-list-tile-title>
+                        <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
+                          {{seed}}
+                        </router-link>
+                        <template v-else>
+                          {{seed}}
+                        </template>
+                      </v-list-tile-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                </template>
+
                 <v-divider class="my-2" inset></v-divider>
                 <v-list-tile>
                   <v-list-tile-action>
@@ -211,6 +231,7 @@ limitations under the License.
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import get from 'lodash/get'
+  import includes from 'lodash/includes'
   import { safeDump } from 'js-yaml'
   import { getDateFormatted, getCloudProviderKind } from '@/utils'
 
@@ -268,7 +289,9 @@ limitations under the License.
       ...mapGetters([
         'shootByNamespaceAndName',
         'journalsByNamespaceAndName',
-        'isAdmin'
+        'isAdmin',
+        'namespaces',
+        'canLinkToSeedWithName'
       ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.item, 'spec.cloud'))
@@ -313,6 +336,15 @@ limitations under the License.
           skipInvalid: true
         })
       },
+      showSeedInfo () {
+        return !!this.seed && this.hasAccessToGardenNamespace
+      },
+      hasAccessToGardenNamespace () {
+        return includes(this.namespaces, 'garden')
+      },
+      canLinkToSeed () {
+        return this.canLinkToSeedWithName({ name: this.seed })
+      },
       item () {
         const params = this.$route.params
         const shoot = this.shootByNamespaceAndName(params)
@@ -351,6 +383,9 @@ limitations under the License.
       },
       cidr () {
         return get(this.item, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
+      },
+      seed () {
+        return get(this.item, `spec.cloud.seed`)
       },
       purpose () {
         return this.annotations['garden.sapcloud.io/purpose']

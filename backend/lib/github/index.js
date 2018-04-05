@@ -22,6 +22,8 @@ const https = require('https')
 const logger = require('../logger')
 const config = require('../config')
 const parseLink = require('parse-link-header')
+const { URL } = require('url')
+const urljoin = require('url-join')
 
 const fetch = async (url, batchFn) => {
   return new Promise(async (resolve, reject) => {
@@ -42,7 +44,7 @@ const fetch = async (url, batchFn) => {
 }
 
 const searchIssues = async function ({ namespace, name, options = {}, batchFn = data => {} }) {
-  let search = ''
+  let search = ' '
   if (namespace) {
     search = `${search}[${namespace}`
   }
@@ -53,10 +55,10 @@ const searchIssues = async function ({ namespace, name, options = {}, batchFn = 
     search = `${search}${name}]`
   }
 
-  search = encodeURI(search)
-  const url = `${config.gitHub.apiUrl}/search/issues?&q=repo:${config.gitHub.org}/${config.gitHub.repository}%20is:open%20${search}`
+  const url = new URL(urljoin(config.gitHub.apiUrl, '/search/issues'))
+  url.searchParams.set('q', `repo:${config.gitHub.org}/${config.gitHub.repository} is:open${search}`)
 
-  return fetch(url, batchFn)
+  return fetch(url.href, batchFn)
 }
 
 const comments = async function ({ issueNumber, options = {}, batchFn = data => {} }) {
@@ -64,8 +66,8 @@ const comments = async function ({ issueNumber, options = {}, batchFn = data => 
     logger.error('failed to read comments; invalid issueNumber')
     return undefined
   }
-  const url = `${config.gitHub.apiUrl}/repos/${config.gitHub.org}/${config.gitHub.repository}/issues/${encodeURI(issueNumber)}/comments`
-  return fetch(url, batchFn)
+  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber), '/comments'))
+  return fetch(url.href, batchFn)
 }
 
 const agent = new https.Agent({

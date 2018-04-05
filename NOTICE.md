@@ -174,3 +174,7 @@ Copyright (c) 2011-2018, Christopher Jeffrey. (MIT License)
 [parse-link-header](https://github.com/thlorenz/parse-link-header)
 Copyright 2013 Thorsten Lorenz.
 [MIT License](https://github.com/thlorenz/parse-link-header/blob/master/LICENSE)
+
+[url-join](https://github.com/jfromaniello/url-join)
+Copyright (c) 2015 José F. Romaniello
+[MIT License](https://github.com/jfromaniello/url-join/blob/master/LICENSE)

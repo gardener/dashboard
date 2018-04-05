@@ -171,7 +171,7 @@ limitations under the License.
           annotations: metadata.annotations,
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
-          lastError: get(status, 'lastError.description', ''),
+          lastError: get(status, 'lastError'),
           tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
           kind,
           region: get(spec, 'cloud.region'),
