@@ -93,6 +93,9 @@ limitations under the License.
             case 'ERR_INFRA_QUOTA_EXCEEDED':
               description = 'Infrastructure secret quota exceeded'
               break
+            case 'ERR_INFRA_DEPENDENCIES':
+              description = 'Operation failed as there are dependent objects on cloud provider level'
+              break
             default:
               description = code
           }
