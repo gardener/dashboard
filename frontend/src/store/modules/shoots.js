@@ -205,14 +205,16 @@ const getSortVal = (item, sortBy) => {
   switch (sortBy) {
     case 'purpose':
       switch (value) {
-        case 'production':
+        case 'infrastructure':
           return 0
-        case 'development':
+        case 'production':
           return 1
-        case 'evaluation':
+        case 'development':
           return 2
-        default:
+        case 'evaluation':
           return 3
+        default:
+          return 4
       }
     case 'lastOperation':
       const operation = value || {}
@@ -248,7 +250,7 @@ const setSortedItems = (state) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
-    state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy)], [descending])
+    state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
   }
 }
 
@@ -258,11 +260,12 @@ const putItem = (state, newItem) => {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
       const sortBy = get(state, 'sortParams.sortBy')
       let sortRequired = true
-      if (sortBy === 'name' || sortBy === 'infrastructure' || sortBy === 'project') {
+      if (sortBy === 'name' || sortBy === 'infrastructure' || sortBy === 'project' || sortBy === 'createdAt' || sortBy === 'createdBy') {
         sortRequired = false // these values cannot change
       } else if (sortBy !== 'lastOperation') { // don't check in this case as most put events will be lastOperation anyway
         const changes = difference(item, newItem)
-        if (!getRawSortVal(changes)) {
+        const sortBy = get(state, 'sortParams.sortBy')
+        if (!getRawSortVal(changes, sortBy)) {
           sortRequired = false
         }
       }

@@ -39,6 +39,8 @@ limitations under the License.
             return 'DEV'
           case 'production':
             return 'PROD'
+          case 'infrastructure':
+              return 'INFRA'
           default:
             return toUpper(this.purpose)
         }
