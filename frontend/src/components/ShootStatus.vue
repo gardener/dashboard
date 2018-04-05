@@ -19,8 +19,8 @@ limitations under the License.
     <div slot="popperRef">
       <v-tooltip top>
         <template slot="activator">
-          <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" color="cyan darken-2" rotate="-90">{{operation.progress}}</v-progress-circular>
-          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error" rotate="-90">!</v-progress-circular>
+          <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" color="cyan darken-2" :rotate="-90">{{operation.progress}}</v-progress-circular>
+          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error" :rotate="-90">!</v-progress-circular>
           <v-icon v-else-if="isError" class="cursor-pointer status-icon" color="error">mdi-alert-outline</v-icon>
           <v-progress-circular v-else-if="operationState==='Pending'" class="cursor-pointer" :size="27" :width="3" indeterminate color="cyan darken-2"></v-progress-circular>
           <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" color="cyan darken-2">mdi-sleep</v-icon>
