@@ -233,7 +233,7 @@ limitations under the License.
   import get from 'lodash/get'
   import includes from 'lodash/includes'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getCloudProviderKind } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -290,8 +290,7 @@ limitations under the License.
         'shootByNamespaceAndName',
         'journalsByNamespaceAndName',
         'isAdmin',
-        'namespaces',
-        'canLinkToSeedWithName'
+        'namespaces'
       ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.item, 'spec.cloud'))
@@ -343,7 +342,10 @@ limitations under the License.
         return includes(this.namespaces, 'garden')
       },
       canLinkToSeed () {
-        return this.canLinkToSeedWithName({ name: this.seed })
+        return canLinkToSeed({ shootNamespace: this.namespace })
+      },
+      namespace () {
+        return get(this.$route.params, 'namespace')
       },
       item () {
         const params = this.$route.params

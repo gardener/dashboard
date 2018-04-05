@@ -41,9 +41,9 @@ limitations under the License.
 <script>
   import get from 'lodash/get'
   import forEach from 'lodash/forEach'
-  import { mapState, mapGetters } from 'vuex'
+  import { mapState } from 'vuex'
   import Journal from '@/components/Journal'
-  import { getDateFormatted, getCloudProviderKind } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
 
   export default {
     components: {
@@ -62,9 +62,6 @@ limitations under the License.
       ...mapState([
         'cfg'
       ]),
-      ...mapGetters([
-        'canLinkToSeedWithName'
-      ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.shoot, 'spec.cloud'))
       },
@@ -81,24 +78,29 @@ limitations under the License.
       gitHubRepoUrl () {
         return this.cfg.gitHubRepoUrl
       },
+      namespace () {
+        return get(this.shoot, 'metadata.namespace')
+      },
+      canLinkToSeed () {
+        return canLinkToSeed({ shootNamespace: this.namespace })
+      },
       createJournalLink () {
         const name = get(this.shoot, 'metadata.name')
-        const namespace = get(this.shoot, 'metadata.namespace')
 
-        const url = `${window.location.origin}/namespace/${namespace}/shoots/${name}`
+        const url = `${window.location.origin}/namespace/${this.namespace}/shoots/${name}`
 
-        const dashboardShootLink = `**Shoot:** [${namespace}/${name}](${url})`
+        const dashboardShootLink = `**Shoot:** [${this.namespace}/${name}](${url})`
         const kind = `**Kind:** ${this.getCloudProviderKind} / ${this.region}`
 
         const seedName = get(this.shoot, 'spec.cloud.seed')
-        const seedLinkOrName = this.canLinkToSeedWithName({name: seedName}) ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
+        const seedLinkOrName = this.canLinkToSeed ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
         const seed = `**Seed:** ${seedLinkOrName}`
 
         const createdAt = `**Created At:** ${getDateFormatted(get(this.shoot, 'metadata.creationTimestamp', ''))}`
         const lastOperation = `**Last Op:** ${get(this.shoot, 'status.lastOperation.description', '')}`
         const lastError = `**Last Error:** ${get(this.shoot, 'status.lastError.description', '-')}`
 
-        const journalTitle = encodeURIComponent(`[${namespace}/${name}]`)
+        const journalTitle = encodeURIComponent(`[${this.namespace}/${name}]`)
         const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}
