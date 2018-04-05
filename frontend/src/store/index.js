@@ -26,6 +26,7 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
+import concat from 'lodash/concat'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -98,7 +99,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/items']
+    return getters['shoots/sortedItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -273,6 +274,12 @@ const actions = {
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setShootSortPrams ({ dispatch }, sortParams) {
+    return dispatch('shoots/setSortParams', sortParams)
       .catch(err => {
         dispatch('setError', err)
       })
@@ -472,11 +479,13 @@ addListener({
   itemKey: 'data',
   eventHandlerFn: {
     put: data => {
+      let objectsToPut = []
       mapKeys(data, (objects, namespace) => {
         if (isCurrentNamespace(namespace)) {
-          store.commit('shoots/ITEMS_PUT', objects)
+          objectsToPut = concat(objectsToPut, objects)
         }
       })
+      store.commit('shoots/ITEMS_PUT', objectsToPut)
     }
   }
 })

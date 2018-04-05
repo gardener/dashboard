@@ -21,8 +21,15 @@ import pick from 'lodash/pick'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
+import transform from 'lodash/transform'
+import isEqual from 'lodash/isEqual'
+import isObject from 'lodash/isObject'
+import orderBy from 'lodash/orderBy'
+import toLower from 'lodash/toLower'
+import padStart from 'lodash/padStart'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
+import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -37,13 +44,15 @@ const findItem = ({name, namespace}) => {
 // initial state
 const state = {
   shoots: {},
+  sortedShoots: [],
+  sortParams: undefined,
   selection: undefined
 }
 
 // getters
 const getters = {
-  items (state) {
-    return map(Object.keys(state.shoots), (key) => state.shoots[key])
+  sortedItems (state) {
+    return state.sortedShoots
   },
   itemByNameAndNamespace () {
     return ({namespace, name}) => {
@@ -148,6 +157,98 @@ const actions = {
         return dispatch('getInfo', {name: metadata.name, namespace: metadata.namespace})
       }
     }
+  },
+  setSortParams ({ commit }, sortParams) {
+    if (!isEqual(sortParams, state.sortParams)) {
+      commit('SET_SORTPARAMS', pick(sortParams, ['sortBy', 'descending']))
+    }
+  }
+}
+
+// Deep diff between two object, using lodash
+const difference = (object, base) => {
+  function changes (object, base) {
+    return transform(object, function (result, value, key) {
+      if (!isEqual(value, base[key])) {
+        result[key] = (isObject(value) && isObject(base[key])) ? changes(value, base[key]) : value
+      }
+    })
+  }
+  return changes(object, base)
+}
+
+const getRawSortVal = (item, sortBy) => {
+  const metadata = item.metadata
+  const spec = item.spec
+  switch (sortBy) {
+    case 'purpose':
+      // eslint-disable-next-line
+      return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+    case 'lastOperation':
+      return get(item, 'status.lastOperation')
+    case 'createdAt':
+      return metadata.creationTimestamp
+    case 'project':
+      return metadata.namespace
+    case 'k8sVersion':
+      return get(spec, 'kubernetes.version')
+    case 'infrastructure':
+      return getCloudProviderKind(spec.cloud)
+    default:
+      return metadata[sortBy]
+  }
+}
+
+const getSortVal = (item, sortBy) => {
+  const value = getRawSortVal(item, sortBy)
+  const spec = item.spec
+  switch (sortBy) {
+    case 'purpose':
+      switch (value) {
+        case 'production':
+          return 0
+        case 'development':
+          return 1
+        case 'evaluation':
+          return 2
+        default:
+          return 3
+      }
+    case 'lastOperation':
+      const operation = value || {}
+      const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
+      const isError = operation.state === 'Failed' || get(item, 'status.lastError')
+      if (isError && !inProgress) {
+        return 0
+      } else if (isError && inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `1${progress}`
+      } else if (inProgress) {
+        const progress = padStart(operation.progress, 2, '0')
+        return `3${progress}`
+      } else if (isHibernated(spec)) {
+        return 200
+      }
+      return 400
+    case 'k8sVersion':
+      const k8sVersion = value
+      const availableK8sUpdates = availableK8sUpdatesForShoot(spec)
+      const sortPrefix = availableK8sUpdates ? '_' : ''
+      return `${sortPrefix}${k8sVersion}`
+    default:
+      return toLower(value)
+  }
+}
+
+const shoots = (state) => {
+  return map(Object.keys(state.shoots), (key) => state.shoots[key])
+}
+
+const setSortedItems = (state) => {
+  const sortBy = get(state, 'sortParams.sortBy')
+  const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
+  if (sortBy) {
+    state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy)], [descending])
   }
 }
 
@@ -155,10 +256,22 @@ const putItem = (state, newItem) => {
   const item = findItem(newItem.metadata)
   if (item !== undefined) {
     if (item.metadata.resourceVersion !== newItem.metadata.resourceVersion) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign({}, item, newItem))
+      const sortBy = get(state, 'sortParams.sortBy')
+      let sortRequired = true
+      if (sortBy === 'name' || sortBy === 'infrastructure' || sortBy === 'project') {
+        sortRequired = false // these values cannot change
+      } else if (sortBy !== 'lastOperation') { // don't check in this case as most put events will be lastOperation anyway
+        const changes = difference(item, newItem)
+        if (!getRawSortVal(changes)) {
+          sortRequired = false
+        }
+      }
+      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, newItem))
+      return sortRequired
     }
   } else {
     Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
+    return true
   }
 }
 
@@ -173,21 +286,37 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
+  SET_SORTPARAMS (state, sortParams) {
+    state.sortParams = sortParams
+    setSortedItems(state)
+  },
   ITEM_PUT (state, newItem) {
-    putItem(state, newItem)
+    const sortRequired = putItem(state, newItem)
+
+    if (sortRequired) {
+      setSortedItems(state)
+    }
   },
   ITEMS_PUT (state, newItems) {
-    forEach(newItems, newItem => putItem(state, newItem))
+    let sortRequired = false
+    forEach(newItems, newItem => {
+      if (putItem(state, newItem)) {
+        sortRequired = true
+      }
+    })
+    if (sortRequired) {
+      setSortedItems(state)
+    }
   },
   ITEM_DEL (state, deletedItem) {
     const item = findItem(deletedItem.metadata)
     if (item !== undefined) {
-      // use undefined instead of delete for performance reasons
-      state.shoots[keyForShoot(item.metadata)] = undefined
+      setSortedItems(state)
     }
   },
   CLEAR_ALL (state) {
     state.shoots = {}
+    state.sortedShoots = []
   }
 }
 

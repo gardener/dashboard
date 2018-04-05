@@ -30,6 +30,7 @@ import find from 'lodash/find'
 import moment from 'moment'
 import semver from 'semver'
 import some from 'lodash/some'
+import store from '../store'
 
 export function emailToDisplayName (email) {
   if (email) {
@@ -188,7 +189,10 @@ export function isOwnSecretBinding (secret) {
   return get(secret, 'namespace') === get(secret, 'bindingNamespace')
 }
 
-export function availableK8sUpdatesForShoot (shootVersion, allVersions) {
+export function availableK8sUpdatesForShoot (spec) {
+  const shootVersion = get(spec, 'kubernetes.version')
+  const allVersions = store.getters.kubernetesVersions(get(spec, 'cloud.profile'))
+
   const newerVersions = {}
   let newerVersion = false
 

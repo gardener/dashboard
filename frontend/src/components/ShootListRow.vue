@@ -177,9 +177,7 @@ limitations under the License.
           region: get(spec, 'cloud.region'),
           isHibernated: isHibernated(spec),
           info,
-          availableK8sUpdates: availableK8sUpdatesForShoot(
-            get(spec, 'kubernetes.version'),
-            this.kubernetesVersions(get(spec, 'cloud.profile'))),
+          availableK8sUpdates: availableK8sUpdatesForShoot(spec),
           k8sVersion: get(spec, 'kubernetes.version'),
           // eslint-disable-next-line
           purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])

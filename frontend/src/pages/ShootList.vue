@@ -68,7 +68,7 @@ limitations under the License.
         </v-menu>
       </v-toolbar>
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :custom-sort="sortTable" :pagination.sync="pagination" hide-actions must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" v-on:showDialog="showDialog"></shoot-list-row>
         </template>
@@ -134,14 +134,13 @@ limitations under the License.
   import zipObject from 'lodash/zipObject'
   import map from 'lodash/map'
   import get from 'lodash/get'
-  import orderBy from 'lodash/orderBy'
   import CodeBlock from '@/components/CodeBlock'
   import GPopper from '@/components/GPopper'
   import ShootListRow from '@/components/ShootListRow'
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import { getCreatedBy, availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind } from '@/utils'
+  import { getCreatedBy } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -174,10 +173,19 @@ limitations under the License.
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
       }
     },
+    watch: {
+      pagination (value) {
+        if (value) {
+          this.$localStorage.setObject('dataTable_sortBy', {sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER})
+          this.setShootSortPrams(value)
+        }
+      }
+    },
     methods: {
       ...mapActions([
         'deleteShoot',
         'setSelectedShoot',
+        'setShootSortPrams',
         'setOnlyShootsWithIssues'
       ]),
       deletionConfirmed () {
@@ -202,58 +210,6 @@ limitations under the License.
       hideDialog () {
         this.dialog = null
         this.setSelectedShoot(null)
-      },
-      getSortVal (row, column) {
-        const metadata = row.metadata
-        const spec = row.spec
-        switch (column) {
-          case 'purpose':
-            // eslint-disable-next-line
-            switch (get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])) {
-              case 'production':
-                return 0
-              case 'development':
-                return 1
-              case 'evaluation':
-                return 2
-              default:
-                return 3
-            }
-          case 'lastOperation':
-            const operation = get(row, 'status.lastOperation', {})
-            const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-            const isError = operation.state === 'Failed' || row.lastError
-            if (isError && !inProgress) {
-              return 0
-            } else if (isError && inProgress) {
-              return 1
-            } else if (inProgress) {
-              return 3
-            } else if (isHibernated(spec)) {
-              return 2
-            }
-            return 4
-          case 'createdAt':
-            return metadata.creationTimestamp
-          case 'project':
-            return metadata.namespace
-          case 'k8sVersion':
-            const k8sVersion = get(spec, 'kubernetes.version')
-            const availableK8sUpdates = availableK8sUpdatesForShoot(
-              k8sVersion,
-              this.kubernetesVersions(get(spec, 'cloud.profile')))
-            const sortPrefix = availableK8sUpdates ? '_' : ''
-            return `${sortPrefix}${k8sVersion}`
-          case 'infrastructure':
-            const kind = getCloudProviderKind(spec.cloud)
-            return kind
-          default:
-            return row.metadata[column]
-        }
-      },
-      sortTable (rows, column, desc) {
-        this.$localStorage.setObject('dataTable_sortBy', {sortBy: this.pagination.sortBy, descending: this.pagination.descending, rowsPerPage: Number.MAX_SAFE_INTEGER})
-        return orderBy(rows, [row => { return this.getSortVal(row, column) }], [desc ? 'desc' : 'asc'])
       },
       setColumnChecked (header) {
         header.checked = !header.checked
@@ -287,8 +243,7 @@ limitations under the License.
       ...mapGetters({
         items: 'shootList',
         item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot',
-        kubernetesVersions: 'kubernetesVersions'
+        selectedItem: 'selectedShoot'
       }),
       ...mapState([
         'shootsLoading',

@@ -93,14 +93,6 @@ limitations under the License.
         }
         return message
       },
-      sortValue () {
-        if (this.isError) {
-          return 0
-        } else if (this.showProgress) {
-          return 1
-        }
-        return 2
-      },
       operationType () {
         return this.operation.type || 'Create'
       },
