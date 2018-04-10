@@ -30,7 +30,7 @@ limitations under the License.
           <a href="/">
             <img src="../assets/logo.svg" class="logo">
             <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2 style="">The Kubernetes Botanist</h2>
+            <h2>The Kubernetes Botanist</h2>
           </a>
 
         </div>
@@ -322,6 +322,7 @@ limitations under the License.
       overflow: hidden
 
       .content {
+        display: block;
         position: relative;
         height: teaserHeight
         overflow: hidden
@@ -385,10 +386,12 @@ limitations under the License.
     .footer{
       background-color: transparent
       bottom: 10px
+      padding-left: 10px;
+      padding-right: 10px;
     }
 
-    >>> ul {
-      li a {
+    >>> .list {
+      div a {
         color: rgba(255,255,255,0.8) !important
         font-weight: 300 !important
         text-transform: uppercase
@@ -397,7 +400,7 @@ limitations under the License.
           color: rgba(255,255,255,0.8) !important
         }
       }
-      li a.list__tile--active {
+      div a.list__tile--active {
         background: rgba(255,255,255,0.1) !important
         color: white !important
         .icon {

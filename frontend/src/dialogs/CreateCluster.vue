@@ -18,393 +18,387 @@ limitations under the License.
   <v-dialog v-model="visible" persistent max-width="1200" content-class="dialogContainer">
     <v-card flat>
 
-      <v-card-text>
-        <v-tabs v-model="activeTab">
+      <v-toolbar dense class="draken-1 header">
+        <v-toolbar-title>
+          <v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon>
+          <span>Create Cluster</span>
+        </v-toolbar-title>
+        <v-tabs align-with-title dark slot="extension" v-model="activeTab">
+          <v-tabs-slider class="yellow"></v-tabs-slider>
+          <v-tab key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tab>
+          <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
+          <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
+          <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
+        </v-tabs>
+      </v-toolbar>
+      <v-tabs-items v-model="activeTab">
+        <v-tab-item key="infra" id="tab-infra">
+          <v-card flat>
+            <v-container fluid>
+              <v-card-text>
 
-          <v-toolbar class="draken-1 header">
-            <v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon>
-            <span>Create Cluster</span>
-            <v-tabs-bar dark slot="extension">
-              <v-tabs-slider class="yellow"></v-tabs-slider>
-              <v-tabs-item key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tabs-item>
-              <v-tabs-item key="worker" href="#tab-worker" ripple>Worker</v-tabs-item>
-              <v-tabs-item key="addons" href="#tab-addons" ripple>Addons</v-tabs-item>
-              <v-tabs-item key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tabs-item>
-            </v-tabs-bar>
-          </v-toolbar>
+                <v-layout row>
+                  <v-flex xs3>
+                    <v-text-field
+                      ref="name"
+                      color="cyan"
+                      label="Cluster Name"
+                      counter="10"
+                      v-model="clusterName"
+                      :error-messages="getErrorMessages('shootDefinition.metadata.name')"
+                      @input="$v.shootDefinition.metadata.name.$touch()"
+                      @blur="$v.shootDefinition.metadata.name.$touch()"
+                      required
+                      ></v-text-field>
+                  </v-flex>
+                </v-layout>
 
-          <v-tabs-items>
+                <v-layout row class="mt-2">
+                  <v-flex xs3>
+                    <v-select
+                      color="cyan"
+                      label="Infrastructure"
+                      :items="sortedCloudProviderKindList"
+                      v-model="infrastructureKind"
+                      required
+                      >
+                      <template slot="item" slot-scope="data">
+                        <v-list-tile-avatar>
+                          <infra-icon v-model="data.item"></infra-icon>
+                        </v-list-tile-avatar>
+                        <v-list-tile-content>
+                          <v-list-tile-title>{{data.item}}</v-list-tile-title>
+                        </v-list-tile-content>
+                      </template>
+                      <template slot="selection" slot-scope="data">
+                        <v-avatar size="30px">
+                          <infra-icon v-model="data.item"></infra-icon>
+                        </v-avatar>
+                        <span class="black--text">
+                          {{data.item}}
+                        </span>
+                      </template>
+                    </v-select>
+                  </v-flex>
 
-            <v-tabs-content key="infra" id="tab-infra">
-              <v-card flat>
-                <v-container fluid>
-                  <v-card-text>
+                  <v-flex xs1 v-show="cloudProfiles.length !== 1">
+                  </v-flex>
 
-                    <v-layout row>
-                      <v-flex xs3>
-                        <v-text-field
-                          ref="name"
-                          color="cyan"
-                          label="Cluster Name"
-                          counter="10"
-                          v-model="clusterName"
-                          :error-messages="getErrorMessages('shootDefinition.metadata.name')"
-                          @input="$v.shootDefinition.metadata.name.$touch()"
-                          @blur="$v.shootDefinition.metadata.name.$touch()"
-                          required
-                          ></v-text-field>
-                      </v-flex>
-                    </v-layout>
+                  <v-flex xs3 v-show="cloudProfiles.length !== 1">
+                    <cloud-profile
+                      ref="cloudProfile"
+                      v-model="cloudProfileName"
+                      :isCreateMode="true"
+                      :cloudProfiles="cloudProfiles"
+                      color="cyan">
+                    </cloud-profile>
+                  </v-flex>
 
-                    <v-layout row class="mt-2">
-                      <v-flex xs3>
-                        <v-select
-                          color="cyan"
-                          label="Infrastructure"
-                          :items="sortedCloudProviderKindList"
-                          v-model="infrastructureKind"
-                          required
-                          >
-                          <template slot="item" slot-scope="data">
-                            <v-list-tile-avatar>
-                              <infra-icon v-model="data.item"></infra-icon>
-                            </v-list-tile-avatar>
-                            <v-list-tile-content>
-                              <v-list-tile-title>{{data.item}}</v-list-tile-title>
-                            </v-list-tile-content>
-                          </template>
-                          <template slot="selection" slot-scope="data">
-                            <v-avatar size="30px">
-                              <infra-icon v-model="data.item"></infra-icon>
-                            </v-avatar>
-                            <span class="black--text">
-                              {{data.item}}
-                            </span>
-                          </template>
-                        </v-select>
-                      </v-flex>
+                  <v-flex xs1>
+                  </v-flex>
 
-                      <v-flex xs1 v-show="cloudProfiles.length !== 1">
-                      </v-flex>
+                  <v-flex xs3>
+                    <v-select
+                      color="cyan"
+                      label="Secrets"
+                      :items="infrastructureSecretsByProfileName"
+                      item-value="metadata"
+                      v-model="secret"
+                      :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
+                      @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
+                      @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
+                      required
+                      >
+                      <template slot="item" slot-scope="data">
+                        {{get(data.item, 'metadata.name')}}
+                        <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+                      </template>
+                      <template slot="selection" slot-scope="data">
+                        <span class="black--text">
+                          {{get(data.item, 'metadata.name')}}
+                        </span>
+                        <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+                      </template>
+                    </v-select>
+                  </v-flex>
+                </v-layout>
 
-                      <v-flex xs3 v-show="cloudProfiles.length !== 1">
-                        <cloud-profile
-                          ref="cloudProfile"
-                          v-model="cloudProfileName"
-                          :isCreateMode="true"
-                          :cloudProfiles="cloudProfiles"
-                          color="cyan">
-                        </cloud-profile>
-                      </v-flex>
+                <v-layout row>
+                  <v-flex xs3>
+                    <v-select
+                      color="cyan"
+                      label="Region"
+                      :items="regions"
+                      v-model="region"
+                      :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
+                      @input="$v.shootDefinition.spec.cloud.region.$touch()"
+                      @blur="$v.shootDefinition.spec.cloud.region.$touch()"
+                      required
+                      ></v-select>
+                  </v-flex>
+                  <v-flex xs1>
+                  </v-flex>
+                  <v-flex xs3 v-if="infrastructureKind !== 'azure'">
+                    <v-select
+                      color="cyan"
+                      label="Zone"
+                      :items="zones"
+                      :error-messages="getErrorMessages('infrastructureData.zones')"
+                      v-model="zone"
+                      @input="$v.infrastructureData.zones.$touch()"
+                      @blur="$v.infrastructureData.zones.$touch()"
+                      required
+                      ></v-select>
+                  </v-flex>
+                </v-layout>
 
-                      <v-flex xs1>
-                      </v-flex>
+                <v-layout row>
+                  <v-flex xs3>
+                    <v-select
+                      color="cyan"
+                      label="Kubernetes"
+                      :items="sortedKubernetesVersions"
+                      v-model="shootDefinition.spec.kubernetes.version"
+                      required
+                      ></v-select>
+                  </v-flex>
+                  <v-flex xs1>
+                  </v-flex>
+                  <v-flex xs3>
+                    <v-select
+                      color="cyan"
+                      label="Purpose"
+                      :items="purpose"
+                      v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
+                      hint="Indicate the importance of the cluster"
+                      persistent-hint
+                      required
+                      ></v-select>
+                  </v-flex>
+                </v-layout>
 
-                      <v-flex xs3>
-                        <v-select
-                          color="cyan"
-                          label="Secrets"
-                          :items="infrastructureSecretsByProfileName"
-                          item-value="metadata"
-                          v-model="secret"
-                          :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
-                          @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
-                          @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
-                          required
-                          >
-                          <template slot="item" slot-scope="data">
-                            {{get(data.item, 'metadata.name')}}
-                            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
-                          </template>
-                          <template slot="selection" slot-scope="data">
-                            <span class="black--text">
-                              {{get(data.item, 'metadata.name')}}
-                            </span>
-                            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
-                          </template>
-                        </v-select>
-                      </v-flex>
-                    </v-layout>
-
-                    <v-layout row>
-                      <v-flex xs3>
-                        <v-select
-                          color="cyan"
-                          label="Region"
-                          :items="regions"
-                          v-model="region"
-                          :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
-                          @input="$v.shootDefinition.spec.cloud.region.$touch()"
-                          @blur="$v.shootDefinition.spec.cloud.region.$touch()"
-                          required
-                          ></v-select>
-                      </v-flex>
-                      <v-flex xs1>
-                      </v-flex>
-                      <v-flex xs3 v-if="infrastructureKind !== 'azure'">
-                        <v-select
-                          color="cyan"
-                          label="Zone"
-                          :items="zones"
-                          :error-messages="getErrorMessages('infrastructureData.zones')"
-                          v-model="zone"
-                          @input="$v.infrastructureData.zones.$touch()"
-                          @blur="$v.infrastructureData.zones.$touch()"
-                          required
-                          ></v-select>
-                      </v-flex>
-                    </v-layout>
-
-                    <v-layout row>
-                      <v-flex xs3>
-                        <v-select
-                          color="cyan"
-                          label="Kubernetes"
-                          :items="sortedKubernetesVersions"
-                          v-model="shootDefinition.spec.kubernetes.version"
-                          required
-                          ></v-select>
-                      </v-flex>
-                      <v-flex xs1>
-                      </v-flex>
-                      <v-flex xs3>
-                        <v-select
-                          color="cyan"
-                          label="Purpose"
-                          :items="purpose"
-                          v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
-                          hint="Indicate the importance of the cluster"
-                          persistent-hint
-                          required
-                          ></v-select>
-                      </v-flex>
-                    </v-layout>
-
-                    <template v-if="infrastructureKind === 'openstack'">
-                      <v-layout row>
-                        <v-flex xs3>
-                          <v-select
-                          color="cyan"
-                          label="Floating Pools"
-                          :items="floatingPoolNames"
-                          v-model="infrastructureData.floatingPoolName"
-                          required
-                          ></v-select>
-                        </v-flex>
-                        <v-flex xs1>
-                        </v-flex>
-                        <v-flex xs3>
-                          <v-select
-                          color="cyan"
-                          label="Load Balancer Providers"
-                          :items="loadBalancerProviderNames"
-                          v-model="infrastructureData.loadBalancerProvider"
-                          persistent-hint
-                          required
-                          ></v-select>
-                        </v-flex>
-                      </v-layout>
-                    </template>
-                  </v-card-text>
-                </v-container>
-              </v-card>
-            </v-tabs-content>
-
-            <v-tabs-content key="worker" id="tab-worker">
-
-              <v-card flat>
-                <v-container fluid >
-                  <transition-group name="list-complete">
-                    <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
-                      <v-flex pa-1 >
-
-                        <worker-input-aws :worker.sync="worker" ref="workerInput"
-                          :workers.sync="workers"
-                          :cloudProfileName="cloudProfileName"
-                          v-if="infrastructureKind === 'aws'">
-                          <v-btn v-show="index>0 || workers.length>1"
-                            small
-                            slot="action"
-                            outline
-                            icon
-                            class="grey--text lighten-2"
-                            @click.native.stop="workers.splice(index, 1)">
-                            <v-icon>mdi-close</v-icon>
-                          </v-btn>
-                        </worker-input-aws>
-
-                        <worker-input-azure :worker.sync="worker" ref="workerInput"
-                          :workers.sync="workers"
-                          :cloudProfileName="cloudProfileName"
-                          v-if="infrastructureKind === 'azure'">
-                          <v-btn v-show="index>0 || workers.length>1"
-                            small
-                            slot="action"
-                            outline
-                            icon
-                            class="grey--text lighten-2"
-                            @click.native.stop="workers.splice(index, 1)">
-                            <v-icon>mdi-close</v-icon>
-                          </v-btn>
-                        </worker-input-azure>
-
-                        <worker-input-gce :worker.sync="worker" ref="workerInput"
-                          :workers.sync="workers"
-                          :cloudProfileName="cloudProfileName"
-                          v-if="infrastructureKind === 'gcp'">
-                          <v-btn v-show="index>0 || workers.length>1"
-                            small
-                            slot="action"
-                            outline
-                            icon
-                            class="grey--text lighten-2"
-                            @click.native.stop="workers.splice(index, 1)">
-                            <v-icon>mdi-close</v-icon>
-                          </v-btn>
-                        </worker-input-gce>
-
-                        <worker-input-openstack :worker.sync="worker" ref="workerInput"
-                          :workers.sync="workers"
-                          :cloudProfileName="cloudProfileName"
-                          v-if="infrastructureKind === 'openstack'">
-                          <v-btn v-show="index>0 || workers.length>1"
-                            small
-                            slot="action"
-                            outline
-                            icon
-                            class="grey--text lighten-2"
-                            @click.native.stop="workers.splice(index, 1)">
-                            <v-icon>mdi-close</v-icon>
-                          </v-btn>
-                        </worker-input-openstack>
-
-                      </v-flex>
-                    </v-layout>
-                    <v-layout row key="1234" class="list-complete-item pt-4 pl-3 ">
-
-                      <v-flex xs1>
-                        <v-btn
-                          small
-                          @click="addWorker"
-                          outline
-                          fab
-                          icon
-                          class="cyan">
-                          <v-icon class="cyan--text">add</v-icon>
-                        </v-btn>
-                      </v-flex>
-
-                      <v-flex xs1 class="mt-2">
-                        <v-btn
-                          @click="addWorker"
-                          flat
-                          class="cyan--text">
-                          Add Worker Group
-                        </v-btn>
-                      </v-flex>
-
-                    </v-layout>
-                  </transition-group>
-                </v-container>
-              </v-card>
-
-            </v-tabs-content>
-
-            <v-tabs-content key="addons" id="tab-addons">
-
-              <v-card flat>
-                <v-container>
-                  <v-list three-line class="mr-extra">
-
-                    <v-list-tile avatar class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox color="cyan" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title >Dashboard</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          General-purpose web UI for Kubernetes clusters.
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-
-                    <v-list-tile  class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox v-model="addons.monocular.enabled" class="cyan--text"></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title >Monocular</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          Monocular is a web-based UI for managing Kubernetes applications and services
-                          packaged as Helm Charts. It allows you to search and discover available charts from
-                          multiple repositories, and install them in your cluster with one click.
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-
-                  </v-list>
-                </v-container>
-              </v-card>
-
-            </v-tabs-content>
-
-            <v-tabs-content key="maintenance" id="tab-maintenance">
-
-              <v-card flat>
-                <v-container>
+                <template v-if="infrastructureKind === 'openstack'">
                   <v-layout row>
-                    <v-flex xs2>
-                      <v-text-field
-                       color="cyan"
-                       label="Maintenance Start Time"
-                       v-model="maintenanceBegin"
-                       :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
-                       @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
-                       @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
-                       type="time"
-                       suffix="UTC"
-                       required
-                     ></v-text-field>
+                    <v-flex xs3>
+                      <v-select
+                      color="cyan"
+                      label="Floating Pools"
+                      :items="floatingPoolNames"
+                      v-model="infrastructureData.floatingPoolName"
+                      required
+                      ></v-select>
+                    </v-flex>
+                    <v-flex xs1>
+                    </v-flex>
+                    <v-flex xs3>
+                      <v-select
+                      color="cyan"
+                      label="Load Balancer Providers"
+                      :items="loadBalancerProviderNames"
+                      v-model="infrastructureData.loadBalancerProvider"
+                      persistent-hint
+                      required
+                      ></v-select>
                     </v-flex>
                   </v-layout>
-                  <v-layout row>
-                    <v-card-title>
-                      <span class="subheading">Auto Update</span>
-                    </v-card-title>
-                  </v-layout>
-                  <v-list class="mr-extra">
-                    <v-list-tile avatar class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title>Operating System</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          Schedule operating system updates of the workers during maintenance.
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                    <v-list-tile avatar class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          Automatically update Kubernetes to latest patch version during maintenance.
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                  </v-list>
-                </v-container>
-              </v-card>
+                </template>
+              </v-card-text>
+            </v-container>
+          </v-card>
+        </v-tab-item>
 
-            </v-tabs-content>
+        <v-tab-item key="worker" id="tab-worker">
 
-          </v-tabs-items>
-        </v-tabs>
-        <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
-      </v-card-text>
+          <v-card flat>
+            <v-container fluid >
+              <transition-group name="list-complete">
+                <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
+                  <v-flex pa-1 >
+
+                    <worker-input-aws :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'aws'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-aws>
+
+                    <worker-input-azure :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'azure'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-azure>
+
+                    <worker-input-gce :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'gcp'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-gce>
+
+                    <worker-input-openstack :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'openstack'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-openstack>
+
+                  </v-flex>
+                </v-layout>
+                <v-layout row key="1234" class="list-complete-item pt-4 pl-3 ">
+
+                  <v-flex xs1>
+                    <v-btn
+                      small
+                      @click="addWorker"
+                      outline
+                      fab
+                      icon
+                      class="cyan">
+                      <v-icon class="cyan--text">add</v-icon>
+                    </v-btn>
+                  </v-flex>
+
+                  <v-flex xs1 class="mt-2">
+                    <v-btn
+                      @click="addWorker"
+                      flat
+                      class="cyan--text">
+                      Add Worker Group
+                    </v-btn>
+                  </v-flex>
+
+                </v-layout>
+              </transition-group>
+            </v-container>
+          </v-card>
+
+        </v-tab-item>
+
+        <v-tab-item key="addons" id="tab-addons">
+
+          <v-card flat>
+            <v-container>
+              <v-list three-line class="mr-extra">
+
+                <v-list-tile avatar class="list-complete-item">
+                  <v-list-tile-action>
+                    <v-checkbox color="cyan" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-title >Dashboard</v-list-tile-title>
+                    <v-list-tile-sub-title>
+                      General-purpose web UI for Kubernetes clusters.
+                    </v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+
+                <v-list-tile  class="list-complete-item">
+                  <v-list-tile-action>
+                    <v-checkbox v-model="addons.monocular.enabled" class="cyan--text"></v-checkbox>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-title >Monocular</v-list-tile-title>
+                    <v-list-tile-sub-title>
+                      Monocular is a web-based UI for managing Kubernetes applications and services
+                      packaged as Helm Charts. It allows you to search and discover available charts from
+                      multiple repositories, and install them in your cluster with one click.
+                    </v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+
+              </v-list>
+            </v-container>
+          </v-card>
+
+        </v-tab-item>
+
+        <v-tab-item key="maintenance" id="tab-maintenance">
+
+          <v-card flat>
+            <v-container>
+              <v-layout row>
+                <v-flex xs2>
+                  <v-text-field
+                   color="cyan"
+                   label="Maintenance Start Time"
+                   v-model="maintenanceBegin"
+                   :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
+                   @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
+                   @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
+                   type="time"
+                   suffix="UTC"
+                   required
+                 ></v-text-field>
+                </v-flex>
+              </v-layout>
+              <v-layout row>
+                <v-card-title>
+                  <span class="subheading">Auto Update</span>
+                </v-card-title>
+              </v-layout>
+              <v-list class="mr-extra">
+                <v-list-tile avatar class="list-complete-item">
+                  <v-list-tile-action>
+                    <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-title>Operating System</v-list-tile-title>
+                    <v-list-tile-sub-title>
+                      Schedule operating system updates of the workers during maintenance.
+                    </v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+                <v-list-tile avatar class="list-complete-item">
+                  <v-list-tile-action>
+                    <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
+                    <v-list-tile-sub-title>
+                      Automatically update Kubernetes to latest patch version during maintenance.
+                    </v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+              </v-list>
+            </v-container>
+          </v-card>
+
+        </v-tab-item>
+      </v-tabs-items>
+      <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
 
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -1036,23 +1030,25 @@ limitations under the License.
       background-image: url(../assets/cluster_background.svg);
       background-size: cover;
       color:white;
-      padding-top:10px;
+      padding-top:30px;
       .tabs__bar {
         background-color:rgba(255,255,255,0.1)
       }
-      span{
-        font-size:25px !important
-        padding-left:30px
-        font-weight:400 !important
-        padding-top:15px !important
-      }
-      .icon {
-        font-size: 50px !important;
+    }
+
+    .toolbar__title {
+      margin-bottom: 30px
+      span {
+        padding-left: 5px;
       }
     }
 
     .card__text{
       padding:0;
+    }
+
+    .tabs__item {
+      font-weight: 400;
     }
 
     .tabs__items {

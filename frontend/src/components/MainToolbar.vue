@@ -152,6 +152,7 @@ limitations under the License.
 
   .content {
     text-align: center;
+    display: block;
   }
 
   .action-button >>> .btn__content {

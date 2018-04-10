@@ -12,7 +12,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// A custom Nightwatch assertion.
+// The assertion name is the filename.
+// Example usage:
+//   browser.assert.elementCount(selector, count)
 //
+// For more information on custom assertions see:
+// http://nightwatchjs.org/guide#writing-custom-assertions
 
 exports.assertion = function (selector, count) {
   this.message = 'Testing if element <' + selector + '> has count: ' + count

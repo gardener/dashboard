@@ -15,22 +15,20 @@ limitations under the License.
  -->
 
 <template>
-  <v-tabs :scrollable="false" v-model="tab">
+  <v-tabs class="white" fixed :scrollable="false" v-model="tab">
 
-    <v-tabs-bar class="white" fixed>
       <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
 
-      <v-tabs-item href="#formatted" ripple>
+      <v-tab href="#formatted" ripple>
         Overview
-      </v-tabs-item>
+      </v-tab>
 
-      <v-tabs-item href="#yaml" ripple>
+      <v-tab href="#yaml" ripple>
         YAML
-      </v-tabs-item>
+      </v-tab>
 
-    </v-tabs-bar>
 
-    <v-tabs-content id="formatted" class="pt-2">
+    <v-tab-item id="formatted" class="pt-2">
       <v-container fluid grid-list-lg>
         <v-layout d-flex wrap row>
           <v-flex md6>
@@ -212,13 +210,13 @@ limitations under the License.
           </v-flex>
         </v-layout>
       </v-container>
-    </v-tabs-content>
+    </v-tab-item>
 
-    <v-tabs-content id="yaml">
+    <v-tab-item id="yaml">
       <v-card>
         <code-block v-model="mounted" height="100%" lang="yaml" :content="rawItem"></code-block>
       </v-card>
-    </v-tabs-content>
+    </v-tab-item>
 
   </v-tabs>
 </template>

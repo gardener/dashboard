@@ -39,7 +39,7 @@ if (version === false) {
     ])
     .then(([
       {default: Vue},
-      {default: Vuetify},
+      Vuetify,
       {default: Vuelidate},
       {default: App},
       {default: store},
@@ -93,6 +93,7 @@ if (version === false) {
 
 function start ({Vue, Vuetify, Vuelidate, App, store, router}) {
   /* eslint-disable no-new */
+  console.log(Vuetify)
   Vue.use(Vuetify)
   Vue.use(Vuelidate)
 

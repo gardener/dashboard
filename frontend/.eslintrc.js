@@ -7,7 +7,7 @@ module.exports = {
     sourceType: 'module'
   },
   env: {
-    browser: true
+    browser: true,
   },
   // https://github.com/standard/standard/blob/master/docs/RULES-en.md
   extends: [
@@ -21,12 +21,10 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
-    // allow paren-less arrow functions
-    'arrow-parens': 0,
     // allow async-await
-    'generator-star-spacing': 0,
+    'generator-star-spacing': 'off',
     // allow debugger during development
-    'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     // loash rules
     'lodash/prefer-lodash-method': [2, {ignoreMethods: [
       'map',

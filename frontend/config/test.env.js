@@ -1,5 +1,4 @@
 'use strict'
-const { join } = require('path')
 const merge = require('webpack-merge')
 const devEnv = require('./dev.env')
 
