@@ -26,7 +26,7 @@ limitations under the License.
         <v-list-tile-title><a :href="dashboardUrl" target="_blank">{{dashboardUrlText}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="!!info.shootIngressDomain">
+    <template v-if="!!info.shootIngressDomain && isAdmin">
       <v-list-tile>
         <v-list-tile-action>
         </v-list-tile-action>
@@ -90,6 +90,7 @@ limitations under the License.
 
 <script>
   import Clipboard from 'clipboard'
+  import { mapGetters } from 'vuex'
 
   export default {
     components: {
@@ -136,6 +137,9 @@ limitations under the License.
       }
     },
     computed: {
+      ...mapGetters([
+        'isAdmin'
+      ]),
       grafanaUrl () {
         return this.info.grafanaUrl || ''
       },
