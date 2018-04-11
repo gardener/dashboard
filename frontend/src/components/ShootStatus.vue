@@ -79,10 +79,10 @@ limitations under the License.
     },
     computed: {
       showProgress () {
-        return this.operation.progress !== 100 && this.operation.state !== 'Failed' && !!this.operation.progress
+        return this.operation.state === 'Processing'
       },
       isError () {
-        return this.operation.state === 'Failed' || this.lastErrorDescription
+        return this.operation.state === 'Failed' || this.operation.state === 'Error' || this.lastErrorDescription
       },
       isUserError () {
         return isUserError(this.errorCodes)
