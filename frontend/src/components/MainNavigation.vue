@@ -37,6 +37,8 @@ limitations under the License.
       </div>
       <template v-if="projectList.length">
       <v-menu
+        light
+        attach
         offset-y
         left
         bottom
@@ -54,10 +56,11 @@ limitations under the License.
           <v-icon right>{{projectMenuIcon}}</v-icon>
         </v-btn>
 
-        <v-card>
+        <v-card light>
           <template v-if="projectList.length > 3">
             <v-card-title class="pa-0 grey lighten-5">
               <v-text-field
+                light
                 clearable
                 label="Filter projects"
                 single-line
@@ -74,11 +77,10 @@ limitations under the License.
             </v-card-title>
             <v-divider></v-divider>
           </template>
-          <v-list two-line dense class="project-list">
+          <v-list light class="project-list">
             <v-list-tile
               v-for="project in sortedAndFilteredProjectList"
               :key="project.metadata.name"
-              avatar
               @click="onProjectSelect(project)"
             >
               <v-list-tile-avatar>
@@ -111,7 +113,7 @@ limitations under the License.
         <template v-for="route in routes" v-if="namespace">
           <v-list-tile :to="namespacedRoute(route)">
             <v-list-tile-action>
-              <v-icon class="white--text">{{route.meta.menu.icon}}</v-icon>
+              <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
               <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
@@ -300,7 +302,7 @@ limitations under the License.
         max-height: (4 * 54px) + (2 * 8px);
         overflow-y: auto;
 
-        li > a {
+        div > a {
           height: 54px;
         }
         .project-owner {
@@ -391,16 +393,11 @@ limitations under the License.
     }
 
     >>> .list {
-      div a {
-        color: rgba(255,255,255,0.8) !important
-        font-weight: 300 !important
-        text-transform: uppercase
-        .icon {
-          font-size: 18px !important
-          color: rgba(255,255,255,0.8) !important
-        }
+      .list__tile__title {
+          text-transform: uppercase
+          font-size: 13px;
       }
-      div a.list__tile--active {
+      .list__tile--active {
         background: rgba(255,255,255,0.1) !important
         color: white !important
         .icon {
