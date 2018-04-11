@@ -321,6 +321,7 @@ const mutations = {
   ITEM_DEL (state, deletedItem) {
     const item = findItem(deletedItem.metadata)
     if (item !== undefined) {
+      delete state.shoots[keyForShoot(item.metadata)]
       setSortedItems(state)
     }
   },
