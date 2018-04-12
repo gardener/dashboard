@@ -45,7 +45,7 @@ limitations under the License.
             <v-subheader>Column Selection</v-subheader>
             <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
               <v-list-tile-action>
-                <v-checkbox v-model="item.checked" color="cyan darken-2" @click></v-checkbox>
+                <v-checkbox v-model="item.checked" color="cyan darken-2" readonly @click.native.stop @click="setColumnChecked(item)"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>{{ item.text }}</v-list-tile-sub-title>
             </v-list-tile>
