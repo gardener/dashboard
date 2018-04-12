@@ -175,6 +175,13 @@ export function getDateFormatted (timestamp) {
   }
 }
 
+export function getTimestampFormatted (timestamp) {
+  if (!timestamp) {
+    return undefined
+  }
+  return moment(timestamp).format('lll')
+}
+
 export function getTimeAgoFrom (time, fromTime) {
   if (!time) {
     return undefined

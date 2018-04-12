@@ -21,7 +21,7 @@ limitations under the License.
 </template>
 
 <script>
-  import {getTimeAgoFrom} from '@/utils'
+  import {getTimeAgoFrom, getDateFormatted} from '@/utils'
 
   const state = {
     current: new Date(),
@@ -36,7 +36,7 @@ limitations under the License.
     }
   }
 
-  export default {
+  const TimeAgo = {
     props: ['dateTime'],
     data () {
       return {
@@ -50,6 +50,15 @@ limitations under the License.
     },
     mounted () {
       run()
+    }
+  }
+  export { TimeAgo }
+  export default {
+    props: ['dateTime'],
+    computed: {
+      timeAgo () {
+        return this.dateTime ? getDateFormatted(this.dateTime) : ''
+      }
     }
   }
 </script>

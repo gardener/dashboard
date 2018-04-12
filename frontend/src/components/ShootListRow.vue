@@ -135,7 +135,7 @@ limitations under the License.
   import replace from 'lodash/replace'
   import get from 'lodash/get'
   import includes from 'lodash/includes'
-  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
+  import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
 
   export default {
     components: {
@@ -196,7 +196,7 @@ limitations under the License.
         return replace(this.row.namespace, /^garden-/, '')
       },
       createdAt () {
-        return getDateFormatted(this.row.creationTimestamp)
+        return getTimestampFormatted(this.row.creationTimestamp)
       },
       k8sPatchAvailable () {
         if (get(this.row, 'availableK8sUpdates.patch')) {
