@@ -251,6 +251,8 @@ const setSortedItems = (state) => {
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
     state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+  } else {
+    state.sortedShoots = shoots(state)
   }
 }
 
