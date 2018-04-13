@@ -60,7 +60,7 @@ limitations under the License.
             <v-subheader v-if="!projectScope">Filter Table</v-subheader>
             <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
-                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click></v-checkbox>
+                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>Show only Shoots with Issues</v-list-tile-sub-title>
             </v-list-tile>
