@@ -236,8 +236,8 @@ limitations under the License.
         return false
       },
       isDeleteDialogDisabled () {
-        const annotations = this.row.annotations
-        const confirmation = annotations['confirmation.garden.sapcloud.io/deletionTimestamp']
+        // eslint-disable-next-line
+        const confirmation = get(this.row, ['annotations', 'confirmation.garden.sapcloud.io/deletionTimestamp'])
         return !!this.row.deletionTimestamp && this.row.deletionTimestamp === confirmation
       },
       isDashboardDialogDisabled () {
