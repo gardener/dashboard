@@ -290,7 +290,7 @@ const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem({namespace, name})
     if (item !== undefined) {
-      state.shoots[keyForShoot(item.metadata)] = assign({}, item, {info})
+      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, {info}))
     }
   },
   SET_SELECTION (state, metadata) {
