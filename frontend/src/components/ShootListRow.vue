@@ -72,6 +72,16 @@ limitations under the License.
         <status-tag :tag="tag" :popper-key="`${row.name}_${tag.text}`"></status-tag>
       </template>
     </td>
+    <td class="nowrap" v-if="this.headerVisible['journal']">
+      <v-tooltip top>
+        <div slot="activator">
+          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+            <time-ago :date-time="row.lastUpdatedJournalTimestamp"></time-ago>
+          </router-link>
+        </div>
+        {{ lastUpdatedJournal }}
+      </v-tooltip>
+    </td>
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
@@ -156,9 +166,10 @@ limitations under the License.
       }
     },
     computed: {
-      ...mapGetters({
-        kubernetesVersions: 'kubernetesVersions'
-      }),
+      ...mapGetters([
+        'kubernetesVersions',
+        'lastUpdatedJournalByNameAndNamespace'
+      ]),
       row () {
         const spec = this.shootItem.spec
         const metadata = this.shootItem.metadata
@@ -167,9 +178,9 @@ limitations under the License.
         const kind = getCloudProviderKind(spec.cloud)
         return {
           name: metadata.name,
+          namespace: metadata.namespace,
           createdBy: getCreatedBy(metadata),
           creationTimestamp: metadata.creationTimestamp,
-          namespace: metadata.namespace,
           annotations: metadata.annotations,
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
@@ -182,7 +193,8 @@ limitations under the License.
           availableK8sUpdates: availableK8sUpdatesForShoot(spec),
           k8sVersion: get(spec, 'kubernetes.version'),
           // eslint-disable-next-line
-          purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+          purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
+          lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata)
         }
       },
       headerVisible () {
@@ -197,6 +209,9 @@ limitations under the License.
       },
       createdAt () {
         return getTimestampFormatted(this.row.creationTimestamp)
+      },
+      lastUpdatedJournal () {
+        return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
       },
       k8sPatchAvailable () {
         if (get(this.row, 'availableK8sUpdates.patch')) {

@@ -36,7 +36,8 @@ limitations under the License.
     }
   }
 
-  const TimeAgo = {
+  export default {
+  // const TimeAgo = {
     props: ['dateTime'],
     data () {
       return {
@@ -52,13 +53,13 @@ limitations under the License.
       run()
     }
   }
-  export { TimeAgo }
-  export default {
-    props: ['dateTime'],
-    computed: {
-      timeAgo () {
-        return this.dateTime ? getDateFormatted(this.dateTime) : ''
-      }
-    }
-  }
+  // export { TimeAgo }
+  // export default {
+  //   props: ['dateTime'],
+  //   computed: {
+  //     timeAgo () {
+  //       return this.dateTime ? getDateFormatted(this.dateTime) : ''
+  //     }
+  //   }
+  // }
 </script>

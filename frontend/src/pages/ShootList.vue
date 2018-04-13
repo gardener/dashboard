@@ -166,6 +166,7 @@ limitations under the License.
           { text: 'STATUS', value: 'lastOperation', align: 'center', checked: true, hidden: false },
           { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, hidden: false },
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
+          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, hidden: false },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
         ],
         dialog: null,
