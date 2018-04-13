@@ -40,7 +40,7 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
-          <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrlText}}</a></v-list-tile-title>
+          <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrl}}</a></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile>
@@ -48,7 +48,7 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
-          <v-list-tile-title><a :href="alertmanagerUrl" target="_blank">{{alertmanagerUrlText}}</a></v-list-tile-title>
+          <v-list-tile-title><a :href="alertmanagerUrl" target="_blank">{{alertmanagerUrl}}</a></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
     </template>
@@ -149,14 +149,8 @@ limitations under the License.
       prometheusUrl () {
         return this.info.prometheusUrl || ''
       },
-      prometheusUrlText () {
-        return this.info.prometheusUrlText || ''
-      },
       alertmanagerUrl () {
         return this.info.alertmanagerUrl || ''
-      },
-      alertmanagerUrlText () {
-        return this.info.alertmanagerUrlText || ''
       },
       dashboardUrl () {
         return this.info.dashboardUrl || ''
