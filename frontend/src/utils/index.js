@@ -1,5 +1,5 @@
 //
-// Copyright 2018 by The Gardener Authors.
+// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -173,6 +173,13 @@ export function getDateFormatted (timestamp) {
   } else {
     return moment(timestamp).format('YYYY-MM-DD')
   }
+}
+
+export function getTimestampFormatted (timestamp) {
+  if (!timestamp) {
+    return undefined
+  }
+  return moment(timestamp).format('lll')
 }
 
 export function getTimeAgoFrom (time, fromTime) {

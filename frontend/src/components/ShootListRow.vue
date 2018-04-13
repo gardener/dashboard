@@ -1,5 +1,5 @@
 <!--
-Copyright 2018 by The Gardener Authors.
+Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ limitations under the License.
   import replace from 'lodash/replace'
   import get from 'lodash/get'
   import includes from 'lodash/includes'
-  import { getDateFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
+  import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
 
   export default {
     components: {
@@ -196,7 +196,7 @@ limitations under the License.
         return replace(this.row.namespace, /^garden-/, '')
       },
       createdAt () {
-        return getDateFormatted(this.row.creationTimestamp)
+        return getTimestampFormatted(this.row.creationTimestamp)
       },
       k8sPatchAvailable () {
         if (get(this.row, 'availableK8sUpdates.patch')) {
