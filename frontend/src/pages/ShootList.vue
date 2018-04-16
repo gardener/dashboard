@@ -157,17 +157,17 @@ limitations under the License.
         floatingButton: false,
         search: '',
         allHeaders: [
-          { text: 'PROJECT', value: 'project', align: 'left', checked: true, hidden: false },
-          { text: 'NAME', value: 'name', align: 'left', checked: true, hidden: false },
-          { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: true, hidden: false },
-          { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, hidden: false },
-          { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, hidden: false },
-          { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, hidden: false },
-          { text: 'STATUS', value: 'lastOperation', align: 'center', checked: true, hidden: false },
-          { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, hidden: false },
-          { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: true, hidden: false },
-          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, hidden: false },
-          { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: true, hidden: false }
+          { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
+          { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
+          { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
+          { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
+          { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
+          { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: false, hidden: false },
+          { text: 'STATUS', value: 'lastOperation', align: 'center', checked: false, defaultChecked: true, hidden: false },
+          { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: false, hidden: false },
+          { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: false, defaultChecked: true, hidden: false },
+          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false },
+          { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
         ],
         dialog: null,
         tableMenu: false,
@@ -225,7 +225,7 @@ limitations under the License.
       },
       resetColumnsChecked () {
         for (const header of this.allHeaders) {
-          header.checked = header.checkedDefault
+          header.checked = header.defaultChecked
         }
         this.saveColumnsChecked()
 
@@ -235,8 +235,7 @@ limitations under the License.
       loadColumnsChecked () {
         const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
         for (const header of this.allHeaders) {
-          header.checkedDefault = header.checked
-          header.checked = get(checkedColumns, header.value, header.checked)
+          header.checked = get(checkedColumns, header.value, header.defaultChecked)
         }
       }
     },
