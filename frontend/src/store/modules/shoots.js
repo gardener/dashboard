@@ -275,6 +275,7 @@ const putItem = (state, newItem) => {
       return sortRequired
     }
   } else {
+    newItem.info = undefined // register property to ensure reactivity
     Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
     return true
   }
