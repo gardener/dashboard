@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" persistent max-width="1200" content-class="dialogContainer">
+  <v-dialog lazy v-model="visible" persistent max-width="1200" content-class="dialogContainer">
     <v-card flat>
 
       <v-toolbar dense class="draken-1 header">
@@ -24,7 +24,7 @@ limitations under the License.
           <span>Create Cluster</span>
         </v-toolbar-title>
         <v-tabs align-with-title dark slot="extension" v-model="activeTab">
-          <v-tabs-slider class="yellow"></v-tabs-slider>
+          <v-tabs-slider color="yellow"></v-tabs-slider>
           <v-tab key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tab>
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
           <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
