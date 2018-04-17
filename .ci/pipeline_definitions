@@ -1,0 +1,39 @@
+dashboard:
+  template: 'default'
+  base_definition:
+    repo: ~
+    traits:
+      version:
+        preprocess:
+          'inject-commit-hash'
+      publish:
+        dockerimages:
+          dashboard:
+            inputs:
+              repos:
+                source: ~ # default
+              steps:
+                build: ~
+            registry: 'gcr-readwrite'
+            image: 'eu.gcr.io/gardener-project/gardener/dashboard'
+    steps:
+      build:
+        image: 'node:alpine'
+        output_dir: 'binary'
+  variants:
+    head-update: ~
+    pull-request:
+      traits:
+        pull-request: ~
+    release:
+      traits:
+        version:
+          preprocess: 'finalise'
+        release:
+          nextversion: 'bump_minor'
+      steps:
+        prepare_release: ~
+        build:
+          depends: ['prepare_release']
+        test:
+          image: node:alpine
