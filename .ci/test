@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$SOURCE_PATH" ]; then
+  export SOURCE_PATH="$(readlink -f $(dirname ${0})/..)"
+else
+  export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
+fi
+
+apk add --update curl && \
+curl -Ls "https://github.com/dustinblackman/phantomized/releases/download/2.1.1/dockerized-phantomjs.tar.gz" | tar xz -C / && \
+apk del curl
+
+# not every environment has pushd
+old_pwd=$PWD
+
+# Dashboard backend
+cd "${SOURCE_PATH}/backend"
+npm install backend
+npm run backend lint
+npm run backend test
+
+# Dashboard frontend
+cd "${SOURCE_PATH}/frontend"
+npm install
+npm run lint
+npm run unit
+
+cd "${old_pwd}"
+
