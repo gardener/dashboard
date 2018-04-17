@@ -98,16 +98,16 @@ limitations under the License.
           let description
           switch (code) {
             case 'ERR_INFRA_UNAUTHORIZED':
-              description = 'Invalid infrastructure secret'
+              description = 'Invalid cloud provider credentials.'
               break
             case 'ERR_INFRA_INSUFFICIENT_PRIVILEGES':
-              description = 'Infrastructure secret has insufficient privileges'
+              description = 'Cloud provider credentials have insufficient privileges.'
               break
             case 'ERR_INFRA_QUOTA_EXCEEDED':
-              description = 'Infrastructure secret quota exceeded'
+              description = 'Cloud provider quota exceeded. Please request limit increases.'
               break
             case 'ERR_INFRA_DEPENDENCIES':
-              description = 'Operation failed as there are dependent objects on cloud provider level'
+              description = 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
               break
             default:
               description = code
