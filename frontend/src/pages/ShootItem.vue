@@ -188,7 +188,7 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2">
                 Kube-Cluster Access
               </v-card-title>
-              <cluster-access v-model="mounted" :info="info"></cluster-access>
+              <cluster-access ref="clusterAccess" :info="info"></cluster-access>
               <template v-if="!!info.kubeconfig">
                 <v-divider class="my-2" inset></v-divider>
                 <v-expansion-panel>
@@ -198,7 +198,7 @@ limitations under the License.
                       <span>KUBECONFIG</span>
                     </div>
                     <v-card>
-                      <code-block v-model="mounted" lang="yaml" :content="info.kubeconfig"></code-block>
+                      <code-block lang="yaml" :content="info.kubeconfig"></code-block>
                     </v-card>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -214,7 +214,7 @@ limitations under the License.
 
     <v-tab-item id="yaml">
       <v-card>
-        <code-block v-model="mounted" height="100%" lang="yaml" :content="rawItem"></code-block>
+        <code-block height="100%" lang="yaml" :content="rawItem"></code-block>
       </v-card>
     </v-tab-item>
 
@@ -412,6 +412,10 @@ limitations under the License.
     },
     mounted () {
       this.mounted = true
+    },
+    beforeRouteUpdate (to, from, next) {
+      this.$refs.clusterAccess.reset()
+      next()
     }
   }
 </script>

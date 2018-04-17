@@ -50,10 +50,6 @@ limitations under the License.
       content: {
         type: String,
         default: ''
-      },
-      value: {
-        type: Boolean,
-        required: true
       }
     },
     data: () => ({
@@ -65,9 +61,10 @@ limitations under the License.
         if (this.clipboard) {
           this.clipboard.destroy()
         }
-
-        this.clipboard = new Clipboard(this.$refs.copy.$el, {
-          target: () => this.$refs.block
+        const target = this.$refs.block
+        const btn = this.$refs.copy.$el
+        this.clipboard = new Clipboard(btn, {
+          target: () => target
         })
         this.clipboard.on('success', (event) => {
           event.clearSelection()
@@ -76,10 +73,6 @@ limitations under the License.
             this.showMessage = false
           }, 2000)
         })
-      },
-      reset () {
-        this.snackbar = false
-        this.showPassword = false
       },
       prettyPrint (textContent) {
         const block = this.$refs.block
@@ -105,20 +98,12 @@ limitations under the License.
       }
     },
     mounted () {
+      this.enableCopy()
       this.prettyPrint(this.content)
     },
     watch: {
       content (textContent) {
         this.prettyPrint(textContent)
-      },
-      value (value) {
-        if (value) {
-          this.$nextTick(() => {
-            this.enableCopy()
-          })
-        } else {
-          this.reset()
-        }
       }
     }
   }

@@ -70,7 +70,7 @@ limitations under the License.
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
-          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" v-on:showDialog="showDialog"></shoot-list-row>
+          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog"></shoot-list-row>
         </template>
       </v-data-table>
       <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -78,12 +78,12 @@ limitations under the License.
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
             <div class="headline">Kubeconfig <code class="cluster_name">{{currentName}}</code></div>
             <v-spacer></v-spacer>
-            <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog()">
+            <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
           <v-card-text>
-            <code-block v-model="kubeconfigDialog" lang="yaml" :content="currentKubeconfig"></code-block>
+            <code-block lang="yaml" :content="currentKubeconfig"></code-block>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -92,11 +92,11 @@ limitations under the License.
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
             <div class="headline">Kube-Cluster Access <code class="cluster_name">{{currentName}}</code></div>
             <v-spacer></v-spacer>
-            <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog()">
+            <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <cluster-access v-model="dashboardDialog" :info="currentInfo"></cluster-access>
+          <cluster-access ref="clusterAccess" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
       <confirm-input-dialog :confirm="currentName" v-model="deleteDialog" :cancel="hideDialog" :ok="deletionConfirmed">
@@ -208,6 +208,11 @@ limitations under the License.
         }
       },
       hideDialog () {
+        switch (this.dialog) {
+          case 'dashboard':
+            this.$refs.clusterAccess.reset()
+            break
+        }
         this.dialog = null
         this.setSelectedShoot(null)
       },
