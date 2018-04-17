@@ -175,6 +175,11 @@ const getters = {
       return getters['journals/comments']({issueNumber})
     }
   },
+  lastUpdatedJournalByNameAndNamespace (state, getters) {
+    return ({namespace, name}) => {
+      return getters['journals/lastUpdated']({namespace, name})
+    }
+  },
   shootsByInfrastructureSecret (state) {
     return (secretName, namespace) => {
       const predicate = item => {

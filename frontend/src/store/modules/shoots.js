@@ -104,14 +104,9 @@ const actions = {
     return getShootInfo({namespace, name, user})
       .then(res => res.data)
       .then(info => {
-        let credentials = ''
-        if (!!info.username && !!info.password) {
-          credentials = `${info.username}:${info.password}@`
-        }
-
         if (info.serverUrl) {
           const [, scheme, host] = uriPattern.exec(info.serverUrl)
-          const authority = `//${credentials}${replace(host, /^\/\//, '')}`
+          const authority = `//${replace(host, /^\/\//, '')}`
           const pathnameAlias = '/ui'
           const pathname = get(rootState.cfg, 'dashboardUrl.pathname', pathnameAlias)
           info.dashboardUrl = [scheme, authority, pathname].join('')
@@ -121,16 +116,14 @@ const actions = {
         if (info.shootIngressDomain) {
           const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
           const grafanaHost = `g.${info.shootIngressDomain}`
-          info.grafanaUrl = `https://${credentials}${grafanaHost}${grafanaPathname}`
+          info.grafanaUrl = `https://${grafanaHost}${grafanaPathname}`
           info.grafanaUrlText = `https://${grafanaHost}`
 
           const prometheusHost = `p.${info.shootIngressDomain}`
-          info.prometheusUrl = `https://${credentials}${prometheusHost}`
-          info.prometheusUrlText = `https://${prometheusHost}`
+          info.prometheusUrl = `https://${prometheusHost}`
 
           const alertmanagerHost = `a.${info.shootIngressDomain}`
-          info.alertmanagerUrl = `https://${credentials}${alertmanagerHost}`
-          info.alertmanagerUrlText = `https://${alertmanagerHost}`
+          info.alertmanagerUrl = `https://${alertmanagerHost}`
         }
         return info
       })
@@ -258,6 +251,8 @@ const setSortedItems = (state) => {
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
     state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+  } else {
+    state.sortedShoots = shoots(state)
   }
 }
 
@@ -280,6 +275,7 @@ const putItem = (state, newItem) => {
       return sortRequired
     }
   } else {
+    newItem.info = undefined // register property to ensure reactivity
     Vue.set(state.shoots, keyForShoot(newItem.metadata), newItem)
     return true
   }

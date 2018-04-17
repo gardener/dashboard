@@ -22,6 +22,8 @@ import matches from 'lodash/matches'
 import forEach from 'lodash/forEach'
 import matchesProperty from 'lodash/matchesProperty'
 import get from 'lodash/get'
+import head from 'lodash/head'
+import orderBy from 'lodash/orderBy'
 
 const eqlNameAndNamespace = ({namespace, name}) => {
   return matches({ metadata: { namespace, name } })
@@ -37,14 +39,21 @@ const state = {
   allComments: {}
 }
 
+const getIssues = (state, name, namespace) => {
+  return filter(state.all, eqlNameAndNamespace({name, namespace}))
+}
 // getters
 const getters = {
   items: state => state.all,
   issues: (state) => ({name, namespace}) => {
-    return filter(state.all, eqlNameAndNamespace({name, namespace}))
+    return getIssues(state, name, namespace)
   },
   comments: (state) => ({issueNumber}) => {
     return state.allComments[issueNumber]
+  },
+  lastUpdated: (state) => ({name, namespace}) => {
+    const lastUpdatedIssue = head(getIssues(state, name, namespace))
+    return get(lastUpdatedIssue, 'metadata.updated_at')
   }
 }
 
@@ -55,13 +64,18 @@ const actions = {
   }
 }
 
+const orderJournalsByUpdatedAt = () => {
+  state.all = orderBy(state.all, ['metadata.updated_at'], ['desc'])
+}
 // mutations
 const mutations = {
   ITEM_PUT (state, newItem) {
     putItem(state, newItem)
+    orderJournalsByUpdatedAt()
   },
   ITEMS_PUT (state, newItems) {
     forEach(newItems, newItem => putItem(state, newItem))
+    orderJournalsByUpdatedAt()
   },
   ITEM_DEL (state, deletedItem) {
     const index = findIndex(state.all, eqIssue(deletedItem))
@@ -107,7 +121,7 @@ const putComment = (state, newItem) => {
   putToList(commentsList, newItem, 'metadata.updated_at', matcher)
 }
 
-const putToList = (list, newItem, updatedAtKeyPath, matcher) => {
+const putToList = (list, newItem, updatedAtKeyPath, matcher, descending = true) => {
   const index = findIndex(list, matcher)
   if (index !== -1) {
     const item = list[index]
