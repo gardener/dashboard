@@ -431,7 +431,7 @@ limitations under the License.
   import { required, maxLength } from 'vuelidate/lib/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
-  import { setInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+  import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
   import moment from 'moment'
 
   var semSort = require('semver-sort')
@@ -948,7 +948,7 @@ limitations under the License.
         this.errorMessage = undefined
         this.detailedMessage = undefined
 
-        setInputFocus(this, 'name')
+        setDelayedInputFocus(this, 'name')
       },
       setDefaultDomain () {
         const domain = head(this.domainList)
