@@ -8,8 +8,8 @@ else
   export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
 fi
 
-apk add --update curl && \
-curl -Ls "https://github.com/dustinblackman/phantomized/releases/download/2.1.1/dockerized-phantomjs.tar.gz" | tar xz -C / && \
+apk add --update curl
+curl -Ls "https://github.com/dustinblackman/phantomized/releases/download/2.1.1/dockerized-phantomjs.tar.gz" | tar xz -C /
 apk del curl
 
 # not every environment has pushd
@@ -17,15 +17,15 @@ old_pwd=$PWD
 
 # Dashboard backend
 cd "${SOURCE_PATH}/backend"
-npm install backend
-npm run backend lint
-npm run backend test
+npm install
+npm run -s lint
+npm run -s test-cov
 
 # Dashboard frontend
 cd "${SOURCE_PATH}/frontend"
 npm install
-npm run lint
-npm run unit
+npm run -s lint
+npm run -s unit
 
 cd "${old_pwd}"
 
