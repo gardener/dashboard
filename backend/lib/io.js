@@ -134,7 +134,7 @@ module.exports = () => {
 
         await Promise.all(shootsPromises)
         batchEmitter.flush()
-        socket.emit('batchEventDone', {kind, namespaces})
+        socket.emit('batchEventDone', {kind, namespaces: _.map(namespaces, nsObj => nsObj.namespace)})
       }
     })
   })

@@ -386,7 +386,7 @@ const actions = {
     return state.shootsLoading
   },
   unsetShootsLoading ({ commit, getters }, namespaces) {
-    const currentNamespace = some(namespaces, namespace => !getters.isCurrentNamespace(namespace))
+    const currentNamespace = !some(namespaces, namespace => !getters.isCurrentNamespace(namespace))
     if (currentNamespace) {
       commit('SET_SHOOTS_LOADING', false)
     }
@@ -471,7 +471,7 @@ addListener({
   itemKey: 'object',
   eventHandlerFn: {
     put: object => {
-      if (getters.isCurrentNamespace(object.metadata.namespace)) {
+      if (store.getters.isCurrentNamespace(object.metadata.namespace)) {
         store.commit('shoots/ITEM_PUT', object)
       }
     }
@@ -488,7 +488,7 @@ addListener({
     put: data => {
       let objectsToPut = []
       mapKeys(data, (objects, namespace) => {
-        if (getters.isCurrentNamespace(namespace)) {
+        if (store.getters.isCurrentNamespace(namespace)) {
           objectsToPut = concat(objectsToPut, objects)
         }
       })
