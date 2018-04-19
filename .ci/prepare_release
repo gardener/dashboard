@@ -18,6 +18,13 @@ then
   echo "Version not found"
   exit 1
 fi
+
+# revert changes VERSION
+git checkout "${SOURCE_PATH}/VERSION"
+
+# print environment
+env
+
 # bump backend version
 sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${SOURCE_PATH}/backend/package.json"
 npm i --prefix "${SOURCE_PATH}/backend"
