@@ -8,6 +8,10 @@ else
   export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
 fi
 
+# not every environment has pushd
+old_pwd=$PWD
+cd "${SOURCE_PATH}"
+
 function bump_version() {
   local version="$(cat "${SOURCE_PATH}/VERSION")"
   if [ -z "$version" ]
@@ -30,3 +34,5 @@ function bump_version() {
 }
 
 bump_version
+
+cd "${old_pwd}"
