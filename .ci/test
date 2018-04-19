@@ -8,10 +8,6 @@ else
   export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
 fi
 
-apk add --update curl
-curl -Ls "https://github.com/dustinblackman/phantomized/releases/download/2.1.1/dockerized-phantomjs.tar.gz" | tar xz -C /
-apk del curl
-
 # not every environment has pushd
 old_pwd=$PWD
 
