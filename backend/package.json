@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.5.0-dev",
+  "version": "1.6.0",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "repository": {
