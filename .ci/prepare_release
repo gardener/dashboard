@@ -29,6 +29,6 @@ npm i --prefix "${SOURCE_PATH}/frontend"
 git add "${SOURCE_PATH}/frontend/package.json"
 git add "${SOURCE_PATH}/frontend/package-lock.json"
 # commit changes
-git commit -m "Update frontend and backend to version $version"
+git commit -m "Update frontend & backend to version $version [skip ci]"
 
 cd "${old_pwd}"
