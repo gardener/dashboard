@@ -241,7 +241,7 @@ limitations under the License.
         const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
         for (const header of this.allHeaders) {
           header.checked = get(checkedColumns, header.value, header.defaultChecked)
-          
+
           if (header.value === 'journal') {
             header.hidden = !this.isAdmin
           }
