@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog lazy v-model="visible" persistent max-width="1200" content-class="dialogContainer">
+  <v-dialog v-model="visible" persistent max-width="1200" content-class="dialogContainer">
     <v-card flat>
 
       <v-toolbar dense class="draken-1 header">
