@@ -71,7 +71,7 @@ limitations under the License.
             </div>
           </v-card-title>
           <v-card-actions>
-            <v-btn block flat class="action-button cyan--text text--darken-2" to="/account" title="My Account">
+            <v-btn block flat class="action-button cyan--text text--darken-2" :to="accountLink" title="My Account">
               <v-icon left>account_circle</v-icon>
               My Account
             </v-btn>
@@ -143,6 +143,9 @@ limitations under the License.
         return (item) => {
           return get(item, 'target', '_blank')
         }
+      },
+      accountLink () {
+        return {name: 'Account', query: this.$route.query}
       }
     }
   }
