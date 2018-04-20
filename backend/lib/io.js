@@ -24,7 +24,7 @@ const { jwt } = require('./middleware')
 const { projects, shoots, journals, userInfo } = require('./services')
 const watches = require('./watches')
 const { shootHasIssue } = require('./utils')
-const { ArrayBatchEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
+const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { getJournalCache } = require('./cache')
 
 module.exports = () => {
@@ -134,7 +134,7 @@ module.exports = () => {
 
         await Promise.all(shootsPromises)
         batchEmitter.flush()
-        socket.emit('batchEventDone', {kind, namespaces: _.map(namespaces, nsObj => nsObj.namespace)})
+        socket.emit('batchNamespacedEventsDone', {kind, namespaces: _.map(namespaces, nsObj => nsObj.namespace)})
       }
     })
   })
@@ -156,7 +156,7 @@ module.exports = () => {
 
         const objects = getJournalCache().getIssues()
 
-        const batchEmitter = new ArrayBatchEmitter('issues', socket)
+        const batchEmitter = new EventsEmitter('issues', socket)
         batchEmitter.batchEmitObjectsAndFlush(objects)
       } else {
         logger.warn('user %s tried to fetch journal but is no admin', _.get(user, 'email'))
@@ -169,7 +169,7 @@ module.exports = () => {
       if (userInfo.isAdmin({user})) {
         joinRoom(socket, `comments_${namespace}/${name}`)
 
-        const batchEmitter = new ArrayBatchEmitter('comments', socket)
+        const batchEmitter = new EventsEmitter('comments', socket)
         try {
           await journals.commentsForNameAndNamespace({name,
             namespace,

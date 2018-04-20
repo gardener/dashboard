@@ -281,6 +281,16 @@ const putItem = (state, newItem) => {
   }
 }
 
+const deleteItem = (state, deletedItem) => {
+  const item = findItem(deletedItem.metadata)
+  let sortRequired = false
+  if (item !== undefined) {
+    delete state.shoots[keyForShoot(item.metadata)]
+    sortRequired = true
+  }
+  return sortRequired
+}
+
 // mutations
 const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
@@ -296,28 +306,26 @@ const mutations = {
     state.sortParams = sortParams
     setSortedItems(state)
   },
-  ITEM_PUT (state, newItem) {
-    const sortRequired = putItem(state, newItem)
-
-    if (sortRequired) {
-      setSortedItems(state)
-    }
-  },
-  ITEMS_PUT (state, newItems) {
+  HANDLE_EVENTS (state, events) {
     let sortRequired = false
-    forEach(newItems, newItem => {
-      if (putItem(state, newItem)) {
-        sortRequired = true
+    forEach(events, event => {
+      switch (event.type) {
+        case 'ADDED':
+        case 'MODIFIED':
+          if (putItem(state, event.object)) {
+            sortRequired = true
+          }
+          break
+        case 'DELETED':
+          if (deleteItem(state, event.object)) {
+            sortRequired = true
+          }
+          break
+        default:
+          console.error('undhandled event type', event.type)
       }
     })
     if (sortRequired) {
-      setSortedItems(state)
-    }
-  },
-  ITEM_DEL (state, deletedItem) {
-    const item = findItem(deletedItem.metadata)
-    if (item !== undefined) {
-      delete state.shoots[keyForShoot(item.metadata)]
       setSortedItems(state)
     }
   },

@@ -452,87 +452,25 @@ const store = new Vuex.Store({
   plugins
 })
 
-const addListener = ({emitter, eventName, itemKey, mutationMapping = {}, eventHandlerFn = {}}) => {
-  emitter.on(eventName, (event) => {
-    if (eventHandlerFn[event.type]) {
-      eventHandlerFn[event.type](event[itemKey])
-    } else if (mutationMapping[event.type]) {
-      store.commit(mutationMapping[event.type], event[itemKey])
-    } else {
-      console.error('unhandled type', event.type)
+/* Shoots */
+EmitterWrapper.shootsEmitter.on('shoots', namespacedEvents => {
+  let eventsToHandle = []
+  mapKeys(namespacedEvents, (events, namespace) => {
+    if (store.getters.isCurrentNamespace(namespace)) {
+      eventsToHandle = concat(eventsToHandle, events)
     }
   })
-}
-
-/* Shoots */
-addListener({
-  emitter: EmitterWrapper.shootsEmitter,
-  eventName: 'shoot',
-  itemKey: 'object',
-  eventHandlerFn: {
-    put: object => {
-      if (store.getters.isCurrentNamespace(object.metadata.namespace)) {
-        store.commit('shoots/ITEM_PUT', object)
-      }
-    }
-  },
-  mutationMapping: {
-    delete: 'shoots/ITEM_DEL'
-  }
-})
-addListener({
-  emitter: EmitterWrapper.shootsEmitter,
-  eventName: 'shoots',
-  itemKey: 'data',
-  eventHandlerFn: {
-    put: data => {
-      let objectsToPut = []
-      mapKeys(data, (objects, namespace) => {
-        if (store.getters.isCurrentNamespace(namespace)) {
-          objectsToPut = concat(objectsToPut, objects)
-        }
-      })
-      store.commit('shoots/ITEMS_PUT', objectsToPut)
-    }
-  }
+  store.commit('shoots/HANDLE_EVENTS', eventsToHandle)
 })
 
 /* Journal Issues */
-addListener({
-  emitter: EmitterWrapper.journalsEmitter,
-  eventName: 'issue',
-  itemKey: 'object',
-  mutationMapping: {
-    put: 'journals/ITEM_PUT',
-    delete: 'journals/ITEM_DEL'
-  }
-})
-addListener({
-  emitter: EmitterWrapper.journalsEmitter,
-  eventName: 'issues',
-  itemKey: 'data',
-  mutationMapping: {
-    put: 'journals/ITEMS_PUT'
-  }
+EmitterWrapper.journalsEmitter.on('issues', events => {
+  store.commit('journals/HANDLE_ISSUE_EVENTS', events)
 })
 
 /* Journal Comments */
-addListener({
-  emitter: EmitterWrapper.journalsEmitter,
-  eventName: 'comment',
-  itemKey: 'object',
-  mutationMapping: {
-    put: 'journals/COMMENT_PUT',
-    delete: 'journals/COMMENT_DEL'
-  }
-})
-addListener({
-  emitter: EmitterWrapper.journalsEmitter,
-  eventName: 'comments',
-  itemKey: 'data',
-  mutationMapping: {
-    put: 'journals/COMMENTS_PUT'
-  }
+EmitterWrapper.journalsEmitter.on('comments', events => {
+  store.commit('journals/HANDLE_COMMENTS_EVENTS', events)
 })
 
 export default store

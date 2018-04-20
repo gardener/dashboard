@@ -16,6 +16,7 @@
 
 'use strict'
 
+const logger = require('../logger')
 const garden = require('../kubernetes').garden()
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
@@ -26,26 +27,32 @@ const shootsWithIssues = []
 module.exports = io => {
   const emitter = garden.shoots.watch()
   registerHandler(emitter, event => {
-    const namespace = event.object.metadata.namespace
-    io.of('/shoots').to(namespace).emit('event', event)
-
-    const shootIdentifier = `${namespace}_${event.object.metadata.name}`
-    const idx = _.indexOf(shootsWithIssues, shootIdentifier)
-
-    if (shootHasIssue(event.object)) {
-      io.of('/shoots').to(`${namespace}_issues`).emit('event', event)
-      if (idx === -1) {
-        shootsWithIssues.push(shootIdentifier)
-      } else {
-        if (event.type === 'DELETED') {
-          _.pullAt(shootsWithIssues, idx)
-        }
-      }
+    if (event.type === 'ERROR') {
+      logger.error('shoots event error', event.object)
     } else {
-      if (idx !== -1) {
-        _.pullAt(shootsWithIssues, idx)
-        event.type = 'DELETED'
-        io.of('/shoots').to(`${namespace}_issues`).emit('event', event)
+      const namespace = event.object.metadata.namespace
+      const namespacedEvents = {kind: 'shoots', namespaces: {}}
+      namespacedEvents.namespaces[namespace] = [event]
+      io.of('/shoots').to(namespace).emit('namespacedEvents', namespacedEvents)
+
+      const shootIdentifier = `${namespace}_${event.object.metadata.name}`
+      const idx = _.indexOf(shootsWithIssues, shootIdentifier)
+
+      if (shootHasIssue(event.object)) {
+        io.of('/shoots').to(`${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+        if (idx === -1) {
+          shootsWithIssues.push(shootIdentifier)
+        } else {
+          if (event.type === 'DELETED') {
+            _.pullAt(shootsWithIssues, idx)
+          }
+        }
+      } else {
+        if (idx !== -1) {
+          _.pullAt(shootsWithIssues, idx)
+          event.type = 'DELETED'
+          io.of('/shoots').to(`${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+        }
       }
     }
   })

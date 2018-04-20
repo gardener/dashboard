@@ -15,7 +15,6 @@
 //
 
 import io from 'socket.io-client'
-import toLower from 'lodash/toLower'
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
 import Emitter from 'component-emitter'
@@ -143,39 +142,20 @@ function onAuthenticated () {
   this.authenticated = true
   this.emit('authenticated')
   console.log(`socket connection ${this.socket.id} authenticated`)
-  this.socket.on('event', ({type, object}) => {
-    const {kind} = object
-    const objectKind = toLower(kind)
-    switch (type) {
-      case 'ADDED':
-      case 'MODIFIED':
-        this.emit(objectKind, {type: 'put', object})
-        break
-      case 'DELETED':
-        this.emit(objectKind, {type: 'delete', object})
-        break
-      case 'ERROR':
-        this.emit('error', object)
-        console.error('Kubernetes error', object)
-        break
-    }
+
+  this.socket.on('events', ({kind, events}) => {
+    this.emit(kind, events)
   })
-  this.socket.on('batchEvent', ({type, kind, data}) => {
-    const objectKind = toLower(kind)
-    switch (type) {
-      case 'ADDED':
-        this.emit(objectKind, {type: 'put', data})
-        break
-      default:
-        console.error('handleBatchEvents: unhandled type', type)
-        break
-    }
+
+  this.socket.on('namespacedEvents', ({kind, namespaces}) => {
+    this.emit(kind, namespaces)
   })
-  this.socket.on('batchEventDone', ({kind, namespaces}) => {
+  this.socket.on('batchNamespacedEventsDone', ({kind, namespaces}) => {
     if (kind === 'shoots') {
       store.dispatch('unsetShootsLoading', namespaces)
     }
   })
+
   const namespace = this.namespace
   const filter = undefined
   this.subscribe({namespace, filter})

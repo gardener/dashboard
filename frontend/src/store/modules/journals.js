@@ -73,37 +73,57 @@ const orderJournalsByUpdatedAt = () => {
 }
 // mutations
 const mutations = {
-  ITEM_PUT (state, newItem) {
-    putItem(state, newItem)
+  HANDLE_ISSUE_EVENTS (state, events) {
+    forEach(events, event => {
+      switch (event.type) {
+        case 'ADDED':
+        case 'MODIFIED':
+          putItem(state, event.object)
+          break
+        case 'DELETED':
+          deleteItem(state, event.object)
+          break
+        default:
+          console.error('undhandled event type', event.type)
+      }
+    })
     orderJournalsByUpdatedAt()
   },
-  ITEMS_PUT (state, newItems) {
-    forEach(newItems, newItem => putItem(state, newItem))
+  HANDLE_COMMENTS_EVENTS (state, events) {
+    forEach(events, event => {
+      switch (event.type) {
+        case 'ADDED':
+        case 'MODIFIED':
+          putComment(state, event.object)
+          break
+        case 'DELETED':
+          deleteComment(state, event.object)
+          break
+        default:
+          console.error('undhandled event type', event.type)
+      }
+    })
     orderJournalsByUpdatedAt()
-  },
-  ITEM_DEL (state, deletedItem) {
-    const index = findIndex(state.all, eqIssue(deletedItem))
-    if (index !== -1) {
-      state.all.splice(index, 1)
-    }
-  },
-  COMMENT_PUT (state, newItem) {
-    putComment(state, newItem)
-  },
-  COMMENTS_PUT (state, newItems) {
-    forEach(newItems, newItem => putComment(state, newItem))
-  },
-  COMMENT_DEL (state, deletedItem) {
-    const issueNumber = get(deletedItem, 'metadata.number')
-
-    // eslint-disable-next-line
-    const index = findIndex(commentForIssue(state, issueNumber), matchesProperty('metadata.id', deletedItem.metadata.id))
-    if (index !== -1) {
-      state.allComments[issueNumber].splice(index, 1)
-    }
   },
   CLEAR_COMMENTS (state) {
     state.allComments = {}
+  }
+}
+
+const deleteItem = (state, deletedItem) => {
+  const index = findIndex(state.all, eqIssue(deletedItem))
+  if (index !== -1) {
+    state.all.splice(index, 1)
+  }
+}
+
+const deleteComment = (state, deletedItem) => {
+  const issueNumber = get(deletedItem, 'metadata.number')
+
+  // eslint-disable-next-line
+  const index = findIndex(commentForIssue(state, issueNumber), matchesProperty('metadata.id', deletedItem.metadata.id))
+  if (index !== -1) {
+    state.allComments[issueNumber].splice(index, 1)
   }
 }
 

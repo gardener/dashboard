@@ -29,13 +29,13 @@ module.exports = async io => {
   }
 
   getJournalCache().subscribeIssues(event => {
-    io.of('/journals').to('issues').emit('event', event)
+    io.of('/journals').to('issues').emit('events', {kind: 'issues', events: [event]})
   })
   getJournalCache().subscribeComments(event => {
     const name = event.object.metadata.name
     const namespace = event.object.metadata.namespace
     logger.debug(`emitting event to room comments_${namespace}/${name}`)
-    io.of('/journals').to(`comments_${namespace}/${name}`).emit('event', event)
+    io.of('/journals').to(`comments_${namespace}/${name}`).emit('events', {kind: 'comments', events: [event]})
   })
 
   const listJournals = async (param, fn) => {
