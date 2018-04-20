@@ -25,8 +25,12 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import orderBy from 'lodash/orderBy'
 
-const eqlNameAndNamespace = ({namespace, name}) => {
-  return matches({ metadata: { namespace, name } })
+const eqlNameAndNamespace = ({namespace, name, state = undefined}) => {
+  const source = { metadata: { namespace, name } }
+  if (state) {
+    source.metadata.state = state
+  }
+  return matches(source)
 }
 
 const eqIssue = issue => {
@@ -39,20 +43,20 @@ const state = {
   allComments: {}
 }
 
-const getIssues = (state, name, namespace) => {
-  return filter(state.all, eqlNameAndNamespace({name, namespace}))
+const getOpenIssues = (state, name, namespace) => {
+  return filter(state.all, eqlNameAndNamespace({name, namespace, state: 'open'}))
 }
 // getters
 const getters = {
   items: state => state.all,
   issues: (state) => ({name, namespace}) => {
-    return getIssues(state, name, namespace)
+    return getOpenIssues(state, name, namespace)
   },
   comments: (state) => ({issueNumber}) => {
     return state.allComments[issueNumber]
   },
   lastUpdated: (state) => ({name, namespace}) => {
-    const lastUpdatedIssue = head(getIssues(state, name, namespace))
+    const lastUpdatedIssue = head(getOpenIssues(state, name, namespace))
     return get(lastUpdatedIssue, 'metadata.updated_at')
   }
 }

@@ -41,7 +41,8 @@ function fromIssue (issue) {
       'id',
       'created_at',
       'updated_at',
-      'number'
+      'number',
+      'state'
     ]), {
       namespace,
       name
