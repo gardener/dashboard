@@ -18,6 +18,7 @@ import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
 import Emitter from 'component-emitter'
+import {ThrottledNamespacedEventEmitter} from './ThrottledEmitter'
 import store from '../store'
 
 const url = window.location.origin
@@ -147,12 +148,17 @@ function onAuthenticated () {
     this.emit(kind, events)
   })
 
+  /* currently we only throttle NamespacedEvents (for shoots) as for this kind
+  * we expect many events coming in in a short period of time */
+  const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({emitter: this, wait: 1000})
+
   this.socket.on('namespacedEvents', ({kind, namespaces}) => {
-    this.emit(kind, namespaces)
+    throttledNsEventEmitter.emit(kind, namespaces)
   })
   this.socket.on('batchNamespacedEventsDone', ({kind, namespaces}) => {
     if (kind === 'shoots') {
       store.dispatch('unsetShootsLoading', namespaces)
+      throttledNsEventEmitter.flush()
     }
   })
 
