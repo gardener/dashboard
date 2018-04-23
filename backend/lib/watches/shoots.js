@@ -30,6 +30,8 @@ module.exports = io => {
     if (event.type === 'ERROR') {
       logger.error('shoots event error', event.object)
     } else {
+      event.objectKey = _.get(event.object, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+
       const namespace = event.object.metadata.namespace
       const namespacedEvents = {kind: 'shoots', namespaces: {}}
       namespacedEvents.namespaces[namespace] = [event]

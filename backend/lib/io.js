@@ -111,7 +111,7 @@ module.exports = () => {
         const projectList = await projects.list({user})
         const shootsPromises = []
 
-        const batchEmitter = new NamespacedBatchEmitter(kind, socket)
+        const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
         _.forEach(namespaces, (nsObj) => {
           const namespace = _.get(nsObj, 'namespace')
           const filter = _.get(nsObj, 'filter')
@@ -156,7 +156,7 @@ module.exports = () => {
 
         const objects = getJournalCache().getIssues()
 
-        const batchEmitter = new EventsEmitter('issues', socket)
+        const batchEmitter = new EventsEmitter({kind: 'issues', socket})
         batchEmitter.batchEmitObjectsAndFlush(objects)
       } else {
         logger.warn('user %s tried to fetch journal but is no admin', _.get(user, 'email'))
@@ -169,7 +169,7 @@ module.exports = () => {
       if (userInfo.isAdmin({user})) {
         joinRoom(socket, `comments_${namespace}/${name}`)
 
-        const batchEmitter = new EventsEmitter('comments', socket)
+        const batchEmitter = new EventsEmitter({kind: 'comments', socket})
         try {
           await journals.commentsForNameAndNamespace({name,
             namespace,

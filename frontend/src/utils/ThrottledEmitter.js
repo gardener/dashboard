@@ -19,6 +19,7 @@ import concat from 'lodash/concat'
 import throttle from 'lodash/throttle'
 import toLower from 'lodash/toLower'
 import get from 'lodash/get'
+import filter from 'lodash/filter'
 
 class ThrottledEmitter {
   constructor ({emitter, wait = 1000}) {
@@ -48,12 +49,28 @@ class ThrottledEmitter {
   flush () {
     this.throttledEmitEvents.flush()
   }
+
+  _replaceOldEventsWithSameKey (bufferedEvents, newEvents) {
+    forEach(newEvents, event => {
+      const filterEventsWithSameKeyPredicate = bufferedEvent => {
+        if (!bufferedEvent.objectKey || !event.objectKey) {
+          return true
+        }
+        return bufferedEvent.objectKey !== event.objectKey
+      }
+
+      bufferedEvents = filter(bufferedEvents, filterEventsWithSameKeyPredicate)
+    })
+    bufferedEvents = concat(bufferedEvents, newEvents)
+
+    return bufferedEvents
+  }
 }
 
 // class ThrottledEventEmitter extends ThrottledEmitter {
 //   appendValue (objectKind, events) {
 //     this.eventsBuffer[objectKind] = get(this.eventsBuffer, objectKind, [])
-//     this.eventsBuffer[objectKind] = concat(this.eventsBuffer[objectKind], events)
+//     this.eventsBuffer[objectKind] = this._replaceOldEventsWithSameKey(this.eventsBuffer[objectKind], events)
 //   }
 // }
 
@@ -62,7 +79,8 @@ class ThrottledNamespacedEventEmitter extends ThrottledEmitter {
     forEach(namespaces, (events, namespace) => {
       this.eventsBuffer[objectKind] = get(this.eventsBuffer, objectKind, {})
       this.eventsBuffer[objectKind][namespace] = get(this.eventsBuffer, `${objectKind}.${namespace}`, [])
-      this.eventsBuffer[objectKind][namespace] = concat(this.eventsBuffer[objectKind][namespace], events)
+
+      this.eventsBuffer[objectKind][namespace] = this._replaceOldEventsWithSameKey(this.eventsBuffer[objectKind][namespace], events)
     })
   }
 }
