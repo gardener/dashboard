@@ -22,6 +22,9 @@ limitations under the License.
     <v-content>
       <router-view></router-view>
     </v-content>
+    <v-alert :type="alertType" v-model="alertVisible" dismissible>
+      <div class="alertMessage" v-html="alertMessageCompiledMarkdown"></div>
+    </v-alert>
     <v-snackbar color="error" fixed bottom v-model="errorVisible">
       <div class="white-text">{{errorMessage}} </div>
       <v-spacer/>
@@ -40,6 +43,7 @@ limitations under the License.
   import MainToolbar from '@/components/MainToolbar.vue'
   import Loading from '@/components/Loading.vue'
   import { mapGetters, mapActions } from 'vuex'
+  import marked from 'marked'
 
   export default {
     name: 'Default',
@@ -56,7 +60,9 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'errorMessage'
+        'errorMessage',
+        'alertMessage',
+        'alertType'
       ]),
       errorVisible: {
         get () {
@@ -67,11 +73,31 @@ limitations under the License.
             this.setError(null)
           }
         }
+      },
+      alertVisible: {
+        get () {
+          return !!this.alertMessage
+        },
+        set (value) {
+          if (!value) {
+            this.setAlert(null)
+          }
+        }
+      },
+      alertMessageCompiledMarkdown () {
+        const options = {
+          gfm: true,
+          breaks: true,
+          tables: true,
+          sanitize: true
+        }
+        return marked(this.alertMessage, options)
       }
     },
     methods: {
       ...mapActions([
-        'setError'
+        'setError',
+        'setAlert'
       ])
     },
     created () {
@@ -83,3 +109,11 @@ limitations under the License.
     }
   }
 </script>
+
+<style lang="styl">
+  .alertMessage {
+    a {
+      color: white !important;
+    }
+  }
+</style>
