@@ -73,7 +73,7 @@ limitations under the License.
         'journalCommentsByIssueNumber'
       ]),
       journalTitle () {
-        const title = get(this.journal, 'metadata.journalTitle')
+        const title = get(this.journal, 'data.journalTitle')
         return title ? ` - ${title}` : ''
       },
       login () {
