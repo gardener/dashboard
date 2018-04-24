@@ -116,4 +116,8 @@ limitations under the License.
       color: white !important;
     }
   }
+
+  .alert {
+    z-index: 1000;
+  }
 </style>
