@@ -180,13 +180,12 @@ const getters = {
       return getters['journals/lastUpdated']({namespace, name})
     }
   },
-  shootsByInfrastructureSecret (state) {
-    return (secretName, namespace) => {
+  shootsByInfrastructureSecret (state, getters) {
+    return (secretName) => {
       const predicate = item => {
-        const secretBindingRef = get(item, 'spec.cloud.secretBindingRef')
-        return get(secretBindingRef, 'name') === secretName && get(secretBindingRef, 'namespace') === namespace
+        return get(item, 'spec.cloud.secretBindingRef.name') === secretName
       }
-      return filter(state.shoots.all, predicate)
+      return filter(getters['shoots/sortedItems'], predicate)
     }
   },
   kubernetesVersions (state, getters) {

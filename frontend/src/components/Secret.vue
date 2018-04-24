@@ -135,7 +135,7 @@ limitations under the License.
       },
       relatedShootCount () {
         return (secret) => {
-          return this.shootsByInfrastructureSecret(secret.metadata.name, secret.metadata.namespace).length
+          return this.shootsByInfrastructureSecret(secret.metadata.name).length
         }
       },
       relatedShootCountLabel () {
