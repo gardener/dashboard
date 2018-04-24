@@ -135,6 +135,12 @@ const getters = {
   },
   errorMessage () {
     return state.error ? state.error.message || '' : ''
+  },
+  alertMessage () {
+    return get(state, 'alert.message', '')
+  },
+  alertType () {
+    return get(state, 'alert.type', 'error')
   }
 }
 
@@ -246,6 +252,11 @@ const actions = {
   },
   setConfiguration ({ commit }, value) {
     commit('SET_CONFIGURATION', value)
+
+    if (get(value, 'alert')) {
+      commit('SET_ALERT', get(value, 'alert'))
+    }
+
     return state.cfg
   },
   setNamespace ({ commit }, value) {
@@ -271,6 +282,10 @@ const actions = {
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
+  },
+  setAlert ({ commit }, value) {
+    commit('SET_ALERT', value)
+    return state.alert
   }
 }
 
@@ -298,6 +313,9 @@ const mutations = {
   },
   SET_ERROR (state, value) {
     state.error = value
+  },
+  SET_ALERT (state, value) {
+    Vue.set(state, 'alert', value)
   }
 }
 
