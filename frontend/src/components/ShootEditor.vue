@@ -1,18 +1,18 @@
 <template>
   <v-container fluid fill-height class="cm-container">
-    <v-dialog v-model="visible" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <v-dialog v-model="visible" @keydown.esc="close" fullscreen hide-overlay transition="dialog-bottom-transition">
       <v-toolbar dense dark>
         <v-toolbar-title>Cluster Editor</v-toolbar-title>
-
         <v-spacer></v-spacer>
-        <v-btn icon @click="onCancel">
+        <v-btn icon flat @click="onCancel">
           <v-icon>close</v-icon>
         </v-btn>
       </v-toolbar>
       <v-alert type="warning" color="cyan darken-2" :value="warning" @input="dismissWarning" dismissible class="modification--warning">
-        By modifying the resource directly you may cause serious problems in your cluster. We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
+        By modifying the resource directly you may cause serious problems in your cluster.
+        We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
       </v-alert>
-      <codemirror ref="editor" :value="content" :options="cmOptions"></codemirror>
+      <codemirror ref="editor" :options="cmOptions"></codemirror>
       <v-snackbar
         bottom
         :timeout="0"
@@ -24,12 +24,10 @@
        <v-btn dark flat @click.native="snackbar = false">Close</v-btn>
      </v-snackbar>
       <v-footer fixed height="56">
-
         <div class="px-3">
           <v-btn @click="onSave" dark color="cyan darken-2" >Save</v-btn>
           <v-btn @click="onCancel">Cancel</v-btn>
         </div>
-
       </v-footer>
     </v-dialog>
   </v-container>
@@ -49,10 +47,6 @@ export default {
     codemirror
   },
   props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
     content: {
       type: String,
       required: true
@@ -61,6 +55,7 @@ export default {
   data () {
     const vm = this
     return {
+      visible: false,
       warning: this.$localStorage.getItem('showShootEditorWarning', 'true') === 'true',
       snackbar: false,
       errorMessage: null,
@@ -76,21 +71,11 @@ export default {
           },
           'Cmd-S' (cm) {
             vm.save(cm.getValue())
+          },
+          'Esc' () {
+            vm.close()
           }
         }
-      }
-    }
-  },
-  computed: {
-    visible: {
-      get () {
-        return this.value
-      },
-      set (value) {
-        if (!value) {
-          this.setValue(this.content)
-        }
-        this.$emit('input', value)
       }
     }
   },
@@ -101,6 +86,20 @@ export default {
     }
   },
   methods: {
+    open () {
+      this.setValue(this.content)
+      this.visible = true
+    },
+    close () {
+      this.visible = false
+      this.$emit('close')
+    },
+    save (value) {
+      const user = this.$store.state.user
+      const { metadata: {namespace, name} } = safeLoad(this.content)
+      const { spec } = safeLoad(value)
+      return replaceShootSpec({namespace, name, user, data: spec})
+    },
     dismissWarning () {
       this.warning = false
       this.$localStorage.setItem('showShootEditorWarning', 'false')
@@ -121,23 +120,15 @@ export default {
     onSave (event) {
       this.save(this.getValue())
         .then(() => {
-          this.visible = false
-          this.$emit('close')
+          this.close()
         })
         .catch(err => {
           this.snackbar = true
           this.errorMessage = err.response.data.message
         })
     },
-    save (value) {
-      const user = this.$store.state.user
-      const { metadata: {namespace, name} } = safeLoad(this.content)
-      const { spec } = safeLoad(value)
-      return replaceShootSpec({namespace, name, user, data: spec})
-    },
     onCancel () {
-      this.visible = false
-      this.$emit('close')
+      this.close()
     }
   },
   name: 'ShootEditor'

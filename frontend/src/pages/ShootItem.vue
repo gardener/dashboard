@@ -223,14 +223,14 @@ limitations under the License.
           fab
           bottom
           right
-          @click.native.stop="editor = true"
+          @click.native.stop="openEditor"
         >
           <v-icon>edit</v-icon>
         </v-btn>
       </v-card>
     </v-tab-item>
 
-    <shoot-editor ref="editor" v-model="editor" :content="rawItem"></shoot-editor>
+    <shoot-editor ref="editor" :content="rawItem"></shoot-editor>
 
   </v-tabs>
 </template>
@@ -299,7 +299,13 @@ limitations under the License.
     methods: {
       ...mapActions([
         'setSelectedShoot'
-      ])
+      ]),
+      openEditor () {
+        const editor = this.$refs.editor
+        if (editor) {
+          editor.open()
+        }
+      }
     },
     computed: {
       ...mapGetters([
