@@ -56,7 +56,7 @@ export default {
     const vm = this
     return {
       visible: false,
-      warning: this.$localStorage.getItem('showShootEditorWarning', 'true') === 'true',
+      warning: true,
       snackbar: false,
       errorMessage: null,
       cmOptions: {
@@ -79,6 +79,10 @@ export default {
       }
     }
   },
+  mounted () {
+    const value = this.$localStorage.getItem('showShootEditorWarning')
+    this.warning = value === null || value === 'true'
+  },
   updated () {
     const editor = this.$refs.editor
     if (editor) {
@@ -99,6 +103,13 @@ export default {
       const { metadata: {namespace, name} } = safeLoad(this.content)
       const { spec } = safeLoad(value)
       return replaceShootSpec({namespace, name, user, data: spec})
+        .then(() => {
+          this.close()
+        })
+        .catch(err => {
+          this.snackbar = true
+          this.errorMessage = err.response.data.message
+        })
     },
     dismissWarning () {
       this.warning = false
@@ -119,13 +130,6 @@ export default {
     },
     onSave (event) {
       this.save(this.getValue())
-        .then(() => {
-          this.close()
-        })
-        .catch(err => {
-          this.snackbar = true
-          this.errorMessage = err.response.data.message
-        })
     },
     onCancel () {
       this.close()
