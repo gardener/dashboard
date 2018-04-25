@@ -60,6 +60,7 @@ const state = {
   user: null,
   loading: false,
   error: null,
+  alert: null,
   shootsLoading: false
 }
 
@@ -209,6 +210,12 @@ const getters = {
   errorMessage () {
     return get(state, 'error.message', '')
   },
+  alertMessage () {
+    return get(state, 'alert.message', '')
+  },
+  alertType () {
+    return get(state, 'alert.type', 'error')
+  },
   isCurrentNamespace (state, getters) {
     return (namespace) => {
       return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
@@ -346,6 +353,11 @@ const actions = {
   },
   setConfiguration ({ commit }, value) {
     commit('SET_CONFIGURATION', value)
+
+    if (get(value, 'alert')) {
+      commit('SET_ALERT', get(value, 'alert'))
+    }
+
     return state.cfg
   },
   setNamespace ({ commit }, value) {
@@ -394,6 +406,10 @@ const actions = {
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
+  },
+  setAlert ({ commit }, value) {
+    commit('SET_ALERT', value)
+    return state.alert
   }
 }
 
@@ -430,6 +446,9 @@ const mutations = {
   },
   SET_ERROR (state, value) {
     state.error = value
+  },
+  SET_ALERT (state, value) {
+    state.alert = value
   }
 }
 
