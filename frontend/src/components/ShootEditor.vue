@@ -92,10 +92,13 @@ export default {
   methods: {
     open () {
       this.setValue(this.content)
+      this.snackbar = false
       this.visible = true
     },
     close () {
       this.visible = false
+      this.snackbar = false
+      this.errorMessage = null
       this.$emit('close')
     },
     save (value) {
