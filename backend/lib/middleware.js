@@ -99,18 +99,10 @@ function errorToLocals (err, req) {
   let reason = err.reason || 'Internal Error'
   const name = err.name
   const error = req.app.get('env') === 'development' ? err : {name}
-  let status = 500
-  if (err instanceof HttpError) {
-    status = err.code
-  } else {
-    switch (name) {
-      case 'UnauthorizedError':
-      case 'JwksError':
-      case 'SigningKeyNotFoundError':
-        status = 401
-        reason = 'Authentication Error'
-        break
-    }
+  let status = err.code || 500
+  if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
+    status = 401
+    reason = 'Authentication Error'
   }
   if (status >= 500) {
     logger.error(err.message, err.stack)

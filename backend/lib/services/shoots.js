@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { inspect } = require('util')
 const kubernetes = require('../kubernetes')
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
@@ -51,8 +52,20 @@ exports.read = async function ({user, namespace, name}) {
   return Garden(user).namespaces(namespace).shoots.get({name})
 }
 
-function patch ({user, namespace, name, body}) {
+const patch = exports.patch = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.mergePatch({name, body})
+}
+
+exports.replaceSpec = async function ({user, namespace, name, body}) {
+  const spec = body.spec || body
+  const patchOperations = [
+    {
+      op: 'replace',
+      path: '/spec',
+      value: spec
+    }
+  ]
+  return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
 }
 
 exports.remove = async function ({user, namespace, name}) {

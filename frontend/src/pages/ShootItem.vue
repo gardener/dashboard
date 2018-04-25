@@ -15,18 +15,17 @@ limitations under the License.
  -->
 
 <template>
-  <v-tabs class="white" fixed :scrollable="false" v-model="tab">
+  <v-tabs fixed :scrollable="false" v-model="tab">
 
-      <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
+    <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
 
-      <v-tab href="#formatted" ripple>
-        Overview
-      </v-tab>
+    <v-tab href="#formatted" ripple>
+      Overview
+    </v-tab>
 
-      <v-tab href="#yaml" ripple>
-        YAML
-      </v-tab>
-
+    <v-tab href="#yaml" ripple>
+      YAML
+    </v-tab>
 
     <v-tab-item id="formatted" class="pt-2">
       <v-container fluid grid-list-lg>
@@ -208,15 +207,30 @@ limitations under the License.
             <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
 
           </v-flex>
+
         </v-layout>
+
       </v-container>
     </v-tab-item>
 
     <v-tab-item id="yaml">
       <v-card>
         <code-block height="100%" lang="yaml" :content="rawItem"></code-block>
+        <v-btn
+          color="cyan darken-2"
+          dark
+          fixed
+          fab
+          bottom
+          right
+          @click.native.stop="editor = true"
+        >
+          <v-icon>edit</v-icon>
+        </v-btn>
       </v-card>
     </v-tab-item>
+
+    <shoot-editor ref="editor" v-model="editor" :content="rawItem"></shoot-editor>
 
   </v-tabs>
 </template>
@@ -226,9 +240,11 @@ limitations under the License.
   import { mapGetters, mapActions } from 'vuex'
   import CodeBlock from '@/components/CodeBlock'
   import ClusterAccess from '@/components/ClusterAccess'
+  import ShootEditor from '@/components/ShootEditor'
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import get from 'lodash/get'
+  import omit from 'lodash/omit'
   import includes from 'lodash/includes'
   import { safeDump } from 'js-yaml'
   import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
@@ -238,6 +254,7 @@ limitations under the License.
     components: {
       CodeBlock,
       ClusterAccess,
+      ShootEditor,
       Journals,
       TimeAgo
     },
@@ -275,7 +292,8 @@ limitations under the License.
             description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
           }
         ],
-        mounted: false
+        mounted: false,
+        editor: false
       }
     },
     methods: {
@@ -321,14 +339,7 @@ limitations under the License.
         return url
       },
       rawItem () {
-        const item = Object.assign({}, this.item)
-        // delete in item copy
-        delete item.info
-        const metadata = item.metadata || {}
-        if (metadata.annotations && metadata.annotations['seed.garden.sapcloud.io/kubeconfig']) {
-          // delete in item orginal
-          delete metadata.annotations['seed.garden.sapcloud.io/kubeconfig']
-        }
+        const item = omit(this.item, ['info'])
         return safeDump(item, {
           skipInvalid: true
         })

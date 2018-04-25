@@ -45,7 +45,7 @@
     "express-session": "^1.15.6",
     "js-yaml": "^3.10.0",
     "jwks-rsa": "^1.2.1",
-    "kubernetes-client": "^4.0.0",
+    "kubernetes-client": "^4.0.1",
     "lodash": "^4.17.5",
     "morgan": "^1.9.0",
     "parse-link-header": "^1.0.1",

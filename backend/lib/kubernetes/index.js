@@ -20,6 +20,7 @@ const { existsSync } = require('fs')
 const BaseObject = require('kubernetes-client/lib/base')
 BaseObject.prototype.watch = require('./watch')
 BaseObject.prototype.mergePatch = mergePatch
+BaseObject.prototype.jsonPatch = jsonPatch
 const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
@@ -76,6 +77,11 @@ function credentials (options = {}) {
 
 function mergePatch (options, ...rest) {
   const headers = {'content-type': 'application/merge-patch+json'}
+  return this.patch(merge({headers}, options), ...rest)
+}
+
+function jsonPatch (options, ...rest) {
+  const headers = {'content-type': 'application/json-patch+json'}
   return this.patch(merge({headers}, options), ...rest)
 }
 
