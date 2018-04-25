@@ -147,7 +147,7 @@ module.exports = () => {
     logger.debug('Socket %s connected', socket.id)
     socket.on('disconnect', onDisconnect)
     socket.on('subscribeIssues', async () => {
-      const filterFn = key => key !== socket.id && _.startsWith(key, 'comments_')
+      const filterFn = key => key !== socket.id && !_.startsWith(key, 'comments_')
       leavePreviousRooms(socket, filterFn)
 
       const user = getUserFromSocket(socket)
