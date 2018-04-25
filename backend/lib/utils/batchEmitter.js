@@ -20,10 +20,11 @@ const _ = require('lodash')
 const logger = require('../logger')
 
 class AbstractBatchEmitter {
-  constructor (kind, socket, eventsKind) {
+  constructor ({kind, socket, objectKeyPath = undefined, eventsKind}) {
     this.eventsKind = eventsKind
     this.kind = kind
     this.socket = socket
+    this.objectKeyPath = objectKeyPath
     this.clearData()
 
     this.MAX_CHUNK_SIZE = 50
@@ -36,7 +37,13 @@ class AbstractBatchEmitter {
   batchEmitObjects (objects) {
     _
       .chain(objects)
-      .map(object => { return {type: 'ADDED', object} })
+      .map(object => {
+        const event = {type: 'ADDED', object}
+        if (this.objectKeyPath) {
+          event.objectKey = _.get(object, this.objectKeyPath) // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+        }
+        return event
+      })
       .chunk(this.MAX_CHUNK_SIZE)
       .forEach(chunkedEvents => {
         this.appendChunkedEvents(chunkedEvents)
@@ -71,8 +78,8 @@ class AbstractBatchEmitter {
 }
 
 class EventsEmitter extends AbstractBatchEmitter {
-  constructor (kind, socket) {
-    super(kind, socket, 'events')
+  constructor ({kind, socket, objectKeyPath = undefined}) {
+    super({kind, socket, objectKeyPath, eventsKind: 'events'})
   }
 
   emit () {
@@ -90,8 +97,8 @@ class EventsEmitter extends AbstractBatchEmitter {
 }
 
 class NamespacedBatchEmitter extends AbstractBatchEmitter {
-  constructor (kind, socket) {
-    super(kind, socket, 'namespacedEvents')
+  constructor ({kind, socket, objectKeyPath = undefined}) {
+    super({kind, socket, objectKeyPath, eventsKind: 'namespacedEvents'})
   }
 
   batchEmitObjects (objects, namespace) {

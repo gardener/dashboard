@@ -60,6 +60,7 @@ const state = {
   user: null,
   loading: false,
   error: null,
+  alert: null,
   shootsLoading: false
 }
 
@@ -180,13 +181,12 @@ const getters = {
       return getters['journals/lastUpdated']({namespace, name})
     }
   },
-  shootsByInfrastructureSecret (state) {
-    return (secretName, namespace) => {
+  shootsByInfrastructureSecret (state, getters) {
+    return (secretName) => {
       const predicate = item => {
-        const secretBindingRef = get(item, 'spec.cloud.secretBindingRef')
-        return get(secretBindingRef, 'name') === secretName && get(secretBindingRef, 'namespace') === namespace
+        return get(item, 'spec.cloud.secretBindingRef.name') === secretName
       }
-      return filter(state.shoots.all, predicate)
+      return filter(getters['shoots/sortedItems'], predicate)
     }
   },
   kubernetesVersions (state, getters) {
@@ -209,6 +209,12 @@ const getters = {
   },
   errorMessage () {
     return get(state, 'error.message', '')
+  },
+  alertMessage () {
+    return get(state, 'alert.message', '')
+  },
+  alertType () {
+    return get(state, 'alert.type', 'error')
   },
   isCurrentNamespace (state, getters) {
     return (namespace) => {
@@ -347,6 +353,11 @@ const actions = {
   },
   setConfiguration ({ commit }, value) {
     commit('SET_CONFIGURATION', value)
+
+    if (get(value, 'alert')) {
+      commit('SET_ALERT', get(value, 'alert'))
+    }
+
     return state.cfg
   },
   setNamespace ({ commit }, value) {
@@ -395,6 +406,10 @@ const actions = {
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
+  },
+  setAlert ({ commit }, value) {
+    commit('SET_ALERT', value)
+    return state.alert
   }
 }
 
@@ -431,6 +446,9 @@ const mutations = {
   },
   SET_ERROR (state, value) {
     state.error = value
+  },
+  SET_ALERT (state, value) {
+    state.alert = value
   }
 }
 

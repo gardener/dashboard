@@ -39,9 +39,9 @@ limitations under the License.
       <pre v-if="!!popperMessage" class="alert-message">{{ popperMessage }}</pre>
       <template v-if="isError">
         <v-divider class="my-2"></v-divider>
-        <h3 class="error--text text-xs-left">Last Error</h3>
+        <h4 class="error--text text-xs-left">Last Error</h4>
         <template v-for="errorCodeDescription in errorCodeDescriptions">
-          <h4 class="error--text text-xs-left">{{errorCodeDescription}}</h4>
+          <h3 class="error--text text-xs-left">{{errorCodeDescription}}</h3>
         </template>
         <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
       </template>
@@ -53,7 +53,27 @@ limitations under the License.
   import GPopper from '@/components/GPopper'
   import get from 'lodash/get'
   import map from 'lodash/map'
+  import join from 'lodash/join'
   import { isUserError } from '@/utils'
+
+  const errorCodes = {
+    'ERR_INFRA_UNAUTHORIZED': {
+      shortDescription: 'Invalid Credentials',
+      description: 'Invalid cloud provider credentials.'
+    },
+    'ERR_INFRA_INSUFFICIENT_PRIVILEGES': {
+      shortDescription: 'Insufficient Privileges',
+      description: 'Cloud provider credentials have insufficient privileges.'
+    },
+    'ERR_INFRA_QUOTA_EXCEEDED': {
+      shortDescription: 'Quota Exceeded',
+      description: 'Cloud provider quota exceeded. Please request limit increases.'
+    },
+    'ERR_INFRA_DEPENDENCIES': {
+      shortDescription: 'Infrastructure Dependencies',
+      description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
+    }
+  }
 
   export default {
     components: {
@@ -94,27 +114,10 @@ limitations under the License.
         return get(this.lastError, 'codes', [])
       },
       errorCodeDescriptions () {
-        const errorCodeDescriptions = map(this.errorCodes, code => {
-          let description
-          switch (code) {
-            case 'ERR_INFRA_UNAUTHORIZED':
-              description = 'Invalid cloud provider credentials.'
-              break
-            case 'ERR_INFRA_INSUFFICIENT_PRIVILEGES':
-              description = 'Cloud provider credentials have insufficient privileges.'
-              break
-            case 'ERR_INFRA_QUOTA_EXCEEDED':
-              description = 'Cloud provider quota exceeded. Please request limit increases.'
-              break
-            case 'ERR_INFRA_DEPENDENCIES':
-              description = 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
-              break
-            default:
-              description = code
-          }
-          return description
-        })
-        return errorCodeDescriptions
+        return map(this.errorCodes, code => get(errorCodes, `${code}.description`, code))
+      },
+      errorCodeShortDescriptions () {
+        return map(this.errorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
       },
       popperKeyWithType () {
         return `shootStatus_${this.popperKey}`
@@ -127,7 +130,14 @@ limitations under the License.
         return popperTitle.concat(`${this.operationType} ${this.operationState}`)
       },
       tooltipText () {
-        return this.showProgress ? `${this.popperTitle} (${this.operation.progress}%)` : this.popperTitle
+        let tooltipText = this.popperTitle
+        if (this.showProgress) {
+          tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
+        }
+        if (this.isUserError) {
+          tooltipText = tooltipText.concat(`; ${join(this.errorCodeShortDescriptions, ', ')}`)
+        }
+        return tooltipText
       },
       popperMessage () {
         let message = this.operation.description

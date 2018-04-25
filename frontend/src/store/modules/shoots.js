@@ -306,6 +306,13 @@ const mutations = {
     state.sortParams = sortParams
     setSortedItems(state)
   },
+  ITEM_PUT (state, newItem) {
+    const sortRequired = putItem(state, newItem)
+
+    if (sortRequired) {
+      setSortedItems(state)
+    }
+  },
   HANDLE_EVENTS (state, events) {
     let sortRequired = false
     forEach(events, event => {
