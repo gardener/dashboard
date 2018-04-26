@@ -81,8 +81,8 @@ limitations under the License.
 
 
     <v-flex xs1 class="ml-2 mt-2">
-    <slot name="action">
-    </slot>
+      <slot name="action">
+      </slot>
     </v-flex>
 
   </v-layout>
