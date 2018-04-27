@@ -70,7 +70,7 @@ limitations under the License.
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
-          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog"></shoot-list-row>
+          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
       </v-data-table>
       <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
