@@ -32,14 +32,3 @@ function hasStatusCode (statusCode, error) {
     return false
   }
 }
-
-function isKubernetesError (error) {
-  const response = error.response || {}
-  const status = response.data || {}
-  const statusError = status.error || {}
-  if (statusError.name === 'KubernetesError') {
-    return true
-  } else {
-    return false
-  }
-}
