@@ -23,7 +23,7 @@ const jwks = require('jwks-rsa')
 const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
-const { HttpError, NotFound, Unauthorized } = require('./errors')
+const { NotFound, Unauthorized } = require('./errors')
 
 const secretProvider = jwtSecret(config.jwks)
 

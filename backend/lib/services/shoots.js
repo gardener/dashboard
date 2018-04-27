@@ -16,7 +16,6 @@
 
 'use strict'
 
-const { inspect } = require('util')
 const kubernetes = require('../kubernetes')
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
