@@ -42,6 +42,7 @@
     "socket.io-client": "^2.1.0",
     "vue": "^2.5.16",
     "vue-codemirror": "^4.0.5",
+    "vue-lazyload": "^1.2.3",
     "vue-popperjs": "^1.2.6",
     "vue-router": "^3.0.1",
     "vuelidate": "^0.6.2",

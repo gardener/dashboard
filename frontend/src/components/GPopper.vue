@@ -36,7 +36,14 @@ limitations under the License.
           <pre class="message">{{message}}</pre>
           <slot name="content-after"></slot>
           <div v-if="!!time">
-            <div class="timestamp grey--text"><time-ago :dateTime="time"></time-ago></div>
+            <div class="timestamp grey--text">
+              <template v-if="showPlaceholder">
+                &nbsp;
+              </template>
+              <lazy-component @show="showPlaceholder=false">
+                <time-ago :dateTime="time"></time-ago>
+              </lazy-component>
+            </div>
           </div>
         </v-card-text>
       </v-card>
@@ -52,6 +59,12 @@ limitations under the License.
   import TimeAgo from '@/components/TimeAgo'
   import { closePopover } from '@/utils'
   import 'vue-popperjs/dist/css/vue-popper.css'
+  import VueLazyload from 'vue-lazyload'
+  import Vue from 'vue'
+
+  Vue.use(VueLazyload, {
+    lazyComponent: true
+  })
 
   export default {
     components: {
@@ -77,6 +90,11 @@ limitations under the License.
       },
       time: {
         type: String
+      }
+    },
+    data () {
+      return {
+        showPlaceholder: true
       }
     },
     computed: {

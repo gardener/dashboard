@@ -21,43 +21,81 @@ limitations under the License.
 </template>
 
 <script>
-  import {getTimeAgoFrom, getDateFormatted} from '@/utils'
+  import {getTimeAgoFrom} from '@/utils'
+  import Vue from 'vue'
 
-  const state = {
-    current: new Date(),
-    intervalId: undefined
-  }
+  class Clock {
+    constructor (updateInterval) {
+      this.interval = updateInterval
+      this.dateObj = new Date()
+      this.intervalId = undefined
+      this.run()
+    }
 
-  function run () {
-    if (!state.intervalId) {
-      state.intervalId = setInterval(() => {
-        state.current = new Date()
-      }, 1000)
+    run () {
+      if (!this.intervalId) {
+        this.intervalId = setInterval(() => {
+          this.dateObj = new Date()
+        }, this.interval)
+      }
     }
   }
 
-  const TimeAgo = {
+  const clockSecondsAccuracy = new Clock(1000)
+  const clockHalfAMinuteAccuracy = new Clock(1000 * 30)
+  const clockHalfAnHourAccuracy = new Clock(1000 * 60 * 30)
+
+  export default {
     props: ['dateTime'],
     data () {
       return {
-        state: state
+        currentClockTimer: undefined,
+        nextClockTimer: undefined
       }
     },
     computed: {
       timeAgo () {
-        return getTimeAgoFrom(this.dateTime, this.state.current)
+        if (this.dateTime && this.currentClockTimer) {
+          return getTimeAgoFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+        } else {
+          return ''
+        }
+      }
+    },
+    methods: {
+      updateClockInstance (dateTimeValue) {
+        const diffInMilliseconds = new Date() - new Date(dateTimeValue)
+
+        if (diffInMilliseconds <= 1000 * 60) {
+          this.setClock(clockSecondsAccuracy, clockHalfAMinuteAccuracy)
+        } else if (diffInMilliseconds <= 1000 * 60 * 60) {
+          this.setClock(clockHalfAMinuteAccuracy, clockHalfAnHourAccuracy)
+        } else {
+          this.setClock(clockHalfAnHourAccuracy, null)
+        }
+      },
+      setClock (currentTimer, nextTimer) {
+        Vue.set(this, 'currentClockTimer', currentTimer)
+        Vue.set(this, 'nextClockTimer', nextTimer)
       }
     },
     mounted () {
-      run()
-    }
-  }
-  export { TimeAgo }
-  export default {
-    props: ['dateTime'],
-    computed: {
-      timeAgo () {
-        return this.dateTime ? getDateFormatted(this.dateTime) : ''
+      if (this.dateTime) {
+        this.updateClockInstance(this.dateTime)
+      }
+    },
+    watch: {
+      dateTime (dateTimeValue) {
+        if (dateTimeValue) {
+          this.updateClockInstance(dateTimeValue)
+        }
+      },
+      'nextClockTimer.dateObj': {
+        handler: function (newValue) {
+          if (newValue) {
+            this.updateClockInstance(this.dateTime)
+          }
+        }
       }
     }
   }
