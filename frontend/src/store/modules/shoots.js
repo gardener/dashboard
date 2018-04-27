@@ -85,6 +85,13 @@ const actions = {
       })
       .then(() => dispatch('getInfo', {name, namespace}))
       .then(() => findItem({name, namespace}))
+      .catch(error => {
+        // shoot info not found -> ignore if KubernetesError
+        if (isNotFound(error)) {
+          return
+        }
+        throw error
+      })
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -296,7 +303,7 @@ const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem({namespace, name})
     if (item !== undefined) {
-      Vue.set(state.shoots, keyForShoot(item.metadata), assign(item, {info}))
+      Vue.set(item, 'info', info)
     }
   },
   SET_SELECTION (state, metadata) {
@@ -313,14 +320,18 @@ const mutations = {
       setSortedItems(state)
     }
   },
-  HANDLE_EVENTS (state, events) {
+  HANDLE_EVENTS (state, {rootState, events}) {
     let sortRequired = false
     forEach(events, event => {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
-          if (putItem(state, event.object)) {
-            sortRequired = true
+        // eslint-disable-next-line lodash/path-style
+          if (rootState.namespace !== '_all' || rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
+            // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
+            if (putItem(state, event.object)) {
+              sortRequired = true
+            }
           }
           break
         case 'DELETED':

@@ -478,7 +478,7 @@ EmitterWrapper.shootsEmitter.on('shoots', namespacedEvents => {
       eventsToHandle = concat(eventsToHandle, events)
     }
   })
-  store.commit('shoots/HANDLE_EVENTS', eventsToHandle)
+  store.commit('shoots/HANDLE_EVENTS', {rootState: state, events: eventsToHandle})
 })
 
 /* Journal Issues */

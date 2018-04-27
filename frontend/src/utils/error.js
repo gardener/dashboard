@@ -17,16 +17,16 @@
 'use strict'
 
 export function isConflict (error) {
-  return hasStatusCodeAndIsKubernetesError(409, error)
+  return hasStatusCode(409, error)
 }
 
 export function isNotFound (error) {
-  return hasStatusCodeAndIsKubernetesError(404, error)
+  return hasStatusCode(404, error)
 }
 
-function hasStatusCodeAndIsKubernetesError (statusCode, error) {
+function hasStatusCode (statusCode, error) {
   const response = error.response || {}
-  if (response.status === statusCode && isKubernetesError(error)) {
+  if (response.status === statusCode) {
     return true
   } else {
     return false
