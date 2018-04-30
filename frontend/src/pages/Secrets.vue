@@ -80,6 +80,50 @@ limitations under the License.
       </template>
     </secret>
 
+    <template v-if="showDisabledCloudProviders">
+      
+      <disabled-secret
+      class="mt-3"
+      infrastructureName="Alibaba Cloud"
+      icon="alibaba-cloud"
+      description="Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials."
+      color="black"
+      ></disabled-secret>
+
+      <disabled-secret
+      class="mt-3"
+      infrastructureName="Digital Ocean"
+      icon="digital-ocean"
+      description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
+      color="blue"
+      ></disabled-secret>
+
+      <disabled-secret
+      class="mt-3"
+      infrastructureName="VMware"
+      icon="vmware"
+      description="Before you can provision and access a Kubernetes cluster on VMware, you need to add account credentials."
+      color="green darken-4"
+      ></disabled-secret>
+
+      <disabled-secret
+      class="mt-3"
+      infrastructureName="China Telecom"
+      icon="china-telecom"
+      description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
+      color="blue darken-3"
+      ></disabled-secret>
+
+      <disabled-secret
+      class="mt-3"
+      infrastructureName="Nutanix"
+      icon="mdi-xamarin"
+      description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."
+      color="light-green lighten-1"
+      ></disabled-secret>
+
+    </template>
+
     <aws-dialog v-model="aws.visible" :secret="selectedSecret"></aws-dialog>
     <aws-help-dialog v-model="aws.help"></aws-help-dialog>
 
@@ -128,6 +172,7 @@ limitations under the License.
   import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
   import DeleteDialog from '@/dialogs/SecretDialogDelete'
   import Secret from '@/components/Secret'
+  import DisabledSecret from '@/components/DisabledSecret'
   import isEmpty from 'lodash/isEmpty'
 
   export default {
@@ -142,7 +187,8 @@ limitations under the License.
       OpenstackDialog,
       OpenstackHelpDialog,
       DeleteDialog,
-      Secret
+      Secret,
+      DisabledSecret
     },
     data () {
       return {
@@ -180,6 +226,9 @@ limitations under the License.
         return (kind) => {
           return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
         }
+      },
+      showDisabledCloudProviders () {
+        return !!this.$store.state.cfg.showDisabledCloudProviders
       }
     },
     methods: {
