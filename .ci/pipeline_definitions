@@ -18,8 +18,10 @@ dashboard:
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
     steps:
       build:
-        image: 'node:alpine'
+        image: &node_image 'eu.gcr.io/gardener-project/gardener/node-test-image:1.0.0'
         output_dir: 'binary'
+      test:
+        image: *node_image
   variants:
     head-update: ~
     pull-request:
@@ -29,11 +31,14 @@ dashboard:
       traits:
         version:
           preprocess: 'finalise'
+          inject_effective_version: true
         release:
           nextversion: 'bump_minor'
       steps:
-        prepare_release: ~
+        prepare_release:
+          image: *node_image
+          publish_to: ['source']
+          depends: ['test']
         build:
           depends: ['prepare_release']
-        test:
-          image: node:alpine
+
