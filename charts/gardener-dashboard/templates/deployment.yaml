@@ -44,12 +44,7 @@ spec:
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
           resources:
-            limits:
-              cpu: 200m
-              memory: 100Mi
-            requests:
-              cpu: 100m
-              memory: 50Mi
+{{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard

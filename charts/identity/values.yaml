@@ -10,6 +10,13 @@ image:
 
 containerPort: 5556
 servicePort: 5556
+resources:
+  limits:
+    cpu: 200m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
 hosts:
   - identity.ingress.example.org
   - identity.example.org

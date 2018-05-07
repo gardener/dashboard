@@ -54,12 +54,7 @@ spec:
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
           resources:
-            limits:
-              cpu: 100m
-              memory: 50Mi
-            requests:
-              cpu: 100m
-              memory: 50Mi
+{{ toYaml .Values.resources | indent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
