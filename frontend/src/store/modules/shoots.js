@@ -355,8 +355,10 @@ const mutations = {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
-        // eslint-disable-next-line lodash/path-style
-          if (rootState.namespace !== '_all' || rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
+          if (rootState.namespace !== '_all' ||
+            !rootState.onlyShootsWithIssues ||
+            // eslint-disable-next-line lodash/path-style
+            rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
             if (putItem(state, event.object)) {
               sortRequired = true
