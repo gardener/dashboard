@@ -87,6 +87,10 @@ if (version === false) {
       })
     )
     .then(start)
+    .catch(error => {
+      renderServerError(error)
+      throw error
+    })
 } else {
   renderNotSupportedBrowser(version)
 }
@@ -107,6 +111,38 @@ function start ({Vue, Vuetify, Vuelidate, App, store, router}) {
       App
     }
   })
+}
+
+function renderServerError (error) {
+  const elem = document.getElementById('app')
+  elem.style.fontFamily = `'Roboto', sans-serif`
+  elem.style.fontSize = '14px'
+  elem.style.fontWeight = '300'
+  elem.style.lineHeight = '1.5'
+  elem.style.padding = '30px'
+  elem.style.border = '1px solid darkred'
+  elem.style.whiteSpace = 'nowrap'
+  elem.style.position = 'absolute'
+  elem.style.top = '30%'
+  elem.style.left = '30px'
+  elem.innerHTML = `<strong>Dear user,</strong>
+  <p>
+    you reached the Kubernetes Clusters self-service
+    powered by <a href="https://github.com/gardener">Gardener</a>.
+    <br>
+    However, the backend is currently unable to process your request.
+  </p>
+  <p>
+    The backend returned this error message:<br />
+    <code style="color: red">${error.message}</code>
+  </p>
+  <br>
+  <p>
+    Sorry for the inconvenience,
+  </p>
+  <p>
+    Your Gardener Dashboard Team
+  </p>`
 }
 
 function renderNotSupportedBrowser (version) {
