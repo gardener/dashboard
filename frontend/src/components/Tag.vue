@@ -47,6 +47,10 @@ limitations under the License.
         type: Boolean,
         required: true
       },
+      isUnknown: {
+        type: Boolean,
+        required: false
+      },
       title: {
         type: String
       },
@@ -66,11 +70,17 @@ limitations under the License.
         if (this.isError) {
           return 'red'
         }
+        if (this.isUnknown) {
+          return 'grey lighten-1'
+        }
         return 'cyan darken-2'
       },
       chipTextColor () {
         if (this.isError) {
           return 'red'
+        }
+        if (this.isUnknown) {
+          return 'grey lighten-1'
         }
         return 'cyan darken-2'
       }

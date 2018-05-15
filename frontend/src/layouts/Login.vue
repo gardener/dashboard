@@ -44,6 +44,13 @@ limitations under the License.
       <v-spacer></v-spacer>
       <div>&copy; {{ new Date().getFullYear() }}</div>
     </v-footer>
+    <v-snackbar color="error" fixed bottom v-model="isError">
+      <div class="white-text">{{errorMessage}} </div>
+      <v-spacer/>
+      <v-btn icon class="white--text" @click.native.stop="isError=false">
+        <v-icon>close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -64,9 +71,20 @@ limitations under the License.
         return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
       }
     },
+    data () {
+      return {
+        errorMessage: null,
+        isError: false
+      }
+    },
     methods: {
       handleLogin () {
         signin(this.$userManager)
+        .catch(error => {
+          this.errorMessage = error.message
+          this.isError = true
+          throw error
+        })
       }
     }
   }

@@ -27,6 +27,9 @@ import isObject from 'lodash/isObject'
 import orderBy from 'lodash/orderBy'
 import toLower from 'lodash/toLower'
 import padStart from 'lodash/padStart'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
 import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError } from '@/utils'
@@ -46,12 +49,25 @@ const state = {
   shoots: {},
   sortedShoots: [],
   sortParams: undefined,
+  searchValue: undefined,
   selection: undefined
 }
 
 // getters
 const getters = {
   sortedItems (state) {
+    if (state.searchValue) {
+      const predicate = item => {
+        let found = true
+        forEach(state.searchValue, value => {
+          if (!includes(item.metadata.name, value)) {
+            found = false
+          }
+        })
+        return found
+      }
+      return filter(state.sortedShoots, predicate)
+    }
     return state.sortedShoots
   },
   itemByNameAndNamespace () {
@@ -158,9 +174,14 @@ const actions = {
       }
     }
   },
-  setSortParams ({ commit }, sortParams) {
+  setListSortParams ({ commit }, sortParams) {
     if (!isEqual(sortParams, state.sortParams)) {
       commit('SET_SORTPARAMS', pick(sortParams, ['sortBy', 'descending']))
+    }
+  },
+  setListSearchValue ({ commit }, searchValue) {
+    if (!isEqual(searchValue, state.searchValue)) {
+      commit('SET_SEARCHVALUE', searchValue)
     }
   }
 }
@@ -313,6 +334,14 @@ const mutations = {
     state.sortParams = sortParams
     setSortedItems(state)
   },
+  SET_SEARCHVALUE (state, searchValue) {
+    if (searchValue && searchValue.length > 0) {
+      state.searchValue = split(searchValue, ' ')
+    } else {
+      state.searchValue = undefined
+    }
+    setSortedItems(state)
+  },
   ITEM_PUT (state, newItem) {
     const sortRequired = putItem(state, newItem)
 
@@ -326,8 +355,10 @@ const mutations = {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
-        // eslint-disable-next-line lodash/path-style
-          if (rootState.namespace !== '_all' || rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
+          if (rootState.namespace !== '_all' ||
+            !rootState.onlyShootsWithIssues ||
+            // eslint-disable-next-line lodash/path-style
+            rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
             if (putItem(state, event.object)) {
               sortRequired = true

@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <tag :chipText="chipTextShortened" :isError="isError" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType"></tag>
+  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType"></tag>
 </template>
 
 <script>
@@ -56,6 +56,14 @@ limitations under the License.
           case 'True':
             return false
           case 'False':
+            return true
+          default:
+            return false
+        }
+      },
+      isUnknown () {
+        switch (this.tag.status) {
+          case 'Unknown':
             return true
           default:
             return false

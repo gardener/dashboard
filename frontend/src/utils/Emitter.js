@@ -77,10 +77,9 @@ const emitterObjForSocket = (socket) => {
     setNamespace (namespace, filter) {
       this.namespace = namespace
       this.filter = filter
+      store.dispatch('clearShoots')
       if (this.namespace && this.authenticated) {
         store.dispatch('setShootsLoading')
-        store.dispatch('clearShoots')
-
         this.subscribe({namespace, filter})
       }
     },

@@ -294,8 +294,14 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootSortPrams ({ dispatch }, sortParams) {
-    return dispatch('shoots/setSortParams', sortParams)
+  setShootListSortParams ({ dispatch }, sortParams) {
+    return dispatch('shoots/setListSortParams', sortParams)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setShootListSearchValue ({ dispatch }, searchValue) {
+    return dispatch('shoots/setListSearchValue', searchValue)
       .catch(err => {
         dispatch('setError', err)
       })

@@ -23,7 +23,7 @@ limitations under the License.
           <div class="headline">Kubernetes Clusters</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="items.length > 3"
+        <v-text-field v-if="search || items.length > 3"
           prepend-icon="search"
           color="cyan darken-2"
           label="Search"
@@ -178,15 +178,19 @@ limitations under the License.
       pagination (value) {
         if (value) {
           this.$localStorage.setObject('dataTable_sortBy', {sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER})
-          this.setShootSortPrams(value)
+          this.setShootListSortParams(value)
         }
+      },
+      search (value) {
+        this.setShootListSearchValue(value)
       }
     },
     methods: {
       ...mapActions([
         'deleteShoot',
         'setSelectedShoot',
-        'setShootSortPrams',
+        'setShootListSortParams',
+        'setShootListSearchValue',
         'setOnlyShootsWithIssues'
       ]),
       deletionConfirmed () {

@@ -452,7 +452,7 @@ limitations under the License.
         name: {
           required: 'Name is required',
           maxLength: 'name ist too long',
-          valid: 'Name must only be lowercase letters, numbers, and hyphens',
+          valid: 'Name must only be lowercase letters and numbers',
           unique: 'cluster name must be unique'
         }
       },
@@ -577,7 +577,7 @@ limitations under the License.
             required,
             maxLength: maxLength(10),
             valid (value) {
-              return /^([a-z][a-z0-9-]*)$/.test(value)
+              return /^([a-z][a-z0-9]*)$/.test(value)
             },
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
