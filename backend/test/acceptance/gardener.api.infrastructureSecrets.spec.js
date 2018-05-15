@@ -58,7 +58,7 @@ describe('gardener', function () {
       it('should return three infrastructure secrets', function () {
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.getInfrastructureSecrets({bearer, namespace})
+        k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: false})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
           .set('authorization', `Bearer ${bearer}`)
@@ -73,7 +73,7 @@ describe('gardener', function () {
       it('should return no infrastructure secrets', function () {
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.getNoInfrastructureSecrets({bearer, namespace})
+        k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: true})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
           .set('authorization', `Bearer ${bearer}`)

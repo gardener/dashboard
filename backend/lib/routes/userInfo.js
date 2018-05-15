@@ -17,8 +17,9 @@
 'use strict'
 
 const express = require('express')
+const _ = require('lodash')
 
-const { userInfo } = require('../services')
+const { administrators } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
 })
@@ -27,7 +28,10 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send(await userInfo.info({user}))
+      const admins = await administrators.list()
+      res.send({
+        isAdmin: _.includes(admins, user.id)
+      })
     } catch (err) {
       next(err)
     }

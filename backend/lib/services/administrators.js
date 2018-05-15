@@ -16,37 +16,44 @@
 
 'use strict'
 
-const { includes, filter, map } = require('lodash')
+const _ = require('lodash')
 const kubernetes = require('../kubernetes')
+const Resources = kubernetes.Resources
+const rbac = kubernetes.rbac()
 
-function Rbac () {
-  return kubernetes.rbac()
+const ClusterRoleBindingName = 'garden-administrators'
+const ClusterRoleResource = Resources.ClusterRole
+const EmptyClusterRoleBinding = {
+  metadata: {
+    name: ClusterRoleBindingName
+  },
+  roleRef: {
+    apiGroup: ClusterRoleResource.apiGroup,
+    kind: ClusterRoleResource.kind,
+    name: 'garden.sapcloud.io:system:project-member'
+  },
+  subjects: []
 }
 
-async function readGardenAdministratorsClusterRoleBinding () {
-  const emptyClusterRoleBinding = {
-    subjects: []
-  }
-  return Rbac().clusterrolebindings('garden-administrators').get()
+function readClusterRoleBinding () {
+  return rbac.clusterrolebindings(ClusterRoleBindingName).get()
     .catch(err => {
       if (err.code === 404) {
-        return emptyClusterRoleBinding
+        return EmptyClusterRoleBinding
       }
       throw err
     })
 }
 
-const isAdminFunction = async function ({user}) {
-  const adminCrb = await readGardenAdministratorsClusterRoleBinding()
-  const admins = map(filter(adminCrb.subjects, ['kind', 'User']), 'name')
-  const isAdmin = includes(admins, user.id)
-
-  return isAdmin
+function fromResource ({subjects} = {}) {
+  return _
+    .chain(subjects)
+    .filter(['kind', 'User'])
+    .map('name')
+    .value()
 }
 
-exports.isAdmin = isAdminFunction
-
-exports.info = async function ({user}) {
-  const isAdmin = await isAdminFunction({user})
-  return {isAdmin}
+exports.list = async function () {
+  const clusterRoleBinding = await readClusterRoleBinding()
+  return fromResource(clusterRoleBinding)
 }

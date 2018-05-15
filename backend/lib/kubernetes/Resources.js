@@ -27,40 +27,20 @@ module.exports = {
     kind: 'Secret',
     apiVersion: 'v1'
   },
-  CloudProfile: {
-    name: 'cloudprofiles',
-    kind: 'CloudProfile',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
-  },
-  SecretBinding: {
-    name: 'secretbindings',
-    kind: 'SecretBinding',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
-  },
   RoleBinding: {
     name: 'rolebindings',
     kind: 'RoleBinding',
-    apiVersion: 'rbac.authorization.k8s.io/v1beta1'
+    apiVersion: 'rbac.authorization.k8s.io/v1'
   },
   ClusterRoleBinding: {
     name: 'clusterrolebindings',
     kind: 'ClusterRoleBinding',
-    apiVersion: 'rbac.authorization.k8s.io/v1beta1'
+    apiVersion: 'rbac.authorization.k8s.io/v1'
   },
   ClusterRole: {
     name: 'clusterroles',
     kind: 'ClusterRole',
-    apiVersion: 'rbac.authorization.k8s.io/v1beta1'
-  },
-  ThirdPartyResource: {
-    name: 'thirdpartyresources',
-    kind: 'ThirdPartyResource',
-    apiVersion: 'extensions/v1beta1'
-  },
-  CustomResourceDefinition: {
-    name: 'customresourcedefinitions',
-    kind: 'CustomResourceDefinition',
-    apiVersion: 'apiextensions.k8s.io/v1beta1'
+    apiVersion: 'rbac.authorization.k8s.io/v1'
   },
   Shoot: {
     name: 'shoots',
@@ -70,6 +50,16 @@ module.exports = {
   Seed: {
     name: 'seeds',
     kind: 'Seed',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  CloudProfile: {
+    name: 'cloudprofiles',
+    kind: 'CloudProfile',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  SecretBinding: {
+    name: 'secretbindings',
+    kind: 'SecretBinding',
     apiVersion: 'garden.sapcloud.io/v1beta1'
   }
 }
