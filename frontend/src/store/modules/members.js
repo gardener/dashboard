@@ -38,6 +38,10 @@ const actions = {
         commit('RECEIVE', res.data)
         return state.all
       })
+      .catch(error => {
+        commit('CLEAR')
+        throw error
+      })
   },
   add: ({ commit, rootState }, name) => {
     const namespace = rootState.namespace
@@ -62,6 +66,9 @@ const actions = {
 const mutations = {
   RECEIVE (state, items) {
     state.all = items
+  },
+  CLEAR (state) {
+    state.all = []
   }
 }
 

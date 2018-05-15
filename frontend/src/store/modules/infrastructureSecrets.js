@@ -37,6 +37,10 @@ const actions = {
         commit('RECEIVE', res.data)
         return state.all
       })
+      .catch(error => {
+        commit('CLEAR')
+        throw error
+      })
   },
   update: ({ commit, rootState }, {metadata, data}) => {
     const user = rootState.user
@@ -72,6 +76,9 @@ const actions = {
 const mutations = {
   RECEIVE (state, items) {
     state.all = items
+  },
+  CLEAR (state) {
+    state.all = []
   },
   ITEM_PUT (state, newItem) {
     const iteratee = item => item.metadata.name === newItem.metadata.name
