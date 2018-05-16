@@ -67,14 +67,13 @@ function toResource ({metadata, data}) {
 async function authorize ({user, namespace}) {
   const [
     memberList,
-    adminList
+    isAdmin
   ] = await Promise.all([
     members.list({user, namespace}),
-    administrators.list()
+    administrators.isAdmin(user)
   ])
   const username = user.id
   const isMember = _.includes(memberList, username)
-  const isAdmin = _.includes(adminList, username)
   if (!isMember && !isAdmin) {
     const projectName = namespace.replace(/^garden-/, '')
     throw new Forbidden(`User ${username} is not authorized to access project ${projectName}`)
@@ -92,7 +91,7 @@ exports.list = async function ({user}) {
   const [
     namespaces,
     roleBindings,
-    adminList
+    isAdmin
   ] = await Promise.all([
     core.namespaces.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=project'}
@@ -100,7 +99,7 @@ exports.list = async function ({user}) {
     rbac.rolebindings.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=members'}
     }),
-    administrators.list()
+    administrators.isAdmin(user)
   ])
 
   const isMemberOf = (roleBindings, subject) => {
@@ -116,8 +115,6 @@ exports.list = async function ({user}) {
     kind: 'User',
     name: user.id
   }
-
-  const isAdmin = _.includes(adminList, user.id)
 
   const predicate = !isAdmin
     ? isMemberOf(roleBindings, subject)
