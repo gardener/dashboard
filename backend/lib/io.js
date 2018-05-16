@@ -21,7 +21,7 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects, shoots, journals, userInfo } = require('./services')
+const { projects, shoots, journals, administrators } = require('./services')
 const watches = require('./watches')
 const { shootHasIssue } = require('./utils')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
@@ -69,6 +69,9 @@ module.exports = () => {
           const user = res.user
           if (user) {
             user.auth = auth
+            user.id = user['email']
+          } else {
+            logger.error('Socket %s: no user on response object', socket.id)
           }
           if (err) {
             logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
@@ -86,7 +89,9 @@ module.exports = () => {
 
   const getUserFromSocket = socket => {
     const user = _.get(socket, 'client.user')
-    user.id = _.get(user, 'email')
+    if (!user) {
+      logger.error('Could not get client.user from socket', _.get(socket, 'id'))
+    }
     return user
   }
 
@@ -151,7 +156,7 @@ module.exports = () => {
       leavePreviousRooms(socket, filterFn)
 
       const user = getUserFromSocket(socket)
-      if (userInfo.isAdmin({user})) {
+      if (await administrators.isAdmin(user)) {
         joinRoom(socket, 'issues')
 
         const objects = getJournalCache().getIssues()
@@ -166,7 +171,7 @@ module.exports = () => {
       leaveCommentRooms(socket)
 
       const user = getUserFromSocket(socket)
-      if (userInfo.isAdmin({user})) {
+      if (await administrators.isAdmin(user)) {
         joinRoom(socket, `comments_${namespace}/${name}`)
 
         const batchEmitter = new EventsEmitter({kind: 'comments', socket})
