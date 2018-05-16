@@ -16,7 +16,13 @@
 
 import assign from 'lodash/assign'
 import findIndex from 'lodash/findIndex'
+import find from 'lodash/find'
+import matches from 'lodash/matches'
 import { getInfrastructureSecrets, updateInfrastructureSecret, createInfrastructureSecret, deleteInfrastructureSecret } from '@/utils/api'
+
+const eqlNameAndNamespace = ({namespace, name}) => {
+  return matches({ metadata: { namespace, name } })
+}
 
 // initial state
 const state = {
@@ -25,6 +31,9 @@ const state = {
 
 // getters
 const getters = {
+  getInfrastructureSecretByName: (state) => ({name, namespace}) => {
+    return find(state.all, eqlNameAndNamespace({name, namespace}))
+  }
 }
 
 // actions
