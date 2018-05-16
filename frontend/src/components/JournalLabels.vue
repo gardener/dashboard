@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <span>
+  <span v-if="labels.length">
     <span v-for="label in labels" :key="label.id" class="label-color" :style="labelStyle(label)">
       {{ label.name }}
     </span>

@@ -181,6 +181,11 @@ const getters = {
       return getters['journals/lastUpdated']({namespace, name})
     }
   },
+  journalsLabels (state, getters) {
+    return ({namespace, name}) => {
+      return getters['journals/labels']({namespace, name})
+    }
+  },
   shootsByInfrastructureSecret (state, getters) {
     return (secretName) => {
       const predicate = item => {
