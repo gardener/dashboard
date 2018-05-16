@@ -26,6 +26,7 @@ limitations under the License.
 
 
 <script>
+  import contrast from 'get-contrast'
   import get from 'lodash/get'
 
   export default {
@@ -38,9 +39,9 @@ limitations under the License.
     computed: {
       labelStyle () {
         return (label) => {
-          const color = `#${get(label, 'color')}`
-
-          return `background-color: ${color}`
+          const bgColor = `#${get(label, 'color')}`
+          const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
+          return `background-color: ${bgColor}; color: ${textColor};`
         }
       }
     }
