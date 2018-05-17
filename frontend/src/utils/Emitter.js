@@ -210,6 +210,11 @@ forEach(emitters, emitter => {
   emitter.socket.on('error', err => {
     console.error(`socket ${emitter.socket.id} error ${err}`)
   })
+  emitter.socket.on('subscription_error', error => {
+    const {kind, code, message} = error
+    console.error(`socket ${emitter.socket.id} ${kind} subscription error: ${message} (${code})`)
+    store.dispatch('setError', error)
+  })
 })
 
 const wrapper = {
