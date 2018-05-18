@@ -7,17 +7,14 @@
 
 # Ignore documentation
 /jsdoc
-/docs/api/agent/*.html
 
 # Ignore all logfiles and tempfiles.
 /logs/*.log
 /tmp
-/store/sessions
+/public
 /etc
 npm-debug.log
 
-# Ignore developer's settings files
-config/settings.*.yml
 
 # Ignore all files starting with "my"
 my*

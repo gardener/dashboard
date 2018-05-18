@@ -244,6 +244,10 @@ Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>   
 [MIT License](https://github.com/expressjs/session/blob/master/LICENSE)   
 
+[helmet](https://github.com/helmetjs/helmet)   
+Copyright (c) 2012-2018 Evan Hahn, Adam Baldwin  
+[MIT License](https://github.com/helmetjs/helmet/blob/master/LICENSE) 
+
 [js-yaml](https://github.com/nodeca/js-yaml)   
 Copyright (C) 2011-2015 by Vitaly Puzrin   
 [MIT License](https://github.com/nodeca/js-yaml/blob/master/LICENSE)   

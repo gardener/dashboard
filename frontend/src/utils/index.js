@@ -133,7 +133,7 @@ export function parseSize (value) {
 }
 
 export function gravatar (email) {
-  return `//www.gravatar.com/avatar/${md5(toLower(email))}?d=identicon&s=128`
+  return `https://www.gravatar.com/avatar/${md5(toLower(email))}?d=identicon&s=128`
 }
 
 export function routes (router, includeRoutesWithProjectScope) {
