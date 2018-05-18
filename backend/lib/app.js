@@ -57,7 +57,7 @@ app.use(helmet.contentSecurityPolicy({
     connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl],
     styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
     fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-    imgSrc: ['\'self\'', 'data:', 'https://www.gravatar.com'],
+    imgSrc: ['\'self\'', 'data:', 'https:'], // TODO allow gravatar and github (for journals) instead of whitelisting https
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
     frameAncestors: ['\'none\'']
   }
