@@ -43,7 +43,29 @@ const fetch = async (url, batchFn) => {
   })
 }
 
-const searchIssues = async function ({ namespace, name, options = {}, batchFn = data => {} }) {
+const patch = async (url, payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await axios.patch(url, payload, { httpsAgent: agent, auth: authentication() })
+      resolve(result.data)
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
+const post = async (url, payload) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const result = await axios.post(url, payload, { httpsAgent: agent, auth: authentication() })
+      resolve(result.data)
+    } catch (e) {
+      reject(e)
+    }
+  })
+}
+
+const searchIssues = async function ({ namespace, name, batchFn = data => {} }) {
   let search = ' '
   if (namespace) {
     search = `${search}[${namespace}`
@@ -61,13 +83,39 @@ const searchIssues = async function ({ namespace, name, options = {}, batchFn = 
   return fetch(url.href, batchFn)
 }
 
-const comments = async function ({ issueNumber, options = {}, batchFn = data => {} }) {
+const comments = async function ({ issueNumber, batchFn = data => {} }) {
   if (!issueNumber) {
     logger.error('failed to read comments; invalid issueNumber')
-    return undefined
+    return Promise.reject(new Error('failed to read comments; invalid issueNumber'))
   }
   const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber), '/comments'))
   return fetch(url.href, batchFn)
+}
+
+const createComments = async function ({ issueNumber, payload }) {
+  if (!issueNumber) {
+    logger.error('failed to create comment; invalid issueNumber')
+    return Promise.reject(new Error('failed to create comment; invalid issueNumber'))
+  }
+  if (!payload) {
+    logger.error('no payload specified')
+    return Promise.reject(new Error('no payload specified'))
+  }
+  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber), '/comments'))
+
+  return post(url.href, payload)
+}
+
+const closeIssue = async function ({ issueNumber }) {
+  if (!issueNumber) {
+    logger.error('failed to close issue; invalid issueNumber')
+    return Promise.reject(new Error('failed to close issue; invalid issueNumber'))
+  }
+  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber)))
+  const payload = {
+    state: 'closed'
+  }
+  return patch(url.href, payload)
 }
 
 const agent = new https.Agent({
@@ -86,5 +134,7 @@ const authentication = function () {
 
 module.exports = {
   searchIssues,
-  comments
+  comments,
+  closeIssue,
+  createComments
 }
