@@ -15,15 +15,17 @@
 //
 
 import Vue from 'vue'
+import assign from 'lodash/assign'
 import filter from 'lodash/filter'
 import findIndex from 'lodash/findIndex'
-import assign from 'lodash/assign'
-import matches from 'lodash/matches'
 import forEach from 'lodash/forEach'
-import matchesProperty from 'lodash/matchesProperty'
 import get from 'lodash/get'
 import head from 'lodash/head'
+import flatMap from 'lodash/flatMap'
+import matches from 'lodash/matches'
+import matchesProperty from 'lodash/matchesProperty'
 import orderBy from 'lodash/orderBy'
+import unionBy from 'lodash/unionBy'
 
 const eqlNameAndNamespace = ({namespace, name, state = undefined}) => {
   const source = { metadata: { namespace, name } }
@@ -58,6 +60,11 @@ const getters = {
   lastUpdated: (state) => ({name, namespace}) => {
     const lastUpdatedIssue = head(getOpenIssues(state, name, namespace))
     return get(lastUpdatedIssue, 'metadata.updated_at')
+  },
+  labels: (state) => ({name, namespace}) => {
+    const issues = getOpenIssues(state, name, namespace)
+    const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
+    return labels
   }
 }
 

@@ -53,7 +53,17 @@ function fromResource ({subjects} = {}) {
     .value()
 }
 
-exports.list = async function () {
+const list = async function () {
   const clusterRoleBinding = await readClusterRoleBinding()
   return fromResource(clusterRoleBinding)
+}
+exports.list = list
+
+exports.isAdmin = async function (user) {
+  if (!user) {
+    return false
+  }
+  const admins = await list()
+  const isAdmin = _.includes(admins, user.id)
+  return isAdmin
 }

@@ -21,7 +21,7 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects, shoots, journals, userInfo } = require('./services')
+const { projects, shoots, journals, administrators } = require('./services')
 const watches = require('./watches')
 const { shootHasIssue } = require('./utils')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
@@ -69,6 +69,9 @@ module.exports = () => {
           const user = res.user
           if (user) {
             user.auth = auth
+            user.id = user['email']
+          } else {
+            logger.error('Socket %s: no user on response object', socket.id)
           }
           if (err) {
             logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
@@ -86,7 +89,9 @@ module.exports = () => {
 
   const getUserFromSocket = socket => {
     const user = _.get(socket, 'client.user')
-    user.id = _.get(user, 'email')
+    if (!user) {
+      logger.error('Could not get client.user from socket', _.get(socket, 'id'))
+    }
     return user
   }
 
@@ -150,38 +155,51 @@ module.exports = () => {
       const filterFn = key => key !== socket.id && !_.startsWith(key, 'comments_')
       leavePreviousRooms(socket, filterFn)
 
+      const kind = 'issues'
+
       const user = getUserFromSocket(socket)
-      if (userInfo.isAdmin({user})) {
-        joinRoom(socket, 'issues')
+      try {
+        if (await administrators.isAdmin(user)) {
+          joinRoom(socket, 'issues')
 
-        const objects = getJournalCache().getIssues()
+          const objects = getJournalCache().getIssues()
 
-        const batchEmitter = new EventsEmitter({kind: 'issues', socket})
-        batchEmitter.batchEmitObjectsAndFlush(objects)
-      } else {
-        logger.warn('user %s tried to fetch journal but is no admin', _.get(user, 'email'))
+          const batchEmitter = new EventsEmitter({kind, socket})
+          batchEmitter.batchEmitObjectsAndFlush(objects)
+        } else {
+          logger.warn('Socket %s: user %s tried to fetch journal but is no admin', _.get(socket, 'id'), _.get(user, 'email'))
+          socket.emit('subscription_error', {kind, code: 403, message: 'Forbidden'})
+        }
+      } catch (error) {
+        logger.error('Socket %s: failed to fetch issues: %s', _.get(socket, 'id'), error)
+        socket.emit('subscription_error', {kind, code: 500, message: 'Failed to fetch issues'})
       }
     })
     socket.on('subscribeComments', async ({name, namespace}) => {
       leaveCommentRooms(socket)
 
-      const user = getUserFromSocket(socket)
-      if (userInfo.isAdmin({user})) {
-        joinRoom(socket, `comments_${namespace}/${name}`)
+      const kind = 'comments'
 
-        const batchEmitter = new EventsEmitter({kind: 'comments', socket})
-        try {
-          await journals.commentsForNameAndNamespace({name,
+      const user = getUserFromSocket(socket)
+      try {
+        if (await administrators.isAdmin(user)) {
+          joinRoom(socket, `comments_${namespace}/${name}`)
+
+          const batchEmitter = new EventsEmitter({kind, socket})
+          await journals.commentsForNameAndNamespace({
+            name,
             namespace,
             batchFn: comments => {
               batchEmitter.batchEmitObjects(comments)
             }})
           batchEmitter.flush()
-        } catch (e) {
-          logger.error('failed to fetch comments for %s/%s', namespace, name, e)
+        } else {
+          logger.warn('Socket %s: user %s tried to fetch journal comments but is no admin', _.get(socket, 'id'), _.get(user, 'email'))
+          socket.emit('subscription_error', {kind, code: 403, message: 'Forbidden'})
         }
-      } else {
-        logger.warn('user %s tried to fetch journal comments but is no admin', _.get(user, 'email'))
+      } catch (error) {
+        logger.error('Socket %s: failed to fetch comments for %s/%s: %s', _.get(socket, 'id'), namespace, name, error)
+        socket.emit('subscription_error', {kind, code: 500, message: 'Failed to fetch comments'})
       }
     })
     socket.on('unsubscribeComments', () => {

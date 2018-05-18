@@ -81,7 +81,7 @@ limitations under the License.
     </secret>
 
     <template v-if="showDisabledCloudProviders">
-      
+
       <disabled-secret
       class="mt-3"
       infrastructureName="Alibaba Cloud"
@@ -216,7 +216,8 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'cloudProfilesByCloudProviderKind'
+        'cloudProfilesByCloudProviderKind',
+        'getInfrastructureSecretByName'
       ]),
       backgroundForSelectedSecret () {
         const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
@@ -268,6 +269,13 @@ limitations under the License.
     },
     mounted () {
       this.floatingButton = true
+
+      if (get(this.$route.params, 'name')) {
+        const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
+        if (infrastructureSecret) {
+          this.onUpdate(infrastructureSecret)
+        }
+      }
     }
   }
 </script>

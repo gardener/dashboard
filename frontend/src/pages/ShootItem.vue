@@ -113,7 +113,9 @@ limitations under the License.
                       </v-tooltip>
                       /
                       <v-tooltip top open-delay="500">
-                        <span slot="activator">{{secret}} </span>
+                        <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
+                          <span>{{secret}} </span>
+                        </router-link>
                         <span>Used Credential</span>
                       </v-tooltip>
                     </v-list-tile-title>

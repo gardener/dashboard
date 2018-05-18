@@ -156,19 +156,43 @@ export default function createRouter ({store, userManager}) {
         },
         {
           path: 'namespace/:namespace/secrets',
-          name: 'Secrets',
-          component: Secrets,
+          component: PlaceholderComponent,
           meta: {
-            public: false,
-            namespaced: true,
-            projectScope: true,
-            title: 'Secrets',
             menu: {
               title: 'Secrets',
               icon: 'mdi-key'
             },
+            namespaced: true,
+            projectScope: true,
+            title: 'Secrets',
+            toRouteName: 'Secrets',
             breadcrumb: true
-          }
+          },
+          children: [
+            {
+              path: '',
+              name: 'Secrets',
+              component: Secrets,
+              meta: {
+                public: false,
+                namespaced: true,
+                projectScope: false,
+                title: 'Secrets'
+              }
+            },
+            {
+              path: ':name',
+              name: 'Secret',
+              component: Secrets,
+              meta: {
+                public: false,
+                namespaced: true,
+                projectScope: false,
+                title: 'Secrets',
+                toRouteName: 'Secrets'
+              }
+            }
+          ]
         },
         {
           path: 'namespace/:namespace/members',
@@ -314,6 +338,7 @@ export default function createRouter ({store, userManager}) {
             }
             return undefined
           case 'Secrets':
+          case 'Secret':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets')
