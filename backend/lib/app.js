@@ -20,7 +20,6 @@ const express = require('express')
 const history = require('connect-history-api-fallback')
 const _ = require('lodash')
 const config = require('./config')
-const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
 const { notFound, renderError } = require('./middleware')
@@ -32,8 +31,6 @@ const port = config.port
 // resolve pathnames
 const INDEX_FILENAME = resolve(join(__dirname, '..', 'public', 'index.html'))
 const STATIC_DIRNAME = resolve(join(__dirname, '..', 'public', 'static'))
-const redirectUri = parseUrl(_.get(config, 'frontend.oidc.redirect_uri'))
-const webSocketUrl = `${_.replace(redirectUri.protocol, /^http/, 'ws')}//${redirectUri.host}`
 const issuerUrl = _.get(config, 'jwt.issuer')
 
 // configure app
@@ -57,7 +54,7 @@ app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
-    connectSrc: ['\'self\'', webSocketUrl, issuerUrl],
+    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl],
     styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
     fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
     imgSrc: ['\'self\'', 'data:', 'https://www.gravatar.com'],
