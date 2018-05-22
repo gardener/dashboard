@@ -396,6 +396,7 @@ limitations under the License.
       .list__tile__title {
           text-transform: uppercase
           font-size: 13px;
+          max-width: 180px;
       }
       .list__tile--active {
         background: rgba(255,255,255,0.1) !important
