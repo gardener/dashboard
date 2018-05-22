@@ -21,7 +21,7 @@ limitations under the License.
           <v-select
             :items="items"
             item-text="version"
-            v-model="selectedVersion"
+            v-model="selectedItem"
             :label="label"
           >
           <template slot="item" slot-scope="data">
@@ -51,12 +51,15 @@ limitations under the License.
     props: {
       availableK8sUpdates: {
         required: true
+      },
+      selectedVersion: {
+        type: String
       }
     },
     data () {
       return {
         snackbar: false,
-        selectedVersion: null
+        selectedItem: null
       }
     },
     computed: {
@@ -103,18 +106,24 @@ limitations under the License.
         })
 
         // eslint-disable-next-line lodash/matches-prop-shorthand
-        this.selectedVersion = find(allItems, item => { return item.header === undefined })
+        this.selectedItem = find(allItems, item => { return item.header === undefined })
 
         return allItems
       },
       selectedVersionIsPatch () {
-        return get(this.selectedVersion, 'type') === 'patch'
+        return get(this.selectedItem, 'type') === 'patch'
       },
       label () {
         if (this.selectedVersionIsPatch) {
           return 'Patch to Version'
         }
         return 'Update to Version'
+      }
+    },
+    watch: {
+      selectedItem (value) {
+        const version = get(value, 'version')
+        this.$emit('update:selectedVersion', version)
       }
     }
   }

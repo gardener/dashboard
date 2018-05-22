@@ -53,19 +53,7 @@ limitations under the License.
       <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated"></shoot-status>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
-      <v-tooltip top>
-        <v-btn slot="activator" class="update_btn" small round
-          @click="showDialog('version')"
-          :outline="!k8sPatchAvailable"
-          :dark="k8sPatchAvailable"
-          color="cyan darken-2">
-            <v-icon small v-if="row.availableK8sUpdates">arrow_drop_up</v-icon>
-            {{row.k8sVersion}}
-        </v-btn>
-        <span v-if="k8sPatchAvailable">Kubernetes patch available</span>
-        <span v-else-if="row.availableK8sUpdates">Kubernetes update available</span>
-        <span v-else>Kubernetes version up to date</span>
-      </v-tooltip>
+      <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
       <template v-for="tag in row.tags">
@@ -149,6 +137,7 @@ limitations under the License.
   import StatusTag from '@/components/StatusTag'
   import PurposeTag from '@/components/PurposeTag'
   import TimeAgo from '@/components/TimeAgo'
+  import ShootVersion from '@/components/ShootVersion'
   import JournalLabels from '@/components/JournalLabels'
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
@@ -163,6 +152,7 @@ limitations under the License.
       PurposeTag,
       ShootStatus,
       TimeAgo,
+      ShootVersion,
       JournalLabels
     },
     props: {
@@ -177,7 +167,6 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'kubernetesVersions',
         'lastUpdatedJournalByNameAndNamespace',
         'journalsLabels'
       ]),
@@ -224,12 +213,6 @@ limitations under the License.
       },
       lastUpdatedJournal () {
         return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
-      },
-      k8sPatchAvailable () {
-        if (get(this.row, 'availableK8sUpdates.patch')) {
-          return true
-        }
-        return false
       },
       isInfoAvailable () {
         const lastOperation = this.row.lastOperation || {}
@@ -320,13 +303,5 @@ limitations under the License.
 
 .nowrap {
   white-space: nowrap;
-}
-
-.update_btn {
-  min-width: 0px;
-}
-
-.update_btn >>> i {
-  margin-left: -8px;
 }
 </style>

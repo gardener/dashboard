@@ -48,6 +48,17 @@ limitations under the License.
                   </v-list-tile-content>
                 </v-list-tile>
 
+                <v-list-tile>
+                  <v-list-tile-action>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
+                  </v-list-tile-content>
+                  <v-list-tile-avatar>
+                    <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+                  </v-list-tile-avatar>
+                </v-list-tile>
+
                 <v-divider class="my-2" inset></v-divider>
                 <v-list-tile>
                   <v-list-tile-action>
@@ -245,11 +256,12 @@ limitations under the License.
   import ShootEditor from '@/components/ShootEditor'
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
+  import ShootVersion from '@/components/ShootVersion'
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
+  import { getDateFormatted, getCloudProviderKind, canLinkToSeed, availableK8sUpdatesForShoot } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -258,7 +270,8 @@ limitations under the License.
       ClusterAccess,
       ShootEditor,
       Journals,
-      TimeAgo
+      TimeAgo,
+      ShootVersion
     },
     data () {
       return {
@@ -404,7 +417,7 @@ limitations under the License.
         return get(this.item, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
       },
       seed () {
-        return get(this.item, `spec.cloud.seed`)
+        return get(this.item, 'spec.cloud.seed')
       },
       purpose () {
         return this.annotations['garden.sapcloud.io/purpose']
@@ -427,6 +440,12 @@ limitations under the License.
             this.$router.push({ query: { tab: newTab } })
           }
         }
+      },
+      availableK8sUpdates() {
+        return availableK8sUpdatesForShoot(get(this.item, 'spec'))
+      },
+      k8sVersion() {
+        return get(this.item, 'spec.kubernetes.version')
       }
     },
     mounted () {

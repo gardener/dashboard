@@ -99,16 +99,6 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
-      <confirm-input-dialog :confirm="currentName" v-model="versionDialog" :cancel="hideDialog" :ok="versionUpdateConfirmed">
-        <template slot="caption">Update Kubernetes Version of Cluster <code>{{currentName}}</code></template>
-        <template slot="message">
-          <version-update :availableK8sUpdates="currentUpdates"></version-update>
-          <br />
-          Type <b>{{currentName}}</b> below and confirm to update the Kubernetes version of your cluster.
-          <br/>
-          <i class="red--text text--darken-2">This action cannot be undone.</i>
-        </template>
-      </confirm-input-dialog>
       <confirm-input-dialog :confirm="currentName" v-model="deleteDialog" :cancel="hideDialog" :ok="deletionConfirmed">
         <template slot="caption">Delete Cluster <code>{{currentName}}</code></template>
         <template slot="message">
@@ -150,8 +140,7 @@ limitations under the License.
   import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import ClusterAccess from '@/components/ClusterAccess'
-  import VersionUpdate from '@/components/VersionUpdate'
-  import { getCreatedBy, availableK8sUpdatesForShoot } from '@/utils'
+  import { getCreatedBy } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -161,8 +150,7 @@ limitations under the License.
       GPopper,
       ShootListRow,
       ConfirmInputDialog,
-      ClusterAccess,
-      VersionUpdate
+      ClusterAccess
     },
     data () {
       return {
@@ -211,18 +199,11 @@ limitations under the License.
           .catch((err) => console.error('Delete shoot failed with error:', err))
           .then(() => this.hideDialog())
       },
-      versionUpdateConfirmed () {
-        // updateShootVersion({namespace, name, user, version: spec})
-        //   .catch((err) => console.error('Update shoot version failed with error:', err))
-        //   .then(() => this.hideDialog())
-        console.log('Version update requested')
-      },
       showDialog (args) {
         switch (args.action) {
           case 'kubeconfig':
           case 'dashboard':
           case 'delete':
-          case 'version':
             this.setSelectedShoot(args.shootItem.metadata)
               .then(() => {
                 this.dialog = args.action
@@ -323,16 +304,6 @@ limitations under the License.
           }
         }
       },
-      versionDialog: {
-        get () {
-          return this.dialog === 'version'
-        },
-        set (value) {
-          if (!value) {
-            this.dialog = null
-          }
-        }
-      },
       currentMetadata () {
         return get(this.selectedItem, 'metadata')
       },
@@ -347,9 +318,6 @@ limitations under the License.
       },
       currentCreatedBy () {
         return getCreatedBy(this.currentMetadata)
-      },
-      currentUpdates () {
-        return availableK8sUpdatesForShoot(get(this.selectedItem, 'spec'))
       },
       currentInfo () {
         return get(this.selectedItem, 'info', {})
