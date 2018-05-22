@@ -55,7 +55,7 @@ limitations under the License.
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
       <v-tooltip top>
         <v-btn slot="activator" class="update_btn" small round
-          :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }"
+          @click="showDialog('version')"
           :outline="!k8sPatchAvailable"
           :dark="k8sPatchAvailable"
           color="cyan darken-2">
