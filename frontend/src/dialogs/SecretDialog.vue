@@ -241,6 +241,10 @@ limitations under the License.
       },
       hide () {
         this.visible = false
+        if (get(this.$route.params, 'name')) {
+          // eslint-disable-next-line lodash/prefer-lodash-method
+          this.$router.replace({ name: 'Secrets', params: { namespace: this.namespace } })
+        }
       },
       cancel () {
         this.hide()
