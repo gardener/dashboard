@@ -16,64 +16,136 @@
 
 'use strict'
 
-const { map, filter, find, remove } = require('lodash')
+const _ = require('lodash')
 const kubernetes = require('../kubernetes')
-const projects = require('./projects')
+const Resources = require('../kubernetes/Resources')
+
+const RoleBindingName = 'garden-project-members'
 
 function Rbac ({auth}) {
   return kubernetes.rbac({auth})
 }
 
-function patchMemberRoleBinding (rbac, namespace, body) {
-  return rbac.namespaces(namespace).rolebindings('garden-project-members').mergePatch({body})
+function fromResource ({subjects} = {}) {
+  return _
+    .chain(subjects)
+    .filter(['kind', 'User'])
+    .map('name')
+    .value()
 }
 
-function readMemberRoleBinding (rbac, namespace) {
-  return rbac.namespaces(namespace).rolebindings('garden-project-members').get()
+function roleBindingBody (namespace, usernames = []) {
+  const ClusterRole = Resources.ClusterRole
+  return {
+    metadata: {
+      name: RoleBindingName,
+      namespace,
+      labels: {
+        'garden.sapcloud.io/role': 'members'
+      }
+    },
+    roleRef: {
+      apiGroup: ClusterRole.apiGroup,
+      kind: ClusterRole.kind,
+      name: 'garden.sapcloud.io:system:project-member'
+    },
+    subjects: _.map(usernames, name => {
+      return {
+        kind: 'User',
+        name,
+        apiGroup: 'rbac.authorization.k8s.io'
+      }
+    })
+  }
 }
 
-function fromResource ({subjects}) {
-  const users = filter(subjects, ['kind', 'User'])
-  return map(users, 'name')
+function readRoleBinding (rbac, namespace) {
+  return rbac.namespaces(namespace).rolebindings.get({
+    name: RoleBindingName
+  })
+    .catch(err => {
+      if (err.code === 404) {
+        return roleBindingBody(namespace)
+      }
+      throw err
+    })
 }
 
+function createRoleBinding (rbac, namespace, names = []) {
+  return rbac.namespaces(namespace).rolebindings.post({
+    body: roleBindingBody(namespace, names)
+  })
+}
+
+async function setRoleBindingSubject (rbac, namespace, name) {
+  let body
+  try {
+    body = await rbac.namespaces(namespace).rolebindings.get({
+      name: RoleBindingName
+    })
+  } catch (err) {
+    if (err.code === 404) {
+      // only administrators can create the rolebinding afterwards
+      return createRoleBinding(rbac, namespace, [name])
+    }
+    throw err
+  }
+  const subjects = body.subjects = body.subjects || []
+  if (_.find(subjects, ['name', name])) {
+    return body
+  }
+  subjects.push({
+    kind: 'User',
+    name,
+    apiGroup: 'rbac.authorization.k8s.io'
+  })
+  return rbac.namespaces(namespace).rolebindings.mergePatch({
+    name: RoleBindingName,
+    body
+  })
+}
+
+async function unsetRoleBindingSubject (rbac, namespace, name) {
+  let body
+  try {
+    body = await rbac.namespaces(namespace).rolebindings.get({
+      name: RoleBindingName
+    })
+  } catch (err) {
+    if (err.code === 404) {
+      return roleBindingBody(namespace)
+    }
+    throw err
+  }
+  const subjects = body.subjects = body.subjects || []
+  if (!_.find(subjects, ['name', name])) {
+    return body
+  }
+  _.remove(subjects, ['name', name])
+  return rbac.namespaces(namespace).rolebindings.mergePatch({
+    name: RoleBindingName,
+    body
+  })
+}
+
+// bootstrap of rolebinding must be done with the serviceaccount
+exports.bootstrap = async function ({user, namespace}) {
+  const rbac = kubernetes.rbac()
+  return fromResource(await createRoleBinding(rbac, namespace, [user.id]))
+}
+
+// list, create and remove is done with the user
 exports.list = async function ({user, namespace}) {
   const rbac = Rbac(user)
-  try {
-    const body = await readMemberRoleBinding(rbac, namespace)
-    return fromResource(body)
-  } catch (e) {
-    if (e.code === 404) {
-      const body = await projects._createMembersClusterRole({namespace})
-      return fromResource(body)
-    }
-    throw e
-  }
+  return fromResource(await readRoleBinding(rbac, namespace))
 }
 
-exports.create = async function ({user, namespace, body: {name}}) {
+exports.create = async function ({user, namespace, body: {name: username}}) {
   const rbac = Rbac(user)
-  let body = await readMemberRoleBinding(rbac, namespace)
-  if (!find(body.subjects, ['name', name])) {
-    if (!body.subjects) {
-      body.subjects = []
-    }
-    body.subjects.push({
-      kind: 'User',
-      name: name,
-      apiGroup: 'rbac.authorization.k8s.io'
-    })
-    body = await patchMemberRoleBinding(rbac, namespace, body)
-  }
-  return fromResource(body)
+  return fromResource(await setRoleBindingSubject(rbac, namespace, username))
 }
 
-exports.remove = async function ({user, namespace, name}) {
+exports.remove = async function ({user, namespace, name: username}) {
   const rbac = Rbac(user)
-  let body = await readMemberRoleBinding(rbac, namespace)
-  if (find(body.subjects, ['name', name])) {
-    remove(body.subjects, ['name', name])
-    body = await patchMemberRoleBinding(rbac, namespace, body)
-  }
-  return fromResource(body)
+  return fromResource(await unsetRoleBindingSubject(rbac, namespace, username))
 }

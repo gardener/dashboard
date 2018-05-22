@@ -18,13 +18,20 @@
 
 const express = require('express')
 const history = require('connect-history-api-fallback')
+const _ = require('lodash')
 const config = require('./config')
-const { serveStatic } = require('./utils')
+const { resolve, join } = require('path')
 const logger = require('./logger')
 const { notFound, renderError } = require('./middleware')
+const helmet = require('helmet')
 const api = require('./api')
 const githubWebhook = require('./github/webhook')
 const port = config.port
+
+// resolve pathnames
+const INDEX_FILENAME = resolve(join(__dirname, '..', 'public', 'index.html'))
+const STATIC_DIRNAME = resolve(join(__dirname, '..', 'public', 'static'))
+const issuerUrl = _.get(config, 'jwt.issuer')
 
 // configure app
 const app = express()
@@ -32,12 +39,42 @@ app.set('port', port)
 app.set('logger', logger)
 app.set('io', api.io)
 app.set('trust proxy', 1)
-app.use('/static', serveStatic('static', true))
+app.set('etag', false)
+app.set('x-powered-by', false)
+
+app.use(helmet.dnsPrefetchControl())
+app.use(helmet.noSniff())
+app.use(helmet.hsts())
+
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
 app.use('/config.json', api.frontendConfig)
+
+app.use(helmet.xssFilter())
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ['\'self\''],
+    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl],
+    styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+    fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+    imgSrc: ['\'self\'', 'data:', 'https:'], // TODO allow gravatar and github (for journals) instead of whitelisting https
+    scriptSrc: ['\'self\'', '\'unsafe-eval\''],
+    frameAncestors: ['\'none\'']
+  }
+}))
+app.use(helmet.referrerPolicy({
+  policy: 'same-origin'
+}))
+
+app.use('/static', express.static(STATIC_DIRNAME))
+
+app.use(helmet.frameguard({
+  action: 'deny'
+}))
+app.use(helmet.noCache())
+
 app.use(history())
-app.use(serveStatic('public', true))
+app.get('/index.html', (req, res, next) => res.sendFile(INDEX_FILENAME, next))
 app.use(notFound)
 app.use(renderError)
 

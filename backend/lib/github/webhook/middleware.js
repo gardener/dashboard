@@ -24,11 +24,11 @@ const { InternalServerError, Forbidden } = require('../../errors')
 const verifySignature = function (req, res, next) {
   const webhookSecret = _.get(config, 'gitHub.webhookSecret')
   if (!webhookSecret) {
-    throw new InternalServerError('gitHub.webhookSecret not configured on dashboard backend')
+    next(new InternalServerError('gitHub.webhookSecret not configured on dashboard backend'))
   }
   const requestSignature = _.get(req.headers, 'x-hub-signature')
   if (!requestSignature) {
-    throw new Forbidden('x-hub-signature header not provided')
+    next(new Forbidden('x-hub-signature header not provided'))
   }
 
   const hmac = crypto.createHmac('sha1', webhookSecret.toString())
@@ -41,7 +41,7 @@ const verifySignature = function (req, res, next) {
 
   const equal = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(requestSignature))
   if (!equal) {
-    throw new Forbidden('Signatures didn\'t match!')
+    next(new Forbidden('Signatures didn\'t match!'))
   } else {
     next()
   }

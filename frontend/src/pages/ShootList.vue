@@ -178,7 +178,8 @@ limitations under the License.
           { text: 'STATUS', value: 'lastOperation', align: 'center', checked: false, defaultChecked: true, hidden: false },
           { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: false, hidden: false },
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: false, defaultChecked: true, hidden: false },
-          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false },
+          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
+          { text: 'JOURNAL LABELS', value: 'journalLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
           { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
         ],
         dialog: null,
@@ -265,7 +266,7 @@ limitations under the License.
         for (const header of this.allHeaders) {
           header.checked = get(checkedColumns, header.value, header.defaultChecked)
 
-          if (header.value === 'journal') {
+          if (get(header, 'adminOnly', false)) {
             header.hidden = !this.isAdmin
           }
         }

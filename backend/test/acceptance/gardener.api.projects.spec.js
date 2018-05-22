@@ -78,6 +78,36 @@ describe('gardener', function () {
           })
       })
 
+      it('should return the foo project', function () {
+        const resourceVersion = 42
+        oidc.stub.getKeys()
+        k8s.stub.getProject({bearer, namespace})
+        return chai.request(app)
+          .get(`/api/namespaces/${namespace}`)
+          .set('authorization', `Bearer ${bearer}`)
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
+          })
+      })
+
+      it('should reject request with authorization error', function () {
+        const bearer = oidc.sign({email: 'baz@example.org'})
+        oidc.stub.getKeys()
+        k8s.stub.getProject({bearer, namespace, unauthorized: true})
+        return chai.request(app)
+          .get(`/api/namespaces/${namespace}`)
+          .set('authorization', `Bearer ${bearer}`)
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(403)
+            expect(res).to.be.json
+            expect(res.body.status).to.equal(403)
+          })
+      })
+
       it('should create a project', function () {
         const createdBy = username
         const resourceVersion = 42
@@ -100,7 +130,7 @@ describe('gardener', function () {
         const createdBy = 'bar@example.org'
         const resourceVersion = 43
         oidc.stub.getKeys()
-        k8s.stub.patchProject({namespace, username, resourceVersion})
+        k8s.stub.patchProject({bearer, namespace, username, resourceVersion})
         return chai.request(app)
           .put(`/api/namespaces/${namespace}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -124,7 +154,7 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.eql({metadata})
+            expect(res.body.metadata).to.eql({name, namespace, role})
           })
       })
     })

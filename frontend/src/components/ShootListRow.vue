@@ -82,6 +82,14 @@ limitations under the License.
         {{ lastUpdatedJournal }}
       </v-tooltip>
     </td>
+    <td v-if="this.headerVisible['journalLabels']">
+      <template v-if="row.lastUpdatedJournalTimestamp && !row.journalsLabels.length">
+        None
+      </template>
+      <template v-else>
+        <journal-labels :labels="row.journalsLabels"></journal-labels>
+      </template>
+    </td>
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
@@ -141,6 +149,7 @@ limitations under the License.
   import StatusTag from '@/components/StatusTag'
   import PurposeTag from '@/components/PurposeTag'
   import TimeAgo from '@/components/TimeAgo'
+  import JournalLabels from '@/components/JournalLabels'
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
   import get from 'lodash/get'
@@ -153,7 +162,8 @@ limitations under the License.
       StatusTag,
       PurposeTag,
       ShootStatus,
-      TimeAgo
+      TimeAgo,
+      JournalLabels
     },
     props: {
       shootItem: {
@@ -168,7 +178,8 @@ limitations under the License.
     computed: {
       ...mapGetters([
         'kubernetesVersions',
-        'lastUpdatedJournalByNameAndNamespace'
+        'lastUpdatedJournalByNameAndNamespace',
+        'journalsLabels'
       ]),
       row () {
         const spec = this.shootItem.spec
@@ -194,7 +205,8 @@ limitations under the License.
           k8sVersion: get(spec, 'kubernetes.version'),
           // eslint-disable-next-line
           purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
-          lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata)
+          lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
+          journalsLabels: this.journalsLabels(this.shootItem.metadata)
         }
       },
       headerVisible () {

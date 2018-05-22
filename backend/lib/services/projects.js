@@ -23,7 +23,7 @@ const rbac = require('../kubernetes').rbac()
 const { Forbidden, PreconditionFailed } = require('../errors')
 const members = require('./members')
 const shoots = require('./shoots')
-const userInfo = require('./userInfo')
+const administrators = require('./administrators')
 
 function fromResource ({metadata}) {
   const annotations = metadata.annotations || {}
@@ -64,32 +64,28 @@ function toResource ({metadata, data}) {
   return {apiVersion, kind, metadata}
 }
 
-const createMembersClusterRole = async function ({namespace, username}) {
-  const ClusterRole = Resources.ClusterRole
-  const subjects = username ? [{
-    kind: 'User',
-    name: username,
-    apiGroup: 'rbac.authorization.k8s.io'
-  }] : []
-  const body = {
-    metadata: {
-      name: 'garden-project-members',
-      namespace,
-      labels: {
-        'garden.sapcloud.io/role': 'members'
-      }
-    },
-    roleRef: {
-      apiGroup: ClusterRole.apiGroup,
-      kind: ClusterRole.kind,
-      name: 'garden.sapcloud.io:system:project-member'
-    },
-    subjects
+async function authorize ({user, namespace}) {
+  const [
+    memberList,
+    isAdmin
+  ] = await Promise.all([
+    members.list({user, namespace}),
+    administrators.isAdmin(user)
+  ])
+  const username = user.id
+  const isMember = _.includes(memberList, username)
+  if (!isMember && !isAdmin) {
+    const projectName = namespace.replace(/^garden-/, '')
+    throw new Forbidden(`User ${username} is not authorized to access project ${projectName}`)
   }
-  return rbac.namespaces(namespace).rolebindings.post({body})
 }
 
-exports._createMembersClusterRole = createMembersClusterRole
+async function validateDeletePreconditions ({user, namespace}) {
+  const shootList = await shoots.list({user, namespace})
+  if (!_.isEmpty(shootList.items)) {
+    throw new PreconditionFailed(`Only empty projects can be deleted`)
+  }
+}
 
 exports.list = async function ({user}) {
   const [
@@ -103,8 +99,9 @@ exports.list = async function ({user}) {
     rbac.rolebindings.get({
       qs: {labelSelector: 'garden.sapcloud.io/role=members'}
     }),
-    userInfo.isAdmin({user})
+    administrators.isAdmin(user)
   ])
+
   const isMemberOf = (roleBindings, subject) => {
     const userNamespaces = _
       .chain(roleBindings.items)
@@ -122,6 +119,7 @@ exports.list = async function ({user}) {
   const predicate = !isAdmin
     ? isMemberOf(roleBindings, subject)
     : _.identity
+
   return _
     .chain(namespaces.items)
     .filter(predicate)
@@ -131,39 +129,50 @@ exports.list = async function ({user}) {
 
 exports.create = async function ({user, body}) {
   const username = user.id
+  // transfrom project to namespace resource
   _.set(body, 'data.createdBy', username)
   body = toResource(body)
-  const namespace = body.metadata.name
+  // create namespace
+  const name = body.metadata.name
+  const namespace = name
   body = await core.namespaces.post({body})
-  await createMembersClusterRole({namespace, username})
+  try {
+    // bootstrap the rolebinding for project members
+    await members.bootstrap({user, namespace})
+  } catch (err) {
+    // rollback the namespace in case of an error
+    await core.namespaces.delete({name})
+    throw err
+  }
   return fromResource(body)
 }
 
 exports.read = async function ({user, name}) {
-  return fromResource(await core.namespaces(name).get())
+  // validate user authorizations
+  const namespace = name
+  await authorize({user, namespace})
+  // read namespace
+  return fromResource(await core.namespaces.get({name}))
 }
 
 exports.patch = async function ({user, name, body}) {
+  // transfrom project to namespace resource
   _.unset(body, 'data.createdBy')
   body = toResource(body)
-  body = await core.namespaces.mergePatch({name, body})
-  return fromResource(body)
+  // validate user authorizations
+  const namespace = name
+  await authorize({user, namespace})
+  // patch namespace
+  return fromResource(await core.namespaces.mergePatch({name, body}))
 }
 
 exports.remove = async function ({user, name}) {
-  const username = user.id
+  // validate user authorizations
   const namespace = name
-  const projectName = name.replace(/^garden-/, '')
-  const [memberList, shootList] = await Promise.all([
-    members.list({user, namespace}),
-    shoots.list({user, namespace})
-  ])
-  if (!_.includes(memberList, username)) {
-    throw new Forbidden(`User ${username} is not a member of project ${projectName}`)
-  }
-  if (shootList.items.length > 0) {
-    throw new PreconditionFailed(`Only empty projects can be deleted`)
-  }
+  await authorize({user, namespace})
+  // validate preconditions
+  await validateDeletePreconditions({user, namespace})
+  // delete namespace
   await core.namespaces.delete({name})
-  return {metadata: {name: projectName}}
+  return fromResource({metadata: {name}})
 }

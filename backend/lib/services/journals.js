@@ -19,6 +19,7 @@
 const github = require('../github')
 const _ = require('lodash')
 const { getJournalCache } = require('../cache')
+const logger = require('../logger')
 
 function fromLabel (item) {
   const label = _.assign(
@@ -99,16 +100,37 @@ exports.list = async function ({name, namespace, batchFn = data => {}}) {
     }})
 }
 
+exports.deleteJournals = async function ({name, namespace}) {
+  const issueNumbers = getJournalCache().getIssueNumbersForNameAndNamespace({name, namespace})
+
+  if (!_.isEmpty(issueNumbers)) {
+    logger.debug('deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, issueNumbers)
+
+    const createCommentPayload = {
+      body: '_[Auto-closed due to Shoot deletion]_'
+    }
+    const createCommentPromises = _.map(issueNumbers, issueNumber => github.createComments({issueNumber, payload: createCommentPayload}))
+    const closeIssuePromises = _.map(issueNumbers, issueNumber => github.closeIssue({issueNumber}))
+
+    const promises = _.concat(createCommentPromises, closeIssuePromises)
+
+    return Promise.all(promises)
+  } else {
+    return Promise.resolve()
+  }
+}
+
 const commentsForNameAndNamespace = async function ({name, namespace, batchFn = data => {}}) {
   const issueNumbers = getJournalCache().getIssueNumbersForNameAndNamespace({name, namespace})
   const readCommentsPromises = _.map(issueNumbers, issueNumber => commentsForIssueNumber({issueNumber, name, namespace, batchFn}))
 
-  await Promise.all(readCommentsPromises)
+  return Promise.all(readCommentsPromises)
 }
 exports.commentsForNameAndNamespace = commentsForNameAndNamespace
 
 const commentsForIssueNumber = async function ({issueNumber, name, namespace, batchFn = comments => {}}) {
-  return github.comments({issueNumber,
+  return github.comments({
+    issueNumber,
     batchFn: data => {
       const commentsBatch = _.map(data, (item) => fromComment(issueNumber, name, namespace, item))
       batchFn(commentsBatch)

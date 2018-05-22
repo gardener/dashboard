@@ -16,6 +16,8 @@
 
 'use strict'
 
+const _ = require('lodash')
+
 describe('gardener', function () {
   describe('api', function () {
     describe('members', function () {
@@ -25,7 +27,12 @@ describe('gardener', function () {
       const name = 'bar'
       const project = 'foo'
       const namespace = `garden-${project}`
-      const members = ['foo@example.org', 'bar@example.org', 'foobar@example.org']
+      const members = _
+        .chain(k8s.projectMembersList)
+        .find(['metadata.namespace', namespace])
+        .get('subjects', [])
+        .map('name')
+        .value()
       const metadata = {}
       const username = `${name}@example.org`
       const email = username
@@ -45,9 +52,9 @@ describe('gardener', function () {
         nocks.reset()
       })
 
-      it('should return three project members', function () {
+      it('should return two project members', function () {
         oidc.stub.getKeys()
-        k8s.stub.getMembers({bearer, namespace, members})
+        k8s.stub.getMembers({bearer, namespace})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
@@ -55,13 +62,14 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(3)
+            expect(res.body).to.eql(members)
           })
       })
 
-      it('should create rolebinding and return empty member list', function () {
+      it('should return empty member list', function () {
+        const namespace = 'garden-baz'
         oidc.stub.getKeys()
-        k8s.stub.getMembersNoRolebinding({bearer, namespace})
+        k8s.stub.getMembers({bearer, namespace})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
@@ -69,54 +77,69 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(0)
+            expect(res.body).to.eql([])
           })
       })
 
       it('should add a project member', function () {
-        const newMember = 'newmember@example.org'
+        const name = 'baz@example.org'
         oidc.stub.getKeys()
-        k8s.stub.addMember({bearer, namespace, newMember, members})
+        k8s.stub.addMember({bearer, namespace, name})
         return chai.request(app)
           .post(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, name: newMember})
+          .send({metadata, name})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(4)
+            expect(res.body).to.eql(_.concat(members, 'baz@example.org'))
           })
       })
 
       it('should not add member that is already a project member', function () {
-        const newMember = 'foo@example.org'
+        const name = 'foo@example.org'
         oidc.stub.getKeys()
-        k8s.stub.notAddMember({bearer, namespace, members})
+        k8s.stub.addMember({bearer, namespace, name})
         return chai.request(app)
           .post(`/api/namespaces/${namespace}/members`)
           .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, name: newMember})
+          .send({metadata, name})
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(3)
+            expect(res.body).to.eql(members)
           })
       })
 
       it('should delete a project member', function () {
-        const removeMember = 'bar@example.org'
+        const name = 'bar@example.org'
         oidc.stub.getKeys()
-        k8s.stub.removeMember({bearer, namespace, removeMember, members})
+        k8s.stub.removeMember({bearer, namespace, name})
         return chai.request(app)
-          .delete(`/api/namespaces/${namespace}/members/${removeMember}`)
+          .delete(`/api/namespaces/${namespace}/members/${name}`)
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body).to.have.length(2)
+            expect(res.body).to.eql(_.without(members, name))
+          })
+      })
+
+      it('should not delete member that is not a project member', function () {
+        const name = 'baz@example.org'
+        oidc.stub.getKeys()
+        k8s.stub.removeMember({bearer, namespace, name})
+        return chai.request(app)
+          .delete(`/api/namespaces/${namespace}/members/${name}`)
+          .set('authorization', `Bearer ${bearer}`)
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body).to.eql(members)
           })
       })
     })

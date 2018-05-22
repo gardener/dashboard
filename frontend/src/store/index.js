@@ -114,6 +114,11 @@ const getters = {
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
   },
+  getInfrastructureSecretByName (state, getters) {
+    return ({namespace, name}) => {
+      return getters['infrastructureSecrets/getInfrastructureSecretByName']({namespace, name})
+    }
+  },
   namespaces (state) {
     const iteratee = item => item.metadata.namespace
     return map(state.projects.all, iteratee)
@@ -179,6 +184,11 @@ const getters = {
   lastUpdatedJournalByNameAndNamespace (state, getters) {
     return ({namespace, name}) => {
       return getters['journals/lastUpdated']({namespace, name})
+    }
+  },
+  journalsLabels (state, getters) {
+    return ({namespace, name}) => {
+      return getters['journals/labels']({namespace, name})
     }
   },
   shootsByInfrastructureSecret (state, getters) {

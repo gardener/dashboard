@@ -89,6 +89,7 @@ module.exports = {
   config,
   credentials,
   kubernetesClient,
+  Resources,
   fromKubeconfig (kubeconfig) {
     return fromKubeconfig(yaml.safeLoad(kubeconfig))
   },
@@ -109,7 +110,7 @@ module.exports = {
   },
   rbac (options) {
     options = assign(options, {
-      version: 'v1beta1'
+      version: 'v1'
     })
     return new Rbac(credentials(options))
   },
@@ -125,8 +126,8 @@ module.exports = {
       version: 'v1beta1',
       resources: [
         Resources.Shoot.name,
-        Resources.CloudProfile.name,
         Resources.Seed.name,
+        Resources.CloudProfile.name,
         Resources.SecretBinding.name
       ]
     })

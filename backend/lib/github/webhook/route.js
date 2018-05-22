@@ -34,7 +34,6 @@ router.route('/')
 
       switch (event) {
         case 'issues':
-        case 'labeled':
           webhookService.processIssue({action, issue})
           break
         case 'issue_comment':
