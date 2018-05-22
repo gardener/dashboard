@@ -90,8 +90,8 @@ export function getShootInfo ({namespace, name, user}) {
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`, user)
 }
 
-export function updateShootVersion ({namespace, name, user, version}) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, user, version)
+export function updateShootVersion ({namespace, name, user, data}) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, user, data)
 }
 
 /* Cloud Profiles */

@@ -53,7 +53,7 @@ limitations under the License.
       <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated"></shoot-status>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
+      <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :shootNamespace="row.namespace" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
       <template v-for="tag in row.tags">

@@ -55,7 +55,7 @@ limitations under the License.
                     <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
                   </v-list-tile-content>
                   <v-list-tile-avatar>
-                    <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+                    <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
                   </v-list-tile-avatar>
                 </v-list-tile>
 
@@ -441,10 +441,10 @@ limitations under the License.
           }
         }
       },
-      availableK8sUpdates() {
+      availableK8sUpdates () {
         return availableK8sUpdatesForShoot(get(this.item, 'spec'))
       },
-      k8sVersion() {
+      k8sVersion () {
         return get(this.item, 'spec.kubernetes.version')
       }
     },

@@ -67,6 +67,18 @@ exports.replaceSpec = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
 }
 
+exports.replaceVersion = async function ({user, namespace, name, body}) {
+  const version = body.version
+  const patchOperations = [
+    {
+      op: 'replace',
+      path: '/spec/kubernetes/version',
+      value: version
+    }
+  ]
+  return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
+}
+
 exports.remove = async function ({user, namespace, name}) {
   await Garden(user).namespaces(namespace).shoots.delete({name})
   const {metadata} = await this.read({user, namespace, name})

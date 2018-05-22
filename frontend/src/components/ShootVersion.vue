@@ -46,6 +46,7 @@ limitations under the License.
   import ShootVersionUpdate from '@/components/ShootVersionUpdate'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import get from 'lodash/get'
+  import { updateShootVersion } from '@/utils/api'
 
   export default {
     components: {
@@ -61,6 +62,10 @@ limitations under the License.
         required: true
       },
       shootName: {
+        type: String,
+        required: true
+      },
+      shootNamespace: {
         type: String,
         required: true
       }
@@ -92,10 +97,10 @@ limitations under the License.
         this.updateDialog = false
       },
       versionUpdateConfirmed () {
-        // updateShootVersion({namespace, name, user, version: spec})
-        //   .catch((err) => console.error('Update shoot version failed with error:', err))
-        //   .then(() => this.hideDialog())
-        console.log('Version update requested', this.selectedVersion)
+        const user = this.$store.state.user
+        updateShootVersion({namespace: this.shootNamespace, name: this.shootName, user, data: {version: this.selectedVersion}})
+          .catch((err) => console.error('Update shoot version failed with error:', err))
+          .then(() => this.hideUpdateDialog())
       }
     }
   }
