@@ -32,7 +32,7 @@ limitations under the License.
 
 <script>
   export default {
-    name: 'create-cluster',
+    name: 'alert',
     props: {
       message: {
         type: String

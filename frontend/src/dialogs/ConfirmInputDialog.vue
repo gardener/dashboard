@@ -29,18 +29,23 @@ limitations under the License.
         This is a generic dialog template.
       </slot>
       <v-text-field
+        v-if="confirmRequired"
         ref="deleteDialogInput"
         :hint="hint"
         persistent-hint
         :error="hasError"
+        :disabled="confirmDisabled"
         v-model="userInput"
         type="text">
       </v-text-field>
     </v-card-text>
+
+    <alert color="error" :message.sync="message" :detailedMessage.sync="detailedMessage"></alert>
+
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn  @click.native.stop="okClicked()" :disabled="hasError" class="red--text" flat>Confirm</v-btn>
+      <v-btn @click.native.stop="okClicked()" :disabled="confirmDisabled || hasError" class="red--text" flat>Confirm</v-btn>
     </v-card-actions>
   </v-card>
   </v-dialog>
@@ -48,8 +53,12 @@ limitations under the License.
 
 <script>
   import { setDelayedInputFocus } from '@/utils'
+  import Alert from '@/components/Alert'
 
   export default {
+    components: {
+      Alert
+    },
     props: {
       value: {
         type: Boolean,
@@ -59,9 +68,27 @@ limitations under the License.
         type: Function,
         required: true
       },
+      cancel: {
+        type: Function,
+        required: true
+      },
       confirm: {
         type: String,
         default: ''
+      },
+      confirmRequired: {
+        type: Boolean,
+        default: true
+      },
+      confirmDisabled: {
+        type: Boolean,
+        default: false
+      },
+      errorMessage: {
+        type: String
+      },
+      detailedErrorMessage: {
+        type: String
       }
     },
     data () {
@@ -78,15 +105,33 @@ limitations under the License.
     },
     computed: {
       hasError () {
-        return this.confirm !== this.userInput
+        return this.confirmRequired && this.confirm !== this.userInput
       },
       hint () {
-        if (this.userInput.length === 0) {
+        if (this.confirmDisabled) {
+          return ''
+        } else if (this.userInput.length === 0) {
           return `Type '${this.confirm}' to confirm`
         } else if (this.userInput !== this.confirm) {
           return `Your input did not match with required phrase '${this.confirm}'`
         }
         return ''
+      },
+      message: {
+        get () {
+          return this.errorMessage
+        },
+        set (value) {
+          this.$emit('update:errorMessage', value)
+        }
+      },
+      detailedMessage: {
+        get () {
+          return this.detailedErrorMessage
+        },
+        set (value) {
+          this.$emit('update:detailedErrorMessage', value)
+        }
       }
     },
     methods: {
@@ -94,13 +139,11 @@ limitations under the License.
         if (this.cancel) {
           this.cancel()
         }
-        this.$emit('input', false)
       },
       okClicked () {
         if (this.ok) {
           this.ok()
         }
-        this.$emit('input', false)
       },
       onShow () {
         // we must delay the "focus" handling because the dialog.open is animated

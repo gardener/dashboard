@@ -29,14 +29,29 @@ limitations under the License.
       <span v-else-if="availableK8sUpdates">Kubernetes update available</span>
       <span v-else>Kubernetes version up to date</span>
     </v-tooltip>
-    <confirm-input-dialog :confirm="shootName" v-model="updateDialog" :cancel="hideUpdateDialog" :ok="versionUpdateConfirmed">
+    <confirm-input-dialog
+      :confirm="shootName"
+      v-model="updateDialog"
+      :cancel="hideUpdateDialog"
+      :ok="versionUpdateConfirmed"
+      :confirmRequired="confirmRequired"
+      :confirmDisabled="selectedVersionInvalid"
+      :errorMessage.sync="updateErrorMessage"
+      :detailedErrorMessage.sync="updateDetailedErrorMessage"
+      >
       <template slot="caption">Update Kubernetes Version of Cluster <code>{{shootName}}</code></template>
       <template slot="message">
-        <shoot-version-update :availableK8sUpdates="availableK8sUpdates" :selectedVersion.sync="selectedVersion"></shoot-version-update>
-        <br />
-        Type <b>{{shootName}}</b> below and confirm to update the Kubernetes version of your cluster.
-        <br/>
-        <i class="red--text text--darken-2">This action cannot be undone.</i>
+        <shoot-version-update
+          :availableK8sUpdates="availableK8sUpdates"
+          :selectedVersion.sync="selectedVersion"
+          :selectedVersionInvalid.sync="selectedVersionInvalid"
+          :confirmRequired.sync="confirmRequired"
+        ></shoot-version-update>
+        <template v-if="!selectedVersionInvalid">
+          Type <b>{{shootName}}</b> below and confirm to update the Kubernetes version of your cluster.
+          <br/>
+          <i class="red--text text--darken-2">This action cannot be undone.</i>
+        </template>
       </template>
     </confirm-input-dialog>
   </div>
@@ -73,7 +88,11 @@ limitations under the License.
     data () {
       return {
         updateDialog: false,
-        selectedVersion: undefined
+        selectedVersion: undefined,
+        selectedVersionInvalid: false,
+        confirmRequired: undefined,
+        updateErrorMessage: null,
+        updateDetailedErrorMessage: null
       }
     },
     computed: {
@@ -95,12 +114,18 @@ limitations under the License.
       },
       hideUpdateDialog () {
         this.updateDialog = false
+        this.updateErrorMessage = null
+        this.updateDetailedErrorMessage = null
       },
       versionUpdateConfirmed () {
         const user = this.$store.state.user
         updateShootVersion({namespace: this.shootNamespace, name: this.shootName, user, data: {version: this.selectedVersion}})
-          .catch((err) => console.error('Update shoot version failed with error:', err))
           .then(() => this.hideUpdateDialog())
+          .catch((err) => {
+            this.updateErrorMessage = 'Update Kubernetes version failed'
+            this.updateDetailedErrorMessage = err.message
+            console.error('Delete shoot failed with error:', err)
+          })
       }
     }
   }

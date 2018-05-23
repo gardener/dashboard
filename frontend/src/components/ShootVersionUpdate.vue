@@ -30,7 +30,11 @@ limitations under the License.
              </v-list-tile-content>
            </template>
           </v-select>
-          <v-alert type="warning" :value="!selectedVersionIsPatch" outline>Before updating, please make sure that your cluster is compatible with the seleced Kubernetes version</v-alert>
+          <v-alert type="error" :value="selectedMinorVersionIsNotNextMinor" outline>
+            You cannot directly upgrade cluster Kubernetes version to <code>{{this.selectedVersion}}</code><br />
+            Please upgrade to a lower Kubernetes version first.
+          </v-alert>
+          <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>Before updating, please make sure that your cluster is compatible with the seleced Kubernetes version</v-alert>
         </v-flex>
       </v-layout>
     </v-container>
@@ -54,6 +58,13 @@ limitations under the License.
       },
       selectedVersion: {
         type: String
+      },
+      selectedVersionInvalid: {
+        type: Boolean,
+        default: false
+      },
+      confirmRequired: {
+        type: Boolean
       }
     },
     data () {
@@ -83,9 +94,9 @@ limitations under the License.
               return -1
             } else {
               if (semver.gt(a.version, b.version)) {
-                return -1
-              } else {
                 return 1
+              } else {
+                return -1
               }
             }
           } else {
@@ -111,7 +122,19 @@ limitations under the License.
         return allItems
       },
       selectedVersionIsPatch () {
-        return get(this.selectedItem, 'type') === 'patch'
+        const isPatch = get(this.selectedItem, 'type') === 'patch'
+        this.$emit('update:confirmRequired', !isPatch)
+        return isPatch
+      },
+      selectedMinorVersionIsNotNextMinor () {
+        const invalid = get(this.selectedItem, 'type') === 'minor' &&
+          find(this.items, item => {
+            return item.type === 'minor' &&
+            item.version !== undefined &&
+            (semver.lt(item.version, this.selectedItem.version))
+          })
+        this.$emit('update:selectedVersionInvalid', !!invalid)
+        return !!invalid
       },
       label () {
         if (this.selectedVersionIsPatch) {

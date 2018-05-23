@@ -351,9 +351,6 @@ const actions = {
   },
   deleteShoot ({ dispatch, commit }, {name, namespace}) {
     return dispatch('shoots/delete', {name, namespace})
-      .catch(err => {
-        dispatch('setError', err)
-      })
   },
   addMember ({ dispatch, commit }, name) {
     return dispatch('members/add', name)

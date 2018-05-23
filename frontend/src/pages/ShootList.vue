@@ -99,7 +99,14 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
-      <confirm-input-dialog :confirm="currentName" v-model="deleteDialog" :cancel="hideDialog" :ok="deletionConfirmed">
+      <confirm-input-dialog
+        :confirm="currentName"
+        v-model="deleteDialog"
+        :cancel="hideDialog"
+        :ok="deletionConfirmed"
+        :errorMessage.sync="deleteErrorMessage"
+        :detailedErrorMessage.sync="deleteDetailedErrorMessage"
+        >
         <template slot="caption">Delete Cluster <code>{{currentName}}</code></template>
         <template slot="message">
           <v-list>
@@ -172,7 +179,9 @@ limitations under the License.
         ],
         dialog: null,
         tableMenu: false,
-        pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER }
+        pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
+        deleteErrorMessage: null,
+        deleteDetailedErrorMessage: null
       }
     },
     watch: {
@@ -196,8 +205,12 @@ limitations under the License.
       ]),
       deletionConfirmed () {
         this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
-          .catch((err) => console.error('Delete shoot failed with error:', err))
           .then(() => this.hideDialog())
+          .catch((err) => {
+            this.deleteErrorMessage = 'Delete shoot failed'
+            this.deleteDetailedErrorMessage = err.message
+            console.error('Delete shoot failed with error:', err)
+          })
       },
       showDialog (args) {
         switch (args.action) {
@@ -218,6 +231,9 @@ limitations under the License.
           case 'dashboard':
             this.$refs.clusterAccess.reset()
             break
+          case 'delete':
+            this.deleteErrorMessage = null
+            this.deleteDetailedErrorMessage = null
         }
         this.dialog = null
         this.setSelectedShoot(null)
