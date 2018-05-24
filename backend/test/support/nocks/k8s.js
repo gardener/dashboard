@@ -346,6 +346,32 @@ const stub = {
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, () => result)
   },
+  replaceShootK8sSpec ({bearer, namespace, name, project, createdBy}) {
+    const shoot = getShoot({name, project, createdBy})
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        const payload = _.head(body)
+        if (payload.op === 'replace' && payload.path === '/spec') {
+          shoot.spec = payload.value
+        }
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replaceShootK8sVersion ({bearer, namespace, name, project, createdBy}) {
+    const shoot = getShoot({name, project, createdBy})
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        const payload = _.head(body)
+        if (payload.op === 'replace' && payload.path === '/spec/kubernetes/version') {
+          shoot.spec.kubernetes = _.assign({}, shoot.spec.kubernetes, payload.value)
+        }
+        return true
+      })
+      .reply(200, () => shoot)
+  },
   getInfrastructureSecrets ({bearer, namespace, empty = false}) {
     return nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`)

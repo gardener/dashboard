@@ -124,7 +124,7 @@ limitations under the License.
           .catch((err) => {
             this.updateErrorMessage = 'Update Kubernetes version failed'
             this.updateDetailedErrorMessage = err.message
-            console.error('Delete shoot failed with error:', err)
+            console.error('Update shoot version failed with error:', err)
           })
       }
     }

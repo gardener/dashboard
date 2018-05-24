@@ -168,6 +168,39 @@ describe('gardener', function () {
             expect(res.body.shootIngressDomain).to.eql(shootIngressDomain)
           })
       })
+
+      it('should replace shoot kubernetes spec', function () {
+        common.stub.getCloudProfiles(sandbox)
+        oidc.stub.getKeys()
+        k8s.stub.replaceShootK8sSpec({bearer, namespace, name, project, createdBy})
+        return chai.request(app)
+          .put(`/api/namespaces/${namespace}/shoots/${name}/spec`)
+          .set('authorization', `Bearer ${bearer}`)
+          .send({spec})
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body.spec).to.eql(spec)
+          })
+      })
+
+      it('should replace shoot kubernetes version', function () {
+        const version = { version: '1.10.1' }
+        common.stub.getCloudProfiles(sandbox)
+        oidc.stub.getKeys()
+        k8s.stub.replaceShootK8sVersion({bearer, namespace, name, project, createdBy})
+        return chai.request(app)
+          .put(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`)
+          .set('authorization', `Bearer ${bearer}`)
+          .send({version})
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body.spec.kubernetes.version).to.eql(version.version)
+          })
+      })
     })
   })
 })
