@@ -242,8 +242,16 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const isError = operation.state === 'Failed' || get(item, 'status.lastError')
       const userError = isUserError(get(item, 'status.lastError.codes', []))
+      // eslint-disable-next-line
+      const ignoredFromReconciliation = get(item, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
 
-      if (userError && !inProgress) {
+      if (ignoredFromReconciliation) {
+        if (isError) {
+          return 400
+        } else {
+          return 450
+        }
+      } else if (userError && !inProgress) {
         return 200
       } else if (userError && inProgress) {
         const progress = padStart(operation.progress, 2, '0')
@@ -255,11 +263,11 @@ const getSortVal = (item, sortBy) => {
         return `1${progress}`
       } else if (inProgress) {
         const progress = padStart(operation.progress, 2, '0')
-        return `5${progress}`
+        return `6${progress}`
       } else if (isHibernated(spec)) {
-        return 400
+        return 500
       }
-      return 600
+      return 700
     case 'k8sVersion':
       const k8sVersion = value
       const availableK8sUpdates = availableK8sUpdatesForShoot(spec)

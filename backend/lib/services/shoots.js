@@ -79,6 +79,15 @@ exports.replaceVersion = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
 }
 
+exports.patchAnnotation = async function ({user, namespace, name, annotations}) {
+  const body = {
+    metadata: {
+      annotations: annotations
+    }
+  }
+  return patch({user, namespace, name, body})
+}
+
 exports.remove = async function ({user, namespace, name}) {
   await Garden(user).namespaces(namespace).shoots.delete({name})
   const {metadata} = await this.read({user, namespace, name})

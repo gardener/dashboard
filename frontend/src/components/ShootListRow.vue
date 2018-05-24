@@ -49,8 +49,18 @@ limitations under the License.
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
       <purpose-tag :purpose="row.purpose"></purpose-tag>
     </td>
-    <td class="nowrap text-xs-center" v-if="this.headerVisible['lastOperation']">
-      <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated"></shoot-status>
+    <td class="text-xs-left" v-if="this.headerVisible['lastOperation']">
+      <div>
+        <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated" :canRetry="canRetry" :reconciliationDeactivated="reconciliationDeactivated" @retryOperation="onRetryOperation"></shoot-status>
+      <template v-if="canRetry">
+        <v-tooltip top>
+          <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
+            <v-icon>mdi-reload</v-icon>
+          </v-btn>
+          Retry Operation
+        </v-tooltip>
+      </template>
+      </div>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
       <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :shootNamespace="row.namespace" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
@@ -144,6 +154,7 @@ limitations under the License.
   import get from 'lodash/get'
   import includes from 'lodash/includes'
   import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
+  import { addAnnotation } from '@/utils/api'
 
   export default {
     components: {
@@ -165,6 +176,11 @@ limitations under the License.
         required: true
       }
     },
+    data () {
+      return {
+        retryingOperation: false
+      }
+    },
     computed: {
       ...mapGetters([
         'lastUpdatedJournalByNameAndNamespace',
@@ -181,7 +197,7 @@ limitations under the License.
           namespace: metadata.namespace,
           createdBy: getCreatedBy(metadata),
           creationTimestamp: metadata.creationTimestamp,
-          annotations: metadata.annotations,
+          annotations: get(metadata, 'annotations', {}),
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
           lastError: get(status, 'lastError'),
@@ -195,7 +211,9 @@ limitations under the License.
           // eslint-disable-next-line
           purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
           lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
-          journalsLabels: this.journalsLabels(this.shootItem.metadata)
+          journalsLabels: this.journalsLabels(this.shootItem.metadata),
+          // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
+          reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration')
         }
       },
       headerVisible () {
@@ -215,17 +233,25 @@ limitations under the License.
         return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
       },
       isInfoAvailable () {
-        const lastOperation = this.row.lastOperation || {}
         // operator not yet updated shoot resource
-        if (lastOperation.type === undefined || lastOperation.state === undefined) {
+        if (this.row.lastOperation.type === undefined || this.row.lastOperation.state === undefined) {
           return false
         }
         return !this.isCreateOrDeleteInProcess
       },
+      canRetry () {
+        return this.row.lastOperation.state === 'Failed' &&
+          !this.reconciliationDeactivated &&
+          !this.retryingOperation &&
+          !this.row.reconcileScheduled
+      },
+      reconciliationDeactivated () {
+        // eslint-disable-next-line
+        return get(this.row, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+      },
       isCreateOrDeleteInProcess () {
-        const lastOperation = this.row.lastOperation || {}
         // create or delete in process
-        if (includes(['Create', 'Delete'], lastOperation.type) && lastOperation.state === 'Processing') {
+        if (includes(['Create', 'Delete'], this.row.lastOperation.type) && this.row.lastOperation.state === 'Processing') {
           return true
         }
         return false
@@ -286,22 +312,46 @@ limitations under the License.
             }
             return {id, text, message, lastTransitionTime, status}
           })
+      },
+      onRetryOperation () {
+        this.retryingOperation = true
+
+        const user = this.$store.state.user
+        const namespace = this.row.namespace
+        const name = this.row.name
+
+        const retryAnnotation = {'shoot.garden.sapcloud.io/operation': 'retry'}
+        return addAnnotation({namespace, name, user, data: retryAnnotation})
+        .then(() => {
+          console.log('success')
+
+          this.retryingOperation = false
+        })
+        .catch(err => {
+          console.log('failed to retry operation', err)
+
+          this.retryingOperation = false
+          this.$store.dispatch('setError', err)
+        })
       }
     }
   }
 </script>
 <style lang="styl" scoped>
 
-.action-button-group {
-  white-space: nowrap;
-
-  button[type=button] {
-    margin: 0 4px;
+  .retryButton {
+    margin: 0px;
   }
 
-}
+  .action-button-group {
+    white-space: nowrap;
 
-.nowrap {
-  white-space: nowrap;
-}
+    button[type=button] {
+      margin: 0 4px;
+    }
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
 </style>
