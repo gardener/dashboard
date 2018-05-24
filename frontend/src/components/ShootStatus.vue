@@ -15,24 +15,25 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" toolbarColor="cyan darken-2" :popperKey="popperKeyWithType">
-    <div slot="popperRef">
+  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType">
+    <div slot="popperRef" style="display: inline-block;">
       <v-tooltip top>
         <template slot="activator">
-          <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" color="cyan darken-2" :rotate="-90">{{operation.progress}}</v-progress-circular>
-          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" color="error" :rotate="-90">
+          <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">{{operation.progress}}</v-progress-circular>
+          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
             <v-icon v-if="isUserError" class="cursor-pointer progress-icon" color="error">mdi-account-alert</v-icon>
             <template v-else>
               !
             </template>
           </v-progress-circular>
-          <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" color="error">mdi-account-alert</v-icon>
-          <v-icon v-else-if="isError" class="cursor-pointer status-icon" color="error">mdi-alert-outline</v-icon>
-          <v-progress-circular v-else-if="operationState==='Pending'" class="cursor-pointer" :size="27" :width="3" indeterminate color="cyan darken-2"></v-progress-circular>
-          <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" color="cyan darken-2">mdi-sleep</v-icon>
+          <v-icon v-else-if="reconciliationDeactivated" class="cursor-pointer block-icon" :color="color">mdi-block-helper</v-icon>
+          <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
+          <v-icon v-else-if="isError" class="cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
+          <v-progress-circular v-else-if="operationState==='Pending'" class="cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+          <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
           <v-icon v-else class="cursor-pointer status-icon" color="success">mdi-check-circle-outline</v-icon>
         </template>
-        <span>{{ tooltipText }}</span>
+        <div>{{ tooltipText }}</div>
       </v-tooltip>
     </div>
     <template slot="content-after">
@@ -45,7 +46,17 @@ limitations under the License.
         </template>
         <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
       </template>
-  </template>>
+    </template>
+    <v-toolbar slot="toolbar" v-if="canRetry" flat color="white" dense>
+      <v-spacer></v-spacer>
+      <v-tooltip top>
+        <v-btn slot="activator" flat class="cyan--text text--darken-2" @click="retry">
+          Retry
+          <v-icon>mdi-reload</v-icon>
+        </v-btn>
+        Retry Operation
+      </v-tooltip>
+    </v-toolbar>
   </g-popper>
 </template>
 
@@ -95,6 +106,14 @@ limitations under the License.
       isHibernated: {
         type: Boolean,
         default: false
+      },
+      canRetry: {
+        type: Boolean,
+        default: false
+      },
+      reconciliationDeactivated: {
+        type: Boolean,
+        default: false
       }
     },
     computed: {
@@ -127,6 +146,9 @@ limitations under the License.
         if (this.isHibernated) {
           popperTitle = popperTitle.concat('Hibernated; ')
         }
+        if (this.reconciliationDeactivated) {
+          return popperTitle.concat('Reconciliation Deactivated')
+        }
         return popperTitle.concat(`${this.operationType} ${this.operationState}`)
       },
       tooltipText () {
@@ -152,6 +174,18 @@ limitations under the License.
       },
       operationState () {
         return this.operation.state || 'Pending'
+      },
+      color () {
+        if (this.isError) {
+          return 'error'
+        } else {
+          return 'cyan darken-2'
+        }
+      }
+    },
+    methods: {
+      retry () {
+        this.$emit('retryOperation')
       }
     }
   }
@@ -185,6 +219,10 @@ limitations under the License.
 
   .status-icon {
     font-size: 2em;
+  }
+
+  .block-icon {
+    font-size: 1.8em;
   }
 
   .alert-message {

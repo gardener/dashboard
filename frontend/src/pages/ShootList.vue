@@ -170,7 +170,7 @@ limitations under the License.
           { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
           { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
           { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: false, hidden: false },
-          { text: 'STATUS', value: 'lastOperation', align: 'center', checked: false, defaultChecked: true, hidden: false },
+          { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
           { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: false, hidden: false },
           { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: false, defaultChecked: true, hidden: false },
           { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },

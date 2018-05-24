@@ -35,6 +35,7 @@ limitations under the License.
           <slot name="content-before"></slot>
           <pre class="message">{{message}}</pre>
           <slot name="content-after"></slot>
+          <slot name="toolbar"></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
               <template v-if="showPlaceholder">
