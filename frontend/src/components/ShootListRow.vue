@@ -323,8 +323,6 @@ limitations under the License.
         const retryAnnotation = {'shoot.garden.sapcloud.io/operation': 'retry'}
         return addAnnotation({namespace, name, user, data: retryAnnotation})
         .then(() => {
-          console.log('success')
-
           this.retryingOperation = false
         })
         .catch(err => {

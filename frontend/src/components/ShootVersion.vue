@@ -26,7 +26,7 @@ limitations under the License.
           {{k8sVersion}}
       </v-btn>
       <span v-if="k8sPatchAvailable">Kubernetes patch available</span>
-      <span v-else-if="availableK8sUpdates">Kubernetes update available</span>
+      <span v-else-if="availableK8sUpdates">Kubernetes upgrade available</span>
       <span v-else>Kubernetes version up to date</span>
     </v-tooltip>
     <confirm-input-dialog
@@ -48,7 +48,7 @@ limitations under the License.
           :confirmRequired.sync="confirmRequired"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && confirmRequired">
-          Type <b>{{shootName}}</b> below and confirm to update the Kubernetes version of your cluster.
+          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.
           <br/>
           <i class="red--text text--darken-2">This action cannot be undone.</i>
         </template>
@@ -116,6 +116,7 @@ limitations under the License.
         this.updateDialog = false
         this.updateErrorMessage = null
         this.updateDetailedErrorMessage = null
+        this.selectedVersion = null
       },
       versionUpdateConfirmed () {
         const user = this.$store.state.user

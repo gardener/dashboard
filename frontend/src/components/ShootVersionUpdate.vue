@@ -31,10 +31,11 @@ limitations under the License.
            </template>
           </v-select>
           <v-alert type="error" :value="selectedMinorVersionIsNotNextMinor" outline>
-            You cannot directly upgrade your cluster Kubernetes version to <code>{{this.selectedVersion}}</code><br />
-            Please upgrade to the previous Kubernetes version first.
+             You cannot upgrade your cluster more than one minor version at a time.
           </v-alert>
-          <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>Before updating, please make sure that your cluster is compatible with the seleced Kubernetes version</v-alert>
+          <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>
+            You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
+          </v-alert>
         </v-flex>
       </v-layout>
     </v-container>
@@ -116,9 +117,6 @@ limitations under the License.
           }
         })
 
-        // eslint-disable-next-line lodash/matches-prop-shorthand
-        this.selectedItem = find(allItems, item => { return item.header === undefined })
-
         return allItems
       },
       selectedVersionIsPatch () {
@@ -140,14 +138,24 @@ limitations under the License.
         if (this.selectedVersionIsPatch) {
           return 'Patch to Version'
         }
-        return 'Update to Version'
+        return 'Upgrade to Version'
       }
     },
     watch: {
       selectedItem (value) {
         const version = get(value, 'version')
         this.$emit('update:selectedVersion', version)
+      },
+      selectedVersion (value) {
+        if (!value) {
+          // eslint-disable-next-line lodash/matches-prop-shorthand
+          this.selectedItem = find(this.items, item => { return item.header === undefined })
+        }
       }
+    },
+    mounted () {
+      // eslint-disable-next-line lodash/matches-prop-shorthand
+      this.selectedItem = find(this.items, item => { return item.header === undefined })
     }
   }
 </script>
