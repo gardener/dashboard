@@ -47,7 +47,7 @@ limitations under the License.
           :selectedVersionInvalid.sync="selectedVersionInvalid"
           :confirmRequired.sync="confirmRequired"
         ></shoot-version-update>
-        <template v-if="!selectedVersionInvalid">
+        <template v-if="!selectedVersionInvalid && confirmRequired">
           Type <b>{{shootName}}</b> below and confirm to update the Kubernetes version of your cluster.
           <br/>
           <i class="red--text text--darken-2">This action cannot be undone.</i>

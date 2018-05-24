@@ -31,8 +31,8 @@ limitations under the License.
            </template>
           </v-select>
           <v-alert type="error" :value="selectedMinorVersionIsNotNextMinor" outline>
-            You cannot directly upgrade cluster Kubernetes version to <code>{{this.selectedVersion}}</code><br />
-            Please upgrade to a lower Kubernetes version first.
+            You cannot directly upgrade your cluster Kubernetes version to <code>{{this.selectedVersion}}</code><br />
+            Please upgrade to the previous Kubernetes version first.
           </v-alert>
           <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>Before updating, please make sure that your cluster is compatible with the seleced Kubernetes version</v-alert>
         </v-flex>

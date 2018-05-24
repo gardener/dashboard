@@ -29,12 +29,11 @@ limitations under the License.
         This is a generic dialog template.
       </slot>
       <v-text-field
-        v-if="confirmRequired"
+        v-if="confirmRequired && !confirmDisabled"
         ref="deleteDialogInput"
         :hint="hint"
         persistent-hint
         :error="hasError"
-        :disabled="confirmDisabled"
         v-model="userInput"
         type="text">
       </v-text-field>
@@ -108,9 +107,7 @@ limitations under the License.
         return this.confirmRequired && this.confirm !== this.userInput
       },
       hint () {
-        if (this.confirmDisabled) {
-          return ''
-        } else if (this.userInput.length === 0) {
+        if (this.userInput.length === 0) {
           return `Type '${this.confirm}' to confirm`
         } else if (this.userInput !== this.confirm) {
           return `Your input did not match with required phrase '${this.confirm}'`
