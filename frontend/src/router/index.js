@@ -292,7 +292,6 @@ export default function createRouter ({store, userManager}) {
 
   function ensureDataLoaded (to, from, next) {
     const meta = to.meta || {}
-    let itemNamespace
     if (meta.public) {
       return next()
     }
@@ -312,11 +311,7 @@ export default function createRouter ({store, userManager}) {
         const namespaces = store.getters.namespaces
         const namespace = params.namespace || query.namespace
         if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
-          if (store.state.namespace === '_all' && to.name === 'ShootItem') {
-            itemNamespace = params.namespace
-          } else {
-            return store.dispatch('setNamespace', namespace)
-          }
+          return store.dispatch('setNamespace', namespace)
         }
       })
       .then(() => {
@@ -351,11 +346,10 @@ export default function createRouter ({store, userManager}) {
             }
             return undefined
           case 'ShootItem':
-            itemNamespace = itemNamespace || namespace
             return Promise
               .all([
-                store.dispatch('fetchShoot', {name: params.name, namespace: itemNamespace}),
-                store.dispatch('subscribeComments', {name: params.name, namespace: itemNamespace})
+                store.dispatch('fetchShoot', {name: params.name, namespace}),
+                store.dispatch('subscribeComments', {name: params.name, namespace})
               ])
               .then(() => undefined)
           case 'Members':
