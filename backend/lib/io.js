@@ -113,31 +113,42 @@ module.exports = () => {
       if (_.isArray(namespaces)) {
         const kind = 'shoots'
         const user = getUserFromSocket(socket)
-        const projectList = await projects.list({user})
-        const shootsPromises = []
-
         const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
-        _.forEach(namespaces, (nsObj) => {
-          const namespace = _.get(nsObj, 'namespace')
-          const filter = _.get(nsObj, 'filter')
-          const shootsWithIssuesOnly = !!filter
-          const predicate = item => item.metadata.namespace === namespace
-          const project = _.find(projectList, predicate)
-          if (project) {
-            const room = filter ? `${namespace}_${filter}` : namespace
-            joinRoom(socket, room)
 
-            shootsPromises.push(new Promise(async (resolve, reject) => {
-              const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
-              const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-              batchEmitter.batchEmitObjects(objects, namespace)
+        try {
+          const shootsPromises = []
+          const projectList = await projects.list({user})
 
-              resolve()
-            }))
-          }
-        })
+          _.forEach(namespaces, (nsObj) => {
+            const namespace = _.get(nsObj, 'namespace')
+            const filter = _.get(nsObj, 'filter')
+            const shootsWithIssuesOnly = !!filter
+            const predicate = item => item.metadata.namespace === namespace
+            const project = _.find(projectList, predicate)
+            if (project) {
+              const room = filter ? `${namespace}_${filter}` : namespace
+              joinRoom(socket, room)
 
-        await Promise.all(shootsPromises)
+              shootsPromises.push(new Promise(async (resolve, reject) => {
+                try {
+                  const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
+                  const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
+                  batchEmitter.batchEmitObjects(objects, namespace)
+
+                  resolve()
+                } catch (error) {
+                  reject(error)
+                }
+              }))
+            }
+          })
+
+          await Promise.all(shootsPromises)
+        } catch (error) {
+          logger.error('Socket %s: failed to subscribe to shoots: %s', _.get(socket, 'id'), error)
+          socket.emit('subscription_error', {kind, code: 500, message: 'Failed to fetch shoots'})
+        }
+
         batchEmitter.flush()
         socket.emit('batchNamespacedEventsDone', {kind, namespaces: _.map(namespaces, nsObj => nsObj.namespace)})
       }
