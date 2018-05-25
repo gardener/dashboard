@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: eu.gcr.io/gardener-project/gardener/dashboard
-  tag: latest
+  tag: 1.10.0
   pullPolicy: Always
 
 logLevel: debug
