@@ -142,7 +142,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="styl" scoped>
 .modification--warning {
   margin-top: 0;
   width: 100%;
@@ -156,7 +156,7 @@ export default {
 .dialog--fullscreen {
   border-radius: 0;
 }
-.CodeMirror {
+>>> .CodeMirror {
   position: fixed;
   top: 48px; left: 0; right: 0; bottom: 56px;
   height: auto;
