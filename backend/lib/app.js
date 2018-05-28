@@ -20,6 +20,7 @@ const express = require('express')
 const history = require('connect-history-api-fallback')
 const _ = require('lodash')
 const config = require('./config')
+const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
 const { notFound, renderError } = require('./middleware')
@@ -32,6 +33,13 @@ const port = config.port
 const INDEX_FILENAME = resolve(join(__dirname, '..', 'public', 'index.html'))
 const STATIC_DIRNAME = resolve(join(__dirname, '..', 'public', 'static'))
 const issuerUrl = _.get(config, 'jwt.issuer')
+let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
+const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
+if (gitHubRepoUrl) {
+  const url = parseUrl(gitHubRepoUrl)
+  const gitHubUrl = `${url.protocol}//${url.host}`
+  imgSrc = _.concat(imgSrc, gitHubUrl)
+}
 
 // configure app
 const app = express()
@@ -54,10 +62,10 @@ app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
-    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl],
+    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl], // TODO allow ws connections only to backend
     styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
     fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
-    imgSrc: ['\'self\'', 'data:', 'https:'], // TODO allow gravatar and github (for journals) instead of whitelisting https
+    imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
     frameAncestors: ['\'none\'']
   }
