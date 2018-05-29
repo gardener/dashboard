@@ -93,8 +93,12 @@ limitations under the License.
           if (a.type === b.type) {
             if (a.header) {
               return -1
+            } else if (b.header) {
+              return 1
             } else {
-              if (semver.gt(a.version, b.version)) {
+              if (semver.eq(a.version, b.version)) {
+                return 0
+              } else if (semver.gt(a.version, b.version)) {
                 return 1
               } else {
                 return -1
@@ -113,10 +117,13 @@ limitations under the License.
                   return 3
               }
             }
-            return sortValForType(a) < sortValForType(b) ? -1 : 1
+            if (sortValForType(a.type) === sortValForType(b.type)) {
+              return 0
+            } else {
+              return sortValForType(a.type) < sortValForType(b.type) ? -1 : 1
+            }
           }
         })
-
         return allItems
       },
       selectedVersionIsPatch () {

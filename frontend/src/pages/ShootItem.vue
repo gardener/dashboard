@@ -122,13 +122,15 @@ limitations under the License.
                         <span slot="activator"> {{region}} </span>
                         <span>Region</span>
                       </v-tooltip>
-                      /
-                      <v-tooltip top open-delay="500">
-                        <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
-                          <span>{{secret}} </span>
-                        </router-link>
-                        <span>Used Credential</span>
-                      </v-tooltip>
+                      <template v-if="!!secret">
+                        /
+                        <v-tooltip top open-delay="500">
+                          <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
+                            <span>{{secret}} </span>
+                          </router-link>
+                          <span>Used Credential</span>
+                        </v-tooltip>
+                      </template>
                     </v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
