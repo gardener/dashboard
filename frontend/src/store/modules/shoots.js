@@ -71,7 +71,7 @@ const getters = {
         }
         items = filter(items, predicate)
       }
-      if (state.hideUserIssues && rootState.onlyShootsWithIssues) {
+      if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
         const predicate = item => {
           return !isUserError(get(item, 'status.lastError.codes', []))
         }

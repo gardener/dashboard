@@ -399,6 +399,14 @@ limitations under the License.
       const predicate = item => item.value === 'project'
       const projectHeader = find(this.allHeaders, predicate)
       projectHeader.hidden = this.projectScope
+    },
+    beforeRouteUpdate (to, from, next) {
+      this.search = null
+      next()
+    },
+    beforeRouteLeave (to, from, next) {
+      this.search = null
+      next()
     }
   }
 </script>
