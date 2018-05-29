@@ -429,6 +429,7 @@ limitations under the License.
   import noop from 'lodash/noop'
   import isEmpty from 'lodash/isEmpty'
   import { required, maxLength } from 'vuelidate/lib/validators'
+  import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
@@ -451,20 +452,22 @@ limitations under the License.
       metadata: {
         name: {
           required: 'Name is required',
-          maxLength: 'name ist too long',
-          valid: 'Name must only be lowercase letters and numbers',
-          unique: 'cluster name must be unique'
+          maxLength: 'Name ist too long',
+          resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+          unique: 'Cluster name must be unique',
+          noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
+          noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
         }
       },
       spec: {
         cloud: {
           secretBindingRef: {
             name: {
-              required: 'secret is required'
+              required: 'Secret is required'
             }
           },
           region: {
-            required: 'region is required'
+            required: 'Region is required'
           }
         },
         maintenance: {
@@ -478,7 +481,7 @@ limitations under the License.
     },
     infrastructureData: {
       zones: {
-        zonesNotEmpty: 'zone is required'
+        zonesNotEmpty: 'Zone is required'
       }
     }
   }
@@ -576,9 +579,9 @@ limitations under the License.
           name: {
             required,
             maxLength: maxLength(10),
-            valid (value) {
-              return /^([a-z][a-z0-9]*)$/.test(value)
-            },
+            noConsecutiveHyphen,
+            noStartEndHyphen,
+            resourceName,
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
             }

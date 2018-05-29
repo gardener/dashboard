@@ -74,7 +74,7 @@ limitations under the License.
         </v-menu>
       </v-toolbar>
       <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>
-        <span>Currently only showing Clusters with Issues</span><span v-if="isHideUserIssues">. User errors are excluded</span>
+        <span>Currently only showing Clusters with Issues</span><span v-if="isHideUserIssues">. User errors are excluded.</span>
       </v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
