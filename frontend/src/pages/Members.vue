@@ -30,7 +30,7 @@ limitations under the License.
           </v-list-tile-avatar>
           <v-list-tile-content>
             <v-list-tile-title>{{displayName(owner)}}</v-list-tile-title>
-            <v-list-tile-sub-title><a :href="'mailto:'+owner">{{owner}}</a></v-list-tile-sub-title>
+            <v-list-tile-sub-title><a :href="'mailto:'+owner" class="cyan--text text--darken-2">{{owner}}</a></v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -88,7 +88,7 @@ limitations under the License.
                 {{displayName(name)}}
               </v-list-tile-title>
               <v-list-tile-sub-title>
-                <a :href="'mailto:'+name">{{name}}</a>
+                <a :href="'mailto:'+name" class="cyan--text text--darken-2">{{name}}</a>
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>

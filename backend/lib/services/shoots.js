@@ -126,7 +126,7 @@ exports.info = async function ({user, namespace, name}) {
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projectName = namespace.replace(/^garden-/, '')
-  const shootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+  const seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
 
   if (secret) {
     const data = _
@@ -137,10 +137,10 @@ exports.info = async function ({user, namespace, name}) {
       .fromPairs()
       .value()
     data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
-    data.shootIngressDomain = shootIngressDomain
+    data.seedShootIngressDomain = seedShootIngressDomain
     return data
   } else {
-    const data = { shootIngressDomain }
+    const data = { seedShootIngressDomain }
     return data
   }
 }

@@ -23,16 +23,16 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="dashboardUrl" target="_blank">{{dashboardUrlText}}</a></v-list-tile-title>
+        <v-list-tile-title><a :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="!!shootIngressDomain && isAdmin">
+    <template v-if="!!seedShootIngressDomain && isAdmin">
       <v-list-tile>
         <v-list-tile-action>
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
-          <v-list-tile-title><a :href="grafanaUrl" target="_blank">{{grafanaUrlText}}</a></v-list-tile-title>
+          <v-list-tile-title><a :href="grafanaUrl" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlText}}</a></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile>
@@ -40,7 +40,7 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
-          <v-list-tile-title><a :href="prometheusUrl" target="_blank">{{prometheusUrl}}</a></v-list-tile-title>
+          <v-list-tile-title><a :href="prometheusUrl" target="_blank" class="cyan--text text--darken-2">{{prometheusUrl}}</a></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile>
@@ -48,7 +48,7 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
-          <v-list-tile-title><a :href="alertmanagerUrl" target="_blank">{{alertmanagerUrl}}</a></v-list-tile-title>
+          <v-list-tile-title><a :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
     </template>
@@ -145,8 +145,8 @@ limitations under the License.
       dashboardUrlText () {
         return this.info.dashboardUrlText || ''
       },
-      shootIngressDomain () {
-        return this.info.shootIngressDomain || ''
+      seedShootIngressDomain () {
+        return this.info.seedShootIngressDomain || ''
       },
       username () {
         return this.info.username || ''

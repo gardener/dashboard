@@ -149,16 +149,16 @@ const actions = {
           info.dashboardUrlText = [scheme, host, pathnameAlias].join('')
         }
 
-        if (info.shootIngressDomain) {
+        if (info.seedShootIngressDomain) {
           const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
-          const grafanaHost = `g.${info.shootIngressDomain}`
+          const grafanaHost = `g.${info.seedShootIngressDomain}`
           info.grafanaUrl = `https://${grafanaHost}${grafanaPathname}`
           info.grafanaUrlText = `https://${grafanaHost}`
 
-          const prometheusHost = `p.${info.shootIngressDomain}`
+          const prometheusHost = `p.${info.seedShootIngressDomain}`
           info.prometheusUrl = `https://${prometheusHost}`
 
-          const alertmanagerHost = `a.${info.shootIngressDomain}`
+          const alertmanagerHost = `a.${info.seedShootIngressDomain}`
           info.alertmanagerUrl = `https://${alertmanagerHost}`
         }
         return info

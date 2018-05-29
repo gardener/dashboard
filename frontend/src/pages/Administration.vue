@@ -35,7 +35,7 @@ limitations under the License.
           </v-flex>
           <v-flex lg8 xs12>
             <label class="caption grey--text text--darken-2">Main Contact</label>
-            <p class="subheading"><a :href="'mailto:'+owner">{{owner}}</a></p>
+            <p class="subheading"><a :href="'mailto:'+owner" class="cyan--text text--darken-2">{{owner}}</a></p>
           </v-flex>
           <v-flex lg4 xs12>
             <v-tooltip top>
@@ -49,7 +49,7 @@ limitations under the License.
           <v-flex lg8 xs12 v-if="projectData.createdBy">
             <label class="caption grey--text text--darken-2">Created By</label>
             <p class="subheading">
-              <a :href="'mailto:'+projectData.createdBy">{{projectData.createdBy}}</a>
+              <a :href="'mailto:'+projectData.createdBy" class="cyan--text text--darken-2">{{projectData.createdBy}}</a>
             </p>
           </v-flex>
           <v-flex xs12 >

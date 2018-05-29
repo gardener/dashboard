@@ -66,7 +66,7 @@ limitations under the License.
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                    <v-list-tile-title><a :href="`mailto:${createdBy}`">{{createdBy}}</a></v-list-tile-title>
+                    <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
 
@@ -163,7 +163,18 @@ limitations under the License.
                     <v-list-tile-title>{{cidr}}</v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
-
+                <template v-if="!!domain">
+                  <v-divider class="my-2" inset></v-divider>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon class="cyan--text text--darken-2">mdi-earth</v-icon>
+                    </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
+                        <v-list-tile-title><a :href="shootIngressDomain" target="_blank" class="cyan--text text--darken-2">{{shootIngressDomainText}}</a></v-list-tile-title>
+                      </v-list-tile-content>
+                  </v-list-tile>
+                </template>
               </v-list>
             </v-card>
 
@@ -406,6 +417,12 @@ limitations under the License.
       },
       domain () {
         return get(this.item, 'spec.dns.domain')
+      },
+      shootIngressDomain () {
+        return `https://placeholder.ingress.${this.domain}`
+      },
+      shootIngressDomainText () {
+        return `<placeholder>.ingress.${this.domain}`
       },
       region () {
         return get(this.item, 'spec.cloud.region')
