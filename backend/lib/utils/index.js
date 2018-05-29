@@ -18,19 +18,10 @@
 'use strict'
 
 const path = require('path')
-const express = require('express')
-const { isProd } = require('../config')
 const _ = require('lodash')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
-}
-
-function serveStatic (pathname, cache) {
-  const maxAge = cache && isProd ? 60 * 60 * 24 * 30 : 0
-  return express.static(resolve(pathname), {
-    maxAge
-  })
 }
 
 function decodeBase64 (value) {
@@ -64,7 +55,6 @@ function shootHasIssue (shoot) {
 
 module.exports = {
   resolve,
-  serveStatic,
   decodeBase64,
   encodeBase64,
   getCloudProviderKind,
