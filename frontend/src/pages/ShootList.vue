@@ -62,12 +62,20 @@ limitations under the License.
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
-              <v-list-tile-sub-title>Show only Shoots with Issues</v-list-tile-sub-title>
+              <v-list-tile-sub-title color="red">Show only Shoots with Issues</v-list-tile-sub-title>
+            </v-list-tile>
+            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesClass">
+              <v-list-tile-action>
+                <v-checkbox :disabled="!showOnlyShootsWithIssues" v-model="hideUserIssues" color="cyan darken-2" readonly @click.native.stop @click="toggleHideUserIssues"></v-checkbox>
+              </v-list-tile-action>
+              <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
             </v-list-tile>
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>Currently only showing Clusters with Issues</v-alert>
+      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>
+        <span>Currently only showing Clusters with Issues</span><span v-if="isHideUserIssues">. User errors are excluded</span>
+      </v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
@@ -201,7 +209,8 @@ limitations under the License.
         'setSelectedShoot',
         'setShootListSortParams',
         'setShootListSearchValue',
-        'setOnlyShootsWithIssues'
+        'setOnlyShootsWithIssues',
+        'setHideUserIssues'
       ]),
       deletionConfirmed () {
         this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
@@ -267,6 +276,11 @@ limitations under the License.
             header.hidden = !this.isAdmin
           }
         }
+      },
+      toggleHideUserIssues () {
+        if (this.showOnlyShootsWithIssues) {
+          this.hideUserIssues = !this.hideUserIssues
+        }
       }
     },
     computed: {
@@ -274,7 +288,8 @@ limitations under the License.
         items: 'shootList',
         item: 'shootByNamespaceAndName',
         selectedItem: 'selectedShoot',
-        isAdmin: 'isAdmin'
+        isAdmin: 'isAdmin',
+        isHideUserIssues: 'isHideUserIssues'
       }),
       ...mapState([
         'shootsLoading',
@@ -360,10 +375,24 @@ limitations under the License.
         set (value) {
           this.setOnlyShootsWithIssues(value)
         }
+      },
+      hideUserIssues: {
+        get () {
+          return this.isHideUserIssues
+        },
+        set (value) {
+          this.setHideUserIssues(value)
+        }
+      },
+      hideUserIssuesClass () {
+        return this.showOnlyShootsWithIssues ? '' : 'hide_user_issues_disabled'
       }
     },
     mounted () {
       this.floatingButton = true
+      if (this.hideUserIssues === undefined) {
+        this.hideUserIssues = this.isAdmin
+      }
       this.loadColumnsChecked()
     },
     beforeUpdate () {
@@ -402,5 +431,9 @@ limitations under the License.
         padding-right: 24px;
       }
     }
+  }
+
+  .hide_user_issues_disabled {
+    opacity: 0.5;
   }
 </style>

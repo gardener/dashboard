@@ -50,25 +50,35 @@ const state = {
   sortedShoots: [],
   sortParams: undefined,
   searchValue: undefined,
-  selection: undefined
+  selection: undefined,
+  hideUserIssues: undefined
 }
 
 // getters
 const getters = {
-  sortedItems (state) {
-    if (state.searchValue) {
-      const predicate = item => {
-        let found = true
-        forEach(state.searchValue, value => {
-          if (!includes(item.metadata.name, value)) {
-            found = false
-          }
-        })
-        return found
+  sortedItems () {
+    return (rootState) => {
+      let items = state.sortedShoots
+      if (state.searchValue) {
+        const predicate = item => {
+          let found = true
+          forEach(state.searchValue, value => {
+            if (!includes(item.metadata.name, value)) {
+              found = false
+            }
+          })
+          return found
+        }
+        items = filter(items, predicate)
       }
-      return filter(state.sortedShoots, predicate)
+      if (state.hideUserIssues && rootState.onlyShootsWithIssues) {
+        const predicate = item => {
+          return !isUserError(get(item, 'status.lastError.codes', []))
+        }
+        items = filter(items, predicate)
+      }
+      return items
     }
-    return state.sortedShoots
   },
   itemByNameAndNamespace () {
     return ({namespace, name}) => {
@@ -79,6 +89,9 @@ const getters = {
     if (state.selection) {
       return findItem(state.selection)
     }
+  },
+  isHideUserIssues () {
+    return state.hideUserIssues
   }
 }
 
@@ -183,6 +196,10 @@ const actions = {
     if (!isEqual(searchValue, state.searchValue)) {
       commit('SET_SEARCHVALUE', searchValue)
     }
+  },
+  setHideUserIssues ({ commit }, value) {
+    commit('SET_HIDEUSERISSUES', value)
+    return state.hideUserIssues
   }
 }
 
@@ -389,6 +406,9 @@ const mutations = {
   CLEAR_ALL (state) {
     state.shoots = {}
     state.sortedShoots = []
+  },
+  SET_HIDEUSERISSUES (state, value) {
+    state.hideUserIssues = value
   }
 }
 

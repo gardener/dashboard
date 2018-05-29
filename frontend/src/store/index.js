@@ -100,7 +100,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems']
+    return getters['shoots/sortedItems'](state)
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -230,6 +230,9 @@ const getters = {
     return (namespace) => {
       return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
     }
+  },
+  isHideUserIssues (state, getters) {
+    return getters['shoots/isHideUserIssues']
   }
 }
 
@@ -306,6 +309,12 @@ const actions = {
   },
   setShootListSortParams ({ dispatch }, sortParams) {
     return dispatch('shoots/setListSortParams', sortParams)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setHideUserIssues ({ dispatch, commit }, value) {
+    return dispatch('shoots/setHideUserIssues', value)
       .catch(err => {
         dispatch('setError', err)
       })
