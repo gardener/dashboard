@@ -196,7 +196,7 @@ const getters = {
       const predicate = item => {
         return get(item, 'spec.cloud.secretBindingRef.name') === secretName
       }
-      return filter(getters['shoots/sortedItems'], predicate)
+      return filter(getters['shoots/sortedItems'](state), predicate)
     }
   },
   kubernetesVersions (state, getters) {
