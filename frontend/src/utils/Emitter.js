@@ -117,23 +117,30 @@ class ShootsEmitter extends AbstractEmitter {
     })
 
     if (this.subscribeAfterAuthentication) {
-      this.subscribe({namespace: this.namespace, filter: undefined})
+      this._subscribe({namespace: this.namespace, filter: undefined})
       this.subscribeAfterAuthentication = undefined
     }
   }
 
-  setNamespace = async function (namespace, filter) {
+  setNamespace = function (namespace, filter) {
     this.namespace = namespace
     this.filter = filter
-
-    this.subscribe({namespace, filter})
   }
 
-  subscribe = async function ({namespace, filter}) {
+  subscribeShoots = async function () {
+    return this._subscribe({namespace: this.namespace, filter: this.filter})
+  }
+
+  _subscribe = async function ({namespace, filter}) {
     if (this.namespace) {
       if (this.authenticated) {
         store.dispatch('clearShoots')
         store.dispatch('setShootsLoading')
+
+        // optimization, so that we do not subscribe again if the namespace did not change (by calling setNamespace)
+        this.namespace = undefined
+        this.filter = undefined
+
         if (namespace === '_all') {
           const allNamespaces = await store.getters.namespaces
           const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })

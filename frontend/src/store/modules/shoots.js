@@ -107,11 +107,20 @@ const actions = {
   },
   get ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
-    return getShoot({namespace, name, user})
-      .then(res => {
-        const item = res.data
-        commit('ITEM_PUT', item)
-      })
+
+    const getShootIfNecessary = new Promise(async (resolve, reject) => {
+      if (!findItem({name, namespace})) {
+        getShoot({namespace, name, user})
+        .then(res => {
+          const item = res.data
+          commit('ITEM_PUT', item)
+        }).then(() => resolve())
+        .catch(error => reject(error))
+      } else {
+        resolve()
+      }
+    })
+    return getShootIfNecessary
       .then(() => dispatch('getInfo', {name, namespace}))
       .then(() => findItem({name, namespace}))
       .catch(error => {

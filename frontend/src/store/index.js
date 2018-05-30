@@ -191,14 +191,6 @@ const getters = {
       return getters['journals/labels']({namespace, name})
     }
   },
-  shootsByInfrastructureSecret (state, getters) {
-    return (secretName) => {
-      const predicate = item => {
-        return get(item, 'spec.cloud.secretBindingRef.name') === secretName
-      }
-      return filter(getters['shoots/sortedItems'](state), predicate)
-    }
-  },
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
@@ -287,6 +279,9 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  subscribeShoots ({ dispatch, commit }) {
+    return EmitterWrapper.shootsEmitter.subscribeShoots()
   },
   subscribeComments ({ dispatch, commit }, {name, namespace}) {
     return new Promise((resolve, reject) => {
@@ -447,11 +442,14 @@ const mutations = {
     if (value !== state.namespace) {
       state.namespace = value
       EmitterWrapper.shootsEmitter.setNamespace(value, getFilterValue(state))
+      // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
     }
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value
     EmitterWrapper.shootsEmitter.setNamespace(state.namespace, getFilterValue(state))
+    // subscribe again for shoots as the filter has changed
+    EmitterWrapper.shootsEmitter.subscribeShoots()
   },
   SET_USER (state, value) {
     state.user = value
