@@ -264,3 +264,8 @@ export function isUserError (errorCodes) {
   ]
   return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
 }
+
+export function isReconciliationDeactivated (metadata) {
+  // eslint-disable-next-line
+  return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+}

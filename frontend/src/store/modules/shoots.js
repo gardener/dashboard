@@ -32,7 +32,7 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError } from '@/utils'
+import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -51,7 +51,8 @@ const state = {
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
-  hideUserIssues: undefined
+  hideUserIssues: undefined,
+  hideDeactivatedReconciliation: undefined
 }
 
 // getters
@@ -77,6 +78,12 @@ const getters = {
         }
         items = filter(items, predicate)
       }
+      if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+        const predicate = item => {
+          return !isReconciliationDeactivated(get(item, 'metadata', {}))
+        }
+        items = filter(items, predicate)
+      }
       return items
     }
   },
@@ -92,6 +99,9 @@ const getters = {
   },
   isHideUserIssues () {
     return state.hideUserIssues
+  },
+  isHideDeactivatedReconciliation () {
+    return state.hideDeactivatedReconciliation
   }
 }
 
@@ -207,8 +217,12 @@ const actions = {
     }
   },
   setHideUserIssues ({ commit }, value) {
-    commit('SET_HIDEUSERISSUES', value)
+    commit('SET_HIDE_USER_ISSUES', value)
     return state.hideUserIssues
+  },
+  setHideDeactivatedReconciliation ({ commit }, value) {
+    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', value)
+    return state.hideDeactivatedReconciliation
   }
 }
 
@@ -416,8 +430,11 @@ const mutations = {
     state.shoots = {}
     state.sortedShoots = []
   },
-  SET_HIDEUSERISSUES (state, value) {
+  SET_HIDE_USER_ISSUES (state, value) {
     state.hideUserIssues = value
+  },
+  SET_HIDE_DEACTIVATED_RECONCILIATION (state, value) {
+    state.hideDeactivatedReconciliation = value
   }
 }
 

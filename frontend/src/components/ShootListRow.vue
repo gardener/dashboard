@@ -153,7 +153,7 @@ limitations under the License.
   import replace from 'lodash/replace'
   import get from 'lodash/get'
   import includes from 'lodash/includes'
-  import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated } from '@/utils'
+  import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated, isReconciliationDeactivated } from '@/utils'
   import { addAnnotation } from '@/utils/api'
 
   export default {
@@ -246,8 +246,8 @@ limitations under the License.
           !this.row.reconcileScheduled
       },
       reconciliationDeactivated () {
-        // eslint-disable-next-line
-        return get(this.row, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+        const metadata = { annotations: this.row.annotations }
+        return isReconciliationDeactivated(metadata)
       },
       isCreateOrDeleteInProcess () {
         // create or delete in process
