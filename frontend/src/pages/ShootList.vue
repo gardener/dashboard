@@ -200,10 +200,9 @@ limitations under the License.
           <i class="red--text text--darken-2">This action cannot be undone.</i>
         </template>
       </confirm-input-dialog>
-      <create-cluster v-model="createDialog" @close="hideDialog"></create-cluster>
     </v-card>
     <v-fab-transition>
-      <v-btn class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showCreateDialog()">
+      <v-btn class="cyan darken-2" fab disabled fixed bottom right v-show="floatingButton">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -224,7 +223,6 @@ limitations under the License.
   import StatusTag from '@/components/StatusTag'
   import PurposeTag from '@/components/PurposeTag'
   import ShootStatus from '@/components/ShootStatus'
-  import CreateCluster from '@/dialogs/CreateCluster'
   import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
   import DashboardInfo from '@/components/DashboardInfo'
   import { getDateFormatted, getTimeAgo } from '@/utils'
@@ -233,7 +231,6 @@ limitations under the License.
     name: 'shoot-list',
     components: {
       CodeBlock,
-      CreateCluster,
       GPopper,
       StatusTag,
       PurposeTag,

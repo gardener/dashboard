@@ -320,18 +320,6 @@ class Client {
     return this.read(Resources.Shoot, {namespace}, options)
   }
 
-  createShoot ({username, namespace}, {body, ...rest} = {}) {
-    const resource = Resources.Shoot
-    const apiVersion = resource.apiVersion
-    const kind = resource.kind
-    const finalizers = ['garden.sapcloud.io/operator']
-    const annotations = {
-      'garden.sapcloud.io/createdBy': username
-    }
-    body = _.merge({}, body, {kind, apiVersion, metadata: {namespace, finalizers, annotations}})
-    return this.create(resource, {namespace}, {body, ...rest})
-  }
-
   readShoot (params, options = {}) {
     return this.read(Resources.Shoot, params, options)
   }

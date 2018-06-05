@@ -30,16 +30,6 @@ router.route('/')
       .then(body => res.send(body))
       .catch(next)
   })
-  .post((req, res, next) => {
-    const namespace = req.params.namespace
-    const username = req.user.email
-    const body = req.body
-    const client = req.client
-    return client
-      .createShoot({username, namespace}, {body})
-      .then(body => res.send(body))
-      .catch(next)
-  })
 
 router.route('/:name')
   .get((req, res, next) => {
