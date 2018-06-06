@@ -215,7 +215,7 @@ limitations under the License.
                 <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
                   <v-flex pa-1 >
 
-                    <worker-input-aws :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'aws'">
@@ -228,9 +228,9 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-aws>
+                    </worker-input-generic>
 
-                    <worker-input-azure :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'azure'">
@@ -243,9 +243,9 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-azure>
+                    </worker-input-generic>
 
-                    <worker-input-gce :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'gcp'">
@@ -258,7 +258,7 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-gce>
+                    </worker-input-generic>
 
                     <worker-input-openstack :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
@@ -412,9 +412,7 @@ limitations under the License.
 
 <script>
   import { mapGetters, mapActions, mapState } from 'vuex'
-  import WorkerInputGce from '@/components/WorkerInputGce'
-  import WorkerInputAws from '@/components/WorkerInputAws'
-  import WorkerInputAzure from '@/components/WorkerInputAzure'
+  import WorkerInputGeneric from '@/components/WorkerInputGeneric'
   import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
   import CloudProfile from '@/components/CloudProfile'
   import Alert from '@/components/Alert'
@@ -543,9 +541,7 @@ limitations under the License.
   export default {
     name: 'create-cluster',
     components: {
-      WorkerInputAws,
-      WorkerInputAzure,
-      WorkerInputGce,
+      WorkerInputGeneric,
       WorkerInputOpenstack,
       CodeBlock,
       InfraIcon,
