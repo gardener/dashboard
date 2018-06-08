@@ -17,21 +17,21 @@
 'use strict'
 
 const express = require('express')
-const history = require('connect-history-api-fallback')
 const _ = require('lodash')
 const config = require('./config')
 const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
-const { notFound, renderError } = require('./middleware')
+const { notFound, renderError, historyFallback } = require('./middleware')
 const helmet = require('helmet')
 const api = require('./api')
 const githubWebhook = require('./github/webhook')
 const port = config.port
 
 // resolve pathnames
-const INDEX_FILENAME = resolve(join(__dirname, '..', 'public', 'index.html'))
-const STATIC_DIRNAME = resolve(join(__dirname, '..', 'public', 'static'))
+const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
+const STATIC_DIRNAME = join(PUBLIC_DIRNAME, 'static')
+const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const issuerUrl = _.get(config, 'jwt.issuer')
 let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
@@ -80,9 +80,8 @@ app.use(helmet.frameguard({
   action: 'deny'
 }))
 app.use(helmet.noCache())
+app.use(historyFallback(INDEX_FILENAME))
 
-app.use(history())
-app.get('/index.html', (req, res, next) => res.sendFile(INDEX_FILENAME, next))
 app.use(notFound)
 app.use(renderError)
 

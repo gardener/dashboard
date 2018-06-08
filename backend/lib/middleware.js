@@ -90,6 +90,19 @@ function jwtSecret (options) {
   }
 }
 
+function historyFallback (filename) {
+  return (req, res, next) => {
+    if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
+      next()
+    }
+    res.sendFile(filename, err => {
+      if (err) {
+        next(err)
+      }
+    })
+  }
+}
+
 function notFound (req, res, next) {
   next(new NotFound('The server has not found anything matching the Request-URI'))
 }
@@ -151,6 +164,7 @@ module.exports = {
   jwtSecret,
   attachAuthorization,
   frontendConfig,
+  historyFallback,
   notFound,
   sendError,
   renderError,
