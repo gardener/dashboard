@@ -23,10 +23,10 @@
        {{errorMessage}}
        <v-btn dark flat @click.native="snackbar = false">Close</v-btn>
      </v-snackbar>
-      <v-footer fixed height="56">
+      <v-footer dark fixed height="56">
         <div class="px-3">
           <v-btn @click="onSave" dark color="cyan darken-2" >Save</v-btn>
-          <v-btn @click="onCancel">Cancel</v-btn>
+          <v-btn @click="onCancel" light>Cancel</v-btn>
         </div>
       </v-footer>
     </v-dialog>
