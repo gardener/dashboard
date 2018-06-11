@@ -25,7 +25,6 @@ limitations under the License.
       <a :href="journalHtmlUrl" target="_blank" class="cyan--text text--darken-2">journal</a>
       <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-ago :dateTime="journal.metadata.created_at"></time-ago>
-    </v-list-tile-title>
     </v-container>
     <v-container grid-list-md>
       <journal-comment :comment="journal"></journal-comment>
