@@ -28,9 +28,7 @@ limitations under the License.
     </v-container>
     <v-container grid-list-md>
       <journal-comment :comment="journal"></journal-comment>
-      <span v-for="comment in commentsForJournal" :key="comment.metadata.id">
-        <journal-comment :comment="comment"></journal-comment>
-      </span>
+      <journal-comment v-for="comment in commentsForJournal" :key="comment.metadata.id" :comment="comment"></journal-comment>
     </v-container>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
