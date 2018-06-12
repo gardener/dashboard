@@ -17,6 +17,7 @@
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
+import isEqual from 'lodash/isEqual'
 import Emitter from 'component-emitter'
 import {ThrottledNamespacedEventEmitter} from './ThrottledEmitter'
 import store from '../store'
@@ -117,8 +118,17 @@ class ShootsEmitter extends AbstractEmitter {
     })
 
     if (this.subscribeAfterAuthentication) {
-      this._subscribe({namespace: this.namespace, filter: undefined})
+      this._subscribe(this.subscribeAfterAuthentication)
       this.subscribeAfterAuthentication = undefined
+    }
+  }
+
+  onDisconnect () {
+    super.onDisconnect()
+
+    if (this.subscribedTo) {
+      this.subscribeAfterAuthentication = this.subscribedTo
+      this.subscribedTo = undefined
     }
   }
 
@@ -131,15 +141,12 @@ class ShootsEmitter extends AbstractEmitter {
     return this._subscribe({namespace: this.namespace, filter: this.filter})
   }
 
-  _subscribe = async function ({namespace, filter}) {
-    if (this.namespace) {
+  _subscribe = async function (subscribeTo) {
+    if (!this.subscribedTo || !isEqual(this.subscribedTo, subscribeTo)) {
+      const {namespace, filter} = subscribeTo
       if (this.authenticated) {
         store.dispatch('clearShoots')
         store.dispatch('setShootsLoading')
-
-        // optimization, so that we do not subscribe again if the namespace did not change (by calling setNamespace)
-        this.namespace = undefined
-        this.filter = undefined
 
         if (namespace === '_all') {
           const allNamespaces = await store.getters.namespaces
@@ -148,8 +155,9 @@ class ShootsEmitter extends AbstractEmitter {
         } else if (namespace) {
           this.socket.emit('subscribe', {namespaces: [{namespace, filter}]})
         }
+        this.subscribedTo = subscribeTo
       } else {
-        this.subscribeAfterAuthentication = {namespace, filter}
+        this.subscribeAfterAuthentication = subscribeTo
       }
     }
   }
@@ -172,6 +180,15 @@ class JournalsEmitter extends AbstractEmitter {
     }
   }
 
+  onDisconnect () {
+    super.onDisconnect()
+
+    if (this.subscribedToComments) {
+      this.subscribeCommentsAfterAuthentication = this.subscribedToComments
+      this.subscribedToComments = undefined
+    }
+  }
+
   setUser (user) {
     if (!store.getters.isAdmin) {
       return
@@ -187,14 +204,15 @@ class JournalsEmitter extends AbstractEmitter {
     }
   }
 
-  subscribeComments ({name, namespace}) {
+  subscribeComments (subscribeToComments) {
     if (this.authenticated) {
       if (store.getters.isAdmin) {
+        const {name, namespace} = subscribeToComments
         this.socket.emit('subscribeComments', {name, namespace})
-        this.subscribedComments = true
+        this.subscribedToComments = subscribeToComments
       }
     } else {
-      this.subscribeCommentsAfterAuthentication = {name, namespace}
+      this.subscribeCommentsAfterAuthentication = subscribeToComments
     }
   }
 
@@ -203,9 +221,9 @@ class JournalsEmitter extends AbstractEmitter {
 
     if (this.authenticated) {
       if (store.getters.isAdmin) {
-        if (this.subscribedComments) {
+        if (this.subscribedToComments) {
           this.socket.emit('unsubscribeComments')
-          this.subscribedComments = false
+          this.subscribedToComments = undefined
         }
       }
     }
