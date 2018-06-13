@@ -79,7 +79,7 @@ exports.replaceVersion = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
 }
 
-exports.patchAnnotation = async function ({user, namespace, name, annotations}) {
+const patchAnnotations = async function ({user, namespace, name, annotations}) {
   const body = {
     metadata: {
       annotations: annotations
@@ -87,9 +87,17 @@ exports.patchAnnotation = async function ({user, namespace, name, annotations}) 
   }
   return patch({user, namespace, name, body})
 }
+exports.patchAnnotations = patchAnnotations
 
 exports.remove = async function ({user, namespace, name}) {
+  const annotations = {
+    'confirmation.garden.sapcloud.io/deletion': 'true'
+  }
+  await patchAnnotations({user, namespace, name, annotations})
+
   await Garden(user).namespaces(namespace).shoots.delete({name})
+
+  /* TODO kept the following lines for backwards compatibility (delete them once the DeletionConfirmation admission controller becomes enabled by default and the gardener logic has been adapted properly) */
   const {metadata} = await this.read({user, namespace, name})
   const body = {
     metadata: {
