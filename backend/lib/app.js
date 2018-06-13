@@ -22,11 +22,12 @@ const config = require('./config')
 const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
-const { notFound, renderError, historyFallback } = require('./middleware')
+const { notFound, renderError, historyFallback, prometheusMetrics } = require('./middleware')
 const helmet = require('helmet')
 const api = require('./api')
 const githubWebhook = require('./github/webhook')
 const port = config.port
+const jwt = require('express-jwt')
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
@@ -56,7 +57,14 @@ app.use(helmet.hsts())
 
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
-app.use('/config.json', api.frontendConfig)
+app.get('/config.json', api.frontendConfig)
+
+if (_.has(config, 'prometheus.secret')) {
+  app.get('/metrics',
+    jwt({ secret: config.prometheus.secret }),
+    prometheusMetrics()
+  )
+}
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

@@ -58,3 +58,6 @@ gitHub:
   authentication:
     username: dashboard
     token: dummytoken
+
+prometheus:
+  secret: secret
