@@ -23,7 +23,7 @@ const jwks = require('jwks-rsa')
 const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
-const { NotFound, Unauthorized } = require('./errors')
+const { NotFound, Unauthorized, InternalServerError } = require('./errors')
 const client = require('prom-client')
 const secretProvider = jwtSecret(config.jwks)
 
@@ -102,11 +102,11 @@ function jwtSecret (options) {
 function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
-      next()
+      return next()
     }
     res.sendFile(filename, err => {
       if (err) {
-        next(err)
+        next(new InternalServerError(err.message))
       }
     })
   }
@@ -139,7 +139,11 @@ function sendError (err, req, res, next) {
 
 function renderError (err, req, res, next) {
   const locals = errorToLocals(err, req)
-  res.status(locals.status).send(ErrorTemplate(locals))
+
+  res.format({
+    json: () => res.status(locals.status).send(locals),
+    default: () => res.status(locals.status).send(ErrorTemplate(locals))
+  })
 }
 
 const ErrorTemplate = _.template(`<!doctype html>
