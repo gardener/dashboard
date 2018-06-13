@@ -21,13 +21,14 @@ limitations under the License.
 <script>
   import split from 'lodash/split'
   import Tag from '@/components/Tag'
+  import replace from 'lodash/replace'
 
   export default {
     components: {
       Tag
     },
     props: {
-      tag: {
+      condition: {
         type: Object,
         required: true
       },
@@ -71,6 +72,23 @@ limitations under the License.
       },
       popperKeyWithType () {
         return `statusTag_${this.popperKey}`
+      },
+      tag () {
+        const {lastTransitionTime, message, status, type} = this.condition
+        const id = type
+        let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
+        switch (type) {
+          case 'ControlPlaneHealthy':
+            text = 'Control Plane'
+            break
+          case 'SystemComponentsHealthy':
+            text = 'System Components'
+            break
+          case 'EveryNodeReady':
+            text = 'Nodes'
+            break
+        }
+        return {id, text, message, lastTransitionTime, status}
       }
     }
   }

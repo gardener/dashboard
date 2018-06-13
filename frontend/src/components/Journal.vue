@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <div>
+  <v-card>
     <v-card-title class="subheading white--text cyan darken-2 mt-3 journalTitle">
       Journal {{journalTitle}} <journal-labels :labels="journal.data.labels"></journal-labels>
     </v-card-title>
@@ -38,7 +38,7 @@ limitations under the License.
       </v-btn>
       <v-spacer></v-spacer>
     </v-card-actions>
-  </div>
+  </v-card>
 </template>
 
 

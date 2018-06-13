@@ -230,6 +230,8 @@ limitations under the License.
               </template>
             </v-card>
 
+            <status-card :shootItem="item"></status-card>
+
             <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
 
           </v-flex>
@@ -270,6 +272,7 @@ limitations under the License.
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import ShootVersion from '@/components/ShootVersion'
+  import StatusCard from '@/components/StatusCard'
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
@@ -284,7 +287,8 @@ limitations under the License.
       ShootEditor,
       Journals,
       TimeAgo,
-      ShootVersion
+      ShootVersion,
+      StatusCard
     },
     data () {
       return {
