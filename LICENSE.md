@@ -340,6 +340,10 @@ Copyright (c) JS Foundation and other contributors
 [oidc-client](https://github.com/IdentityModel/oidc-client-js)
 [Apache License 2.0](https://github.com/IdentityModel/oidc-client-js/blob/dev/LICENSE)
 
+[prom-client](https://github.com/siimon/prom-client)
+Copyright (c) 2015 Simon Nyberg
+[Apache License 2.0](https://github.com/siimon/prom-client/blob/master/LICENSE)
+
 [semver-sort](https://github.com/ragingwind/semver-sort)
 Copyright (c) ragingwind <ragingwind@gmail.com> (ragingwind.me)
 [MIT License](https://github.com/ragingwind/semver-sort/blob/master/license)

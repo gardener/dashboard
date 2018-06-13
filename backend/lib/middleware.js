@@ -24,8 +24,17 @@ const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
 const { NotFound, Unauthorized } = require('./errors')
-
+const client = require('prom-client')
 const secretProvider = jwtSecret(config.jwks)
+
+function prometheusMetrics ({timeout = 30000} = {}) {
+  client.collectDefaultMetrics({ timeout })
+
+  return (req, res, next) => {
+    res.set('Content-Type', client.register.contentType)
+    res.end(client.register.metrics())
+  }
+}
 
 function frontendConfig (req, res, next) {
   res.json(config.frontend)
@@ -168,5 +177,6 @@ module.exports = {
   notFound,
   sendError,
   renderError,
-  ErrorTemplate
+  ErrorTemplate,
+  prometheusMetrics
 }
