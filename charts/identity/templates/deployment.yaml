@@ -16,6 +16,8 @@ spec:
       release: "{{ .Release.Name }}"
   template:
     metadata:
+      annotations:
+        checksum/configmap-identity-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         app: identity
         release: {{ .Release.Name }}
@@ -30,7 +32,7 @@ spec:
             name: identity-configmap
       serviceAccountName: identity
       containers:
-        - name: gardener-dashboard
+        - name: dex
           command:
             - /usr/local/bin/dex
             - serve
