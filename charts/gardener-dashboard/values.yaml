@@ -22,7 +22,6 @@ hosts:
   - dashboard.ingress.example.org
   - dashboard.example.org
 
-connectors:
 tls:
   crt: |
     -----BEGIN CERTIFICATE-----
