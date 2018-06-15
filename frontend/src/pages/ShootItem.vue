@@ -209,8 +209,10 @@ limitations under the License.
           </v-flex>
 
           <v-flex md6 v-show="isInfoAvailable">
+            <status-card :shootItem="item"></status-card>
+
             <v-card>
-              <v-card-title class="subheading white--text cyan darken-2">
+              <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Kube-Cluster Access
               </v-card-title>
               <cluster-access ref="clusterAccess" :info="info"></cluster-access>
@@ -229,8 +231,6 @@ limitations under the License.
                 </v-expansion-panel>
               </template>
             </v-card>
-
-            <status-card :shootItem="item"></status-card>
 
             <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
 

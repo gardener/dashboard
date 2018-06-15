@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 mt-3 statusTitle">
+    <v-card-title class="subheading white--text cyan darken-2 statusTitle">
       Monitoring
     </v-card-title>
     <div class="list">
