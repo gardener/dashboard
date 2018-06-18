@@ -361,7 +361,7 @@ const deleteItem = (state, deletedItem) => {
   const item = findItem(deletedItem.metadata)
   let sortRequired = false
   if (item !== undefined) {
-    delete state.shoots[keyForShoot(item.metadata)]
+    Vue.delete(state.shoots, keyForShoot(item.metadata))
     sortRequired = true
   }
   return sortRequired
