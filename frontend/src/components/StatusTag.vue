@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType"></tag>
+  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType" :popperPlacement="popperPlacement"></tag>
 </template>
 
 <script>
@@ -35,6 +35,9 @@ limitations under the License.
       popperKey: {
         type: String,
         required: true
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {

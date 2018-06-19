@@ -90,6 +90,10 @@ limitations under the License.
       },
       time: {
         type: String
+      },
+      placement: {
+        type: String,
+        default: 'top'
       }
     },
     data () {
@@ -100,7 +104,7 @@ limitations under the License.
     computed: {
       popperOptions () {
         const options = {
-          placement: 'top',
+          placement: this.placement,
           modifiers: {
             customArrowStyles: {
               enabled: true,

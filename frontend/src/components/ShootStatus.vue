@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType">
+  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <div slot="popperRef" style="display: inline-block;">
       <v-tooltip top>
         <template slot="activator">
@@ -100,6 +100,9 @@ limitations under the License.
       reconciliationDeactivated: {
         type: Boolean,
         default: false
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {

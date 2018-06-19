@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <span>
-    <status-tag v-for="condition in filteredConditions" :condition="condition" :popper-key="condition.type" :key="condition.type"></status-tag>
+    <status-tag v-for="condition in filteredConditions" :condition="condition" :popper-key="condition.type" :key="condition.type" :popperPlacement="popperPlacement"></status-tag>
   </span>
 </template>
 
@@ -32,6 +32,9 @@ limitations under the License.
     props: {
       conditions: {
         type: Array
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {

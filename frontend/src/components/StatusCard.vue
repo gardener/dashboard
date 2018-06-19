@@ -31,6 +31,7 @@ limitations under the License.
             :popperKey="`${namespace}/${name}_lastOp`"
             :isHibernated="isHibernated"
             :reconciliationDeactivated="reconciliationDeactivated"
+            popperPlacement="bottom"
             @titleChange="onShootStatusTitleChange">
           </shoot-status>
           <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
@@ -43,7 +44,7 @@ limitations under the License.
         <div>
           <span class="grey--text">Readiness</span><br>
           <template v-if="conditions.length === 0">-</template>
-          <status-tags v-else :conditions="conditions"></status-tags>
+          <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
         </div>
       </v-card-title>
     </div>

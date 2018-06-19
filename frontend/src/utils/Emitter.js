@@ -141,8 +141,6 @@ class AbstractSubscription {
         if (this._unsubscribe()) {
           this.subscribedTo = undefined
         }
-      } else {
-        console.log('skipped as not subscribed anyhow')
       }
     } else {
       // not connected or connection lost -> no need to unsubscribe
