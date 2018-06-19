@@ -196,7 +196,7 @@ export function getCloudProviderKind (object) {
 }
 
 export function isOwnSecretBinding (secret) {
-  return get(secret, 'namespace') === get(secret, 'bindingNamespace')
+  return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
 }
 
 const availableK8sUpdatesCache = {}

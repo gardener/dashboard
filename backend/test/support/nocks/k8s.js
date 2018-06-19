@@ -26,10 +26,32 @@ const clientConfig = credentials()
 const url = clientConfig.url
 const auth = clientConfig.auth
 
+const quotas = [{
+  name: 'foo-quota1',
+  namespace: 'garden-foo'},
+{
+  name: 'foo-quota2',
+  namespace: 'garden-foo'}]
+
+const quotaObject = {
+  kind: 'Quota',
+  metadata: {
+    name: 'trial-secret-quota',
+    namespace: 'garden-trial'
+  },
+  spec: {
+    scope: 'secret',
+    clusterLifetimeDays: 14,
+    metrics: {
+      cpu: '200'
+    }
+  }
+}
+
 const secretBindingList = [
-  getSecretBinding('foo-infra1', 'garden-foo', 'infra1-profileName', 'garden-foo', 'secret1'),
-  getSecretBinding('foo-infra3', 'garden-foo', 'infra3-profileName', 'garden-foo', 'secret2'),
-  getSecretBinding('trial-infra1', 'garden-foo', 'infra1-profileName', 'garden-trial', 'trial-secret')
+  getSecretBinding('foo-infra1', 'garden-foo', 'infra1-profileName', 'garden-foo', 'secret1', quotas),
+  getSecretBinding('foo-infra3', 'garden-foo', 'infra3-profileName', 'garden-foo', 'secret2', quotas),
+  getSecretBinding('trial-infra1', 'garden-foo', 'infra1-profileName', 'garden-trial', 'trial-secret', quotas)
 ]
 
 const projectList = [
@@ -61,7 +83,7 @@ const certificateAuthorityData = encodeBase64('certificate-authority-data')
 const clientCertificateData = encodeBase64('client-certificate-data')
 const clientKeyData = encodeBase64('client-key-data')
 
-function getSecretBinding (name, namespace, profileName, secretRefName, secretRefNamespace, quotas = {}) {
+function getSecretBinding (name, namespace, profileName, secretRefName, secretRefNamespace, quotas = []) {
   const secretBinding = {
     kind: 'SecretBinding',
     metadata: {
@@ -378,7 +400,8 @@ const stub = {
       .reply(200, () => shoot)
   },
   getInfrastructureSecrets ({bearer, namespace, empty = false}) {
-    return nockWithAuthorization(bearer)
+    const returnNocks = []
+    returnNocks.push(nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: empty ? [] : secretBindingList
@@ -386,7 +409,19 @@ const stub = {
       .get(`/api/v1/namespaces/${namespace}/secrets`)
       .reply(200, {
         items: empty ? [] : infrastructureSecretList
+      }))
+
+    returnNocks.push(_.map(empty ? [] : secretBindingList, secretBinding => {
+      return _.map(secretBinding.quotas, quota => {
+        return nockWithAuthorization(auth.bearer)
+          .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${quota.namespace}/quotas/${quota.name}`)
+          .reply(200, {
+            quotaObject
+          })
       })
+    }))
+
+    return returnNocks
   },
   createInfrastructureSecret ({bearer, namespace, data, cloudProfileName, resourceVersion = 42}) {
     const {
