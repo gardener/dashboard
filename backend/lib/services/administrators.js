@@ -18,52 +18,28 @@
 
 const _ = require('lodash')
 const kubernetes = require('../kubernetes')
-const Resources = kubernetes.Resources
-const rbac = kubernetes.rbac()
 
-const ClusterRoleBindingName = 'garden-administrators'
-const ClusterRoleResource = Resources.ClusterRole
-const EmptyClusterRoleBinding = {
-  metadata: {
-    name: ClusterRoleBindingName
-  },
-  roleRef: {
-    apiGroup: ClusterRoleResource.apiGroup,
-    kind: ClusterRoleResource.kind,
-    name: 'garden.sapcloud.io:system:project-member'
-  },
-  subjects: []
+function Authorization ({auth}) {
+  return kubernetes.authorization({auth})
 }
-
-function readClusterRoleBinding () {
-  return rbac.clusterrolebindings(ClusterRoleBindingName).get()
-    .catch(err => {
-      if (err.code === 404) {
-        return EmptyClusterRoleBinding
-      }
-      throw err
-    })
-}
-
-function fromResource ({subjects} = {}) {
-  return _
-    .chain(subjects)
-    .filter(['kind', 'User'])
-    .map('name')
-    .value()
-}
-
-const list = async function () {
-  const clusterRoleBinding = await readClusterRoleBinding()
-  return fromResource(clusterRoleBinding)
-}
-exports.list = list
 
 exports.isAdmin = async function (user) {
   if (!user) {
     return false
   }
-  const admins = await list()
-  const isAdmin = _.includes(admins, user.id)
+  // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
+  const body = {
+    kind: 'SelfSubjectAccessReview',
+    apiVersion: 'authorization.k8s.io/v1',
+    spec: {
+      resourceAttributes: {
+        verb: 'delete',
+        group: 'garden.sapcloud.io',
+        resource: 'shoots'
+      }
+    }
+  }
+  const response = await Authorization(user).selfsubjectaccessreviews.post({ body })
+  const isAdmin = _.get(response, 'status.allowed', false)
   return isAdmin
 }

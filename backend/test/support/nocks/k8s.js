@@ -22,6 +22,7 @@ const yaml = require('js-yaml')
 
 const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
+const jwtDecode = require('jwt-decode')
 const clientConfig = credentials()
 const url = clientConfig.url
 const auth = clientConfig.auth
@@ -77,7 +78,7 @@ const projectMembersList = [
   getProjectMembers('garden-secret', ['admin@example.org'])
 ]
 
-const gardenAdministrators = getAdministrators(['admin@example.org'])
+const gardenAdministrators = ['admin@example.org']
 
 const certificateAuthorityData = encodeBase64('certificate-authority-data')
 const clientCertificateData = encodeBase64('client-certificate-data')
@@ -133,19 +134,23 @@ function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, b
   return {metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret}
 }
 
-function getAdministrators (users) {
-  const apiGroup = 'rbac.authorization.k8s.io'
-  return {
-    metadata: {
-      name: 'garden-administrators'
-    },
-    roleRef: {
-      apiGroup,
-      kind: 'ClusterRole',
-      name: 'garden.sapcloud.io:system:project-member'
-    },
-    subjects: _.map(users, getRoleBindingSubject)
-  }
+function canIDeleteShoots ({spec}) {
+  return spec.resourceAttributes.verb === 'delete' &&
+  spec.resourceAttributes.resource === 'shoots' &&
+  spec.resourceAttributes.group === 'garden.sapcloud.io'
+}
+
+function isAdmin (uri, requestBody) {
+  const userId = jwtDecode(this.req.headers.authorization)['email']
+  const isAdmin = _.includes(gardenAdministrators, userId)
+  return [
+    200,
+    {
+      status: {
+        allowed: isAdmin
+      }
+    }
+  ]
 }
 
 function getProjectMembers (namespace, users) {
@@ -550,24 +555,27 @@ const stub = {
         items: [shoot, referencingShoot]
       })
   },
-  getProjects () {
-    return nockWithAuthorization(auth.bearer)
-      .get('/api/v1/namespaces')
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=project'
-      })
-      .reply(200, {
-        items: projectList
-      })
-      .get('/apis/rbac.authorization.k8s.io/v1/rolebindings')
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=members'
-      })
-      .reply(200, {
-        items: projectMembersList
-      })
-      .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-      .reply(200, gardenAdministrators)
+  getProjects ({bearer}) {
+    return [
+      nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, canIDeleteShoots)
+        .reply(isAdmin),
+      nockWithAuthorization(auth.bearer)
+        .get('/api/v1/namespaces')
+        .query({
+          labelSelector: 'garden.sapcloud.io/role=project'
+        })
+        .reply(200, {
+          items: projectList
+        })
+        .get('/apis/rbac.authorization.k8s.io/v1/rolebindings')
+        .query({
+          labelSelector: 'garden.sapcloud.io/role=members'
+        })
+        .reply(200, {
+          items: projectMembersList
+        })
+    ]
   },
   getProject ({bearer, namespace, resourceVersion = 42, unauthorized = false}) {
     const roleBinding = readProjectMembers(namespace)
@@ -582,14 +590,11 @@ const stub = {
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => result)
     }
-    return [
-      scope
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
-      nockWithAuthorization(bearer)
-        .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-        .reply(200, roleBinding)
-    ]
+    return nockWithAuthorization(bearer)
+      .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, canIDeleteShoots)
+      .reply(isAdmin)
+      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, roleBinding)
   },
   createProject ({bearer, namespace, username, resourceVersion = 42}) {
     const result = {
@@ -627,10 +632,10 @@ const stub = {
           _.merge(result.metadata, body.metadata)
           return true
         })
-        .reply(200, () => result)
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
+        .reply(200, () => result),
       nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, canIDeleteShoots)
+        .reply(isAdmin)
         .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
         .reply(200, roleBinding)
     ]
@@ -641,10 +646,10 @@ const stub = {
     return [
       nockWithAuthorization(auth.bearer)
         .delete(`/api/v1/namespaces/${namespace}`)
-        .reply(200)
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
+        .reply(200),
       nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, canIDeleteShoots)
+        .reply(isAdmin)
         .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
         .reply(200, roleBinding)
         .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
