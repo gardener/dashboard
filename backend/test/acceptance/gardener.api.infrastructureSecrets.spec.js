@@ -38,7 +38,7 @@ describe('gardener', function () {
       const secret = 'mySecret'
       const data = {key, secret}
       const resourceVersion = 42
-      const sandbox = sinon.sandbox.create()
+      const sandbox = sinon.createSandbox()
       let app
 
       before(function () {

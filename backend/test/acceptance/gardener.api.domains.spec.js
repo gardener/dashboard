@@ -24,7 +24,7 @@ describe('gardener', function () {
     describe('domains', function () {
     /* eslint no-unused-expressions: 0 */
       const oidc = nocks.oidc
-      const sandbox = sinon.sandbox.create()
+      const sandbox = sinon.createSandbox()
       const email = 'john.doe@example.org'
       let app
 

@@ -56,7 +56,7 @@ describe('config', function () {
     })
 
     describe('#loadConfig', function () {
-      const sandbox = sinon.sandbox.create()
+      const sandbox = sinon.createSandbox()
 
       afterEach(function () {
         sandbox.restore()

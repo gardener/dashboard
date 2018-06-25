@@ -55,7 +55,7 @@ describe('gardener', function () {
       }
       spec.cloud[kind] = {}
       const resourceVersion = 42
-      const sandbox = sinon.sandbox.create()
+      const sandbox = sinon.createSandbox()
       let app
 
       before(function () {
