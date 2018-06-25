@@ -90,7 +90,7 @@ limitations under the License.
   }
 </script>
 
-<style lang="styl" >
+<style lang="styl" scoped>
 
   bg1 = #24232c
   bg2 = #504e5a
