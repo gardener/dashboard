@@ -23,10 +23,10 @@
        {{errorMessage}}
        <v-btn dark flat @click.native="snackbar = false">Close</v-btn>
      </v-snackbar>
-      <v-footer fixed height="56">
+      <v-footer dark fixed height="56">
         <div class="px-3">
           <v-btn @click="onSave" dark color="cyan darken-2" >Save</v-btn>
-          <v-btn @click="onCancel">Cancel</v-btn>
+          <v-btn @click="onCancel" light>Cancel</v-btn>
         </div>
       </v-footer>
     </v-dialog>
@@ -142,7 +142,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="styl" scoped>
 .modification--warning {
   margin-top: 0;
   width: 100%;
@@ -156,7 +156,7 @@ export default {
 .dialog--fullscreen {
   border-radius: 0;
 }
-.CodeMirror {
+>>> .CodeMirror {
   position: fixed;
   top: 48px; left: 0; right: 0; bottom: 56px;
   height: auto;

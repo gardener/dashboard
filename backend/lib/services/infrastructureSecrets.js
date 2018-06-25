@@ -32,7 +32,7 @@ function Garden ({auth}) {
   return kubernetes.garden({auth})
 }
 
-function fromResource ({secretBinding, cloudProviderKind, secret}) {
+async function fromResource ({secretBinding, cloudProviderKind, secret}) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
   const infrastructureSecret = {}
@@ -46,6 +46,10 @@ function fromResource ({secretBinding, cloudProviderKind, secret}) {
       bindingName: _.get(secretBinding, 'metadata.name')
     })
     .value()
+
+  const quotaMetadata = _.get(secretBinding, 'quotas')
+  infrastructureSecret.quotas = await getQuoutas({quotaMetadata})
+
   if (secret) {
     infrastructureSecret.metadata = _
       .chain(secret.metadata)
@@ -119,7 +123,7 @@ function toSecretBindingResource ({metadata}) {
   return {apiVersion, kind, metadata, secretRef}
 }
 
-function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
+async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
   let infrastructureSecrets = []
 
   for (const secretBinding of secretBindings) {
@@ -132,7 +136,7 @@ function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList
     } else if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
       logger.error('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName)
     } else {
-      infrastructureSecrets.push(fromResource({secretBinding, cloudProviderKind, secret}))
+      infrastructureSecrets.push(await fromResource({secretBinding, cloudProviderKind, secret}))
     }
   }
   return infrastructureSecrets
@@ -142,6 +146,23 @@ async function getCloudProviderKind (cloudProfileName) {
   const cloudProfile = await cloudprofiles.read({name: cloudProfileName})
   const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
   return cloudProviderKind
+}
+
+async function getQuoutas ({quotaMetadata}) {
+  const promises = _.map(quotaMetadata, (quota) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        resolve(await kubernetes.garden().ns(quota.namespace).quotas.get({name: quota.name}))
+      } catch (err) {
+        if (err.code === 404) {
+          resolve(undefined)
+        } else {
+          reject(err)
+        }
+      }
+    })
+  })
+  return Promise.all(promises)
 }
 
 exports.list = async function ({user, namespace}) {
@@ -156,7 +177,7 @@ exports.list = async function ({user, namespace}) {
   ])
 
   return _.concat(
-    getInfrastructureSecrets({secretBindings: secretBindingList, cloudProfileList, secretList})
+    await getInfrastructureSecrets({secretBindings: secretBindingList, cloudProfileList, secretList})
   )
 }
 

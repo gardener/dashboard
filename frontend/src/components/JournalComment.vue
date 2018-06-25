@@ -98,6 +98,11 @@ limitations under the License.
   }
   .comment-body {
     padding: 5px;
+    word-wrap: break-word;
+  }
+
+  >>> .flex {
+    width: 200px;
   }
 
   a {

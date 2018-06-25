@@ -35,7 +35,6 @@ limitations under the License.
           <slot name="content-before"></slot>
           <pre class="message">{{message}}</pre>
           <slot name="content-after"></slot>
-          <slot name="toolbar"></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
               <template v-if="showPlaceholder">
@@ -91,6 +90,10 @@ limitations under the License.
       },
       time: {
         type: String
+      },
+      placement: {
+        type: String,
+        default: 'top'
       }
     },
     data () {
@@ -101,7 +104,7 @@ limitations under the License.
     computed: {
       popperOptions () {
         const options = {
-          placement: 'top',
+          placement: this.placement,
           modifiers: {
             customArrowStyles: {
               enabled: true,

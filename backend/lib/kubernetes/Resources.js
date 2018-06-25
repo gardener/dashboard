@@ -61,5 +61,10 @@ module.exports = {
     name: 'secretbindings',
     kind: 'SecretBinding',
     apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  Quota: {
+    name: 'quotas',
+    kind: 'Quotas',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
   }
 }

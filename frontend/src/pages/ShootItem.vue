@@ -66,7 +66,7 @@ limitations under the License.
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                    <v-list-tile-title><a :href="`mailto:${createdBy}`">{{createdBy}}</a></v-list-tile-title>
+                    <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
 
@@ -122,13 +122,15 @@ limitations under the License.
                         <span slot="activator"> {{region}} </span>
                         <span>Region</span>
                       </v-tooltip>
-                      /
-                      <v-tooltip top open-delay="500">
-                        <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
-                          <span>{{secret}} </span>
-                        </router-link>
-                        <span>Used Credential</span>
-                      </v-tooltip>
+                      <template v-if="!!secret">
+                        /
+                        <v-tooltip top open-delay="500">
+                          <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
+                            <span>{{secret}} </span>
+                          </router-link>
+                          <span>Used Credential</span>
+                        </v-tooltip>
+                      </template>
                     </v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
@@ -163,7 +165,18 @@ limitations under the License.
                     <v-list-tile-title>{{cidr}}</v-list-tile-title>
                   </v-list-tile-content>
                 </v-list-tile>
-
+                <template v-if="!!domain">
+                  <v-divider class="my-2" inset></v-divider>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon class="cyan--text text--darken-2">mdi-earth</v-icon>
+                    </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
+                        <v-list-tile-title><a :href="shootIngressDomain" target="_blank" class="cyan--text text--darken-2">{{shootIngressDomainText}}</a></v-list-tile-title>
+                      </v-list-tile-content>
+                  </v-list-tile>
+                </template>
               </v-list>
             </v-card>
 
@@ -196,8 +209,10 @@ limitations under the License.
           </v-flex>
 
           <v-flex md6 v-show="isInfoAvailable">
+            <status-card :shootItem="item"></status-card>
+
             <v-card>
-              <v-card-title class="subheading white--text cyan darken-2">
+              <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Kube-Cluster Access
               </v-card-title>
               <cluster-access ref="clusterAccess" :info="info"></cluster-access>
@@ -257,6 +272,7 @@ limitations under the License.
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import ShootVersion from '@/components/ShootVersion'
+  import StatusCard from '@/components/StatusCard'
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
@@ -271,7 +287,8 @@ limitations under the License.
       ShootEditor,
       Journals,
       TimeAgo,
-      ShootVersion
+      ShootVersion,
+      StatusCard
     },
     data () {
       return {
@@ -406,6 +423,12 @@ limitations under the License.
       },
       domain () {
         return get(this.item, 'spec.dns.domain')
+      },
+      shootIngressDomain () {
+        return `https://placeholder.ingress.${this.domain}`
+      },
+      shootIngressDomainText () {
+        return `<placeholder>.ingress.${this.domain}`
       },
       region () {
         return get(this.item, 'spec.cloud.region')

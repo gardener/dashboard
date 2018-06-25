@@ -215,7 +215,7 @@ limitations under the License.
                 <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
                   <v-flex pa-1 >
 
-                    <worker-input-aws :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'aws'">
@@ -228,9 +228,9 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-aws>
+                    </worker-input-generic>
 
-                    <worker-input-azure :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'azure'">
@@ -243,9 +243,9 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-azure>
+                    </worker-input-generic>
 
-                    <worker-input-gce :worker.sync="worker" ref="workerInput"
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
                       :cloudProfileName="cloudProfileName"
                       v-if="infrastructureKind === 'gcp'">
@@ -258,7 +258,7 @@ limitations under the License.
                         @click.native.stop="workers.splice(index, 1)">
                         <v-icon>mdi-close</v-icon>
                       </v-btn>
-                    </worker-input-gce>
+                    </worker-input-generic>
 
                     <worker-input-openstack :worker.sync="worker" ref="workerInput"
                       :workers.sync="workers"
@@ -412,9 +412,7 @@ limitations under the License.
 
 <script>
   import { mapGetters, mapActions, mapState } from 'vuex'
-  import WorkerInputGce from '@/components/WorkerInputGce'
-  import WorkerInputAws from '@/components/WorkerInputAws'
-  import WorkerInputAzure from '@/components/WorkerInputAzure'
+  import WorkerInputGeneric from '@/components/WorkerInputGeneric'
   import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
   import CloudProfile from '@/components/CloudProfile'
   import Alert from '@/components/Alert'
@@ -429,6 +427,7 @@ limitations under the License.
   import noop from 'lodash/noop'
   import isEmpty from 'lodash/isEmpty'
   import { required, maxLength } from 'vuelidate/lib/validators'
+  import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
@@ -451,20 +450,22 @@ limitations under the License.
       metadata: {
         name: {
           required: 'Name is required',
-          maxLength: 'name ist too long',
-          valid: 'Name must only be lowercase letters and numbers',
-          unique: 'cluster name must be unique'
+          maxLength: 'Name ist too long',
+          resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+          unique: 'Cluster name must be unique',
+          noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
+          noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
         }
       },
       spec: {
         cloud: {
           secretBindingRef: {
             name: {
-              required: 'secret is required'
+              required: 'Secret is required'
             }
           },
           region: {
-            required: 'region is required'
+            required: 'Region is required'
           }
         },
         maintenance: {
@@ -478,7 +479,7 @@ limitations under the License.
     },
     infrastructureData: {
       zones: {
-        zonesNotEmpty: 'zone is required'
+        zonesNotEmpty: 'Zone is required'
       }
     }
   }
@@ -540,9 +541,7 @@ limitations under the License.
   export default {
     name: 'create-cluster',
     components: {
-      WorkerInputAws,
-      WorkerInputAzure,
-      WorkerInputGce,
+      WorkerInputGeneric,
       WorkerInputOpenstack,
       CodeBlock,
       InfraIcon,
@@ -576,9 +575,9 @@ limitations under the License.
           name: {
             required,
             maxLength: maxLength(10),
-            valid (value) {
-              return /^([a-z][a-z0-9]*)$/.test(value)
-            },
+            noConsecutiveHyphen,
+            noStartEndHyphen,
+            resourceName,
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
             }

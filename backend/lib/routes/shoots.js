@@ -99,7 +99,7 @@ router.route('/:name/metadata/annotations')
       const namespace = req.params.namespace
       const name = req.params.name
       const annotations = req.body
-      res.send(await shoots.patchAnnotation({user, namespace, name, annotations}))
+      res.send(await shoots.patchAnnotations({user, namespace, name, annotations}))
     } catch (err) {
       next(err)
     }

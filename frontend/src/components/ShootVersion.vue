@@ -73,16 +73,13 @@ limitations under the License.
         type: Object
       },
       k8sVersion: {
-        type: String,
-        required: true
+        type: String
       },
       shootName: {
-        type: String,
-        required: true
+        type: String
       },
       shootNamespace: {
-        type: String,
-        required: true
+        type: String
       }
     },
     data () {

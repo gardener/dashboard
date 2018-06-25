@@ -20,6 +20,7 @@ import Router from 'vue-router'
 import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
+import concat from 'lodash/concat'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -336,19 +337,23 @@ export default function createRouter ({store, userManager}) {
           case 'Secret':
             return Promise
               .all([
-                store.dispatch('fetchInfrastructureSecrets')
+                store.dispatch('fetchInfrastructureSecrets'),
+                store.dispatch('subscribeShoots')
               ])
               .then(() => undefined)
           case 'ShootList':
+            const promises = []
+            concat(promises, store.dispatch('subscribeShoots'))
             if (namespace !== '_all') {
-              return Promise.resolve(store.dispatch('fetchInfrastructureSecrets'))
-                .then(() => undefined)
+              concat(promises, store.dispatch('fetchInfrastructureSecrets'))
             }
-            return undefined
+            return Promise
+              .all(promises)
+              .then(() => undefined)
           case 'ShootItem':
             return Promise
               .all([
-                store.dispatch('fetchShoot', {name: params.name, namespace}),
+                store.dispatch('subscribeShoot', {name: params.name, namespace}),
                 store.dispatch('subscribeComments', {name: params.name, namespace})
               ])
               .then(() => undefined)
@@ -356,7 +361,8 @@ export default function createRouter ({store, userManager}) {
           case 'Administration':
             return Promise
               .all([
-                store.dispatch('fetchMembers')
+                store.dispatch('fetchMembers'),
+                store.dispatch('subscribeShoots')
               ])
               .then(() => undefined)
           case 'Account':

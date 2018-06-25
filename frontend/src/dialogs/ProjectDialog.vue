@@ -103,7 +103,7 @@ limitations under the License.
 <script>
   import { mapActions, mapGetters } from 'vuex'
   import { required, maxLength } from 'vuelidate/lib/validators'
-  import { resourceName, unique } from '@/utils/validators'
+  import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import { getValidationErrors, setInputFocus } from '@/utils'
   import { isConflict } from '@/utils/error'
   import map from 'lodash/map'
@@ -119,7 +119,9 @@ limitations under the License.
       required: 'Name is required',
       maxLength: 'Name exceeds the maximum length',
       resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
-      unique: 'Name is already in use'
+      unique: 'Name is already in use',
+      noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
+      noStartEndHyphen: 'Name must not start or end with a hyphen'
     }
   }
 
@@ -183,8 +185,10 @@ limitations under the License.
         if (this.isCreateMode) {
           validators.projectName = {
             required,
-            resourceName,
             maxLength: maxLength(10),
+            noConsecutiveHyphen,
+            noStartEndHyphen,
+            resourceName,
             unique: unique('projectNames')
           }
         }

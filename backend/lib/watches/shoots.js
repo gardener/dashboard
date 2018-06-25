@@ -37,7 +37,8 @@ module.exports = io => {
       const namespace = event.object.metadata.namespace
       const namespacedEvents = {kind: 'shoots', namespaces: {}}
       namespacedEvents.namespaces[namespace] = [event]
-      io.of('/shoots').to(namespace).emit('namespacedEvents', namespacedEvents)
+      io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
+      io.of('/shoots').to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
 
       const shootIdentifier = `${namespace}_${name}`
       const idx = _.indexOf(shootsWithIssues, shootIdentifier)
@@ -51,7 +52,7 @@ module.exports = io => {
       }
 
       if (shootHasIssue(event.object)) {
-        io.of('/shoots').to(`${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+        io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
         if (idx === -1) {
           shootsWithIssues.push(shootIdentifier)
         } else {
@@ -63,7 +64,7 @@ module.exports = io => {
         if (idx !== -1) {
           _.pullAt(shootsWithIssues, idx)
           event.type = 'DELETED'
-          io.of('/shoots').to(`${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+          io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
         }
       }
     }

@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <span>
     <template v-if="message">
-      <g-popper :title="title" :message="message" :toolbarColor="color" :time="time" :popperKey="popperKey">
+      <g-popper :title="title" :message="message" :toolbarColor="color" :time="time" :popperKey="popperKey" :placement="popperPlacement">
         <v-chip class="cursor-pointer" slot="popperRef" outline :text-color="chipTextColor" small :color="color">
           {{chipText}}
         </v-chip>
@@ -63,6 +63,9 @@ limitations under the License.
       popperKey: {
         type: String,
         required: true
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {

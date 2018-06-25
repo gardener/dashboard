@@ -100,7 +100,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems']
+    return getters['shoots/sortedItems'](state)
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -191,14 +191,6 @@ const getters = {
       return getters['journals/labels']({namespace, name})
     }
   },
-  shootsByInfrastructureSecret (state, getters) {
-    return (secretName) => {
-      const predicate = item => {
-        return get(item, 'spec.cloud.secretBindingRef.name') === secretName
-      }
-      return filter(getters['shoots/sortedItems'], predicate)
-    }
-  },
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
@@ -230,6 +222,12 @@ const getters = {
     return (namespace) => {
       return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
     }
+  },
+  isHideUserIssues (state, getters) {
+    return getters['shoots/isHideUserIssues']
+  },
+  isHideDeactivatedReconciliation (state, getters) {
+    return getters['shoots/isHideDeactivatedReconciliation']
   }
 }
 
@@ -279,22 +277,43 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchShoot ({ dispatch, commit }, {name, namespace}) {
-    return dispatch('shoots/get', {name, namespace})
+  clearIssues ({ dispatch, commit }) {
+    return dispatch('journals/clearIssues')
       .catch(err => {
         dispatch('setError', err)
       })
   },
+  clearComments ({ dispatch, commit }) {
+    return dispatch('journals/clearComments')
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  subscribeShoot ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/clearAll')
+    .then(() => EmitterWrapper.shootEmitter.subscribeShoot({name, namespace}))
+    .catch(err => {
+      dispatch('setError', err)
+    })
+  },
+  getShootInfo ({ dispatch, commit }, {name, namespace}) {
+    return dispatch('shoots/getInfo', {name, namespace})
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  subscribeShoots ({ dispatch, commit, state }) {
+    return EmitterWrapper.shootsEmitter.subscribeShoots({namespace: state.namespace, filter: getFilterValue(state)})
+  },
   subscribeComments ({ dispatch, commit }, {name, namespace}) {
     return new Promise((resolve, reject) => {
-      commit('journals/CLEAR_COMMENTS')
-      EmitterWrapper.journalsEmitter.subscribeComments({name, namespace})
+      EmitterWrapper.journalCommentsEmitter.subscribeComments({name, namespace})
       resolve()
     })
   },
   unsubscribeComments ({ dispatch, commit }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalsEmitter.unsubscribeComments()
+      EmitterWrapper.journalCommentsEmitter.unsubscribe()
       resolve()
     })
   },
@@ -306,6 +325,18 @@ const actions = {
   },
   setShootListSortParams ({ dispatch }, sortParams) {
     return dispatch('shoots/setListSortParams', sortParams)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setHideUserIssues ({ dispatch, commit }, value) {
+    return dispatch('shoots/setHideUserIssues', value)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setHideDeactivatedReconciliation ({ dispatch, commit }, value) {
+    return dispatch('shoots/setHideDeactivatedReconciliation', value)
       .catch(err => {
         dispatch('setError', err)
       })
@@ -437,12 +468,13 @@ const mutations = {
   SET_NAMESPACE (state, value) {
     if (value !== state.namespace) {
       state.namespace = value
-      EmitterWrapper.shootsEmitter.setNamespace(value, getFilterValue(state))
+      // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
     }
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value
-    EmitterWrapper.shootsEmitter.setNamespace(state.namespace, getFilterValue(state))
+    // subscribe again for shoots as the filter has changed
+    EmitterWrapper.shootsEmitter.subscribeShoots({namespace: state.namespace, filter: getFilterValue(state)})
   },
   SET_USER (state, value) {
     state.user = value
@@ -484,7 +516,7 @@ const store = new Vuex.Store({
 })
 
 /* Shoots */
-EmitterWrapper.shootsEmitter.on('shoots', namespacedEvents => {
+const shootNamespacedEventsHandler = namespacedEvents => {
   let eventsToHandle = []
   mapKeys(namespacedEvents, (events, namespace) => {
     if (store.getters.isCurrentNamespace(namespace)) {
@@ -492,15 +524,17 @@ EmitterWrapper.shootsEmitter.on('shoots', namespacedEvents => {
     }
   })
   store.commit('shoots/HANDLE_EVENTS', {rootState: state, events: eventsToHandle})
-})
+}
+EmitterWrapper.shootsEmitter.on('shoots', shootNamespacedEventsHandler)
+EmitterWrapper.shootEmitter.on('shoot', shootNamespacedEventsHandler)
 
 /* Journal Issues */
-EmitterWrapper.journalsEmitter.on('issues', events => {
+EmitterWrapper.journalIssuesEmitter.on('issues', events => {
   store.commit('journals/HANDLE_ISSUE_EVENTS', events)
 })
 
 /* Journal Comments */
-EmitterWrapper.journalsEmitter.on('comments', events => {
+EmitterWrapper.journalCommentsEmitter.on('comments', events => {
   store.commit('journals/HANDLE_COMMENTS_EVENTS', events)
 })
 

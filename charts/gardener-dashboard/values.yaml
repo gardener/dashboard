@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: eu.gcr.io/gardener-project/gardener/dashboard
-  tag: latest
+  tag: 1.13.0
   pullPolicy: Always
 
 logLevel: debug
@@ -22,7 +22,6 @@ hosts:
   - dashboard.ingress.example.org
   - dashboard.example.org
 
-connectors:
 tls:
   crt: |
     -----BEGIN CERTIFICATE-----
@@ -58,3 +57,6 @@ gitHub:
   authentication:
     username: dashboard
     token: dummytoken
+
+prometheus:
+  secret: secret

@@ -37,31 +37,17 @@ limitations under the License.
 
     <!-- List of the added secrets -->
     <v-list two-line v-else>
-      <v-list-tile v-for="row in rows" :key="row.metadata.name">
-        <v-list-tile-content>
-          <v-list-tile-title>
-            {{row.metadata.name}}
-            <v-icon v-if="!isOwnSecretBinding(row)">mdi-share</v-icon>
-            <span style="opacity:0.5">({{relatedShootCountLabel(row)}})</span>
-          </v-list-tile-title>
-          <v-list-tile-sub-title>
-            <slot name="rowSubTitle" :data="row.data">{{secretDescriptor(row)}}</slot>
-          </v-list-tile-sub-title>
-        </v-list-tile-content>
-
-        <v-list-tile-action v-if="relatedShootCount(row)===0 && isOwnSecretBinding(row)">
-          <v-btn icon @click.native.stop="onDelete(row)">
-            <v-icon class="red--text">delete</v-icon>
-          </v-btn>
-        </v-list-tile-action>
-
-        <v-list-tile-action v-if="isOwnSecretBinding(row)">
-          <v-btn icon @click.native.stop="onUpdate(row)">
-            <v-icon class="blue--text">edit</v-icon>
-          </v-btn>
-        </v-list-tile-action>
-
-      </v-list-tile>
+      <secret-row
+        v-for="row in rows"
+        :key="row.metadata.name"
+        :secret="row"
+        :secretDescriptorKey="secretDescriptorKey"
+        @update="onUpdate"
+        @delete="onDelete"
+      >
+        <!-- forward slot -->
+        <slot slot="rowSubTitle" name="rowSubTitle" :data="row.data"></slot>
+      </secret-row>
     </v-list>
 
   </v-card>
@@ -69,10 +55,12 @@ limitations under the License.
 
 <script>
   import { mapGetters } from 'vuex'
-  import get from 'lodash/get'
-  import { isOwnSecretBinding } from '@/utils'
+  import SecretRow from '@/components/SecretRow'
 
   export default {
+    components: {
+      SecretRow
+    },
     props: {
       infrastructureKey: {
         type: String,
@@ -105,7 +93,6 @@ limitations under the License.
     },
     computed: {
       ...mapGetters([
-        'shootsByInfrastructureSecret',
         'infrastructureSecretsByInfrastructureKind'
       ]),
       rows () {
@@ -123,35 +110,6 @@ limitations under the License.
       },
       toolbarClass () {
         return `${this.color} elevation-0`
-      },
-      secretDescriptor () {
-        return (secret) => {
-          if (this.isOwnSecretBinding(secret)) {
-            return get(secret, `data.${this.secretDescriptorKey}`)
-          } else {
-            return get(secret, 'metadata.namespace')
-          }
-        }
-      },
-      relatedShootCount () {
-        return (secret) => {
-          return this.shootsByInfrastructureSecret(secret.metadata.name).length
-        }
-      },
-      relatedShootCountLabel () {
-        return (secret) => {
-          const count = this.relatedShootCount(secret)
-          if (count === 0) {
-            return 'currently unused'
-          } else {
-            return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
-          }
-        }
-      },
-      isOwnSecretBinding () {
-        return (secret) => {
-          return isOwnSecretBinding(secret)
-        }
       }
     },
     methods: {

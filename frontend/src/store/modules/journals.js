@@ -72,6 +72,14 @@ const getters = {
 const actions = {
   getCommentsList ({ commit, rootState }, {name, namespace}) {
     return state.comments
+  },
+  clearIssues ({ commit, dispatch }) {
+    commit('CLEAR_ISSUES')
+    return state.all
+  },
+  clearComments ({ commit, dispatch }) {
+    commit('CLEAR_COMMENTS')
+    return state.comments
   }
 }
 
@@ -111,6 +119,9 @@ const mutations = {
       }
     })
     orderJournalsByUpdatedAt()
+  },
+  CLEAR_ISSUES (state) {
+    state.all = []
   },
   CLEAR_COMMENTS (state) {
     state.allComments = {}

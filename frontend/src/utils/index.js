@@ -196,7 +196,7 @@ export function getCloudProviderKind (object) {
 }
 
 export function isOwnSecretBinding (secret) {
-  return get(secret, 'namespace') === get(secret, 'bindingNamespace')
+  return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
 }
 
 const availableK8sUpdatesCache = {}
@@ -263,4 +263,9 @@ export function isUserError (errorCodes) {
     'ERR_INFRA_DEPENDENCIES'
   ]
   return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
+}
+
+export function isReconciliationDeactivated (metadata) {
+  // eslint-disable-next-line
+  return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
 }

@@ -32,7 +32,7 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError } from '@/utils'
+import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -50,25 +50,42 @@ const state = {
   sortedShoots: [],
   sortParams: undefined,
   searchValue: undefined,
-  selection: undefined
+  selection: undefined,
+  hideUserIssues: undefined,
+  hideDeactivatedReconciliation: undefined
 }
 
 // getters
 const getters = {
-  sortedItems (state) {
-    if (state.searchValue) {
-      const predicate = item => {
-        let found = true
-        forEach(state.searchValue, value => {
-          if (!includes(item.metadata.name, value)) {
-            found = false
-          }
-        })
-        return found
+  sortedItems () {
+    return (rootState) => {
+      let items = state.sortedShoots
+      if (state.searchValue) {
+        const predicate = item => {
+          let found = true
+          forEach(state.searchValue, value => {
+            if (!includes(item.metadata.name, value)) {
+              found = false
+            }
+          })
+          return found
+        }
+        items = filter(items, predicate)
       }
-      return filter(state.sortedShoots, predicate)
+      if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+        const predicate = item => {
+          return !isUserError(get(item, 'status.lastError.codes', []))
+        }
+        items = filter(items, predicate)
+      }
+      if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+        const predicate = item => {
+          return !isReconciliationDeactivated(get(item, 'metadata', {}))
+        }
+        items = filter(items, predicate)
+      }
+      return items
     }
-    return state.sortedShoots
   },
   itemByNameAndNamespace () {
     return ({namespace, name}) => {
@@ -79,6 +96,12 @@ const getters = {
     if (state.selection) {
       return findItem(state.selection)
     }
+  },
+  isHideUserIssues () {
+    return state.hideUserIssues
+  },
+  isHideDeactivatedReconciliation () {
+    return state.hideDeactivatedReconciliation
   }
 }
 
@@ -94,11 +117,20 @@ const actions = {
   },
   get ({ dispatch, commit, rootState }, {name, namespace}) {
     const user = rootState.user
-    return getShoot({namespace, name, user})
-      .then(res => {
-        const item = res.data
-        commit('ITEM_PUT', item)
-      })
+
+    const getShootIfNecessary = new Promise(async (resolve, reject) => {
+      if (!findItem({name, namespace})) {
+        getShoot({namespace, name, user})
+        .then(res => {
+          const item = res.data
+          commit('ITEM_PUT', item)
+        }).then(() => resolve())
+        .catch(error => reject(error))
+      } else {
+        resolve()
+      }
+    })
+    return getShootIfNecessary
       .then(() => dispatch('getInfo', {name, namespace}))
       .then(() => findItem({name, namespace}))
       .catch(error => {
@@ -136,16 +168,16 @@ const actions = {
           info.dashboardUrlText = [scheme, host, pathnameAlias].join('')
         }
 
-        if (info.shootIngressDomain) {
+        if (info.seedShootIngressDomain) {
           const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
-          const grafanaHost = `g.${info.shootIngressDomain}`
+          const grafanaHost = `g.${info.seedShootIngressDomain}`
           info.grafanaUrl = `https://${grafanaHost}${grafanaPathname}`
           info.grafanaUrlText = `https://${grafanaHost}`
 
-          const prometheusHost = `p.${info.shootIngressDomain}`
+          const prometheusHost = `p.${info.seedShootIngressDomain}`
           info.prometheusUrl = `https://${prometheusHost}`
 
-          const alertmanagerHost = `a.${info.shootIngressDomain}`
+          const alertmanagerHost = `a.${info.seedShootIngressDomain}`
           info.alertmanagerUrl = `https://${alertmanagerHost}`
         }
         return info
@@ -183,6 +215,14 @@ const actions = {
     if (!isEqual(searchValue, state.searchValue)) {
       commit('SET_SEARCHVALUE', searchValue)
     }
+  },
+  setHideUserIssues ({ commit }, value) {
+    commit('SET_HIDE_USER_ISSUES', value)
+    return state.hideUserIssues
+  },
+  setHideDeactivatedReconciliation ({ commit }, value) {
+    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', value)
+    return state.hideDeactivatedReconciliation
   }
 }
 
@@ -321,7 +361,7 @@ const deleteItem = (state, deletedItem) => {
   const item = findItem(deletedItem.metadata)
   let sortRequired = false
   if (item !== undefined) {
-    delete state.shoots[keyForShoot(item.metadata)]
+    Vue.delete(state.shoots, keyForShoot(item.metadata))
     sortRequired = true
   }
   return sortRequired
@@ -389,6 +429,12 @@ const mutations = {
   CLEAR_ALL (state) {
     state.shoots = {}
     state.sortedShoots = []
+  },
+  SET_HIDE_USER_ISSUES (state, value) {
+    state.hideUserIssues = value
+  },
+  SET_HIDE_DEACTIVATED_RECONCILIATION (state, value) {
+    state.hideDeactivatedReconciliation = value
   }
 }
 

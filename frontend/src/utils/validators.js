@@ -24,13 +24,20 @@ const uppercaseAlphaNumPattern = /^[A-Z0-9]+$/
 const alphaNumUnderscorePattern = /^\w+$/
 const alphaNumUnderscoreHyphenPattern = /^[a-zA-Z0-9-_]+$/
 const resourceNamePattern = /^[a-z0-9](?:[-a-z0-9]*[a-z0-9])?$/
+const consecutiveHyphenPattern = /.?-{2,}.?/
+const startEndHyphenPattern = /^-.*.|.*-$/
 
 const base64 = regex('base64', base64Pattern)
 const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
 const alphaNumUnderscore = regex('alphaNumUnderscore', alphaNumUnderscorePattern)
 const alphaNumUnderscoreHyphen = regex('alphaNumUnderscoreHyphen', alphaNumUnderscoreHyphenPattern)
 const resourceName = regex('resourceName', resourceNamePattern)
-const projectName = regex('projectName', resourceNamePattern)
+const noConsecutiveHyphen = (value) => {
+  return !consecutiveHyphenPattern.test(value)
+}
+const noStartEndHyphen = (value) => {
+  return !startEndHyphenPattern.test(value)
+}
 
 const unique = key => withParams({type: 'unique', key},
   function (value, parentVm) {
@@ -72,8 +79,9 @@ export {
   alphaNumUnderscoreHyphen,
   base64,
   resourceName,
+  noConsecutiveHyphen,
+  noStartEndHyphen,
   serviceAccountKey,
-  projectName,
   minVolumeSize,
   uniqueWorkerName
 }

@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: quay.io/coreos/dex
-  tag: 2.10.0
+  tag: v2.10.0
   pullPolicy: IfNotPresent
 
 containerPort: 5556

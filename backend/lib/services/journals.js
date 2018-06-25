@@ -136,3 +136,4 @@ const commentsForIssueNumber = async function ({issueNumber, name, namespace, ba
       batchFn(commentsBatch)
     }})
 }
+exports.commentsForIssueNumber = commentsForIssueNumber

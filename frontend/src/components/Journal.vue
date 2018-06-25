@@ -15,23 +15,20 @@ limitations under the License.
 -->
 
 <template>
-  <div>
+  <v-card>
     <v-card-title class="subheading white--text cyan darken-2 mt-3 journalTitle">
       Journal {{journalTitle}} <journal-labels :labels="journal.data.labels"></journal-labels>
     </v-card-title>
 
     <v-container>
       <span style="font-weight: 700">{{login}}</span> created this
-      <a :href="journalHtmlUrl" target="_blank">journal</a>
+      <a :href="journalHtmlUrl" target="_blank" class="cyan--text text--darken-2">journal</a>
       <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-ago :dateTime="journal.metadata.created_at"></time-ago>
-    </v-list-tile-title>
     </v-container>
     <v-container grid-list-md>
       <journal-comment :comment="journal"></journal-comment>
-      <span v-for="comment in commentsForJournal" :key="comment.metadata.id">
-        <journal-comment :comment="comment"></journal-comment>
-      </span>
+      <journal-comment v-for="comment in commentsForJournal" :key="comment.metadata.id" :comment="comment"></journal-comment>
     </v-container>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
@@ -41,7 +38,7 @@ limitations under the License.
       </v-btn>
       <v-spacer></v-spacer>
     </v-card-actions>
-  </div>
+  </v-card>
 </template>
 
 

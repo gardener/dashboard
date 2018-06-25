@@ -35,7 +35,19 @@ limitations under the License.
       </machine-type>
     </v-flex>
 
-    <v-flex xs1 class="ml-5">
+    <v-flex xs1 class="ml-3">
+      <v-text-field
+        min="1"
+        color="cyan"
+        :error-messages="getErrorMessages('worker.autoScalerMin')"
+        @input="$v.worker.autoScalerMin.$touch()"
+        @blur="$v.worker.autoScalerMin.$touch()"
+        type="number"
+        v-model="innerMin"
+        label="Autoscaler Min."></v-text-field>
+    </v-flex>
+
+    <v-flex xs1 class="ml-3">
       <v-text-field
         min="1"
         color="cyan"
@@ -44,7 +56,7 @@ limitations under the License.
         @blur="$v.worker.autoScalerMax.$touch()"
         type="number"
         v-model="innerMax"
-        label="Node Count"
+        label="Max."
       ></v-text-field>
     </v-flex>
 
@@ -70,8 +82,11 @@ limitations under the License.
         required: 'You can\'t leave this empty.',
         uniqueWorkerName: 'Name is taken. Try another.'
       },
+      autoScalerMin: {
+        minValue: 'Invalid value'
+      },
       autoScalerMax: {
-        minValue: 'Invalid node count'
+        minValue: 'Invalid value'
       }
     }
   }
@@ -81,6 +96,9 @@ limitations under the License.
       name: {
         required,
         uniqueWorkerName
+      },
+      autoScalerMin: {
+        minValue: minValue(1)
       },
       autoScalerMax: {
         minValue: minValue(1)
@@ -105,12 +123,12 @@ limitations under the License.
         type: String
       }
     },
-    validations,
     data () {
       return {
         validationErrors
       }
     },
+    validations,
     computed: {
       ...mapGetters([
         'machineTypesByCloudProfileName'
@@ -119,15 +137,26 @@ limitations under the License.
       machineTypes () {
         return this.machineTypesByCloudProfileName(this.cloudProfileName)
       },
-
+      innerMin: {
+        get: function () {
+          return Math.max(1, this.worker.autoScalerMin)
+        },
+        set: function (value) {
+          this.worker.autoScalerMin = Math.max(1, parseInt(value))
+          if (this.innerMax < this.worker.autoScalerMin) {
+            this.worker.autoScalerMax = this.worker.autoScalerMin
+          }
+        }
+      },
       innerMax: {
         get: function () {
           return Math.max(1, this.worker.autoScalerMax)
         },
         set: function (value) {
           this.worker.autoScalerMax = Math.max(1, parseInt(value))
-          // min/max must be the same in OpenStack
-          this.worker.autoScalerMin = this.worker.autoScalerMax
+          if (this.innerMin > this.worker.autoScalerMax) {
+            this.worker.autoScalerMin = this.worker.autoScalerMax
+          }
         }
       }
     },

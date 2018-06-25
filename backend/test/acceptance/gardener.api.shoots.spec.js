@@ -149,7 +149,7 @@ describe('gardener', function () {
         const shootPassword = 'shootFooPwd'
         const seedClusterName = `${region}.${kind}.example.org`
         const shootServerUrl = 'https://seed.foo.bar:443'
-        const shootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
+        const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
 
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
@@ -165,7 +165,7 @@ describe('gardener', function () {
             expect(res.body.username).to.eql(shootUser)
             expect(res.body.password).to.eql(shootPassword)
             expect(res.body.serverUrl).to.eql(shootServerUrl)
-            expect(res.body.shootIngressDomain).to.eql(shootIngressDomain)
+            expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
           })
       })
 

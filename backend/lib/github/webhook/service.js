@@ -19,18 +19,38 @@
 const _ = require('lodash')
 const { journals } = require('../../services')
 const { getJournalCache } = require('../../cache')
+const logger = require('../../logger')
 
-exports.processIssue = function ({action, issue}) {
+exports.processIssue = async function ({action, issue}) {
   issue = journals.fromIssue(issue)
 
   if (action === 'closed') {
     getJournalCache().removeIssue({issue})
   } else {
     getJournalCache().addOrUpdateIssue({issue})
+
+    const hasComments = _.get(issue, 'data.comments', 0) > 0
+    if (action === 'reopened' && hasComments) {
+      const issueNumber = _.get(issue, 'metadata.number')
+      const batchFn = comments => {
+        logger.debug('fetched %s comments (batch) for issue %s', comments.length, issueNumber)
+        _.forEach(comments, comment => getJournalCache().addOrUpdateComment({issueNumber, comment}))
+      }
+      try {
+        await journals.commentsForIssueNumber({
+          issueNumber,
+          name: _.get(issue, 'metadata.name'),
+          namespace: _.get(issue, 'metadata.namespace'),
+          batchFn
+        })
+      } catch (error) {
+        logger.error('failed to fetch comments for reopened issue %s: %s', issueNumber, error)
+      }
+    }
   }
 }
 
-const processComment = function ({action, issue, comment}) {
+const processComment = ({action, issue, comment}) => {
   issue = journals.fromIssue(issue)
   const issueNumber = _.get(issue, 'metadata.number')
   const name = _.get(issue, 'metadata.name')
