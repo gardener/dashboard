@@ -45,6 +45,16 @@ router.route('/')
   })
 
 router.route('/:name')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await members.get({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
+  })
   .delete(async (req, res, next) => {
     try {
       const user = req.user

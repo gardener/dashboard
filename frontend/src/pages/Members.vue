@@ -100,21 +100,98 @@ limitations under the License.
         </template>
       </v-list>
     </v-card>
-    <member-dialog v-model="dialog"></member-dialog>
-    <v-fab-transition>
+
+    <v-card class="mr-extra mt-4">
+      <v-toolbar card color="blue-grey">
+        <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
+        <v-toolbar-title class="subheading white--text">
+          Service Accounts
+        </v-toolbar-title>
+      </v-toolbar>
+
+      <v-card-text v-if="!serviceAccountList.length">
+        <div class="title grey--text text--darken-1 my-3">Add service accounts to your project.</div>
+        <p class="body-1">
+          Adding service accounts to your project allows you to automate processes in your project.
+          Service accounts have full access to all resources within your project.
+        </p>
+      </v-card-text>
+      <v-list two-line subheader v-else>
+        <template v-for="(name, index) in serviceAccountList">
+          <v-divider
+            v-if="index > 0"
+            inset
+            :key="`${name}-dividerKey`"
+          ></v-divider>
+          <v-list-tile
+            avatar
+            :key="name"
+          >
+
+            <v-list-tile-avatar>
+              <img :src="`https://robohash.org/${name}`" />
+            </v-list-tile-avatar>
+            <v-list-tile-content>
+              <v-list-tile-title>
+                {{name.replace(/^system:serviceaccount:[^:]+:/, '').toUpperCase()}}
+              </v-list-tile-title>
+              <v-list-tile-sub-title>
+                {{name}}
+              </v-list-tile-sub-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-btn icon class="grey--text" @click.native.stop="onDownload(name)">
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-btn icon class="red--text" @click.native.stop="onDelete(name)">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+        </template>
+      </v-list>
+    </v-card>
+
+    <member-dialog v-model="memberDialog"></member-dialog>
+    <service-account-dialog v-model="serviceaccountDialog"></service-account-dialog>
+    <v-speed-dial
+      v-model="fab"
+      fixed
+      bottom
+      right
+      direction="top"
+      transition="slide-y-reverse-transition"
+    >
       <v-btn
-        fixed
+        slot="activator"
+        v-model="fab"
+        color="green darken-1"
         dark
         fab
-        bottom
-        right
-        v-show="floatingButton"
-        class="green darken-1"
-        @click.native.stop="dialog = true"
       >
         <v-icon>add</v-icon>
+        <v-icon>close</v-icon>
       </v-btn>
-    </v-fab-transition>
+      <v-btn
+        fab
+        small
+        color="grey lighten-2"
+        @click.native.stop="openMemberDialog"
+      >
+        <v-icon color="green darken-2">person</v-icon>
+      </v-btn>
+      <v-btn
+        fab
+        small
+        color="grey lighten-2"
+        light
+        @click.native.stop="openServiceaccountDialog"
+      >
+        <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
+      </v-btn>
+    </v-speed-dial>
   </v-container>
 </template>
 
@@ -123,22 +200,28 @@ limitations under the License.
   import toLower from 'lodash/toLower'
   import replace from 'lodash/replace'
   import sortBy from 'lodash/sortBy'
+  import startsWith from 'lodash/startsWith'
   import find from 'lodash/find'
+  import download from 'downloadjs'
   import filter from 'lodash/filter'
   import MemberDialog from '@/dialogs/MemberDialog'
+  import ServiceAccountDialog from '@/dialogs/ServiceAccountDialog'
   import { mapState, mapActions, mapGetters } from 'vuex'
   import { emailToDisplayName, gravatar } from '@/utils'
+  import { getMember } from '@/utils/api'
 
   export default {
     name: 'members',
     components: {
-      MemberDialog
+      MemberDialog,
+      ServiceAccountDialog
     },
     data () {
       return {
-        dialog: false,
+        memberDialog: false,
+        serviceaccountDialog: false,
         filter: '',
-        floatingButton: false
+        fab: false
       }
     },
     computed: {
@@ -160,8 +243,12 @@ limitations under the License.
       owner () {
         return toLower(this.projectData.owner)
       },
+      serviceAccountList () {
+        const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
+        return filter(this.memberList, predicate)
+      },
       memberListWithoutOwner () {
-        const predicate = email => !this.isOwner(email)
+        const predicate = username => !this.isOwner(username) && !startsWith(username, 'system:serviceaccount:')
         return filter(this.memberList, predicate)
       },
       sortedAndFilteredMemberList () {
@@ -178,8 +265,15 @@ limitations under the License.
     methods: {
       ...mapActions([
         'addMember',
-        'deleteMember'
+        'deleteMember',
+        'setError'
       ]),
+      openMemberDialog () {
+        this.memberDialog = true
+      },
+      openServiceaccountDialog () {
+        this.serviceaccountDialog = true
+      },
       displayName (email) {
         return emailToDisplayName(email)
       },
@@ -189,12 +283,19 @@ limitations under the License.
       avatar (email) {
         return gravatar(email)
       },
-      onDelete (email) {
-        this.deleteMember(email)
+      async onDownload (name) {
+        const namespace = this.namespace
+        const user = this.user
+        try {
+          const {data} = await getMember({namespace, name, user})
+          download(data.kubeconfig, 'kubeconfig.yaml', 'text/plain')
+        } catch (err) {
+          this.setError(err)
+        }
+      },
+      onDelete (username) {
+        this.deleteMember(username)
       }
-    },
-    mounted () {
-      this.floatingButton = true
     }
   }
 </script>

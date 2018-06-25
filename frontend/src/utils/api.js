@@ -147,6 +147,10 @@ export function addMember ({namespace, user, data}) {
   return createResource(`/api/namespaces/${namespace}/members`, user, data)
 }
 
+export function getMember ({namespace, name, user}) {
+  return getResource(`/api/namespaces/${namespace}/members/${name}`, user)
+}
+
 export function deleteMember ({namespace, name, user}) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`, user)
 }

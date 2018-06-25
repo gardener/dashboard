@@ -50,9 +50,19 @@ const infrastructureSecretList = [
 ]
 
 const projectMembersList = [
-  getProjectMembers('garden-foo', ['foo@example.org', 'bar@example.org']),
+  getProjectMembers('garden-foo', ['foo@example.org', 'bar@example.org', 'system:serviceaccount:garden-foo:robot']),
   getProjectMembers('garden-bar', ['bar@example.org', 'foo@example.org']),
   getProjectMembers('garden-secret', ['admin@example.org'])
+]
+
+const serviceAccountList = [
+  getServiceAccount('garden-foo', 'robot-foo'),
+  getServiceAccount('garden-bar', 'robot-bar')
+]
+
+const serviceAccountSecretList = [
+  getServiceAccountSecret('garden-foo', 'robot-foo'),
+  getServiceAccountSecret('garden-bar', 'robot-bar')
 ]
 
 const gardenAdministrators = getAdministrators(['admin@example.org'])
@@ -79,6 +89,38 @@ function getSecretBinding (name, namespace, profileName, secretRefName, secretRe
   }
 
   return secretBinding
+}
+
+function getServiceAccount (namespace, name) {
+  const suffix = Buffer.from(name, 'utf8').toString('hex').substring(0, 5)
+  const secret = {
+    name: `${name}-token-${suffix}`
+  }
+  const metadata = {
+    name,
+    namespace
+  }
+  return {
+    metadata,
+    secrets: [secret]
+  }
+}
+
+function getServiceAccountSecret (namespace, serviceAccountName) {
+  const suffix = Buffer.from(serviceAccountName, 'utf8').toString('hex').substring(0, 5)
+  const name = `${serviceAccountName}-token-${suffix}`
+  const metadata = {
+    name,
+    namespace
+  }
+  const data = {}
+  data['ca.crt'] = encodeBase64('ca.crt')
+  data['namespace'] = encodeBase64(namespace)
+  data['token'] = encodeBase64(name)
+  return {
+    metadata,
+    data
+  }
 }
 
 function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, bindingName, bindingNamespace, cloudProfileName}) {
@@ -635,6 +677,21 @@ const stub = {
           return true
         })
         .reply(200, () => newRoleBinding)
+    }
+    return scope
+  },
+  getMember ({bearer, namespace, name}) {
+    const scope = nockWithAuthorization(bearer)
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+    if (serviceAccountNamespace === namespace) {
+      const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
+      const serviceAccountSecretName = _.first(serviceAccount.secrets).name
+      const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
+      scope
+        .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
+        .reply(200, serviceAccount)
+        .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
+        .reply(200, serviceAccountSecret)
     }
     return scope
   },

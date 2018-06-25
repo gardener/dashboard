@@ -81,6 +81,25 @@ describe('gardener', function () {
           })
       })
 
+      it('should return a service account', function () {
+        const serviceAccountName = 'robot-foo'
+        const name = `system:serviceaccount:${namespace}:${serviceAccountName}`
+        oidc.stub.getKeys()
+        k8s.stub.getMember({bearer, namespace, name})
+        return chai.request(app)
+          .get(`/api/namespaces/${namespace}/members/${name}`)
+          .set('authorization', `Bearer ${bearer}`)
+          .send({metadata, name})
+          .catch(err => err.response)
+          .then(res => {
+            expect(res).to.have.status(200)
+            expect(res).to.be.json
+            expect(res.body.name).to.equal(name)
+            expect(res.body.kind).to.equal('ServiceAccount')
+            expect(res.body).to.have.property('kubeconfigData')
+          })
+      })
+
       it('should add a project member', function () {
         const name = 'baz@example.org'
         oidc.stub.getKeys()

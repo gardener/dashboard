@@ -17,6 +17,8 @@
 'use strict'
 
 const _ = require('lodash')
+const yaml = require('js-yaml')
+const { decodeBase64, encodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const Resources = require('../kubernetes/Resources')
 
@@ -26,12 +28,49 @@ function Rbac ({auth}) {
   return kubernetes.rbac({auth})
 }
 
+function Core ({auth}) {
+  return kubernetes.core({auth})
+}
+
 function fromResource ({subjects} = {}) {
   return _
     .chain(subjects)
     .filter(['kind', 'User'])
     .map('name')
     .value()
+}
+
+function getKubeconfig ({serviceaccountName, token, server, caData}) {
+  const clusterName = 'garden'
+  const cluster = {
+    'certificate-authority-data': caData,
+    server
+  }
+  const userName = serviceaccountName
+  const user = {
+    token
+  }
+  const contextName = 'default'
+  const context = {
+    cluster: clusterName,
+    user: userName
+  }
+  return yaml.safeDump({
+    kind: 'Config',
+    clusters: [{
+      cluster,
+      name: clusterName
+    }],
+    users: [{
+      user,
+      name: userName
+    }],
+    contexts: [{
+      context,
+      name: contextName
+    }],
+    'current-context': contextName
+  })
 }
 
 function roleBindingBody (namespace, usernames = []) {
@@ -75,6 +114,31 @@ function createRoleBinding (rbac, namespace, names = []) {
   return rbac.namespaces(namespace).rolebindings.post({
     body: roleBindingBody(namespace, names)
   })
+}
+
+function createServiceaccount (core, namespace, name) {
+  const body = {metadata: {name, namespace}}
+  return core.namespaces(namespace).serviceaccounts.post({
+    body
+  })
+    .catch(err => {
+      if (err.code === 409) {
+        return body
+      }
+      throw err
+    })
+}
+
+function deleteServiceaccount (core, namespace, name) {
+  return core.namespaces(namespace).serviceaccounts.delete({
+    name
+  })
+    .catch(err => {
+      if (err.code === 404 || err.code === 410) {
+        return {metadata: {name, namespace}}
+      }
+      throw err
+    })
 }
 
 async function setRoleBindingSubject (rbac, namespace, name) {
@@ -141,11 +205,48 @@ exports.list = async function ({user, namespace}) {
 }
 
 exports.create = async function ({user, namespace, body: {name: username}}) {
+  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  if (serviceaccountNamespace === namespace) {
+    const core = Core(user)
+    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName)
+  }
   const rbac = Rbac(user)
-  return fromResource(await setRoleBindingSubject(rbac, namespace, username))
+  const roleBinding = await setRoleBindingSubject(rbac, namespace, username)
+  return fromResource(roleBinding)
+}
+
+exports.get = async function ({user, namespace, name: username}) {
+  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  const member = {
+    name: username,
+    kind: 'User'
+  }
+  if (serviceaccountNamespace === namespace) {
+    const core = Core(user)
+    const ns = core.namespaces(namespace)
+    const serviceaccount = await ns.serviceaccounts.get({
+      name: serviceaccountName
+    })
+    const api = ns.serviceaccounts.api
+    const server = api.url
+    const secret = await ns.secrets.get({
+      name: _.first(serviceaccount.secrets).name
+    })
+    const token = decodeBase64(secret.data.token)
+    const caData = secret.data['ca.crt']
+    member.kind = 'ServiceAccount'
+    member.kubeconfig = getKubeconfig({serviceaccountName, token, caData, server})
+  }
+  return member
 }
 
 exports.remove = async function ({user, namespace, name: username}) {
   const rbac = Rbac(user)
-  return fromResource(await unsetRoleBindingSubject(rbac, namespace, username))
+  const roleBinding = await unsetRoleBindingSubject(rbac, namespace, username)
+  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  if (serviceaccountNamespace === namespace) {
+    const core = Core(user)
+    await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
+  }
+  return fromResource(roleBinding)
 }
