@@ -359,7 +359,7 @@ export default function createRouter ({store, userManager}) {
             itemNamespace = itemNamespace || namespace
             return Promise
               .all([
-                store.dispatch('fetchShoot', {name: params.name, namespace: itemNamespace}),
+                store.dispatch('subscribeShoot', {name: params.name, namespace: itemNamespace}),
                 store.dispatch('subscribeComments', {name: params.name, namespace: itemNamespace})
               ])
               .then(() => undefined)

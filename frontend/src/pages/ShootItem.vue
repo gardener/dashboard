@@ -209,8 +209,10 @@ limitations under the License.
           </v-flex>
 
           <v-flex md6 v-show="isInfoAvailable">
+            <status-card :shootItem="item"></status-card>
+
             <v-card>
-              <v-card-title class="subheading white--text cyan darken-2">
+              <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Kube-Cluster Access
               </v-card-title>
               <cluster-access ref="clusterAccess" :info="info"></cluster-access>
@@ -270,6 +272,7 @@ limitations under the License.
   import Journals from '@/components/Journals'
   import TimeAgo from '@/components/TimeAgo'
   import ShootVersion from '@/components/ShootVersion'
+  import StatusCard from '@/components/StatusCard'
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
@@ -284,7 +287,8 @@ limitations under the License.
       ShootEditor,
       Journals,
       TimeAgo,
-      ShootVersion
+      ShootVersion,
+      StatusCard
     },
     data () {
       return {

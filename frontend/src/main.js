@@ -45,7 +45,7 @@ if (version === false) {
       {default: store},
       {default: router},
       {default: axios},
-      {default: Oidc}
+      Oidc
     ]) => axios
       .get('/config.json')
       .then(({data}) => store.dispatch('setConfiguration', data))

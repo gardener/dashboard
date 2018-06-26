@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType">
+  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <div slot="popperRef" style="display: inline-block;">
       <v-tooltip top>
         <template slot="activator">
@@ -42,21 +42,11 @@ limitations under the License.
         <v-divider class="my-2"></v-divider>
         <h4 class="error--text text-xs-left">Last Error</h4>
         <template v-for="errorCodeDescription in errorCodeDescriptions">
-          <h3 class="error--text text-xs-left">{{errorCodeDescription}}</h3>
+          <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
         </template>
         <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
       </template>
     </template>
-    <v-toolbar slot="toolbar" v-if="canRetry" flat color="white" dense>
-      <v-spacer></v-spacer>
-      <v-tooltip top>
-        <v-btn slot="activator" flat class="cyan--text text--darken-2" @click="retry">
-          Retry
-          <v-icon>mdi-reload</v-icon>
-        </v-btn>
-        Retry Operation
-      </v-tooltip>
-    </v-toolbar>
   </g-popper>
 </template>
 
@@ -107,13 +97,12 @@ limitations under the License.
         type: Boolean,
         default: false
       },
-      canRetry: {
-        type: Boolean,
-        default: false
-      },
       reconciliationDeactivated: {
         type: Boolean,
         default: false
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {
@@ -138,6 +127,9 @@ limitations under the License.
       errorCodeShortDescriptions () {
         return map(this.errorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
       },
+      errorCodeShortDescriptionsText () {
+        return join(this.errorCodeShortDescriptions, ', ')
+      },
       popperKeyWithType () {
         return `shootStatus_${this.popperKey}`
       },
@@ -147,9 +139,15 @@ limitations under the License.
           popperTitle = popperTitle.concat('Hibernated; ')
         }
         if (this.reconciliationDeactivated) {
-          return popperTitle.concat('Reconciliation Deactivated')
+          popperTitle = popperTitle.concat('Reconciliation Deactivated')
+
+          this.emitExtendedTitle(popperTitle)
+          return popperTitle
         }
-        return popperTitle.concat(`${this.operationType} ${this.operationState}`)
+        popperTitle = popperTitle.concat(`${this.operationType} ${this.operationState}`)
+
+        this.emitExtendedTitle(popperTitle)
+        return popperTitle
       },
       tooltipText () {
         let tooltipText = this.popperTitle
@@ -157,8 +155,9 @@ limitations under the License.
           tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
         }
         if (this.isUserError) {
-          tooltipText = tooltipText.concat(`; ${join(this.errorCodeShortDescriptions, ', ')}`)
+          tooltipText = tooltipText.concat(`; ${this.errorCodeShortDescriptionsText}`)
         }
+
         return tooltipText
       },
       popperMessage () {
@@ -184,8 +183,14 @@ limitations under the License.
       }
     },
     methods: {
-      retry () {
-        this.$emit('retryOperation')
+      emitExtendedTitle (title) {
+        // similar to tooltipText, except the progress is missing
+        let extendedTitle = title
+        if (this.isUserError) {
+          extendedTitle = extendedTitle.concat(`; ${this.errorCodeShortDescriptionsText}`)
+        }
+
+        this.$emit('titleChange', extendedTitle)
       }
     }
   }

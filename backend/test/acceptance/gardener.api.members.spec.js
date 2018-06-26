@@ -96,7 +96,7 @@ describe('gardener', function () {
             expect(res).to.be.json
             expect(res.body.name).to.equal(name)
             expect(res.body.kind).to.equal('ServiceAccount')
-            expect(res.body).to.have.property('kubeconfigData')
+            expect(res.body).to.have.property('kubeconfig')
           })
       })
 

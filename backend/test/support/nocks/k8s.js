@@ -22,14 +22,41 @@ const yaml = require('js-yaml')
 
 const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
+const jwt = require('jsonwebtoken')
 const clientConfig = credentials()
 const url = clientConfig.url
 const auth = clientConfig.auth
 
+const quotas = [
+  {
+    name: 'foo-quota1',
+    namespace: 'garden-foo'
+  },
+  {
+    name: 'foo-quota2',
+    namespace: 'garden-foo'
+  }
+]
+
+const quotaObject = {
+  kind: 'Quota',
+  metadata: {
+    name: 'trial-secret-quota',
+    namespace: 'garden-trial'
+  },
+  spec: {
+    scope: 'secret',
+    clusterLifetimeDays: 14,
+    metrics: {
+      cpu: '200'
+    }
+  }
+}
+
 const secretBindingList = [
-  getSecretBinding('foo-infra1', 'garden-foo', 'infra1-profileName', 'garden-foo', 'secret1'),
-  getSecretBinding('foo-infra3', 'garden-foo', 'infra3-profileName', 'garden-foo', 'secret2'),
-  getSecretBinding('trial-infra1', 'garden-foo', 'infra1-profileName', 'garden-trial', 'trial-secret')
+  getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'garden-foo', 'secret1', quotas),
+  getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'garden-foo', 'secret2', quotas),
+  getSecretBinding('garden-foo', 'trial-infra1', 'infra1-profileName', 'garden-trial', 'trial-secret', quotas)
 ]
 
 const projectList = [
@@ -39,14 +66,38 @@ const projectList = [
 ]
 
 const shootList = [
-  getShoot({name: 'fooShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', bindingName: 'fooSecretName'}),
-  getShoot({name: 'barShoot', project: 'fooProject', createdBy: 'barCreator', purpose: 'barPurpose', bindingName: 'barSecretName'}),
-  getShoot({name: 'dummyShoot', project: 'fooProject', createdBy: 'fooCreator', purpose: 'fooPurpose', bindingName: 'barSecretName'})
+  getShoot({
+    name: 'fooShoot',
+    namespace: 'garden-foo',
+    createdBy: 'fooCreator',
+    purpose: 'fooPurpose',
+    bindingName: 'fooSecretName'
+  }),
+  getShoot({
+    name: 'barShoot',
+    namespace: 'garden-foo',
+    createdBy: 'barCreator',
+    purpose: 'barPurpose',
+    bindingName: 'barSecretName'
+  }),
+  getShoot({
+    name: 'dummyShoot',
+    namespace: 'garden-foo',
+    createdBy: 'fooCreator',
+    purpose: 'fooPurpose',
+    bindingName: 'barSecretName'
+  })
 ]
 
 const infrastructureSecretList = [
-  getInfrastructureSecret('foo', 'secret1', 'infra1-profileName', {fooKey: 'fooKey', fooSecret: 'fooSecret'}),
-  getInfrastructureSecret('foo', 'secret2', 'infra2-profileName', {fooKey: 'fooKey', fooSecret: 'fooSecret'})
+  getInfrastructureSecret('garden-foo', 'secret1', 'infra1-profileName', {
+    fooKey: 'fooKey',
+    fooSecret: 'fooSecret'
+  }),
+  getInfrastructureSecret('garden-foo', 'secret2', 'infra2-profileName', {
+    fooKey: 'fooKey',
+    fooSecret: 'fooSecret'
+  })
 ]
 
 const projectMembersList = [
@@ -65,13 +116,13 @@ const serviceAccountSecretList = [
   getServiceAccountSecret('garden-bar', 'robot-bar')
 ]
 
-const gardenAdministrators = getAdministrators(['admin@example.org'])
+const gardenAdministrators = ['admin@example.org']
 
 const certificateAuthorityData = encodeBase64('certificate-authority-data')
 const clientCertificateData = encodeBase64('client-certificate-data')
 const clientKeyData = encodeBase64('client-key-data')
 
-function getSecretBinding (name, namespace, profileName, secretRefName, secretRefNamespace, quotas = {}) {
+function getSecretBinding (namespace, name, profileName, secretRefName, secretRefNamespace, quotas = []) {
   const secretBinding = {
     kind: 'SecretBinding',
     metadata: {
@@ -153,19 +204,16 @@ function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, b
   return {metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret}
 }
 
-function getAdministrators (users) {
-  const apiGroup = 'rbac.authorization.k8s.io'
-  return {
-    metadata: {
-      name: 'garden-administrators'
-    },
-    roleRef: {
-      apiGroup,
-      kind: 'ClusterRole',
-      name: 'garden.sapcloud.io:system:project-member'
-    },
-    subjects: _.map(users, getRoleBindingSubject)
-  }
+function validateCanDeleteShootsInAllNamespacesRequest (selfSubjectAccessReview) {
+  const {namespace, verb, resource, group} = selfSubjectAccessReview.spec.resourceAttributes
+  return !namespace && group === 'garden.sapcloud.io' && resource === 'shoots' && verb === 'delete'
+}
+
+function canDeleteShootsInAllNamespacesReply (uri, selfSubjectAccessReview) {
+  const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+  const payload = jwt.decode(token)
+  const allowed = _.includes(gardenAdministrators, payload.email)
+  return [200, _.assign({}, selfSubjectAccessReview, {status: {allowed}})]
 }
 
 function getProjectMembers (namespace, users) {
@@ -204,11 +252,11 @@ function readProjectMembers (namespace) {
     .value()
 }
 
-function getInfrastructureSecret (project, name, profileName, data = {}) {
+function getInfrastructureSecret (namespace, name, profileName, data = {}) {
   return {
     metadata: {
       name,
-      namespace: `garden-${project}`,
+      namespace,
       labels: {
         'cloudprofile.garden.sapcloud.io/name': profileName
       }
@@ -236,8 +284,8 @@ function getProject (name, owner, createdBy, description, purpose) {
 }
 
 function getShoot ({
+  namespace,
   name,
-  project,
   createdBy,
   purpose = 'foo-purpose',
   kind = 'fooInfra',
@@ -249,7 +297,7 @@ function getShoot ({
   const shoot = {
     metadata: {
       name,
-      namespace: `garden-${project}`,
+      namespace,
       annotations: {
         'garden.sapcloud.io/purpose': purpose
       }
@@ -261,7 +309,7 @@ function getShoot ({
         seed,
         secretBindingRef: {
           name: bindingName,
-          namespace: `garden-${project}`
+          namespace
         }
       }
     }
@@ -316,8 +364,8 @@ const stub = {
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, shoots)
   },
-  getShoot ({bearer, namespace, name, project, createdBy, purpose, kind, profile, region, bindingName}) {
-    const shoot = getShoot({name, project, createdBy, purpose, kind, profile, region, bindingName})
+  getShoot ({bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName}) {
+    const shoot = getShoot({namespace, name, createdBy, purpose, kind, profile, region, bindingName})
 
     return nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -347,6 +395,11 @@ const stub = {
     const result = {metadata}
 
     return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        _.assign(metadata, body.metadata)
+        return true
+      })
+      .reply(200)
       .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -415,15 +468,38 @@ const stub = {
       .reply(200, () => shoot)
   },
   getInfrastructureSecrets ({bearer, namespace, empty = false}) {
-    return nockWithAuthorization(bearer)
+    const secretBindings = !empty
+      ? _.filter(secretBindingList, ['metadata.namespace', namespace])
+      : []
+    const infrastructureSecrets = !empty
+      ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
+      : []
+    const userScope = nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
-        items: empty ? [] : secretBindingList
+        items: secretBindings
       })
       .get(`/api/v1/namespaces/${namespace}/secrets`)
       .reply(200, {
-        items: empty ? [] : infrastructureSecretList
+        items: infrastructureSecrets
       })
+    const adminScope = nockWithAuthorization(auth.bearer)
+
+    if (!empty) {
+      _
+        .chain(secretBindings)
+        .map(secretBinding => secretBinding.quotas)
+        .flatten()
+        .uniqBy(quota => `${quota.namespace}/${quota.name}`)
+        .forEach(quota => {
+          adminScope
+            .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${quota.namespace}/quotas/${quota.name}`)
+            .reply(200, quotaObject)
+        })
+        .commit()
+    }
+
+    return [userScope, adminScope]
   },
   createInfrastructureSecret ({bearer, namespace, data, cloudProfileName, resourceVersion = 42}) {
     const {
@@ -552,24 +628,27 @@ const stub = {
         items: [shoot, referencingShoot]
       })
   },
-  getProjects () {
-    return nockWithAuthorization(auth.bearer)
-      .get('/api/v1/namespaces')
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=project'
-      })
-      .reply(200, {
-        items: projectList
-      })
-      .get('/apis/rbac.authorization.k8s.io/v1/rolebindings')
-      .query({
-        labelSelector: 'garden.sapcloud.io/role=members'
-      })
-      .reply(200, {
-        items: projectMembersList
-      })
-      .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-      .reply(200, gardenAdministrators)
+  getProjects ({bearer}) {
+    return [
+      nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
+        .reply(canDeleteShootsInAllNamespacesReply),
+      nockWithAuthorization(auth.bearer)
+        .get('/api/v1/namespaces')
+        .query({
+          labelSelector: 'garden.sapcloud.io/role=project'
+        })
+        .reply(200, {
+          items: projectList
+        })
+        .get('/apis/rbac.authorization.k8s.io/v1/rolebindings')
+        .query({
+          labelSelector: 'garden.sapcloud.io/role=members'
+        })
+        .reply(200, {
+          items: projectMembersList
+        })
+    ]
   },
   getProject ({bearer, namespace, resourceVersion = 42, unauthorized = false}) {
     const roleBinding = readProjectMembers(namespace)
@@ -584,14 +663,11 @@ const stub = {
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => result)
     }
-    return [
-      scope
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
-      nockWithAuthorization(bearer)
-        .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-        .reply(200, roleBinding)
-    ]
+    return nockWithAuthorization(bearer)
+      .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
+      .reply(canDeleteShootsInAllNamespacesReply)
+      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
+      .reply(200, roleBinding)
   },
   createProject ({bearer, namespace, username, resourceVersion = 42}) {
     const result = {
@@ -629,10 +705,10 @@ const stub = {
           _.merge(result.metadata, body.metadata)
           return true
         })
-        .reply(200, () => result)
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
+        .reply(200, () => result),
       nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
+        .reply(canDeleteShootsInAllNamespacesReply)
         .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
         .reply(200, roleBinding)
     ]
@@ -643,10 +719,10 @@ const stub = {
     return [
       nockWithAuthorization(auth.bearer)
         .delete(`/api/v1/namespaces/${namespace}`)
-        .reply(200)
-        .get('/apis/rbac.authorization.k8s.io/v1/clusterrolebindings/garden-administrators')
-        .reply(200, gardenAdministrators),
+        .reply(200),
       nockWithAuthorization(bearer)
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
+        .reply(canDeleteShootsInAllNamespacesReply)
         .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
         .reply(200, roleBinding)
         .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)

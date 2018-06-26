@@ -15,25 +15,29 @@ limitations under the License.
 -->
 
 <template>
-  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType"></tag>
+  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType" :popperPlacement="popperPlacement"></tag>
 </template>
 
 <script>
   import split from 'lodash/split'
   import Tag from '@/components/Tag'
+  import replace from 'lodash/replace'
 
   export default {
     components: {
       Tag
     },
     props: {
-      tag: {
+      condition: {
         type: Object,
         required: true
       },
       popperKey: {
         type: String,
         required: true
+      },
+      popperPlacement: {
+        type: String
       }
     },
     computed: {
@@ -71,6 +75,23 @@ limitations under the License.
       },
       popperKeyWithType () {
         return `statusTag_${this.popperKey}`
+      },
+      tag () {
+        const {lastTransitionTime, message, status, type} = this.condition
+        const id = type
+        let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
+        switch (type) {
+          case 'ControlPlaneHealthy':
+            text = 'Control Plane'
+            break
+          case 'SystemComponentsHealthy':
+            text = 'System Components'
+            break
+          case 'EveryNodeReady':
+            text = 'Nodes'
+            break
+        }
+        return {id, text, message, lastTransitionTime, status}
       }
     }
   }

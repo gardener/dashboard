@@ -21,6 +21,7 @@ const BaseObject = require('kubernetes-client/lib/base')
 BaseObject.prototype.watch = require('./watch')
 BaseObject.prototype.mergePatch = mergePatch
 BaseObject.prototype.jsonPatch = jsonPatch
+const ApiGroup = require('kubernetes-client/lib/api-group')
 const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
@@ -128,9 +129,25 @@ module.exports = {
         Resources.Shoot.name,
         Resources.Seed.name,
         Resources.CloudProfile.name,
-        Resources.SecretBinding.name
+        Resources.SecretBinding.name,
+        Resources.Quota.name
       ]
     })
     return new CustomResourceDefinitions(credentials(options))
+  },
+  authorization (options) {
+    options = assign(options, {
+      path: 'apis/authorization.k8s.io',
+      version: 'v1',
+      namespaceResources: [
+        'localsubjectaccessreviews'
+      ],
+      groupResources: [
+        'selfsubjectaccessreviews',
+        'selfsubjectrulesreviews',
+        'subjectaccessreviews'
+      ]
+    })
+    return new ApiGroup(credentials(options))
   }
 }

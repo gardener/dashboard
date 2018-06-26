@@ -52,7 +52,7 @@ describe('gardener', function () {
 
       it('should return two projects', function () {
         oidc.stub.getKeys()
-        k8s.stub.getProjects()
+        k8s.stub.getProjects({bearer})
         return chai.request(app)
           .get('/api/namespaces')
           .set('authorization', `Bearer ${bearer}`)
@@ -66,7 +66,7 @@ describe('gardener', function () {
 
       it('should return all projects', function () {
         oidc.stub.getKeys()
-        k8s.stub.getProjects()
+        k8s.stub.getProjects({bearer: adminBearer})
         return chai.request(app)
           .get('/api/namespaces')
           .set('authorization', `Bearer ${adminBearer}`)

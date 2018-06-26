@@ -54,6 +54,10 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
+{{- if .Values.prometheus }}
+    prometheus:
+      secret: {{ .Values.prometheus.secret }}
+{{- end }}
 {{- if .Values.gitHub }}
     gitHub:
       apiUrl: {{ .Values.gitHub.apiUrl }}

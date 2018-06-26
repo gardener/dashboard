@@ -18,7 +18,9 @@ const _ = require('lodash')
 const logger = require('../logger')
 const Resources = require('../kubernetes/Resources')
 const kubernetes = require('../kubernetes')
+const garden = kubernetes.garden()
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
+const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl']
 const cloudprofiles = require('./cloudprofiles')
@@ -32,7 +34,7 @@ function Garden ({auth}) {
   return kubernetes.garden({auth})
 }
 
-function fromResource ({secretBinding, cloudProviderKind, secret}) {
+function fromResource ({secretBinding, cloudProviderKind, secret, quotas = []}) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
   const infrastructureSecret = {}
@@ -46,6 +48,9 @@ function fromResource ({secretBinding, cloudProviderKind, secret}) {
       bindingName: _.get(secretBinding, 'metadata.name')
     })
     .value()
+
+  infrastructureSecret.quotas = quotas
+
   if (secret) {
     infrastructureSecret.metadata = _
       .chain(secret.metadata)
@@ -119,23 +124,72 @@ function toSecretBindingResource ({metadata}) {
   return {apiVersion, kind, metadata, secretRef}
 }
 
-function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
-  let infrastructureSecrets = []
+function getQuotas (secretBindings = []) {
+  const getQuotaPromises = _
+    .chain([])
+    .concat(secretBindings)
+    .map(secretBinding => secretBinding.quotas)
+    .compact()
+    .flatten()
+    .uniqBy(quota => `${quota.namespace}/${quota.name}`)
+    .map(quota => {
+      return garden.ns(quota.namespace).quotas
+        .get({
+          name: quota.name
+        })
+        .catch(err => {
+          if (err.code === 404) {
+            return
+          }
+          throw err
+        })
+    })
+    .value()
+  return Promise.all(getQuotaPromises)
+}
 
-  for (const secretBinding of secretBindings) {
-    const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
-    const cloudProviderKind = _.get(_.find(cloudProfileList, ['metadata.name', cloudProfileName]), 'metadata.cloudProviderKind')
-    const secretName = secretBinding.secretRef.name
-    const secret = _.find(secretList, ['metadata.name', secretName])
-    if (!cloudProviderKind) {
-      logger.error('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName)
-    } else if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
-      logger.error('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName)
-    } else {
-      infrastructureSecrets.push(fromResource({secretBinding, cloudProviderKind, secret}))
-    }
+function resolveQuotas (secretBinding, quotas) {
+  const findQuota = ({namespace, name} = {}) => _.find(quotas, ({metadata}) => metadata.namespace === namespace && metadata.name === name)
+  try {
+    return _
+      .chain(secretBinding.quotas)
+      .map(findQuota)
+      .compact()
+      .value()
+  } catch (err) {
+    return []
   }
-  return infrastructureSecrets
+}
+
+async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
+  const quotas = await getQuotas(secretBindings)
+  return _
+    .chain(secretBindings)
+    .map(secretBinding => {
+      try {
+        const cloudProfileName = _.get(secretBinding, ['metadata', 'labels', 'cloudprofile.garden.sapcloud.io/name'])
+        const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
+        const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
+        const secretName = _.get(secretBinding, 'secretRef.name')
+        if (!cloudProviderKind) {
+          throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName))
+        }
+        const secret = _.find(secretList, ['metadata.name', secretName])
+        if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
+          throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
+        }
+        return fromResource({
+          secretBinding,
+          cloudProviderKind,
+          secret,
+          quotas: resolveQuotas(secretBinding, quotas)
+        })
+      } catch (err) {
+        logger.error(err.message)
+      }
+    })
+    .compact()
+    .value()
 }
 
 async function getCloudProviderKind (cloudProfileName) {
@@ -155,22 +209,30 @@ exports.list = async function ({user, namespace}) {
     Core(user).namespaces(namespace).secrets.get({})
   ])
 
-  return _.concat(
-    getInfrastructureSecrets({secretBindings: secretBindingList, cloudProfileList, secretList})
-  )
+  return getInfrastructureSecrets({
+    secretBindings: secretBindingList,
+    cloudProfileList,
+    secretList
+  })
 }
 
 exports.create = async function ({user, namespace, body}) {
-  const secret = toSecretResource(body)
-  const bodySecret = await Core(user).namespaces(namespace).secrets.post({body: secret})
+  const secret = await Core(user).namespaces(namespace).secrets.post({
+    body: toSecretResource(body)
+  })
 
-  const secretBinding = toSecretBindingResource(body)
-  const bodysecretBinding = await Garden(user).namespaces(namespace).secretbindings.post({body: secretBinding})
+  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.post({
+    body: toSecretBindingResource(body)
+  })
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
-
-  return fromResource({secretBinding: bodysecretBinding, secret: bodySecret, cloudProviderKind})
+  return fromResource({
+    secretBinding,
+    secret,
+    cloudProviderKind,
+    quotas: resolveQuotas(secretBinding, await getQuotas(secretBinding))
+  })
 }
 
 function checkIfOwnSecret (bodySecretBinding) {
@@ -183,25 +245,36 @@ function checkIfOwnSecret (bodySecretBinding) {
 }
 
 exports.patch = async function ({user, namespace, bindingName, body}) {
-  const bodySecretBinding = await Garden(user).namespaces(namespace).secretbindings.get({name: bindingName})
-  const secretName = _.get(bodySecretBinding, 'secretRef.name')
+  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
+    name: bindingName
+  })
+  const secretName = _.get(secretBinding, 'secretRef.name')
 
-  checkIfOwnSecret(bodySecretBinding)
+  checkIfOwnSecret(secretBinding)
 
-  const secret = toSecretResource(body)
-  const bodySecret = await Core(user).namespaces(namespace).secrets.mergePatch({name: secretName, body: secret})
+  const secret = await Core(user).namespaces(namespace).secrets.mergePatch({
+    name: secretName,
+    body: toSecretResource(body)
+  })
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
 
-  return fromResource({secretBinding: bodySecretBinding, secret: bodySecret, cloudProviderKind})
+  return fromResource({
+    secretBinding,
+    secret,
+    cloudProviderKind,
+    quotas: resolveQuotas(secretBinding, await getQuotas(secretBinding))
+  })
 }
 
 exports.remove = async function ({user, namespace, bindingName}) {
-  const bodySecretBinding = await Garden(user).namespaces(namespace).secretbindings.get({name: bindingName})
-  const secretName = _.get(bodySecretBinding, 'secretRef.name')
+  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
+    name: bindingName
+  })
+  const secretName = _.get(secretBinding, 'secretRef.name')
 
-  checkIfOwnSecret(bodySecretBinding)
+  checkIfOwnSecret(secretBinding)
 
   const {items: shootList} = await shoots.list({user, namespace})
   const predicate = (item) => {

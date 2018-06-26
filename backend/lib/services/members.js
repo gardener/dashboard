@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const yaml = require('js-yaml')
-const { decodeBase64, encodeBase64 } = require('../utils')
+const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const Resources = require('../kubernetes/Resources')
 

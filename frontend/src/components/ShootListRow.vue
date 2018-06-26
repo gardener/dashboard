@@ -51,24 +51,15 @@ limitations under the License.
     </td>
     <td class="text-xs-left" v-if="this.headerVisible['lastOperation']">
       <div>
-        <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="row.name" :isHibernated="row.isHibernated" :canRetry="canRetry" :reconciliationDeactivated="reconciliationDeactivated" @retryOperation="onRetryOperation"></shoot-status>
-      <template v-if="canRetry">
-        <v-tooltip top>
-          <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
-            <v-icon>mdi-reload</v-icon>
-          </v-btn>
-          Retry Operation
-        </v-tooltip>
-      </template>
+        <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="`${row.namespace}/${row.name}`" :isHibernated="row.isHibernated" :reconciliationDeactivated="reconciliationDeactivated"></shoot-status>
+        <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
       <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :shootNamespace="row.namespace" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
-      <template v-for="tag in row.tags">
-        <status-tag :tag="tag" :popper-key="`${row.name}_${tag.text}`"></status-tag>
-      </template>
+      <status-tags :conditions="row.conditions"></status-tags>
     </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>
@@ -144,27 +135,33 @@ limitations under the License.
   import { mapGetters } from 'vuex'
   import InfraIcon from '@/components/InfrastructureIcon'
   import ShootStatus from '@/components/ShootStatus'
-  import StatusTag from '@/components/StatusTag'
+  import StatusTags from '@/components/StatusTags'
   import PurposeTag from '@/components/PurposeTag'
   import TimeAgo from '@/components/TimeAgo'
   import ShootVersion from '@/components/ShootVersion'
+  import RetryOperation from '@/components/RetryOperation'
   import JournalLabels from '@/components/JournalLabels'
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
   import get from 'lodash/get'
   import includes from 'lodash/includes'
-  import { getTimestampFormatted, getCloudProviderKind, availableK8sUpdatesForShoot, getCreatedBy, isHibernated, isReconciliationDeactivated } from '@/utils'
-  import { addAnnotation } from '@/utils/api'
+  import { getTimestampFormatted,
+    getCloudProviderKind,
+    availableK8sUpdatesForShoot,
+    getCreatedBy,
+    isHibernated,
+    isReconciliationDeactivated } from '@/utils'
 
   export default {
     components: {
       InfraIcon,
-      StatusTag,
+      StatusTags,
       PurposeTag,
       ShootStatus,
       TimeAgo,
       ShootVersion,
-      JournalLabels
+      JournalLabels,
+      RetryOperation
     },
     props: {
       shootItem: {
@@ -174,11 +171,6 @@ limitations under the License.
       visibleHeaders: {
         type: Array,
         required: true
-      }
-    },
-    data () {
-      return {
-        retryingOperation: false
       }
     },
     computed: {
@@ -201,7 +193,7 @@ limitations under the License.
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
           lastError: get(status, 'lastError'),
-          tags: this.mapConditionsToStatusTags(get(status, 'conditions', {})),
+          conditions: get(status, 'conditions', []),
           kind,
           region: get(spec, 'cloud.region'),
           isHibernated: isHibernated(spec),
@@ -238,12 +230,6 @@ limitations under the License.
           return false
         }
         return !this.isCreateOrDeleteInProcess
-      },
-      canRetry () {
-        return this.row.lastOperation.state === 'Failed' &&
-          !this.reconciliationDeactivated &&
-          !this.retryingOperation &&
-          !this.row.reconcileScheduled
       },
       reconciliationDeactivated () {
         const metadata = { annotations: this.row.annotations }
@@ -289,48 +275,6 @@ limitations under the License.
           const shootItem = this.shootItem
           this.$emit('showDialog', { action, shootItem })
         }
-      },
-      mapConditionsToStatusTags (conditions) {
-        if (!conditions || !conditions.length) {
-          return []
-        }
-        return conditions
-          .filter(condition => !!condition.lastTransitionTime)
-          .map(({lastTransitionTime, message, status, type}) => {
-            const id = type
-            let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
-            switch (type) {
-              case 'ControlPlaneHealthy':
-                text = 'Control Plane'
-                break
-              case 'SystemComponentsHealthy':
-                text = 'System Components'
-                break
-              case 'EveryNodeReady':
-                text = 'Nodes'
-                break
-            }
-            return {id, text, message, lastTransitionTime, status}
-          })
-      },
-      onRetryOperation () {
-        this.retryingOperation = true
-
-        const user = this.$store.state.user
-        const namespace = this.row.namespace
-        const name = this.row.name
-
-        const retryAnnotation = {'shoot.garden.sapcloud.io/operation': 'retry'}
-        return addAnnotation({namespace, name, user, data: retryAnnotation})
-        .then(() => {
-          this.retryingOperation = false
-        })
-        .catch(err => {
-          console.log('failed to retry operation', err)
-
-          this.retryingOperation = false
-          this.$store.dispatch('setError', err)
-        })
       }
     }
   }

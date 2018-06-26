@@ -34,7 +34,7 @@ router.route('/')
 
       switch (event) {
         case 'issues':
-          webhookService.processIssue({action, issue})
+          await webhookService.processIssue({action, issue})
           break
         case 'issue_comment':
           const comment = _.get(body, 'comment')

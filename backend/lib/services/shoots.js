@@ -79,7 +79,7 @@ exports.replaceVersion = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
 }
 
-exports.patchAnnotation = async function ({user, namespace, name, annotations}) {
+const patchAnnotations = async function ({user, namespace, name, annotations}) {
   const body = {
     metadata: {
       annotations: annotations
@@ -87,9 +87,17 @@ exports.patchAnnotation = async function ({user, namespace, name, annotations}) 
   }
   return patch({user, namespace, name, body})
 }
+exports.patchAnnotations = patchAnnotations
 
 exports.remove = async function ({user, namespace, name}) {
+  const annotations = {
+    'confirmation.garden.sapcloud.io/deletion': 'true'
+  }
+  await patchAnnotations({user, namespace, name, annotations})
+
   await Garden(user).namespaces(namespace).shoots.delete({name})
+
+  /* TODO kept the following lines for backwards compatibility (delete them once the DeletionConfirmation admission controller becomes enabled by default and the gardener logic has been adapted properly) */
   const {metadata} = await this.read({user, namespace, name})
   const body = {
     metadata: {
@@ -103,44 +111,39 @@ exports.remove = async function ({user, namespace, name}) {
 }
 
 exports.info = async function ({user, namespace, name}) {
-  const readKubeConfig = new Promise(async (resolve, reject) => {
-    try {
-      resolve(await Core(user).ns(namespace).secrets.get({name: `${name}.kubeconfig`}))
-    } catch (err) {
+  const core = Core(user)
+  const readKubeconfigPromise = core.ns(namespace).secrets.get({name: `${name}.kubeconfig`})
+    .catch(err => {
       if (err.code === 404) {
-        resolve(undefined)
-      } else {
-        reject(err)
+        return
       }
-    }
-  })
+      throw err
+    })
   const [
     shoot,
     secret
   ] = await Promise.all([
     this.read({user, namespace, name}),
-    readKubeConfig
+    readKubeconfigPromise
   ])
 
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projectName = namespace.replace(/^garden-/, '')
-  const seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
-
+  const data = {
+    seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
+  }
   if (secret) {
-    const data = _
+    _
       .chain(secret)
       .get('data')
       .pick('kubeconfig', 'username', 'password')
-      .map((value, key) => [key, decodeBase64(value)])
-      .fromPairs()
-      .value()
+      .forEach((value, key) => {
+        data[key] = decodeBase64(value)
+      })
+      .commit()
     data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
-    data.seedShootIngressDomain = seedShootIngressDomain
-    return data
-  } else {
-    const data = { seedShootIngressDomain }
-    return data
   }
+  return data
 }

@@ -17,18 +17,24 @@
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import map from 'lodash/map'
+import isEqual from 'lodash/isEqual'
+import concat from 'lodash/concat'
 import Emitter from 'component-emitter'
 import {ThrottledNamespacedEventEmitter} from './ThrottledEmitter'
 import store from '../store'
 
-/* Event Emitters */
-class AbstractEmitter {
+class SocketAuthenticator {
   constructor (socket) {
     this.authenticated = false
     this.auth = {
       bearer: undefined
     }
     this.socket = socket
+    this.handlers = []
+  }
+
+  addHandler (handler) {
+    this.handlers = concat(this.handlers, handler)
   }
 
   authenticate () {
@@ -40,8 +46,9 @@ class AbstractEmitter {
 
   onAuthenticated () {
     this.authenticated = true
-    this.emit('authenticated')
     console.log(`socket connection ${this.socket.id} authenticated`)
+
+    forEach(this.handlers, handler => handler.onAuthenticated())
   }
 
   onConnect (attempt) {
@@ -56,8 +63,8 @@ class AbstractEmitter {
   onDisconnect (reason) {
     console.error(`socket connection lost because`, reason)
     this.authenticated = false
-    this.socket.off('event')
-    this.emit('disconnect', reason)
+
+    forEach(this.handlers, handler => handler.onDisconnect())
   }
 
   setUser (user) {
@@ -91,23 +98,91 @@ class AbstractEmitter {
   }
 }
 
-class ShootsEmitter extends AbstractEmitter {
-  constructor (socket) {
-    super(socket)
+class AbstractSubscription {
+  constructor (socketAuthenticator) {
+    socketAuthenticator.addHandler(this)
 
-    this.filter = undefined
-    this.namespace = undefined
+    this.socketAuthenticator = socketAuthenticator
+    this.socket = this.socketAuthenticator.socket
   }
 
   onAuthenticated () {
-    super.onAuthenticated()
+    if (this.subscribeTo) {
+      this.subscribe()
+    }
+  }
+
+  onDisconnect () {
+    this.subscribeOnNextTrigger()
+  }
+
+  subscribe = async function () {
+    if (this.subscribeTo) {
+      if (!this.subscribedTo || !isEqual(this.subscribedTo, this.subscribeTo)) {
+        if (this.socketAuthenticator.authenticated) {
+          if (await this._subscribe()) {
+            this.subscribed()
+          }
+        } else {
+          this.subscribeOnNextTrigger()
+        }
+      }
+    } else {
+      if (!this.subscribedTo) {
+        console.error(new Error('subscribe called without subscribing to anything'))
+      }
+    }
+  }
+
+  unsubscribe () {
+    this.subscribeTo = undefined
+    if (this.socketAuthenticator.authenticated) {
+      if (this.subscribedTo) {
+        if (this._unsubscribe()) {
+          this.subscribedTo = undefined
+        }
+      }
+    } else {
+      // not connected or connection lost -> no need to unsubscribe
+      this.subscribedTo = undefined
+    }
+  }
+
+  // eslint-disable-next-line
+  _unsubscribe () {
+    // default implementation
+    return true
+  }
+
+  subscribed () {
+    this.subscribedTo = this.subscribeTo
+    this.subscribeTo = undefined
+  }
+
+  /*
+  * subscribeOnNextTrigger: trigger could be onAuthenticated or by calling subscribe
+  */
+  subscribeOnNextTrigger (subscription = this.subscribeTo || this.subscribedTo) {
+    if (!subscription) {
+      return
+    }
+    this.subscribeTo = subscription
+    this.subscribedTo = undefined
+  }
+}
+
+class ShootsSubscription extends AbstractSubscription {
+  constructor (socketAuthenticator) {
+    super(socketAuthenticator)
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
     const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({emitter: this, wait: 1000})
 
     this.socket.on('namespacedEvents', ({kind, namespaces}) => {
-      throttledNsEventEmitter.emit(kind, namespaces)
+      if (kind === 'shoots') {
+        throttledNsEventEmitter.emit(kind, namespaces)
+      }
     })
     this.socket.on('batchNamespacedEventsDone', ({kind, namespaces}) => {
       if (kind === 'shoots') {
@@ -115,61 +190,80 @@ class ShootsEmitter extends AbstractEmitter {
         throttledNsEventEmitter.flush()
       }
     })
+  }
 
-    if (this.subscribeAfterAuthentication) {
-      this._subscribe({namespace: this.namespace, filter: undefined})
-      this.subscribeAfterAuthentication = undefined
+  subscribeShoots = function ({namespace, filter}) {
+    this.subscribeOnNextTrigger({namespace, filter})
+    this.subscribe()
+  }
+
+  _subscribe = async function () {
+    const {namespace, filter} = this.subscribeTo
+
+    await Promise.all([
+      store.dispatch('clearShoots'),
+      store.dispatch('setShootsLoading')
+    ])
+    if (namespace === '_all') {
+      const allNamespaces = await store.getters.namespaces
+      const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
+      this.socket.emit('subscribeShoots', {namespaces})
+    } else if (namespace) {
+      this.socket.emit('subscribeShoots', {namespaces: [{namespace, filter}]})
+    } else {
+      console.error(new Error('no namespace specified'))
+      return false
     }
-  }
-
-  setNamespace = function (namespace, filter) {
-    this.namespace = namespace
-    this.filter = filter
-  }
-
-  subscribeShoots = async function () {
-    return this._subscribe({namespace: this.namespace, filter: this.filter})
-  }
-
-  _subscribe = async function ({namespace, filter}) {
-    if (this.namespace) {
-      if (this.authenticated) {
-        store.dispatch('clearShoots')
-        store.dispatch('setShootsLoading')
-
-        // optimization, so that we do not subscribe again if the namespace did not change (by calling setNamespace)
-        this.namespace = undefined
-        this.filter = undefined
-
-        if (namespace === '_all') {
-          const allNamespaces = await store.getters.namespaces
-          const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
-          this.socket.emit('subscribe', {namespaces})
-        } else if (namespace) {
-          this.socket.emit('subscribe', {namespaces: [{namespace, filter}]})
-        }
-      } else {
-        this.subscribeAfterAuthentication = {namespace, filter}
-      }
-    }
+    return true
   }
 }
 
-class JournalsEmitter extends AbstractEmitter {
-  onAuthenticated () {
-    super.onAuthenticated()
+class ShootSubscription extends AbstractSubscription {
+  constructor (socketAuthenticator) {
+    super(socketAuthenticator)
+
+    /* currently we only throttle NamespacedEvents (for shoots) as for this kind
+    * we expect many events coming in in a short period of time */
+    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({emitter: this, wait: 1000})
+
+    this.socket.on('namespacedEvents', ({kind, namespaces}) => {
+      if (kind === 'shoot') {
+        throttledNsEventEmitter.emit(kind, namespaces)
+      }
+    })
+    this.socket.on('shootSubscriptionDone', ({kind, target}) => {
+      const {name, namespace} = target
+      throttledNsEventEmitter.flush()
+      store.dispatch('getShootInfo', {name, namespace})
+    })
+  }
+
+  subscribeShoot ({name, namespace}) {
+    this.subscribeOnNextTrigger({name, namespace})
+    this.subscribe()
+  }
+
+  _subscribe = async function () {
+    const {namespace, name} = this.subscribeTo
+    // TODO clear shoot from store?
+
+    this.socket.emit('subscribeShoot', {namespace, name})
+    return true
+  }
+
+  _unsubscribe () {
+    this.socket.emit('unsubscribeShoot')
+    return true
+  }
+}
+
+class AbstractJournalsSubscription extends AbstractSubscription {
+  constructor (socketAuthenticator) {
+    super(socketAuthenticator)
 
     this.socket.on('events', ({kind, events}) => {
       this.emit(kind, events)
     })
-
-    this.subscribeIssues()
-
-    if (this.subscribeCommentsAfterAuthentication) {
-      this.subscribeComments(this.subscribeCommentsAfterAuthentication)
-
-      this.subscribeCommentsAfterAuthentication = undefined
-    }
   }
 
   setUser (user) {
@@ -178,37 +272,62 @@ class JournalsEmitter extends AbstractEmitter {
     }
     super.setUser(user)
   }
+}
+
+class IssuesSubscription extends AbstractJournalsSubscription {
+  onAuthenticated () {
+    super.onAuthenticated()
+
+    if (store.getters.isAdmin && !this.subscribedTo) {
+      this.subscribeIssues()
+    }
+  }
 
   subscribeIssues () {
-    if (this.authenticated) {
-      if (store.getters.isAdmin) {
-        this.socket.emit('subscribeIssues')
-      }
+    if (store.getters.isAdmin) {
+      this.subscribeOnNextTrigger({}) // no need to pass any parameter, except an empty object; could be improved
+      this.subscribe()
     }
   }
 
+  _subscribe = async function () {
+    if (store.getters.isAdmin) {
+      await Promise.all([
+        store.dispatch('clearIssues')
+      ])
+
+      this.socket.emit('subscribeIssues')
+      return true
+    }
+    return false
+  }
+}
+
+class CommentsSubscription extends AbstractJournalsSubscription {
   subscribeComments ({name, namespace}) {
-    if (this.authenticated) {
-      if (store.getters.isAdmin) {
-        this.socket.emit('subscribeComments', {name, namespace})
-        this.subscribedComments = true
-      }
-    } else {
-      this.subscribeCommentsAfterAuthentication = {name, namespace}
-    }
+    this.subscribeOnNextTrigger({name, namespace})
+    this.subscribe()
   }
 
-  unsubscribeComments () {
-    this.subscribeCommentsAfterAuthentication = undefined
+  _subscribe = async function () {
+    if (store.getters.isAdmin) {
+      await Promise.all([
+        store.dispatch('clearComments')
+      ])
 
-    if (this.authenticated) {
-      if (store.getters.isAdmin) {
-        if (this.subscribedComments) {
-          this.socket.emit('unsubscribeComments')
-          this.subscribedComments = false
-        }
-      }
+      const {name, namespace} = this.subscribeTo
+      this.socket.emit('subscribeComments', {name, namespace})
+      return true
     }
+    return false
+  }
+
+  _unsubscribe () {
+    if (store.getters.isAdmin) {
+      this.socket.emit('unsubscribeComments')
+      return true
+    }
+    return false
   }
 }
 
@@ -218,17 +337,20 @@ const socketConfig = {
   transports: ['websocket'],
   autoConnect: false
 }
-const shootsSocket = io(`${url}/shoots`, socketConfig)
-const journalsSocket = io(`${url}/journals`, socketConfig)
 
-const shootsEmitter = Emitter(new ShootsEmitter(shootsSocket))
-const journalsEmitter = Emitter(new JournalsEmitter(journalsSocket))
+const shootsSocketAuthenticator = new SocketAuthenticator(io(`${url}/shoots`, socketConfig))
+const journalsSocketAuthenticator = new SocketAuthenticator(io(`${url}/journals`, socketConfig))
 
-const emitters = [shootsEmitter, journalsEmitter]
+const shootsEmitter = Emitter(new ShootsSubscription(shootsSocketAuthenticator))
+const shootEmitter = Emitter(new ShootSubscription(shootsSocketAuthenticator))
+const journalIssuesEmitter = Emitter(new IssuesSubscription(journalsSocketAuthenticator))
+const journalCommentsEmitter = Emitter(new CommentsSubscription(journalsSocketAuthenticator))
+
+const socketAuthenticators = [shootsSocketAuthenticator, journalsSocketAuthenticator]
 
 /* Web Socket Connection */
 
-forEach(emitters, emitter => {
+forEach(socketAuthenticators, emitter => {
   emitter.socket.on('connect', attempt => emitter.onConnect(attempt))
   emitter.socket.on('reconnect', attempt => emitter.onConnect(attempt))
   emitter.socket.on('authenticated', () => emitter.onAuthenticated())
@@ -263,10 +385,12 @@ forEach(emitters, emitter => {
 
 const wrapper = {
   setUser (user) {
-    forEach(emitters, emitter => emitter.setUser(user))
+    forEach(socketAuthenticators, emitter => emitter.setUser(user))
   },
   shootsEmitter,
-  journalsEmitter
+  shootEmitter,
+  journalIssuesEmitter,
+  journalCommentsEmitter
 }
 
 window.GARDEN = {emitter: shootsEmitter}

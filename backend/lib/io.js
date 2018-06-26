@@ -104,10 +104,15 @@ module.exports = () => {
   const shootsNsp = io.of('/shoots')
   shootsNsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
-    socket.on('disconnect', onDisconnect)
-    socket.on('subscribe', async ({namespaces}) => {
+
+    const leaveShootsAndShootRoom = (socket) => {
       const filterFn = key => key !== socket.id
       leavePreviousRooms(socket, filterFn)
+    }
+
+    socket.on('disconnect', onDisconnect)
+    socket.on('subscribeShoots', async ({namespaces}) => {
+      leaveShootsAndShootRoom(socket)
 
       /* join current rooms */
       if (_.isArray(namespaces)) {
@@ -126,7 +131,7 @@ module.exports = () => {
             const predicate = item => item.metadata.namespace === namespace
             const project = _.find(projectList, predicate)
             if (project) {
-              const room = filter ? `${namespace}_${filter}` : namespace
+              const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
               joinRoom(socket, room)
 
               shootsPromises.push(new Promise(async (resolve, reject) => {
@@ -153,14 +158,41 @@ module.exports = () => {
         socket.emit('batchNamespacedEventsDone', {kind, namespaces: _.map(namespaces, nsObj => nsObj.namespace)})
       }
     })
+    socket.on('subscribeShoot', async ({name, namespace}) => {
+      leaveShootsAndShootRoom(socket)
+
+      const kind = 'shoot'
+      const user = getUserFromSocket(socket)
+      const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+      try {
+        const projectList = await projects.list({user})
+
+        const predicate = item => item.metadata.namespace === namespace
+        const project = _.find(projectList, predicate)
+        if (project) {
+          const room = `shoot_${namespace}_${name}`
+          joinRoom(socket, room)
+
+          const shoot = await shoots.read({user, name, namespace})
+          batchEmitter.batchEmitObjects([shoot], namespace)
+        }
+      } catch (error) {
+        logger.error('Socket %s: failed to subscribe to shoot: (%s) %s', _.get(socket, 'id'), error.code, error)
+        socket.emit('subscription_error', {kind, code: error.code, message: 'Failed to fetch shoot'})
+      }
+      batchEmitter.flush()
+
+      socket.emit('shootSubscriptionDone', {kind, target: {name, namespace}})
+    })
   })
   const journalsNsp = io.of('/journals')
-  const leaveCommentRooms = (socket) => {
-    const filterFn = key => key !== socket.id && key !== 'issues'
-    leavePreviousRooms(socket, filterFn)
-  }
   journalsNsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
+
+    const leaveCommentRooms = (socket) => {
+      const filterFn = key => key !== socket.id && key !== 'issues'
+      leavePreviousRooms(socket, filterFn)
+    }
     socket.on('disconnect', onDisconnect)
     socket.on('subscribeIssues', async () => {
       const filterFn = key => key !== socket.id && !_.startsWith(key, 'comments_')

@@ -111,7 +111,7 @@ describe('gardener', function () {
 
       it('should return a shoot', function () {
         oidc.stub.getKeys()
-        k8s.stub.getShoot({bearer, namespace, name, project, createdBy, purpose, kind, profile, region, bindingName: secret})
+        k8s.stub.getShoot({bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName: secret})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/shoots/${name}`)
           .set('authorization', `Bearer ${bearer}`)
