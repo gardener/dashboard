@@ -34,6 +34,7 @@ dashboard:
           inject_effective_version: true
         release:
           nextversion: 'bump_minor'
+        component_descriptor: ~
       steps:
         prepare_release:
           image: *node_image
