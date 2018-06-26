@@ -403,7 +403,7 @@ limitations under the License.
       },
       items () {
         return this.cachedItems || this.mappedItems
-	  },
+      },
       isHideUserIssuesAndHideDeactedReconciliationDisabled () {
         return !this.showOnlyShootsWithIssues
       },
