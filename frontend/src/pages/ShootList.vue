@@ -206,7 +206,8 @@ limitations under the License.
         tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
         deleteErrorMessage: null,
-        deleteDetailedErrorMessage: null
+        deleteDetailedErrorMessage: null,
+        cachedItems: null
       }
     },
     watch: {
@@ -308,7 +309,7 @@ limitations under the License.
     },
     computed: {
       ...mapGetters({
-        items: 'shootList',
+        mappedItems: 'shootList',
         item: 'shootByNamespaceAndName',
         selectedItem: 'selectedShoot',
         isAdmin: 'isAdmin',
@@ -400,6 +401,9 @@ limitations under the License.
           this.setOnlyShootsWithIssues(value)
         }
       },
+      items () {
+        return this.cachedItems || this.mappedItems
+      },
       isHideUserIssuesAndHideDeactedReconciliationDisabled () {
         return !this.showOnlyShootsWithIssues
       },
@@ -444,11 +448,17 @@ limitations under the License.
       const projectHeader = find(this.allHeaders, predicate)
       projectHeader.hidden = this.projectScope
     },
+    beforeRouteEnter (to, from, next) {
+      next(vm => {
+        vm.cachedItems = null
+      })
+    },
     beforeRouteUpdate (to, from, next) {
       this.search = null
       next()
     },
     beforeRouteLeave (to, from, next) {
+      this.cachedItems = this.mappedItems.slice(0)
       this.search = null
       next()
     }
