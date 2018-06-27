@@ -18,13 +18,13 @@ const _ = require('lodash')
 const logger = require('../logger')
 const Resources = require('../kubernetes/Resources')
 const kubernetes = require('../kubernetes')
-const garden = kubernetes.garden()
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl']
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
+const { getQuotas } = require('../cache')
 
 function Core ({auth}) {
   return kubernetes.core({auth})
@@ -124,31 +124,8 @@ function toSecretBindingResource ({metadata}) {
   return {apiVersion, kind, metadata, secretRef}
 }
 
-function getQuotas (secretBindings = []) {
-  const getQuotaPromises = _
-    .chain([])
-    .concat(secretBindings)
-    .map(secretBinding => secretBinding.quotas)
-    .compact()
-    .flatten()
-    .uniqBy(quota => `${quota.namespace}/${quota.name}`)
-    .map(quota => {
-      return garden.ns(quota.namespace).quotas
-        .get({
-          name: quota.name
-        })
-        .catch(err => {
-          if (err.code === 404) {
-            return
-          }
-          throw err
-        })
-    })
-    .value()
-  return Promise.all(getQuotaPromises)
-}
-
-function resolveQuotas (secretBinding, quotas) {
+function resolveQuotas (secretBinding) {
+  const quotas = getQuotas()
   const findQuota = ({namespace, name} = {}) => _.find(quotas, ({metadata}) => metadata.namespace === namespace && metadata.name === name)
   try {
     return _
@@ -162,7 +139,6 @@ function resolveQuotas (secretBinding, quotas) {
 }
 
 async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
-  const quotas = await getQuotas(secretBindings)
   return _
     .chain(secretBindings)
     .map(secretBinding => {
@@ -182,7 +158,7 @@ async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secr
           secretBinding,
           cloudProviderKind,
           secret,
-          quotas: resolveQuotas(secretBinding, quotas)
+          quotas: resolveQuotas(secretBinding)
         })
       } catch (err) {
         logger.error(err.message)
@@ -231,7 +207,7 @@ exports.create = async function ({user, namespace, body}) {
     secretBinding,
     secret,
     cloudProviderKind,
-    quotas: resolveQuotas(secretBinding, await getQuotas(secretBinding))
+    quotas: resolveQuotas(secretBinding)
   })
 }
 
@@ -264,7 +240,7 @@ exports.patch = async function ({user, namespace, bindingName, body}) {
     secretBinding,
     secret,
     cloudProviderKind,
-    quotas: resolveQuotas(secretBinding, await getQuotas(secretBinding))
+    quotas: resolveQuotas(secretBinding)
   })
 }
 

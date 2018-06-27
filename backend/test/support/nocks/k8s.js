@@ -38,21 +38,6 @@ const quotas = [
   }
 ]
 
-const quotaObject = {
-  kind: 'Quota',
-  metadata: {
-    name: 'trial-secret-quota',
-    namespace: 'garden-trial'
-  },
-  spec: {
-    scope: 'secret',
-    clusterLifetimeDays: 14,
-    metrics: {
-      cpu: '200'
-    }
-  }
-}
-
 const secretBindingList = [
   getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'garden-foo', 'secret1', quotas),
   getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'garden-foo', 'secret2', quotas),
@@ -474,7 +459,7 @@ const stub = {
     const infrastructureSecrets = !empty
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
-    const userScope = nockWithAuthorization(bearer)
+    return nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
@@ -483,23 +468,6 @@ const stub = {
       .reply(200, {
         items: infrastructureSecrets
       })
-    const adminScope = nockWithAuthorization(auth.bearer)
-
-    if (!empty) {
-      _
-        .chain(secretBindings)
-        .map(secretBinding => secretBinding.quotas)
-        .flatten()
-        .uniqBy(quota => `${quota.namespace}/${quota.name}`)
-        .forEach(quota => {
-          adminScope
-            .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${quota.namespace}/quotas/${quota.name}`)
-            .reply(200, quotaObject)
-        })
-        .commit()
-    }
-
-    return [userScope, adminScope]
   },
   createInfrastructureSecret ({bearer, namespace, data, cloudProfileName, resourceVersion = 42}) {
     const {

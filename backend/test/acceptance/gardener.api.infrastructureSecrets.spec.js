@@ -16,6 +16,7 @@
 
 'use strict'
 
+const _ = require('lodash')
 const common = require('../support/common')
 
 describe('gardener', function () {
@@ -56,6 +57,7 @@ describe('gardener', function () {
       })
 
       it('should return three infrastructure secrets', function () {
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: false})
@@ -67,10 +69,14 @@ describe('gardener', function () {
             expect(res).to.have.status(200)
             expect(res).to.be.json
             expect(res.body).to.have.length(3)
+            _.forEach(res.body, secret => {
+              expect(secret.quotas).to.have.length(2)
+            })
           })
       })
 
       it('should return no infrastructure secrets', function () {
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: true})
@@ -86,6 +92,7 @@ describe('gardener', function () {
       })
 
       it('should create a infrastructure secret', function () {
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.createInfrastructureSecret({bearer, namespace, data, cloudProfileName, resourceVersion})
@@ -104,6 +111,7 @@ describe('gardener', function () {
       })
 
       it('should patch an own infrastructure secret', function () {
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.patchInfrastructureSecret({bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
@@ -123,6 +131,7 @@ describe('gardener', function () {
 
       it('should not patch a shared infrastructure secret', function () {
         const otherNamespace = 'garden-bar'
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.patchSharedInfrastructureSecret({bearer, namespace: otherNamespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
@@ -137,6 +146,7 @@ describe('gardener', function () {
       })
 
       it('should delete an own infrastructure secret', function () {
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.deleteInfrastructureSecret({bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
@@ -153,6 +163,7 @@ describe('gardener', function () {
 
       it('should not delete a shared infrastructure secret', function () {
         const otherNamespace = 'garden-bar'
+        common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
         k8s.stub.deleteSharedInfrastructureSecret({bearer, namespace: otherNamespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})

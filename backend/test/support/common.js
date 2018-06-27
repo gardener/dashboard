@@ -15,10 +15,11 @@
 //
 
 'use strict'
+const _ = require('lodash')
 const {_cache: cache} = require('../../lib/cache')
 const { _config: config } = require('../../lib/utils')
 
-const getSeed = (name, profileName, region, kind, seedProtected = false, seedVisible = true) => {
+function getSeed (name, profileName, region, kind, seedProtected = false, seedVisible = true) {
   return {
     metadata: {
       name
@@ -39,25 +40,24 @@ const getSeed = (name, profileName, region, kind, seedProtected = false, seedVis
   }
 }
 
-const getCloudProfile = (cloudProfileName, kind) => {
-  const cloudProfile = {
-    metadata: {
-      name: `${cloudProfileName}`
-    },
-    spec: {}
-  }
-
-  cloudProfile.spec[kind] = {
+function getCloudProfile (cloudProfileName, kind) {
+  const spec = _.set({}, kind, {
     constraints: {
       kubernetes: {
         versions: ['1.9.0', '1.8.5']
       }
     }
+  })
+
+  return {
+    metadata: {
+      name: `${cloudProfileName}`
+    },
+    spec
   }
-  return cloudProfile
 }
 
-const getDomain = (name, provider, domain) => {
+function getDomain (name, provider, domain) {
   return {
     metadata: {
       name,
@@ -67,6 +67,22 @@ const getDomain = (name, provider, domain) => {
       }
     },
     data: {}
+  }
+}
+
+function getQuota ({name, namespace = 'garden-trial', scope = 'secret', clusterLifetimeDays = 14, cpu = '200'}) {
+  return {
+    metadata: {
+      name,
+      namespace
+    },
+    spec: {
+      scope,
+      clusterLifetimeDays,
+      metrics: {
+        cpu
+      }
+    }
   }
 }
 
@@ -89,6 +105,12 @@ const domainList = [
   getDomain('provider2-default-domain', 'provider2', 'domain2')
 ]
 
+const quotaList = [
+  getQuota({name: 'trial-secret-quota', namespace: 'garden-trial'}),
+  getQuota({name: 'foo-quota1', namespace: 'garden-foo'}),
+  getQuota({name: 'foo-quota2', namespace: 'garden-foo'})
+]
+
 const stub = {
   getCloudProfiles (sandbox) {
     const getcloudProviderKindListStub = sandbox.stub(config, 'getCloudProviderKindList')
@@ -99,6 +121,10 @@ const stub = {
 
     const getSeedsStub = sandbox.stub(cache, 'getSeeds')
     getSeedsStub.returns(seedList)
+  },
+  getQuotas (sandbox) {
+    const getQuotasStub = sandbox.stub(cache, 'getQuotas')
+    getQuotasStub.returns(quotaList)
   },
   getDomains (sandbox) {
     const getDomainsStub = sandbox.stub(cache, 'getDomains')

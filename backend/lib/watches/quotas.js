@@ -16,10 +16,11 @@
 
 'use strict'
 
-exports.namespaces = require('./namespaces')
-exports.shoots = require('./shoots')
-exports.seeds = require('./seeds')
-exports.cloudprofiles = require('./cloudprofiles')
-exports.quotas = require('./quotas')
-exports.domains = require('./domains')
-exports.journals = require('./journals')
+const garden = require('../kubernetes').garden()
+const { cacheResource } = require('./common')
+const { getQuotas } = require('../cache')
+
+module.exports = io => {
+  const emitter = garden.quotas.watch()
+  cacheResource(emitter, getQuotas(), 'metadata.name')
+}
