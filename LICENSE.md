@@ -307,6 +307,10 @@ Copyright (c) 2018 Zeno Rocha <hi@zenorocha.com>
 Copyright (c) 2014 Component contributors <dev@component.io>
 [MIT License](https://github.com/component/emitter/blob/master/LICENSE)
 
+[downloadjs](https://github.com/rndme/download)
+Copyright (c) 2016 dandavis
+[MIT License](https://github.com/rndme/download/blob/master/LICENSE.md)
+
 [highlight.js](https://github.com/isagalaev/highlight.js/)
 Copyright (c) 2006, Ivan Sagalaev
 [BSD 3-clause License](https://github.com/isagalaev/highlight.js/blob/master/LICENSE)
