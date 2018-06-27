@@ -121,12 +121,6 @@ function createServiceaccount (core, namespace, name) {
   return core.namespaces(namespace).serviceaccounts.post({
     body
   })
-    .catch(err => {
-      if (err.code === 409) {
-        return body
-      }
-      throw err
-    })
 }
 
 function deleteServiceaccount (core, namespace, name) {

@@ -23,6 +23,8 @@ import map from 'lodash/map'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
+import split from 'lodash/split'
+import last from 'lodash/last'
 import includes from 'lodash/includes'
 import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
@@ -386,6 +388,9 @@ const actions = {
   addMember ({ dispatch, commit }, name) {
     return dispatch('members/add', name)
       .catch(err => {
+        if (get(err, 'response.status') === 409) {
+          err = new Error(`Serviceaccount '${last(split(name, ':'))}' already exists`)
+        }
         dispatch('setError', err)
       })
   },
