@@ -140,9 +140,12 @@ limitations under the License.
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
-              <v-btn icon class="grey--text" @click.native.stop="onDownload(name)">
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="grey--text" @click.native.stop="onDownload(name)">
+                  <v-icon>mdi-download</v-icon>
+                </v-btn>
+                <span>download kubeconfig</span>
+              </v-tooltip>
             </v-list-tile-action>
             <v-list-tile-action>
               <v-btn icon class="red--text" @click.native.stop="onDelete(name)">
