@@ -350,7 +350,7 @@ limitations under the License.
           <v-card flat>
             <v-container>
               <v-layout row>
-                <v-flex xs2>
+                <v-flex xs3>
                   <v-text-field
                    color="cyan"
                    label="Maintenance Start Time"
@@ -361,6 +361,8 @@ limitations under the License.
                    type="time"
                    suffix="UTC"
                    required
+                   persistent-hint
+                   hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
                  ></v-text-field>
                 </v-flex>
               </v-layout>
@@ -369,7 +371,7 @@ limitations under the License.
                   <span class="subheading">Auto Update</span>
                 </v-card-title>
               </v-layout>
-              <v-list class="mr-extra">
+              <v-list class="mr-extra" two-line>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
                     <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
@@ -377,7 +379,8 @@ limitations under the License.
                   <v-list-tile-content>
                     <v-list-tile-title>Operating System</v-list-tile-title>
                     <v-list-tile-sub-title>
-                      Schedule operating system updates of the workers during maintenance.
+                      Update the operating system of the workers<br />
+                      (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
                     </v-list-tile-sub-title>
                   </v-list-tile-content>
                 </v-list-tile>
@@ -388,7 +391,8 @@ limitations under the License.
                   <v-list-tile-content>
                     <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
                     <v-list-tile-sub-title>
-                      Automatically update Kubernetes to latest patch version during maintenance.
+                      Update the control plane of the cluster and the worker components<br />
+                      (control plane, most notably the API server, will be briefly unavailable during switch-over)
                     </v-list-tile-sub-title>
                   </v-list-tile-content>
                 </v-list-tile>
