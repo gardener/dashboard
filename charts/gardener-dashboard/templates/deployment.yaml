@@ -18,6 +18,8 @@ spec:
     metadata:
       annotations:
         checksum/configmap-gardener-dashboard-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret-gardener-dashboard-prometheus: {{ include (print $.Template.BasePath "/secret-prometheus.yaml") . | sha256sum }}
+        checksum/secret-gardener-dashboard-github: {{ include (print $.Template.BasePath "/secret-github.yaml") . | sha256sum }}
       labels:
         app: gardener-dashboard
         release: {{ .Release.Name }}
@@ -30,6 +32,28 @@ spec:
           - key: config.yaml
             path: config.yaml
           defaultMode: 420
+      {{- if .Values.prometheus }}
+      - name: gardener-dashboard-secret-prometheus
+        secret:
+          secretName: gardener-dashboard-prometheus
+          defaultMode: 256
+          items:
+          - key: prometheusSecret
+            path: secret
+      {{- end }}
+      {{- if .Values.gitHub }}
+      - name: gardener-dashboard-secret-github
+        secret:
+          secretName: gardener-dashboard-github
+          defaultMode: 256
+          items:
+          - key: authentication.username
+            path: authentication/username
+          - key: authentication.token
+            path: authentication/token
+          - key: webhookSecret
+            path: webhookSecret
+      {{- end }}
       serviceAccountName: gardener-dashboard
       containers:
         - name: gardener-dashboard
@@ -47,6 +71,16 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
-            mountPath: /etc/gardener-dashboard
+            mountPath: /etc/gardener-dashboard/config.yaml
+            subPath: config.yaml
+          {{- if .Values.prometheus }}
+          - name: gardener-dashboard-secret-prometheus
+            mountPath: /etc/gardener-dashboard/secrets/prometheus
+            readOnly: true
+          {{- end }}
+          {{- if .Values.gitHub }}
+          - name: gardener-dashboard-secret-github
+            mountPath: /etc/gardener-dashboard/secrets/gitHub
+            readOnly: true
+          {{- end }}
       restartPolicy: Always
-

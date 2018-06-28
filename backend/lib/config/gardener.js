@@ -20,7 +20,26 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const { existsSync, readFileSync } = require('fs')
 const { homedir } = require('os')
-const { join: joinPath } = require('path')
+const { join: joinPath, dirname } = require('path')
+
+/*
+objectPath: foo.bar.foobar
+pathToSecret: <secretsPath>/foo/bar/foobar
+*/
+function buildPathToSecret (secretsPath, objectPath) {
+  const pathToSecret = joinPath(secretsPath, ..._.toPath(objectPath))
+  return pathToSecret
+}
+
+function applySecretToConfig (config, secretsPath, objectPath) {
+  const pathToSecret = buildPathToSecret(secretsPath, objectPath)
+
+  const secretExists = existsSync(pathToSecret)
+  if (secretExists) {
+    const secretValue = readFileSync(pathToSecret, 'utf8')
+    _.set(config, objectPath, secretValue)
+  }
+}
 
 module.exports = {
   getDefaults ({env} = process) {
@@ -75,8 +94,16 @@ module.exports = {
   loadConfig (filename, {env} = process) {
     const config = this.getDefaults({env})
     try {
-      if (filename && this.existsSync(filename)) {
-        _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
+      if (filename) {
+        if (this.existsSync(filename)) {
+          _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
+        }
+
+        const secretsPath = joinPath(dirname(filename), 'secrets')
+        applySecretToConfig(config, secretsPath, 'prometheus.secret')
+        applySecretToConfig(config, secretsPath, 'gitHub.webhookSecret')
+        applySecretToConfig(config, secretsPath, 'gitHub.authentication.username')
+        applySecretToConfig(config, secretsPath, 'gitHub.authentication.token')
       }
     } catch (err) { /* ignore */ }
 
