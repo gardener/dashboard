@@ -16,12 +16,12 @@ limitations under the License.
 
 <template>
   <span>
-    {{timeAgo}}
+    {{TimeString}}
   </span>
 </template>
 
 <script>
-  import {getTimeAgoFrom} from '@/utils'
+  import {getTimeStringFrom, getTimeStringTo} from '@/utils'
   import Vue from 'vue'
 
   class Clock {
@@ -50,13 +50,18 @@ limitations under the License.
     data () {
       return {
         currentClockTimer: undefined,
-        nextClockTimer: undefined
+        nextClockTimer: undefined,
+        negativeRefDate: true
       }
     },
     computed: {
-      timeAgo () {
+      TimeString () {
         if (this.dateTime && this.currentClockTimer) {
-          return getTimeAgoFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+          if (this.negativeRefDate) {
+            return getTimeStringFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+          } else {
+            return getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.dateTime)
+          }
         } else {
           return ''
         }
@@ -64,8 +69,16 @@ limitations under the License.
     },
     methods: {
       updateClockInstance (dateTimeValue) {
-        const diffInMilliseconds = new Date() - new Date(dateTimeValue)
-
+        const currentDate = new Date()
+        const refDate = new Date(dateTimeValue)
+        let diffInMilliseconds
+        if (currentDate > refDate) {
+          diffInMilliseconds = currentDate - refDate
+          this.negativeRefDate = true
+        } else {
+          diffInMilliseconds = refDate - currentDate
+          this.negativeRefDate = false
+        }
         if (diffInMilliseconds <= 1000 * 60) {
           this.setClock(clockSecondsAccuracy, clockHalfAMinuteAccuracy)
         } else if (diffInMilliseconds <= 1000 * 60 * 60) {

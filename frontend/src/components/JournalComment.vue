@@ -24,7 +24,7 @@ limitations under the License.
     <v-flex fluid>
       <div class="comment">
         <div class="comment-header">
-          <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-ago :dateTime="createdAt"></time-ago></a>
+          <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt"></time-string></a>
         </div>
         <div class="comment-body" v-html="compiledMarkdown"></div>
       </div>
@@ -39,11 +39,11 @@ limitations under the License.
 <script>
   import get from 'lodash/get'
   import marked from 'marked'
-  import TimeAgo from '@/components/TimeAgo'
+  import TimeString from '@/components/TimeString'
 
   export default {
     components: {
-      TimeAgo
+      TimeString
     },
     props: {
       comment: {
