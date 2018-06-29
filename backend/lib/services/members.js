@@ -21,6 +21,7 @@ const yaml = require('js-yaml')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const Resources = require('../kubernetes/Resources')
+const rbac = kubernetes.rbac()
 
 const RoleBindingName = 'garden-project-members'
 
@@ -110,6 +111,14 @@ function readRoleBinding (rbac, namespace) {
     })
 }
 
+// patch rolebinding must be done with the serviceaccount
+function patchRoleBinding (namespace, body) {
+  return rbac.namespaces(namespace).rolebindings.mergePatch({
+    name: RoleBindingName,
+    body
+  })
+}
+
 function createRoleBinding (rbac, namespace, names = []) {
   return rbac.namespaces(namespace).rolebindings.post({
     body: roleBindingBody(namespace, names)
@@ -157,10 +166,7 @@ async function setRoleBindingSubject (rbac, namespace, name) {
     name,
     apiGroup: 'rbac.authorization.k8s.io'
   })
-  return rbac.namespaces(namespace).rolebindings.mergePatch({
-    name: RoleBindingName,
-    body
-  })
+  return patchRoleBinding(namespace, body)
 }
 
 async function unsetRoleBindingSubject (rbac, namespace, name) {
@@ -180,15 +186,11 @@ async function unsetRoleBindingSubject (rbac, namespace, name) {
     return body
   }
   _.remove(subjects, ['name', name])
-  return rbac.namespaces(namespace).rolebindings.mergePatch({
-    name: RoleBindingName,
-    body
-  })
+  return patchRoleBinding(namespace, body)
 }
 
 // bootstrap of rolebinding must be done with the serviceaccount
 exports.bootstrap = async function ({user, namespace}) {
-  const rbac = kubernetes.rbac()
   return fromResource(await createRoleBinding(rbac, namespace, [user.id]))
 }
 
