@@ -18,6 +18,7 @@
 
 const _ = require('lodash')
 const yaml = require('js-yaml')
+const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const Resources = require('../kubernetes/Resources')
@@ -224,7 +225,7 @@ exports.get = async function ({user, namespace, name: username}) {
       name: serviceaccountName
     })
     const api = ns.serviceaccounts.api
-    const server = api.url
+    const server = _.get(config, 'apiServerUrl', api.url)
     const secret = await ns.secrets.get({
       name: _.first(serviceaccount.secrets).name
     })

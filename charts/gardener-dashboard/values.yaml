@@ -9,6 +9,7 @@ image:
   pullPolicy: Always
 
 logLevel: debug
+apiServerUrl: https://api.example.org
 containerPort: 8080
 servicePort: 8080
 resources:
