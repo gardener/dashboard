@@ -715,7 +715,7 @@ const stub = {
     if (!_.find(roleBinding.subjects, {name, kind: 'User'})) {
       const newRoleBinding = _.cloneDeep(roleBinding)
       newRoleBinding.subjects.push(getRoleBindingSubject(name))
-      scope
+      nockWithAuthorization(auth.bearer)
         .patch(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
           newRoleBinding.metadata = body.metadata
           return true
@@ -748,7 +748,7 @@ const stub = {
     if (_.find(roleBinding.subjects, {name, kind: 'User'})) {
       const newRoleBinding = _.cloneDeep(roleBinding)
       _.remove(newRoleBinding.subjects, {name, kind: 'User'})
-      scope
+      nockWithAuthorization(auth.bearer)
         .patch(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
           newRoleBinding.metadata = body.metadata
           return true
