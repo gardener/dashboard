@@ -71,8 +71,7 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
-            mountPath: /etc/gardener-dashboard/config.yaml
-            subPath: config.yaml
+            mountPath: /etc/gardener-dashboard
           {{- if .Values.prometheus }}
           - name: gardener-dashboard-secret-prometheus
             mountPath: /etc/gardener-dashboard/secrets/prometheus
