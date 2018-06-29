@@ -169,10 +169,12 @@ limitations under the License.
                     <v-select
                       color="cyan"
                       label="Purpose"
-                      :items="filteredPurpose"
+                      :items="filteredPurposes"
                       v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
                       hint="Indicate the importance of the cluster"
                       persistent-hint
+                      @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
+                      @blur="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
                       required
                       ></v-select>
                   </v-flex>
@@ -460,6 +462,11 @@ limitations under the License.
           unique: 'Cluster name must be unique',
           noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
           noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
+        },
+        annotations: {
+          'garden.sapcloud.io/purpose': {
+            required: 'Purpose is required'
+          }
         }
       },
       spec: {
@@ -496,7 +503,7 @@ limitations under the License.
       name: null,
       namespace: null,
       annotations: {
-        'garden.sapcloud.io/purpose': 'evaluation'
+        'garden.sapcloud.io/purpose': null
       }
     },
     spec: {
@@ -566,7 +573,7 @@ limitations under the License.
         selectedSecret: undefined,
         selectedInfrastructureKind: undefined,
         activeTab: 'tab-infra',
-        purpose: ['evaluation', 'development', 'production'],
+        purposes: ['evaluation', 'development', 'production'],
         refs_: {},
         validationErrors,
         errorMessage: undefined,
@@ -585,6 +592,11 @@ limitations under the License.
             resourceName,
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
+            }
+          },
+          annotations: {
+            'garden.sapcloud.io/purpose': {
+              required
             }
           }
         },
@@ -692,6 +704,8 @@ limitations under the License.
           this.selectedSecret = secret
 
           this.setCloudProfileDefaults()
+
+          this.setDefaultPurpose()
         }
       },
       region: {
@@ -898,8 +912,8 @@ limitations under the License.
 
         return terminationDays
       },
-      filteredPurpose () {
-        return this.selfTerminationDays ? 'evaluation' : this.purpose
+      filteredPurposes () {
+        return this.selfTerminationDays ? [] : this.purposes
       }
     },
     methods: {
@@ -988,6 +1002,9 @@ limitations under the License.
       },
       setDefaultSecret () {
         this.secret = head(this.infrastructureSecretsByProfileName)
+      },
+      setDefaultPurpose () {
+        this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
       },
       setCloudProfileDefaults () {
         this.setDefaultRegion()

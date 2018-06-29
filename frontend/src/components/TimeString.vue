@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <span>
-    {{TimeString}}
+    {{timeString}}
   </span>
 </template>
 
@@ -55,7 +55,7 @@ limitations under the License.
       }
     },
     computed: {
-      TimeString () {
+      timeString () {
         if (this.dateTime && this.currentClockTimer) {
           if (this.negativeRefDate) {
             return getTimeStringFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))

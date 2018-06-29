@@ -15,7 +15,7 @@ limitations under the License.
  -->
 <template>
   <div>
-    <self-termination-warning :expirationTimestamp="metadata.expirationTimestamp" type="alert"></self-termination-warning>
+    <self-termination-warning :expirationTimestamp="expirationTimestamp" type="alert"></self-termination-warning>
 
     <v-tabs fixed :scrollable="false" v-model="tab">
 
@@ -425,6 +425,9 @@ limitations under the License.
       },
       created () {
         return getDateFormatted(this.metadata.creationTimestamp)
+      },
+      expirationTimestamp () {
+        return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
       },
       domain () {
         return get(this.item, 'spec.dns.domain')

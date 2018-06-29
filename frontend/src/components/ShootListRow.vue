@@ -192,6 +192,8 @@ limitations under the License.
           namespace: metadata.namespace,
           createdBy: getCreatedBy(metadata),
           creationTimestamp: metadata.creationTimestamp,
+          // eslint-disable-next-line lodash/path-style
+          expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
           annotations: get(metadata, 'annotations', {}),
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
@@ -203,8 +205,8 @@ limitations under the License.
           info,
           availableK8sUpdates: availableK8sUpdatesForShoot(spec),
           k8sVersion: get(spec, 'kubernetes.version'),
-          // eslint-disable-next-line
-          purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
+          // eslint-disable-next-line lodash/path-style
+          purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
           lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
           journalsLabels: this.journalsLabels(this.shootItem.metadata),
           // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
