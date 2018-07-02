@@ -25,6 +25,7 @@ limitations under the License.
       <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
         {{ row.name }}
       </router-link>
+      <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
@@ -41,7 +42,7 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
         <div slot="activator">
-          <time-ago :date-time="row.creationTimestamp"></time-ago>
+          <time-string :date-time="row.creationTimestamp"></time-string>
         </div>
         {{ createdAt }}
       </v-tooltip>
@@ -65,7 +66,7 @@ limitations under the License.
       <v-tooltip top>
         <div slot="activator">
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-            <time-ago :date-time="row.lastUpdatedJournalTimestamp"></time-ago>
+            <time-string :date-time="row.lastUpdatedJournalTimestamp"></time-string>
           </router-link>
         </div>
         {{ lastUpdatedJournal }}
@@ -137,10 +138,11 @@ limitations under the License.
   import ShootStatus from '@/components/ShootStatus'
   import StatusTags from '@/components/StatusTags'
   import PurposeTag from '@/components/PurposeTag'
-  import TimeAgo from '@/components/TimeAgo'
+  import TimeString from '@/components/TimeString'
   import ShootVersion from '@/components/ShootVersion'
   import RetryOperation from '@/components/RetryOperation'
   import JournalLabels from '@/components/JournalLabels'
+  import SelfTerminationWarning from '@/components/SelfTerminationWarning'
   import forEach from 'lodash/forEach'
   import replace from 'lodash/replace'
   import get from 'lodash/get'
@@ -158,10 +160,11 @@ limitations under the License.
       StatusTags,
       PurposeTag,
       ShootStatus,
-      TimeAgo,
+      TimeString,
       ShootVersion,
       JournalLabels,
-      RetryOperation
+      RetryOperation,
+      SelfTerminationWarning
     },
     props: {
       shootItem: {
@@ -189,6 +192,8 @@ limitations under the License.
           namespace: metadata.namespace,
           createdBy: getCreatedBy(metadata),
           creationTimestamp: metadata.creationTimestamp,
+          // eslint-disable-next-line lodash/path-style
+          expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
           annotations: get(metadata, 'annotations', {}),
           deletionTimestamp: metadata.deletionTimestamp,
           lastOperation: get(status, 'lastOperation', {}),
@@ -200,8 +205,8 @@ limitations under the License.
           info,
           availableK8sUpdates: availableK8sUpdatesForShoot(spec),
           k8sVersion: get(spec, 'kubernetes.version'),
-          // eslint-disable-next-line
-          purpose:get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
+          // eslint-disable-next-line lodash/path-style
+          purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
           lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
           journalsLabels: this.journalsLabels(this.shootItem.metadata),
           // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
@@ -280,11 +285,6 @@ limitations under the License.
   }
 </script>
 <style lang="styl" scoped>
-
-  .retryButton {
-    margin: 0px;
-  }
-
   .action-button-group {
     white-space: nowrap;
 

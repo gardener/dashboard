@@ -35,6 +35,8 @@ limitations under the License.
         <v-tab-item key="infra" id="tab-infra">
           <v-card flat>
             <v-container fluid>
+              <v-alert type="warning" :value="selfTerminationDays" outline>The selected secret has an associated quota that will cause the cluster to self terminate after {{selfTerminationDays}} days</v-alert>
+
               <v-card-text>
 
                 <v-layout row>
@@ -102,7 +104,6 @@ limitations under the License.
                       color="cyan"
                       label="Secrets"
                       :items="infrastructureSecretsByProfileName"
-                      item-value="metadata"
                       v-model="secret"
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
                       @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
@@ -168,10 +169,12 @@ limitations under the License.
                     <v-select
                       color="cyan"
                       label="Purpose"
-                      :items="purpose"
+                      :items="filteredPurposes"
                       v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
                       hint="Indicate the importance of the cluster"
                       persistent-hint
+                      @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
+                      @blur="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
                       required
                       ></v-select>
                   </v-flex>
@@ -459,6 +462,11 @@ limitations under the License.
           unique: 'Cluster name must be unique',
           noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
           noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
+        },
+        annotations: {
+          'garden.sapcloud.io/purpose': {
+            required: 'Purpose is required'
+          }
         }
       },
       spec: {
@@ -495,7 +503,7 @@ limitations under the License.
       name: null,
       namespace: null,
       annotations: {
-        'garden.sapcloud.io/purpose': 'evaluation'
+        'garden.sapcloud.io/purpose': null
       }
     },
     spec: {
@@ -565,7 +573,7 @@ limitations under the License.
         selectedSecret: undefined,
         selectedInfrastructureKind: undefined,
         activeTab: 'tab-infra',
-        purpose: ['evaluation', 'development', 'production'],
+        purposes: ['evaluation', 'development', 'production'],
         refs_: {},
         validationErrors,
         errorMessage: undefined,
@@ -584,6 +592,11 @@ limitations under the License.
             resourceName,
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
+            }
+          },
+          annotations: {
+            'garden.sapcloud.io/purpose': {
+              required
             }
           }
         },
@@ -682,15 +695,17 @@ limitations under the License.
         get () {
           return this.selectedSecret
         },
-        set (metadata) {
+        set (secret) {
           const secretBindingRef = {
-            name: get(metadata, 'bindingName')
+            name: get(secret, 'metadata.bindingName')
           }
           this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
 
-          this.selectedSecret = metadata
+          this.selectedSecret = secret
 
           this.setCloudProfileDefaults()
+
+          this.setDefaultPurpose()
         }
       },
       region: {
@@ -882,6 +897,23 @@ limitations under the License.
         return (secret) => {
           return isOwnSecretBinding(secret)
         }
+      },
+      selfTerminationDays () {
+        const clusterLifetimeDays = function (quotas, scope) {
+          const predicate = item => get(item, 'spec.scope') === scope
+          return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+        }
+
+        const quotas = get(this.selectedSecret, 'quotas')
+        let terminationDays = clusterLifetimeDays(quotas, 'project')
+        if (!terminationDays) {
+          terminationDays = clusterLifetimeDays(quotas, 'secret')
+        }
+
+        return terminationDays
+      },
+      filteredPurposes () {
+        return this.selfTerminationDays ? [] : this.purposes
       }
     },
     methods: {
@@ -969,7 +1001,10 @@ limitations under the License.
         this.cloudProfileName = cloudProfileName
       },
       setDefaultSecret () {
-        this.secret = get(head(this.infrastructureSecretsByProfileName), 'metadata')
+        this.secret = head(this.infrastructureSecretsByProfileName)
+      },
+      setDefaultPurpose () {
+        this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
       },
       setCloudProfileDefaults () {
         this.setDefaultRegion()

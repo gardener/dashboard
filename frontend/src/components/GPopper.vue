@@ -41,7 +41,7 @@ limitations under the License.
                 &nbsp;
               </template>
               <lazy-component @show="showPlaceholder=false">
-                <time-ago :dateTime="time"></time-ago>
+                <time-string :dateTime="time"></time-string>
               </lazy-component>
             </div>
           </div>
@@ -56,7 +56,7 @@ limitations under the License.
 
 <script>
   import Popper from 'vue-popperjs'
-  import TimeAgo from '@/components/TimeAgo'
+  import TimeString from '@/components/TimeString'
   import { closePopover } from '@/utils'
   import 'vue-popperjs/dist/css/vue-popper.css'
   import VueLazyload from 'vue-lazyload'
@@ -69,7 +69,7 @@ limitations under the License.
   export default {
     components: {
       Popper,
-      TimeAgo
+      TimeString
     },
     props: {
       popperKey: {

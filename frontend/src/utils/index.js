@@ -182,11 +182,19 @@ export function getTimestampFormatted (timestamp) {
   return moment(timestamp).format('lll')
 }
 
-export function getTimeAgoFrom (time, fromTime) {
+export function getTimeStringFrom (time, fromTime) {
   if (!time) {
     return undefined
   } else {
     return moment(time).from(fromTime)
+  }
+}
+
+export function getTimeStringTo (time, toTime) {
+  if (!time) {
+    return undefined
+  } else {
+    return moment(time).to(toTime)
   }
 }
 

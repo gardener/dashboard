@@ -43,7 +43,7 @@ limitations under the License.
                 <label class="caption grey--text text--darken-2">Created At</label>
                 <p class="subheading">{{created}}</p>
               </template>
-              <time-ago :dateTime="metadata.creationTimestamp"></time-ago>
+              <time-string :dateTime="metadata.creationTimestamp"></time-string>
             </v-tooltip>
           </v-flex>
           <v-flex lg8 xs12 v-if="projectData.createdBy">
@@ -79,7 +79,7 @@ limitations under the License.
   import find from 'lodash/find'
   import UpdateDialog from '@/dialogs/ProjectDialog'
   import DeleteDialog from '@/dialogs/ProjectDialogDelete'
-  import TimeAgo from '@/components/TimeAgo'
+  import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
 
   export default {
@@ -87,7 +87,7 @@ limitations under the License.
     components: {
       UpdateDialog,
       DeleteDialog,
-      TimeAgo
+      TimeString
     },
     data () {
       return {
