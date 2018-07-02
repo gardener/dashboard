@@ -374,7 +374,7 @@ limitations under the License.
                   <span class="subheading">Auto Update</span>
                 </v-card-title>
               </v-layout>
-              <v-list class="mr-extra" two-line>
+              <v-list two-line>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
                     <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
