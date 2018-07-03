@@ -15,12 +15,12 @@
 //
 
 const _ = require('lodash')
-const journals = require('./journals')
 
 const cloudProfiles = []
 const seeds = []
 const domains = []
 const quotas = []
+const journals = require('./journals')()
 
 const cache = {
   getCloudProfiles () {

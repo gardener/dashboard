@@ -18,43 +18,47 @@
 
 const logger = require('../logger')
 const backoff = require('backoff')
-const { journals } = require('../services')
+const { loadOpenIssues } = require('../services/journals')
 const { getJournalCache } = require('../cache')
 const config = require('../config')
 
-module.exports = async io => {
+module.exports = io => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for journals feature')
     return
   }
 
-  getJournalCache().subscribeIssues(event => {
-    io.of('/journals').to('issues').emit('events', {kind: 'issues', events: [event]})
+  const cache = getJournalCache()
+  cache.onIssue(event => {
+    const room = 'issues'
+    logger.debug(`emitting event to room ${room}`)
+    io.of('/journals').to(room).emit('events', {
+      kind: 'issues',
+      events: [event]
+    })
   })
-  getJournalCache().subscribeComments(event => {
-    const name = event.object.metadata.name
-    const namespace = event.object.metadata.namespace
-    logger.debug(`emitting event to room comments_${namespace}/${name}`)
-    io.of('/journals').to(`comments_${namespace}/${name}`).emit('events', {kind: 'comments', events: [event]})
+  cache.onComment(event => {
+    const { namespace, name } = event.object.metadata
+    const room = `comments_${namespace}/${name}`
+    logger.debug(`emitting event to room ${room}`)
+    io.of('/journals').to(room).emit('events', {
+      kind: 'comments',
+      events: [event]
+    })
   })
 
-  const listJournals = async (param, fn) => {
-    try {
-      await journals.list({})
-      fn(undefined)
-    } catch (err) {
-      fn(err)
-    }
+  function loadAllOpenIssues (cb) {
+    loadOpenIssues().then(() => cb(), err => cb(err))
   }
-  const call = backoff.call(listJournals, {}, function (err) {
+
+  const call = backoff.call(loadAllOpenIssues, err => {
     if (err) {
       logger.error('failed to fetch journals', err)
     } else {
       logger.info('successfully fetched journals')
     }
   })
-
-  call.retryIf(function (err) {
+  call.retryIf(err => {
     const willRetry = err.status === 503
     logger.info('will retry to fetch journals', willRetry)
     return willRetry
