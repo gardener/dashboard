@@ -24,6 +24,7 @@ limitations under the License.
         @input="$v.worker.name.$touch()"
         @blur="$v.worker.name.$touch()"
         v-model="worker.name"
+        counter="15"
         label="Group Name">
       </v-text-field>
     </v-flex>
@@ -93,15 +94,19 @@ limitations under the License.
   import SizeInput from '@/components/VolumeSizeInput'
   import MachineType from '@/components/MachineType'
   import VolumeType from '@/components/VolumeType'
-  import { required, minValue } from 'vuelidate/lib/validators'
+  import { required, maxLength, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
-  import { uniqueWorkerName, minVolumeSize } from '@/utils/validators'
+  import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 
   const validationErrors = {
     worker: {
       name: {
-        required: 'You can\'t leave this empty.',
-        uniqueWorkerName: 'Name is taken. Try another.'
+        required: 'Name is required',
+        maxLength: 'Name ist too long',
+        resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+        uniqueWorkerName: 'Name is taken. Try another.',
+        noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
+        noStartEndHyphen: 'Name must not start or end with a hyphen'
       },
       volumeSize: {
         minVolumeSize: 'Invalid volume size'
@@ -119,6 +124,10 @@ limitations under the License.
     worker: {
       name: {
         required,
+        maxLength: maxLength(15),
+        noConsecutiveHyphen,
+        noStartEndHyphen,
+        resourceName,
         uniqueWorkerName
       },
       volumeSize: {
