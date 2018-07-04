@@ -187,7 +187,7 @@ limitations under the License.
             required,
             maxLength: maxLength(10),
             noConsecutiveHyphen,
-            noStartEndHyphen,
+            noStartEndHyphen, // Order is important for UI hints
             resourceName,
             unique: unique('projectNames')
           }
