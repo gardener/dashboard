@@ -96,7 +96,7 @@ limitations under the License.
   import VolumeType from '@/components/VolumeType'
   import { required, maxLength, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
-  import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+  import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen } from '@/utils/validators'
 
   const validationErrors = {
     worker: {
@@ -105,7 +105,6 @@ limitations under the License.
         maxLength: 'Name ist too long',
         resourceName: 'Name must only be lowercase letters, numbers and hyphens',
         uniqueWorkerName: 'Name is taken. Try another.',
-        noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
         noStartEndHyphen: 'Name must not start or end with a hyphen'
       },
       volumeSize: {
@@ -125,7 +124,6 @@ limitations under the License.
       name: {
         required,
         maxLength: maxLength(15),
-        noConsecutiveHyphen,
         noStartEndHyphen,
         resourceName,
         uniqueWorkerName
