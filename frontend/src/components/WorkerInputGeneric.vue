@@ -124,7 +124,7 @@ limitations under the License.
       name: {
         required,
         maxLength: maxLength(15),
-        noStartEndHyphen,
+        noStartEndHyphen, // Order is important for UI hints
         resourceName,
         uniqueWorkerName
       },

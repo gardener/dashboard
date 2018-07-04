@@ -588,7 +588,7 @@ limitations under the License.
             required,
             maxLength: maxLength(10),
             noConsecutiveHyphen,
-            noStartEndHyphen,
+            noStartEndHyphen, // Order is important for UI hints
             resourceName,
             unique (value) {
               return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
