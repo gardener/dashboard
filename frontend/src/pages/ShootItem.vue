@@ -175,7 +175,7 @@ limitations under the License.
                       </v-list-tile-action>
                         <v-list-tile-content>
                           <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
-                          <v-list-tile-title><a :href="shootIngressDomain" target="_blank" class="cyan--text text--darken-2">{{shootIngressDomainText}}</a></v-list-tile-title>
+                          <v-list-tile-title>{{shootIngressDomainText}}</v-list-tile-title>
                         </v-list-tile-content>
                     </v-list-tile>
                   </template>
@@ -432,11 +432,8 @@ limitations under the License.
       domain () {
         return get(this.item, 'spec.dns.domain')
       },
-      shootIngressDomain () {
-        return `https://placeholder.ingress.${this.domain}`
-      },
       shootIngressDomainText () {
-        return `<placeholder>.ingress.${this.domain}`
+        return `*.ingress.${this.domain}`
       },
       region () {
         return get(this.item, 'spec.cloud.region')
