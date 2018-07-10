@@ -17,11 +17,12 @@ limitations under the License.
 <template>
   <v-dialog v-model="value" persistent max-width="500">
   <v-card>
-    <v-card-title class="red darken-2 grey--text text--lighten-4">
+    <v-card-title :class="titleClass">
       <div class="headline">
         <slot name="caption">
           Confirm Dialog
         </slot>
+        <code :class="textClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
       </div>
     </v-card-title>
     <v-card-text class="subheadingfont">
@@ -33,9 +34,10 @@ limitations under the License.
         ref="deleteDialogInput"
         :hint="hint"
         persistent-hint
-        :error="hasError"
+        :error="hasError && userInput.length > 0"
         v-model="userInput"
-        type="text">
+        type="text"
+        color="cyan darken-2">
       </v-text-field>
     </v-card-text>
 
@@ -44,7 +46,7 @@ limitations under the License.
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="okClicked()" :disabled="confirmDisabled || hasError" class="red--text" flat>Confirm</v-btn>
+      <v-btn @click.native.stop="okClicked()" :disabled="confirmDisabled || hasError" :class="textClass" flat>Confirm</v-btn>
     </v-card-actions>
   </v-card>
   </v-dialog>
@@ -88,7 +90,16 @@ limitations under the License.
       },
       detailedErrorMessage: {
         type: String
-      }
+      },
+      confirmTitleColorClass: {
+        type: String,
+        default: 'red darken-2 grey--text text--lighten-4'
+      },
+      confirmTextColorClass: {
+        type: String,
+        default: 'red--text text--darken-2'
+      },
+
     },
     data () {
       return {
@@ -129,6 +140,12 @@ limitations under the License.
         set (value) {
           this.$emit('update:detailedErrorMessage', value)
         }
+      },
+      titleClass () {
+        return this.confirmRequired ? this.confirmTitleColorClass : 'cyan darken-2 grey--text text--lighten-4'
+      },
+      textClass () {
+        return this.confirmRequired ? this.confirmTextColorClass : 'cyan--text text--darken-2'
       }
     },
     methods: {

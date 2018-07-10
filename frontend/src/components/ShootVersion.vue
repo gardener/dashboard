@@ -38,8 +38,11 @@ limitations under the License.
       :confirmDisabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
+      confirmTitleColorClass="orange darken-2 grey--text text--lighten-4"
+      confirmTextColorClass="orange--text text--darken-2"
       >
-      <template slot="caption">Update Kubernetes Version of Cluster <code>{{shootName}}</code></template>
+      <template slot="caption">Update Kubernetes Version</template>
+      <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
@@ -48,9 +51,9 @@ limitations under the License.
           :confirmRequired.sync="confirmRequired"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && confirmRequired">
-          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.
-          <br/>
-          <i class="red--text text--darken-2">This action cannot be undone.</i>
+          You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
+          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
+          <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
     </confirm-input-dialog>

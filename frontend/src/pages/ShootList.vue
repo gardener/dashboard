@@ -132,7 +132,8 @@ limitations under the License.
         :errorMessage.sync="deleteErrorMessage"
         :detailedErrorMessage.sync="deleteDetailedErrorMessage"
         >
-        <template slot="caption">Delete Cluster <code>{{currentName}}</code></template>
+        <template slot="caption">Delete Cluster</template>
+        <template slot="affectedObjectName">{{currentName}}</template>
         <template slot="message">
           <v-list>
             <v-list-tile-content>
