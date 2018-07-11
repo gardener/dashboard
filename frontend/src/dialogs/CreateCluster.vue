@@ -315,33 +315,17 @@ limitations under the License.
           <v-card flat>
             <v-container>
               <v-list three-line class="mr-extra">
-
-                <v-list-tile avatar class="list-complete-item">
+                <v-list-tile class="list-complete-item"
+                  v-for="addonDefinition in addonDefinitionList"
+                  :key="addonDefinition.name">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
+                    <v-checkbox color="cyan" v-model="addons[addonDefinition.name].enabled"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
-                    <v-list-tile-title >Dashboard</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      General-purpose web UI for Kubernetes clusters.
-                    </v-list-tile-sub-title>
+                    <v-list-tile-title >{{addonDefinition.title}}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{addonDefinition.description}}</v-list-tile-sub-title>
                   </v-list-tile-content>
                 </v-list-tile>
-
-                <v-list-tile  class="list-complete-item">
-                  <v-list-tile-action>
-                    <v-checkbox v-model="addons.monocular.enabled" class="cyan--text"></v-checkbox>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title >Monocular</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      Monocular is a web-based UI for managing Kubernetes applications and services
-                      packaged as Helm Charts. It allows you to search and discover available charts from
-                      multiple repositories, and install them in your cluster with one click.
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-
               </v-list>
             </v-container>
           </v-card>
@@ -433,6 +417,13 @@ limitations under the License.
   import every from 'lodash/every'
   import noop from 'lodash/noop'
   import isEmpty from 'lodash/isEmpty'
+  import forEach from 'lodash/forEach'
+  import filter from 'lodash/filter'
+  import reduce from 'lodash/reduce'
+  import set from 'lodash/set'
+  import pick from 'lodash/pick'
+  import omit from 'lodash/omit'
+  import concat from 'lodash/concat'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
@@ -440,7 +431,7 @@ limitations under the License.
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
   import moment from 'moment'
 
-  var semSort = require('semver-sort')
+  const semSort = require('semver-sort')
 
   function shortRandomString (length) {
     const start = 'abcdefghijklmnopqrstuvwxyz'
@@ -496,6 +487,44 @@ limitations under the License.
     }
   }
 
+  const standardAddonDefinitionList = [
+    {
+      name: 'cluster-autoscaler',
+      title: 'Cluster Autoscaler',
+      description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
+      visible: false,
+      enabled: true
+    },
+    {
+      name: 'heapster',
+      title: 'Heapster',
+      description: 'Heapster enables Container Cluster Monitoring and Performance Analysis.',
+      visible: false,
+      enabled: true
+    },
+    {
+      name: 'kubernetes-dashboard',
+      title: 'Dashboard',
+      description: 'General-purpose web UI for Kubernetes clusters.',
+      visible: true,
+      enabled: true
+    },
+    {
+      name: 'monocular',
+      title: 'Monocular',
+      description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.',
+      visible: true,
+      enabled: false
+    },
+    {
+      name: 'nginx-ingress',
+      title: 'Nginx Ingress',
+      description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.',
+      visible: false,
+      enabled: true
+    }
+  ]
+
   const defaultShootDefinition = {
     apiVersion: 'garden.sapcloud.io/v1beta1',
     kind: 'Shoot',
@@ -530,23 +559,7 @@ limitations under the License.
           kubernetesVersion: true
         }
       },
-      addons: {
-        'cluster-autoscaler': {
-          enabled: true
-        },
-        heapster: {
-          enabled: true
-        },
-        'kubernetes-dashboard': {
-          enabled: true
-        },
-        monocular: {
-          enabled: false
-        },
-        'nginx-ingress': {
-          enabled: true
-        }
-      }
+      addons: reduce(standardAddonDefinitionList, (addons, {name, enabled}) => set(addons, name, {enabled}), {})
     }
   }
 
@@ -650,7 +663,8 @@ limitations under the License.
         'infrastructureSecretsByCloudProfileName',
         'projectList',
         'domainList',
-        'shootByNamespaceAndName'
+        'shootByNamespaceAndName',
+        'customAddonDefinitionList'
       ]),
       visible: {
         get () {
@@ -914,6 +928,9 @@ limitations under the License.
       },
       filteredPurposes () {
         return this.selfTerminationDays ? [] : this.purposes
+      },
+      addonDefinitionList () {
+        return concat(filter(standardAddonDefinitionList, 'visible'), this.customAddonDefinitionList)
       }
     },
     methods: {
@@ -925,11 +942,21 @@ limitations under the License.
       },
       createShootResource () {
         const data = cloneDeep(this.shootDefinition)
+        const annotations = data.metadata.annotations
         const infrastructureData = cloneDeep(this.infrastructureData)
-        infrastructureData.workers.forEach(worker => {
+        forEach(infrastructureData.workers, worker => {
           delete worker.id
         })
         data.spec.cloud[this.infrastructureKind] = infrastructureData
+        // transform addons specification
+        const standardAddonNames = map(standardAddonDefinitionList, 'name')
+        const standardAddons = pick(data.spec.addons, standardAddonNames)
+        const customAddons = omit(data.spec.addons, standardAddonNames)
+        data.spec.addons = standardAddons
+        const enabledCustomAddonNames = reduce(customAddons, (accumulator, {enabled}, name) => !enabled ? accumulator : concat(accumulator, name), [])
+        if (!isEmpty(enabledCustomAddonNames)) {
+          annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
+        }
         return this.createShoot(data)
       },
       addWorker () {
@@ -945,7 +972,8 @@ limitations under the License.
         })
       },
       createClicked () {
-        this.createShootResource()
+        Promise.resolve()
+          .then(() => this.createShootResource())
           .then(() => {
             this.$emit('created')
             this.$emit('close', false)
@@ -968,6 +996,7 @@ limitations under the License.
 
         this.selectedSecret = undefined
         this.shootDefinition = cloneDeep(defaultShootDefinition)
+
         this.setDefaultInfrastructureKind()
 
         this.clusterName = shortRandomString(10)
@@ -1052,6 +1081,12 @@ limitations under the License.
       }
     },
     created () {
+      // add custom addons to default shootDefinition
+      forEach(this.customAddonDefinitionList, ({name}) => {
+        defaultShootDefinition.spec.addons[name] = {
+          enabled: false
+        }
+      })
       this.reset()
     },
     mounted () {

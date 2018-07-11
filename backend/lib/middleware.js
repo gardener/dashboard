@@ -24,6 +24,7 @@ const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
 const { NotFound, Unauthorized, InternalServerError } = require('./errors')
+const { customAddonDefinitions } = require('./services')
 const client = require('prom-client')
 const secretProvider = jwtSecret(config.jwks)
 
@@ -36,8 +37,13 @@ function prometheusMetrics ({timeout = 30000} = {}) {
   }
 }
 
-function frontendConfig (req, res, next) {
-  res.json(config.frontend)
+async function frontendConfig (req, res, next) {
+  const user = req.user
+  const frontendConfig = _.cloneDeep(config.frontend)
+  try {
+    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({user, namespace: 'garden'})
+  } catch (err) { /* ignore error */ }
+  res.json(frontendConfig)
 }
 
 function attachAuthorization (req, res, next) {
