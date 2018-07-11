@@ -22,9 +22,12 @@ limitations under the License.
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="shootList.length === 0" icon @click.native.stop="deleteConfirm=true">
-          <v-icon>delete</v-icon>
-        </v-btn>
+        <v-tooltip top :disabled="!isDeleteButtonDisabled">
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+            <v-icon>delete</v-icon>
+          </v-btn>
+          <span>You can only delete projects that do not contain clusters</span>
+        </v-tooltip>
       </v-toolbar>
 
       <v-card-text>
@@ -141,6 +144,9 @@ limitations under the License.
       },
       purpose () {
         return this.projectData.purpose || ''
+      },
+      isDeleteButtonDisabled () {
+        return this.shootList.length > 0
       }
     },
     methods: {
