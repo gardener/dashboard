@@ -70,15 +70,28 @@ limitations under the License.
       </v-btn>
     </v-fab-transition>
 
-    <delete-dialog v-model="deleteConfirm" :project="project"></delete-dialog>
+    <confirm-dialog
+      v-model="deleteConfirm"
+      defaultColor="red"
+      :cancel="hide"
+      :ok="onDeleteProject">
+      <div slot="caption">
+        Confirm Delete
+      </div>
+      <div slot="message">
+        Are you sure to delete the project <b>{{projectName}}</b>?
+        <br />
+        <i class="red--text text--darken-2">The operation can not be undone.</i>
+      </div>
+    </confirm-dialog>
   </v-container>
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
+  import { mapState, mapGetters, mapActions } from 'vuex'
   import find from 'lodash/find'
   import UpdateDialog from '@/dialogs/ProjectDialog'
-  import DeleteDialog from '@/dialogs/ProjectDialogDelete'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
 
@@ -86,7 +99,7 @@ limitations under the License.
     name: 'administration',
     components: {
       UpdateDialog,
-      DeleteDialog,
+      ConfirmDialog,
       TimeString
     },
     data () {
@@ -128,6 +141,28 @@ limitations under the License.
       },
       purpose () {
         return this.projectData.purpose || ''
+      }
+    },
+    methods: {
+      ...mapActions([
+        'deleteProject'
+      ]),
+      hide () {
+        this.deleteConfirm = false
+      },
+      onDeleteProject () {
+        this
+          .deleteProject(this.project)
+          .then(() => {
+            this.hide()
+            if (this.projectList.length > 0) {
+              const p1 = this.projectList[0]
+              this.$router.push({name: 'ShootList', params: { namespace: p1.metadata.namespace }})
+            } else {
+              this.$router.push({name: 'Home', params: { }})
+            }
+            this.$bus.$emit('toast', 'Project deleted successfully')
+          })
       }
     },
     mounted () {

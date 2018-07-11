@@ -29,17 +29,15 @@ limitations under the License.
       <span v-else-if="availableK8sUpdates">Kubernetes upgrade available</span>
       <span v-else>Kubernetes version up to date</span>
     </v-tooltip>
-    <confirm-input-dialog
-      :confirm="shootName"
+    <confirm-dialog
+      :confirm="confirm"
       v-model="updateDialog"
       :cancel="hideUpdateDialog"
       :ok="versionUpdateConfirmed"
-      :confirmRequired="confirmRequired"
       :confirmDisabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
-      confirmTitleColorClass="orange darken-2 grey--text text--lighten-4"
-      confirmTextColorClass="orange--text text--darken-2"
+      confirmColor="orange"
       >
       <template slot="caption">Update Kubernetes Version</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -56,20 +54,20 @@ limitations under the License.
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
-    </confirm-input-dialog>
+    </confirm-dialog>
   </div>
 </template>
 
 <script>
   import ShootVersionUpdate from '@/components/ShootVersionUpdate'
-  import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import get from 'lodash/get'
   import { updateShootVersion } from '@/utils/api'
 
   export default {
     components: {
       ShootVersionUpdate,
-      ConfirmInputDialog
+      ConfirmDialog
     },
     props: {
       availableK8sUpdates: {
@@ -104,6 +102,9 @@ limitations under the License.
       },
       buttonInactive () {
         return this.availableK8sUpdates ? '' : 'update_btn_inactive'
+      },
+      confirm () {
+        return this.confirmRequired ? this.shootName : undefined
       }
     },
     methods: {

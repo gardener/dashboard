@@ -124,7 +124,7 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
-      <confirm-input-dialog
+      <confirm-dialog
         :confirm="currentName"
         v-model="deleteDialog"
         :cancel="hideDialog"
@@ -150,7 +150,7 @@ limitations under the License.
           <br/>
           <i class="red--text text--darken-2">This action cannot be undone.</i>
         </template>
-      </confirm-input-dialog>
+      </confirm-dialog>
       <create-cluster v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster>
     </v-card>
     <v-fab-transition>
@@ -171,7 +171,7 @@ limitations under the License.
   import GPopper from '@/components/GPopper'
   import ShootListRow from '@/components/ShootListRow'
   import CreateCluster from '@/dialogs/CreateCluster'
-  import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import ClusterAccess from '@/components/ClusterAccess'
   import { getCreatedBy } from '@/utils'
 
@@ -182,7 +182,7 @@ limitations under the License.
       CreateCluster,
       GPopper,
       ShootListRow,
-      ConfirmInputDialog,
+      ConfirmDialog,
       ClusterAccess
     },
     data () {
