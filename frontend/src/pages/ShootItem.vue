@@ -175,7 +175,7 @@ limitations under the License.
                       </v-list-tile-action>
                         <v-list-tile-content>
                           <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
-                          <v-list-tile-title><a :href="shootIngressDomain" target="_blank" class="cyan--text text--darken-2">{{shootIngressDomainText}}</a></v-list-tile-title>
+                          <v-list-tile-title>{{shootIngressDomainText}}</v-list-tile-title>
                         </v-list-tile-content>
                     </v-list-tile>
                   </template>
@@ -184,10 +184,10 @@ limitations under the License.
 
               <v-card class="cyan darken-2 mt-3">
                 <v-card-title class="subheading white--text" >
-                  Addons provided by Gardener
+                  Addons
                 </v-card-title>
-                <v-list>
-
+                <v-list subheader>
+                  <v-subheader>Addons provided by Gardener</v-subheader>
                   <v-list-tile avatar v-for="item in addonList" :key="item.name" v-if="addon(item.name).enabled">
                     <v-list-tile-avatar>
                       <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
@@ -204,8 +204,24 @@ limitations under the License.
                       </template>
                     </v-list-tile-action>
                   </v-list-tile>
-
                 </v-list>
+
+                <template v-if="customAddonList.length">
+                  <v-divider></v-divider>
+                  <v-list subheader>
+                  <v-subheader>Custom addons</v-subheader>
+                  <v-list-tile avatar v-for="item in customAddonList" :key="item.name">
+                    <v-list-tile-avatar>
+                      <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
+                    </v-list-tile-avatar>
+                    <v-list-tile-content>
+                      <v-list-tile-title>{{item.title}}</v-list-tile-title>
+                      <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  </v-list>
+                </template>
+
               </v-card>
 
             </v-flex>
@@ -279,6 +295,8 @@ limitations under the License.
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
+  import find from 'lodash/find'
+  import forEach from 'lodash/forEach'
   import { safeDump } from 'js-yaml'
   import { getDateFormatted, getCloudProviderKind, canLinkToSeed, availableK8sUpdatesForShoot } from '@/utils'
 
@@ -348,7 +366,8 @@ limitations under the License.
         'shootByNamespaceAndName',
         'journalsByNamespaceAndName',
         'isAdmin',
-        'namespaces'
+        'namespaces',
+        'customAddonDefinitionList'
       ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.item, 'spec.cloud'))
@@ -432,11 +451,8 @@ limitations under the License.
       domain () {
         return get(this.item, 'spec.dns.domain')
       },
-      shootIngressDomain () {
-        return `https://placeholder.ingress.${this.domain}`
-      },
       shootIngressDomainText () {
-        return `<placeholder>.ingress.${this.domain}`
+        return `*.ingress.${this.domain}`
       },
       region () {
         return get(this.item, 'spec.cloud.region')
@@ -459,6 +475,21 @@ limitations under the License.
       addon () {
         return (name) => {
           return this.addons[name] || {}
+        }
+      },
+      customAddonList () {
+        try {
+          const customAddonNames = JSON.parse(this.annotations['gardenextensions.sapcloud.io/addons'])
+          const list = []
+          forEach(customAddonNames, name => {
+            const item = find(this.customAddonDefinitionList, ['name', name])
+            if (item) {
+              list.push(item)
+            }
+          })
+          return list
+        } catch (err) {
+          return []
         }
       },
       tab: {
