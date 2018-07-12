@@ -45,7 +45,7 @@ limitations under the License.
     </v-card>
 
     <v-card class="mr-extra mt-4">
-      <v-toolbar card color="green darken-1">
+      <v-toolbar card color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
           Project Members
@@ -53,7 +53,7 @@ limitations under the License.
         <v-spacer></v-spacer>
           <v-text-field v-if="memberList.length > 3"
             prepend-icon="search"
-            color="green darken-1"
+            color="green darken-2"
             label="Search"
             solo
             clearable
@@ -92,7 +92,7 @@ limitations under the License.
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
-              <v-btn icon class="red--text" @click.native.stop="onDelete(name)">
+              <v-btn icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-list-tile-action>
@@ -148,7 +148,7 @@ limitations under the License.
               </v-tooltip>
             </v-list-tile-action>
             <v-list-tile-action>
-              <v-btn icon class="red--text" @click.native.stop="onDelete(name)">
+              <v-btn icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-list-tile-action>

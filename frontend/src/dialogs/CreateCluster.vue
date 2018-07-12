@@ -43,7 +43,7 @@ limitations under the License.
                   <v-flex xs3>
                     <v-text-field
                       ref="name"
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Cluster Name"
                       counter="10"
                       v-model="clusterName"
@@ -58,7 +58,7 @@ limitations under the License.
                 <v-layout row class="mt-2">
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Infrastructure"
                       :items="sortedCloudProviderKindList"
                       v-model="infrastructureKind"
@@ -92,7 +92,7 @@ limitations under the License.
                       v-model="cloudProfileName"
                       :isCreateMode="true"
                       :cloudProfiles="cloudProfiles"
-                      color="cyan">
+                      color="cyan darken-2">
                     </cloud-profile>
                   </v-flex>
 
@@ -101,7 +101,7 @@ limitations under the License.
 
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Secrets"
                       :items="infrastructureSecretsByProfileName"
                       v-model="secret"
@@ -127,7 +127,7 @@ limitations under the License.
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Region"
                       :items="regions"
                       v-model="region"
@@ -141,7 +141,7 @@ limitations under the License.
                   </v-flex>
                   <v-flex xs3 v-if="infrastructureKind !== 'azure'">
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Zone"
                       :items="zones"
                       :error-messages="getErrorMessages('infrastructureData.zones')"
@@ -156,7 +156,7 @@ limitations under the License.
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Kubernetes"
                       :items="sortedKubernetesVersions"
                       v-model="shootDefinition.spec.kubernetes.version"
@@ -167,7 +167,7 @@ limitations under the License.
                   </v-flex>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Purpose"
                       :items="filteredPurposes"
                       v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
@@ -184,7 +184,7 @@ limitations under the License.
                   <v-layout row>
                     <v-flex xs3>
                       <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Floating Pools"
                       :items="floatingPoolNames"
                       v-model="infrastructureData.floatingPoolName"
@@ -195,7 +195,7 @@ limitations under the License.
                     </v-flex>
                     <v-flex xs3>
                       <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Load Balancer Providers"
                       :items="loadBalancerProviderNames"
                       v-model="infrastructureData.loadBalancerProvider"
@@ -289,8 +289,8 @@ limitations under the License.
                       outline
                       fab
                       icon
-                      class="cyan">
-                      <v-icon class="cyan--text">add</v-icon>
+                      class="cyan darken-2">
+                      <v-icon class="cyan--text text--darken-2">add</v-icon>
                     </v-btn>
                   </v-flex>
 
@@ -298,7 +298,7 @@ limitations under the License.
                     <v-btn
                       @click="addWorker"
                       flat
-                      class="cyan--text">
+                      class="cyan--text text--darken-2">
                       Add Worker Group
                     </v-btn>
                   </v-flex>
@@ -318,7 +318,7 @@ limitations under the License.
 
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title >Dashboard</v-list-tile-title>
@@ -330,7 +330,7 @@ limitations under the License.
 
                 <v-list-tile  class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox v-model="addons.monocular.enabled" class="cyan--text"></v-checkbox>
+                    <v-checkbox v-model="addons.monocular.enabled" class="cyan--text text--darken-2"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title >Monocular</v-list-tile-title>
@@ -355,7 +355,7 @@ limitations under the License.
               <v-layout row>
                 <v-flex xs3>
                   <v-text-field
-                   color="cyan"
+                   color="cyan darken-2"
                    label="Maintenance Start Time"
                    v-model="maintenanceBegin"
                    :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
@@ -377,7 +377,7 @@ limitations under the License.
               <v-list two-line>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title>Operating System</v-list-tile-title>
@@ -389,7 +389,7 @@ limitations under the License.
                 </v-list-tile>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
@@ -410,7 +410,7 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text">Create</v-btn>
+        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
       </v-card-actions>
 
     </v-card>

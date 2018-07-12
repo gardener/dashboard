@@ -30,7 +30,7 @@ limitations under the License.
     <v-list-tile-action>
       <v-tooltip top :disabled="!isDeleteButtonDisabled">
         <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete" slot="activator">
-          <v-icon class="red--text">delete</v-icon>
+          <v-icon class="red--text text--darken-2">delete</v-icon>
         </v-btn>
         <span v-if="!isOwnSecretBinding">You can only delete secrets that are owned by you</span>
         <span v-else-if="relatedShootCount > 0">You can only delete secrets that are currently unused</span>
@@ -40,7 +40,7 @@ limitations under the License.
     <v-list-tile-action>
       <v-tooltip top :disabled="isOwnSecretBinding">
         <v-btn :disabled="!isOwnSecretBinding" icon @click.native.stop="onUpdate" slot="activator">
-          <v-icon class="cyan--text darken-2">edit</v-icon>
+          <v-icon class="cyan--text text--darken-2">edit</v-icon>
         </v-btn>
         <span>You can only edit secrets that are owned by you</span>
       </v-tooltip>

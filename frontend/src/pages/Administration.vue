@@ -18,7 +18,7 @@ limitations under the License.
   <v-container fluid>
     <v-card class="mr-extra">
 
-      <v-toolbar class="red elevation-0 darken-1" dark>
+      <v-toolbar class="red elevation-0 darken-2" dark>
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -68,7 +68,7 @@ limitations under the License.
       </v-card-text>
     </v-card>
     <v-fab-transition>
-      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-1" @click.native.stop="edit = true">
+      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
     </v-fab-transition>

@@ -62,7 +62,7 @@ limitations under the License.
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
-              <v-list-tile-sub-title color="red">Show only clusters with issues</v-list-tile-sub-title>
+              <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
             </v-list-tile>
             <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
               <v-list-tile-action>
