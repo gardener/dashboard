@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
@@ -14,14 +15,27 @@
 // limitations under the License.
 //
 
-module.exports = {
-  cloudprofiles: require('./cloudprofiles'),
-  domains: require('./domains'),
-  projects: require('./projects'),
-  shoots: require('./shoots'),
-  infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members'),
-  administrators: require('./administrators'),
-  journals: require('./journals'),
-  customAddonDefinitions: require('./customAddonDefinitions')
+'use strict'
+
+const _ = require('lodash')
+const yaml = require('js-yaml')
+const core = require('../kubernetes').core()
+
+exports.list = async function ({user, namespace = 'garden'}) {
+  const {items} = await core.namespaces(namespace).configmaps.get({
+    qs: {
+      labelSelector: 'gardenextensions.sapcloud.io/role=addonDefinitions'
+    }
+  })
+  return _
+    .chain(items)
+    .first()
+    .get('data')
+    .map((data, name) => {
+      try {
+        return _.set(yaml.safeLoad(data), 'name', name)
+      } catch (err) { /* ignore error */ }
+    })
+    .compact()
+    .value()
 }
