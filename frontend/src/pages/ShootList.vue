@@ -208,7 +208,8 @@ limitations under the License.
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
         deleteErrorMessage: null,
         deleteDetailedErrorMessage: null,
-        cachedItems: null
+        cachedItems: null,
+        clearSelectedShootTimerID: undefined
       }
     },
     watch: {
@@ -223,15 +224,15 @@ limitations under the License.
       }
     },
     methods: {
-      ...mapActions([
-        'deleteShoot',
-        'setSelectedShoot',
-        'setShootListSortParams',
-        'setShootListSearchValue',
-        'setOnlyShootsWithIssues',
-        'setHideUserIssues',
-        'setHideDeactivatedReconciliation'
-      ]),
+      ...mapActions({
+        deleteShoot: 'deleteShoot',
+        setSelectedShootInternal: 'setSelectedShoot',
+        setShootListSortParams: 'setShootListSortParams',
+        setShootListSearchValue: 'setShootListSearchValue',
+        setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
+        setHideUserIssues: 'setHideUserIssues',
+        setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
+      }),
       deletionConfirmed () {
         this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
           .then(() => this.hideDialog())
@@ -265,7 +266,7 @@ limitations under the License.
             this.deleteDetailedErrorMessage = null
         }
         this.dialog = null
-        this.setSelectedShoot(null)
+        this.clearSelectedShootWithDelay()
       },
       setColumnChecked (header) {
         header.checked = !header.checked
@@ -306,6 +307,15 @@ limitations under the License.
         if (this.showOnlyShootsWithIssues) {
           this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
         }
+      },
+      setSelectedShoot (selectedShoot) {
+        clearTimeout(this.clearSelectedShootTimerID)
+        return this.setSelectedShootInternal(selectedShoot)
+      },
+      clearSelectedShootWithDelay () {
+        this.clearSelectedShootTimerID = setTimeout(() => {
+          this.setSelectedShootInternal(null)
+        }, 500)
       }
     },
     computed: {
