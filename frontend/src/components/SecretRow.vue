@@ -72,7 +72,7 @@ limitations under the License.
         if (this.isOwnSecretBinding) {
           return get(this.secret, `data.${this.secretDescriptorKey}`)
         } else {
-          return 'Owner: '+ get(this.secret, 'metadata.namespace')
+          return 'Owner: ' + get(this.secret, 'metadata.namespace')
         }
       },
       relatedShootCount () {
