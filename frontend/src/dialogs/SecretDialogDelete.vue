@@ -38,7 +38,7 @@ limitations under the License.
         <v-container fluid>
 
           <div slot="message">
-            Are you sure to delete the secret <b>{{name}}</b>? <span class="red--text">The operation
+            Are you sure to delete the secret <b>{{name}}</b>? <span class="red--text text--darken-2">The operation
             can not be undone.</span>
           </div>
 
