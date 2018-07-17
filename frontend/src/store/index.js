@@ -27,6 +27,7 @@ import includes from 'lodash/includes'
 import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
+import merge from 'lodash/merge'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -61,7 +62,8 @@ const state = {
   loading: false,
   error: null,
   alert: null,
-  shootsLoading: false
+  shootsLoading: false,
+  websocketConnectionError: null
 }
 
 const getFilterValue = (state) => {
@@ -225,6 +227,12 @@ const getters = {
     return (namespace) => {
       return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
     }
+  },
+  isWebsocketConnectionError () {
+    return get(state, 'websocketConnectionError') !== null
+  },
+  websocketConnectAttempt () {
+    return get(state, 'websocketConnectionError.reconnectAttempt')
   },
   isHideUserIssues (state, getters) {
     return getters['shoots/isHideUserIssues']
@@ -475,6 +483,14 @@ const actions = {
     }
     return state.shootsLoading
   },
+  setWebsocketConnectionError ({ commit }, { reason, reconnectAttempt }) {
+    commit('SET_WEBSOCKETCONNECTIONERROR', { reason, reconnectAttempt })
+    return state.websocketConnectionError
+  },
+  unsetWebsocketConnectionError ({ commit }) {
+    commit('SET_WEBSOCKETCONNECTIONERROR', null)
+    return state.websocketConnectionError
+  },
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
@@ -516,6 +532,13 @@ const mutations = {
   },
   SET_SHOOTS_LOADING (state, value) {
     state.shootsLoading = value
+  },
+  SET_WEBSOCKETCONNECTIONERROR (state, value) {
+    if (value) {
+      state.websocketConnectionError = merge({}, state.websocketConnectionError, value)
+    } else {
+      state.websocketConnectionError = null
+    }
   },
   SET_ERROR (state, value) {
     state.error = value

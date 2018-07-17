@@ -32,7 +32,7 @@ limitations under the License.
   import Loading from '@/components/Loading.vue'
   import { mapGetters, mapActions } from 'vuex'
   import 'vue-snotify/styles/material.css'
-  import {SnotifyPosition} from 'vue-snotify'
+  import { SnotifyPosition } from 'vue-snotify'
 
   export default {
     name: 'Default',
@@ -43,15 +43,17 @@ limitations under the License.
     },
     data () {
       return {
-        snackbar: false,
-        message: ''
+        websocketConnectionNotification: undefined,
+        websocketConnectionNotificationMessage: 'The content on this page might be outdated'
       }
     },
     computed: {
       ...mapGetters([
         'errorMessage',
         'alertMessage',
-        'alertType'
+        'alertType',
+        'isWebsocketConnectionError',
+        'websocketConnectAttempt'
       ])
     },
     watch: {
@@ -66,6 +68,21 @@ limitations under the License.
           this.showSnotifyToast(value, this.alertType)
           this.setAlert(null)
         }
+      },
+      isWebsocketConnectionError (value) {
+        if (value === true) {
+          this.showWebsocketConnectionError()
+        } else {
+          this.removeWebsocketConnectionError()
+        }
+      },
+      websocketConnectAttempt (value) {
+        console.log('watch!!');
+        if (value > 0) {
+          this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
+        } else {
+          this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
+        }
       }
     },
     methods: {
@@ -73,6 +90,21 @@ limitations under the License.
         'setError',
         'setAlert'
       ]),
+      showWebsocketConnectionError () {
+        if (!this.websocketConnectionNotification) {
+          this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, `No Connection`, {
+            timeout: 0,
+            closeOnClick: false,
+            position: SnotifyPosition.rightTop
+          })
+        }
+      },
+      removeWebsocketConnectionError () {
+        if (this.websocketConnectionNotification.id) {
+          this.$snotify.remove(this.websocketConnectionNotification.id)
+        }
+        this.websocketConnectionNotification = undefined
+      },
       showSnotifyToast (message, type) {
         const config = {
           position: SnotifyPosition.rightBottom,
@@ -99,6 +131,10 @@ limitations under the License.
 <style lang="styl">
   @import 'vue-snotify/styles/material.css'
 
+  .snotify-rightTop {
+    top: 75px;
+  }
+  
   .alertMessage {
     a {
       color: white !important;
