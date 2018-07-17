@@ -77,7 +77,6 @@ limitations under the License.
         }
       },
       websocketConnectAttempt (value) {
-        console.log('watch!!');
         if (value > 0) {
           this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
         } else {
@@ -134,7 +133,7 @@ limitations under the License.
   .snotify-rightTop {
     top: 75px;
   }
-  
+
   .alertMessage {
     a {
       color: white !important;
