@@ -87,7 +87,7 @@ limitations under the License.
                   ></v-text-field>
               </v-flex>
             </v-layout>
-            <v-alert color="error" dismissible v-model="alertVisible">{{errorMessage}}</v-alert>
+            <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
           </v-container>
         </form>
       </v-card-text>
@@ -105,9 +105,10 @@ limitations under the License.
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import { getValidationErrors, setInputFocus } from '@/utils'
-  import { isConflict } from '@/utils/error'
   import map from 'lodash/map'
   import cloneDeep from 'lodash/cloneDeep'
+  import Alert from '@/components/Alert'
+  import { errorDetailsFromError, isConflict } from '@/utils/error'
 
   const defaultProjectName = 'my-project'
 
@@ -127,6 +128,9 @@ limitations under the License.
 
   export default {
     name: 'project-dialog',
+    components: {
+      Alert
+    },
     props: {
       value: {
         type: Boolean,
@@ -143,6 +147,7 @@ limitations under the License.
         purpose: undefined,
         owner: undefined,
         errorMessage: undefined,
+        detailedErrorMessage: undefined,
         validationErrors
       }
     },
@@ -193,16 +198,6 @@ limitations under the License.
           }
         }
         return validators
-      },
-      alertVisible: {
-        get () {
-          return !!this.errorMessage
-        },
-        set (value) {
-          if (!value) {
-            this.errorMessage = undefined
-          }
-        }
       }
     },
     methods: {
@@ -228,16 +223,20 @@ limitations under the License.
               }
             })
             .catch(err => {
-              if (isConflict(err)) {
-                if (this.isCreateMode) {
-                  this.errorMessage = 'Project name is already taken. Please try a different name.'
+              if (this.isCreateMode) {
+                if (isConflict(err)) {
+                  this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
                   setInputFocus(this, 'projectName')
                 } else {
-                  this.errorMessage = 'Conflict. Failed to update project.'
+                  this.errorMessage = 'Failed to create project.'
                 }
               } else {
-                this.errorMessage = err.message
+                this.errorMessage = 'Failed to update project.'
               }
+
+              const errorDetails = errorDetailsFromError(err)
+              console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+              this.detailedErrorMessage = errorDetails.detailedMessage
             })
         }
       },
@@ -268,6 +267,7 @@ limitations under the License.
       reset () {
         this.$v.$reset()
         this.errorMessage = undefined
+        this.detailedMessage = undefined
 
         if (this.isCreateMode) {
           this.projectName = defaultProjectName

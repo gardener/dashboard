@@ -160,7 +160,9 @@ async function setRoleBindingSubject (rbac, namespace, name) {
   }
   const subjects = body.subjects = body.subjects || []
   if (_.find(subjects, ['name', name])) {
-    return body
+    const err = new Error(`User '${name}' is already member of this project`)
+    err.code = 409
+    throw err
   }
   subjects.push({
     kind: 'User',

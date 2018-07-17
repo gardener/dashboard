@@ -157,8 +157,8 @@ limitations under the License.
       </v-list>
     </v-card>
 
-    <member-dialog v-model="memberDialog"></member-dialog>
-    <service-account-dialog v-model="serviceaccountDialog"></service-account-dialog>
+    <member-dialog type="user" v-model="memberDialog"></member-dialog>
+    <member-dialog type="service" v-model="serviceaccountDialog"></member-dialog>
     <v-speed-dial
       v-model="fab"
       fixed
@@ -208,7 +208,6 @@ limitations under the License.
   import download from 'downloadjs'
   import filter from 'lodash/filter'
   import MemberDialog from '@/dialogs/MemberDialog'
-  import ServiceAccountDialog from '@/dialogs/ServiceAccountDialog'
   import { mapState, mapActions, mapGetters } from 'vuex'
   import { emailToDisplayName, gravatar } from '@/utils'
   import { getMember } from '@/utils/api'
@@ -216,8 +215,7 @@ limitations under the License.
   export default {
     name: 'members',
     components: {
-      MemberDialog,
-      ServiceAccountDialog
+      MemberDialog
     },
     data () {
       return {

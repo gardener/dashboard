@@ -20,21 +20,9 @@ limitations under the License.
     <main-navigation></main-navigation>
     <main-toolbar></main-toolbar>
     <v-content>
-      <v-alert :type="alertType" v-model="alertVisible" dismissible>
-        <div class="alertMessage" v-html="alertMessageCompiledMarkdown"></div>
-      </v-alert>
       <router-view></router-view>
     </v-content>
-    <v-snackbar color="error" fixed bottom v-model="errorVisible">
-      <div class="white-text">{{errorMessage}} </div>
-      <v-spacer/>
-      <v-btn icon class="white--text" @click.native.stop="setError(null)">
-        <v-icon>close</v-icon>
-      </v-btn>
-    </v-snackbar>
-    <v-snackbar :timeout.number="2000" color="success" v-model="snackbar">
-      {{message}}
-    </v-snackbar>
+    <vue-snotify></vue-snotify>
   </v-app>
 </template>
 
@@ -43,7 +31,8 @@ limitations under the License.
   import MainToolbar from '@/components/MainToolbar.vue'
   import Loading from '@/components/Loading.vue'
   import { mapGetters, mapActions } from 'vuex'
-  import marked from 'marked'
+  import 'vue-snotify/styles/material.css'
+  import {SnotifyPosition} from 'vue-snotify'
 
   export default {
     name: 'Default',
@@ -63,54 +52,53 @@ limitations under the License.
         'errorMessage',
         'alertMessage',
         'alertType'
-      ]),
-      errorVisible: {
-        get () {
-          return !!this.errorMessage
-        },
-        set (value) {
-          if (!value) {
-            this.setError(null)
-          }
+      ])
+    },
+    watch: {
+      errorMessage (value) {
+        if (value) {
+          this.showSnotifyToast(value, 'error')
+          this.setError(null)
         }
       },
-      alertVisible: {
-        get () {
-          return !!this.alertMessage
-        },
-        set (value) {
-          if (!value) {
-            this.setAlert(null)
-          }
+      alertMessage (value) {
+        if (value) {
+          this.showSnotifyToast(value, this.alertType)
+          this.setAlert(null)
         }
-      },
-      alertMessageCompiledMarkdown () {
-        const options = {
-          gfm: true,
-          breaks: true,
-          tables: true,
-          sanitize: true
-        }
-        return marked(this.alertMessage, options)
       }
     },
     methods: {
       ...mapActions([
         'setError',
         'setAlert'
-      ])
-    },
-    created () {
-      // Global event handler to show a toast message. you can show a toast from any component
-      this.$bus.$on('toast', msg => {
-        this.message = msg
-        this.snackbar = true
-      })
+      ]),
+      showSnotifyToast (message, type) {
+        const config = {
+          position: SnotifyPosition.rightBottom,
+          timeout: 5000
+        }
+        switch (type) {
+          case 'success':
+            this.$snotify.success(message, config)
+            break
+          case 'warning':
+            this.$snotify.warning(message, config)
+            break
+          case 'info':
+            this.$snotify.info(message, config)
+            break
+          default:
+            this.$snotify.error(message, config)
+        }
+      }
     }
   }
 </script>
 
 <style lang="styl">
+  @import 'vue-snotify/styles/material.css'
+
   .alertMessage {
     a {
       color: white !important;

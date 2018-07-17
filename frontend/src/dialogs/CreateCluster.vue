@@ -429,6 +429,7 @@ limitations under the License.
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+  import { errorDetailsFromError } from '@/utils/error'
   import moment from 'moment'
 
   const semSort = require('semver-sort')
@@ -979,11 +980,10 @@ limitations under the License.
             this.$emit('close', false)
           })
           .catch(err => {
-            const errorCode = get(err, 'response.data.error.code')
-            const detailedMessage = get(err, 'response.data.message')
-            console.error('Failed to create shoot cluster.', errorCode, detailedMessage, err)
+            const errorDetails = errorDetailsFromError(err)
             this.errorMessage = `Failed to create cluster.`
-            this.detailedErrorMessage = detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
           })
       },
       cancelClicked () {
