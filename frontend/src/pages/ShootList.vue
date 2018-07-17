@@ -442,7 +442,7 @@ limitations under the License.
         return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
       },
       headlineText () {
-        if(!this.projectScope && this.showOnlyShootsWithIssues) {
+        if (!this.projectScope && this.showOnlyShootsWithIssues) {
           return 'Kubernetes Clusters with Issues'
         } else {
           return 'Kubernetes Clusters'
