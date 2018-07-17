@@ -39,7 +39,7 @@ limitations under the License.
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
       confirmColor="orange"
       >
-      <template slot="caption">Update Kubernetes Version</template>
+      <template slot="caption">Update Cluster</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <shoot-version-update

@@ -266,6 +266,7 @@ limitations under the License.
             this.deleteDetailedErrorMessage = null
         }
         this.dialog = null
+        // Delay resetting shoot so that the dialog does not lose context during closing animation
         this.clearSelectedShootWithDelay()
       },
       setColumnChecked (header) {
