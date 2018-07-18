@@ -20,7 +20,8 @@ limitations under the License.
       <v-toolbar card height="70" color="cyan darken-2">
         <img src="../assets/certified_kubernetes_white.svg" height="60" class="pl-1">
         <v-toolbar-title class="white--text">
-          <div class="headline">{{headlineText}}</div>
+          <div class="headline">Kubernetes Clusters</div>
+          <div class="subheading">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
@@ -441,12 +442,21 @@ limitations under the License.
       hideUserIssuesAndHideDeactivatedReconciliationClass () {
         return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
       },
-      headlineText () {
+      headlineSubtitle () {
+        let subtitle = ''
         if (!this.projectScope && this.showOnlyShootsWithIssues) {
-          return 'Kubernetes Clusters with Issues'
-        } else {
-          return 'Kubernetes Clusters'
+          subtitle = 'Currently only showing clusters with issues'
+          if (this.hideUserIssues || this.isHideDeactivatedReconciliation) {
+            subtitle += '.'
+          }
+          if (this.isHideUserIssues) {
+            subtitle += ' User errors are excluded.'
+          }
+          if (this.isHideDeactivatedReconciliation) {
+            subtitle += ' Clusters with deactivated reconciliation are excluded.'
+          }
         }
+        return subtitle
       }
     },
     mounted () {
