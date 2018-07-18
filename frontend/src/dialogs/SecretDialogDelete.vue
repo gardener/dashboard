@@ -105,6 +105,11 @@ limitations under the License.
           .then(() => this.hide())
           .catch(err => console.error(err))
       }
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hide()
+      })
     }
   }
 </script>

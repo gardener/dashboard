@@ -1088,6 +1088,10 @@ limitations under the License.
         }
       })
       this.reset()
+
+      this.$bus.$on('esc-pressed', () => {
+        this.cancelClicked()
+      })
     },
     mounted () {
       this.refs_ = this.$refs
