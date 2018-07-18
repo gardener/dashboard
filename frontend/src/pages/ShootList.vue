@@ -487,6 +487,11 @@ limitations under the License.
       this.cachedItems = this.mappedItems.slice(0)
       this.search = null
       next()
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hideDialog()
+      })
     }
   }
 </script>

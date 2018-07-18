@@ -124,22 +124,22 @@ limitations under the License.
 
     </template>
 
-    <aws-dialog v-model="aws.visible" :secret="selectedSecret"></aws-dialog>
-    <aws-help-dialog v-model="aws.help"></aws-help-dialog>
+    <aws-dialog v-model="dialogState.aws.visible" :secret="selectedSecret"></aws-dialog>
+    <aws-help-dialog v-model="dialogState.aws.help"></aws-help-dialog>
 
-    <azure-dialog v-model="azure.visible" :secret="selectedSecret"></azure-dialog>
-    <azure-help-dialog v-model="azure.help"></azure-help-dialog>
+    <azure-dialog v-model="dialogState.azure.visible" :secret="selectedSecret"></azure-dialog>
+    <azure-help-dialog v-model="dialogState.azure.help"></azure-help-dialog>
 
-    <gcp-dialog v-model="gcp.visible" :secret="selectedSecret"></gcp-dialog>
-    <gcp-help-dialog v-model="gcp.help"></gcp-help-dialog>
+    <gcp-dialog v-model="dialogState.gcp.visible" :secret="selectedSecret"></gcp-dialog>
+    <gcp-help-dialog v-model="dialogState.gcp.help"></gcp-help-dialog>
 
-    <openstack-dialog v-model="openstack.visible" :secret="selectedSecret"></openstack-dialog>
-    <openstack-help-dialog v-model="openstack.help"></openstack-help-dialog>
+    <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret"></openstack-dialog>
+    <openstack-help-dialog v-model="dialogState.openstack.help"></openstack-help-dialog>
 
-    <delete-dialog v-if="selectedSecret" v-model="deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
+    <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
     <v-speed-dial fixed bottom right fab dark v-show="floatingButton" direction="top" transition="scale-transition">
-      <v-btn slot="activator" class="blue darken-2" dark fab v-model="speedDial">
+      <v-btn slot="activator" class="blue darken-2" dark fab v-model="dialogState.speedDial">
         <v-icon>add</v-icon>
         <v-icon>close</v-icon>
       </v-btn>
@@ -174,6 +174,7 @@ limitations under the License.
   import Secret from '@/components/Secret'
   import DisabledSecret from '@/components/DisabledSecret'
   import isEmpty from 'lodash/isEmpty'
+  import merge from 'lodash/merge'
 
   export default {
     name: 'secrets',
@@ -193,24 +194,27 @@ limitations under the License.
     data () {
       return {
         selectedSecret: {},
-        aws: {
-          visible: false,
-          help: false
+        dialogState: {
+          aws: {
+            visible: false,
+            help: false
+          },
+          azure: {
+            visible: false,
+            help: false
+          },
+          gcp: {
+            visible: false,
+            help: false
+          },
+          openstack: {
+            visible: false,
+            help: false
+          },
+          deleteConfirm: false,
+          speedDial: false
         },
-        azure: {
-          visible: false,
-          help: false
-        },
-        gcp: {
-          visible: false,
-          help: false
-        },
-        openstack: {
-          visible: false,
-          help: false
-        },
-        speedDial: false,
-        deleteConfirm: false,
+        initialDialogState: {},
         floatingButton: false
       }
     },
@@ -234,24 +238,24 @@ limitations under the License.
     },
     methods: {
       onToogleHelp (infrastructureKind) {
-        const infrastructure = this[infrastructureKind]
+        const infrastructure = this.dialogState[infrastructureKind]
         infrastructure.help = !infrastructure.help
       },
       onHideHelp (infrastructureKind) {
-        this[infrastructureKind].help = false
+        this.dialogState[infrastructureKind].help = false
       },
       onAdd (infrastructureKind) {
         this.selectedSecret = undefined
-        this[infrastructureKind].visible = true
+        this.dialogState[infrastructureKind].visible = true
       },
       onUpdate (row) {
         const kind = row.metadata.cloudProviderKind
         this.selectedSecret = row
-        this[kind].visible = true
+        this.dialogState[kind].visible = true
       },
       onDelete (row) {
         this.selectedSecret = row
-        this.deleteConfirm = true
+        this.dialogState.deleteConfirm = true
       },
       backgroundForCloudProviderKind (kind) {
         switch (kind) {
@@ -265,6 +269,9 @@ limitations under the License.
             return '/static/background_openstack.svg'
         }
         return '/static/background_aws.svg'
+      },
+      hideDialogs () {
+        merge(this.dialogState, this.initialDialogState)
       }
     },
     mounted () {
@@ -276,6 +283,13 @@ limitations under the License.
           this.onUpdate(infrastructureSecret)
         }
       }
+    },
+    created () {
+      merge(this.initialDialogState, this.dialogState)
+
+      this.$bus.$on('esc-pressed', () => {
+        this.hideDialogs()
+      })
     }
   }
 </script>

@@ -311,11 +311,6 @@ limitations under the License.
           this.reset()
         }
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.cancel()
-      })
     }
   }
 </script>

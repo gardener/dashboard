@@ -148,11 +148,6 @@ limitations under the License.
         }
       }
     },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.cancel()
-      })
-    },
     mounted () {
       const textField = this.$refs.serviceaccountName
       if (textField) {

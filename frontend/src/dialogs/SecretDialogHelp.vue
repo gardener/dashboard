@@ -83,11 +83,6 @@ limitations under the License.
       hide () {
         this.visible = false
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hide()
-      })
     }
   }
 </script>

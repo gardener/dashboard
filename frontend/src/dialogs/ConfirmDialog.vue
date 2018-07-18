@@ -178,11 +178,6 @@ limitations under the License.
         this.userInput = ''
         setDelayedInputFocus(this, 'deleteDialogInput')
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.cancelClicked()
-      })
     }
   }
 </script>
