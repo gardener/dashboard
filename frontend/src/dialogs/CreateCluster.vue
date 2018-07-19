@@ -930,7 +930,9 @@ limitations under the License.
         return this.selfTerminationDays ? [] : this.purposes
       },
       addonDefinitionList () {
-        return concat(filter(standardAddonDefinitionList, 'visible'), this.customAddonDefinitionList)
+        const project = find(this.projectList, ['metadata.namespace', this.namespace])
+        const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
+        return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
       }
     },
     methods: {
