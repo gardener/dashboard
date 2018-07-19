@@ -15,8 +15,6 @@ limitations under the License.
  -->
 <template>
   <div>
-    <self-termination-warning :expirationTimestamp="expirationTimestamp" type="alert"></self-termination-warning>
-
     <v-tabs fixed :scrollable="false" v-model="tab">
 
       <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
@@ -279,6 +277,8 @@ limitations under the License.
       <shoot-editor ref="editor" :content="rawItem"></shoot-editor>
 
     </v-tabs>
+
+    <time-string :date-time="expirationTimestamp" :currentString.sync="currentExpirationString" v-show="false"></time-string>
   </div>
 </template>
 
@@ -298,7 +298,13 @@ limitations under the License.
   import find from 'lodash/find'
   import forEach from 'lodash/forEach'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getCloudProviderKind, canLinkToSeed, availableK8sUpdatesForShoot } from '@/utils'
+  import { SnotifyPosition } from 'vue-snotify'
+  import { getDateFormatted,
+    getCloudProviderKind,
+    canLinkToSeed,
+    availableK8sUpdatesForShoot,
+    isSelfTerminationWarning,
+    isValidTerminationDate } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -347,7 +353,9 @@ limitations under the License.
           }
         ],
         mounted: false,
-        editor: false
+        editor: false,
+        currentExpirationString: '',
+        selfTerminationNotification: undefined
       }
     },
     methods: {
@@ -359,6 +367,27 @@ limitations under the License.
         if (editor) {
           editor.open()
         }
+      },
+      showSelfTerminationWarning () {
+        if (!this.selfTerminationNotification) {
+          const config = {
+            timeout: 0,
+            closeOnClick: false,
+            position: SnotifyPosition.rightTop,
+            titleMaxLength: 20
+          }
+          if (this.isSelfTerminationWarning) {
+            this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          } else {
+            this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          }
+        }
+      },
+      removeSelfTerminationWarning () {
+        if (this.selfTerminationNotification) {
+          this.$snotify.remove(this.selfTerminationNotification.id)
+        }
+        this.selfTerminationNotification = undefined
       }
     },
     computed: {
@@ -508,10 +537,44 @@ limitations under the License.
       },
       k8sVersion () {
         return get(this.item, 'spec.kubernetes.version')
+      },
+      selfTerminationNotificationMessage () {
+        if (this.isValidTerminationDate) {
+          return `This cluster will self terminate ${this.currentExpirationString}`
+        } else {
+          return 'This cluster is about to self terminate'
+        }
+      },
+      isSelfTerminationWarning () {
+        return isSelfTerminationWarning(this.expirationTimestamp)
+      },
+      isValidTerminationDate () {
+        return isValidTerminationDate(this.expirationTimestamp)
+      }
+    },
+    watch: {
+      currentExpirationString (currentString) {
+        if (currentString && this.selfTerminationNotification) {
+          this.selfTerminationNotification.config.type = this.isSelfTerminationWarning ? 'warning' : 'info'
+          this.selfTerminationNotification.body = this.selfTerminationNotificationMessage
+        }
+      },
+      expirationTimestamp(expirationTimestamp) {
+        if (this.expirationTimestamp) {
+          this.showSelfTerminationWarning()
+        } else {
+          this.removeSelfTerminationWarning()
+        }
       }
     },
     mounted () {
       this.mounted = true
+      if (this.expirationTimestamp) {
+        this.showSelfTerminationWarning()
+      }
+    },
+    destroyed () {
+      this.removeSelfTerminationWarning()
     },
     beforeRouteUpdate (to, from, next) {
       this.$refs.clusterAccess.reset()

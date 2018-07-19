@@ -77,7 +77,7 @@ limitations under the License.
         }
       },
       websocketConnectAttempt (value) {
-        if (value > 0) {
+        if (value > 0 && this.websocketConnectionNotification) {
           this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
         } else {
           this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
@@ -99,7 +99,7 @@ limitations under the License.
         }
       },
       removeWebsocketConnectionError () {
-        if (this.websocketConnectionNotification.id) {
+        if (this.websocketConnectionNotificatioN) {
           this.$snotify.remove(this.websocketConnectionNotification.id)
         }
         this.websocketConnectionNotification = undefined
@@ -132,6 +132,14 @@ limitations under the License.
 
   .snotify-rightTop {
     top: 75px;
+  }
+
+  .snotify-info {
+    background-color: #00ACC1; // cyan darken-1
+  }
+
+  .snotify {
+    width: 400px;
   }
 
   .alertMessage {

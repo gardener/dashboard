@@ -35,8 +35,6 @@ limitations under the License.
         <v-tab-item key="infra" id="tab-infra">
           <v-card flat>
             <v-container fluid>
-              <v-alert type="warning" :value="selfTerminationDays" outline>The selected secret has an associated quota that will cause the cluster to self terminate after {{selfTerminationDays}} days</v-alert>
-
               <v-card-text>
 
                 <v-layout row>
@@ -109,6 +107,8 @@ limitations under the License.
                       @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       required
+                      persistent-hint
+                      :hint="secretHint"
                       >
                       <template slot="item" slot-scope="data">
                         {{get(data.item, 'metadata.name')}}
@@ -928,10 +928,17 @@ limitations under the License.
         return terminationDays
       },
       filteredPurposes () {
-        return this.selfTerminationDays ? [] : this.purposes
+        return this.selfTerminationDays ? ['evaluation'] : this.purposes
       },
       addonDefinitionList () {
         return concat(filter(standardAddonDefinitionList, 'visible'), this.customAddonDefinitionList)
+      },
+      secretHint () {
+        if (this.selfTerminationDays) {
+          return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+        } else {
+          return undefined
+        }
       }
     },
     methods: {

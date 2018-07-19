@@ -25,7 +25,14 @@ limitations under the License.
       <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
         {{ row.name }}
       </router-link>
-      <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+      <v-tooltip top v-if="row.expirationTimestamp">
+        <template slot="activator">
+          <v-icon color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
+          <v-icon color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
+        </template>
+        <span v-if="isValidTerminationDate">This cluster will self terminate<span class="bold"><time-string :date-time="row.expirationTimestamp"></time-string></span></span>
+        <span v-else>This cluster is about to self terminate</span>
+      </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
@@ -152,7 +159,9 @@ limitations under the License.
     availableK8sUpdatesForShoot,
     getCreatedBy,
     isHibernated,
-    isReconciliationDeactivated } from '@/utils'
+    isReconciliationDeactivated,
+    isSelfTerminationWarning,
+    isValidTerminationDate } from '@/utils'
 
   export default {
     components: {
@@ -271,6 +280,12 @@ limitations under the License.
 
         // disabled if info is NOT available
         return !this.isInfoAvailable
+      },
+      isSelfTerminationWarning () {
+        return isSelfTerminationWarning(this.row.expirationTimestamp)
+      },
+      isValidTerminationDate () {
+        return isValidTerminationDate(this.row.expirationTimestamp)
       }
     },
     methods: {
@@ -295,5 +310,13 @@ limitations under the License.
 
   .nowrap {
     white-space: nowrap;
+  }
+
+  .terminationIcon {
+    margin-left: 10px;
+  }
+
+  .bold {
+    font-weight: bold;
   }
 </style>
