@@ -559,7 +559,7 @@ limitations under the License.
           this.selfTerminationNotification.body = this.selfTerminationNotificationMessage
         }
       },
-      expirationTimestamp(expirationTimestamp) {
+      expirationTimestamp (expirationTimestamp) {
         if (this.expirationTimestamp) {
           this.showSelfTerminationWarning()
         } else {
