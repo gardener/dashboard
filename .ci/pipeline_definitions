@@ -30,7 +30,7 @@ dashboard:
     release:
       traits:
         version:
-          preprocess: 'finalise'
+          preprocess: 'finalize'
           inject_effective_version: true
         release:
           nextversion: 'bump_minor'
