@@ -297,6 +297,12 @@ limitations under the License.
       onDelete (username) {
         this.deleteMember(username)
       }
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.memberDialog = false
+        this.serviceaccountDialog = false
+      })
     }
   }
 </script>

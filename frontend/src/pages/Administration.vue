@@ -159,9 +159,10 @@ limitations under the License.
         'deleteProject'
       ]),
       hide () {
-        this.deleteConfirm = false
         this.errorMessage = undefined
         this.detailedMessage = undefined
+        this.deleteConfirm = false
+        this.edit = false
       },
       onDeleteProject () {
         this
@@ -186,6 +187,11 @@ limitations under the License.
     },
     mounted () {
       this.floatingButton = true
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hide()
+      })
     }
   }
 </script>

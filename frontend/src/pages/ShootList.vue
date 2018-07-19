@@ -21,6 +21,7 @@ limitations under the License.
         <img src="../assets/certified_kubernetes_white.svg" height="60" class="pl-1">
         <v-toolbar-title class="white--text">
           <div class="headline">Kubernetes Clusters</div>
+          <div class="subheading">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
@@ -90,9 +91,6 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>
-        <span>Currently only showing clusters with issues</span><span v-if="isHideUserIssues">. User errors are excluded</span><span v-if="isHideDeactivatedReconciliation">. Clusters with deactivated reconciliation are excluded</span>
-      </v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
@@ -443,6 +441,22 @@ limitations under the License.
       },
       hideUserIssuesAndHideDeactivatedReconciliationClass () {
         return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+      },
+      headlineSubtitle () {
+        let subtitle = ''
+        if (!this.projectScope && this.showOnlyShootsWithIssues) {
+          subtitle = 'Currently only showing clusters with issues'
+          if (this.hideUserIssues || this.isHideDeactivatedReconciliation) {
+            subtitle += '.'
+          }
+          if (this.isHideUserIssues) {
+            subtitle += ' User errors are excluded.'
+          }
+          if (this.isHideDeactivatedReconciliation) {
+            subtitle += ' Clusters with deactivated reconciliation are excluded.'
+          }
+        }
+        return subtitle
       }
     },
     mounted () {
@@ -473,6 +487,11 @@ limitations under the License.
       this.cachedItems = this.mappedItems.slice(0)
       this.search = null
       next()
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hideDialog()
+      })
     }
   }
 </script>

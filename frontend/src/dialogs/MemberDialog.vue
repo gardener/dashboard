@@ -209,7 +209,7 @@ limitations under the License.
           const input = this.textField.$refs.input
           this.$nextTick(() => {
             input.focus()
-            input.setSelectionRange(0, 8)
+            input.setSelectionRange(0, 5)
           })
         }
       },
@@ -230,11 +230,6 @@ limitations under the License.
           this.reset()
         }
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.cancel()
-      })
     },
     mounted () {
       if (this.textField) {
