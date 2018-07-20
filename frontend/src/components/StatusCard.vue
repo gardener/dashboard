@@ -31,6 +31,7 @@ limitations under the License.
             :popperKey="`${namespace}/${name}_lastOp`"
             :isHibernated="isHibernated"
             :reconciliationDeactivated="reconciliationDeactivated"
+            :shootDeleted="isShootMarkedForDeletion"
             popperPlacement="bottom"
             @titleChange="onShootStatusTitleChange">
           </shoot-status>
@@ -58,7 +59,9 @@ limitations under the License.
   import StatusTags from '@/components/StatusTags'
   import RetryOperation from '@/components/RetryOperation'
   import get from 'lodash/get'
-  import { isHibernated, isReconciliationDeactivated } from '@/utils'
+  import { isHibernated,
+           isReconciliationDeactivated,
+           isShootMarkedForDeletion } from '@/utils'
 
   export default {
     components: {
@@ -110,6 +113,9 @@ limitations under the License.
       reconciliationDeactivated () {
         const metadata = { annotations: this.annotations }
         return isReconciliationDeactivated(metadata)
+      },
+      isShootMarkedForDeletion () {
+        return isShootMarkedForDeletion(this.metadata)
       }
     },
     methods: {

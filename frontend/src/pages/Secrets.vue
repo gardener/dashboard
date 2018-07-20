@@ -138,21 +138,21 @@ limitations under the License.
 
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
-    <v-speed-dial fixed bottom right fab dark v-show="floatingButton" direction="top" transition="scale-transition">
-      <v-btn slot="activator" class="blue darken-2" dark fab v-model="dialogState.speedDial">
+    <v-speed-dial fixed bottom right fab dark v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
+      <v-btn slot="activator" class="cyan darken-2" dark fab v-model="dialogState.speedDial">
         <v-icon>add</v-icon>
         <v-icon>close</v-icon>
       </v-btn>
-      <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="orange" @click.native.stop="onAdd('openstack')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="orange" @click="onAdd('openstack')">
         <v-icon>mdi-server-network</v-icon>
       </v-btn>
-      <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click.stop="onAdd('gcp')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click="onAdd('gcp')">
         <v-icon>mdi-google</v-icon>
       </v-btn>
-      <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="blue" @click.native.stop="onAdd('azure')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="blue" @click="onAdd('azure')">
         <v-icon>mdi-microsoft</v-icon>
       </v-btn>
-      <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="orange darken-2" @click.native.stop="onAdd('aws')">
+      <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="orange darken-2" @click="onAdd('aws')">
         <v-icon>mdi-amazon</v-icon>
       </v-btn>
     </v-speed-dial>

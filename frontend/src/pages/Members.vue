@@ -170,7 +170,7 @@ limitations under the License.
       <v-btn
         slot="activator"
         v-model="fab"
-        color="green darken-1"
+        color="cyan darken-2"
         dark
         fab
       >
@@ -181,7 +181,7 @@ limitations under the License.
         fab
         small
         color="grey lighten-2"
-        @click.native.stop="openMemberDialog"
+        @click="openMemberDialog"
       >
         <v-icon color="green darken-2">person</v-icon>
       </v-btn>
@@ -190,7 +190,7 @@ limitations under the License.
         small
         color="grey lighten-2"
         light
-        @click.native.stop="openServiceaccountDialog"
+        @click="openServiceaccountDialog"
       >
         <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
       </v-btn>
@@ -302,6 +302,7 @@ limitations under the License.
       this.$bus.$on('esc-pressed', () => {
         this.memberDialog = false
         this.serviceaccountDialog = false
+        this.fab = false
       })
     }
   }

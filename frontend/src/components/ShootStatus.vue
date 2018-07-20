@@ -19,12 +19,13 @@ limitations under the License.
     <div slot="popperRef" style="display: inline-block;">
       <v-tooltip top>
         <template slot="activator">
-          <v-progress-circular v-if="showProgress && !isError" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">{{operation.progress}}</v-progress-circular>
-          <v-progress-circular v-else-if="showProgress" class="cursor-pointer progress-circular-error" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-            <v-icon v-if="isUserError" class="cursor-pointer progress-icon" color="error">mdi-account-alert</v-icon>
-            <template v-else>
-              !
-            </template>
+          <v-progress-circular v-if="showProgress" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
+            <v-icon v-if="isUserError" class="cursor-pointer progress-icon-user-error" color="error">mdi-account-alert</v-icon>
+            <v-icon v-else-if="shootDeleted" class="cursor-pointer progress-icon" :color="color">mdi-delete</v-icon>
+            <v-icon v-else-if="this.operationType === 'Create'" class="cursor-pointer progress-icon" :color="color">mdi-plus</v-icon>
+            <v-icon v-else-if="this.operationType === 'Reconcile'" class="cursor-pointer progress-icon" :color="color">mdi-tractor</v-icon>
+            <span v-else-if="isError" class="error-exclamation-mark">!</span>
+            <template v-else>{{operation.progress}}</template>
           </v-progress-circular>
           <v-icon v-else-if="reconciliationDeactivated" class="cursor-pointer block-icon" :color="color">mdi-block-helper</v-icon>
           <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
@@ -83,6 +84,10 @@ limitations under the License.
     props: {
       operation: {
         type: Object,
+        required: true
+      },
+      shootDeleted: {
+        type: Boolean,
         required: true
       },
       lastError: {
@@ -213,11 +218,23 @@ limitations under the License.
 
   .progress-icon {
     font-size: 1.1em;
-    padding-left: 2px;
+    padding-left: 1px;
     padding-bottom: 3px;
   }
 
-  .progress-circular-error {
+  .progress-icon {
+    font-size: 1.3em;
+    padding-left: 1px;
+    padding-bottom: 2px;
+  }
+
+  .progress-icon-user-error {
+    font-size: 1.1em;
+    padding-left: 2px;
+    padding-bottom: 2px;
+  }
+
+  .error-exclamation-mark {
     font-size: 15px;
     font-weight: bold;
   }

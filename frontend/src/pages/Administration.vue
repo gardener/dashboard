@@ -21,13 +21,6 @@ limitations under the License.
       <v-toolbar class="red elevation-0 darken-2" dark>
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-tooltip top :disabled="!isDeleteButtonDisabled">
-          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
-            <v-icon>delete</v-icon>
-          </v-btn>
-          <span>You can only delete projects that do not contain clusters</span>
-        </v-tooltip>
       </v-toolbar>
 
       <v-card-text>
@@ -67,11 +60,54 @@ limitations under the License.
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
       </v-card-text>
     </v-card>
-    <v-fab-transition>
-      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
+
+    <v-speed-dial
+      v-model="floatingButton"
+      fixed
+      bottom
+      right
+      direction="top"
+      transition="slide-y-reverse-transition"
+    >
+      <v-btn
+        slot="activator"
+        v-model="floatingButton"
+        color="red darken-2"
+        dark
+        fab
+      >
+        <v-icon>more_vert</v-icon>
+        <v-icon>close</v-icon>
+      </v-btn>
+      <v-btn
+        fab
+        dark
+        small
+        color="red darken-2"
+        @click="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
-    </v-fab-transition>
+      <v-tooltip v-if="isDeleteButtonDisabled" top>
+        <v-btn
+          slot="activator"
+          fab
+          dark
+          small
+          color="red lighten-2"
+          @click.native.stop>
+          <v-icon>delete</v-icon>
+        </v-btn>
+        <span>You can only delete projects that do not contain clusters</span>
+      </v-tooltip>
+      <v-btn v-else
+        fab
+        dark
+        small
+        color="red darken-2"
+        @click="deleteConfirm = true">
+        <v-icon>delete</v-icon>
+      </v-btn>
+    </v-speed-dial>
 
     <confirm-dialog
       v-model="deleteConfirm"
@@ -163,6 +199,7 @@ limitations under the License.
         this.detailedMessage = undefined
         this.deleteConfirm = false
         this.edit = false
+        this.floatingButton = false
       },
       onDeleteProject () {
         this
@@ -184,9 +221,6 @@ limitations under the License.
             this.detailedErrorMessage = errorDetails.detailedMessage
           })
       }
-    },
-    mounted () {
-      this.floatingButton = true
     },
     created () {
       this.$bus.$on('esc-pressed', () => {
