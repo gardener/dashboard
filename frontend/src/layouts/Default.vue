@@ -99,7 +99,7 @@ limitations under the License.
         }
       },
       removeWebsocketConnectionError () {
-        if (this.websocketConnectionNotificatioN) {
+        if (this.websocketConnectionNotification) {
           this.$snotify.remove(this.websocketConnectionNotification.id)
         }
         this.websocketConnectionNotification = undefined
@@ -107,7 +107,8 @@ limitations under the License.
       showSnotifyToast (message, type) {
         const config = {
           position: SnotifyPosition.rightBottom,
-          timeout: 5000
+          timeout: 5000,
+          showProgressBar: false
         }
         switch (type) {
           case 'success':
