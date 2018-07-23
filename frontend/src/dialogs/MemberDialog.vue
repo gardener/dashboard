@@ -61,15 +61,19 @@ limitations under the License.
 
 <script>
   import toLower from 'lodash/toLower'
-  import { mapActions, mapState } from 'vuex'
+  import { mapActions, mapState, mapGetters } from 'vuex'
   import { required, email } from 'vuelidate/lib/validators'
-  import { resourceName } from '@/utils/validators'
+  import { resourceName, unique } from '@/utils/validators'
   import Alert from '@/components/Alert'
   import { errorDetailsFromError, isConflict } from '@/utils/error'
+  import filter from 'lodash/filter'
+  import startsWith from 'lodash/startsWith'
+  import map from 'lodash/map'
   import split from 'lodash/split'
   import last from 'lodash/last'
+  import includes from 'lodash/includes'
 
-  const defaultEmail = 'john.doe@example.org'
+  const defaultEmail = ''
   const defaultServiceName = 'robot'
 
   export default {
@@ -90,24 +94,37 @@ limitations under the License.
     data () {
       return {
         email: defaultEmail,
-        serviceaccountName: defaultServiceName,
+        serviceaccountName: undefined,
         errorMessage: undefined,
         detailedErrorMessage: undefined
       }
     },
-    validations: {
-      email: {
-        required,
-        email
-      },
-      serviceaccountName: {
-        required,
-        resourceName
+    validations () {
+      if (this.isUserDialog) {
+        return {
+          email: {
+            required,
+            email,
+            unique: unique('projectMembersNames')
+          }
+        }
+      } else if (this.isServiceDialog) {
+        return {
+          serviceaccountName: {
+            required,
+            resourceName,
+            unique: unique('serviceAccountNames')
+          }
+        }
       }
     },
     computed: {
       ...mapState([
         'namespace'
+      ]),
+      ...mapGetters([
+        'memberList',
+        'projectList'
       ]),
       visible: {
         get () {
@@ -123,10 +140,13 @@ limitations under the License.
           return errors
         }
         if (!this.$v.email.required) {
-          errors.push('E-mail is required')
+          errors.push('E-mail address is required')
         }
         if (!this.$v.email.email) {
-          errors.push('Must be valid e-mail')
+          errors.push('Must be a valid e-mail address')
+        }
+        if (!this.$v.email.unique) {
+          errors.push(`User '${this.email}' is already member of this project.`)
         }
         return errors
       },
@@ -140,6 +160,9 @@ limitations under the License.
         }
         if (!this.$v.serviceaccountName.resourceName) {
           errors.push('Must contain only alphanumeric characters or hypen')
+        }
+        if (!this.$v.serviceaccountName.unique) {
+          errors.push(`Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`)
         }
         return errors
       },
@@ -159,6 +182,14 @@ limitations under the License.
           return this.$refs.serviceaccountName
         }
         return undefined
+      },
+      serviceAccountNames () {
+        const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
+        return map(filter(this.memberList, predicate), serviceaccountName => this.serviceaccountDisplayName(serviceaccountName))
+      },
+      projectMembersNames () {
+        const predicate = username => !startsWith(username, 'system:serviceaccount:')
+        return filter(this.memberList, predicate)
       }
     },
     methods: {
@@ -179,7 +210,7 @@ limitations under the License.
                 if (this.isUserDialog) {
                   this.errorMessage = `User '${this.email}' is already member of this project.`
                 } else if (this.isServiceDialog) {
-                  this.errorMessage = `Serviceaccount '${last(split(this.serviceaccountName, ':'))}' already exists. Please try a different name.`
+                  this.errorMessage = `Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`
                 }
               } else {
                 this.errorMessage = 'Failed to add project member'
@@ -197,7 +228,7 @@ limitations under the License.
       reset () {
         this.$v.$reset()
         this.email = defaultEmail
-        this.serviceaccountName = defaultServiceName
+        this.serviceaccountName = this.defaultServiceName()
 
         this.errorMessage = undefined
         this.detailedMessage = undefined
@@ -209,7 +240,6 @@ limitations under the License.
           const input = this.textField.$refs.input
           this.$nextTick(() => {
             input.focus()
-            input.setSelectionRange(0, 5)
           })
         }
       },
@@ -222,6 +252,19 @@ limitations under the License.
           const name = toLower(this.serviceaccountName)
           return this.addMember(`system:serviceaccount:${namespace}:${name}`)
         }
+      },
+      serviceaccountDisplayName (serviceaccountName) {
+        return last(split(serviceaccountName, ':'))
+      },
+      defaultServiceName () {
+        let name = defaultServiceName
+        let counter = 1
+        while (includes(this.serviceAccountNames, name)) {
+          name = `${defaultServiceName}-${counter}`
+          counter++
+        }
+
+        return name
       }
     },
     watch: {
