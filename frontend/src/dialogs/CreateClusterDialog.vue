@@ -565,7 +565,7 @@ limitations under the License.
   }
 
   export default {
-    name: 'create-cluster',
+    name: 'create-cluster-dialog',
     components: {
       WorkerInputGeneric,
       WorkerInputOpenstack,

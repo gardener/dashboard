@@ -159,44 +159,20 @@ limitations under the License.
 
     <member-dialog type="user" v-model="memberDialog"></member-dialog>
     <member-dialog type="service" v-model="serviceaccountDialog"></member-dialog>
-    <v-speed-dial
-      v-model="fab"
-      fixed
-      bottom
-      right
-      direction="top"
-      transition="slide-y-reverse-transition"
-    >
-      <v-btn
-        slot="activator"
-        v-model="fab"
-        color="cyan darken-2"
-        dark
-        fab
-      >
-        <v-icon>add</v-icon>
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn
-        fab
-        small
-        color="grey lighten-2"
-        @click="openServiceaccountDialog"
-        light
-      >
-        <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
-      </v-btn>
-      <v-btn
-        fab
-        small
-        color="grey lighten-2"
-        light
-        light
-        @click="openMemberDialog"
-      >
-        <v-icon color="green darken-2">person</v-icon>
-      </v-btn>
-    </v-speed-dial>
+    <v-fab-transition>
+      <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
+        <v-btn slot="activator" v-model="fab" color="cyan darken-2" dark fab>
+          <v-icon>add</v-icon>
+          <v-icon>close</v-icon>
+        </v-btn>
+        <v-btn fab small color="grey lighten-2" light @click="openServiceaccountDialog">
+          <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
+        </v-btn>
+        <v-btn fab small color="grey lighten-2" @click="openMemberDialog">
+          <v-icon color="green darken-2">person</v-icon>
+        </v-btn>
+      </v-speed-dial>
+    </v-fab-transition>
   </v-container>
 </template>
 
@@ -224,7 +200,8 @@ limitations under the License.
         memberDialog: false,
         serviceaccountDialog: false,
         filter: '',
-        fab: false
+        fab: false,
+        floatingButton: false
       }
     },
     computed: {
@@ -299,6 +276,9 @@ limitations under the License.
       onDelete (username) {
         this.deleteMember(username)
       }
+    },
+    mounted () {
+      this.floatingButton = true
     },
     created () {
       this.$bus.$on('esc-pressed', () => {

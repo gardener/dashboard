@@ -198,7 +198,7 @@ limitations under the License.
           return 'blue-grey--text'
         }
         return ''
-	  },
+      },
       serviceAccountNames () {
         const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
         return map(filter(this.memberList, predicate), serviceaccountName => this.serviceaccountDisplayName(serviceaccountName))

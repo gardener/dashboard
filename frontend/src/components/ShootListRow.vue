@@ -57,7 +57,7 @@ limitations under the License.
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
       <purpose-tag :purpose="row.purpose"></purpose-tag>
     </td>
-    <td class="text-xs-left" v-if="this.headerVisible['lastOperation']">
+    <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
         <shoot-status
          :operation="row.lastOperation"

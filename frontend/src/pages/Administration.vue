@@ -21,6 +21,13 @@ limitations under the License.
       <v-toolbar class="red elevation-0 darken-2" dark>
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-tooltip top :disabled="!isDeleteButtonDisabled">
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+            <v-icon>delete</v-icon>
+          </v-btn>
+          <span>You can only delete projects that do not contain clusters</span>
+        </v-tooltip>
       </v-toolbar>
 
       <v-card-text>
@@ -60,62 +67,17 @@ limitations under the License.
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
       </v-card-text>
     </v-card>
-
-    <v-speed-dial
-      v-model="floatingButton"
-      fixed
-      bottom
-      right
-      direction="top"
-      transition="slide-y-reverse-transition"
-    >
-      <v-btn
-        slot="activator"
-        v-model="floatingButton"
-        color="red darken-2"
-        dark
-        fab
-      >
-        <v-icon>more_vert</v-icon>
-        <v-icon>close</v-icon>
-      </v-btn>
-      <v-btn
-        fab
-        dark
-        small
-        color="red darken-2"
-        @click="edit = true">
+    <v-fab-transition>
+      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
-      <v-tooltip v-if="isDeleteButtonDisabled" top>
-        <v-btn
-          slot="activator"
-          fab
-          dark
-          small
-          color="red lighten-2"
-          @click.native.stop>
-          <v-icon>delete</v-icon>
-        </v-btn>
-        <span>You can only delete projects that do not contain clusters</span>
-      </v-tooltip>
-      <v-btn v-else
-        fab
-        dark
-        small
-        color="red darken-2"
-        @click="deleteConfirm = true">
-        <v-icon>delete</v-icon>
-      </v-btn>
-    </v-speed-dial>
+    </v-fab-transition>
 
     <confirm-dialog
       v-model="deleteConfirm"
       defaultColor="red"
       :cancel="hide"
-      :ok="onDeleteProject"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage">
+      :ok="onDeleteProject">
       <div slot="caption">
         Confirm Delete
       </div>
@@ -135,7 +97,6 @@ limitations under the License.
   import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
-  import { errorDetailsFromError } from '@/utils/error'
 
   export default {
     name: 'administration',
@@ -148,9 +109,7 @@ limitations under the License.
       return {
         edit: false,
         deleteConfirm: false,
-        floatingButton: false,
-        errorMessage: undefined,
-        detailedErrorMessage: undefined
+        floatingButton: false
       }
     },
     computed: {
@@ -195,11 +154,8 @@ limitations under the License.
         'deleteProject'
       ]),
       hide () {
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
         this.deleteConfirm = false
         this.edit = false
-        this.floatingButton = false
       },
       onDeleteProject () {
         this
@@ -212,15 +168,12 @@ limitations under the License.
             } else {
               this.$router.push({name: 'Home', params: { }})
             }
-          })
-          .catch(err => {
-            this.errorMessage = 'Failed to delete project.'
-
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-            this.detailedErrorMessage = errorDetails.detailedMessage
+            this.$bus.$emit('toast', 'Project deleted successfully')
           })
       }
+    },
+    mounted () {
+      this.floatingButton = true
     },
     created () {
       this.$bus.$on('esc-pressed', () => {
