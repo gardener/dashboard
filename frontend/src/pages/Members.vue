@@ -181,18 +181,20 @@ limitations under the License.
         fab
         small
         color="grey lighten-2"
-        @click="openMemberDialog"
+        @click="openServiceaccountDialog"
+        light
       >
-        <v-icon color="green darken-2">person</v-icon>
+        <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
       </v-btn>
       <v-btn
         fab
         small
         color="grey lighten-2"
         light
-        @click="openServiceaccountDialog"
+        light
+        @click="openMemberDialog"
       >
-        <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
+        <v-icon color="green darken-2">person</v-icon>
       </v-btn>
     </v-speed-dial>
   </v-container>

@@ -28,7 +28,7 @@
             <rect id="Rectangle" fill="#4FC3F7" x="-18" y="-16" width="777" height="290"></rect>
             <g id="Rectangle" transform="translate(380.901484, 14.129051) rotate(5.000000) translate(-380.901484, -14.129051) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                <use fill="#81C784" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use fill="#90A4AE" fill-rule="evenodd" xlink:href="#path-1"></use>
             </g>
             <g id="Rectangle" transform="translate(379.828952, -31.611851) rotate(5.000000) translate(-379.828952, 31.611851) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
@@ -36,7 +36,7 @@
             </g>
             <g id="Rectangle" transform="translate(310.812766, 37.216932) rotate(-9.000000) translate(-310.812766, -37.216932) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-6)" xlink:href="#path-5"></use>
-                <use fill="#388E3C" fill-rule="evenodd" xlink:href="#path-5"></use>
+                <use fill="#607D8B" fill-rule="evenodd" xlink:href="#path-5"></use>
             </g>
         </g>
     </g>

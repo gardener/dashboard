@@ -428,7 +428,7 @@ const actions = {
         return res
       })
       .catch(err => {
-        dispatch('setError', err)
+        dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
   setConfiguration ({ commit }, value) {
