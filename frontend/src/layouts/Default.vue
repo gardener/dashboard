@@ -136,7 +136,7 @@ limitations under the License.
   }
 
   .snotify-info {
-    background-color: #00ACC1; // cyan darken-1
+    background-color: #0097A7; // cyan darken-2
   }
 
   .snotify {
