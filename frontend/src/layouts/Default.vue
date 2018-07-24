@@ -142,10 +142,4 @@ limitations under the License.
   .snotify {
     width: 400px;
   }
-
-  .alertMessage {
-    a {
-      color: white !important;
-    }
-  }
 </style>
