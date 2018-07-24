@@ -110,7 +110,7 @@ limitations under the License.
   import Alert from '@/components/Alert'
   import { errorDetailsFromError, isConflict } from '@/utils/error'
 
-  const defaultProjectName = 'my-project'
+  const defaultProjectName = ''
 
   const validationErrors = {
     description: {
