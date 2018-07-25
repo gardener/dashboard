@@ -77,7 +77,7 @@ limitations under the License.
   const defaultServiceName = 'robot'
 
   export default {
-    name: 'member-dialog',
+    name: 'add-member-dialog',
     components: {
       Alert
     },

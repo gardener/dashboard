@@ -51,15 +51,22 @@ limitations under the License.
           Project Members
         </v-toolbar-title>
         <v-spacer></v-spacer>
-          <v-text-field v-if="memberList.length > 3"
-            prepend-icon="search"
-            color="green darken-2"
-            label="Search"
-            solo
-            clearable
-            v-model="filter"
-            @keyup.esc="filter=''"
-          ></v-text-field>
+        <v-text-field v-if="memberListWithoutOwner.length > 3"
+          class="searchField"
+          prepend-icon="search"
+          color="green darken-2"
+          label="Search"
+          solo
+          clearable
+          v-model="userFilter"
+          @keyup.esc="userFilter=''"
+        ></v-text-field>
+        <v-btn icon @click.native.stop="openAddMemberDialog">
+          <v-icon class="white--text">add</v-icon>
+        </v-btn>
+        <v-btn icon @click.native.stop="openMemberHelpDialog">
+          <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+        </v-btn>
       </v-toolbar>
 
       <v-card-text v-if="!memberListWithoutOwner.length">
@@ -107,6 +114,23 @@ limitations under the License.
         <v-toolbar-title class="subheading white--text">
           Service Accounts
         </v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field v-if="serviceAccountList.length > 3"
+          class="searchField"
+          prepend-icon="search"
+          color="green darken-2"
+          label="Search"
+          solo
+          clearable
+          v-model="serviceFilter"
+          @keyup.esc="serrviceFilter=''"
+        ></v-text-field>
+        <v-btn icon @click.native.stop="openAddServiceaccountDialog">
+          <v-icon class="white--text">add</v-icon>
+        </v-btn>
+        <v-btn icon @click.native.stop="openServiceaccountHelpDialog">
+          <v-icon class="white--text">mdi-help-circle-outline</v-icon>
+        </v-btn>
       </v-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
@@ -117,7 +141,7 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in serviceAccountList">
+        <template v-for="(name, index) in sortedAndFilteredServiceAccountList">
           <v-divider
             v-if="index > 0"
             inset
@@ -157,18 +181,20 @@ limitations under the License.
       </v-list>
     </v-card>
 
-    <member-dialog type="user" v-model="memberDialog"></member-dialog>
-    <member-dialog type="service" v-model="serviceaccountDialog"></member-dialog>
+    <member-add-dialog type="user" v-model="memberAddDialog"></member-add-dialog>
+    <member-add-dialog type="service" v-model="serviceaccountAddDialog"></member-add-dialog>
+    <member-help-dialog type="user" v-model="memberHelpDialog"></member-help-dialog>
+    <member-help-dialog type="service" v-model="serviceaccountHelpDialog"></member-help-dialog>
     <v-fab-transition>
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <v-btn slot="activator" v-model="fab" color="cyan darken-2" dark fab>
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" light @click="openServiceaccountDialog">
+        <v-btn fab small color="grey lighten-2" light @click="openAddServiceaccountDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" @click="openMemberDialog">
+        <v-btn fab small color="grey lighten-2" @click="openAddMemberDialog">
           <v-icon color="green darken-2">person</v-icon>
         </v-btn>
       </v-speed-dial>
@@ -185,7 +211,10 @@ limitations under the License.
   import find from 'lodash/find'
   import download from 'downloadjs'
   import filter from 'lodash/filter'
-  import MemberDialog from '@/dialogs/MemberDialog'
+  import split from 'lodash/split'
+  import last from 'lodash/last'
+  import MemberAddDialog from '@/dialogs/MemberAddDialog'
+  import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
   import { mapState, mapActions, mapGetters } from 'vuex'
   import { emailToDisplayName, gravatar } from '@/utils'
   import { getMember } from '@/utils/api'
@@ -193,13 +222,17 @@ limitations under the License.
   export default {
     name: 'members',
     components: {
-      MemberDialog
+      MemberAddDialog,
+      MemberHelpDialog
     },
     data () {
       return {
-        memberDialog: false,
-        serviceaccountDialog: false,
-        filter: '',
+        memberAddDialog: false,
+        serviceaccountAddDialog: false,
+        memberHelpDialog: false,
+        serviceaccountHelpDialog: false,
+        userFilter: '',
+        serviceFilter: '',
         fab: false,
         floatingButton: false
       }
@@ -233,13 +266,23 @@ limitations under the License.
       },
       sortedAndFilteredMemberList () {
         const predicate = email => {
-          if (!this.filter) {
+          if (!this.userFilter) {
             return true
           }
           const name = replace(email, /@.*$/, '')
-          return includes(toLower(name), toLower(this.filter))
+          return includes(toLower(name), toLower(this.userFilter))
         }
         return sortBy(filter(this.memberListWithoutOwner, predicate))
+      },
+      sortedAndFilteredServiceAccountList () {
+        const predicate = service => {
+          if (!this.serviceFilter) {
+            return true
+          }
+          const name = last(split(service, ':'))
+          return includes(toLower(name), toLower(this.serviceFilter))
+        }
+        return sortBy(filter(this.serviceAccountList, predicate))
       }
     },
     methods: {
@@ -248,11 +291,17 @@ limitations under the License.
         'deleteMember',
         'setError'
       ]),
-      openMemberDialog () {
-        this.memberDialog = true
+      openAddMemberDialog () {
+        this.memberAddDialog = true
       },
-      openServiceaccountDialog () {
-        this.serviceaccountDialog = true
+      openAddServiceaccountDialog () {
+        this.serviceaccountAddDialog = true
+      },
+      openMemberHelpDialog () {
+        this.memberHelpDialog = true
+      },
+      openServiceaccountHelpDialog () {
+        this.serviceaccountHelpDialog = true
       },
       displayName (email) {
         return emailToDisplayName(email)
@@ -289,3 +338,9 @@ limitations under the License.
     }
   }
 </script>
+
+<style lang="styl">
+  .searchField {
+    margin-right: 20px;
+  }
+</style>
