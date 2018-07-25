@@ -353,7 +353,8 @@ limitations under the License.
           }
         ],
         mounted: false,
-        editor: false
+        editor: false,
+        selfTerminationNotification: undefined
       }
     },
     methods: {
@@ -367,17 +368,19 @@ limitations under the License.
         }
       },
       showSelfTerminationWarning () {
-        const config = {
-          timeout: 5000,
-          closeOnClick: false,
-          showProgressBar: false,
-          position: SnotifyPosition.rightBottom,
-          titleMaxLength: 20
-        }
-        if (this.isSelfTerminationWarning) {
-          this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
-        } else {
-          this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+        if (!this.selfTerminationNotification) {
+          const config = {
+            timeout: 5000,
+            closeOnClick: false,
+            showProgressBar: false,
+            position: SnotifyPosition.rightBottom,
+            titleMaxLength: 20
+          }
+          if (this.isSelfTerminationWarning) {
+            this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          } else {
+            this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          }
         }
       }
     },
@@ -543,10 +546,22 @@ limitations under the License.
         return isValidTerminationDate(this.expirationTimestamp)
       }
     },
+    watch: {
+      expirationTimestamp (expirationTimestamp) {
+        if (expirationTimestamp) {
+          this.showSelfTerminationWarning()
+        }
+      }
+    },
     mounted () {
       this.mounted = true
       if (this.expirationTimestamp) {
         this.showSelfTerminationWarning()
+      }
+    },
+    destroyed () {
+      if (this.selfTerminationNotification) {
+        this.$snotify.remove(this.selfTerminationNotification.id)
       }
     },
     beforeRouteUpdate (to, from, next) {

@@ -112,6 +112,7 @@ limitations under the License.
         }
         switch (type) {
           case 'success':
+            config.timeout = 3000
             this.$snotify.success(message, config)
             break
           case 'warning':
