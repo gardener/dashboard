@@ -26,7 +26,6 @@ delete process.env.https_proxy
 /*!
  * Common modules
  */
-global.Promise = require('bluebird')
 global.sinon = require('sinon')
 global.nocks = require('./nocks')()
 

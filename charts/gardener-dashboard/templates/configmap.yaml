@@ -22,8 +22,7 @@ data:
       - RS256
     jwks:
 {{- if .Values.oidc.ca }}
-      ca: |
-{{ toYaml . | indent 8 }}
+      ca: {{ toJson .Values.oidc.ca }}
 {{- end }}
       strictSsl: false
       rejectUnauthorized: true
@@ -62,6 +61,9 @@ data:
 {{- if .Values.gitHub }}
     gitHub:
       apiUrl: {{ .Values.gitHub.apiUrl }}
+      {{- if .Values.gitHub.ca }}
+      ca: {{ toJson .Values.gitHub.ca }}
+      {{- end }}
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
       webhookSecret: {{ .Values.gitHub.webhookSecret }}

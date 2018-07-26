@@ -50,6 +50,16 @@ module.exports = {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
       port,
+      apiServerUrl: 'https://minikube:8443',
+      gitHub: {
+        apiUrl: 'https://api.github.com',
+        org: 'gardener',
+        repository: 'journal-dev',
+        webhookSecret: '776562686f6f6b536563726574',
+        authentication: {
+          token: '746f6b656e'
+        }
+      },
       jwks: {
         cache: false,
         rateLimit: false,
