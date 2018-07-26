@@ -187,7 +187,7 @@ limitations under the License.
             required,
             maxLength: maxLength(10),
             noConsecutiveHyphen,
-            noStartEndHyphen,
+            noStartEndHyphen, // Order is important for UI hints
             resourceName,
             unique: unique('projectNames')
           }
@@ -292,11 +292,6 @@ limitations under the License.
           this.reset()
         }
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.cancel()
-      })
     }
   }
 </script>

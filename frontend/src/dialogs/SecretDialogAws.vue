@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="aws"
-    color="orange"
+    color="orange darken-2"
     infraIcon="mdi-amazon"
     backgroundSrc="/static/background_aws.svg"
     createTitle="Add new AWS Secret"
@@ -32,7 +32,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="orange"
+            color="orange darken-2"
             ref="accessKeyId"
             v-model="accessKeyId"
             :label="accessKeyIdLabel"
@@ -48,7 +48,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="orange"
+            color="orange darken-2"
             v-model="secretAccessKey"
             :label="secretAccessKeyLabel"
             :error-messages="getErrorMessages('secretAccessKey')"

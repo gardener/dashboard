@@ -72,6 +72,9 @@ const getFilterValue = (state) => {
 
 // getters
 const getters = {
+  customAddonDefinitionList (state) {
+    return get(state, 'cfg.customAddonDefinitions', [])
+  },
   domainList (state) {
     return state.domains.all
   },

@@ -1,6 +1,6 @@
 <template>
   <v-select
-    color="cyan"
+    color="cyan darken-2"
     :items="volumeTypes"
     item-text="name"
     item-value="name"

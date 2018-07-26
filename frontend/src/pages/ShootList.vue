@@ -21,6 +21,7 @@ limitations under the License.
         <img src="../assets/certified_kubernetes_white.svg" height="60" class="pl-1">
         <v-toolbar-title class="white--text">
           <div class="headline">Kubernetes Clusters</div>
+          <div class="subheading">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
@@ -62,7 +63,7 @@ limitations under the License.
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
-              <v-list-tile-sub-title color="red">Show only clusters with issues</v-list-tile-sub-title>
+              <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
             </v-list-tile>
             <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
               <v-list-tile-action>
@@ -90,9 +91,6 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-alert type="info" :value="!projectScope && showOnlyShootsWithIssues" outline>
-        <span>Currently only showing clusters with issues</span><span v-if="isHideUserIssues">. User errors are excluded</span><span v-if="isHideDeactivatedReconciliation">. Clusters with deactivated reconciliation are excluded</span>
-      </v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
@@ -124,7 +122,7 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :info="currentInfo"></cluster-access>
         </v-card>
       </v-dialog>
-      <confirm-input-dialog
+      <confirm-dialog
         :confirm="currentName"
         v-model="deleteDialog"
         :cancel="hideDialog"
@@ -132,7 +130,8 @@ limitations under the License.
         :errorMessage.sync="deleteErrorMessage"
         :detailedErrorMessage.sync="deleteDetailedErrorMessage"
         >
-        <template slot="caption">Delete Cluster <code>{{currentName}}</code></template>
+        <template slot="caption">Delete Cluster</template>
+        <template slot="affectedObjectName">{{currentName}}</template>
         <template slot="message">
           <v-list>
             <v-list-tile-content>
@@ -149,7 +148,7 @@ limitations under the License.
           <br/>
           <i class="red--text text--darken-2">This action cannot be undone.</i>
         </template>
-      </confirm-input-dialog>
+      </confirm-dialog>
       <create-cluster v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster>
     </v-card>
     <v-fab-transition>
@@ -170,7 +169,7 @@ limitations under the License.
   import GPopper from '@/components/GPopper'
   import ShootListRow from '@/components/ShootListRow'
   import CreateCluster from '@/dialogs/CreateCluster'
-  import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import ClusterAccess from '@/components/ClusterAccess'
   import { getCreatedBy } from '@/utils'
 
@@ -181,7 +180,7 @@ limitations under the License.
       CreateCluster,
       GPopper,
       ShootListRow,
-      ConfirmInputDialog,
+      ConfirmDialog,
       ClusterAccess
     },
     data () {
@@ -207,7 +206,8 @@ limitations under the License.
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
         deleteErrorMessage: null,
         deleteDetailedErrorMessage: null,
-        cachedItems: null
+        cachedItems: null,
+        clearSelectedShootTimerID: undefined
       }
     },
     watch: {
@@ -222,15 +222,15 @@ limitations under the License.
       }
     },
     methods: {
-      ...mapActions([
-        'deleteShoot',
-        'setSelectedShoot',
-        'setShootListSortParams',
-        'setShootListSearchValue',
-        'setOnlyShootsWithIssues',
-        'setHideUserIssues',
-        'setHideDeactivatedReconciliation'
-      ]),
+      ...mapActions({
+        deleteShoot: 'deleteShoot',
+        setSelectedShootInternal: 'setSelectedShoot',
+        setShootListSortParams: 'setShootListSortParams',
+        setShootListSearchValue: 'setShootListSearchValue',
+        setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
+        setHideUserIssues: 'setHideUserIssues',
+        setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
+      }),
       deletionConfirmed () {
         this.deleteShoot({name: this.currentName, namespace: this.currentNamespace})
           .then(() => this.hideDialog())
@@ -264,7 +264,8 @@ limitations under the License.
             this.deleteDetailedErrorMessage = null
         }
         this.dialog = null
-        this.setSelectedShoot(null)
+        // Delay resetting shoot so that the dialog does not lose context during closing animation
+        this.clearSelectedShootWithDelay()
       },
       setColumnChecked (header) {
         header.checked = !header.checked
@@ -305,6 +306,15 @@ limitations under the License.
         if (this.showOnlyShootsWithIssues) {
           this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
         }
+      },
+      setSelectedShoot (selectedShoot) {
+        clearTimeout(this.clearSelectedShootTimerID)
+        return this.setSelectedShootInternal(selectedShoot)
+      },
+      clearSelectedShootWithDelay () {
+        this.clearSelectedShootTimerID = setTimeout(() => {
+          this.setSelectedShootInternal(null)
+        }, 500)
       }
     },
     computed: {
@@ -431,6 +441,22 @@ limitations under the License.
       },
       hideUserIssuesAndHideDeactivatedReconciliationClass () {
         return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+      },
+      headlineSubtitle () {
+        let subtitle = ''
+        if (!this.projectScope && this.showOnlyShootsWithIssues) {
+          subtitle = 'Currently only showing clusters with issues'
+          if (this.hideUserIssues || this.isHideDeactivatedReconciliation) {
+            subtitle += '.'
+          }
+          if (this.isHideUserIssues) {
+            subtitle += ' User errors are excluded.'
+          }
+          if (this.isHideDeactivatedReconciliation) {
+            subtitle += ' Clusters with deactivated reconciliation are excluded.'
+          }
+        }
+        return subtitle
       }
     },
     mounted () {
@@ -461,6 +487,11 @@ limitations under the License.
       this.cachedItems = this.mappedItems.slice(0)
       this.search = null
       next()
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hideDialog()
+      })
     }
   }
 </script>

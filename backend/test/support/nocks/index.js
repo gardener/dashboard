@@ -21,6 +21,7 @@ const nock = require('nock')
 exports = module.exports = init
 exports.oidc = require('./oidc')
 exports.k8s = require('./k8s')
+exports.github = require('./github')
 exports.verify = verify
 exports.reset = reset
 

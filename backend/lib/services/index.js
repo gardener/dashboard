@@ -22,5 +22,6 @@ module.exports = {
   infrastructureSecrets: require('./infrastructureSecrets'),
   members: require('./members'),
   administrators: require('./administrators'),
-  journals: require('./journals')
+  journals: require('./journals'),
+  customAddonDefinitions: require('./customAddonDefinitions')
 }

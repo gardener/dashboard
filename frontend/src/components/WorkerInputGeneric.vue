@@ -16,14 +16,15 @@ limitations under the License.
 
 <template>
   <v-layout row>
-    <v-flex xs1 class="mt-1"><v-avatar class="cyan"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
+    <v-flex xs1 class="mt-1"><v-avatar class="cyan darken-2"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
     <v-flex xs2 class="ml-2">
       <v-text-field
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.name')"
         @input="$v.worker.name.$touch()"
         @blur="$v.worker.name.$touch()"
         v-model="worker.name"
+        counter="15"
         label="Group Name">
       </v-text-field>
     </v-flex>
@@ -45,7 +46,7 @@ limitations under the License.
     <v-flex xs1  class="ml-3">
       <size-input
         min="1"
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.volumeSize')"
         @input="$v.worker.volumeSize.$touch()"
         @blur="$v.worker.volumeSize.$touch()"
@@ -57,7 +58,7 @@ limitations under the License.
     <v-flex xs1 class="ml-3">
       <v-text-field
         min="1"
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMin')"
         @input="$v.worker.autoScalerMin.$touch()"
         @blur="$v.worker.autoScalerMin.$touch()"
@@ -69,7 +70,7 @@ limitations under the License.
     <v-flex xs1 class="ml-3">
       <v-text-field
         min="1"
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMax')"
         @input="$v.worker.autoScalerMax.$touch()"
         @blur="$v.worker.autoScalerMax.$touch()"
@@ -93,15 +94,18 @@ limitations under the License.
   import SizeInput from '@/components/VolumeSizeInput'
   import MachineType from '@/components/MachineType'
   import VolumeType from '@/components/VolumeType'
-  import { required, minValue } from 'vuelidate/lib/validators'
+  import { required, maxLength, minValue } from 'vuelidate/lib/validators'
   import { getValidationErrors } from '@/utils'
-  import { uniqueWorkerName, minVolumeSize } from '@/utils/validators'
+  import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen } from '@/utils/validators'
 
   const validationErrors = {
     worker: {
       name: {
-        required: 'You can\'t leave this empty.',
-        uniqueWorkerName: 'Name is taken. Try another.'
+        required: 'Name is required',
+        maxLength: 'Name ist too long',
+        resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+        uniqueWorkerName: 'Name is taken. Try another.',
+        noStartEndHyphen: 'Name must not start or end with a hyphen'
       },
       volumeSize: {
         minVolumeSize: 'Invalid volume size'
@@ -119,6 +123,9 @@ limitations under the License.
     worker: {
       name: {
         required,
+        maxLength: maxLength(15),
+        noStartEndHyphen, // Order is important for UI hints
+        resourceName,
         uniqueWorkerName
       },
       volumeSize: {

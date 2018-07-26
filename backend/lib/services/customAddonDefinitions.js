@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
@@ -16,34 +17,25 @@
 
 'use strict'
 
-process.env.NODE_ENV = 'test'
+const _ = require('lodash')
+const yaml = require('js-yaml')
+const core = require('../kubernetes').core()
 
-delete process.env.HTTP_PROXY
-delete process.env.http_proxy
-delete process.env.HTTPS_PROXY
-delete process.env.https_proxy
-
-/*!
- * Common modules
- */
-global.sinon = require('sinon')
-global.nocks = require('./nocks')()
-
-/*!
- * Attach chai to global
- */
-global.chai = require('chai')
-global.expect = global.chai.expect
-
-/*!
- * Chai Plugins
- */
-global.chai.use(require('sinon-chai'))
-global.chai.use(require('chai-http'))
-
-/*!
- * HTTP server object for testing to allow closing
- */
-const http = require('http')
-const app = require('../../lib/app')
-global.createServer = () => http.createServer(app)
+exports.list = async function ({user, namespace = 'garden'}) {
+  const {items} = await core.namespaces(namespace).configmaps.get({
+    qs: {
+      labelSelector: 'gardenextensions.sapcloud.io/role=addonDefinitions'
+    }
+  })
+  return _
+    .chain(items)
+    .first()
+    .get('data')
+    .map((data, name) => {
+      try {
+        return _.set(yaml.safeLoad(data), 'name', name)
+      } catch (err) { /* ignore error */ }
+    })
+    .compact()
+    .value()
+}

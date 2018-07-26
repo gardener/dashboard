@@ -18,13 +18,16 @@ limitations under the License.
   <v-container fluid>
     <v-card class="mr-extra">
 
-      <v-toolbar class="red elevation-0 darken-1" dark>
+      <v-toolbar class="red elevation-0 darken-2" dark>
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="shootList.length === 0" icon @click.native.stop="deleteConfirm=true">
-          <v-icon>delete</v-icon>
-        </v-btn>
+        <v-tooltip top :disabled="!isDeleteButtonDisabled">
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+            <v-icon>delete</v-icon>
+          </v-btn>
+          <span>You can only delete projects that do not contain clusters</span>
+        </v-tooltip>
       </v-toolbar>
 
       <v-card-text>
@@ -43,7 +46,7 @@ limitations under the License.
                 <label class="caption grey--text text--darken-2">Created At</label>
                 <p class="subheading">{{created}}</p>
               </template>
-              <time-ago :dateTime="metadata.creationTimestamp"></time-ago>
+              <time-string :dateTime="metadata.creationTimestamp"></time-string>
             </v-tooltip>
           </v-flex>
           <v-flex lg8 xs12 v-if="projectData.createdBy">
@@ -65,29 +68,42 @@ limitations under the License.
       </v-card-text>
     </v-card>
     <v-fab-transition>
-      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-1" @click.native.stop="edit = true">
+      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
     </v-fab-transition>
 
-    <delete-dialog v-model="deleteConfirm" :project="project"></delete-dialog>
+    <confirm-dialog
+      v-model="deleteConfirm"
+      defaultColor="red"
+      :cancel="hide"
+      :ok="onDeleteProject">
+      <div slot="caption">
+        Confirm Delete
+      </div>
+      <div slot="message">
+        Are you sure to delete the project <b>{{projectName}}</b>?
+        <br />
+        <i class="red--text text--darken-2">The operation can not be undone.</i>
+      </div>
+    </confirm-dialog>
   </v-container>
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
+  import { mapState, mapGetters, mapActions } from 'vuex'
   import find from 'lodash/find'
   import UpdateDialog from '@/dialogs/ProjectDialog'
-  import DeleteDialog from '@/dialogs/ProjectDialogDelete'
-  import TimeAgo from '@/components/TimeAgo'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
+  import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
 
   export default {
     name: 'administration',
     components: {
       UpdateDialog,
-      DeleteDialog,
-      TimeAgo
+      ConfirmDialog,
+      TimeString
     },
     data () {
       return {
@@ -128,10 +144,41 @@ limitations under the License.
       },
       purpose () {
         return this.projectData.purpose || ''
+      },
+      isDeleteButtonDisabled () {
+        return this.shootList.length > 0
+      }
+    },
+    methods: {
+      ...mapActions([
+        'deleteProject'
+      ]),
+      hide () {
+        this.deleteConfirm = false
+        this.edit = false
+      },
+      onDeleteProject () {
+        this
+          .deleteProject(this.project)
+          .then(() => {
+            this.hide()
+            if (this.projectList.length > 0) {
+              const p1 = this.projectList[0]
+              this.$router.push({name: 'ShootList', params: { namespace: p1.metadata.namespace }})
+            } else {
+              this.$router.push({name: 'Home', params: { }})
+            }
+            this.$bus.$emit('toast', 'Project deleted successfully')
+          })
       }
     },
     mounted () {
       this.floatingButton = true
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hide()
+      })
     }
   }
 </script>

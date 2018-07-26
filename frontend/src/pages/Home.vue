@@ -20,7 +20,7 @@ limitations under the License.
       <v-card-text>
         <h3>Let's get started</h3>
         <v-btn @click.native.stop="projectDialog = true">
-          <v-icon class="red--text">mdi-plus</v-icon> Create your first Project
+          <v-icon class="red--text text--darken-2">mdi-plus</v-icon> Create your first Project
         </v-btn>
       </v-card-text>
       <project-create-dialog @submit="onProjectCreated" v-model="projectDialog">

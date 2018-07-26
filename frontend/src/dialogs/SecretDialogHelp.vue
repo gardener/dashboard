@@ -41,7 +41,7 @@ limitations under the License.
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn :class="`${color}--text`" flat  @click.native.stop="visible = false">
+        <v-btn :class="`${color}--text`" flat  @click.native.stop="hide">
           Got it
         </v-btn>
       </v-card-actions>
@@ -77,6 +77,11 @@ limitations under the License.
         set (value) {
           this.$emit('input', value)
         }
+      }
+    },
+    methods: {
+      hide () {
+        this.visible = false
       }
     }
   }

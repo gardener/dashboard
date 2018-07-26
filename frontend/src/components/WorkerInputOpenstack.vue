@@ -16,10 +16,10 @@ limitations under the License.
 
 <template>
   <v-layout row>
-    <v-flex xs1 class="mt-1"><v-avatar class="cyan"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
+    <v-flex xs1 class="mt-1"><v-avatar class="cyan darken-2"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
     <v-flex xs2 class="ml-2">
       <v-text-field
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.name')"
         @input="$v.worker.name.$touch()"
         @blur="$v.worker.name.$touch()"
@@ -38,7 +38,7 @@ limitations under the License.
     <v-flex xs1 class="ml-3">
       <v-text-field
         min="1"
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMin')"
         @input="$v.worker.autoScalerMin.$touch()"
         @blur="$v.worker.autoScalerMin.$touch()"
@@ -50,7 +50,7 @@ limitations under the License.
     <v-flex xs1 class="ml-3">
       <v-text-field
         min="1"
-        color="cyan"
+        color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMax')"
         @input="$v.worker.autoScalerMax.$touch()"
         @blur="$v.worker.autoScalerMax.$touch()"

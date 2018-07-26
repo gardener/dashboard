@@ -15,30 +15,21 @@ limitations under the License.
 -->
 
 <template>
-    <v-container fluid>
-      <v-layout row wrap>
-        <v-flex xs12>
-          <v-select
-            :items="items"
-            item-text="version"
-            v-model="selectedItem"
-            :label="label"
-          >
-          <template slot="item" slot-scope="data">
-             <v-list-tile-content>
-               <v-list-tile-title>{{data.item.version}}</v-list-tile-title>
-             </v-list-tile-content>
-           </template>
-          </v-select>
-          <v-alert type="error" :value="selectedMinorVersionIsNotNextMinor" outline>
-             You cannot upgrade your cluster more than one minor version at a time.
-          </v-alert>
-          <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>
-            You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
-          </v-alert>
-        </v-flex>
-      </v-layout>
-    </v-container>
+  <v-select
+    :items="items"
+    item-text="version"
+    v-model="selectedItem"
+    :label="label"
+    color="cyan darken-2"
+    :hint="hint"
+    :error="selectedMinorVersionIsNotNextMinor"
+  >
+  <template slot="item" slot-scope="data">
+     <v-list-tile-content>
+       <v-list-tile-title>{{data.item.version}}</v-list-tile-title>
+     </v-list-tile-content>
+   </template>
+  </v-select>
 </template>
 
 
@@ -146,6 +137,9 @@ limitations under the License.
           return 'Patch to Version'
         }
         return 'Upgrade to Version'
+      },
+      hint () {
+        return this.selectedMinorVersionIsNotNextMinor ? 'You cannot upgrade your cluster more than one minor version at a time' : ''
       }
     },
     watch: {
