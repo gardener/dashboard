@@ -283,5 +283,5 @@ export function isSelfTerminationWarning (expirationTimestamp) {
 }
 
 export function isValidTerminationDate (expirationTimestamp) {
-  return new Date(expirationTimestamp) > new Date()
+  return expirationTimestamp && new Date(expirationTimestamp) > new Date()
 }

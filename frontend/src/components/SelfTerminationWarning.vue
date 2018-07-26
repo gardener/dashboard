@@ -28,7 +28,7 @@ limitations under the License.
 <script>
   import TimeString from '@/components/TimeString'
   import {isSelfTerminationWarning,
-  isValidTerminationDate} from '@/utils'
+          isValidTerminationDate} from '@/utils'
 
   export default {
     name: 'selfTerminationWarning',
