@@ -15,10 +15,10 @@ npm install --prefix backend
 
 ### Configuration
 
-#### `KUBECONFIG`
+#### *KUBECONFIG*
 If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in `${HOME}/.kube/config` or by the `KUBECONFIG` environment variable.
 
-#### `GARDENER_CONFIG`
+#### *GARDENER_CONFIG*
 The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable `GARDENER_CONFIG` at the server process. If nothing is specified the default location is `${HOME}/.gardener/config.yaml`.
 
 A local configuration example for [minikube](https://github.com/kubernetes/minikube) and [dex](https://github.com/coreos/dex) could look like follows:
