@@ -34,11 +34,19 @@ import moment from 'moment'
 import semver from 'semver'
 import some from 'lodash/some'
 import store from '../store'
+import split from 'lodash/split'
+import last from 'lodash/last'
 
 export function emailToDisplayName (email) {
   if (email) {
     const [, givenName, familyName] = /^([^.]+)(?:\.([^@]+))?@.*$/.exec(email) || []
     return familyName ? `${capitalize(familyName)}, ${capitalize(givenName)}` : capitalize(givenName)
+  }
+}
+
+export function serviceAccountToDisplayName (serviceAccount) {
+  if (serviceAccount) {
+    return last(split(serviceAccount, ':'))
   }
 }
 

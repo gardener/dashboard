@@ -99,9 +99,12 @@ limitations under the License.
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
-              <v-btn icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+                <span>Delete</span>
+              </v-tooltip>
             </v-list-tile-action>
           </v-list-tile>
         </template>
@@ -125,10 +128,10 @@ limitations under the License.
           v-model="serviceFilter"
           @keyup.esc="serrviceFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openAddServiceaccountDialog">
+        <v-btn icon @click.native.stop="openAddserviceAccountDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openServiceaccountHelpDialog">
+        <v-btn icon @click.native.stop="openserviceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
@@ -141,7 +144,7 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in sortedAndFilteredServiceAccountList">
+        <template v-for="(name, index) in sortedAndFilteredserviceAccountList">
           <v-divider
             v-if="index > 0"
             inset
@@ -165,16 +168,27 @@ limitations under the License.
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="grey--text" @click.native.stop="onDownload(name)">
-                  <v-icon>mdi-download</v-icon>
+                <v-btn slot="activator" small icon class="blue-grey--text text--darken-2" @click="onKubeconfig(name)">
+                  <v-icon>settings</v-icon>
                 </v-btn>
-                <span>download kubeconfig</span>
+                <span>Show Kubeconfig</span>
               </v-tooltip>
             </v-list-tile-action>
             <v-list-tile-action>
-              <v-btn icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="blue-grey--text text--darken-2" @click.native.stop="onDownload(name)">
+                  <v-icon>mdi-download</v-icon>
+                </v-btn>
+                <span>Download Kubeconfig</span>
+              </v-tooltip>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+                <span>Delete</span>
+              </v-tooltip>
             </v-list-tile-action>
           </v-list-tile>
         </template>
@@ -182,16 +196,30 @@ limitations under the License.
     </v-card>
 
     <member-add-dialog type="user" v-model="memberAddDialog"></member-add-dialog>
-    <member-add-dialog type="service" v-model="serviceaccountAddDialog"></member-add-dialog>
+    <member-add-dialog type="service" v-model="serviceAccountAddDialog"></member-add-dialog>
     <member-help-dialog type="user" v-model="memberHelpDialog"></member-help-dialog>
-    <member-help-dialog type="service" v-model="serviceaccountHelpDialog"></member-help-dialog>
+    <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
+    <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
+      <v-card>
+        <v-card-title class="teal darken-2 grey--text text--lighten-4">
+          <div class="headline">Kubeconfig <code class="serviceAccount_name">{{currentServiceAccountDisplayName}}</code></div>
+          <v-spacer></v-spacer>
+          <v-btn icon class="grey--text text--lighten-4" @click.native="kubeconfigDialog = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <code-block lang="yaml" :content="currentServiceAccountKubeconfig"></code-block>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
     <v-fab-transition>
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <v-btn slot="activator" v-model="fab" color="cyan darken-2" dark fab>
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" light @click="openAddServiceaccountDialog">
+        <v-btn fab small color="grey lighten-2" light @click="openAddserviceAccountDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
         <v-btn fab small color="grey lighten-2" @click="openAddMemberDialog">
@@ -211,30 +239,33 @@ limitations under the License.
   import find from 'lodash/find'
   import download from 'downloadjs'
   import filter from 'lodash/filter'
-  import split from 'lodash/split'
-  import last from 'lodash/last'
   import MemberAddDialog from '@/dialogs/MemberAddDialog'
   import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
   import { mapState, mapActions, mapGetters } from 'vuex'
-  import { emailToDisplayName, gravatar } from '@/utils'
+  import { emailToDisplayName, gravatar, serviceAccountToDisplayName } from '@/utils'
   import { getMember } from '@/utils/api'
+  import CodeBlock from '@/components/CodeBlock'
 
   export default {
     name: 'members',
     components: {
       MemberAddDialog,
-      MemberHelpDialog
+      MemberHelpDialog,
+      CodeBlock
     },
     data () {
       return {
         memberAddDialog: false,
-        serviceaccountAddDialog: false,
+        serviceAccountAddDialog: false,
         memberHelpDialog: false,
-        serviceaccountHelpDialog: false,
+        serviceAccountHelpDialog: false,
+        kubeconfigDialog: false,
         userFilter: '',
         serviceFilter: '',
         fab: false,
-        floatingButton: false
+        floatingButton: false,
+        currentServiceAccountName: undefined,
+        currentServiceAccountKubeconfig: undefined
       }
     },
     computed: {
@@ -274,15 +305,18 @@ limitations under the License.
         }
         return sortBy(filter(this.memberListWithoutOwner, predicate))
       },
-      sortedAndFilteredServiceAccountList () {
+      sortedAndFilteredserviceAccountList () {
         const predicate = service => {
           if (!this.serviceFilter) {
             return true
           }
-          const name = last(split(service, ':'))
+          const name = serviceAccountToDisplayName(service)
           return includes(toLower(name), toLower(this.serviceFilter))
         }
         return sortBy(filter(this.serviceAccountList, predicate))
+      },
+      currentServiceAccountDisplayName () {
+        return serviceAccountToDisplayName(this.currentServiceAccountName)
       }
     },
     methods: {
@@ -294,14 +328,14 @@ limitations under the License.
       openAddMemberDialog () {
         this.memberAddDialog = true
       },
-      openAddServiceaccountDialog () {
-        this.serviceaccountAddDialog = true
+      openAddserviceAccountDialog () {
+        this.serviceAccountAddDialog = true
       },
       openMemberHelpDialog () {
         this.memberHelpDialog = true
       },
-      openServiceaccountHelpDialog () {
-        this.serviceaccountHelpDialog = true
+      openserviceAccountHelpDialog () {
+        this.serviceAccountHelpDialog = true
       },
       displayName (email) {
         return emailToDisplayName(email)
@@ -312,14 +346,32 @@ limitations under the License.
       avatar (email) {
         return gravatar(email)
       },
-      async onDownload (name) {
+      async downloadKubeconfig (name) {
         const namespace = this.namespace
         const user = this.user
         try {
           const {data} = await getMember({namespace, name, user})
-          download(data.kubeconfig, 'kubeconfig.yaml', 'text/plain')
+          if (!data.kubeconfig) {
+            this.setError({message: 'Failed to fetch Kubeconfig'})
+          } else {
+            return data.kubeconfig
+          }
         } catch (err) {
           this.setError(err)
+        }
+      },
+      async onDownload (name) {
+        const kubeconfig = await this.downloadKubeconfig(name)
+        if (kubeconfig) {
+          download(kubeconfig, 'kubeconfig.yaml', 'text/plain')
+        }
+      },
+      async onKubeconfig (name) {
+        const kubeconfig = await this.downloadKubeconfig(name)
+        if (kubeconfig) {
+          this.currentServiceAccountName = name
+          this.currentServiceAccountKubeconfig = kubeconfig
+          this.kubeconfigDialog = true
         }
       },
       onDelete (username) {
@@ -331,8 +383,11 @@ limitations under the License.
     },
     created () {
       this.$bus.$on('esc-pressed', () => {
-        this.memberDialog = false
-        this.serviceaccountDialog = false
+        this.memberAddDialog = false
+        this.memberHelpDialog = false
+        this.serviceAccountAddDialog = false
+        this.serviceAccountHelpDialog = false
+        this.kubeconfigDialog = false
         this.fab = false
       })
     }
@@ -340,7 +395,12 @@ limitations under the License.
 </script>
 
 <style lang="styl">
+
   .searchField {
     margin-right: 20px;
+  }
+
+  .serviceAccount_name {
+    color: rgb(0, 137, 123);
   }
 </style>

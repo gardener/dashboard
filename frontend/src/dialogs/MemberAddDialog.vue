@@ -39,12 +39,12 @@ limitations under the License.
           <v-text-field
             v-if="isServiceDialog"
             color="blue-grey"
-            ref="serviceaccountName"
+            ref="serviceAccountName"
             label="Service Account"
-            v-model="serviceaccountName"
-            :error-messages="serviceaccountNameErrors"
-            @input="$v.serviceaccountName.$touch()"
-            @blur="$v.serviceaccountName.$touch()"
+            v-model="serviceAccountName"
+            :error-messages="serviceAccountNameErrors"
+            @input="$v.serviceAccountName.$touch()"
+            @blur="$v.serviceAccountName.$touch()"
             required
             tabindex="1"
           ></v-text-field>
@@ -66,11 +66,10 @@ limitations under the License.
   import { resourceName, unique } from '@/utils/validators'
   import Alert from '@/components/Alert'
   import { errorDetailsFromError, isConflict } from '@/utils/error'
+  import { serviceAccountToDisplayName } from '@/utils'
   import filter from 'lodash/filter'
   import startsWith from 'lodash/startsWith'
   import map from 'lodash/map'
-  import split from 'lodash/split'
-  import last from 'lodash/last'
   import includes from 'lodash/includes'
 
   const defaultEmail = ''
@@ -94,7 +93,7 @@ limitations under the License.
     data () {
       return {
         email: defaultEmail,
-        serviceaccountName: undefined,
+        serviceAccountName: undefined,
         errorMessage: undefined,
         detailedErrorMessage: undefined
       }
@@ -110,7 +109,7 @@ limitations under the License.
         }
       } else if (this.isServiceDialog) {
         return {
-          serviceaccountName: {
+          serviceAccountName: {
             required,
             resourceName,
             unique: unique('serviceAccountNames')
@@ -150,19 +149,19 @@ limitations under the License.
         }
         return errors
       },
-      serviceaccountNameErrors () {
+      serviceAccountNameErrors () {
         const errors = []
-        if (!this.$v.serviceaccountName.$dirty) {
+        if (!this.$v.serviceAccountName.$dirty) {
           return errors
         }
-        if (!this.$v.serviceaccountName.required) {
+        if (!this.$v.serviceAccountName.required) {
           errors.push('Service Account is required')
         }
-        if (!this.$v.serviceaccountName.resourceName) {
+        if (!this.$v.serviceAccountName.resourceName) {
           errors.push('Must contain only alphanumeric characters or hypen')
         }
-        if (!this.$v.serviceaccountName.unique) {
-          errors.push(`Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`)
+        if (!this.$v.serviceAccountName.unique) {
+          errors.push(`serviceAccount '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`)
         }
         return errors
       },
@@ -179,7 +178,7 @@ limitations under the License.
         if (this.isUserDialog) {
           return this.$refs.email
         } else if (this.isServiceDialog) {
-          return this.$refs.serviceaccountName
+          return this.$refs.serviceAccountName
         }
         return undefined
       },
@@ -201,7 +200,7 @@ limitations under the License.
       },
       serviceAccountNames () {
         const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
-        return map(filter(this.memberList, predicate), serviceaccountName => this.serviceaccountDisplayName(serviceaccountName))
+        return map(filter(this.memberList, predicate), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
       },
       projectMembersNames () {
         const predicate = username => !startsWith(username, 'system:serviceaccount:')
@@ -226,7 +225,7 @@ limitations under the License.
                 if (this.isUserDialog) {
                   this.errorMessage = `User '${this.email}' is already member of this project.`
                 } else if (this.isServiceDialog) {
-                  this.errorMessage = `Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`
+                  this.errorMessage = `serviceAccount '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
                 }
               } else {
                 this.errorMessage = 'Failed to add project member'
@@ -244,7 +243,7 @@ limitations under the License.
       reset () {
         this.$v.$reset()
         this.email = defaultEmail
-        this.serviceaccountName = this.defaultServiceName()
+        this.serviceAccountName = this.defaultServiceName()
 
         this.errorMessage = undefined
         this.detailedMessage = undefined
@@ -265,12 +264,12 @@ limitations under the License.
           return this.addMember(email)
         } else if (this.isServiceDialog) {
           const namespace = this.namespace
-          const name = toLower(this.serviceaccountName)
+          const name = toLower(this.serviceAccountName)
           return this.addMember(`system:serviceaccount:${namespace}:${name}`)
         }
       },
-      serviceaccountDisplayName (serviceaccountName) {
-        return last(split(serviceaccountName, ':'))
+      serviceAccountDisplayName (serviceAccountName) {
+        return serviceAccountToDisplayName(serviceAccountName)
       },
       defaultServiceName () {
         let name = defaultServiceName

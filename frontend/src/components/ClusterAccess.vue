@@ -74,12 +74,18 @@ limitations under the License.
             Copied to clipboard!
           </v-snackbar>
         </v-list-tile-content>
-        <v-btn icon ref="copy" title="copy to clipboard">
-          <v-icon>content_copy</v-icon>
-        </v-btn>
-        <v-btn icon :title="passwordVisibilityTitle" @click.native.stop="showPassword = !showPassword">
-          <v-icon>{{visibilityIcon}}</v-icon>
-        </v-btn>
+        <v-tooltip top>
+          <v-btn slot="activator" icon ref="copy">
+            <v-icon>content_copy</v-icon>
+          </v-btn>
+          <span>Copy to clipboard</span>
+        </v-tooltip>
+        <v-tooltip top>
+          <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
+            <v-icon>{{visibilityIcon}}</v-icon>
+          </v-btn>
+          <span>{{passwordVisibilityTitle}}</span>
+        </v-tooltip>
       </v-list-tile>
     </template>
 
