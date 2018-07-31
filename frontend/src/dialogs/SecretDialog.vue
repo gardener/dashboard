@@ -70,6 +70,7 @@ limitations under the License.
 
             <slot name="data-slot"></slot>
             </v-layout>
+            <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
           </v-container>
         </form>
       </v-card-text>
@@ -88,12 +89,14 @@ limitations under the License.
   import { mapActions, mapState, mapGetters } from 'vuex'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { unique, resourceName } from '@/utils/validators'
-  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+  import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
   import CloudProfile from '@/components/CloudProfile'
   import cloneDeep from 'lodash/cloneDeep'
   import get from 'lodash/get'
   import head from 'lodash/head'
   import sortBy from 'lodash/sortBy'
+  import Alert from '@/components/Alert'
+  import { errorDetailsFromError, isConflict } from '@/utils/error'
 
   const validationErrors = {
     secretName: {
@@ -105,8 +108,12 @@ limitations under the License.
   }
 
   export default {
+    name: 'secret-dialog',
     components: {
-      CloudProfile
+      CloudProfile,
+      Alert,
+      errorMessage: undefined,
+      detailedErrorMessage: undefined
     },
     props: {
       value: {
@@ -153,6 +160,8 @@ limitations under the License.
       return {
         selectedCloudProfile: undefined,
         secretName: undefined,
+        errorMessage: undefined,
+        detailedErrorMessage: undefined,
         validationErrors
       }
     },
@@ -256,6 +265,22 @@ limitations under the License.
             .then(secret => {
               this.hide()
             })
+            .catch(err => {
+              if (this.isCreateMode) {
+                if (isConflict(err)) {
+                  this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
+                  setInputFocus(this, 'secretName')
+                } else {
+                  this.errorMessage = 'Failed to create Infrastructure Secret.'
+                }
+              } else {
+                this.errorMessage = 'Failed to update Infrastructure Secret.'
+              }
+
+              const errorDetails = errorDetailsFromError(err)
+              console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+              this.detailedErrorMessage = errorDetails.detailedMessage
+            })
         }
       },
       save () {
@@ -300,6 +325,9 @@ limitations under the License.
           this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
           setDelayedInputFocus(this, 'accessKeyId')
         }
+
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
       },
       getErrorMessages (field) {
         return getValidationErrors(this, field)

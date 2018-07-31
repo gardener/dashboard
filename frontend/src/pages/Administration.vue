@@ -77,7 +77,9 @@ limitations under the License.
       v-model="deleteConfirm"
       defaultColor="red"
       :cancel="hide"
-      :ok="onDeleteProject">
+      :ok="onDeleteProject"
+      :errorMessage.sync="errorMessage"
+      :detailedErrorMessage.sync="detailedErrorMessage">
       <div slot="caption">
         Confirm Delete
       </div>
@@ -97,6 +99,7 @@ limitations under the License.
   import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
+  import { errorDetailsFromError } from '@/utils/error'
 
   export default {
     name: 'administration',
@@ -109,7 +112,9 @@ limitations under the License.
       return {
         edit: false,
         deleteConfirm: false,
-        floatingButton: false
+        floatingButton: false,
+        errorMessage: undefined,
+        detailedErrorMessage: undefined
       }
     },
     computed: {
@@ -154,6 +159,8 @@ limitations under the License.
         'deleteProject'
       ]),
       hide () {
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
         this.deleteConfirm = false
         this.edit = false
       },
@@ -168,7 +175,13 @@ limitations under the License.
             } else {
               this.$router.push({name: 'Home', params: { }})
             }
-            this.$bus.$emit('toast', 'Project deleted successfully')
+          })
+          .catch(err => {
+            this.errorMessage = 'Failed to delete project.'
+
+            const errorDetails = errorDetailsFromError(err)
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
           })
       }
     },

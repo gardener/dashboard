@@ -35,8 +35,6 @@ limitations under the License.
         <v-tab-item key="infra" id="tab-infra">
           <v-card flat>
             <v-container fluid>
-              <v-alert type="warning" :value="selfTerminationDays" outline>The selected secret has an associated quota that will cause the cluster to self terminate after {{selfTerminationDays}} days</v-alert>
-
               <v-card-text>
 
                 <v-layout row>
@@ -109,6 +107,8 @@ limitations under the License.
                       @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       required
+                      persistent-hint
+                      :hint="secretHint"
                       >
                       <template slot="item" slot-scope="data">
                         {{get(data.item, 'metadata.name')}}
@@ -429,6 +429,7 @@ limitations under the License.
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+  import { errorDetailsFromError } from '@/utils/error'
   import moment from 'moment'
 
   const semSort = require('semver-sort')
@@ -927,12 +928,19 @@ limitations under the License.
         return terminationDays
       },
       filteredPurposes () {
-        return this.selfTerminationDays ? [] : this.purposes
+        return this.selfTerminationDays ? ['evaluation'] : this.purposes
       },
       addonDefinitionList () {
         const project = find(this.projectList, ['metadata.namespace', this.namespace])
         const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
         return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
+      },
+      secretHint () {
+        if (this.selfTerminationDays) {
+          return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+        } else {
+          return undefined
+        }
       }
     },
     methods: {
@@ -981,11 +989,10 @@ limitations under the License.
             this.$emit('close', false)
           })
           .catch(err => {
-            const errorCode = get(err, 'response.data.error.code')
-            const detailedMessage = get(err, 'response.data.message')
-            console.error('Failed to create shoot cluster.', errorCode, detailedMessage, err)
+            const errorDetails = errorDetailsFromError(err)
             this.errorMessage = `Failed to create cluster.`
-            this.detailedErrorMessage = detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
           })
       },
       cancelClicked () {

@@ -23,12 +23,11 @@ import map from 'lodash/map'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
-import split from 'lodash/split'
-import last from 'lodash/last'
 import includes from 'lodash/includes'
 import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
+import merge from 'lodash/merge'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -63,7 +62,8 @@ const state = {
   loading: false,
   error: null,
   alert: null,
-  shootsLoading: false
+  shootsLoading: false,
+  websocketConnectionError: null
 }
 
 const getFilterValue = (state) => {
@@ -228,6 +228,12 @@ const getters = {
       return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
     }
   },
+  isWebsocketConnectionError () {
+    return get(state, 'websocketConnectionError') !== null
+  },
+  websocketConnectAttempt () {
+    return get(state, 'websocketConnectionError.reconnectAttempt')
+  },
   isHideUserIssues (state, getters) {
     return getters['shoots/isHideUserIssues']
   },
@@ -354,51 +360,73 @@ const actions = {
   },
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)
+      .then(res => {
+        dispatch('setAlert', { message: 'Project created successfully', type: 'success' })
+        return res
+      })
   },
   updateProject ({ dispatch, commit }, data) {
     return dispatch('projects/update', data)
+      .then(res => {
+        dispatch('setAlert', { message: 'Project updated successfully', type: 'success' })
+        return res
+      })
   },
   deleteProject ({ dispatch, commit }, data) {
     return dispatch('projects/delete', data)
-      .catch(err => {
-        dispatch('setError', err)
+      .then(res => {
+        dispatch('setAlert', { message: 'Project deleted successfully', type: 'success' })
+        return res
       })
   },
   createInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/create', data)
-      .catch(err => {
-        dispatch('setError', err)
+      .then(res => {
+        dispatch('setAlert', { message: 'Infractructure Secret created successfully', type: 'success' })
+        return res
       })
   },
   updateInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/update', data)
-      .catch(err => {
-        dispatch('setError', err)
+      .then(res => {
+        dispatch('setAlert', { message: 'Infractructure Secret updated successfully', type: 'success' })
+        return res
       })
   },
   deleteInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/delete', data)
-      .catch(err => {
-        dispatch('setError', err)
+      .then(res => {
+        dispatch('setAlert', { message: 'Infractructure Secret deleted successfully', type: 'success' })
+        return res
       })
   },
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
+      .then(res => {
+        dispatch('setAlert', { message: 'Shoot created successfully', type: 'success' })
+        return res
+      })
   },
   deleteShoot ({ dispatch, commit }, {name, namespace}) {
     return dispatch('shoots/delete', {name, namespace})
+      .then(res => {
+        dispatch('setAlert', { message: 'Shoot marked for deletion successfully', type: 'success' })
+        return res
+      })
   },
   addMember ({ dispatch, commit }, name) {
     return dispatch('members/add', name)
-      .catch(err => {
-        if (get(err, 'response.status') === 409) {
-          err = new Error(`Serviceaccount '${last(split(name, ':'))}' already exists`)
-        }
-        dispatch('setError', err)
+      .then(res => {
+        dispatch('setAlert', { message: 'Member added successfully', type: 'success' })
+        return res
       })
   },
   deleteMember ({ dispatch, commit }, name) {
     return dispatch('members/delete', name)
+      .then(res => {
+        dispatch('setAlert', { message: 'Member deleted successfully', type: 'success' })
+        return res
+      })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -455,6 +483,14 @@ const actions = {
     }
     return state.shootsLoading
   },
+  setWebsocketConnectionError ({ commit }, { reason, reconnectAttempt }) {
+    commit('SET_WEBSOCKETCONNECTIONERROR', { reason, reconnectAttempt })
+    return state.websocketConnectionError
+  },
+  unsetWebsocketConnectionError ({ commit }) {
+    commit('SET_WEBSOCKETCONNECTIONERROR', null)
+    return state.websocketConnectionError
+  },
   setError ({ commit }, value) {
     commit('SET_ERROR', value)
     return state.error
@@ -496,6 +532,13 @@ const mutations = {
   },
   SET_SHOOTS_LOADING (state, value) {
     state.shootsLoading = value
+  },
+  SET_WEBSOCKETCONNECTIONERROR (state, value) {
+    if (value) {
+      state.websocketConnectionError = merge({}, state.websocketConnectionError, value)
+    } else {
+      state.websocketConnectionError = null
+    }
   },
   SET_ERROR (state, value) {
     state.error = value

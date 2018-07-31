@@ -47,6 +47,7 @@ class SocketAuthenticator {
   onAuthenticated () {
     this.authenticated = true
     console.log(`socket connection ${this.socket.id} authenticated`)
+    store.dispatch('unsetWebsocketConnectionError')
 
     forEach(this.handlers, handler => handler.onAuthenticated())
   }
@@ -63,6 +64,7 @@ class SocketAuthenticator {
   onDisconnect (reason) {
     console.error(`socket connection lost because`, reason)
     this.authenticated = false
+    store.dispatch('setWebsocketConnectionError', { reason })
 
     forEach(this.handlers, handler => handler.onDisconnect())
   }
@@ -365,6 +367,7 @@ forEach(socketAuthenticators, emitter => {
     console.log(`socket ${emitter.socket.id} reconnect attempt`)
   })
   emitter.socket.on('reconnecting', attempt => {
+    store.dispatch('setWebsocketConnectionError', { reconnectAttempt: attempt })
     console.log(`socket ${emitter.socket.id} reconnecting attempt number '${attempt}'`)
   })
   emitter.socket.on('reconnect_error', err => {

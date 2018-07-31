@@ -47,6 +47,7 @@
     "vue-lazyload": "^1.2.3",
     "vue-popperjs": "^1.2.6",
     "vue-router": "^3.0.1",
+    "vue-snotify": "^3.2.0",
     "vuelidate": "^0.6.2",
     "vuetify": "^1.0.16",
     "vuex": "^3.0.1"

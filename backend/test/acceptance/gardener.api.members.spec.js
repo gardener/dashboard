@@ -126,9 +126,7 @@ describe('gardener', function () {
           .send({metadata, name})
           .catch(err => err.response)
           .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body).to.eql(members)
+            expect(res).to.have.status(409)
           })
       })
 

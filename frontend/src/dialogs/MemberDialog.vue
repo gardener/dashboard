@@ -18,12 +18,14 @@ limitations under the License.
   <v-dialog v-model="visible" max-width="650">
     <v-card class="add_user_to_project">
       <v-card-title>
-        <v-icon x-large class="white--text">mdi-account-plus</v-icon><span>Assign user to Project</span>
+        <v-icon x-large class="white--text">mdi-account-plus</v-icon>
+        <span v-if="isUserDialog">Assign user to Project</span>
+        <span v-if="isServiceDialog">Add Service Account to Project</span>
       </v-card-title>
 
       <v-card-text>
-
           <v-text-field
+            v-if="isUserDialog"
             color="green"
             ref="email"
             label="Email"
@@ -34,7 +36,19 @@ limitations under the License.
             required
             tabindex="1"
           ></v-text-field>
-
+          <v-text-field
+            v-if="isServiceDialog"
+            color="green"
+            ref="serviceaccountName"
+            label="Service Account"
+            v-model="serviceaccountName"
+            :error-messages="serviceaccountNameErrors"
+            @input="$v.serviceaccountName.$touch()"
+            @blur="$v.serviceaccountName.$touch()"
+            required
+            tabindex="1"
+          ></v-text-field>
+          <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -47,31 +61,71 @@ limitations under the License.
 
 <script>
   import toLower from 'lodash/toLower'
-  import { mapActions } from 'vuex'
+  import { mapActions, mapState, mapGetters } from 'vuex'
   import { required, email } from 'vuelidate/lib/validators'
+  import { resourceName, unique } from '@/utils/validators'
+  import Alert from '@/components/Alert'
+  import { errorDetailsFromError, isConflict } from '@/utils/error'
+  import filter from 'lodash/filter'
+  import startsWith from 'lodash/startsWith'
+  import map from 'lodash/map'
+  import split from 'lodash/split'
+  import last from 'lodash/last'
+  import includes from 'lodash/includes'
 
-  const defaultEmail = 'john.doe@example.org'
+  const defaultEmail = ''
+  const defaultServiceName = 'robot'
 
   export default {
     name: 'member-dialog',
+    components: {
+      Alert
+    },
     props: {
       value: {
         type: Boolean,
+        required: true
+      },
+      type: {
+        type: String,
         required: true
       }
     },
     data () {
       return {
-        email: defaultEmail
+        email: defaultEmail,
+        serviceaccountName: undefined,
+        errorMessage: undefined,
+        detailedErrorMessage: undefined
       }
     },
-    validations: {
-      email: {
-        required,
-        email
+    validations () {
+      if (this.isUserDialog) {
+        return {
+          email: {
+            required,
+            email,
+            unique: unique('projectMembersNames')
+          }
+        }
+      } else if (this.isServiceDialog) {
+        return {
+          serviceaccountName: {
+            required,
+            resourceName,
+            unique: unique('serviceAccountNames')
+          }
+        }
       }
     },
     computed: {
+      ...mapState([
+        'namespace'
+      ]),
+      ...mapGetters([
+        'memberList',
+        'projectList'
+      ]),
       visible: {
         get () {
           return this.value
@@ -86,15 +140,56 @@ limitations under the License.
           return errors
         }
         if (!this.$v.email.required) {
-          errors.push('E-mail is required')
+          errors.push('E-mail address is required')
         }
         if (!this.$v.email.email) {
-          errors.push('Must be valid e-mail')
+          errors.push('Must be a valid e-mail address')
+        }
+        if (!this.$v.email.unique) {
+          errors.push(`User '${this.email}' is already member of this project.`)
+        }
+        return errors
+      },
+      serviceaccountNameErrors () {
+        const errors = []
+        if (!this.$v.serviceaccountName.$dirty) {
+          return errors
+        }
+        if (!this.$v.serviceaccountName.required) {
+          errors.push('Service Account is required')
+        }
+        if (!this.$v.serviceaccountName.resourceName) {
+          errors.push('Must contain only alphanumeric characters or hypen')
+        }
+        if (!this.$v.serviceaccountName.unique) {
+          errors.push(`Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`)
         }
         return errors
       },
       valid () {
         return !this.$v.$invalid
+      },
+      isUserDialog () {
+        return this.type === 'user'
+      },
+      isServiceDialog () {
+        return this.type === 'service'
+      },
+      textField () {
+        if (this.isUserDialog) {
+          return this.$refs.email
+        } else if (this.isServiceDialog) {
+          return this.$refs.serviceaccountName
+        }
+        return undefined
+      },
+      serviceAccountNames () {
+        const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
+        return map(filter(this.memberList, predicate), serviceaccountName => this.serviceaccountDisplayName(serviceaccountName))
+      },
+      projectMembersNames () {
+        const predicate = username => !startsWith(username, 'system:serviceaccount:')
+        return filter(this.memberList, predicate)
       }
     },
     methods: {
@@ -110,7 +205,21 @@ limitations under the License.
         if (this.valid) {
           this.save()
             .then(hide)
-            .catch(hide)
+            .catch(err => {
+              if (isConflict(err)) {
+                if (this.isUserDialog) {
+                  this.errorMessage = `User '${this.email}' is already member of this project.`
+                } else if (this.isServiceDialog) {
+                  this.errorMessage = `Serviceaccount '${this.serviceaccountDisplayName(this.serviceaccountName)}' already exists. Please try a different name.`
+                }
+              } else {
+                this.errorMessage = 'Failed to add project member'
+              }
+
+              const errorDetails = errorDetailsFromError(err)
+              console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+              this.detailedErrorMessage = errorDetails.detailedMessage
+            })
         }
       },
       cancel () {
@@ -119,22 +228,43 @@ limitations under the License.
       reset () {
         this.$v.$reset()
         this.email = defaultEmail
+        this.serviceaccountName = this.defaultServiceName()
+
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
 
         this.setFocusAndSelection()
       },
       setFocusAndSelection () {
-        const textField = this.$refs.email
-        if (textField) {
-          const input = textField.$refs.input
+        if (this.textField) {
+          const input = this.textField.$refs.input
           this.$nextTick(() => {
             input.focus()
-            input.setSelectionRange(0, 5)
           })
         }
       },
       save () {
-        const email = toLower(this.email)
-        return this.addMember(email)
+        if (this.isUserDialog) {
+          const email = toLower(this.email)
+          return this.addMember(email)
+        } else if (this.isServiceDialog) {
+          const namespace = this.namespace
+          const name = toLower(this.serviceaccountName)
+          return this.addMember(`system:serviceaccount:${namespace}:${name}`)
+        }
+      },
+      serviceaccountDisplayName (serviceaccountName) {
+        return last(split(serviceaccountName, ':'))
+      },
+      defaultServiceName () {
+        let name = defaultServiceName
+        let counter = 1
+        while (includes(this.serviceAccountNames, name)) {
+          name = `${defaultServiceName}-${counter}`
+          counter++
+        }
+
+        return name
       }
     },
     watch: {
@@ -145,9 +275,8 @@ limitations under the License.
       }
     },
     mounted () {
-      const textField = this.$refs.email
-      if (textField) {
-        const input = textField.$refs.input
+      if (this.textField) {
+        const input = this.textField.$refs.input
         input.style.textTransform = 'lowercase'
       }
     }
