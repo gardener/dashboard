@@ -41,6 +41,10 @@ function applySecretToConfig (config, secretsPath, objectPath) {
   }
 }
 
+function hexEncode (value) {
+  return Buffer.from(value, 'utf8').toString('hex')
+}
+
 module.exports = {
   getDefaults ({env} = process) {
     const isProd = env.NODE_ENV === 'production'
@@ -50,6 +54,16 @@ module.exports = {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
       port,
+      apiServerUrl: 'https://apiserver:8443',
+      gitHub: {
+        apiUrl: 'https://api.github.com',
+        org: 'gardener',
+        repository: 'journal-dev',
+        webhookSecret: hexEncode('webhookSecret'),
+        authentication: {
+          token: hexEncode('token')
+        }
+      },
       jwks: {
         cache: false,
         rateLimit: false,

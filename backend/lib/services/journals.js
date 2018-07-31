@@ -16,124 +16,135 @@
 
 'use strict'
 
-const github = require('../github')
 const _ = require('lodash')
-const { getJournalCache } = require('../cache')
 const logger = require('../logger')
+const github = require('../github')
+const { getJournalCache } = require('../cache')
 
 function fromLabel (item) {
-  const label = _.assign(
-    _.pick(item, [
-      'id',
-      'name',
-      'color'
-    ]))
-  return label
+  return _.pick(item, [
+    'id',
+    'name',
+    'color'
+  ])
 }
 
 function fromIssue (issue) {
-  const journal = { kind: 'issue' }
-  const title = _.get(issue, 'title', '')
-  const labels = _.map(_.get(issue, 'labels', []), fromLabel)
-
-  const [, namespace, name, journalTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\](.*)$/.exec(title) || []
-  journal.metadata = _.assign(
-    _.pick(issue, [
-      'id',
-      'created_at',
-      'updated_at',
-      'number',
-      'state'
-    ]), {
-      namespace,
-      name
-    })
-  journal.data = _.assign(
-    _.pick(issue, [
-      'user.login',
-      'user.avatar_url',
-      'html_url',
-      'body',
-      'comments'
-    ]), {
-      labels,
-      journalTitle
-    })
-
-  return journal
+  const labels = _.map(issue.labels, fromLabel)
+  const [, namespace, name, journalTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
+  return {
+    kind: 'issue',
+    metadata: _
+      .chain(issue)
+      .pick([
+        'id',
+        'created_at',
+        'updated_at',
+        'number',
+        'state'
+      ])
+      .assign({
+        namespace,
+        name
+      })
+      .value(),
+    data: _
+      .chain(issue)
+      .pick([
+        'user.login',
+        'user.avatar_url',
+        'html_url',
+        'body',
+        'comments'
+      ])
+      .assign({
+        labels,
+        journalTitle
+      })
+      .value()
+  }
 }
 exports.fromIssue = fromIssue
 
-function fromComment (issueNumber, name, namespace, item) {
-  const comment = { kind: 'comment' }
-  comment.metadata = _.assign(
-    _.pick(item, [
-      'id',
-      'created_at',
-      'updated_at'
-    ]), {
-      number: issueNumber,
-      name,
-      namespace
-    })
-  comment.data = _.pick(item, [
-    'user.login',
-    'user.avatar_url',
-    'body',
-    'html_url'
-  ])
-
-  return comment
+function fromComment (number, name, namespace, item) {
+  return {
+    kind: 'comment',
+    metadata: _
+      .chain(item)
+      .pick([
+        'id',
+        'created_at',
+        'updated_at'
+      ])
+      .assign({
+        number,
+        name,
+        namespace
+      })
+      .value(),
+    data: _.pick(item, [
+      'user.login',
+      'user.avatar_url',
+      'body',
+      'html_url'
+    ])
+  }
 }
 exports.fromComment = fromComment
 
-exports.list = async function ({name, namespace, batchFn = data => {}}) {
-  return github.searchIssues({
-    name,
-    namespace,
-    batchFn: (data) => {
-      const items = _.get(data, 'items', [])
-      const journals = _.map(items, fromIssue)
+function getOpenIssues ({name, namespace} = {}) {
+  let title
+  if (name && namespace) {
+    title = `[${namespace}/${name}]`
+  }
+  return github
+    .searchIssues({state: 'open', title})
+    .thru(githubIssues => _.map(githubIssues, fromIssue))
+}
+exports.getOpenIssues = getOpenIssues
 
-      getJournalCache().addOrUpdateIssues({issues: journals})
-      batchFn(items)
-    }})
+function loadOpenIssues (...args) {
+  return getOpenIssues(...args)
+    .reduce((cache, issues) => {
+      cache.addOrUpdateIssues({issues})
+      return cache
+    }, getJournalCache())
+    .then(() => undefined)
+}
+exports.loadOpenIssues = exports.list = loadOpenIssues
+
+function finalizeIssue (number) {
+  return Promise.resolve()
+    .then(() => github.createComment({number}, '_[Auto-closed due to Shoot deletion]_'))
+    .then(() => github.closeIssue({number}))
 }
 
-exports.deleteJournals = async function ({name, namespace}) {
-  const issueNumbers = getJournalCache().getIssueNumbersForNameAndNamespace({name, namespace})
-
-  if (!_.isEmpty(issueNumbers)) {
-    logger.debug('deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, issueNumbers)
-
-    const createCommentPayload = {
-      body: '_[Auto-closed due to Shoot deletion]_'
-    }
-    const createCommentPromises = _.map(issueNumbers, issueNumber => github.createComments({issueNumber, payload: createCommentPayload}))
-    const closeIssuePromises = _.map(issueNumbers, issueNumber => github.closeIssue({issueNumber}))
-
-    const promises = _.concat(createCommentPromises, closeIssuePromises)
-
-    return Promise.all(promises)
-  } else {
+function deleteJournals ({name, namespace}) {
+  const cache = getJournalCache()
+  const numbers = cache.getIssueNumbersForNameAndNamespace({name, namespace})
+  if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
+  logger.debug('deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, numbers)
+  return Promise.all(_.map(numbers, finalizeIssue))
 }
+exports.deleteJournals = deleteJournals
 
-const commentsForNameAndNamespace = async function ({name, namespace, batchFn = data => {}}) {
-  const issueNumbers = getJournalCache().getIssueNumbersForNameAndNamespace({name, namespace})
-  const readCommentsPromises = _.map(issueNumbers, issueNumber => commentsForIssueNumber({issueNumber, name, namespace, batchFn}))
-
-  return Promise.all(readCommentsPromises)
+function getIssueComments ({number}) {
+  const cache = getJournalCache()
+  const {metadata: {name, namespace}} = cache.getIssue(number)
+  return github
+    .getComments({number})
+    .thru(githubComments => _.map(githubComments, comment => fromComment(number, name, namespace, comment)))
 }
-exports.commentsForNameAndNamespace = commentsForNameAndNamespace
+exports.getIssueComments = getIssueComments
 
-const commentsForIssueNumber = async function ({issueNumber, name, namespace, batchFn = comments => {}}) {
-  return github.comments({
-    issueNumber,
-    batchFn: data => {
-      const commentsBatch = _.map(data, (item) => fromComment(issueNumber, name, namespace, item))
-      batchFn(commentsBatch)
-    }})
+function loadIssueComments ({number}) {
+  return getIssueComments({number})
+    .reduce((cache, comments) => {
+      _.forEach(comments, comment => cache.addOrUpdateComment({issueNumber: number, comment}))
+      return cache
+    }, getJournalCache())
+    .then(() => undefined)
 }
-exports.commentsForIssueNumber = commentsForIssueNumber
+exports.loadIssueComments = loadIssueComments

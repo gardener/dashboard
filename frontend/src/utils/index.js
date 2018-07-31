@@ -281,17 +281,17 @@ export function isUserError (errorCodes) {
   return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
 }
 
+export function isReconciliationDeactivated (metadata) {
+  // eslint-disable-next-line
+  return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+}
+
 export function isSelfTerminationWarning (expirationTimestamp) {
   return expirationTimestamp && new Date(expirationTimestamp) - new Date() < 24 * 60 * 60 * 1000 // 1 day
 }
 
 export function isValidTerminationDate (expirationTimestamp) {
   return expirationTimestamp && new Date(expirationTimestamp) > new Date()
-}
-
-export function isReconciliationDeactivated (metadata) {
-  // eslint-disable-next-line
-  return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
 }
 
 export function isShootMarkedForDeletion (metadata) {
