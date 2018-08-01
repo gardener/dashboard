@@ -281,7 +281,7 @@ limitations under the License.
       },
       showDashboardActionTitle () {
         return this.isDashboardDialogDisabled
-          ? 'Dashboard URL not avialable'
+          ? 'Dashboard not avialable'
           : 'Show Dashboard'
       },
       showKubeconfigActionTitle () {

@@ -225,7 +225,7 @@ limitations under the License.
                 if (this.isUserDialog) {
                   this.errorMessage = `User '${this.email}' is already member of this project.`
                 } else if (this.isServiceDialog) {
-                  this.errorMessage = `serviceAccount '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
+                  this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
                 }
               } else {
                 this.errorMessage = 'Failed to add project member'

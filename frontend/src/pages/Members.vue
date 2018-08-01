@@ -103,7 +103,7 @@ limitations under the License.
                 <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
-                <span>Delete</span>
+                <span>Delete Member</span>
               </v-tooltip>
             </v-list-tile-action>
           </v-list-tile>
@@ -126,7 +126,7 @@ limitations under the License.
           solo
           clearable
           v-model="serviceFilter"
-          @keyup.esc="serrviceFilter=''"
+          @keyup.esc="serviceFilter=''"
         ></v-text-field>
         <v-btn icon @click.native.stop="openAddserviceAccountDialog">
           <v-icon class="white--text">add</v-icon>
@@ -187,7 +187,7 @@ limitations under the License.
                 <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
-                <span>Delete</span>
+                <span>Delete Service Account</span>
               </v-tooltip>
             </v-list-tile-action>
           </v-list-tile>
