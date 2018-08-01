@@ -50,9 +50,16 @@ limitations under the License.
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
       <purpose-tag :purpose="row.purpose"></purpose-tag>
     </td>
-    <td class="text-xs-left" v-if="this.headerVisible['lastOperation']">
+    <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
-        <shoot-status :operation="row.lastOperation" :lastError="row.lastError" :popperKey="`${row.namespace}/${row.name}`" :isHibernated="row.isHibernated" :reconciliationDeactivated="reconciliationDeactivated"></shoot-status>
+        <shoot-status
+         :operation="row.lastOperation"
+         :lastError="row.lastError"
+         :popperKey="`${row.namespace}/${row.name}`"
+         :isHibernated="row.isHibernated"
+         :reconciliationDeactivated="reconciliationDeactivated"
+         :shootDeleted="isShootMarkedForDeletion">
+        </shoot-status>
         <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
@@ -86,19 +93,19 @@ limitations under the License.
           <v-btn small icon class="green--text text--darken-2" slot="activator" :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard')">
             <v-icon>dashboard</v-icon>
           </v-btn>
-          <span>Open Dashboard</span>
+          <span>{{showDashboardActionTitle}}</span>
         </v-tooltip>
         <v-tooltip top>
           <v-btn small icon class="blue--text text--darken-2" slot="activator" :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig')">
             <v-icon>settings</v-icon>
           </v-btn>
-          <span>Show Kubeconfig</span>
+          <span>{{showKubeconfigActionTitle}}</span>
         </v-tooltip>
         <v-tooltip top>
-          <v-btn small icon class="red--text text--darken-2" slot="activator" :disabled="isDeleteDialogDisabled" @click="showDialog('delete')">
+          <v-btn small icon class="red--text text--darken-2" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
             <v-icon>delete</v-icon>
           </v-btn>
-          <span>Delete Cluster</span>
+          <span>{{deleteClusterActionTitle}}</span>
         </v-tooltip>
       </div>
       <div class="hidden-lg-and-up">
@@ -111,19 +118,19 @@ limitations under the License.
               <v-list-tile-action>
                 <v-icon class="green--text">dashboard</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>Open Dashboard</v-list-tile-title>
+              <v-list-tile-title>{{showDashboardActionTitle}}</v-list-tile-title>
             </v-list-tile>
             <v-list-tile :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig', isKubeconfigDialogDisabled)">
               <v-list-tile-action>
                 <v-icon class="blue--text">settings</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>Show Kubeconfig</v-list-tile-title>
+              <v-list-tile-title>{{showKubeconfigActionTitle}}</v-list-tile-title>
             </v-list-tile>
-            <v-list-tile :disabled="isDeleteDialogDisabled" @click="showDialog('delete', isDeleteDialogDisabled)">
+            <v-list-tile :disabled="isShootMarkedForDeletion" @click="showDialog('delete', isShootMarkedForDeletion)">
               <v-list-tile-action>
                 <v-icon class="red--text">delete</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>Delete Cluster</v-list-tile-title>
+              <v-list-tile-title>{{deleteClusterActionTitle}}</v-list-tile-title>
             </v-list-tile>
           </v-list>
         </v-menu>
@@ -152,7 +159,8 @@ limitations under the License.
     availableK8sUpdatesForShoot,
     getCreatedBy,
     isHibernated,
-    isReconciliationDeactivated } from '@/utils'
+    isReconciliationDeactivated,
+    isShootMarkedForDeletion } from '@/utils'
 
   export default {
     components: {
@@ -247,10 +255,9 @@ limitations under the License.
         }
         return false
       },
-      isDeleteDialogDisabled () {
-        // eslint-disable-next-line
-        const confirmation = get(this.row, ['annotations', 'confirmation.garden.sapcloud.io/deletionTimestamp'])
-        return !!this.row.deletionTimestamp && this.row.deletionTimestamp === confirmation
+      isShootMarkedForDeletion () {
+        const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
+        return isShootMarkedForDeletion(metadata)
       },
       isDashboardDialogDisabled () {
         const itemInfo = this.row.info || {}
@@ -271,6 +278,21 @@ limitations under the License.
 
         // disabled if info is NOT available
         return !this.isInfoAvailable
+      },
+      showDashboardActionTitle () {
+        return this.isDashboardDialogDisabled
+          ? 'Dashboard not avialable'
+          : 'Show Dashboard'
+      },
+      showKubeconfigActionTitle () {
+        return this.isKubeconfigDialogDisabled
+          ? 'Kubeconfig not available'
+          : 'Show Kubeconfig'
+      },
+      deleteClusterActionTitle () {
+        return this.isShootMarkedForDeletion
+          ? 'Cluster already marked for deletion'
+          : 'Delete Cluster'
       }
     },
     methods: {

@@ -57,6 +57,7 @@ limitations under the License.
   import Alert from '@/components/Alert'
 
   export default {
+    name: 'confirm-dialog',
     components: {
       Alert
     },

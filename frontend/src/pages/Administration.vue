@@ -22,11 +22,12 @@ limitations under the License.
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-tooltip top :disabled="!isDeleteButtonDisabled">
+        <v-tooltip top>
           <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
             <v-icon>delete</v-icon>
           </v-btn>
-          <span>You can only delete projects that do not contain clusters</span>
+          <span v-if="isDeleteButtonDisabled">You can only delete projects that do not contain clusters</span>
+          <span v-else>Delete Project</span>
         </v-tooltip>
       </v-toolbar>
 

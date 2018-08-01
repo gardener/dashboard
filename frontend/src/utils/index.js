@@ -34,11 +34,19 @@ import moment from 'moment'
 import semver from 'semver'
 import some from 'lodash/some'
 import store from '../store'
+import split from 'lodash/split'
+import last from 'lodash/last'
 
 export function emailToDisplayName (email) {
   if (email) {
     const [, givenName, familyName] = /^([^.]+)(?:\.([^@]+))?@.*$/.exec(email) || []
     return familyName ? `${capitalize(familyName)}, ${capitalize(givenName)}` : capitalize(givenName)
+  }
+}
+
+export function serviceAccountToDisplayName (serviceAccount) {
+  if (serviceAccount) {
+    return last(split(serviceAccount, ':'))
   }
 }
 
@@ -284,4 +292,15 @@ export function isSelfTerminationWarning (expirationTimestamp) {
 
 export function isValidTerminationDate (expirationTimestamp) {
   return expirationTimestamp && new Date(expirationTimestamp) > new Date()
+}
+
+export function isShootMarkedForDeletion (metadata) {
+  // eslint-disable-next-line
+  const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'],
+    /* TODO kept the following lines for backwards compatibility (delete them once the DeletionConfirmation admission controller becomes enabled by default and the gardener logic has been adapted properly) */
+    // eslint-disable-next-line
+    get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletionTimestamp']))
+  const deletionTimestamp = get(metadata, 'deletionTimestamp')
+
+  return !!deletionTimestamp && deletionTimestamp === confirmation
 }
