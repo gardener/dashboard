@@ -231,7 +231,7 @@ limitations under the License.
 
             <v-card>
               <v-card-title class="subheading white--text cyan darken-2 mt-3">
-                Kube-Cluster Access
+                Access
               </v-card-title>
               <cluster-access ref="clusterAccess" :info="info"></cluster-access>
               <template v-if="!!info.kubeconfig">
@@ -405,22 +405,8 @@ limitations under the License.
           }
         }
       },
-      userinfo () {
-        if (this.info.username && this.info.password) {
-          const username = encodeURIComponent(this.info.username)
-          const password = encodeURIComponent(this.info.password)
-          return `${username}:${password}`
-        }
-        return ''
-      },
       monocularUrl () {
-        let url = 'https://'
-        const userinfo = this.userinfo
-        if (userinfo) {
-          url += `${userinfo}@`
-        }
-        url += `monocular.ingress.${this.domain}`
-        return url
+        return `https://monocular.ingress.${this.domain}`
       },
       rawItem () {
         const item = omit(this.item, ['info'])

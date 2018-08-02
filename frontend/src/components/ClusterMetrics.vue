@@ -16,13 +16,29 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-show="!!dashboardUrl">
+    <v-list-tile>
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
       </v-list-tile-action>
       <v-list-tile-content>
-        <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a></v-list-tile-title>
+        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
+        <v-list-tile-title><a :href="grafanaUrl" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlText}}</a></v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
+    <v-list-tile>
+      <v-list-tile-action>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
+        <v-list-tile-title><a :href="prometheusUrl" target="_blank" class="cyan--text text--darken-2">{{prometheusUrl}}</a></v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
+    <v-list-tile>
+      <v-list-tile-action>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
+        <v-list-tile-title><a :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
     <username-password :username="username" :password="password"></username-password>
@@ -43,17 +59,23 @@ limitations under the License.
       }
     },
     computed: {
-      dashboardUrl () {
-        return this.info.dashboardUrl || ''
+      grafanaUrl () {
+        return this.info.grafanaUrl || ''
       },
-      dashboardUrlText () {
-        return this.info.dashboardUrlText || ''
+      grafanaUrlText () {
+        return this.info.grafanaUrlText || ''
+      },
+      prometheusUrl () {
+        return this.info.prometheusUrl || ''
+      },
+      alertmanagerUrl () {
+        return this.info.alertmanagerUrl || ''
       },
       username () {
-        return this.info.cluster_username || ''
+        return this.info.monitoring_username || ''
       },
       password () {
-        return this.info.cluster_password || ''
+        return this.info.monitoring_password || ''
       }
     }
   }
