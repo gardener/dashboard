@@ -48,6 +48,10 @@ limitations under the License.
           <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
         </div>
       </v-card-title>
+      <template v-if="isAdmin && seedShootIngressDomain">
+        <v-divider class="my-2" inset></v-divider>
+        <cluster-metrics :info="info"></cluster-metrics>
+      </template>
     </div>
   </v-card>
 </template>
@@ -58,16 +62,19 @@ limitations under the License.
   import ShootStatus from '@/components/ShootStatus'
   import StatusTags from '@/components/StatusTags'
   import RetryOperation from '@/components/RetryOperation'
+  import ClusterMetrics from '@/components/ClusterMetrics'
   import get from 'lodash/get'
   import { isHibernated,
            isReconciliationDeactivated,
            isShootMarkedForDeletion } from '@/utils'
+  import { mapGetters } from 'vuex'
 
   export default {
     components: {
       ShootStatus,
       StatusTags,
-      RetryOperation
+      RetryOperation,
+      ClusterMetrics
     },
     props: {
       shootItem: {
@@ -80,6 +87,9 @@ limitations under the License.
       }
     },
     computed: {
+      ...mapGetters([
+        'isAdmin'
+      ]),
       lastOperation () {
         return get(this.shootItem, 'status.lastOperation', {})
       },
@@ -116,6 +126,12 @@ limitations under the License.
       },
       isShootMarkedForDeletion () {
         return isShootMarkedForDeletion(this.metadata)
+      },
+      info () {
+        return get(this.shootItem, 'info', {})
+      },
+      seedShootIngressDomain () {
+        return this.info.seedShootIngressDomain || ''
       }
     },
     methods: {

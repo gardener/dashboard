@@ -19,6 +19,7 @@
 const kubernetes = require('../kubernetes')
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
+const administrators = require('./administrators')
 const _ = require('lodash')
 
 function Garden ({auth}) {
@@ -119,6 +120,7 @@ exports.info = async function ({user, namespace, name}) {
       }
       throw err
     })
+
   const [
     shoot,
     secret
@@ -140,10 +142,58 @@ exports.info = async function ({user, namespace, name}) {
       .get('data')
       .pick('kubeconfig', 'username', 'password')
       .forEach((value, key) => {
-        data[key] = decodeBase64(value)
+        if (key === 'password') {
+          data['cluster_password'] = decodeBase64(value)
+        } else if (key === 'username') {
+          data['cluster_username'] = decodeBase64(value)
+        } else {
+          data[key] = decodeBase64(value)
+        }
       })
       .commit()
     data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
   }
+
+  const isAdmin = await administrators.isAdmin(user)
+  if (isAdmin) {
+    const seedSecretName = _.get(seed, 'spec.secretRef.name')
+    const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
+    const seedSecret = await core.ns(seedSecretNamespace).secrets.get({name: seedSecretName})
+      .catch(err => {
+        if (err.code === 404) {
+          return
+        }
+        throw err
+      })
+
+    if (seedSecret) {
+      const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
+
+      const seedShootNS = _.get(shoot, 'status.technicalID')
+      const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({name: 'monitoring-ingress-credentials'})
+        .catch(err => {
+          if (err.code === 404) {
+            return
+          }
+          throw err
+        })
+
+      if (monitoringSecret) {
+        _
+          .chain(monitoringSecret)
+          .get('data')
+          .pick('username', 'password')
+          .forEach((value, key) => {
+            if (key === 'password') {
+              data['monitoring_password'] = decodeBase64(value)
+            } else if (key === 'username') {
+              data['monitoring_username'] = decodeBase64(value)
+            }
+          })
+          .commit()
+      }
+    }
+  }
+
   return data
 }

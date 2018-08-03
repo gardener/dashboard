@@ -405,11 +405,20 @@ const stub = {
     shootServerUrl,
     shootUser,
     shootPassword,
+    monitoringUser,
+    monitoringPassword,
     seedClusterName,
     seedSecretName,
     seedName
   }) {
-    const result = {
+    const seedServerURL = 'https://seed.foo.bar:8443'
+    const technicalID = `shoot--${project}--${name}`
+
+    const shootResult = getShoot({name, project, kind, region, seed: seedName})
+    shootResult.status = {
+      technicalID: `shoot--${project}--${name}`
+    }
+    const kubecfgResult = {
       data: {
         kubeconfig: encodeBase64(getKubeconfig({
           server: shootServerUrl,
@@ -419,12 +428,38 @@ const stub = {
         password: encodeBase64(shootPassword)
       }
     }
+    const isAdminResult = {
+      status: {
+        allowed: true
+      }
+    }
+    const seedSecretResult = {
+      data: {
+        kubeconfig: encodeBase64(getKubeconfig({
+          server: seedServerURL,
+          name: 'seed.foo.bar'
+        }))
+      }
+    }
+    const monitoringSecretResult = {
+      data: {
+        username: encodeBase64(monitoringUser),
+        password: encodeBase64(monitoringPassword)
+      }
+    }
 
-    return nockWithAuthorization(bearer)
+    return [nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
-      .reply(200, getShoot({name, project, kind, region, seed: seedName}))
+      .reply(200, () => shootResult)
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
-      .reply(200, () => result)
+      .reply(200, () => kubecfgResult)
+      .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`)
+      .reply(200, () => isAdminResult)
+      .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)
+      .reply(200, () => seedSecretResult),
+    nock(seedServerURL)
+      .get(`/api/v1/namespaces/${technicalID}/secrets/monitoring-ingress-credentials`)
+      .reply(200, monitoringSecretResult)]
   },
   replaceShootK8sSpec ({bearer, namespace, name, project, createdBy}) {
     const shoot = getShoot({name, project, createdBy})
