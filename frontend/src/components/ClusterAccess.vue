@@ -55,6 +55,11 @@ limitations under the License.
       password () {
         return this.info.cluster_password || ''
       }
+    },
+    methods: {
+      reset () {
+        this.$refs.usernamePassword.reset()
+      }
     }
   }
 </script>

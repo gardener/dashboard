@@ -77,6 +77,11 @@ limitations under the License.
       password () {
         return this.info.monitoring_password || ''
       }
+    },
+    methods: {
+      reset () {
+        this.$refs.usernamePassword.reset()
+      }
     }
   }
 </script>

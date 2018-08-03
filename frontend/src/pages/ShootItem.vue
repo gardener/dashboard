@@ -552,6 +552,7 @@ limitations under the License.
     },
     beforeRouteUpdate (to, from, next) {
       this.$refs.clusterAccess.reset()
+      this.$refs.clusterMetrics.reset()
       next()
     }
 }
