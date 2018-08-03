@@ -299,5 +299,5 @@ export function isShootMarkedForDeletion (metadata) {
   const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'], false)
   const deletionTimestamp = get(metadata, 'deletionTimestamp')
 
-  return !!deletionTimestamp && confirmation
+  return !!deletionTimestamp && !!confirmation
 }
