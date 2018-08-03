@@ -296,11 +296,8 @@ export function isValidTerminationDate (expirationTimestamp) {
 
 export function isShootMarkedForDeletion (metadata) {
   // eslint-disable-next-line
-  const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'],
-    /* TODO kept the following lines for backwards compatibility (delete them once the DeletionConfirmation admission controller becomes enabled by default and the gardener logic has been adapted properly) */
-    // eslint-disable-next-line
-    get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletionTimestamp']))
+  const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'], false)
   const deletionTimestamp = get(metadata, 'deletionTimestamp')
 
-  return !!deletionTimestamp && deletionTimestamp === confirmation
+  return !!deletionTimestamp && confirmation
 }
