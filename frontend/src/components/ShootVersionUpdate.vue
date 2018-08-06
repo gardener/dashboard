@@ -57,6 +57,9 @@ limitations under the License.
       },
       confirmRequired: {
         type: Boolean
+      },
+      currentk8sVersion: {
+        type: String
       }
     },
     data () {
@@ -123,14 +126,15 @@ limitations under the License.
         return isPatch
       },
       selectedMinorVersionIsNotNextMinor () {
-        const invalid = get(this.selectedItem, 'type') === 'minor' &&
-          find(this.items, item => {
-            return item.type === 'minor' &&
-            item.version !== undefined &&
-            (semver.lt(item.version, this.selectedItem.version))
-          })
-        this.$emit('update:selectedVersionInvalid', !!invalid)
-        return !!invalid
+        const selectedVersion = get(this, 'selectedItem.version')
+        let invalid = false
+        if (selectedVersion && this.selectedItem.type === 'minor') {
+          const currentMinorVersion = semver.minor(this.currentk8sVersion)
+          const selectedItemMinorVersion = semver.minor(selectedVersion)
+          invalid = selectedItemMinorVersion - currentMinorVersion !== 1
+        }
+        this.$emit('update:selectedVersionInvalid', invalid)
+        return invalid
       },
       label () {
         if (this.selectedVersionIsPatch) {
