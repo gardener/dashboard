@@ -16,43 +16,53 @@
 
 'use strict'
 
-const _ = require('lodash')
-const axios = require('axios')
-const https = require('https')
-const config = require('../config')
+const { Client } = require('kubernetes-client')
 const kubernetes = require('../kubernetes')
 const { format: fmt } = require('util')
 
-function Core ({auth}) {
-  return kubernetes.core({auth})
+const spec = {
+  swagger: '2.0',
+  paths: {
+    '/healthz': {
+      get: {
+        description: 'healthz check',
+        schemes: [
+          'https'
+        ],
+        operationId: 'healthzCheck',
+        responses: {
+          '200': {
+            description: 'OK',
+            content: {
+              'text/plain': {
+                schema: {
+                  type: 'string'
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          }
+        }
+      }
+    }
+  }
 }
 
 exports.check = async function ({user}) {
-  const core = Core(user)
-  const ns = core.namespaces('garden')
-  const api = ns.serviceaccounts.api
-  const server = _.get(config, 'apiServerUrl', api.url)
-  const ca = _.get(config, 'jwks.ca')
-  const url = server + '/healthz'
-  const reqConfig = {
-    headers: {
-      'Authorization': 'bearer ' + user.auth.bearer
-    }
-  }
-  const instance = axios.create({
-    httpsAgent: new https.Agent({
-      ca
-    })
-  })
-
   let response
   try {
-    response = await instance.get(url, reqConfig)
-    console.log(response)
+    const client = new Client({
+      config: kubernetes.config(),
+      spec
+    })
+    response = await client.healthz.get()
   } catch (error) {
     throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', error))
   }
-  if (response.status === 200) {
+
+  if (response.statusCode === 200) {
     return 'ok'
   } else {
     throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.data, response.status))
