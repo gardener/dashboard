@@ -65,6 +65,6 @@ exports.check = async function ({user}) {
   if (response.statusCode === 200) {
     return 'ok'
   } else {
-    throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.data, response.status))
+    throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.body, response.statusCode))
   }
 }
