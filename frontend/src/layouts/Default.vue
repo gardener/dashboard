@@ -77,10 +77,12 @@ limitations under the License.
         }
       },
       websocketConnectAttempt (value) {
-        if (value > 0 && this.websocketConnectionNotification) {
-          this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
-        } else {
-          this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
+        if (this.websocketConnectionNotification) {
+          if (value > 0) {
+            this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
+          } else {
+            this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
+          }
         }
       }
     },
