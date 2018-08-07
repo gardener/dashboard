@@ -54,7 +54,7 @@ exports.check = async function ({user}) {
   let response
   try {
     const client = new Client({
-      config: kubernetes.config(),
+      config: kubernetes.credentials(user),
       spec
     })
     response = await client.healthz.get()
