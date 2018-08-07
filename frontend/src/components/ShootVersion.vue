@@ -47,6 +47,7 @@ limitations under the License.
           :selectedVersion.sync="selectedVersion"
           :selectedVersionInvalid.sync="selectedVersionInvalid"
           :confirmRequired.sync="confirmRequired"
+          :currentk8sVersion="k8sVersion"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && confirmRequired">
           You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
