@@ -36,15 +36,13 @@ limitations under the License.
 
       <v-card-text>
         <v-container fluid>
-
           <div slot="message">
-            Are you sure to delete the secret <b>{{name}}</b>? <span class="red--text">The operation
+            Are you sure to delete the secret <b>{{name}}</b>? <br /><span class="red--text text--darken-2">The operation
             can not be undone.</span>
           </div>
-
         </v-container>
+        <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
       </v-card-text>
-
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native="hide">Cancel</v-btn>
@@ -58,8 +56,14 @@ limitations under the License.
 <script>
   import { mapActions } from 'vuex'
   import get from 'lodash/get'
+  import Alert from '@/components/Alert'
+  import { errorDetailsFromError } from '@/utils/error'
 
   export default {
+    name: 'secret-dialog-delete',
+    components: {
+      Alert
+    },
     props: {
       value: {
         type: Boolean,
@@ -76,6 +80,8 @@ limitations under the License.
     },
     data () {
       return {
+        errorMessage: undefined,
+        detailedErrorMessage: undefined
       }
     },
     computed: {
@@ -92,8 +98,8 @@ limitations under the License.
       }
     },
     methods: {
-      ...mapActions('infrastructureSecrets', {
-        deleteSecret: 'delete'
+      ...mapActions({
+        deleteSecret: 'deleteInfrastructureSecret'
       }),
       hide () {
         this.visible = false
@@ -103,7 +109,24 @@ limitations under the License.
         this
           .deleteSecret(bindingName)
           .then(() => this.hide())
-          .catch(err => console.error(err))
+          .catch(err => {
+            this.errorMessage = 'Failed to delete Infrastructure Secret.'
+
+            const errorDetails = errorDetailsFromError(err)
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
+          })
+      },
+      reset () {
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
+      }
+    },
+    watch: {
+      value: function (value) {
+        if (value) {
+          this.reset()
+        }
       }
     }
   }

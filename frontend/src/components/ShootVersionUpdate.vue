@@ -15,30 +15,25 @@ limitations under the License.
 -->
 
 <template>
-    <v-container fluid>
-      <v-layout row wrap>
-        <v-flex xs12>
-          <v-select
-            :items="items"
-            item-text="version"
-            v-model="selectedItem"
-            :label="label"
-          >
-          <template slot="item" slot-scope="data">
-             <v-list-tile-content>
-               <v-list-tile-title>{{data.item.version}}</v-list-tile-title>
-             </v-list-tile-content>
-           </template>
-          </v-select>
-          <v-alert type="error" :value="selectedMinorVersionIsNotNextMinor" outline>
-             You cannot upgrade your cluster more than one minor version at a time.
-          </v-alert>
-          <v-alert type="warning" :value="!selectedMinorVersionIsNotNextMinor && !selectedVersionIsPatch" outline>
-            You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
-          </v-alert>
-        </v-flex>
-      </v-layout>
-    </v-container>
+  <v-select
+    :items="items"
+    item-text="version"
+    v-model="selectedItem"
+    :label="label"
+    color="cyan darken-2"
+    :hint="hint"
+    :error="selectedMinorVersionIsNotNextMinor"
+  >
+  <template slot="item" slot-scope="data">
+    <v-tooltip top :disabled="!data.item.notNextMinor">
+      <v-list-tile-content slot="activator">
+        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.version}}</v-list-tile-title>
+        <v-list-tile-title v-else class="text--disabled">{{data.item.version}}</v-list-tile-title>
+      </v-list-tile-content>
+      <span>You cannot upgrade your cluster more than one minor version at a time</span>
+    </v-tooltip>
+  </template>
+  </v-select>
 </template>
 
 
@@ -66,6 +61,9 @@ limitations under the License.
       },
       confirmRequired: {
         type: Boolean
+      },
+      currentk8sVersion: {
+        type: String
       }
     },
     data () {
@@ -76,10 +74,11 @@ limitations under the License.
     },
     computed: {
       items () {
-        const selectionItemsForType = function (versions, type) {
+        const selectionItemsForType = (versions, type) => {
           return map(versions, version => {
             return {type,
-              version
+              version,
+              notNextMinor: this.itemIsNotNextMinor(version, type)
             }
           })
         }
@@ -132,20 +131,31 @@ limitations under the License.
         return isPatch
       },
       selectedMinorVersionIsNotNextMinor () {
-        const invalid = get(this.selectedItem, 'type') === 'minor' &&
-          find(this.items, item => {
-            return item.type === 'minor' &&
-            item.version !== undefined &&
-            (semver.lt(item.version, this.selectedItem.version))
-          })
-        this.$emit('update:selectedVersionInvalid', !!invalid)
-        return !!invalid
+        const version = get(this, 'selectedItem.version')
+        const type = get(this, 'selectedItem.type')
+        let invalid = this.itemIsNotNextMinor(version, type)
+        this.$emit('update:selectedVersionInvalid', invalid)
+        return invalid
       },
       label () {
         if (this.selectedVersionIsPatch) {
           return 'Patch to Version'
         }
         return 'Upgrade to Version'
+      },
+      hint () {
+        return this.selectedMinorVersionIsNotNextMinor ? 'You cannot upgrade your cluster more than one minor version at a time' : ''
+      }
+    },
+    methods: {
+      itemIsNotNextMinor (version, type) {
+        let invalid = false
+        if (version && type === 'minor') {
+          const currentMinorVersion = semver.minor(this.currentk8sVersion)
+          const selectedItemMinorVersion = semver.minor(version)
+          invalid = selectedItemMinorVersion - currentMinorVersion !== 1
+        }
+        return invalid
       }
     },
     watch: {

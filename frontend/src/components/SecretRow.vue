@@ -27,16 +27,25 @@ limitations under the License.
       </v-list-tile-sub-title>
     </v-list-tile-content>
 
-    <v-list-tile-action v-if="relatedShootCount===0 && isOwnSecretBinding">
-      <v-btn icon @click.native.stop="onDelete">
-        <v-icon class="red--text">delete</v-icon>
-      </v-btn>
+    <v-list-tile-action>
+      <v-tooltip top>
+        <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete" slot="activator">
+          <v-icon class="red--text text--darken-2">delete</v-icon>
+        </v-btn>
+        <span v-if="!isOwnSecretBinding">You can only delete secrets that are owned by you</span>
+        <span v-else-if="relatedShootCount > 0">You can only delete secrets that are currently unused</span>
+        <span v-else>Delete Secret</span>
+      </v-tooltip>
     </v-list-tile-action>
 
-    <v-list-tile-action v-if="isOwnSecretBinding">
-      <v-btn icon @click.native.stop="onUpdate">
-        <v-icon class="blue--text">edit</v-icon>
-      </v-btn>
+    <v-list-tile-action>
+      <v-tooltip top>
+        <v-btn :disabled="!isOwnSecretBinding" icon @click.native.stop="onUpdate" slot="activator">
+          <v-icon class="cyan--text text--darken-2">edit</v-icon>
+        </v-btn>
+        <span v-if="!isOwnSecretBinding">You can only edit secrets that are owned by you</span>
+        <span v-else>Edit Secret</span>
+      </v-tooltip>
     </v-list-tile-action>
   </v-list-tile>
 </template>
@@ -65,7 +74,7 @@ limitations under the License.
         if (this.isOwnSecretBinding) {
           return get(this.secret, `data.${this.secretDescriptorKey}`)
         } else {
-          return get(this.secret, 'metadata.namespace')
+          return `Owner: ${get(this.secret, 'metadata.namespace')}`
         }
       },
       relatedShootCount () {
@@ -88,6 +97,9 @@ limitations under the License.
       },
       isOwnSecretBinding () {
         return isOwnSecretBinding(this.secret)
+      },
+      isDeleteButtonDisabled () {
+        return this.relatedShootCount > 0 || !this.isOwnSecretBinding
       }
     },
     methods: {

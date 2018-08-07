@@ -33,7 +33,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="blue"
+            color="orange"
             ref="domainName"
             v-model="domainName"
             label="Domain Name"
@@ -47,7 +47,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="blue"
+            color="orange"
             ref="tenantName"
             v-model="tenantName"
             label="Tenant Name"
@@ -61,7 +61,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="blue"
+            color="orange"
             v-model="keystoneUrl"
             label="Keystone URL"
             disabled
@@ -72,7 +72,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-          color="blue"
+          color="orange"
           v-model="username"
           :label="usernameLabel"
           :error-messages="getErrorMessages('username')"
@@ -85,7 +85,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="blue"
+            color="orange"
             v-model="password"
             :label="passwordLabel"
             :error-messages="getErrorMessages('password')"

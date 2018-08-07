@@ -14,256 +14,271 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-  <div>
-    <self-termination-warning :expirationTimestamp="expirationTimestamp" type="alert"></self-termination-warning>
+  <v-tabs fixed :scrollable="false" v-model="tab">
 
-    <v-tabs fixed :scrollable="false" v-model="tab">
+    <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
 
-      <v-tabs-slider color="cyan darken-2"></v-tabs-slider>
+    <v-tab href="#formatted" ripple>
+      Overview
+    </v-tab>
 
-      <v-tab href="#formatted" ripple>
-        Overview
-      </v-tab>
+    <v-tab href="#yaml" ripple>
+      YAML
+    </v-tab>
 
-      <v-tab href="#yaml" ripple>
-        YAML
-      </v-tab>
+    <v-tab-item id="formatted" class="pt-2">
+      <v-container fluid grid-list-lg>
+        <v-layout d-flex wrap row>
+          <v-flex md6>
 
-      <v-tab-item id="formatted" class="pt-2">
-        <v-container fluid grid-list-lg>
-          <v-layout d-flex wrap row>
-            <v-flex md6>
+            <v-card class="cyan darken-2">
+              <v-card-title class="subheading white--text">
+                Details
+              </v-card-title>
+              <v-list>
 
-              <v-card class="cyan darken-2">
-                <v-card-title class="subheading white--text">
-                  Details
-                </v-card-title>
-                <v-list>
+                <v-list-tile>
+                  <v-list-tile-action>
+                    <v-icon class="cyan--text text--darken-2">info_outline</v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>Name</v-list-tile-sub-title>
+                    <v-list-tile-title>
+                      {{metadata.name}}
+                      <self-termination-warning :expirationTimestamp="expirationTimestamp"></self-termination-warning>
+                    </v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
 
-                  <v-list-tile>
-                    <v-list-tile-action>
-                      <v-icon class="cyan--text text--darken-2">info_outline</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-sub-title>Name</v-list-tile-sub-title>
-                      <v-list-tile-title>{{metadata.name}}</v-list-tile-title>
-                    </v-list-tile-content>
-                  </v-list-tile>
+                <v-list-tile>
+                  <v-list-tile-action>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
+                  </v-list-tile-content>
+                  <v-list-tile-avatar>
+                    <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+                  </v-list-tile-avatar>
+                </v-list-tile>
 
-                  <v-list-tile>
-                    <v-list-tile-action>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
-                    </v-list-tile-content>
-                    <v-list-tile-avatar>
-                      <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
-                    </v-list-tile-avatar>
-                  </v-list-tile>
+                <v-divider class="my-2" inset></v-divider>
+                <v-list-tile>
+                  <v-list-tile-action>
+                    <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
+                    <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
 
+                <v-list-tile>
+                  <v-list-tile-action>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-tooltip top>
+                      <template slot="activator">
+                        <v-list-tile-sub-title>Created at</v-list-tile-sub-title>
+                        <v-list-tile-title>{{created}}</v-list-tile-title>
+                      </template>
+                      <time-string :dateTime="metadata.creationTimestamp"></time-string>
+                    </v-tooltip>
+                  </v-list-tile-content>
+                </v-list-tile>
+
+                <template v-if="!!purpose">
                   <v-divider class="my-2" inset></v-divider>
                   <v-list-tile>
                     <v-list-tile-action>
-                      <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
+                      <v-icon class="cyan--text text--darken-2">label_outline</v-icon>
                     </v-list-tile-action>
                     <v-list-tile-content>
-                      <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                      <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
+                      <v-list-tile-sub-title>Purpose</v-list-tile-sub-title>
+                      <v-list-tile-title>{{purpose}}</v-list-tile-title>
                     </v-list-tile-content>
                   </v-list-tile>
+                </template>
 
-                  <v-list-tile>
-                    <v-list-tile-action>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-tooltip top>
-                        <template slot="activator">
-                          <v-list-tile-sub-title>Created at</v-list-tile-sub-title>
-                          <v-list-tile-title>{{created}}</v-list-tile-title>
-                        </template>
-                        <time-string :dateTime="metadata.creationTimestamp"></time-string>
+              </v-list>
+            </v-card>
+
+            <v-card class="cyan darken-2 mt-3">
+              <v-card-title class="subheading white--text">
+                Infrastructure
+              </v-card-title>
+              <v-list>
+
+                <v-list-tile>
+                  <v-list-tile-action>
+                    <v-icon class="cyan--text text--darken-2">cloud_queue</v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>Provider</v-list-tile-sub-title>
+                    <v-list-tile-title>
+                      <v-tooltip top open-delay="500">
+                        <span slot="activator"> {{getCloudProviderKind}} </span>
+                        <span>Provider</span>
                       </v-tooltip>
-                    </v-list-tile-content>
-                  </v-list-tile>
-
-                  <template v-if="!!purpose">
-                    <v-divider class="my-2" inset></v-divider>
-                    <v-list-tile>
-                      <v-list-tile-action>
-                        <v-icon class="cyan--text text--darken-2">label_outline</v-icon>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-sub-title>Purpose</v-list-tile-sub-title>
-                        <v-list-tile-title>{{purpose}}</v-list-tile-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                  </template>
-
-                </v-list>
-              </v-card>
-
-              <v-card class="cyan darken-2 mt-3">
-                <v-card-title class="subheading white--text">
-                  Infrastructure
-                </v-card-title>
-                <v-list>
-
-                  <v-list-tile>
-                    <v-list-tile-action>
-                      <v-icon class="cyan--text text--darken-2">cloud_queue</v-icon>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-sub-title>Provider</v-list-tile-sub-title>
-                      <v-list-tile-title>
-                        <v-tooltip top open-delay="500">
-                          <span slot="activator"> {{getCloudProviderKind}} </span>
-                          <span>Provider</span>
-                        </v-tooltip>
+                      /
+                      <v-tooltip top open-delay="500">
+                        <span slot="activator"> {{region}} </span>
+                        <span>Region</span>
+                      </v-tooltip>
+                      <template v-if="!!secret">
                         /
                         <v-tooltip top open-delay="500">
-                          <span slot="activator"> {{region}} </span>
-                          <span>Region</span>
+                          <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
+                            <span>{{secret}} </span>
+                          </router-link>
+                          <span>Used Credential</span>
                         </v-tooltip>
-                        <template v-if="!!secret">
-                          /
-                          <v-tooltip top open-delay="500">
-                            <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
-                              <span>{{secret}} </span>
-                            </router-link>
-                            <span>Used Credential</span>
-                          </v-tooltip>
+                      </template>
+                    </v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+
+                <template v-if="showSeedInfo">
+                  <v-divider class="my-2" inset></v-divider>
+                  <v-list-tile>
+                    <v-list-tile-action>
+                      <v-icon class="cyan--text text--darken-2">spa</v-icon>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                      <v-list-tile-sub-title>Seed</v-list-tile-sub-title>
+                      <v-list-tile-title>
+                        <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
+                          {{seed}}
+                        </router-link>
+                        <template v-else>
+                          {{seed}}
                         </template>
                       </v-list-tile-title>
                     </v-list-tile-content>
                   </v-list-tile>
+                </template>
 
-                  <template v-if="showSeedInfo">
-                    <v-divider class="my-2" inset></v-divider>
-                    <v-list-tile>
-                      <v-list-tile-action>
-                        <v-icon class="cyan--text text--darken-2">spa</v-icon>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-sub-title>Seed</v-list-tile-sub-title>
-                        <v-list-tile-title>
-                          <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
-                            {{seed}}
-                          </router-link>
-                          <template v-else>
-                            {{seed}}
-                          </template>
-                        </v-list-tile-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                  </template>
-
+                <v-divider class="my-2" inset></v-divider>
+                <v-list-tile>
+                  <v-list-tile-action>
+                    <v-icon class="cyan--text text--darken-2">settings_ethernet</v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                    <v-list-tile-sub-title>CIDR</v-list-tile-sub-title>
+                    <v-list-tile-title>{{cidr}}</v-list-tile-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+                <template v-if="!!domain">
                   <v-divider class="my-2" inset></v-divider>
                   <v-list-tile>
                     <v-list-tile-action>
-                      <v-icon class="cyan--text text--darken-2">settings_ethernet</v-icon>
+                      <v-icon class="cyan--text text--darken-2">mdi-earth</v-icon>
                     </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-sub-title>CIDR</v-list-tile-sub-title>
-                      <v-list-tile-title>{{cidr}}</v-list-tile-title>
-                    </v-list-tile-content>
+                      <v-list-tile-content>
+                        <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
+                        <v-list-tile-title>{{shootIngressDomainText}}</v-list-tile-title>
+                      </v-list-tile-content>
                   </v-list-tile>
-                  <template v-if="!!domain">
-                    <v-divider class="my-2" inset></v-divider>
-                    <v-list-tile>
-                      <v-list-tile-action>
-                        <v-icon class="cyan--text text--darken-2">mdi-earth</v-icon>
-                      </v-list-tile-action>
-                        <v-list-tile-content>
-                          <v-list-tile-sub-title>Ingress Domain</v-list-tile-sub-title>
-                          <v-list-tile-title><a :href="shootIngressDomain" target="_blank" class="cyan--text text--darken-2">{{shootIngressDomainText}}</a></v-list-tile-title>
-                        </v-list-tile-content>
-                    </v-list-tile>
-                  </template>
-                </v-list>
-              </v-card>
-
-              <v-card class="cyan darken-2 mt-3">
-                <v-card-title class="subheading white--text" >
-                  Addons provided by Gardener
-                </v-card-title>
-                <v-list>
-
-                  <v-list-tile avatar v-for="item in addonList" :key="item.name" v-if="addon(item.name).enabled">
-                    <v-list-tile-avatar>
-                      <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
-                    </v-list-tile-avatar>
-                    <v-list-tile-content>
-                      <v-list-tile-title>{{item.title}}</v-list-tile-title>
-                      <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
-                    </v-list-tile-content>
-                    <v-list-tile-action>
-                      <template v-if="componentUrl(item.name)">
-                        <v-btn icon :href="componentUrl(item.name)" target="_blank">
-                          <v-icon color="cyan darken-2">mdi-open-in-new</v-icon>
-                        </v-btn>
-                      </template>
-                    </v-list-tile-action>
-                  </v-list-tile>
-
-                </v-list>
-              </v-card>
-
-            </v-flex>
-
-            <v-flex md6 v-show="isInfoAvailable">
-              <status-card :shootItem="item"></status-card>
-
-              <v-card>
-                <v-card-title class="subheading white--text cyan darken-2 mt-3">
-                  Kube-Cluster Access
-                </v-card-title>
-                <cluster-access ref="clusterAccess" :info="info"></cluster-access>
-                <template v-if="!!info.kubeconfig">
-                  <v-divider class="my-2" inset></v-divider>
-                  <v-expansion-panel>
-                    <v-expansion-panel-content>
-                      <div slot="header" class="kubeconfig-title">
-                        <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-                        <span>KUBECONFIG</span>
-                      </div>
-                      <v-card>
-                        <code-block lang="yaml" :content="info.kubeconfig"></code-block>
-                      </v-card>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
                 </template>
-              </v-card>
+              </v-list>
+            </v-card>
 
-              <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
+            <v-card class="cyan darken-2 mt-3">
+              <v-card-title class="subheading white--text" >
+                Addons
+              </v-card-title>
+              <v-list subheader>
+                <v-subheader>Addons provided by Gardener</v-subheader>
+                <v-list-tile avatar v-for="item in addonList" :key="item.name" v-if="addon(item.name).enabled">
+                  <v-list-tile-avatar>
+                    <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
+                  </v-list-tile-avatar>
+                  <v-list-tile-content>
+                    <v-list-tile-title>{{item.title}}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+                  </v-list-tile-content>
+                  <v-list-tile-action>
+                    <template v-if="componentUrl(item.name)">
+                      <v-btn icon :href="componentUrl(item.name)" target="_blank">
+                        <v-icon color="cyan darken-2">mdi-open-in-new</v-icon>
+                      </v-btn>
+                    </template>
+                  </v-list-tile-action>
+                </v-list-tile>
+              </v-list>
 
-            </v-flex>
+              <template v-if="customAddonList.length">
+                <v-divider></v-divider>
+                <v-list subheader>
+                <v-subheader>Custom addons</v-subheader>
+                <v-list-tile avatar v-for="item in customAddonList" :key="item.name">
+                  <v-list-tile-avatar>
+                    <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
+                  </v-list-tile-avatar>
+                  <v-list-tile-content>
+                    <v-list-tile-title>{{item.title}}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{item.description}}</v-list-tile-sub-title>
+                  </v-list-tile-content>
+                </v-list-tile>
+                </v-list>
+              </template>
 
-          </v-layout>
+            </v-card>
 
-        </v-container>
-      </v-tab-item>
+          </v-flex>
 
-      <v-tab-item id="yaml">
-        <v-card>
-          <code-block height="100%" lang="yaml" :content="rawItem"></code-block>
-          <v-btn
-            color="cyan darken-2"
-            dark
-            fixed
-            fab
-            bottom
-            right
-            @click.native.stop="openEditor"
-          >
-            <v-icon>edit</v-icon>
-          </v-btn>
-        </v-card>
-      </v-tab-item>
+          <v-flex md6 v-show="isInfoAvailable">
+            <status-card :shootItem="item"></status-card>
 
-      <shoot-editor ref="editor" :content="rawItem"></shoot-editor>
+            <v-card>
+              <v-card-title class="subheading white--text cyan darken-2 mt-3">
+                Access
+              </v-card-title>
+              <cluster-access ref="clusterAccess" :info="info"></cluster-access>
+              <template v-if="!!info.kubeconfig">
+                <v-divider class="my-2" inset></v-divider>
+                <v-expansion-panel>
+                  <v-expansion-panel-content>
+                    <div slot="header" class="kubeconfig-title">
+                      <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
+                      <span>KUBECONFIG</span>
+                    </div>
+                    <v-card>
+                      <code-block lang="yaml" :content="info.kubeconfig"></code-block>
+                    </v-card>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </template>
+            </v-card>
 
-    </v-tabs>
-  </div>
+            <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
+
+          </v-flex>
+
+        </v-layout>
+
+      </v-container>
+    </v-tab-item>
+
+    <v-tab-item id="yaml">
+      <v-card>
+        <code-block height="100%" lang="yaml" :content="rawItem"></code-block>
+        <v-btn
+          color="cyan darken-2"
+          dark
+          fixed
+          fab
+          bottom
+          right
+          @click.native.stop="openEditor"
+        >
+          <v-icon>edit</v-icon>
+        </v-btn>
+      </v-card>
+    </v-tab-item>
+
+    <shoot-editor ref="editor" :content="rawItem"></shoot-editor>
+
+  </v-tabs>
 </template>
 
 <script>
@@ -279,8 +294,17 @@ limitations under the License.
   import get from 'lodash/get'
   import omit from 'lodash/omit'
   import includes from 'lodash/includes'
+  import find from 'lodash/find'
+  import forEach from 'lodash/forEach'
   import { safeDump } from 'js-yaml'
-  import { getDateFormatted, getCloudProviderKind, canLinkToSeed, availableK8sUpdatesForShoot } from '@/utils'
+  import { SnotifyPosition } from 'vue-snotify'
+  import { getDateFormatted,
+    getCloudProviderKind,
+    canLinkToSeed,
+    availableK8sUpdatesForShoot,
+    isSelfTerminationWarning,
+    isValidTerminationDate,
+    getTimeStringTo } from '@/utils'
 
   export default {
     name: 'shoot-list',
@@ -329,7 +353,8 @@ limitations under the License.
           }
         ],
         mounted: false,
-        editor: false
+        editor: false,
+        selfTerminationNotification: undefined
       }
     },
     methods: {
@@ -341,6 +366,22 @@ limitations under the License.
         if (editor) {
           editor.open()
         }
+      },
+      showSelfTerminationWarning () {
+        if (!this.selfTerminationNotification) {
+          const config = {
+            timeout: 5000,
+            closeOnClick: false,
+            showProgressBar: false,
+            position: SnotifyPosition.rightBottom,
+            titleMaxLength: 20
+          }
+          if (this.isSelfTerminationWarning) {
+            this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          } else {
+            this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
+          }
+        }
       }
     },
     computed: {
@@ -348,7 +389,8 @@ limitations under the License.
         'shootByNamespaceAndName',
         'journalsByNamespaceAndName',
         'isAdmin',
-        'namespaces'
+        'namespaces',
+        'customAddonDefinitionList'
       ]),
       getCloudProviderKind () {
         return getCloudProviderKind(get(this.item, 'spec.cloud'))
@@ -363,22 +405,8 @@ limitations under the License.
           }
         }
       },
-      userinfo () {
-        if (this.info.username && this.info.password) {
-          const username = encodeURIComponent(this.info.username)
-          const password = encodeURIComponent(this.info.password)
-          return `${username}:${password}`
-        }
-        return ''
-      },
       monocularUrl () {
-        let url = 'https://'
-        const userinfo = this.userinfo
-        if (userinfo) {
-          url += `${userinfo}@`
-        }
-        url += `monocular.ingress.${this.domain}`
-        return url
+        return `https://monocular.ingress.${this.domain}`
       },
       rawItem () {
         const item = omit(this.item, ['info'])
@@ -432,11 +460,8 @@ limitations under the License.
       domain () {
         return get(this.item, 'spec.dns.domain')
       },
-      shootIngressDomain () {
-        return `https://placeholder.ingress.${this.domain}`
-      },
       shootIngressDomainText () {
-        return `<placeholder>.ingress.${this.domain}`
+        return `*.ingress.${this.domain}`
       },
       region () {
         return get(this.item, 'spec.cloud.region')
@@ -461,6 +486,21 @@ limitations under the License.
           return this.addons[name] || {}
         }
       },
+      customAddonList () {
+        try {
+          const customAddonNames = JSON.parse(this.annotations['gardenextensions.sapcloud.io/addons'])
+          const list = []
+          forEach(customAddonNames, name => {
+            const item = find(this.customAddonDefinitionList, ['name', name])
+            if (item) {
+              list.push(item)
+            }
+          })
+          return list
+        } catch (err) {
+          return []
+        }
+      },
       tab: {
         get: function () {
           return this.$route.query.tab || 'formatted'
@@ -477,16 +517,45 @@ limitations under the License.
       },
       k8sVersion () {
         return get(this.item, 'spec.kubernetes.version')
+      },
+      selfTerminationNotificationMessage () {
+        if (this.isValidTerminationDate) {
+          return `This cluster will self terminate ${getTimeStringTo(new Date(), this.expirationTimestamp)}`
+        } else {
+          return 'This cluster is about to self terminate'
+        }
+      },
+      isSelfTerminationWarning () {
+        return isSelfTerminationWarning(this.expirationTimestamp)
+      },
+      isValidTerminationDate () {
+        return isValidTerminationDate(this.expirationTimestamp)
+      }
+    },
+    watch: {
+      expirationTimestamp (expirationTimestamp) {
+        if (expirationTimestamp) {
+          this.showSelfTerminationWarning()
+        }
       }
     },
     mounted () {
       this.mounted = true
+      if (this.expirationTimestamp) {
+        this.showSelfTerminationWarning()
+      }
+    },
+    destroyed () {
+      if (this.selfTerminationNotification) {
+        this.$snotify.remove(this.selfTerminationNotification.id)
+      }
     },
     beforeRouteUpdate (to, from, next) {
       this.$refs.clusterAccess.reset()
+      this.$refs.clusterMetrics.reset()
       next()
     }
-  }
+}
 </script>
 
 

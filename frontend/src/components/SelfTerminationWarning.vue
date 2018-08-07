@@ -15,11 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-alert :type="expirationAlertType" outline value="true" v-if="expirationTimestamp && isAlertType">
-    <span v-if="isValidTerminationDate">This cluster will self terminate<span class="bold"><time-string :date-time="expirationTimestamp"></time-string></span></span>
-    <span v-else>This cluster is about to self terminate</span>
-  </v-alert>
-  <v-tooltip top v-else-if="expirationTimestamp">
+  <v-tooltip top v-if="expirationTimestamp">
     <template slot="activator">
       <v-icon color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
       <v-icon color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
@@ -31,6 +27,7 @@ limitations under the License.
 
 <script>
   import TimeString from '@/components/TimeString'
+  import { isSelfTerminationWarning, isValidTerminationDate } from '@/utils'
 
   export default {
     name: 'selfTerminationWarning',
@@ -40,20 +37,14 @@ limitations under the License.
     props: {
       expirationTimestamp: {
         type: String
-      },
-      type: {
-        type: String
       }
     },
     computed: {
       isValidTerminationDate () {
-        return new Date(this.expirationTimestamp) > new Date()
+        return isValidTerminationDate(this.expirationTimestamp)
       },
       isSelfTerminationWarning () {
-        return this.expirationTimestamp && new Date(this.expirationTimestamp) - new Date() < 24 * 60 * 60 * 1000 // 1 day
-      },
-      isAlertType () {
-        return this.type === 'alert'
+        return isSelfTerminationWarning(this.expirationTimestamp)
       },
       expirationAlertType () {
         return this.isSelfTerminationWarning ? 'warning' : 'info'

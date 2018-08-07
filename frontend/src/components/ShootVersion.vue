@@ -29,44 +29,46 @@ limitations under the License.
       <span v-else-if="availableK8sUpdates">Kubernetes upgrade available</span>
       <span v-else>Kubernetes version up to date</span>
     </v-tooltip>
-    <confirm-input-dialog
-      :confirm="shootName"
+    <confirm-dialog
+      :confirm="confirm"
       v-model="updateDialog"
       :cancel="hideUpdateDialog"
       :ok="versionUpdateConfirmed"
-      :confirmRequired="confirmRequired"
       :confirmDisabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
+      confirmColor="orange"
       >
-      <template slot="caption">Update Kubernetes Version of Cluster <code>{{shootName}}</code></template>
+      <template slot="caption">Update Cluster</template>
+      <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
           :selectedVersion.sync="selectedVersion"
           :selectedVersionInvalid.sync="selectedVersionInvalid"
           :confirmRequired.sync="confirmRequired"
+          :currentk8sVersion="k8sVersion"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && confirmRequired">
-          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.
-          <br/>
-          <i class="red--text text--darken-2">This action cannot be undone.</i>
+          You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
+          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
+          <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
-    </confirm-input-dialog>
+    </confirm-dialog>
   </div>
 </template>
 
 <script>
   import ShootVersionUpdate from '@/components/ShootVersionUpdate'
-  import ConfirmInputDialog from '@/dialogs/ConfirmInputDialog'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import get from 'lodash/get'
   import { updateShootVersion } from '@/utils/api'
 
   export default {
     components: {
       ShootVersionUpdate,
-      ConfirmInputDialog
+      ConfirmDialog
     },
     props: {
       availableK8sUpdates: {
@@ -101,6 +103,9 @@ limitations under the License.
       },
       buttonInactive () {
         return this.availableK8sUpdates ? '' : 'update_btn_inactive'
+      },
+      confirm () {
+        return this.confirmRequired ? this.shootName : undefined
       }
     },
     methods: {
@@ -125,6 +130,11 @@ limitations under the License.
             console.error('Update shoot version failed with error:', err)
           })
       }
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hideUpdateDialog()
+      })
     }
   }
 </script>

@@ -35,15 +35,13 @@ limitations under the License.
         <v-tab-item key="infra" id="tab-infra">
           <v-card flat>
             <v-container fluid>
-              <v-alert type="warning" :value="selfTerminationDays" outline>The selected secret has an associated quota that will cause the cluster to self terminate after {{selfTerminationDays}} days</v-alert>
-
               <v-card-text>
 
                 <v-layout row>
                   <v-flex xs3>
                     <v-text-field
                       ref="name"
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Cluster Name"
                       counter="10"
                       v-model="clusterName"
@@ -58,7 +56,7 @@ limitations under the License.
                 <v-layout row class="mt-2">
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Infrastructure"
                       :items="sortedCloudProviderKindList"
                       v-model="infrastructureKind"
@@ -92,7 +90,7 @@ limitations under the License.
                       v-model="cloudProfileName"
                       :isCreateMode="true"
                       :cloudProfiles="cloudProfiles"
-                      color="cyan">
+                      color="cyan darken-2">
                     </cloud-profile>
                   </v-flex>
 
@@ -101,7 +99,7 @@ limitations under the License.
 
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Secrets"
                       :items="infrastructureSecretsByProfileName"
                       v-model="secret"
@@ -109,6 +107,8 @@ limitations under the License.
                       @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       required
+                      persistent-hint
+                      :hint="secretHint"
                       >
                       <template slot="item" slot-scope="data">
                         {{get(data.item, 'metadata.name')}}
@@ -127,7 +127,7 @@ limitations under the License.
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Region"
                       :items="regions"
                       v-model="region"
@@ -141,7 +141,7 @@ limitations under the License.
                   </v-flex>
                   <v-flex xs3 v-if="infrastructureKind !== 'azure'">
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Zone"
                       :items="zones"
                       :error-messages="getErrorMessages('infrastructureData.zones')"
@@ -156,7 +156,7 @@ limitations under the License.
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Kubernetes"
                       :items="sortedKubernetesVersions"
                       v-model="shootDefinition.spec.kubernetes.version"
@@ -167,7 +167,7 @@ limitations under the License.
                   </v-flex>
                   <v-flex xs3>
                     <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Purpose"
                       :items="filteredPurposes"
                       v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
@@ -184,7 +184,7 @@ limitations under the License.
                   <v-layout row>
                     <v-flex xs3>
                       <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Floating Pools"
                       :items="floatingPoolNames"
                       v-model="infrastructureData.floatingPoolName"
@@ -195,7 +195,7 @@ limitations under the License.
                     </v-flex>
                     <v-flex xs3>
                       <v-select
-                      color="cyan"
+                      color="cyan darken-2"
                       label="Load Balancer Providers"
                       :items="loadBalancerProviderNames"
                       v-model="infrastructureData.loadBalancerProvider"
@@ -289,8 +289,8 @@ limitations under the License.
                       outline
                       fab
                       icon
-                      class="cyan">
-                      <v-icon class="cyan--text">add</v-icon>
+                      class="cyan darken-2">
+                      <v-icon class="cyan--text text--darken-2">add</v-icon>
                     </v-btn>
                   </v-flex>
 
@@ -298,7 +298,7 @@ limitations under the License.
                     <v-btn
                       @click="addWorker"
                       flat
-                      class="cyan--text">
+                      class="cyan--text text--darken-2">
                       Add Worker Group
                     </v-btn>
                   </v-flex>
@@ -315,33 +315,17 @@ limitations under the License.
           <v-card flat>
             <v-container>
               <v-list three-line class="mr-extra">
-
-                <v-list-tile avatar class="list-complete-item">
+                <v-list-tile class="list-complete-item"
+                  v-for="addonDefinition in addonDefinitionList"
+                  :key="addonDefinition.name">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="addons['kubernetes-dashboard'].enabled"></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="addons[addonDefinition.name].enabled"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
-                    <v-list-tile-title >Dashboard</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      General-purpose web UI for Kubernetes clusters.
-                    </v-list-tile-sub-title>
+                    <v-list-tile-title >{{addonDefinition.title}}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{addonDefinition.description}}</v-list-tile-sub-title>
                   </v-list-tile-content>
                 </v-list-tile>
-
-                <v-list-tile  class="list-complete-item">
-                  <v-list-tile-action>
-                    <v-checkbox v-model="addons.monocular.enabled" class="cyan--text"></v-checkbox>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title >Monocular</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      Monocular is a web-based UI for managing Kubernetes applications and services
-                      packaged as Helm Charts. It allows you to search and discover available charts from
-                      multiple repositories, and install them in your cluster with one click.
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-
               </v-list>
             </v-container>
           </v-card>
@@ -355,7 +339,7 @@ limitations under the License.
               <v-layout row>
                 <v-flex xs3>
                   <v-text-field
-                   color="cyan"
+                   color="cyan darken-2"
                    label="Maintenance Start Time"
                    v-model="maintenanceBegin"
                    :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
@@ -377,7 +361,7 @@ limitations under the License.
               <v-list two-line>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="osUpdates" disabled></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title>Operating System</v-list-tile-title>
@@ -389,7 +373,7 @@ limitations under the License.
                 </v-list-tile>
                 <v-list-tile avatar class="list-complete-item">
                   <v-list-tile-action>
-                    <v-checkbox color="cyan" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                    <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
                   </v-list-tile-action>
                   <v-list-tile-content>
                     <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
@@ -410,7 +394,7 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text">Create</v-btn>
+        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
       </v-card-actions>
 
     </v-card>
@@ -433,14 +417,22 @@ limitations under the License.
   import every from 'lodash/every'
   import noop from 'lodash/noop'
   import isEmpty from 'lodash/isEmpty'
+  import forEach from 'lodash/forEach'
+  import filter from 'lodash/filter'
+  import reduce from 'lodash/reduce'
+  import set from 'lodash/set'
+  import pick from 'lodash/pick'
+  import omit from 'lodash/omit'
+  import concat from 'lodash/concat'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+  import { errorDetailsFromError } from '@/utils/error'
   import moment from 'moment'
 
-  var semSort = require('semver-sort')
+  const semSort = require('semver-sort')
 
   function shortRandomString (length) {
     const start = 'abcdefghijklmnopqrstuvwxyz'
@@ -496,6 +488,44 @@ limitations under the License.
     }
   }
 
+  const standardAddonDefinitionList = [
+    {
+      name: 'cluster-autoscaler',
+      title: 'Cluster Autoscaler',
+      description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
+      visible: false,
+      enabled: true
+    },
+    {
+      name: 'heapster',
+      title: 'Heapster',
+      description: 'Heapster enables Container Cluster Monitoring and Performance Analysis.',
+      visible: false,
+      enabled: true
+    },
+    {
+      name: 'kubernetes-dashboard',
+      title: 'Dashboard',
+      description: 'General-purpose web UI for Kubernetes clusters.',
+      visible: true,
+      enabled: true
+    },
+    {
+      name: 'monocular',
+      title: 'Monocular',
+      description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.',
+      visible: true,
+      enabled: false
+    },
+    {
+      name: 'nginx-ingress',
+      title: 'Nginx Ingress',
+      description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.',
+      visible: false,
+      enabled: true
+    }
+  ]
+
   const defaultShootDefinition = {
     apiVersion: 'garden.sapcloud.io/v1beta1',
     kind: 'Shoot',
@@ -530,28 +560,12 @@ limitations under the License.
           kubernetesVersion: true
         }
       },
-      addons: {
-        'cluster-autoscaler': {
-          enabled: true
-        },
-        heapster: {
-          enabled: true
-        },
-        'kubernetes-dashboard': {
-          enabled: true
-        },
-        monocular: {
-          enabled: false
-        },
-        'nginx-ingress': {
-          enabled: true
-        }
-      }
+      addons: reduce(standardAddonDefinitionList, (addons, {name, enabled}) => set(addons, name, {enabled}), {})
     }
   }
 
   export default {
-    name: 'create-cluster',
+    name: 'create-cluster-dialog',
     components: {
       WorkerInputGeneric,
       WorkerInputOpenstack,
@@ -650,7 +664,8 @@ limitations under the License.
         'infrastructureSecretsByCloudProfileName',
         'projectList',
         'domainList',
-        'shootByNamespaceAndName'
+        'shootByNamespaceAndName',
+        'customAddonDefinitionList'
       ]),
       visible: {
         get () {
@@ -913,7 +928,19 @@ limitations under the License.
         return terminationDays
       },
       filteredPurposes () {
-        return this.selfTerminationDays ? [] : this.purposes
+        return this.selfTerminationDays ? ['evaluation'] : this.purposes
+      },
+      addonDefinitionList () {
+        const project = find(this.projectList, ['metadata.namespace', this.namespace])
+        const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
+        return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
+      },
+      secretHint () {
+        if (this.selfTerminationDays) {
+          return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+        } else {
+          return undefined
+        }
       }
     },
     methods: {
@@ -925,11 +952,21 @@ limitations under the License.
       },
       createShootResource () {
         const data = cloneDeep(this.shootDefinition)
+        const annotations = data.metadata.annotations
         const infrastructureData = cloneDeep(this.infrastructureData)
-        infrastructureData.workers.forEach(worker => {
+        forEach(infrastructureData.workers, worker => {
           delete worker.id
         })
         data.spec.cloud[this.infrastructureKind] = infrastructureData
+        // transform addons specification
+        const standardAddonNames = map(standardAddonDefinitionList, 'name')
+        const standardAddons = pick(data.spec.addons, standardAddonNames)
+        const customAddons = omit(data.spec.addons, standardAddonNames)
+        data.spec.addons = standardAddons
+        const enabledCustomAddonNames = reduce(customAddons, (accumulator, {enabled}, name) => !enabled ? accumulator : concat(accumulator, name), [])
+        if (!isEmpty(enabledCustomAddonNames)) {
+          annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
+        }
         return this.createShoot(data)
       },
       addWorker () {
@@ -945,17 +982,17 @@ limitations under the License.
         })
       },
       createClicked () {
-        this.createShootResource()
+        Promise.resolve()
+          .then(() => this.createShootResource())
           .then(() => {
             this.$emit('created')
             this.$emit('close', false)
           })
           .catch(err => {
-            const errorCode = get(err, 'response.data.error.code')
-            const detailedMessage = get(err, 'response.data.message')
-            console.error('Failed to create shoot cluster.', errorCode, detailedMessage, err)
+            const errorDetails = errorDetailsFromError(err)
             this.errorMessage = `Failed to create cluster.`
-            this.detailedErrorMessage = detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
           })
       },
       cancelClicked () {
@@ -968,6 +1005,7 @@ limitations under the License.
 
         this.selectedSecret = undefined
         this.shootDefinition = cloneDeep(defaultShootDefinition)
+
         this.setDefaultInfrastructureKind()
 
         this.clusterName = shortRandomString(10)
@@ -1052,6 +1090,12 @@ limitations under the License.
       }
     },
     created () {
+      // add custom addons to default shootDefinition
+      forEach(this.customAddonDefinitionList, ({name}) => {
+        defaultShootDefinition.spec.addons[name] = {
+          enabled: false
+        }
+      })
       this.reset()
     },
     mounted () {

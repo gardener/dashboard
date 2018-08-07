@@ -46,7 +46,7 @@ limitations under the License.
   const clockHalfAnHourAccuracy = new Clock(1000 * 60 * 30)
 
   export default {
-    props: ['dateTime'],
+    props: ['dateTime', 'currentString'],
     data () {
       return {
         currentClockTimer: undefined,
@@ -56,15 +56,17 @@ limitations under the License.
     },
     computed: {
       timeString () {
+        let timeString = ''
         if (this.dateTime && this.currentClockTimer) {
           if (this.negativeRefDate) {
-            return getTimeStringFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+            timeString = getTimeStringFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
           } else {
-            return getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.dateTime)
+            timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.dateTime)
           }
-        } else {
-          return ''
         }
+
+        this.$emit('update:currentString', timeString)
+        return timeString
       }
     },
     methods: {

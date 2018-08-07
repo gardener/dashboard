@@ -16,125 +16,59 @@
 
 'use strict'
 
-const _ = require('lodash')
-const axios = require('axios')
-const https = require('https')
-const logger = require('../logger')
+const octokit = require('./octokit')()
+
 const config = require('../config')
-const parseLink = require('parse-link-header')
-const { URL } = require('url')
-const urljoin = require('url-join')
+const {
+  org: owner,
+  repository: repo
+} = config.gitHub || {}
 
-const fetch = async (url, batchFn) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.get(url, { httpsAgent: agent, auth: authentication() })
-      const link = _.get(result, 'headers.link', '')
-      const nextLink = _.get(parseLink(link), 'next.url')
-      batchFn(result.data)
-      if (nextLink) {
-        resolve(fetch(nextLink, batchFn))
-      } else {
-        resolve()
-      }
-    } catch (e) {
-      reject(e)
-    }
+function searchIssues ({state, title} = {}) {
+  const q = [
+    `repo:${owner}/${repo}`
+  ]
+  if (state) {
+    q.push(`state:${state}`)
+  }
+  if (title) {
+    q.push(`${title} in:title`)
+  }
+  return octokit.createPageStream(octokit.search.issues, {
+    path_to_items: 'items',
+    q: q.join(' ')
   })
 }
 
-const patch = async (url, payload) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.patch(url, payload, { httpsAgent: agent, auth: authentication() })
-      resolve(result.data)
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-const post = async (url, payload) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const result = await axios.post(url, payload, { httpsAgent: agent, auth: authentication() })
-      resolve(result.data)
-    } catch (e) {
-      reject(e)
-    }
-  })
-}
-
-const searchIssues = async function ({ namespace, name, batchFn = data => {} }) {
-  let search = ' '
-  if (namespace) {
-    search = `${search}[${namespace}`
-  }
-  if (namespace || name) {
-    search = `${search}/`
-  }
-  if (name) {
-    search = `${search}${name}]`
-  }
-
-  const url = new URL(urljoin(config.gitHub.apiUrl, '/search/issues'))
-  url.searchParams.set('q', `repo:${config.gitHub.org}/${config.gitHub.repository} is:open${search}`)
-
-  return fetch(url.href, batchFn)
-}
-
-const comments = async function ({ issueNumber, batchFn = data => {} }) {
-  if (!issueNumber) {
-    logger.error('failed to read comments; invalid issueNumber')
-    return Promise.reject(new Error('failed to read comments; invalid issueNumber'))
-  }
-  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber), '/comments'))
-  return fetch(url.href, batchFn)
-}
-
-const createComments = async function ({ issueNumber, payload }) {
-  if (!issueNumber) {
-    logger.error('failed to create comment; invalid issueNumber')
-    return Promise.reject(new Error('failed to create comment; invalid issueNumber'))
-  }
-  if (!payload) {
-    logger.error('no payload specified')
-    return Promise.reject(new Error('no payload specified'))
-  }
-  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber), '/comments'))
-
-  return post(url.href, payload)
-}
-
-const closeIssue = async function ({ issueNumber }) {
-  if (!issueNumber) {
-    logger.error('failed to close issue; invalid issueNumber')
-    return Promise.reject(new Error('failed to close issue; invalid issueNumber'))
-  }
-  const url = new URL(urljoin(config.gitHub.apiUrl, '/repos/', config.gitHub.org, config.gitHub.repository, '/issues/', encodeURI(issueNumber)))
-  const payload = {
+function closeIssue ({number}) {
+  return octokit.issues.edit({
+    owner,
+    repo,
+    number,
     state: 'closed'
-  }
-  return patch(url.href, payload)
+  })
 }
 
-const agent = new https.Agent({
-  rejectUnauthorized: false
-})
+function getComments ({number}) {
+  return octokit.createPageStream(octokit.issues.getComments, {
+    owner,
+    repo,
+    number
+  })
+}
 
-const authentication = function () {
-  if (!config.gitHub.authentication) {
-    return undefined
-  }
-  return {
-    username: config.gitHub.authentication.username,
-    password: config.gitHub.authentication.token
-  }
+function createComment ({number}, body) {
+  return octokit.issues.createComment({
+    owner,
+    repo,
+    number,
+    body
+  })
 }
 
 module.exports = {
   searchIssues,
-  comments,
   closeIssue,
-  createComments
+  getComments,
+  createComment
 }

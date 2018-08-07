@@ -16,6 +16,8 @@
 
 'use strict'
 
+import get from 'lodash/get'
+
 export function isConflict (error) {
   return hasStatusCode(409, error)
 }
@@ -31,4 +33,12 @@ function hasStatusCode (statusCode, error) {
   } else {
     return false
   }
+}
+
+export function errorDetailsFromError (err) {
+  console.log(err)
+  const errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
+  const detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
+
+  return { errorCode, detailedMessage }
 }

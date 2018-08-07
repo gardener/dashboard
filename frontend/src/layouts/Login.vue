@@ -44,19 +44,15 @@ limitations under the License.
       <v-spacer></v-spacer>
       <div>&copy; {{ new Date().getFullYear() }}</div>
     </v-footer>
-    <v-snackbar color="error" fixed bottom v-model="isError">
-      <div class="white-text">{{errorMessage}} </div>
-      <v-spacer/>
-      <v-btn icon class="white--text" @click.native.stop="isError=false">
-        <v-icon>close</v-icon>
-      </v-btn>
-    </v-snackbar>
+    <vue-snotify></vue-snotify>
   </v-app>
 </template>
 
 <script>
   import { mapState } from 'vuex'
   import { signin } from '@/utils/auth'
+  import 'vue-snotify/styles/material.css'
+  import { SnotifyPosition } from 'vue-snotify'
 
   export default {
     computed: {
@@ -71,20 +67,21 @@ limitations under the License.
         return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
       }
     },
-    data () {
-      return {
-        errorMessage: null,
-        isError: false
-      }
-    },
     methods: {
       handleLogin () {
         signin(this.$userManager)
         .catch(error => {
-          this.errorMessage = error.message
-          this.isError = true
+          this.showSnotifyLoginError(error.message)
           throw error
         })
+      },
+      showSnotifyLoginError (message) {
+        const config = {
+          position: SnotifyPosition.rightBottom,
+          timeout: 5000,
+          showProgressBar: false
+        }
+        this.$snotify.error(message, 'Login Error', config)
       }
     }
   }
@@ -199,6 +196,20 @@ limitations under the License.
 
       }
     }
+  }
+
+  @import 'vue-snotify/styles/material.css'
+
+  .snotify-rightTop {
+    top: 75px;
+  }
+
+  .snotify-info {
+    background-color: #0097A7; // cyan darken-2
+  }
+
+  .snotify {
+    width: 400px;
   }
 
 </style>

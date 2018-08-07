@@ -23,6 +23,7 @@ const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const Resources = require('../kubernetes/Resources')
 const rbac = kubernetes.rbac()
+const {Conflict} = require('../errors.js')
 
 const RoleBindingName = 'garden-project-members'
 
@@ -160,7 +161,7 @@ async function setRoleBindingSubject (rbac, namespace, name) {
   }
   const subjects = body.subjects = body.subjects || []
   if (_.find(subjects, ['name', name])) {
-    return body
+    throw new Conflict(`User '${name}' is already member of this project`)
   }
   subjects.push({
     kind: 'User',

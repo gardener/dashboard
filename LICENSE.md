@@ -224,6 +224,10 @@ Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>
 Copyright (c) 2013 Troy Goode <troygoode@gmail.com>
 [MIT License](https://github.com/expressjs/cors/blob/master/LICENSE)
 
+[es6-error](https://github.com/bjyoungblood/es6-error)
+Copyright (c) 2015 Ben Youngblood
+[MIT License](https://github.com/bjyoungblood/es6-error/blob/master/LICENSE.md)
+
 [express](https://github.com/expressjs/express)
 Copyright (c) 2009-2014 TJ Holowaychuk <tj@vision-media.ca>
 Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>

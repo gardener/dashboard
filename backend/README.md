@@ -1,4 +1,4 @@
-Gardener Dashbaord Server
+Gardener Dashboard Server
 =======================
 
 Setup

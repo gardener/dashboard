@@ -18,13 +18,17 @@ limitations under the License.
   <v-container fluid>
     <v-card class="mr-extra">
 
-      <v-toolbar class="red elevation-0 darken-1" dark>
+      <v-toolbar class="red elevation-0 darken-2" dark>
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="shootList.length === 0" icon @click.native.stop="deleteConfirm=true">
-          <v-icon>delete</v-icon>
-        </v-btn>
+        <v-tooltip top>
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+            <v-icon>delete</v-icon>
+          </v-btn>
+          <span v-if="isDeleteButtonDisabled">You can only delete projects that do not contain clusters</span>
+          <span v-else>Delete Project</span>
+        </v-tooltip>
       </v-toolbar>
 
       <v-card-text>
@@ -65,35 +69,53 @@ limitations under the License.
       </v-card-text>
     </v-card>
     <v-fab-transition>
-      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-1" @click.native.stop="edit = true">
+      <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
     </v-fab-transition>
 
-    <delete-dialog v-model="deleteConfirm" :project="project"></delete-dialog>
+    <confirm-dialog
+      v-model="deleteConfirm"
+      defaultColor="red"
+      :cancel="hide"
+      :ok="onDeleteProject"
+      :errorMessage.sync="errorMessage"
+      :detailedErrorMessage.sync="detailedErrorMessage">
+      <div slot="caption">
+        Confirm Delete
+      </div>
+      <div slot="message">
+        Are you sure to delete the project <b>{{projectName}}</b>?
+        <br />
+        <i class="red--text text--darken-2">The operation can not be undone.</i>
+      </div>
+    </confirm-dialog>
   </v-container>
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
+  import { mapState, mapGetters, mapActions } from 'vuex'
   import find from 'lodash/find'
   import UpdateDialog from '@/dialogs/ProjectDialog'
-  import DeleteDialog from '@/dialogs/ProjectDialogDelete'
+  import ConfirmDialog from '@/dialogs/ConfirmDialog'
   import TimeString from '@/components/TimeString'
   import { getDateFormatted } from '@/utils'
+  import { errorDetailsFromError } from '@/utils/error'
 
   export default {
     name: 'administration',
     components: {
       UpdateDialog,
-      DeleteDialog,
+      ConfirmDialog,
       TimeString
     },
     data () {
       return {
         edit: false,
         deleteConfirm: false,
-        floatingButton: false
+        floatingButton: false,
+        errorMessage: undefined,
+        detailedErrorMessage: undefined
       }
     },
     computed: {
@@ -128,10 +150,49 @@ limitations under the License.
       },
       purpose () {
         return this.projectData.purpose || ''
+      },
+      isDeleteButtonDisabled () {
+        return this.shootList.length > 0
+      }
+    },
+    methods: {
+      ...mapActions([
+        'deleteProject'
+      ]),
+      hide () {
+        this.errorMessage = undefined
+        this.detailedMessage = undefined
+        this.deleteConfirm = false
+        this.edit = false
+      },
+      onDeleteProject () {
+        this
+          .deleteProject(this.project)
+          .then(() => {
+            this.hide()
+            if (this.projectList.length > 0) {
+              const p1 = this.projectList[0]
+              this.$router.push({name: 'ShootList', params: { namespace: p1.metadata.namespace }})
+            } else {
+              this.$router.push({name: 'Home', params: { }})
+            }
+          })
+          .catch(err => {
+            this.errorMessage = 'Failed to delete project.'
+
+            const errorDetails = errorDetailsFromError(err)
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
+          })
       }
     },
     mounted () {
       this.floatingButton = true
+    },
+    created () {
+      this.$bus.$on('esc-pressed', () => {
+        this.hide()
+      })
     }
   }
 </script>

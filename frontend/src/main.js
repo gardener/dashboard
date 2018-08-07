@@ -35,6 +35,7 @@ if (version === false) {
       import('./store'),
       import('./router'),
       import('axios'),
+      import('vue-snotify'),
       import('oidc-client')
     ])
     .then(([
@@ -45,6 +46,7 @@ if (version === false) {
       {default: store},
       {default: router},
       {default: axios},
+      {default: Snotify},
       Oidc
     ]) => axios
       .get('/config.json')
@@ -80,6 +82,7 @@ if (version === false) {
           Vue,
           Vuetify,
           Vuelidate,
+          Snotify,
           App,
           store,
           router: router({store, userManager})
@@ -95,10 +98,11 @@ if (version === false) {
   renderNotSupportedBrowser(version)
 }
 
-function start ({Vue, Vuetify, Vuelidate, App, store, router}) {
+function start ({Vue, Vuetify, Vuelidate, Snotify, App, store, router}) {
   /* eslint-disable no-new */
   Vue.use(Vuetify)
   Vue.use(Vuelidate)
+  Vue.use(Snotify)
 
   Vue.config.productionTip = false
 

@@ -1,6 +1,7 @@
 port: 3030
 logLevel: info
 logFormat: text
+apiServerUrl: https://minikube:8443
 jwt:
   audience: &client_id gardener
   issuer: &issuer https://minikube:32001
