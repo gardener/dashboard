@@ -233,7 +233,7 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Access
               </v-card-title>
-              <cluster-access ref="clusterAccess" :info="info"></cluster-access>
+              <cluster-access :info="info"></cluster-access>
               <template v-if="!!info.kubeconfig">
                 <v-divider class="my-2" inset></v-divider>
                 <v-expansion-panel>
@@ -549,11 +549,6 @@ limitations under the License.
       if (this.selfTerminationNotification) {
         this.$snotify.remove(this.selfTerminationNotification.id)
       }
-    },
-    beforeRouteUpdate (to, from, next) {
-      this.$refs.clusterAccess.reset()
-      this.$refs.clusterMetrics.reset()
-      next()
     }
 }
 </script>

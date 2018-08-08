@@ -123,6 +123,11 @@ limitations under the License.
             }
           }
         })
+
+        // cannot do in mount as need to reset selected item in case component gets reused, e.g. when the user switches from yaml back to ovweview
+        // eslint-disable-next-line lodash/matches-prop-shorthand
+        this.selectedItem = find(allItems, item => { return item.header === undefined })
+
         return allItems
       },
       selectedVersionIsPatch () {
@@ -149,6 +154,9 @@ limitations under the License.
     },
     methods: {
       itemIsNotNextMinor (version, type) {
+        if (!this.currentk8sVersion) {
+          return false
+        }
         let invalid = false
         if (version && type === 'minor') {
           const currentMinorVersion = semver.minor(this.currentk8sVersion)
@@ -169,10 +177,6 @@ limitations under the License.
           this.selectedItem = find(this.items, item => { return item.header === undefined })
         }
       }
-    },
-    mounted () {
-      // eslint-disable-next-line lodash/matches-prop-shorthand
-      this.selectedItem = find(this.items, item => { return item.header === undefined })
     }
   }
 </script>
