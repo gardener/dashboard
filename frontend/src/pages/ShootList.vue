@@ -32,6 +32,7 @@ limitations under the License.
           solo
           v-model="search"
           @keyup.esc="search=''"
+          class="search_textfield"
         ></v-text-field>
         <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute full-width>
           <div slot="activator">
@@ -409,15 +410,12 @@ limitations under the License.
       headlineSubtitle () {
         let subtitle = ''
         if (!this.projectScope && this.showOnlyShootsWithIssues) {
-          subtitle = 'Currently only showing clusters with issues'
-          if (this.hideUserIssues || this.isHideDeactivatedReconciliation) {
-            subtitle += '.'
-          }
+          subtitle = 'Cluster Filters: Healthy'
           if (this.isHideUserIssues) {
-            subtitle += ' User errors are excluded.'
+            subtitle += ', User Errors'
           }
           if (this.isHideDeactivatedReconciliation) {
-            subtitle += ' Clusters with deactivated reconciliation are excluded.'
+            subtitle += ', Deactivated Reconciliation'
           }
         }
         return subtitle
@@ -493,4 +491,10 @@ limitations under the License.
   .disabled_filter {
     opacity: 0.5;
   }
+
+  .search_textfield {
+    min-width: 125px;
+  }
+
+
 </style>

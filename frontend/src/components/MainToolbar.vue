@@ -60,9 +60,27 @@ limitations under the License.
         :close-on-content-click="true"
         v-model="menu"
       >
-        <v-avatar slot="activator" size="40px">
-          <img :src="avatar" :title="avatarTitle"/>
-        </v-avatar>
+        <v-tooltip left slot="activator" open-delay="500">
+          <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>
+            <v-icon slot="badge" small dark>supervisor_account</v-icon>
+            <v-avatar size="40px">
+              <img :src="avatar"/>
+            </v-avatar>
+          </v-badge>
+          <v-avatar v-else slot="activator" size="40px">
+            <img :src="avatar"/>
+          </v-avatar>
+          <span v-if="isAdmin">
+            {{avatarTitle}}
+            <v-chip small color="cyan darken-2" dark>
+              <v-avatar>
+                <v-icon>supervisor_account</v-icon>
+              </v-avatar>
+              <span class="operator">Operator</span>
+            </v-chip>
+          </span>
+          <span v-else>{{avatarTitle}}</span>
+        </v-tooltip>
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -122,7 +140,8 @@ limitations under the License.
         'cfg'
       ]),
       ...mapGetters([
-        'username'
+        'username',
+        'isAdmin'
       ]),
       helpMenuItems () {
         return this.cfg.helpMenuItems || {}
@@ -165,6 +184,11 @@ limitations under the License.
   .link-icon {
     font-size: 100%;
     padding-left: 4px;
+  }
+
+  .operator {
+    color: white;
+    font-weight: bold;
   }
 
 </style>
