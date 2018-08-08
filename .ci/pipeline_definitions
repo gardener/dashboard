@@ -18,7 +18,7 @@ dashboard:
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
     steps:
       build:
-        image: &node_image 'eu.gcr.io/gardener-project/gardener/node-test-image:1.0.0'
+        image: &node_image 'eu.gcr.io/gardener-project/gardener/node-test-image:latest'
         output_dir: 'binary'
       test:
         image: *node_image
