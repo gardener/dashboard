@@ -35,6 +35,10 @@ dashboard:
         release:
           nextversion: 'bump_minor'
         component_descriptor: ~
+        publish:
+          dockerimages:
+            dashboard:
+              tag_as_latest: true
       steps:
         prepare_release:
           image: *node_image
