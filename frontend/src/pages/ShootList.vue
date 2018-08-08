@@ -222,11 +222,6 @@ limitations under the License.
         }
       },
       hideDialog () {
-        switch (this.dialog) {
-          case 'dashboard':
-            this.$refs.clusterAccess.reset()
-            break
-        }
         this.dialog = null
         // Delay resetting shoot so that the dialog does not lose context during closing animation
         this.clearSelectedShootWithDelay()

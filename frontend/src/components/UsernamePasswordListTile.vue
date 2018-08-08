@@ -111,6 +111,11 @@ limitations under the License.
         }
       }
     },
+    watch: {
+      password (value) {
+        this.reset()
+      }
+    },
     mounted () {
       this.enableCopy()
     }
