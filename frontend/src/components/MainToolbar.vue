@@ -60,7 +60,7 @@ limitations under the License.
         :close-on-content-click="true"
         v-model="menu"
       >
-        <v-tooltip left slot="activator">
+        <v-tooltip left slot="activator" open-delay="500">
           <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>
             <v-icon slot="badge" small dark>supervisor_account</v-icon>
             <v-avatar size="40px">
