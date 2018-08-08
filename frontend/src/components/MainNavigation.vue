@@ -164,15 +164,11 @@ limitations under the License.
     },
     computed: {
       ...mapState([
-        'user',
         'namespace',
         'sidebar',
-        'title',
-        'color',
         'cfg'
       ]),
       ...mapGetters([
-        'username',
         'projectList'
       ]),
       footerLogoUrl () {

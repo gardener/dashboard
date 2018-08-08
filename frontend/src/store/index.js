@@ -56,8 +56,6 @@ const state = {
   namespace: null,
   onlyShootsWithIssues: true,
   sidebar: true,
-  title: 'Gardener',
-  color: 'green',
   user: null,
   loading: false,
   error: null,
