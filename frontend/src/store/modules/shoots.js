@@ -32,7 +32,7 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated } from '@/utils'
+import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -249,6 +249,8 @@ const getRawSortVal = (item, sortBy) => {
       return get(item, 'status.lastOperation')
     case 'createdAt':
       return metadata.creationTimestamp
+    case 'createdBy':
+      return getCreatedBy(metadata)
     case 'project':
       return metadata.namespace
     case 'k8sVersion':
