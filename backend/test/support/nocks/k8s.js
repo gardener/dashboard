@@ -791,6 +791,11 @@ const stub = {
         .reply(200, () => newRoleBinding)
     }
     return scope
+  },
+  healthz () {
+    return nockWithAuthorization(auth.bearer)
+      .get(`/healthz`)
+      .reply(200, 'ok')
   }
 }
 module.exports = {

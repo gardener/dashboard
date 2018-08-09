@@ -25,6 +25,7 @@ const ApiGroup = require('kubernetes-client/lib/api-group')
 const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
+const Specs = require('./Specs')
 
 const {
   Api,
@@ -149,5 +150,11 @@ module.exports = {
       ]
     })
     return new ApiGroup(credentials(options))
+  },
+  healthz () {
+    return new kubernetesClient.Client({
+      config: credentials(),
+      spec: Specs.Healthz
+    })
   }
 }

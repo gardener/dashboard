@@ -16,48 +16,24 @@
 
 'use strict'
 
-const { Client } = require('kubernetes-client')
+const express = require('express')
+const router = module.exports = express.Router()
 const kubernetes = require('../kubernetes')
 const { format: fmt } = require('util')
 
-const spec = {
-  swagger: '2.0',
-  paths: {
-    '/healthz': {
-      get: {
-        description: 'healthz check',
-        schemes: [
-          'https'
-        ],
-        operationId: 'healthzCheck',
-        responses: {
-          '200': {
-            description: 'OK',
-            content: {
-              'text/plain': {
-                schema: {
-                  type: 'string'
-                }
-              }
-            }
-          },
-          '401': {
-            description: 'Unauthorized'
-          }
-        }
-      }
+router.route('/')
+  .get(async (req, res, next) => {
+    try {
+      res.send(await check())
+    } catch (err) {
+      next(err)
     }
-  }
-}
+  })
 
-exports.check = async function ({user}) {
+async function check () {
   let response
   try {
-    const client = new Client({
-      config: kubernetes.credentials(user),
-      spec
-    })
-    response = await client.healthz.get()
+    response = await kubernetes.healthz().healthz.get()
   } catch (error) {
     throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', error))
   }

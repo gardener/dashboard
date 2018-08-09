@@ -34,7 +34,6 @@ router.route('/')
 module.exports = {
   '/info': router,
   '/user': require('./userInfo'),
-  '/healthz': require('./healthz'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/domains': require('./domains'),
   '/shoots': require('./shoots'),

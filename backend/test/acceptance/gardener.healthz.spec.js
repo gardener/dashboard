@@ -14,14 +14,31 @@
 // limitations under the License.
 //
 
-module.exports = {
-  cloudprofiles: require('./cloudprofiles'),
-  domains: require('./domains'),
-  projects: require('./projects'),
-  shoots: require('./shoots'),
-  infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members'),
-  administrators: require('./administrators'),
-  journals: require('./journals'),
-  customAddonDefinitions: require('./customAddonDefinitions')
-}
+'use strict'
+
+const k8s = nocks.k8s
+
+describe('gardener', function () {
+  describe('healthz', function () {
+    /* eslint no-unused-expressions: 0 */
+    let app
+
+    before(function () {
+      app = global.createServer()
+    })
+
+    after(function () {
+      app.close()
+    })
+
+    it('should return the backend healthz status', function () {
+      k8s.stub.healthz()
+      return chai.request(app)
+        .get('/healthz')
+        .then(res => {
+          expect(res).to.have.status(200)
+          expect(res.text).to.equal('ok')
+        })
+    })
+  })
+})

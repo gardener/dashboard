@@ -16,17 +16,34 @@
 
 'use strict'
 
-const express = require('express')
-const { healthz } = require('../services')
-
-const router = module.exports = express.Router()
-
-router.route('/')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      res.send(await healthz.check({user}))
-    } catch (err) {
-      next(err)
+module.exports = {
+  Healthz: {
+    swagger: '2.0',
+    paths: {
+      '/healthz': {
+        get: {
+          description: 'healthz check',
+          schemes: [
+            'https'
+          ],
+          operationId: 'healthzCheck',
+          responses: {
+            '200': {
+              description: 'OK',
+              content: {
+                'text/plain': {
+                  schema: {
+                    type: 'string'
+                  }
+                }
+              }
+            },
+            '401': {
+              description: 'Unauthorized'
+            }
+          }
+        }
+      }
     }
-  })
+  }
+}
