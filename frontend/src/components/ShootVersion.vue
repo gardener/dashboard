@@ -118,7 +118,9 @@ limitations under the License.
         this.updateDialog = false
         this.updateErrorMessage = null
         this.updateDetailedErrorMessage = null
-        this.selectedVersion = null
+        setTimeout(() => {
+          this.selectedVersion = null
+        }, 500)
       },
       versionUpdateConfirmed () {
         const user = this.$store.state.user
