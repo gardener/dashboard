@@ -23,24 +23,12 @@ module.exports = {
       '/healthz': {
         get: {
           description: 'healthz check',
-          schemes: [
-            'https'
-          ],
+          schemes: ['https'],
           operationId: 'healthzCheck',
           responses: {
-            '200': {
-              description: 'OK',
-              content: {
-                'text/plain': {
-                  schema: {
-                    type: 'string'
-                  }
-                }
-              }
-            },
-            '401': {
-              description: 'Unauthorized'
-            }
+            '200': {description: 'OK'},
+            '401': {description: 'Unauthorized'},
+            '503': {description: 'Unhealthy'}
           }
         }
       }
