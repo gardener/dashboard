@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="value" persistent max-width="500">
+  <v-dialog v-model="value" persistent max-width="500" lazy>
   <v-card>
     <v-card-title :class="titleColorClass">
       <div class="headline">

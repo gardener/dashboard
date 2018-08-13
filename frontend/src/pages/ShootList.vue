@@ -98,7 +98,7 @@ limitations under the License.
         </template>
       </v-data-table>
 
-      <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
+      <v-dialog v-model="kubeconfigDialog" persistent max-width="67%" lazy>
         <v-card>
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
             <div class="headline">Kubeconfig <code class="cluster_name">{{currentName}}</code></div>
@@ -113,7 +113,7 @@ limitations under the License.
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dashboardDialog" max-width="600">
+      <v-dialog v-model="dashboardDialog" max-width="600" lazy>
         <v-card>
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
             <div class="headline">Kube-Cluster Access <code class="cluster_name">{{currentName}}</code></div>
@@ -128,7 +128,9 @@ limitations under the License.
 
       <delete-cluster-dialog v-model="deleteDialog" @close="hideDialog" :clusterName="currentName" :clusterNamespace="currentNamespace" :clusterCreatedBy="currentCreatedBy"></delete-cluster-dialog>
 
-      <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
+      <template v-if="renderCreateDialog">
+        <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
+      </template>
     </v-card>
     <v-fab-transition>
       <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showDialog({action: 'create'})">
@@ -151,6 +153,12 @@ limitations under the License.
   import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
   import ClusterAccess from '@/components/ClusterAccess'
   import { getCreatedBy } from '@/utils'
+  import VueLazyload from 'vue-lazyload'
+  import Vue from 'vue'
+
+  Vue.use(VueLazyload, {
+    lazyComponent: true
+  })
 
   export default {
     name: 'shoot-list',
@@ -184,7 +192,8 @@ limitations under the License.
         tableMenu: false,
         pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
         cachedItems: null,
-        clearSelectedShootTimerID: undefined
+        clearSelectedShootTimerID: undefined,
+        renderCreateDialog: false
       }
     },
     watch: {
@@ -219,6 +228,7 @@ limitations under the License.
               })
             break
           case 'create':
+            this.renderCreateDialog = true
             this.dialog = args.action
         }
       },
