@@ -50,8 +50,9 @@ function registerHandler (emitter, handler) {
     if (events.includes(type)) {
       if (type !== 'ERROR') {
         const metadata = event.object.metadata
-        const name = metadata.name
-        logger.debug('%s to %s: %s', type, emitter.resourceName, name)
+        const name = get(metadata, 'name')
+        const namespace = get(metadata, 'namespace', '')
+        logger.debug('%s to %s: %s/%s', type, emitter.resourceName, namespace, name)
         handler(event)
       } else {
         const status = event.object
