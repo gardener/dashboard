@@ -301,3 +301,15 @@ export function isShootMarkedForDeletion (metadata) {
 
   return !!deletionTimestamp && !!confirmation
 }
+
+// expect colors to be in format <color> <optional:modifier>
+export function textColor (color) {
+  const colorArr = split(color, ' ')
+  const colorStr = colorArr[0]
+  const colorMod = colorArr[1]
+  let textColor = `${colorStr}--text`
+  if (colorMod) {
+    textColor = `${textColor} text--${colorMod}`
+  }
+  return textColor
+}
