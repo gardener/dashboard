@@ -24,7 +24,7 @@ limitations under the License.
       >
         <v-container>
           <v-layout>
-            <v-flex xs2>
+            <v-flex xs1>
               <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
             </v-flex>
             <v-flex>
@@ -140,7 +140,6 @@ limitations under the License.
 
   .credential_title {
     font-size:30px
-    padding-top:40px
     font-weight:400
   }
 </style>

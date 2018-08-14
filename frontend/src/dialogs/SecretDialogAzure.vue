@@ -36,6 +36,9 @@ limitations under the License.
             ref="clientId"
             v-model="clientId"
             :label="clientIdLabel"
+            :error-messages="getErrorMessages('clientId')"
+            @input="$v.clientId.$touch()"
+            @blur="$v.clientId.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -49,6 +52,9 @@ limitations under the License.
             :append-icon-cb="() => (hideSecret = !hideSecret)"
             :type="hideSecret ? 'password' : 'text'"
             :label="clientSecretLabel"
+            :error-messages="getErrorMessages('clientSecret')"
+            @input="$v.clientSecret.$touch()"
+            @blur="$v.clientSecret.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -59,6 +65,9 @@ limitations under the License.
             color="blue"
             v-model="tenantId"
             :label="tenantIdLabel"
+            :error-messages="getErrorMessages('tenantId')"
+            @input="$v.tenantId.$touch()"
+            @blur="$v.tenantId.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -69,6 +78,9 @@ limitations under the License.
             color="blue"
             v-model="subscriptionId"
             :label="subscriptionIdLabel"
+            :error-messages="getErrorMessages('subscriptionId')"
+            @input="$v.subscriptionId.$touch()"
+            @blur="$v.subscriptionId.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -82,8 +94,22 @@ limitations under the License.
 <script>
   import SecretDialog from '@/dialogs/SecretDialog'
   import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+  import { required } from 'vuelidate/lib/validators'
 
-  const validationErrors = {}
+  const validationErrors = {
+    clientId: {
+      required: 'You can\'t leave this empty.'
+    },
+    clientSecret: {
+      required: 'You can\'t leave this empty.'
+    },
+    tenantId: {
+      required: 'You can\'t leave this empty.'
+    },
+    subscriptionId: {
+      required: 'You can\'t leave this empty.'
+    }
+  }
 
   export default {
     components: {
@@ -125,7 +151,20 @@ limitations under the License.
         }
       },
       validators () {
-        const validators = {}
+        const validators = {
+          clientId: {
+            required
+          },
+          clientSecret: {
+            required
+          },
+          tenantId: {
+            required
+          },
+          subscriptionId: {
+            required
+          }
+        }
         return validators
       },
       isCreateMode () {

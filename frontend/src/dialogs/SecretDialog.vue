@@ -78,7 +78,7 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native="cancel">Cancel</v-btn>
-        <v-btn flat @click.native="submit" :class="`${color}--text`" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-btn flat @click.native="submit" :class="`${textColor}`" :disabled="!valid">{{submitButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -89,7 +89,7 @@ limitations under the License.
   import { mapActions, mapState, mapGetters } from 'vuex'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { unique, resourceName } from '@/utils/validators'
-  import { getValidationErrors, setDelayedInputFocus, setInputFocus } from '@/utils'
+  import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
   import CloudProfile from '@/components/CloudProfile'
   import cloneDeep from 'lodash/cloneDeep'
   import get from 'lodash/get'
@@ -234,6 +234,9 @@ limitations under the License.
       },
       title () {
         return this.isCreateMode ? this.createTitle : this.replaceTitle
+      },
+      textColor () {
+        return textColor(this.color)
       }
     },
     methods: {

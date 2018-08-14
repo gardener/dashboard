@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="value" persistent max-width="500">
+  <v-dialog v-model="value" persistent max-width="500" lazy>
   <v-card>
     <v-card-title :class="titleColorClass">
       <div class="headline">
@@ -30,6 +30,7 @@ limitations under the License.
         This is a generic dialog template.
       </slot>
       <v-text-field
+        @keyup.enter="okClicked()"
         v-if="confirm && !confirmDisabled"
         ref="deleteDialogInput"
         :hint="hint"
@@ -46,7 +47,7 @@ limitations under the License.
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="okClicked()" :disabled="confirmDisabled || hasError" :class="textColorClass" flat>Confirm</v-btn>
+      <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>Confirm</v-btn>
     </v-card-actions>
   </v-card>
   </v-dialog>
@@ -140,6 +141,9 @@ limitations under the License.
       },
       textColorClass () {
         return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
+      },
+      valid () {
+        return !this.confirmDisabled && !this.hasError
       }
     },
     methods: {
@@ -169,7 +173,7 @@ limitations under the License.
         }
       },
       okClicked () {
-        if (this.ok) {
+        if (this.ok && this.valid) {
           this.ok()
         }
       },

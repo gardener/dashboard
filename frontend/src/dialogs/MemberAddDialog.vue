@@ -19,7 +19,7 @@ limitations under the License.
     <v-card class="add_member" :class="cardClass">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <span v-if="isUserDialog">Assign user to Project</span>
+        <span v-if="isUserDialog">Add user to Project</span>
         <span v-if="isServiceDialog">Add Service Account to Project</span>
       </v-card-title>
 
@@ -33,6 +33,7 @@ limitations under the License.
             :error-messages="emailErrors"
             @input="$v.email.$touch()"
             @blur="$v.email.$touch()"
+            @keyup.enter="submit()"
             required
             tabindex="1"
           ></v-text-field>
@@ -45,6 +46,7 @@ limitations under the License.
             :error-messages="serviceAccountNameErrors"
             @input="$v.serviceAccountName.$touch()"
             @blur="$v.serviceAccountName.$touch()"
+            @keyup.enter="submit()"
             required
             tabindex="1"
           ></v-text-field>
