@@ -153,12 +153,6 @@ limitations under the License.
   import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
   import ClusterAccess from '@/components/ClusterAccess'
   import { getCreatedBy } from '@/utils'
-  import VueLazyload from 'vue-lazyload'
-  import Vue from 'vue'
-
-  Vue.use(VueLazyload, {
-    lazyComponent: true
-  })
 
   export default {
     name: 'shoot-list',

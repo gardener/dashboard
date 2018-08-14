@@ -47,7 +47,7 @@ limitations under the License.
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="okClicked()" :disabled="confirmDisabled || hasError" :class="textColorClass" flat>Confirm</v-btn>
+      <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>Confirm</v-btn>
     </v-card-actions>
   </v-card>
   </v-dialog>
@@ -141,6 +141,9 @@ limitations under the License.
       },
       textColorClass () {
         return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
+      },
+      valid () {
+        return !this.confirmDisabled && !this.hasError
       }
     },
     methods: {
@@ -170,7 +173,7 @@ limitations under the License.
         }
       },
       okClicked () {
-        if (this.ok && !this.confirmDisabled && !this.hasError) {
+        if (this.ok && this.valid) {
           this.ok()
         }
       },
