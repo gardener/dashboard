@@ -30,6 +30,7 @@ limitations under the License.
         This is a generic dialog template.
       </slot>
       <v-text-field
+        @keyup.enter="okClicked()"
         v-if="confirm && !confirmDisabled"
         ref="deleteDialogInput"
         :hint="hint"
@@ -169,7 +170,7 @@ limitations under the License.
         }
       },
       okClicked () {
-        if (this.ok) {
+        if (this.ok && !this.confirmDisabled && !this.hasError) {
           this.ok()
         }
       },
