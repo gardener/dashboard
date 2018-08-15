@@ -61,7 +61,20 @@ export default function createRouter ({store, userManager}) {
     }
   }
 
-  /* router */
+  /* router
+    meta {
+    public: 'Determines whether route needs authorization',
+    namespaced: 'Determines whether route is namespace specific and has namespace in path',
+    projectscope: 'Determines whether route can be accessed in context of mutiple projects (_all)',
+    toRouteName: 'Sets "to" target name in case navigation is triggered (e.g. due to project change),
+                   this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
+                   Furthermore, it is possible to set a default child route for a top level item',
+    title: 'main menu title',
+    icon: 'main menu icon',
+    breadcrumb: 'Determines if breadcrumb is visible for route'
+  }
+
+  */
   const mode = 'history'
   const routes = [
     {
@@ -96,7 +109,6 @@ export default function createRouter ({store, userManager}) {
           name: 'Home',
           component: Home,
           meta: {
-            public: false,
             title: 'Home',
             namespaced: false,
             projectScope: false
@@ -107,7 +119,6 @@ export default function createRouter ({store, userManager}) {
           name: 'Account',
           component: Account,
           meta: {
-            public: false,
             title: 'Account',
             breadcrumb: true,
             namespaced: false,
@@ -134,7 +145,6 @@ export default function createRouter ({store, userManager}) {
               name: 'ShootList',
               component: ShootList,
               meta: {
-                public: false,
                 namespaced: true,
                 projectScope: false,
                 title: 'Project Clusters'
@@ -145,9 +155,8 @@ export default function createRouter ({store, userManager}) {
               name: 'ShootItem',
               component: ShootItem,
               meta: {
-                public: false,
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootList',
                 breadcrumb: true
@@ -175,9 +184,8 @@ export default function createRouter ({store, userManager}) {
               name: 'Secrets',
               component: Secrets,
               meta: {
-                public: false,
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Secrets'
               }
             },
@@ -186,9 +194,8 @@ export default function createRouter ({store, userManager}) {
               name: 'Secret',
               component: Secrets,
               meta: {
-                public: false,
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Secrets',
                 toRouteName: 'Secrets'
               }
@@ -200,7 +207,6 @@ export default function createRouter ({store, userManager}) {
           name: 'Members',
           component: Members,
           meta: {
-            public: false,
             namespaced: true,
             projectScope: true,
             title: 'Members',
@@ -216,7 +222,6 @@ export default function createRouter ({store, userManager}) {
           name: 'Administration',
           component: Administration,
           meta: {
-            public: false,
             namespaced: true,
             projectScope: true,
             title: 'Administration',
