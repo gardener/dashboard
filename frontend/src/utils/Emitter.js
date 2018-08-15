@@ -206,7 +206,8 @@ class ShootsSubscription extends AbstractSubscription {
       store.dispatch('clearShoots'),
       store.dispatch('setShootsLoading')
     ])
-    if (namespace === '_all') {
+    if (namespace === '_all' && !store.getters.isAdmin) {
+      // Non admim users cannot fetch all shoots but must make requests for each ns they have access to
       const allNamespaces = await store.getters.namespaces
       const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
       this.socket.emit('subscribeShoots', {namespaces})
