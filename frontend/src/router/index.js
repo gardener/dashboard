@@ -63,9 +63,9 @@ export default function createRouter ({store, userManager}) {
 
   /* router
     meta {
-    public: 'Determines weather route needs authorization',
-    namespaced: 'Determines weather route is namespace specific and has namespace in path',
-    projectscope: 'Determines weather route can be accessed in context of mutiple projects (_all)',
+    public: 'Determines whether route needs authorization',
+    namespaced: 'Determines whether route is namespace specific and has namespace in path',
+    projectscope: 'Determines whether route can be accessed in context of mutiple projects (_all)',
     toRouteName: 'Sets "to" target name in case navigation is triggered (e.g. due to project change),
                    this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
                    Furthermore, it is possible to set a default child route for a top level item',
