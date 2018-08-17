@@ -111,11 +111,11 @@ function leaveCommentsRooms (socket) {
 }
 
 function setupShootsNamespace (shootsNsp) {
-  const subscribeShoots = async function ({socket, namespaces, projectList}) {
+  const subscribeShoots = async function ({socket, namespacesAndFilters, projectList}) {
     leaveShootsAndShootRoom(socket)
 
     /* join current rooms */
-    if (!_.isArray(namespaces)) {
+    if (!_.isArray(namespacesAndFilters)) {
       return
     }
     const kind = 'shoots'
@@ -123,7 +123,7 @@ function setupShootsNamespace (shootsNsp) {
     const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
 
     await _
-      .chain(namespaces)
+      .chain(namespacesAndFilters)
       .filter(({namespace}) => !!_.find(projectList, ['metadata.namespace', namespace]))
       .map(async ({namespace, filter}) => {
         // join room
@@ -150,7 +150,7 @@ function setupShootsNamespace (shootsNsp) {
     batchEmitter.flush()
     socket.emit('batchNamespacedEventsDone', {
       kind,
-      namespaces: _.map(namespaces, ({namespace}) => namespace)
+      namespaces: _.map(namespacesAndFilters, ({namespace}) => namespace)
     })
   }
   const subscribeShootsAdmin = async function ({socket, user, namespaces, filter}) {
@@ -207,14 +207,14 @@ function setupShootsNamespace (shootsNsp) {
       if (await administrators.isAdmin(user)) {
         subscribeShootsAdmin({socket, user, namespaces, filter})
       } else {
-        const subscribeToNamespaces = _.map(namespaces, (namespace) => { return { namespace, filter } })
-        subscribeShoots({socket, namespaces: subscribeToNamespaces, projectList})
+        const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
+        subscribeShoots({socket, namespacesAndFilters, projectList})
       }
     })
     socket.on('subscribeShoots', async ({namespaces}) => {
       const user = getUserFromSocket(socket)
       const projectList = await projects.list({user})
-      subscribeShoots({namespaces, socket, projectList})
+      subscribeShoots({namespacesAndFilters: namespaces, socket, projectList})
     })
     socket.on('subscribeShoot', async ({name, namespace}) => {
       leaveShootsAndShootRoom(socket)
