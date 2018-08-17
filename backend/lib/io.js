@@ -111,7 +111,7 @@ function leaveCommentsRooms (socket) {
 }
 
 function setupShootsNamespace (shootsNsp) {
-  const subscribeShoots = async function ({socket, namespaces, validateNamespaces}) {
+  const subscribeShoots = async function ({socket, namespaces, projectList}) {
     leaveShootsAndShootRoom(socket)
 
     /* join current rooms */
@@ -122,17 +122,9 @@ function setupShootsNamespace (shootsNsp) {
     const user = getUserFromSocket(socket)
     const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
 
-    let filter
-    if (validateNamespaces) {
-      const projectList = await projects.list({user})
-      filter = (namespace) => !!_.find(projectList, ['metadata.namespace', namespace])
-    } else {
-      filter = (namespace) => true
-    }
-
     await _
       .chain(namespaces)
-      .filter(({namespace}) => filter(namespace))
+      .filter(({namespace}) => !!_.find(projectList, ['metadata.namespace', namespace]))
       .map(async ({namespace, filter}) => {
         // join room
         const shootsWithIssuesOnly = !!filter
@@ -161,6 +153,47 @@ function setupShootsNamespace (shootsNsp) {
       namespaces: _.map(namespaces, ({namespace}) => namespace)
     })
   }
+  const subscribeShootsAdmin = async function ({socket, user, namespaces, filter}) {
+    leaveShootsAndShootRoom(socket)
+
+    const kind = 'shoots'
+    const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+    const shootsWithIssuesOnly = !!filter
+
+    try {
+      // join rooms
+      _.forEach(namespaces, namespace => {
+        const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
+        joinRoom(socket, room)
+      })
+
+      // fetch shoots
+      const shootList = await shoots.list({user, shootsWithIssuesOnly})
+      const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
+      const nsObjects = {}
+      _.forEach(objects, object => {
+        const ns = _.get(object, 'metadata.namespace')
+        if (!nsObjects[ns]) {
+          nsObjects[ns] = []
+        }
+        nsObjects[ns].push(object)
+      })
+      _.forEach(_.keys(nsObjects), ns => batchEmitter.batchEmitObjects(nsObjects[ns], ns))
+    } catch (error) {
+      logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
+      socket.emit('subscription_error', {
+        kind,
+        code: 500,
+        message: `Failed to fetch shoots for all namespaces`
+      })
+    }
+    batchEmitter.flush()
+    socket.emit('batchNamespacedEventsDone', {
+      kind,
+      namespaces
+    })
+  }
+
   // handle socket connections
   shootsNsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
@@ -172,50 +205,17 @@ function setupShootsNamespace (shootsNsp) {
       const namespaces = _.map(projectList, (project) => _.get(project, 'metadata.namespace'))
 
       if (await administrators.isAdmin(user)) {
-        leaveShootsAndShootRoom(socket)
-
-        const kind = 'shoots'
-        const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
-        const shootsWithIssuesOnly = !!filter
-
-        try {
-          // join rooms
-          _.forEach(namespaces, namespace => {
-            const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-            joinRoom(socket, room)
-          })
-
-          // fetch shoots
-          const shootList = await shoots.list({user, shootsWithIssuesOnly})
-          const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-          const nsObjects = {}
-          _.forEach(objects, object => {
-            const ns = _.get(object, 'metadata.namespace')
-            if (!nsObjects[ns]) {
-              nsObjects[ns] = []
-            }
-            nsObjects[ns].push(object)
-          })
-          _.forEach(_.keys(nsObjects), ns => batchEmitter.batchEmitObjects(nsObjects[ns], ns))
-        } catch (error) {
-          logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
-          socket.emit('subscription_error', {
-            kind,
-            code: 500,
-            message: `Failed to fetch shoots for all namespaces`
-          })
-        }
-        batchEmitter.flush()
-        socket.emit('batchNamespacedEventsDone', {
-          kind,
-          namespaces: _.map(namespaces, ({namespace}) => namespace)
-        })
+        subscribeShootsAdmin({socket, user, namespaces, filter})
       } else {
         const subscribeToNamespaces = _.map(namespaces, (namespace) => { return { namespace, filter } })
-        subscribeShoots({namespaces: subscribeToNamespaces, socket})
+        subscribeShoots({socket, namespaces: subscribeToNamespaces, projectList})
       }
     })
-    socket.on('subscribeShoots', ({namespaces}) => subscribeShoots({namespaces, socket, validateNamespaces: true}))
+    socket.on('subscribeShoots', async ({namespaces}) => {
+      const user = getUserFromSocket(socket)
+      const projectList = await projects.list({user})
+      subscribeShoots({namespaces, socket, projectList})
+    })
     socket.on('subscribeShoot', async ({name, namespace}) => {
       leaveShootsAndShootRoom(socket)
 
