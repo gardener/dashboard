@@ -111,33 +111,81 @@ function leaveCommentsRooms (socket) {
 }
 
 function setupShootsNamespace (shootsNsp) {
+  const subscribeShoots = async function ({socket, namespaces, validateNamespaces}) {
+    leaveShootsAndShootRoom(socket)
+
+    /* join current rooms */
+    if (!_.isArray(namespaces)) {
+      return
+    }
+    const kind = 'shoots'
+    const user = getUserFromSocket(socket)
+    const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+
+    let filter
+    if (validateNamespaces) {
+      const projectList = await projects.list({user})
+      filter = (namespace) => !!_.find(projectList, ['metadata.namespace', namespace])
+    } else {
+      filter = (namespace) => true
+    }
+
+    await _
+      .chain(namespaces)
+      .filter(({namespace}) => filter(namespace))
+      .map(async ({namespace, filter}) => {
+        // join room
+        const shootsWithIssuesOnly = !!filter
+        const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
+        joinRoom(socket, room)
+        try {
+          // fetch shoots for namespace
+          const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
+          const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
+          batchEmitter.batchEmitObjects(objects, namespace)
+        } catch (error) {
+          logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
+          socket.emit('subscription_error', {
+            kind,
+            code: 500,
+            message: `Failed to fetch shoots for namespace ${namespace}`
+          })
+        }
+      })
+      .thru(promises => Promise.all(promises))
+      .value()
+
+    batchEmitter.flush()
+    socket.emit('batchNamespacedEventsDone', {
+      kind,
+      namespaces: _.map(namespaces, ({namespace}) => namespace)
+    })
+  }
   // handle socket connections
   shootsNsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
 
     socket.on('disconnect', onDisconnect)
-    socket.on('subscribeShoots', async ({namespaces}) => {
-      leaveShootsAndShootRoom(socket)
-
-      /* join current rooms */
-      if (!_.isArray(namespaces)) {
-        return
-      }
-      const kind = 'shoots'
+    socket.on('subscribeAllShoots', async ({filter}) => {
       const user = getUserFromSocket(socket)
-      const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
       const projectList = await projects.list({user})
+      const namespaces = _.map(projectList, (project) => _.get(project, 'metadata.namespace'))
 
-      if (_.get(_.head(namespaces), 'namespace') === '_all') {
+      if (await administrators.isAdmin(user)) {
+        leaveShootsAndShootRoom(socket)
+
+        const kind = 'shoots'
+        const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+        const shootsWithIssuesOnly = !!filter
+
         try {
-          const filter = _.get(_.head(namespaces), 'filter')
-          const shootsWithIssuesOnly = !!filter
-          const subscribeToNamespaces = _.map(projectList, (project) => _.get(project, 'metadata.namespace'))
-          _.forEach(subscribeToNamespaces, namespace => {
+          // join rooms
+          _.forEach(namespaces, namespace => {
             const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
             joinRoom(socket, room)
           })
 
+          // fetch shoots
           const shootList = await shoots.list({user, shootsWithIssuesOnly})
           const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
           const nsObjects = {}
@@ -148,7 +196,6 @@ function setupShootsNamespace (shootsNsp) {
             }
             nsObjects[ns].push(object)
           })
-
           _.forEach(_.keys(nsObjects), ns => batchEmitter.batchEmitObjects(nsObjects[ns], ns))
         } catch (error) {
           logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
@@ -158,37 +205,17 @@ function setupShootsNamespace (shootsNsp) {
             message: `Failed to fetch shoots for all namespaces`
           })
         }
+        batchEmitter.flush()
+        socket.emit('batchNamespacedEventsDone', {
+          kind,
+          namespaces: _.map(namespaces, ({namespace}) => namespace)
+        })
       } else {
-        await _
-          .chain(namespaces)
-          .filter(({namespace}) => !!_.find(projectList, ['metadata.namespace', namespace]))
-          .map(async ({namespace, filter}) => {
-            const shootsWithIssuesOnly = !!filter
-            const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
-            joinRoom(socket, room)
-            try {
-              const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
-              const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-              batchEmitter.batchEmitObjects(objects, namespace)
-            } catch (error) {
-              logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
-              socket.emit('subscription_error', {
-                kind,
-                code: 500,
-                message: `Failed to fetch shoots for namespace ${namespace}`
-              })
-            }
-          })
-          .thru(promises => Promise.all(promises))
-          .value()
+        const subscribeToNamespaces = _.map(namespaces, (namespace) => { return { namespace, filter } })
+        subscribeShoots({namespaces: subscribeToNamespaces, socket})
       }
-
-      batchEmitter.flush()
-      socket.emit('batchNamespacedEventsDone', {
-        kind,
-        namespaces: _.map(namespaces, ({namespace}) => namespace)
-      })
     })
+    socket.on('subscribeShoots', ({namespaces}) => subscribeShoots({namespaces, socket, validateNamespaces: true}))
     socket.on('subscribeShoot', async ({name, namespace}) => {
       leaveShootsAndShootRoom(socket)
 
