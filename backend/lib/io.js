@@ -133,8 +133,7 @@ function setupShootsNamespace (shootsNsp) {
         try {
           // fetch shoots for namespace
           const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
-          const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-          batchEmitter.batchEmitObjects(objects, namespace)
+          batchEmitter.batchEmitObjects(shootList.items, namespace)
         } catch (error) {
           logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
           socket.emit('subscription_error', {
@@ -150,7 +149,7 @@ function setupShootsNamespace (shootsNsp) {
     batchEmitter.flush()
     socket.emit('batchNamespacedEventsDone', {
       kind,
-      namespaces: _.map(namespacesAndFilters, ({namespace}) => namespace)
+      namespaces: _.map(namespacesAndFilters, 'namespace')
     })
   }
   const subscribeShootsAdmin = async function ({socket, user, namespaces, filter}) {
@@ -169,16 +168,18 @@ function setupShootsNamespace (shootsNsp) {
 
       // fetch shoots
       const shootList = await shoots.list({user, shootsWithIssuesOnly})
-      const objects = _.filter(shootList.items, (shoot) => filter !== 'issues' || shootHasIssue(shoot))
-      const nsObjects = {}
-      _.forEach(objects, object => {
-        const ns = _.get(object, 'metadata.namespace')
-        if (!nsObjects[ns]) {
-          nsObjects[ns] = []
-        }
-        nsObjects[ns].push(object)
-      })
-      _.forEach(_.keys(nsObjects), ns => batchEmitter.batchEmitObjects(nsObjects[ns], ns))
+      const batchEmitObjects = _
+        .chain(batchEmitter)
+        .bindKey('batchEmitObjects')
+        .ary(2)
+        .value()
+
+      _
+        .chain(shootList)
+        .get('items')
+        .groupBy('metadata.namespace')
+        .forEach(batchEmitObjects)
+        .commit()
     } catch (error) {
       logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
       socket.emit('subscription_error', {
@@ -202,7 +203,7 @@ function setupShootsNamespace (shootsNsp) {
     socket.on('subscribeAllShoots', async ({filter}) => {
       const user = getUserFromSocket(socket)
       const projectList = await projects.list({user})
-      const namespaces = _.map(projectList, (project) => _.get(project, 'metadata.namespace'))
+      const namespaces = _.map(projectList, 'metadata.namespace')
 
       if (await administrators.isAdmin(user)) {
         subscribeShootsAdmin({socket, user, namespaces, filter})
