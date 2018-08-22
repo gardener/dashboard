@@ -21,6 +21,7 @@ limitations under the License.
         @click="showUpdateDialog"
         :outline="!k8sPatchAvailable"
         :dark="k8sPatchAvailable"
+        depressed
         color="cyan darken-2">
           <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
           {{k8sVersion}}
@@ -38,6 +39,7 @@ limitations under the License.
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
       confirmColor="orange"
+      defaultColor="orange"
       >
       <template slot="caption">Update Cluster</template>
       <template slot="affectedObjectName">{{shootName}}</template>

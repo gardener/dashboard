@@ -17,7 +17,6 @@ limitations under the License.
 <template>
   <v-select
     :items="items"
-    item-text="version"
     v-model="selectedItem"
     :label="label"
     color="cyan darken-2"
@@ -27,8 +26,8 @@ limitations under the License.
   <template slot="item" slot-scope="data">
     <v-tooltip top :disabled="!data.item.notNextMinor">
       <v-list-tile-content slot="activator">
-        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.version}}</v-list-tile-title>
-        <v-list-tile-title v-else class="text--disabled">{{data.item.version}}</v-list-tile-title>
+        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.text}}</v-list-tile-title>
+        <v-list-tile-title v-else class="text--disabled">{{data.item.text}}</v-list-tile-title>
       </v-list-tile-content>
       <span>You cannot upgrade your cluster more than one minor version at a time</span>
     </v-tooltip>
@@ -78,6 +77,7 @@ limitations under the License.
           return map(versions, version => {
             return {type,
               version,
+              text: `${this.currentk8sVersion} → ${version}`,
               notNextMinor: this.itemIsNotNextMinor(version, type)
             }
           })
