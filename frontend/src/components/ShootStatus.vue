@@ -251,7 +251,7 @@ limitations under the License.
   }
 
   .status-icon-check {
-    font-size: 2.4em;
+    font-size: 2.3em;
   }
 
   .alert-message {

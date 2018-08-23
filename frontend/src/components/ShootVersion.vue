@@ -17,7 +17,12 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" class="update_btn" :class="buttonInactive" small round
+      <v-btn
+        slot="activator"
+        class="update_btn"
+        :class="buttonInactive"
+        small
+        round
         @click="showUpdateDialog"
         :outline="!k8sPatchAvailable"
         :dark="k8sPatchAvailable"
@@ -146,6 +151,7 @@ limitations under the License.
 <style lang="styl" scoped>
   .update_btn {
     min-width: 0px;
+    margin: 0px;
   }
 
   .update_btn >>> i {
