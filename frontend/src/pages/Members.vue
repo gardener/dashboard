@@ -100,7 +100,7 @@ limitations under the License.
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <span>Delete Member</span>
@@ -168,7 +168,7 @@ limitations under the License.
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" small icon class="blue-grey--text text--darken-2" @click="onKubeconfig(name)">
+                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
                   <v-icon>settings</v-icon>
                 </v-btn>
                 <span>Show Kubeconfig</span>
@@ -176,7 +176,7 @@ limitations under the License.
             </v-list-tile-action>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="blue-grey--text text--darken-2" @click.native.stop="onDownload(name)">
+                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
                   <v-icon>mdi-download</v-icon>
                 </v-btn>
                 <span>Download Kubeconfig</span>
@@ -184,7 +184,7 @@ limitations under the License.
             </v-list-tile-action>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text text--darken-2" @click.native.stop="onDelete(name)">
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <span>Delete Service Account</span>
@@ -215,7 +215,7 @@ limitations under the License.
     </v-dialog>
     <v-fab-transition>
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
-        <v-btn slot="activator" v-model="fab" color="cyan darken-2" dark fab>
+        <v-btn slot="activator" v-model="fab" color="teal darken-2" dark fab>
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>

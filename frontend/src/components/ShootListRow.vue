@@ -90,19 +90,19 @@ limitations under the License.
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
-          <v-btn small icon class="green--text text--darken-2" slot="activator" :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard')">
+          <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard')">
             <v-icon>dashboard</v-icon>
           </v-btn>
           <span>{{showDashboardActionTitle}}</span>
         </v-tooltip>
         <v-tooltip top>
-          <v-btn small icon class="blue--text text--darken-2" slot="activator" :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig')">
+          <v-btn small icon class="blue--text" slot="activator" :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig')">
             <v-icon>settings</v-icon>
           </v-btn>
           <span>{{showKubeconfigActionTitle}}</span>
         </v-tooltip>
         <v-tooltip top>
-          <v-btn small icon class="red--text text--darken-2" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
+          <v-btn small icon class="red--text" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
             <v-icon>delete</v-icon>
           </v-btn>
           <span>{{deleteClusterActionTitle}}</span>
