@@ -35,7 +35,12 @@ exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) 
   if (shootsWithIssuesOnly) {
     qs = {labelSelector: 'shoot.garden.sapcloud.io/unhealthy=true'}
   }
-  return Garden(user).namespaces(namespace).shoots.get({qs})
+  if (namespace) {
+    return Garden(user).namespaces(namespace).shoots.get({qs})
+  } else {
+    // only works if user is member of garden-administrators (admin)
+    return Garden(user).shoots.get({qs})
+  }
 }
 
 exports.create = async function ({user, namespace, body}) {
