@@ -24,7 +24,6 @@ const { jwt } = require('./middleware')
 const { projects, shoots, journals, administrators } = require('./services')
 const { getIssueComments } = journals
 const watches = require('./watches')
-const { shootHasIssue } = require('./utils')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { getJournalCache } = require('./cache')
 
