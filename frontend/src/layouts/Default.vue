@@ -22,7 +22,7 @@ limitations under the License.
     <v-content>
       <router-view></router-view>
     </v-content>
-    <vue-snotify></vue-snotify>
+    <g-snotify></g-snotify>
   </v-app>
 </template>
 
@@ -30,119 +30,15 @@ limitations under the License.
   import MainNavigation from '@/components/MainNavigation.vue'
   import MainToolbar from '@/components/MainToolbar.vue'
   import Loading from '@/components/Loading.vue'
-  import { mapGetters, mapActions } from 'vuex'
-  import 'vue-snotify/styles/material.css'
-  import { SnotifyPosition } from 'vue-snotify'
+  import GSnotify from '@/components/GSnotify.vue'
 
   export default {
     name: 'Default',
     components: {
       MainNavigation,
       MainToolbar,
-      Loading
-    },
-    data () {
-      return {
-        websocketConnectionNotification: undefined,
-        websocketConnectionNotificationMessage: 'The content on this page might be outdated'
-      }
-    },
-    computed: {
-      ...mapGetters([
-        'errorMessage',
-        'alertMessage',
-        'alertType',
-        'isWebsocketConnectionError',
-        'websocketConnectAttempt'
-      ])
-    },
-    watch: {
-      errorMessage (value) {
-        if (value) {
-          this.showSnotifyToast(value, 'error')
-          this.setError(null)
-        }
-      },
-      alertMessage (value) {
-        if (value) {
-          this.showSnotifyToast(value, this.alertType)
-          this.setAlert(null)
-        }
-      },
-      isWebsocketConnectionError (value) {
-        if (value === true) {
-          this.showWebsocketConnectionError()
-        } else {
-          this.removeWebsocketConnectionError()
-        }
-      },
-      websocketConnectAttempt (value) {
-        if (this.websocketConnectionNotification) {
-          if (value > 0) {
-            this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
-          } else {
-            this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
-          }
-        }
-      }
-    },
-    methods: {
-      ...mapActions([
-        'setError',
-        'setAlert'
-      ]),
-      showWebsocketConnectionError () {
-        if (!this.websocketConnectionNotification) {
-          this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, `No Connection`, {
-            timeout: 0,
-            closeOnClick: false,
-            position: SnotifyPosition.rightTop
-          })
-        }
-      },
-      removeWebsocketConnectionError () {
-        if (this.websocketConnectionNotification) {
-          this.$snotify.remove(this.websocketConnectionNotification.id)
-        }
-        this.websocketConnectionNotification = undefined
-      },
-      showSnotifyToast (message, type) {
-        const config = {
-          position: SnotifyPosition.rightBottom,
-          timeout: 5000,
-          showProgressBar: false
-        }
-        switch (type) {
-          case 'success':
-            config.timeout = 3000
-            this.$snotify.success(message, config)
-            break
-          case 'warning':
-            this.$snotify.warning(message, config)
-            break
-          case 'info':
-            this.$snotify.info(message, config)
-            break
-          default:
-            this.$snotify.error(message, config)
-        }
-      }
+      Loading,
+      GSnotify
     }
   }
 </script>
-
-<style lang="styl">
-  @import 'vue-snotify/styles/material.css'
-
-  .snotify-rightTop {
-    top: 75px;
-  }
-
-  .snotify-info {
-    background-color: #0097A7; // cyan darken-2
-  }
-
-  .snotify {
-    width: 400px;
-  }
-</style>
