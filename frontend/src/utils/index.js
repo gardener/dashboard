@@ -202,6 +202,10 @@ export function getTimeStringTo (time, toTime) {
   if (!time) {
     return undefined
   } else {
+    if (time.getTime() === toTime.getTime()) {
+      // Equal dates result in text "a few seconds ago", this is not we want here...
+      toTime.setSeconds(toTime.getSeconds() + 1)
+    }
     return moment(time).to(toTime)
   }
 }

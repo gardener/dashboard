@@ -47,7 +47,7 @@ limitations under the License.
                 <label class="caption grey--text text--darken-2">Created At</label>
                 <p class="subheading">{{created}}</p>
               </template>
-              <time-string :dateTime="metadata.creationTimestamp"></time-string>
+              <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
           </v-flex>
           <v-flex lg8 xs12 v-if="projectData.createdBy">

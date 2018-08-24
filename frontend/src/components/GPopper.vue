@@ -41,7 +41,7 @@ limitations under the License.
                 &nbsp;
               </template>
               <lazy-component @show="showPlaceholder=false">
-                <time-string :dateTime="time"></time-string>
+                <time-string :dateTime="time" :pointInTime="-1"></time-string>
               </lazy-component>
             </div>
           </div>

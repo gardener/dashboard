@@ -42,7 +42,7 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
         <div slot="activator">
-          <time-string :date-time="row.creationTimestamp"></time-string>
+          <time-string :date-time="row.creationTimestamp" :pointInTime="-1"></time-string>
         </div>
         {{ createdAt }}
       </v-tooltip>
@@ -73,7 +73,7 @@ limitations under the License.
       <v-tooltip top>
         <div slot="activator">
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-            <time-string :date-time="row.lastUpdatedJournalTimestamp"></time-string>
+            <time-string :date-time="row.lastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
           </router-link>
         </div>
         {{ lastUpdatedJournal }}
