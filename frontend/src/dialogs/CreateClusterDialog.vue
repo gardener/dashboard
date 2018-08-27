@@ -352,6 +352,16 @@ limitations under the License.
                    hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
                  ></v-text-field>
                 </v-flex>
+                <v-flex xs4>
+                  <v-list>
+                    <v-list-tile>
+                      <v-list-tile-sub-title>
+                        <v-icon small>info</v-icon>
+                        <span color="grey--text">Equals {{localMaintenanceBegin}} in your local timezone</span>
+                      </v-list-tile-sub-title>
+                    </v-list-tile>
+                  </v-list>
+                </v-flex>
               </v-layout>
               <v-layout row>
                 <v-card-title>
@@ -756,6 +766,12 @@ limitations under the License.
           this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
           newMoment.add(1, 'h')
           this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
+        }
+      },
+      localMaintenanceBegin () {
+        const momentObj = moment(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
+        if (momentObj.isValid()) {
+          return momentObj.format('HH:mm')
         }
       },
       infrastructure () {
