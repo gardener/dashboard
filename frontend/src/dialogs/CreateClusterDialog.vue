@@ -408,7 +408,6 @@ limitations under the License.
   import CloudProfile from '@/components/CloudProfile'
   import Alert from '@/components/Alert'
   import find from 'lodash/find'
-  import random from 'lodash/random'
   import get from 'lodash/get'
   import head from 'lodash/head'
   import sortBy from 'lodash/sortBy'
@@ -424,6 +423,7 @@ limitations under the License.
   import pick from 'lodash/pick'
   import omit from 'lodash/omit'
   import concat from 'lodash/concat'
+  import sample from 'lodash/sample'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
@@ -1012,8 +1012,7 @@ limitations under the License.
         this.shootDefinition.metadata.namespace = this.namespace
 
         const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-        const randomHour = get(hours, random(0, hours.length - 1))
-        const randomMoment = moment.utc(randomHour, 'HH')
+        const randomMoment = moment.utc(sample(hours), 'HH')
         this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
         randomMoment.add(1, 'h')
         this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
@@ -1071,7 +1070,7 @@ limitations under the License.
         this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
       },
       setDefaultZone () {
-        const zoneName = head(this.zones)
+        const zoneName = sample(this.zones)
         if (zoneName) {
           this.infrastructureData.zones = [zoneName]
         } else {
