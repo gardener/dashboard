@@ -75,8 +75,8 @@ limitations under the License.
     @update="onUpdate"
     @delete="onDelete"
     >
-      <template slot="rowSubTitle" slot-scope="props">
-        {{props.data.domainName}} / {{props.data.tenantName}}
+      <template v-if="isOwnSecretBinding(props.secret)" slot="rowSubTitle" slot-scope="props">
+        {{props.secret.data.domainName}} / {{props.secret.data.tenantName}}
       </template>
     </secret>
 
@@ -164,6 +164,7 @@ limitations under the License.
 <script>
   import { mapGetters } from 'vuex'
   import get from 'lodash/get'
+  import { isOwnSecretBinding } from '@/utils'
   import GcpDialog from '@/dialogs/SecretDialogGcp'
   import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
   import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
@@ -274,6 +275,9 @@ limitations under the License.
       },
       hideDialogs () {
         merge(this.dialogState, this.initialDialogState)
+      },
+      isOwnSecretBinding (secret) {
+        return isOwnSecretBinding(secret)
       }
     },
     mounted () {
