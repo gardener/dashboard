@@ -24,9 +24,11 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@mdi/font": "^2.7.94",
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
     "clipboard": "^2.0.0",
+    "codemirror": "^5.40.0",
     "component-emitter": "^1.2.1",
     "downloadjs": "^1.4.7",
     "get-contrast": "^2.0.0",

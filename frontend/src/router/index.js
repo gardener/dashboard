@@ -30,7 +30,8 @@ const Default = () => import('@/layouts/Default')
 const Home = () => import('@/pages/Home')
 const ShootList = () => import('@/pages/ShootList')
 const PlaceholderComponent = { template: '<router-view></router-view>' }
-const ShootItem = () => import('@/pages/ShootItem')
+const ShootItemCards = () => import('@/pages/ShootItemCards')
+const ShootItemEditor = () => import('@/pages/ShootItemEditor')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
 const Account = () => import('@/pages/Account')
@@ -76,6 +77,26 @@ export default function createRouter ({store, userManager}) {
 
   */
   const mode = 'history'
+  const shootItemTabs = [
+    {
+      title: 'Overview',
+      to: ({params}) => {
+        return {
+          name: 'ShootItem',
+          params
+        }
+      }
+    },
+    {
+      title: 'YAML',
+      to: ({params}) => {
+        return {
+          name: 'ShootItemEditor',
+          params
+        }
+      }
+    }
+  ]
   const routes = [
     {
       path: '/login',
@@ -153,13 +174,27 @@ export default function createRouter ({store, userManager}) {
             {
               path: ':name',
               name: 'ShootItem',
-              component: ShootItem,
+              component: ShootItemCards,
               meta: {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootList',
-                breadcrumb: true
+                breadcrumb: true,
+                tabs: shootItemTabs
+              }
+            },
+            {
+              path: ':name/yaml',
+              name: 'ShootItemEditor',
+              component: ShootItemEditor,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                title: 'Cluster Editor',
+                toRouteName: 'ShootList',
+                breadcrumb: true,
+                tabs: shootItemTabs
               }
             }
           ]
@@ -356,6 +391,7 @@ export default function createRouter ({store, userManager}) {
               .all(promises)
               .then(() => undefined)
           case 'ShootItem':
+          case 'ShootItemEditor':
             return Promise
               .all([
                 store.dispatch('subscribeShoot', {name: params.name, namespace}),

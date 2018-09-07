@@ -30,6 +30,29 @@ function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
+function isReserved (key) {
+  return /garden\.sapcloud\.io\//.test(key)
+}
+
+function isReservedException (key) {
+  return _.includes([
+    'shoot.garden.sapcloud.io/ignore',
+    'garden.sapcloud.io/purpose'
+  ], key)
+}
+
+function isReservedAnnotation (value, key) {
+  return isReserved(key) && !isReservedException(key)
+}
+
+const isUnreservedAnnotation = _.negate(isReservedAnnotation)
+
+function isReservedLabel (value, key) {
+  return isReserved(key)
+}
+
+const isUnreservedLabel = _.negate(isReservedLabel)
+
 exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) {
   let qs
   if (shootsWithIssuesOnly) {
@@ -53,12 +76,31 @@ exports.create = async function ({user, namespace, body}) {
   return Garden(user).namespaces(namespace).shoots.post({body})
 }
 
-exports.read = async function ({user, namespace, name}) {
+const read = exports.read = async function ({user, namespace, name}) {
   return Garden(user).namespaces(namespace).shoots.get({name})
 }
 
 const patch = exports.patch = async function ({user, namespace, name, body}) {
   return Garden(user).namespaces(namespace).shoots.mergePatch({name, body})
+}
+
+exports.replace = async function ({user, namespace, name, body}) {
+  const { metadata: oldMetadata, kind, apiVersion, status } = await read({user, namespace, name})
+  const { metadata: newMetadata, spec } = body
+  // labels
+  const reservedLabels = _.pickBy(oldMetadata.labels, isReservedLabel)
+  const unreservedLabels = _.pickBy(newMetadata.labels, isUnreservedLabel)
+  const labels = _.assign(unreservedLabels, reservedLabels)
+  // annotations
+  const reservedAnnotations = _.pickBy(oldMetadata.annotations, isReservedAnnotation)
+  const unreservedAnnotations = _.pickBy(newMetadata.annotations, isUnreservedAnnotation)
+  const annotations = _.assign(unreservedAnnotations, reservedAnnotations)
+  // metadata
+  const metadata = _.assign({}, oldMetadata, {labels, annotations})
+  // body
+  body = { kind, apiVersion, metadata, spec, status }
+  // replace
+  return Garden(user).namespaces(namespace).shoots.put({name, body})
 }
 
 exports.replaceSpec = async function ({user, namespace, name, body}) {
@@ -103,7 +145,10 @@ exports.remove = async function ({user, namespace, name}) {
 
   await Garden(user).namespaces(namespace).shoots.delete({name})
 
-  /* TODO kept the following lines for backwards compatibility (delete them once the DeletionConfirmation admission controller becomes enabled by default and the gardener logic has been adapted properly) */
+  /* TODO: Kept the following lines for backwards compatibility
+   * (delete them once the DeletionConfirmation admission controller becomes
+   * enabled by default and the gardener logic has been adapted properly)
+   */
   const {metadata} = await this.read({user, namespace, name})
   const body = {
     metadata: {

@@ -15,8 +15,7 @@ limitations under the License.
  -->
 
 <template>
-
-  <v-container fluid class="secrets">
+  <v-container fluid>
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('aws')"
