@@ -306,6 +306,10 @@ export function isShootMarkedForDeletion (metadata) {
   return !!deletionTimestamp && !!confirmation
 }
 
+export function isTypeDelete (lastOperation) {
+  return get(lastOperation, 'type') === 'Delete'
+}
+
 // expect colors to be in format <color> <optional:modifier>
 export function textColor (color) {
   const colorArr = split(color, ' ')

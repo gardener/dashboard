@@ -58,7 +58,7 @@ limitations under the License.
          :popperKey="`${row.namespace}/${row.name}`"
          :isHibernated="row.isHibernated"
          :reconciliationDeactivated="reconciliationDeactivated"
-         :shootDeleted="isShootMarkedForDeletion">
+         :shootDeleted="isTypeDelete">
         </shoot-status>
         <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
@@ -160,7 +160,8 @@ limitations under the License.
     getCreatedBy,
     isHibernated,
     isReconciliationDeactivated,
-    isShootMarkedForDeletion } from '@/utils'
+    isShootMarkedForDeletion,
+    isTypeDelete } from '@/utils'
 
   export default {
     components: {
@@ -258,6 +259,9 @@ limitations under the License.
       isShootMarkedForDeletion () {
         const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
         return isShootMarkedForDeletion(metadata)
+      },
+      isTypeDelete () {
+        return isTypeDelete(this.row.lastOperation)
       },
       isDashboardDialogDisabled () {
         const itemInfo = this.row.info || {}
