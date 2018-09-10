@@ -497,13 +497,6 @@ limitations under the License.
       enabled: true
     },
     {
-      name: 'heapster',
-      title: 'Heapster',
-      description: 'Heapster enables Container Cluster Monitoring and Performance Analysis.',
-      visible: false,
-      enabled: true
-    },
-    {
       name: 'kubernetes-dashboard',
       title: 'Dashboard',
       description: 'General-purpose web UI for Kubernetes clusters.',
