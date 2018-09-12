@@ -100,7 +100,7 @@ limitations under the License.
                   <v-flex xs3>
                     <v-select
                       color="cyan darken-2"
-                      label="Secrets"
+                      label="Secret"
                       :items="infrastructureSecretsByProfileName"
                       v-model="secret"
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"

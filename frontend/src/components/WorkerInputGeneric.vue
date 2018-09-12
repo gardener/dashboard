@@ -136,6 +136,9 @@ limitations under the License.
       },
       autoScalerMax: {
         minValue: minValue(1)
+      },
+      machineType: {
+        required
       }
     }
   }
