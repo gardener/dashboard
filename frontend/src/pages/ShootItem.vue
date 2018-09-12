@@ -233,7 +233,7 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Access
               </v-card-title>
-              <cluster-access :info="info"></cluster-access>
+              <cluster-access :item="item"></cluster-access>
               <template v-if="!!info.kubeconfig">
                 <v-divider class="my-2" inset></v-divider>
                 <v-expansion-panel>
