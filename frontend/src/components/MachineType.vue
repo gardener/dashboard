@@ -4,8 +4,11 @@
     :items="machineTypes"
     item-text="name"
     item-value="name"
+    :error-messages="getErrorMessages('worker.machineType')"
+    @input="$v.worker.machineType.$touch()"
+    @blur="$v.worker.machineType.$touch()"
     v-model="worker.machineType"
-    label="Machine Types"
+    label="Machine Type"
   >
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
@@ -17,6 +20,25 @@
 </template>
 
 <script>
+  import { required } from 'vuelidate/lib/validators'
+  import { getValidationErrors } from '@/utils'
+
+  const validationErrors = {
+    worker: {
+      machineType: {
+        required: 'Machine Type is required'
+      }
+    }
+  }
+
+  const validations = {
+    worker: {
+      machineType: {
+        required
+      }
+    }
+  }
+
   export default {
     props: {
       worker: {
@@ -27,6 +49,20 @@
         type: Array,
         default: () => []
       }
+    },
+    data () {
+      return {
+        validationErrors
+      }
+    },
+    validations,
+    methods: {
+      getErrorMessages (field) {
+        return getValidationErrors(this, field)
+      }
+    },
+    mounted () {
+      this.$v.$touch()
     }
   }
 </script>
