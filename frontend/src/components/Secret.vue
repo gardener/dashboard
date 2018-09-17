@@ -46,7 +46,7 @@ limitations under the License.
         @delete="onDelete"
       >
         <!-- forward slot -->
-        <slot slot="rowSubTitle" name="rowSubTitle" :secret="row"></slot>
+        <slot name="rowSubTitle" :secret="row"></slot>
       </secret-row>
     </v-list>
 
