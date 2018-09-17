@@ -42,7 +42,7 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
         <div slot="activator">
-          <time-string :date-time="row.creationTimestamp"></time-string>
+          <time-string :date-time="row.creationTimestamp" :pointInTime="-1"></time-string>
         </div>
         {{ createdAt }}
       </v-tooltip>
@@ -58,7 +58,7 @@ limitations under the License.
          :popperKey="`${row.namespace}/${row.name}`"
          :isHibernated="row.isHibernated"
          :reconciliationDeactivated="reconciliationDeactivated"
-         :shootDeleted="isShootMarkedForDeletion">
+         :shootDeleted="isTypeDelete">
         </shoot-status>
         <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
@@ -73,7 +73,7 @@ limitations under the License.
       <v-tooltip top>
         <div slot="activator">
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-            <time-string :date-time="row.lastUpdatedJournalTimestamp"></time-string>
+            <time-string :date-time="row.lastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
           </router-link>
         </div>
         {{ lastUpdatedJournal }}
@@ -160,7 +160,8 @@ limitations under the License.
     getCreatedBy,
     isHibernated,
     isReconciliationDeactivated,
-    isShootMarkedForDeletion } from '@/utils'
+    isShootMarkedForDeletion,
+    isTypeDelete } from '@/utils'
 
   export default {
     components: {
@@ -258,6 +259,9 @@ limitations under the License.
       isShootMarkedForDeletion () {
         const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
         return isShootMarkedForDeletion(metadata)
+      },
+      isTypeDelete () {
+        return isTypeDelete(this.row.lastOperation)
       },
       isDashboardDialogDisabled () {
         const itemInfo = this.row.info || {}

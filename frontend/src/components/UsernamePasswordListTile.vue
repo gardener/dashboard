@@ -16,7 +16,6 @@ limitations under the License.
 
 <template>
   <div v-show="!!username && !!password">
-    <v-divider class="my-2" inset></v-divider>
     <v-list-tile>
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>

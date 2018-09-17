@@ -109,10 +109,6 @@ export function getCloudprofiles ({user}) {
   return getResource(`/api/cloudprofiles`, user)
 }
 
-export function getSeedsForCloudprofile ({user, cloudProfileName}) {
-  return getResource(`/api/cloudprofiles/${cloudProfileName}/seeds`, user)
-}
-
 /* Domains */
 
 export function getDomains ({user}) {

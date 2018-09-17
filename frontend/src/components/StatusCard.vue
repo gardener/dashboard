@@ -31,7 +31,7 @@ limitations under the License.
             :popperKey="`${namespace}/${name}_lastOp`"
             :isHibernated="isHibernated"
             :reconciliationDeactivated="reconciliationDeactivated"
-            :shootDeleted="isShootMarkedForDeletion"
+            :shootDeleted="isTypeDelete"
             popperPlacement="bottom"
             @titleChange="onShootStatusTitleChange">
           </shoot-status>
@@ -66,7 +66,7 @@ limitations under the License.
   import get from 'lodash/get'
   import { isHibernated,
            isReconciliationDeactivated,
-           isShootMarkedForDeletion } from '@/utils'
+           isTypeDelete } from '@/utils'
   import { mapGetters } from 'vuex'
 
   export default {
@@ -124,8 +124,8 @@ limitations under the License.
         const metadata = { annotations: this.annotations }
         return isReconciliationDeactivated(metadata)
       },
-      isShootMarkedForDeletion () {
-        return isShootMarkedForDeletion(this.metadata)
+      isTypeDelete () {
+        return isTypeDelete(this.lastOperation)
       },
       info () {
         return get(this.shootItem, 'info', {})

@@ -46,7 +46,18 @@ limitations under the License.
   const clockHalfAnHourAccuracy = new Clock(1000 * 60 * 30)
 
   export default {
-    props: ['dateTime', 'currentString'],
+    props: {
+      dateTime: {
+        type: String
+      },
+      pointInTime: {
+        type: Number,
+        default: 0  // negative = force past date, positive = force future date
+      },
+      currentString: {
+        type: String // access the datetime string from outside of the component
+      }
+    },
     data () {
       return {
         currentClockTimer: undefined,
@@ -59,9 +70,9 @@ limitations under the License.
         let timeString = ''
         if (this.dateTime && this.currentClockTimer) {
           if (this.negativeRefDate) {
-            timeString = getTimeStringFrom(this.dateTime, new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+            timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
           } else {
-            timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.dateTime)
+            timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime))
           }
         }
 
@@ -71,15 +82,22 @@ limitations under the License.
     },
     methods: {
       updateClockInstance (dateTimeValue) {
-        const currentDate = new Date()
-        const refDate = new Date(dateTimeValue)
+        const currentDate = new Date().getTime()
+        const refDate = new Date(dateTimeValue).getTime()
         let diffInMilliseconds
-        if (currentDate > refDate) {
-          diffInMilliseconds = currentDate - refDate
+        if (this.pointInTime < 0) {
+          this.negativeRefDate = true
+        } else if (this.pointInTime > 0) {
+          this.negativeRefDate = false
+        } else if (currentDate > refDate) {
           this.negativeRefDate = true
         } else {
-          diffInMilliseconds = refDate - currentDate
           this.negativeRefDate = false
+        }
+        if (this.negativeRefDate) {
+          diffInMilliseconds = currentDate - refDate
+        } else {
+          diffInMilliseconds = refDate - currentDate
         }
         if (diffInMilliseconds <= 1000 * 60) {
           this.setClock(clockSecondsAccuracy, clockHalfAMinuteAccuracy)

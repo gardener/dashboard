@@ -202,6 +202,10 @@ export function getTimeStringTo (time, toTime) {
   if (!time) {
     return undefined
   } else {
+    if (time.getTime() === toTime.getTime()) {
+      // Equal dates result in text "a few seconds ago", this is not we want here...
+      toTime.setSeconds(toTime.getSeconds() + 1)
+    }
     return moment(time).to(toTime)
   }
 }
@@ -300,6 +304,10 @@ export function isShootMarkedForDeletion (metadata) {
   const deletionTimestamp = get(metadata, 'deletionTimestamp')
 
   return !!deletionTimestamp && !!confirmation
+}
+
+export function isTypeDelete (lastOperation) {
+  return get(lastOperation, 'type') === 'Delete'
 }
 
 // expect colors to be in format <color> <optional:modifier>

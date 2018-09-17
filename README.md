@@ -1,5 +1,9 @@
 # Gardener Dashboard
 
+![](https://github.com/gardener/dashboard/blob/master/logo/logo_gardener_dashboard.png)
+
+## Demo
+
 <img src="https://user-images.githubusercontent.com/5526658/35324536-4447618c-00f1-11e8-8cb7-70b0ad193593.gif" alt="Gardener Demo" width="600"/>
 
 ## Development Setup
@@ -16,10 +20,10 @@ npm install --prefix backend
 ### Configuration
 
 #### KUBECONFIG
-If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in `${HOME}/.kube/config` or by the `KUBECONFIG` environment variable.
+If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in *${HOME}/.kube/config* or by the *KUBECONFIG* environment variable.
 
 #### GARDENER_CONFIG
-The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable `GARDENER_CONFIG` at the server process. If nothing is specified the default location is `${HOME}/.gardener/config.yaml`.
+The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable *GARDENER_CONFIG* at the server process. If nothing is specified the default location is *${HOME}/.gardener/config.yaml*.
 
 A local configuration example for [minikube](https://github.com/kubernetes/minikube) and [dex](https://github.com/coreos/dex) could look like follows:
 
@@ -84,7 +88,7 @@ Run the frontend server with hot reload under localhost:8080.
 npm run dev --prefix frontend
 ```
 
-All request to `/api` and `/config.json` with be proxied by default to the backend server.
+All request to */api* and */config.json* with be proxied by default to the backend server.
 
 ## Build
 
@@ -94,7 +98,7 @@ Build frontend artifacts for production with minification
 make build
 ```
 
-The build results will be written to `frontend/dist`. The static resource path `public` of the backend server is symlinked to this directory.
+The build results will be written to *frontend/dist*. The static resource path *public* of the backend server is symlinked to this directory.
 
 ## Release
 
@@ -104,7 +108,7 @@ Publish a new container image and publish to Google Container Registry.
 npm run build --prefix frontend
 ```
 
-This expects valid GCR credentials located at `${HOME}/.config/gcloud/gcr-readwrite.json`. It will build a new image and pushes it to the container registry.
+This expects valid GCR credentials located at *${HOME}/.config/gcloud/gcr-readwrite.json*. It will build a new image and pushes it to the container registry.
 
 ## People
 
@@ -119,7 +123,7 @@ initial contribution was published as open source.
 | Gross, Lukas |    31  (4%) |    400 |    267 |  2018-01-10  |  2018-01-23 |
 
 
-It is derived from the historical, internal `gardener-ui` repository
+It is derived from the historical, internal *gardener-ui* repository
 at commit eeb623d60c86e6037c0e1dc2bdd9e54663bf41a8.
 
 ## License

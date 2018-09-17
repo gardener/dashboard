@@ -100,7 +100,7 @@ limitations under the License.
                   <v-flex xs3>
                     <v-select
                       color="cyan darken-2"
-                      label="Secrets"
+                      label="Secret"
                       :items="infrastructureSecretsByProfileName"
                       v-model="secret"
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
@@ -503,13 +503,6 @@ limitations under the License.
       name: 'cluster-autoscaler',
       title: 'Cluster Autoscaler',
       description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
-      visible: false,
-      enabled: true
-    },
-    {
-      name: 'heapster',
-      title: 'Heapster',
-      description: 'Heapster enables Container Cluster Monitoring and Performance Analysis.',
       visible: false,
       enabled: true
     },

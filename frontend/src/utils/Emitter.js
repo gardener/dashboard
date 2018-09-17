@@ -16,7 +16,6 @@
 
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
-import map from 'lodash/map'
 import isEqual from 'lodash/isEqual'
 import concat from 'lodash/concat'
 import Emitter from 'component-emitter'
@@ -207,9 +206,7 @@ class ShootsSubscription extends AbstractSubscription {
       store.dispatch('setShootsLoading')
     ])
     if (namespace === '_all') {
-      const allNamespaces = await store.getters.namespaces
-      const namespaces = map(allNamespaces, (namespace) => { return {namespace, filter} })
-      this.socket.emit('subscribeShoots', {namespaces})
+      this.socket.emit('subscribeAllShoots', {filter})
     } else if (namespace) {
       this.socket.emit('subscribeShoots', {namespaces: [{namespace, filter}]})
     } else {

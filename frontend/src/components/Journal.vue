@@ -24,7 +24,7 @@ limitations under the License.
       <span style="font-weight: 700">{{login}}</span> created this
       <a :href="journalHtmlUrl" target="_blank" class="cyan--text text--darken-2">journal</a>
       <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :dateTime="journal.metadata.created_at"></time-string>
+      <time-string :dateTime="journal.metadata.created_at" :pointInTime="-1"></time-string>
     </v-container>
     <v-container grid-list-md>
       <journal-comment :comment="journal"></journal-comment>

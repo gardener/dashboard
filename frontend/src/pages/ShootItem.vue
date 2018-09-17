@@ -81,7 +81,7 @@ limitations under the License.
                         <v-list-tile-sub-title>Created at</v-list-tile-sub-title>
                         <v-list-tile-title>{{created}}</v-list-tile-title>
                       </template>
-                      <time-string :dateTime="metadata.creationTimestamp"></time-string>
+                      <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
                     </v-tooltip>
                   </v-list-tile-content>
                 </v-list-tile>
@@ -233,7 +233,7 @@ limitations under the License.
               <v-card-title class="subheading white--text cyan darken-2 mt-3">
                 Access
               </v-card-title>
-              <cluster-access :info="info"></cluster-access>
+              <cluster-access :item="item"></cluster-access>
               <template v-if="!!info.kubeconfig">
                 <v-divider class="my-2" inset></v-divider>
                 <v-expansion-panel>
@@ -520,7 +520,7 @@ limitations under the License.
       },
       selfTerminationNotificationMessage () {
         if (this.isValidTerminationDate) {
-          return `This cluster will self terminate ${getTimeStringTo(new Date(), this.expirationTimestamp)}`
+          return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
         } else {
           return 'This cluster is about to self terminate'
         }
