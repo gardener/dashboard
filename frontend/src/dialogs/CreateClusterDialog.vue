@@ -756,8 +756,8 @@ limitations under the License.
           this.shootDefinition.spec.maintenance.timeWindow.end = null
           return null
         },
-        set (time) {
-          this.updateMaintenanceWindow({time})
+        set (newTime) {
+          this.updateMaintenanceWindow({newTime})
         }
       },
       selectedTimezone: {
@@ -1093,13 +1093,13 @@ limitations under the License.
       getErrorMessages (field) {
         return getValidationErrors(this, field)
       },
-      updateMaintenanceWindow ({time, newTimezone}) {
+      updateMaintenanceWindow ({newTime, newTimezone}) {
         let newMoment
-        if (time) {
-          newMoment = moment.tz(time, 'HHmm', this.timezone).utc()
+        if (newTime) {
+          newMoment = moment.tz(newTime, 'HHmm', this.timezone).utc()
         } else if (newTimezone) {
-          const time = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
-          newMoment = moment.tz(time, 'HHmm', newTimezone).utc()
+          const localizedTime = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
+          newMoment = moment.tz(localizedTime, 'HHmm', newTimezone).utc()
         }
 
         this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
