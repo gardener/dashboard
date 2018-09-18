@@ -356,7 +356,7 @@ limitations under the License.
                     color="cyan darken-2"
                     label="Timezone"
                     :items="timezones"
-                    v-model="timezone"
+                    v-model="selectedTimezone"
                     autocomplete
                     required
                     >
@@ -596,7 +596,8 @@ limitations under the License.
         errorMessage: undefined,
         detailedErrorMessage: undefined,
         osUpdates: true,
-        timezone: moment.tz.guess()
+        timezone: undefined,
+        timezones: moment.tz.names()
       }
     },
     validations: {
@@ -747,7 +748,7 @@ limitations under the License.
       },
       localizedMaintenanceBegin: {
         get () {
-          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ').tz(this.timezone)
+          const momentObj = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone)
           if (momentObj.isValid()) {
             return momentObj.format('HH:mm:00')
           }
@@ -756,14 +757,17 @@ limitations under the License.
           return null
         },
         set (time) {
-          const newMoment = moment.tz(time, 'HHmm', this.timezone).utc()
-          this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
-          newMoment.add(1, 'h')
-          this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
+          this.updateMaintenanceWindow({time})
         }
       },
-      timezones () {
-        return moment.tz.names()
+      selectedTimezone: {
+        get () {
+          return this.timezone
+        },
+        set (newTimezone) {
+          this.updateMaintenanceWindow({newTimezone})
+          this.timezone = newTimezone
+        }
       },
       infrastructure () {
         return this.infrastructureData
@@ -1018,6 +1022,7 @@ limitations under the License.
         this.clusterName = shortRandomString(10)
         this.shootDefinition.metadata.namespace = this.namespace
 
+        this.timezone = moment.tz.guess()
         const hours = [22, 23, 0, 1, 2, 3, 4, 5]
         const randomHour = sample(hours)
         const randomMoment = moment.tz(randomHour, 'HH', this.timezone).utc()
@@ -1087,6 +1092,19 @@ limitations under the License.
       },
       getErrorMessages (field) {
         return getValidationErrors(this, field)
+      },
+      updateMaintenanceWindow ({time, newTimezone}) {
+        let newMoment
+        if (time) {
+          newMoment = moment.tz(time, 'HHmm', this.timezone).utc()
+        } else if (newTimezone) {
+          const time = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
+          newMoment = moment.tz(time, 'HHmm', newTimezone).utc()
+        }
+
+        this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
+        newMoment.add(1, 'h')
+        this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
       }
     },
     watch: {
