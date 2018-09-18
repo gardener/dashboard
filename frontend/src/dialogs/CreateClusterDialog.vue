@@ -335,9 +335,9 @@ limitations under the License.
         <v-tab-item key="maintenance" id="tab-maintenance">
 
           <v-card flat>
-            <v-container>
-              <v-layout row>
-                <v-flex xs3>
+            <v-container fluid>
+              <v-layout row wrap>
+                <v-flex xs3 class="mr-3">
                   <v-text-field
                    color="cyan darken-2"
                    label="Maintenance Start Time"
@@ -362,37 +362,37 @@ limitations under the License.
                     >
                   </v-select>
                 </v-flex>
-              </v-layout>
-              <v-layout row>
-                <v-list two-line>
-                  <v-list-tile>
-                    <v-list-tile-title>Auto Update</v-list-tile-title>
-                  </v-list-tile>
-                  <v-list-tile avatar class="list-complete-item">
-                    <v-list-tile-action>
-                      <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-title>Operating System</v-list-tile-title>
-                      <v-list-tile-sub-title>
-                        Update the operating system of the workers<br />
-                        (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-                      </v-list-tile-sub-title>
-                    </v-list-tile-content>
-                  </v-list-tile>
-                  <v-list-tile avatar class="list-complete-item">
-                    <v-list-tile-action>
-                      <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
-                    </v-list-tile-action>
-                    <v-list-tile-content>
-                      <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
-                      <v-list-tile-sub-title>
-                        Update the control plane of the cluster and the worker components<br />
-                        (control plane, most notably the API server, will be briefly unavailable during switch-over)
-                      </v-list-tile-sub-title>
-                    </v-list-tile-content>
-                  </v-list-tile>
-                </v-list>
+                <v-flex xs12>
+                  <div class="subheading pt-3">Auto Update</div>
+                </v-flex>
+                <v-flex xs12>
+                  <v-list two-line>
+                    <v-list-tile class="list-complete-item">
+                      <v-list-tile-action>
+                        <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title>Operating System</v-list-tile-title>
+                        <v-list-tile-sub-title>
+                          Update the operating system of the workers<br />
+                          (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
+                        </v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                    <v-list-tile class="list-complete-item">
+                      <v-list-tile-action>
+                        <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                      </v-list-tile-action>
+                      <v-list-tile-content>
+                        <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
+                        <v-list-tile-sub-title>
+                          Update the control plane of the cluster and the worker components<br />
+                          (control plane, most notably the API server, will be briefly unavailable during switch-over)
+                        </v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                  </v-list>
+                </v-flex>
               </v-layout>
             </v-container>
           </v-card>

@@ -127,7 +127,6 @@ limitations under the License.
         })
 
         // cannot do in mount as need to reset selected item in case component gets reused, e.g. when the user switches from yaml back to ovweview
-        // eslint-disable-next-line lodash/matches-prop-shorthand
         this.selectedItem = undefined
 
         return allItems
@@ -140,7 +139,7 @@ limitations under the License.
       selectedMinorVersionIsNotNextMinor () {
         const version = get(this, 'selectedItem.version')
         const type = get(this, 'selectedItem.type')
-        let invalid = !version || this.itemIsNotNextMinor(version, type)
+        const invalid = !version || this.itemIsNotNextMinor(version, type)
         this.$emit('update:selectedVersionInvalid', invalid)
         return invalid
       },
@@ -181,7 +180,6 @@ limitations under the License.
       },
       selectedVersion (value) {
         if (!value) {
-          // eslint-disable-next-line lodash/matches-prop-shorthand
           this.selectedItem = undefined
         }
       }
