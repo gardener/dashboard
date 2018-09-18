@@ -36,8 +36,12 @@ dashboard:
           inject_effective_version: true
         release:
           nextversion: 'bump_minor'
-          # slackcfgname: 'scp_workspace'
-          # slackchannel: 'CA1BXJBJB' #k8s-garden-dashboard
+        slack:
+          default_channel: 'internal_scp_workspace'
+          channel_cfgs:
+            internal_scp_workspace:
+              channel_name: 'k8s-garden-dashboard'
+              slack_cfg_name: 'scp_workspace'
         component_descriptor: ~
         publish:
           dockerimages:
