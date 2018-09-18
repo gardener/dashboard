@@ -19,9 +19,9 @@ limitations under the License.
     :items="items"
     v-model="selectedItem"
     :label="label"
-    color="cyan darken-2"
     :hint="hint"
     :error="selectedMinorVersionIsNotNextMinor"
+    placeholder="Please select version..."
   >
   <template slot="item" slot-scope="data">
     <v-tooltip top :disabled="!data.item.notNextMinor">
@@ -52,6 +52,9 @@ limitations under the License.
         required: true
       },
       selectedVersion: {
+        type: String
+      },
+      selectedVersionType: {
         type: String
       },
       selectedVersionInvalid: {
@@ -126,7 +129,7 @@ limitations under the License.
 
         // cannot do in mount as need to reset selected item in case component gets reused, e.g. when the user switches from yaml back to ovweview
         // eslint-disable-next-line lodash/matches-prop-shorthand
-        this.selectedItem = find(allItems, item => { return item.header === undefined })
+        this.selectedItem = undefined
 
         return allItems
       },
@@ -138,7 +141,7 @@ limitations under the License.
       selectedMinorVersionIsNotNextMinor () {
         const version = get(this, 'selectedItem.version')
         const type = get(this, 'selectedItem.type')
-        let invalid = this.itemIsNotNextMinor(version, type)
+        let invalid = !version || this.itemIsNotNextMinor(version, type)
         this.$emit('update:selectedVersionInvalid', invalid)
         return invalid
       },
@@ -169,12 +172,14 @@ limitations under the License.
     watch: {
       selectedItem (value) {
         const version = get(value, 'version')
+        const type = get(value, 'type')
         this.$emit('update:selectedVersion', version)
+        this.$emit('update:selectedVersionType', type)
       },
       selectedVersion (value) {
         if (!value) {
           // eslint-disable-next-line lodash/matches-prop-shorthand
-          this.selectedItem = find(this.items, item => { return item.header === undefined })
+          this.selectedItem = undefined
         }
       }
     }

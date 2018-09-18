@@ -52,13 +52,20 @@ limitations under the License.
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
           :selectedVersion.sync="selectedVersion"
+          :selectedVersionType.sync="selectedVersionType"
           :selectedVersionInvalid.sync="selectedVersionInvalid"
           :confirmRequired.sync="confirmRequired"
           :currentk8sVersion="k8sVersion"
         ></shoot-version-update>
-        <template v-if="!selectedVersionInvalid && confirmRequired">
+        <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
           Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
+          Please your scenario well before updating a productive cluster.<br />
+        </br/>
+          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+        </template>
+        <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
+          Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects. Please test your scenario before updating a productive cluster.<br />
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
@@ -95,6 +102,7 @@ limitations under the License.
       return {
         updateDialog: false,
         selectedVersion: undefined,
+        selectedVersionType: undefined,
         selectedVersionInvalid: false,
         confirmRequired: undefined,
         updateErrorMessage: null,

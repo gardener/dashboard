@@ -17,12 +17,12 @@ limitations under the License.
 <template>
   <tr>
     <td class="nowrap" v-if="this.headerVisible['project']">
-      <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootList', params: { namespace:row.namespace } }">
+      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace:row.namespace } }">
         {{ projectName }}
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <router-link class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
         {{ row.name }}
       </router-link>
       <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>

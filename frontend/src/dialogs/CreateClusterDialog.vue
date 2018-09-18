@@ -341,59 +341,59 @@ limitations under the License.
                   <v-text-field
                    color="cyan darken-2"
                    label="Maintenance Start Time"
-                   v-model="maintenanceBegin"
+                   v-model="localizedMaintenanceBegin"
                    :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
                    @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
                    @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
                    type="time"
-                   suffix="UTC"
                    required
                    persistent-hint
                    hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
                  ></v-text-field>
                 </v-flex>
-                <v-flex xs4>
-                  <v-list>
-                    <v-list-tile>
-                      <v-list-tile-sub-title>
-                        <v-icon small>info</v-icon>
-                        <span color="grey--text">Equals {{localMaintenanceBegin}} in your local timezone</span>
-                      </v-list-tile-sub-title>
-                    </v-list-tile>
-                  </v-list>
+                <v-flex xs2>
+                  <v-select
+                    color="cyan darken-2"
+                    label="Timezone"
+                    :items="timezones"
+                    v-model="timezone"
+                    autocomplete
+                    required
+                    >
+                  </v-select>
                 </v-flex>
               </v-layout>
               <v-layout row>
-                <v-card-title>
-                  <span class="subheading">Auto Update</span>
-                </v-card-title>
+                <v-list two-line>
+                  <v-list-tile>
+                    <v-list-tile-title>Auto Update</v-list-tile-title>
+                  </v-list-tile>
+                  <v-list-tile avatar class="list-complete-item">
+                    <v-list-tile-action>
+                      <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                      <v-list-tile-title>Operating System</v-list-tile-title>
+                      <v-list-tile-sub-title>
+                        Update the operating system of the workers<br />
+                        (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
+                      </v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                  <v-list-tile avatar class="list-complete-item">
+                    <v-list-tile-action>
+                      <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
+                    </v-list-tile-action>
+                    <v-list-tile-content>
+                      <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
+                      <v-list-tile-sub-title>
+                        Update the control plane of the cluster and the worker components<br />
+                        (control plane, most notably the API server, will be briefly unavailable during switch-over)
+                      </v-list-tile-sub-title>
+                    </v-list-tile-content>
+                  </v-list-tile>
+                </v-list>
               </v-layout>
-              <v-list two-line>
-                <v-list-tile avatar class="list-complete-item">
-                  <v-list-tile-action>
-                    <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title>Operating System</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      Update the operating system of the workers<br />
-                      (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-                <v-list-tile avatar class="list-complete-item">
-                  <v-list-tile-action>
-                    <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      Update the control plane of the cluster and the worker components<br />
-                      (control plane, most notably the API server, will be briefly unavailable during switch-over)
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-              </v-list>
             </v-container>
           </v-card>
 
@@ -418,7 +418,6 @@ limitations under the License.
   import CloudProfile from '@/components/CloudProfile'
   import Alert from '@/components/Alert'
   import find from 'lodash/find'
-  import random from 'lodash/random'
   import get from 'lodash/get'
   import head from 'lodash/head'
   import sortBy from 'lodash/sortBy'
@@ -434,6 +433,7 @@ limitations under the License.
   import pick from 'lodash/pick'
   import omit from 'lodash/omit'
   import concat from 'lodash/concat'
+  import sample from 'lodash/sample'
   import { required, maxLength } from 'vuelidate/lib/validators'
   import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
   import CodeBlock from '@/components/CodeBlock'
@@ -441,6 +441,7 @@ limitations under the License.
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
   import { errorDetailsFromError } from '@/utils/error'
   import moment from 'moment'
+  require('moment-timezone')
 
   const semSort = require('semver-sort')
 
@@ -595,7 +596,8 @@ limitations under the License.
         validationErrors,
         errorMessage: undefined,
         detailedErrorMessage: undefined,
-        osUpdates: true
+        osUpdates: true,
+        timezone: moment.tz.guess()
       }
     },
     validations: {
@@ -744,9 +746,9 @@ limitations under the License.
           this.infrastructureData.zones = [zone]
         }
       },
-      maintenanceBegin: {
+      localizedMaintenanceBegin: {
         get () {
-          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
+          const momentObj = moment.utc(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ').tz(this.timezone)
           if (momentObj.isValid()) {
             return momentObj.format('HH:mm:00')
           }
@@ -755,17 +757,14 @@ limitations under the License.
           return null
         },
         set (time) {
-          const newMoment = moment.utc(time, 'HHmmZ')
+          const newMoment = moment.tz(time, 'HHmm', this.timezone).utc()
           this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
           newMoment.add(1, 'h')
           this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
         }
       },
-      localMaintenanceBegin () {
-        const momentObj = moment(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ')
-        if (momentObj.isValid()) {
-          return momentObj.format('HH:mm')
-        }
+      timezones () {
+        return moment.tz.names()
       },
       infrastructure () {
         return this.infrastructureData
@@ -1021,8 +1020,8 @@ limitations under the License.
         this.shootDefinition.metadata.namespace = this.namespace
 
         const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-        const randomHour = get(hours, random(0, hours.length - 1))
-        const randomMoment = moment.utc(randomHour, 'HH')
+        const randomHour = sample(hours)
+        const randomMoment = moment.tz(randomHour, 'HH', this.timezone).utc()
         this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
         randomMoment.add(1, 'h')
         this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
@@ -1080,7 +1079,7 @@ limitations under the License.
         this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
       },
       setDefaultZone () {
-        const zoneName = head(this.zones)
+        const zoneName = sample(this.zones)
         if (zoneName) {
           this.infrastructureData.zones = [zoneName]
         } else {
