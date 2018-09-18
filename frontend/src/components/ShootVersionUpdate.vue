@@ -20,7 +20,7 @@ limitations under the License.
     v-model="selectedItem"
     :label="label"
     :hint="hint"
-    :error="selectedMinorVersionIsNotNextMinor"
+    :error="isError"
     placeholder="Please select version..."
   >
   <template slot="item" slot-scope="data">
@@ -43,7 +43,6 @@ limitations under the License.
   import upperFirst from 'lodash/upperFirst'
   import head from 'lodash/head'
   import get from 'lodash/get'
-  import find from 'lodash/find'
   import semver from 'semver'
 
   export default {
@@ -144,6 +143,10 @@ limitations under the License.
         let invalid = !version || this.itemIsNotNextMinor(version, type)
         this.$emit('update:selectedVersionInvalid', invalid)
         return invalid
+      },
+      isError () {
+        const selectedVersion = get(this, 'selectedItem.version')
+        return selectedVersion && this.selectedMinorVersionIsNotNextMinor
       },
       label () {
         if (this.selectedVersionIsPatch) {

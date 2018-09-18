@@ -60,7 +60,7 @@ limitations under the License.
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
           Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
-          Please your scenario well before updating a productive cluster.<br />
+          Please test your scenario before updating a productive cluster.<br />
         </br/>
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
