@@ -341,9 +341,9 @@ Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reser
 Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE
 [SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
 
-[moment](https://github.com/moment/moment/)
+[moment-timezone](https://github.com/moment/moment-timezone)
 Copyright (c) JS Foundation and other contributors
-[MIT License](https://github.com/moment/moment/blob/develop/LICENSE)
+[MIT License](https://github.com/moment/moment-timezone/blob/develop/LICENSE)
 
 [oidc-client](https://github.com/IdentityModel/oidc-client-js)
 [Apache License 2.0](https://github.com/IdentityModel/oidc-client-js/blob/dev/LICENSE)

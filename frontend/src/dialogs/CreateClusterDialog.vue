@@ -440,8 +440,7 @@ limitations under the License.
   import InfraIcon from '@/components/InfrastructureIcon'
   import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
   import { errorDetailsFromError } from '@/utils/error'
-  import moment from 'moment'
-  require('moment-timezone')
+  import moment from 'moment-timezone'
 
   const semSort = require('semver-sort')
 
