@@ -58,7 +58,7 @@ limitations under the License.
 <script>
   import { mapState, mapGetters } from 'vuex'
   import Clipboard from 'clipboard'
-  import moment from 'moment'
+  import moment from 'moment-timezone'
 
   export default {
     name: 'profile',

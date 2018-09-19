@@ -17,10 +17,16 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" class="update_btn" :class="buttonInactive" small round
+      <v-btn
+        slot="activator"
+        class="update_btn"
+        :class="buttonInactive"
+        small
+        round
         @click="showUpdateDialog"
         :outline="!k8sPatchAvailable"
         :dark="k8sPatchAvailable"
+        depressed
         color="cyan darken-2">
           <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
           {{k8sVersion}}
@@ -38,6 +44,7 @@ limitations under the License.
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
       confirmColor="orange"
+      defaultColor="orange"
       >
       <template slot="caption">Update Cluster</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -45,13 +52,18 @@ limitations under the License.
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
           :selectedVersion.sync="selectedVersion"
+          :selectedVersionType.sync="selectedVersionType"
           :selectedVersionInvalid.sync="selectedVersionInvalid"
           :confirmRequired.sync="confirmRequired"
           :currentk8sVersion="k8sVersion"
         ></shoot-version-update>
-        <template v-if="!selectedVersionInvalid && confirmRequired">
-          You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
-          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
+        <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
+          You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br /><br />
+          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
+          <i class="orange--text text--darken-2">This action cannot be undone.</i>
+        </template>
+        <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
+          Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.<br /><br />
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
@@ -88,6 +100,7 @@ limitations under the License.
       return {
         updateDialog: false,
         selectedVersion: undefined,
+        selectedVersionType: undefined,
         selectedVersionInvalid: false,
         confirmRequired: undefined,
         updateErrorMessage: null,
@@ -144,6 +157,7 @@ limitations under the License.
 <style lang="styl" scoped>
   .update_btn {
     min-width: 0px;
+    margin: 0px;
   }
 
   .update_btn >>> i {

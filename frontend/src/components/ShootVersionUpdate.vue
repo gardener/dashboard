@@ -17,18 +17,17 @@ limitations under the License.
 <template>
   <v-select
     :items="items"
-    item-text="version"
     v-model="selectedItem"
     :label="label"
-    color="cyan darken-2"
     :hint="hint"
-    :error="selectedMinorVersionIsNotNextMinor"
+    :error="isError"
+    placeholder="Please select version..."
   >
   <template slot="item" slot-scope="data">
     <v-tooltip top :disabled="!data.item.notNextMinor">
       <v-list-tile-content slot="activator">
-        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.version}}</v-list-tile-title>
-        <v-list-tile-title v-else class="text--disabled">{{data.item.version}}</v-list-tile-title>
+        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.text}}</v-list-tile-title>
+        <v-list-tile-title v-else class="text--disabled">{{data.item.text}}</v-list-tile-title>
       </v-list-tile-content>
       <span>You cannot upgrade your cluster more than one minor version at a time</span>
     </v-tooltip>
@@ -44,7 +43,6 @@ limitations under the License.
   import upperFirst from 'lodash/upperFirst'
   import head from 'lodash/head'
   import get from 'lodash/get'
-  import find from 'lodash/find'
   import semver from 'semver'
 
   export default {
@@ -53,6 +51,9 @@ limitations under the License.
         required: true
       },
       selectedVersion: {
+        type: String
+      },
+      selectedVersionType: {
         type: String
       },
       selectedVersionInvalid: {
@@ -78,6 +79,7 @@ limitations under the License.
           return map(versions, version => {
             return {type,
               version,
+              text: `${this.currentk8sVersion} → ${version}`,
               notNextMinor: this.itemIsNotNextMinor(version, type)
             }
           })
@@ -125,8 +127,7 @@ limitations under the License.
         })
 
         // cannot do in mount as need to reset selected item in case component gets reused, e.g. when the user switches from yaml back to ovweview
-        // eslint-disable-next-line lodash/matches-prop-shorthand
-        this.selectedItem = find(allItems, item => { return item.header === undefined })
+        this.selectedItem = undefined
 
         return allItems
       },
@@ -138,9 +139,13 @@ limitations under the License.
       selectedMinorVersionIsNotNextMinor () {
         const version = get(this, 'selectedItem.version')
         const type = get(this, 'selectedItem.type')
-        let invalid = this.itemIsNotNextMinor(version, type)
+        const invalid = !version || this.itemIsNotNextMinor(version, type)
         this.$emit('update:selectedVersionInvalid', invalid)
         return invalid
+      },
+      isError () {
+        const selectedVersion = get(this, 'selectedItem.version')
+        return selectedVersion && this.selectedMinorVersionIsNotNextMinor
       },
       label () {
         if (this.selectedVersionIsPatch) {
@@ -169,12 +174,13 @@ limitations under the License.
     watch: {
       selectedItem (value) {
         const version = get(value, 'version')
+        const type = get(value, 'type')
         this.$emit('update:selectedVersion', version)
+        this.$emit('update:selectedVersionType', type)
       },
       selectedVersion (value) {
         if (!value) {
-          // eslint-disable-next-line lodash/matches-prop-shorthand
-          this.selectedItem = find(this.items, item => { return item.header === undefined })
+          this.selectedItem = undefined
         }
       }
     }
