@@ -58,13 +58,12 @@ limitations under the License.
           :currentk8sVersion="k8sVersion"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
-          You should always back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br />
-          Upgrading the Kubernetes version of your cluster can lead to unexpected side effects. Please test your scenario before updating a productive cluster.<br />
-          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br />
+          You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br /><br />
+          Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'patch'">
-          Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects. Please test your scenario before updating a productive cluster.<br />
+          Applying a patch to your cluster will increase the Kubernetes version which can lead to unexpected side effects.<br /><br />
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
