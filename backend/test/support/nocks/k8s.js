@@ -285,7 +285,8 @@ function getShoot ({
       namespace,
       annotations: {
         'garden.sapcloud.io/purpose': purpose
-      }
+      },
+      labels: {}
     },
     spec: {
       cloud: {
@@ -461,15 +462,13 @@ const stub = {
       .get(`/api/v1/namespaces/${technicalID}/secrets/monitoring-ingress-credentials`)
       .reply(200, monitoringSecretResult)]
   },
-  replaceShootK8sSpec ({bearer, namespace, name, project, createdBy}) {
+  replaceShoot ({bearer, namespace, name, project, createdBy}) {
     const shoot = getShoot({name, project, createdBy})
-
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
-        const payload = _.head(body)
-        if (payload.op === 'replace' && payload.path === '/spec') {
-          shoot.spec = payload.value
-        }
+      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, () => shoot)
+      .put(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        _.assign(shoot, body)
         return true
       })
       .reply(200, () => shoot)

@@ -76,7 +76,7 @@ exports.create = async function ({user, namespace, body}) {
   return Garden(user).namespaces(namespace).shoots.post({body})
 }
 
-const read = exports.read = async function ({user, namespace, name}) {
+exports.read = async function ({user, namespace, name}) {
   return Garden(user).namespaces(namespace).shoots.get({name})
 }
 
@@ -85,7 +85,8 @@ const patch = exports.patch = async function ({user, namespace, name, body}) {
 }
 
 exports.replace = async function ({user, namespace, name, body}) {
-  const { metadata: oldMetadata, kind, apiVersion, status } = await read({user, namespace, name})
+  const shoots = Garden(user).namespaces(namespace).shoots
+  const { metadata: oldMetadata, kind, apiVersion, status } = await shoots.get({name})
   const { metadata: newMetadata, spec } = body
   // labels
   const reservedLabels = _.pickBy(oldMetadata.labels, isReservedLabel)
@@ -100,19 +101,7 @@ exports.replace = async function ({user, namespace, name, body}) {
   // body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return Garden(user).namespaces(namespace).shoots.put({name, body})
-}
-
-exports.replaceSpec = async function ({user, namespace, name, body}) {
-  const spec = body.spec || body
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: '/spec',
-      value: spec
-    }
-  ]
-  return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
+  return shoots.put({name, body})
 }
 
 exports.replaceVersion = async function ({user, namespace, name, body}) {

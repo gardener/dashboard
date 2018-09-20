@@ -30,7 +30,17 @@ limitations under the License.
   import MainContent from '@/components/MainContent.vue'
   import Loading from '@/components/Loading.vue'
   import GSnotify from '@/components/GSnotify.vue'
-  import assign from 'lodash/assign'
+  import set from 'lodash/set'
+
+  function setElementStyle (element, key, value) {
+    if (element) {
+      set(element.style, key, value)
+    }
+  }
+
+  function disableVerticalScrolling (element) {
+    setElementStyle(element, 'overflowY', 'hidden')
+  }
 
   export default {
     name: 'Default',
@@ -41,32 +51,20 @@ limitations under the License.
       Loading,
       GSnotify
     },
+    methods: {
+      getWrapElement () {
+        return this.$el.querySelector(':scope > div[class$="wrap"]')
+      }
+    },
     beforeRouteUpdate (to, from, next) {
       this.$refs.content.setScrollTop(0)
       next()
     },
     mounted () {
-      const element = this.$el
-      if (element.style) {
-        assign(element.style, {
-          overflowY: 'hidden'
-        })
-      }
-      const wrapElement = element.querySelector(':scope > div[class$="wrap"]')
-      if (wrapElement && wrapElement.style) {
-        assign(wrapElement.style, {
-          overflowY: 'hidden'
-        })
-      }
+      disableVerticalScrolling(this.$el)
+      const element = this.getWrapElement()
+      disableVerticalScrolling(element)
     }
   }
 </script>
 
-<style lang="styl" scoped>
-.v-navigation-drawer {
-  z-index: 9
-}
-.v-toolbar--fixed {
-  z-index: 8
-}
-</style>

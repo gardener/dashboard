@@ -91,21 +91,21 @@ limitations under the License.
         </v-flex>
       </v-layout>
     </v-flex>
-    <v-dialog v-model="dialog" persistent scrollable max-width="360px" @keydown.esc="resolveAction(false)">
-      <v-card>
-        <v-card-title primary-title class="orange grey--text text--lighten-4 headline" v-text="action.title"></v-card-title>
-        <v-divider></v-divider>
-        <v-card-text style="height: 120px;" v-html="action.text"></v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn small flat @click="resolveAction(false)" color="primary">{{action.noButtonText}}</v-btn>
-          <v-btn small flat @click="resolveAction(true)" color="secondary">{{action.yesButtonText}}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
+    <v-dialog v-model="dialog" persistent scrollable max-width="360px" @keydown.esc="resolveAction(false)">
+      <v-card>
+        <v-card-title primary-title class="orange darken-2 grey--text text--lighten-4 headline" v-text="action.title"></v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 80px;" v-html="action.text"></v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click="resolveAction(false)" color="primary">{{action.noButtonText}}</v-btn>
+          <v-btn flat @click="resolveAction(true)" color="secondary">{{action.yesButtonText}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 
@@ -114,7 +114,6 @@ limitations under the License.
   import { replaceShoot } from '@/utils/api'
   import Clipboard from 'clipboard'
   import download from 'downloadjs'
-  import Popper from 'vue-popperjs'
 
   // codemirror
   import CodeMirror from 'codemirror'
@@ -143,9 +142,6 @@ limitations under the License.
 
   export default {
     name: 'shoot-item-editor',
-    components: {
-      Popper
-    },
     data () {
       return {
         conflictPath: null,
@@ -245,11 +241,18 @@ limitations under the License.
       undo () {
         if (this.$instance) {
           this.$instance.execCommand('undo')
+          this.$instance.focus()
         }
       },
       redo () {
         if (this.$instance) {
           this.$instance.execCommand('redo')
+          this.$instance.focus()
+        }
+      },
+      focus () {
+        if (this.$instance) {
+          this.$instance.focus()
         }
       },
       reload () {
@@ -266,6 +269,7 @@ limitations under the License.
           this.snackbarText = 'Download content failed'
           this.snackbar = true
         }
+        this.focus()
       },
       refresh () {
         this.$nextTick(() => this.refreshInstance())
@@ -326,16 +330,6 @@ limitations under the License.
           }
         }
         this.$instance = undefined
-      },
-      setOption (key, value) {
-        if (this.$instance) {
-          this.$instance.setOption(key, value)
-        }
-      },
-      getOption (key) {
-        if (this.$instance) {
-          this.$instance.getOption(key)
-        }
       },
       clearHistory () {
         if (this.$instance) {
@@ -427,6 +421,7 @@ limitations under the License.
         this.snackbarText = 'Copied content to clipboard'
         this.snackbar = true
         e.clearSelection()
+        this.focus()
       })
       clipboard.on('error', e => {
         this.snackbarColor = 'error'
@@ -457,7 +452,12 @@ limitations under the License.
         return next()
       }
       try {
-        next(await this.confirmNavigation())
+        if (await this.confirmNavigation()) {
+          next()
+        } else {
+          this.focus()
+          next(false)
+        }
       } catch (err) {
         next(err)
       }
