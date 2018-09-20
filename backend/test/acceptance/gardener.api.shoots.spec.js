@@ -173,19 +173,41 @@ describe('gardener', function () {
           })
       })
 
-      it('should replace shoot kubernetes spec', function () {
+      it('should replace shoot', function () {
+        const metadata = {
+          annotations: {
+            'garden.sapcloud.io/createdBy': 'baz@example.org',
+            'garden.sapcloud.io/purpose': 'evaluation'
+          },
+          labels: {
+            foo: 'bar'
+          }
+        }
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.replaceShootK8sSpec({bearer, namespace, name, project, createdBy})
+        k8s.stub.replaceShoot({bearer, namespace, name, project, createdBy})
         return chai.request(app)
-          .put(`/api/namespaces/${namespace}/shoots/${name}/spec`)
+          .put(`/api/namespaces/${namespace}/shoots/${name}`)
           .set('authorization', `Bearer ${bearer}`)
-          .send({spec})
+          .send({
+            metadata,
+            spec
+          })
           .catch(err => err.response)
           .then(res => {
+            const body = res.body
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.spec).to.eql(spec)
+            expect(body.spec).to.eql(spec)
+            const actLabels = body.metadata.labels
+            const expLabels = metadata.labels
+            expect(actLabels).to.eql(expLabels)
+            const actPurpose = body.metadata.annotations['garden.sapcloud.io/purpose']
+            const expPurpose = metadata.annotations['garden.sapcloud.io/purpose']
+            expect(actPurpose).to.equal(expPurpose)
+            const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/createdBy']
+            const expCreatedBy = 'bar@example.org'
+            expect(actCreatedBy).to.equal(expCreatedBy)
           })
       })
 

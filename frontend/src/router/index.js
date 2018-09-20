@@ -30,7 +30,8 @@ const Default = () => import('@/layouts/Default')
 const Home = () => import('@/pages/Home')
 const ShootList = () => import('@/pages/ShootList')
 const PlaceholderComponent = { template: '<router-view></router-view>' }
-const ShootItem = () => import('@/pages/ShootItem')
+const ShootItemCards = () => import('@/pages/ShootItemCards')
+const ShootItemEditor = () => import('@/pages/ShootItemEditor')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
 const Account = () => import('@/pages/Account')
@@ -61,21 +62,51 @@ export default function createRouter ({store, userManager}) {
     }
   }
 
-  /* router
-    meta {
-    public: 'Determines whether route needs authorization',
-    namespaced: 'Determines whether route is namespace specific and has namespace in path',
-    projectscope: 'Determines whether route can be accessed in context of mutiple projects (_all)',
-    toRouteName: 'Sets "to" target name in case navigation is triggered (e.g. due to project change),
-                   this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
-                   Furthermore, it is possible to set a default child route for a top level item',
-    title: 'main menu title',
-    icon: 'main menu icon',
-    breadcrumb: 'Determines if breadcrumb is visible for route'
-  }
-
-  */
   const mode = 'history'
+
+  /**
+   * Tabstrip type definition
+   * @typedef {Object} Tab
+   * @prop {string}   title - The tile of the tabstrip
+   * @prop {function} to    - This function determines the navigation target of the router-link.
+   *                          The current route object https://router.vuejs.org/api/#the-route-object is passed as parameter
+   */
+  const shootItemTabs = [
+    {
+      title: 'Overview',
+      to: ({params}) => {
+        return {
+          name: 'ShootItem',
+          params
+        }
+      }
+    },
+    {
+      title: 'YAML',
+      to: ({params}) => {
+        return {
+          name: 'ShootItemEditor',
+          params
+        }
+      }
+    }
+  ]
+
+  /**
+   * Route Meta fields type definition
+   * @typedef {Object} RouteMeta
+   * @prop {boolean} [public]       - Determines whether route needs authorization.
+   * @prop {boolean} [namespaced]   - Determines whether route is namespace specific and has namespace in path.
+   * @prop {boolean} [projectScope] - Determines whether route can be accessed in context of mutiple projects (_all).
+   * @prop {string}  [toRouteName]  - Sets "to" target name in case navigation is triggered (e.g. due to project change),
+   *                                  this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
+   *                                  Furthermore, it is possible to set a default child route for a top level item.
+   * @prop {string}  [title]        - Main menu title.
+   * @prop {string}  [icon]         - Main menu icon.
+   * @prop {boolean} [breadcrumb]   - Determines if breadcrumb is visible for route.
+   * @prop {Tab[]}   [tabs]         - Determines the tabs to displayed in the main toolbar extenstion slot.
+   */
+
   const routes = [
     {
       path: '/login',
@@ -153,13 +184,27 @@ export default function createRouter ({store, userManager}) {
             {
               path: ':name',
               name: 'ShootItem',
-              component: ShootItem,
+              component: ShootItemCards,
               meta: {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootList',
-                breadcrumb: true
+                breadcrumb: true,
+                tabs: shootItemTabs
+              }
+            },
+            {
+              path: ':name/yaml',
+              name: 'ShootItemEditor',
+              component: ShootItemEditor,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                title: 'Cluster Editor',
+                toRouteName: 'ShootList',
+                breadcrumb: true,
+                tabs: shootItemTabs
               }
             }
           ]
@@ -356,6 +401,7 @@ export default function createRouter ({store, userManager}) {
               .all(promises)
               .then(() => undefined)
           case 'ShootItem':
+          case 'ShootItemEditor':
             return Promise
               .all([
                 store.dispatch('subscribeShoot', {name: params.name, namespace}),

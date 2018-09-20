@@ -55,25 +55,23 @@ router.route('/:name')
       next(err)
     }
   })
-  .delete(async (req, res, next) => {
-    try {
-      const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      res.send(await shoots.remove({user, namespace, name}))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/:name/spec')
   .put(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceSpec({user, namespace, name, body}))
+      res.send(await shoots.replace({user, namespace, name, body}))
+    } catch (err) {
+      next(err)
+    }
+  })
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.remove({user, namespace, name}))
     } catch (err) {
       next(err)
     }

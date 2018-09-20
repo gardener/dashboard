@@ -456,8 +456,8 @@ limitations under the License.
     }
   }
 </script>
+
 <style lang="styl" scoped >
-  @import '../stylus/main'
 
   .dashboard {
     padding-top: 10px;
@@ -494,6 +494,4 @@ limitations under the License.
   .search_textfield {
     min-width: 125px;
   }
-
-
 </style>

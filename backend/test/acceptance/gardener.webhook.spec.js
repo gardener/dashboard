@@ -67,6 +67,7 @@ describe('gardener', function () {
     const sandbox = sinon.createSandbox()
 
     before(function () {
+      nocks.reset()
       app = global.createServer()
     })
 

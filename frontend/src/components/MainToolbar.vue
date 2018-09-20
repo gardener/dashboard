@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-toolbar fixed app>
+  <v-toolbar fixed app :tabs="!!tabs">
     <v-toolbar-side-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-toolbar-side-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
@@ -104,6 +104,11 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
+    <v-tabs v-if="tabs" slot="extension" slider-color="grey darken-3">
+      <v-tab v-for="(tab, key) in tabs" :to="tab.to($route)" :key="key" ripple>
+        {{tab.title}}
+      </v-tab>
+    </v-tabs>
   </v-toolbar>
 </template>
 
@@ -152,8 +157,8 @@ limitations under the License.
       email () {
         return this.user.profile.email
       },
-      toolbarTitle () {
-        return this.$route.meta.title || ''
+      tabs () {
+        return get(this.$route, 'meta.tabs', false)
       },
       avatarTitle () {
         return `${this.username} (${this.email})`

@@ -83,8 +83,8 @@ export function deleteShoot ({namespace, name, user}) {
   return deleteResource(`/api/namespaces/${namespace}/shoots/${name}`, user)
 }
 
-export function replaceShootSpec ({namespace, name, user, data}) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec`, user, data)
+export function replaceShoot ({namespace, name, user, data}) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, user, data)
 }
 
 export function addAnnotation ({namespace, name, user, data}) {

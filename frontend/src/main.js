@@ -21,7 +21,7 @@
 import { parse as parseUrl } from 'url'
 import includes from 'lodash/includes'
 
-import 'mdi/css/materialdesignicons.css'
+import '@mdi/font/css/materialdesignicons.css'
 
 const version = isIE()
 

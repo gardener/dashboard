@@ -49,8 +49,7 @@ limitations under the License.
         const namespace = this.namespace
         const matched = this.$route.matched
         matched.forEach(function (matchedRoute) {
-          var hasBreadcrumb = get(matchedRoute, 'meta.breadcrumb')
-
+          const hasBreadcrumb = get(matchedRoute, 'meta.breadcrumb')
           if (hasBreadcrumb) {
             const text = get(matchedRoute, 'meta.title')
             const to = namespacedRoute(matchedRoute, namespace)
