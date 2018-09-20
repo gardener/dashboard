@@ -285,8 +285,7 @@ function getShoot ({
       namespace,
       annotations: {
         'garden.sapcloud.io/purpose': purpose
-      },
-      labels: {}
+      }
     },
     spec: {
       cloud: {
