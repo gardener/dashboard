@@ -235,7 +235,7 @@ limitations under the License.
         } catch (err) {
           this.alert = true
           this.alertType = 'error'
-          this.alertMessage = err.message
+          this.alertMessage = get(err, 'response.data.message', err.message)
         }
       },
       undo () {
