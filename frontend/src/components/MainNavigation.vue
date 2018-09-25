@@ -72,6 +72,7 @@ limitations under the License.
                 v-model="projectFilter"
                 ref="projectFilter"
                 @keyup.esc="projectFilter = ''"
+                autofocus
               >
               </v-text-field>
             </v-card-title>
@@ -269,7 +270,9 @@ limitations under the License.
     watch: {
       projectMenu (value) {
         if (value) {
-          setDelayedInputFocus(this, 'projectFilter')
+          requestAnimationFrame(() => {
+            setDelayedInputFocus(this, 'projectFilter')
+          })
         }
       }
     }
