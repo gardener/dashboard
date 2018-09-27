@@ -37,7 +37,7 @@ limitations under the License.
 
     <v-flex xs1 class="ml-3">
       <v-text-field
-        min="1"
+        min="0"
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMin')"
         @input="$v.worker.autoScalerMin.$touch()"
@@ -49,7 +49,7 @@ limitations under the License.
 
     <v-flex xs1 class="ml-3">
       <v-text-field
-        min="1"
+        min="0"
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMax')"
         @input="$v.worker.autoScalerMax.$touch()"
@@ -98,10 +98,10 @@ limitations under the License.
         uniqueWorkerName
       },
       autoScalerMin: {
-        minValue: minValue(1)
+        minValue: minValue(0)
       },
       autoScalerMax: {
-        minValue: minValue(1)
+        minValue: minValue(0)
       }
     }
   }
@@ -139,10 +139,10 @@ limitations under the License.
       },
       innerMin: {
         get: function () {
-          return Math.max(1, this.worker.autoScalerMin)
+          return Math.max(0, this.worker.autoScalerMin)
         },
         set: function (value) {
-          this.worker.autoScalerMin = Math.max(1, parseInt(value))
+          this.worker.autoScalerMin = Math.max(0, parseInt(value))
           if (this.innerMax < this.worker.autoScalerMin) {
             this.worker.autoScalerMax = this.worker.autoScalerMin
           }
@@ -150,10 +150,10 @@ limitations under the License.
       },
       innerMax: {
         get: function () {
-          return Math.max(1, this.worker.autoScalerMax)
+          return Math.max(0, this.worker.autoScalerMax)
         },
         set: function (value) {
-          this.worker.autoScalerMax = Math.max(1, parseInt(value))
+          this.worker.autoScalerMax = Math.max(0, parseInt(value))
           if (this.innerMin > this.worker.autoScalerMax) {
             this.worker.autoScalerMin = this.worker.autoScalerMax
           }
