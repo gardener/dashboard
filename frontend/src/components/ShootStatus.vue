@@ -29,14 +29,13 @@ limitations under the License.
             <template v-else>{{operation.progress}}</template>
           </v-progress-circular>
           <v-icon v-else-if="reconciliationDeactivated" class="cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
+          <v-icon v-else-if="isAborted && shootDeleted" class="cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+          <v-icon v-else-if="isAborted && isTypeCreate" class="cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
           <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
           <v-icon v-else-if="isError" class="cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
           <v-progress-circular v-else-if="isPending" class="cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
           <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
-          <v-icon v-else-if="isAborted && shootDeleted" class="cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
-          <v-icon v-else-if="isAborted && isTypeCreate" class="cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
-          <v-icon v-else-if="isAborted && isTypeReconcile" class="cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
-          <v-icon v-else class="cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+          <v-icon v-else class="cursor-pointer status-icon-check" :color="color">mdi-check-circle-outline</v-icon>
         </template>
         <div>{{ tooltipText }}</div>
       </v-tooltip>
@@ -196,10 +195,10 @@ limitations under the License.
         return this.operation.state || 'Pending'
       },
       color () {
-        if (this.isError) {
-          return 'error'
-        } else if (this.isAborted) {
+        if (this.isAborted) {
           return 'grey darken-1'
+        } else if (this.isError) {
+          return 'error'
         } else {
           return 'cyan darken-2'
         }
