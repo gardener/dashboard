@@ -155,7 +155,7 @@ limitations under the License.
                 <v-list-tile-title>{{cidr}}</v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
-            <template v-if="!!domain">
+            <template v-if="!!shootIngressDomainText">
               <v-divider class="my-2" inset></v-divider>
               <v-list-tile>
                 <v-list-tile-action>
@@ -416,6 +416,10 @@ limitations under the License.
         return get(this.item, 'spec.dns.domain')
       },
       shootIngressDomainText () {
+        const nginxIngressEnabled = get(this.item, 'spec.addons.nginx-ingress.enabled', false)
+        if (!this.domain || !nginxIngressEnabled) {
+          return undefined
+        }
         return `*.ingress.${this.domain}`
       },
       region () {
