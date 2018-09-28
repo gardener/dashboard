@@ -232,7 +232,6 @@ exports.info = async function ({user, namespace, name}) {
             .commit()
         }
       }
-
     }
   }
 
