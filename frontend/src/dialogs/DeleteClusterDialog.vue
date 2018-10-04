@@ -81,7 +81,7 @@ limitations under the License.
         this.deleteShoot({name: this.clusterName, namespace: this.clusterNamespace})
           .then(() => this.hideDialog())
           .catch((err) => {
-            this.deleteErrorMessage = 'Delete shoot failed'
+            this.deleteErrorMessage = 'Cluster deletion failed'
             this.deleteDetailedErrorMessage = err.message
             console.error('Delete shoot failed with error:', err)
           })
