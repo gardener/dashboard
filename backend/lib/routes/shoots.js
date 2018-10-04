@@ -90,6 +90,19 @@ router.route('/:name/spec/kubernetes/version')
     }
   })
 
+router.route('/:name/spec/hibernation/enabled')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.replaceHibernationEnabled({user, namespace, name, body}))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 router.route('/:name/metadata/annotations')
   .patch(async (req, res, next) => {
     try {

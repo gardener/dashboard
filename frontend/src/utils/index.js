@@ -255,10 +255,15 @@ export function getCreatedBy (metadata) {
 }
 
 export function isHibernated (spec) {
+  if (!spec) {
+    return false
+  }
+
   const kind = getCloudProviderKind(spec.cloud)
   // eslint-disable-next-line
   const workers = get(spec, ['cloud', kind, 'workers'])
-  return some(workers, worker => get(worker, 'autoScalerMax') === 0)
+  const hibernationEnabled = get(spec, 'hibernation.enabled', false)
+  return hibernationEnabled || some(workers, worker => get(worker, 'autoScalerMax') === 0)
 }
 
 export function canLinkToSeed ({shootNamespace}) {

@@ -103,6 +103,10 @@ export function updateShootVersion ({namespace, name, user, data}) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, user, data)
 }
 
+export function updateShootHibernation ({namespace, name, user, data}) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, user, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles ({user}) {
