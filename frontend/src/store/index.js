@@ -360,70 +360,70 @@ const actions = {
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Project created successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Project created', type: 'success' })
         return res
       })
   },
   updateProject ({ dispatch, commit }, data) {
     return dispatch('projects/update', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Project updated successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Project updated', type: 'success' })
         return res
       })
   },
   deleteProject ({ dispatch, commit }, data) {
     return dispatch('projects/delete', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Project deleted successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Project deleted', type: 'success' })
         return res
       })
   },
   createInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure Secret created successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Infractructure secret created', type: 'success' })
         return res
       })
   },
   updateInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/update', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure Secret updated successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Infractructure secret updated', type: 'success' })
         return res
       })
   },
   deleteInfrastructureSecret ({ dispatch, commit }, data) {
     return dispatch('infrastructureSecrets/delete', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Infractructure Secret deleted successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Infractructure secret deleted', type: 'success' })
         return res
       })
   },
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Shoot created successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Shoot created', type: 'success' })
         return res
       })
   },
   deleteShoot ({ dispatch, commit }, {name, namespace}) {
     return dispatch('shoots/delete', {name, namespace})
       .then(res => {
-        dispatch('setAlert', { message: 'Shoot marked for deletion successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Shoot marked for deletion', type: 'success' })
         return res
       })
   },
   addMember ({ dispatch, commit }, name) {
     return dispatch('members/add', name)
       .then(res => {
-        dispatch('setAlert', { message: 'Member added successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Member added', type: 'success' })
         return res
       })
   },
   deleteMember ({ dispatch, commit }, name) {
     return dispatch('members/delete', name)
       .then(res => {
-        dispatch('setAlert', { message: 'Member deleted successfully', type: 'success' })
+        dispatch('setAlert', { message: 'Member deleted', type: 'success' })
         return res
       })
       .catch(err => {
