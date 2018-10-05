@@ -24,6 +24,7 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       :confirm="confirm"
+      :confirmButtonText="confirmText"
       v-model="dialog"
       :cancel="hideDialog"
       :ok="updateShootHibernation"
@@ -36,7 +37,7 @@ limitations under the License.
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <template v-if="!isHibernated">
-          This will scale the worker nodes of your cluster down to 0.<br /><br />
+          This will scale the worker nodes of your cluster down to zero.<br /><br />
           Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
         </template>
         <template v-else>
@@ -77,12 +78,17 @@ limitations under the License.
       confirm () {
         return this.confirmRequired ? this.shootName : undefined
       },
+      confirmText () {
+        if (!this.isHibernated) {
+          return 'Hibernate'
+        } else {
+          return 'Wake-up'
+        }
+      },
       icon () {
         if (!this.isHibernated) {
-          console.log('mdi-pause-circle-outline')
           return 'mdi-pause-circle-outline'
         } else {
-          console.log('mdi-play-circle-outline')
           return 'mdi-play-circle-outline'
         }
       },

@@ -47,7 +47,7 @@ limitations under the License.
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>Confirm</v-btn>
+      <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>{{confirmButtonText}}</v-btn>
     </v-card-actions>
   </v-card>
   </v-dialog>
@@ -94,6 +94,10 @@ limitations under the License.
       },
       defaultColor: {
         type: String
+      },
+      confirmButtonText: {
+        type: String,
+        default: 'Confirm'
       }
     },
     data () {
