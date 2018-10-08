@@ -188,11 +188,6 @@ limitations under the License.
     },
     mounted () {
       this.floatingButton = true
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hide()
-      })
     }
   }
 </script>

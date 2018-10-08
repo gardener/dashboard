@@ -136,11 +136,6 @@ limitations under the License.
           })
       }
     },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hideDialog()
-      })
-    },
     watch: {
       isHibernated (value) {
         // hide dialog if hibernation state changes

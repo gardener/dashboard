@@ -146,11 +146,6 @@ limitations under the License.
             console.error('Update shoot version failed with error:', err)
           })
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hideUpdateDialog()
-      })
     }
   }
 </script>
