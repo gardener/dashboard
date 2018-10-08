@@ -43,7 +43,7 @@ function fromResource ({subjects} = {}) {
     .value()
 }
 
-function getKubeconfig ({serviceaccountName, token, server, caData}) {
+function getKubeconfig ({serviceaccountName, serviceaccountNamespace, token, server, caData}) {
   const clusterName = 'garden'
   const cluster = {
     'certificate-authority-data': caData,
@@ -56,7 +56,8 @@ function getKubeconfig ({serviceaccountName, token, server, caData}) {
   const contextName = 'default'
   const context = {
     cluster: clusterName,
-    user: userName
+    user: userName,
+    namespace: serviceaccountNamespace
   }
   return yaml.safeDump({
     kind: 'Config',
@@ -233,7 +234,7 @@ exports.get = async function ({user, namespace, name: username}) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({serviceaccountName, token, caData, server})
+    member.kubeconfig = getKubeconfig({serviceaccountName, serviceaccountNamespace, token, caData, server})
   }
   return member
 }
