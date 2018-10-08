@@ -117,15 +117,15 @@ exports.replaceVersion = async function ({user, namespace, name, body}) {
 }
 
 exports.replaceHibernationEnabled = async function ({user, namespace, name, body}) {
-  const enabled = body.enabled
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: '/spec/hibernation/enabled',
-      value: enabled
+  const enabled = !!body.enabled
+  const payload = {
+    spec: {
+      hibernation: {
+        enabled
+      }
     }
-  ]
-  return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
+  }
+  return patch({user, namespace, name, body: payload})
 }
 
 const patchAnnotations = async function ({user, namespace, name, annotations}) {

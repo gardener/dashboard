@@ -37,6 +37,7 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       :confirm="confirm"
+      confirmButtonText="Update"
       v-model="updateDialog"
       :cancel="hideUpdateDialog"
       :ok="versionUpdateConfirmed"

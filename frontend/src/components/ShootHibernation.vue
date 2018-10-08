@@ -68,7 +68,7 @@ limitations under the License.
         dialog: false,
         hibernationErrorMessage: null,
         hibernationDetailedErrorMessage: null,
-        hibernate: false
+        enableHibernation: false
       }
     },
     computed: {

@@ -20,10 +20,10 @@ limitations under the License.
       <v-tooltip top>
         <template slot="activator">
           <v-progress-circular v-if="showProgress" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-            <v-icon v-if="isUserError" class="cursor-pointer progress-icon-user-error" color="error">mdi-account-alert</v-icon>
+            <v-icon v-if="isHibernated" class="cursor-pointer progress-icon" :color="color">mdi-sleep</v-icon>
+            <v-icon v-else-if="isUserError" class="cursor-pointer progress-icon-user-error" color="error">mdi-account-alert</v-icon>
             <v-icon v-else-if="shootDeleted" class="cursor-pointer progress-icon" :color="color">mdi-delete</v-icon>
             <v-icon v-else-if="isTypeCreate" class="cursor-pointer progress-icon" :color="color">mdi-plus</v-icon>
-            <v-icon v-else-if="isHibernated" class="cursor-pointer progress-icon" :color="color">mdi-sleep</v-icon>
             <span v-else-if="isTypeReconcile && isError" class="error-exclamation-mark">!</span>
             <v-icon v-else-if="isTypeReconcile" class="cursor-pointer progress-icon-check" :color="color">mdi-check</v-icon>
             <span v-else-if="isError" class="error-exclamation-mark">!</span>
