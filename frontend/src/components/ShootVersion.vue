@@ -37,6 +37,7 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       :confirm="confirm"
+      confirmButtonText="Update"
       v-model="updateDialog"
       :cancel="hideUpdateDialog"
       :ok="versionUpdateConfirmed"
@@ -145,11 +146,6 @@ limitations under the License.
             console.error('Update shoot version failed with error:', err)
           })
       }
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hideUpdateDialog()
-      })
     }
   }
 </script>

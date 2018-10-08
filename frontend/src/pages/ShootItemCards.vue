@@ -44,9 +44,7 @@ limitations under the License.
               <v-list-tile-content>
                 <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
               </v-list-tile-content>
-              <v-list-tile-avatar>
-                <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
-              </v-list-tile-avatar>
+              <shoot-version class="pr-3" :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
             </v-list-tile>
 
             <v-divider class="my-2" inset></v-divider>
@@ -86,6 +84,17 @@ limitations under the License.
                 </v-list-tile-content>
               </v-list-tile>
             </template>
+
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-sleep</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-sub-title>Hibernation</v-list-tile-sub-title>
+              </v-list-tile-content>
+              <shoot-hibernation :shootItem="item"></shoot-hibernation>
+            </v-list-tile>
 
           </v-list>
         </v-card>
@@ -257,6 +266,7 @@ limitations under the License.
   import ShootVersion from '@/components/ShootVersion'
   import StatusCard from '@/components/StatusCard'
   import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+  import ShootHibernation from '@/components/ShootHibernation'
   import get from 'lodash/get'
   import includes from 'lodash/includes'
   import find from 'lodash/find'
@@ -283,7 +293,8 @@ limitations under the License.
       TimeString,
       ShootVersion,
       StatusCard,
-      SelfTerminationWarning
+      SelfTerminationWarning,
+      ShootHibernation
     },
     data () {
       return {
