@@ -110,14 +110,13 @@ limitations under the License.
 </script>
 
 <style lang="styl" scoped>
-  @import '../stylus/main'
 
   .code-block {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: $grey.lighten-3;
-    color: $grey.darken-2;
+    background-color: #f5f5f5; /* grey--lighten--3 */
+    color: #f5f5f5; /* grey--lighten--3 */
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;
