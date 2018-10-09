@@ -137,7 +137,6 @@ limitations under the License.
 
 
 <script>
-  /* global VERSION */
   import { mapState, mapGetters, mapActions } from 'vuex'
   import find from 'lodash/find'
   import filter from 'lodash/filter'
@@ -155,7 +154,7 @@ limitations under the License.
     },
     data () {
       return {
-        version: VERSION,
+        version: process.env.VUE_APP_VERSION,
         copyright: `© ${new Date().getFullYear()}`,
         projectDialog: false,
         projectFilter: '',
