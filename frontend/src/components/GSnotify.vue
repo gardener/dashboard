@@ -20,7 +20,6 @@ limitations under the License.
 
 <script>
   import { mapGetters, mapActions } from 'vuex'
-  import 'vue-snotify/styles/material.css'
   import { SnotifyPosition } from 'vue-snotify'
 
   export default {
@@ -114,7 +113,7 @@ limitations under the License.
   }
 </script>
 <style lang="styl">
-  @import 'vue-snotify/styles/material.css'
+  @import "~vue-snotify/styles/material.css";
 
   .snotify-rightTop {
     top: 75px;
