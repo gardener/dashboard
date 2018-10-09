@@ -76,9 +76,9 @@ limitations under the License.
       },
       cardClass () {
         if (this.isUserDialog) {
-          return 'add_user'
+          return 'help_user'
         } else if (this.isServiceDialog) {
-          return 'add_service'
+          return 'help_service'
         }
         return ''
       },
@@ -99,9 +99,9 @@ limitations under the License.
   }
 </script>
 
-<style lang="styl">
+<style lang="styl" scoped>
   .help_member {
-    .card__title{
+    .v-card__title{
       background-size: cover;
       color:white;
       height:130px;
@@ -117,12 +117,12 @@ limitations under the License.
     }
   }
   .help_user {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_user_background.svg);
     }
   }
   .help_service {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_service_background.svg);
     }
   }

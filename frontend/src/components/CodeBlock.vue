@@ -128,7 +128,7 @@ limitations under the License.
       &:after {
         opacity: 0;
       }
-      .btn {
+      .v-btn {
         opacity: 1;
       }
     }
@@ -174,7 +174,7 @@ limitations under the License.
     padding: 16px;
     overflow: auto;
   }
-  .btn {
+  .v-btn {
     position: absolute;
     top: 12px;
     right: 12px;

@@ -104,7 +104,7 @@ limitations under the License.
       cardClass () {
         let cardClass = 'mr-extra'
         if (this.disabled) {
-          cardClass = `${cardClass} card__disabled`
+          cardClass = `${cardClass} card_disabled`
         }
         return cardClass
       },
@@ -131,7 +131,7 @@ limitations under the License.
 
 <style lang="styl" scoped>
 
-  .card__disabled {
+  .card_disabled {
     opacity:0.3;
     pointer-events: none
   }

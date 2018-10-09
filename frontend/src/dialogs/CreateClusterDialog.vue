@@ -1138,57 +1138,38 @@ limitations under the License.
       background-size: cover;
       color:white;
       padding-top:30px;
-      .tabs__bar {
+      .v-tabs__bar {
         background-color:rgba(255,255,255,0.1)
       }
     }
 
-    .toolbar__title {
+    .v-toolbar__title {
       margin-bottom: 30px
       span {
         padding-left: 5px;
       }
     }
 
-    .card__text{
+    .v-card__text{
       padding:0;
     }
 
-    .tabs__item {
+    .v-tabs__item {
       font-weight: 400;
     }
 
-    .tabs__items {
+    .v-tabs__items {
       margin: 10px;
       height:410px !important;
-      .tabs__content {
+      .v-tabs__content {
         height:100%;
         overflow:auto;
       }
     }
 
-    .input-group{
-      label{
-        overflow:visible;
-      }
-    }
-
-    .list-complete-item {
-      transition: all 0.5s;
-    }
-
     .add_worker{
       margin-left:30px;
       border:0;
-    }
-
-    .list-complete-enter, .list-complete-leave-to {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    .list-complete-leave-active {
-      position: absolute;
     }
 
   }

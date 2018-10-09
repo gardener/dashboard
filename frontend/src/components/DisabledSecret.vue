@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-card class="mr-extra card__disabled">
+  <v-card class="mr-extra card_disabled">
     <v-toolbar :class="toolbarClass" dark>
       <img v-if="icon === 'alibaba-cloud'" src="@/assets/alibaba-cloud.svg" width="32">
       <img v-else-if="icon === 'digital-ocean'" src="@/assets/digital-ocean.svg" width="32">
@@ -71,7 +71,7 @@ limitations under the License.
 </script>
 
 <style lang="styl" scoped>
-  .card__disabled {
+  .card_disabled {
     opacity:0.5;
   }
 

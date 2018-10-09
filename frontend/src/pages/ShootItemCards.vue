@@ -509,18 +509,18 @@ limitations under the License.
 
 
 <style lang="styl" scoped>
-  .subheading.card__title {
+  .subheading.v-card__title {
     height: 42px;
   }
 
-  .expansion-panel {
+  .v-expansion-panel {
     box-shadow: none;
     display: initial;
 
     >>> li {
       border: none;
 
-      .expansion-panel__header {
+      .v-expansion-panel__header {
         padding: 16px 32px 16px 16px !important;
 
         .material-icons {

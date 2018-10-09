@@ -166,7 +166,7 @@ limitations under the License.
     padding-right: 8px;
   }
 
-  .retryOperation >>> .btn {
+  .retryOperation >>> .v-btn {
     margin-right: 4px;
     margin-left: 0px;
     margin-bottom: 0px;

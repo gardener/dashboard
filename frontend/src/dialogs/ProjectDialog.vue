@@ -298,7 +298,7 @@ limitations under the License.
 
 <style lang="styl">
   .project {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/project_background.svg);
       background-size: cover;
       color:white;

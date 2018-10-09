@@ -77,7 +77,7 @@ limitations under the License.
 
 <style lang="styl" scoped>
 
-  .breadcrumbs {
+  .v-breadcrumbs {
     padding-left: 0px;
   }
 

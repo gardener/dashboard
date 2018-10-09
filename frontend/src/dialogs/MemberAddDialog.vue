@@ -300,9 +300,9 @@ limitations under the License.
   }
 </script>
 
-<style lang="styl">
+<style lang="styl" scoped>
   .add_member {
-    .card__title{
+    .v-card__title{
       background-size: cover;
       color:white;
       height:130px;
@@ -318,12 +318,12 @@ limitations under the License.
     }
   }
   .add_user {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_user_background.svg);
     }
   }
   .add_service {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_service_background.svg);
     }
   }

@@ -68,7 +68,7 @@ limitations under the License.
                 full-width
                 color="grey darken-1"
                 prepend-icon="search"
-                class="ml-3 py-2 project-filter"
+                class="ml-4 project-filter"
                 v-model="projectFilter"
                 ref="projectFilter"
                 @keyup.esc="projectFilter = ''"
@@ -282,13 +282,11 @@ limitations under the License.
   .project-menu {
     border-radius: 0;
 
-    .card {
+    .v-card {
       border-radius: 0;
 
       .project-filter {
-        label {
-          top: 10px;
-        }
+        align-items: center
       }
 
       .project-add > div {
@@ -383,20 +381,20 @@ limitations under the License.
       }
     }
 
-    .footer{
+    .v-footer{
       background-color: transparent
       bottom: 10px
       padding-left: 10px;
       padding-right: 10px;
     }
 
-    >>> .list {
-      .list__tile__title {
+    >>> .v-list {
+      .v-list__tile__title {
           text-transform: uppercase
           font-size: 13px;
           max-width: 180px;
       }
-      .list__tile--active {
+      .v-list__tile--active {
         background: rgba(255,255,255,0.1) !important
         color: white !important
         .icon {

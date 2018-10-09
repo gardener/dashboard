@@ -40,10 +40,8 @@ limitations under the License.
     .content > .container {
       min-height: calc(100vh - 156px)
     }
-  }
-
-  // for some reasons text is not selectable in list items of vuetify...patch them
-  .list__tile {
-    user-select: initial !important;
+    .container {
+      padding: 16px;
+    }
   }
 </style>

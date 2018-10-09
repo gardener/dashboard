@@ -182,7 +182,7 @@ limitations under the License.
     display: block;
   }
 
-  .action-button >>> .btn__content {
+  .action-button >>> .v-btn__content {
     justify-content: left
   }
 
@@ -194,6 +194,10 @@ limitations under the License.
   .operator {
     color: white;
     font-weight: bold;
+  }
+
+  >>> .v-toolbar__extension {
+    padding: 0;
   }
 
 </style>

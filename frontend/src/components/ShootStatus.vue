@@ -19,7 +19,7 @@ limitations under the License.
     <div slot="popperRef" class="shoot-status-div">
       <v-tooltip top>
         <template slot="activator">
-          <v-progress-circular v-if="showProgress" class="cursor-pointer progress-circular" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
+          <v-progress-circular v-if="showProgress" class="cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
             <v-icon v-if="isHibernated" class="cursor-pointer progress-icon" :color="color">mdi-sleep</v-icon>
             <v-icon v-else-if="isUserError" class="cursor-pointer progress-icon-user-error" color="error">mdi-account-alert</v-icon>
             <v-icon v-else-if="shootDeleted" class="cursor-pointer progress-icon" :color="color">mdi-delete</v-icon>
@@ -238,14 +238,12 @@ limitations under the License.
     cursor: pointer;
   }
 
-  .progress-circular {
+  .v-progress-circular {
     font-size: 0.9em;
   }
 
   .progress-icon {
     font-size: 1.3em;
-    padding-left: 0.1em;
-    padding-bottom: 0.1em;
   }
 
   .progress-icon-check {
@@ -257,7 +255,6 @@ limitations under the License.
   .progress-icon-user-error {
     font-size: 1.1em;
     padding-left: 0.1em;
-    padding-bottom: 0.1em;
   }
 
   .error-exclamation-mark {
