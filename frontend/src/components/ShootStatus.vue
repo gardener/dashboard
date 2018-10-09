@@ -36,7 +36,7 @@ limitations under the License.
           <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
           <v-icon v-else-if="isError" class="cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
           <v-progress-circular v-else-if="isPending" class="cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-          <v-icon v-else class="cursor-pointer status-icon-check" :color="color">mdi-check-circle-outline</v-icon>
+          <v-icon v-else class="cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
         </template>
         <div>{{ tooltipText }}</div>
       </v-tooltip>
