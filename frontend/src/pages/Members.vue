@@ -18,7 +18,7 @@ limitations under the License.
   <v-container fluid>
     <v-card class="mr-extra">
       <v-toolbar card color="teal darken-2">
-        <v-icon class="white--text pr-2">mdi-account-settings-variant</v-icon>
+        <v-icon class="white--text pr-2">mdi-account</v-icon>
         <v-toolbar-title class="subheading white--text">
           Main Contact
         </v-toolbar-title>
