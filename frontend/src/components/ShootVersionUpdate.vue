@@ -154,6 +154,9 @@ limitations under the License.
         return 'Upgrade to Version'
       },
       hint () {
+        if (!this.selectedItem) {
+          return ''
+        }
         return this.selectedMinorVersionIsNotNextMinor ? 'You cannot upgrade your cluster more than one minor version at a time' : ''
       }
     },
