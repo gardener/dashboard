@@ -36,6 +36,7 @@ dashboard:
           inject_effective_version: true
         release:
           nextversion: 'bump_minor'
+          release_callback: '.ci/prepare_release'
         slack:
           default_channel: 'internal_scp_workspace'
           channel_cfgs:
@@ -48,10 +49,6 @@ dashboard:
             dashboard:
               tag_as_latest: true
       steps:
-        prepare_release:
-          image: *node_image
-          publish_to: ['source']
-          depends: ['test']
         build:
           depends: ['prepare_release']
 
