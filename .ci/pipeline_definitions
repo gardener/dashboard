@@ -48,5 +48,3 @@ dashboard:
           dockerimages:
             dashboard:
               tag_as_latest: true
-      steps:
-        build: ~
