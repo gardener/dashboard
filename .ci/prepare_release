@@ -2,40 +2,38 @@
 
 set -e
 
-if [ -z "$SOURCE_PATH" ]; then
-  export SOURCE_PATH="$(readlink -f $(dirname ${0})/..)"
+if [ -z "$REPO_DIR" ]; then
+  export REPO_DIR="$(readlink -f $(dirname ${0})/..)"
 else
-  export SOURCE_PATH="$(readlink -f "${SOURCE_PATH}")"
+  export REPO_DIR="$(readlink -f "${REPO_DIR}")"
 fi
 
 # not every environment has pushd
 old_pwd=$PWD
-cd "${SOURCE_PATH}"
+cd "${REPO_DIR}"
 
-version="$(cat "${SOURCE_PATH}/VERSION")"
-if [ -z "$version" ]
-then
-  echo "Version not found"
-  exit 1
+if [ -z "$EFFECTIVE_VERSION" ]; then
+    version="$(cat "${REPO_DIR}/VERSION")"
+    if [ -z "$version" ]
+    then
+      echo "Version not found"
+      exit 1
+    fi
+else
+    version="${EFFECTIVE_VERSION}"
 fi
 
-# revert changes VERSION
-git checkout "${SOURCE_PATH}/VERSION"
+# revert changed VERSION
+git checkout "${REPO_DIR}/VERSION"
 
 # print environment
 env
 
 # bump backend version
-sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${SOURCE_PATH}/backend/package.json"
-npm i --prefix "${SOURCE_PATH}/backend"
-git add "${SOURCE_PATH}/backend/package.json"
-git add "${SOURCE_PATH}/backend/package-lock.json"
+sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${REPO_DIR}/backend/package.json"
+npm i --prefix "${REPO_DIR}/backend"
 # bump frontend version
-sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${SOURCE_PATH}/frontend/package.json"
-npm i --prefix "${SOURCE_PATH}/frontend"
-git add "${SOURCE_PATH}/frontend/package.json"
-git add "${SOURCE_PATH}/frontend/package-lock.json"
-# commit changes
-git commit -m "Update frontend & backend to version $version [skip ci]"
+sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${REPO_DIR}/frontend/package.json"
+npm i --prefix "${REPO_DIR}/frontend"
 
 cd "${old_pwd}"
