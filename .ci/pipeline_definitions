@@ -33,7 +33,6 @@ dashboard:
       traits:
         version:
           preprocess: 'finalize'
-          inject_effective_version: true
         release:
           nextversion: 'bump_minor'
           release_callback: '.ci/prepare_release'
