@@ -29,6 +29,12 @@ git checkout "${REPO_DIR}/VERSION"
 # print environment
 env
 
+# install npm if absent
+if ! which npm > /dev/null; then
+    apk update
+    apk add npm
+fi
+
 # bump backend version
 sed -i -r "s/\"version\": *\".+\"/\"version\": \"$version\"/g" "${REPO_DIR}/backend/package.json"
 npm i --prefix "${REPO_DIR}/backend"
