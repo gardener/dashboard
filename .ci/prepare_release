@@ -23,9 +23,6 @@ else
     version="${EFFECTIVE_VERSION}"
 fi
 
-# revert changed VERSION
-git checkout "${REPO_DIR}/VERSION"
-
 # print environment
 env
 
