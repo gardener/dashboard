@@ -57,7 +57,6 @@ limitations under the License.
         return get(this.shootItem, 'status', {})
       },
       canRetry () {
-        return true
         const reconcileScheduled = get(this.metadata, 'generation') !== get(this.status, 'observedGeneration')
 
         return get(this.status, 'lastOperation.state') === 'Failed' &&
