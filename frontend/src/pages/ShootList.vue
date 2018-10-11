@@ -47,7 +47,7 @@ limitations under the License.
             <v-subheader>Column Selection</v-subheader>
             <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
               <v-list-tile-action>
-                <v-checkbox v-model="item.checked" color="cyan darken-2" readonly @click.native.stop @click="setColumnChecked(item)"></v-checkbox>
+                <v-checkbox v-model="item.checked" color="cyan darken-2" @click="setColumnChecked(item)"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>{{ item.text }}</v-list-tile-sub-title>
             </v-list-tile>
@@ -62,7 +62,7 @@ limitations under the License.
             <v-subheader v-if="!projectScope">Filter Table</v-subheader>
             <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
-                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
+                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
             </v-list-tile>
@@ -72,7 +72,6 @@ limitations under the License.
                   :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
                   v-model="hideUserIssues"
                   color="cyan darken-2"
-                  readonly @click.native.stop
                   @click="toggleHideUserIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
@@ -83,8 +82,6 @@ limitations under the License.
                 :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
                 v-model="hideDeactivatedReconciliation"
                 color="cyan darken-2"
-                readonly
-                @click.native.stop
                 @click="toggleHideDeactivatedReconciliation"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide clusters with deactivated reconciliation</v-list-tile-sub-title>
