@@ -15,12 +15,14 @@ limitations under the License.
 -->
 
 <template>
-  <v-tooltip top v-if="canRetry">
-    <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
-      <v-icon>mdi-reload</v-icon>
-    </v-btn>
-    Retry Operation
-  </v-tooltip>
+  <div class="retry-operation-div">
+    <v-tooltip top v-if="canRetry">
+      <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
+        <v-icon>mdi-reload</v-icon>
+      </v-btn>
+      Retry Operation
+    </v-tooltip>
+  </div>
 </template>
 
 
@@ -55,6 +57,7 @@ limitations under the License.
         return get(this.shootItem, 'status', {})
       },
       canRetry () {
+        return true
         const reconcileScheduled = get(this.metadata, 'generation') !== get(this.status, 'observedGeneration')
 
         return get(this.status, 'lastOperation.state') === 'Failed' &&
@@ -92,4 +95,17 @@ limitations under the License.
 </script>
 
 <style lang="styl" scoped>
+
+.retry-operation-div {
+  display: inline-block;
+  width: 30px;
+  text-align: center;
+  height: auto;
+  max-height:  30px;
+}
+
+.retryButton {
+  margin: 0px;
+}
+
 </style>

@@ -34,7 +34,6 @@ limitations under the License.
             @input="$v.email.$touch()"
             @blur="$v.email.$touch()"
             @keyup.enter="submit()"
-            required
             tabindex="1"
           ></v-text-field>
           <v-text-field
@@ -47,7 +46,6 @@ limitations under the License.
             @input="$v.serviceAccountName.$touch()"
             @blur="$v.serviceAccountName.$touch()"
             @keyup.enter="submit()"
-            required
             tabindex="1"
           ></v-text-field>
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>

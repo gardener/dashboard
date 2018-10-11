@@ -21,7 +21,7 @@ limitations under the License.
       <div class="headline">
         <slot name="caption">
           Confirm Dialog
-        </slot>
+        </slot>&nbsp;
         <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
       </div>
     </v-card-title>

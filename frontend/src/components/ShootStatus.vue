@@ -19,24 +19,23 @@ limitations under the License.
     <div slot="popperRef" class="shoot-status-div">
       <v-tooltip top>
         <template slot="activator">
-          <v-progress-circular v-if="showProgress" class="cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-            <v-icon v-if="isHibernated" class="cursor-pointer progress-icon" :color="color">mdi-sleep</v-icon>
-            <v-icon v-else-if="isUserError" class="cursor-pointer progress-icon-user-error" color="error">mdi-account-alert</v-icon>
-            <v-icon v-else-if="shootDeleted" class="cursor-pointer progress-icon" :color="color">mdi-delete</v-icon>
-            <v-icon v-else-if="isTypeCreate" class="cursor-pointer progress-icon" :color="color">mdi-plus</v-icon>
-            <span v-else-if="isTypeReconcile && isError" class="error-exclamation-mark">!</span>
-            <v-icon v-else-if="isTypeReconcile" class="cursor-pointer progress-icon-check" :color="color">mdi-check</v-icon>
-            <span v-else-if="isError" class="error-exclamation-mark">!</span>
+          <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
+            <v-icon v-if="isHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
+            <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" color="error">mdi-account-alert</v-icon>
+            <v-icon v-else-if="shootDeleted" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
+            <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
+            <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
+            <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
             <template v-else>{{operation.progress}}</template>
           </v-progress-circular>
-          <v-icon v-else-if="isHibernated" class="cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
-          <v-icon v-else-if="reconciliationDeactivated" class="cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
-          <v-icon v-else-if="isAborted && shootDeleted" class="cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
-          <v-icon v-else-if="isAborted && isTypeCreate" class="cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
-          <v-icon v-else-if="isUserError" class="cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
-          <v-icon v-else-if="isError" class="cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
-          <v-progress-circular v-else-if="isPending" class="cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
-          <v-icon v-else class="cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
+          <v-icon v-else-if="isHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
+          <v-icon v-else-if="reconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
+          <v-icon v-else-if="isAborted && shootDeleted" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+          <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
+          <v-icon v-else-if="isUserError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
+          <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
+          <v-progress-circular v-else-if="isPending" class="vertical-align-middle cursor-pointer" :size="27" :width="3" indeterminate :color="color"></v-progress-circular>
+          <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
         </template>
         <div>{{ tooltipText }}</div>
       </v-tooltip>
@@ -228,46 +227,49 @@ limitations under the License.
 
   .shoot-status-div {
     display: inline-block;
-    width: 2.5em;
+    width: 30px;
     text-align: center;
     height: auto;
-    max-height:  2.5em;
+    max-height:  30px;
   }
 
   .cursor-pointer {
     cursor: pointer;
   }
 
+  .vertical-align-middle {
+    vertical-align: middle;
+  }
+
   .v-progress-circular {
-    font-size: 0.9em;
+    font-size: 12px;
+    vertical-align: middle;
+
   }
 
   .progress-icon {
-    font-size: 1.3em;
+    font-size: 15px;
   }
 
   .progress-icon-check {
-    font-size: 1.6em;
-    padding-left: 0.05em;
-    padding-bottom: 0.05em;
+    font-size: 20px;
   }
 
   .progress-icon-user-error {
-    font-size: 1.1em;
-    padding-left: 0.1em;
+    font-size: 14px;
   }
 
   .error-exclamation-mark {
-    font-size: 1.5em;
+    font-size: 20px;
     font-weight: bold;
   }
 
   .status-icon {
-    font-size: 2em;
+    font-size: 25px;
   }
 
   .status-icon-check {
-    font-size: 2.3em;
+    font-size: 30px;
   }
 
   .alert-message {

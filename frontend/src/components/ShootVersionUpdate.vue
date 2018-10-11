@@ -21,6 +21,7 @@ limitations under the License.
     :label="label"
     :hint="hint"
     :error="isError"
+    return-object
     placeholder="Please select version..."
   >
   <template slot="item" slot-scope="data">

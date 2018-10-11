@@ -48,7 +48,6 @@ limitations under the License.
                       :error-messages="getErrorMessages('shootDefinition.metadata.name')"
                       @input="$v.shootDefinition.metadata.name.$touch()"
                       @blur="$v.shootDefinition.metadata.name.$touch()"
-                      required
                       ></v-text-field>
                   </v-flex>
                 </v-layout>
@@ -60,7 +59,6 @@ limitations under the License.
                       label="Infrastructure"
                       :items="sortedCloudProviderKindList"
                       v-model="infrastructureKind"
-                      required
                       >
                       <template slot="item" slot-scope="data">
                         <v-list-tile-avatar>
@@ -106,7 +104,6 @@ limitations under the License.
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
                       @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
                       @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
-                      required
                       persistent-hint
                       :hint="secretHint"
                       >
@@ -134,7 +131,6 @@ limitations under the License.
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
                       @input="$v.shootDefinition.spec.cloud.region.$touch()"
                       @blur="$v.shootDefinition.spec.cloud.region.$touch()"
-                      required
                       ></v-select>
                   </v-flex>
                   <v-flex xs1>
@@ -148,7 +144,6 @@ limitations under the License.
                       v-model="zone"
                       @input="$v.infrastructureData.zones.$touch()"
                       @blur="$v.infrastructureData.zones.$touch()"
-                      required
                       ></v-select>
                   </v-flex>
                 </v-layout>
@@ -160,7 +155,6 @@ limitations under the License.
                       label="Kubernetes"
                       :items="sortedKubernetesVersions"
                       v-model="shootDefinition.spec.kubernetes.version"
-                      required
                       ></v-select>
                   </v-flex>
                   <v-flex xs1>
@@ -175,7 +169,6 @@ limitations under the License.
                       persistent-hint
                       @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
                       @blur="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
-                      required
                       ></v-select>
                   </v-flex>
                 </v-layout>
@@ -188,7 +181,6 @@ limitations under the License.
                       label="Floating Pools"
                       :items="floatingPoolNames"
                       v-model="infrastructureData.floatingPoolName"
-                      required
                       ></v-select>
                     </v-flex>
                     <v-flex xs1>
@@ -200,7 +192,6 @@ limitations under the License.
                       :items="loadBalancerProviderNames"
                       v-model="infrastructureData.loadBalancerProvider"
                       persistent-hint
-                      required
                       ></v-select>
                     </v-flex>
                   </v-layout>
@@ -346,7 +337,6 @@ limitations under the License.
                    @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
                    @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
                    type="time"
-                   required
                    persistent-hint
                    hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
                  ></v-text-field>
@@ -358,7 +348,6 @@ limitations under the License.
                     :items="timezones"
                     v-model="selectedTimezone"
                     autocomplete
-                    required
                     >
                   </v-select>
                 </v-flex>

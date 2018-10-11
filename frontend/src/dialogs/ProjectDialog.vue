@@ -37,7 +37,6 @@ limitations under the License.
                     :error-messages="getFieldValidationErrors('projectName')"
                     @input="$v.projectName.$touch()"
                     @blur="$v.projectName.$touch()"
-                    required
                     counter="10"
                     tabindex="1"
                     ></v-text-field>
