@@ -342,14 +342,13 @@ limitations under the License.
                  ></v-text-field>
                 </v-flex>
                 <v-flex xs2>
-                  <v-select
+                  <v-autocomplete
                     color="cyan darken-2"
                     label="Timezone"
                     :items="timezones"
                     v-model="selectedTimezone"
-                    autocomplete
                     >
-                  </v-select>
+                  </v-autocomplete>
                 </v-flex>
                 <v-flex xs12>
                   <div class="subheading pt-3">Auto Update</div>
