@@ -146,3 +146,11 @@ limitations under the License.
   }
 </script>
 
+<style lang="styl" scoped>
+
+  >>> .v-input__control textarea {
+    font-family: monospace;
+    font-size: 14px;
+  }
+
+</style>
