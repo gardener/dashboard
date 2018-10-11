@@ -17,13 +17,13 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" max-width="800">
     <v-card>
-      <v-card-media
+      <v-img
         class="white--text"
         height="130px"
         :src="backgroundSrc"
       >
-        <v-container>
-          <v-layout>
+        <v-container fill-height>
+          <v-layout align-center justify-start row fill-height>
             <v-flex xs1>
               <v-icon x-large class="white--text infra_icon">{{infraIcon}}</v-icon>
             </v-flex>
@@ -32,7 +32,7 @@ limitations under the License.
             </v-flex>
           </v-layout>
         </v-container>
-      </v-card-media>
+      </v-img>
 
       <v-card-text>
         <form>

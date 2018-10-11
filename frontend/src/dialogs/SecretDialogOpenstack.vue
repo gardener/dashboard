@@ -90,8 +90,8 @@ limitations under the License.
             :label="passwordLabel"
             :error-messages="getErrorMessages('password')"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :append-icon-cb="() => (hideSecret = !hideSecret)"
             :type="hideSecret ? 'password' : 'text'"
+            @click:append="() => (hideSecret = !hideSecret)"
             @input="$v.password.$touch()"
             @blur="$v.password.$touch()"
           ></v-text-field>

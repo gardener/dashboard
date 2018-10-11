@@ -49,10 +49,10 @@ limitations under the License.
             color="blue"
             v-model="clientSecret"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :append-icon-cb="() => (hideSecret = !hideSecret)"
             :type="hideSecret ? 'password' : 'text'"
             :label="clientSecretLabel"
             :error-messages="getErrorMessages('clientSecret')"
+            @click:append="() => (hideSecret = !hideSecret)"
             @input="$v.clientSecret.$touch()"
             @blur="$v.clientSecret.$touch()"
           ></v-text-field>
