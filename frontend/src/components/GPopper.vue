@@ -172,4 +172,8 @@ limitations under the License.
     margin-top: 1.2em;
   }
 
+  >>> .v-toolbar__content {
+    padding: 0px 16px;
+  }
+
 </style>

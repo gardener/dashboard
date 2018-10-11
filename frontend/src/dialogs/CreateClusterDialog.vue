@@ -19,11 +19,11 @@ limitations under the License.
     <v-card flat>
 
       <v-toolbar dense class="draken-1 header">
+        <v-toolbar-side-icon><v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon></v-toolbar-side-icon>
         <v-toolbar-title>
-          <v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon>
           <span>Create Cluster</span>
         </v-toolbar-title>
-        <v-tabs align-with-title dark slot="extension" v-model="activeTab">
+        <v-tabs dark slot="extension" v-model="activeTab">
           <v-tabs-slider color="yellow"></v-tabs-slider>
           <v-tab key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tab>
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
@@ -31,7 +31,7 @@ limitations under the License.
           <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
         </v-tabs>
       </v-toolbar>
-      <v-tabs-items v-model="activeTab">
+      <v-tabs-items v-model="activeTab" class="items">
         <v-tab-item key="infra" id="tab-infra">
           <v-card flat>
             <v-container fluid>
@@ -1118,47 +1118,45 @@ limitations under the License.
   }
 </script>
 
-<style lang="styl" >
+<style lang="styl" scoped>
 
   .dialogContainer{
 
     .header {
       background-image: url(../assets/cluster_background.svg);
       background-size: cover;
-      color:white;
-      padding-top:30px;
-      .v-tabs__bar {
-        background-color:rgba(255,255,255,0.1)
+      color: white;
+      padding-top: 30px;
+      >>> .v-tabs__bar {
+        background-color:rgba(255,255,255,0.1);
+      }
+
+      >>> .v-toolbar__title {
+        margin-bottom: 25px;
+        margin-left: 10px;
+       }
+
+      >>> .v-toolbar__side-icon {
+        margin-bottom: 30px;
+      }
+
+      >>> .v-tabs__item {
+        font-weight: 400;
       }
     }
 
-    .v-toolbar__title {
-      margin-bottom: 30px
-      span {
-        padding-left: 5px;
-      }
-    }
-
-    .v-card__text{
-      padding:0;
-    }
-
-    .v-tabs__item {
-      font-weight: 400;
-    }
-
-    .v-tabs__items {
+    .items {
       margin: 10px;
-      height:410px !important;
-      .v-tabs__content {
-        height:100%;
-        overflow:auto;
+      height: 410px !important;
+
+      >>> .v-card__text{
+        padding:0;
       }
     }
 
     .add_worker{
-      margin-left:30px;
-      border:0;
+      margin-left: 30px;
+      border: 0;
     }
 
   }
