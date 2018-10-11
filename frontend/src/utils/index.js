@@ -50,7 +50,7 @@ export function serviceAccountToDisplayName (serviceAccount) {
   }
 }
 
-export function handleTextFieldDrop (textField, fileTypePattern) {
+export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
   const textarea = textField.$refs.input
 
   function drop (event) {
@@ -65,7 +65,8 @@ export function handleTextFieldDrop (textField, fileTypePattern) {
         const onLoaded = event => {
           try {
             const result = JSON.parse(event.target.result)
-            textField.inputValue = JSON.stringify(result, null, '  ')
+
+            onDrop(JSON.stringify(result, null, '  '))
           } catch (err) { /* ignore error */ }
         }
         reader.onloadend = onLoaded

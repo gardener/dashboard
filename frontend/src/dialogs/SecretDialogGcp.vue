@@ -31,19 +31,18 @@ limitations under the License.
     <template slot="data-slot">
       <v-layout row>
         <v-flex xs12>
-          <v-text-field
+          <v-textarea
             ref="serviceAccountKey"
             color="green"
+            box
             v-model="serviceAccountKey"
             :label="serviceAccountKeyLabel"
             :error-messages="getErrorMessages('serviceAccountKey')"
             @input="$v.serviceAccountKey.$touch()"
             @blur="$v.serviceAccountKey.$touch()"
-            textarea
-            multi-line
             hint="Enter or drop a service account key in JSON format"
             persistent-hint
-          ></v-text-field>
+          ></v-textarea>
         </v-flex>
       </v-layout>
     </template>
@@ -139,23 +138,11 @@ limitations under the License.
       }
     },
     mounted () {
-      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/)
+      const onDrop = (value) => {
+        this.serviceAccountKey = value
+      }
+      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
     }
   }
 </script>
-
-
-<style lang="styl" scoped>
-  .gce_credential {
-    >>> .input-group--textarea textarea {
-      font-family: monospace;
-      font-size: 14px;
-    }
-
-    >>> .input-group--text-field.input-group--textarea:not(.input-group--full-width) .input-group__input {
-       border: 1px solid rgba(0,0,0,0.3);
-       background-color: rgba(0,20,0,0.02);
-    }
-  }
-</style>
 
