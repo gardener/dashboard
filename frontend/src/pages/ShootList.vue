@@ -25,7 +25,7 @@ limitations under the License.
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
-          prepend-icon="search"
+          prepend-inner-icon="search"
           color="cyan darken-2"
           label="Search"
           clearable
@@ -493,5 +493,9 @@ limitations under the License.
 
   .search_textfield {
     min-width: 125px;
+  }
+
+  >>> .v-input__slot {
+    margin: 0px;
   }
 </style>

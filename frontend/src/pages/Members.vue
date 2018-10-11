@@ -53,7 +53,7 @@ limitations under the License.
         <v-spacer></v-spacer>
         <v-text-field v-if="memberListWithoutOwner.length > 3"
           class="searchField"
-          prepend-icon="search"
+          prepend-inner-icon="search"
           color="green darken-2"
           label="Search"
           solo
@@ -120,7 +120,7 @@ limitations under the License.
         <v-spacer></v-spacer>
         <v-text-field v-if="serviceAccountList.length > 3"
           class="searchField"
-          prepend-icon="search"
+          prepend-inner-icon="search"
           color="green darken-2"
           label="Search"
           solo
@@ -394,10 +394,14 @@ limitations under the License.
   }
 </script>
 
-<style lang="styl">
+<style lang="styl" scoped>
 
   .searchField {
-    margin-right: 20px;
+    margin-right: 20px !important;
+  }
+
+  >>> .v-input__slot {
+    margin: 0px;
   }
 
   .serviceAccount_name {
