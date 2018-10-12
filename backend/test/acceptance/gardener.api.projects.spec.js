@@ -46,8 +46,7 @@ describe('gardener', function () {
       })
 
       afterEach(function () {
-        nocks.verify()
-        nocks.reset()
+        verifyAndRestore()
       })
 
       it('should return two projects', function () {
@@ -81,7 +80,7 @@ describe('gardener', function () {
       it('should return the foo project', function () {
         const resourceVersion = 42
         oidc.stub.getKeys()
-        k8s.stub.getProject({bearer, namespace})
+        k8s.stub.getProject({bearer, name, namespace})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -93,10 +92,10 @@ describe('gardener', function () {
           })
       })
 
-      it('should reject request with authorization error', function () {
+      it.only('should reject request with authorization error', function () {
         const bearer = oidc.sign({email: 'baz@example.org'})
         oidc.stub.getKeys()
-        k8s.stub.getProject({bearer, namespace, unauthorized: true})
+        k8s.stub.getProject({bearer, name, namespace, unauthorized: true})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}`)
           .set('authorization', `Bearer ${bearer}`)

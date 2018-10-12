@@ -37,9 +37,7 @@ describe('gardener', function () {
       })
 
       afterEach(function () {
-        nocks.verify()
-        nocks.reset()
-        sandbox.restore()
+        verifyAndRestore(sandbox)
       })
 
       it('should return all domains', function () {

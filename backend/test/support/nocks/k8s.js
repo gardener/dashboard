@@ -253,16 +253,31 @@ function getInfrastructureSecret (namespace, name, profileName, data = {}) {
 function getProject (name, owner, createdBy, description, purpose) {
   return {
     metadata: {
-      name: `garden-${name}`,
+      name,
+      annotations: {
+        'garden.sapcloud.io/createdBy': createdBy
+      }
+    },
+    spec: {
+      namespace: `garden-${name}`,
+      owner: {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
+        name: owner
+      },
+      purpose,
+      description
+    }
+  }
+}
+
+function getProjectNamespace ({name, namespace}) {
+  return {
+    metadata: {
+      name: namespace,
       labels: {
         'garden.sapcloud.io/role': 'project',
         'project.garden.sapcloud.io/name': name
-      },
-      annotations: {
-        'project.garden.sapcloud.io/createdBy': createdBy,
-        'project.garden.sapcloud.io/owner': owner,
-        'project.garden.sapcloud.io/description': description,
-        'project.garden.sapcloud.io/purpose': purpose
       }
     }
   }
@@ -626,10 +641,7 @@ const stub = {
         .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
         .reply(canDeleteShootsInAllNamespacesReply),
       nockWithAuthorization(auth.bearer)
-        .get('/api/v1/namespaces')
-        .query({
-          labelSelector: 'garden.sapcloud.io/role=project'
-        })
+        .get('/apis/garden.sapcloud.io/v1beta1/projects')
         .reply(200, {
           items: projectList
         })
@@ -642,24 +654,27 @@ const stub = {
         })
     ]
   },
-  getProject ({bearer, namespace, resourceVersion = 42, unauthorized = false}) {
-    const roleBinding = readProjectMembers(namespace)
-    const result = _
+  getProject ({bearer, name, namespace, resourceVersion = 42, unauthorized = false}) {
+    let statusCode = 200
+    let result = _
       .chain(projectList)
-      .find(['metadata.name', namespace])
+      .find(['metadata.name', name])
       .set('metadata.resourceVersion', resourceVersion)
       .value()
-    const scope = nockWithAuthorization(auth.bearer)
-    if (!unauthorized) {
-      scope
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => result)
+    if (unauthorized) {
+      statusCode = 403
+      result = {
+        message: 'Forbidden'
+      }
     }
-    return nockWithAuthorization(bearer)
-      .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
-      .reply(canDeleteShootsInAllNamespacesReply)
-      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-      .reply(200, roleBinding)
+    return [
+      nockWithAuthorization(auth.bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace({name, namespace})),
+      nockWithAuthorization(bearer)
+        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .reply(statusCode, () => result)
+    ]
   },
   createProject ({bearer, namespace, username, resourceVersion = 42}) {
     const result = {
@@ -668,20 +683,12 @@ const stub = {
       }
     }
 
-    function matchRolebindingProjectMembers ({metadata, roleRef, subjects: [subject]}) {
-      return metadata.name === 'garden-project-members' &&
-        roleRef.name === 'garden.sapcloud.io:system:project-member' &&
-        subject.name === username
-    }
-
     return nockWithAuthorization(auth.bearer)
-      .post('/api/v1/namespaces', body => {
+      .post('/apis/garden.sapcloud.io/v1beta1/projects', body => {
         _.assign(result.metadata, body.metadata)
         return true
       })
       .reply(200, () => result)
-      .post(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings`, matchRolebindingProjectMembers)
-      .reply(200)
   },
   patchProject ({bearer, namespace, username, resourceVersion = 43}) {
     const roleBinding = readProjectMembers(namespace)
