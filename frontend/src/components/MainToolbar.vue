@@ -39,7 +39,7 @@ limitations under the License.
             </div>
           </v-card-title>
           <template v-for="(item, index) in helpMenuItems">
-            <v-divider v-if="index !== 0"></v-divider>
+            <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index">
               <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
                 <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>

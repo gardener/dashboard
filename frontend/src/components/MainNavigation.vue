@@ -111,8 +111,8 @@ limitations under the License.
             <v-list-tile-title class="subheading">Home</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <template v-for="route in routes" v-if="namespace">
-          <v-list-tile :to="namespacedRoute(route)">
+        <template v-for="(route, index) in routes" v-if="namespace">
+          <v-list-tile :to="namespacedRoute(route)" :key="index">
             <v-list-tile-action>
               <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
             </v-list-tile-action>
