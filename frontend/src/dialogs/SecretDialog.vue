@@ -69,7 +69,6 @@ limitations under the License.
             </v-layout>
 
             <slot name="data-slot"></slot>
-            </v-layout>
             <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
           </v-container>
         </form>

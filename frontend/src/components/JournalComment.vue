@@ -30,7 +30,6 @@ limitations under the License.
       </div>
     </v-flex>
   </v-layout>
-  </div>
 
 </template>
 

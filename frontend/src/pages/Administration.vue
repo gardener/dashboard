@@ -35,7 +35,7 @@ limitations under the License.
         <v-layout row wrap>
           <v-flex lg4 xs12>
             <label class="caption grey--text text--darken-2">Name</label>
-            <p class="subheading">{{projectName}}</a></p>
+            <p class="subheading">{{projectName}}</p>
           </v-flex>
           <v-flex lg8 xs12>
             <label class="caption grey--text text--darken-2">Main Contact</label>
