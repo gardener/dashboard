@@ -48,8 +48,7 @@ describe('gardener', function () {
       })
 
       afterEach(function () {
-        nocks.verify()
-        nocks.reset()
+        verifyAndRestore()
       })
 
       it('should return two project members', function () {

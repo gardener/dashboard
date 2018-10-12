@@ -25,6 +25,7 @@ module.exports = {
     sinon: true,
     nocks: true,
     support: true,
-    createServer: true
+    createServer: true,
+    verifyAndRestore: true
   }
 }
