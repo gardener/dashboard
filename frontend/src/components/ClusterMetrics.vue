@@ -41,7 +41,7 @@ limitations under the License.
         <v-list-tile-title><a :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a></v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-divider class="my-2" inset></v-divider>
+    <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
     <username-password :username="username" :password="password"></username-password>
   </v-list>
 </template>
