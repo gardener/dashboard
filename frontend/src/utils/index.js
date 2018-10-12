@@ -51,7 +51,7 @@ export function serviceAccountToDisplayName (serviceAccount) {
 }
 
 export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
-  const textarea = textField.$refs.input
+  const textarea = textField.$refs['input-slot']
 
   function drop (event) {
     event.stopPropagation()
