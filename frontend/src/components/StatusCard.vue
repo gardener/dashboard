@@ -50,7 +50,7 @@ limitations under the License.
       </v-card-title>
       <template v-if="isAdmin && seedShootIngressDomain">
         <v-divider class="my-2" inset></v-divider>
-        <cluster-metrics :info="info"></cluster-metrics>
+        <cluster-metrics :shootItem="shootItem"></cluster-metrics>
       </template>
     </div>
   </v-card>

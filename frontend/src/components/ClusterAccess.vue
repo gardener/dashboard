@@ -22,7 +22,13 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a></v-list-tile-title>
+        <v-list-tile-title>
+          <v-tooltip v-if="isHibernated" top>
+            <span slot="activator">{{dashboardUrlText}}</span>
+            Dashboard is not running for hibernated clusters
+          </v-tooltip>
+          <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
+        </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
     <v-divider v-show="!!dashboardUrl && !!username && !!password" class="my-2" inset></v-divider>
@@ -33,6 +39,7 @@ limitations under the License.
 <script>
   import UsernamePassword from '@/components/UsernamePasswordListTile'
   import get from 'lodash/get'
+  import { isHibernated } from '@/utils'
 
   export default {
     components: {
@@ -64,7 +71,10 @@ limitations under the License.
       },
       hasDashboardEnabled () {
         return get(this.item, 'spec.addons.kubernetes-dashboard.enabled', false) === true
-      }
+      },
+      isHibernated () {
+        return isHibernated(get(this.item, 'spec'))
+      },
     }
   }
 </script>

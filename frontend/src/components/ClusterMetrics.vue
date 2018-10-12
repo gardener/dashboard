@@ -22,7 +22,13 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="grafanaUrl" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlText}}</a></v-list-tile-title>
+        <v-list-tile-title>
+          <v-tooltip v-if="isHibernated" top>
+            <span slot="activator">{{grafanaUrlText}}</span>
+            Grafana is not running for hibernated clusters
+          </v-tooltip>
+          <a v-else :href="grafanaUrl" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlText}}</a>
+        </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
     <v-list-tile>
@@ -30,7 +36,13 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="prometheusUrl" target="_blank" class="cyan--text text--darken-2">{{prometheusUrl}}</a></v-list-tile-title>
+        <v-list-tile-title>
+          <v-tooltip v-if="isHibernated" top>
+            <span slot="activator">{{prometheusUrl}}</span>
+            Prometheus is not running for hibernated clusters
+          </v-tooltip>
+          <a v-else :href="prometheusUrl" target="_blank" class="cyan--text text--darken-2">{{prometheusUrl}}</a>
+        </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
     <v-list-tile>
@@ -38,7 +50,13 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
-        <v-list-tile-title><a :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a></v-list-tile-title>
+        <v-list-tile-title>
+          <v-tooltip v-if="isHibernated" top>
+            <span slot="activator">{{alertmanagerUrl}}</span>
+            Alertmanager is not running for hibernated clusters
+          </v-tooltip>
+          <a v-else :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a>
+        </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
     <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
@@ -47,36 +65,41 @@ limitations under the License.
 </template>
 
 <script>
+  import get from 'lodash/get'
   import UsernamePassword from '@/components/UsernamePasswordListTile'
+  import { isHibernated } from '@/utils'
 
   export default {
     components: {
       UsernamePassword
     },
     props: {
-      info: {
+      shootItem: {
         type: Object,
         required: true
       }
     },
     computed: {
       grafanaUrl () {
-        return this.info.grafanaUrl || ''
+        return get(this.shootItem, 'info.grafanaUrl', '')
       },
       grafanaUrlText () {
-        return this.info.grafanaUrlText || ''
+        return get(this.shootItem, 'info.grafanaUrlText', '')
       },
       prometheusUrl () {
-        return this.info.prometheusUrl || ''
+        return get(this.shootItem, 'info.prometheusUrl', '')
       },
       alertmanagerUrl () {
-        return this.info.alertmanagerUrl || ''
+        return get(this.shootItem, 'info.alertmanagerUrl', '')
       },
       username () {
-        return this.info.monitoring_username || ''
+        return get(this.shootItem, 'info.monitoring_username', '')
       },
       password () {
-        return this.info.monitoring_password || ''
+        return get(this.shootItem, 'info.monitoring_password', '')
+      },
+      isHibernated () {
+        return isHibernated(get(this.shootItem, 'spec'))
       }
     }
   }
