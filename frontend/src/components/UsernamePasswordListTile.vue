@@ -31,7 +31,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Password</v-list-tile-sub-title>
         <v-list-tile-title>{{passwordText}}</v-list-tile-title>
-        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout.number="2000">
+        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout="2000">
           Copied to clipboard!
         </v-snackbar>
       </v-list-tile-content>
