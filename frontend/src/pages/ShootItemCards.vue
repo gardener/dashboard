@@ -305,11 +305,6 @@ limitations under the License.
             description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.'
           },
           {
-            name: 'heapster',
-            title: 'Heapster',
-            description: 'Heapster enables Container Cluster Monitoring and Performance Analysis.'
-          },
-          {
             name: 'kube-lego',
             title: 'Kube Lego',
             description: 'Kube-Lego automatically requests certificates for Kubernetes Ingress resources from Let\'s Encrypt.'
