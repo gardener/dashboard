@@ -21,7 +21,7 @@ limitations under the License.
       <div class="headline">
         <slot name="caption">
           Confirm Dialog
-        </slot>
+        </slot>&nbsp;
         <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
       </div>
     </v-card-title>
@@ -54,139 +54,139 @@ limitations under the License.
 </template>
 
 <script>
-  import { setDelayedInputFocus } from '@/utils'
-  import Alert from '@/components/Alert'
+import { setDelayedInputFocus } from '@/utils'
+import Alert from '@/components/Alert'
 
-  export default {
-    name: 'confirm-dialog',
-    components: {
-      Alert
+export default {
+  name: 'confirm-dialog',
+  components: {
+    Alert
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      },
-      ok: {
-        type: Function,
-        required: true
-      },
-      cancel: {
-        type: Function,
-        required: true
-      },
-      confirm: {
-        type: String
-      },
-      confirmDisabled: {
-        type: Boolean,
-        default: false
-      },
-      errorMessage: {
-        type: String
-      },
-      detailedErrorMessage: {
-        type: String
-      },
-      confirmColor: {
-        type: String,
-        default: 'red'
-      },
-      defaultColor: {
-        type: String
-      },
-      confirmButtonText: {
-        type: String,
-        default: 'Confirm'
-      }
+    ok: {
+      type: Function,
+      required: true
     },
-    data () {
-      return {
-        userInput: ''
-      }
+    cancel: {
+      type: Function,
+      required: true
     },
-    watch: {
-      value (value) {
-        if (value) {
-          this.onShow()
-        }
-      }
+    confirm: {
+      type: String
     },
-    computed: {
-      hasError () {
-        return this.confirm && this.confirm !== this.userInput
-      },
-      hint () {
-        if (this.userInput.length === 0) {
-          return `Type '${this.confirm}' to confirm`
-        } else if (this.userInput !== this.confirm) {
-          return `Your input did not match with required phrase '${this.confirm}'`
-        }
-        return ''
-      },
-      message: {
-        get () {
-          return this.errorMessage
-        },
-        set (value) {
-          this.$emit('update:errorMessage', value)
-        }
-      },
-      detailedMessage: {
-        get () {
-          return this.detailedErrorMessage
-        },
-        set (value) {
-          this.$emit('update:detailedErrorMessage', value)
-        }
-      },
-      titleColorClass () {
-        return this.confirm ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
-      },
-      textColorClass () {
-        return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
-      },
-      valid () {
-        return !this.confirmDisabled && !this.hasError
-      }
+    confirmDisabled: {
+      type: Boolean,
+      default: false
     },
-    methods: {
-      titleColorClassForString (titleColorClass) {
-        switch (titleColorClass) {
-          case 'red':
-            return 'red darken-2 grey--text text--lighten-4'
-          case 'orange':
-            return 'orange darken-2 grey--text text--lighten-4'
-          default:
-            return 'cyan darken-2 grey--text text--lighten-4'
-        }
-      },
-      textColorClassForString (textColorClass) {
-        switch (textColorClass) {
-          case 'red':
-            return 'red--text text--darken-2'
-          case 'orange':
-            return 'orange--text text--darken-2'
-          default:
-            return 'cyan--text text--darken-2'
-        }
-      },
-      cancelClicked () {
-        if (this.cancel) {
-          this.cancel()
-        }
-      },
-      okClicked () {
-        if (this.ok && this.valid) {
-          this.ok()
-        }
-      },
-      onShow () {
-        // we must delay the "focus" handling because the dialog.open is animated
-        // and the 'autofocus' property didn't work in this case.
-        this.userInput = ''
-        setDelayedInputFocus(this, 'deleteDialogInput')
+    errorMessage: {
+      type: String
+    },
+    detailedErrorMessage: {
+      type: String
+    },
+    confirmColor: {
+      type: String,
+      default: 'red'
+    },
+    defaultColor: {
+      type: String
+    },
+    confirmButtonText: {
+      type: String,
+      default: 'Confirm'
+    }
+  },
+  data () {
+    return {
+      userInput: ''
+    }
+  },
+  watch: {
+    value (value) {
+      if (value) {
+        this.onShow()
       }
     }
+  },
+  computed: {
+    hasError () {
+      return this.confirm && this.confirm !== this.userInput
+    },
+    hint () {
+      if (this.userInput.length === 0) {
+        return `Type '${this.confirm}' to confirm`
+      } else if (this.userInput !== this.confirm) {
+        return `Your input did not match with required phrase '${this.confirm}'`
+      }
+      return ''
+    },
+    message: {
+      get () {
+        return this.errorMessage
+      },
+      set (value) {
+        this.$emit('update:errorMessage', value)
+      }
+    },
+    detailedMessage: {
+      get () {
+        return this.detailedErrorMessage
+      },
+      set (value) {
+        this.$emit('update:detailedErrorMessage', value)
+      }
+    },
+    titleColorClass () {
+      return this.confirm ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
+    },
+    textColorClass () {
+      return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
+    },
+    valid () {
+      return !this.confirmDisabled && !this.hasError
+    }
+  },
+  methods: {
+    titleColorClassForString (titleColorClass) {
+      switch (titleColorClass) {
+        case 'red':
+          return 'red darken-2 grey--text text--lighten-4'
+        case 'orange':
+          return 'orange darken-2 grey--text text--lighten-4'
+        default:
+          return 'cyan darken-2 grey--text text--lighten-4'
+      }
+    },
+    textColorClassForString (textColorClass) {
+      switch (textColorClass) {
+        case 'red':
+          return 'red--text text--darken-2'
+        case 'orange':
+          return 'orange--text text--darken-2'
+        default:
+          return 'cyan--text text--darken-2'
+      }
+    },
+    cancelClicked () {
+      if (this.cancel) {
+        this.cancel()
+      }
+    },
+    okClicked () {
+      if (this.ok && this.valid) {
+        this.ok()
+      }
+    },
+    onShow () {
+      // we must delay the "focus" handling because the dialog.open is animated
+      // and the 'autofocus' property didn't work in this case.
+      this.userInput = ''
+      setDelayedInputFocus(this, 'deleteDialogInput')
+    }
   }
+}
 </script>

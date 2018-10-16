@@ -31,39 +31,39 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    name: 'alert',
-    props: {
-      message: {
-        type: String
-      },
-      detailedMessage: {
-        type: String
-      },
-      color: {
-        type: String,
-        required: true
-      }
+export default {
+  name: 'alert',
+  props: {
+    message: {
+      type: String
     },
-    data () {
-      return {
-        detailedMessageVisible: false
-      }
+    detailedMessage: {
+      type: String
     },
-    computed: {
-      alertVisible: {
-        get () {
-          return !!this.message
-        },
-        set (value) {
-          if (!value) {
-            this.$emit('update:message', undefined)
-            this.$emit('update:detailedMessage', undefined)
-          }
+    color: {
+      type: String,
+      required: true
+    }
+  },
+  data () {
+    return {
+      detailedMessageVisible: false
+    }
+  },
+  computed: {
+    alertVisible: {
+      get () {
+        return !!this.message
+      },
+      set (value) {
+        if (!value) {
+          this.$emit('update:message', undefined)
+          this.$emit('update:detailedMessage', undefined)
         }
       }
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

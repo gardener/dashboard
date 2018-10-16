@@ -41,27 +41,25 @@ limitations under the License.
 </template>
 
 <script>
-  import SecretDialogHelp from '@/dialogs/SecretDialogHelp'
+import SecretDialogHelp from '@/dialogs/SecretDialogHelp'
 
-  export default {
-    components: {
-      SecretDialogHelp
-    },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      }
-    },
-    methods: {
-      onInput (value) {
-        this.$emit('input', value)
-      }
+export default {
+  components: {
+    SecretDialogHelp
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    }
+  },
+  methods: {
+    onInput (value) {
+      this.$emit('input', value)
     }
   }
+}
 </script>
-
-
 
 <style lang="styl" scoped>
 

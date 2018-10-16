@@ -68,7 +68,7 @@ limitations under the License.
                 full-width
                 color="grey darken-1"
                 prepend-icon="search"
-                class="ml-3 py-2 project-filter"
+                class="ml-4 project-filter"
                 v-model="projectFilter"
                 ref="projectFilter"
                 @keyup.esc="projectFilter = ''"
@@ -111,8 +111,8 @@ limitations under the License.
             <v-list-tile-title class="subheading">Home</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <template v-for="route in routes" v-if="namespace">
-          <v-list-tile :to="namespacedRoute(route)">
+        <template v-for="(route, index) in routes" v-if="namespace">
+          <v-list-tile :to="namespacedRoute(route)" :key="index">
             <v-list-tile-action>
               <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
             </v-list-tile-action>
@@ -135,161 +135,157 @@ limitations under the License.
 
 </template>
 
-
 <script>
-  /* global VERSION */
-  import { mapState, mapGetters, mapActions } from 'vuex'
-  import find from 'lodash/find'
-  import filter from 'lodash/filter'
-  import sortBy from 'lodash/sortBy'
-  import toLower from 'lodash/toLower'
-  import includes from 'lodash/includes'
-  import replace from 'lodash/replace'
-  import get from 'lodash/get'
-  import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
-  import ProjectCreateDialog from '@/dialogs/ProjectDialog'
+import { mapState, mapGetters, mapActions } from 'vuex'
+import find from 'lodash/find'
+import filter from 'lodash/filter'
+import sortBy from 'lodash/sortBy'
+import toLower from 'lodash/toLower'
+import includes from 'lodash/includes'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
+import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
+import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
-  export default {
-    components: {
-      ProjectCreateDialog
+export default {
+  components: {
+    ProjectCreateDialog
+  },
+  data () {
+    return {
+      version: process.env.VUE_APP_VERSION,
+      copyright: `© ${new Date().getFullYear()}`,
+      projectDialog: false,
+      projectFilter: '',
+      projectMenu: false,
+      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } }
+    }
+  },
+  computed: {
+    ...mapState([
+      'namespace',
+      'sidebar',
+      'cfg'
+    ]),
+    ...mapGetters([
+      'projectList'
+    ]),
+    footerLogoUrl () {
+      return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
     },
-    data () {
-      return {
-        version: VERSION,
-        copyright: `© ${new Date().getFullYear()}`,
-        projectDialog: false,
-        projectFilter: '',
-        projectMenu: false,
-        allProjectsItem: {metadata: {name: 'All Projects', namespace: '_all'}}
+    isActive: {
+      get () {
+        return this.sidebar
+      },
+      set (val) {
+        this.setSidebar(val)
       }
     },
-    computed: {
-      ...mapState([
-        'namespace',
-        'sidebar',
-        'cfg'
-      ]),
-      ...mapGetters([
-        'projectList'
-      ]),
-      footerLogoUrl () {
-        return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
-      },
-      isActive: {
-        get () {
-          return this.sidebar
-        },
-        set (val) {
-          this.setSidebar(val)
+    project: {
+      get () {
+        if (this.namespace === this.allProjectsItem.metadata.namespace) {
+          return this.allProjectsItem
         }
+        const predicate = item => item.metadata.namespace === this.namespace
+        return find(this.projectList, predicate)
       },
-      project: {
-        get () {
-          if (this.namespace === this.allProjectsItem.metadata.namespace) {
-            return this.allProjectsItem
-          }
-          const predicate = item => item.metadata.namespace === this.namespace
-          return find(this.projectList, predicate)
-        },
-        set ({metadata = {}} = {}) {
-          const namespace = metadata.namespace
-          this.$router.push(this.getProjectMenuTargetRoute(namespace))
-        }
-      },
-      routeMeta () {
-        return this.$route.meta || {}
-      },
-      namespaced () {
-        return !!this.routeMeta.namespaced
-      },
-      hasNoProjects () {
-        return !this.projectList.length
-      },
-      routes () {
-        const hasProjectScope = get(this.project, 'metadata.namespace') !== this.allProjectsItem.metadata.namespace
-        return routes(this.$router, hasProjectScope)
-      },
-      projectMenuIcon () {
-        return this.projectMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
-      },
-      projectName () {
-        const project = this.project
-        return project ? project.metadata.name : ''
-      },
-      sortedAndFilteredProjectList () {
-        const predicate = item => {
-          if (!this.projectFilter) {
-            return true
-          }
-          const filter = toLower(this.projectFilter)
-          const name = toLower(item.metadata.name)
-          const owner = toLower(replace(item.data.owner, /@.*$/, ''))
-          return includes(name, filter) || includes(owner, filter)
-        }
-        const sortedList = sortBy(filter(this.projectList, predicate))
-        if (sortedList.length > 1) {
-          sortedList.unshift(this.allProjectsItem)
-        }
-        return sortedList
-      },
-      getProjectOwner () {
-        return (project) => {
-          return emailToDisplayName(get(project, 'data.owner'))
-        }
-      },
-      namespacedRoute () {
-        return (route) => {
-          return namespacedRoute(route, this.namespace)
-        }
+      set ({ metadata = {} } = {}) {
+        const namespace = metadata.namespace
+        this.$router.push(this.getProjectMenuTargetRoute(namespace))
       }
     },
-    methods: {
-      ...mapActions([
-        'setSidebar'
-      ]),
-      onProjectSelect (project) {
-        this.projectMenu = false
-        this.project = project
-      },
-      openProjectDialog () {
-        this.projectMenu = false
-        this.projectDialog = true
-      },
-      getProjectMenuTargetRoute (namespace) {
-        let name = routeName(this.$route)
-        const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
-        if (!nsHasProjectScope) {
-          const thisProjectScoped = this.routeMeta.projectScope
-          if (thisProjectScoped) {
-            name = 'ShootList'
-          }
+    routeMeta () {
+      return this.$route.meta || {}
+    },
+    namespaced () {
+      return !!this.routeMeta.namespaced
+    },
+    hasNoProjects () {
+      return !this.projectList.length
+    },
+    routes () {
+      const hasProjectScope = get(this.project, 'metadata.namespace') !== this.allProjectsItem.metadata.namespace
+      return routes(this.$router, hasProjectScope)
+    },
+    projectMenuIcon () {
+      return this.projectMenu ? 'mdi-chevron-up' : 'mdi-chevron-down'
+    },
+    projectName () {
+      const project = this.project
+      return project ? project.metadata.name : ''
+    },
+    sortedAndFilteredProjectList () {
+      const predicate = item => {
+        if (!this.projectFilter) {
+          return true
         }
-        return !this.namespaced ? {name, query: {namespace}} : {name, params: {namespace}}
+        const filter = toLower(this.projectFilter)
+        const name = toLower(item.metadata.name)
+        const owner = toLower(replace(item.data.owner, /@.*$/, ''))
+        return includes(name, filter) || includes(owner, filter)
+      }
+      const sortedList = sortBy(filter(this.projectList, predicate))
+      if (sortedList.length > 1) {
+        sortedList.unshift(this.allProjectsItem)
+      }
+      return sortedList
+    },
+    getProjectOwner () {
+      return (project) => {
+        return emailToDisplayName(get(project, 'data.owner'))
       }
     },
-    watch: {
-      projectMenu (value) {
-        if (value) {
-          requestAnimationFrame(() => {
-            setDelayedInputFocus(this, 'projectFilter')
-          })
+    namespacedRoute () {
+      return (route) => {
+        return namespacedRoute(route, this.namespace)
+      }
+    }
+  },
+  methods: {
+    ...mapActions([
+      'setSidebar'
+    ]),
+    onProjectSelect (project) {
+      this.projectMenu = false
+      this.project = project
+    },
+    openProjectDialog () {
+      this.projectMenu = false
+      this.projectDialog = true
+    },
+    getProjectMenuTargetRoute (namespace) {
+      let name = routeName(this.$route)
+      const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
+      if (!nsHasProjectScope) {
+        const thisProjectScoped = this.routeMeta.projectScope
+        if (thisProjectScoped) {
+          name = 'ShootList'
         }
+      }
+      return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
+    }
+  },
+  watch: {
+    projectMenu (value) {
+      if (value) {
+        requestAnimationFrame(() => {
+          setDelayedInputFocus(this, 'projectFilter')
+        })
       }
     }
   }
+}
 </script>
 
 <style lang="styl">
   .project-menu {
     border-radius: 0;
 
-    .card {
+    .v-card {
       border-radius: 0;
 
       .project-filter {
-        label {
-          top: 10px;
-        }
+        align-items: center
       }
 
       .project-add > div {
@@ -369,7 +365,6 @@ limitations under the License.
           }
         }
 
-
       }
     }
 
@@ -384,20 +379,20 @@ limitations under the License.
       }
     }
 
-    .footer{
+    .v-footer{
       background-color: transparent
       bottom: 10px
       padding-left: 10px;
       padding-right: 10px;
     }
 
-    >>> .list {
-      .list__tile__title {
+    >>> .v-list {
+      .v-list__tile__title {
           text-transform: uppercase
           font-size: 13px;
           max-width: 180px;
       }
-      .list__tile--active {
+      .v-list__tile--active {
         background: rgba(255,255,255,0.1) !important
         color: white !important
         .icon {

@@ -51,64 +51,64 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import get from 'lodash/get'
-  import filter from 'lodash/filter'
-  import { isOwnSecretBinding } from '@/utils'
+import { mapGetters } from 'vuex'
+import get from 'lodash/get'
+import filter from 'lodash/filter'
+import { isOwnSecretBinding } from '@/utils'
 
-  export default {
-    props: {
-      secret: {
-        type: Object
-      },
-      secretDescriptorKey: {
-        type: String,
-        default: ''
+export default {
+  props: {
+    secret: {
+      type: Object
+    },
+    secretDescriptorKey: {
+      type: String,
+      default: ''
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'shootList'
+    ]),
+    secretDescriptor () {
+      if (this.isOwnSecretBinding) {
+        return get(this.secret, `data.${this.secretDescriptorKey}`)
+      } else {
+        return `Owner: ${get(this.secret, 'metadata.namespace')}`
       }
     },
-    computed: {
-      ...mapGetters([
-        'shootList'
-      ]),
-      secretDescriptor () {
-        if (this.isOwnSecretBinding) {
-          return get(this.secret, `data.${this.secretDescriptorKey}`)
-        } else {
-          return `Owner: ${get(this.secret, 'metadata.namespace')}`
-        }
-      },
-      relatedShootCount () {
-        return this.shootsByInfrastructureSecret.length
-      },
-      shootsByInfrastructureSecret () {
-        const secretName = this.secret.metadata.name
-        const predicate = item => {
-          return get(item, 'spec.cloud.secretBindingRef.name') === secretName
-        }
-        return filter(this.shootList, predicate)
-      },
-      relatedShootCountLabel () {
-        const count = this.relatedShootCount
-        if (count === 0) {
-          return 'currently unused'
-        } else {
-          return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
-        }
-      },
-      isOwnSecretBinding () {
-        return isOwnSecretBinding(this.secret)
-      },
-      isDeleteButtonDisabled () {
-        return this.relatedShootCount > 0 || !this.isOwnSecretBinding
+    relatedShootCount () {
+      return this.shootsByInfrastructureSecret.length
+    },
+    shootsByInfrastructureSecret () {
+      const secretName = this.secret.metadata.name
+      const predicate = item => {
+        return get(item, 'spec.cloud.secretBindingRef.name') === secretName
+      }
+      return filter(this.shootList, predicate)
+    },
+    relatedShootCountLabel () {
+      const count = this.relatedShootCount
+      if (count === 0) {
+        return 'currently unused'
+      } else {
+        return `used by ${count} ${count > 1 ? 'clusters' : 'cluster'}`
       }
     },
-    methods: {
-      onUpdate () {
-        this.$emit('update', this.secret)
-      },
-      onDelete () {
-        this.$emit('delete', this.secret)
-      }
+    isOwnSecretBinding () {
+      return isOwnSecretBinding(this.secret)
+    },
+    isDeleteButtonDisabled () {
+      return this.relatedShootCount > 0 || !this.isOwnSecretBinding
+    }
+  },
+  methods: {
+    onUpdate () {
+      this.$emit('update', this.secret)
+    },
+    onDelete () {
+      this.$emit('delete', this.secret)
     }
   }
+}
 </script>

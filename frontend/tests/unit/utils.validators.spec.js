@@ -14,7 +14,8 @@
 // limitations under the License.
 //
 
-import {unique, serviceAccountKey} from '@/utils/validators'
+import { expect } from 'chai'
+import { unique, serviceAccountKey } from '@/utils/validators'
 
 describe('utils', function () {
   describe('validators', function () {

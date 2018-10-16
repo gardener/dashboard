@@ -20,7 +20,9 @@
  */
 import { parse as parseUrl } from 'url'
 import includes from 'lodash/includes'
+import assign from 'lodash/assign'
 
+import 'vuetify/dist/vuetify.min.css'
 import '@mdi/font/css/materialdesignicons.css'
 
 const version = isIE()
@@ -39,18 +41,18 @@ if (version === false) {
       import('oidc-client')
     ])
     .then(([
-      {default: Vue},
+      { default: Vue },
       Vuetify,
-      {default: Vuelidate},
-      {default: App},
-      {default: store},
-      {default: router},
-      {default: axios},
-      {default: Snotify},
+      { default: Vuelidate },
+      { default: App },
+      { default: store },
+      { default: router },
+      { default: axios },
+      { default: Snotify },
       Oidc
     ]) => axios
       .get('/config.json')
-      .then(({data}) => store.dispatch('setConfiguration', data))
+      .then(({ data }) => store.dispatch('setConfiguration', data))
       .then(cfg => {
         Oidc.Log.logger = console
         Oidc.Log.level = Oidc.Log.ERROR
@@ -61,9 +63,10 @@ if (version === false) {
             cfg.oidc.redirect_uri = window.location.origin + redirectUri.path
           }
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error('Invalid redirect URI in OIDC config', err)
         }
-        const userManager = new Oidc.UserManager(Object.assign({userStore}, cfg.oidc))
+        const userManager = new Oidc.UserManager(assign({ userStore }, cfg.oidc))
         const bus = new Vue({})
         Storage.prototype.setObject = function (key, value) {
           this.setItem(key, JSON.stringify(value))
@@ -73,10 +76,10 @@ if (version === false) {
           return value && JSON.parse(value)
         }
         Object.defineProperties(Vue.prototype, {
-          $userManager: {value: userManager},
-          $http: {value: axios},
-          $bus: {value: bus},
-          $localStorage: {value: window.localStorage}
+          $userManager: { value: userManager },
+          $http: { value: axios },
+          $bus: { value: bus },
+          $localStorage: { value: window.localStorage }
         })
         return {
           Vue,
@@ -85,7 +88,7 @@ if (version === false) {
           Snotify,
           App,
           store,
-          router: router({store, userManager})
+          router: router({ store, userManager })
         }
       })
     )
@@ -98,23 +101,21 @@ if (version === false) {
   renderNotSupportedBrowser(version)
 }
 
-function start ({Vue, Vuetify, Vuelidate, Snotify, App, store, router}) {
+function start ({ Vue, Vuetify, Vuelidate, Snotify, App, store, router }) {
   /* eslint-disable no-new */
-  Vue.use(Vuetify)
+  Vue.use(Vuetify, {
+    iconfont: 'md'
+  })
   Vue.use(Vuelidate)
   Vue.use(Snotify)
 
   Vue.config.productionTip = false
 
   new Vue({
-    el: '#app',
     router,
     store,
-    template: '<App/>',
-    components: {
-      App
-    }
-  })
+    render: h => h(App)
+  }).$mount('#app')
 }
 
 function renderServerError (error) {

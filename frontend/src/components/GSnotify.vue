@@ -19,102 +19,101 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters, mapActions } from 'vuex'
-  import 'vue-snotify/styles/material.css'
-  import { SnotifyPosition } from 'vue-snotify'
+import { mapGetters, mapActions } from 'vuex'
+import { SnotifyPosition } from 'vue-snotify'
 
-  export default {
-    data () {
-      return {
-        websocketConnectionNotification: undefined,
-        websocketConnectionNotificationMessage: 'The content on this page might be outdated'
+export default {
+  data () {
+    return {
+      websocketConnectionNotification: undefined,
+      websocketConnectionNotificationMessage: 'The content on this page might be outdated'
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'errorMessage',
+      'alertMessage',
+      'alertType',
+      'isWebsocketConnectionError',
+      'websocketConnectAttempt'
+    ])
+  },
+  watch: {
+    errorMessage (value) {
+      if (value) {
+        this.showSnotifyToast(value, 'error')
+        this.setError(null)
       }
     },
-    computed: {
-      ...mapGetters([
-        'errorMessage',
-        'alertMessage',
-        'alertType',
-        'isWebsocketConnectionError',
-        'websocketConnectAttempt'
-      ])
+    alertMessage (value) {
+      if (value) {
+        this.showSnotifyToast(value, this.alertType)
+        this.setAlert(null)
+      }
     },
-    watch: {
-      errorMessage (value) {
-        if (value) {
-          this.showSnotifyToast(value, 'error')
-          this.setError(null)
-        }
-      },
-      alertMessage (value) {
-        if (value) {
-          this.showSnotifyToast(value, this.alertType)
-          this.setAlert(null)
-        }
-      },
-      isWebsocketConnectionError (value) {
-        if (value === true) {
-          this.showWebsocketConnectionError()
+    isWebsocketConnectionError (value) {
+      if (value === true) {
+        this.showWebsocketConnectionError()
+      } else {
+        this.removeWebsocketConnectionError()
+      }
+    },
+    websocketConnectAttempt (value) {
+      if (this.websocketConnectionNotification) {
+        if (value > 0) {
+          this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
         } else {
-          this.removeWebsocketConnectionError()
+          this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
         }
-      },
-      websocketConnectAttempt (value) {
-        if (this.websocketConnectionNotification) {
-          if (value > 0) {
-            this.websocketConnectionNotification.body = `${this.websocketConnectionNotificationMessage}. Reconnect attempt ${this.websocketConnectAttempt}`
-          } else {
-            this.websocketConnectionNotification.body = this.websocketConnectionNotificationMessage
-          }
-        }
-      }
-    },
-    methods: {
-      ...mapActions([
-        'setError',
-        'setAlert'
-      ]),
-      showSnotifyToast (message, type) {
-        const config = {
-          position: SnotifyPosition.rightBottom,
-          timeout: 5000,
-          showProgressBar: false
-        }
-        switch (type) {
-          case 'success':
-            config.timeout = 3000
-            this.$snotify.success(message, config)
-            break
-          case 'warning':
-            this.$snotify.warning(message, config)
-            break
-          case 'info':
-            this.$snotify.info(message, config)
-            break
-          default:
-            this.$snotify.error(message, config)
-        }
-      },
-      showWebsocketConnectionError () {
-        if (!this.websocketConnectionNotification) {
-          this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, `No Connection`, {
-            timeout: 0,
-            closeOnClick: false,
-            position: SnotifyPosition.rightTop
-          })
-        }
-      },
-      removeWebsocketConnectionError () {
-        if (this.websocketConnectionNotification) {
-          this.$snotify.remove(this.websocketConnectionNotification.id)
-        }
-        this.websocketConnectionNotification = undefined
       }
     }
+  },
+  methods: {
+    ...mapActions([
+      'setError',
+      'setAlert'
+    ]),
+    showSnotifyToast (message, type) {
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      switch (type) {
+        case 'success':
+          config.timeout = 3000
+          this.$snotify.success(message, config)
+          break
+        case 'warning':
+          this.$snotify.warning(message, config)
+          break
+        case 'info':
+          this.$snotify.info(message, config)
+          break
+        default:
+          this.$snotify.error(message, config)
+      }
+    },
+    showWebsocketConnectionError () {
+      if (!this.websocketConnectionNotification) {
+        this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, `No Connection`, {
+          timeout: 0,
+          closeOnClick: false,
+          position: SnotifyPosition.rightTop
+        })
+      }
+    },
+    removeWebsocketConnectionError () {
+      if (this.websocketConnectionNotification) {
+        this.$snotify.remove(this.websocketConnectionNotification.id)
+      }
+      this.websocketConnectionNotification = undefined
+    }
   }
+}
 </script>
 <style lang="styl">
-  @import 'vue-snotify/styles/material.css'
+  @import "~vue-snotify/styles/material.css";
 
   .snotify-rightTop {
     top: 75px;

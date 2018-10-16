@@ -14,14 +14,14 @@
 // limitations under the License.
 //
 
-import Vue from 'vue'
-import CodeBlock from '@/components/CodeBlock'
+import { expect } from 'chai'
+import { mount } from '@vue/test-utils'
+import CodeBlock from '@/components/CodeBlock.vue'
 import VIcon from 'vuetify/es5/components/VIcon'
 import VBtn from 'vuetify/es5/components/VBtn'
 
 describe('CodeBlock.vue', function () {
   it('should render correct contents', function () {
-    const Ctor = Vue.extend(CodeBlock)
     const propsData = {
       lang: 'yaml',
       content: `
@@ -29,13 +29,14 @@ describe('CodeBlock.vue', function () {
         foo: true
         bar: 42`
     }
-    const vm = new Ctor({
+    const wrapper = mount(CodeBlock, {
       propsData,
       components: {
         VIcon,
         VBtn
       }
-    }).$mount()
+    })
+    const vm = wrapper.vm
     return new Promise(resolve => vm.$nextTick(resolve))
       .then(() => {
         const codeElement = vm.$el.querySelector('code.yaml')

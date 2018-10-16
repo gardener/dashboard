@@ -40,62 +40,61 @@ limitations under the License.
 </template>
 
 <script>
-  import { required } from 'vuelidate/lib/validators'
-  import { getValidationErrors } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
 
-  const validationErrors = {
-    value: {
-      required: 'You can\'t leave this empty.'
-    }
+const validationErrors = {
+  value: {
+    required: 'You can\'t leave this empty.'
   }
+}
 
-  export default {
-    name: 'CloudProfile',
-    props: {
-      value: {
-        type: String
-      },
-      isCreateMode: {
-        type: Boolean,
-        required: true
-      },
-      cloudProfiles: {
-        type: Array,
-        required: true
-      },
-      color: {
-        type: String,
-        required: true
-      }
+export default {
+  name: 'CloudProfile',
+  props: {
+    value: {
+      type: String
     },
-    data () {
+    isCreateMode: {
+      type: Boolean,
+      required: true
+    },
+    cloudProfiles: {
+      type: Array,
+      required: true
+    },
+    color: {
+      type: String,
+      required: true
+    }
+  },
+  data () {
+    return {
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    validators () {
       return {
-        validationErrors
-      }
-    },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      validators () {
-        return {
-          value: {
-            required
-          }
+        value: {
+          required
         }
       }
+    }
+  },
+  methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
     },
-    methods: {
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
-      },
-      onInput (value) {
-        this.$v.value.$touch()
+    onInput (value) {
+      this.$v.value.$touch()
 
-        this.$emit('input', value)
-      }
+      this.$emit('input', value)
     }
   }
+}
 </script>
-

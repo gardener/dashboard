@@ -16,16 +16,16 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      worker: {
-        type: Object,
-        required: true
-      },
-      volumeTypes: {
-        type: Array,
-        default: () => []
-      }
+export default {
+  props: {
+    worker: {
+      type: Object,
+      required: true
+    },
+    volumeTypes: {
+      type: Array,
+      default: () => []
     }
   }
+}
 </script>

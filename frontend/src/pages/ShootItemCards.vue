@@ -258,269 +258,268 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import CodeBlock from '@/components/CodeBlock'
-  import ClusterAccess from '@/components/ClusterAccess'
-  import Journals from '@/components/Journals'
-  import TimeString from '@/components/TimeString'
-  import ShootVersion from '@/components/ShootVersion'
-  import StatusCard from '@/components/StatusCard'
-  import SelfTerminationWarning from '@/components/SelfTerminationWarning'
-  import ShootHibernation from '@/components/ShootHibernation'
-  import get from 'lodash/get'
-  import includes from 'lodash/includes'
-  import find from 'lodash/find'
-  import forEach from 'lodash/forEach'
-  import { SnotifyPosition } from 'vue-snotify'
-  import {
-    getDateFormatted,
-    getCloudProviderKind,
-    canLinkToSeed,
-    availableK8sUpdatesForShoot,
-    isSelfTerminationWarning,
-    isValidTerminationDate,
-    getTimeStringTo
-  } from '@/utils'
+import { mapGetters } from 'vuex'
+import CodeBlock from '@/components/CodeBlock'
+import ClusterAccess from '@/components/ClusterAccess'
+import Journals from '@/components/Journals'
+import TimeString from '@/components/TimeString'
+import ShootVersion from '@/components/ShootVersion'
+import StatusCard from '@/components/StatusCard'
+import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import ShootHibernation from '@/components/ShootHibernation'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
+import find from 'lodash/find'
+import forEach from 'lodash/forEach'
+import { SnotifyPosition } from 'vue-snotify'
+import {
+  getDateFormatted,
+  getCloudProviderKind,
+  canLinkToSeed,
+  availableK8sUpdatesForShoot,
+  isSelfTerminationWarning,
+  isValidTerminationDate,
+  getTimeStringTo
+} from '@/utils'
 
-  import 'codemirror/mode/yaml/yaml.js'
+import 'codemirror/mode/yaml/yaml.js'
 
-  export default {
-    name: 'shoot-item',
-    components: {
-      CodeBlock,
-      ClusterAccess,
-      Journals,
-      TimeString,
-      ShootVersion,
-      StatusCard,
-      SelfTerminationWarning,
-      ShootHibernation
-    },
-    data () {
-      return {
-        addonList: [
-          {
-            name: 'cluster-autoscaler',
-            title: 'Cluster Autoscaler',
-            description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.'
-          },
-          {
-            name: 'kube-lego',
-            title: 'Kube Lego',
-            description: 'Kube-Lego automatically requests certificates for Kubernetes Ingress resources from Let\'s Encrypt.'
-          },
-          {
-            name: 'kubernetes-dashboard',
-            title: 'Dashboard',
-            description: 'General-purpose web UI for Kubernetes clusters.'
-          },
-          {
-            name: 'monocular',
-            title: 'Monocular',
-            description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
-          },
-          {
-            name: 'nginx-ingress',
-            title: 'Nginx Ingress',
-            description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
-          }
-        ],
-        mounted: false,
-        selfTerminationNotification: undefined
-      }
-    },
-    methods: {
-      showSelfTerminationWarning () {
-        if (!this.selfTerminationNotification) {
-          const config = {
-            timeout: 5000,
-            closeOnClick: false,
-            showProgressBar: false,
-            position: SnotifyPosition.rightBottom,
-            titleMaxLength: 20
-          }
-          if (this.isSelfTerminationWarning) {
-            this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
-          } else {
-            this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
-          }
+export default {
+  name: 'shoot-item',
+  components: {
+    CodeBlock,
+    ClusterAccess,
+    Journals,
+    TimeString,
+    ShootVersion,
+    StatusCard,
+    SelfTerminationWarning,
+    ShootHibernation
+  },
+  data () {
+    return {
+      addonList: [
+        {
+          name: 'cluster-autoscaler',
+          title: 'Cluster Autoscaler',
+          description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.'
+        },
+        {
+          name: 'kube-lego',
+          title: 'Kube Lego',
+          description: 'Kube-Lego automatically requests certificates for Kubernetes Ingress resources from Let\'s Encrypt.'
+        },
+        {
+          name: 'kubernetes-dashboard',
+          title: 'Dashboard',
+          description: 'General-purpose web UI for Kubernetes clusters.'
+        },
+        {
+          name: 'monocular',
+          title: 'Monocular',
+          description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
+        },
+        {
+          name: 'nginx-ingress',
+          title: 'Nginx Ingress',
+          description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
         }
-      }
-    },
-    computed: {
-      ...mapGetters([
-        'shootByNamespaceAndName',
-        'journalsByNamespaceAndName',
-        'isAdmin',
-        'namespaces',
-        'customAddonDefinitionList'
-      ]),
-
-      getCloudProviderKind () {
-        return getCloudProviderKind(get(this.item, 'spec.cloud'))
-      },
-      componentUrl () {
-        return (name) => {
-          switch (name) {
-            case 'monocular':
-              return this.monocularUrl
-            default:
-              return undefined
-          }
+      ],
+      mounted: false,
+      selfTerminationNotification: undefined
+    }
+  },
+  methods: {
+    showSelfTerminationWarning () {
+      if (!this.selfTerminationNotification) {
+        const config = {
+          timeout: 5000,
+          closeOnClick: false,
+          showProgressBar: false,
+          position: SnotifyPosition.rightBottom,
+          titleMaxLength: 20
         }
-      },
-      monocularUrl () {
-        return `https://monocular.ingress.${this.domain}`
-      },
-      showSeedInfo () {
-        return !!this.seed && this.hasAccessToGardenNamespace
-      },
-      hasAccessToGardenNamespace () {
-        return includes(this.namespaces, 'garden')
-      },
-      canLinkToSeed () {
-        return canLinkToSeed({ shootNamespace: this.namespace })
-      },
-      namespace () {
-        return get(this.$route.params, 'namespace')
-      },
-      value () {
-        return this.shootByNamespaceAndName(this.$route.params)
-      },
-      info () {
-        return get(this, 'value.info', {})
-      },
-      item () {
-        return get(this, 'value', {})
-      },
-      kubeconfig () {
-        return get(this, 'info.kubeconfig')
-      },
-      isInfoAvailable () {
-        return !!this.info
-      },
-      journals () {
-        const params = this.$route.params
-        return this.journalsByNamespaceAndName(params)
-      },
-      metadata () {
-        return this.item.metadata || {}
-      },
-      annotations () {
-        return this.metadata.annotations || {}
-      },
-      createdBy () {
-        return this.annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
-      },
-      created () {
-        return getDateFormatted(this.metadata.creationTimestamp)
-      },
-      expirationTimestamp () {
-        return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
-      },
-      domain () {
-        return get(this.item, 'spec.dns.domain')
-      },
-      shootIngressDomainText () {
-        const nginxIngressEnabled = get(this.item, 'spec.addons.nginx-ingress.enabled', false)
-        if (!this.domain || !nginxIngressEnabled) {
-          return undefined
-        }
-        return `*.ingress.${this.domain}`
-      },
-      region () {
-        return get(this.item, 'spec.cloud.region')
-      },
-      secret () {
-        return get(this.item, 'spec.cloud.secretBindingRef.name')
-      },
-      cidr () {
-        return get(this.item, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
-      },
-      seed () {
-        return get(this.item, 'spec.cloud.seed')
-      },
-      purpose () {
-        return this.annotations['garden.sapcloud.io/purpose']
-      },
-      addons () {
-        return get(this.item, 'spec.addons', {})
-      },
-      addon () {
-        return (name) => {
-          return this.addons[name] || {}
-        }
-      },
-      customAddonList () {
-        try {
-          const customAddonNames = JSON.parse(this.annotations['gardenextensions.sapcloud.io/addons'])
-          const list = []
-          forEach(customAddonNames, name => {
-            const item = find(this.customAddonDefinitionList, ['name', name])
-            if (item) {
-              list.push(item)
-            }
-          })
-          return list
-        } catch (err) {
-          return []
-        }
-      },
-      availableK8sUpdates () {
-        return availableK8sUpdatesForShoot(get(this.item, 'spec'))
-      },
-      k8sVersion () {
-        return get(this.item, 'spec.kubernetes.version')
-      },
-      selfTerminationNotificationMessage () {
-        if (this.isValidTerminationDate) {
-          return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
+        if (this.isSelfTerminationWarning) {
+          this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
         } else {
-          return 'This cluster is about to self terminate'
+          this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
         }
-      },
-      isSelfTerminationWarning () {
-        return isSelfTerminationWarning(this.expirationTimestamp)
-      },
-      isValidTerminationDate () {
-        return isValidTerminationDate(this.expirationTimestamp)
-      }
-    },
-    watch: {
-      expirationTimestamp (expirationTimestamp) {
-        if (expirationTimestamp) {
-          this.showSelfTerminationWarning()
-        }
-      }
-    },
-    mounted () {
-      this.mounted = true
-      if (this.expirationTimestamp) {
-        this.showSelfTerminationWarning()
-      }
-    },
-    destroyed () {
-      if (this.selfTerminationNotification) {
-        this.$snotify.remove(this.selfTerminationNotification.id)
       }
     }
+  },
+  computed: {
+    ...mapGetters([
+      'shootByNamespaceAndName',
+      'journalsByNamespaceAndName',
+      'isAdmin',
+      'namespaces',
+      'customAddonDefinitionList'
+    ]),
+
+    getCloudProviderKind () {
+      return getCloudProviderKind(get(this.item, 'spec.cloud'))
+    },
+    componentUrl () {
+      return (name) => {
+        switch (name) {
+          case 'monocular':
+            return this.monocularUrl
+          default:
+            return undefined
+        }
+      }
+    },
+    monocularUrl () {
+      return `https://monocular.ingress.${this.domain}`
+    },
+    showSeedInfo () {
+      return !!this.seed && this.hasAccessToGardenNamespace
+    },
+    hasAccessToGardenNamespace () {
+      return includes(this.namespaces, 'garden')
+    },
+    canLinkToSeed () {
+      return canLinkToSeed({ shootNamespace: this.namespace })
+    },
+    namespace () {
+      return get(this.$route.params, 'namespace')
+    },
+    value () {
+      return this.shootByNamespaceAndName(this.$route.params)
+    },
+    info () {
+      return get(this, 'value.info', {})
+    },
+    item () {
+      return get(this, 'value', {})
+    },
+    kubeconfig () {
+      return get(this, 'info.kubeconfig')
+    },
+    isInfoAvailable () {
+      return !!this.info
+    },
+    journals () {
+      const params = this.$route.params
+      return this.journalsByNamespaceAndName(params)
+    },
+    metadata () {
+      return this.item.metadata || {}
+    },
+    annotations () {
+      return this.metadata.annotations || {}
+    },
+    createdBy () {
+      return this.annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
+    },
+    created () {
+      return getDateFormatted(this.metadata.creationTimestamp)
+    },
+    expirationTimestamp () {
+      return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
+    },
+    domain () {
+      return get(this.item, 'spec.dns.domain')
+    },
+    shootIngressDomainText () {
+      const nginxIngressEnabled = get(this.item, 'spec.addons.nginx-ingress.enabled', false)
+      if (!this.domain || !nginxIngressEnabled) {
+        return undefined
+      }
+      return `*.ingress.${this.domain}`
+    },
+    region () {
+      return get(this.item, 'spec.cloud.region')
+    },
+    secret () {
+      return get(this.item, 'spec.cloud.secretBindingRef.name')
+    },
+    cidr () {
+      return get(this.item, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
+    },
+    seed () {
+      return get(this.item, 'spec.cloud.seed')
+    },
+    purpose () {
+      return this.annotations['garden.sapcloud.io/purpose']
+    },
+    addons () {
+      return get(this.item, 'spec.addons', {})
+    },
+    addon () {
+      return (name) => {
+        return this.addons[name] || {}
+      }
+    },
+    customAddonList () {
+      try {
+        const customAddonNames = JSON.parse(this.annotations['gardenextensions.sapcloud.io/addons'])
+        const list = []
+        forEach(customAddonNames, name => {
+          const item = find(this.customAddonDefinitionList, ['name', name])
+          if (item) {
+            list.push(item)
+          }
+        })
+        return list
+      } catch (err) {
+        return []
+      }
+    },
+    availableK8sUpdates () {
+      return availableK8sUpdatesForShoot(get(this.item, 'spec'))
+    },
+    k8sVersion () {
+      return get(this.item, 'spec.kubernetes.version')
+    },
+    selfTerminationNotificationMessage () {
+      if (this.isValidTerminationDate) {
+        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
+      } else {
+        return 'This cluster is about to self terminate'
+      }
+    },
+    isSelfTerminationWarning () {
+      return isSelfTerminationWarning(this.expirationTimestamp)
+    },
+    isValidTerminationDate () {
+      return isValidTerminationDate(this.expirationTimestamp)
+    }
+  },
+  watch: {
+    expirationTimestamp (expirationTimestamp) {
+      if (expirationTimestamp) {
+        this.showSelfTerminationWarning()
+      }
+    }
+  },
+  mounted () {
+    this.mounted = true
+    if (this.expirationTimestamp) {
+      this.showSelfTerminationWarning()
+    }
+  },
+  destroyed () {
+    if (this.selfTerminationNotification) {
+      this.$snotify.remove(this.selfTerminationNotification.id)
+    }
+  }
 }
 </script>
 
-
 <style lang="styl" scoped>
-  .subheading.card__title {
+  .subheading.v-card__title {
     height: 42px;
   }
 
-  .expansion-panel {
+  .v-expansion-panel {
     box-shadow: none;
     display: initial;
 
     >>> li {
       border: none;
 
-      .expansion-panel__header {
+      .v-expansion-panel__header {
         padding: 16px 32px 16px 16px !important;
 
         .material-icons {

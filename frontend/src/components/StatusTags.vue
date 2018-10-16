@@ -21,29 +21,29 @@ limitations under the License.
 </template>
 
 <script>
-  import StatusTag from '@/components/StatusTag'
-  import isEmpty from 'lodash/isEmpty'
-  import filter from 'lodash/filter'
+import StatusTag from '@/components/StatusTag'
+import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
 
-  export default {
-    components: {
-      StatusTag
+export default {
+  components: {
+    StatusTag
+  },
+  props: {
+    conditions: {
+      type: Array
     },
-    props: {
-      conditions: {
-        type: Array
-      },
-      popperPlacement: {
-        type: String
+    popperPlacement: {
+      type: String
+    }
+  },
+  computed: {
+    filteredConditions () {
+      if (isEmpty(this.conditions)) {
+        return []
       }
-    },
-    computed: {
-      filteredConditions () {
-        if (isEmpty(this.conditions)) {
-          return []
-        }
-        return filter(this.conditions, condition => !!condition.lastTransitionTime)
-      }
+      return filter(this.conditions, condition => !!condition.lastTransitionTime)
     }
   }
+}
 </script>

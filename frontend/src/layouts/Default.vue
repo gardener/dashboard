@@ -25,46 +25,45 @@ limitations under the License.
 </template>
 
 <script>
-  import MainNavigation from '@/components/MainNavigation.vue'
-  import MainToolbar from '@/components/MainToolbar.vue'
-  import MainContent from '@/components/MainContent.vue'
-  import Loading from '@/components/Loading.vue'
-  import GSnotify from '@/components/GSnotify.vue'
-  import set from 'lodash/set'
+import MainNavigation from '@/components/MainNavigation.vue'
+import MainToolbar from '@/components/MainToolbar.vue'
+import MainContent from '@/components/MainContent.vue'
+import Loading from '@/components/Loading.vue'
+import GSnotify from '@/components/GSnotify.vue'
+import set from 'lodash/set'
 
-  function setElementStyle (element, key, value) {
-    if (element) {
-      set(element.style, key, value)
+function setElementStyle (element, key, value) {
+  if (element) {
+    set(element.style, key, value)
+  }
+}
+
+function disableVerticalScrolling (element) {
+  setElementStyle(element, 'overflowY', 'hidden')
+}
+
+export default {
+  name: 'Default',
+  components: {
+    MainNavigation,
+    MainToolbar,
+    MainContent,
+    Loading,
+    GSnotify
+  },
+  methods: {
+    getWrapElement () {
+      return this.$el.querySelector(':scope > div[class$="wrap"]')
     }
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.$refs.content.setScrollTop(0)
+    next()
+  },
+  mounted () {
+    disableVerticalScrolling(this.$el)
+    const element = this.getWrapElement()
+    disableVerticalScrolling(element)
   }
-
-  function disableVerticalScrolling (element) {
-    setElementStyle(element, 'overflowY', 'hidden')
-  }
-
-  export default {
-    name: 'Default',
-    components: {
-      MainNavigation,
-      MainToolbar,
-      MainContent,
-      Loading,
-      GSnotify
-    },
-    methods: {
-      getWrapElement () {
-        return this.$el.querySelector(':scope > div[class$="wrap"]')
-      }
-    },
-    beforeRouteUpdate (to, from, next) {
-      this.$refs.content.setScrollTop(0)
-      next()
-    },
-    mounted () {
-      disableVerticalScrolling(this.$el)
-      const element = this.getWrapElement()
-      disableVerticalScrolling(element)
-    }
-  }
+}
 </script>
-

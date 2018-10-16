@@ -37,7 +37,6 @@ limitations under the License.
                     :error-messages="getFieldValidationErrors('projectName')"
                     @input="$v.projectName.$touch()"
                     @blur="$v.projectName.$touch()"
-                    required
                     counter="10"
                     tabindex="1"
                     ></v-text-field>
@@ -101,204 +100,204 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapActions, mapGetters } from 'vuex'
-  import { required, maxLength } from 'vuelidate/lib/validators'
-  import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-  import { getValidationErrors, setInputFocus } from '@/utils'
-  import map from 'lodash/map'
-  import cloneDeep from 'lodash/cloneDeep'
-  import Alert from '@/components/Alert'
-  import { errorDetailsFromError, isConflict } from '@/utils/error'
+import { mapActions, mapGetters } from 'vuex'
+import { required, maxLength } from 'vuelidate/lib/validators'
+import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+import { getValidationErrors, setInputFocus } from '@/utils'
+import map from 'lodash/map'
+import cloneDeep from 'lodash/cloneDeep'
+import Alert from '@/components/Alert'
+import { errorDetailsFromError, isConflict } from '@/utils/error'
 
-  const defaultProjectName = ''
+const defaultProjectName = ''
 
-  const validationErrors = {
-    description: {
-      maxLength: 'Description exceeds the maximum length'
-    },
-    projectName: {
-      required: 'Name is required',
-      maxLength: 'Name exceeds the maximum length',
-      resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
-      unique: 'Name is already in use',
-      noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
-      noStartEndHyphen: 'Name must not start or end with a hyphen'
-    }
+const validationErrors = {
+  description: {
+    maxLength: 'Description exceeds the maximum length'
+  },
+  projectName: {
+    required: 'Name is required',
+    maxLength: 'Name exceeds the maximum length',
+    resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
+    unique: 'Name is already in use',
+    noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
+    noStartEndHyphen: 'Name must not start or end with a hyphen'
   }
+}
 
-  export default {
-    name: 'project-dialog',
-    components: {
-      Alert
+export default {
+  name: 'project-dialog',
+  components: {
+    Alert
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
+    project: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      projectName: undefined,
+      description: undefined,
+      purpose: undefined,
+      owner: undefined,
+      errorMessage: undefined,
+      detailedErrorMessage: undefined,
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    ...mapGetters([
+      'projectList',
+      'memberList'
+    ]),
+    visible: {
+      get () {
+        return this.value
       },
-      project: {
-        type: Object
+      set (value) {
+        this.$emit('input', value)
       }
     },
-    data () {
-      return {
-        projectName: undefined,
-        description: undefined,
-        purpose: undefined,
-        owner: undefined,
-        errorMessage: undefined,
-        detailedErrorMessage: undefined,
-        validationErrors
+    projectNames () {
+      const iteratee = item => item.metadata.name
+      return map(this.projectList, iteratee)
+    },
+    valid () {
+      return !this.$v.$invalid
+    },
+    isCreateMode () {
+      return !this.project
+    },
+    submitButtonText () {
+      return this.isCreateMode ? 'Create' : 'Save'
+    },
+    validators () {
+      const validators = {
+        description: {
+          maxLength: maxLength(50)
+        }
       }
-    },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      ...mapGetters([
-        'projectList',
-        'memberList'
-      ]),
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
+      if (this.isCreateMode) {
+        validators.projectName = {
+          required,
+          maxLength: maxLength(10),
+          noConsecutiveHyphen,
+          noStartEndHyphen, // Order is important for UI hints
+          resourceName,
+          unique: unique('projectNames')
         }
-      },
-      projectNames () {
-        const iteratee = item => item.metadata.name
-        return map(this.projectList, iteratee)
-      },
-      valid () {
-        return !this.$v.$invalid
-      },
-      isCreateMode () {
-        return !this.project
-      },
-      submitButtonText () {
-        return this.isCreateMode ? 'Create' : 'Save'
-      },
-      validators () {
-        const validators = {
-          description: {
-            maxLength: maxLength(50)
-          }
-        }
-        if (this.isCreateMode) {
-          validators.projectName = {
-            required,
-            maxLength: maxLength(10),
-            noConsecutiveHyphen,
-            noStartEndHyphen, // Order is important for UI hints
-            resourceName,
-            unique: unique('projectNames')
-          }
-        }
-        return validators
       }
+      return validators
+    }
+  },
+  methods: {
+    ...mapActions([
+      'createProject',
+      'updateProject'
+    ]),
+    getFieldValidationErrors (field) {
+      return getValidationErrors(this, field)
     },
-    methods: {
-      ...mapActions([
-        'createProject',
-        'updateProject'
-      ]),
-      getFieldValidationErrors (field) {
-        return getValidationErrors(this, field)
-      },
-      hide () {
-        this.visible = false
-      },
-      submit () {
-        this.$v.$touch()
-        if (this.valid) {
-          this.save()
-            .then(project => {
-              this.hide()
-              this.$emit('submit', project)
-              if (this.isCreateMode) {
-                this.$router.push({name: 'Secrets', params: { namespace: project.metadata.namespace }})
-              }
-            })
-            .catch(err => {
-              if (this.isCreateMode) {
-                if (isConflict(err)) {
-                  this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
-                  setInputFocus(this, 'projectName')
-                } else {
-                  this.errorMessage = 'Failed to create project.'
-                }
+    hide () {
+      this.visible = false
+    },
+    submit () {
+      this.$v.$touch()
+      if (this.valid) {
+        this.save()
+          .then(project => {
+            this.hide()
+            this.$emit('submit', project)
+            if (this.isCreateMode) {
+              this.$router.push({ name: 'Secrets', params: { namespace: project.metadata.namespace } })
+            }
+          })
+          .catch(err => {
+            if (this.isCreateMode) {
+              if (isConflict(err)) {
+                this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
+                setInputFocus(this, 'projectName')
               } else {
-                this.errorMessage = 'Failed to update project.'
+                this.errorMessage = 'Failed to create project.'
               }
+            } else {
+              this.errorMessage = 'Failed to update project.'
+            }
 
-              const errorDetails = errorDetailsFromError(err)
-              console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-              this.detailedErrorMessage = errorDetails.detailedMessage
-            })
-        }
-      },
-      cancel () {
-        this.hide()
-        this.$emit('cancel')
-      },
-      save () {
-        if (this.isCreateMode) {
-          const name = this.projectName
-          const metadata = {name}
-
-          const description = this.description
-          const purpose = this.purpose
-          const data = {description, purpose}
-
-          return this.createProject({metadata, data})
-        } else {
-          const project = cloneDeep(this.project)
-
-          project.data.description = this.description
-          project.data.purpose = this.purpose
-          project.data.owner = this.owner
-
-          return this.updateProject(project)
-        }
-      },
-      reset () {
-        this.$v.$reset()
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
-
-        if (this.isCreateMode) {
-          this.projectName = defaultProjectName
-          this.description = undefined
-          this.purpose = undefined
-          setInputFocus(this, 'projectName')
-        } else {
-          const metadata = this.project ? this.project.metadata || {} : {}
-          const projectData = this.project ? this.project.data || {} : {}
-
-          this.projectName = metadata ? metadata.name || '' : ''
-          this.description = projectData.description
-          this.purpose = projectData.purpose
-          this.owner = projectData.owner
-          setInputFocus(this, 'description')
-        }
+            const errorDetails = errorDetailsFromError(err)
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
+          })
       }
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
-        }
+    cancel () {
+      this.hide()
+      this.$emit('cancel')
+    },
+    save () {
+      if (this.isCreateMode) {
+        const name = this.projectName
+        const metadata = { name }
+
+        const description = this.description
+        const purpose = this.purpose
+        const data = { description, purpose }
+
+        return this.createProject({ metadata, data })
+      } else {
+        const project = cloneDeep(this.project)
+
+        project.data.description = this.description
+        project.data.purpose = this.purpose
+        project.data.owner = this.owner
+
+        return this.updateProject(project)
+      }
+    },
+    reset () {
+      this.$v.$reset()
+      this.errorMessage = undefined
+      this.detailedMessage = undefined
+
+      if (this.isCreateMode) {
+        this.projectName = defaultProjectName
+        this.description = undefined
+        this.purpose = undefined
+        setInputFocus(this, 'projectName')
+      } else {
+        const metadata = this.project ? this.project.metadata || {} : {}
+        const projectData = this.project ? this.project.data || {} : {}
+
+        this.projectName = metadata ? metadata.name || '' : ''
+        this.description = projectData.description
+        this.purpose = projectData.purpose
+        this.owner = projectData.owner
+        setInputFocus(this, 'description')
+      }
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>
 
 <style lang="styl">
   .project {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/project_background.svg);
       background-size: cover;
       color:white;

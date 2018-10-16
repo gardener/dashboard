@@ -54,84 +54,84 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import SecretRow from '@/components/SecretRow'
+import { mapGetters } from 'vuex'
+import SecretRow from '@/components/SecretRow'
 
-  export default {
-    components: {
-      SecretRow
+export default {
+  components: {
+    SecretRow
+  },
+  props: {
+    infrastructureKey: {
+      type: String,
+      required: true
     },
-    props: {
-      infrastructureKey: {
-        type: String,
-        required: true
-      },
-      infrastructureName: {
-        type: String,
-        required: true
-      },
-      icon: {
-        type: String,
-        required: true
-      },
-      color: {
-        type: String,
-        required: true
-      },
-      description: {
-        type: String,
-        required: true
-      },
-      secretDescriptorKey: {
-        type: String,
-        default: ''
-      },
-      disabled: {
-        type: Boolean,
-        default: false
-      }
+    infrastructureName: {
+      type: String,
+      required: true
     },
-    computed: {
-      ...mapGetters([
-        'infrastructureSecretsByInfrastructureKind'
-      ]),
-      rows () {
-        return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKey)
-      },
-      hasRows () {
-        return this.rows.length > 0
-      },
-      cardClass () {
-        let cardClass = 'mr-extra'
-        if (this.disabled) {
-          cardClass = `${cardClass} card__disabled`
-        }
-        return cardClass
-      },
-      toolbarClass () {
-        return `${this.color} elevation-0`
-      }
+    icon: {
+      type: String,
+      required: true
     },
-    methods: {
-      onAdd () {
-        this.$emit('add', this.infrastructureKey)
-      },
-      onToogleHelp () {
-        this.$emit('toogleHelp', this.infrastructureKey)
-      },
-      onUpdate (row) {
-        this.$emit('update', row)
-      },
-      onDelete (row) {
-        this.$emit('delete', row)
+    color: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    },
+    secretDescriptorKey: {
+      type: String,
+      default: ''
+    },
+    disabled: {
+      type: Boolean,
+      default: false
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'infrastructureSecretsByInfrastructureKind'
+    ]),
+    rows () {
+      return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKey)
+    },
+    hasRows () {
+      return this.rows.length > 0
+    },
+    cardClass () {
+      let cardClass = 'mr-extra'
+      if (this.disabled) {
+        cardClass = `${cardClass} card_disabled`
       }
+      return cardClass
+    },
+    toolbarClass () {
+      return `${this.color} elevation-0`
+    }
+  },
+  methods: {
+    onAdd () {
+      this.$emit('add', this.infrastructureKey)
+    },
+    onToogleHelp () {
+      this.$emit('toogleHelp', this.infrastructureKey)
+    },
+    onUpdate (row) {
+      this.$emit('update', row)
+    },
+    onDelete (row) {
+      this.$emit('delete', row)
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>
 
-  .card__disabled {
+  .card_disabled {
     opacity:0.3;
     pointer-events: none
   }

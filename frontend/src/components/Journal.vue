@@ -41,56 +41,54 @@ limitations under the License.
   </v-card>
 </template>
 
-
-
 <script>
-  import get from 'lodash/get'
-  import { mapState, mapGetters } from 'vuex'
-  import TimeString from '@/components/TimeString'
-  import JournalLabels from '@/components/JournalLabels'
-  import JournalComment from '@/components/JournalComment'
+import get from 'lodash/get'
+import { mapState, mapGetters } from 'vuex'
+import TimeString from '@/components/TimeString'
+import JournalLabels from '@/components/JournalLabels'
+import JournalComment from '@/components/JournalComment'
 
-  export default {
-    components: {
-      TimeString,
-      JournalLabels,
-      JournalComment
+export default {
+  components: {
+    TimeString,
+    JournalLabels,
+    JournalComment
+  },
+  props: {
+    journal: {
+      type: Object,
+      required: true
+    }
+  },
+  computed: {
+    ...mapState([
+      'cfg'
+    ]),
+    ...mapGetters([
+      'journalCommentsByIssueNumber'
+    ]),
+    journalTitle () {
+      const title = get(this.journal, 'data.journalTitle')
+      return title ? ` - ${title}` : ''
     },
-    props: {
-      journal: {
-        type: Object,
-        required: true
-      }
+    login () {
+      return get(this.journal, 'data.user.login')
     },
-    computed: {
-      ...mapState([
-        'cfg'
-      ]),
-      ...mapGetters([
-        'journalCommentsByIssueNumber'
-      ]),
-      journalTitle () {
-        const title = get(this.journal, 'data.journalTitle')
-        return title ? ` - ${title}` : ''
-      },
-      login () {
-        return get(this.journal, 'data.user.login')
-      },
-      journalHtmlUrl () {
-        return get(this.journal, 'data.html_url')
-      },
-      commentsForJournal () {
-        const issueNumber = get(this.journal, 'metadata.number')
-        return this.journalCommentsByIssueNumber({issueNumber})
-      },
-      gitHubRepoUrl () {
-        return this.cfg.gitHubRepoUrl
-      },
-      addCommentLink () {
-        return `${this.journalHtmlUrl}#new_comment_field`
-      }
+    journalHtmlUrl () {
+      return get(this.journal, 'data.html_url')
+    },
+    commentsForJournal () {
+      const issueNumber = get(this.journal, 'metadata.number')
+      return this.journalCommentsByIssueNumber({ issueNumber })
+    },
+    gitHubRepoUrl () {
+      return this.cfg.gitHubRepoUrl
+    },
+    addCommentLink () {
+      return `${this.journalHtmlUrl}#new_comment_field`
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

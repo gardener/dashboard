@@ -30,40 +30,40 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
-  import ProjectCreateDialog from '@/dialogs/ProjectDialog'
+import { mapState, mapGetters } from 'vuex'
+import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
-  export default {
-    name: 'profile',
-    components: {
-      ProjectCreateDialog
-    },
-    data () {
-      return {
-        projectDialog: false,
-        projectMenu: false
+export default {
+  name: 'profile',
+  components: {
+    ProjectCreateDialog
+  },
+  data () {
+    return {
+      projectDialog: false,
+      projectMenu: false
+    }
+  },
+  computed: {
+    ...mapState([
+      'user'
+    ]),
+    ...mapGetters([
+      'username',
+      'namespaces'
+    ])
+  },
+  methods: {
+    onProjectCreated ({ metadata } = {}) {
+      const name = 'ShootList'
+      let namespace = metadata.namespace
+      if (!namespace) {
+        namespace = this.namespaces[0]
       }
-    },
-    computed: {
-      ...mapState([
-        'user'
-      ]),
-      ...mapGetters([
-        'username',
-        'namespaces'
-      ])
-    },
-    methods: {
-      onProjectCreated ({metadata} = {}) {
-        const name = 'ShootList'
-        let namespace = metadata.namespace
-        if (!namespace) {
-          namespace = this.namespaces[0]
-        }
-        if (namespace) {
-          this.$router.push({name, params: {namespace}})
-        }
+      if (namespace) {
+        this.$router.push({ name, params: { namespace } })
       }
     }
   }
+}
 </script>

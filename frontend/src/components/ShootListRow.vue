@@ -140,175 +140,175 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import InfraIcon from '@/components/InfrastructureIcon'
-  import ShootStatus from '@/components/ShootStatus'
-  import StatusTags from '@/components/StatusTags'
-  import PurposeTag from '@/components/PurposeTag'
-  import TimeString from '@/components/TimeString'
-  import ShootVersion from '@/components/ShootVersion'
-  import RetryOperation from '@/components/RetryOperation'
-  import JournalLabels from '@/components/JournalLabels'
-  import SelfTerminationWarning from '@/components/SelfTerminationWarning'
-  import forEach from 'lodash/forEach'
-  import replace from 'lodash/replace'
-  import get from 'lodash/get'
-  import includes from 'lodash/includes'
-  import { getTimestampFormatted,
-    getCloudProviderKind,
-    availableK8sUpdatesForShoot,
-    getCreatedBy,
-    isHibernated,
-    isReconciliationDeactivated,
-    isShootMarkedForDeletion,
-    isTypeDelete } from '@/utils'
+import { mapGetters } from 'vuex'
+import InfraIcon from '@/components/InfrastructureIcon'
+import ShootStatus from '@/components/ShootStatus'
+import StatusTags from '@/components/StatusTags'
+import PurposeTag from '@/components/PurposeTag'
+import TimeString from '@/components/TimeString'
+import ShootVersion from '@/components/ShootVersion'
+import RetryOperation from '@/components/RetryOperation'
+import JournalLabels from '@/components/JournalLabels'
+import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import forEach from 'lodash/forEach'
+import replace from 'lodash/replace'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
+import { getTimestampFormatted,
+  getCloudProviderKind,
+  availableK8sUpdatesForShoot,
+  getCreatedBy,
+  isHibernated,
+  isReconciliationDeactivated,
+  isShootMarkedForDeletion,
+  isTypeDelete } from '@/utils'
 
-  export default {
-    components: {
-      InfraIcon,
-      StatusTags,
-      PurposeTag,
-      ShootStatus,
-      TimeString,
-      ShootVersion,
-      JournalLabels,
-      RetryOperation,
-      SelfTerminationWarning
+export default {
+  components: {
+    InfraIcon,
+    StatusTags,
+    PurposeTag,
+    ShootStatus,
+    TimeString,
+    ShootVersion,
+    JournalLabels,
+    RetryOperation,
+    SelfTerminationWarning
+  },
+  props: {
+    shootItem: {
+      type: Object,
+      required: true
     },
-    props: {
-      shootItem: {
-        type: Object,
-        required: true
-      },
-      visibleHeaders: {
-        type: Array,
-        required: true
+    visibleHeaders: {
+      type: Array,
+      required: true
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'lastUpdatedJournalByNameAndNamespace',
+      'journalsLabels'
+    ]),
+    row () {
+      const spec = this.shootItem.spec
+      const metadata = this.shootItem.metadata
+      const status = this.shootItem.status
+      const info = this.shootItem.info
+      const kind = getCloudProviderKind(spec.cloud)
+      return {
+        name: metadata.name,
+        namespace: metadata.namespace,
+        createdBy: getCreatedBy(metadata),
+        creationTimestamp: metadata.creationTimestamp,
+        // eslint-disable-next-line lodash/path-style
+        expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
+        annotations: get(metadata, 'annotations', {}),
+        deletionTimestamp: metadata.deletionTimestamp,
+        lastOperation: get(status, 'lastOperation', {}),
+        lastError: get(status, 'lastError'),
+        conditions: get(status, 'conditions', []),
+        kind,
+        region: get(spec, 'cloud.region'),
+        isHibernated: isHibernated(spec),
+        info,
+        availableK8sUpdates: availableK8sUpdatesForShoot(spec),
+        k8sVersion: get(spec, 'kubernetes.version'),
+        // eslint-disable-next-line lodash/path-style
+        purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
+        lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
+        journalsLabels: this.journalsLabels(this.shootItem.metadata),
+        // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
+        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration')
       }
     },
-    computed: {
-      ...mapGetters([
-        'lastUpdatedJournalByNameAndNamespace',
-        'journalsLabels'
-      ]),
-      row () {
-        const spec = this.shootItem.spec
-        const metadata = this.shootItem.metadata
-        const status = this.shootItem.status
-        const info = this.shootItem.info
-        const kind = getCloudProviderKind(spec.cloud)
-        return {
-          name: metadata.name,
-          namespace: metadata.namespace,
-          createdBy: getCreatedBy(metadata),
-          creationTimestamp: metadata.creationTimestamp,
-          // eslint-disable-next-line lodash/path-style
-          expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
-          annotations: get(metadata, 'annotations', {}),
-          deletionTimestamp: metadata.deletionTimestamp,
-          lastOperation: get(status, 'lastOperation', {}),
-          lastError: get(status, 'lastError'),
-          conditions: get(status, 'conditions', []),
-          kind,
-          region: get(spec, 'cloud.region'),
-          isHibernated: isHibernated(spec),
-          info,
-          availableK8sUpdates: availableK8sUpdatesForShoot(spec),
-          k8sVersion: get(spec, 'kubernetes.version'),
-          // eslint-disable-next-line lodash/path-style
-          purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
-          lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
-          journalsLabels: this.journalsLabels(this.shootItem.metadata),
-          // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
-          reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration')
-        }
-      },
-      headerVisible () {
-        const headerVisible = {}
-        forEach(this.visibleHeaders, (header) => {
-          headerVisible[header.value] = true
-        })
-        return headerVisible
-      },
-      projectName () {
-        return replace(this.row.namespace, /^garden-/, '')
-      },
-      createdAt () {
-        return getTimestampFormatted(this.row.creationTimestamp)
-      },
-      lastUpdatedJournal () {
-        return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
-      },
-      isInfoAvailable () {
-        // operator not yet updated shoot resource
-        if (this.row.lastOperation.type === undefined || this.row.lastOperation.state === undefined) {
-          return false
-        }
-        return !this.isCreateOrDeleteInProcess
-      },
-      reconciliationDeactivated () {
-        const metadata = { annotations: this.row.annotations }
-        return isReconciliationDeactivated(metadata)
-      },
-      isCreateOrDeleteInProcess () {
-        // create or delete in process
-        if (includes(['Create', 'Delete'], this.row.lastOperation.type) && this.row.lastOperation.state === 'Processing') {
-          return true
-        }
+    headerVisible () {
+      const headerVisible = {}
+      forEach(this.visibleHeaders, (header) => {
+        headerVisible[header.value] = true
+      })
+      return headerVisible
+    },
+    projectName () {
+      return replace(this.row.namespace, /^garden-/, '')
+    },
+    createdAt () {
+      return getTimestampFormatted(this.row.creationTimestamp)
+    },
+    lastUpdatedJournal () {
+      return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
+    },
+    isInfoAvailable () {
+      // operator not yet updated shoot resource
+      if (this.row.lastOperation.type === undefined || this.row.lastOperation.state === undefined) {
         return false
-      },
-      isShootMarkedForDeletion () {
-        const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
-        return isShootMarkedForDeletion(metadata)
-      },
-      isTypeDelete () {
-        return isTypeDelete(this.row.lastOperation)
-      },
-      isDashboardDialogDisabled () {
-        const itemInfo = this.row.info || {}
-
-        if (itemInfo.dashboardUrl) {
-          return false
-        }
-
-        // disabled if info is NOT available
-        return !this.isInfoAvailable
-      },
-      isKubeconfigDialogDisabled () {
-        const itemInfo = this.row.info || {}
-
-        if (itemInfo.kubeconfig) {
-          return false
-        }
-
-        // disabled if info is NOT available
-        return !this.isInfoAvailable
-      },
-      showDashboardActionTitle () {
-        return this.isDashboardDialogDisabled
-          ? 'Dashboard not avialable'
-          : 'Show Dashboard'
-      },
-      showKubeconfigActionTitle () {
-        return this.isKubeconfigDialogDisabled
-          ? 'Kubeconfig not available'
-          : 'Show Kubeconfig'
-      },
-      deleteClusterActionTitle () {
-        return this.isShootMarkedForDeletion
-          ? 'Cluster already marked for deletion'
-          : 'Delete Cluster'
       }
+      return !this.isCreateOrDeleteInProcess
     },
-    methods: {
-      showDialog: function (action, disabled = false) {
-        if (disabled !== true) {
-          // disabled check required as v-list-tile disabled=true does not prevent click action
-          const shootItem = this.shootItem
-          this.$emit('showDialog', { action, shootItem })
-        }
+    reconciliationDeactivated () {
+      const metadata = { annotations: this.row.annotations }
+      return isReconciliationDeactivated(metadata)
+    },
+    isCreateOrDeleteInProcess () {
+      // create or delete in process
+      if (includes(['Create', 'Delete'], this.row.lastOperation.type) && this.row.lastOperation.state === 'Processing') {
+        return true
+      }
+      return false
+    },
+    isShootMarkedForDeletion () {
+      const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
+      return isShootMarkedForDeletion(metadata)
+    },
+    isTypeDelete () {
+      return isTypeDelete(this.row.lastOperation)
+    },
+    isDashboardDialogDisabled () {
+      const itemInfo = this.row.info || {}
+
+      if (itemInfo.dashboardUrl) {
+        return false
+      }
+
+      // disabled if info is NOT available
+      return !this.isInfoAvailable
+    },
+    isKubeconfigDialogDisabled () {
+      const itemInfo = this.row.info || {}
+
+      if (itemInfo.kubeconfig) {
+        return false
+      }
+
+      // disabled if info is NOT available
+      return !this.isInfoAvailable
+    },
+    showDashboardActionTitle () {
+      return this.isDashboardDialogDisabled
+        ? 'Dashboard not avialable'
+        : 'Show Dashboard'
+    },
+    showKubeconfigActionTitle () {
+      return this.isKubeconfigDialogDisabled
+        ? 'Kubeconfig not available'
+        : 'Show Kubeconfig'
+    },
+    deleteClusterActionTitle () {
+      return this.isShootMarkedForDeletion
+        ? 'Cluster already marked for deletion'
+        : 'Delete Cluster'
+    }
+  },
+  methods: {
+    showDialog: function (action, disabled = false) {
+      if (disabled !== true) {
+        // disabled check required as v-list-tile disabled=true does not prevent click action
+        const shootItem = this.shootItem
+        this.$emit('showDialog', { action, shootItem })
       }
     }
   }
+}
 </script>
 <style lang="styl" scoped>
   .action-button-group {

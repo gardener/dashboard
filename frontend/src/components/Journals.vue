@@ -36,72 +36,70 @@ limitations under the License.
 
 </template>
 
-
-
 <script>
-  import get from 'lodash/get'
-  import forEach from 'lodash/forEach'
-  import { mapState } from 'vuex'
-  import Journal from '@/components/Journal'
-  import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
+import get from 'lodash/get'
+import forEach from 'lodash/forEach'
+import { mapState } from 'vuex'
+import Journal from '@/components/Journal'
+import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
 
-  export default {
-    components: {
-      Journal
+export default {
+  components: {
+    Journal
+  },
+  props: {
+    journals: {
+      type: Array
     },
-    props: {
-      journals: {
-        type: Array
-      },
-      shoot: {
-        type: Object,
-        required: true
-      }
+    shoot: {
+      type: Object,
+      required: true
+    }
+  },
+  computed: {
+    ...mapState([
+      'cfg'
+    ]),
+    getCloudProviderKind () {
+      return getCloudProviderKind(get(this.shoot, 'spec.cloud'))
     },
-    computed: {
-      ...mapState([
-        'cfg'
-      ]),
-      getCloudProviderKind () {
-        return getCloudProviderKind(get(this.shoot, 'spec.cloud'))
-      },
-      region () {
-        return get(this.shoot, 'spec.cloud.region')
-      },
-      errorConditions () {
-        let errorConditions = ''
-        forEach(get(this.shoot, 'status.conditions'), condition => {
-          errorConditions = `${errorConditions}\n**${condition.type}:** ${condition.message}`
-        })
-        return errorConditions
-      },
-      gitHubRepoUrl () {
-        return this.cfg.gitHubRepoUrl
-      },
-      namespace () {
-        return get(this.shoot, 'metadata.namespace')
-      },
-      canLinkToSeed () {
-        return canLinkToSeed({ shootNamespace: this.namespace })
-      },
-      createJournalLink () {
-        const name = get(this.shoot, 'metadata.name')
+    region () {
+      return get(this.shoot, 'spec.cloud.region')
+    },
+    errorConditions () {
+      let errorConditions = ''
+      forEach(get(this.shoot, 'status.conditions'), condition => {
+        errorConditions = `${errorConditions}\n**${condition.type}:** ${condition.message}`
+      })
+      return errorConditions
+    },
+    gitHubRepoUrl () {
+      return this.cfg.gitHubRepoUrl
+    },
+    namespace () {
+      return get(this.shoot, 'metadata.namespace')
+    },
+    canLinkToSeed () {
+      return canLinkToSeed({ shootNamespace: this.namespace })
+    },
+    createJournalLink () {
+      const name = get(this.shoot, 'metadata.name')
 
-        const url = `${window.location.origin}/namespace/${this.namespace}/shoots/${name}`
+      const url = `${window.location.origin}/namespace/${this.namespace}/shoots/${name}`
 
-        const dashboardShootLink = `**Shoot:** [${this.namespace}/${name}](${url})`
-        const kind = `**Kind:** ${this.getCloudProviderKind} / ${this.region}`
+      const dashboardShootLink = `**Shoot:** [${this.namespace}/${name}](${url})`
+      const kind = `**Kind:** ${this.getCloudProviderKind} / ${this.region}`
 
-        const seedName = get(this.shoot, 'spec.cloud.seed')
-        const seedLinkOrName = this.canLinkToSeed ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
-        const seed = `**Seed:** ${seedLinkOrName}`
+      const seedName = get(this.shoot, 'spec.cloud.seed')
+      const seedLinkOrName = this.canLinkToSeed ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
+      const seed = `**Seed:** ${seedLinkOrName}`
 
-        const createdAt = `**Created At:** ${getDateFormatted(get(this.shoot, 'metadata.creationTimestamp', ''))}`
-        const lastOperation = `**Last Op:** ${get(this.shoot, 'status.lastOperation.description', '')}`
-        const lastError = `**Last Error:** ${get(this.shoot, 'status.lastError.description', '-')}`
+      const createdAt = `**Created At:** ${getDateFormatted(get(this.shoot, 'metadata.creationTimestamp', ''))}`
+      const lastOperation = `**Last Op:** ${get(this.shoot, 'status.lastOperation.description', '')}`
+      const lastError = `**Last Error:** ${get(this.shoot, 'status.lastError.description', '-')}`
 
-        const journalTitle = encodeURIComponent(`[${this.namespace}/${name}]`)
-        const body = encodeURIComponent(`
+      const journalTitle = encodeURIComponent(`[${this.namespace}/${name}]`)
+      const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}
 ${seed}
@@ -110,10 +108,10 @@ ${lastOperation}
 ${lastError}
 ${this.errorConditions}`)
 
-        return `${this.gitHubRepoUrl}/issues/new?title=${journalTitle}&body=${body}`
-      }
+      return `${this.gitHubRepoUrl}/issues/new?title=${journalTitle}&body=${body}`
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

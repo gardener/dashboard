@@ -25,7 +25,7 @@ limitations under the License.
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"
-          prepend-icon="search"
+          prepend-inner-icon="search"
           color="cyan darken-2"
           label="Search"
           clearable
@@ -47,7 +47,7 @@ limitations under the License.
             <v-subheader>Column Selection</v-subheader>
             <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
               <v-list-tile-action>
-                <v-checkbox v-model="item.checked" color="cyan darken-2" readonly @click.native.stop @click="setColumnChecked(item)"></v-checkbox>
+                <v-checkbox v-model="item.checked" color="cyan darken-2" @click="setColumnChecked(item)"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>{{ item.text }}</v-list-tile-sub-title>
             </v-list-tile>
@@ -62,7 +62,7 @@ limitations under the License.
             <v-subheader v-if="!projectScope">Filter Table</v-subheader>
             <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
-                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" readonly @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
+                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
             </v-list-tile>
@@ -72,7 +72,6 @@ limitations under the License.
                   :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
                   v-model="hideUserIssues"
                   color="cyan darken-2"
-                  readonly @click.native.stop
                   @click="toggleHideUserIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
@@ -83,8 +82,6 @@ limitations under the License.
                 :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
                 v-model="hideDeactivatedReconciliation"
                 color="cyan darken-2"
-                readonly
-                @click.native.stop
                 @click="toggleHideDeactivatedReconciliation"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide clusters with deactivated reconciliation</v-list-tile-sub-title>
@@ -141,320 +138,320 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters, mapActions, mapState } from 'vuex'
-  import find from 'lodash/find'
-  import zipObject from 'lodash/zipObject'
-  import map from 'lodash/map'
-  import get from 'lodash/get'
-  import CodeBlock from '@/components/CodeBlock'
-  import GPopper from '@/components/GPopper'
-  import ShootListRow from '@/components/ShootListRow'
-  import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
-  import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
-  import ClusterAccess from '@/components/ClusterAccess'
-  import { getCreatedBy } from '@/utils'
+import { mapGetters, mapActions, mapState } from 'vuex'
+import find from 'lodash/find'
+import zipObject from 'lodash/zipObject'
+import map from 'lodash/map'
+import get from 'lodash/get'
+import CodeBlock from '@/components/CodeBlock'
+import GPopper from '@/components/GPopper'
+import ShootListRow from '@/components/ShootListRow'
+import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
+import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
+import ClusterAccess from '@/components/ClusterAccess'
+import { getCreatedBy } from '@/utils'
 
-  export default {
-    name: 'shoot-list',
-    components: {
-      CodeBlock,
-      CreateClusterDialog,
-      DeleteClusterDialog,
-      GPopper,
-      ShootListRow,
-      ClusterAccess
-    },
-    data () {
-      return {
-        floatingButton: false,
-        search: '',
-        allHeaders: [
-          { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
-          { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
-          { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
-          { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
-          { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
-          { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },
-          { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
-          { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
-          { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: false, defaultChecked: true, hidden: false },
-          { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-          { text: 'JOURNAL LABELS', value: 'journalLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
-          { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
-        ],
-        dialog: null,
-        tableMenu: false,
-        pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
-        cachedItems: null,
-        clearSelectedShootTimerID: undefined,
-        renderCreateDialog: false
-      }
-    },
-    watch: {
-      pagination (value) {
-        if (value) {
-          this.$localStorage.setObject('dataTable_sortBy', {sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER})
-          this.setShootListSortParams(value)
-        }
-      },
-      search (value) {
-        this.setShootListSearchValue(value)
-      }
-    },
-    methods: {
-      ...mapActions({
-        deleteShoot: 'deleteShoot',
-        setSelectedShootInternal: 'setSelectedShoot',
-        setShootListSortParams: 'setShootListSortParams',
-        setShootListSearchValue: 'setShootListSearchValue',
-        setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
-        setHideUserIssues: 'setHideUserIssues',
-        setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
-      }),
-      showDialog (args) {
-        switch (args.action) {
-          case 'kubeconfig':
-          case 'dashboard':
-          case 'delete':
-            this.setSelectedShoot(args.shootItem.metadata)
-              .then(() => {
-                this.dialog = args.action
-              })
-            break
-          case 'create':
-            this.renderCreateDialog = true
-            this.dialog = args.action
-        }
-      },
-      hideDialog () {
-        this.dialog = null
-        // Delay resetting shoot so that the dialog does not lose context during closing animation
-        this.clearSelectedShootWithDelay()
-      },
-      setColumnChecked (header) {
-        header.checked = !header.checked
-        this.saveColumnsChecked()
-      },
-      saveColumnsChecked () {
-        const keys = map(this.allHeaders, 'value')
-        const checkedValues = map(this.allHeaders, 'checked')
-        const checkedColumns = zipObject(keys, checkedValues)
-
-        this.$localStorage.setObject('dataTable_checkedColumns', checkedColumns)
-      },
-      resetColumnsChecked () {
-        for (const header of this.allHeaders) {
-          header.checked = header.defaultChecked
-        }
-        this.saveColumnsChecked()
-
-        this.pagination.sortBy = 'name'
-        this.pagination.descending = false
-      },
-      loadColumnsChecked () {
-        const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
-        for (const header of this.allHeaders) {
-          header.checked = get(checkedColumns, header.value, header.defaultChecked)
-
-          if (get(header, 'adminOnly', false)) {
-            header.hidden = !this.isAdmin
-          }
-        }
-      },
-      toggleHideUserIssues () {
-        if (this.showOnlyShootsWithIssues) {
-          this.hideUserIssues = !this.hideUserIssues
-        }
-      },
-      toggleHideDeactivatedReconciliation () {
-        if (this.showOnlyShootsWithIssues) {
-          this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
-        }
-      },
-      setSelectedShoot (selectedShoot) {
-        clearTimeout(this.clearSelectedShootTimerID)
-        return this.setSelectedShootInternal(selectedShoot)
-      },
-      clearSelectedShootWithDelay () {
-        this.clearSelectedShootTimerID = setTimeout(() => {
-          this.setSelectedShootInternal(null)
-        }, 500)
-      }
-    },
-    computed: {
-      ...mapGetters({
-        mappedItems: 'shootList',
-        item: 'shootByNamespaceAndName',
-        selectedItem: 'selectedShoot',
-        isAdmin: 'isAdmin',
-        isHideUserIssues: 'isHideUserIssues',
-        isHideDeactivatedReconciliation: 'isHideDeactivatedReconciliation'
-      }),
-      ...mapState([
-        'shootsLoading',
-        'onlyShootsWithIssues'
-      ]),
-      createDialog: {
-        get () {
-          return this.dialog === 'create'
-        },
-        set (value) {
-          if (!value) {
-            this.dialog = null
-          }
-        }
-      },
-      deleteDialog: {
-        get () {
-          return this.dialog === 'delete'
-        },
-        set (value) {
-          if (!value) {
-            this.dialog = null
-          }
-        }
-      },
-      kubeconfigDialog: {
-        get () {
-          return this.dialog === 'kubeconfig'
-        },
-        set (value) {
-          if (!value) {
-            this.dialog = null
-          }
-        }
-      },
-      dashboardDialog: {
-        get () {
-          return this.dialog === 'dashboard'
-        },
-        set (value) {
-          if (!value) {
-            this.dialog = null
-          }
-        }
-      },
-      currentMetadata () {
-        return get(this.selectedItem, 'metadata')
-      },
-      currentStatus () {
-        return get(this.selectedItem, 'status')
-      },
-      currentName () {
-        return get(this.selectedItem, 'metadata.name')
-      },
-      currentNamespace () {
-        return get(this.selectedItem, 'metadata.namespace')
-      },
-      currentCreatedBy () {
-        return getCreatedBy(this.currentMetadata)
-      },
-      currentInfo () {
-        return get(this.selectedItem, 'info', {})
-      },
-      currentKubeconfig () {
-        return get(this.selectedItem, 'info.kubeconfig')
-      },
-      currentLog () {
-        return get(this.selectedItem, 'spec.status.lastOperation.description')
-      },
-      headers () {
-        return this.allHeaders.filter(e => e.hidden === false)
-      },
-      visibleHeaders () {
-        return this.headers.filter(e => e.checked === true)
-      },
-      projectScope () {
-        return this.$route.params.namespace !== '_all'
-      },
-      showOnlyShootsWithIssues: {
-        get () {
-          return this.onlyShootsWithIssues
-        },
-        set (value) {
-          this.setOnlyShootsWithIssues(value)
-        }
-      },
-      items () {
-        return this.cachedItems || this.mappedItems
-      },
-      isHideUserIssuesAndHideDeactedReconciliationDisabled () {
-        return !this.showOnlyShootsWithIssues
-      },
-      hideUserIssues: {
-        get () {
-          if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
-            return false
-          }
-          return this.isHideUserIssues
-        },
-        set (value) {
-          this.setHideUserIssues(value)
-        }
-      },
-      hideDeactivatedReconciliation: {
-        get () {
-          if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
-            return false
-          }
-          return this.isHideDeactivatedReconciliation
-        },
-        set (value) {
-          this.setHideDeactivatedReconciliation(value)
-        }
-      },
-      hideUserIssuesAndHideDeactivatedReconciliationClass () {
-        return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
-      },
-      headlineSubtitle () {
-        let subtitle = ''
-        if (!this.projectScope && this.showOnlyShootsWithIssues) {
-          subtitle = 'Cluster Filters: Healthy'
-          if (this.isHideUserIssues) {
-            subtitle += ', User Errors'
-          }
-          if (this.isHideDeactivatedReconciliation) {
-            subtitle += ', Deactivated Reconciliation'
-          }
-        }
-        return subtitle
-      }
-    },
-    mounted () {
-      this.floatingButton = true
-      if (this.hideUserIssues === undefined) {
-        this.hideUserIssues = this.isAdmin
-      }
-      if (this.hideDeactivatedReconciliation === undefined) {
-        this.hideDeactivatedReconciliation = this.isAdmin
-      }
-      this.loadColumnsChecked()
-    },
-    beforeUpdate () {
-      const predicate = item => item.value === 'project'
-      const projectHeader = find(this.allHeaders, predicate)
-      projectHeader.hidden = this.projectScope
-    },
-    beforeRouteEnter (to, from, next) {
-      next(vm => {
-        vm.cachedItems = null
-      })
-    },
-    beforeRouteUpdate (to, from, next) {
-      this.search = null
-      next()
-    },
-    beforeRouteLeave (to, from, next) {
-      this.cachedItems = this.mappedItems.slice(0)
-      this.search = null
-      next()
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.hideDialog()
-      })
+export default {
+  name: 'shoot-list',
+  components: {
+    CodeBlock,
+    CreateClusterDialog,
+    DeleteClusterDialog,
+    GPopper,
+    ShootListRow,
+    ClusterAccess
+  },
+  data () {
+    return {
+      floatingButton: false,
+      search: '',
+      allHeaders: [
+        { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
+        { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
+        { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },
+        { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
+        { text: 'READINESS', value: 'readiness', sortable: false, align: 'center', checked: false, defaultChecked: true, hidden: false },
+        { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
+        { text: 'JOURNAL LABELS', value: 'journalLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
+        { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
+      ],
+      dialog: null,
+      tableMenu: false,
+      pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
+      cachedItems: null,
+      clearSelectedShootTimerID: undefined,
+      renderCreateDialog: false
     }
+  },
+  watch: {
+    pagination (value) {
+      if (value) {
+        this.$localStorage.setObject('dataTable_sortBy', { sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER })
+        this.setShootListSortParams(value)
+      }
+    },
+    search (value) {
+      this.setShootListSearchValue(value)
+    }
+  },
+  methods: {
+    ...mapActions({
+      deleteShoot: 'deleteShoot',
+      setSelectedShootInternal: 'setSelectedShoot',
+      setShootListSortParams: 'setShootListSortParams',
+      setShootListSearchValue: 'setShootListSearchValue',
+      setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
+      setHideUserIssues: 'setHideUserIssues',
+      setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
+    }),
+    showDialog (args) {
+      switch (args.action) {
+        case 'kubeconfig':
+        case 'dashboard':
+        case 'delete':
+          this.setSelectedShoot(args.shootItem.metadata)
+            .then(() => {
+              this.dialog = args.action
+            })
+          break
+        case 'create':
+          this.renderCreateDialog = true
+          this.dialog = args.action
+      }
+    },
+    hideDialog () {
+      this.dialog = null
+      // Delay resetting shoot so that the dialog does not lose context during closing animation
+      this.clearSelectedShootWithDelay()
+    },
+    setColumnChecked (header) {
+      header.checked = !header.checked
+      this.saveColumnsChecked()
+    },
+    saveColumnsChecked () {
+      const keys = map(this.allHeaders, 'value')
+      const checkedValues = map(this.allHeaders, 'checked')
+      const checkedColumns = zipObject(keys, checkedValues)
+
+      this.$localStorage.setObject('dataTable_checkedColumns', checkedColumns)
+    },
+    resetColumnsChecked () {
+      for (const header of this.allHeaders) {
+        header.checked = header.defaultChecked
+      }
+      this.saveColumnsChecked()
+
+      this.pagination.sortBy = 'name'
+      this.pagination.descending = false
+    },
+    loadColumnsChecked () {
+      const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
+      for (const header of this.allHeaders) {
+        header.checked = get(checkedColumns, header.value, header.defaultChecked)
+
+        if (get(header, 'adminOnly', false)) {
+          header.hidden = !this.isAdmin
+        }
+      }
+    },
+    toggleHideUserIssues () {
+      if (this.showOnlyShootsWithIssues) {
+        this.hideUserIssues = !this.hideUserIssues
+      }
+    },
+    toggleHideDeactivatedReconciliation () {
+      if (this.showOnlyShootsWithIssues) {
+        this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
+      }
+    },
+    setSelectedShoot (selectedShoot) {
+      clearTimeout(this.clearSelectedShootTimerID)
+      return this.setSelectedShootInternal(selectedShoot)
+    },
+    clearSelectedShootWithDelay () {
+      this.clearSelectedShootTimerID = setTimeout(() => {
+        this.setSelectedShootInternal(null)
+      }, 500)
+    }
+  },
+  computed: {
+    ...mapGetters({
+      mappedItems: 'shootList',
+      item: 'shootByNamespaceAndName',
+      selectedItem: 'selectedShoot',
+      isAdmin: 'isAdmin',
+      isHideUserIssues: 'isHideUserIssues',
+      isHideDeactivatedReconciliation: 'isHideDeactivatedReconciliation'
+    }),
+    ...mapState([
+      'shootsLoading',
+      'onlyShootsWithIssues'
+    ]),
+    createDialog: {
+      get () {
+        return this.dialog === 'create'
+      },
+      set (value) {
+        if (!value) {
+          this.dialog = null
+        }
+      }
+    },
+    deleteDialog: {
+      get () {
+        return this.dialog === 'delete'
+      },
+      set (value) {
+        if (!value) {
+          this.dialog = null
+        }
+      }
+    },
+    kubeconfigDialog: {
+      get () {
+        return this.dialog === 'kubeconfig'
+      },
+      set (value) {
+        if (!value) {
+          this.dialog = null
+        }
+      }
+    },
+    dashboardDialog: {
+      get () {
+        return this.dialog === 'dashboard'
+      },
+      set (value) {
+        if (!value) {
+          this.dialog = null
+        }
+      }
+    },
+    currentMetadata () {
+      return get(this.selectedItem, 'metadata')
+    },
+    currentStatus () {
+      return get(this.selectedItem, 'status')
+    },
+    currentName () {
+      return get(this.selectedItem, 'metadata.name')
+    },
+    currentNamespace () {
+      return get(this.selectedItem, 'metadata.namespace')
+    },
+    currentCreatedBy () {
+      return getCreatedBy(this.currentMetadata)
+    },
+    currentInfo () {
+      return get(this.selectedItem, 'info', {})
+    },
+    currentKubeconfig () {
+      return get(this.selectedItem, 'info.kubeconfig')
+    },
+    currentLog () {
+      return get(this.selectedItem, 'spec.status.lastOperation.description')
+    },
+    headers () {
+      return this.allHeaders.filter(e => e.hidden === false)
+    },
+    visibleHeaders () {
+      return this.headers.filter(e => e.checked === true)
+    },
+    projectScope () {
+      return this.$route.params.namespace !== '_all'
+    },
+    showOnlyShootsWithIssues: {
+      get () {
+        return this.onlyShootsWithIssues
+      },
+      set (value) {
+        this.setOnlyShootsWithIssues(value)
+      }
+    },
+    items () {
+      return this.cachedItems || this.mappedItems
+    },
+    isHideUserIssuesAndHideDeactedReconciliationDisabled () {
+      return !this.showOnlyShootsWithIssues
+    },
+    hideUserIssues: {
+      get () {
+        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+          return false
+        }
+        return this.isHideUserIssues
+      },
+      set (value) {
+        this.setHideUserIssues(value)
+      }
+    },
+    hideDeactivatedReconciliation: {
+      get () {
+        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+          return false
+        }
+        return this.isHideDeactivatedReconciliation
+      },
+      set (value) {
+        this.setHideDeactivatedReconciliation(value)
+      }
+    },
+    hideUserIssuesAndHideDeactivatedReconciliationClass () {
+      return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+    },
+    headlineSubtitle () {
+      let subtitle = ''
+      if (!this.projectScope && this.showOnlyShootsWithIssues) {
+        subtitle = 'Cluster Filters: Healthy'
+        if (this.isHideUserIssues) {
+          subtitle += ', User Errors'
+        }
+        if (this.isHideDeactivatedReconciliation) {
+          subtitle += ', Deactivated Reconciliation'
+        }
+      }
+      return subtitle
+    }
+  },
+  mounted () {
+    this.floatingButton = true
+    if (this.hideUserIssues === undefined) {
+      this.hideUserIssues = this.isAdmin
+    }
+    if (this.hideDeactivatedReconciliation === undefined) {
+      this.hideDeactivatedReconciliation = this.isAdmin
+    }
+    this.loadColumnsChecked()
+  },
+  beforeUpdate () {
+    const predicate = item => item.value === 'project'
+    const projectHeader = find(this.allHeaders, predicate)
+    projectHeader.hidden = this.projectScope
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.cachedItems = null
+    })
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.search = null
+    next()
+  },
+  beforeRouteLeave (to, from, next) {
+    this.cachedItems = this.mappedItems.slice(0)
+    this.search = null
+    next()
+  },
+  created () {
+    this.$bus.$on('esc-pressed', () => {
+      this.hideDialog()
+    })
   }
+}
 </script>
 
 <style lang="styl" scoped >
@@ -493,5 +490,9 @@ limitations under the License.
 
   .search_textfield {
     min-width: 125px;
+  }
+
+  >>> .v-input__slot {
+    margin: 0px;
   }
 </style>

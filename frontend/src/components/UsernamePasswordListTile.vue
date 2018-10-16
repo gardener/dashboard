@@ -31,7 +31,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Password</v-list-tile-sub-title>
         <v-list-tile-title>{{passwordText}}</v-list-tile-title>
-        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout.number="2000">
+        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout="2000">
           Copied to clipboard!
         </v-snackbar>
       </v-list-tile-content>
@@ -52,71 +52,71 @@ limitations under the License.
 </template>
 
 <script>
-  import Clipboard from 'clipboard'
+import Clipboard from 'clipboard'
 
-  export default {
-    components: {
-      Clipboard
+export default {
+  components: {
+    Clipboard
+  },
+  props: {
+    username: {
+      type: String
     },
-    props: {
-      username: {
-        type: String
-      },
-      password: {
-        type: String
-      }
-    },
-    data () {
-      return {
-        snackbar: false,
-        showPassword: false,
-        clipboard: undefined
-      }
-    },
-    methods: {
-      enableCopy () {
-        this.clipboard = new Clipboard(this.$refs.copy.$el, {
-          text: () => this.password
-        })
-        this.clipboard.on('success', (event) => {
-          this.snackbar = true
-        })
-      },
-      reset () {
-        this.snackbar = false
-        this.showPassword = false
-      }
-    },
-    computed: {
-      passwordText () {
-        if (this.showPassword) {
-          return this.password
-        } else {
-          return '****************'
-        }
-      },
-      passwordVisibilityTitle () {
-        if (this.showPassword) {
-          return 'Hide password'
-        } else {
-          return 'Show password'
-        }
-      },
-      visibilityIcon () {
-        if (this.showPassword) {
-          return 'visibility_off'
-        } else {
-          return 'visibility'
-        }
-      }
-    },
-    watch: {
-      password (value) {
-        this.reset()
-      }
-    },
-    mounted () {
-      this.enableCopy()
+    password: {
+      type: String
     }
+  },
+  data () {
+    return {
+      snackbar: false,
+      showPassword: false,
+      clipboard: undefined
+    }
+  },
+  methods: {
+    enableCopy () {
+      this.clipboard = new Clipboard(this.$refs.copy.$el, {
+        text: () => this.password
+      })
+      this.clipboard.on('success', (event) => {
+        this.snackbar = true
+      })
+    },
+    reset () {
+      this.snackbar = false
+      this.showPassword = false
+    }
+  },
+  computed: {
+    passwordText () {
+      if (this.showPassword) {
+        return this.password
+      } else {
+        return '****************'
+      }
+    },
+    passwordVisibilityTitle () {
+      if (this.showPassword) {
+        return 'Hide password'
+      } else {
+        return 'Show password'
+      }
+    },
+    visibilityIcon () {
+      if (this.showPassword) {
+        return 'visibility_off'
+      } else {
+        return 'visibility'
+      }
+    }
+  },
+  watch: {
+    password (value) {
+      this.reset()
+    }
+  },
+  mounted () {
+    this.enableCopy()
   }
+}
 </script>

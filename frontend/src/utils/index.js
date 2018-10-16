@@ -50,8 +50,8 @@ export function serviceAccountToDisplayName (serviceAccount) {
   }
 }
 
-export function handleTextFieldDrop (textField, fileTypePattern) {
-  const textarea = textField.$refs.input
+export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
+  const textarea = textField.$refs['input-slot']
 
   function drop (event) {
     event.stopPropagation()
@@ -65,7 +65,8 @@ export function handleTextFieldDrop (textField, fileTypePattern) {
         const onLoaded = event => {
           try {
             const result = JSON.parse(event.target.result)
-            textField.inputValue = JSON.stringify(result, null, '  ')
+
+            onDrop(JSON.stringify(result, null, '  '))
           } catch (err) { /* ignore error */ }
         }
         reader.onloadend = onLoaded
@@ -157,7 +158,7 @@ export function namespacedRoute (route, namespace) {
   const params = {
     namespace: namespace
   }
-  return {name, params}
+  return { name, params }
 }
 
 export function routeName (route) {
@@ -266,7 +267,7 @@ export function isHibernated (spec) {
   return hibernationEnabled || some(workers, worker => get(worker, 'autoScalerMax') === 0)
 }
 
-export function canLinkToSeed ({shootNamespace}) {
+export function canLinkToSeed ({ shootNamespace }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".
   * Currently there is only the secret available.

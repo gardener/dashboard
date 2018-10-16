@@ -49,98 +49,98 @@ limitations under the License.
 </template>
 
 <script>
-  import ConfirmDialog from '@/dialogs/ConfirmDialog'
-  import { isHibernated } from '@/utils'
-  import { updateShootHibernation } from '@/utils/api'
-  import get from 'lodash/get'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import { isHibernated } from '@/utils'
+import { updateShootHibernation } from '@/utils/api'
+import get from 'lodash/get'
 
-  export default {
-    components: {
-      ConfirmDialog
+export default {
+  components: {
+    ConfirmDialog
+  },
+  props: {
+    shootItem: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      dialog: false,
+      hibernationErrorMessage: null,
+      hibernationDetailedErrorMessage: null,
+      enableHibernation: false
+    }
+  },
+  computed: {
+    confirmRequired () {
+      return !this.isHibernated
     },
-    props: {
-      shootItem: {
-        type: Object
+    confirm () {
+      return this.confirmRequired ? this.shootName : undefined
+    },
+    confirmText () {
+      if (!this.isHibernated) {
+        return 'Hibernate'
+      } else {
+        return 'Wake-up'
       }
     },
-    data () {
-      return {
-        dialog: false,
-        hibernationErrorMessage: null,
-        hibernationDetailedErrorMessage: null,
-        enableHibernation: false
+    icon () {
+      if (!this.isHibernated) {
+        return 'mdi-pause-circle-outline'
+      } else {
+        return 'mdi-play-circle-outline'
       }
     },
-    computed: {
-      confirmRequired () {
-        return !this.isHibernated
-      },
-      confirm () {
-        return this.confirmRequired ? this.shootName : undefined
-      },
-      confirmText () {
-        if (!this.isHibernated) {
-          return 'Hibernate'
-        } else {
-          return 'Wake-up'
-        }
-      },
-      icon () {
-        if (!this.isHibernated) {
-          return 'mdi-pause-circle-outline'
-        } else {
-          return 'mdi-play-circle-outline'
-        }
-      },
-      caption () {
-        if (!this.isHibernated) {
-          return 'Hibernate Cluster'
-        } else {
-          return 'Wake-up Cluster'
-        }
-      },
-      isHibernated () {
-        return isHibernated(get(this.shootItem, 'spec'))
-      },
-      shootName () {
-        return get(this.shootItem, 'metadata.name')
-      },
-      shootNamespace () {
-        return get(this.shootItem, 'metadata.namespace')
+    caption () {
+      if (!this.isHibernated) {
+        return 'Hibernate Cluster'
+      } else {
+        return 'Wake-up Cluster'
       }
     },
-    methods: {
-      showDialog () {
-        this.dialog = true
-        this.enableHibernation = !this.isHibernated
-      },
-      hideDialog () {
-        this.dialog = false
-        this.hibernationErrorMessage = null
-        this.hibernationDetailedErrorMessage = null
-      },
-      updateShootHibernation () {
-        const user = this.$store.state.user
-        updateShootHibernation({namespace: this.shootNamespace, name: this.shootName, user, data: {enabled: this.enableHibernation}})
-          .then(() => this.hideDialog())
-          .catch((err) => {
-            let msg
-            if (!this.isHibernated) {
-              msg = 'Could not hibernate cluster'
-            } else {
-              msg = 'Could not wake up cluster from hibernation'
-            }
-            this.hibernationErrorMessage = msg
-            this.hibernationDetailedErrorMessage = err.message
-            console.error(msg, err)
-          })
-      }
+    isHibernated () {
+      return isHibernated(get(this.shootItem, 'spec'))
     },
-    watch: {
-      isHibernated (value) {
-        // hide dialog if hibernation state changes
-        this.hideDialog()
-      }
+    shootName () {
+      return get(this.shootItem, 'metadata.name')
+    },
+    shootNamespace () {
+      return get(this.shootItem, 'metadata.namespace')
+    }
+  },
+  methods: {
+    showDialog () {
+      this.dialog = true
+      this.enableHibernation = !this.isHibernated
+    },
+    hideDialog () {
+      this.dialog = false
+      this.hibernationErrorMessage = null
+      this.hibernationDetailedErrorMessage = null
+    },
+    updateShootHibernation () {
+      const user = this.$store.state.user
+      updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
+        .then(() => this.hideDialog())
+        .catch((err) => {
+          let msg
+          if (!this.isHibernated) {
+            msg = 'Could not hibernate cluster'
+          } else {
+            msg = 'Could not wake up cluster from hibernation'
+          }
+          this.hibernationErrorMessage = msg
+          this.hibernationDetailedErrorMessage = err.message
+          console.error(msg, err)
+        })
+    }
+  },
+  watch: {
+    isHibernated (value) {
+      // hide dialog if hibernation state changes
+      this.hideDialog()
     }
   }
+}
 </script>

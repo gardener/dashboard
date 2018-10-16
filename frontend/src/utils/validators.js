@@ -39,20 +39,20 @@ const noStartEndHyphen = (value) => {
   return !startEndHyphenPattern.test(value)
 }
 
-const unique = key => withParams({type: 'unique', key},
+const unique = key => withParams({ type: 'unique', key },
   function (value, parentVm) {
     const keys = ref(key, this, parentVm)
     return !includes(keys, value)
   }
 )
 
-const uniqueWorkerName = withParams({type: 'uniqueWorkerName'},
+const uniqueWorkerName = withParams({ type: 'uniqueWorkerName' },
   function unique (value) {
     return this.workers.filter(item => item.name === value).length === 1
   }
 )
 
-const serviceAccountKey = withParams({type: 'serviceAccountKey'},
+const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
   function (value) {
     try {
       const key = JSON.parse(value)
@@ -64,7 +64,7 @@ const serviceAccountKey = withParams({type: 'serviceAccountKey'},
   }
 )
 
-const minVolumeSize = key => withParams({type: 'minVolumeSize', key},
+const minVolumeSize = key => withParams({ type: 'minVolumeSize', key },
   function (value) {
     return minValue(key)(parseSize(value))
   }

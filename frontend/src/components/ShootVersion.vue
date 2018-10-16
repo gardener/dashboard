@@ -52,11 +52,12 @@ limitations under the License.
       <template slot="message">
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
-          :selectedVersion.sync="selectedVersion"
-          :selectedVersionType.sync="selectedVersionType"
-          :selectedVersionInvalid.sync="selectedVersionInvalid"
-          :confirmRequired.sync="confirmRequired"
           :currentk8sVersion="k8sVersion"
+          @selectedVersion="onSelectedVersion"
+          @selectedVersionType="onSelectedVersionType"
+          @selectedVersionInvalid="onSelectedVersionInvalid"
+          @confirmRequired="onConfirmRequired"
+          ref="shootVersionUpdate"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br /><br />
@@ -73,81 +74,95 @@ limitations under the License.
 </template>
 
 <script>
-  import ShootVersionUpdate from '@/components/ShootVersionUpdate'
-  import ConfirmDialog from '@/dialogs/ConfirmDialog'
-  import get from 'lodash/get'
-  import { updateShootVersion } from '@/utils/api'
+import ShootVersionUpdate from '@/components/ShootVersionUpdate'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import get from 'lodash/get'
+import { updateShootVersion } from '@/utils/api'
 
-  export default {
-    components: {
-      ShootVersionUpdate,
-      ConfirmDialog
+export default {
+  components: {
+    ShootVersionUpdate,
+    ConfirmDialog
+  },
+  props: {
+    availableK8sUpdates: {
+      type: Object
     },
-    props: {
-      availableK8sUpdates: {
-        type: Object
-      },
-      k8sVersion: {
-        type: String
-      },
-      shootName: {
-        type: String
-      },
-      shootNamespace: {
-        type: String
+    k8sVersion: {
+      type: String
+    },
+    shootName: {
+      type: String
+    },
+    shootNamespace: {
+      type: String
+    }
+  },
+  data () {
+    return {
+      updateDialog: false,
+      selectedVersion: undefined,
+      selectedVersionType: undefined,
+      selectedVersionInvalid: true,
+      confirmRequired: false,
+      updateErrorMessage: null,
+      updateDetailedErrorMessage: null
+    }
+  },
+  computed: {
+    k8sPatchAvailable () {
+      if (get(this.availableK8sUpdates, 'patch')) {
+        return true
+      }
+      return false
+    },
+    buttonInactive () {
+      return this.availableK8sUpdates ? '' : 'update_btn_inactive'
+    },
+    confirm () {
+      return this.confirmRequired ? this.shootName : undefined
+    }
+  },
+  methods: {
+    onSelectedVersion (value) {
+      this.selectedVersion = value
+    },
+    onSelectedVersionType (value) {
+      this.selectedVersionType = value
+    },
+    onSelectedVersionInvalid (value) {
+      this.selectedVersionInvalid = value
+    },
+    onConfirmRequired (value) {
+      this.confirmRequired = value
+    },
+    showUpdateDialog () {
+      if (this.availableK8sUpdates) {
+        this.updateDialog = true
       }
     },
-    data () {
-      return {
-        updateDialog: false,
-        selectedVersion: undefined,
-        selectedVersionType: undefined,
-        selectedVersionInvalid: false,
-        confirmRequired: undefined,
-        updateErrorMessage: null,
-        updateDetailedErrorMessage: null
-      }
+    hideUpdateDialog () {
+      this.updateDialog = false
+      this.reset()
     },
-    computed: {
-      k8sPatchAvailable () {
-        if (get(this.availableK8sUpdates, 'patch')) {
-          return true
-        }
-        return false
-      },
-      buttonInactive () {
-        return this.availableK8sUpdates ? '' : 'update_btn_inactive'
-      },
-      confirm () {
-        return this.confirmRequired ? this.shootName : undefined
-      }
+    reset () {
+      const defaultData = this.$options.data.apply(this)
+      Object.assign(this.$data, defaultData)
+
+      this.$refs.shootVersionUpdate.reset()
     },
-    methods: {
-      showUpdateDialog () {
-        if (this.availableK8sUpdates) {
-          this.updateDialog = true
-        }
-      },
-      hideUpdateDialog () {
-        this.updateDialog = false
-        this.updateErrorMessage = null
-        this.updateDetailedErrorMessage = null
-        setTimeout(() => {
-          this.selectedVersion = null
-        }, 500)
-      },
-      versionUpdateConfirmed () {
-        const user = this.$store.state.user
-        updateShootVersion({namespace: this.shootNamespace, name: this.shootName, user, data: {version: this.selectedVersion}})
-          .then(() => this.hideUpdateDialog())
-          .catch((err) => {
-            this.updateErrorMessage = 'Update Kubernetes version failed'
-            this.updateDetailedErrorMessage = err.message
-            console.error('Update shoot version failed with error:', err)
-          })
-      }
+    versionUpdateConfirmed () {
+      const user = this.$store.state.user
+      updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, user, data: { version: this.selectedVersion } })
+        .then(() => this.hideUpdateDialog())
+        .catch((err) => {
+          this.updateErrorMessage = 'Update Kubernetes version failed'
+          this.updateDetailedErrorMessage = err.message
+          console.error('Update shoot version failed with error:', err)
+        })
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

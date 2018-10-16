@@ -47,61 +47,61 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    name: 'help-member-dialog',
-    props: {
-      value: {
-        type: Boolean,
-        required: true
+export default {
+  name: 'help-member-dialog',
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    }
+  },
+  computed: {
+    visible: {
+      get () {
+        return this.value
       },
-      type: {
-        type: String,
-        required: true
+      set (value) {
+        this.$emit('input', value)
       }
     },
-    computed: {
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
-      isUserDialog () {
-        return this.type === 'user'
-      },
-      isServiceDialog () {
-        return this.type === 'service'
-      },
-      cardClass () {
-        if (this.isUserDialog) {
-          return 'add_user'
-        } else if (this.isServiceDialog) {
-          return 'add_service'
-        }
-        return ''
-      },
-      buttonClass () {
-        if (this.isUserDialog) {
-          return 'green--text darken-2'
-        } else if (this.isServiceDialog) {
-          return 'blue-grey--text'
-        }
-        return ''
-      }
+    isUserDialog () {
+      return this.type === 'user'
     },
-    methods: {
-      hide () {
-        this.visible = false
+    isServiceDialog () {
+      return this.type === 'service'
+    },
+    cardClass () {
+      if (this.isUserDialog) {
+        return 'help_user'
+      } else if (this.isServiceDialog) {
+        return 'help_service'
       }
+      return ''
+    },
+    buttonClass () {
+      if (this.isUserDialog) {
+        return 'green--text darken-2'
+      } else if (this.isServiceDialog) {
+        return 'blue-grey--text'
+      }
+      return ''
+    }
+  },
+  methods: {
+    hide () {
+      this.visible = false
     }
   }
+}
 </script>
 
-<style lang="styl">
+<style lang="styl" scoped>
   .help_member {
-    .card__title{
+    .v-card__title{
       background-size: cover;
       color:white;
       height:130px;
@@ -117,12 +117,12 @@ limitations under the License.
     }
   }
   .help_user {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_user_background.svg);
     }
   }
   .help_service {
-    .card__title{
+    .v-card__title{
       background-image: url(../assets/add_service_background.svg);
     }
   }

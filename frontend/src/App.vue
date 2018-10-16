@@ -19,18 +19,18 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    name: 'App',
-    created () {
-      // provide the keyboard events for dialogs. Dialogs can't catch keyboard events
-      // if any input element of the dialog didn't have the focus.
-      window.addEventListener('keyup', ({keyCode}) => {
-        if (keyCode === 27) {
-          this.$bus.$emit('esc-pressed')
-        }
-      })
-    }
+export default {
+  name: 'App',
+  created () {
+    // provide the keyboard events for dialogs. Dialogs can't catch keyboard events
+    // if any input element of the dialog didn't have the focus.
+    window.addEventListener('keyup', ({ keyCode }) => {
+      if (keyCode === 27) {
+        this.$bus.$emit('esc-pressed')
+      }
+    })
   }
+}
 </script>
 
 <style lang="styl">
@@ -40,10 +40,8 @@ limitations under the License.
     .content > .container {
       min-height: calc(100vh - 156px)
     }
-  }
-
-  // for some reasons text is not selectable in list items of vuetify...patch them
-  .list__tile {
-    user-select: initial !important;
+    .container {
+      padding: 16px;
+    }
   }
 </style>
