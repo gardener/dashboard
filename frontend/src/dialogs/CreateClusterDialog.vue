@@ -684,7 +684,7 @@ export default {
       },
       set (infrastructureKind) {
         this.selectedInfrastructureKind = infrastructureKind
-        this.infraHandler.setDefaults()
+        this.getInfraHandler().setDefaults()
 
         this.setDefaultCloudProfileName()
       }
@@ -723,7 +723,7 @@ export default {
       set (region) {
         this.shootDefinition.spec.cloud.region = region
 
-        this.infraHandler.setDefaultZone()
+        this.getInfraHandler().setDefaultZone()
       }
     },
     zone: {
@@ -737,12 +737,10 @@ export default {
     localizedMaintenanceBegin: {
       get () {
         const momentObj = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone)
-        if (momentObj.isValid()) {
-          return momentObj.format('HH:mm:00')
+        if (!momentObj.isValid()) {
+          return null
         }
-        this.shootDefinition.spec.maintenance.timeWindow.begin = null
-        this.shootDefinition.spec.maintenance.timeWindow.end = null
-        return null
+        return momentObj.format('HH:mm:00')
       },
       set (newTime) {
         this.updateMaintenanceWindow({ newTime })
@@ -816,7 +814,54 @@ export default {
     sortedCloudProviderKindList () {
       return sortBy(this.cloudProviderKindList)
     },
-    infraHandler () {
+    projectName () {
+      const predicate = item => item.metadata.namespace === this.namespace
+      const project = find(this.projectList, predicate)
+      return get(project, 'metadata.name')
+    },
+    isOwnSecretBinding () {
+      return (secret) => {
+        return isOwnSecretBinding(secret)
+      }
+    },
+    selfTerminationDays () {
+      const clusterLifetimeDays = function (quotas, scope) {
+        const predicate = item => get(item, 'spec.scope') === scope
+        return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+      }
+
+      const quotas = get(this.selectedSecret, 'quotas')
+      let terminationDays = clusterLifetimeDays(quotas, 'project')
+      if (!terminationDays) {
+        terminationDays = clusterLifetimeDays(quotas, 'secret')
+      }
+
+      return terminationDays
+    },
+    filteredPurposes () {
+      return this.selfTerminationDays ? ['evaluation'] : this.purposes
+    },
+    addonDefinitionList () {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
+      return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
+    },
+    secretHint () {
+      if (this.selfTerminationDays) {
+        return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+      } else {
+        return undefined
+      }
+    }
+  },
+  methods: {
+    ...mapActions([
+      'createShoot'
+    ]),
+    get (object, path, defaultValue) {
+      return get(object, path, defaultValue)
+    },
+    getInfraHandler () {
       switch (this.infrastructureKind) {
         case 'aws':
           return {
@@ -901,53 +946,6 @@ export default {
             }
           }
       }
-    },
-    projectName () {
-      const predicate = item => item.metadata.namespace === this.namespace
-      const project = find(this.projectList, predicate)
-      return get(project, 'metadata.name')
-    },
-    isOwnSecretBinding () {
-      return (secret) => {
-        return isOwnSecretBinding(secret)
-      }
-    },
-    selfTerminationDays () {
-      const clusterLifetimeDays = function (quotas, scope) {
-        const predicate = item => get(item, 'spec.scope') === scope
-        return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
-      }
-
-      const quotas = get(this.selectedSecret, 'quotas')
-      let terminationDays = clusterLifetimeDays(quotas, 'project')
-      if (!terminationDays) {
-        terminationDays = clusterLifetimeDays(quotas, 'secret')
-      }
-
-      return terminationDays
-    },
-    filteredPurposes () {
-      return this.selfTerminationDays ? ['evaluation'] : this.purposes
-    },
-    addonDefinitionList () {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
-      return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
-    },
-    secretHint () {
-      if (this.selfTerminationDays) {
-        return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
-      } else {
-        return undefined
-      }
-    }
-  },
-  methods: {
-    ...mapActions([
-      'createShoot'
-    ]),
-    get (object, path, defaultValue) {
-      return get(object, path, defaultValue)
     },
     createShootResource () {
       const data = cloneDeep(this.shootDefinition)
