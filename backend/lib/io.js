@@ -134,11 +134,11 @@ function setupShootsNamespace (shootsNsp) {
           const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
           batchEmitter.batchEmitObjects(shootList.items, namespace)
         } catch (error) {
-          logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, error)
+          logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
           socket.emit('subscription_error', {
             kind,
             code: 500,
-            message: `Failed to fetch shoots for namespace ${namespace}`
+            message: `Failed to fetch clusters for namespace ${namespace}`
           })
         }
       })
@@ -184,7 +184,7 @@ function setupShootsNamespace (shootsNsp) {
       socket.emit('subscription_error', {
         kind,
         code: 500,
-        message: `Failed to fetch shoots for all namespaces`
+        message: `Failed to fetch clusters`
       })
     }
     batchEmitter.flush()
@@ -200,21 +200,39 @@ function setupShootsNamespace (shootsNsp) {
 
     socket.on('disconnect', onDisconnect)
     socket.on('subscribeAllShoots', async ({filter}) => {
-      const user = getUserFromSocket(socket)
-      const projectList = await projects.list({user})
-      const namespaces = _.map(projectList, 'metadata.namespace')
+      try {
+        const user = getUserFromSocket(socket)
+        const projectList = await projects.list({user})
+        const namespaces = _.map(projectList, 'metadata.namespace')
 
-      if (await administrators.isAdmin(user)) {
-        subscribeShootsAdmin({socket, user, namespaces, filter})
-      } else {
-        const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
-        subscribeShoots({socket, namespacesAndFilters, projectList})
+        if (await administrators.isAdmin(user)) {
+          subscribeShootsAdmin({socket, user, namespaces, filter})
+        } else {
+          const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
+          subscribeShoots({socket, namespacesAndFilters, projectList})
+        }
+      } catch (err) {
+        logger.error('Socket %s: failed to subscribe to all shoots: %s', socket.id, err)
+        socket.emit('subscription_error', {
+          kind: 'shoots',
+          code: 500,
+          message: `Failed to fetch clusters`
+        })
       }
     })
     socket.on('subscribeShoots', async ({namespaces}) => {
-      const user = getUserFromSocket(socket)
-      const projectList = await projects.list({user})
-      subscribeShoots({namespacesAndFilters: namespaces, socket, projectList})
+      try {
+        const user = getUserFromSocket(socket)
+        const projectList = await projects.list({user})
+        subscribeShoots({namespacesAndFilters: namespaces, socket, projectList})
+      } catch (err) {
+        logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
+        socket.emit('subscription_error', {
+          kind: 'shoots',
+          code: 500,
+          message: `Failed to fetch clusters`
+        })
+      }
     })
     socket.on('subscribeShoot', async ({name, namespace}) => {
       leaveShootsAndShootRoom(socket)
