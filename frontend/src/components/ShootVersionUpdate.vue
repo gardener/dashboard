@@ -51,19 +51,6 @@ limitations under the License.
       availableK8sUpdates: {
         required: true
       },
-      selectedVersion: {
-        type: String
-      },
-      selectedVersionType: {
-        type: String
-      },
-      selectedVersionInvalid: {
-        type: Boolean,
-        default: false
-      },
-      confirmRequired: {
-        type: Boolean
-      },
       currentk8sVersion: {
         type: String
       }
@@ -127,21 +114,18 @@ limitations under the License.
           }
         })
 
-        // cannot do in mount as need to reset selected item in case component gets reused, e.g. when the user switches from yaml back to ovweview
-        this.selectedItem = undefined
-
         return allItems
       },
       selectedVersionIsPatch () {
         const isPatch = get(this.selectedItem, 'type') === 'patch'
-        this.$emit('update:confirmRequired', !isPatch)
+        this.$emit('confirmRequired', !isPatch)
         return isPatch
       },
       selectedMinorVersionIsNotNextMinor () {
         const version = get(this, 'selectedItem.version')
         const type = get(this, 'selectedItem.type')
         const invalid = !version || this.itemIsNotNextMinor(version, type)
-        this.$emit('update:selectedVersionInvalid', invalid)
+        this.$emit('selectedVersionInvalid', invalid)
         return invalid
       },
       isError () {
@@ -173,19 +157,17 @@ limitations under the License.
           invalid = selectedItemMinorVersion - currentMinorVersion !== 1
         }
         return invalid
-      }
+      },
+      reset () {
+        this.selectedItem = undefined
+      },
     },
     watch: {
       selectedItem (value) {
         const version = get(value, 'version')
         const type = get(value, 'type')
-        this.$emit('update:selectedVersion', version)
-        this.$emit('update:selectedVersionType', type)
-      },
-      selectedVersion (value) {
-        if (!value) {
-          this.selectedItem = undefined
-        }
+        this.$emit('selectedVersion', version)
+        this.$emit('selectedVersionType', type)
       }
     }
   }

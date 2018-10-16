@@ -52,11 +52,12 @@ limitations under the License.
       <template slot="message">
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
-          :selectedVersion.sync="selectedVersion"
-          :selectedVersionType.sync="selectedVersionType"
-          :selectedVersionInvalid.sync="selectedVersionInvalid"
-          :confirmRequired.sync="confirmRequired"
           :currentk8sVersion="k8sVersion"
+          @selectedVersion="onSelectedVersion"
+          @selectedVersionType="onSelectedVersionType"
+          @selectedVersionInvalid="onSelectedVersionInvalid"
+          @confirmRequired="onConfirmRequired"
+          ref="shootVersionUpdate"
         ></shoot-version-update>
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!<br /><br />
@@ -102,8 +103,8 @@ limitations under the License.
         updateDialog: false,
         selectedVersion: undefined,
         selectedVersionType: undefined,
-        selectedVersionInvalid: false,
-        confirmRequired: undefined,
+        selectedVersionInvalid: true,
+        confirmRequired: false,
         updateErrorMessage: null,
         updateDetailedErrorMessage: null
       }
@@ -123,6 +124,18 @@ limitations under the License.
       }
     },
     methods: {
+      onSelectedVersion (value) {
+        this.selectedVersion = value
+      },
+      onSelectedVersionType (value) {
+        this.selectedVersionType = value
+      },
+      onSelectedVersionInvalid (value) {
+        this.selectedVersionInvalid = value
+      },
+      onConfirmRequired (value) {
+        this.confirmRequired = value
+      },
       showUpdateDialog () {
         if (this.availableK8sUpdates) {
           this.updateDialog = true
@@ -130,11 +143,13 @@ limitations under the License.
       },
       hideUpdateDialog () {
         this.updateDialog = false
-        this.updateErrorMessage = null
-        this.updateDetailedErrorMessage = null
-        setTimeout(() => {
-          this.selectedVersion = null
-        }, 500)
+        this.reset()
+      },
+      reset () {
+        const defaultData = this.$options.data.apply(this)
+        Object.assign(this.$data, defaultData)
+
+        this.$refs.shootVersionUpdate.reset()
       },
       versionUpdateConfirmed () {
         const user = this.$store.state.user
