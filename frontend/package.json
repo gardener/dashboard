@@ -59,6 +59,7 @@
     "@vue/eslint-config-standard": "^3.0.4",
     "@vue/test-utils": "^1.0.0-beta.20",
     "chai": "^4.1.2",
+    "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-lodash": "^3.1.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
