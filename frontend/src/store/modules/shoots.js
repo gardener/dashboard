@@ -36,12 +36,12 @@ import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUser
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
-const keyForShoot = ({name, namespace}) => {
+const keyForShoot = ({ name, namespace }) => {
   return `${name}_${namespace}`
 }
 
-const findItem = ({name, namespace}) => {
-  return state.shoots[keyForShoot({name, namespace})]
+const findItem = ({ name, namespace }) => {
+  return state.shoots[keyForShoot({ name, namespace })]
 }
 
 // initial state
@@ -88,8 +88,8 @@ const getters = {
     }
   },
   itemByNameAndNamespace () {
-    return ({namespace, name}) => {
-      return findItem({name, namespace})
+    return ({ namespace, name }) => {
+      return findItem({ name, namespace })
     }
   },
   selectedItem () {
@@ -115,24 +115,24 @@ const actions = {
     commit('CLEAR_ALL')
     return getters.items
   },
-  get ({ dispatch, commit, rootState }, {name, namespace}) {
+  get ({ dispatch, commit, rootState }, { name, namespace }) {
     const user = rootState.user
 
     const getShootIfNecessary = new Promise(async (resolve, reject) => {
-      if (!findItem({name, namespace})) {
-        getShoot({namespace, name, user})
-        .then(res => {
-          const item = res.data
-          commit('ITEM_PUT', item)
-        }).then(() => resolve())
-        .catch(error => reject(error))
+      if (!findItem({ name, namespace })) {
+        getShoot({ namespace, name, user })
+          .then(res => {
+            const item = res.data
+            commit('ITEM_PUT', item)
+          }).then(() => resolve())
+          .catch(error => reject(error))
       } else {
         resolve()
       }
     })
     return getShootIfNecessary
-      .then(() => dispatch('getInfo', {name, namespace}))
-      .then(() => findItem({name, namespace}))
+      .then(() => dispatch('getInfo', { name, namespace }))
+      .then(() => findItem({ name, namespace }))
       .catch(error => {
         // shoot info not found -> ignore if KubernetesError
         if (isNotFound(error)) {
@@ -144,19 +144,19 @@ const actions = {
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
     const user = rootState.user
-    return createShoot({namespace, user, data})
+    return createShoot({ namespace, user, data })
   },
-  delete ({ dispatch, commit, rootState }, {name, namespace}) {
+  delete ({ dispatch, commit, rootState }, { name, namespace }) {
     const user = rootState.user
-    return deleteShoot({namespace, name, user})
+    return deleteShoot({ namespace, name, user })
   },
   /**
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
-  getInfo ({ commit, rootState }, {name, namespace}) {
+  getInfo ({ commit, rootState }, { name, namespace }) {
     const user = rootState.user
-    return getShootInfo({namespace, name, user})
+    return getShootInfo({ namespace, name, user })
       .then(res => res.data)
       .then(info => {
         if (info.serverUrl) {
@@ -182,7 +182,7 @@ const actions = {
         return info
       })
       .then(info => {
-        commit('RECEIVE_INFO', {name, namespace, info})
+        commit('RECEIVE_INFO', { name, namespace, info })
         return info
       })
       .catch(error => {
@@ -201,7 +201,7 @@ const actions = {
     if (item) {
       commit('SET_SELECTION', pick(metadata, ['namespace', 'name']))
       if (!item.info) {
-        return dispatch('getInfo', {name: metadata.name, namespace: metadata.namespace})
+        return dispatch('getInfo', { name: metadata.name, namespace: metadata.namespace })
       }
     }
   },
@@ -371,7 +371,7 @@ const deleteItem = (state, deletedItem) => {
 // mutations
 const mutations = {
   RECEIVE_INFO (state, { namespace, name, info }) {
-    const item = findItem({namespace, name})
+    const item = findItem({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
     }
@@ -398,7 +398,7 @@ const mutations = {
       setSortedItems(state)
     }
   },
-  HANDLE_EVENTS (state, {rootState, events}) {
+  HANDLE_EVENTS (state, { rootState, events }) {
     let sortRequired = false
     forEach(events, event => {
       switch (event.type) {

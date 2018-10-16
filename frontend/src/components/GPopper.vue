@@ -55,94 +55,94 @@ limitations under the License.
 </template>
 
 <script>
-  import Popper from 'vue-popperjs'
-  import TimeString from '@/components/TimeString'
-  import { closePopover } from '@/utils'
-  import 'vue-popperjs/dist/css/vue-popper.css'
-  import VueLazyload from 'vue-lazyload'
-  import Vue from 'vue'
+import Popper from 'vue-popperjs'
+import TimeString from '@/components/TimeString'
+import { closePopover } from '@/utils'
+import 'vue-popperjs/dist/css/vue-popper.css'
+import VueLazyload from 'vue-lazyload'
+import Vue from 'vue'
 
-  Vue.use(VueLazyload, {
-    lazyComponent: true
-  })
+Vue.use(VueLazyload, {
+  lazyComponent: true
+})
 
-  export default {
-    components: {
-      Popper,
-      TimeString
+export default {
+  components: {
+    Popper,
+    TimeString
+  },
+  props: {
+    popperKey: {
+      type: String,
+      required: true
     },
-    props: {
-      popperKey: {
-        type: String,
-        required: true
-      },
-      toolbarColor: {
-        type: String,
-        required: true
-      },
-      title: {
-        type: String,
-        required: true
-      },
-      message: {
-        type: String,
-        required: false
-      },
-      time: {
-        type: String
-      },
-      placement: {
-        type: String,
-        default: 'top'
-      }
+    toolbarColor: {
+      type: String,
+      required: true
     },
-    data () {
-      return {
-        showPlaceholder: true
-      }
+    title: {
+      type: String,
+      required: true
     },
-    computed: {
-      popperOptions () {
-        const options = {
-          placement: this.placement,
-          modifiers: {
-            customArrowStyles: {
-              enabled: true,
-              fn: this.customArrowStyles,
-              order: 875 // needs to run beofre applyStyle modifier
-            }
+    message: {
+      type: String,
+      required: false
+    },
+    time: {
+      type: String
+    },
+    placement: {
+      type: String,
+      default: 'top'
+    }
+  },
+  data () {
+    return {
+      showPlaceholder: true
+    }
+  },
+  computed: {
+    popperOptions () {
+      const options = {
+        placement: this.placement,
+        modifiers: {
+          customArrowStyles: {
+            enabled: true,
+            fn: this.customArrowStyles,
+            order: 875 // needs to run beofre applyStyle modifier
           }
         }
-        return options
       }
+      return options
+    }
+  },
+  methods: {
+    closePopover () {
+      closePopover(this.$refs.popper)
     },
-    methods: {
-      closePopover () {
-        closePopover(this.$refs.popper)
-      },
-      customArrowStyles (data) {
-        if (data.placement === 'bottom') {
-          const toolbar = this.$refs.toolbar
-          const content = toolbar.$el
-          const css = getComputedStyle(content, null)
-          const toolbarColor = css['background-color']
+    customArrowStyles (data) {
+      if (data.placement === 'bottom') {
+        const toolbar = this.$refs.toolbar
+        const content = toolbar.$el
+        const css = getComputedStyle(content, null)
+        const toolbarColor = css['background-color']
 
-          const borderColor = `transparent transparent ${toolbarColor} transparent`
-          data.arrowStyles = Object.assign(data.arrowStyles, { borderColor })
-        }
-        return data
+        const borderColor = `transparent transparent ${toolbarColor} transparent`
+        data.arrowStyles = Object.assign(data.arrowStyles, { borderColor })
       }
-    },
-    created () {
-      /*
+      return data
+    }
+  },
+  created () {
+    /*
        * listen on the global "esc-key" event to close all tooltips.
        * shorthand instead of click outside of the tooltip.
        */
-      this.$bus.$on('esc-pressed', () => {
-        this.closePopover()
-      })
-    }
+    this.$bus.$on('esc-pressed', () => {
+      this.closePopover()
+    })
   }
+}
 </script>
 
 <style lang="styl" scoped>

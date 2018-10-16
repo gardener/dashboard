@@ -51,99 +51,98 @@ limitations under the License.
 
 </template>
 
-
 <script>
-  import SecretDialog from '@/dialogs/SecretDialog'
-  import { required } from 'vuelidate/lib/validators'
-  import { serviceAccountKey } from '@/utils/validators'
-  import { handleTextFieldDrop, getValidationErrors, setDelayedInputFocus } from '@/utils'
+import SecretDialog from '@/dialogs/SecretDialog'
+import { required } from 'vuelidate/lib/validators'
+import { serviceAccountKey } from '@/utils/validators'
+import { handleTextFieldDrop, getValidationErrors, setDelayedInputFocus } from '@/utils'
 
-  const validationErrors = {
-    serviceAccountKey: {
-      required: 'You can\'t leave this empty.',
-      serviceAccountKey: 'Not a valid Service Account Key'
-    }
+const validationErrors = {
+  serviceAccountKey: {
+    required: 'You can\'t leave this empty.',
+    serviceAccountKey: 'Not a valid Service Account Key'
   }
+}
 
-  export default {
-    components: {
-      SecretDialog
+export default {
+  components: {
+    SecretDialog
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      },
-      secret: {
-        type: Object
-      }
+    secret: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      serviceAccountKey: undefined,
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    valid () {
+      return !this.$v.$invalid
     },
-    data () {
+    secretData () {
       return {
-        serviceAccountKey: undefined,
-        validationErrors
+        'serviceaccount.json': this.serviceAccountKey
       }
     },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      valid () {
-        return !this.$v.$invalid
-      },
-      secretData () {
-        return {
-          'serviceaccount.json': this.serviceAccountKey
-        }
-      },
-      validators () {
-        const validators = {
-          serviceAccountKey: {
-            required,
-            serviceAccountKey
-          }
-        }
-        return validators
-      },
-      isCreateMode () {
-        return !this.secret
-      },
-      serviceAccountKeyLabel () {
-        return this.isCreateMode ? 'Service Account Key' : 'New Service Account Key'
-      }
-    },
-    methods: {
-      onInput (value) {
-        this.$emit('input', value)
-      },
-      reset () {
-        this.$v.$reset()
-
-        this.serviceAccountKey = ''
-
-        if (!this.isCreateMode) {
-          setDelayedInputFocus(this, 'serviceAccountKey')
-        }
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
-      }
-    },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
+    validators () {
+      const validators = {
+        serviceAccountKey: {
+          required,
+          serviceAccountKey
         }
       }
+      return validators
     },
-    mounted () {
-      const onDrop = (value) => {
-        this.serviceAccountKey = value
-      }
-      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
+    isCreateMode () {
+      return !this.secret
+    },
+    serviceAccountKeyLabel () {
+      return this.isCreateMode ? 'Service Account Key' : 'New Service Account Key'
     }
+  },
+  methods: {
+    onInput (value) {
+      this.$emit('input', value)
+    },
+    reset () {
+      this.$v.$reset()
+
+      this.serviceAccountKey = ''
+
+      if (!this.isCreateMode) {
+        setDelayedInputFocus(this, 'serviceAccountKey')
+      }
+    },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
+      }
+    }
+  },
+  mounted () {
+    const onDrop = (value) => {
+      this.serviceAccountKey = value
+    }
+    handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
   }
+}
 </script>
 
 <style lang="styl" scoped>

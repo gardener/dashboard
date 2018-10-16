@@ -56,53 +56,53 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState, mapGetters } from 'vuex'
-  import Clipboard from 'clipboard'
-  import moment from 'moment-timezone'
+import { mapState, mapGetters } from 'vuex'
+import Clipboard from 'clipboard'
+import moment from 'moment-timezone'
 
-  export default {
-    name: 'profile',
-    data () {
-      return {
-        floatingButton: false,
-        showMessage: false
-      }
-    },
-    computed: {
-      ...mapState([
-        'user'
-      ]),
-      ...mapGetters([
-        'username'
-      ]),
-      avatar () {
-        return this.user.profile.picture
-      },
-      email () {
-        return this.user.profile.email
-      },
-      idToken () {
-        return this.user.id_token || ''
-      },
-      expiresIn () {
-        return moment.duration(this.user.expires_in, 'seconds').humanize()
-      },
-      expiresAt () {
-        return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
-      }
-    },
-    mounted () {
-      const clipboard = new Clipboard(this.$refs.copy.$el)
-      clipboard.on('success', event => {
-        event.clearSelection()
-        this.showMessage = true
-        window.setTimeout(() => {
-          this.showMessage = false
-        }, 2000)
-      })
-      clipboard.on('error', err => {
-        console.error('error', err)
-      })
+export default {
+  name: 'profile',
+  data () {
+    return {
+      floatingButton: false,
+      showMessage: false
     }
+  },
+  computed: {
+    ...mapState([
+      'user'
+    ]),
+    ...mapGetters([
+      'username'
+    ]),
+    avatar () {
+      return this.user.profile.picture
+    },
+    email () {
+      return this.user.profile.email
+    },
+    idToken () {
+      return this.user.id_token || ''
+    },
+    expiresIn () {
+      return moment.duration(this.user.expires_in, 'seconds').humanize()
+    },
+    expiresAt () {
+      return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
+    }
+  },
+  mounted () {
+    const clipboard = new Clipboard(this.$refs.copy.$el)
+    clipboard.on('success', event => {
+      event.clearSelection()
+      this.showMessage = true
+      window.setTimeout(() => {
+        this.showMessage = false
+      }, 2000)
+    })
+    clipboard.on('error', err => {
+      console.error('error', err)
+    })
   }
+}
 </script>

@@ -23,29 +23,27 @@ limitations under the License.
 
 </template>
 
-
-
 <script>
-  import contrast from 'get-contrast'
-  import get from 'lodash/get'
+import contrast from 'get-contrast'
+import get from 'lodash/get'
 
-  export default {
-    props: {
-      labels: {
-        type: Array,
-        required: true
-      }
-    },
-    computed: {
-      labelStyle () {
-        return (label) => {
-          const bgColor = `#${get(label, 'color')}`
-          const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
-          return `background-color: ${bgColor}; color: ${textColor};`
-        }
+export default {
+  props: {
+    labels: {
+      type: Array,
+      required: true
+    }
+  },
+  computed: {
+    labelStyle () {
+      return (label) => {
+        const bgColor = `#${get(label, 'color')}`
+        const textColor = contrast.isAccessible(bgColor, '#fff') ? '#fff' : '#000'
+        return `background-color: ${bgColor}; color: ${textColor};`
       }
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

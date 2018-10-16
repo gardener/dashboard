@@ -19,43 +19,43 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    props: ['value'],
-    computed: {
-      icon () {
-        switch (this.value) {
-          case 'azure':
-            return 'mdi-microsoft'
-          case 'aws':
-            return 'mdi-amazon'
-          case 'gcp':
-            return 'mdi-google'
-          case 'openstack':
-            return 'mdi-server-network'
-        }
-        return 'mdi-amazon'
-      },
-      iconClass () {
-        return `${this.kindColor}--text mr-1`
-      },
-      kindColor () {
-        var kindColor
-        switch (this.value) {
-          case 'aws':
-            kindColor = 'orange'
-            break
-          case 'gcp':
-            kindColor = 'green'
-            break
-          case 'azure':
-            kindColor = 'blue'
-            break
-          case 'openstack':
-            kindColor = 'orange'
-            break
-        }
-        return kindColor
+export default {
+  props: ['value'],
+  computed: {
+    icon () {
+      switch (this.value) {
+        case 'azure':
+          return 'mdi-microsoft'
+        case 'aws':
+          return 'mdi-amazon'
+        case 'gcp':
+          return 'mdi-google'
+        case 'openstack':
+          return 'mdi-server-network'
       }
+      return 'mdi-amazon'
+    },
+    iconClass () {
+      return `${this.kindColor}--text mr-1`
+    },
+    kindColor () {
+      var kindColor
+      switch (this.value) {
+        case 'aws':
+          kindColor = 'orange'
+          break
+        case 'gcp':
+          kindColor = 'green'
+          break
+        case 'azure':
+          kindColor = 'blue'
+          break
+        case 'openstack':
+          kindColor = 'orange'
+          break
+      }
+      return kindColor
     }
   }
+}
 </script>

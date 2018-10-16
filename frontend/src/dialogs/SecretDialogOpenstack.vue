@@ -103,135 +103,133 @@ limitations under the License.
 
 </template>
 
-
 <script>
-  import { mapGetters } from 'vuex'
-  import SecretDialog from '@/dialogs/SecretDialog'
-  import { required } from 'vuelidate/lib/validators'
-  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-  import get from 'lodash/get'
+import { mapGetters } from 'vuex'
+import SecretDialog from '@/dialogs/SecretDialog'
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import get from 'lodash/get'
 
-  const validationErrors = {
-    domainName: {
-      required: 'You can\'t leave this empty.'
-    },
-    tenantName: {
-      required: 'You can\'t leave this empty.'
-    },
-    username: {
-      required: 'You can\'t leave this empty.'
-    },
-    password: {
-      required: 'You can\'t leave this empty.'
-    }
+const validationErrors = {
+  domainName: {
+    required: 'You can\'t leave this empty.'
+  },
+  tenantName: {
+    required: 'You can\'t leave this empty.'
+  },
+  username: {
+    required: 'You can\'t leave this empty.'
+  },
+  password: {
+    required: 'You can\'t leave this empty.'
   }
+}
 
-  export default {
-    components: {
-      SecretDialog
+export default {
+  components: {
+    SecretDialog
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      },
-      secret: {
-        type: Object
-      }
+    secret: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      domainName: undefined,
+      tenantName: undefined,
+      username: undefined,
+      password: undefined,
+      hideSecret: true,
+      validationErrors,
+      keystoneUrl: undefined
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    ...mapGetters([
+      'cloudProfileByName'
+    ]),
+    valid () {
+      return !this.$v.$invalid
     },
-    data () {
+    secretData () {
       return {
-        domainName: undefined,
-        tenantName: undefined,
-        username: undefined,
-        password: undefined,
-        hideSecret: true,
-        validationErrors,
-        keystoneUrl: undefined
+        domainName: this.domainName,
+        tenantName: this.tenantName,
+        username: this.username,
+        password: this.password
       }
     },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      ...mapGetters([
-        'cloudProfileByName'
-      ]),
-      valid () {
-        return !this.$v.$invalid
-      },
-      secretData () {
-        return {
-          domainName: this.domainName,
-          tenantName: this.tenantName,
-          username: this.username,
-          password: this.password
+    validators () {
+      const validators = {
+        domainName: {
+          required
+        },
+        tenantName: {
+          required
+        },
+        username: {
+          required
+        },
+        password: {
+          required
         }
-      },
-      validators () {
-        const validators = {
-          domainName: {
-            required
-          },
-          tenantName: {
-            required
-          },
-          username: {
-            required
-          },
-          password: {
-            required
-          }
-        }
-        return validators
-      },
-      isCreateMode () {
-        return !this.secret
-      },
-      usernameLabel () {
-        return this.isCreateMode ? 'Username' : 'New Username'
-      },
-      passwordLabel () {
-        return this.isCreateMode ? 'Password' : 'New Password'
       }
+      return validators
     },
-    methods: {
-      onInput (value) {
-        this.$emit('input', value)
-      },
-      onCloudProfileNameUpdate (cloudProfileName) {
-        const cloudProfile = this.cloudProfileByName(cloudProfileName)
-        this.keystoneUrl = get(cloudProfile, 'data.keyStoneURL')
-      },
-      reset () {
-        this.$v.$reset()
+    isCreateMode () {
+      return !this.secret
+    },
+    usernameLabel () {
+      return this.isCreateMode ? 'Username' : 'New Username'
+    },
+    passwordLabel () {
+      return this.isCreateMode ? 'Password' : 'New Password'
+    }
+  },
+  methods: {
+    onInput (value) {
+      this.$emit('input', value)
+    },
+    onCloudProfileNameUpdate (cloudProfileName) {
+      const cloudProfile = this.cloudProfileByName(cloudProfileName)
+      this.keystoneUrl = get(cloudProfile, 'data.keyStoneURL')
+    },
+    reset () {
+      this.$v.$reset()
 
-        this.domainName = ''
-        this.tenantName = ''
-        this.username = ''
-        this.password = ''
-        this.keyStoneUrl = ''
+      this.domainName = ''
+      this.tenantName = ''
+      this.username = ''
+      this.password = ''
+      this.keyStoneUrl = ''
 
-        if (!this.isCreateMode) {
-          if (this.secret.data) {
-            this.domainName = this.secret.data.domainName
-            this.tenantName = this.secret.data.tenantName
-          }
-          setDelayedInputFocus(this, 'domainName')
+      if (!this.isCreateMode) {
+        if (this.secret.data) {
+          this.domainName = this.secret.data.domainName
+          this.tenantName = this.secret.data.tenantName
         }
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
+        setDelayedInputFocus(this, 'domainName')
       }
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
-        }
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>
-

@@ -20,7 +20,7 @@ import find from 'lodash/find'
 import matches from 'lodash/matches'
 import { getInfrastructureSecrets, updateInfrastructureSecret, createInfrastructureSecret, deleteInfrastructureSecret } from '@/utils/api'
 
-const eqlNameAndNamespace = ({namespace, name}) => {
+const eqlNameAndNamespace = ({ namespace, name }) => {
   return matches({ metadata: { namespace, name } })
 }
 
@@ -31,8 +31,8 @@ const state = {
 
 // getters
 const getters = {
-  getInfrastructureSecretByName: (state) => ({name, namespace}) => {
-    return find(state.all, eqlNameAndNamespace({name, namespace}))
+  getInfrastructureSecretByName: (state) => ({ name, namespace }) => {
+    return find(state.all, eqlNameAndNamespace({ name, namespace }))
   }
 }
 
@@ -41,7 +41,7 @@ const actions = {
   getAll: ({ commit, rootState }) => {
     const namespace = rootState.namespace
     const user = rootState.user
-    return getInfrastructureSecrets({user, namespace})
+    return getInfrastructureSecrets({ user, namespace })
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all
@@ -51,20 +51,20 @@ const actions = {
         throw error
       })
   },
-  update: ({ commit, rootState }, {metadata, data}) => {
+  update: ({ commit, rootState }, { metadata, data }) => {
     const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
     const bindingName = metadata.bindingName
-    return updateInfrastructureSecret({user, namespace, bindingName, data: {metadata, data}})
+    return updateInfrastructureSecret({ user, namespace, bindingName, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
       })
   },
-  create: ({ commit, rootState }, {metadata, data}) => {
+  create: ({ commit, rootState }, { metadata, data }) => {
     const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
-    return createInfrastructureSecret({user, namespace, data: {metadata, data}})
+    return createInfrastructureSecret({ user, namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
@@ -73,7 +73,7 @@ const actions = {
   delete ({ dispatch, commit, rootState }, bindingName) {
     const namespace = rootState.namespace
     const user = rootState.user
-    return deleteInfrastructureSecret({namespace, bindingName, user})
+    return deleteInfrastructureSecret({ namespace, bindingName, user })
       .then(res => {
         commit('ITEM_DELETED', res.data)
         return res.data

@@ -161,140 +161,140 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import get from 'lodash/get'
-  import { isOwnSecretBinding } from '@/utils'
-  import GcpDialog from '@/dialogs/SecretDialogGcp'
-  import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
-  import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
-  import AwsDialog from '@/dialogs/SecretDialogAws'
-  import AzureDialog from '@/dialogs/SecretDialogAzure'
-  import AzureHelpDialog from '@/dialogs/SecretDialogAzureHelp'
-  import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
-  import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
-  import DeleteDialog from '@/dialogs/SecretDialogDelete'
-  import Secret from '@/components/Secret'
-  import DisabledSecret from '@/components/DisabledSecret'
-  import isEmpty from 'lodash/isEmpty'
-  import merge from 'lodash/merge'
+import { mapGetters } from 'vuex'
+import get from 'lodash/get'
+import { isOwnSecretBinding } from '@/utils'
+import GcpDialog from '@/dialogs/SecretDialogGcp'
+import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
+import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
+import AwsDialog from '@/dialogs/SecretDialogAws'
+import AzureDialog from '@/dialogs/SecretDialogAzure'
+import AzureHelpDialog from '@/dialogs/SecretDialogAzureHelp'
+import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
+import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
+import DeleteDialog from '@/dialogs/SecretDialogDelete'
+import Secret from '@/components/Secret'
+import DisabledSecret from '@/components/DisabledSecret'
+import isEmpty from 'lodash/isEmpty'
+import merge from 'lodash/merge'
 
-  export default {
-    name: 'secrets',
-    components: {
-      GcpDialog,
-      GcpHelpDialog,
-      AzureHelpDialog,
-      AzureDialog,
-      AwsDialog,
-      AwsHelpDialog,
-      OpenstackDialog,
-      OpenstackHelpDialog,
-      DeleteDialog,
-      Secret,
-      DisabledSecret
-    },
-    data () {
-      return {
-        selectedSecret: {},
-        dialogState: {
-          aws: {
-            visible: false,
-            help: false
-          },
-          azure: {
-            visible: false,
-            help: false
-          },
-          gcp: {
-            visible: false,
-            help: false
-          },
-          openstack: {
-            visible: false,
-            help: false
-          },
-          deleteConfirm: false,
-          speedDial: false
+export default {
+  name: 'secrets',
+  components: {
+    GcpDialog,
+    GcpHelpDialog,
+    AzureHelpDialog,
+    AzureDialog,
+    AwsDialog,
+    AwsHelpDialog,
+    OpenstackDialog,
+    OpenstackHelpDialog,
+    DeleteDialog,
+    Secret,
+    DisabledSecret
+  },
+  data () {
+    return {
+      selectedSecret: {},
+      dialogState: {
+        aws: {
+          visible: false,
+          help: false
         },
-        initialDialogState: {},
-        floatingButton: false
-      }
-    },
-    computed: {
-      ...mapGetters([
-        'cloudProfilesByCloudProviderKind',
-        'getInfrastructureSecretByName'
-      ]),
-      backgroundForSelectedSecret () {
-        const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
-        return this.backgroundForCloudProviderKind(kind)
+        azure: {
+          visible: false,
+          help: false
+        },
+        gcp: {
+          visible: false,
+          help: false
+        },
+        openstack: {
+          visible: false,
+          help: false
+        },
+        deleteConfirm: false,
+        speedDial: false
       },
-      hasCloudProfileForCloudProviderKind () {
-        return (kind) => {
-          return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
-        }
-      },
-      showDisabledCloudProviders () {
-        return !!this.$store.state.cfg.showDisabledCloudProviders
-      }
-    },
-    methods: {
-      onToogleHelp (infrastructureKind) {
-        const infrastructure = this.dialogState[infrastructureKind]
-        infrastructure.help = !infrastructure.help
-      },
-      onHideHelp (infrastructureKind) {
-        this.dialogState[infrastructureKind].help = false
-      },
-      onAdd (infrastructureKind) {
-        this.selectedSecret = undefined
-        this.dialogState[infrastructureKind].visible = true
-      },
-      onUpdate (row) {
-        const kind = row.metadata.cloudProviderKind
-        this.selectedSecret = row
-        this.dialogState[kind].visible = true
-      },
-      onDelete (row) {
-        this.selectedSecret = row
-        this.dialogState.deleteConfirm = true
-      },
-      backgroundForCloudProviderKind (kind) {
-        switch (kind) {
-          case 'azure':
-            return '/static/background_azure.svg'
-          case 'aws':
-            return '/static/background_aws.svg'
-          case 'gcp':
-            return '/static/background_gcp.svg'
-          case 'openstack':
-            return '/static/background_openstack.svg'
-        }
-        return '/static/background_aws.svg'
-      },
-      hideDialogs () {
-        merge(this.dialogState, this.initialDialogState)
-      },
-      isOwnSecretBinding (secret) {
-        return isOwnSecretBinding(secret)
-      }
-    },
-    mounted () {
-      this.floatingButton = true
-
-      if (get(this.$route.params, 'name')) {
-        const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
-        if (infrastructureSecret) {
-          this.onUpdate(infrastructureSecret)
-        }
-      }
-    },
-    created () {
-      merge(this.initialDialogState, this.dialogState)
-
-      this.$bus.$on('esc-pressed', () => {
-        this.hideDialogs()
-      })
+      initialDialogState: {},
+      floatingButton: false
     }
+  },
+  computed: {
+    ...mapGetters([
+      'cloudProfilesByCloudProviderKind',
+      'getInfrastructureSecretByName'
+    ]),
+    backgroundForSelectedSecret () {
+      const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
+      return this.backgroundForCloudProviderKind(kind)
+    },
+    hasCloudProfileForCloudProviderKind () {
+      return (kind) => {
+        return !isEmpty(this.cloudProfilesByCloudProviderKind(kind))
+      }
+    },
+    showDisabledCloudProviders () {
+      return !!this.$store.state.cfg.showDisabledCloudProviders
+    }
+  },
+  methods: {
+    onToogleHelp (infrastructureKind) {
+      const infrastructure = this.dialogState[infrastructureKind]
+      infrastructure.help = !infrastructure.help
+    },
+    onHideHelp (infrastructureKind) {
+      this.dialogState[infrastructureKind].help = false
+    },
+    onAdd (infrastructureKind) {
+      this.selectedSecret = undefined
+      this.dialogState[infrastructureKind].visible = true
+    },
+    onUpdate (row) {
+      const kind = row.metadata.cloudProviderKind
+      this.selectedSecret = row
+      this.dialogState[kind].visible = true
+    },
+    onDelete (row) {
+      this.selectedSecret = row
+      this.dialogState.deleteConfirm = true
+    },
+    backgroundForCloudProviderKind (kind) {
+      switch (kind) {
+        case 'azure':
+          return '/static/background_azure.svg'
+        case 'aws':
+          return '/static/background_aws.svg'
+        case 'gcp':
+          return '/static/background_gcp.svg'
+        case 'openstack':
+          return '/static/background_openstack.svg'
+      }
+      return '/static/background_aws.svg'
+    },
+    hideDialogs () {
+      merge(this.dialogState, this.initialDialogState)
+    },
+    isOwnSecretBinding (secret) {
+      return isOwnSecretBinding(secret)
+    }
+  },
+  mounted () {
+    this.floatingButton = true
+
+    if (get(this.$route.params, 'name')) {
+      const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
+      if (infrastructureSecret) {
+        this.onUpdate(infrastructureSecret)
+      }
+    }
+  },
+  created () {
+    merge(this.initialDialogState, this.dialogState)
+
+    this.$bus.$on('esc-pressed', () => {
+      this.hideDialogs()
+    })
   }
+}
 </script>

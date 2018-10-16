@@ -33,47 +33,45 @@ limitations under the License.
 
 </template>
 
-
-
 <script>
-  import get from 'lodash/get'
-  import marked from 'marked'
-  import TimeString from '@/components/TimeString'
+import get from 'lodash/get'
+import marked from 'marked'
+import TimeString from '@/components/TimeString'
 
-  export default {
-    components: {
-      TimeString
-    },
-    props: {
-      comment: {
-        type: Object,
-        required: true
+export default {
+  components: {
+    TimeString
+  },
+  props: {
+    comment: {
+      type: Object,
+      required: true
+    }
+  },
+  computed: {
+    compiledMarkdown () {
+      const options = {
+        gfm: true,
+        breaks: true,
+        tables: true,
+        sanitize: true
       }
+      return marked(get(this.comment, 'data.body', ''), options)
     },
-    computed: {
-      compiledMarkdown () {
-        const options = {
-          gfm: true,
-          breaks: true,
-          tables: true,
-          sanitize: true
-        }
-        return marked(get(this.comment, 'data.body', ''), options)
-      },
-      login () {
-        return get(this.comment, 'data.user.login')
-      },
-      createdAt () {
-        return get(this.comment, 'metadata.created_at')
-      },
-      avatarUrl () {
-        return get(this.comment, 'data.user.avatar_url')
-      },
-      htmlUrl () {
-        return get(this.comment, 'data.html_url')
-      }
+    login () {
+      return get(this.comment, 'data.user.login')
+    },
+    createdAt () {
+      return get(this.comment, 'metadata.created_at')
+    },
+    avatarUrl () {
+      return get(this.comment, 'data.user.avatar_url')
+    },
+    htmlUrl () {
+      return get(this.comment, 'data.html_url')
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

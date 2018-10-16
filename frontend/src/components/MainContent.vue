@@ -21,44 +21,44 @@ limitations under the License.
 </template>
 
 <script>
-  import set from 'lodash/set'
+import set from 'lodash/set'
 
-  function setElementStyle (element, key, value) {
-    if (element) {
-      set(element.style, key, value)
-    }
+function setElementStyle (element, key, value) {
+  if (element) {
+    set(element.style, key, value)
   }
+}
 
-  function setElementOverflowY (element, value) {
-    setElementStyle(element, 'overflowY', value)
-  }
+function setElementOverflowY (element, value) {
+  setElementStyle(element, 'overflowY', value)
+}
 
-  function setWrapElementHeight (element, value) {
-    setElementStyle(element, 'height', `calc(100vh - ${value}px)`)
-  }
+function setWrapElementHeight (element, value) {
+  setElementStyle(element, 'height', `calc(100vh - ${value}px)`)
+}
 
-  export default {
-    name: 'main-content',
-    methods: {
-      getWrapElement () {
-        return this.$el.querySelector(':scope > div[class$="wrap"]')
-      },
-      setScrollTop (top = 0) {
-        const element = this.getWrapElement()
-        set(element, 'scrollTop', top)
-      }
+export default {
+  name: 'main-content',
+  methods: {
+    getWrapElement () {
+      return this.$el.querySelector(':scope > div[class$="wrap"]')
     },
-    watch: {
-      '$vuetify.application.top' (value) {
-        const element = this.getWrapElement()
-        setWrapElementHeight(element, value)
-      }
-    },
-    mounted () {
-      setElementOverflowY(this.$el, 'hidden')
+    setScrollTop (top = 0) {
       const element = this.getWrapElement()
-      setElementOverflowY(element, 'auto')
-      setWrapElementHeight(element, this.$vuetify.application.top)
+      set(element, 'scrollTop', top)
     }
+  },
+  watch: {
+    '$vuetify.application.top' (value) {
+      const element = this.getWrapElement()
+      setWrapElementHeight(element, value)
+    }
+  },
+  mounted () {
+    setElementOverflowY(this.$el, 'hidden')
+    const element = this.getWrapElement()
+    setElementOverflowY(element, 'auto')
+    setWrapElementHeight(element, this.$vuetify.application.top)
   }
+}
 </script>

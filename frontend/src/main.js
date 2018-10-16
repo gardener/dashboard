@@ -41,18 +41,18 @@ if (version === false) {
       import('oidc-client')
     ])
     .then(([
-      {default: Vue},
+      { default: Vue },
       Vuetify,
-      {default: Vuelidate},
-      {default: App},
-      {default: store},
-      {default: router},
-      {default: axios},
-      {default: Snotify},
+      { default: Vuelidate },
+      { default: App },
+      { default: store },
+      { default: router },
+      { default: axios },
+      { default: Snotify },
       Oidc
     ]) => axios
       .get('/config.json')
-      .then(({data}) => store.dispatch('setConfiguration', data))
+      .then(({ data }) => store.dispatch('setConfiguration', data))
       .then(cfg => {
         Oidc.Log.logger = console
         Oidc.Log.level = Oidc.Log.ERROR
@@ -76,10 +76,10 @@ if (version === false) {
           return value && JSON.parse(value)
         }
         Object.defineProperties(Vue.prototype, {
-          $userManager: {value: userManager},
-          $http: {value: axios},
-          $bus: {value: bus},
-          $localStorage: {value: window.localStorage}
+          $userManager: { value: userManager },
+          $http: { value: axios },
+          $bus: { value: bus },
+          $localStorage: { value: window.localStorage }
         })
         return {
           Vue,
@@ -88,7 +88,7 @@ if (version === false) {
           Snotify,
           App,
           store,
-          router: router({store, userManager})
+          router: router({ store, userManager })
         }
       })
     )
@@ -101,7 +101,7 @@ if (version === false) {
   renderNotSupportedBrowser(version)
 }
 
-function start ({Vue, Vuetify, Vuelidate, Snotify, App, store, router}) {
+function start ({ Vue, Vuetify, Vuelidate, Snotify, App, store, router }) {
   /* eslint-disable no-new */
   Vue.use(Vuetify, {
     iconfont: 'md'

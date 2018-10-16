@@ -46,7 +46,6 @@ limitations under the License.
   bright1 = #8989a0
   bright2 = #77788d
 
-
   .headerContainer {
     margin-top:30px
     position:relative

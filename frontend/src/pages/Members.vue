@@ -231,167 +231,167 @@ limitations under the License.
 </template>
 
 <script>
-  import includes from 'lodash/includes'
-  import toLower from 'lodash/toLower'
-  import replace from 'lodash/replace'
-  import sortBy from 'lodash/sortBy'
-  import startsWith from 'lodash/startsWith'
-  import find from 'lodash/find'
-  import download from 'downloadjs'
-  import filter from 'lodash/filter'
-  import MemberAddDialog from '@/dialogs/MemberAddDialog'
-  import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
-  import { mapState, mapActions, mapGetters } from 'vuex'
-  import { emailToDisplayName, gravatar, serviceAccountToDisplayName } from '@/utils'
-  import { getMember } from '@/utils/api'
-  import CodeBlock from '@/components/CodeBlock'
+import includes from 'lodash/includes'
+import toLower from 'lodash/toLower'
+import replace from 'lodash/replace'
+import sortBy from 'lodash/sortBy'
+import startsWith from 'lodash/startsWith'
+import find from 'lodash/find'
+import download from 'downloadjs'
+import filter from 'lodash/filter'
+import MemberAddDialog from '@/dialogs/MemberAddDialog'
+import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
+import { mapState, mapActions, mapGetters } from 'vuex'
+import { emailToDisplayName, gravatar, serviceAccountToDisplayName } from '@/utils'
+import { getMember } from '@/utils/api'
+import CodeBlock from '@/components/CodeBlock'
 
-  export default {
-    name: 'members',
-    components: {
-      MemberAddDialog,
-      MemberHelpDialog,
-      CodeBlock
-    },
-    data () {
-      return {
-        memberAddDialog: false,
-        serviceAccountAddDialog: false,
-        memberHelpDialog: false,
-        serviceAccountHelpDialog: false,
-        kubeconfigDialog: false,
-        userFilter: '',
-        serviceFilter: '',
-        fab: false,
-        floatingButton: false,
-        currentServiceAccountName: undefined,
-        currentServiceAccountKubeconfig: undefined
-      }
-    },
-    computed: {
-      ...mapState([
-        'user',
-        'namespace'
-      ]),
-      ...mapGetters([
-        'memberList',
-        'projectList'
-      ]),
-      project () {
-        const predicate = project => project.metadata.namespace === this.namespace
-        return find(this.projectList, predicate)
-      },
-      projectData () {
-        return this.project.data || {}
-      },
-      owner () {
-        return toLower(this.projectData.owner)
-      },
-      serviceAccountList () {
-        const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
-        return filter(this.memberList, predicate)
-      },
-      memberListWithoutOwner () {
-        const predicate = username => !this.isOwner(username) && !startsWith(username, 'system:serviceaccount:')
-        return filter(this.memberList, predicate)
-      },
-      sortedAndFilteredMemberList () {
-        const predicate = email => {
-          if (!this.userFilter) {
-            return true
-          }
-          const name = replace(email, /@.*$/, '')
-          return includes(toLower(name), toLower(this.userFilter))
-        }
-        return sortBy(filter(this.memberListWithoutOwner, predicate))
-      },
-      sortedAndFilteredserviceAccountList () {
-        const predicate = service => {
-          if (!this.serviceFilter) {
-            return true
-          }
-          const name = serviceAccountToDisplayName(service)
-          return includes(toLower(name), toLower(this.serviceFilter))
-        }
-        return sortBy(filter(this.serviceAccountList, predicate))
-      },
-      currentServiceAccountDisplayName () {
-        return serviceAccountToDisplayName(this.currentServiceAccountName)
-      }
-    },
-    methods: {
-      ...mapActions([
-        'addMember',
-        'deleteMember',
-        'setError'
-      ]),
-      openAddMemberDialog () {
-        this.memberAddDialog = true
-      },
-      openAddserviceAccountDialog () {
-        this.serviceAccountAddDialog = true
-      },
-      openMemberHelpDialog () {
-        this.memberHelpDialog = true
-      },
-      openserviceAccountHelpDialog () {
-        this.serviceAccountHelpDialog = true
-      },
-      displayName (email) {
-        return emailToDisplayName(email)
-      },
-      isOwner (email) {
-        return this.owner === toLower(email)
-      },
-      avatar (email) {
-        return gravatar(email)
-      },
-      async downloadKubeconfig (name) {
-        const namespace = this.namespace
-        const user = this.user
-        try {
-          const {data} = await getMember({namespace, name, user})
-          if (!data.kubeconfig) {
-            this.setError({message: 'Failed to fetch Kubeconfig'})
-          } else {
-            return data.kubeconfig
-          }
-        } catch (err) {
-          this.setError(err)
-        }
-      },
-      async onDownload (name) {
-        const kubeconfig = await this.downloadKubeconfig(name)
-        if (kubeconfig) {
-          download(kubeconfig, 'kubeconfig.yaml', 'text/plain')
-        }
-      },
-      async onKubeconfig (name) {
-        const kubeconfig = await this.downloadKubeconfig(name)
-        if (kubeconfig) {
-          this.currentServiceAccountName = name
-          this.currentServiceAccountKubeconfig = kubeconfig
-          this.kubeconfigDialog = true
-        }
-      },
-      onDelete (username) {
-        this.deleteMember(username)
-      }
-    },
-    mounted () {
-      this.floatingButton = true
-    },
-    created () {
-      this.$bus.$on('esc-pressed', () => {
-        this.memberAddDialog = false
-        this.memberHelpDialog = false
-        this.serviceAccountAddDialog = false
-        this.serviceAccountHelpDialog = false
-        this.kubeconfigDialog = false
-        this.fab = false
-      })
+export default {
+  name: 'members',
+  components: {
+    MemberAddDialog,
+    MemberHelpDialog,
+    CodeBlock
+  },
+  data () {
+    return {
+      memberAddDialog: false,
+      serviceAccountAddDialog: false,
+      memberHelpDialog: false,
+      serviceAccountHelpDialog: false,
+      kubeconfigDialog: false,
+      userFilter: '',
+      serviceFilter: '',
+      fab: false,
+      floatingButton: false,
+      currentServiceAccountName: undefined,
+      currentServiceAccountKubeconfig: undefined
     }
+  },
+  computed: {
+    ...mapState([
+      'user',
+      'namespace'
+    ]),
+    ...mapGetters([
+      'memberList',
+      'projectList'
+    ]),
+    project () {
+      const predicate = project => project.metadata.namespace === this.namespace
+      return find(this.projectList, predicate)
+    },
+    projectData () {
+      return this.project.data || {}
+    },
+    owner () {
+      return toLower(this.projectData.owner)
+    },
+    serviceAccountList () {
+      const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
+      return filter(this.memberList, predicate)
+    },
+    memberListWithoutOwner () {
+      const predicate = username => !this.isOwner(username) && !startsWith(username, 'system:serviceaccount:')
+      return filter(this.memberList, predicate)
+    },
+    sortedAndFilteredMemberList () {
+      const predicate = email => {
+        if (!this.userFilter) {
+          return true
+        }
+        const name = replace(email, /@.*$/, '')
+        return includes(toLower(name), toLower(this.userFilter))
+      }
+      return sortBy(filter(this.memberListWithoutOwner, predicate))
+    },
+    sortedAndFilteredserviceAccountList () {
+      const predicate = service => {
+        if (!this.serviceFilter) {
+          return true
+        }
+        const name = serviceAccountToDisplayName(service)
+        return includes(toLower(name), toLower(this.serviceFilter))
+      }
+      return sortBy(filter(this.serviceAccountList, predicate))
+    },
+    currentServiceAccountDisplayName () {
+      return serviceAccountToDisplayName(this.currentServiceAccountName)
+    }
+  },
+  methods: {
+    ...mapActions([
+      'addMember',
+      'deleteMember',
+      'setError'
+    ]),
+    openAddMemberDialog () {
+      this.memberAddDialog = true
+    },
+    openAddserviceAccountDialog () {
+      this.serviceAccountAddDialog = true
+    },
+    openMemberHelpDialog () {
+      this.memberHelpDialog = true
+    },
+    openserviceAccountHelpDialog () {
+      this.serviceAccountHelpDialog = true
+    },
+    displayName (email) {
+      return emailToDisplayName(email)
+    },
+    isOwner (email) {
+      return this.owner === toLower(email)
+    },
+    avatar (email) {
+      return gravatar(email)
+    },
+    async downloadKubeconfig (name) {
+      const namespace = this.namespace
+      const user = this.user
+      try {
+        const { data } = await getMember({ namespace, name, user })
+        if (!data.kubeconfig) {
+          this.setError({ message: 'Failed to fetch Kubeconfig' })
+        } else {
+          return data.kubeconfig
+        }
+      } catch (err) {
+        this.setError(err)
+      }
+    },
+    async onDownload (name) {
+      const kubeconfig = await this.downloadKubeconfig(name)
+      if (kubeconfig) {
+        download(kubeconfig, 'kubeconfig.yaml', 'text/plain')
+      }
+    },
+    async onKubeconfig (name) {
+      const kubeconfig = await this.downloadKubeconfig(name)
+      if (kubeconfig) {
+        this.currentServiceAccountName = name
+        this.currentServiceAccountKubeconfig = kubeconfig
+        this.kubeconfigDialog = true
+      }
+    },
+    onDelete (username) {
+      this.deleteMember(username)
+    }
+  },
+  mounted () {
+    this.floatingButton = true
+  },
+  created () {
+    this.$bus.$on('esc-pressed', () => {
+      this.memberAddDialog = false
+      this.memberHelpDialog = false
+      this.serviceAccountAddDialog = false
+      this.serviceAccountHelpDialog = false
+      this.kubeconfigDialog = false
+      this.fab = false
+    })
   }
+}
 </script>
 
 <style lang="styl" scoped>

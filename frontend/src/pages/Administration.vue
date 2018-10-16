@@ -94,100 +94,100 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState, mapGetters, mapActions } from 'vuex'
-  import find from 'lodash/find'
-  import UpdateDialog from '@/dialogs/ProjectDialog'
-  import ConfirmDialog from '@/dialogs/ConfirmDialog'
-  import TimeString from '@/components/TimeString'
-  import { getDateFormatted } from '@/utils'
-  import { errorDetailsFromError } from '@/utils/error'
+import { mapState, mapGetters, mapActions } from 'vuex'
+import find from 'lodash/find'
+import UpdateDialog from '@/dialogs/ProjectDialog'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import TimeString from '@/components/TimeString'
+import { getDateFormatted } from '@/utils'
+import { errorDetailsFromError } from '@/utils/error'
 
-  export default {
-    name: 'administration',
-    components: {
-      UpdateDialog,
-      ConfirmDialog,
-      TimeString
-    },
-    data () {
-      return {
-        edit: false,
-        deleteConfirm: false,
-        floatingButton: false,
-        errorMessage: undefined,
-        detailedErrorMessage: undefined
-      }
-    },
-    computed: {
-      ...mapState([
-        'namespace'
-      ]),
-      ...mapGetters([
-        'projectList',
-        'shootList'
-      ]),
-      project () {
-        const predicate = project => project.metadata.namespace === this.namespace
-        return find(this.projectList, predicate) || {}
-      },
-      projectData () {
-        return this.project.data || {}
-      },
-      metadata () {
-        return this.project.metadata || {}
-      },
-      projectName () {
-        return this.metadata.name || ''
-      },
-      owner () {
-        return this.projectData.owner || ''
-      },
-      created () {
-        return getDateFormatted(this.metadata.creationTimestamp)
-      },
-      description () {
-        return this.projectData.description || ''
-      },
-      purpose () {
-        return this.projectData.purpose || ''
-      },
-      isDeleteButtonDisabled () {
-        return this.shootList.length > 0
-      }
-    },
-    methods: {
-      ...mapActions([
-        'deleteProject'
-      ]),
-      hide () {
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
-        this.deleteConfirm = false
-        this.edit = false
-      },
-      onDeleteProject () {
-        this
-          .deleteProject(this.project)
-          .then(() => {
-            this.hide()
-            if (this.projectList.length > 0) {
-              const p1 = this.projectList[0]
-              this.$router.push({name: 'ShootList', params: { namespace: p1.metadata.namespace }})
-            } else {
-              this.$router.push({name: 'Home', params: { }})
-            }
-          })
-          .catch(err => {
-            this.errorMessage = 'Failed to delete project.'
-
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-            this.detailedErrorMessage = errorDetails.detailedMessage
-          })
-      }
-    },
-    mounted () {
-      this.floatingButton = true
+export default {
+  name: 'administration',
+  components: {
+    UpdateDialog,
+    ConfirmDialog,
+    TimeString
+  },
+  data () {
+    return {
+      edit: false,
+      deleteConfirm: false,
+      floatingButton: false,
+      errorMessage: undefined,
+      detailedErrorMessage: undefined
     }
+  },
+  computed: {
+    ...mapState([
+      'namespace'
+    ]),
+    ...mapGetters([
+      'projectList',
+      'shootList'
+    ]),
+    project () {
+      const predicate = project => project.metadata.namespace === this.namespace
+      return find(this.projectList, predicate) || {}
+    },
+    projectData () {
+      return this.project.data || {}
+    },
+    metadata () {
+      return this.project.metadata || {}
+    },
+    projectName () {
+      return this.metadata.name || ''
+    },
+    owner () {
+      return this.projectData.owner || ''
+    },
+    created () {
+      return getDateFormatted(this.metadata.creationTimestamp)
+    },
+    description () {
+      return this.projectData.description || ''
+    },
+    purpose () {
+      return this.projectData.purpose || ''
+    },
+    isDeleteButtonDisabled () {
+      return this.shootList.length > 0
+    }
+  },
+  methods: {
+    ...mapActions([
+      'deleteProject'
+    ]),
+    hide () {
+      this.errorMessage = undefined
+      this.detailedMessage = undefined
+      this.deleteConfirm = false
+      this.edit = false
+    },
+    onDeleteProject () {
+      this
+        .deleteProject(this.project)
+        .then(() => {
+          this.hide()
+          if (this.projectList.length > 0) {
+            const p1 = this.projectList[0]
+            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+          } else {
+            this.$router.push({ name: 'Home', params: { } })
+          }
+        })
+        .catch(err => {
+          this.errorMessage = 'Failed to delete project.'
+
+          const errorDetails = errorDetailsFromError(err)
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        })
+    }
+  },
+  mounted () {
+    this.floatingButton = true
   }
+}
 </script>

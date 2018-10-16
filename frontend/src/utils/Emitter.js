@@ -19,7 +19,7 @@ import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
 import concat from 'lodash/concat'
 import Emitter from 'component-emitter'
-import {ThrottledNamespacedEventEmitter} from './ThrottledEmitter'
+import { ThrottledNamespacedEventEmitter } from './ThrottledEmitter'
 import store from '../store'
 
 class SocketAuthenticator {
@@ -71,7 +71,7 @@ class SocketAuthenticator {
   setUser (user) {
     user = user || {}
     const id_token = user.id_token
-      /* eslint camelcase: off */
+    /* eslint camelcase: off */
     if (!id_token) {
       console.log(`Disconnect socket ${this.socket.id} because ID token is empty`)
       this.auth.bearer = undefined
@@ -178,14 +178,14 @@ class ShootsSubscription extends AbstractSubscription {
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
-    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({emitter: this, wait: 1000})
+    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
 
-    this.socket.on('namespacedEvents', ({kind, namespaces}) => {
+    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
       if (kind === 'shoots') {
         throttledNsEventEmitter.emit(kind, namespaces)
       }
     })
-    this.socket.on('batchNamespacedEventsDone', ({kind, namespaces}) => {
+    this.socket.on('batchNamespacedEventsDone', ({ kind, namespaces }) => {
       if (kind === 'shoots') {
         store.dispatch('unsetShootsLoading', namespaces)
         throttledNsEventEmitter.flush()
@@ -193,22 +193,22 @@ class ShootsSubscription extends AbstractSubscription {
     })
   }
 
-  subscribeShoots = function ({namespace, filter}) {
-    this.subscribeOnNextTrigger({namespace, filter})
+  subscribeShoots = function ({ namespace, filter }) {
+    this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
 
   _subscribe = async function () {
-    const {namespace, filter} = this.subscribeTo
+    const { namespace, filter } = this.subscribeTo
 
     await Promise.all([
       store.dispatch('clearShoots'),
       store.dispatch('setShootsLoading')
     ])
     if (namespace === '_all') {
-      this.socket.emit('subscribeAllShoots', {filter})
+      this.socket.emit('subscribeAllShoots', { filter })
     } else if (namespace) {
-      this.socket.emit('subscribeShoots', {namespaces: [{namespace, filter}]})
+      this.socket.emit('subscribeShoots', { namespaces: [{ namespace, filter }] })
     } else {
       console.error(new Error('no namespace specified'))
       return false
@@ -223,30 +223,30 @@ class ShootSubscription extends AbstractSubscription {
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
-    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({emitter: this, wait: 1000})
+    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
 
-    this.socket.on('namespacedEvents', ({kind, namespaces}) => {
+    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
       if (kind === 'shoot') {
         throttledNsEventEmitter.emit(kind, namespaces)
       }
     })
-    this.socket.on('shootSubscriptionDone', ({kind, target}) => {
-      const {name, namespace} = target
+    this.socket.on('shootSubscriptionDone', ({ kind, target }) => {
+      const { name, namespace } = target
       throttledNsEventEmitter.flush()
-      store.dispatch('getShootInfo', {name, namespace})
+      store.dispatch('getShootInfo', { name, namespace })
     })
   }
 
-  subscribeShoot ({name, namespace}) {
-    this.subscribeOnNextTrigger({name, namespace})
+  subscribeShoot ({ name, namespace }) {
+    this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
   }
 
   _subscribe = async function () {
-    const {namespace, name} = this.subscribeTo
+    const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
 
-    this.socket.emit('subscribeShoot', {namespace, name})
+    this.socket.emit('subscribeShoot', { namespace, name })
     return true
   }
 
@@ -260,7 +260,7 @@ class AbstractJournalsSubscription extends AbstractSubscription {
   constructor (socketAuthenticator) {
     super(socketAuthenticator)
 
-    this.socket.on('events', ({kind, events}) => {
+    this.socket.on('events', ({ kind, events }) => {
       this.emit(kind, events)
     })
   }
@@ -303,8 +303,8 @@ class IssuesSubscription extends AbstractJournalsSubscription {
 }
 
 class CommentsSubscription extends AbstractJournalsSubscription {
-  subscribeComments ({name, namespace}) {
-    this.subscribeOnNextTrigger({name, namespace})
+  subscribeComments ({ name, namespace }) {
+    this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
   }
 
@@ -314,8 +314,8 @@ class CommentsSubscription extends AbstractJournalsSubscription {
         store.dispatch('clearComments')
       ])
 
-      const {name, namespace} = this.subscribeTo
-      this.socket.emit('subscribeComments', {name, namespace})
+      const { name, namespace } = this.subscribeTo
+      this.socket.emit('subscribeComments', { name, namespace })
       return true
     }
     return false
@@ -377,7 +377,7 @@ forEach(socketAuthenticators, emitter => {
     console.error(`socket ${emitter.socket.id} error ${err}`)
   })
   emitter.socket.on('subscription_error', error => {
-    const {kind, code, message} = error
+    const { kind, code, message } = error
     console.error(`socket ${emitter.socket.id} ${kind} subscription error: ${message} (${code})`)
     store.dispatch('setError', error)
   })
@@ -393,6 +393,6 @@ const wrapper = {
   journalCommentsEmitter
 }
 
-window.GARDEN = {emitter: shootsEmitter}
+window.GARDEN = { emitter: shootsEmitter }
 
 export default wrapper

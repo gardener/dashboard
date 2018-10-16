@@ -22,7 +22,7 @@ import get from 'lodash/get'
 import filter from 'lodash/filter'
 
 class ThrottledEmitter {
-  constructor ({emitter, wait = 1000}) {
+  constructor ({ emitter, wait = 1000 }) {
     this.wait = wait
 
     this.eventsBuffer = {}

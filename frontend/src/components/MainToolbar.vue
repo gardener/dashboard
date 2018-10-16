@@ -113,66 +113,66 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState, mapGetters, mapActions } from 'vuex'
-  import get from 'lodash/get'
-  import { gravatar } from '@/utils'
-  import Breadcrumb from '@/components/Breadcrumb'
+import { mapState, mapGetters, mapActions } from 'vuex'
+import get from 'lodash/get'
+import { gravatar } from '@/utils'
+import Breadcrumb from '@/components/Breadcrumb'
 
-  export default {
-    name: 'toolbar',
-    components: {
-      Breadcrumb
+export default {
+  name: 'toolbar',
+  components: {
+    Breadcrumb
+  },
+  data () {
+    return {
+      menu: false,
+      help: false
+    }
+  },
+  methods: {
+    ...mapActions([
+      'setSidebar'
+    ]),
+    handleLogout () {
+      this.$router.push({ name: 'Logout' })
+    }
+  },
+  computed: {
+    ...mapState([
+      'title',
+      'sidebar',
+      'user',
+      'cfg'
+    ]),
+    ...mapGetters([
+      'username',
+      'isAdmin'
+    ]),
+    helpMenuItems () {
+      return this.cfg.helpMenuItems || {}
     },
-    data () {
-      return {
-        menu: false,
-        help: false
+    avatar () {
+      return gravatar(this.email)
+    },
+    email () {
+      return this.user.profile.email
+    },
+    tabs () {
+      return get(this.$route, 'meta.tabs', false)
+    },
+    avatarTitle () {
+      return `${this.username} (${this.email})`
+    },
+    helpTarget () {
+      return (item) => {
+        return get(item, 'target', '_blank')
       }
     },
-    methods: {
-      ...mapActions([
-        'setSidebar'
-      ]),
-      handleLogout () {
-        this.$router.push({name: 'Logout'})
-      }
-    },
-    computed: {
-      ...mapState([
-        'title',
-        'sidebar',
-        'user',
-        'cfg'
-      ]),
-      ...mapGetters([
-        'username',
-        'isAdmin'
-      ]),
-      helpMenuItems () {
-        return this.cfg.helpMenuItems || {}
-      },
-      avatar () {
-        return gravatar(this.email)
-      },
-      email () {
-        return this.user.profile.email
-      },
-      tabs () {
-        return get(this.$route, 'meta.tabs', false)
-      },
-      avatarTitle () {
-        return `${this.username} (${this.email})`
-      },
-      helpTarget () {
-        return (item) => {
-          return get(item, 'target', '_blank')
-        }
-      },
-      accountLink () {
-        return {name: 'Account', query: this.$route.query}
-      }
+    accountLink () {
+      return { name: 'Account', query: this.$route.query }
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

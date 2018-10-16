@@ -39,7 +39,7 @@ const Administration = () => import('@/pages/Administration')
 
 Vue.use(Router)
 
-export default function createRouter ({store, userManager}) {
+export default function createRouter ({ store, userManager }) {
   /* technical components */
   const Logout = {
     template: '<div/>',
@@ -74,7 +74,7 @@ export default function createRouter ({store, userManager}) {
   const shootItemTabs = [
     {
       title: 'Overview',
-      to: ({params}) => {
+      to: ({ params }) => {
         return {
           name: 'ShootItem',
           params
@@ -83,7 +83,7 @@ export default function createRouter ({store, userManager}) {
     },
     {
       title: 'YAML',
-      to: ({params}) => {
+      to: ({ params }) => {
         return {
           name: 'ShootItemEditor',
           params
@@ -282,7 +282,7 @@ export default function createRouter ({store, userManager}) {
   ]
   const zeroPoint = { x: 0, y: 0 }
   const scrollBehavior = (to, from, savedPosition) => savedPosition || zeroPoint
-  const routerOptions = {mode, scrollBehavior, routes}
+  const routerOptions = { mode, scrollBehavior, routes }
 
   /* navigation guards */
   function ensureConfigurationLoaded (to, from, next) {
@@ -380,7 +380,7 @@ export default function createRouter ({store, userManager}) {
           case 'Home':
             if (namespace) {
               const name = 'ShootList'
-              return {name, params: {namespace}}
+              return { name, params: { namespace } }
             }
             return undefined
           case 'Secrets':
@@ -404,8 +404,8 @@ export default function createRouter ({store, userManager}) {
           case 'ShootItemEditor':
             return Promise
               .all([
-                store.dispatch('subscribeShoot', {name: params.name, namespace}),
-                store.dispatch('subscribeComments', {name: params.name, namespace})
+                store.dispatch('subscribeShoot', { name: params.name, namespace }),
+                store.dispatch('subscribeComments', { name: params.name, namespace })
               ])
               .then(() => undefined)
           case 'Members':
@@ -419,7 +419,7 @@ export default function createRouter ({store, userManager}) {
           case 'Account':
             if (query.namespace !== namespace) {
               const name = 'Account'
-              return {name, query: { namespace }}
+              return { name, query: { namespace } }
             }
             return undefined
           default:

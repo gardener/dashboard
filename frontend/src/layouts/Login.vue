@@ -49,41 +49,41 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import { signin } from '@/utils/auth'
-  import { SnotifyPosition } from 'vue-snotify'
+import { mapState } from 'vuex'
+import { signin } from '@/utils/auth'
+import { SnotifyPosition } from 'vue-snotify'
 
-  export default {
-    computed: {
-      ...mapState([
-        'color',
-        'cfg'
-      ]),
-      landingPageUrl () {
-        return this.cfg.landingPageUrl
-      },
-      footerLogoUrl () {
-        return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
-      }
+export default {
+  computed: {
+    ...mapState([
+      'color',
+      'cfg'
+    ]),
+    landingPageUrl () {
+      return this.cfg.landingPageUrl
     },
-    methods: {
-      handleLogin () {
-        signin(this.$userManager)
+    footerLogoUrl () {
+      return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
+    }
+  },
+  methods: {
+    handleLogin () {
+      signin(this.$userManager)
         .catch(error => {
           this.showSnotifyLoginError(error.message)
           throw error
         })
-      },
-      showSnotifyLoginError (message) {
-        const config = {
-          position: SnotifyPosition.rightBottom,
-          timeout: 5000,
-          showProgressBar: false
-        }
-        this.$snotify.error(message, 'Login Error', config)
+    },
+    showSnotifyLoginError (message) {
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
       }
+      this.$snotify.error(message, 'Login Error', config)
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

@@ -31,48 +31,48 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import { namespacedRoute } from '@/utils'
-  import get from 'lodash/get'
-  import last from 'lodash/last'
-  import size from 'lodash/size'
-  import assign from 'lodash/assign'
+import { mapState } from 'vuex'
+import { namespacedRoute } from '@/utils'
+import get from 'lodash/get'
+import last from 'lodash/last'
+import size from 'lodash/size'
+import assign from 'lodash/assign'
 
-  export default {
-    name: 'breadcrumb',
-    computed: {
-      ...mapState([
-        'namespace'
-      ]),
-      breadcrumbItems () {
-        var crumbs = []
-        const namespace = this.namespace
-        const matched = this.$route.matched
-        matched.forEach(function (matchedRoute) {
-          const hasBreadcrumb = get(matchedRoute, 'meta.breadcrumb')
-          if (hasBreadcrumb) {
-            const text = get(matchedRoute, 'meta.title')
-            const to = namespacedRoute(matchedRoute, namespace)
-            crumbs.push({text, to})
-          }
-        })
+export default {
+  name: 'breadcrumb',
+  computed: {
+    ...mapState([
+      'namespace'
+    ]),
+    breadcrumbItems () {
+      var crumbs = []
+      const namespace = this.namespace
+      const matched = this.$route.matched
+      matched.forEach(function (matchedRoute) {
+        const hasBreadcrumb = get(matchedRoute, 'meta.breadcrumb')
+        if (hasBreadcrumb) {
+          const text = get(matchedRoute, 'meta.title')
+          const to = namespacedRoute(matchedRoute, namespace)
+          crumbs.push({ text, to })
+        }
+      })
 
-        const lastItem = last(crumbs)
-        crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
+      const lastItem = last(crumbs)
+      crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
 
-        return crumbs
-      },
-      textClass () {
-        return (item) => {
-          if (item.currentRoute) {
-            return 'breadcrumb title'
-          } else {
-            return 'breadcrumb subheading pointer'
-          }
+      return crumbs
+    },
+    textClass () {
+      return (item) => {
+        if (item.currentRoute) {
+          return 'breadcrumb title'
+        } else {
+          return 'breadcrumb subheading pointer'
         }
       }
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

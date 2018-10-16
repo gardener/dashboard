@@ -68,113 +68,111 @@ limitations under the License.
 
 </template>
 
-
 <script>
-  import SecretDialog from '@/dialogs/SecretDialog'
-  import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-  import { alphaNumUnderscore, base64 } from '@/utils/validators'
-  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import SecretDialog from '@/dialogs/SecretDialog'
+import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import { alphaNumUnderscore, base64 } from '@/utils/validators'
+import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
-  const validationErrors = {
-    accessKeyId: {
-      required: 'You can\'t leave this empty.',
-      minLength: 'It must contain at least 16 characters.',
-      maxLength: 'It exceeds the maximum length of 128 characters.',
-      alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
-    },
-    secretAccessKey: {
-      required: 'You can\'t leave this empty.',
-      minLength: 'It must contain at least 40 characters.',
-      base64: 'Invalid secret access key.'
-    }
+const validationErrors = {
+  accessKeyId: {
+    required: 'You can\'t leave this empty.',
+    minLength: 'It must contain at least 16 characters.',
+    maxLength: 'It exceeds the maximum length of 128 characters.',
+    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
+  },
+  secretAccessKey: {
+    required: 'You can\'t leave this empty.',
+    minLength: 'It must contain at least 40 characters.',
+    base64: 'Invalid secret access key.'
   }
+}
 
-  export default {
-    components: {
-      SecretDialog
+export default {
+  components: {
+    SecretDialog
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      },
-      secret: {
-        type: Object
-      }
+    secret: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      accessKeyId: undefined,
+      secretAccessKey: undefined,
+      hideSecret: true,
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    valid () {
+      return !this.$v.$invalid
     },
-    data () {
+    secretData () {
       return {
-        accessKeyId: undefined,
-        secretAccessKey: undefined,
-        hideSecret: true,
-        validationErrors
+        accessKeyID: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey
       }
     },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      valid () {
-        return !this.$v.$invalid
-      },
-      secretData () {
-        return {
-          accessKeyID: this.accessKeyId,
-          secretAccessKey: this.secretAccessKey
+    validators () {
+      const validators = {
+        accessKeyId: {
+          required,
+          minLength: minLength(16),
+          maxLength: maxLength(128),
+          alphaNumUnderscore
+        },
+        secretAccessKey: {
+          required,
+          minLength: minLength(40),
+          base64
         }
-      },
-      validators () {
-        const validators = {
-          accessKeyId: {
-            required,
-            minLength: minLength(16),
-            maxLength: maxLength(128),
-            alphaNumUnderscore
-          },
-          secretAccessKey: {
-            required,
-            minLength: minLength(40),
-            base64
-          }
-        }
-        return validators
-      },
-      isCreateMode () {
-        return !this.secret
-      },
-      accessKeyIdLabel () {
-        return this.isCreateMode ? 'Access Key Id' : 'New Access Key Id'
-      },
-      secretAccessKeyLabel () {
-        return this.isCreateMode ? 'Secret Access Key' : 'New Secret Access Key'
       }
+      return validators
     },
-    methods: {
-      onInput (value) {
-        this.$emit('input', value)
-      },
-      reset () {
-        this.$v.$reset()
+    isCreateMode () {
+      return !this.secret
+    },
+    accessKeyIdLabel () {
+      return this.isCreateMode ? 'Access Key Id' : 'New Access Key Id'
+    },
+    secretAccessKeyLabel () {
+      return this.isCreateMode ? 'Secret Access Key' : 'New Secret Access Key'
+    }
+  },
+  methods: {
+    onInput (value) {
+      this.$emit('input', value)
+    },
+    reset () {
+      this.$v.$reset()
 
-        this.accessKeyId = ''
-        this.secretAccessKey = ''
+      this.accessKeyId = ''
+      this.secretAccessKey = ''
 
-        if (!this.isCreateMode) {
-          setDelayedInputFocus(this, 'accessKeyId')
-        }
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
+      if (!this.isCreateMode) {
+        setDelayedInputFocus(this, 'accessKeyId')
       }
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
-        }
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>
-

@@ -90,125 +90,124 @@ limitations under the License.
 
 </template>
 
-
 <script>
-  import SecretDialog from '@/dialogs/SecretDialog'
-  import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-  import { required } from 'vuelidate/lib/validators'
+import SecretDialog from '@/dialogs/SecretDialog'
+import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
 
-  const validationErrors = {
-    clientId: {
-      required: 'You can\'t leave this empty.'
-    },
-    clientSecret: {
-      required: 'You can\'t leave this empty.'
-    },
-    tenantId: {
-      required: 'You can\'t leave this empty.'
-    },
-    subscriptionId: {
-      required: 'You can\'t leave this empty.'
-    }
+const validationErrors = {
+  clientId: {
+    required: 'You can\'t leave this empty.'
+  },
+  clientSecret: {
+    required: 'You can\'t leave this empty.'
+  },
+  tenantId: {
+    required: 'You can\'t leave this empty.'
+  },
+  subscriptionId: {
+    required: 'You can\'t leave this empty.'
   }
+}
 
-  export default {
-    components: {
-      SecretDialog
+export default {
+  components: {
+    SecretDialog
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
-      },
-      secret: {
-        type: Object
-      }
+    secret: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      clientId: undefined,
+      clientSecret: undefined,
+      tenantId: undefined,
+      subscriptionId: undefined,
+      hideSecret: true,
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    valid () {
+      return !this.$v.$invalid
     },
-    data () {
+    secretData () {
       return {
-        clientId: undefined,
-        clientSecret: undefined,
-        tenantId: undefined,
-        subscriptionId: undefined,
-        hideSecret: true,
-        validationErrors
+        clientID: this.clientId,
+        clientSecret: this.clientSecret,
+        subscriptionID: this.subscriptionId,
+        tenantID: this.tenantId
       }
     },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      valid () {
-        return !this.$v.$invalid
-      },
-      secretData () {
-        return {
-          clientID: this.clientId,
-          clientSecret: this.clientSecret,
-          subscriptionID: this.subscriptionId,
-          tenantID: this.tenantId
+    validators () {
+      const validators = {
+        clientId: {
+          required
+        },
+        clientSecret: {
+          required
+        },
+        tenantId: {
+          required
+        },
+        subscriptionId: {
+          required
         }
-      },
-      validators () {
-        const validators = {
-          clientId: {
-            required
-          },
-          clientSecret: {
-            required
-          },
-          tenantId: {
-            required
-          },
-          subscriptionId: {
-            required
-          }
-        }
-        return validators
-      },
-      isCreateMode () {
-        return !this.secret
-      },
-      clientIdLabel () {
-        return this.isCreateMode ? 'Client Id' : 'New Client Id'
-      },
-      clientSecretLabel () {
-        return this.isCreateMode ? 'Client Secret' : 'New Client Secret'
-      },
-      tenantIdLabel () {
-        return this.isCreateMode ? 'Tenant Id' : 'New Tenant Id'
-      },
-      subscriptionIdLabel () {
-        return this.isCreateMode ? 'Subscription Id' : 'New Subscription Id'
       }
+      return validators
     },
-    methods: {
-      onInput (value) {
-        this.$emit('input', value)
-      },
-      reset () {
-        this.$v.$reset()
+    isCreateMode () {
+      return !this.secret
+    },
+    clientIdLabel () {
+      return this.isCreateMode ? 'Client Id' : 'New Client Id'
+    },
+    clientSecretLabel () {
+      return this.isCreateMode ? 'Client Secret' : 'New Client Secret'
+    },
+    tenantIdLabel () {
+      return this.isCreateMode ? 'Tenant Id' : 'New Tenant Id'
+    },
+    subscriptionIdLabel () {
+      return this.isCreateMode ? 'Subscription Id' : 'New Subscription Id'
+    }
+  },
+  methods: {
+    onInput (value) {
+      this.$emit('input', value)
+    },
+    reset () {
+      this.$v.$reset()
 
-        this.clientId = ''
-        this.clientSecret = ''
-        this.subscriptionId = ''
-        this.tenantId = ''
+      this.clientId = ''
+      this.clientSecret = ''
+      this.subscriptionId = ''
+      this.tenantId = ''
 
-        if (!this.isCreateMode) {
-          setDelayedInputFocus(this, 'clientId')
-        }
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
+      if (!this.isCreateMode) {
+        setDelayedInputFocus(this, 'clientId')
       }
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
-        }
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>

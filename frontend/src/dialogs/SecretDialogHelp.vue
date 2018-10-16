@@ -50,44 +50,42 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    props: {
-      title: {
-        type: String,
-        required: true
-      },
-      value: {
-        type: Boolean,
-        required: true
-      },
-      color: {
-        type: String,
-        required: true
-      },
-      backgroundSrc: {
-        type: String,
-        required: true
-      }
+export default {
+  props: {
+    title: {
+      type: String,
+      required: true
     },
-    computed: {
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      }
+    value: {
+      type: Boolean,
+      required: true
     },
-    methods: {
-      hide () {
-        this.visible = false
+    color: {
+      type: String,
+      required: true
+    },
+    backgroundSrc: {
+      type: String,
+      required: true
+    }
+  },
+  computed: {
+    visible: {
+      get () {
+        return this.value
+      },
+      set (value) {
+        this.$emit('input', value)
       }
     }
+  },
+  methods: {
+    hide () {
+      this.visible = false
+    }
   }
+}
 </script>
-
-
 
 <style lang="styl" scoped>
 

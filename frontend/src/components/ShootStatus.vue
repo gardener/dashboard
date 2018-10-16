@@ -55,167 +55,167 @@ limitations under the License.
 </template>
 
 <script>
-  import GPopper from '@/components/GPopper'
-  import get from 'lodash/get'
-  import map from 'lodash/map'
-  import join from 'lodash/join'
-  import { isUserError } from '@/utils'
+import GPopper from '@/components/GPopper'
+import get from 'lodash/get'
+import map from 'lodash/map'
+import join from 'lodash/join'
+import { isUserError } from '@/utils'
 
-  const errorCodes = {
-    'ERR_INFRA_UNAUTHORIZED': {
-      shortDescription: 'Invalid Credentials',
-      description: 'Invalid cloud provider credentials.'
-    },
-    'ERR_INFRA_INSUFFICIENT_PRIVILEGES': {
-      shortDescription: 'Insufficient Privileges',
-      description: 'Cloud provider credentials have insufficient privileges.'
-    },
-    'ERR_INFRA_QUOTA_EXCEEDED': {
-      shortDescription: 'Quota Exceeded',
-      description: 'Cloud provider quota exceeded. Please request limit increases.'
-    },
-    'ERR_INFRA_DEPENDENCIES': {
-      shortDescription: 'Infrastructure Dependencies',
-      description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
-    }
+const errorCodes = {
+  'ERR_INFRA_UNAUTHORIZED': {
+    shortDescription: 'Invalid Credentials',
+    description: 'Invalid cloud provider credentials.'
+  },
+  'ERR_INFRA_INSUFFICIENT_PRIVILEGES': {
+    shortDescription: 'Insufficient Privileges',
+    description: 'Cloud provider credentials have insufficient privileges.'
+  },
+  'ERR_INFRA_QUOTA_EXCEEDED': {
+    shortDescription: 'Quota Exceeded',
+    description: 'Cloud provider quota exceeded. Please request limit increases.'
+  },
+  'ERR_INFRA_DEPENDENCIES': {
+    shortDescription: 'Infrastructure Dependencies',
+    description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
   }
+}
 
-  export default {
-    components: {
-      GPopper
+export default {
+  components: {
+    GPopper
+  },
+  props: {
+    operation: {
+      type: Object,
+      required: true
     },
-    props: {
-      operation: {
-        type: Object,
-        required: true
-      },
-      shootDeleted: {
-        type: Boolean,
-        required: true
-      },
-      lastError: {
-        type: Object,
-        required: false
-      },
-      popperKey: {
-        type: String,
-        required: true
-      },
-      isHibernated: {
-        type: Boolean,
-        default: false
-      },
-      reconciliationDeactivated: {
-        type: Boolean,
-        default: false
-      },
-      popperPlacement: {
-        type: String
+    shootDeleted: {
+      type: Boolean,
+      required: true
+    },
+    lastError: {
+      type: Object,
+      required: false
+    },
+    popperKey: {
+      type: String,
+      required: true
+    },
+    isHibernated: {
+      type: Boolean,
+      default: false
+    },
+    reconciliationDeactivated: {
+      type: Boolean,
+      default: false
+    },
+    popperPlacement: {
+      type: String
+    }
+  },
+  computed: {
+    showProgress () {
+      return this.operationState === 'Processing'
+    },
+    isError () {
+      return this.operationState === 'Failed' || this.operationState === 'Error' || this.lastErrorDescription
+    },
+    isAborted () {
+      return this.operationState === 'Aborted'
+    },
+    isPending () {
+      return this.operationState === 'Pending'
+    },
+    isTypeCreate () {
+      return this.operationType === 'Create'
+    },
+    isTypeReconcile () {
+      return this.operationType === 'Reconcile'
+    },
+    isUserError () {
+      return isUserError(this.errorCodes)
+    },
+    lastErrorDescription () {
+      return get(this.lastError, 'description')
+    },
+    errorCodes () {
+      return get(this.lastError, 'codes', [])
+    },
+    errorCodeDescriptions () {
+      return map(this.errorCodes, code => get(errorCodes, `${code}.description`, code))
+    },
+    errorCodeShortDescriptions () {
+      return map(this.errorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
+    },
+    errorCodeShortDescriptionsText () {
+      return join(this.errorCodeShortDescriptions, ', ')
+    },
+    popperKeyWithType () {
+      return `shootStatus_${this.popperKey}`
+    },
+    popperTitle () {
+      let popperTitle = ''
+      if (this.isHibernated) {
+        popperTitle = popperTitle.concat('Hibernated; ')
       }
-    },
-    computed: {
-      showProgress () {
-        return this.operationState === 'Processing'
-      },
-      isError () {
-        return this.operationState === 'Failed' || this.operationState === 'Error' || this.lastErrorDescription
-      },
-      isAborted () {
-        return this.operationState === 'Aborted'
-      },
-      isPending () {
-        return this.operationState === 'Pending'
-      },
-      isTypeCreate () {
-        return this.operationType === 'Create'
-      },
-      isTypeReconcile () {
-        return this.operationType === 'Reconcile'
-      },
-      isUserError () {
-        return isUserError(this.errorCodes)
-      },
-      lastErrorDescription () {
-        return get(this.lastError, 'description')
-      },
-      errorCodes () {
-        return get(this.lastError, 'codes', [])
-      },
-      errorCodeDescriptions () {
-        return map(this.errorCodes, code => get(errorCodes, `${code}.description`, code))
-      },
-      errorCodeShortDescriptions () {
-        return map(this.errorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
-      },
-      errorCodeShortDescriptionsText () {
-        return join(this.errorCodeShortDescriptions, ', ')
-      },
-      popperKeyWithType () {
-        return `shootStatus_${this.popperKey}`
-      },
-      popperTitle () {
-        let popperTitle = ''
-        if (this.isHibernated) {
-          popperTitle = popperTitle.concat('Hibernated; ')
-        }
-        if (this.reconciliationDeactivated) {
-          popperTitle = popperTitle.concat('Reconciliation Deactivated')
-
-          this.emitExtendedTitle(popperTitle)
-          return popperTitle
-        }
-        popperTitle = popperTitle.concat(`${this.operationType} ${this.operationState}`)
+      if (this.reconciliationDeactivated) {
+        popperTitle = popperTitle.concat('Reconciliation Deactivated')
 
         this.emitExtendedTitle(popperTitle)
         return popperTitle
-      },
-      tooltipText () {
-        let tooltipText = this.popperTitle
-        if (this.showProgress) {
-          tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
-        }
-        if (this.isUserError) {
-          tooltipText = tooltipText.concat(`; ${this.errorCodeShortDescriptionsText}`)
-        }
-
-        return tooltipText
-      },
-      popperMessage () {
-        let message = this.operation.description
-        message = message || 'No description'
-        if (message === this.lastErrorDescription) {
-          return undefined
-        }
-        return message
-      },
-      operationType () {
-        return this.operation.type || 'Create'
-      },
-      operationState () {
-        return this.operation.state || 'Pending'
-      },
-      color () {
-        if (this.isAborted) {
-          return 'grey darken-1'
-        } else if (this.isError) {
-          return 'error'
-        } else {
-          return 'cyan darken-2'
-        }
       }
-    },
-    methods: {
-      emitExtendedTitle (title) {
-        // similar to tooltipText, except the progress is missing
-        let extendedTitle = title
-        if (this.isUserError) {
-          extendedTitle = extendedTitle.concat(`; ${this.errorCodeShortDescriptionsText}`)
-        }
+      popperTitle = popperTitle.concat(`${this.operationType} ${this.operationState}`)
 
-        this.$emit('titleChange', extendedTitle)
+      this.emitExtendedTitle(popperTitle)
+      return popperTitle
+    },
+    tooltipText () {
+      let tooltipText = this.popperTitle
+      if (this.showProgress) {
+        tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
+      }
+      if (this.isUserError) {
+        tooltipText = tooltipText.concat(`; ${this.errorCodeShortDescriptionsText}`)
+      }
+
+      return tooltipText
+    },
+    popperMessage () {
+      let message = this.operation.description
+      message = message || 'No description'
+      if (message === this.lastErrorDescription) {
+        return undefined
+      }
+      return message
+    },
+    operationType () {
+      return this.operation.type || 'Create'
+    },
+    operationState () {
+      return this.operation.state || 'Pending'
+    },
+    color () {
+      if (this.isAborted) {
+        return 'grey darken-1'
+      } else if (this.isError) {
+        return 'error'
+      } else {
+        return 'cyan darken-2'
       }
     }
+  },
+  methods: {
+    emitExtendedTitle (title) {
+      // similar to tooltipText, except the progress is missing
+      let extendedTitle = title
+      if (this.isUserError) {
+        extendedTitle = extendedTitle.concat(`; ${this.errorCodeShortDescriptionsText}`)
+      }
+
+      this.$emit('titleChange', extendedTitle)
+    }
   }
+}
 </script>
 
 <style lang="styl" scoped>

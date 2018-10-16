@@ -45,52 +45,52 @@ limitations under the License.
 </template>
 
 <script>
-  import ConfirmDialog from '@/dialogs/ConfirmDialog'
-  import { mapActions } from 'vuex'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import { mapActions } from 'vuex'
 
-  export default {
-    name: 'delete-cluster-dialog',
-    components: {
-      ConfirmDialog
+export default {
+  name: 'delete-cluster-dialog',
+  components: {
+    ConfirmDialog
+  },
+  props: {
+    value: {
+      type: Boolean
     },
-    props: {
-      value: {
-        type: Boolean
-      },
-      clusterName: {
-        type: String
-      },
-      clusterNamespace: {
-        type: String
-      },
-      clusterCreatedBy: {
-        type: String
-      }
+    clusterName: {
+      type: String
     },
-    data () {
-      return {
-        deleteErrorMessage: null,
-        deleteDetailedErrorMessage: null
-      }
+    clusterNamespace: {
+      type: String
     },
-    methods: {
-      ...mapActions([
-        'deleteShoot'
-      ]),
-      deletionConfirmed () {
-        this.deleteShoot({name: this.clusterName, namespace: this.clusterNamespace})
-          .then(() => this.hideDialog())
-          .catch((err) => {
-            this.deleteErrorMessage = 'Cluster deletion failed'
-            this.deleteDetailedErrorMessage = err.message
-            console.error('Delete shoot failed with error:', err)
-          })
-      },
-      hideDialog () {
-        this.deleteErrorMessage = null
-        this.deleteDetailedErrorMessage = null
-        this.$emit('close', true)
-      }
+    clusterCreatedBy: {
+      type: String
+    }
+  },
+  data () {
+    return {
+      deleteErrorMessage: null,
+      deleteDetailedErrorMessage: null
+    }
+  },
+  methods: {
+    ...mapActions([
+      'deleteShoot'
+    ]),
+    deletionConfirmed () {
+      this.deleteShoot({ name: this.clusterName, namespace: this.clusterNamespace })
+        .then(() => this.hideDialog())
+        .catch((err) => {
+          this.deleteErrorMessage = 'Cluster deletion failed'
+          this.deleteDetailedErrorMessage = err.message
+          console.error('Delete shoot failed with error:', err)
+        })
+    },
+    hideDialog () {
+      this.deleteErrorMessage = null
+      this.deleteDetailedErrorMessage = null
+      this.$emit('close', true)
     }
   }
+}
 </script>

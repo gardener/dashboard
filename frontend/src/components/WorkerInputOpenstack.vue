@@ -60,7 +60,6 @@ limitations under the License.
       ></v-text-field>
     </v-flex>
 
-
     <v-flex xs1 class="ml-2 mt-2">
       <slot name="action">
       </slot>
@@ -70,101 +69,101 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import MachineType from '@/components/MachineType'
-  import { required, minValue } from 'vuelidate/lib/validators'
-  import { getValidationErrors } from '@/utils'
-  import { uniqueWorkerName } from '@/utils/validators'
+import { mapGetters } from 'vuex'
+import MachineType from '@/components/MachineType'
+import { required, minValue } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
+import { uniqueWorkerName } from '@/utils/validators'
 
-  const validationErrors = {
-    worker: {
-      name: {
-        required: 'You can\'t leave this empty.',
-        uniqueWorkerName: 'Name is taken. Try another.'
-      },
-      autoScalerMin: {
-        minValue: 'Invalid value'
-      },
-      autoScalerMax: {
-        minValue: 'Invalid value'
-      }
+const validationErrors = {
+  worker: {
+    name: {
+      required: 'You can\'t leave this empty.',
+      uniqueWorkerName: 'Name is taken. Try another.'
+    },
+    autoScalerMin: {
+      minValue: 'Invalid value'
+    },
+    autoScalerMax: {
+      minValue: 'Invalid value'
     }
   }
+}
 
-  const validations = {
-    worker: {
-      name: {
-        required,
-        uniqueWorkerName
-      },
-      autoScalerMin: {
-        minValue: minValue(0)
-      },
-      autoScalerMax: {
-        minValue: minValue(0)
-      }
+const validations = {
+  worker: {
+    name: {
+      required,
+      uniqueWorkerName
+    },
+    autoScalerMin: {
+      minValue: minValue(0)
+    },
+    autoScalerMax: {
+      minValue: minValue(0)
     }
   }
+}
 
-  export default {
-    components: {
-      MachineType
+export default {
+  components: {
+    MachineType
+  },
+  props: {
+    worker: {
+      type: Object,
+      required: true
     },
-    props: {
-      worker: {
-        type: Object,
-        required: true
-      },
-      workers: {
-        type: Array,
-        required: true
-      },
-      cloudProfileName: {
-        type: String
-      }
+    workers: {
+      type: Array,
+      required: true
     },
-    data () {
-      return {
-        validationErrors
-      }
-    },
-    validations,
-    computed: {
-      ...mapGetters([
-        'machineTypesByCloudProfileName'
-      ]),
+    cloudProfileName: {
+      type: String
+    }
+  },
+  data () {
+    return {
+      validationErrors
+    }
+  },
+  validations,
+  computed: {
+    ...mapGetters([
+      'machineTypesByCloudProfileName'
+    ]),
 
-      machineTypes () {
-        return this.machineTypesByCloudProfileName(this.cloudProfileName)
+    machineTypes () {
+      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+    },
+    innerMin: {
+      get: function () {
+        return Math.max(0, this.worker.autoScalerMin)
       },
-      innerMin: {
-        get: function () {
-          return Math.max(0, this.worker.autoScalerMin)
-        },
-        set: function (value) {
-          this.worker.autoScalerMin = Math.max(0, parseInt(value))
-          if (this.innerMax < this.worker.autoScalerMin) {
-            this.worker.autoScalerMax = this.worker.autoScalerMin
-          }
-        }
-      },
-      innerMax: {
-        get: function () {
-          return Math.max(0, this.worker.autoScalerMax)
-        },
-        set: function (value) {
-          this.worker.autoScalerMax = Math.max(0, parseInt(value))
-          if (this.innerMin > this.worker.autoScalerMax) {
-            this.worker.autoScalerMin = this.worker.autoScalerMax
-          }
+      set: function (value) {
+        this.worker.autoScalerMin = Math.max(0, parseInt(value))
+        if (this.innerMax < this.worker.autoScalerMin) {
+          this.worker.autoScalerMax = this.worker.autoScalerMin
         }
       }
     },
-
-    methods: {
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
+    innerMax: {
+      get: function () {
+        return Math.max(0, this.worker.autoScalerMax)
+      },
+      set: function (value) {
+        this.worker.autoScalerMax = Math.max(0, parseInt(value))
+        if (this.innerMin > this.worker.autoScalerMax) {
+          this.worker.autoScalerMin = this.worker.autoScalerMax
+        }
       }
     }
+  },
+
+  methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
   }
+}
 </script>

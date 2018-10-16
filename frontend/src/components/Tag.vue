@@ -32,63 +32,63 @@ limitations under the License.
 </template>
 
 <script>
-  import GPopper from '@/components/GPopper'
+import GPopper from '@/components/GPopper'
 
-  export default {
-    components: {
-      GPopper
+export default {
+  components: {
+    GPopper
+  },
+  props: {
+    chipText: {
+      type: String,
+      required: true
     },
-    props: {
-      chipText: {
-        type: String,
-        required: true
-      },
-      isError: {
-        type: Boolean,
-        required: true
-      },
-      isUnknown: {
-        type: Boolean,
-        required: false
-      },
-      title: {
-        type: String
-      },
-      message: {
-        type: String
-      },
-      time: {
-        type: String
-      },
-      popperKey: {
-        type: String,
-        required: true
-      },
-      popperPlacement: {
-        type: String
-      }
+    isError: {
+      type: Boolean,
+      required: true
     },
-    computed: {
-      color () {
-        if (this.isError) {
-          return 'red'
-        }
-        if (this.isUnknown) {
-          return 'grey lighten-1'
-        }
-        return 'cyan darken-2'
-      },
-      chipTextColor () {
-        if (this.isError) {
-          return 'red'
-        }
-        if (this.isUnknown) {
-          return 'grey lighten-1'
-        }
-        return 'cyan darken-2'
+    isUnknown: {
+      type: Boolean,
+      required: false
+    },
+    title: {
+      type: String
+    },
+    message: {
+      type: String
+    },
+    time: {
+      type: String
+    },
+    popperKey: {
+      type: String,
+      required: true
+    },
+    popperPlacement: {
+      type: String
+    }
+  },
+  computed: {
+    color () {
+      if (this.isError) {
+        return 'red'
       }
+      if (this.isUnknown) {
+        return 'grey lighten-1'
+      }
+      return 'cyan darken-2'
+    },
+    chipTextColor () {
+      if (this.isError) {
+        return 'red'
+      }
+      if (this.isUnknown) {
+        return 'grey lighten-1'
+      }
+      return 'cyan darken-2'
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

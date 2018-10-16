@@ -56,90 +56,88 @@ limitations under the License.
   </v-card>
 </template>
 
-
-
 <script>
-  import ShootStatus from '@/components/ShootStatus'
-  import StatusTags from '@/components/StatusTags'
-  import RetryOperation from '@/components/RetryOperation'
-  import ClusterMetrics from '@/components/ClusterMetrics'
-  import get from 'lodash/get'
-  import { isHibernated,
-           isReconciliationDeactivated,
-           isTypeDelete } from '@/utils'
-  import { mapGetters } from 'vuex'
+import ShootStatus from '@/components/ShootStatus'
+import StatusTags from '@/components/StatusTags'
+import RetryOperation from '@/components/RetryOperation'
+import ClusterMetrics from '@/components/ClusterMetrics'
+import get from 'lodash/get'
+import { isHibernated,
+  isReconciliationDeactivated,
+  isTypeDelete } from '@/utils'
+import { mapGetters } from 'vuex'
 
-  export default {
-    components: {
-      ShootStatus,
-      StatusTags,
-      RetryOperation,
-      ClusterMetrics
+export default {
+  components: {
+    ShootStatus,
+    StatusTags,
+    RetryOperation,
+    ClusterMetrics
+  },
+  props: {
+    shootItem: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      shootStatusTitle: ''
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'isAdmin'
+    ]),
+    lastOperation () {
+      return get(this.shootItem, 'status.lastOperation', {})
     },
-    props: {
-      shootItem: {
-        type: Object
-      }
+    lastError () {
+      return get(this.shootItem, 'status.lastError', {})
     },
-    data () {
-      return {
-        shootStatusTitle: ''
-      }
+    name () {
+      return get(this.shootItem, 'metadata.name')
     },
-    computed: {
-      ...mapGetters([
-        'isAdmin'
-      ]),
-      lastOperation () {
-        return get(this.shootItem, 'status.lastOperation', {})
-      },
-      lastError () {
-        return get(this.shootItem, 'status.lastError', {})
-      },
-      name () {
-        return get(this.shootItem, 'metadata.name')
-      },
-      namespace () {
-        return get(this.shootItem, 'metadata.namespace')
-      },
-      metadata () {
-        return get(this.shootItem, 'metadata', {})
-      },
-      annotations () {
-        return get(this.shootItem, 'metadata.annotations', {})
-      },
-      spec () {
-        return get(this.shootItem, 'spec', {})
-      },
-      status () {
-        return get(this.shootItem, 'status', {})
-      },
-      conditions () {
-        return get(this.shootItem, 'status.conditions', [])
-      },
-      isHibernated () {
-        return isHibernated(this.spec)
-      },
-      reconciliationDeactivated () {
-        const metadata = { annotations: this.annotations }
-        return isReconciliationDeactivated(metadata)
-      },
-      isTypeDelete () {
-        return isTypeDelete(this.lastOperation)
-      },
-      info () {
-        return get(this.shootItem, 'info', {})
-      },
-      seedShootIngressDomain () {
-        return this.info.seedShootIngressDomain || ''
-      }
+    namespace () {
+      return get(this.shootItem, 'metadata.namespace')
     },
-    methods: {
-      onShootStatusTitleChange (shootStatusTitle) {
-        this.shootStatusTitle = shootStatusTitle
-      }
+    metadata () {
+      return get(this.shootItem, 'metadata', {})
+    },
+    annotations () {
+      return get(this.shootItem, 'metadata.annotations', {})
+    },
+    spec () {
+      return get(this.shootItem, 'spec', {})
+    },
+    status () {
+      return get(this.shootItem, 'status', {})
+    },
+    conditions () {
+      return get(this.shootItem, 'status.conditions', [])
+    },
+    isHibernated () {
+      return isHibernated(this.spec)
+    },
+    reconciliationDeactivated () {
+      const metadata = { annotations: this.annotations }
+      return isReconciliationDeactivated(metadata)
+    },
+    isTypeDelete () {
+      return isTypeDelete(this.lastOperation)
+    },
+    info () {
+      return get(this.shootItem, 'info', {})
+    },
+    seedShootIngressDomain () {
+      return this.info.seedShootIngressDomain || ''
+    }
+  },
+  methods: {
+    onShootStatusTitleChange (shootStatusTitle) {
+      this.shootStatusTitle = shootStatusTitle
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

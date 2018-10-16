@@ -83,268 +83,266 @@ limitations under the License.
   </v-dialog>
 </template>
 
-
 <script>
-  import { mapActions, mapState, mapGetters } from 'vuex'
-  import { required, maxLength } from 'vuelidate/lib/validators'
-  import { unique, resourceName } from '@/utils/validators'
-  import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
-  import CloudProfile from '@/components/CloudProfile'
-  import cloneDeep from 'lodash/cloneDeep'
-  import get from 'lodash/get'
-  import head from 'lodash/head'
-  import sortBy from 'lodash/sortBy'
-  import Alert from '@/components/Alert'
-  import { errorDetailsFromError, isConflict } from '@/utils/error'
+import { mapActions, mapState, mapGetters } from 'vuex'
+import { required, maxLength } from 'vuelidate/lib/validators'
+import { unique, resourceName } from '@/utils/validators'
+import { getValidationErrors, setDelayedInputFocus, setInputFocus, textColor } from '@/utils'
+import CloudProfile from '@/components/CloudProfile'
+import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import sortBy from 'lodash/sortBy'
+import Alert from '@/components/Alert'
+import { errorDetailsFromError, isConflict } from '@/utils/error'
 
-  const validationErrors = {
-    secretName: {
-      required: 'You can\'t leave this empty.',
-      maxLength: 'It exceeds the maximum length of 128 characters.',
-      resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
-      unique: 'Name is taken. Try another.'
-    }
+const validationErrors = {
+  secretName: {
+    required: 'You can\'t leave this empty.',
+    maxLength: 'It exceeds the maximum length of 128 characters.',
+    resourceName: 'Please use only lowercase alphanumeric characters and hyphen',
+    unique: 'Name is taken. Try another.'
   }
+}
 
-  export default {
-    name: 'secret-dialog',
-    components: {
-      CloudProfile,
-      Alert,
+export default {
+  name: 'secret-dialog',
+  components: {
+    CloudProfile,
+    Alert,
+    errorMessage: undefined,
+    detailedErrorMessage: undefined
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
+    },
+    data: {
+      type: Object,
+      required: true
+    },
+    dataValid: {
+      type: Boolean,
+      required: true
+    },
+    cloudProviderKind: {
+      type: String,
+      required: true
+    },
+    backgroundSrc: {
+      type: String,
+      required: true
+    },
+    createTitle: {
+      type: String,
+      required: true
+    },
+    replaceTitle: {
+      type: String,
+      required: true
+    },
+    secret: {
+      type: Object
+    },
+    color: {
+      type: String,
+      required: true
+    },
+    infraIcon: {
+      type: String,
+      required: true
+    }
+  },
+  data () {
+    return {
+      selectedCloudProfile: undefined,
+      secretName: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
-    },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
+      detailedErrorMessage: undefined,
+      validationErrors
+    }
+  },
+  validations () {
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
+  },
+  computed: {
+    ...mapState([
+      'namespace'
+    ]),
+    ...mapGetters([
+      'infrastructureSecretList',
+      'cloudProfilesByCloudProviderKind'
+    ]),
+    cloudProfileName: {
+      get () {
+        return this.selectedCloudProfile
       },
-      data: {
-        type: Object,
-        required: true
-      },
-      dataValid: {
-        type: Boolean,
-        required: true
-      },
-      cloudProviderKind: {
-        type: String,
-        required: true
-      },
-      backgroundSrc: {
-        type: String,
-        required: true
-      },
-      createTitle: {
-        type: String,
-        required: true
-      },
-      replaceTitle: {
-        type: String,
-        required: true
-      },
-      secret: {
-        type: Object
-      },
-      color: {
-        type: String,
-        required: true
-      },
-      infraIcon: {
-        type: String,
-        required: true
+      set (cloudProfileName) {
+        this.selectedCloudProfile = cloudProfileName
+        this.$emit('cloudProfileName', cloudProfileName)
       }
     },
-    data () {
-      return {
-        selectedCloudProfile: undefined,
-        secretName: undefined,
-        errorMessage: undefined,
-        detailedErrorMessage: undefined,
-        validationErrors
+    cloudProfiles () {
+      return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
+    },
+    bindingName () {
+      if (this.isCreateMode) {
+        return this.secretName
+      } else {
+        return get(this.secret, 'metadata.bindingName')
       }
     },
-    validations () {
-      // had to move the code to a computed property so that the getValidationErrors method can access it
-      return this.validators
-    },
-    computed: {
-      ...mapState([
-        'namespace'
-      ]),
-      ...mapGetters([
-        'infrastructureSecretList',
-        'cloudProfilesByCloudProviderKind'
-      ]),
-      cloudProfileName: {
-        get () {
-          return this.selectedCloudProfile
-        },
-        set (cloudProfileName) {
-          this.selectedCloudProfile = cloudProfileName
-          this.$emit('cloudProfileName', cloudProfileName)
-        }
+    visible: {
+      get () {
+        return this.value
       },
-      cloudProfiles () {
-        return sortBy(this.cloudProfilesByCloudProviderKind(this.cloudProviderKind), [(item) => item.metadata.name])
-      },
-      bindingName () {
-        if (this.isCreateMode) {
-          return this.secretName
-        } else {
-          return get(this.secret, 'metadata.bindingName')
-        }
-      },
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
-      valid () {
-        let isCloudProfileValid = true
-        if (this.isCreateMode) {
-          isCloudProfileValid = this.isValid(this.$refs.cloudProfile)
-        }
-        return isCloudProfileValid && this.dataValid && this.isValid(this)
-      },
-      validators () {
-        const validators = {}
-        if (this.isCreateMode) {
-          validators.secretName = {
-            required,
-            maxLength: maxLength(128),
-            resourceName,
-            unique: unique('infrastructureSecretNames')
-          }
-        }
-        return validators
-      },
-      infrastructureSecretNames () {
-        return this.infrastructureSecretList.map(item => item.metadata.name)
-      },
-      isCreateMode () {
-        return !this.secret
-      },
-      submitButtonText () {
-        return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
-      },
-      title () {
-        return this.isCreateMode ? this.createTitle : this.replaceTitle
-      },
-      textColor () {
-        return textColor(this.color)
+      set (value) {
+        this.$emit('input', value)
       }
     },
-    methods: {
-      ...mapActions([
-        'createInfrastructureSecret',
-        'updateInfrastructureSecret'
-      ]),
-      isValid (component) {
-        let isValid = true
-        if (component) {
-          isValid = !component.$v.$invalid
+    valid () {
+      let isCloudProfileValid = true
+      if (this.isCreateMode) {
+        isCloudProfileValid = this.isValid(this.$refs.cloudProfile)
+      }
+      return isCloudProfileValid && this.dataValid && this.isValid(this)
+    },
+    validators () {
+      const validators = {}
+      if (this.isCreateMode) {
+        validators.secretName = {
+          required,
+          maxLength: maxLength(128),
+          resourceName,
+          unique: unique('infrastructureSecretNames')
         }
-        return isValid
-      },
-      hide () {
-        this.visible = false
-        if (get(this.$route.params, 'name')) {
-          // eslint-disable-next-line lodash/prefer-lodash-method
-          this.$router.replace({ name: 'Secrets', params: { namespace: this.namespace } })
-        }
-      },
-      cancel () {
-        this.hide()
-      },
-      submit () {
-        this.$v.$touch()
-        if (this.valid) {
-          this.save()
-            .then(secret => {
-              this.hide()
-            })
-            .catch(err => {
-              if (this.isCreateMode) {
-                if (isConflict(err)) {
-                  this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
-                  setInputFocus(this, 'secretName')
-                } else {
-                  this.errorMessage = 'Failed to create Infrastructure Secret.'
-                }
+      }
+      return validators
+    },
+    infrastructureSecretNames () {
+      return this.infrastructureSecretList.map(item => item.metadata.name)
+    },
+    isCreateMode () {
+      return !this.secret
+    },
+    submitButtonText () {
+      return this.isCreateMode ? 'Add Secret' : 'Replace Secret'
+    },
+    title () {
+      return this.isCreateMode ? this.createTitle : this.replaceTitle
+    },
+    textColor () {
+      return textColor(this.color)
+    }
+  },
+  methods: {
+    ...mapActions([
+      'createInfrastructureSecret',
+      'updateInfrastructureSecret'
+    ]),
+    isValid (component) {
+      let isValid = true
+      if (component) {
+        isValid = !component.$v.$invalid
+      }
+      return isValid
+    },
+    hide () {
+      this.visible = false
+      if (get(this.$route.params, 'name')) {
+        // eslint-disable-next-line lodash/prefer-lodash-method
+        this.$router.replace({ name: 'Secrets', params: { namespace: this.namespace } })
+      }
+    },
+    cancel () {
+      this.hide()
+    },
+    submit () {
+      this.$v.$touch()
+      if (this.valid) {
+        this.save()
+          .then(secret => {
+            this.hide()
+          })
+          .catch(err => {
+            if (this.isCreateMode) {
+              if (isConflict(err)) {
+                this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
+                setInputFocus(this, 'secretName')
               } else {
-                this.errorMessage = 'Failed to update Infrastructure Secret.'
+                this.errorMessage = 'Failed to create Infrastructure Secret.'
               }
+            } else {
+              this.errorMessage = 'Failed to update Infrastructure Secret.'
+            }
 
-              const errorDetails = errorDetailsFromError(err)
-              console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-              this.detailedErrorMessage = errorDetails.detailedMessage
-            })
-        }
-      },
-      save () {
-        if (this.isCreateMode) {
-          const metadata = {
-            name: this.secretName,
-            namespace: this.namespace,
-            cloudProviderKind: this.cloudProviderKind,
-            cloudProfileName: this.cloudProfileName,
-            bindingName: this.bindingName
-          }
-
-          return this.createInfrastructureSecret({metadata, data: this.data})
-        } else {
-          const metadata = cloneDeep(this.secret.metadata)
-
-          return this.updateInfrastructureSecret({metadata, data: this.data})
-        }
-      },
-      reset () {
-        this.$v.$reset()
-        const cloudProfileRef = this.$refs.cloudProfile
-        if (cloudProfileRef) {
-          cloudProfileRef.$v.$reset()
-        }
-
-        this.accessKeyId = ''
-        this.secretAccessKey = ''
-
-        if (this.isCreateMode) {
-          this.secretName = `my-${this.cloudProviderKind}-secret`
-
-          if (this.cloudProfiles.length === 1) {
-            this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
-          } else {
-            this.cloudProfileName = undefined
-          }
-
-          setDelayedInputFocus(this, 'secretName')
-        } else {
-          this.secretName = get(this.secret, 'metadata.name')
-          this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
-          setDelayedInputFocus(this, 'accessKeyId')
-        }
-
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
+            const errorDetails = errorDetailsFromError(err)
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+            this.detailedErrorMessage = errorDetails.detailedMessage
+          })
       }
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
+    save () {
+      if (this.isCreateMode) {
+        const metadata = {
+          name: this.secretName,
+          namespace: this.namespace,
+          cloudProviderKind: this.cloudProviderKind,
+          cloudProfileName: this.cloudProfileName,
+          bindingName: this.bindingName
         }
+
+        return this.createInfrastructureSecret({ metadata, data: this.data })
+      } else {
+        const metadata = cloneDeep(this.secret.metadata)
+
+        return this.updateInfrastructureSecret({ metadata, data: this.data })
+      }
+    },
+    reset () {
+      this.$v.$reset()
+      const cloudProfileRef = this.$refs.cloudProfile
+      if (cloudProfileRef) {
+        cloudProfileRef.$v.$reset()
+      }
+
+      this.accessKeyId = ''
+      this.secretAccessKey = ''
+
+      if (this.isCreateMode) {
+        this.secretName = `my-${this.cloudProviderKind}-secret`
+
+        if (this.cloudProfiles.length === 1) {
+          this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
+        } else {
+          this.cloudProfileName = undefined
+        }
+
+        setDelayedInputFocus(this, 'secretName')
+      } else {
+        this.secretName = get(this.secret, 'metadata.name')
+        this.cloudProfileName = get(this.secret, 'metadata.cloudProfileName')
+        setDelayedInputFocus(this, 'accessKeyId')
+      }
+
+      this.errorMessage = undefined
+      this.detailedMessage = undefined
+    },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>
-
 
 <style lang="styl" scoped>
 

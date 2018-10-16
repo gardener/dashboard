@@ -35,7 +35,7 @@ const getters = {
 const actions = {
   getAll: ({ commit, rootState }) => {
     const user = rootState.user
-    return getCloudprofiles({user})
+    return getCloudprofiles({ user })
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all

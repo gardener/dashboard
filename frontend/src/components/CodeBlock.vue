@@ -27,86 +27,86 @@ limitations under the License.
 </template>
 
 <script>
-  import trim from 'lodash/trim'
-  import split from 'lodash/split'
-  import replace from 'lodash/replace'
-  import highlight from 'highlight.js/lib/highlight.js'
-  import highlightJSON from 'highlight.js/lib/languages/json'
-  import highlightYAML from 'highlight.js/lib/languages/yaml'
-  import highlightJavascript from 'highlight.js/lib/languages/javascript'
-  import highlightBash from 'highlight.js/lib/languages/bash'
-  import Clipboard from 'clipboard'
-  highlight.registerLanguage('json', highlightJSON)
-  highlight.registerLanguage('yaml', highlightYAML)
-  highlight.registerLanguage('javascript', highlightJavascript)
-  highlight.registerLanguage('bash', highlightBash)
-  export default {
-    props: {
-      lang: String,
-      height: {
-        type: [Number, String],
-        default: '450px'
-      },
-      content: {
-        type: String,
-        default: ''
-      }
+import trim from 'lodash/trim'
+import split from 'lodash/split'
+import replace from 'lodash/replace'
+import highlight from 'highlight.js/lib/highlight.js'
+import highlightJSON from 'highlight.js/lib/languages/json'
+import highlightYAML from 'highlight.js/lib/languages/yaml'
+import highlightJavascript from 'highlight.js/lib/languages/javascript'
+import highlightBash from 'highlight.js/lib/languages/bash'
+import Clipboard from 'clipboard'
+highlight.registerLanguage('json', highlightJSON)
+highlight.registerLanguage('yaml', highlightYAML)
+highlight.registerLanguage('javascript', highlightJavascript)
+highlight.registerLanguage('bash', highlightBash)
+export default {
+  props: {
+    lang: String,
+    height: {
+      type: [Number, String],
+      default: '450px'
     },
-    data: () => ({
-      showMessage: false,
-      clipboard: undefined
-    }),
-    methods: {
-      enableCopy () {
-        if (this.clipboard) {
-          this.clipboard.destroy()
-        }
-        const target = this.$refs.block
-        const btn = this.$refs.copy.$el
-        this.clipboard = new Clipboard(btn, {
-          target: () => target
+    content: {
+      type: String,
+      default: ''
+    }
+  },
+  data: () => ({
+    showMessage: false,
+    clipboard: undefined
+  }),
+  methods: {
+    enableCopy () {
+      if (this.clipboard) {
+        this.clipboard.destroy()
+      }
+      const target = this.$refs.block
+      const btn = this.$refs.copy.$el
+      this.clipboard = new Clipboard(btn, {
+        target: () => target
+      })
+      this.clipboard.on('success', (event) => {
+        event.clearSelection()
+        this.showMessage = true
+        window.setTimeout(() => {
+          this.showMessage = false
+        }, 2000)
+      })
+    },
+    prettyPrint (textContent) {
+      const block = this.$refs.block
+      if (textContent) {
+        block.textContent = textContent
+      }
+      let lines = split(block.textContent, '\n')
+      let matches
+      if (lines[0] === '') {
+        lines.shift()
+      }
+      const indentation = (matches = (/^[\s\t]+/).exec(lines[0])) !== null ? matches[0] : null
+      if (indentation) {
+        lines = lines.map(line => {
+          line = replace(line, indentation, '')
+          line = replace(line, /\t/g, '  ')
+          return line
         })
-        this.clipboard.on('success', (event) => {
-          event.clearSelection()
-          this.showMessage = true
-          window.setTimeout(() => {
-            this.showMessage = false
-          }, 2000)
-        })
-      },
-      prettyPrint (textContent) {
-        const block = this.$refs.block
-        if (textContent) {
-          block.textContent = textContent
-        }
-        let lines = split(block.textContent, '\n')
-        let matches
-        if (lines[0] === '') {
-          lines.shift()
-        }
-        const indentation = (matches = (/^[\s\t]+/).exec(lines[0])) !== null ? matches[0] : null
-        if (indentation) {
-          lines = lines.map(line => {
-            line = replace(line, indentation, '')
-            line = replace(line, /\t/g, '  ')
-            return line
-          })
-          block.textContent = trim(lines.join('\n'))
-        }
-        highlight.highlightBlock(block)
-        this.$emit('highlightBlock')
+        block.textContent = trim(lines.join('\n'))
       }
-    },
-    mounted () {
-      this.enableCopy()
-      this.prettyPrint(this.content)
-    },
-    watch: {
-      content (textContent) {
-        this.prettyPrint(textContent)
-      }
+      highlight.highlightBlock(block)
+      this.$emit('highlightBlock')
+    }
+  },
+  mounted () {
+    this.enableCopy()
+    this.prettyPrint(this.content)
+  },
+  watch: {
+    content (textContent) {
+      this.prettyPrint(textContent)
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

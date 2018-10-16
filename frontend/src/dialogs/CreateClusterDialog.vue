@@ -400,62 +400,210 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters, mapActions, mapState } from 'vuex'
-  import WorkerInputGeneric from '@/components/WorkerInputGeneric'
-  import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
-  import CloudProfile from '@/components/CloudProfile'
-  import Alert from '@/components/Alert'
-  import find from 'lodash/find'
-  import get from 'lodash/get'
-  import head from 'lodash/head'
-  import sortBy from 'lodash/sortBy'
-  import map from 'lodash/map'
-  import cloneDeep from 'lodash/cloneDeep'
-  import every from 'lodash/every'
-  import noop from 'lodash/noop'
-  import isEmpty from 'lodash/isEmpty'
-  import forEach from 'lodash/forEach'
-  import filter from 'lodash/filter'
-  import reduce from 'lodash/reduce'
-  import set from 'lodash/set'
-  import pick from 'lodash/pick'
-  import omit from 'lodash/omit'
-  import concat from 'lodash/concat'
-  import sample from 'lodash/sample'
-  import { required, maxLength } from 'vuelidate/lib/validators'
-  import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-  import CodeBlock from '@/components/CodeBlock'
-  import InfraIcon from '@/components/InfrastructureIcon'
-  import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
-  import { errorDetailsFromError } from '@/utils/error'
-  import moment from 'moment-timezone'
+import { mapGetters, mapActions, mapState } from 'vuex'
+import WorkerInputGeneric from '@/components/WorkerInputGeneric'
+import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
+import CloudProfile from '@/components/CloudProfile'
+import Alert from '@/components/Alert'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import sortBy from 'lodash/sortBy'
+import map from 'lodash/map'
+import cloneDeep from 'lodash/cloneDeep'
+import every from 'lodash/every'
+import noop from 'lodash/noop'
+import isEmpty from 'lodash/isEmpty'
+import forEach from 'lodash/forEach'
+import filter from 'lodash/filter'
+import reduce from 'lodash/reduce'
+import set from 'lodash/set'
+import pick from 'lodash/pick'
+import omit from 'lodash/omit'
+import concat from 'lodash/concat'
+import sample from 'lodash/sample'
+import { required, maxLength } from 'vuelidate/lib/validators'
+import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
+import CodeBlock from '@/components/CodeBlock'
+import InfraIcon from '@/components/InfrastructureIcon'
+import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+import { errorDetailsFromError } from '@/utils/error'
+import moment from 'moment-timezone'
 
-  const semSort = require('semver-sort')
+const semSort = require('semver-sort')
 
-  function shortRandomString (length) {
-    const start = 'abcdefghijklmnopqrstuvwxyz'
-    const possible = start + '0123456789'
-    var text = start.charAt(Math.floor(Math.random() * start.length))
-    for (var i = 0; i < (length - 1); i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length))
-    }
-    return text
+function shortRandomString (length) {
+  const start = 'abcdefghijklmnopqrstuvwxyz'
+  const possible = start + '0123456789'
+  var text = start.charAt(Math.floor(Math.random() * start.length))
+  for (var i = 0; i < (length - 1); i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
+  return text
+}
 
-  const validationErrors = {
+const validationErrors = {
+  shootDefinition: {
+    metadata: {
+      name: {
+        required: 'Name is required',
+        maxLength: 'Name ist too long',
+        resourceName: 'Name must only be lowercase letters, numbers and hyphens',
+        unique: 'Cluster name must be unique',
+        noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
+        noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
+      },
+      annotations: {
+        'garden.sapcloud.io/purpose': {
+          required: 'Purpose is required'
+        }
+      }
+    },
+    spec: {
+      cloud: {
+        secretBindingRef: {
+          name: {
+            required: 'Secret is required'
+          }
+        },
+        region: {
+          required: 'Region is required'
+        }
+      },
+      maintenance: {
+        timeWindow: {
+          begin: {
+            required: 'Maintenance start time is required'
+          }
+        }
+      }
+    }
+  },
+  infrastructureData: {
+    zones: {
+      zonesNotEmpty: 'Zone is required'
+    }
+  }
+}
+
+const standardAddonDefinitionList = [
+  {
+    name: 'cluster-autoscaler',
+    title: 'Cluster Autoscaler',
+    description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
+    visible: false,
+    enabled: true
+  },
+  {
+    name: 'kubernetes-dashboard',
+    title: 'Dashboard',
+    description: 'General-purpose web UI for Kubernetes clusters.',
+    visible: true,
+    enabled: true
+  },
+  {
+    name: 'monocular',
+    title: 'Monocular',
+    description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.',
+    visible: true,
+    enabled: false
+  },
+  {
+    name: 'nginx-ingress',
+    title: 'Nginx Ingress',
+    description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.',
+    visible: false,
+    enabled: true
+  }
+]
+
+const defaultShootDefinition = {
+  apiVersion: 'garden.sapcloud.io/v1beta1',
+  kind: 'Shoot',
+  metadata: {
+    name: null,
+    namespace: null,
+    annotations: {
+      'garden.sapcloud.io/purpose': null
+    }
+  },
+  spec: {
+    cloud: {
+      profile: null,
+      region: null,
+      secretBindingRef: {
+        name: null
+      }
+    },
+    kubernetes: {
+      version: null
+    },
+    dns: {
+      provider: null,
+      domain: null
+    },
+    maintenance: {
+      timeWindow: {
+        begin: null,
+        end: null
+      },
+      autoUpdate: {
+        kubernetesVersion: true
+      }
+    },
+    addons: reduce(standardAddonDefinitionList, (addons, { name, enabled }) => set(addons, name, { enabled }), {})
+  }
+}
+
+export default {
+  name: 'create-cluster-dialog',
+  components: {
+    WorkerInputGeneric,
+    WorkerInputOpenstack,
+    CodeBlock,
+    InfraIcon,
+    Alert,
+    CloudProfile
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: false
+    }
+  },
+  data () {
+    return {
+      shootDefinition: undefined,
+      infrastructureData: undefined,
+      selectedSecret: undefined,
+      selectedInfrastructureKind: undefined,
+      activeTab: 'tab-infra',
+      purposes: ['evaluation', 'development', 'production'],
+      refs_: {},
+      validationErrors,
+      errorMessage: undefined,
+      detailedErrorMessage: undefined,
+      osUpdates: true,
+      timezone: undefined,
+      timezones: moment.tz.names()
+    }
+  },
+  validations: {
     shootDefinition: {
       metadata: {
         name: {
-          required: 'Name is required',
-          maxLength: 'Name ist too long',
-          resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-          unique: 'Cluster name must be unique',
-          noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
-          noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
+          required,
+          maxLength: maxLength(10),
+          noConsecutiveHyphen,
+          noStartEndHyphen, // Order is important for UI hints
+          resourceName,
+          unique (value) {
+            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
+          }
         },
         annotations: {
           'garden.sapcloud.io/purpose': {
-            required: 'Purpose is required'
+            required
           }
         }
       },
@@ -463,17 +611,17 @@ limitations under the License.
         cloud: {
           secretBindingRef: {
             name: {
-              required: 'Secret is required'
+              required
             }
           },
           region: {
-            required: 'Region is required'
+            required
           }
         },
         maintenance: {
           timeWindow: {
             begin: {
-              required: 'Maintenance start time is required'
+              required
             }
           }
         }
@@ -481,640 +629,492 @@ limitations under the License.
     },
     infrastructureData: {
       zones: {
-        zonesNotEmpty: 'Zone is required'
+        zonesNotEmpty () {
+          if (this.infrastructureKind === 'azure') {
+            return true
+          }
+          return !isEmpty(this.infrastructureData.zones)
+        }
       }
     }
-  }
+  },
+  computed: {
+    ...mapState([
+      'user',
+      'namespace'
+    ]),
+    ...mapGetters([
+      'cloudProfileByName',
+      'machineTypesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
+      'cloudProfilesByCloudProviderKind',
+      'regionsByCloudProfileName',
+      'loadBalancerProviderNamesByCloudProfileName',
+      'floatingPoolNamesByCloudProfileName',
+      'cloudProviderKindList',
+      'kubernetesVersions',
+      'infrastructureSecretsByInfrastructureKind',
+      'infrastructureSecretsByCloudProfileName',
+      'projectList',
+      'domainList',
+      'shootByNamespaceAndName',
+      'customAddonDefinitionList'
+    ]),
+    visible: {
+      get () {
+        return this.value
+      },
+      set (value) {
+        this.$emit('input', value)
+      }
+    },
+    clusterName: {
+      get () {
+        return this.shootDefinition.metadata.name
+      },
+      set (name) {
+        this.shootDefinition.metadata.name = name
 
-  const standardAddonDefinitionList = [
-    {
-      name: 'cluster-autoscaler',
-      title: 'Cluster Autoscaler',
-      description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
-      visible: false,
-      enabled: true
+        this.setDefaultDomain()
+      }
     },
-    {
-      name: 'kubernetes-dashboard',
-      title: 'Dashboard',
-      description: 'General-purpose web UI for Kubernetes clusters.',
-      visible: true,
-      enabled: true
+    infrastructureKind: {
+      get () {
+        return this.selectedInfrastructureKind
+      },
+      set (infrastructureKind) {
+        this.selectedInfrastructureKind = infrastructureKind
+        this.infraHandler.setDefaults()
+
+        this.setDefaultCloudProfileName()
+      }
     },
-    {
-      name: 'monocular',
-      title: 'Monocular',
-      description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.',
-      visible: true,
-      enabled: false
+    cloudProfileName: {
+      get () {
+        return this.shootDefinition.spec.cloud.profile
+      },
+      set (cloudProfileName) {
+        this.shootDefinition.spec.cloud.profile = cloudProfileName
+
+        this.setDefaultSecret()
+      }
     },
-    {
-      name: 'nginx-ingress',
-      title: 'Nginx Ingress',
-      description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.',
-      visible: false,
-      enabled: true
+    secret: {
+      get () {
+        return this.selectedSecret
+      },
+      set (secret) {
+        const secretBindingRef = {
+          name: get(secret, 'metadata.bindingName')
+        }
+        this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
+
+        this.selectedSecret = secret
+
+        this.setCloudProfileDefaults()
+
+        this.setDefaultPurpose()
+      }
+    },
+    region: {
+      get () {
+        return get(this.shootDefinition, 'spec.cloud.region')
+      },
+      set (region) {
+        this.shootDefinition.spec.cloud.region = region
+
+        this.infraHandler.setDefaultZone()
+      }
+    },
+    zone: {
+      get () {
+        return head(this.infrastructureData.zones)
+      },
+      set (zone) {
+        this.infrastructureData.zones = [zone]
+      }
+    },
+    localizedMaintenanceBegin: {
+      get () {
+        const momentObj = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone)
+        if (momentObj.isValid()) {
+          return momentObj.format('HH:mm:00')
+        }
+        this.shootDefinition.spec.maintenance.timeWindow.begin = null
+        this.shootDefinition.spec.maintenance.timeWindow.end = null
+        return null
+      },
+      set (newTime) {
+        this.updateMaintenanceWindow({ newTime })
+      }
+    },
+    selectedTimezone: {
+      get () {
+        return this.timezone
+      },
+      set (newTimezone) {
+        this.updateMaintenanceWindow({ newTimezone })
+        this.timezone = newTimezone
+      }
+    },
+    infrastructure () {
+      return this.infrastructureData
+    },
+    cloudProfiles () {
+      return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
+    },
+    cloudProfileNames () {
+      return map(this.cloudProfiles, 'metadata.name')
+    },
+    workers () {
+      return get(this.infrastructureData, 'workers', [])
+    },
+    addons () {
+      return get(this.shootDefinition, 'spec.addons', {})
+    },
+    machineTypes () {
+      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+    },
+    volumeTypes () {
+      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+    },
+    regions () {
+      return this.regionsByCloudProfileName(this.cloudProfileName)
+    },
+    loadBalancerProviderNames () {
+      return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
+    },
+    floatingPoolNames () {
+      return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
+    },
+    zones () {
+      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
+      const predicate = item => item.region === this.region
+      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+    },
+    infrastructureSecretsByKind () {
+      return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKind)
+    },
+    infrastructureSecretsByProfileName () {
+      return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+    },
+    valid () {
+      const workerInput = this.refs_.workerInput
+
+      var workersValid = true
+      if (workerInput) {
+        const isValid = (element, index, array) => {
+          return !element.$v.$invalid
+        }
+        workersValid = every([].concat(workerInput), isValid)
+      }
+      return workersValid && !this.$v.$invalid
+    },
+    sortedKubernetesVersions () {
+      return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
+    },
+    sortedCloudProviderKindList () {
+      return sortBy(this.cloudProviderKindList)
+    },
+    infraHandler () {
+      switch (this.infrastructureKind) {
+        case 'aws':
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  vpc: {
+                    cidr: '10.250.0.0/16'
+                  },
+                  internal: [
+                    '10.250.112.0/22'
+                  ],
+                  nodes: '10.250.0.0/16',
+                  pods: '100.96.0.0/11',
+                  public: [
+                    '10.250.96.0/22'
+                  ],
+                  services: '100.64.0.0/13',
+                  workers: [
+                    '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
+              }
+            }
+          }
+        case 'azure':
+          return {
+            setDefaultZone: noop,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  vnet: {
+                    cidr: '10.250.0.0/16'
+                  },
+                  nodes: '10.250.0.0/19',
+                  pods: '100.96.0.0/11',
+                  services: '100.64.0.0/13',
+                  public: '10.250.96.0/22',
+                  workers: '10.250.0.0/19'
+                },
+                workers: null
+              }
+            }
+          }
+        case 'gcp':
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  nodes: '10.250.0.0/19',
+                  pods: '100.96.0.0/11',
+                  services: '100.64.0.0/13',
+                  workers: [
+                    '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
+              }
+            }
+          }
+        case 'openstack':
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  nodes: '10.250.0.0/19',
+                  pods: '100.96.0.0/11',
+                  services: '100.64.0.0/13',
+                  workers: [
+                    '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
+              }
+            }
+          }
+      }
+    },
+    projectName () {
+      const predicate = item => item.metadata.namespace === this.namespace
+      const project = find(this.projectList, predicate)
+      return get(project, 'metadata.name')
+    },
+    isOwnSecretBinding () {
+      return (secret) => {
+        return isOwnSecretBinding(secret)
+      }
+    },
+    selfTerminationDays () {
+      const clusterLifetimeDays = function (quotas, scope) {
+        const predicate = item => get(item, 'spec.scope') === scope
+        return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+      }
+
+      const quotas = get(this.selectedSecret, 'quotas')
+      let terminationDays = clusterLifetimeDays(quotas, 'project')
+      if (!terminationDays) {
+        terminationDays = clusterLifetimeDays(quotas, 'secret')
+      }
+
+      return terminationDays
+    },
+    filteredPurposes () {
+      return this.selfTerminationDays ? ['evaluation'] : this.purposes
+    },
+    addonDefinitionList () {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
+      return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
+    },
+    secretHint () {
+      if (this.selfTerminationDays) {
+        return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
+      } else {
+        return undefined
+      }
     }
-  ]
-
-  const defaultShootDefinition = {
-    apiVersion: 'garden.sapcloud.io/v1beta1',
-    kind: 'Shoot',
-    metadata: {
-      name: null,
-      namespace: null,
-      annotations: {
-        'garden.sapcloud.io/purpose': null
-      }
+  },
+  methods: {
+    ...mapActions([
+      'createShoot'
+    ]),
+    get (object, path, defaultValue) {
+      return get(object, path, defaultValue)
     },
-    spec: {
-      cloud: {
-        profile: null,
-        region: null,
-        secretBindingRef: {
-          name: null
-        }
-      },
-      kubernetes: {
-        version: null
-      },
-      dns: {
-        provider: null,
-        domain: null
-      },
-      maintenance: {
-        timeWindow: {
-          begin: null,
-          end: null
-        },
-        autoUpdate: {
-          kubernetesVersion: true
-        }
-      },
-      addons: reduce(standardAddonDefinitionList, (addons, {name, enabled}) => set(addons, name, {enabled}), {})
-    }
-  }
-
-  export default {
-    name: 'create-cluster-dialog',
-    components: {
-      WorkerInputGeneric,
-      WorkerInputOpenstack,
-      CodeBlock,
-      InfraIcon,
-      Alert,
-      CloudProfile
-    },
-    props: {
-      value: {
-        type: Boolean,
-        required: false
-      }
-    },
-    data () {
-      return {
-        shootDefinition: undefined,
-        infrastructureData: undefined,
-        selectedSecret: undefined,
-        selectedInfrastructureKind: undefined,
-        activeTab: 'tab-infra',
-        purposes: ['evaluation', 'development', 'production'],
-        refs_: {},
-        validationErrors,
-        errorMessage: undefined,
-        detailedErrorMessage: undefined,
-        osUpdates: true,
-        timezone: undefined,
-        timezones: moment.tz.names()
-      }
-    },
-    validations: {
-      shootDefinition: {
-        metadata: {
-          name: {
-            required,
-            maxLength: maxLength(10),
-            noConsecutiveHyphen,
-            noStartEndHyphen, // Order is important for UI hints
-            resourceName,
-            unique (value) {
-              return this.shootByNamespaceAndName({namespace: this.namespace, name: value}) === undefined
-            }
-          },
-          annotations: {
-            'garden.sapcloud.io/purpose': {
-              required
-            }
-          }
-        },
-        spec: {
-          cloud: {
-            secretBindingRef: {
-              name: {
-                required
-              }
-            },
-            region: {
-              required
-            }
-          },
-          maintenance: {
-            timeWindow: {
-              begin: {
-                required
-              }
-            }
-          }
-        }
-      },
-      infrastructureData: {
-        zones: {
-          zonesNotEmpty () {
-            if (this.infrastructureKind === 'azure') {
-              return true
-            }
-            return !isEmpty(this.infrastructureData.zones)
-          }
-        }
-      }
-    },
-    computed: {
-      ...mapState([
-        'user',
-        'namespace'
-      ]),
-      ...mapGetters([
-        'cloudProfileByName',
-        'machineTypesByCloudProfileName',
-        'volumeTypesByCloudProfileName',
-        'cloudProfilesByCloudProviderKind',
-        'regionsByCloudProfileName',
-        'loadBalancerProviderNamesByCloudProfileName',
-        'floatingPoolNamesByCloudProfileName',
-        'cloudProviderKindList',
-        'kubernetesVersions',
-        'infrastructureSecretsByInfrastructureKind',
-        'infrastructureSecretsByCloudProfileName',
-        'projectList',
-        'domainList',
-        'shootByNamespaceAndName',
-        'customAddonDefinitionList'
-      ]),
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
-      clusterName: {
-        get () {
-          return this.shootDefinition.metadata.name
-        },
-        set (name) {
-          this.shootDefinition.metadata.name = name
-
-          this.setDefaultDomain()
-        }
-      },
-      infrastructureKind: {
-        get () {
-          return this.selectedInfrastructureKind
-        },
-        set (infrastructureKind) {
-          this.selectedInfrastructureKind = infrastructureKind
-          this.infraHandler.setDefaults()
-
-          this.setDefaultCloudProfileName()
-        }
-      },
-      cloudProfileName: {
-        get () {
-          return this.shootDefinition.spec.cloud.profile
-        },
-        set (cloudProfileName) {
-          this.shootDefinition.spec.cloud.profile = cloudProfileName
-
-          this.setDefaultSecret()
-        }
-      },
-      secret: {
-        get () {
-          return this.selectedSecret
-        },
-        set (secret) {
-          const secretBindingRef = {
-            name: get(secret, 'metadata.bindingName')
-          }
-          this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
-
-          this.selectedSecret = secret
-
-          this.setCloudProfileDefaults()
-
-          this.setDefaultPurpose()
-        }
-      },
-      region: {
-        get () {
-          return get(this.shootDefinition, 'spec.cloud.region')
-        },
-        set (region) {
-          this.shootDefinition.spec.cloud.region = region
-
-          this.infraHandler.setDefaultZone()
-        }
-      },
-      zone: {
-        get () {
-          return head(this.infrastructureData.zones)
-        },
-        set (zone) {
-          this.infrastructureData.zones = [zone]
-        }
-      },
-      localizedMaintenanceBegin: {
-        get () {
-          const momentObj = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone)
-          if (momentObj.isValid()) {
-            return momentObj.format('HH:mm:00')
-          }
-          this.shootDefinition.spec.maintenance.timeWindow.begin = null
-          this.shootDefinition.spec.maintenance.timeWindow.end = null
-          return null
-        },
-        set (newTime) {
-          this.updateMaintenanceWindow({newTime})
-        }
-      },
-      selectedTimezone: {
-        get () {
-          return this.timezone
-        },
-        set (newTimezone) {
-          this.updateMaintenanceWindow({newTimezone})
-          this.timezone = newTimezone
-        }
-      },
-      infrastructure () {
-        return this.infrastructureData
-      },
-      cloudProfiles () {
-        return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
-      },
-      cloudProfileNames () {
-        return map(this.cloudProfiles, 'metadata.name')
-      },
-      workers () {
-        return get(this.infrastructureData, 'workers', [])
-      },
-      addons () {
-        return get(this.shootDefinition, 'spec.addons', {})
-      },
-      machineTypes () {
-        return this.machineTypesByCloudProfileName(this.cloudProfileName)
-      },
-      volumeTypes () {
-        return this.volumeTypesByCloudProfileName(this.cloudProfileName)
-      },
-      regions () {
-        return this.regionsByCloudProfileName(this.cloudProfileName)
-      },
-      loadBalancerProviderNames () {
-        return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
-      },
-      floatingPoolNames () {
-        return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
-      },
-      zones () {
-        const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-        const predicate = item => item.region === this.region
-        return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
-      },
-      infrastructureSecretsByKind () {
-        return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKind)
-      },
-      infrastructureSecretsByProfileName () {
-        return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
-      },
-      valid () {
-        const workerInput = this.refs_.workerInput
-
-        var workersValid = true
-        if (workerInput) {
-          const isValid = (element, index, array) => {
-            return !element.$v.$invalid
-          }
-          workersValid = every([].concat(workerInput), isValid)
-        }
-        return workersValid && !this.$v.$invalid
-      },
-      sortedKubernetesVersions () {
-        return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
-      },
-      sortedCloudProviderKindList () {
-        return sortBy(this.cloudProviderKindList)
-      },
-      infraHandler () {
-        switch (this.infrastructureKind) {
-          case 'aws':
-            return {
-              setDefaultZone: this.setDefaultZone,
-              setDefaults: () => {
-                this.infrastructureData = {
-                  networks: {
-                    vpc: {
-                      cidr: '10.250.0.0/16'
-                    },
-                    internal: [
-                      '10.250.112.0/22'
-                    ],
-                    nodes: '10.250.0.0/16',
-                    pods: '100.96.0.0/11',
-                    public: [
-                      '10.250.96.0/22'
-                    ],
-                    services: '100.64.0.0/13',
-                    workers: [
-                      '10.250.0.0/19'
-                    ]
-                  },
-                  workers: null,
-                  zones: null
-                }
-              }
-            }
-          case 'azure':
-            return {
-              setDefaultZone: noop,
-              setDefaults: () => {
-                this.infrastructureData = {
-                  networks: {
-                    vnet: {
-                      cidr: '10.250.0.0/16'
-                    },
-                    nodes: '10.250.0.0/19',
-                    pods: '100.96.0.0/11',
-                    services: '100.64.0.0/13',
-                    public: '10.250.96.0/22',
-                    workers: '10.250.0.0/19'
-                  },
-                  workers: null
-                }
-              }
-            }
-          case 'gcp':
-            return {
-              setDefaultZone: this.setDefaultZone,
-              setDefaults: () => {
-                this.infrastructureData = {
-                  networks: {
-                    nodes: '10.250.0.0/19',
-                    pods: '100.96.0.0/11',
-                    services: '100.64.0.0/13',
-                    workers: [
-                      '10.250.0.0/19'
-                    ]
-                  },
-                  workers: null,
-                  zones: null
-                }
-              }
-            }
-          case 'openstack':
-            return {
-              setDefaultZone: this.setDefaultZone,
-              setDefaults: () => {
-                this.infrastructureData = {
-                  networks: {
-                    nodes: '10.250.0.0/19',
-                    pods: '100.96.0.0/11',
-                    services: '100.64.0.0/13',
-                    workers: [
-                      '10.250.0.0/19'
-                    ]
-                  },
-                  workers: null,
-                  zones: null
-                }
-              }
-            }
-        }
-      },
-      projectName () {
-        const predicate = item => item.metadata.namespace === this.namespace
-        const project = find(this.projectList, predicate)
-        return get(project, 'metadata.name')
-      },
-      isOwnSecretBinding () {
-        return (secret) => {
-          return isOwnSecretBinding(secret)
-        }
-      },
-      selfTerminationDays () {
-        const clusterLifetimeDays = function (quotas, scope) {
-          const predicate = item => get(item, 'spec.scope') === scope
-          return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
-        }
-
-        const quotas = get(this.selectedSecret, 'quotas')
-        let terminationDays = clusterLifetimeDays(quotas, 'project')
-        if (!terminationDays) {
-          terminationDays = clusterLifetimeDays(quotas, 'secret')
-        }
-
-        return terminationDays
-      },
-      filteredPurposes () {
-        return this.selfTerminationDays ? ['evaluation'] : this.purposes
-      },
-      addonDefinitionList () {
-        const project = find(this.projectList, ['metadata.namespace', this.namespace])
-        const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
-        return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
-      },
-      secretHint () {
-        if (this.selfTerminationDays) {
-          return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
-        } else {
-          return undefined
-        }
-      }
-    },
-    methods: {
-      ...mapActions([
-        'createShoot'
-      ]),
-      get (object, path, defaultValue) {
-        return get(object, path, defaultValue)
-      },
-      createShootResource () {
-        const data = cloneDeep(this.shootDefinition)
-        const annotations = data.metadata.annotations
-        const infrastructureData = cloneDeep(this.infrastructureData)
-        forEach(infrastructureData.workers, worker => {
-          delete worker.id
-        })
-        data.spec.cloud[this.infrastructureKind] = infrastructureData
-        // transform addons specification
-        const standardAddonNames = map(standardAddonDefinitionList, 'name')
-        const standardAddons = pick(data.spec.addons, standardAddonNames)
-        const customAddons = omit(data.spec.addons, standardAddonNames)
-        data.spec.addons = standardAddons
-        const enabledCustomAddonNames = reduce(customAddons, (accumulator, {enabled}, name) => !enabled ? accumulator : concat(accumulator, name), [])
-        if (!isEmpty(enabledCustomAddonNames)) {
-          annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
-        }
-        return this.createShoot(data)
-      },
-      addWorker () {
-        const id = shortRandomString(5)
-        this.infrastructureData.workers.push({
-          id,
-          name: `worker-${id}`,
-          machineType: get(head(this.machineTypes), 'name'),
-          volumeType: get(head(this.volumeTypes), 'name'),
-          volumeSize: '50Gi',
-          autoScalerMin: 1,
-          autoScalerMax: 2
-        })
-      },
-      createClicked () {
-        Promise.resolve()
-          .then(() => this.createShootResource())
-          .then(() => {
-            this.$emit('created')
-            this.$emit('close', false)
-          })
-          .catch(err => {
-            const errorDetails = errorDetailsFromError(err)
-            this.errorMessage = `Failed to create cluster.`
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-            this.detailedErrorMessage = errorDetails.detailedMessage
-          })
-      },
-      cancelClicked () {
-        this.$emit('close', true)
-      },
-      reset () {
-        this.$v.$touch()
-
-        this.activeTab = 'tab-infra'
-
-        this.selectedSecret = undefined
-        this.shootDefinition = cloneDeep(defaultShootDefinition)
-
-        this.setDefaultInfrastructureKind()
-
-        this.clusterName = shortRandomString(10)
-        this.shootDefinition.metadata.namespace = this.namespace
-
-        this.timezone = moment.tz.guess()
-        const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-        const randomHour = sample(hours)
-        const randomMoment = moment.tz(randomHour, 'HH', this.timezone).utc()
-        this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
-        randomMoment.add(1, 'h')
-        this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
-
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
-
-        setDelayedInputFocus(this, 'name')
-      },
-      setDefaultDomain () {
-        const domain = head(this.domainList)
-        this.shootDefinition.spec.dns.domain = `${this.clusterName}.${this.projectName}.${domain.data.domain}`
-        this.shootDefinition.spec.dns.provider = domain.data.provider
-      },
-      setDefaultInfrastructureKind () {
-        this.infrastructureKind = head(this.sortedCloudProviderKindList)
-      },
-      setDefaultCloudProfileName () {
-        let cloudProfileName = get(head(this.infrastructureSecretsByKind), 'metadata.cloudProfileName')
-        if (!cloudProfileName) {
-          cloudProfileName = head(this.cloudProfileNames)
-        }
-        this.cloudProfileName = cloudProfileName
-      },
-      setDefaultSecret () {
-        this.secret = head(this.infrastructureSecretsByProfileName)
-      },
-      setDefaultPurpose () {
-        this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
-      },
-      setCloudProfileDefaults () {
-        this.setDefaultRegion()
-        this.setDefaultKubernetesVersion()
-        this.setDefaultWorker()
-
-        if (this.infrastructureKind === 'openstack') {
-          this.setDefaultFloatingPoolName()
-          this.setDefaultLoadBalancerProvider()
-        }
-      },
-      setDefaultFloatingPoolName () {
-        this.infrastructureData.floatingPoolName = head(this.floatingPoolNames)
-      },
-      setDefaultLoadBalancerProvider () {
-        this.infrastructureData.loadBalancerProvider = head(this.loadBalancerProviderNames)
-      },
-      setDefaultWorker () {
-        this.infrastructureData.workers = []
-        this.addWorker()
-      },
-      setDefaultRegion () {
-        this.region = head(this.regions)
-      },
-      setDefaultKubernetesVersion () {
-        this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
-      },
-      setDefaultZone () {
-        const zoneName = sample(this.zones)
-        if (zoneName) {
-          this.infrastructureData.zones = [zoneName]
-        } else {
-          this.infrastructureData.zones = []
-        }
-      },
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
-      },
-      updateMaintenanceWindow ({newTime, newTimezone}) {
-        let newMoment
-        if (newTime) {
-          newMoment = moment.tz(newTime, 'HHmm', this.timezone).utc()
-        } else if (newTimezone) {
-          const localizedTime = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
-          newMoment = moment.tz(localizedTime, 'HHmm', newTimezone).utc()
-        }
-
-        this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
-        newMoment.add(1, 'h')
-        this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
-      }
-    },
-    watch: {
-      value (newValue) {
-        if (newValue === true) {
-          this.reset()
-        }
-      }
-    },
-    created () {
-      // add custom addons to default shootDefinition
-      forEach(this.customAddonDefinitionList, ({name}) => {
-        defaultShootDefinition.spec.addons[name] = {
-          enabled: false
-        }
+    createShootResource () {
+      const data = cloneDeep(this.shootDefinition)
+      const annotations = data.metadata.annotations
+      const infrastructureData = cloneDeep(this.infrastructureData)
+      forEach(infrastructureData.workers, worker => {
+        delete worker.id
       })
-      this.reset()
+      data.spec.cloud[this.infrastructureKind] = infrastructureData
+      // transform addons specification
+      const standardAddonNames = map(standardAddonDefinitionList, 'name')
+      const standardAddons = pick(data.spec.addons, standardAddonNames)
+      const customAddons = omit(data.spec.addons, standardAddonNames)
+      data.spec.addons = standardAddons
+      const enabledCustomAddonNames = reduce(customAddons, (accumulator, { enabled }, name) => !enabled ? accumulator : concat(accumulator, name), [])
+      if (!isEmpty(enabledCustomAddonNames)) {
+        annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
+      }
+      return this.createShoot(data)
     },
-    mounted () {
-      this.refs_ = this.$refs
+    addWorker () {
+      const id = shortRandomString(5)
+      this.infrastructureData.workers.push({
+        id,
+        name: `worker-${id}`,
+        machineType: get(head(this.machineTypes), 'name'),
+        volumeType: get(head(this.volumeTypes), 'name'),
+        volumeSize: '50Gi',
+        autoScalerMin: 1,
+        autoScalerMax: 2
+      })
+    },
+    createClicked () {
+      Promise.resolve()
+        .then(() => this.createShootResource())
+        .then(() => {
+          this.$emit('created')
+          this.$emit('close', false)
+        })
+        .catch(err => {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = `Failed to create cluster.`
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        })
+    },
+    cancelClicked () {
+      this.$emit('close', true)
+    },
+    reset () {
+      this.$v.$touch()
+
+      this.activeTab = 'tab-infra'
+
+      this.selectedSecret = undefined
+      this.shootDefinition = cloneDeep(defaultShootDefinition)
+
+      this.setDefaultInfrastructureKind()
+
+      this.clusterName = shortRandomString(10)
+      this.shootDefinition.metadata.namespace = this.namespace
+
+      this.timezone = moment.tz.guess()
+      const hours = [22, 23, 0, 1, 2, 3, 4, 5]
+      const randomHour = sample(hours)
+      const randomMoment = moment.tz(randomHour, 'HH', this.timezone).utc()
+      this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
+      randomMoment.add(1, 'h')
+      this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
+
+      this.errorMessage = undefined
+      this.detailedMessage = undefined
+
+      setDelayedInputFocus(this, 'name')
+    },
+    setDefaultDomain () {
+      const domain = head(this.domainList)
+      this.shootDefinition.spec.dns.domain = `${this.clusterName}.${this.projectName}.${domain.data.domain}`
+      this.shootDefinition.spec.dns.provider = domain.data.provider
+    },
+    setDefaultInfrastructureKind () {
+      this.infrastructureKind = head(this.sortedCloudProviderKindList)
+    },
+    setDefaultCloudProfileName () {
+      let cloudProfileName = get(head(this.infrastructureSecretsByKind), 'metadata.cloudProfileName')
+      if (!cloudProfileName) {
+        cloudProfileName = head(this.cloudProfileNames)
+      }
+      this.cloudProfileName = cloudProfileName
+    },
+    setDefaultSecret () {
+      this.secret = head(this.infrastructureSecretsByProfileName)
+    },
+    setDefaultPurpose () {
+      this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
+    },
+    setCloudProfileDefaults () {
+      this.setDefaultRegion()
+      this.setDefaultKubernetesVersion()
+      this.setDefaultWorker()
+
+      if (this.infrastructureKind === 'openstack') {
+        this.setDefaultFloatingPoolName()
+        this.setDefaultLoadBalancerProvider()
+      }
+    },
+    setDefaultFloatingPoolName () {
+      this.infrastructureData.floatingPoolName = head(this.floatingPoolNames)
+    },
+    setDefaultLoadBalancerProvider () {
+      this.infrastructureData.loadBalancerProvider = head(this.loadBalancerProviderNames)
+    },
+    setDefaultWorker () {
+      this.infrastructureData.workers = []
+      this.addWorker()
+    },
+    setDefaultRegion () {
+      this.region = head(this.regions)
+    },
+    setDefaultKubernetesVersion () {
+      this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
+    },
+    setDefaultZone () {
+      const zoneName = sample(this.zones)
+      if (zoneName) {
+        this.infrastructureData.zones = [zoneName]
+      } else {
+        this.infrastructureData.zones = []
+      }
+    },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
+    updateMaintenanceWindow ({ newTime, newTimezone }) {
+      let newMoment
+      if (newTime) {
+        newMoment = moment.tz(newTime, 'HHmm', this.timezone).utc()
+      } else if (newTimezone) {
+        const localizedTime = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
+        newMoment = moment.tz(localizedTime, 'HHmm', newTimezone).utc()
+      }
+
+      this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
+      newMoment.add(1, 'h')
+      this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
     }
+  },
+  watch: {
+    value (newValue) {
+      if (newValue === true) {
+        this.reset()
+      }
+    }
+  },
+  created () {
+    // add custom addons to default shootDefinition
+    forEach(this.customAddonDefinitionList, ({ name }) => {
+      defaultShootDefinition.spec.addons[name] = {
+        enabled: false
+      }
+    })
+    this.reset()
+  },
+  mounted () {
+    this.refs_ = this.$refs
   }
+}
 </script>
 
 <style lang="styl" scoped>

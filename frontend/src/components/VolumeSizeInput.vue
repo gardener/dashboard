@@ -29,27 +29,27 @@ limitations under the License.
 </template>
 
 <script>
-  import { parseSize } from '@/utils'
+import { parseSize } from '@/utils'
 
-  export default {
-    props: ['value', 'label', 'color', 'errorMessages', 'min'],
-    computed: {
-      innerValue: {
-        get () {
-          return parseSize(this.value)
-        },
-        set (value) {
-          this.$emit('input', this.format(value))
-        }
-      }
-    },
-    methods: {
-      format (value) {
-        return parseSize(value) + 'Gi'
+export default {
+  props: ['value', 'label', 'color', 'errorMessages', 'min'],
+  computed: {
+    innerValue: {
+      get () {
+        return parseSize(this.value)
       },
-      emitBlur (e) {
-        this.$emit('blur', e)
+      set (value) {
+        this.$emit('input', this.format(value))
       }
     }
+  },
+  methods: {
+    format (value) {
+      return parseSize(value) + 'Gi'
+    },
+    emitBlur (e) {
+      this.$emit('blur', e)
+    }
   }
+}
 </script>

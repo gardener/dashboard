@@ -40,34 +40,34 @@ limitations under the License.
 </template>
 
 <script>
-  export default {
-    props: {
-      icon: {
-        type: String,
-        default: 'mdi-cloud-outline'
-      },
-      image: {
-        type: String
-      },
-      infrastructureName: {
-        type: String,
-        required: true
-      },
-      color: {
-        type: String,
-        required: true
-      },
-      description: {
-        type: String,
-        required: true
-      }
+export default {
+  props: {
+    icon: {
+      type: String,
+      default: 'mdi-cloud-outline'
     },
-    computed: {
-      toolbarClass () {
-        return `${this.color} elevation-0`
-      }
+    image: {
+      type: String
+    },
+    infrastructureName: {
+      type: String,
+      required: true
+    },
+    color: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
+    }
+  },
+  computed: {
+    toolbarClass () {
+      return `${this.color} elevation-0`
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

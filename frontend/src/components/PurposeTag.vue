@@ -22,39 +22,39 @@ limitations under the License.
 </template>
 
 <script>
-  import toUpper from 'lodash/toUpper'
+import toUpper from 'lodash/toUpper'
 
-  export default {
-    props: {
-      purpose: {
-        type: String
+export default {
+  props: {
+    purpose: {
+      type: String
+    }
+  },
+  computed: {
+    shortPurpose () {
+      switch (this.purpose) {
+        case 'evaluation':
+          return 'EVAL'
+        case 'development':
+          return 'DEV'
+        case 'production':
+          return 'PROD'
+        case 'infrastructure':
+          return 'INFRA'
+        default:
+          return toUpper(this.purpose)
       }
     },
-    computed: {
-      shortPurpose () {
-        switch (this.purpose) {
-          case 'evaluation':
-            return 'EVAL'
-          case 'development':
-            return 'DEV'
-          case 'production':
-            return 'PROD'
-          case 'infrastructure':
-            return 'INFRA'
-          default:
-            return toUpper(this.purpose)
-        }
-      },
-      isCritical () {
-        return this.purpose === 'production' || this.purpose === 'infrastructure'
-      },
-      textColor () {
-        if (!this.isCritical) {
-          return 'cyan darken-2'
-        } else {
-          return 'white'
-        }
+    isCritical () {
+      return this.purpose === 'production' || this.purpose === 'infrastructure'
+    },
+    textColor () {
+      if (!this.isCritical) {
+        return 'cyan darken-2'
+      } else {
+        return 'white'
       }
     }
   }
+}
 </script>

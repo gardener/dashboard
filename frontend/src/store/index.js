@@ -119,8 +119,8 @@ const getters = {
     return state.infrastructureSecrets.all
   },
   getInfrastructureSecretByName (state, getters) {
-    return ({namespace, name}) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByName']({namespace, name})
+    return ({ namespace, name }) => {
+      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -171,28 +171,28 @@ const getters = {
     }
   },
   shootByNamespaceAndName (state, getters) {
-    return ({namespace, name}) => {
-      return getters['shoots/itemByNameAndNamespace']({namespace, name})
+    return ({ namespace, name }) => {
+      return getters['shoots/itemByNameAndNamespace']({ namespace, name })
     }
   },
   journalsByNamespaceAndName (state, getters) {
-    return ({namespace, name}) => {
-      return getters['journals/issues']({namespace, name})
+    return ({ namespace, name }) => {
+      return getters['journals/issues']({ namespace, name })
     }
   },
   journalCommentsByIssueNumber (state, getters) {
-    return ({issueNumber}) => {
-      return getters['journals/comments']({issueNumber})
+    return ({ issueNumber }) => {
+      return getters['journals/comments']({ issueNumber })
     }
   },
   lastUpdatedJournalByNameAndNamespace (state, getters) {
-    return ({namespace, name}) => {
-      return getters['journals/lastUpdated']({namespace, name})
+    return ({ namespace, name }) => {
+      return getters['journals/lastUpdated']({ namespace, name })
     }
   },
   journalsLabels (state, getters) {
-    return ({namespace, name}) => {
-      return getters['journals/labels']({namespace, name})
+    return ({ namespace, name }) => {
+      return getters['journals/labels']({ namespace, name })
     }
   },
   kubernetesVersions (state, getters) {
@@ -299,25 +299,25 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoot ({ dispatch, commit }, {name, namespace}) {
+  subscribeShoot ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/clearAll')
-    .then(() => EmitterWrapper.shootEmitter.subscribeShoot({name, namespace}))
-    .catch(err => {
-      dispatch('setError', err)
-    })
+      .then(() => EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace }))
+      .catch(err => {
+        dispatch('setError', err)
+      })
   },
-  getShootInfo ({ dispatch, commit }, {name, namespace}) {
-    return dispatch('shoots/getInfo', {name, namespace})
+  getShootInfo ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getInfo', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
   },
   subscribeShoots ({ dispatch, commit, state }) {
-    return EmitterWrapper.shootsEmitter.subscribeShoots({namespace: state.namespace, filter: getFilterValue(state)})
+    return EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
   },
-  subscribeComments ({ dispatch, commit }, {name, namespace}) {
+  subscribeComments ({ dispatch, commit }, { name, namespace }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalCommentsEmitter.subscribeComments({name, namespace})
+      EmitterWrapper.journalCommentsEmitter.subscribeComments({ name, namespace })
       resolve()
     })
   },
@@ -406,8 +406,8 @@ const actions = {
         return res
       })
   },
-  deleteShoot ({ dispatch, commit }, {name, namespace}) {
-    return dispatch('shoots/delete', {name, namespace})
+  deleteShoot ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/delete', { name, namespace })
       .then(res => {
         dispatch('setAlert', { message: 'Shoot marked for deletion', type: 'success' })
         return res
@@ -448,7 +448,7 @@ const actions = {
     return state.onlyShootsWithIssues
   },
   setUser ({ dispatch, commit }, value) {
-    return getUserInfo({user: value})
+    return getUserInfo({ user: value })
       .then(res => {
         value.info = res.data
         commit('SET_USER', value)
@@ -517,7 +517,7 @@ const mutations = {
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value
     // subscribe again for shoots as the filter has changed
-    EmitterWrapper.shootsEmitter.subscribeShoots({namespace: state.namespace, filter: getFilterValue(state)})
+    EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
   },
   SET_USER (state, value) {
     state.user = value
@@ -573,7 +573,7 @@ const shootNamespacedEventsHandler = namespacedEvents => {
       eventsToHandle = concat(eventsToHandle, events)
     }
   })
-  store.commit('shoots/HANDLE_EVENTS', {rootState: state, events: eventsToHandle})
+  store.commit('shoots/HANDLE_EVENTS', { rootState: state, events: eventsToHandle })
 }
 EmitterWrapper.shootsEmitter.on('shoots', shootNamespacedEventsHandler)
 EmitterWrapper.shootEmitter.on('shoot', shootNamespacedEventsHandler)

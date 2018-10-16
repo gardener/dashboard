@@ -26,31 +26,31 @@ limitations under the License.
 </template>
 
 <script>
-  import TimeString from '@/components/TimeString'
-  import { isSelfTerminationWarning, isValidTerminationDate } from '@/utils'
+import TimeString from '@/components/TimeString'
+import { isSelfTerminationWarning, isValidTerminationDate } from '@/utils'
 
-  export default {
-    name: 'selfTerminationWarning',
-    components: {
-      TimeString
+export default {
+  name: 'selfTerminationWarning',
+  components: {
+    TimeString
+  },
+  props: {
+    expirationTimestamp: {
+      type: String
+    }
+  },
+  computed: {
+    isValidTerminationDate () {
+      return isValidTerminationDate(this.expirationTimestamp)
     },
-    props: {
-      expirationTimestamp: {
-        type: String
-      }
+    isSelfTerminationWarning () {
+      return isSelfTerminationWarning(this.expirationTimestamp)
     },
-    computed: {
-      isValidTerminationDate () {
-        return isValidTerminationDate(this.expirationTimestamp)
-      },
-      isSelfTerminationWarning () {
-        return isSelfTerminationWarning(this.expirationTimestamp)
-      },
-      expirationAlertType () {
-        return this.isSelfTerminationWarning ? 'warning' : 'info'
-      }
+    expirationAlertType () {
+      return this.isSelfTerminationWarning ? 'warning' : 'info'
     }
   }
+}
 </script>
 
 <style lang="styl" scoped>

@@ -20,49 +20,49 @@
 </template>
 
 <script>
-  import { required } from 'vuelidate/lib/validators'
-  import { getValidationErrors } from '@/utils'
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
 
-  const validationErrors = {
+const validationErrors = {
+  worker: {
+    machineType: {
+      required: 'Machine Type is required'
+    }
+  }
+}
+
+const validations = {
+  worker: {
+    machineType: {
+      required
+    }
+  }
+}
+
+export default {
+  props: {
     worker: {
-      machineType: {
-        required: 'Machine Type is required'
-      }
-    }
-  }
-
-  const validations = {
-    worker: {
-      machineType: {
-        required
-      }
-    }
-  }
-
-  export default {
-    props: {
-      worker: {
-        type: Object,
-        required: true
-      },
-      machineTypes: {
-        type: Array,
-        default: () => []
-      }
+      type: Object,
+      required: true
     },
-    data () {
-      return {
-        validationErrors
-      }
-    },
-    validations,
-    methods: {
-      getErrorMessages (field) {
-        return getValidationErrors(this, field)
-      }
-    },
-    mounted () {
-      this.$v.$touch()
+    machineTypes: {
+      type: Array,
+      default: () => []
     }
+  },
+  data () {
+    return {
+      validationErrors
+    }
+  },
+  validations,
+  methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  mounted () {
+    this.$v.$touch()
   }
+}
 </script>

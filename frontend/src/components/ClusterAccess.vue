@@ -37,44 +37,44 @@ limitations under the License.
 </template>
 
 <script>
-  import UsernamePassword from '@/components/UsernamePasswordListTile'
-  import get from 'lodash/get'
-  import { isHibernated } from '@/utils'
+import UsernamePassword from '@/components/UsernamePasswordListTile'
+import get from 'lodash/get'
+import { isHibernated } from '@/utils'
 
-  export default {
-    components: {
-      UsernamePassword
-    },
-    props: {
-      item: {
-        type: Object
+export default {
+  components: {
+    UsernamePassword
+  },
+  props: {
+    item: {
+      type: Object
+    }
+  },
+  computed: {
+    dashboardUrl () {
+      if (!this.hasDashboardEnabled) {
+        return ''
       }
+      return this.info.dashboardUrl || ''
     },
-    computed: {
-      dashboardUrl () {
-        if (!this.hasDashboardEnabled) {
-          return ''
-        }
-        return this.info.dashboardUrl || ''
-      },
-      dashboardUrlText () {
-        return this.info.dashboardUrlText || ''
-      },
-      username () {
-        return this.info.cluster_username || ''
-      },
-      password () {
-        return this.info.cluster_password || ''
-      },
-      info () {
-        return get(this.item, 'info', {})
-      },
-      hasDashboardEnabled () {
-        return get(this.item, 'spec.addons.kubernetes-dashboard.enabled', false) === true
-      },
-      isHibernated () {
-        return isHibernated(get(this.item, 'spec'))
-      },
+    dashboardUrlText () {
+      return this.info.dashboardUrlText || ''
+    },
+    username () {
+      return this.info.cluster_username || ''
+    },
+    password () {
+      return this.info.cluster_password || ''
+    },
+    info () {
+      return get(this.item, 'info', {})
+    },
+    hasDashboardEnabled () {
+      return get(this.item, 'spec.addons.kubernetes-dashboard.enabled', false) === true
+    },
+    isHibernated () {
+      return isHibernated(get(this.item, 'spec'))
     }
   }
+}
 </script>

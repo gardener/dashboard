@@ -110,362 +110,362 @@ limitations under the License.
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-  import { replaceShoot } from '@/utils/api'
-  import Clipboard from 'clipboard'
-  import download from 'downloadjs'
+import { mapGetters } from 'vuex'
+import { replaceShoot } from '@/utils/api'
+import Clipboard from 'clipboard'
+import download from 'downloadjs'
 
-  // codemirror
-  import CodeMirror from 'codemirror'
-  import 'codemirror/mode/yaml/yaml.js'
-  import 'codemirror/lib/codemirror.css'
+// codemirror
+import CodeMirror from 'codemirror'
+import 'codemirror/mode/yaml/yaml.js'
+import 'codemirror/lib/codemirror.css'
 
-  // lodash
-  import isEqual from 'lodash/isEqual'
-  import assign from 'lodash/assign'
-  import get from 'lodash/get'
-  import omit from 'lodash/omit'
-  import find from 'lodash/find'
-  import pick from 'lodash/pick'
-  import noop from 'lodash/noop'
-  import replace from 'lodash/replace'
-  import isFunction from 'lodash/isFunction'
+// lodash
+import isEqual from 'lodash/isEqual'
+import assign from 'lodash/assign'
+import get from 'lodash/get'
+import omit from 'lodash/omit'
+import find from 'lodash/find'
+import pick from 'lodash/pick'
+import noop from 'lodash/noop'
+import replace from 'lodash/replace'
+import isFunction from 'lodash/isFunction'
 
-  // js-yaml
-  import jsyaml from 'js-yaml'
+// js-yaml
+import jsyaml from 'js-yaml'
 
-  function safeDump (value) {
-    return jsyaml.safeDump(value, {
-      skipInvalid: true
-    })
-  }
+function safeDump (value) {
+  return jsyaml.safeDump(value, {
+    skipInvalid: true
+  })
+}
 
-  export default {
-    name: 'shoot-item-editor',
-    data () {
-      return {
-        conflictPath: null,
-        modificationWarning: true,
-        alert: false,
-        alertMessage: '',
-        alertType: 'error',
-        snackbar: false,
-        dialog: false,
-        action: {
-          id: '',
-          title: '',
-          text: '',
-          yesButtonText: '',
-          noButtonText: '',
-          resolve: noop
-        },
-        snackbarTimeout: 3000,
-        snackbarColor: undefined,
-        snackbarText: '',
-        clean: true,
-        untouched: true,
-        historySize: {
-          undo: 0,
-          redo: 0
-        },
-        generation: undefined,
-        lineHeight: 21,
-        toolbarHeight: 48
-      }
-    },
-    computed: {
-      ...mapGetters([
-        'projectList',
-        'shootByNamespaceAndName'
-      ]),
-      value () {
-        const data = this.shootByNamespaceAndName(this.$route.params)
-        if (data) {
-          return omit(data, ['info'])
-        }
+export default {
+  name: 'shoot-item-editor',
+  data () {
+    return {
+      conflictPath: null,
+      modificationWarning: true,
+      alert: false,
+      alertMessage: '',
+      alertType: 'error',
+      snackbar: false,
+      dialog: false,
+      action: {
+        id: '',
+        title: '',
+        text: '',
+        yesButtonText: '',
+        noButtonText: '',
+        resolve: noop
       },
-      containerStyles () {
-        return {
-          height: `${this.lineHeight * 15}px`,
-          minHeight: `${this.lineHeight * 3}px`
-        }
+      snackbarTimeout: 3000,
+      snackbarColor: undefined,
+      snackbarText: '',
+      clean: true,
+      untouched: true,
+      historySize: {
+        undo: 0,
+        redo: 0
       },
-      hasConflict () {
-        return !!this.conflictPath
-      },
-      toolbarStyles () {
-        return {
-          flex: '0 0 auto',
-          height: `${this.toolbarHeight}px`,
-          minHeight: `${this.toolbarHeight}px`
-        }
-      }
-    },
-    methods: {
-      getQualifiedName () {
-        const { metadata: { name, namespace } } = this.value
-        const project = find(this.projectList, ['metadata.namespace', namespace])
-        const projectName = project.name || replace(namespace, /^garden-/, '')
-        return `shoot--${projectName}--${name}.yaml`
-      },
-      dismissModificationWarning () {
-        this.modificationWarning = false
-        this.$localStorage.setItem('showShootEditorWarning', 'false')
-      },
-      async save () {
-        try {
-          if (this.untouched) {
-            return
-          }
-          if (this.clean) {
-            return this.clearHistory()
-          }
-          if (this.hasConflict && !(await this.confirmOverwrite())) {
-            return
-          }
-          const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-          const data = pick(jsyaml.safeLoad(this.getContent()), paths)
-          const user = this.$store.state.user
-          const { metadata: { namespace, name } } = this.value
-          const { data: value } = await replaceShoot({namespace, name, user, data})
-          this.update(value)
-          this.snackbarColor = 'success'
-          this.snackbarText = `Cluster specification has been successfully updated`
-          this.snackbar = true
-        } catch (err) {
-          this.alert = true
-          this.alertType = 'error'
-          this.alertMessage = get(err, 'response.data.message', err.message)
-        }
-      },
-      undo () {
-        if (this.$instance) {
-          this.$instance.execCommand('undo')
-          this.$instance.focus()
-        }
-      },
-      redo () {
-        if (this.$instance) {
-          this.$instance.execCommand('redo')
-          this.$instance.focus()
-        }
-      },
-      focus () {
-        if (this.$instance) {
-          this.$instance.focus()
-        }
-      },
-      reload () {
-        this.update(this.value)
-      },
-      downloadContent () {
-        try {
-          download(this.getContent(), this.getQualifiedName(), 'text/yaml')
-          this.snackbarColor = undefined
-          this.snackbarText = 'Content has been downloaded'
-          this.snackbar = true
-        } catch (err) {
-          this.snackbarColor = 'error'
-          this.snackbarText = 'Download content failed'
-          this.snackbar = true
-        }
-        this.focus()
-      },
-      refresh () {
-        this.$nextTick(() => this.refreshInstance())
-      },
-      refreshInstance () {
-        if (this.$instance) {
-          this.$instance.refresh()
-        }
-      },
-      createInstance (element) {
-        const vm = this
-        const extraKeys = {
-          'Ctrl-S' (instance) {
-            vm.save()
-          },
-          'Cmd-S' (instance) {
-            vm.save()
-          },
-          'Tab': (instance) => {
-            if (instance.somethingSelected()) {
-              instance.indentSelection('add')
-            } else {
-              instance.execCommand('insertSoftTab')
-            }
-          },
-          'Shift-Tab': (instance) => {
-            instance.indentSelection('subtract')
-          }
-        }
-        const options = {
-          mode: 'text/x-yaml',
-          autofocus: true,
-          indentUnit: 2,
-          tabSize: 2,
-          indentWithTabs: false,
-          smartIndent: true,
-          scrollbarStyle: 'native',
-          lineNumbers: true,
-          lineWrapping: true,
-          extraKeys
-        }
-        this.$instance = CodeMirror(element, options)
-        this.$instance.setSize('100%', '100%')
-        const onChange = ({doc}) => {
-          this.untouched = false
-          this.clean = doc.isClean(this.generation)
-          this.historySize = doc.historySize()
-          this.alert = false
-          this.alertMessage = ''
-        }
-        this.$instance.on('change', onChange)
-      },
-      destroyInstance () {
-        if (this.$instance) {
-          const element = this.$instance.doc.cm.getWrapperElement()
-          if (element && element.remove) {
-            element.remove()
-          }
-        }
-        this.$instance = undefined
-      },
-      clearHistory () {
-        if (this.$instance) {
-          this.$instance.doc.clearHistory()
-          this.generation = this.$instance.doc.changeGeneration()
-          this.clean = true
-          this.untouched = true
-          this.conflictPath = null
-          this.historySize.undo = 0
-          this.historySize.redo = 0
-        }
-      },
-      getContent () {
-        if (this.$instance) {
-          return this.$instance.doc.getValue()
-        }
-        return ''
-      },
-      setContent (value) {
-        if (this.$instance) {
-          const editor = this.$instance
-          const doc = editor.doc
-          const cursor = doc.getCursor()
-          const {left, top} = editor.getScrollInfo() || {}
-          doc.setValue(value)
-          editor.scrollTo(left, top)
-          editor.focus()
-          if (cursor) {
-            doc.setCursor(cursor)
-          }
-          this.clearHistory()
-        }
-      },
-      update (value = this.value) {
-        if (value) {
-          this.setContent(safeDump(value))
-        }
-      },
-      resolveAction (value) {
-        this.dialog = false
-        if (isFunction(this.action.resolve)) {
-          const resolve = this.action.resolve
-          this.action.resolve = undefined
-          resolve(value)
-        }
-      },
-      confirmNavigation () {
-        this.dialog = true
-        return new Promise(resolve => {
-          assign(this.action, {
-            id: 'navigation',
-            title: 'Confirm Navigation',
-            text: 'Your changes have not been saved.<br/>Are you sure you want to leave this page?',
-            yesButtonText: 'Leave',
-            noButtonText: 'Stay',
-            resolve
-          })
-        })
-      },
-      confirmOverwrite () {
-        this.dialog = true
-        return new Promise(resolve => {
-          assign(this.action, {
-            id: 'save',
-            title: 'Confirm Overwrite',
-            text: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?',
-            yesButtonText: 'Save',
-            noButtonText: 'Cancel',
-            resolve
-          })
-        })
-      }
-    },
-    mounted () {
-      const value = this.$localStorage.getItem('showShootEditorWarning')
-      this.modificationWarning = value === null || value === 'true'
-      this.createInstance(this.$refs.container)
-      this.update(this.value)
-      this.refresh()
-      // clipboard
-      const vm = this
-      const clipboard = new Clipboard(vm.$refs.btnCopy.$el, {
-        text () {
-          return vm.getContent()
-        }
-      })
-      clipboard.on('success', e => {
-        this.snackbarColor = undefined
-        this.snackbarText = 'Copied content to clipboard'
-        this.snackbar = true
-        e.clearSelection()
-        this.focus()
-      })
-      clipboard.on('error', e => {
-        this.snackbarColor = 'error'
-        this.snackbarText = 'Copy to clipboard failed'
-        this.snackbar = true
-      })
-    },
-    watch: {
-      value: {
-        deep: true,
-        handler (newValue, oldValue) {
-          if (this.untouched) {
-            return this.update(newValue)
-          }
-          for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
-            const newProp = get(newValue, path)
-            const oldProp = get(oldValue, path)
-            if (!isEqual(newProp, oldProp)) {
-              this.conflictPath = path
-              break
-            }
-          }
-        }
-      }
-    },
-    async beforeRouteLeave (to, from, next) {
-      if (this.clean) {
-        return next()
-      }
-      try {
-        if (await this.confirmNavigation()) {
-          next()
-        } else {
-          this.focus()
-          next(false)
-        }
-      } catch (err) {
-        next(err)
-      }
-    },
-    beforeDestroy () {
-      this.destroyInstance()
+      generation: undefined,
+      lineHeight: 21,
+      toolbarHeight: 48
     }
+  },
+  computed: {
+    ...mapGetters([
+      'projectList',
+      'shootByNamespaceAndName'
+    ]),
+    value () {
+      const data = this.shootByNamespaceAndName(this.$route.params)
+      if (data) {
+        return omit(data, ['info'])
+      }
+    },
+    containerStyles () {
+      return {
+        height: `${this.lineHeight * 15}px`,
+        minHeight: `${this.lineHeight * 3}px`
+      }
+    },
+    hasConflict () {
+      return !!this.conflictPath
+    },
+    toolbarStyles () {
+      return {
+        flex: '0 0 auto',
+        height: `${this.toolbarHeight}px`,
+        minHeight: `${this.toolbarHeight}px`
+      }
+    }
+  },
+  methods: {
+    getQualifiedName () {
+      const { metadata: { name, namespace } } = this.value
+      const project = find(this.projectList, ['metadata.namespace', namespace])
+      const projectName = project.name || replace(namespace, /^garden-/, '')
+      return `shoot--${projectName}--${name}.yaml`
+    },
+    dismissModificationWarning () {
+      this.modificationWarning = false
+      this.$localStorage.setItem('showShootEditorWarning', 'false')
+    },
+    async save () {
+      try {
+        if (this.untouched) {
+          return
+        }
+        if (this.clean) {
+          return this.clearHistory()
+        }
+        if (this.hasConflict && !(await this.confirmOverwrite())) {
+          return
+        }
+        const paths = ['spec', 'metadata.labels', 'metadata.annotations']
+        const data = pick(jsyaml.safeLoad(this.getContent()), paths)
+        const user = this.$store.state.user
+        const { metadata: { namespace, name } } = this.value
+        const { data: value } = await replaceShoot({ namespace, name, user, data })
+        this.update(value)
+        this.snackbarColor = 'success'
+        this.snackbarText = `Cluster specification has been successfully updated`
+        this.snackbar = true
+      } catch (err) {
+        this.alert = true
+        this.alertType = 'error'
+        this.alertMessage = get(err, 'response.data.message', err.message)
+      }
+    },
+    undo () {
+      if (this.$instance) {
+        this.$instance.execCommand('undo')
+        this.$instance.focus()
+      }
+    },
+    redo () {
+      if (this.$instance) {
+        this.$instance.execCommand('redo')
+        this.$instance.focus()
+      }
+    },
+    focus () {
+      if (this.$instance) {
+        this.$instance.focus()
+      }
+    },
+    reload () {
+      this.update(this.value)
+    },
+    downloadContent () {
+      try {
+        download(this.getContent(), this.getQualifiedName(), 'text/yaml')
+        this.snackbarColor = undefined
+        this.snackbarText = 'Content has been downloaded'
+        this.snackbar = true
+      } catch (err) {
+        this.snackbarColor = 'error'
+        this.snackbarText = 'Download content failed'
+        this.snackbar = true
+      }
+      this.focus()
+    },
+    refresh () {
+      this.$nextTick(() => this.refreshInstance())
+    },
+    refreshInstance () {
+      if (this.$instance) {
+        this.$instance.refresh()
+      }
+    },
+    createInstance (element) {
+      const vm = this
+      const extraKeys = {
+        'Ctrl-S' (instance) {
+          vm.save()
+        },
+        'Cmd-S' (instance) {
+          vm.save()
+        },
+        'Tab': (instance) => {
+          if (instance.somethingSelected()) {
+            instance.indentSelection('add')
+          } else {
+            instance.execCommand('insertSoftTab')
+          }
+        },
+        'Shift-Tab': (instance) => {
+          instance.indentSelection('subtract')
+        }
+      }
+      const options = {
+        mode: 'text/x-yaml',
+        autofocus: true,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        smartIndent: true,
+        scrollbarStyle: 'native',
+        lineNumbers: true,
+        lineWrapping: true,
+        extraKeys
+      }
+      this.$instance = CodeMirror(element, options)
+      this.$instance.setSize('100%', '100%')
+      const onChange = ({ doc }) => {
+        this.untouched = false
+        this.clean = doc.isClean(this.generation)
+        this.historySize = doc.historySize()
+        this.alert = false
+        this.alertMessage = ''
+      }
+      this.$instance.on('change', onChange)
+    },
+    destroyInstance () {
+      if (this.$instance) {
+        const element = this.$instance.doc.cm.getWrapperElement()
+        if (element && element.remove) {
+          element.remove()
+        }
+      }
+      this.$instance = undefined
+    },
+    clearHistory () {
+      if (this.$instance) {
+        this.$instance.doc.clearHistory()
+        this.generation = this.$instance.doc.changeGeneration()
+        this.clean = true
+        this.untouched = true
+        this.conflictPath = null
+        this.historySize.undo = 0
+        this.historySize.redo = 0
+      }
+    },
+    getContent () {
+      if (this.$instance) {
+        return this.$instance.doc.getValue()
+      }
+      return ''
+    },
+    setContent (value) {
+      if (this.$instance) {
+        const editor = this.$instance
+        const doc = editor.doc
+        const cursor = doc.getCursor()
+        const { left, top } = editor.getScrollInfo() || {}
+        doc.setValue(value)
+        editor.scrollTo(left, top)
+        editor.focus()
+        if (cursor) {
+          doc.setCursor(cursor)
+        }
+        this.clearHistory()
+      }
+    },
+    update (value = this.value) {
+      if (value) {
+        this.setContent(safeDump(value))
+      }
+    },
+    resolveAction (value) {
+      this.dialog = false
+      if (isFunction(this.action.resolve)) {
+        const resolve = this.action.resolve
+        this.action.resolve = undefined
+        resolve(value)
+      }
+    },
+    confirmNavigation () {
+      this.dialog = true
+      return new Promise(resolve => {
+        assign(this.action, {
+          id: 'navigation',
+          title: 'Confirm Navigation',
+          text: 'Your changes have not been saved.<br/>Are you sure you want to leave this page?',
+          yesButtonText: 'Leave',
+          noButtonText: 'Stay',
+          resolve
+        })
+      })
+    },
+    confirmOverwrite () {
+      this.dialog = true
+      return new Promise(resolve => {
+        assign(this.action, {
+          id: 'save',
+          title: 'Confirm Overwrite',
+          text: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?',
+          yesButtonText: 'Save',
+          noButtonText: 'Cancel',
+          resolve
+        })
+      })
+    }
+  },
+  mounted () {
+    const value = this.$localStorage.getItem('showShootEditorWarning')
+    this.modificationWarning = value === null || value === 'true'
+    this.createInstance(this.$refs.container)
+    this.update(this.value)
+    this.refresh()
+    // clipboard
+    const vm = this
+    const clipboard = new Clipboard(vm.$refs.btnCopy.$el, {
+      text () {
+        return vm.getContent()
+      }
+    })
+    clipboard.on('success', e => {
+      this.snackbarColor = undefined
+      this.snackbarText = 'Copied content to clipboard'
+      this.snackbar = true
+      e.clearSelection()
+      this.focus()
+    })
+    clipboard.on('error', e => {
+      this.snackbarColor = 'error'
+      this.snackbarText = 'Copy to clipboard failed'
+      this.snackbar = true
+    })
+  },
+  watch: {
+    value: {
+      deep: true,
+      handler (newValue, oldValue) {
+        if (this.untouched) {
+          return this.update(newValue)
+        }
+        for (const path of ['spec', 'metadata.annotations', 'metadata.labels']) {
+          const newProp = get(newValue, path)
+          const oldProp = get(oldValue, path)
+          if (!isEqual(newProp, oldProp)) {
+            this.conflictPath = path
+            break
+          }
+        }
+      }
+    }
+  },
+  async beforeRouteLeave (to, from, next) {
+    if (this.clean) {
+      return next()
+    }
+    try {
+      if (await this.confirmNavigation()) {
+        next()
+      } else {
+        this.focus()
+        next(false)
+      }
+    } catch (err) {
+      next(err)
+    }
+  },
+  beforeDestroy () {
+    this.destroyInstance()
   }
+}
 </script>
 
 <style lang="styl" scoped>

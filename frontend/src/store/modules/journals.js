@@ -27,7 +27,7 @@ import matchesProperty from 'lodash/matchesProperty'
 import orderBy from 'lodash/orderBy'
 import unionBy from 'lodash/unionBy'
 
-const eqlNameAndNamespace = ({namespace, name, state = undefined}) => {
+const eqlNameAndNamespace = ({ namespace, name, state = undefined }) => {
   const source = { metadata: { namespace, name } }
   if (state) {
     source.metadata.state = state
@@ -46,22 +46,22 @@ const state = {
 }
 
 const getOpenIssues = (state, name, namespace) => {
-  return filter(state.all, eqlNameAndNamespace({name, namespace, state: 'open'}))
+  return filter(state.all, eqlNameAndNamespace({ name, namespace, state: 'open' }))
 }
 // getters
 const getters = {
   items: state => state.all,
-  issues: (state) => ({name, namespace}) => {
+  issues: (state) => ({ name, namespace }) => {
     return getOpenIssues(state, name, namespace)
   },
-  comments: (state) => ({issueNumber}) => {
+  comments: (state) => ({ issueNumber }) => {
     return state.allComments[issueNumber]
   },
-  lastUpdated: (state) => ({name, namespace}) => {
+  lastUpdated: (state) => ({ name, namespace }) => {
     const lastUpdatedIssue = head(getOpenIssues(state, name, namespace))
     return get(lastUpdatedIssue, 'metadata.updated_at')
   },
-  labels: (state) => ({name, namespace}) => {
+  labels: (state) => ({ name, namespace }) => {
     const issues = getOpenIssues(state, name, namespace)
     const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
     return labels
@@ -70,7 +70,7 @@ const getters = {
 
 // actions
 const actions = {
-  getCommentsList ({ commit, rootState }, {name, namespace}) {
+  getCommentsList ({ commit, rootState }, { name, namespace }) {
     return state.comments
   },
   clearIssues ({ commit, dispatch }) {

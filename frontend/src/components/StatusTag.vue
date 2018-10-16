@@ -19,80 +19,80 @@ limitations under the License.
 </template>
 
 <script>
-  import split from 'lodash/split'
-  import Tag from '@/components/Tag'
-  import replace from 'lodash/replace'
+import split from 'lodash/split'
+import Tag from '@/components/Tag'
+import replace from 'lodash/replace'
 
-  export default {
-    components: {
-      Tag
+export default {
+  components: {
+    Tag
+  },
+  props: {
+    condition: {
+      type: Object,
+      required: true
     },
-    props: {
-      condition: {
-        type: Object,
-        required: true
-      },
-      popperKey: {
-        type: String,
-        required: true
-      },
-      popperPlacement: {
-        type: String
+    popperKey: {
+      type: String,
+      required: true
+    },
+    popperPlacement: {
+      type: String
+    }
+  },
+  computed: {
+    chipText () {
+      return this.tag.text || ''
+    },
+    chipTextShortened () {
+      if (this.$vuetify.breakpoint.mdAndDown) {
+        return this.chipText.charAt(0)
+      }
+      if (this.$vuetify.breakpoint.lgOnly) {
+        return split(this.chipText, ' ').shift()
+      }
+      if (this.$vuetify.breakpoint.xlOnly) {
+        return this.chipText
       }
     },
-    computed: {
-      chipText () {
-        return this.tag.text || ''
-      },
-      chipTextShortened () {
-        if (this.$vuetify.breakpoint.mdAndDown) {
-          return this.chipText.charAt(0)
-        }
-        if (this.$vuetify.breakpoint.lgOnly) {
-          return split(this.chipText, ' ').shift()
-        }
-        if (this.$vuetify.breakpoint.xlOnly) {
-          return this.chipText
-        }
-      },
-      isError () {
-        switch (this.tag.status) {
-          case 'True':
-            return false
-          case 'False':
-            return true
-          default:
-            return false
-        }
-      },
-      isUnknown () {
-        switch (this.tag.status) {
-          case 'Unknown':
-            return true
-          default:
-            return false
-        }
-      },
-      popperKeyWithType () {
-        return `statusTag_${this.popperKey}`
-      },
-      tag () {
-        const {lastTransitionTime, message, status, type} = this.condition
-        const id = type
-        let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
-        switch (type) {
-          case 'ControlPlaneHealthy':
-            text = 'Control Plane'
-            break
-          case 'SystemComponentsHealthy':
-            text = 'System Components'
-            break
-          case 'EveryNodeReady':
-            text = 'Nodes'
-            break
-        }
-        return {id, text, message, lastTransitionTime, status}
+    isError () {
+      switch (this.tag.status) {
+        case 'True':
+          return false
+        case 'False':
+          return true
+        default:
+          return false
       }
+    },
+    isUnknown () {
+      switch (this.tag.status) {
+        case 'Unknown':
+          return true
+        default:
+          return false
+      }
+    },
+    popperKeyWithType () {
+      return `statusTag_${this.popperKey}`
+    },
+    tag () {
+      const { lastTransitionTime, message, status, type } = this.condition
+      const id = type
+      let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
+      switch (type) {
+        case 'ControlPlaneHealthy':
+          text = 'Control Plane'
+          break
+        case 'SystemComponentsHealthy':
+          text = 'System Components'
+          break
+        case 'EveryNodeReady':
+          text = 'Nodes'
+          break
+      }
+      return { id, text, message, lastTransitionTime, status }
     }
   }
+}
 </script>

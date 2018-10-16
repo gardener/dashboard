@@ -52,86 +52,84 @@ limitations under the License.
   </v-dialog>
 </template>
 
-
 <script>
-  import { mapActions } from 'vuex'
-  import get from 'lodash/get'
-  import Alert from '@/components/Alert'
-  import { errorDetailsFromError } from '@/utils/error'
+import { mapActions } from 'vuex'
+import get from 'lodash/get'
+import Alert from '@/components/Alert'
+import { errorDetailsFromError } from '@/utils/error'
 
-  export default {
-    name: 'secret-dialog-delete',
-    components: {
-      Alert
+export default {
+  name: 'secret-dialog-delete',
+  components: {
+    Alert
+  },
+  props: {
+    value: {
+      type: Boolean,
+      required: true
     },
-    props: {
-      value: {
-        type: Boolean,
-        required: true
+    secret: {
+      type: Object,
+      required: true
+    },
+    backgroundSrc: {
+      type: String,
+      required: true
+    }
+  },
+  data () {
+    return {
+      errorMessage: undefined,
+      detailedErrorMessage: undefined
+    }
+  },
+  computed: {
+    visible: {
+      get () {
+        return this.value
       },
-      secret: {
-        type: Object,
-        required: true
-      },
-      backgroundSrc: {
-        type: String,
-        required: true
+      set (value) {
+        this.$emit('input', value)
       }
     },
-    data () {
-      return {
-        errorMessage: undefined,
-        detailedErrorMessage: undefined
-      }
+    name () {
+      return get(this.secret, 'metadata.name', '')
+    }
+  },
+  methods: {
+    ...mapActions({
+      deleteSecret: 'deleteInfrastructureSecret'
+    }),
+    hide () {
+      this.visible = false
     },
-    computed: {
-      visible: {
-        get () {
-          return this.value
-        },
-        set (value) {
-          this.$emit('input', value)
-        }
-      },
-      name () {
-        return get(this.secret, 'metadata.name', '')
-      }
-    },
-    methods: {
-      ...mapActions({
-        deleteSecret: 'deleteInfrastructureSecret'
-      }),
-      hide () {
-        this.visible = false
-      },
-      onDeleteSecret () {
-        const bindingName = get(this.secret, 'metadata.bindingName')
-        this
-          .deleteSecret(bindingName)
-          .then(() => this.hide())
-          .catch(err => {
-            this.errorMessage = 'Failed to delete Infrastructure Secret.'
+    onDeleteSecret () {
+      const bindingName = get(this.secret, 'metadata.bindingName')
+      this
+        .deleteSecret(bindingName)
+        .then(() => this.hide())
+        .catch(err => {
+          this.errorMessage = 'Failed to delete Infrastructure Secret.'
 
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-            this.detailedErrorMessage = errorDetails.detailedMessage
-          })
-      },
-      reset () {
-        this.errorMessage = undefined
-        this.detailedMessage = undefined
-      }
+          const errorDetails = errorDetailsFromError(err)
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+        })
     },
-    watch: {
-      value: function (value) {
-        if (value) {
-          this.reset()
-        }
+    reset () {
+      this.errorMessage = undefined
+      this.detailedMessage = undefined
+    }
+  },
+  watch: {
+    value: function (value) {
+      if (value) {
+        this.reset()
       }
     }
   }
+}
 </script>
-
 
 <style lang="styl" scoped>
   .icon {

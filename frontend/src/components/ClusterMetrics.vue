@@ -65,42 +65,42 @@ limitations under the License.
 </template>
 
 <script>
-  import get from 'lodash/get'
-  import UsernamePassword from '@/components/UsernamePasswordListTile'
-  import { isHibernated } from '@/utils'
+import get from 'lodash/get'
+import UsernamePassword from '@/components/UsernamePasswordListTile'
+import { isHibernated } from '@/utils'
 
-  export default {
-    components: {
-      UsernamePassword
+export default {
+  components: {
+    UsernamePassword
+  },
+  props: {
+    shootItem: {
+      type: Object,
+      required: true
+    }
+  },
+  computed: {
+    grafanaUrl () {
+      return get(this.shootItem, 'info.grafanaUrl', '')
     },
-    props: {
-      shootItem: {
-        type: Object,
-        required: true
-      }
+    grafanaUrlText () {
+      return get(this.shootItem, 'info.grafanaUrlText', '')
     },
-    computed: {
-      grafanaUrl () {
-        return get(this.shootItem, 'info.grafanaUrl', '')
-      },
-      grafanaUrlText () {
-        return get(this.shootItem, 'info.grafanaUrlText', '')
-      },
-      prometheusUrl () {
-        return get(this.shootItem, 'info.prometheusUrl', '')
-      },
-      alertmanagerUrl () {
-        return get(this.shootItem, 'info.alertmanagerUrl', '')
-      },
-      username () {
-        return get(this.shootItem, 'info.monitoring_username', '')
-      },
-      password () {
-        return get(this.shootItem, 'info.monitoring_password', '')
-      },
-      isHibernated () {
-        return isHibernated(get(this.shootItem, 'spec'))
-      }
+    prometheusUrl () {
+      return get(this.shootItem, 'info.prometheusUrl', '')
+    },
+    alertmanagerUrl () {
+      return get(this.shootItem, 'info.alertmanagerUrl', '')
+    },
+    username () {
+      return get(this.shootItem, 'info.monitoring_username', '')
+    },
+    password () {
+      return get(this.shootItem, 'info.monitoring_password', '')
+    },
+    isHibernated () {
+      return isHibernated(get(this.shootItem, 'spec'))
     }
   }
+}
 </script>
