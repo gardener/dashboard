@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM node:10.10-alpine
+FROM node:10.12-alpine
 
 # Create app directory
 RUN mkdir -p /usr/src/app/public
