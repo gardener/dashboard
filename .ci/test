@@ -21,7 +21,7 @@ npm run -s test-cov
 cd "${SOURCE_PATH}/frontend"
 npm install
 npm run -s lint
-npm run -s unit
+npm run -s test:unit
 
 cd "${old_pwd}"
 
