@@ -1,5 +1,3 @@
-global.chai = require('chai')
-
 module.exports = {
   env: {
     mocha: true
