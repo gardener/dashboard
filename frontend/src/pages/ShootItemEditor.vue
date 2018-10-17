@@ -355,11 +355,11 @@ export default {
         const cursor = doc.getCursor()
         const { left, top } = editor.getScrollInfo() || {}
         doc.setValue(value)
-        editor.scrollTo(left, top)
         editor.focus()
         if (cursor) {
           doc.setCursor(cursor)
         }
+        editor.scrollTo(left, top)
         this.clearHistory()
       }
     },
