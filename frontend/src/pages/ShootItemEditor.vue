@@ -381,10 +381,10 @@ export default {
       return new Promise(resolve => {
         assign(this.action, {
           id: 'navigation',
-          title: 'Confirm Navigation',
-          text: 'Your changes have not been saved.<br/>Are you sure you want to leave this page?',
+          title: 'Leave Editor?',
+          text: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?',
           yesButtonText: 'Leave',
-          noButtonText: 'Stay',
+          noButtonText: 'Cancel',
           resolve
         })
       })
