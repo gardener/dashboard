@@ -125,7 +125,7 @@ limitations under the License.
                     /
                     <v-tooltip top open-delay="500">
                       <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
-                        <span>{{secret}} </span>
+                        <span>{{secret}}</span>
                       </router-link>
                       <span>Used Credential</span>
                     </v-tooltip>
@@ -231,20 +231,6 @@ limitations under the License.
             Access
           </v-card-title>
           <cluster-access :item="item"></cluster-access>
-          <template v-if="!!kubeconfig">
-            <v-divider class="my-2" inset></v-divider>
-            <v-expansion-panel>
-              <v-expansion-panel-content>
-                <div slot="header" class="kubeconfig-title">
-                  <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-                  <span>KUBECONFIG</span>
-                </div>
-                <v-card>
-                  <code-block lang="yaml" :content="info.kubeconfig"></code-block>
-                </v-card>
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </template>
         </v-card>
 
         <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
@@ -259,7 +245,6 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import CodeBlock from '@/components/CodeBlock'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
 import TimeString from '@/components/TimeString'
@@ -287,7 +272,6 @@ import 'codemirror/mode/yaml/yaml.js'
 export default {
   name: 'shoot-item',
   components: {
-    CodeBlock,
     ClusterAccess,
     Journals,
     TimeString,
@@ -392,9 +376,6 @@ export default {
     },
     item () {
       return get(this, 'value', {})
-    },
-    kubeconfig () {
-      return get(this, 'info.kubeconfig')
     },
     isInfoAvailable () {
       return !!this.info
@@ -510,33 +491,5 @@ export default {
 <style lang="styl" scoped>
   .subheading.v-card__title {
     height: 42px;
-  }
-
-  .v-expansion-panel {
-    box-shadow: none;
-    display: initial;
-
-    >>> li {
-      border: none;
-
-      .v-expansion-panel__header {
-        padding: 16px 32px 16px 16px !important;
-
-        .material-icons {
-          justify-content: flex-start;
-        }
-
-        .kubeconfig-title {
-          .material-icons {
-            padding-right: 30px;
-          }
-
-          span {
-            font-size: 13px;
-          }
-        }
-
-      }
-    }
   }
 </style>

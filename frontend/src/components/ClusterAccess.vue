@@ -33,24 +33,69 @@ limitations under the License.
     </v-list-tile>
     <v-divider v-show="!!dashboardUrl && !!username && !!password" class="my-2" inset></v-divider>
     <username-password :username="username" :password="password"></username-password>
+    <template v-if="!!kubeconfig">
+      <v-divider class="my-2" inset></v-divider>
+      <v-expansion-panel :value="expandKubeconfigIndex" readonly>
+        <v-expansion-panel-content hide-actions>
+          <v-container slot="header" class="pt-0 pb-0">
+            <v-layout align-center row fill-height class="ma-0">
+              <v-icon class="kubeconfig-icon cyan--text text--darken-2">insert_drive_file</v-icon>
+              <span>KUBECONFIG</span>
+              <v-spacer></v-spacer>
+              <v-tooltip top>
+                <v-btn slot="activator" icon @click.native.stop="onDownload">
+                  <v-icon>mdi-download</v-icon>
+                </v-btn>
+                <span>Download Kubeconfig</span>
+              </v-tooltip>
+              <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+              <v-tooltip top>
+                <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
+                  <v-icon>{{visibilityIconKubeconfig}}</v-icon>
+                </v-btn>
+                <span>{{kubeconfigVisibilityTitle}}</span>
+              </v-tooltip>
+            </v-layout>
+          </v-container>
+          <v-card>
+            <code-block lang="yaml" :content="info.kubeconfig" :show-copy-button="false"></code-block>
+          </v-card>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </template>
   </v-list>
 </template>
 
 <script>
 import UsernamePassword from '@/components/UsernamePasswordListTile'
+import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
+import replace from 'lodash/replace'
 import { isHibernated } from '@/utils'
+import download from 'downloadjs'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
-    UsernamePassword
+    UsernamePassword,
+    CodeBlock,
+    CopyBtn
   },
   props: {
     item: {
       type: Object
     }
   },
+  data () {
+    return {
+      expandKubeconfigIndex: null
+    }
+  },
   computed: {
+    ...mapGetters([
+      'projectList'
+    ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
@@ -66,6 +111,12 @@ export default {
     password () {
       return this.info.cluster_password || ''
     },
+    name () {
+      return get(this.item, 'metadata.name')
+    },
+    namespace () {
+      return get(this.item, 'metadata.namespace')
+    },
     info () {
       return get(this.item, 'info', {})
     },
@@ -74,7 +125,70 @@ export default {
     },
     isHibernated () {
       return isHibernated(get(this.item, 'spec'))
+    },
+    kubeconfig () {
+      return get(this, 'info.kubeconfig')
+    },
+    visibilityIconKubeconfig () {
+      if (this.isKubeconfigVisible) {
+        return 'visibility_off'
+      } else {
+        return 'visibility'
+      }
+    },
+    kubeconfigVisibilityTitle () {
+      if (this.isKubeconfigVisible) {
+        return 'Hide Kubeconfig'
+      } else {
+        return 'Show Kubeconfig'
+      }
+    },
+    isKubeconfigVisible () {
+      return this.expandKubeconfigIndex === 0
+    },
+    getQualifiedName () {
+      const project = find(this.projectList, ['metadata.namespace', this.namespace])
+      const projectName = project.name || replace(this.namespace, /^garden-/, '')
+      return `kubeconfig--${projectName}--${this.name}.yaml`
+    }
+  },
+  methods: {
+    reset () {
+      this.hideKubekonfig()
+    },
+    hideKubekonfig () {
+      this.expandKubeconfigIndex = null
+    },
+    showKubeconfig () {
+      this.expandKubeconfigIndex = 0
+    },
+    onDownload () {
+      const kubeconfig = this.kubeconfig
+      if (kubeconfig) {
+        download(kubeconfig, this.getQualifiedName, 'text/plain')
+      }
+    }
+  },
+  watch: {
+    kubeconfig (value) {
+      this.reset()
     }
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  .v-expansion-panel {
+    box-shadow: none;
+  }
+
+  >>> .v-expansion-panel__header {
+    cursor: auto;
+    padding: 0;
+  }
+
+  .kubeconfig-icon {
+    padding-right: 30px;
+  }
+
+</style>
