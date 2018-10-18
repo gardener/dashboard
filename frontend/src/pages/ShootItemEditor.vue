@@ -69,12 +69,15 @@ limitations under the License.
           </v-tooltip>
         </v-flex >
         <v-flex d-flex class="divider-right">
-          <v-tooltip top>
-            <v-btn icon slot="activator" ref="btnCopy">
-              <v-icon small>content_copy</v-icon>
-            </v-btn>
-            <span>Copy</span>
-          </v-tooltip>
+          <copy-btn
+            :clipboard-text="getContent()"
+            @click.native.stop="focus"
+            tooltip-text='Copy'
+            :user-feedback="false"
+            @copy="onCopy"
+            @copyFailed="onCopyFailed"
+          >
+          </copy-btn>
         </v-flex>
         <v-flex d-flex xs12>
         </v-flex>
@@ -110,9 +113,9 @@ limitations under the License.
 </template>
 
 <script>
+import CopyBtn from '@/components/CopyBtn'
 import { mapGetters } from 'vuex'
 import { replaceShoot } from '@/utils/api'
-import Clipboard from 'clipboard'
 import download from 'downloadjs'
 
 // codemirror
@@ -141,6 +144,9 @@ function safeDump (value) {
 }
 
 export default {
+  components: {
+    CopyBtn
+  },
   name: 'shoot-item-editor',
   data () {
     return {
@@ -401,6 +407,16 @@ export default {
           resolve
         })
       })
+    },
+    onCopy () {
+      this.snackbarColor = undefined
+      this.snackbarText = 'Copied content to clipboard'
+      this.snackbar = true
+    },
+    onCopyFailed () {
+      this.snackbarColor = 'error'
+      this.snackbarText = 'Copy to clipboard failed'
+      this.snackbar = true
     }
   },
   mounted () {
@@ -409,25 +425,6 @@ export default {
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
-    // clipboard
-    const vm = this
-    const clipboard = new Clipboard(vm.$refs.btnCopy.$el, {
-      text () {
-        return vm.getContent()
-      }
-    })
-    clipboard.on('success', e => {
-      this.snackbarColor = undefined
-      this.snackbarText = 'Copied content to clipboard'
-      this.snackbar = true
-      e.clearSelection()
-      this.focus()
-    })
-    clipboard.on('error', e => {
-      this.snackbarColor = 'error'
-      this.snackbarText = 'Copy to clipboard failed'
-      this.snackbar = true
-    })
   },
   watch: {
     value: {

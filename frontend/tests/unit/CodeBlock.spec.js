@@ -17,8 +17,13 @@
 import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import CodeBlock from '@/components/CodeBlock.vue'
-import VIcon from 'vuetify/es5/components/VIcon'
-import VBtn from 'vuetify/es5/components/VBtn'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+
+Vue.use(Vuetify, {
+  iconfont: 'md'
+})
+document.body.setAttribute('data-app', true)
 
 describe('CodeBlock.vue', function () {
   it('should render correct contents', function () {
@@ -30,11 +35,7 @@ describe('CodeBlock.vue', function () {
         bar: 42`
     }
     const wrapper = mount(CodeBlock, {
-      propsData,
-      components: {
-        VIcon,
-        VBtn
-      }
+      propsData
     })
     const vm = wrapper.vm
     return new Promise(resolve => vm.$nextTick(resolve))

@@ -31,16 +31,8 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Password</v-list-tile-sub-title>
         <v-list-tile-title>{{passwordText}}</v-list-tile-title>
-        <v-snackbar :bottom="true" v-model="snackbar" :success="true" :absolute="true" :timeout="2000">
-          Copied to clipboard!
-        </v-snackbar>
       </v-list-tile-content>
-      <v-tooltip top>
-        <v-btn slot="activator" icon ref="copy">
-          <v-icon>content_copy</v-icon>
-        </v-btn>
-        <span>Copy to clipboard</span>
-      </v-tooltip>
+      <copy-btn :clipboard-text="password"></copy-btn>
       <v-tooltip top>
         <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
           <v-icon>{{visibilityIcon}}</v-icon>
@@ -52,11 +44,11 @@ limitations under the License.
 </template>
 
 <script>
-import Clipboard from 'clipboard'
+import CopyBtn from '@/components/CopyBtn'
 
 export default {
   components: {
-    Clipboard
+    CopyBtn
   },
   props: {
     username: {
@@ -68,22 +60,11 @@ export default {
   },
   data () {
     return {
-      snackbar: false,
-      showPassword: false,
-      clipboard: undefined
+      showPassword: false
     }
   },
   methods: {
-    enableCopy () {
-      this.clipboard = new Clipboard(this.$refs.copy.$el, {
-        text: () => this.password
-      })
-      this.clipboard.on('success', (event) => {
-        this.snackbar = true
-      })
-    },
     reset () {
-      this.snackbar = false
       this.showPassword = false
     }
   },
@@ -114,9 +95,6 @@ export default {
     password (value) {
       this.reset()
     }
-  },
-  mounted () {
-    this.enableCopy()
   }
 }
 </script>

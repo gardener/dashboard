@@ -18,22 +18,11 @@ limitations under the License.
   <v-container fluid>
 
     <v-card class="mt-2">
-      <v-snackbar :timeout="5000" top right v-model="showMessage">
-        <div>Copied ID Token to clipboard!</div>
-      </v-snackbar>
       <v-toolbar card class="teal darken-1" dark>
         <v-icon class="white--text pr-2">mdi-account</v-icon>
         <v-toolbar-title>User Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn
-          ref="copy"
-          icon
-          class="mr-3"
-          :data-clipboard-text="idToken"
-        >
-          <v-icon class="white--text">mdi-content-copy</v-icon>
-        </v-btn>
-
+        <copy-btn :clipboard-text="idToken" copy-success-text="Copied ID Token to clipboard!"></copy-btn>
       </v-toolbar>
       <v-card-text>
        <v-layout row wrap>
@@ -56,11 +45,14 @@ limitations under the License.
 </template>
 
 <script>
+import CopyBtn from '@/components/CopyBtn'
 import { mapState, mapGetters } from 'vuex'
-import Clipboard from 'clipboard'
 import moment from 'moment-timezone'
 
 export default {
+  components: {
+    CopyBtn
+  },
   name: 'profile',
   data () {
     return {
@@ -90,19 +82,6 @@ export default {
     expiresAt () {
       return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
     }
-  },
-  mounted () {
-    const clipboard = new Clipboard(this.$refs.copy.$el)
-    clipboard.on('success', event => {
-      event.clearSelection()
-      this.showMessage = true
-      window.setTimeout(() => {
-        this.showMessage = false
-      }, 2000)
-    })
-    clipboard.on('error', err => {
-      console.error('error', err)
-    })
   }
 }
 </script>
