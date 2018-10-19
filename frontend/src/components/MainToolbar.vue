@@ -115,7 +115,7 @@ limitations under the License.
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import { gravatar } from '@/utils'
+import { gravatarUrlIdenticon } from '@/utils'
 import Breadcrumb from '@/components/Breadcrumb'
 
 export default {
@@ -152,7 +152,7 @@ export default {
       return this.cfg.helpMenuItems || {}
     },
     avatar () {
-      return gravatar(this.email)
+      return gravatarUrlIdenticon(this.email)
     },
     email () {
       return this.user.profile.email

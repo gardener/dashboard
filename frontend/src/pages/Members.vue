@@ -26,7 +26,7 @@ limitations under the License.
       <v-list v-if="!!owner" two-line subheader>
         <v-list-tile avatar>
           <v-list-tile-avatar>
-            <img :src="avatar(owner)" />
+            <img :src="avatarUrl(owner)" />
           </v-list-tile-avatar>
           <v-list-tile-content>
             <v-list-tile-title>{{displayName(owner)}}</v-list-tile-title>
@@ -88,7 +88,7 @@ limitations under the License.
             :key="name"
           >
             <v-list-tile-avatar>
-              <img :src="avatar(name)" />
+              <img :src="avatarUrl(name)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
@@ -156,7 +156,7 @@ limitations under the License.
           >
 
             <v-list-tile-avatar>
-              <img :src="`https://robohash.org/${name}`" />
+              <img :src="robohashUrl(name)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
@@ -242,7 +242,12 @@ import filter from 'lodash/filter'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import { mapState, mapActions, mapGetters } from 'vuex'
-import { emailToDisplayName, gravatar, serviceAccountToDisplayName } from '@/utils'
+import {
+  emailToDisplayName,
+  gravatarUrlIdenticon,
+  gravatarUrlRobohash,
+  serviceAccountToDisplayName
+} from '@/utils'
 import { getMember } from '@/utils/api'
 import CodeBlock from '@/components/CodeBlock'
 
@@ -343,8 +348,11 @@ export default {
     isOwner (email) {
       return this.owner === toLower(email)
     },
-    avatar (email) {
-      return gravatar(email)
+    avatarUrl (email) {
+      return gravatarUrlIdenticon(email)
+    },
+    robohashUrl (value) {
+      return gravatarUrlRobohash(value)
     },
     async downloadKubeconfig (name) {
       const namespace = this.namespace

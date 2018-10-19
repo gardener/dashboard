@@ -35,7 +35,7 @@ const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const STATIC_DIRNAME = join(PUBLIC_DIRNAME, 'static')
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const issuerUrl = _.get(config, 'jwt.issuer')
-let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com', 'https://robohash.org']
+let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
   const url = parseUrl(gitHubRepoUrl)
