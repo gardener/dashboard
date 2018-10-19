@@ -32,7 +32,7 @@ limitations under the License.
         </v-tabs>
       </v-toolbar>
       <v-tabs-items v-model="activeTab" class="items">
-        <v-tab-item key="infra" id="tab-infra">
+        <v-tab-item key="infra" value="tab-infra">
           <v-card flat>
             <v-container fluid>
               <v-card-text>
@@ -201,7 +201,7 @@ limitations under the License.
           </v-card>
         </v-tab-item>
 
-        <v-tab-item key="worker" id="tab-worker">
+        <v-tab-item key="worker" value="tab-worker">
 
           <v-card flat>
             <v-container fluid >
@@ -301,7 +301,7 @@ limitations under the License.
 
         </v-tab-item>
 
-        <v-tab-item key="addons" id="tab-addons">
+        <v-tab-item key="addons" value="tab-addons">
 
           <v-card flat>
             <v-container>
@@ -323,7 +323,7 @@ limitations under the License.
 
         </v-tab-item>
 
-        <v-tab-item key="maintenance" id="tab-maintenance">
+        <v-tab-item key="maintenance" value="tab-maintenance">
 
           <v-card flat>
             <v-container fluid>
