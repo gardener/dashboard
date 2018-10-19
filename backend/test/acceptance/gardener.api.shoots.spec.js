@@ -125,14 +125,12 @@ describe('gardener', function () {
       })
 
       it('should delete a shoot', function () {
-        const deletionTimestamp = '1970-01-01T00:00:00Z'
         const deleteAnnotations = {
-          'action.garden.sapcloud.io/delete': name,
-          'confirmation.garden.sapcloud.io/deletionTimestamp': deletionTimestamp
+          'confirmation.garden.sapcloud.io/deletion': 'true'
         }
 
         oidc.stub.getKeys()
-        k8s.stub.deleteShoot({bearer, namespace, name, deleteAnnotations, deletionTimestamp, resourceVersion})
+        k8s.stub.deleteShoot({bearer, namespace, name, resourceVersion})
         return chai.request(app)
           .delete(`/api/namespaces/${namespace}/shoots/${name}`)
           .set('authorization', `Bearer ${bearer}`)

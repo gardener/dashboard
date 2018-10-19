@@ -370,13 +370,11 @@ const stub = {
       })
       .reply(200, () => result)
   },
-  deleteShoot ({bearer, namespace, name, project, createdBy, purpose, kind, region, bindingName, deletionTimestamp, resourceVersion = 42}) {
+  deleteShoot ({bearer, namespace, name, resourceVersion = 42}) {
     const metadata = {
       resourceVersion,
       namespace
     }
-    const shoot = getShoot({name, project, createdBy, purpose, kind, region, bindingName, deletionTimestamp})
-    shoot.metadata.deletionTimestamp = deletionTimestamp
     const result = {metadata}
 
     return nockWithAuthorization(bearer)
@@ -386,13 +384,6 @@ const stub = {
       })
       .reply(200)
       .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
-      .reply(200)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
-      .reply(200, shoot)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
-        _.assign(metadata, body.metadata)
-        return true
-      })
       .reply(200, () => result)
   },
   getShootInfo ({

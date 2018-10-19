@@ -144,22 +144,7 @@ exports.remove = async function ({user, namespace, name}) {
   }
   await patchAnnotations({user, namespace, name, annotations})
 
-  await Garden(user).namespaces(namespace).shoots.delete({name})
-
-  /* TODO: Kept the following lines for backwards compatibility
-   * (delete them once the DeletionConfirmation admission controller becomes
-   * enabled by default and the gardener logic has been adapted properly)
-   */
-  const {metadata} = await this.read({user, namespace, name})
-  const body = {
-    metadata: {
-      annotations: {
-        'confirmation.garden.sapcloud.io/deletionTimestamp': metadata.deletionTimestamp,
-        'action.garden.sapcloud.io/delete': name
-      }
-    }
-  }
-  return patch({user, namespace, name, body})
+  return Garden(user).namespaces(namespace).shoots.delete({name})
 }
 
 exports.info = async function ({user, namespace, name}) {
