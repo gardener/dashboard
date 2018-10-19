@@ -279,7 +279,7 @@ export default {
       },
       set (value) {
         if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
@@ -289,7 +289,7 @@ export default {
       },
       set (value) {
         if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
@@ -299,7 +299,7 @@ export default {
       },
       set (value) {
         if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
