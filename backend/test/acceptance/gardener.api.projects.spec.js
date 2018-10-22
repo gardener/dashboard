@@ -131,8 +131,6 @@ describe('gardener', function () {
           ['ADDED', uninitializedProject],
           ['MODIFIED', initializedProject]
         ])
-        sandbox.stub(services.projects, 'projectInitializationTimeout')
-          .value(100)
         const watchStub = sandbox.stub(services.projects, 'watchProject')
           .callsFake(() => reconnectorStub.start())
 
@@ -142,11 +140,45 @@ describe('gardener', function () {
           .send({metadata, data})
           .catch(err => err.response)
           .then(res => {
+            expect(watchStub).to.have.callCount(1)
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(watchStub).to.have.callCount(1)
             expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
             expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+          })
+      })
+
+      it('should timeout when creating a project', function () {
+        const createdBy = username
+        const resourceVersion = 42
+        const timeout = 30
+        oidc.stub.getKeys()
+        k8s.stub.createProject({bearer, resourceVersion})
+
+        // watch project stub
+        const project = k8s.getProject({name, namespace, createdBy, owner, description, purpose})
+        // project with initializer
+        const uninitializedProject = _.cloneDeep(project)
+        uninitializedProject.metadata.initializers = ['gardener']
+        // reconnector
+        const reconnectorStub = createReconnectorStub([
+          ['ADDED', uninitializedProject],
+          ['MODIFIED', uninitializedProject]
+        ])
+        sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
+        const watchStub = sandbox.stub(services.projects, 'watchProject')
+          .callsFake(() => reconnectorStub.start())
+
+        return chai.request(app)
+          .post('/api/namespaces')
+          .set('authorization', `Bearer ${bearer}`)
+          .send({metadata, data})
+          .catch(err => err.response)
+          .then(res => {
+            expect(watchStub).to.have.callCount(1)
+            expect(res).to.have.status(504)
+            expect(res).to.be.json
+            expect(res.body.message).to.equal(`Project could not be initialized within ${timeout} ms`)
           })
       })
 

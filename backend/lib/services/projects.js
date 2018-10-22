@@ -21,7 +21,7 @@ const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
 const core = kubernetes.core()
-const { PreconditionFailed, NotFound } = require('../errors')
+const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
 const logger = require('../logger')
 const shoots = require('./shoots')
 const administrators = require('./administrators')
@@ -144,7 +144,7 @@ function waitUntilProjectIsReady (projects, name) {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       const duration = `${projectInitializationTimeout} ms`
-      done(new Error(`Project could not be initialized within ${duration}`))
+      done(new GatewayTimeout(`Project could not be initialized within ${duration}`))
     }, projectInitializationTimeout)
 
     function done (err, project) {
@@ -173,7 +173,7 @@ function waitUntilProjectIsReady (projects, name) {
           }
           break
         case 'DELETED':
-          done(new Error(`Project "${name}" has been deleted`))
+          done(new InternalServerError(`Project "${name}" has been deleted`))
           break
       }
     }
@@ -183,7 +183,7 @@ function waitUntilProjectIsReady (projects, name) {
     }
 
     function onDisconnect (err) {
-      done(err || new Error(`Watch for project "${name}" has been disconnected`))
+      done(err || new InternalServerError(`Watch for project "${name}" has been disconnected`))
     }
 
     reconnector.on('event', onEvent)
