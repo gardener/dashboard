@@ -27,12 +27,7 @@ describe('gardener', function () {
       const name = 'bar'
       const project = 'foo'
       const namespace = `garden-${project}`
-      const members = _
-        .chain(k8s.projectMembersList)
-        .find(['metadata.namespace', namespace])
-        .get('subjects', [])
-        .map('name')
-        .value()
+      const members = k8s.readProjectMembers(namespace)
       const metadata = {}
       const username = `${name}@example.org`
       const email = username
@@ -65,7 +60,7 @@ describe('gardener', function () {
           })
       })
 
-      it('should return empty member list', function () {
+      it('should not return members but respond "Namespace not found"', function () {
         const namespace = 'garden-baz'
         oidc.stub.getKeys()
         k8s.stub.getMembers({bearer, namespace})
@@ -74,9 +69,9 @@ describe('gardener', function () {
           .set('authorization', `Bearer ${bearer}`)
           .catch(err => err.response)
           .then(res => {
-            expect(res).to.have.status(200)
+            expect(res).to.have.status(404)
             expect(res).to.be.json
-            expect(res.body).to.eql([])
+            expect(res.body.message).to.equal('Namespace not found')
           })
       })
 

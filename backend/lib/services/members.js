@@ -21,26 +21,35 @@ const yaml = require('js-yaml')
 const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
-const Resources = require('../kubernetes/Resources')
-const rbac = kubernetes.rbac()
-const {Conflict} = require('../errors.js')
-
-const RoleBindingName = 'garden-project-members'
-
-function Rbac ({auth}) {
-  return kubernetes.rbac({auth})
-}
+const core = kubernetes.core()
+const { Conflict, NotFound } = require('../errors.js')
 
 function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
-function fromResource ({subjects} = {}) {
+function Garden ({auth}) {
+  return kubernetes.garden({auth})
+}
+
+function fromResource (project = {}) {
   return _
-    .chain(subjects)
+    .chain(project)
+    .get('spec.members')
     .filter(['kind', 'User'])
     .map('name')
     .value()
+}
+
+async function getProjectNameFromNamespace (namespace) {
+  // read namespace
+  const ns = await core.namespaces.get({name: namespace})
+  // get name of project from namespace label
+  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
+  if (!name) {
+    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+  }
+  return name
 }
 
 function getKubeconfig ({serviceaccountName, serviceaccountNamespace, token, server, caData}) {
@@ -77,57 +86,6 @@ function getKubeconfig ({serviceaccountName, serviceaccountNamespace, token, ser
   })
 }
 
-function roleBindingBody (namespace, usernames = []) {
-  const ClusterRole = Resources.ClusterRole
-  return {
-    metadata: {
-      name: RoleBindingName,
-      namespace,
-      labels: {
-        'garden.sapcloud.io/role': 'members'
-      }
-    },
-    roleRef: {
-      apiGroup: ClusterRole.apiGroup,
-      kind: ClusterRole.kind,
-      name: 'garden.sapcloud.io:system:project-member'
-    },
-    subjects: _.map(usernames, name => {
-      return {
-        kind: 'User',
-        name,
-        apiGroup: 'rbac.authorization.k8s.io'
-      }
-    })
-  }
-}
-
-function readRoleBinding (rbac, namespace) {
-  return rbac.namespaces(namespace).rolebindings.get({
-    name: RoleBindingName
-  })
-    .catch(err => {
-      if (err.code === 404) {
-        return roleBindingBody(namespace)
-      }
-      throw err
-    })
-}
-
-// patch rolebinding must be done with the serviceaccount
-function patchRoleBinding (namespace, body) {
-  return rbac.namespaces(namespace).rolebindings.mergePatch({
-    name: RoleBindingName,
-    body
-  })
-}
-
-function createRoleBinding (rbac, namespace, names = []) {
-  return rbac.namespaces(namespace).rolebindings.post({
-    body: roleBindingBody(namespace, names)
-  })
-}
-
 function createServiceaccount (core, namespace, name) {
   const body = {metadata: {name, namespace}}
   return core.namespaces(namespace).serviceaccounts.post({
@@ -147,71 +105,54 @@ function deleteServiceaccount (core, namespace, name) {
     })
 }
 
-async function setRoleBindingSubject (rbac, namespace, name) {
-  let body
-  try {
-    body = await rbac.namespaces(namespace).rolebindings.get({
-      name: RoleBindingName
-    })
-  } catch (err) {
-    if (err.code === 404) {
-      // only administrators can create the rolebinding afterwards
-      return createRoleBinding(rbac, namespace, [name])
-    }
-    throw err
+async function setProjectMember (projects, namespace, username) {
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // get project members from project
+  const project = await projects.get({name})
+  const members = _.slice(project.spec.members, 0)
+  if (_.find(members, ['name', username])) {
+    throw new Conflict(`User '${username}' is already member of this project`)
   }
-  const subjects = body.subjects = body.subjects || []
-  if (_.find(subjects, ['name', name])) {
-    throw new Conflict(`User '${name}' is already member of this project`)
-  }
-  subjects.push({
+  members.push({
     kind: 'User',
-    name,
+    name: username,
     apiGroup: 'rbac.authorization.k8s.io'
   })
-  return patchRoleBinding(namespace, body)
-}
-
-async function unsetRoleBindingSubject (rbac, namespace, name) {
-  let body
-  try {
-    body = await rbac.namespaces(namespace).rolebindings.get({
-      name: RoleBindingName
-    })
-  } catch (err) {
-    if (err.code === 404) {
-      return roleBindingBody(namespace)
+  const body = {
+    spec: {
+      members
     }
-    throw err
   }
-  const subjects = body.subjects = body.subjects || []
-  if (!_.find(subjects, ['name', name])) {
-    return body
-  }
-  _.remove(subjects, ['name', name])
-  return patchRoleBinding(namespace, body)
+  return projects.mergePatch({name, body})
 }
 
-// bootstrap of rolebinding must be done with the serviceaccount
-exports.bootstrap = async function ({user, namespace}) {
-  return fromResource(await createRoleBinding(rbac, namespace, [user.id]))
+async function unsetProjectMember (projects, namespace, username) {
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // get project members from project
+  const project = await projects.get({name})
+  const members = _.slice(project.spec.members, 0)
+  if (!_.find(members, ['name', username])) {
+    return project
+  }
+  _.remove(members, ['name', username])
+  const body = {
+    spec: {
+      members
+    }
+  }
+  return projects.mergePatch({name, body})
 }
 
 // list, create and remove is done with the user
 exports.list = async function ({user, namespace}) {
-  const rbac = Rbac(user)
-  return fromResource(await readRoleBinding(rbac, namespace))
-}
-
-exports.create = async function ({user, namespace, body: {name: username}}) {
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-  if (serviceaccountNamespace === namespace) {
-    const core = Core(user)
-    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName)
-  }
-  const rbac = Rbac(user)
-  const roleBinding = await setRoleBindingSubject(rbac, namespace, username)
-  return fromResource(roleBinding)
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // get project members from project
+  return fromResource(await projects.get({name}))
 }
 
 exports.get = async function ({user, namespace, name: username}) {
@@ -239,13 +180,28 @@ exports.get = async function ({user, namespace, name: username}) {
   return member
 }
 
+exports.create = async function ({user, namespace, body: {name: username}}) {
+  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  if (serviceaccountNamespace === namespace) {
+    const core = Core(user)
+    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName)
+  }
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // assign user to project
+  const project = await setProjectMember(projects, namespace, username)
+  return fromResource(project)
+}
+
 exports.remove = async function ({user, namespace, name: username}) {
-  const rbac = Rbac(user)
-  const roleBinding = await unsetRoleBindingSubject(rbac, namespace, username)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // unassign user from project
+  const project = await unsetProjectMember(projects, namespace, username)
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
     await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
   }
-  return fromResource(roleBinding)
+  return fromResource(project)
 }

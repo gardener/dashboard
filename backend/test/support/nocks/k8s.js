@@ -19,6 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
+const { applyPatch } = require('fast-json-patch')
 
 const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
@@ -45,9 +46,34 @@ const secretBindingList = [
 ]
 
 const projectList = [
-  getProject('foo', 'foo@example.org', 'bar@example.org', 'foo-description', 'foo-purpose'),
-  getProject('bar', 'bar@example.org', 'foo@example.org', 'bar-description', 'bar-purpose'),
-  getProject('secret', 'admin@example.org', 'admin@example.org', 'secret-description', 'secret-purpose')
+  getProject({
+    name: 'foo',
+    createdBy: 'bar@example.org',
+    owner: 'foo@example.org',
+    members: [
+      'bar@example.org',
+      'system:serviceaccount:garden-foo:robot'
+    ],
+    description: 'foo-description',
+    purpose: 'foo-purpose'
+  }),
+  getProject({
+    name: 'bar',
+    createdBy: 'foo@example.org',
+    owner: 'bar@example.org',
+    members: [
+      'foo@example.org',
+      'system:serviceaccount:garden-bar:robot'
+    ],
+    description: 'bar-description',
+    purpose: 'bar-purpose'
+  }),
+  getProject({
+    name: 'secret',
+    createdBy: 'admin@example.org',
+    description: 'secret-description',
+    purpose: 'secret-purpose'
+  })
 ]
 
 const shootList = [
@@ -83,12 +109,6 @@ const infrastructureSecretList = [
     fooKey: 'fooKey',
     fooSecret: 'fooSecret'
   })
-]
-
-const projectMembersList = [
-  getProjectMembers('garden-foo', ['foo@example.org', 'bar@example.org', 'system:serviceaccount:garden-foo:robot']),
-  getProjectMembers('garden-bar', ['bar@example.org', 'foo@example.org']),
-  getProjectMembers('garden-secret', ['admin@example.org'])
 ]
 
 const serviceAccountList = [
@@ -201,39 +221,22 @@ function canDeleteShootsInAllNamespacesReply (uri, selfSubjectAccessReview) {
   return [200, _.assign({}, selfSubjectAccessReview, {status: {allowed}})]
 }
 
-function getProjectMembers (namespace, users) {
-  const apiGroup = 'rbac.authorization.k8s.io'
-  return {
-    metadata: {
-      name: 'garden-project-members',
-      namespace,
-      labels: {
-        'garden.sapcloud.io/role': 'members'
-      }
-    },
-    roleRef: {
-      apiGroup,
-      kind: 'ClusterRole',
-      name: 'garden.sapcloud.io:system:project-member'
-    },
-    subjects: _.map(users, getRoleBindingSubject)
-  }
-}
-
-function getRoleBindingSubject (name) {
-  const apiGroup = 'rbac.authorization.k8s.io'
-  return {
-    apiGroup,
-    kind: 'User',
-    name
-  }
+function readProject (namespace) {
+  return _
+    .chain(projectList)
+    .find(['spec.namespace', namespace])
+    .value()
 }
 
 function readProjectMembers (namespace) {
+  return getProjectMembers(readProject(namespace))
+}
+
+function getProjectMembers (project) {
   return _
-    .chain(projectMembersList)
-    .find(['metadata.namespace', namespace])
-    .cloneDeep()
+    .chain(project)
+    .get('spec.members')
+    .map('name')
     .value()
 }
 
@@ -250,28 +253,46 @@ function getInfrastructureSecret (namespace, name, profileName, data = {}) {
   }
 }
 
-function getProject (name, owner, createdBy, description, purpose) {
+function getUser (name) {
+  return {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'User',
+    name
+  }
+}
+
+function getProject ({name, namespace, createdBy, owner, members = [], description, purpose}) {
+  owner = owner || createdBy
+  namespace = namespace || `garden-${name}`
+  members = _
+    .chain(members)
+    .concat(owner)
+    .uniq()
+    .map(getUser)
+    .value()
+  owner = getUser(owner)
   return {
     metadata: {
       name,
       annotations: {
-        'garden.sapcloud.io/createdBy': createdBy
+        'garden.sapcloud.io/createdBy': 'system:serviceaccount:garden:gardener-controller-manager'
       }
     },
     spec: {
-      namespace: `garden-${name}`,
-      owner: {
-        apiGroup: 'rbac.authorization.k8s.io',
-        kind: 'User',
-        name: owner
-      },
+      namespace,
+      createdBy,
+      owner,
+      members,
       purpose,
       description
     }
   }
 }
 
-function getProjectNamespace ({name, namespace}) {
+function getProjectNamespace (namespace) {
+  const project = readProject(namespace)
+  const defaultName = namespace.replace(/^garden-/)
+  const name = _.get(project, 'metadata.name', defaultName)
   return {
     metadata: {
       name: namespace,
@@ -645,13 +666,6 @@ const stub = {
         .reply(200, {
           items: projectList
         })
-        .get('/apis/rbac.authorization.k8s.io/v1/rolebindings')
-        .query({
-          labelSelector: 'garden.sapcloud.io/role=members'
-        })
-        .reply(200, {
-          items: projectMembersList
-        })
     ]
   },
   getProject ({bearer, name, namespace, resourceVersion = 42, unauthorized = false}) {
@@ -670,94 +684,152 @@ const stub = {
     return [
       nockWithAuthorization(auth.bearer)
         .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace({name, namespace})),
+        .reply(200, () => getProjectNamespace(namespace)),
       nockWithAuthorization(bearer)
         .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
         .reply(statusCode, () => result)
     ]
   },
-  createProject ({bearer, namespace, username, resourceVersion = 42}) {
+  createProject ({bearer, resourceVersion = 42}) {
     const result = {
       metadata: {
-        resourceVersion
-      }
+        resourceVersion,
+        initializers: [
+          'gardener'
+        ]
+      },
+      spec: {}
     }
 
-    return nockWithAuthorization(auth.bearer)
+    return nockWithAuthorization(bearer)
       .post('/apis/garden.sapcloud.io/v1beta1/projects', body => {
-        _.assign(result.metadata, body.metadata)
+        const namespace = `garden-${body.metadata.name}`
+        _
+          .chain(result)
+          .merge({spec: {namespace}}, body)
+          .commit()
         return true
       })
       .reply(200, () => result)
   },
-  patchProject ({bearer, namespace, username, resourceVersion = 43}) {
-    const roleBinding = readProjectMembers(namespace)
-    const result = _
-      .chain(projectList)
-      .find(['metadata.name', namespace])
-      .set('metadata.resourceVersion', resourceVersion)
-      .value()
+  patchProject ({bearer, namespace, resourceVersion = 43}) {
+    const project = readProject(namespace)
+    _.set(project, 'metadata.resourceVersion', resourceVersion)
+    const name = _.get(project, 'metadata.name')
 
     return [
       nockWithAuthorization(auth.bearer)
-        .patch(`/api/v1/namespaces/${namespace}`, body => {
-          _.merge(result.metadata, body.metadata)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      nockWithAuthorization(bearer)
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          _.merge(project, body)
           return true
         })
-        .reply(200, () => result),
-      nockWithAuthorization(bearer)
-        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
-        .reply(canDeleteShootsInAllNamespacesReply)
-        .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-        .reply(200, roleBinding)
+        .reply(200, () => project)
     ]
   },
-  deleteProject ({bearer, namespace, username}) {
-    const roleBinding = readProjectMembers(namespace)
-
+  deleteProject ({bearer, namespace}) {
+    let project = readProject(namespace)
+    const name = _.get(project, 'metadata.name')
+    const jsonPatchBody = [{
+      op: 'add',
+      path: '/metadata/annotations/confirmation.garden.sapcloud.io~1deletion',
+      value: 'true'
+    }]
     return [
       nockWithAuthorization(auth.bearer)
-        .delete(`/api/v1/namespaces/${namespace}`)
-        .reply(200),
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
       nockWithAuthorization(bearer)
-        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
-        .reply(canDeleteShootsInAllNamespacesReply)
-        .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-        .reply(200, roleBinding)
         .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
         .reply(200, {
           items: []
         })
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => _.isEqual(body, jsonPatchBody))
+        .reply(200, () => {
+          project = applyPatch(project, jsonPatchBody).newDocument
+          return project
+        })
+        .delete(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .reply(200, () => project)
     ]
   },
   getMembers ({bearer, namespace}) {
-    const roleBinding = readProjectMembers(namespace)
-
-    return nockWithAuthorization(bearer)
-      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-      .reply(200, roleBinding)
+    const project = readProject(namespace)
+    if (project) {
+      return [
+        nockWithAuthorization(auth.bearer)
+          .get(`/api/v1/namespaces/${namespace}`)
+          .reply(200, () => getProjectNamespace(namespace)),
+        nockWithAuthorization(bearer)
+          .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project.metadata.name}`)
+          .reply(200, () => project)
+      ]
+    }
+    return nockWithAuthorization(auth.bearer)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(404, () => {
+        return {
+          message: 'Namespace not found'
+        }
+      })
   },
-  addMember ({bearer, namespace, name, roleBindingExists}) {
-    const roleBinding = readProjectMembers(namespace)
+  addMember ({bearer, namespace, name: username}) {
+    const project = readProject(namespace)
+    const newProject = _.cloneDeep(project)
+    const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-      .reply(200, roleBinding)
-    if (!_.find(roleBinding.subjects, {name, kind: 'User'})) {
-      const newRoleBinding = _.cloneDeep(roleBinding)
-      newRoleBinding.subjects.push(getRoleBindingSubject(name))
-      nockWithAuthorization(auth.bearer)
-        .patch(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
-          newRoleBinding.metadata = body.metadata
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    if (!_.find(project.spec.members, ['name', username])) {
+      scope
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          if (!_.find(body.spec.members, ['name', username])) {
+            return false
+          }
+          newProject.spec.members = body.spec.members
           return true
         })
-        .reply(200, () => newRoleBinding)
+        .reply(200, () => newProject)
     }
-    return scope
+    return [
+      nockWithAuthorization(auth.bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
   },
-  getMember ({bearer, namespace, name}) {
+  removeMember ({bearer, namespace, name: username}) {
+    const project = readProject(namespace)
+    const newProject = _.cloneDeep(project)
+    const name = project.metadata.name
+
     const scope = nockWithAuthorization(bearer)
-    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    if (_.find(project.spec.members, ['name', username])) {
+      scope
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          if (_.find(body.spec.members, ['name', username])) {
+            return false
+          }
+          newProject.spec.members = body.spec.members
+          return true
+        })
+        .reply(200, () => newProject)
+    }
+    return [
+      nockWithAuthorization(auth.bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
+  },
+  getMember ({bearer, namespace, name: username}) {
+    const scope = nockWithAuthorization(bearer)
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace) {
       const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
@@ -770,34 +842,19 @@ const stub = {
     }
     return scope
   },
-  removeMember ({bearer, namespace, name}) {
-    const roleBinding = readProjectMembers(namespace)
-
-    const scope = nockWithAuthorization(bearer)
-      .get(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`)
-      .reply(200, roleBinding)
-    if (_.find(roleBinding.subjects, {name, kind: 'User'})) {
-      const newRoleBinding = _.cloneDeep(roleBinding)
-      _.remove(newRoleBinding.subjects, {name, kind: 'User'})
-      nockWithAuthorization(auth.bearer)
-        .patch(`/apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings/garden-project-members`, body => {
-          newRoleBinding.metadata = body.metadata
-          return true
-        })
-        .reply(200, () => newRoleBinding)
-    }
-    return scope
-  },
   healthz () {
     return nockWithAuthorization(auth.bearer)
       .get(`/healthz`)
       .reply(200, 'ok')
   }
 }
+
 module.exports = {
   url,
   projectList,
-  projectMembersList,
+  getProject,
+  readProject,
+  readProjectMembers,
   auth,
   stub
 }
