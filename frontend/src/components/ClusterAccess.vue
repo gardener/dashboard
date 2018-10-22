@@ -172,7 +172,7 @@ export default {
     onDownload () {
       const kubeconfig = this.kubeconfig
       if (kubeconfig) {
-        download(kubeconfig, this.getQualifiedName, 'text/plain')
+        download(kubeconfig, this.getQualifiedName, 'text/yaml')
       }
     }
   },

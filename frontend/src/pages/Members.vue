@@ -363,7 +363,7 @@ export default {
     async onDownload (name) {
       const kubeconfig = await this.downloadKubeconfig(name)
       if (kubeconfig) {
-        download(kubeconfig, 'kubeconfig.yaml', 'text/plain')
+        download(kubeconfig, 'kubeconfig.yaml', 'text/yaml')
       }
     },
     async onKubeconfig (name) {
