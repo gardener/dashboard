@@ -95,25 +95,10 @@ limitations under the License.
         </template>
       </v-data-table>
 
-      <v-dialog v-model="kubeconfigDialog" persistent max-width="67%" lazy>
+      <v-dialog v-model="clusterAccessDialog" max-width="600" lazy>
         <v-card>
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
-            <div class="headline">Kubeconfig <code class="cluster_name">{{currentName}}</code></div>
-            <v-spacer></v-spacer>
-            <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
-              <v-icon>close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <code-block lang="yaml" :content="currentKubeconfig"></code-block>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <v-dialog v-model="dashboardDialog" max-width="600" lazy>
-        <v-card>
-          <v-card-title class="teal darken-1 grey--text text--lighten-4">
-            <div class="headline">Kube-Cluster Access <code class="cluster_name">{{currentName}}</code></div>
+            <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
               <v-icon>close</v-icon>
@@ -143,7 +128,6 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import CodeBlock from '@/components/CodeBlock'
 import GPopper from '@/components/GPopper'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
@@ -154,7 +138,6 @@ import { getCreatedBy } from '@/utils'
 export default {
   name: 'shoot-list',
   components: {
-    CodeBlock,
     CreateClusterDialog,
     DeleteClusterDialog,
     GPopper,
@@ -210,8 +193,7 @@ export default {
     }),
     showDialog (args) {
       switch (args.action) {
-        case 'kubeconfig':
-        case 'dashboard':
+        case 'access':
         case 'delete':
           this.setSelectedShoot(args.shootItem.metadata)
             .then(() => {
@@ -297,7 +279,7 @@ export default {
       },
       set (value) {
         if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
@@ -307,27 +289,17 @@ export default {
       },
       set (value) {
         if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
-    kubeconfigDialog: {
+    clusterAccessDialog: {
       get () {
-        return this.dialog === 'kubeconfig'
+        return this.dialog === 'access'
       },
       set (value) {
         if (!value) {
-          this.dialog = null
-        }
-      }
-    },
-    dashboardDialog: {
-      get () {
-        return this.dialog === 'dashboard'
-      },
-      set (value) {
-        if (!value) {
-          this.dialog = null
+          this.hideDialog()
         }
       }
     },
@@ -348,9 +320,6 @@ export default {
     },
     currentInfo () {
       return get(this.selectedItem, 'info', {})
-    },
-    currentKubeconfig () {
-      return get(this.selectedItem, 'info.kubeconfig')
     },
     currentLog () {
       return get(this.selectedItem, 'spec.status.lastOperation.description')

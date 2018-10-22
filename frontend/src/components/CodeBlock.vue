@@ -20,13 +20,18 @@ limitations under the License.
       <pre><code :class="lang" ref="block"></code></pre>
       <span class="copied" :class="{ 'active': showMessage }">Copied!</span>
     </div>
-    <v-btn icon ref="copy">
-      <v-icon>content_copy</v-icon>
-    </v-btn>
+    <copy-btn
+      v-if="showCopyButton"
+      class="copy-button"
+      :clipboard-text="content"
+      @copy="onCopy"
+      :user-feedback="false"
+    ></copy-btn>
   </div>
 </template>
 
 <script>
+import CopyBtn from '@/components/CopyBtn'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
@@ -35,12 +40,14 @@ import highlightJSON from 'highlight.js/lib/languages/json'
 import highlightYAML from 'highlight.js/lib/languages/yaml'
 import highlightJavascript from 'highlight.js/lib/languages/javascript'
 import highlightBash from 'highlight.js/lib/languages/bash'
-import Clipboard from 'clipboard'
 highlight.registerLanguage('json', highlightJSON)
 highlight.registerLanguage('yaml', highlightYAML)
 highlight.registerLanguage('javascript', highlightJavascript)
 highlight.registerLanguage('bash', highlightBash)
 export default {
+  components: {
+    CopyBtn
+  },
   props: {
     lang: String,
     height: {
@@ -50,30 +57,18 @@ export default {
     content: {
       type: String,
       default: ''
+    },
+    showCopyButton: {
+      type: Boolean,
+      default: true
     }
+
   },
   data: () => ({
     showMessage: false,
     clipboard: undefined
   }),
   methods: {
-    enableCopy () {
-      if (this.clipboard) {
-        this.clipboard.destroy()
-      }
-      const target = this.$refs.block
-      const btn = this.$refs.copy.$el
-      this.clipboard = new Clipboard(btn, {
-        target: () => target
-      })
-      this.clipboard.on('success', (event) => {
-        event.clearSelection()
-        this.showMessage = true
-        window.setTimeout(() => {
-          this.showMessage = false
-        }, 2000)
-      })
-    },
     prettyPrint (textContent) {
       const block = this.$refs.block
       if (textContent) {
@@ -95,10 +90,15 @@ export default {
       }
       highlight.highlightBlock(block)
       this.$emit('highlightBlock')
+    },
+    onCopy () {
+      this.showMessage = true
+      window.setTimeout(() => {
+        this.showMessage = false
+      }, 2000)
     }
   },
   mounted () {
-    this.enableCopy()
     this.prettyPrint(this.content)
   },
   watch: {
@@ -127,7 +127,7 @@ export default {
       &:after {
         opacity: 0;
       }
-      .v-btn {
+      .copy-button {
         opacity: 1;
       }
     }
@@ -173,7 +173,7 @@ export default {
     padding: 16px;
     overflow: auto;
   }
-  .v-btn {
+  .copy-button {
     position: absolute;
     top: 12px;
     right: 12px;

@@ -168,18 +168,18 @@ limitations under the License.
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
-                  <v-icon>settings</v-icon>
-                </v-btn>
-                <span>Show Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
                 <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
                   <v-icon>mdi-download</v-icon>
                 </v-btn>
                 <span>Download Kubeconfig</span>
+              </v-tooltip>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
+                  <v-icon>visibility</v-icon>
+                </v-btn>
+                <span>Show Kubeconfig</span>
               </v-tooltip>
             </v-list-tile-action>
             <v-list-tile-action>
@@ -371,7 +371,7 @@ export default {
     async onDownload (name) {
       const kubeconfig = await this.downloadKubeconfig(name)
       if (kubeconfig) {
-        download(kubeconfig, 'kubeconfig.yaml', 'text/plain')
+        download(kubeconfig, 'kubeconfig.yaml', 'text/yaml')
       }
     },
     async onKubeconfig (name) {

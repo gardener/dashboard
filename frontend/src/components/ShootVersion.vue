@@ -169,6 +169,8 @@ export default {
   .update_btn {
     min-width: 0px;
     margin: 0px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   .update_btn >>> i {

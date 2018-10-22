@@ -90,16 +90,10 @@ limitations under the License.
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
-          <v-btn small icon class="green--text" slot="activator" :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard')">
-            <v-icon>dashboard</v-icon>
+          <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+            <v-icon>mdi-shield-key-outline</v-icon>
           </v-btn>
-          <span>{{showDashboardActionTitle}}</span>
-        </v-tooltip>
-        <v-tooltip top>
-          <v-btn small icon class="blue--text" slot="activator" :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig')">
-            <v-icon>settings</v-icon>
-          </v-btn>
-          <span>{{showKubeconfigActionTitle}}</span>
+          <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
         <v-tooltip top>
           <v-btn small icon class="red--text" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
@@ -114,17 +108,11 @@ limitations under the License.
             <v-icon>more_vert</v-icon>
           </v-btn>
           <v-list>
-            <v-list-tile :disabled="isDashboardDialogDisabled" @click="showDialog('dashboard', isDashboardDialogDisabled)">
+            <v-list-tile :disabled="isClusterAccessDialogDisabled" @click="showDialog('access', isClusterAccessDialogDisabled)">
               <v-list-tile-action>
-                <v-icon class="green--text">dashboard</v-icon>
+                <v-icon class="cyan--text text--darken-2">mdi-shield-key-outline</v-icon>
               </v-list-tile-action>
-              <v-list-tile-title>{{showDashboardActionTitle}}</v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile :disabled="isKubeconfigDialogDisabled" @click="showDialog('kubeconfig', isKubeconfigDialogDisabled)">
-              <v-list-tile-action>
-                <v-icon class="blue--text">settings</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-title>{{showKubeconfigActionTitle}}</v-list-tile-title>
+              <v-list-tile-title>{{showClusterAccessActionTitle}}</v-list-tile-title>
             </v-list-tile>
             <v-list-tile :disabled="isShootMarkedForDeletion" @click="showDialog('delete', isShootMarkedForDeletion)">
               <v-list-tile-action>
@@ -263,19 +251,12 @@ export default {
     isTypeDelete () {
       return isTypeDelete(this.row.lastOperation)
     },
-    isDashboardDialogDisabled () {
+    isClusterAccessDialogDisabled () {
       const itemInfo = this.row.info || {}
 
       if (itemInfo.dashboardUrl) {
         return false
       }
-
-      // disabled if info is NOT available
-      return !this.isInfoAvailable
-    },
-    isKubeconfigDialogDisabled () {
-      const itemInfo = this.row.info || {}
-
       if (itemInfo.kubeconfig) {
         return false
       }
@@ -283,15 +264,10 @@ export default {
       // disabled if info is NOT available
       return !this.isInfoAvailable
     },
-    showDashboardActionTitle () {
-      return this.isDashboardDialogDisabled
-        ? 'Dashboard not avialable'
-        : 'Show Dashboard'
-    },
-    showKubeconfigActionTitle () {
-      return this.isKubeconfigDialogDisabled
-        ? 'Kubeconfig not available'
-        : 'Show Kubeconfig'
+    showClusterAccessActionTitle () {
+      return this.isClusterAccessDialogDisabled
+        ? 'Cluster Access'
+        : 'Show Cluster Access'
     },
     deleteClusterActionTitle () {
       return this.isShootMarkedForDeletion
