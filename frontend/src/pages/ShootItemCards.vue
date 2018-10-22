@@ -44,7 +44,9 @@ limitations under the License.
               <v-list-tile-content>
                 <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
               </v-list-tile-content>
-              <shoot-version class="pr-3" :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+              <v-list-tile-action>
+                <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+              </v-list-tile-action>
             </v-list-tile>
 
             <v-divider class="my-2" inset></v-divider>
@@ -93,7 +95,9 @@ limitations under the License.
               <v-list-tile-content>
                 <v-list-tile-sub-title>Hibernation</v-list-tile-sub-title>
               </v-list-tile-content>
-              <shoot-hibernation :shootItem="item"></shoot-hibernation>
+              <v-list-tile-action>
+                <shoot-hibernation :shootItem="item"></shoot-hibernation>
+              </v-list-tile-action>
             </v-list-tile>
 
           </v-list>

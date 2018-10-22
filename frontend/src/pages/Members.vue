@@ -64,7 +64,7 @@ limitations under the License.
         <v-btn icon @click.native.stop="openAddMemberDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openMemberHelpDialog" class="mr-1">
+        <v-btn icon @click.native.stop="openMemberHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
@@ -98,12 +98,14 @@ limitations under the License.
                 <a :href="'mailto:'+name" class="cyan--text text--darken-2">{{name}}</a>
               </v-list-tile-sub-title>
             </v-list-tile-content>
-            <v-tooltip top>
-              <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-              <span>Delete Member</span>
-            </v-tooltip>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+                <span>Delete Member</span>
+              </v-tooltip>
+            </v-list-tile-action>
           </v-list-tile>
         </template>
       </v-list>
@@ -129,7 +131,7 @@ limitations under the License.
         <v-btn icon @click.native.stop="openAddserviceAccountDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openserviceAccountHelpDialog" class="mr-1">
+        <v-btn icon @click.native.stop="openserviceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
@@ -164,24 +166,30 @@ limitations under the License.
                 {{name}}
               </v-list-tile-sub-title>
             </v-list-tile-content>
-            <v-tooltip top>
-              <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
-              <span>Download Kubeconfig</span>
-            </v-tooltip>
-            <v-tooltip top>
-              <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
-                <v-icon>visibility</v-icon>
-              </v-btn>
-              <span>Show Kubeconfig</span>
-            </v-tooltip>
-            <v-tooltip top>
-              <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-              <span>Delete Service Account</span>
-            </v-tooltip>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
+                  <v-icon>mdi-download</v-icon>
+                </v-btn>
+                <span>Download Kubeconfig</span>
+              </v-tooltip>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
+                  <v-icon>visibility</v-icon>
+                </v-btn>
+                <span>Show Kubeconfig</span>
+              </v-tooltip>
+            </v-list-tile-action>
+            <v-list-tile-action>
+              <v-tooltip top>
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+                <span>Delete Service Account</span>
+              </v-tooltip>
+            </v-list-tile-action>
           </v-list-tile>
         </template>
       </v-list>

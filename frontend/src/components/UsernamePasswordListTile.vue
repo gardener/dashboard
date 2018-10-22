@@ -32,13 +32,17 @@ limitations under the License.
         <v-list-tile-sub-title>Password</v-list-tile-sub-title>
         <v-list-tile-title>{{passwordText}}</v-list-tile-title>
       </v-list-tile-content>
-      <copy-btn :clipboard-text="password"></copy-btn>
-      <v-tooltip top>
-        <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
-          <v-icon>{{visibilityIcon}}</v-icon>
-        </v-btn>
-        <span>{{passwordVisibilityTitle}}</span>
-      </v-tooltip>
+      <v-list-tile-action>
+        <copy-btn :clipboard-text="password"></copy-btn>
+      </v-list-tile-action>
+      <v-list-tile-action>
+        <v-tooltip top>
+          <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
+            <v-icon>{{visibilityIcon}}</v-icon>
+          </v-btn>
+          <span>{{passwordVisibilityTitle}}</span>
+        </v-tooltip>
+      </v-list-tile-action>
     </v-list-tile>
   </div>
 </template>

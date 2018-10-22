@@ -37,26 +37,33 @@ limitations under the License.
       <v-divider class="my-2" inset></v-divider>
       <v-expansion-panel :value="expandKubeconfigIndex" readonly>
         <v-expansion-panel-content hide-actions>
-          <v-container slot="header" class="pt-0 pb-0">
-            <v-layout align-center row fill-height class="ma-0">
-              <v-icon class="kubeconfig-icon cyan--text text--darken-2">insert_drive_file</v-icon>
-              <span>KUBECONFIG</span>
-              <v-spacer></v-spacer>
+          <v-list-tile slot="header">
+            <v-list-tile-action>
+              <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+            <span>KUBECONFIG</span>
+            </v-list-tile-content>
+            <v-list-tile-action>
               <v-tooltip top>
                 <v-btn slot="activator" icon @click.native.stop="onDownload">
                   <v-icon>mdi-download</v-icon>
                 </v-btn>
                 <span>Download Kubeconfig</span>
               </v-tooltip>
+            </v-list-tile-action>
+            <v-list-tile-action>
               <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+            </v-list-tile-action>
+            <v-list-tile-action>
               <v-tooltip top>
                 <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
                   <v-icon>{{visibilityIconKubeconfig}}</v-icon>
                 </v-btn>
                 <span>{{kubeconfigVisibilityTitle}}</span>
               </v-tooltip>
-            </v-layout>
-          </v-container>
+            </v-list-tile-action>
+          </v-list-tile>
           <v-card>
             <code-block lang="yaml" :content="info.kubeconfig" :show-copy-button="false"></code-block>
           </v-card>
@@ -185,10 +192,6 @@ export default {
   >>> .v-expansion-panel__header {
     cursor: auto;
     padding: 0;
-  }
-
-  .kubeconfig-icon {
-    padding-right: 30px;
   }
 
 </style>
