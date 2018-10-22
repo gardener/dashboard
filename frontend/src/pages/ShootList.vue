@@ -98,7 +98,7 @@ limitations under the License.
       <v-dialog v-model="clusterAccessDialog" max-width="600" lazy>
         <v-card>
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
-            <div class="headline">Kube-Cluster Access <code class="cluster_name">{{currentName}}</code></div>
+            <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
             <v-spacer></v-spacer>
             <v-btn icon class="grey--text text--lighten-4" @click.native="hideDialog">
               <v-icon>close</v-icon>

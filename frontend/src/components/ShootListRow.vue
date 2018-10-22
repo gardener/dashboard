@@ -90,8 +90,8 @@ limitations under the License.
     <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
       <div class="hidden-md-and-down">
         <v-tooltip top>
-          <v-btn small icon class="green--text" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon>dashboard</v-icon>
+          <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+            <v-icon>mdi-shield-key-outline</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
@@ -110,7 +110,7 @@ limitations under the License.
           <v-list>
             <v-list-tile :disabled="isClusterAccessDialogDisabled" @click="showDialog('access', isClusterAccessDialogDisabled)">
               <v-list-tile-action>
-                <v-icon class="green--text">dashboard</v-icon>
+                <v-icon class="cyan--text text--darken-2">mdi-shield-key-outline</v-icon>
               </v-list-tile-action>
               <v-list-tile-title>{{showClusterAccessActionTitle}}</v-list-tile-title>
             </v-list-tile>
