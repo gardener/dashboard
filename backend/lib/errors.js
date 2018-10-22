@@ -191,3 +191,10 @@ class ServiceUnavailable extends HttpServerError {
   }
 }
 exports.ServiceUnavailable = ServiceUnavailable
+
+class GatewayTimeout extends HttpServerError {
+  constructor (message) {
+    super(504, 'Gateway Timeout', message)
+  }
+}
+exports.GatewayTimeout = GatewayTimeout
