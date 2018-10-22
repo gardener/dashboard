@@ -5,6 +5,9 @@
     item-text="name"
     item-value="name"
     v-model="worker.volumeType"
+    :error-messages="getErrorMessages('worker.volumeType')"
+    @input="$v.worker.volumeType.$touch()"
+    @blur="$v.worker.volumeType.$touch()"
     label="Volume Type">
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
@@ -16,6 +19,23 @@
 </template>
 
 <script>
+import { required } from 'vuelidate/lib/validators'
+import { getValidationErrors } from '@/utils'
+  const validationErrors = {
+  worker: {
+    volumeType: {
+      required: 'Volume Type is required'
+    }
+  }
+}
+  const validations = {
+  worker: {
+    volumeType: {
+      required
+    }
+  }
+}
+
 export default {
   props: {
     worker: {
@@ -26,6 +46,20 @@ export default {
       type: Array,
       default: () => []
     }
+  },
+  data () {
+    return {
+      validationErrors
+    }
+  },
+  validations,
+  methods: {
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    }
+  },
+  mounted () {
+    this.$v.$touch()
   }
 }
 </script>
