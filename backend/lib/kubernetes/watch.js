@@ -134,6 +134,8 @@ function wrap (emitter, ws) {
     .on('close', onClose)
 
   emitter.websocket = ws
+  emitter.end = () => ws.terminate()
+
   return emitter
 }
 

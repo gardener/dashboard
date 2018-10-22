@@ -16,12 +16,17 @@
 
 'use strict'
 
+const _ = require('lodash')
+const { createReconnectorStub } = require('../support/common')
+const services = require('../../lib/services')
+
 describe('gardener', function () {
   describe('api', function () {
     describe('projects', function () {
       /* eslint no-unused-expressions: 0 */
       const oidc = nocks.oidc
       const k8s = nocks.k8s
+      const sandbox = sinon.createSandbox()
       const name = 'foo'
       const namespace = `garden-${name}`
       const metadata = {name}
@@ -46,7 +51,7 @@ describe('gardener', function () {
       })
 
       afterEach(function () {
-        verifyAndRestore()
+        verifyAndRestore(sandbox)
       })
 
       it('should return two projects', function () {
@@ -92,7 +97,7 @@ describe('gardener', function () {
           })
       })
 
-      it.only('should reject request with authorization error', function () {
+      it('should reject request with authorization error', function () {
         const bearer = oidc.sign({email: 'baz@example.org'})
         oidc.stub.getKeys()
         k8s.stub.getProject({bearer, name, namespace, unauthorized: true})
@@ -111,7 +116,26 @@ describe('gardener', function () {
         const createdBy = username
         const resourceVersion = 42
         oidc.stub.getKeys()
-        k8s.stub.createProject({namespace, username, resourceVersion})
+        k8s.stub.createProject({bearer, resourceVersion})
+
+        // watch project stub
+        const project = k8s.getProject({name, namespace, createdBy, owner, description, purpose})
+        // project with initializer
+        const uninitializedProject = _.cloneDeep(project)
+        uninitializedProject.metadata.initializers = ['gardener']
+        // project without initializer
+        const initializedProject = _.cloneDeep(project)
+        initializedProject.metadata.resourceVersion = resourceVersion
+        // reconnector
+        const reconnectorStub = createReconnectorStub([
+          ['ADDED', uninitializedProject],
+          ['MODIFIED', initializedProject]
+        ])
+        sandbox.stub(services.projects, 'projectInitializationTimeout')
+          .value(100)
+        const watchStub = sandbox.stub(services.projects, 'watchProject')
+          .callsFake(() => reconnectorStub.start())
+
         return chai.request(app)
           .post('/api/namespaces')
           .set('authorization', `Bearer ${bearer}`)
@@ -120,16 +144,18 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
+            expect(watchStub).to.have.callCount(1)
             expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
             expect(res.body.data).to.eql({createdBy, owner, description, purpose})
           })
       })
 
       it('should patch a project', function () {
-        const createdBy = 'bar@example.org'
         const resourceVersion = 43
+        const { createdBy } = k8s.readProject(namespace).spec
+
         oidc.stub.getKeys()
-        k8s.stub.patchProject({bearer, namespace, username, resourceVersion})
+        k8s.stub.patchProject({bearer, namespace, resourceVersion})
         return chai.request(app)
           .put(`/api/namespaces/${namespace}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -145,7 +171,7 @@ describe('gardener', function () {
 
       it('should delete a project', function () {
         oidc.stub.getKeys()
-        k8s.stub.deleteProject({bearer, namespace, username})
+        k8s.stub.deleteProject({bearer, namespace})
         return chai.request(app)
           .delete(`/api/namespaces/${namespace}`)
           .set('authorization', `Bearer ${bearer}`)
