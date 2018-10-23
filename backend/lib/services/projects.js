@@ -97,6 +97,7 @@ async function getProjectNameFromNamespace (namespace) {
   }
   return name
 }
+exports.getProjectNameFromNamespace = getProjectNameFromNamespace
 
 exports.list = async function ({user}) {
   const [

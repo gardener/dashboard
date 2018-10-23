@@ -23,6 +23,7 @@ const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const core = kubernetes.core()
 const { Conflict, NotFound } = require('../errors.js')
+const projects = require('./projects')
 
 function Core ({auth}) {
   return kubernetes.core({auth})
@@ -52,7 +53,7 @@ async function getProjectNameFromNamespace (namespace) {
   return name
 }
 
-function getKubeconfig ({serviceaccountName, serviceaccountNamespace, token, server, caData}) {
+function getKubeconfig ({serviceaccountName, projectName, serviceaccountNamespace, token, server, caData}) {
   const clusterName = 'garden'
   const cluster = {
     'certificate-authority-data': caData,
@@ -62,7 +63,7 @@ function getKubeconfig ({serviceaccountName, serviceaccountNamespace, token, ser
   const user = {
     token
   }
-  const contextName = 'default'
+  const contextName = projectName || 'default'
   const context = {
     cluster: clusterName,
     user: userName,
@@ -167,6 +168,8 @@ exports.get = async function ({user, namespace, name: username}) {
     const serviceaccount = await ns.serviceaccounts.get({
       name: serviceaccountName
     })
+    const projectName = await projects.getProjectNameFromNamespace(namespace)
+    console.log(projectName)
     const api = ns.serviceaccounts.api
     const server = _.get(config, 'apiServerUrl', api.url)
     const secret = await ns.secrets.get({
@@ -175,7 +178,7 @@ exports.get = async function ({user, namespace, name: username}) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({serviceaccountName, serviceaccountNamespace, token, caData, server})
+    member.kubeconfig = getKubeconfig({serviceaccountName, projectName, serviceaccountNamespace, token, caData, server})
   }
   return member
 }
