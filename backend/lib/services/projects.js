@@ -176,3 +176,12 @@ exports.remove = async function ({user, name}) {
   await core.namespaces.delete({name})
   return fromResource({metadata: {name}})
 }
+
+exports.projectName = async function ({user, namespace}) {
+  await authorize({user, namespace})
+  // read namespace
+  const ns = await core.namespaces.get({name: namespace})
+  // eslint-disable-next-line lodash/path-style
+  console.log(ns)
+  return _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
+}
