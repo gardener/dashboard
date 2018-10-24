@@ -129,12 +129,8 @@ exports.list = async function ({user}) {
     .value()
 }
 
-function isProjectReady (project) {
-  return _
-    .chain(project)
-    .get('metadata.initializers')
-    .isEmpty()
-    .value()
+function isProjectReady ({status: {phase} = {}} = {}) {
+  return phase === 'Ready'
 }
 
 function waitUntilProjectIsReady (projects, name) {

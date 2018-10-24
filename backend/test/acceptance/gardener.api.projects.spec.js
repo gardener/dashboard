@@ -122,15 +122,18 @@ describe('gardener', function () {
         const project = k8s.getProject({name, namespace, createdBy, owner, description, purpose})
         // project with initializer
         const uninitializedProject = _.cloneDeep(project)
-        uninitializedProject.metadata.initializers = ['gardener']
         // project without initializer
         const initializedProject = _.cloneDeep(project)
         initializedProject.metadata.resourceVersion = resourceVersion
+        initializedProject.status = {
+          phase: 'Ready'
+        }
         // reconnector
         const reconnectorStub = createReconnectorStub([
           ['ADDED', uninitializedProject],
           ['MODIFIED', initializedProject]
         ])
+        sandbox.stub(services.projects, 'projectInitializationTimeout').value(50)
         const watchStub = sandbox.stub(services.projects, 'watchProject')
           .callsFake(() => reconnectorStub.start())
 
