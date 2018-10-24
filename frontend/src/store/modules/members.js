@@ -22,11 +22,7 @@ const state = {
 }
 
 // getters
-const getters = {
-  all (state) {
-    return state.data
-  }
-}
+const getters = {}
 
 // actions
 const actions = {
