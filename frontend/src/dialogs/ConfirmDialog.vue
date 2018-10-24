@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="value" persistent max-width="500" lazy @keydown.esc="cancel">
+  <v-dialog v-model="value" persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
   <v-card>
     <v-card-title :class="titleColorClass">
       <div class="headline">
@@ -98,6 +98,10 @@ export default {
     confirmButtonText: {
       type: String,
       default: 'Confirm'
+    },
+    maxWidth: {
+      type: String,
+      default: '500'
     }
   },
   data () {

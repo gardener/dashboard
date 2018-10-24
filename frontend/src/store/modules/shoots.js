@@ -406,7 +406,6 @@ const mutations = {
         case 'MODIFIED':
           if (rootState.namespace !== '_all' ||
             !rootState.onlyShootsWithIssues ||
-            // eslint-disable-next-line lodash/path-style
             rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
             if (putItem(state, event.object)) {

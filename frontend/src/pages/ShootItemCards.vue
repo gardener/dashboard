@@ -38,11 +38,13 @@ limitations under the License.
               </v-list-tile-content>
             </v-list-tile>
 
+            <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-ship-wheel</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
-                <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
+                <v-list-tile-title>Kubernetes Version</v-list-tile-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
@@ -86,19 +88,6 @@ limitations under the License.
                 </v-list-tile-content>
               </v-list-tile>
             </template>
-
-            <v-divider class="my-2" inset></v-divider>
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-sleep</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Hibernation</v-list-tile-sub-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
-                <shoot-hibernation :shootItem="item"></shoot-hibernation>
-              </v-list-tile-action>
-            </v-list-tile>
 
           </v-list>
         </v-card>
@@ -237,6 +226,43 @@ limitations under the License.
           <cluster-access :item="item"></cluster-access>
         </v-card>
 
+        <v-card class="cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text">
+            Lifecycle
+          </v-card-title>
+          <v-list>
+
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-sleep</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Hibernation</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <shoot-hibernation :shootItem="item"></shoot-hibernation>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-wrench-outline</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Maintenance</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <maintenance-configuration :shootItem="item"></maintenance-configuration>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <maintenance-start :shootItem="item"></maintenance-start>
+              </v-list-tile-action>
+            </v-list-tile>
+
+          </v-list>
+        </v-card>
+
         <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
 
       </v-flex>
@@ -256,6 +282,8 @@ import ShootVersion from '@/components/ShootVersion'
 import StatusCard from '@/components/StatusCard'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import ShootHibernation from '@/components/ShootHibernation'
+import MaintenanceStart from '@/components/MaintenanceStart'
+import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
@@ -282,7 +310,9 @@ export default {
     ShootVersion,
     StatusCard,
     SelfTerminationWarning,
-    ShootHibernation
+    ShootHibernation,
+    MaintenanceStart,
+    MaintenanceConfiguration
   },
   data () {
     return {
