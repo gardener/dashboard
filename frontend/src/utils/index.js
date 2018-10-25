@@ -141,16 +141,16 @@ export function parseSize (value) {
   return parseInt(replace(value, /(^.+\D)(\d+)(\D.+$)/i, '$2'))
 }
 
-export function gravatarUrlIdenticon (email) {
-  return gravatarUrl(email, 'identicon')
+export function gravatarUrlIdenticon (email, size = 128) {
+  return gravatarUrl(email, 'identicon', size)
 }
 
-export function gravatarUrlRobohash (email) {
-  return gravatarUrl(email, 'robohash')
+export function gravatarUrlRobohash (email, size = 128) {
+  return gravatarUrl(email, 'robohash', size)
 }
 
-export function gravatarUrl (value, image) {
-  return `https://www.gravatar.com/avatar/${md5(toLower(value))}?d=${image}&s=128`
+export function gravatarUrl (value, image, size) {
+  return `https://www.gravatar.com/avatar/${md5(toLower(value))}?d=${image}&s=${size}`
 }
 
 export function routes (router, includeRoutesWithProjectScope) {

@@ -32,7 +32,7 @@ limitations under the License.
             Created By
           </v-list-tile-sub-title>
           <v-list-tile-title>
-            {{clusterCreatedBy}}
+            <account-avatar :account-name="clusterCreatedBy" size=22></account-avatar>
           </v-list-tile-title>
         </v-list-tile-content>
       </v-list>
@@ -45,12 +45,14 @@ limitations under the License.
 </template>
 
 <script>
+import AccountAvatar from '@/components/AccountAvatar'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'delete-cluster-dialog',
   components: {
+    AccountAvatar,
     ConfirmDialog
   },
   props: {
