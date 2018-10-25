@@ -137,9 +137,6 @@ const stub = {
     const journalCache = createJournalCache()
     getJournalCacheStub.returns(journalCache)
     return journalCache
-  },
-  watch (sandbox) {
-
   }
 }
 
@@ -147,27 +144,13 @@ class Reconnector extends EventEmitter {
   constructor () {
     super()
     this.disconnected = false
-    this.delay = 0
     this.events = []
   }
   disconnect () {
     this.disconnected = true
   }
-  pushAdded (object, delay) {
-    this.push('ADDED', object, delay)
-  }
-  pushModified (object, delay) {
-    this.push('MODIFIED', object, delay)
-  }
-  pushDeleted (object, delay) {
-    this.push('DELETED', object, delay)
-  }
-  pushError (object, delay) {
-    this.push('Error', object, delay)
-  }
   pushEvent (type, object, delay = 10) {
     this.events.push({delay, event: {type, object}})
-    setTimeout(() => this.emit('event', {type, object}), delay)
   }
   start () {
     const emit = (event) => {

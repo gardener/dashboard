@@ -219,7 +219,7 @@ exports.create = async function ({user, body}) {
   // project is ready now
   return fromResource(project)
 }
-// used for testing
+// needs to be exported for testing
 exports.watchProject = (projects, name) => projects.watch({name})
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 

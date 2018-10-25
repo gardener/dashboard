@@ -112,9 +112,6 @@ const getters = {
   projectList (state) {
     return state.projects.all
   },
-  projectByNamespace (state) {
-    return (namespace) => find(state.projects.all, ['metadata.namespace', namespace])
-  },
   memberList (state, getters) {
     return state.members.all
   },
