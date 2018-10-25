@@ -53,7 +53,7 @@ limitations under the License.
                 <v-flex xs5>
                   <v-select
                     color="deep-purple"
-                    :items="memberListWithOwner"
+                    :items="ownerItems"
                     label="Main Contact"
                     v-model="owner"
                     tabindex="1"
@@ -193,12 +193,14 @@ export default {
     projectNames () {
       return map(this.projectList, 'metadata.name')
     },
-    memberListWithOwner () {
+    ownerItems () {
+      const predicate = username => !startsWith(username, 'system:serviceaccount:')
+      const members = filter(this.memberList, predicate)
       const owner = get(this.project, 'data.owner')
-      if (!owner || includes(this.memberList, owner)) {
-        return this.memberList
+      if (!owner || includes(members, owner)) {
+        return members
       }
-      return concat(this.memberList, owner)
+      return concat(members, owner)
     },
     valid () {
       return !this.$v.$invalid
