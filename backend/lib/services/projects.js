@@ -35,8 +35,9 @@ function Garden ({auth}) {
 function fromResource ({metadata, spec = {}}) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp } = metadata
-  const { namespace, createdBy, owner: ownerRef = {}, description, purpose } = spec
+  const { namespace, createdBy: createdByRef = {}, owner: ownerRef = {}, description, purpose } = spec
   const { name: owner } = ownerRef
+  const { name: createdBy } = createdByRef
   return {
     metadata: {
       name,
@@ -63,6 +64,11 @@ function toResource ({metadata, data = {}}) {
     kind: 'User',
     name: owner
   }
+  const createdByRef = {
+    apiGroup: 'rbac.authorization.k8s.io',
+    kind: 'User',
+    name: createdBy
+  }
   return {
     apiVersion,
     kind,
@@ -72,7 +78,7 @@ function toResource ({metadata, data = {}}) {
     },
     spec: {
       namespace,
-      createdBy,
+      createdBy: createdByRef,
       owner: ownerRef,
       description,
       purpose
@@ -224,7 +230,10 @@ exports.patch = async function ({user, name: namespace, body}) {
   // do not update createdBy
   _.unset(body, 'data.createdBy')
   // patch project
-  const project = await projects.mergePatch({name, body: toResource(body)})
+  const project = await projects.mergePatch({
+    name,
+    body: toResource(body)
+  })
   return fromResource(project)
 }
 
@@ -235,19 +244,21 @@ exports.remove = async function ({user, name: namespace}) {
   const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // read project
+  const project = await projects.get({name})
+  const annotations = _.assign({
+    'confirmation.garden.sapcloud.io/deletion': 'true'
+  }, project.metadata.annotations)
   // patch annotations
-  await projects.jsonPatch({
+  await projects.mergePatch({
     name,
-    body: [{
-      op: 'add',
-      path: '/metadata/annotations/confirmation.garden.sapcloud.io~1deletion',
-      value: 'true'
-    }]
+    body: {
+      metadata: {
+        annotations
+      }
+    }
   })
   // delete project
   await projects.delete({name})
-  return fromResource({
-    metadata: {name},
-    spec: {namespace}
-  })
+  return fromResource(project)
 }

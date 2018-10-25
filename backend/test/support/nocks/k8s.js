@@ -271,6 +271,7 @@ function getProject ({name, namespace, createdBy, owner, members = [], descripti
     .map(getUser)
     .value()
   owner = getUser(owner)
+  createdBy = getUser(createdBy)
   return {
     metadata: {
       name,
