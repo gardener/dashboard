@@ -227,12 +227,15 @@ exports.patch = async function ({user, name: namespace, body}) {
   const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // read project
+  let project = await projects.get({name})
   // do not update createdBy
-  _.unset(body, 'data.createdBy')
+  const { metadata, data } = fromResource(project)
+  _.assign(data, _.omit(body.data, 'createdBy'))
   // patch project
-  const project = await projects.mergePatch({
+  project = await projects.mergePatch({
     name,
-    body: toResource(body)
+    body: toResource({metadata, data})
   })
   return fromResource(project)
 }
@@ -246,10 +249,10 @@ exports.remove = async function ({user, name: namespace}) {
   const projects = Garden(user).projects
   // read project
   const project = await projects.get({name})
+  // patch annotations
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)
-  // patch annotations
   await projects.mergePatch({
     name,
     body: {
