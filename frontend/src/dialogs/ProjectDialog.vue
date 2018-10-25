@@ -22,7 +22,7 @@ limitations under the License.
         <span v-if="isCreateMode">Create new Project</span>
         <span v-else>Update Project</span>
       </v-card-title>
-      <v-card-text style="height: 400px; position: relative">
+      <v-card-text style="height: 300px; position: relative">
         <form>
           <v-container fluid>
             <template v-if="isCreateMode">
@@ -128,6 +128,8 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import concat from 'lodash/concat'
+import filter from 'lodash/filter'
+import startsWith from 'lodash/startsWith'
 import Alert from '@/components/Alert'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
