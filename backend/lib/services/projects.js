@@ -104,7 +104,7 @@ async function getProjectNameFromNamespace (namespace) {
   return name
 }
 
-exports.list = async function ({user}) {
+exports.list = async function ({user, qs = {}}) {
   const [
     projects,
     isAdmin
@@ -113,24 +113,35 @@ exports.list = async function ({user}) {
     administrators.isAdmin(user)
   ])
 
-  const subject = {
-    kind: 'User',
-    name: user.id
-  }
+  const isMemberOf = project => _
+    .chain(project)
+    .get('spec.members')
+    .findIndex({
+      kind: 'User',
+      name: user.id
+    })
+    .gte(0)
+    .value()
 
-  const predicate = !isAdmin
-    ? project => _
-      .chain(project)
-      .get('spec.members')
-      .findIndex(subject)
-      .gte(0)
-      .value()
-    : _.identity
-
+  const phases = _
+    .chain(qs)
+    .get('phase', 'Ready')
+    .split(',')
+    .compact()
+    .value()
   return _
     .chain(projects)
     .get('items')
-    .filter(predicate)
+    .filter(project => {
+      if (!isAdmin && !isMemberOf(project)) {
+        return false
+      }
+      if (!_.isEmpty(phases)) {
+        const phase = _.get(project, 'status.phase', 'Initial')
+        return _.includes(phases, phase)
+      }
+      return true
+    })
     .map(fromResource)
     .value()
 }

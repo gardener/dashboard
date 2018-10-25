@@ -67,6 +67,13 @@ const projectList = [
     purpose: 'bar-purpose'
   }),
   getProject({
+    name: 'new',
+    createdBy: 'new@example.org',
+    description: 'new-description',
+    purpose: 'new-purpose',
+    phase: 'Initial'
+  }),
+  getProject({
     name: 'secret',
     createdBy: 'admin@example.org',
     description: 'secret-description',

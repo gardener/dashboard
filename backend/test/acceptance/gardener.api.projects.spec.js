@@ -127,7 +127,7 @@ describe('gardener', function () {
           owner,
           description,
           purpose,
-          phase: 'New'
+          phase: 'Initial'
         })
         // project with initializer
         const newProject = _.cloneDeep(project)
@@ -173,7 +173,7 @@ describe('gardener', function () {
           owner,
           description,
           purpose,
-          phase: 'New'
+          phase: 'Initial'
         })
         // new project
         const newProject = _.cloneDeep(project)
