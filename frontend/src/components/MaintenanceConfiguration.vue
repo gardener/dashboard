@@ -138,9 +138,9 @@ export default {
     onUpdateKubernetesVersion (value) {
       this.data.updateKubernetesVersion = value
     },
-    onUpdateMaintenanceWindow ({ begin, end }) {
-      this.data.timeWindowBegin = begin
-      this.data.timeWindowEnd = end
+    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
+      this.data.timeWindowBegin = utcBegin
+      this.data.timeWindowEnd = utcEnd
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value

@@ -65,48 +65,32 @@ export default {
   },
   data () {
     return {
-      selectedTimezone: undefined,
+      selectedTimezone: moment.tz.guess(),
       timezones: moment.tz.names(),
-      validationErrors
-    }
-  },
-  computed: {
-    localizedMaintenanceBegin: {
-      get () {
-        const momentObj = moment.tz(this.timeWindowBegin, 'HHmmZ', this.selectedTimezone)
-        if (!momentObj.isValid()) {
-          return null
-        }
-        return momentObj.format('HH:mm:00')
-      },
-      set (newTime) {
-        this.updateMaintenanceWindow({ newTime })
-      }
+      validationErrors,
+      localizedMaintenanceBegin: undefined
     }
   },
   methods: {
-    updateMaintenanceWindow ({ newTime, newTimezone }) {
-      let newMoment
-      if (newTime) {
-        newMoment = moment.tz(newTime, 'HHmm', this.selectedTimezone).utc()
-      } else if (newTimezone) {
-        const localizedTime = moment.tz(this.timeWindowBegin, 'HHmmZ', this.selectedTimezone).format('HHmm')
-        newMoment = moment.tz(localizedTime, 'HHmm', newTimezone).utc()
+    updateMaintenanceWindow ({localBegin, localTimezone}) {
+      localBegin = localBegin || this.localizedMaintenanceBegin
+      localTimezone = localTimezone || this.selectedTimezone
+      let utcMoment
+      if (localBegin && localTimezone) {
+        utcMoment = moment.tz(localBegin, 'HHmm', localTimezone).utc()
       }
 
-      let begin
-      let end
-      if (newMoment) {
-        begin = newMoment.format('HHmm00+0000')
-        newMoment.add(1, 'h')
-        end = newMoment.format('HHmm00+0000')
+      let utcBegin
+      let utcEnd
+      if (utcMoment && utcMoment.isValid()) {
+        utcBegin = utcMoment.format('HHmm00+0000')
+        utcMoment.add(1, 'h')
+        utcEnd = utcMoment.format('HHmm00+0000')
       }
-
-      this.$emit('updateMaintenanceWindow', { begin, end })
+      this.$emit('updateMaintenanceWindow', { utcBegin, utcEnd })
     },
     reset () {
       this.selectedTimezone = moment.tz.guess()
-
       this.validateInput()
     },
     getErrorMessages (field) {
@@ -116,14 +100,33 @@ export default {
       this.$v.timeWindowBegin.$touch()
 
       this.$emit('valid', !this.$v.$invalid)
+    },
+    setLocalizedTime(utcTime) {
+      const momentObj = moment.tz(utcTime, 'HHmmZ', this.selectedTimezone)
+      if (momentObj.isValid()) {
+        const newLocalizedTimeWindowBegin = momentObj.format('HH:mm')
+        if (newLocalizedTimeWindowBegin !== this.localizedMaintenanceBegin) {
+          // Only set if value actually changed in parent component
+          // Vue component would reset input focus otherwise
+          this.localizedMaintenanceBegin = newLocalizedTimeWindowBegin
+        }
+      }
     }
   },
   watch: {
     timeWindowBegin (value) {
+      this.setLocalizedTime(value)
       this.validateInput()
+    },
+    localizedMaintenanceBegin (value) {
+      this.updateMaintenanceWindow({localBegin: value})
+    },
+    selectedTimezone (value) {
+      this.updateMaintenanceWindow({localTimezone: value})
     }
   },
   mounted () {
+    this.setLocalizedTime(this.timeWindowBegin)
     this.validateInput()
   }
 }

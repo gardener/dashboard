@@ -331,6 +331,7 @@ limitations under the License.
                 <maintenance-time
                   ref="maintenanceTime"
                   :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
+                  :use-local-tz=true
                   @updateMaintenanceWindow="onUpdateMaintenanceWindow"
                   @valid="onMaintenanceTimeValid"
                 ></maintenance-time>
@@ -939,12 +940,14 @@ export default {
         // randomize maintenance time window
         const hours = [22, 23, 0, 1, 2, 3, 4, 5]
         const randomHour = sample(hours)
-        const randomMoment = moment.tz(randomHour, 'HH', this.selectedTimezone).utc()
+        // use local timezone offset
+        const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
 
-        const begin = randomMoment.format('HH0000+0000')
+        const utcBegin = randomMoment.format('HH0000+0000')
         randomMoment.add(1, 'h')
-        const end = randomMoment.format('HH0000+0000')
-        this.onUpdateMaintenanceWindow({ begin, end })
+        const utcEnd = randomMoment.format('HH0000+0000')
+
+        this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
       })
 
       this.errorMessage = undefined
@@ -1013,9 +1016,9 @@ export default {
     onUpdateKubernetesVersion (value) {
       this.shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion = value
     },
-    onUpdateMaintenanceWindow ({ begin, end }) {
-      this.shootDefinition.spec.maintenance.timeWindow.begin = begin
-      this.shootDefinition.spec.maintenance.timeWindow.end = end
+    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
+      this.shootDefinition.spec.maintenance.timeWindow.begin = utcBegin
+      this.shootDefinition.spec.maintenance.timeWindow.end = utcEnd
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value
