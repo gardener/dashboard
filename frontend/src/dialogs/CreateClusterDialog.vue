@@ -331,7 +331,6 @@ limitations under the License.
                 <maintenance-time
                   ref="maintenanceTime"
                   :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
-                  :use-local-tz=true
                   @updateMaintenanceWindow="onUpdateMaintenanceWindow"
                   @valid="onMaintenanceTimeValid"
                 ></maintenance-time>
