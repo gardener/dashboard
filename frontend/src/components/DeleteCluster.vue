@@ -17,18 +17,57 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn icon slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog">
+      <v-btn
+        slot="activator"
+        icon
+        :small="small"
+        :disabled="isShootMarkedForDeletion"
+        :class="contentClass"
+        @click="renderAndShowDialog"
+      >
         <v-icon>delete</v-icon>
       </v-btn>
       <span>{{caption}}</span>
     </v-tooltip>
-    <delete-cluster-dialog v-model="dialog" @close="hideDialog" :clusterName="shootName" :clusterNamespace="shootNamespace" :clusterCreatedBy="createdBy"></delete-cluster-dialog>
+
+    <template v-if="renderDialog">
+      <confirm-dialog
+        :confirm="shootName"
+        v-model="dialog"
+        :cancel="hideDialog"
+        :ok="deletionConfirmed"
+        :errorMessage.sync="errorMessage"
+        :detailedErrorMessage.sync="detailedErrorMessage"
+      >
+        <template slot="caption">Delete Cluster</template>
+        <template slot="affectedObjectName">{{shootName}}</template>
+        <template slot="message">
+          <v-list>
+            <v-list-tile-content>
+              <v-list-tile-sub-title>
+                Created By
+              </v-list-tile-sub-title>
+              <v-list-tile-title>
+                <account-avatar :account-name="createdBy" :size=22></account-avatar>
+              </v-list-tile-title>
+            </v-list-tile-content>
+          </v-list>
+          <br />
+          Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
+          <br />
+          <i class="red--text text--darken-2">This action cannot be undone.</i>
+        </template>
+      </confirm-dialog>
+    </template>
   </div>
 </template>
 
 <script>
-import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
+import AccountAvatar from '@/components/AccountAvatar'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import get from 'lodash/get'
+import { mapActions } from 'vuex'
+import { errorDetailsFromError } from '@/utils/error'
 import {
   getCreatedBy,
   isShootMarkedForDeletion
@@ -36,16 +75,28 @@ import {
 
 export default {
   components: {
-    DeleteClusterDialog
+    ConfirmDialog,
+    AccountAvatar
   },
   props: {
     shootItem: {
       type: Object
+    },
+    small: {
+      type: Boolean,
+      default: false
+    },
+    contentClass: {
+      type: String,
+      default: undefined
     }
   },
   data () {
     return {
-      dialog: false
+      renderDialog: false,
+      dialog: false,
+      errorMessage: null,
+      detailedErrorMessage: null
     }
   },
   computed: {
@@ -71,11 +122,37 @@ export default {
     }
   },
   methods: {
+    renderAndShowDialog () {
+      // as this component is potentially embedded in a list with many items we only want to render the dialog on demand
+      this.renderDialog = true
+
+      this.$nextTick(() => {
+        this.showDialog()
+      })
+    },
     showDialog () {
       this.dialog = true
+      this.reset()
     },
     hideDialog () {
       this.dialog = false
+    },
+    ...mapActions([
+      'deleteShoot'
+    ]),
+    deletionConfirmed () {
+      this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
+        .then(() => this.hideDialog())
+        .catch((err) => {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Cluster deletion failed'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        })
+    },
+    reset () {
+      this.errorMessage = null
+      this.detailedErrorMessage = null
     }
   }
 }

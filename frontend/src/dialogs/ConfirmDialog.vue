@@ -16,40 +16,40 @@ limitations under the License.
 
 <template>
   <v-dialog v-model="value" persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
-  <v-card>
-    <v-card-title :class="titleColorClass">
-      <div class="headline">
-        <slot name="caption">
-          Confirm Dialog
-        </slot>&nbsp;
-        <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
-      </div>
-    </v-card-title>
-    <v-card-text class="subheadingfont">
-      <slot name="message">
-        This is a generic dialog template.
-      </slot>
-      <v-text-field
-        @keyup.enter="okClicked()"
-        v-if="confirm && !confirmDisabled"
-        ref="deleteDialogInput"
-        :hint="hint"
-        persistent-hint
-        :error="hasError && userInput.length > 0"
-        v-model="userInput"
-        type="text"
-        color="cyan darken-2">
-      </v-text-field>
-    </v-card-text>
+    <v-card>
+      <v-card-title :class="titleColorClass">
+        <div class="headline">
+          <slot name="caption">
+            Confirm Dialog
+          </slot>&nbsp;
+          <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
+        </div>
+      </v-card-title>
+      <v-card-text class="subheadingfont">
+        <slot name="message">
+          This is a generic dialog template.
+        </slot>
+        <v-text-field
+          @keyup.enter="okClicked()"
+          v-if="confirm && !confirmDisabled"
+          ref="deleteDialogInput"
+          :hint="hint"
+          persistent-hint
+          :error="hasError && userInput.length > 0"
+          v-model="userInput"
+          type="text"
+          color="cyan darken-2">
+        </v-text-field>
+      </v-card-text>
 
-    <alert color="error" :message.sync="message" :detailedMessage.sync="detailedMessage"></alert>
+      <alert color="error" :message.sync="message" :detailedMessage.sync="detailedMessage"></alert>
 
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>{{confirmButtonText}}</v-btn>
-    </v-card-actions>
-  </v-card>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
+        <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>{{confirmButtonText}}</v-btn>
+      </v-card-actions>
+    </v-card>
   </v-dialog>
 </template>
 

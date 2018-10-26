@@ -87,42 +87,16 @@ limitations under the License.
         <journal-labels :labels="row.journalsLabels"></journal-labels>
       </template>
     </td>
-    <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
-      <div class="hidden-md-and-down">
+    <td class="action-button-group text-xs-right nowrap" v-if="this.headerVisible['actions']">
+      <v-layout align-center justify-end row fill-height>
         <v-tooltip top>
           <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
             <v-icon>mdi-shield-key-outline</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <v-tooltip top>
-          <v-btn small icon class="red--text" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
-            <v-icon>delete</v-icon>
-          </v-btn>
-          <span>{{deleteClusterActionTitle}}</span>
-        </v-tooltip>
-      </div>
-      <div class="hidden-lg-and-up">
-        <v-menu left origin="center center" transition="scale-transition">
-          <v-btn icon slot="activator">
-            <v-icon>more_vert</v-icon>
-          </v-btn>
-          <v-list>
-            <v-list-tile :disabled="isClusterAccessDialogDisabled" @click="showDialog('access', isClusterAccessDialogDisabled)">
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-shield-key-outline</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-title>{{showClusterAccessActionTitle}}</v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile :disabled="isShootMarkedForDeletion" @click="showDialog('delete', isShootMarkedForDeletion)">
-              <v-list-tile-action>
-                <v-icon class="red--text">delete</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-title>{{deleteClusterActionTitle}}</v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-      </div>
+        <delete-cluster :shootItem="shootItem" small content-class="red--text"></delete-cluster>
+      </v-layout>
     </td>
   </tr>
 </template>
@@ -139,6 +113,7 @@ import ShootVersion from '@/components/ShootVersion'
 import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
@@ -163,7 +138,8 @@ export default {
     JournalLabels,
     RetryOperation,
     SelfTerminationWarning,
-    AccountAvatar
+    AccountAvatar,
+    DeleteCluster
   },
   props: {
     shootItem: {
@@ -268,20 +244,12 @@ export default {
       return this.isClusterAccessDialogDisabled
         ? 'Cluster Access'
         : 'Show Cluster Access'
-    },
-    deleteClusterActionTitle () {
-      return this.isShootMarkedForDeletion
-        ? 'Cluster already marked for deletion'
-        : 'Delete Cluster'
     }
   },
   methods: {
-    showDialog: function (action, disabled = false) {
-      if (disabled !== true) {
-        // disabled check required as v-list-tile disabled=true does not prevent click action
-        const shootItem = this.shootItem
-        this.$emit('showDialog', { action, shootItem })
-      }
+    showDialog: function (action) {
+      const shootItem = this.shootItem
+      this.$emit('showDialog', { action, shootItem })
     }
   }
 }

@@ -108,8 +108,6 @@ limitations under the License.
         </v-card>
       </v-dialog>
 
-      <delete-cluster-dialog v-model="deleteDialog" @close="hideDialog" :clusterName="currentName" :clusterNamespace="currentNamespace" :clusterCreatedBy="currentCreatedBy"></delete-cluster-dialog>
-
       <template v-if="renderCreateDialog">
         <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
       </template>
@@ -131,7 +129,6 @@ import get from 'lodash/get'
 import GPopper from '@/components/GPopper'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
-import DeleteClusterDialog from '@/dialogs/DeleteClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
 import { getCreatedBy } from '@/utils'
 
@@ -139,7 +136,6 @@ export default {
   name: 'shoot-list',
   components: {
     CreateClusterDialog,
-    DeleteClusterDialog,
     GPopper,
     ShootListRow,
     ClusterAccess
@@ -193,7 +189,6 @@ export default {
     showDialog (args) {
       switch (args.action) {
         case 'access':
-        case 'delete':
           this.setSelectedShoot(args.shootItem.metadata)
             .then(() => {
               this.dialog = args.action
@@ -275,16 +270,6 @@ export default {
     createDialog: {
       get () {
         return this.dialog === 'create'
-      },
-      set (value) {
-        if (!value) {
-          this.hideDialog()
-        }
-      }
-    },
-    deleteDialog: {
-      get () {
-        return this.dialog === 'delete'
       },
       set (value) {
         if (!value) {
