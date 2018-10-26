@@ -913,8 +913,8 @@ export default {
         .catch(err => {
           const errorDetails = errorDetailsFromError(err)
           this.errorMessage = `Failed to create cluster.`
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     cancelClicked () {

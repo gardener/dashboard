@@ -59,6 +59,7 @@ import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import { updateMaintenance } from '@/utils/api'
 import get from 'lodash/get'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'maintenance-configuration',
@@ -116,10 +117,10 @@ export default {
       return updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
         .then(() => this.hideDialog())
         .catch((err) => {
-          const msg = 'Could not save maintenance configuration'
-          this.errorMessage = msg
-          this.detailedErrorMessage = err.message
-          console.error(msg, err)
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save maintenance configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     reset () {

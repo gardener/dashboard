@@ -20,8 +20,8 @@ limitations under the License.
     v-model="value"
     :cancel="hideDialog"
     :ok="deletionConfirmed"
-    :errorMessage.sync="deleteErrorMessage"
-    :detailedErrorMessage.sync="deleteDetailedErrorMessage"
+    :errorMessage.sync="errorMessage"
+    :detailedErrorMessage.sync="detailedErrorMessage"
     >
     <template slot="caption">Delete Cluster</template>
     <template slot="affectedObjectName">{{clusterName}}</template>
@@ -48,6 +48,7 @@ limitations under the License.
 import AccountAvatar from '@/components/AccountAvatar'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions } from 'vuex'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'delete-cluster-dialog',
@@ -71,8 +72,8 @@ export default {
   },
   data () {
     return {
-      deleteErrorMessage: null,
-      deleteDetailedErrorMessage: null
+      errorMessage: null,
+      detailedErrorMessage: null
     }
   },
   methods: {
@@ -83,14 +84,15 @@ export default {
       this.deleteShoot({ name: this.clusterName, namespace: this.clusterNamespace })
         .then(() => this.hideDialog())
         .catch((err) => {
-          this.deleteErrorMessage = 'Cluster deletion failed'
-          this.deleteDetailedErrorMessage = err.message
-          console.error('Delete shoot failed with error:', err)
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Cluster deletion failed'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     hideDialog () {
-      this.deleteErrorMessage = null
-      this.deleteDetailedErrorMessage = null
+      this.errorMessage = null
+      this.detailedErrorMessage = null
       this.$emit('close', true)
     }
   }

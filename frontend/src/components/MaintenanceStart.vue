@@ -57,6 +57,7 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addAnnotation } from '@/utils/api'
 import get from 'lodash/get'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
@@ -107,10 +108,10 @@ export default {
       return addAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
         .then(() => this.hideDialog())
         .catch((err) => {
-          const msg = 'Could not start maintenance'
-          this.errorMessage = msg
-          this.detailedErrorMessage = err.message
-          console.error(msg, err)
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not start maintenance'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     reset () {

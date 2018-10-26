@@ -109,11 +109,10 @@ export default {
         .deleteSecret(bindingName)
         .then(() => this.hide())
         .catch(err => {
-          this.errorMessage = 'Failed to delete Infrastructure Secret.'
-
           const errorDetails = errorDetailsFromError(err)
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.errorMessage = 'Failed to delete Infrastructure Secret.'
           this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     reset () {

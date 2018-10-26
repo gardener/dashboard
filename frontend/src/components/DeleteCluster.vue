@@ -67,11 +67,8 @@ export default {
       return getCreatedBy(get(this.shootItem, 'metadata'))
     },
     isShootMarkedForDeletion () {
-      const deletionTimestamp = get(this.shootItem, 'metadata.deletionTimestamp')
-      const annotations = get(this.shootItem, 'metadata.annotations')
-      const metadata = { deletionTimestamp, annotations }
-      return isShootMarkedForDeletion(metadata)
-    },
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
+    }
   },
   methods: {
     showDialog () {

@@ -28,8 +28,8 @@ limitations under the License.
       v-model="dialog"
       :cancel="hideDialog"
       :ok="updateShootHibernation"
-      :errorMessage.sync="hibernationErrorMessage"
-      :detailedErrorMessage.sync="hibernationDetailedErrorMessage"
+      :errorMessage.sync="errorMessage"
+      :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
       >
@@ -53,6 +53,7 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { isHibernated } from '@/utils'
 import { updateShootHibernation } from '@/utils/api'
 import get from 'lodash/get'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
@@ -66,8 +67,8 @@ export default {
   data () {
     return {
       dialog: false,
-      hibernationErrorMessage: null,
-      hibernationDetailedErrorMessage: null,
+      errorMessage: null,
+      detailedErrorMessage: null,
       enableHibernation: false
     }
   },
@@ -116,23 +117,22 @@ export default {
     },
     hideDialog () {
       this.dialog = false
-      this.hibernationErrorMessage = null
-      this.hibernationDetailedErrorMessage = null
+      this.errorMessage = null
+      this.detailedErrorMessage = null
     },
     updateShootHibernation () {
       const user = this.$store.state.user
       updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
         .then(() => this.hideDialog())
         .catch((err) => {
-          let msg
+          const errorDetails = errorDetailsFromError(err)
           if (!this.isHibernated) {
-            msg = 'Could not hibernate cluster'
+            this.errorMessage = 'Could not hibernate cluster'
           } else {
-            msg = 'Could not wake up cluster from hibernation'
+            this.errorMessage = 'Could not wake up cluster from hibernation'
           }
-          this.hibernationErrorMessage = msg
-          this.hibernationDetailedErrorMessage = err.message
-          console.error(msg, err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     }
   },
