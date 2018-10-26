@@ -731,7 +731,6 @@ export default {
         workersValid = every([].concat(workerInput), isValid)
       }
 
-
       return workersValid && this.maintenanceTimeValid && !this.$v.$invalid
     },
     sortedKubernetesVersions () {

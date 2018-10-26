@@ -72,7 +72,7 @@ export default {
     }
   },
   methods: {
-    updateMaintenanceWindow ({localBegin, localTimezone}) {
+    updateMaintenanceWindow ({ localBegin, localTimezone }) {
       localBegin = localBegin || this.localizedMaintenanceBegin
       localTimezone = localTimezone || this.selectedTimezone
       let utcMoment
@@ -101,7 +101,7 @@ export default {
 
       this.$emit('valid', !this.$v.$invalid)
     },
-    setLocalizedTime(utcTime) {
+    setLocalizedTime (utcTime) {
       const momentObj = moment.tz(utcTime, 'HHmmZ', this.selectedTimezone)
       if (momentObj.isValid()) {
         const newLocalizedTimeWindowBegin = momentObj.format('HH:mm')
@@ -119,10 +119,10 @@ export default {
       this.validateInput()
     },
     localizedMaintenanceBegin (value) {
-      this.updateMaintenanceWindow({localBegin: value})
+      this.updateMaintenanceWindow({ localBegin: value })
     },
     selectedTimezone (value) {
-      this.updateMaintenanceWindow({localTimezone: value})
+      this.updateMaintenanceWindow({ localTimezone: value })
     }
   },
   mounted () {
