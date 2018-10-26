@@ -328,59 +328,16 @@ limitations under the License.
           <v-card flat>
             <v-container fluid>
               <v-layout row wrap>
-                <v-flex xs3 class="mr-3">
-                  <v-text-field
-                   color="cyan darken-2"
-                   label="Maintenance Start Time"
-                   v-model="localizedMaintenanceBegin"
-                   :error-messages="getErrorMessages('shootDefinition.spec.maintenance.timeWindow.begin')"
-                   @input="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
-                   @blur="$v.shootDefinition.spec.maintenance.timeWindow.begin.$touch()"
-                   type="time"
-                   persistent-hint
-                   hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
-                 ></v-text-field>
-                </v-flex>
-                <v-flex xs2>
-                  <v-autocomplete
-                    color="cyan darken-2"
-                    label="Timezone"
-                    :items="timezones"
-                    v-model="selectedTimezone"
-                    >
-                  </v-autocomplete>
-                </v-flex>
-                <v-flex xs12>
-                  <div class="subheading pt-3">Auto Update</div>
-                </v-flex>
-                <v-flex xs12>
-                  <v-list two-line>
-                    <v-list-tile class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title>Operating System</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          Update the operating system of the workers<br />
-                          (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                    <v-list-tile class="list-complete-item">
-                      <v-list-tile-action>
-                        <v-checkbox color="cyan darken-2" v-model="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"></v-checkbox>
-                      </v-list-tile-action>
-                      <v-list-tile-content>
-                        <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
-                        <v-list-tile-sub-title>
-                          Update the control plane of the cluster and the worker components<br />
-                          (control plane, most notably the API server, will be briefly unavailable during switch-over)
-                        </v-list-tile-sub-title>
-                      </v-list-tile-content>
-                    </v-list-tile>
-                  </v-list>
-                </v-flex>
+                <maintenance-time
+                  ref="maintenanceTime"
+                  :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
+                  :use-local-tz=true
+                  @updateMaintenanceWindow="onUpdateMaintenanceWindow"
+                  @valid="onMaintenanceTimeValid"
+                ></maintenance-time>
+                <maintenance-components
+                  :update-kubernetes-version="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"
+                  @updateKubernetesVersion="onUpdateKubernetesVersion"></maintenance-components>
               </v-layout>
             </v-container>
           </v-card>
@@ -404,6 +361,8 @@ import { mapGetters, mapActions, mapState } from 'vuex'
 import WorkerInputGeneric from '@/components/WorkerInputGeneric'
 import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
 import CloudProfile from '@/components/CloudProfile'
+import MaintenanceComponents from '@/components/MaintenanceComponents'
+import MaintenanceTime from '@/components/MaintenanceTime'
 import Alert from '@/components/Alert'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -468,13 +427,6 @@ const validationErrors = {
         },
         region: {
           required: 'Region is required'
-        }
-      },
-      maintenance: {
-        timeWindow: {
-          begin: {
-            required: 'Maintenance start time is required'
-          }
         }
       }
     }
@@ -563,7 +515,9 @@ export default {
     CodeBlock,
     InfraIcon,
     Alert,
-    CloudProfile
+    CloudProfile,
+    MaintenanceComponents,
+    MaintenanceTime
   },
   props: {
     value: {
@@ -581,11 +535,9 @@ export default {
       purposes: ['evaluation', 'development', 'production'],
       refs_: {},
       validationErrors,
+      maintenanceTimeValid: false,
       errorMessage: undefined,
-      detailedErrorMessage: undefined,
-      osUpdates: true,
-      timezone: undefined,
-      timezones: moment.tz.names()
+      detailedErrorMessage: undefined
     }
   },
   validations: {
@@ -616,13 +568,6 @@ export default {
           },
           region: {
             required
-          }
-        },
-        maintenance: {
-          timeWindow: {
-            begin: {
-              required
-            }
           }
         }
       }
@@ -734,27 +679,6 @@ export default {
         this.infrastructureData.zones = [zone]
       }
     },
-    localizedMaintenanceBegin: {
-      get () {
-        const momentObj = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone)
-        if (!momentObj.isValid()) {
-          return null
-        }
-        return momentObj.format('HH:mm:00')
-      },
-      set (newTime) {
-        this.updateMaintenanceWindow({ newTime })
-      }
-    },
-    selectedTimezone: {
-      get () {
-        return this.timezone
-      },
-      set (newTimezone) {
-        this.updateMaintenanceWindow({ newTimezone })
-        this.timezone = newTimezone
-      }
-    },
     infrastructure () {
       return this.infrastructureData
     },
@@ -806,7 +730,8 @@ export default {
         }
         workersValid = every([].concat(workerInput), isValid)
       }
-      return workersValid && !this.$v.$invalid
+
+      return workersValid && this.maintenanceTimeValid && !this.$v.$invalid
     },
     sortedKubernetesVersions () {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
@@ -1008,13 +933,21 @@ export default {
       this.clusterName = shortRandomString(10)
       this.shootDefinition.metadata.namespace = this.namespace
 
-      this.timezone = moment.tz.guess()
-      const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-      const randomHour = sample(hours)
-      const randomMoment = moment.tz(randomHour, 'HH', this.timezone).utc()
-      this.shootDefinition.spec.maintenance.timeWindow.begin = randomMoment.format('HH0000+0000')
-      randomMoment.add(1, 'h')
-      this.shootDefinition.spec.maintenance.timeWindow.end = randomMoment.format('HH0000+0000')
+      this.$nextTick(() => {
+        this.$refs.maintenanceTime.reset()
+
+        // randomize maintenance time window
+        const hours = [22, 23, 0, 1, 2, 3, 4, 5]
+        const randomHour = sample(hours)
+        // use local timezone offset
+        const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
+
+        const utcBegin = randomMoment.format('HH0000+0000')
+        randomMoment.add(1, 'h')
+        const utcEnd = randomMoment.format('HH0000+0000')
+
+        this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
+      })
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
@@ -1079,18 +1012,15 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    updateMaintenanceWindow ({ newTime, newTimezone }) {
-      let newMoment
-      if (newTime) {
-        newMoment = moment.tz(newTime, 'HHmm', this.timezone).utc()
-      } else if (newTimezone) {
-        const localizedTime = moment.tz(this.shootDefinition.spec.maintenance.timeWindow.begin, 'HHmmZ', this.timezone).format('HHmm')
-        newMoment = moment.tz(localizedTime, 'HHmm', newTimezone).utc()
-      }
-
-      this.shootDefinition.spec.maintenance.timeWindow.begin = newMoment.format('HHmm00+0000')
-      newMoment.add(1, 'h')
-      this.shootDefinition.spec.maintenance.timeWindow.end = newMoment.format('HHmm00+0000')
+    onUpdateKubernetesVersion (value) {
+      this.shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion = value
+    },
+    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
+      this.shootDefinition.spec.maintenance.timeWindow.begin = utcBegin
+      this.shootDefinition.spec.maintenance.timeWindow.end = utcEnd
+    },
+    onMaintenanceTimeValid (value) {
+      this.maintenanceTimeValid = value
     }
   },
   watch: {
