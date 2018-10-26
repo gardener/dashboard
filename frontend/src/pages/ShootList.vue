@@ -183,7 +183,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      deleteShoot: 'deleteShoot',
       setSelectedShootInternal: 'setSelectedShoot',
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',

@@ -260,6 +260,19 @@ limitations under the License.
               </v-list-tile-action>
             </v-list-tile>
 
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-delete-circle-outline</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Delete Cluster</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <delete-cluster :shootItem="item"></delete-cluster>
+              </v-list-tile-action>
+            </v-list-tile>
+
           </v-list>
         </v-card>
 
@@ -285,6 +298,7 @@ import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
+import DeleteCluster from '@/components/DeleteCluster'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
@@ -314,7 +328,8 @@ export default {
     SelfTerminationWarning,
     ShootHibernation,
     MaintenanceStart,
-    MaintenanceConfiguration
+    MaintenanceConfiguration,
+    DeleteCluster
   },
   data () {
     return {
