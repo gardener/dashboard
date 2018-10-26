@@ -58,7 +58,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
+                <v-list-tile-title><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
@@ -275,6 +275,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import AccountAvatar from '@/components/AccountAvatar'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
 import TimeString from '@/components/TimeString'
@@ -304,6 +305,7 @@ import 'codemirror/mode/yaml/yaml.js'
 export default {
   name: 'shoot-item',
   components: {
+    AccountAvatar,
     ClusterAccess,
     Journals,
     TimeString,
