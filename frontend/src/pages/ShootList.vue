@@ -196,7 +196,9 @@ export default {
           break
         case 'create':
           this.renderCreateDialog = true
-          this.dialog = args.action
+          this.$nextTick(() => {
+            this.dialog = args.action
+          })
       }
     },
     hideDialog () {
