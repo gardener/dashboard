@@ -37,7 +37,8 @@ function isReserved (key) {
 function isReservedException (key) {
   return _.includes([
     'shoot.garden.sapcloud.io/ignore',
-    'garden.sapcloud.io/purpose'
+    'garden.sapcloud.io/purpose',
+    'shoot.garden.sapcloud.io/operation'
   ], key)
 }
 
