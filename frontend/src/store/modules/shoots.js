@@ -242,7 +242,6 @@ const getRawSortVal = (item, sortBy) => {
   const spec = item.spec
   switch (sortBy) {
     case 'purpose':
-      // eslint-disable-next-line
       return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
     case 'lastOperation':
       return get(item, 'status.lastOperation')
@@ -283,7 +282,6 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const isError = operation.state === 'Failed' || get(item, 'status.lastError')
       const userError = isUserError(get(item, 'status.lastError.codes', []))
-      // eslint-disable-next-line
       const ignoredFromReconciliation = get(item, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
 
       if (ignoredFromReconciliation) {
