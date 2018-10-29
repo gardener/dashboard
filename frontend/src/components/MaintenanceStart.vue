@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog">
+      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
@@ -56,8 +56,9 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addAnnotation } from '@/utils/api'
-import get from 'lodash/get'
 import { errorDetailsFromError } from '@/utils/error'
+import { isShootMarkedForDeletion } from '@/utils'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -92,6 +93,9 @@ export default {
     },
     updateKubernetesVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

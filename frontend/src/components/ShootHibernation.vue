@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
       {{caption}}
@@ -50,10 +50,10 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { isHibernated } from '@/utils'
+import { isHibernated, isShootMarkedForDeletion } from '@/utils'
 import { updateShootHibernation } from '@/utils/api'
-import get from 'lodash/get'
 import { errorDetailsFromError } from '@/utils/error'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -108,6 +108,9 @@ export default {
     },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

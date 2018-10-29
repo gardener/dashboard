@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
       {{caption}}
@@ -58,8 +58,9 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import { updateMaintenance } from '@/utils/api'
-import get from 'lodash/get'
 import { errorDetailsFromError } from '@/utils/error'
+import { isShootMarkedForDeletion } from '@/utils'
+import get from 'lodash/get'
 
 export default {
   name: 'maintenance-configuration',
@@ -101,6 +102,9 @@ export default {
     },
     valid () {
       return this.maintenanceTimeValid
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
