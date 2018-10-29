@@ -24,7 +24,7 @@ limitations under the License.
       <span v-else>{{caption}}</span>
     </v-tooltip>
     <confirm-dialog
-      confirmButtonText="Maintain"
+      confirmButtonText="Schedule Now"
       v-model="dialog"
       :cancel="hideDialog"
       :ok="triggerMaintenance"
@@ -58,6 +58,7 @@ import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
+import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 
 export default {
@@ -75,15 +76,17 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      osUpdates: true // won't change
+      osUpdates: true, // won't change
+      maintenanceTriggered: false
     }
   },
   computed: {
     isMaintenanceToBeScheduled () {
+      // TODO we need a better way to track the maintenance status instead of checking the operation annotation
       return get(this.shootItem, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/operation']) === 'maintain'
     },
     caption () {
-      return 'Maintain Cluster'
+      return 'Schedule Maintenance'
     },
     shootName () {
       return get(this.shootItem, 'metadata.name')
@@ -107,6 +110,8 @@ export default {
       this.dialog = false
     },
     triggerMaintenance () {
+      this.maintenanceTriggered = true
+
       const user = this.$store.state.user
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
       return addAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
@@ -116,11 +121,30 @@ export default {
           this.errorMessage = 'Could not start maintenance'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+
+          this.maintenanceTriggered = false
         })
     },
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
+    }
+  },
+  watch: {
+    isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
+      const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
+      if (isMaintenanceScheduled) {
+        this.maintenanceTriggered = false
+
+        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+          const config = {
+            position: SnotifyPosition.rightBottom,
+            timeout: 5000,
+            showProgressBar: false
+          }
+          this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
+        }
+      }
     }
   }
 }
