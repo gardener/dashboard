@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog">
+      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
@@ -56,6 +56,8 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addAnnotation } from '@/utils/api'
+import { errorDetailsFromError } from '@/utils/error'
+import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 
 export default {
@@ -91,6 +93,9 @@ export default {
     },
     updateKubernetesVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -107,10 +112,10 @@ export default {
       return addAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
         .then(() => this.hideDialog())
         .catch((err) => {
-          const msg = 'Could not start maintenance'
-          this.errorMessage = msg
-          this.detailedErrorMessage = err.message
-          console.error(msg, err)
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not start maintenance'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     reset () {

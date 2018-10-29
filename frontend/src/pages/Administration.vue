@@ -180,11 +180,10 @@ export default {
           }
         })
         .catch(err => {
-          this.errorMessage = 'Failed to delete project.'
-
           const errorDetails = errorDetailsFromError(err)
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.errorMessage = 'Failed to delete project.'
           this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     }
   },

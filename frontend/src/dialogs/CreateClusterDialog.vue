@@ -331,7 +331,6 @@ limitations under the License.
                 <maintenance-time
                   ref="maintenanceTime"
                   :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
-                  :use-local-tz=true
                   @updateMaintenanceWindow="onUpdateMaintenanceWindow"
                   @valid="onMaintenanceTimeValid"
                 ></maintenance-time>
@@ -913,8 +912,8 @@ export default {
         .catch(err => {
           const errorDetails = errorDetailsFromError(err)
           this.errorMessage = `Failed to create cluster.`
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     cancelClicked () {

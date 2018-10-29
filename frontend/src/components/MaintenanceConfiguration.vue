@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
       {{caption}}
@@ -58,6 +58,8 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import { updateMaintenance } from '@/utils/api'
+import { errorDetailsFromError } from '@/utils/error'
+import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 
 export default {
@@ -100,6 +102,9 @@ export default {
     },
     valid () {
       return this.maintenanceTimeValid
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -116,10 +121,10 @@ export default {
       return updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
         .then(() => this.hideDialog())
         .catch((err) => {
-          const msg = 'Could not save maintenance configuration'
-          this.errorMessage = msg
-          this.detailedErrorMessage = err.message
-          console.error(msg, err)
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save maintenance configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
     reset () {

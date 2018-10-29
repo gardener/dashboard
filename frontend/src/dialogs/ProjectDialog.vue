@@ -222,6 +222,7 @@ export default {
             }
           })
           .catch(err => {
+            const errorDetails = errorDetailsFromError(err)
             if (this.isCreateMode) {
               if (isConflict(err)) {
                 this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
@@ -233,9 +234,8 @@ export default {
               this.errorMessage = 'Failed to update project.'
             }
 
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
             this.detailedErrorMessage = errorDetails.detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           })
       }
     },

@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
       {{caption}}
@@ -28,8 +28,8 @@ limitations under the License.
       v-model="dialog"
       :cancel="hideDialog"
       :ok="updateShootHibernation"
-      :errorMessage.sync="hibernationErrorMessage"
-      :detailedErrorMessage.sync="hibernationDetailedErrorMessage"
+      :errorMessage.sync="errorMessage"
+      :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
       >
@@ -50,8 +50,9 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { isHibernated } from '@/utils'
+import { isHibernated, isShootMarkedForDeletion } from '@/utils'
 import { updateShootHibernation } from '@/utils/api'
+import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 
 export default {
@@ -66,8 +67,8 @@ export default {
   data () {
     return {
       dialog: false,
-      hibernationErrorMessage: null,
-      hibernationDetailedErrorMessage: null,
+      errorMessage: null,
+      detailedErrorMessage: null,
       enableHibernation: false
     }
   },
@@ -107,6 +108,9 @@ export default {
     },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -116,23 +120,22 @@ export default {
     },
     hideDialog () {
       this.dialog = false
-      this.hibernationErrorMessage = null
-      this.hibernationDetailedErrorMessage = null
+      this.errorMessage = null
+      this.detailedErrorMessage = null
     },
     updateShootHibernation () {
       const user = this.$store.state.user
       updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
         .then(() => this.hideDialog())
         .catch((err) => {
-          let msg
+          const errorDetails = errorDetailsFromError(err)
           if (!this.isHibernated) {
-            msg = 'Could not hibernate cluster'
+            this.errorMessage = 'Could not hibernate cluster'
           } else {
-            msg = 'Could not wake up cluster from hibernation'
+            this.errorMessage = 'Could not wake up cluster from hibernation'
           }
-          this.hibernationErrorMessage = msg
-          this.hibernationDetailedErrorMessage = err.message
-          console.error(msg, err)
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     }
   },
