@@ -22,10 +22,12 @@ limitations under the License.
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-        {{ row.name }}
-      </router-link>
-      <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+      <v-layout align-center row fill-height class="pa-0 ma-0">
+        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+          {{ row.name }}
+        </router-link>
+        <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+      </v-layout>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
