@@ -93,7 +93,7 @@ limitations under the License.
       <v-layout align-center justify-end row fill-height>
         <v-tooltip top>
           <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon>mdi-shield-key-outline</v-icon>
+            <v-icon size="22">mdi-key</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
