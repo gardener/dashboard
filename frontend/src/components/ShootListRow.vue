@@ -66,7 +66,7 @@ limitations under the License.
       </div>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :shootNamespace="row.namespace" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
+      <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="row.conditions"></status-tags>
@@ -93,7 +93,7 @@ limitations under the License.
       <v-layout align-center justify-end row fill-height>
         <v-tooltip top>
           <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon>mdi-shield-key-outline</v-icon>
+            <v-icon size="22">mdi-key</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
@@ -122,7 +122,6 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { getTimestampFormatted,
   getCloudProviderKind,
-  availableK8sUpdatesForShoot,
   getCreatedBy,
   isHibernated,
   isReconciliationDeactivated,
@@ -179,8 +178,6 @@ export default {
         region: get(spec, 'cloud.region'),
         isHibernated: isHibernated(spec),
         info,
-        availableK8sUpdates: availableK8sUpdatesForShoot(spec),
-        k8sVersion: get(spec, 'kubernetes.version'),
         purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
         lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
         journalsLabels: this.journalsLabels(this.shootItem.metadata),

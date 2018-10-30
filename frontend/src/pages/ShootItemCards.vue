@@ -59,13 +59,14 @@ limitations under the License.
             <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-ship-wheel</v-icon>
+                <v-icon class="cyan--text text--darken-2">mdi-cube-outline</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
-                <v-list-tile-title>Kubernetes Version</v-list-tile-title>
+                <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
+                <v-list-tile-title>{{k8sVersion}}</v-list-tile-title>
               </v-list-tile-content>
               <v-list-tile-action>
-                <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+                <shoot-version :shoot-item="item" :chip-style="false"></shoot-version>
               </v-list-tile-action>
             </v-list-tile>
 
@@ -324,7 +325,6 @@ import {
   getDateFormatted,
   getCloudProviderKind,
   canLinkToSeed,
-  availableK8sUpdatesForShoot,
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo
@@ -492,9 +492,6 @@ export default {
       } catch (err) {
         return []
       }
-    },
-    availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(get(this.item, 'spec'))
     },
     k8sVersion () {
       return get(this.item, 'spec.kubernetes.version')
