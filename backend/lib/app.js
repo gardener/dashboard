@@ -32,7 +32,6 @@ const jwt = require('express-jwt')
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
-const STATIC_DIRNAME = join(PUBLIC_DIRNAME, 'static')
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 const issuerUrl = _.get(config, 'jwt.issuer')
 let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
@@ -84,7 +83,7 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin'
 }))
 
-app.use('/static', express.static(STATIC_DIRNAME))
+app.use(express.static(PUBLIC_DIRNAME))
 
 app.use(helmet.frameguard({
   action: 'deny'
