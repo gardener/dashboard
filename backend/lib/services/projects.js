@@ -35,9 +35,7 @@ function Garden ({auth}) {
 function fromResource ({metadata, spec = {}}) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp } = metadata
-  const { namespace, createdBy: createdByRef = {}, owner: ownerRef = {}, description, purpose } = spec
-  const { name: owner } = ownerRef
-  const { name: createdBy } = createdByRef
+  const { namespace, createdBy, owner, description, purpose } = spec
   return {
     metadata: {
       name,
@@ -47,8 +45,8 @@ function fromResource ({metadata, spec = {}}) {
       creationTimestamp
     },
     data: {
-      createdBy,
-      owner,
+      createdBy: fromSubject(createdBy),
+      owner: fromSubject(owner),
       description,
       purpose
     }
@@ -59,16 +57,6 @@ function toResource ({metadata, data = {}}) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion } = metadata
   const { createdBy, owner, description, purpose } = data
-  const ownerRef = {
-    apiGroup: 'rbac.authorization.k8s.io',
-    kind: 'User',
-    name: owner
-  }
-  const createdByRef = {
-    apiGroup: 'rbac.authorization.k8s.io',
-    kind: 'User',
-    name: createdBy
-  }
   return {
     apiVersion,
     kind,
@@ -78,10 +66,24 @@ function toResource ({metadata, data = {}}) {
     },
     spec: {
       namespace,
-      createdBy: createdByRef,
-      owner: ownerRef,
+      createdBy: toSubject(createdBy),
+      owner: toSubject(owner),
       description,
       purpose
+    }
+  }
+}
+
+function fromSubject ({ name } = {}) {
+  return name
+}
+
+function toSubject (username) {
+  if (username) {
+    return {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'User',
+      name: username
     }
   }
 }

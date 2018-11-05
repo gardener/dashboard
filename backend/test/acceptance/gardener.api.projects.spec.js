@@ -36,10 +36,9 @@ describe('gardener', function () {
       const adminBearer = oidc.sign({email: 'admin@example.org'})
       const role = 'project'
       const owner = 'owner'
-      const createdBy = 'createdBy'
       const description = 'description'
       const purpose = 'purpose'
-      const data = {createdBy, owner, description, purpose}
+      const data = {owner, description, purpose}
       let app
 
       before(function () {
