@@ -56,7 +56,11 @@ function fromResource ({metadata, spec = {}}) {
 function toResource ({metadata, data = {}}) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion } = metadata
-  const { createdBy, owner, description, purpose } = data
+  const { createdBy, owner } = data
+
+  const description = data.description || null
+  const purpose = data.purpose || null
+
   return {
     apiVersion,
     kind,
