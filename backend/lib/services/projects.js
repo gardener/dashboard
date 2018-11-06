@@ -26,7 +26,7 @@ const logger = require('../logger')
 const shoots = require('./shoots')
 const administrators = require('./administrators')
 
-const PROJECT_INITIALIZATION_TIMEOUT = 60 * 1000
+const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function Garden ({auth}) {
   return kubernetes.garden({auth})
