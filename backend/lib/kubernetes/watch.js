@@ -129,21 +129,26 @@ function wrap (emitter, ws) {
   ws
     .once('open', onOpen)
     .on('message', onMessage)
-
     .on('error', onError)
     .on('close', onClose)
 
   emitter.websocket = ws
+  emitter.end = () => ws.terminate()
+
   return emitter
 }
 
-function createWebSocket (resource, options) {
+function createWebSocket (resource, options = {}) {
   const api = resource.api
   const url = parse(api.url)
   url.protocol = replace(url.protocol, /^http/, 'ws')
   url.href = url.path = url.search = undefined
-  url.query = assign({}, resource.qs, options.qs, {watch: true})
-  url.pathname = join(resource._path(options), '/')
+  const qs = {}
+  if (options.name) {
+    qs.fieldSelector = join(['metadata.name', options.name], '=')
+  }
+  url.query = assign(qs, resource.qs, options.qs, {watch: true})
+  url.pathname = resource.path
   const { key, cert, ca, strictSSL, auth = {} } = get(api, 'http.requestOptions', {})
   const origin = get(options, 'origin', api.url)
   const rejectUnauthorized = get(options, 'rejectUnauthorized', !strictSSL)

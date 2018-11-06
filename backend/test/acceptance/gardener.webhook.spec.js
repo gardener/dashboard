@@ -67,7 +67,6 @@ describe('gardener', function () {
     const sandbox = sinon.createSandbox()
 
     before(function () {
-      nocks.reset()
       app = global.createServer()
     })
 
@@ -82,9 +81,7 @@ describe('gardener', function () {
     })
 
     afterEach(function () {
-      nocks.verify()
-      nocks.reset()
-      sandbox.restore()
+      verifyAndRestore(sandbox)
     })
 
     it('should initialize the cache with all open issues', function () {

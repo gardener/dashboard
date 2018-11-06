@@ -15,14 +15,14 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="600" persistent>
+  <v-dialog v-model="visible" persistent scrollable max-width="600px">
     <v-card class="project">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-cube</v-icon>
         <span v-if="isCreateMode">Create new Project</span>
         <span v-else>Update Project</span>
       </v-card-title>
-      <v-card-text>
+      <v-card-text style="height: 300px; position: relative">
         <form>
           <v-container fluid>
             <template v-if="isCreateMode">
@@ -53,7 +53,7 @@ limitations under the License.
                 <v-flex xs5>
                   <v-select
                     color="deep-purple"
-                    :items="memberList"
+                    :items="ownerItems"
                     label="Main Contact"
                     v-model="owner"
                     tabindex="1"
@@ -89,11 +89,30 @@ limitations under the License.
             <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
           </v-container>
         </form>
+        <v-snackbar :value="loading" bottom right absolute :timeout="0">
+          <span>{{snackbarText}}</span>
+        </v-snackbar>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.stop="cancel" tabindex="5">Cancel</v-btn>
-        <v-btn flat @click.stop="submit" :disabled="!valid" tabindex="4" class="deep-purple--text">{{submitButtonText}}</v-btn>
+        <v-btn
+          flat
+          :disabled="loading"
+          @click.stop="cancel"
+          tabindex="5"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          flat
+          :loading="loading"
+          :disabled="!valid || loading"
+          tabindex="4"
+          @click.stop="submit"
+          class="deep-purple--text"
+        >
+          {{submitButtonText}}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -106,8 +125,13 @@ import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/u
 import { getValidationErrors, setInputFocus } from '@/utils'
 import map from 'lodash/map'
 import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
+import includes from 'lodash/includes'
+import concat from 'lodash/concat'
+import filter from 'lodash/filter'
+import startsWith from 'lodash/startsWith'
 import Alert from '@/components/Alert'
-import { errorDetailsFromError, isConflict } from '@/utils/error'
+import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
 const defaultProjectName = ''
 
@@ -147,7 +171,8 @@ export default {
       owner: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors
+      validationErrors,
+      loading: false
     }
   },
   validations () {
@@ -168,8 +193,16 @@ export default {
       }
     },
     projectNames () {
-      const iteratee = item => item.metadata.name
-      return map(this.projectList, iteratee)
+      return map(this.projectList, 'metadata.name')
+    },
+    ownerItems () {
+      const predicate = username => !startsWith(username, 'system:serviceaccount:')
+      const members = filter(this.memberList, predicate)
+      const owner = get(this.project, 'data.owner')
+      if (!owner || includes(members, owner)) {
+        return members
+      }
+      return concat(members, owner)
     },
     valid () {
       return !this.$v.$invalid
@@ -179,6 +212,9 @@ export default {
     },
     submitButtonText () {
       return this.isCreateMode ? 'Create' : 'Save'
+    },
+    snackbarText () {
+      return this.isCreateMode ? 'Creating project ...' : 'Updating project ...'
     },
     validators () {
       const validators = {
@@ -210,33 +246,42 @@ export default {
     hide () {
       this.visible = false
     },
-    submit () {
+    async submit () {
       this.$v.$touch()
       if (this.valid) {
-        this.save()
-          .then(project => {
-            this.hide()
-            this.$emit('submit', project)
-            if (this.isCreateMode) {
-              this.$router.push({ name: 'Secrets', params: { namespace: project.metadata.namespace } })
-            }
-          })
-          .catch(err => {
-            const errorDetails = errorDetailsFromError(err)
-            if (this.isCreateMode) {
-              if (isConflict(err)) {
-                this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
-                setInputFocus(this, 'projectName')
-              } else {
-                this.errorMessage = 'Failed to create project.'
+        try {
+          this.loading = true
+          const project = await this.save()
+          this.loading = false
+          this.hide()
+          this.$emit('submit', project)
+          if (this.isCreateMode) {
+            this.$router.push({
+              name: 'Secrets',
+              params: {
+                namespace: project.metadata.namespace
               }
+            })
+          }
+        } catch (err) {
+          this.loading = false
+          if (this.isCreateMode) {
+            if (isConflict(err)) {
+              this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
+              setInputFocus(this, 'projectName')
+            } else if (isGatewayTimeout(err)) {
+              this.errorMessage = 'Project has been created but initialization is still pending.'
             } else {
-              this.errorMessage = 'Failed to update project.'
+              this.errorMessage = 'Failed to create project.'
             }
+          } else {
+            this.errorMessage = 'Failed to update project.'
+          }
 
-            this.detailedErrorMessage = errorDetails.detailedMessage
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          })
+          const { errorCode, detailedMessage } = errorDetailsFromError(err)
+          this.detailedErrorMessage = detailedMessage
+          console.error(this.errorMessage, errorCode, detailedMessage, err)
+        }
       }
     },
     cancel () {
@@ -286,7 +331,7 @@ export default {
     }
   },
   watch: {
-    value: function (value) {
+    value (value) {
       if (value) {
         this.reset()
       }

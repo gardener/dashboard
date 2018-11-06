@@ -17,66 +17,74 @@
 'use strict'
 
 const _ = require('lodash')
-const Resources = require('../kubernetes/Resources')
-const core = require('../kubernetes').core()
-const rbac = require('../kubernetes').rbac()
-const { Forbidden, PreconditionFailed } = require('../errors')
-const members = require('./members')
+const kubernetes = require('../kubernetes')
+const Resources = kubernetes.Resources
+const garden = kubernetes.garden()
+const core = kubernetes.core()
+const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
+const logger = require('../logger')
 const shoots = require('./shoots')
 const administrators = require('./administrators')
 
-function fromResource ({metadata}) {
-  const annotations = metadata.annotations || {}
-  const labels = metadata.labels || {}
+const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
+
+function Garden ({auth}) {
+  return kubernetes.garden({auth})
+}
+
+function fromResource ({metadata, spec = {}}) {
   const role = 'project'
-  const resourceVersion = metadata.resourceVersion
-  const namespace = metadata.name
-  const name = labels['project.garden.sapcloud.io/name'] || namespace.replace(/^garden-/, '')
-  const creationTimestamp = metadata.creationTimestamp
-  metadata = {name, namespace, resourceVersion, role, creationTimestamp}
-  const data = {
-    createdBy: annotations['project.garden.sapcloud.io/createdBy'],
-    owner: annotations['project.garden.sapcloud.io/owner'],
-    description: annotations['project.garden.sapcloud.io/description'],
-    purpose: annotations['project.garden.sapcloud.io/purpose']
+  const { name, resourceVersion, creationTimestamp } = metadata
+  const { namespace, createdBy, owner, description, purpose } = spec
+  return {
+    metadata: {
+      name,
+      namespace,
+      resourceVersion,
+      role,
+      creationTimestamp
+    },
+    data: {
+      createdBy: fromSubject(createdBy),
+      owner: fromSubject(owner),
+      description,
+      purpose
+    }
   }
-  return {metadata, data}
 }
 
-function toResource ({metadata, data}) {
-  const resource = Resources.Namespace
-  const apiVersion = resource.apiVersion
-  const kind = resource.kind
-  const labels = {
-    'garden.sapcloud.io/role': 'project',
-    'project.garden.sapcloud.io/name': metadata.name
+function toResource ({metadata, data = {}}) {
+  const { apiVersion, kind } = Resources.Project
+  const { name, namespace, resourceVersion } = metadata
+  const { createdBy, owner, description, purpose } = data
+  return {
+    apiVersion,
+    kind,
+    metadata: {
+      name,
+      resourceVersion
+    },
+    spec: {
+      namespace,
+      createdBy: toSubject(createdBy),
+      owner: toSubject(owner),
+      description,
+      purpose
+    }
   }
-  data = data || {}
-  const annotations = {
-    'project.garden.sapcloud.io/createdBy': data.createdBy,
-    'project.garden.sapcloud.io/owner': data.owner,
-    'project.garden.sapcloud.io/description': data.description,
-    'project.garden.sapcloud.io/purpose': data.purpose
-  }
-  const name = metadata.namespace || `garden-${metadata.name}`
-  const resourceVersion = metadata.resourceVersion
-  metadata = {name, resourceVersion, labels, annotations}
-  return {apiVersion, kind, metadata}
 }
 
-async function authorize ({user, namespace}) {
-  const [
-    memberList,
-    isAdmin
-  ] = await Promise.all([
-    members.list({user, namespace}),
-    administrators.isAdmin(user)
-  ])
-  const username = user.id
-  const isMember = _.includes(memberList, username)
-  if (!isMember && !isAdmin) {
-    const projectName = namespace.replace(/^garden-/, '')
-    throw new Forbidden(`User ${username} is not authorized to access project ${projectName}`)
+function fromSubject ({ name } = {}) {
+  return name
+}
+
+function toSubject (username) {
+  if (username) {
+    return {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'User',
+      name: username
+    }
   }
 }
 
@@ -87,92 +95,186 @@ async function validateDeletePreconditions ({user, namespace}) {
   }
 }
 
-exports.list = async function ({user}) {
+async function getProjectNameFromNamespace (namespace) {
+  // read namespace
+  const ns = await core.namespaces.get({name: namespace})
+  // get name of project from namespace label
+  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
+  if (!name) {
+    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+  }
+  return name
+}
+
+exports.list = async function ({user, qs = {}}) {
   const [
-    namespaces,
-    roleBindings,
+    projects,
     isAdmin
   ] = await Promise.all([
-    core.namespaces.get({
-      qs: {labelSelector: 'garden.sapcloud.io/role=project'}
-    }),
-    rbac.rolebindings.get({
-      qs: {labelSelector: 'garden.sapcloud.io/role=members'}
-    }),
+    garden.projects.get(),
     administrators.isAdmin(user)
   ])
 
-  const isMemberOf = (roleBindings, subject) => {
-    const userNamespaces = _
-      .chain(roleBindings.items)
-      .filter(item => _.findIndex(item.subjects, subject) !== -1)
-      .map(item => item.metadata.namespace)
-      .value()
-    return item => _.includes(userNamespaces, item.metadata.name)
-  }
+  const isMemberOf = project => _
+    .chain(project)
+    .get('spec.members')
+    .findIndex({
+      kind: 'User',
+      name: user.id
+    })
+    .gte(0)
+    .value()
 
-  const subject = {
-    kind: 'User',
-    name: user.id
-  }
-
-  const predicate = !isAdmin
-    ? isMemberOf(roleBindings, subject)
-    : _.identity
-
+  const phases = _
+    .chain(qs)
+    .get('phase', 'Ready')
+    .split(',')
+    .compact()
+    .value()
   return _
-    .chain(namespaces.items)
-    .filter(predicate)
+    .chain(projects)
+    .get('items')
+    .filter(project => {
+      if (!isAdmin && !isMemberOf(project)) {
+        return false
+      }
+      if (!_.isEmpty(phases)) {
+        const phase = _.get(project, 'status.phase', 'Initial')
+        return _.includes(phases, phase)
+      }
+      return true
+    })
     .map(fromResource)
     .value()
 }
 
+function isProjectReady ({status: {phase} = {}} = {}) {
+  return phase === 'Ready'
+}
+
+function waitUntilProjectIsReady (projects, name) {
+  const reconnector = exports.watchProject(projects, name)
+  const projectInitializationTimeout = exports.projectInitializationTimeout
+
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      const duration = `${projectInitializationTimeout} ms`
+      done(new GatewayTimeout(`Project could not be initialized within ${duration}`))
+    }, projectInitializationTimeout)
+
+    function done (err, project) {
+      // clear timeout
+      clearTimeout(timeoutId)
+      // remove all listeners
+      reconnector.removeListener('event', onEvent)
+      reconnector.removeListener('error', onError)
+      reconnector.removeListener('disconnect', onDisconnect)
+      // prevent reconnecting
+      reconnector.reconnect = false
+      // disconnect
+      reconnector.disconnect()
+      if (err) {
+        return reject(err)
+      }
+      resolve(project)
+    }
+
+    function onEvent (event) {
+      switch (event.type) {
+        case 'ADDED':
+        case 'MODIFIED':
+          if (isProjectReady(event.object)) {
+            done(null, event.object)
+          }
+          break
+        case 'DELETED':
+          done(new InternalServerError(`Project "${name}" has been deleted`))
+          break
+      }
+    }
+
+    function onError (err) {
+      logger.error(`Error watching project "%s": %s`, name, err.message)
+    }
+
+    function onDisconnect (err) {
+      done(err || new InternalServerError(`Watch for project "${name}" has been disconnected`))
+    }
+
+    reconnector.on('event', onEvent)
+    reconnector.on('error', onError)
+    reconnector.on('disconnect', onDisconnect)
+  })
+}
+
 exports.create = async function ({user, body}) {
-  const username = user.id
-  // transfrom project to namespace resource
-  _.set(body, 'data.createdBy', username)
-  body = toResource(body)
-  // create namespace
-  const name = body.metadata.name
-  const namespace = name
-  body = await core.namespaces.post({body})
-  try {
-    // bootstrap the rolebinding for project members
-    await members.bootstrap({user, namespace})
-  } catch (err) {
-    // rollback the namespace in case of an error
-    await core.namespaces.delete({name})
-    throw err
-  }
-  return fromResource(body)
+  // initialize createdBy
+  _.set(body, 'data.createdBy', user.id)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // create project with service account
+  let project = await projects.post({body: toResource(body)})
+  // project name
+  const name = project.metadata.name
+  // wait until project is ready
+  project = await waitUntilProjectIsReady(projects, name)
+  // project is ready now
+  return fromResource(project)
+}
+// needs to be exported for testing
+exports.watchProject = (projects, name) => projects.watch({name})
+exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
+
+exports.read = async function ({user, name: namespace}) {
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // read project
+  const project = await projects.get({name})
+  return fromResource(project)
 }
 
-exports.read = async function ({user, name}) {
-  // validate user authorizations
-  const namespace = name
-  await authorize({user, namespace})
-  // read namespace
-  return fromResource(await core.namespaces.get({name}))
+exports.patch = async function ({user, name: namespace, body}) {
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // read project
+  let project = await projects.get({name})
+  // do not update createdBy
+  const { metadata, data } = fromResource(project)
+  _.assign(data, _.omit(body.data, 'createdBy'))
+  // patch project
+  project = await projects.mergePatch({
+    name,
+    body: toResource({metadata, data})
+  })
+  return fromResource(project)
 }
 
-exports.patch = async function ({user, name, body}) {
-  // transfrom project to namespace resource
-  _.unset(body, 'data.createdBy')
-  body = toResource(body)
-  // validate user authorizations
-  const namespace = name
-  await authorize({user, namespace})
-  // patch namespace
-  return fromResource(await core.namespaces.mergePatch({name, body}))
-}
-
-exports.remove = async function ({user, name}) {
-  // validate user authorizations
-  const namespace = name
-  await authorize({user, namespace})
+exports.remove = async function ({user, name: namespace}) {
   // validate preconditions
   await validateDeletePreconditions({user, namespace})
-  // delete namespace
-  await core.namespaces.delete({name})
-  return fromResource({metadata: {name}})
+  // get name of project
+  const name = await getProjectNameFromNamespace(namespace)
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // read project
+  const project = await projects.get({name})
+  // patch annotations
+  const annotations = _.assign({
+    'confirmation.garden.sapcloud.io/deletion': 'true'
+  }, project.metadata.annotations)
+  await projects.mergePatch({
+    name,
+    body: {
+      metadata: {
+        annotations
+      }
+    }
+  })
+  // delete project
+  await projects.delete({name})
+  return fromResource(project)
 }

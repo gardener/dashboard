@@ -25,7 +25,8 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send(await projects.list({user}))
+      const qs = req.query
+      res.send(await projects.list({user, qs}))
     } catch (err) {
       next(err)
     }

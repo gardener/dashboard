@@ -16,15 +16,15 @@
 
 'use strict'
 
-const core = require('../kubernetes').core()
+const garden = require('../kubernetes').garden()
 const { registerHandler } = require('./common')
 
 module.exports = io => {
-  const labelSelector = 'garden.sapcloud.io/role=project'
-  const emitter = core.namespaces.watch({qs: {labelSelector}})
+  const emitter = garden.projects.watch()
   registerHandler(emitter, event => {
     if (event.type === 'ADDED') {
-      const namespace = event.object.metadata.name
+      const namespace = event.object.spec.namespace
+      // initialize the room
       io.of('/shoots').to(namespace).emit('ping')
     }
   })

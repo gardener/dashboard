@@ -123,18 +123,21 @@ module.exports = {
     return new Batch(credentials(options))
   },
   garden (options) {
+    const resources = [
+      Resources.Shoot.name,
+      Resources.Seed.name,
+      Resources.CloudProfile.name,
+      Resources.SecretBinding.name,
+      Resources.Quota.name,
+      Resources.Project.name
+    ]
     options = assign(options, {
-      group: 'garden.sapcloud.io',
+      path: 'apis/garden.sapcloud.io',
       version: 'v1beta1',
-      resources: [
-        Resources.Shoot.name,
-        Resources.Seed.name,
-        Resources.CloudProfile.name,
-        Resources.SecretBinding.name,
-        Resources.Quota.name
-      ]
+      namespaceResources: resources,
+      groupResources: resources
     })
-    return new CustomResourceDefinitions(credentials(options))
+    return new ApiGroup(credentials(options))
   },
   authorization (options) {
     options = assign(options, {

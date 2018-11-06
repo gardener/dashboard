@@ -22,8 +22,7 @@ exports = module.exports = init
 exports.oidc = require('./oidc')
 exports.k8s = require('./k8s')
 exports.github = require('./github')
-exports.verify = verify
-exports.reset = reset
+exports.verifyAndCleanAll = verifyAndCleanAll
 
 function init () {
   nock.disableNetConnect()
@@ -31,15 +30,14 @@ function init () {
   return exports
 }
 
-function verify () {
-  /* eslint no-unused-expressions: 0 */
-  const isDone = nock.isDone()
-  if (!isDone) {
-    console.error('pending mocks: %j', nock.pendingMocks())
+function verifyAndCleanAll () {
+  try {
+    // eslint-disable-next-line no-unused-expressions
+    expect(nock.isDone()).to.be.true
+  } catch (err) {
+    console.error('pending mocks:', nock.pendingMocks())
+    throw err
+  } finally {
+    nock.cleanAll()
   }
-  expect(isDone).to.be.true
-}
-
-function reset () {
-  nock.cleanAll()
 }

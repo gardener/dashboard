@@ -64,7 +64,12 @@ module.exports = {
   },
   Quota: {
     name: 'quotas',
-    kind: 'Quotas',
+    kind: 'Quota',
+    apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  Project: {
+    name: 'projects',
+    kind: 'Project',
     apiVersion: 'garden.sapcloud.io/v1beta1'
   }
 }
