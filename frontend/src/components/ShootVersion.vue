@@ -153,11 +153,9 @@ export default {
     tooltipText () {
       if (this.k8sPatchAvailable) {
         return 'Kubernetes patch available'
-      }
-      else if (this.availableK8sUpdates) {
+      } else if (this.availableK8sUpdates) {
         return 'Kubernetes upgrade available'
-      }
-      else {
+      } else {
         return 'Kubernetes version up to date'
       }
     }
