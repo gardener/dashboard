@@ -21,14 +21,14 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-  const validationErrors = {
+const validationErrors = {
   worker: {
     volumeType: {
       required: 'Volume Type is required'
     }
   }
 }
-  const validations = {
+const validations = {
   worker: {
     volumeType: {
       required
