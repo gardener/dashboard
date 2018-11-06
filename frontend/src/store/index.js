@@ -94,13 +94,14 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => get(machineType, 'deprecated', false) === false)
+      return filter(machineTypes, machineType => get(machineType, 'usable', true) === true)
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return get(cloudProfile, 'data.volumeTypes')
+      const volumeTypes = get(cloudProfile, 'data.volumeTypes')
+      return filter(volumeTypes, volumeType => get(volumeType, 'usable', true) === true)
     }
   },
   shootList (state, getters) {
