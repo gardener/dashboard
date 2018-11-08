@@ -18,6 +18,7 @@ limitations under the License.
   <div>
     <v-tooltip top>
       <v-btn
+        v-if="chipStyle"
         slot="activator"
         class="update_btn"
         :class="buttonInactive"
@@ -26,14 +27,24 @@ limitations under the License.
         @click="showUpdateDialog"
         :outline="!k8sPatchAvailable"
         :dark="k8sPatchAvailable"
+        :ripple="canUpdate"
         depressed
-        color="cyan darken-2">
-          <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
-          {{k8sVersion}}
+        color="cyan darken-2"
+      >
+        <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
+        {{k8sVersion}}
       </v-btn>
-      <span v-if="k8sPatchAvailable">Kubernetes patch available</span>
-      <span v-else-if="availableK8sUpdates">Kubernetes upgrade available</span>
-      <span v-else>Kubernetes version up to date</span>
+      <v-btn
+        v-else-if="!!availableK8sUpdates"
+        slot="activator"
+        @click="showUpdateDialog"
+        icon
+        :disabled="isShootMarkedForDeletion"
+      >
+        <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
+        <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
+      </v-btn>
+      <span>{{tooltipText}}</span>
     </v-tooltip>
     <confirm-dialog
       :confirm="confirm"
@@ -76,8 +87,12 @@ limitations under the License.
 <script>
 import ShootVersionUpdate from '@/components/ShootVersionUpdate'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import get from 'lodash/get'
 import { updateShootVersion } from '@/utils/api'
+import {
+  availableK8sUpdatesForShoot,
+  isShootMarkedForDeletion
+} from '@/utils'
+import get from 'lodash/get'
 
 export default {
   components: {
@@ -85,17 +100,12 @@ export default {
     ConfirmDialog
   },
   props: {
-    availableK8sUpdates: {
+    shootItem: {
       type: Object
     },
-    k8sVersion: {
-      type: String
-    },
-    shootName: {
-      type: String
-    },
-    shootNamespace: {
-      type: String
+    chipStyle: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -117,10 +127,37 @@ export default {
       return false
     },
     buttonInactive () {
-      return this.availableK8sUpdates ? '' : 'update_btn_inactive'
+      return this.canUpdate ? '' : 'update_btn_inactive'
+    },
+    canUpdate () {
+      return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion
     },
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
+    },
+    k8sVersion () {
+      return get(this.shootItem, 'spec.kubernetes.version')
+    },
+    availableK8sUpdates () {
+      return availableK8sUpdatesForShoot(get(this.shootItem, 'spec'))
+    },
+    shootName () {
+      return get(this.shootItem, 'metadata.name')
+    },
+    shootNamespace () {
+      return get(this.shootItem, 'metadata.namespace')
+    },
+    isShootMarkedForDeletion () {
+      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
+    },
+    tooltipText () {
+      if (this.k8sPatchAvailable) {
+        return 'Kubernetes patch available'
+      } else if (this.availableK8sUpdates) {
+        return 'Kubernetes upgrade available'
+      } else {
+        return 'Kubernetes version up to date'
+      }
     }
   },
   methods: {
@@ -137,7 +174,7 @@ export default {
       this.confirmRequired = value
     },
     showUpdateDialog () {
-      if (this.availableK8sUpdates) {
+      if (this.canUpdate) {
         this.updateDialog = true
       }
     },

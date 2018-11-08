@@ -26,7 +26,7 @@ const logger = require('../logger')
 const shoots = require('./shoots')
 const administrators = require('./administrators')
 
-const PROJECT_INITIALIZATION_TIMEOUT = 60 * 1000
+const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function Garden ({auth}) {
   return kubernetes.garden({auth})
@@ -35,8 +35,7 @@ function Garden ({auth}) {
 function fromResource ({metadata, spec = {}}) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp } = metadata
-  const { namespace, createdBy, owner: ownerRef = {}, description, purpose } = spec
-  const { name: owner } = ownerRef
+  const { namespace, createdBy, owner, description, purpose } = spec
   return {
     metadata: {
       name,
@@ -46,8 +45,8 @@ function fromResource ({metadata, spec = {}}) {
       creationTimestamp
     },
     data: {
-      createdBy,
-      owner,
+      createdBy: fromSubject(createdBy),
+      owner: fromSubject(owner),
       description,
       purpose
     }
@@ -57,12 +56,11 @@ function fromResource ({metadata, spec = {}}) {
 function toResource ({metadata, data = {}}) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion } = metadata
-  const { createdBy, owner, description, purpose } = data
-  const ownerRef = {
-    apiGroup: 'rbac.authorization.k8s.io',
-    kind: 'User',
-    name: owner
-  }
+  const { createdBy, owner } = data
+
+  const description = data.description || null
+  const purpose = data.purpose || null
+
   return {
     apiVersion,
     kind,
@@ -72,10 +70,24 @@ function toResource ({metadata, data = {}}) {
     },
     spec: {
       namespace,
-      createdBy,
-      owner: ownerRef,
+      createdBy: toSubject(createdBy),
+      owner: toSubject(owner),
       description,
       purpose
+    }
+  }
+}
+
+function fromSubject ({ name } = {}) {
+  return name
+}
+
+function toSubject (username) {
+  if (username) {
+    return {
+      apiGroup: 'rbac.authorization.k8s.io',
+      kind: 'User',
+      name: username
     }
   }
 }
@@ -97,9 +109,8 @@ async function getProjectNameFromNamespace (namespace) {
   }
   return name
 }
-exports.getProjectNameFromNamespace = getProjectNameFromNamespace
 
-exports.list = async function ({user}) {
+exports.list = async function ({user, qs = {}}) {
   const [
     projects,
     isAdmin
@@ -108,34 +119,41 @@ exports.list = async function ({user}) {
     administrators.isAdmin(user)
   ])
 
-  const subject = {
-    kind: 'User',
-    name: user.id
-  }
+  const isMemberOf = project => _
+    .chain(project)
+    .get('spec.members')
+    .findIndex({
+      kind: 'User',
+      name: user.id
+    })
+    .gte(0)
+    .value()
 
-  const predicate = !isAdmin
-    ? project => _
-      .chain(project)
-      .get('spec.members')
-      .findIndex(subject)
-      .gte(0)
-      .value()
-    : _.identity
-
+  const phases = _
+    .chain(qs)
+    .get('phase', 'Ready')
+    .split(',')
+    .compact()
+    .value()
   return _
     .chain(projects)
     .get('items')
-    .filter(predicate)
+    .filter(project => {
+      if (!isAdmin && !isMemberOf(project)) {
+        return false
+      }
+      if (!_.isEmpty(phases)) {
+        const phase = _.get(project, 'status.phase', 'Initial')
+        return _.includes(phases, phase)
+      }
+      return true
+    })
     .map(fromResource)
     .value()
 }
 
-function isProjectReady (project) {
-  return _
-    .chain(project)
-    .get('metadata.initializers')
-    .isEmpty()
-    .value()
+function isProjectReady ({status: {phase} = {}} = {}) {
+  return phase === 'Ready'
 }
 
 function waitUntilProjectIsReady (projects, name) {
@@ -207,7 +225,7 @@ exports.create = async function ({user, body}) {
   // project is ready now
   return fromResource(project)
 }
-// used for testing
+// needs to be exported for testing
 exports.watchProject = (projects, name) => projects.watch({name})
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
@@ -226,10 +244,16 @@ exports.patch = async function ({user, name: namespace, body}) {
   const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // read project
+  let project = await projects.get({name})
   // do not update createdBy
-  _.unset(body, 'data.createdBy')
+  const { metadata, data } = fromResource(project)
+  _.assign(data, _.omit(body.data, 'createdBy'))
   // patch project
-  const project = await projects.mergePatch({name, body: toResource(body)})
+  project = await projects.mergePatch({
+    name,
+    body: toResource({metadata, data})
+  })
   return fromResource(project)
 }
 
@@ -240,19 +264,21 @@ exports.remove = async function ({user, name: namespace}) {
   const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // read project
+  const project = await projects.get({name})
   // patch annotations
-  await projects.jsonPatch({
+  const annotations = _.assign({
+    'confirmation.garden.sapcloud.io/deletion': 'true'
+  }, project.metadata.annotations)
+  await projects.mergePatch({
     name,
-    body: [{
-      op: 'add',
-      path: '/metadata/annotations/confirmation.garden.sapcloud.io~1deletion',
-      value: 'true'
-    }]
+    body: {
+      metadata: {
+        annotations
+      }
+    }
   })
   // delete project
   await projects.delete({name})
-  return fromResource({
-    metadata: {name},
-    spec: {namespace}
-  })
+  return fromResource(project)
 }

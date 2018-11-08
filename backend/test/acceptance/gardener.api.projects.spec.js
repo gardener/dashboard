@@ -36,10 +36,9 @@ describe('gardener', function () {
       const adminBearer = oidc.sign({email: 'admin@example.org'})
       const role = 'project'
       const owner = 'owner'
-      const createdBy = 'createdBy'
       const description = 'description'
       const purpose = 'purpose'
-      const data = {createdBy, owner, description, purpose}
+      const data = {owner, description, purpose}
       let app
 
       before(function () {
@@ -115,22 +114,32 @@ describe('gardener', function () {
       it('should create a project', function () {
         const createdBy = username
         const resourceVersion = 42
+        const timeout = 30
         oidc.stub.getKeys()
         k8s.stub.createProject({bearer, resourceVersion})
 
         // watch project stub
-        const project = k8s.getProject({name, namespace, createdBy, owner, description, purpose})
+        const project = k8s.getProject({
+          name,
+          namespace,
+          createdBy,
+          owner,
+          description,
+          purpose,
+          phase: 'Initial'
+        })
         // project with initializer
-        const uninitializedProject = _.cloneDeep(project)
-        uninitializedProject.metadata.initializers = ['gardener']
+        const newProject = _.cloneDeep(project)
         // project without initializer
-        const initializedProject = _.cloneDeep(project)
-        initializedProject.metadata.resourceVersion = resourceVersion
+        const modifiedProject = _.cloneDeep(project)
+        modifiedProject.metadata.resourceVersion = resourceVersion
+        modifiedProject.status.phase = 'Ready'
         // reconnector
         const reconnectorStub = createReconnectorStub([
-          ['ADDED', uninitializedProject],
-          ['MODIFIED', initializedProject]
+          ['ADDED', newProject],
+          ['MODIFIED', modifiedProject]
         ])
+        sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
         const watchStub = sandbox.stub(services.projects, 'watchProject')
           .callsFake(() => reconnectorStub.start())
 
@@ -156,14 +165,25 @@ describe('gardener', function () {
         k8s.stub.createProject({bearer, resourceVersion})
 
         // watch project stub
-        const project = k8s.getProject({name, namespace, createdBy, owner, description, purpose})
-        // project with initializer
-        const uninitializedProject = _.cloneDeep(project)
-        uninitializedProject.metadata.initializers = ['gardener']
+        const project = k8s.getProject({
+          name,
+          namespace,
+          createdBy,
+          owner,
+          description,
+          purpose,
+          phase: 'Initial'
+        })
+        // new project
+        const newProject = _.cloneDeep(project)
+        // pending project
+        const modifiedProject = _.cloneDeep(project)
+        modifiedProject.metadata.resourceVersion = resourceVersion
+        modifiedProject.status.phase = 'Pending'
         // reconnector
         const reconnectorStub = createReconnectorStub([
-          ['ADDED', uninitializedProject],
-          ['MODIFIED', uninitializedProject]
+          ['ADDED', newProject],
+          ['MODIFIED', modifiedProject]
         ])
         sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
         const watchStub = sandbox.stub(services.projects, 'watchProject')
@@ -184,7 +204,7 @@ describe('gardener', function () {
 
       it('should patch a project', function () {
         const resourceVersion = 43
-        const { createdBy } = k8s.readProject(namespace).spec
+        const createdBy = k8s.readProject(namespace).spec.createdBy.name
 
         oidc.stub.getKeys()
         k8s.stub.patchProject({bearer, namespace, resourceVersion})
@@ -211,7 +231,8 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(200)
             expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, role})
+            expect(res.body.metadata.name).to.equal(name)
+            expect(res.body.metadata.namespace).to.equal(namespace)
           })
       })
     })

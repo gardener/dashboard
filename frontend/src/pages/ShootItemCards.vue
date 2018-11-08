@@ -33,19 +33,40 @@ limitations under the License.
                 <v-list-tile-sub-title>Name</v-list-tile-sub-title>
                 <v-list-tile-title>
                   {{metadata.name}}
-                  <self-termination-warning :expirationTimestamp="expirationTimestamp"></self-termination-warning>
                 </v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
+            <template v-if="expirationTimestamp">
+              <v-divider class="my-2" inset></v-divider>
+              <v-list-tile>
+                <v-list-tile-action>
+                  <v-icon class="cyan--text text--darken-2">mdi-clock-outline</v-icon>
+                </v-list-tile-action>
+                <v-list-tile-content>
+                  <v-list-tile-sub-title>Cluster Termination</v-list-tile-sub-title>
+                  <v-list-tile-title>
+                    <v-layout align-center row fill-height class="pa-0 ma-0">
+                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2">mdi-information</v-icon>
+                      <v-icon v-else color="warning">mdi-alert-circle</v-icon>
+                      <span class="pl-2">{{selfTerminationMessage}}</span>
+                    </v-layout>
+                  </v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
+
+            <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-cube-outline</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
+                <v-list-tile-title>{{k8sVersion}}</v-list-tile-title>
               </v-list-tile-content>
               <v-list-tile-action>
-                <shoot-version :k8sVersion="k8sVersion" :shootName="metadata.name" :shootNamespace="metadata.namespace" :availableK8sUpdates="availableK8sUpdates"></shoot-version>
+                <shoot-version :shoot-item="item" :chip-style="false"></shoot-version>
               </v-list-tile-action>
             </v-list-tile>
 
@@ -56,7 +77,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                <v-list-tile-title><a :href="`mailto:${createdBy}`" class="cyan--text text--darken-2">{{createdBy}}</a></v-list-tile-title>
+                <v-list-tile-title><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></v-list-tile-title>
               </v-list-tile-content>
             </v-list-tile>
 
@@ -86,19 +107,6 @@ limitations under the License.
                 </v-list-tile-content>
               </v-list-tile>
             </template>
-
-            <v-divider class="my-2" inset></v-divider>
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-sleep</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Hibernation</v-list-tile-sub-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
-                <shoot-hibernation :shootItem="item"></shoot-hibernation>
-              </v-list-tile-action>
-            </v-list-tile>
 
           </v-list>
         </v-card>
@@ -237,6 +245,56 @@ limitations under the License.
           <cluster-access :item="item"></cluster-access>
         </v-card>
 
+        <v-card class="cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text">
+            Lifecycle
+          </v-card-title>
+          <v-list>
+
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-sleep</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Hibernation</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <shoot-hibernation :shootItem="item"></shoot-hibernation>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-wrench-outline</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Maintenance</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <maintenance-configuration :shootItem="item"></maintenance-configuration>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <maintenance-start :shootItem="item"></maintenance-start>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-delete-circle-outline</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title>Delete Cluster</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <delete-cluster :shootItem="item"></delete-cluster>
+              </v-list-tile-action>
+            </v-list-tile>
+
+          </v-list>
+        </v-card>
+
         <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
 
       </v-flex>
@@ -249,23 +307,24 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import AccountAvatar from '@/components/AccountAvatar'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion'
 import StatusCard from '@/components/StatusCard'
-import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import ShootHibernation from '@/components/ShootHibernation'
+import MaintenanceStart from '@/components/MaintenanceStart'
+import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
+import DeleteCluster from '@/components/DeleteCluster'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import forEach from 'lodash/forEach'
-import { SnotifyPosition } from 'vue-snotify'
 import {
   getDateFormatted,
   getCloudProviderKind,
   canLinkToSeed,
-  availableK8sUpdatesForShoot,
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo
@@ -276,13 +335,16 @@ import 'codemirror/mode/yaml/yaml.js'
 export default {
   name: 'shoot-item',
   components: {
+    AccountAvatar,
     ClusterAccess,
     Journals,
     TimeString,
     ShootVersion,
     StatusCard,
-    SelfTerminationWarning,
-    ShootHibernation
+    ShootHibernation,
+    MaintenanceStart,
+    MaintenanceConfiguration,
+    DeleteCluster
   },
   data () {
     return {
@@ -312,27 +374,7 @@ export default {
           title: 'Nginx Ingress',
           description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
         }
-      ],
-      mounted: false,
-      selfTerminationNotification: undefined
-    }
-  },
-  methods: {
-    showSelfTerminationWarning () {
-      if (!this.selfTerminationNotification) {
-        const config = {
-          timeout: 5000,
-          closeOnClick: false,
-          showProgressBar: false,
-          position: SnotifyPosition.rightBottom,
-          titleMaxLength: 20
-        }
-        if (this.isSelfTerminationWarning) {
-          this.selfTerminationNotification = this.$snotify.warning(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
-        } else {
-          this.selfTerminationNotification = this.$snotify.info(this.selfTerminationNotificationMessage, `Cluster Termination`, config)
-        }
-      }
+      ]
     }
   },
   computed: {
@@ -451,13 +493,10 @@ export default {
         return []
       }
     },
-    availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(get(this.item, 'spec'))
-    },
     k8sVersion () {
       return get(this.item, 'spec.kubernetes.version')
     },
-    selfTerminationNotificationMessage () {
+    selfTerminationMessage () {
       if (this.isValidTerminationDate) {
         return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
       } else {
@@ -469,24 +508,6 @@ export default {
     },
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
-    }
-  },
-  watch: {
-    expirationTimestamp (expirationTimestamp) {
-      if (expirationTimestamp) {
-        this.showSelfTerminationWarning()
-      }
-    }
-  },
-  mounted () {
-    this.mounted = true
-    if (this.expirationTimestamp) {
-      this.showSelfTerminationWarning()
-    }
-  },
-  destroyed () {
-    if (this.selfTerminationNotification) {
-      this.$snotify.remove(this.selfTerminationNotification.id)
     }
   }
 }

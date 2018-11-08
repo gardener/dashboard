@@ -42,7 +42,7 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
             </v-list-tile-action>
             <v-list-tile-content>
-            <span>KUBECONFIG</span>
+              <v-list-tile-title>Kubeconfig</v-list-tile-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>

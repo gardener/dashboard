@@ -193,6 +193,42 @@ function createReconnectorStub (events = []) {
   return reconnector
 }
 
+class Reconnector extends EventEmitter {
+  constructor () {
+    super()
+    this.disconnected = false
+    this.events = []
+  }
+  disconnect () {
+    this.disconnected = true
+  }
+  pushEvent (type, object, delay = 10) {
+    this.events.push({delay, event: {type, object}})
+  }
+  start () {
+    const emit = (event) => {
+      return () => {
+        this.emit('event', event)
+        process.nextTick(shift)
+      }
+    }
+    const shift = () => {
+      if (this.events.length) {
+        const { delay, event } = this.events.shift()
+        setTimeout(emit(event), delay)
+      }
+    }
+    shift()
+    return this
+  }
+}
+
+function createReconnectorStub (events = []) {
+  const reconnector = new Reconnector()
+  _.forEach(events, args => reconnector.pushEvent(...args))
+  return reconnector
+}
+
 module.exports = {
   stub,
   createJournalCache,

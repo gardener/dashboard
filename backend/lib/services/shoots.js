@@ -37,7 +37,8 @@ function isReserved (key) {
 function isReservedException (key) {
   return _.includes([
     'shoot.garden.sapcloud.io/ignore',
-    'garden.sapcloud.io/purpose'
+    'garden.sapcloud.io/purpose',
+    'shoot.garden.sapcloud.io/operation'
   ], key)
 }
 
@@ -122,6 +123,24 @@ exports.replaceHibernationEnabled = async function ({user, namespace, name, body
     spec: {
       hibernation: {
         enabled
+      }
+    }
+  }
+  return patch({user, namespace, name, body: payload})
+}
+
+exports.replaceMaintenance = async function ({user, namespace, name, body}) {
+  const {timeWindowBegin, timeWindowEnd, updateKubernetesVersion} = body
+  const payload = {
+    spec: {
+      maintenance: {
+        timeWindow: {
+          begin: timeWindowBegin,
+          end: timeWindowEnd
+        },
+        autoUpdate: {
+          kubernetesVersion: updateKubernetesVersion
+        }
       }
     }
   }

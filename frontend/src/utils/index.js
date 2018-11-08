@@ -141,16 +141,16 @@ export function parseSize (value) {
   return parseInt(replace(value, /(^.+\D)(\d+)(\D.+$)/i, '$2'))
 }
 
-export function gravatarUrlIdenticon (email) {
-  return gravatarUrl(email, 'identicon')
+export function gravatarUrlIdenticon (email, size = 128) {
+  return gravatarUrl(email, 'identicon', size)
 }
 
-export function gravatarUrlRobohash (email) {
-  return gravatarUrl(email, 'robohash')
+export function gravatarUrlRobohash (email, size = 128) {
+  return gravatarUrl(email, 'robohash', size)
 }
 
-export function gravatarUrl (value, image) {
-  return `https://www.gravatar.com/avatar/${md5(toLower(value))}?d=${image}&s=128`
+export function gravatarUrl (value, image, size) {
+  return `https://www.gravatar.com/avatar/${md5(toLower(value))}?d=${image}&s=${size}`
 }
 
 export function routes (router, includeRoutesWithProjectScope) {
@@ -259,7 +259,6 @@ export function availableK8sUpdatesForShoot (spec) {
 }
 
 export function getCreatedBy (metadata) {
-  // eslint-disable-next-line
   return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
 }
 
@@ -269,7 +268,6 @@ export function isHibernated (spec) {
   }
 
   const kind = getCloudProviderKind(spec.cloud)
-  // eslint-disable-next-line
   const workers = get(spec, ['cloud', kind, 'workers'])
   const hibernationEnabled = get(spec, 'hibernation.enabled', false)
   return hibernationEnabled || some(workers, worker => get(worker, 'autoScalerMax') === 0)
@@ -300,7 +298,6 @@ export function isUserError (errorCodes) {
 }
 
 export function isReconciliationDeactivated (metadata) {
-  // eslint-disable-next-line
   return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
 }
 
@@ -313,7 +310,6 @@ export function isValidTerminationDate (expirationTimestamp) {
 }
 
 export function isShootMarkedForDeletion (metadata) {
-  // eslint-disable-next-line
   const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'], false)
   const deletionTimestamp = get(metadata, 'deletionTimestamp')
 

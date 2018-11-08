@@ -23,26 +23,31 @@ limitations under the License.
       {{caption}}
     </v-tooltip>
     <confirm-dialog
-      :confirm="confirm"
-      :confirmButtonText="confirmText"
+      confirmButtonText="Save"
+      :confirm-disabled="!valid"
       v-model="dialog"
       :cancel="hideDialog"
-      :ok="updateShootHibernation"
+      :ok="updateMaintenance"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
+      max-width=850
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <template v-if="!isHibernated">
-          This will scale the worker nodes of your cluster down to zero.<br /><br />
-          Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
-        </template>
-        <template v-else>
-          This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
-        </template>
+        <v-layout row wrap>
+          <maintenance-time
+            ref="maintenanceTime"
+            :time-window-begin="data.timeWindowBegin"
+            @updateMaintenanceWindow="onUpdateMaintenanceWindow"
+            @valid="onMaintenanceTimeValid"
+          ></maintenance-time>
+          <maintenance-components
+            :update-kubernetes-version="data.updateKubernetesVersion"
+            @updateKubernetesVersion="onUpdateKubernetesVersion"></maintenance-components>
+        </v-layout>
       </template>
     </confirm-dialog>
   </div>
@@ -50,14 +55,19 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { isHibernated, isShootMarkedForDeletion } from '@/utils'
-import { updateShootHibernation } from '@/utils/api'
+import MaintenanceComponents from '@/components/MaintenanceComponents'
+import MaintenanceTime from '@/components/MaintenanceTime'
+import { updateMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
+import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 
 export default {
+  name: 'maintenance-configuration',
   components: {
-    ConfirmDialog
+    ConfirmDialog,
+    MaintenanceComponents,
+    MaintenanceTime
   },
   props: {
     shootItem: {
@@ -69,45 +79,29 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      enableHibernation: false
+      maintenanceTimeValid: false,
+      data: {
+        timeWindowBegin: undefined,
+        timeWindowEnd: undefined,
+        updateKubernetesVersion: false
+      }
     }
   },
   computed: {
-    confirmRequired () {
-      return !this.isHibernated
-    },
-    confirm () {
-      return this.confirmRequired ? this.shootName : undefined
-    },
-    confirmText () {
-      if (!this.isHibernated) {
-        return 'Hibernate'
-      } else {
-        return 'Wake-up'
-      }
-    },
     icon () {
-      if (!this.isHibernated) {
-        return 'mdi-pause-circle-outline'
-      } else {
-        return 'mdi-play-circle-outline'
-      }
+      return 'mdi-settings-outline'
     },
     caption () {
-      if (!this.isHibernated) {
-        return 'Hibernate Cluster'
-      } else {
-        return 'Wake-up Cluster'
-      }
-    },
-    isHibernated () {
-      return isHibernated(get(this.shootItem, 'spec'))
+      return 'Configure Maintenance'
     },
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
+    },
+    valid () {
+      return this.maintenanceTimeValid
     },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
@@ -116,33 +110,45 @@ export default {
   methods: {
     showDialog () {
       this.dialog = true
-      this.enableHibernation = !this.isHibernated
+
+      this.reset()
     },
     hideDialog () {
       this.dialog = false
-      this.errorMessage = null
-      this.detailedErrorMessage = null
     },
-    updateShootHibernation () {
+    updateMaintenance () {
       const user = this.$store.state.user
-      updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
+      return updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)
-          if (!this.isHibernated) {
-            this.errorMessage = 'Could not hibernate cluster'
-          } else {
-            this.errorMessage = 'Could not wake up cluster from hibernation'
-          }
+          this.errorMessage = 'Could not save maintenance configuration'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
-    }
-  },
-  watch: {
-    isHibernated (value) {
-      // hide dialog if hibernation state changes
-      this.hideDialog()
+    },
+    reset () {
+      this.errorMessage = null
+      this.detailedErrorMessage = null
+      this.maintenanceTimeValid = false
+
+      this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
+      this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
+      this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+
+      this.$nextTick(() => {
+        this.$refs.maintenanceTime.reset()
+      })
+    },
+    onUpdateKubernetesVersion (value) {
+      this.data.updateKubernetesVersion = value
+    },
+    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
+      this.data.timeWindowBegin = utcBegin
+      this.data.timeWindowEnd = utcEnd
+    },
+    onMaintenanceTimeValid (value) {
+      this.maintenanceTimeValid = value
     }
   }
 }

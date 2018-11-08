@@ -26,17 +26,15 @@ export function isNotFound (error) {
   return hasStatusCode(404, error)
 }
 
-function hasStatusCode (statusCode, error) {
-  const response = error.response || {}
-  if (response.status === statusCode) {
-    return true
-  } else {
-    return false
-  }
+export function isGatewayTimeout (error) {
+  return hasStatusCode(504, error)
+}
+
+function hasStatusCode (statusCode, err) {
+  return get(err, 'response.status') === statusCode
 }
 
 export function errorDetailsFromError (err) {
-  console.log(err)
   const errorCode = get(err, 'response.data.error.code', get(err, 'response.status'))
   const detailedMessage = get(err, 'response.data.message', 'Request failed with code: ' + errorCode)
 

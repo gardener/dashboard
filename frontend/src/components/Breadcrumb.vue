@@ -15,18 +15,17 @@ limitations under the License.
 -->
 
 <template>
-  <v-breadcrumbs>
+  <v-breadcrumbs :items="breadcrumbItems">
     <v-icon slot="divider" large>keyboard_arrow_right</v-icon>
-    <v-breadcrumbs-item
-      v-for="item in breadcrumbItems"
-      :key="item.text"
+    <router-link
+      slot-scope="{item}"
+      slot="item"
       :to="item.to"
-      :exact="true"
+      :class="textClass(item)"
+      tag="span"
     >
-      <div :class="textClass(item)">
-        {{ item.text }}
-      </div>
-    </v-breadcrumbs-item>
+      {{ item.text }}
+    </router-link>
   </v-breadcrumbs>
 </template>
 

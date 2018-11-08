@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 <template>
-  <div class="retry-operation-div">
-    <v-tooltip top v-if="canRetry">
+  <div class="retry-operation-div" v-if="canRetry">
+    <v-tooltip top>
       <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
         <v-icon>mdi-reload</v-icon>
       </v-btn>

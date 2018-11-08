@@ -138,6 +138,9 @@ const validations = {
     },
     machineType: {
       required
+    },
+    volumeType: {
+      required
     }
   }
 }

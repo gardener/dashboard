@@ -22,10 +22,12 @@ limitations under the License.
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-        {{ row.name }}
-      </router-link>
-      <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+      <v-layout align-center row fill-height class="pa-0 ma-0">
+        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+          {{ row.name }}
+        </router-link>
+        <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+      </v-layout>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
@@ -37,7 +39,7 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
-      {{ row.createdBy }}
+      <account-avatar :account-name="row.createdBy"></account-avatar>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
@@ -64,7 +66,7 @@ limitations under the License.
       </div>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :k8sVersion="row.k8sVersion" :shootName="row.name" :shootNamespace="row.namespace" :availableK8sUpdates="row.availableK8sUpdates"></shoot-version>
+      <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="row.conditions"></status-tags>
@@ -87,48 +89,23 @@ limitations under the License.
         <journal-labels :labels="row.journalsLabels"></journal-labels>
       </template>
     </td>
-    <td class="action-button-group text-xs-right" v-if="this.headerVisible['actions']">
-      <div class="hidden-md-and-down">
+    <td class="action-button-group text-xs-right nowrap" v-if="this.headerVisible['actions']">
+      <v-layout align-center justify-end row fill-height>
         <v-tooltip top>
           <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon>mdi-shield-key-outline</v-icon>
+            <v-icon size="22">mdi-key</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <v-tooltip top>
-          <v-btn small icon class="red--text" slot="activator" :disabled="isShootMarkedForDeletion" @click="showDialog('delete')">
-            <v-icon>delete</v-icon>
-          </v-btn>
-          <span>{{deleteClusterActionTitle}}</span>
-        </v-tooltip>
-      </div>
-      <div class="hidden-lg-and-up">
-        <v-menu left origin="center center" transition="scale-transition">
-          <v-btn icon slot="activator">
-            <v-icon>more_vert</v-icon>
-          </v-btn>
-          <v-list>
-            <v-list-tile :disabled="isClusterAccessDialogDisabled" @click="showDialog('access', isClusterAccessDialogDisabled)">
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-shield-key-outline</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-title>{{showClusterAccessActionTitle}}</v-list-tile-title>
-            </v-list-tile>
-            <v-list-tile :disabled="isShootMarkedForDeletion" @click="showDialog('delete', isShootMarkedForDeletion)">
-              <v-list-tile-action>
-                <v-icon class="red--text">delete</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-title>{{deleteClusterActionTitle}}</v-list-tile-title>
-            </v-list-tile>
-          </v-list>
-        </v-menu>
-      </div>
+        <delete-cluster :shootItem="shootItem" small content-class="red--text"></delete-cluster>
+      </v-layout>
     </td>
   </tr>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import AccountAvatar from '@/components/AccountAvatar'
 import InfraIcon from '@/components/InfrastructureIcon'
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
@@ -138,13 +115,13 @@ import ShootVersion from '@/components/ShootVersion'
 import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { getTimestampFormatted,
   getCloudProviderKind,
-  availableK8sUpdatesForShoot,
   getCreatedBy,
   isHibernated,
   isReconciliationDeactivated,
@@ -161,7 +138,9 @@ export default {
     ShootVersion,
     JournalLabels,
     RetryOperation,
-    SelfTerminationWarning
+    SelfTerminationWarning,
+    AccountAvatar,
+    DeleteCluster
   },
   props: {
     shootItem: {
@@ -189,7 +168,6 @@ export default {
         namespace: metadata.namespace,
         createdBy: getCreatedBy(metadata),
         creationTimestamp: metadata.creationTimestamp,
-        // eslint-disable-next-line lodash/path-style
         expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
         annotations: get(metadata, 'annotations', {}),
         deletionTimestamp: metadata.deletionTimestamp,
@@ -200,9 +178,6 @@ export default {
         region: get(spec, 'cloud.region'),
         isHibernated: isHibernated(spec),
         info,
-        availableK8sUpdates: availableK8sUpdatesForShoot(spec),
-        k8sVersion: get(spec, 'kubernetes.version'),
-        // eslint-disable-next-line lodash/path-style
         purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
         lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
         journalsLabels: this.journalsLabels(this.shootItem.metadata),
@@ -268,20 +243,12 @@ export default {
       return this.isClusterAccessDialogDisabled
         ? 'Cluster Access'
         : 'Show Cluster Access'
-    },
-    deleteClusterActionTitle () {
-      return this.isShootMarkedForDeletion
-        ? 'Cluster already marked for deletion'
-        : 'Delete Cluster'
     }
   },
   methods: {
-    showDialog: function (action, disabled = false) {
-      if (disabled !== true) {
-        // disabled check required as v-list-tile disabled=true does not prevent click action
-        const shootItem = this.shootItem
-        this.$emit('showDialog', { action, shootItem })
-      }
+    showDialog: function (action) {
+      const shootItem = this.shootItem
+      this.$emit('showDialog', { action, shootItem })
     }
   }
 }

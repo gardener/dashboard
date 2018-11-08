@@ -19,8 +19,6 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { applyPatch } = require('fast-json-patch')
-
 const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
 const jwt = require('jsonwebtoken')
@@ -67,6 +65,13 @@ const projectList = [
     ],
     description: 'bar-description',
     purpose: 'bar-purpose'
+  }),
+  getProject({
+    name: 'new',
+    createdBy: 'new@example.org',
+    description: 'new-description',
+    purpose: 'new-purpose',
+    phase: 'Initial'
   }),
   getProject({
     name: 'secret',
@@ -261,7 +266,7 @@ function getUser (name) {
   }
 }
 
-function getProject ({name, namespace, createdBy, owner, members = [], description, purpose}) {
+function getProject ({name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready'}) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -271,12 +276,10 @@ function getProject ({name, namespace, createdBy, owner, members = [], descripti
     .map(getUser)
     .value()
   owner = getUser(owner)
+  createdBy = getUser(createdBy)
   return {
     metadata: {
-      name,
-      annotations: {
-        'garden.sapcloud.io/createdBy': 'system:serviceaccount:garden:gardener-controller-manager'
-      }
+      name
     },
     spec: {
       namespace,
@@ -285,6 +288,9 @@ function getProject ({name, namespace, createdBy, owner, members = [], descripti
       members,
       purpose,
       description
+    },
+    status: {
+      phase
     }
   }
 }
@@ -693,12 +699,12 @@ const stub = {
   createProject ({bearer, resourceVersion = 42}) {
     const result = {
       metadata: {
-        resourceVersion,
-        initializers: [
-          'gardener'
-        ]
+        resourceVersion
       },
-      spec: {}
+      spec: {},
+      status: {
+        phase: undefined
+      }
     }
 
     return nockWithAuthorization(bearer)
@@ -714,29 +720,27 @@ const stub = {
   },
   patchProject ({bearer, namespace, resourceVersion = 43}) {
     const project = readProject(namespace)
-    _.set(project, 'metadata.resourceVersion', resourceVersion)
     const name = _.get(project, 'metadata.name')
+    const newProject = _.cloneDeep(project)
 
     return [
       nockWithAuthorization(auth.bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace)),
       nockWithAuthorization(bearer)
+        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .reply(200, () => project)
         .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
-          _.merge(project, body)
+          _.merge(newProject, body)
           return true
         })
-        .reply(200, () => project)
+        .reply(200, () => _.set(newProject, 'metadata.resourceVersion', resourceVersion))
     ]
   },
   deleteProject ({bearer, namespace}) {
     let project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
-    const jsonPatchBody = [{
-      op: 'add',
-      path: '/metadata/annotations/confirmation.garden.sapcloud.io~1deletion',
-      value: 'true'
-    }]
+    const confirmationPath = ['metadata', 'annotations', 'confirmation.garden.sapcloud.io/deletion']
     return [
       nockWithAuthorization(auth.bearer)
         .get(`/api/v1/namespaces/${namespace}`)
@@ -746,11 +750,12 @@ const stub = {
         .reply(200, {
           items: []
         })
-        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => _.isEqual(body, jsonPatchBody))
-        .reply(200, () => {
-          project = applyPatch(project, jsonPatchBody).newDocument
-          return project
+        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .reply(200, () => project)
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          return _.get(body, confirmationPath) === 'true'
         })
+        .reply(200, () => _.set(project, confirmationPath, 'true'))
         .delete(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
         .reply(200, () => project)
     ]

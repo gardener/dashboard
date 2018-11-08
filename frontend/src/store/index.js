@@ -94,13 +94,14 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => get(machineType, 'deprecated', false) === false)
+      return filter(machineTypes, machineType => get(machineType, 'usable', true) === true)
     }
   },
   volumeTypesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return get(cloudProfile, 'data.volumeTypes')
+      const volumeTypes = get(cloudProfile, 'data.volumeTypes')
+      return filter(volumeTypes, volumeType => get(volumeType, 'usable', true) === true)
     }
   },
   shootList (state, getters) {
@@ -112,7 +113,7 @@ const getters = {
   projectList (state) {
     return state.projects.all
   },
-  memberList (state) {
+  memberList (state, getters) {
     return state.members.all
   },
   infrastructureSecretList (state) {
@@ -124,50 +125,37 @@ const getters = {
     }
   },
   namespaces (state) {
-    const iteratee = item => item.metadata.namespace
-    return map(state.projects.all, iteratee)
+    return map(state.projects.all, 'metadata.namespace')
   },
   cloudProviderKindList (state) {
-    const iteratee = item => item.metadata.cloudProviderKind
-    return uniq(map(state.cloudProfiles.all, iteratee))
+    return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   regionsByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const iteratee = item => item.data.region
-      return uniq(map(get(cloudProfile, 'data.seeds'), iteratee))
+      return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const iteratee = item => item.name
-      return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), iteratee))
+      return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), 'name'))
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const iteratee = item => item.name
-      return uniq(map(get(cloudProfile, 'data.floatingPools'), iteratee))
+      return uniq(map(get(cloudProfile, 'data.floatingPools'), 'name'))
     }
   },
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
-      const predicate = item => {
-        return item.metadata.cloudProviderKind === infrastructureKind
-      }
-      const filtered = filter(state.infrastructureSecrets.all, predicate)
-      return filtered
+      return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])
     }
   },
   infrastructureSecretsByCloudProfileName (state) {
     return (cloudProfileName) => {
-      const predicate = item => {
-        return item.metadata.cloudProfileName === cloudProfileName
-      }
-      const filtered = filter(state.infrastructureSecrets.all, predicate)
-      return filtered
+      return filter(state.infrastructureSecrets.all, ['metadata.cloudProfileName', cloudProfileName])
     }
   },
   shootByNamespaceAndName (state, getters) {

@@ -19,7 +19,10 @@ limitations under the License.
     <v-list-tile-content>
       <v-list-tile-title>
         {{secret.metadata.name}}
-        <v-icon v-if="!isOwnSecretBinding">mdi-share</v-icon>
+        <v-tooltip v-if="!isOwnSecretBinding" top>
+          <v-icon slot="activator">mdi-share</v-icon>
+          <span>Secret shared by {{secretOwner}}</span>
+        </v-tooltip>
         <span style="opacity:0.5">({{relatedShootCountLabel}})</span>
       </v-list-tile-title>
       <v-list-tile-sub-title>
@@ -74,8 +77,11 @@ export default {
       if (this.isOwnSecretBinding) {
         return get(this.secret, `data.${this.secretDescriptorKey}`)
       } else {
-        return `Owner: ${get(this.secret, 'metadata.namespace')}`
+        return `Owner: ${this.secretOwner}`
       }
+    },
+    secretOwner () {
+      return get(this.secret, 'metadata.namespace')
     },
     relatedShootCount () {
       return this.shootsByInfrastructureSecret.length

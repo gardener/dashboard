@@ -221,6 +221,7 @@ export default {
         this.save()
           .then(hide)
           .catch(err => {
+            const errorDetails = errorDetailsFromError(err)
             if (isConflict(err)) {
               if (this.isUserDialog) {
                 this.errorMessage = `User '${this.email}' is already member of this project.`
@@ -230,10 +231,8 @@ export default {
             } else {
               this.errorMessage = 'Failed to add project member'
             }
-
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
             this.detailedErrorMessage = errorDetails.detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           })
       }
     },

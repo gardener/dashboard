@@ -267,6 +267,7 @@ export default {
             this.hide()
           })
           .catch(err => {
+            const errorDetails = errorDetailsFromError(err)
             if (this.isCreateMode) {
               if (isConflict(err)) {
                 this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
@@ -277,10 +278,8 @@ export default {
             } else {
               this.errorMessage = 'Failed to update Infrastructure Secret.'
             }
-
-            const errorDetails = errorDetailsFromError(err)
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
             this.detailedErrorMessage = errorDetails.detailedMessage
+            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           })
       }
     },
