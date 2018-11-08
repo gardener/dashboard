@@ -75,7 +75,7 @@ limitations under the License.
     @delete="onDelete"
     >
       <template v-if="isOwnSecretBinding(props.secret)" slot="rowSubTitle" slot-scope="props">
-        {{props.secret.data.domainName}} / {{props.secret.data.tenantName}}
+        {{middleTruncatedOpenstackSecretDescriptor(props.secret)}}
       </template>
     </secret>
 
@@ -163,7 +163,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecretBinding, maskMiddle } from '@/utils'
 import GcpDialog from '@/dialogs/SecretDialogGcp'
 import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
 import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
@@ -277,6 +277,9 @@ export default {
     },
     isOwnSecretBinding (secret) {
       return isOwnSecretBinding(secret)
+    },
+    middleTruncatedOpenstackSecretDescriptor (secret) {
+      return `${maskMiddle(secret.data.domainName)} / ${maskMiddle(secret.data.tenantName)}`
     }
   },
   mounted () {

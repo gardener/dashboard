@@ -57,7 +57,7 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecretBinding, maskMiddle } from '@/utils'
 
 export default {
   props: {
@@ -75,7 +75,7 @@ export default {
     ]),
     secretDescriptor () {
       if (this.isOwnSecretBinding) {
-        return get(this.secret, `data.${this.secretDescriptorKey}`)
+        return maskMiddle(get(this.secret, `data.${this.secretDescriptorKey}`, ''))
       } else {
         return `Owner: ${this.secretOwner}`
       }

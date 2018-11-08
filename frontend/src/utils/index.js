@@ -36,6 +36,7 @@ import some from 'lodash/some'
 import store from '../store'
 import split from 'lodash/split'
 import last from 'lodash/last'
+import repeat from 'lodash/repeat'
 
 export function emailToDisplayName (email) {
   if (email) {
@@ -337,4 +338,19 @@ export function textColor (color) {
     textColor = `${textColor} text--${colorMod}`
   }
   return textColor
+}
+
+export function maskMiddle (value, frontLen = 2, backLen = 3, mask = '*') {
+  if (!value) {
+    return undefined
+  }
+  const minStringLen = frontLen + backLen + 3
+  const stringLen = value.length
+
+  if (stringLen < minStringLen) {
+    return repeat(mask, stringLen)
+  }
+
+  const charsCountToReplace = stringLen - frontLen - backLen
+  return value.substr(0, frontLen) + repeat(mask, charsCountToReplace) + value.substr(value.length - backLen)
 }
