@@ -156,8 +156,8 @@ function isProjectReady ({status: {phase} = {}} = {}) {
   return phase === 'Ready'
 }
 
-function waitUntilProjectIsReady (projects, name) {
-  const reconnector = exports.watchProject(projects, name)
+function waitUntilProjectIsReady (name) {
+  const reconnector = exports.watchProject(name)
   const projectInitializationTimeout = exports.projectInitializationTimeout
 
   return new Promise((resolve, reject) => {
@@ -221,12 +221,12 @@ exports.create = async function ({user, body}) {
   // project name
   const name = project.metadata.name
   // wait until project is ready
-  project = await waitUntilProjectIsReady(projects, name)
+  project = await waitUntilProjectIsReady(name)
   // project is ready now
   return fromResource(project)
 }
 // needs to be exported for testing
-exports.watchProject = (projects, name) => projects.watch({name})
+exports.watchProject = name => garden.projects.watch({name})
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({user, name: namespace}) {
