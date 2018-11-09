@@ -62,7 +62,7 @@ exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) 
   if (namespace) {
     return Garden(user).namespaces(namespace).shoots.get({qs})
   } else {
-    // only works if user is member of garden-authorization (admin)
+    // only works if user is member of garden-administrators (admin)
     return Garden(user).shoots.get({qs})
   }
 }

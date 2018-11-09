@@ -35,6 +35,7 @@ async function hasAuthorization (user, resourceAttributes) {
 }
 
 exports.isAdmin = async function (user) {
+  // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
     verb: 'delete',
     group: 'garden.sapcloud.io',
