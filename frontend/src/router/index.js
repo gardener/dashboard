@@ -142,7 +142,8 @@ export default function createRouter ({ store, userManager }) {
           meta: {
             title: 'Home',
             namespaced: false,
-            projectScope: false
+            projectScope: false,
+            breadcrumb: true
           }
         },
         {
