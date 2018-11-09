@@ -19,9 +19,17 @@ limitations under the License.
     <v-card class="mt-2">
       <v-card-text>
         <h3>Let's get started</h3>
-        <v-btn :disabled="!canCreateProject" @click.native.stop="projectDialog = true">
-          <v-icon class="red--text text--darken-2">mdi-plus</v-icon> Create your first Project
-        </v-btn>
+        <v-tooltip top :disabled="canCreateProject">
+          <v-btn
+            slot="activator"
+            :disabled="!canCreateProject"
+            @click.native.stop="projectDialog = true"
+          >
+            <v-icon class="red--text text--darken-2">mdi-plus</v-icon>
+            <span class="ml-2">Create your first Project</span>
+          </v-btn>
+          <span>You are not authorized to create projects</span>
+        </v-tooltip>
       </v-card-text>
       <project-create-dialog @submit="onProjectCreated" v-model="projectDialog">
       </project-create-dialog>
