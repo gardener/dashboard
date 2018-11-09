@@ -18,28 +18,35 @@
 
 const _ = require('lodash')
 const kubernetes = require('../kubernetes')
+const Resources = kubernetes.Resources
 
 function Authorization ({auth}) {
   return kubernetes.authorization({auth})
 }
 
-exports.isAdmin = async function (user) {
+async function hasAuthorization (user, resourceAttributes) {
   if (!user) {
     return false
   }
-  // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
-  const body = {
-    kind: 'SelfSubjectAccessReview',
-    apiVersion: 'authorization.k8s.io/v1',
-    spec: {
-      resourceAttributes: {
-        verb: 'delete',
-        group: 'garden.sapcloud.io',
-        resource: 'shoots'
-      }
-    }
-  }
+  const { apiVersion, kind } = Resources.SelfSubjectAccessReview
+  const body = { kind, apiVersion, spec: { resourceAttributes } }
   const response = await Authorization(user).selfsubjectaccessreviews.post({ body })
-  const isAdmin = _.get(response, 'status.allowed', false)
-  return isAdmin
+  return _.get(response, 'status.allowed', false)
+}
+
+exports.isAdmin = async function (user) {
+  // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
+  return hasAuthorization(user, {
+    verb: 'delete',
+    group: 'garden.sapcloud.io',
+    resource: 'shoots'
+  })
+}
+
+exports.canCreateProject = async function (user) {
+  return hasAuthorization(user, {
+    verb: 'create',
+    group: 'garden.sapcloud.io',
+    resource: 'projects'
+  })
 }

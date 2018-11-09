@@ -27,6 +27,11 @@ module.exports = {
     kind: 'Secret',
     apiVersion: 'v1'
   },
+  SelfSubjectAccessReview: {
+    name: 'selfsubjectaccessreviews',
+    kind: 'SelfSubjectAccessReview',
+    apiVersion: 'authorization.k8s.io/v1'
+  },
   RoleBinding: {
     name: 'rolebindings',
     kind: 'RoleBinding',

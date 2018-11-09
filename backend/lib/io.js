@@ -21,8 +21,9 @@ const socketIO = require('socket.io')
 const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
 const { jwt } = require('./middleware')
-const { projects, shoots, journals, administrators } = require('./services')
+const { projects, shoots, journals, authorization } = require('./services')
 const { getIssueComments } = journals
+const { isAdmin } = authorization
 const watches = require('./watches')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { getJournalCache } = require('./cache')
@@ -205,7 +206,7 @@ function setupShootsNamespace (shootsNsp) {
         const projectList = await projects.list({user})
         const namespaces = _.map(projectList, 'metadata.namespace')
 
-        if (await administrators.isAdmin(user)) {
+        if (await isAdmin(user)) {
           subscribeShootsAdmin({socket, user, namespaces, filter})
         } else {
           const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
@@ -280,7 +281,7 @@ function setupJournalsNamespace (journalsNsp) {
 
       const user = getUserFromSocket(socket)
       try {
-        if (await administrators.isAdmin(user)) {
+        if (await isAdmin(user)) {
           joinRoom(socket, 'issues')
 
           const batchEmitter = new EventsEmitter({kind, socket})
@@ -301,7 +302,7 @@ function setupJournalsNamespace (journalsNsp) {
 
       const user = getUserFromSocket(socket)
       try {
-        if (await administrators.isAdmin(user)) {
+        if (await isAdmin(user)) {
           const room = `comments_${namespace}/${name}`
           joinRoom(socket, room)
 
