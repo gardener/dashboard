@@ -315,6 +315,7 @@ export default {
         scrollbarStyle: 'native',
         lineNumbers: true,
         lineWrapping: true,
+        viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
         extraKeys
       }
       this.$instance = CodeMirror(element, options)
