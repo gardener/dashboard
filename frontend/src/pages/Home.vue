@@ -19,7 +19,7 @@ limitations under the License.
     <v-card class="mt-2">
       <v-card-text>
         <h3>Let's get started</h3>
-        <v-btn @click.native.stop="projectDialog = true">
+        <v-btn :disabled="!canCreateProject" @click.native.stop="projectDialog = true">
           <v-icon class="red--text text--darken-2">mdi-plus</v-icon> Create your first Project
         </v-btn>
       </v-card-text>
@@ -50,6 +50,7 @@ export default {
     ]),
     ...mapGetters([
       'username',
+      'canCreateProject',
       'namespaces'
     ])
   },

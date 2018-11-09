@@ -18,7 +18,7 @@
 
 const express = require('express')
 
-const { administrators } = require('../services')
+const { authorization } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
 })
@@ -27,8 +27,16 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
+      const [
+        isAdmin,
+        canCreateProject
+      ] = await Promise.all([
+        authorization.isAdmin(user),
+        authorization.canCreateProject(user)
+      ])
       res.send({
-        isAdmin: await administrators.isAdmin(user)
+        isAdmin,
+        canCreateProject
       })
     } catch (err) {
       next(err)

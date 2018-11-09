@@ -19,7 +19,7 @@
 const kubernetes = require('../kubernetes')
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
-const administrators = require('./administrators')
+const authorization = require('./authorization')
 const _ = require('lodash')
 
 function Garden ({auth}) {
@@ -62,7 +62,7 @@ exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) 
   if (namespace) {
     return Garden(user).namespaces(namespace).shoots.get({qs})
   } else {
-    // only works if user is member of garden-administrators (admin)
+    // only works if user is member of garden-authorization (admin)
     return Garden(user).shoots.get({qs})
   }
 }
@@ -209,7 +209,7 @@ exports.info = async function ({user, namespace, name}) {
     data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
   }
 
-  const isAdmin = await administrators.isAdmin(user)
+  const isAdmin = await authorization.isAdmin(user)
   if (isAdmin) {
     const seedSecretName = _.get(seed, 'spec.secretRef.name')
     const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')

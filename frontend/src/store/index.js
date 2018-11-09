@@ -192,6 +192,9 @@ const getters = {
   isAdmin (state) {
     return get(state.user, 'info.isAdmin', false)
   },
+  canCreateProject (state) {
+    return get(state.user, 'info.canCreateProject', false)
+  },
   journalList (state) {
     return state.journals.all
   },

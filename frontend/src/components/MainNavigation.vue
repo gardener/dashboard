@@ -94,7 +94,7 @@ limitations under the License.
             </v-list-tile>
           </v-list>
           <v-card-actions class="grey lighten-3">
-            <v-btn flat block class="project-add text-xs-left teal--text" @click.stop="openProjectDialog">
+            <v-btn flat block class="project-add text-xs-left teal--text" :disabled="!canCreateProject" @click.stop="openProjectDialog">
               <v-icon>add</v-icon>
               <span class="ml-2">Create new Project</span>
             </v-btn>
@@ -168,6 +168,7 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
+      'canCreateProject',
       'projectList'
     ]),
     footerLogoUrl () {

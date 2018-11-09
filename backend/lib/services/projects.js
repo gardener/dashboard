@@ -24,7 +24,7 @@ const core = kubernetes.core()
 const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
 const logger = require('../logger')
 const shoots = require('./shoots')
-const administrators = require('./administrators')
+const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
@@ -116,7 +116,7 @@ exports.list = async function ({user, qs = {}}) {
     isAdmin
   ] = await Promise.all([
     garden.projects.get(),
-    administrators.isAdmin(user)
+    authorization.isAdmin(user)
   ])
 
   const isMemberOf = project => _
