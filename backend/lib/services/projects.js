@@ -100,15 +100,14 @@ async function validateDeletePreconditions ({user, namespace}) {
 }
 
 async function getProjectNameFromNamespace (namespace) {
-  // read namespace
   const ns = await core.namespaces.get({name: namespace})
-  // get name of project from namespace label
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
   }
   return name
 }
+exports.getProjectNameFromNamespace = getProjectNameFromNamespace
 
 exports.list = async function ({user, qs = {}}) {
   const [
@@ -167,15 +166,13 @@ function waitUntilProjectIsReady (name) {
     }, projectInitializationTimeout)
 
     function done (err, project) {
-      // clear timeout
       clearTimeout(timeoutId)
-      // remove all listeners
+
       reconnector.removeListener('event', onEvent)
       reconnector.removeListener('error', onError)
       reconnector.removeListener('disconnect', onDisconnect)
-      // prevent reconnecting
+
       reconnector.reconnect = false
-      // disconnect
       reconnector.disconnect()
       if (err) {
         return reject(err)
@@ -212,17 +209,11 @@ function waitUntilProjectIsReady (name) {
 }
 
 exports.create = async function ({user, body}) {
-  // initialize createdBy
   _.set(body, 'data.createdBy', user.id)
-  // create garden client for current user
   const projects = Garden(user).projects
-  // create project with service account
   let project = await projects.post({body: toResource(body)})
-  // project name
   const name = project.metadata.name
-  // wait until project is ready
   project = await waitUntilProjectIsReady(name)
-  // project is ready now
   return fromResource(project)
 }
 // needs to be exported for testing
@@ -230,26 +221,19 @@ exports.watchProject = name => garden.projects.watch({name})
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({user, name: namespace}) {
-  // get name of project
   const name = await getProjectNameFromNamespace(namespace)
-  // create garden client for current user
   const projects = Garden(user).projects
-  // read project
   const project = await projects.get({name})
   return fromResource(project)
 }
 
 exports.patch = async function ({user, name: namespace, body}) {
-  // get name of project
   const name = await getProjectNameFromNamespace(namespace)
-  // create garden client for current user
   const projects = Garden(user).projects
-  // read project
   let project = await projects.get({name})
   // do not update createdBy
   const { metadata, data } = fromResource(project)
   _.assign(data, _.omit(body.data, 'createdBy'))
-  // patch project
   project = await projects.mergePatch({
     name,
     body: toResource({metadata, data})
@@ -258,15 +242,10 @@ exports.patch = async function ({user, name: namespace, body}) {
 }
 
 exports.remove = async function ({user, name: namespace}) {
-  // validate preconditions
   await validateDeletePreconditions({user, namespace})
-  // get name of project
   const name = await getProjectNameFromNamespace(namespace)
-  // create garden client for current user
   const projects = Garden(user).projects
-  // read project
   const project = await projects.get({name})
-  // patch annotations
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)
@@ -278,7 +257,6 @@ exports.remove = async function ({user, name: namespace}) {
       }
     }
   })
-  // delete project
   await projects.delete({name})
   return fromResource(project)
 }
