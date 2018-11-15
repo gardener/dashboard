@@ -21,8 +21,8 @@ const yaml = require('js-yaml')
 const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
-const core = kubernetes.core()
-const { Conflict, NotFound } = require('../errors.js')
+const {getProjectNameFromNamespace} = require('./projects')
+const { Conflict } = require('../errors.js')
 
 function Core ({auth}) {
   return kubernetes.core({auth})
@@ -39,17 +39,6 @@ function fromResource (project = {}) {
     .filter(['kind', 'User'])
     .map('name')
     .value()
-}
-
-async function getProjectNameFromNamespace (namespace) {
-  // read namespace
-  const ns = await core.namespaces.get({name: namespace})
-  // get name of project from namespace label
-  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
-  if (!name) {
-    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
-  }
-  return name
 }
 
 function getKubeconfig ({serviceaccountName, projectName, serviceaccountNamespace, token, server, caData}) {
