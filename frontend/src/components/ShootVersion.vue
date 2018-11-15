@@ -73,10 +73,16 @@ limitations under the License.
         <template v-if="!selectedVersionInvalid && selectedVersionType === 'minor'">
           <p>
             You should always test your scenario and back up all your data before attempting an upgrade. Don’t forget to include the workload inside your cluster!
-          </p><p>
-            You should consider the <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank">Kubernetes release notes
-            <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> before upgrading your cluster.
-          </p><p>
+          </p>
+          <p>
+            You should consider the
+            <a href="https://github.com/kubernetes/kubernetes/releases" target="_blank">
+              Kubernetes release notes
+              <v-icon style="font-size:80%">mdi-open-in-new</v-icon>
+            </a>
+            before upgrading your cluster.
+          </p>
+          <p>
             Type <b>{{shootName}}</b> below and confirm to upgrade the Kubernetes version of your cluster.<br /><br />
           </p>
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
