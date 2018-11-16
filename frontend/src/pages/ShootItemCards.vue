@@ -350,16 +350,6 @@ export default {
     return {
       addonList: [
         {
-          name: 'cluster-autoscaler',
-          title: 'Cluster Autoscaler',
-          description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.'
-        },
-        {
-          name: 'kube-lego',
-          title: 'Kube Lego',
-          description: 'Kube-Lego automatically requests certificates for Kubernetes Ingress resources from Let\'s Encrypt.'
-        },
-        {
           name: 'kubernetes-dashboard',
           title: 'Dashboard',
           description: 'General-purpose web UI for Kubernetes clusters.'

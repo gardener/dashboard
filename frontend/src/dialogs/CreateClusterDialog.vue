@@ -439,25 +439,11 @@ const validationErrors = {
 
 const standardAddonDefinitionList = [
   {
-    name: 'cluster-autoscaler',
-    title: 'Cluster Autoscaler',
-    description: 'Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster.',
-    visible: false,
-    enabled: true
-  },
-  {
     name: 'kubernetes-dashboard',
     title: 'Dashboard',
     description: 'General-purpose web UI for Kubernetes clusters.',
     visible: true,
     enabled: true
-  },
-  {
-    name: 'monocular',
-    title: 'Monocular',
-    description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.',
-    visible: true,
-    enabled: false
   },
   {
     name: 'nginx-ingress',
