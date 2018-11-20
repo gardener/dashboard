@@ -28,7 +28,11 @@ data:
       rejectUnauthorized: true
       cache: false
       rateLimit: false
+{{- if .Values.oidc.jwksUri }}
+      jwksUri: {{ .Values.oidc.jwksUri }}
+{{- else }}
       jwksUri: "{{ .Values.oidc.issuerUrl }}/keys"
+{{- end }}
     frontend:
 {{- if .Values.frontendConfig.landingPageUrl }}
       landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
