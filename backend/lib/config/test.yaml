@@ -1,0 +1,44 @@
+port: 3030
+logLevel: info
+logFormat: text
+apiServerUrl: https://kubernetes:6443
+gitHub:
+  apiUrl: https://api.github.com
+  org: gardener
+  repository: journal-dev
+  webhookSecret: 776562686f6f6b536563726574
+  authentication:
+    token: 746f6b656e
+jwks:
+  strictSsl: false
+  rejectUnauthorized: true
+  cache: false
+  rateLimit: false
+  jwksRequestsPerMinute: 5
+  jwksUri: https://kubernetes:32001/keys
+jwt:
+  audience: &client_id gardener
+  issuer: &issuer https://kubernetes:32001
+  algorithms: [ RS256 ]
+frontend:
+  oidc:
+    authority: *issuer
+    client_id: *client_id
+    redirect_uri: http://localhost:8080/callback
+    response_type: 'token id_token'
+    scope: 'openid email profile audience:server:client_id:gardener audience:server:client_id:kube-kubectl'
+    loadUserInfo: false
+  dashboardUrl:
+    pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
+  landingPageUrl: https://gardener.cloud/
+  helpMenuItems:
+  - title: Getting Started
+    icon: description
+    url: https://gardener.cloud/about/
+  - title: Feedback
+    icon: mdi-slack
+    url: https://kubernetes.slack.com/messages/gardener/
+  - title: Issues
+    icon: mdi-bug
+    url: https://github.com/gardener/dashboard/issues/
+
