@@ -30,6 +30,10 @@ dashboard:
       traits:
         pull-request: ~
     release:
+      steps:
+        build:
+          vars:
+            NODE_ENV: '"production"'
       traits:
         version:
           preprocess: 'finalize'
