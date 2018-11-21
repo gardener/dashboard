@@ -4,7 +4,7 @@ VERSION      ?= $(shell ./scripts/git-version)
 
 REGISTRY := eu.gcr.io/gardener-project
 IMAGE    := $(REGISTRY)/$(ORGANIZATION)/$(PROJECT)
-TAG      := $(VERSION)
+TAG      := $(shell cat ./VERSION)-$(VERSION)
 
 .PHONY: build
 build: clean
