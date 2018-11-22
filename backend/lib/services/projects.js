@@ -209,10 +209,11 @@ function waitUntilProjectIsReady (name) {
 }
 
 exports.create = async function ({user, body}) {
+  const name = _.get(body, 'metadata.name')
+  _.set(body, 'metadata.namespace', `garden-${name}`)
   _.set(body, 'data.createdBy', user.id)
   const projects = Garden(user).projects
   let project = await projects.post({body: toResource(body)})
-  const name = project.metadata.name
   project = await waitUntilProjectIsReady(name)
   return fromResource(project)
 }
