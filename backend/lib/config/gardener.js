@@ -41,61 +41,19 @@ function applySecretToConfig (config, secretsPath, objectPath) {
   }
 }
 
-function hexEncode (value) {
-  return Buffer.from(value, 'utf8').toString('hex')
-}
-
 module.exports = {
   getDefaults ({env} = process) {
     const isProd = env.NODE_ENV === 'production'
     const port = env.PORT || 3030
-    const issuer = `http://localhost:${port}/identity`
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
-      port,
-      apiServerUrl: 'https://apiserver:8443',
-      gitHub: {
-        apiUrl: 'https://api.github.com',
-        org: 'gardener',
-        repository: 'journal-dev',
-        webhookSecret: hexEncode('webhookSecret'),
-        authentication: {
-          token: hexEncode('token')
-        }
-      },
-      jwks: {
-        cache: false,
-        rateLimit: false,
-        jwksRequestsPerMinute: 5,
-        jwksUri: `${issuer}/keys`
-      },
-      jwt: {
-        audience: 'gardener',
-        issuer,
-        algorithms: ['RS256']
-      },
-      frontend: {
-        oidc: {
-          authority: issuer,
-          client_id: 'gardener',
-          redirect_uri: `http://localhost:${port}/callback`,
-          response_type: 'id_token token',
-          scope: 'openid email profile groups audience:server:client_id:gardener audience:server:client_id:kube-kubectl',
-          loadUserInfo: false
-        },
-        dashboardUrl: {
-          pathname: '/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy'
-        }
-      }
+      port
     }
   },
   getFilename ({argv, env} = process) {
-    if (/^test$/.test(env.NODE_ENV)) {
-      return
-    }
-    if (/^testing$/.test(env.NODE_ENV)) {
-      return joinPath(__dirname, 'testing.yaml')
+    if (/^test/.test(env.NODE_ENV)) {
+      return joinPath(__dirname, 'test.yaml')
     }
     if (env.GARDENER_CONFIG) {
       return env.GARDENER_CONFIG

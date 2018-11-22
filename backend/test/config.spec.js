@@ -16,24 +16,29 @@
 
 'use strict'
 
-const config = require('../lib/config')
 const gardener = require('../lib/config/gardener')
+const path = require('path')
+const testConfigPath = path.resolve(__dirname, '../lib/config/test.yaml')
 
 describe('config', function () {
   /* eslint no-unused-expressions: 0 */
-
-  it('should have loaded the default gardener configuration for test environment', function () {
-    const env = {NODE_ENV: 'test'}
-    const defaults = gardener.getDefaults({env})
-    expect(config).to.eql(defaults)
-  })
-
   describe('gardener', function () {
+    describe('#getDefaults', function () {
+      it('should return the defaults for the test environment', function () {
+        const env = {NODE_ENV: 'test'}
+        const defaults = gardener.getDefaults({env})
+        expect(defaults).to.eql({
+          isProd: false,
+          logLevel: 'debug',
+          port: 3030
+        })
+      })
+    })
     describe('#getFilename', function () {
       it('should return no filename in test environment', function () {
         const env = {NODE_ENV: 'test'}
         const filename = gardener.getFilename({env})
-        expect(filename).to.be.undefined
+        expect(filename).to.equal(testConfigPath)
       })
       it('should return the filename from GARDENER_CONFIG environment variable', function () {
         const GARDENER_CONFIG = '.gardener/config.yaml'

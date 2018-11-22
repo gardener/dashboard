@@ -369,7 +369,7 @@ export default function createRouter ({ store, userManager }) {
       .then(() => {
         if (!store.state.namespace) {
           const namespaces = store.getters.namespaces
-          const namespace = head(namespaces)
+          const namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
           return store.dispatch('setNamespace', namespace)
         }
       })

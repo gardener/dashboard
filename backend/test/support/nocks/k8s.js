@@ -833,19 +833,24 @@ const stub = {
     ]
   },
   getMember ({bearer, namespace, name: username}) {
-    const scope = nockWithAuthorization(bearer)
+    const scopes = []
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace) {
       const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
       const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
-      scope
-        .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
-        .reply(200, serviceAccount)
-        .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
-        .reply(200, serviceAccountSecret)
+      scopes.push(...[
+        nockWithAuthorization(auth.bearer)
+          .get(`/api/v1/namespaces/${namespace}`)
+          .reply(200, () => getProjectNamespace(namespace)),
+        nockWithAuthorization(bearer)
+          .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
+          .reply(200, serviceAccount)
+          .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
+          .reply(200, serviceAccountSecret)
+      ])
     }
-    return scope
+    return scopes
   },
   healthz () {
     return nockWithAuthorization(auth.bearer)
