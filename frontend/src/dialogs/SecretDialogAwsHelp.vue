@@ -87,6 +87,7 @@ export default {
               'iam:CreatePolicy',
               'iam:CreatePolicyVersion',
               'iam:CreateRole',
+              'iam:CreateServiceLinkedRole',
               'iam:AddRoleToInstanceProfile',
               'iam:AttachRolePolicy',
               'iam:DetachRolePolicy',
