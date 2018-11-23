@@ -1,4 +1,14 @@
-*/.git*
-*/node_modules
-*/*.md
-*/public
+# Ignore everything
+**
+
+# include backend files and folders
+!backend/server.js
+!backend/lib
+
+# include frontend dist folder
+!frontend/dist
+
+# include metadata files
+!LICENSE.md
+!NOTICE.md
+!VERSION

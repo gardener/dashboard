@@ -44,7 +44,7 @@ function applySecretToConfig (config, secretsPath, objectPath) {
 module.exports = {
   getDefaults ({env} = process) {
     const isProd = env.NODE_ENV === 'production'
-    const port = env.PORT || 3030
+    const port = 3030
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
@@ -69,6 +69,12 @@ module.exports = {
       if (filename) {
         if (this.existsSync(filename)) {
           _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
+        }
+        if (env.PORT) {
+          const port = parseInt(env.PORT, 10)
+          if (Number.isInteger(port)) {
+            config.port = port
+          }
         }
 
         const secretsPath = joinPath(dirname(filename), 'secrets')

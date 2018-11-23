@@ -16,6 +16,9 @@
 
 FROM node:10.12-alpine
 
+# Install Tini
+RUN apk add --no-cache tini
+
 # Create app directory
 RUN mkdir -p /usr/src/app/public
 WORKDIR      /usr/src/app
@@ -26,12 +29,20 @@ ENV NODE_ENV $NODE_ENV
 ARG PORT=8080
 ENV PORT $PORT
 
-# Install backend app
-COPY backend .
-RUN npm install --production && npm cache clean --force
+# Install backend app dependencies
+COPY backend/package*.json ./
 
-# Install frontend app
+# Only building code for production
+RUN npm install --only=production && npm cache clean --force
+
+# Bundle backend app source
+COPY backend .
+
+# Copy frontend app build results to express static directory
 COPY frontend/dist ./public
 
 EXPOSE $PORT
-CMD ["node","server.js"]
+
+USER node
+
+ENTRYPOINT ["/sbin/tini", "--", "node", "server.js"]
