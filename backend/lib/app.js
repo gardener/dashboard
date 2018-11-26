@@ -33,7 +33,11 @@ const jwt = require('express-jwt')
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
+const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
 const issuerUrl = _.get(config, 'jwt.issuer')
+if (issuerUrl) {
+  connectSrc.push(issuerUrl)
+}
 let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
@@ -71,7 +75,7 @@ app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
-    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl], // TODO allow ws connections only to backend
+    connectSrc,
     styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
     fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
     imgSrc,

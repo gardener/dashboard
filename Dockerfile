@@ -23,8 +23,7 @@ RUN apk add --no-cache tini
 RUN mkdir -p /usr/src/app/public
 WORKDIR      /usr/src/app
 
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
+ENV NODE_ENV production
 
 ARG PORT=8080
 ENV PORT $PORT
@@ -44,5 +43,7 @@ COPY frontend/dist ./public
 EXPOSE $PORT
 
 USER node
+
+VOLUME ["/home/node", "/var/run/secrets/kubernetes.io/serviceaccount"]
 
 ENTRYPOINT ["/sbin/tini", "--", "node", "server.js"]

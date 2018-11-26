@@ -2,6 +2,7 @@
 **
 
 # include backend files and folders
+!backend/package*.json
 !backend/server.js
 !backend/lib
 
