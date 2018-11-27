@@ -26,7 +26,6 @@ const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
-const logger = require('../logger')
 const {
   Api,
   ApiExtensions,
@@ -58,7 +57,7 @@ function config () {
   try {
     return getInCluster()
   } catch (err) {
-    logger.info(`InCluster configuration not found: ${err}`)
+    console.log(`InCluster configuration not found: ${err}`)
     const cfgPath = process.env.KUBECONFIG
     if (cfgPath && existsSync(cfgPath)) {
       return fromKubeconfig(loadKubeconfig(cfgPath))
