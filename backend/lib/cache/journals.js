@@ -34,7 +34,7 @@ function init () {
   }
 
   function emit (kind, type, object) {
-    emitter.emit(kind, {kind, type, object})
+    emitter.emit(kind, { kind, type, object })
   }
 
   function emitAdded (kind, object) {
@@ -57,47 +57,47 @@ function init () {
     return _.values(issues)
   }
 
-  function getCommentsForIssue ({issueNumber}) {
-    return _.values(getCommentsForIssueCache({issueNumber}))
+  function getCommentsForIssue ({ issueNumber }) {
+    return _.values(getCommentsForIssueCache({ issueNumber }))
   }
 
   function getIssue (number) {
     return issues[number]
   }
 
-  function getIssueNumbersForNameAndNamespace ({name, namespace}) {
+  function getIssueNumbersForNameAndNamespace ({ name, namespace }) {
     return _
       .chain(getIssues())
-      .filter(_.matches({metadata: {name, namespace}}))
+      .filter(_.matches({ metadata: { name, namespace } }))
       .map(issue => issue.metadata.number)
       .value()
   }
 
-  function getCommentsForIssueCache ({issueNumber}) {
+  function getCommentsForIssueCache ({ issueNumber }) {
     if (!commentsForIssues[issueNumber]) {
       commentsForIssues[issueNumber] = {}
     }
     return commentsForIssues[issueNumber]
   }
 
-  function addOrUpdateIssues ({issues}) {
-    _.forEach(issues, issue => addOrUpdateIssue({issue}))
+  function addOrUpdateIssues ({ issues }) {
+    _.forEach(issues, issue => addOrUpdateIssue({ issue }))
   }
 
-  function addOrUpdateIssue ({issue}) {
+  function addOrUpdateIssue ({ issue }) {
     updateIfNewer('issue', issues, issue, 'number')
   }
 
-  function addOrUpdateComment ({issueNumber, comment}) {
-    const comments = getCommentsForIssueCache({issueNumber})
+  function addOrUpdateComment ({ issueNumber, comment }) {
+    const comments = getCommentsForIssueCache({ issueNumber })
     updateIfNewer('comment', comments, comment, 'id')
   }
 
-  function removeIssue ({issue}) {
+  function removeIssue ({ issue }) {
     const issueNumber = issue.metadata.number
     logger.debug('removing issue', issueNumber, 'and comments')
 
-    const comments = getCommentsForIssueCache({issueNumber})
+    const comments = getCommentsForIssueCache({ issueNumber })
 
     _.unset(issues, issueNumber)
     _.unset(commentsForIssues, issueNumber)
@@ -106,10 +106,10 @@ function init () {
     _.forEach(comments, emitCommmentDeleted)
   }
 
-  function removeComment ({issueNumber, comment}) {
+  function removeComment ({ issueNumber, comment }) {
     const identifier = comment.metadata.id
     logger.debug('removing comment', identifier, 'of issue', issueNumber)
-    const commentsForIssuesCache = getCommentsForIssueCache({issueNumber})
+    const commentsForIssuesCache = getCommentsForIssueCache({ issueNumber })
     _.unset(commentsForIssuesCache, identifier)
     emitCommmentDeleted(comment)
   }

@@ -28,7 +28,7 @@ const { customAddonDefinitions } = require('./services')
 const client = require('prom-client')
 const secretProvider = jwtSecret(config.jwks)
 
-function prometheusMetrics ({timeout = 30000} = {}) {
+function prometheusMetrics ({ timeout = 30000 } = {}) {
   client.collectDefaultMetrics({ timeout })
 
   return (req, res, next) => {
@@ -41,7 +41,7 @@ async function frontendConfig (req, res, next) {
   const user = req.user
   const frontendConfig = _.cloneDeep(config.frontend)
   try {
-    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({user, namespace: 'garden'})
+    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({ user, namespace: 'garden' })
   } catch (err) { /* ignore error */ }
   res.json(frontendConfig)
 }
@@ -51,7 +51,7 @@ function attachAuthorization (req, res, next) {
   if (!/bearer/i.test(scheme)) {
     return next(new Unauthorized('No authorization header with bearer'))
   }
-  req.user.auth = {bearer}
+  req.user.auth = { bearer }
   req.user.id = req.user['email']
 
   next()
@@ -59,7 +59,7 @@ function attachAuthorization (req, res, next) {
 
 function jwt (options) {
   const secret = secretProvider
-  options = _.assign({secret}, config.jwt, options)
+  options = _.assign({ secret }, config.jwt, options)
   return expressJwt(options)
 }
 
@@ -71,7 +71,7 @@ function getKeysMonkeyPatch (cb) {
   const ca = this.options.ca
   const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
   this.logger(`Fetching keys from '${uri}'`)
-  request({json, uri, headers, strictSSL, ca, rejectUnauthorized}, (err, res) => {
+  request({ json, uri, headers, strictSSL, ca, rejectUnauthorized }, (err, res) => {
     if (err) {
       this.logger('Failure:', err)
       return cb(err)
@@ -126,7 +126,7 @@ function errorToLocals (err, req) {
   const message = err.message
   let reason = err.reason || 'Internal Error'
   const name = err.name
-  const error = req.app.get('env') === 'development' ? err : {name}
+  const error = req.app.get('env') === 'development' ? err : { name }
   let status = err.code || 500
   if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
     status = 401
@@ -135,7 +135,7 @@ function errorToLocals (err, req) {
   if (status >= 500) {
     logger.error(err.message, err.stack)
   }
-  return {message, reason, status, error}
+  return { message, reason, status, error }
 }
 
 function sendError (err, req, res, next) {

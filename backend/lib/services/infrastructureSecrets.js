@@ -26,15 +26,15 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas } = require('../cache')
 
-function Core ({auth}) {
-  return kubernetes.core({auth})
+function Core ({ auth }) {
+  return kubernetes.core({ auth })
 }
 
-function Garden ({auth}) {
-  return kubernetes.garden({auth})
+function Garden ({ auth }) {
+  return kubernetes.garden({ auth })
 }
 
-function fromResource ({secretBinding, cloudProviderKind, secret, quotas = []}) {
+function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [] }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
   const infrastructureSecret = {}
@@ -86,7 +86,7 @@ function projectId (serviceAccountKey) {
   }
 }
 
-function toSecretResource ({metadata, data}) {
+function toSecretResource ({ metadata, data }) {
   const resource = Resources.Secret
   const apiVersion = resource.apiVersion
   const kind = resource.kind
@@ -100,10 +100,10 @@ function toSecretResource ({metadata, data}) {
   } catch (err) {
     throw new UnprocessableEntity('Failed to encode "base64" secret data')
   }
-  return {apiVersion, kind, metadata, type, data}
+  return { apiVersion, kind, metadata, type, data }
 }
 
-function toSecretBindingResource ({metadata}) {
+function toSecretBindingResource ({ metadata }) {
   const resource = Resources.SecretBinding
   const apiVersion = resource.apiVersion
   const kind = resource.kind
@@ -119,14 +119,14 @@ function toSecretBindingResource ({metadata}) {
   metadata = _
     .chain(metadata)
     .pick(['namespace', 'resourceVersion'])
-    .assign({name, labels})
+    .assign({ name, labels })
     .value()
-  return {apiVersion, kind, metadata, secretRef}
+  return { apiVersion, kind, metadata, secretRef }
 }
 
 function resolveQuotas (secretBinding) {
   const quotas = getQuotas()
-  const findQuota = ({namespace, name} = {}) => _.find(quotas, ({metadata}) => metadata.namespace === namespace && metadata.name === name)
+  const findQuota = ({ namespace, name } = {}) => _.find(quotas, ({ metadata }) => metadata.namespace === namespace && metadata.name === name)
   try {
     return _
       .chain(secretBinding.quotas)
@@ -138,7 +138,7 @@ function resolveQuotas (secretBinding) {
   }
 }
 
-async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secretList}) {
+async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, secretList }) {
   return _
     .chain(secretBindings)
     .map(secretBinding => {
@@ -169,16 +169,16 @@ async function getInfrastructureSecrets ({secretBindings, cloudProfileList, secr
 }
 
 async function getCloudProviderKind (cloudProfileName) {
-  const cloudProfile = await cloudprofiles.read({name: cloudProfileName})
+  const cloudProfile = await cloudprofiles.read({ name: cloudProfileName })
   const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
   return cloudProviderKind
 }
 
-exports.list = async function ({user, namespace}) {
+exports.list = async function ({ user, namespace }) {
   const [
     cloudProfileList,
-    {items: secretBindingList},
-    {items: secretList}
+    { items: secretBindingList },
+    { items: secretList }
   ] = await Promise.all([
     cloudprofiles.list(),
     Garden(user).namespaces(namespace).secretbindings.get({}),
@@ -192,7 +192,7 @@ exports.list = async function ({user, namespace}) {
   })
 }
 
-exports.create = async function ({user, namespace, body}) {
+exports.create = async function ({ user, namespace, body }) {
   const secret = await Core(user).namespaces(namespace).secrets.post({
     body: toSecretResource(body)
   })
@@ -220,7 +220,7 @@ function checkIfOwnSecret (bodySecretBinding) {
   }
 }
 
-exports.patch = async function ({user, namespace, bindingName, body}) {
+exports.patch = async function ({ user, namespace, bindingName, body }) {
   const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
     name: bindingName
   })
@@ -244,7 +244,7 @@ exports.patch = async function ({user, namespace, bindingName, body}) {
   })
 }
 
-exports.remove = async function ({user, namespace, bindingName}) {
+exports.remove = async function ({ user, namespace, bindingName }) {
   const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
     name: bindingName
   })
@@ -252,7 +252,7 @@ exports.remove = async function ({user, namespace, bindingName}) {
 
   checkIfOwnSecret(secretBinding)
 
-  const {items: shootList} = await shoots.list({user, namespace})
+  const { items: shootList } = await shoots.list({ user, namespace })
   const predicate = (item) => {
     const secretBindingRef = _.get(item, 'spec.cloud.secretBindingRef')
     return secretBindingRef.name === bindingName
@@ -263,8 +263,8 @@ exports.remove = async function ({user, namespace, bindingName}) {
   }
 
   await Promise.all([
-    await Garden(user).namespaces(namespace).secretbindings.delete({name: bindingName}),
-    await Core(user).namespaces(namespace).secrets.delete({name: secretName})
+    await Garden(user).namespaces(namespace).secretbindings.delete({ name: bindingName }),
+    await Core(user).namespaces(namespace).secrets.delete({ name: secretName })
   ])
-  return {metadata: {name: secretName, bindingName, namespace}}
+  return { metadata: { name: secretName, bindingName, namespace } }
 }

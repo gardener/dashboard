@@ -19,7 +19,6 @@
 const express = require('express')
 const _ = require('lodash')
 const config = require('./config')
-const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
 const { notFound, renderError, historyFallback, prometheusMetrics } = require('./middleware')
@@ -41,9 +40,8 @@ if (issuerUrl) {
 let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
-  const url = parseUrl(gitHubRepoUrl)
-  const gitHubUrl = `${url.protocol}//${url.host}`
-  imgSrc = _.concat(imgSrc, gitHubUrl)
+  const gitHubOrigin = new URL(gitHubRepoUrl).origin
+  imgSrc = _.concat(imgSrc, gitHubOrigin)
 }
 
 // configure app

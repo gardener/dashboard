@@ -42,7 +42,7 @@ function applySecretToConfig (config, secretsPath, objectPath) {
 }
 
 module.exports = {
-  getDefaults ({env} = process) {
+  getDefaults ({ env } = process) {
     const isProd = env.NODE_ENV === 'production'
     const port = 3030
     return {
@@ -51,7 +51,7 @@ module.exports = {
       port
     }
   },
-  getFilename ({argv, env} = process) {
+  getFilename ({ argv, env } = process) {
     if (/^test/.test(env.NODE_ENV)) {
       return joinPath(__dirname, 'test.yaml')
     }
@@ -63,8 +63,8 @@ module.exports = {
     }
     return joinPath(homedir(), '.gardener', 'config.yaml')
   },
-  loadConfig (filename, {env} = process) {
-    const config = this.getDefaults({env})
+  loadConfig (filename, { env } = process) {
+    const config = this.getDefaults({ env })
     try {
       if (filename) {
         if (this.existsSync(filename)) {

@@ -41,8 +41,8 @@ function socketAuthentication (nsp) {
     authenticate (socket, data, cb) {
       logger.debug('Socket %s authenticating', socket.id)
       const bearer = data.bearer || data.token
-      const auth = {bearer}
-      const req = {auth}
+      const auth = { bearer }
+      const req = { auth }
       const res = {}
       const next = (err) => {
         const user = res.user
@@ -111,7 +111,7 @@ function leaveCommentsRooms (socket) {
 }
 
 function setupShootsNamespace (shootsNsp) {
-  const subscribeShoots = async function ({socket, namespacesAndFilters, projectList}) {
+  const subscribeShoots = async function ({ socket, namespacesAndFilters, projectList }) {
     leaveShootsAndShootRoom(socket)
 
     /* join current rooms */
@@ -120,19 +120,19 @@ function setupShootsNamespace (shootsNsp) {
     }
     const kind = 'shoots'
     const user = getUserFromSocket(socket)
-    const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+    const batchEmitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath: 'metadata.uid' })
 
     await _
       .chain(namespacesAndFilters)
-      .filter(({namespace}) => !!_.find(projectList, ['metadata.namespace', namespace]))
-      .map(async ({namespace, filter}) => {
+      .filter(({ namespace }) => !!_.find(projectList, ['metadata.namespace', namespace]))
+      .map(async ({ namespace, filter }) => {
         // join room
         const shootsWithIssuesOnly = !!filter
         const room = filter ? `shoots_${namespace}_${filter}` : `shoots_${namespace}`
         joinRoom(socket, room)
         try {
           // fetch shoots for namespace
-          const shootList = await shoots.list({user, namespace, shootsWithIssuesOnly})
+          const shootList = await shoots.list({ user, namespace, shootsWithIssuesOnly })
           batchEmitter.batchEmitObjects(shootList.items, namespace)
         } catch (error) {
           logger.error('Socket %s: failed to list to shoots: %s', socket.id, error)
@@ -152,11 +152,11 @@ function setupShootsNamespace (shootsNsp) {
       namespaces: _.map(namespacesAndFilters, 'namespace')
     })
   }
-  const subscribeShootsAdmin = async function ({socket, user, namespaces, filter}) {
+  const subscribeShootsAdmin = async function ({ socket, user, namespaces, filter }) {
     leaveShootsAndShootRoom(socket)
 
     const kind = 'shoots'
-    const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+    const batchEmitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath: 'metadata.uid' })
     const shootsWithIssuesOnly = !!filter
 
     try {
@@ -167,7 +167,7 @@ function setupShootsNamespace (shootsNsp) {
       })
 
       // fetch shoots
-      const shootList = await shoots.list({user, shootsWithIssuesOnly})
+      const shootList = await shoots.list({ user, shootsWithIssuesOnly })
       const batchEmitObjects = _
         .chain(batchEmitter)
         .bindKey('batchEmitObjects')
@@ -200,17 +200,17 @@ function setupShootsNamespace (shootsNsp) {
     logger.debug('Socket %s connected', socket.id)
 
     socket.on('disconnect', onDisconnect)
-    socket.on('subscribeAllShoots', async ({filter}) => {
+    socket.on('subscribeAllShoots', async ({ filter }) => {
       try {
         const user = getUserFromSocket(socket)
-        const projectList = await projects.list({user})
+        const projectList = await projects.list({ user })
         const namespaces = _.map(projectList, 'metadata.namespace')
 
         if (await isAdmin(user)) {
-          subscribeShootsAdmin({socket, user, namespaces, filter})
+          subscribeShootsAdmin({ socket, user, namespaces, filter })
         } else {
           const namespacesAndFilters = _.map(namespaces, (namespace) => { return { namespace, filter } })
-          subscribeShoots({socket, namespacesAndFilters, projectList})
+          subscribeShoots({ socket, namespacesAndFilters, projectList })
         }
       } catch (err) {
         logger.error('Socket %s: failed to subscribe to all shoots: %s', socket.id, err)
@@ -221,11 +221,11 @@ function setupShootsNamespace (shootsNsp) {
         })
       }
     })
-    socket.on('subscribeShoots', async ({namespaces}) => {
+    socket.on('subscribeShoots', async ({ namespaces }) => {
       try {
         const user = getUserFromSocket(socket)
-        const projectList = await projects.list({user})
-        subscribeShoots({namespacesAndFilters: namespaces, socket, projectList})
+        const projectList = await projects.list({ user })
+        subscribeShoots({ namespacesAndFilters: namespaces, socket, projectList })
       } catch (err) {
         logger.error('Socket %s: failed to subscribe to shoots: %s', socket.id, err)
         socket.emit('subscription_error', {
@@ -235,20 +235,20 @@ function setupShootsNamespace (shootsNsp) {
         })
       }
     })
-    socket.on('subscribeShoot', async ({name, namespace}) => {
+    socket.on('subscribeShoot', async ({ name, namespace }) => {
       leaveShootsAndShootRoom(socket)
 
       const kind = 'shoot'
       const user = getUserFromSocket(socket)
-      const batchEmitter = new NamespacedBatchEmitter({kind, socket, objectKeyPath: 'metadata.uid'})
+      const batchEmitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath: 'metadata.uid' })
       try {
-        const projectList = await projects.list({user})
+        const projectList = await projects.list({ user })
         const project = _.find(projectList, ['metadata.namespace', namespace])
         if (project) {
           const room = `shoot_${namespace}_${name}`
           joinRoom(socket, room)
 
-          const shoot = await shoots.read({user, name, namespace})
+          const shoot = await shoots.read({ user, name, namespace })
           batchEmitter.batchEmitObjects([shoot], namespace)
         }
       } catch (error) {
@@ -261,7 +261,7 @@ function setupShootsNamespace (shootsNsp) {
       }
       batchEmitter.flush()
 
-      socket.emit('shootSubscriptionDone', {kind, target: {name, namespace}})
+      socket.emit('shootSubscriptionDone', { kind, target: { name, namespace } })
     })
   })
   socketAuthentication(shootsNsp)
@@ -284,18 +284,18 @@ function setupJournalsNamespace (journalsNsp) {
         if (await isAdmin(user)) {
           joinRoom(socket, 'issues')
 
-          const batchEmitter = new EventsEmitter({kind, socket})
+          const batchEmitter = new EventsEmitter({ kind, socket })
           batchEmitter.batchEmitObjectsAndFlush(cache.getIssues())
         } else {
           logger.warn('Socket %s: user %s tried to fetch journal but is no admin', socket.id, user.email)
-          socket.emit('subscription_error', {kind, code: 403, message: 'Forbidden'})
+          socket.emit('subscription_error', { kind, code: 403, message: 'Forbidden' })
         }
       } catch (error) {
         logger.error('Socket %s: failed to fetch issues: %s', socket.id, error)
-        socket.emit('subscription_error', {kind, code: 500, message: 'Failed to fetch issues'})
+        socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch issues' })
       }
     })
-    socket.on('subscribeComments', async ({name, namespace}) => {
+    socket.on('subscribeComments', async ({ name, namespace }) => {
       leaveCommentsRooms(socket)
 
       const kind = 'comments'
@@ -306,25 +306,25 @@ function setupJournalsNamespace (journalsNsp) {
           const room = `comments_${namespace}/${name}`
           joinRoom(socket, room)
 
-          const batchEmitter = new EventsEmitter({kind, socket})
-          const numbers = cache.getIssueNumbersForNameAndNamespace({name, namespace})
+          const batchEmitter = new EventsEmitter({ kind, socket })
+          const numbers = cache.getIssueNumbersForNameAndNamespace({ name, namespace })
           for (const number of numbers) {
             try {
-              await getIssueComments({number})
+              await getIssueComments({ number })
                 .reduce((accumulator, comments) => batchEmitter.batchEmitObjects(comments))
             } catch (err) {
               logger.error('Socket %s: failed to fetch comments for %s/%s issue %s: %s', socket.id, namespace, name, number, err)
-              socket.emit('subscription_error', {kind, code: 500, message: `Failed to fetch comments for issue ${number}`})
+              socket.emit('subscription_error', { kind, code: 500, message: `Failed to fetch comments for issue ${number}` })
             }
           }
           batchEmitter.flush()
         } else {
           logger.warn('Socket %s: user %s tried to fetch journal comments but is no admin', socket.id, user.email)
-          socket.emit('subscription_error', {kind, code: 403, message: 'Forbidden'})
+          socket.emit('subscription_error', { kind, code: 403, message: 'Forbidden' })
         }
       } catch (error) {
         logger.error('Socket %s: failed to fetch comments for %s/%s: %s', socket.id, namespace, name, error)
-        socket.emit('subscription_error', {kind, code: 500, message: 'Failed to fetch comments'})
+        socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch comments' })
       }
     })
     socket.on('unsubscribeComments', () => {
