@@ -25,7 +25,7 @@ const { notFound, renderError, historyFallback, prometheusMetrics } = require('.
 const helmet = require('helmet')
 const api = require('./api')
 const githubWebhook = require('./github/webhook')
-const healthz = require('./healthz')
+const { healthCheck } = require('./healthz')
 const port = config.port
 const jwt = require('express-jwt')
 
@@ -48,6 +48,7 @@ if (gitHubRepoUrl) {
 const app = express()
 app.set('port', port)
 app.set('logger', logger)
+app.set('healthCheck', healthCheck)
 app.set('io', api.io)
 app.set('trust proxy', 1)
 app.set('etag', false)
@@ -60,7 +61,6 @@ app.use(helmet.hsts())
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
 app.get('/config.json', api.frontendConfig)
-app.use('/healthz', healthz)
 
 if (_.has(config, 'prometheus.secret')) {
   app.get('/metrics',

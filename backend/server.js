@@ -17,14 +17,42 @@
 'use strict'
 
 const http = require('http')
+const { createTerminus } = require('@godaddy/terminus')
 const app = require('./lib/app')
 const port = app.get('port')
 const logger = app.get('logger')
+const healthCheck = app.get('healthCheck')
 const io = app.get('io')()
 
 // create server
 const server = http.createServer(app)
 io.attach(server)
+createTerminus(server, {
+  healthChecks: {
+    '/healthz': healthCheck
+  },
+  beforeShutdown,
+  onSignal,
+  onShutdown,
+  logger: (...args) => logger.error(...args)
+})
 server.listen(port, () => {
   logger.info(`Server listening on port ${port}`)
 })
+
+async function onSignal () {
+  logger.debug('Server is starting cleanup')
+  try {
+    await new Promise(resolve => io.close(resolve))
+  } catch (err) {
+    logger.error('Error during server cleanup', err.stack)
+  }
+}
+
+function beforeShutdown () {
+  return new Promise(resolve => setTimeout(resolve, 5000))
+}
+
+function onShutdown () {
+  logger.debug('Cleanup has been finished. Server is shutting down')
+}

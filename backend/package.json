@@ -24,6 +24,7 @@
     "test-cov": "cross-env NODE_ENV=test nyc _mocha -- test/ test/acceptance/"
   },
   "dependencies": {
+    "@godaddy/terminus": "^4.1.0",
     "@octokit/rest": "^15.9.4",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
@@ -42,7 +43,6 @@
     "request": "^2.87.0",
     "socket.io": "^2.1.1",
     "socketio-auth": "^0.1.1",
-    "winston": "^2.4.3",
     "ws": "^5.2.2"
   },
   "devDependencies": {
