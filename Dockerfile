@@ -44,6 +44,6 @@ EXPOSE $PORT
 
 USER node
 
-VOLUME ["/home/node", "/var/run/secrets/kubernetes.io/serviceaccount"]
+VOLUME ["/home/node"]
 
 ENTRYPOINT ["/sbin/tini", "--", "node", "server.js"]
