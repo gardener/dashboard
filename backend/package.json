@@ -19,7 +19,7 @@
     "dev": "nodemon --ext js --watch lib server.js",
     "start": "node server.js",
     "testing": "cross-env NODE_ENV=testing node server.js",
-    "lint": "node_modules/.bin/eslint --ext .js server.js lib",
+    "lint": "eslint --ext .js server.js lib",
     "test": "cross-env NODE_ENV=test _mocha test/ test/acceptance/",
     "test-cov": "cross-env NODE_ENV=test nyc _mocha -- test/ test/acceptance/"
   },

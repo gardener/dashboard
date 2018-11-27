@@ -44,11 +44,10 @@ function applySecretToConfig (config, secretsPath, objectPath) {
 module.exports = {
   getDefaults ({ env } = process) {
     const isProd = env.NODE_ENV === 'production'
-    const port = 3030
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
-      port
+      port: 3030
     }
   },
   getFilename ({ argv, env } = process) {
