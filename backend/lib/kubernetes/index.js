@@ -57,7 +57,6 @@ function config () {
   try {
     return getInCluster()
   } catch (err) {
-    console.log(`InCluster configuration not found: ${err}`)
     const cfgPath = process.env.KUBECONFIG
     if (cfgPath && existsSync(cfgPath)) {
       return fromKubeconfig(loadKubeconfig(cfgPath))
