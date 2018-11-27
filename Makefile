@@ -25,5 +25,4 @@ release: docker-build docker-push
 
 .PHONY: clean
 clean:
-	@rm -rf backend/node_modules
 	@rm -rf frontend/dist
