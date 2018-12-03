@@ -18,7 +18,6 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "test:e2e": "vue-cli-service test:e2e",
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
@@ -52,7 +51,6 @@
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.4",
-    "@vue/cli-plugin-e2e-cypress": "^3.0.4",
     "@vue/cli-plugin-eslint": "^3.0.4",
     "@vue/cli-plugin-unit-mocha": "^3.0.4",
     "@vue/cli-service": "^3.0.4",
