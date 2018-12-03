@@ -14,36 +14,76 @@
 # limitations under the License.
 #
 
-FROM node:10.12-alpine
+#### Base ####
+FROM node:10-alpine as base
 
-# Install Tini
-RUN apk add --no-cache tini
+WORKDIR /usr/src/app
 
-# Create app directory
-RUN mkdir -p /usr/src/app/public
-WORKDIR      /usr/src/app
+RUN npm set progress=false \
+    && npm config set depth 0
 
-ENV NODE_ENV production
+#### Backend base ####
+FROM base as backend-builder
+
+COPY backend/package*.json ./
+
+RUN npm install --only=production
+
+COPY backend/lib ./lib/
+COPY backend/server.js ./
+
+#### Backend test ####
+FROM base as backend-test
+
+COPY backend/package*.json ./
+
+RUN npm install
+
+COPY backend ./
+
+RUN npm run lint \
+    && npm run test-cov
+
+#### Frontend  base ####
+FROM base as frontend-builder
+
+COPY frontend/package*.json ./
+
+RUN npm install
+
+COPY frontend ./
+COPY VERSION ../
+
+RUN npm run lint \
+    && npm run test:unit \
+    && npm run build
+
+# Release
+FROM alpine:3.8 as release
+
+RUN addgroup -g 1000 node \
+    && adduser -u 1000 -G node -s /bin/sh -D node \
+    && apk add --no-cache tini
+
+WORKDIR /usr/src/app
+
+ARG NODE_ENV=production
+ENV NODE_ENV $NODE_ENV
 
 ARG PORT=8080
 ENV PORT $PORT
 
-# Install backend app dependencies
-COPY backend/package*.json ./
-
-# Only building code for production
-RUN npm install --only=production && npm cache clean --force
-
-# Bundle backend app source
-COPY backend .
-
-# Copy frontend app build results to express static directory
-COPY frontend/dist ./public
-
-EXPOSE $PORT
+COPY --from=backend-builder /usr/local/bin/node /usr/local/bin/
+COPY --from=backend-builder /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
+COPY --from=backend-builder /usr/src/app ./
+COPY --from=frontend-builder /usr/src/app/dist ./public/
 
 USER node
 
+EXPOSE $PORT
+
 VOLUME ["/home/node"]
 
-ENTRYPOINT ["/sbin/tini", "--", "node", "server.js"]
+ENTRYPOINT [ "/sbin/tini", "--" ]
+
+CMD [ "node", "server.js" ]

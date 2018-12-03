@@ -1,28 +1,19 @@
+REGISTRY     := eu.gcr.io/gardener-project
 ORGANIZATION := gardener
 PROJECT      := dashboard
-VERSION      ?= $(shell ./scripts/git-version)
+IMAGE        := $(REGISTRY)/$(ORGANIZATION)/$(PROJECT)
+TAG          := $(shell cat ./VERSION)-$(shell ./scripts/git-version)
 
-REGISTRY := eu.gcr.io/gardener-project
-IMAGE    := $(REGISTRY)/$(ORGANIZATION)/$(PROJECT)
-TAG      := $(shell cat ./VERSION)-$(VERSION)
+.PHONY: build
+build:
+	@docker build -t $(IMAGE):$(TAG) --rm .
 
-.PHONY: npm-build
-npm-build: clean
-	@npm run --prefix frontend -s build
-
-.PHONY: docker-build
-docker-build: npm-build
-	docker build -t $(IMAGE):$(TAG) --rm .
-
-.PHONY: docker-push
-docker-push:
-	@if ! docker images $(IMAGE) | awk '{ print $$2 }' | grep -q -F $(TAG); then echo "$(IMAGE) version $(TAG) is not yet built. Please run 'make docker-build'"; false; fi
+.PHONY: push
+push:
+	@if ! gcloud config configurations list | tail -n +2 | awk '{ print $$1 }' | grep -q -F "gardener"; then echo "Activation of gcloud configuration \"gardener\" failed"; false; fi
 	@gcloud config configurations activate gardener
+	@if ! docker images $(IMAGE) | tail -n +2 | awk '{ print $$2 }' | grep -q -F "$(TAG)"; then echo "Dashboard image \"$(TAG)\" not found. Please run 'make build'"; false; fi
 	@docker push $(IMAGE):$(TAG)
 
 .PHONY: release
-release: docker-build docker-push
-
-.PHONY: clean
-clean:
-	@rm -rf frontend/dist
+release: build push

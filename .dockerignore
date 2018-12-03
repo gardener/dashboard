@@ -4,10 +4,12 @@
 # include backend files and folders
 !backend/package*.json
 !backend/server.js
+!backend/.*
 !backend/lib
+!backend/test
 
-# include frontend dist folder
-!frontend/dist
+# include frontend folder
+!frontend
 
 # include metadata files
 !LICENSE.md

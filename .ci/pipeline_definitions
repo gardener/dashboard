@@ -16,12 +16,7 @@ dashboard:
                 build: ~
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
-    steps:
-      build:
-        image: &node_image 'node:10.12-alpine'
-        output_dir: 'binary'
-      test:
-        image: *node_image
+    steps: ~
   variants:
     head-update:
       traits:
