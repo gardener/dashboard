@@ -23,21 +23,13 @@ RUN npm set progress=false \
     && npm config set depth 0
 
 #### Backend base ####
-FROM base as backend-builder
+FROM base as backend
 
 COPY backend/package*.json ./
 
-RUN npm install --only=production
-
-COPY backend/lib ./lib/
-COPY backend/server.js ./
-
-#### Backend test ####
-FROM base as backend-test
-
-COPY backend/package*.json ./
-
-RUN npm install
+RUN npm install --only=production \
+    && cp -R node_modules dist \
+    && npm install
 
 COPY backend ./
 
@@ -45,7 +37,7 @@ RUN npm run lint \
     && npm run test-cov
 
 #### Frontend  base ####
-FROM base as frontend-builder
+FROM base as frontend
 
 COPY frontend/package*.json ./
 
@@ -67,16 +59,20 @@ RUN addgroup -g 1000 node \
 
 WORKDIR /usr/src/app
 
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
+ENV NODE_ENV production
 
 ARG PORT=8080
 ENV PORT $PORT
 
-COPY --from=backend-builder /usr/local/bin/node /usr/local/bin/
-COPY --from=backend-builder /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
-COPY --from=backend-builder /usr/src/app ./
-COPY --from=frontend-builder /usr/src/app/dist ./public/
+COPY --from=backend /usr/local/bin/node /usr/local/bin/
+COPY --from=backend /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
+
+COPY backend/package.json ./
+COPY --from=backend /usr/src/app/dist  ./node_modules/
+COPY backend/lib ./lib/
+COPY backend/server.js ./
+
+COPY --from=frontend /usr/src/app/dist ./public/
 
 USER node
 
