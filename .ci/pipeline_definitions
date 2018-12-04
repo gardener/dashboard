@@ -12,8 +12,6 @@ dashboard:
             inputs:
               repos:
                 source: ~ # default
-              steps:
-                build: ~
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
     steps: ~
