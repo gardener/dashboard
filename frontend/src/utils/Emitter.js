@@ -117,7 +117,7 @@ class AbstractSubscription {
     this.subscribeOnNextTrigger()
   }
 
-  subscribe = async function () {
+  async subscribe () {
     if (this.subscribeTo) {
       if (!this.subscribedTo || !isEqual(this.subscribedTo, this.subscribeTo)) {
         if (this.socketAuthenticator.authenticated) {
@@ -193,12 +193,12 @@ class ShootsSubscription extends AbstractSubscription {
     })
   }
 
-  subscribeShoots = function ({ namespace, filter }) {
+  subscribeShoots ({ namespace, filter }) {
     this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
 
-  _subscribe = async function () {
+  async _subscribe () {
     const { namespace, filter } = this.subscribeTo
 
     await Promise.all([
@@ -242,7 +242,7 @@ class ShootSubscription extends AbstractSubscription {
     this.subscribe()
   }
 
-  _subscribe = async function () {
+  async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
 
@@ -289,7 +289,7 @@ class IssuesSubscription extends AbstractJournalsSubscription {
     }
   }
 
-  _subscribe = async function () {
+  async _subscribe () {
     if (store.getters.isAdmin) {
       await Promise.all([
         store.dispatch('clearIssues')
@@ -308,7 +308,7 @@ class CommentsSubscription extends AbstractJournalsSubscription {
     this.subscribe()
   }
 
-  _subscribe = async function () {
+  async _subscribe () {
     if (store.getters.isAdmin) {
       await Promise.all([
         store.dispatch('clearComments')

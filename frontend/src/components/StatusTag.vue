@@ -54,6 +54,7 @@ export default {
       if (this.$vuetify.breakpoint.xlOnly) {
         return this.chipText
       }
+      return ''
     },
     isError () {
       switch (this.tag.status) {

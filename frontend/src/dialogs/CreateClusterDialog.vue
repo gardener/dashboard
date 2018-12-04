@@ -382,7 +382,6 @@ import concat from 'lodash/concat'
 import sample from 'lodash/sample'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import CodeBlock from '@/components/CodeBlock'
 import InfraIcon from '@/components/InfrastructureIcon'
 import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
@@ -497,7 +496,6 @@ export default {
   components: {
     WorkerInputGeneric,
     WorkerInputOpenstack,
-    CodeBlock,
     InfraIcon,
     Alert,
     CloudProfile,

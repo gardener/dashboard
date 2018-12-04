@@ -45,7 +45,7 @@ limitations under the License.
           </div>
           <v-list dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
+            <v-list-tile v-for="item in headers" :key="item.text" @click="setColumnChecked(item)">
               <v-list-tile-action>
                 <v-checkbox v-model="item.checked" color="cyan darken-2" @click="setColumnChecked(item)"></v-checkbox>
               </v-list-tile-action>
@@ -53,20 +53,20 @@ limitations under the License.
             </v-list-tile>
             <v-tooltip top>
               <v-list-tile-action slot="activator">
-                <v-btn block flat class="text-xs-center cyan--text text--darken-2" @click.native.stop @click="resetColumnsChecked">
+                <v-btn block flat class="text-xs-center cyan--text text--darken-2" @click="resetColumnsChecked">
                   Reset
                 </v-btn>
               </v-list-tile-action>
               <span>Reset to Defaults</span>
             </v-tooltip>
             <v-subheader v-if="!projectScope">Filter Table</v-subheader>
-            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+            <v-list-tile v-if="!projectScope" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
               <v-list-tile-action>
                 <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
               </v-list-tile-action>
               <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
             </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+            <v-list-tile v-if="!projectScope && isAdmin" @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
               <v-list-tile-action>
                 <v-checkbox
                   :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
@@ -76,7 +76,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
             </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideDeactivatedReconciliation" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+            <v-list-tile v-if="!projectScope && isAdmin" @click="toggleHideDeactivatedReconciliation" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
               <v-list-tile-action>
                 <v-checkbox
                 :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
@@ -126,7 +126,6 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import GPopper from '@/components/GPopper'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -136,7 +135,6 @@ export default {
   name: 'shoot-list',
   components: {
     CreateClusterDialog,
-    GPopper,
     ShootListRow,
     ClusterAccess
   },
