@@ -61,4 +61,8 @@ const { createTerminus } = require('@godaddy/terminus')
 const healthChecks = {
   '/healthz': app.get('healthCheck')
 }
-global.createServer = () => createTerminus(http.createServer(app), { healthChecks })
+const signal = 'SIGTERM'
+global.createServer = () => {
+  process.removeAllListeners(signal)
+  return createTerminus(http.createServer(app), { signal, healthChecks })
+}
