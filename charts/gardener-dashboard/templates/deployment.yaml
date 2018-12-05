@@ -54,7 +54,15 @@ spec:
           - key: webhookSecret
             path: webhookSecret
       {{- end }}
+      {{- if .Values.kubeconfig }}
+      - name: gardener-dashboard-secret-kubeconfig
+        secret:
+          secretName: gardener-dashboard-kubeconfig
+      {{- end }}
       serviceAccountName: gardener-dashboard
+      {{- if .Values.kubeconfig }}
+      automountServiceAccountToken: false
+      {{- end }}
       containers:
         - name: gardener-dashboard
           command:
@@ -67,6 +75,11 @@ spec:
             - name: http
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
+          {{- if .Values.kubeconfig }}
+          env:
+          - name: KUBECONFIG
+            value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
+          {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
@@ -80,6 +93,11 @@ spec:
           {{- if .Values.gitHub }}
           - name: gardener-dashboard-secret-github
             mountPath: /etc/gardener-dashboard/secrets/gitHub
+            readOnly: true
+          {{- end }}
+          {{- if .Values.kubeconfig }}
+          - name: gardener-dashboard-secret-kubeconfig
+            mountPath: /etc/gardener-dashboard/secrets/kubeconfig
             readOnly: true
           {{- end }}
       restartPolicy: Always
