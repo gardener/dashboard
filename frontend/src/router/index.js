@@ -32,6 +32,7 @@ const ShootList = () => import('@/pages/ShootList')
 const PlaceholderComponent = { template: '<router-view></router-view>' }
 const ShootItemCards = () => import('@/pages/ShootItemCards')
 const ShootItemEditor = () => import('@/pages/ShootItemEditor')
+const ShootItemTerminal = () => import('@/pages/ShootItemTerminal')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
 const Account = () => import('@/pages/Account')
@@ -86,6 +87,15 @@ export default function createRouter ({ store, userManager }) {
       to: ({ params }) => {
         return {
           name: 'ShootItemEditor',
+          params
+        }
+      }
+    },
+    {
+      title: 'Terminal',
+      to: ({ params }) => {
+        return {
+          name: 'ShootItemTerminal',
           params
         }
       }
@@ -203,6 +213,19 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Editor',
+                toRouteName: 'ShootList',
+                breadcrumb: true,
+                tabs: shootItemTabs
+              }
+            },
+            {
+              path: ':name/term',
+              name: 'ShootItemTerminal',
+              component: ShootItemTerminal,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                title: 'Cluster Terminal',
                 toRouteName: 'ShootList',
                 breadcrumb: true,
                 tabs: shootItemTabs

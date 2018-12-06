@@ -48,7 +48,8 @@
     "vue-snotify": "^3.2.1",
     "vuelidate": "^0.7.4",
     "vuetify": "^1.3.3",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "xterm": "^3.8.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.4",
