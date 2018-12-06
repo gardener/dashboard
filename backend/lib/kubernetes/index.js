@@ -26,6 +26,8 @@ const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
+const { GatewayTimeout, InternalServerError } = require('../errors')
+const logger = require('../logger')
 
 const {
   Api,
@@ -157,6 +159,87 @@ module.exports = {
     return new kubernetesClient.Client({
       config: credentials(),
       spec: Specs.Healthz
+    })
+  },
+  getKubeconfigFromServiceAccount ({serviceaccountName, contextName = 'default', serviceaccountNamespace, token, server, caData}) {
+    const clusterName = 'garden'
+    const cluster = {
+      'certificate-authority-data': caData,
+      server
+    }
+    const userName = serviceaccountName
+    const user = {
+      token
+    }
+    const context = {
+      cluster: clusterName,
+      user: userName,
+      namespace: serviceaccountNamespace
+    }
+    return yaml.safeDump({
+      kind: 'Config',
+      clusters: [{
+        cluster,
+        name: clusterName
+      }],
+      users: [{
+        user,
+        name: userName
+      }],
+      contexts: [{
+        context,
+        name: contextName
+      }],
+      'current-context': contextName
+    })
+  },
+  waitUntilResourceHasCondition ({watch, conditionFunction, initializationTimeout = 5000, resourceName}) {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        const duration = `${initializationTimeout} ms`
+        done(new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${duration}`))
+      }, initializationTimeout)
+
+      function done (err, serviceaccount) {
+        clearTimeout(timeoutId)
+
+        watch.removeListener('event', onEvent)
+        watch.removeListener('error', onError)
+        watch.removeListener('disconnect', onDisconnect)
+
+        watch.reconnect = false
+        watch.disconnect()
+        if (err) {
+          return reject(err)
+        }
+        resolve(serviceaccount)
+      }
+
+      function onEvent (event) {
+        switch (event.type) {
+          case 'ADDED':
+          case 'MODIFIED':
+            if (conditionFunction(event.object)) {
+              done(null, event.object)
+            }
+            break
+          case 'DELETED':
+            done(new InternalServerError(`Resource "${resourceName}" has been deleted`))
+            break
+        }
+      }
+
+      function onError (err) {
+        logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
+      }
+
+      function onDisconnect (err) {
+        done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
+      }
+
+      watch.on('event', onEvent)
+      watch.on('error', onError)
+      watch.on('disconnect', onDisconnect)
     })
   }
 }

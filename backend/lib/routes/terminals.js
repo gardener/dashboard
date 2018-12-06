@@ -14,15 +14,23 @@
 // limitations under the License.
 //
 
-module.exports = {
-  cloudprofiles: require('./cloudprofiles'),
-  domains: require('./domains'),
-  projects: require('./projects'),
-  shoots: require('./shoots'),
-  infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members'),
-  authorization: require('./authorization'),
-  journals: require('./journals'),
-  customAddonDefinitions: require('./customAddonDefinitions'),
-  terminals: require('./terminals')
-}
+'use strict'
+
+const express = require('express')
+const { terminals } = require('../services')
+
+const router = module.exports = express.Router({
+  mergeParams: true
+})
+
+router.route('/:name')
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await terminals.create({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
+  })

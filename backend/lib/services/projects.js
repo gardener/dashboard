@@ -21,8 +21,7 @@ const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
 const core = kubernetes.core()
-const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
-const logger = require('../logger')
+const { PreconditionFailed, NotFound } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 
@@ -155,66 +154,19 @@ function isProjectReady ({status: {phase} = {}} = {}) {
   return phase === 'Ready'
 }
 
-function waitUntilProjectIsReady (name) {
-  const reconnector = exports.watchProject(name)
-  const projectInitializationTimeout = exports.projectInitializationTimeout
-
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      const duration = `${projectInitializationTimeout} ms`
-      done(new GatewayTimeout(`Project could not be initialized within ${duration}`))
-    }, projectInitializationTimeout)
-
-    function done (err, project) {
-      clearTimeout(timeoutId)
-
-      reconnector.removeListener('event', onEvent)
-      reconnector.removeListener('error', onError)
-      reconnector.removeListener('disconnect', onDisconnect)
-
-      reconnector.reconnect = false
-      reconnector.disconnect()
-      if (err) {
-        return reject(err)
-      }
-      resolve(project)
-    }
-
-    function onEvent (event) {
-      switch (event.type) {
-        case 'ADDED':
-        case 'MODIFIED':
-          if (isProjectReady(event.object)) {
-            done(null, event.object)
-          }
-          break
-        case 'DELETED':
-          done(new InternalServerError(`Project "${name}" has been deleted`))
-          break
-      }
-    }
-
-    function onError (err) {
-      logger.error(`Error watching project "%s": %s`, name, err.message)
-    }
-
-    function onDisconnect (err) {
-      done(err || new InternalServerError(`Watch for project "${name}" has been disconnected`))
-    }
-
-    reconnector.on('event', onEvent)
-    reconnector.on('error', onError)
-    reconnector.on('disconnect', onDisconnect)
-  })
-}
-
 exports.create = async function ({user, body}) {
   const name = _.get(body, 'metadata.name')
   _.set(body, 'metadata.namespace', `garden-${name}`)
   _.set(body, 'data.createdBy', user.id)
   const projects = Garden(user).projects
   let project = await projects.post({body: toResource(body)})
-  project = await waitUntilProjectIsReady(name)
+
+  const watch = exports.watchProject(name)
+  const conditionFunction = isProjectReady
+  const resourceName = name
+  const initializationTimeout = exports.projectInitializationTimeout
+  project = await kubernetes.waitUntilResourceHasCondition({watch, conditionFunction, initializationTimeout, resourceName})
+
   return fromResource(project)
 }
 // needs to be exported for testing
