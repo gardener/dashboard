@@ -40,5 +40,6 @@ module.exports = {
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
+  '/namespaces/:namespace/members': require('./members'),
+  '/namespaces/:namespace/terminals': require('./terminals')
 }

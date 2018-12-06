@@ -198,7 +198,7 @@ describe('gardener', function () {
             expect(watchStub).to.have.callCount(1)
             expect(res).to.have.status(504)
             expect(res).to.be.json
-            expect(res.body.message).to.equal(`Project could not be initialized within ${timeout} ms`)
+            expect(res.body.message).to.equal(`Resource "${name}" could not be initialized within ${timeout} ms`)
           })
       })
 

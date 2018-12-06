@@ -17,7 +17,6 @@
 'use strict'
 
 const _ = require('lodash')
-const yaml = require('js-yaml')
 const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
@@ -39,40 +38,6 @@ function fromResource (project = {}) {
     .filter(['kind', 'User'])
     .map('name')
     .value()
-}
-
-function getKubeconfig ({serviceaccountName, projectName, serviceaccountNamespace, token, server, caData}) {
-  const clusterName = 'garden'
-  const cluster = {
-    'certificate-authority-data': caData,
-    server
-  }
-  const userName = serviceaccountName
-  const user = {
-    token
-  }
-  const contextName = projectName || 'default'
-  const context = {
-    cluster: clusterName,
-    user: userName,
-    namespace: serviceaccountNamespace
-  }
-  return yaml.safeDump({
-    kind: 'Config',
-    clusters: [{
-      cluster,
-      name: clusterName
-    }],
-    users: [{
-      user,
-      name: userName
-    }],
-    contexts: [{
-      context,
-      name: contextName
-    }],
-    'current-context': contextName
-  })
 }
 
 function createServiceaccount (core, namespace, name) {
@@ -165,7 +130,7 @@ exports.get = async function ({user, namespace, name: username}) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({serviceaccountName, projectName, serviceaccountNamespace, token, caData, server})
+    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({serviceaccountName, contextName: projectName, serviceaccountNamespace, token, caData, server})
   }
   return member
 }

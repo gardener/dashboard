@@ -47,6 +47,16 @@ module.exports = {
     kind: 'ClusterRole',
     apiVersion: 'rbac.authorization.k8s.io/v1'
   },
+  Pod: {
+    name: 'pods',
+    kind: 'Pod',
+    apiVersion: 'v1'
+  },
+  ServiceAccount: {
+    name: 'serviceaccounts',
+    kind: 'ServiceAccount',
+    apiVersion: 'v1'
+  },
   Shoot: {
     name: 'shoots',
     kind: 'Shoot',
