@@ -31,14 +31,14 @@ function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
-function toToolbeltServiceAccountResource ({prefix, name, user, ownerReferences = []}) {
+function toTerminalServiceAccountResource ({prefix, name, user, ownerReferences = []}) {
   const apiVersion = Resources.ServiceAccount.apiVersion
   const kind = Resources.ServiceAccount.kind
   const labels = {
-    component: 'toolbelt-pod'
+    component: 'dashboard-terminal'
   }
   const annotations = {
-    'garden.sapcloud.io/toolbelt-user': user
+    'garden.sapcloud.io/terminal-user': user
   }
   const metadata = {labels, annotations, ownerReferences}
   if (name) {
@@ -50,14 +50,14 @@ function toToolbeltServiceAccountResource ({prefix, name, user, ownerReferences 
   return {apiVersion, kind, metadata}
 }
 
-function toToolbeltRoleBindingResource ({name, user, roleName, ownerReferences}) {
+function toTerminalRoleBindingResource ({name, user, roleName, ownerReferences}) {
   const apiVersion = Resources.RoleBinding.apiVersion
   const kind = Resources.RoleBinding.kind
   const labels = {
-    component: 'toolbelt-pod'
+    component: 'dashboard-terminal'
   }
   const annotations = {
-    'garden.sapcloud.io/toolbelt-user': user
+    'garden.sapcloud.io/terminal-user': user
   }
   const metadata = {name, labels, annotations, ownerReferences}
 
@@ -81,10 +81,10 @@ function toSecretResource ({name, user, ownerReferences, data}) {
   const apiVersion = Resources.Secret.apiVersion
   const kind = Resources.Secret.kind
   const labels = {
-    component: 'toolbelt-pod'
+    component: 'dashboard-terminal'
   }
   const annotations = {
-    'garden.sapcloud.io/toolbelt-user': user
+    'garden.sapcloud.io/terminal-user': user
   }
   const metadata = {name, labels, annotations, ownerReferences}
   const type = 'Opaque'
@@ -92,20 +92,20 @@ function toSecretResource ({name, user, ownerReferences, data}) {
   return {apiVersion, kind, metadata, type, data}
 }
 
-function toToolbeltPodResource ({name, cpSecretName, user, ownerReferences}) {
+function toTerminalPodResource ({name, cpSecretName, user, ownerReferences}) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
-    component: 'toolbelt-pod'
+    component: 'dashboard-terminal'
   }
   const annotations = {
-    'garden.sapcloud.io/toolbelt-user': user
+    'garden.sapcloud.io/terminal-user': user
   }
   const metadata = {name, labels, annotations, ownerReferences}
   const spec = {
     containers: [
       {
-        name: 'toolbelt-terminal',
+        name: 'terminal',
         image: 'eu.gcr.io/gardener-project/gardener/ops-toolbelt',
         // image: 'astefanutti/kubebox',
         stdin: true,
@@ -200,7 +200,7 @@ exports.create = async function ({user, namespace, name}) {
     if (seedKubeconfig && !_.isEmpty(seedShootNS)) {
       const terminalInfo = {}
       terminalInfo.namespace = seedShootNS
-      terminalInfo.container = 'toolbelt-terminal'
+      terminalInfo.container = 'terminal'
 
       const seedKubeconfigJson = yaml.safeLoad(seedKubeconfig)
       const server = _.get(_.head(_.get(seedKubeconfigJson, 'clusters')), 'cluster.server')
@@ -208,16 +208,19 @@ exports.create = async function ({user, namespace, name}) {
 
       const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
       const seedK8sRbacClient = kubernetes.rbac(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
-      const qs = { labelSelector: 'component=toolbelt-pod' }
+      const qs = { labelSelector: 'component=dashboard-terminal' }
       const existingPods = await seedK8sCoreClient.pods.get({qs})
-      const existingPodForUser = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/toolbelt-user'] === username)
+      const existingPodForUser = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username)
       if (existingPodForUser && _.get(existingPodForUser, 'status.phase') === 'Running') {
         const existingPodName = existingPodForUser.metadata.name
-        logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
-        terminalInfo.pod = existingPodName
-        const {attachToken} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: existingPodName})
-        terminalInfo.token = attachToken
-        return terminalInfo
+        const attachServiceAccount = _.first(existingPodForUser.metadata.ownerReferences)
+        if (attachServiceAccount) {
+          logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
+          terminalInfo.pod = existingPodName
+          const {token} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccount.name})
+          terminalInfo.token = token
+          return terminalInfo
+        }
       }
 
       logger.debug(`No running Pod found for user ${username}. Creating new Pod and required Resources..`)
@@ -225,12 +228,12 @@ exports.create = async function ({user, namespace, name}) {
       let attachServiceAccountResource
       try {
         // create attach serviceaccount
-        attachServiceAccountResource = await seedK8sCoreClient.serviceaccounts.post({body: toToolbeltServiceAccountResource({prefix: 'toolbelt-attach-', user: username})})
+        attachServiceAccountResource = await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix: 'terminal-attach-', user: username})})
 
         // create owner ref object, attach-serviceaccount gets owner of all resources created below
         const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
-        const identifier = _.replace(attachServiceAccountName, 'toolbelt-attach-', '')
-        const name = `toolbelt-${identifier}`
+        const identifier = _.replace(attachServiceAccountName, 'terminal-attach-', '')
+        const name = `terminal-${identifier}`
         const uid = _.get(attachServiceAccountResource, 'metadata.uid')
         const ownerReferences = [
           {
@@ -243,14 +246,14 @@ exports.create = async function ({user, namespace, name}) {
         ]
 
         // create rolebinding for attach-sa
-        await seedK8sRbacClient.rolebindings.post({body: toToolbeltRoleBindingResource({name: attachServiceAccountName, user: username, roleName: 'garden.sapcloud.io:toolbelt-attach', ownerReferences})})
+        await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
 
-        // create service account used by toolbelt pod for control plane access
-        const cpServiceAccountName = `toolbelt-cp-${name}`
-        await seedK8sCoreClient.serviceaccounts.post({body: toToolbeltServiceAccountResource({name: cpServiceAccountName, user: username, ownerReferences})})
+        // create service account used by terminal pod for control plane access
+        const cpServiceAccountName = `terminal-cp-${name}`
+        await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user: username, ownerReferences})})
 
         // create rolebinding for cpaccess-sa
-        await seedK8sRbacClient.rolebindings.post({body: toToolbeltRoleBindingResource({name: cpServiceAccountName, user: username, roleName: 'garden.sapcloud.io:toolbelt-cpaccess', ownerReferences})})
+        await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: cpServiceAccountName, user: username, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences})})
 
         // create kubeconfig for cpaccess-sa and store as secret
         const {token, caData} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: cpServiceAccountName})
@@ -259,10 +262,10 @@ exports.create = async function ({user, namespace, name}) {
         await seedK8sCoreClient.secrets.post({body: toSecretResource({name: cpServiceAccountName, user: username, ownerReferences, data: {kubeconfig}})})
 
         // create pod
-        const podResource = await seedK8sCoreClient.pods.post({body: toToolbeltPodResource({name, cpSecretName: cpServiceAccountName, user: username, ownerReferences})})
-        const {attachToken} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName})
+        const podResource = await seedK8sCoreClient.pods.post({body: toTerminalPodResource({name, cpSecretName: cpServiceAccountName, user: username, ownerReferences})})
+        const attachServiceAccountToken = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName})
         terminalInfo.pod = _.get(podResource, 'metadata.name')
-        terminalInfo.token = attachToken
+        terminalInfo.token = _.get(attachServiceAccountToken, 'token')
 
         return terminalInfo
       } catch (e) {
