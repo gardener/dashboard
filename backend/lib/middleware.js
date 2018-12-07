@@ -127,7 +127,17 @@ function errorToLocals (err, req) {
   let reason = err.reason || 'Internal Error'
   const name = err.name
   const error = req.app.get('env') === 'development' ? err : { name }
-  let status = err.code || 500
+  let status = 500
+  if (_.isInteger(err.code)) {
+    status = err.code
+  } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
+    status = parseInt(err.code)
+  } else {
+    logger.error(`Error with invalid code ${err.code}:`, err.message, err.stack)
+  }
+  if (status < 100 || status >= 600) {
+    status = 500
+  }
   if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
     status = 401
     reason = 'Authentication Error'
