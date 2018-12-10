@@ -69,9 +69,7 @@ spec:
       {{- end }}
       containers:
         - name: gardener-dashboard
-          command:
-            - node
-            - server.js
+          args:
             - /etc/gardener-dashboard/config.yaml
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
