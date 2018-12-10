@@ -220,7 +220,7 @@ export default {
       return checked ? 'cyan darken-2' : ''
     },
     checkboxIcon (checked) {
-      return checked ?  'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
+      return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
     },
     setColumnChecked (header) {
       header.checked = !header.checked
