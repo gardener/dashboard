@@ -27,6 +27,7 @@ const api = require('./api')
 const githubWebhook = require('./github/webhook')
 const { healthCheck } = require('./healthz')
 const port = config.port
+const periodSeconds = _.get(config, 'readinessProbe.periodSeconds', 10)
 const jwt = require('express-jwt')
 
 // resolve pathnames
@@ -49,6 +50,7 @@ const app = express()
 app.set('port', port)
 app.set('logger', logger)
 app.set('healthCheck', healthCheck)
+app.set('periodSeconds ', periodSeconds)
 app.set('io', api.io)
 app.set('trust proxy', 1)
 app.set('etag', false)
