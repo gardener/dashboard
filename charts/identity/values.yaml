@@ -22,6 +22,8 @@ hosts:
   - identity.example.org
 issuerUrl: https://identity.ingress.example.org
 
+#kubeconfig: kubeconfig-to-external-cluster (optionally, if not given in-cluster config is used)
+
 dashboardOrigins:
   - 'https://dashboard.ingress.example.org'
   - 'https://dashboard.example.org'

@@ -2,14 +2,18 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: identity-configmap
-  namespace: kube-system
+  namespace: {{ .Release.Namespace }}
 data:
   config.yaml: |
     issuer: {{ .Values.issuerUrl }}
     storage:
       type: kubernetes
       config:
+        {{- if not .Values.kubeconfig }}
         inCluster: true
+        {{- else }}
+        kubeConfigFile: /etc/kubeconfig/kubeconfig
+        {{- end }}
     web:
       http: "0.0.0.0:{{ .Values.containerPort }}"
       allowedOrigins:

@@ -20,6 +20,9 @@ spec:
         checksum/configmap-gardener-dashboard-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret-gardener-dashboard-prometheus: {{ include (print $.Template.BasePath "/secret-prometheus.yaml") . | sha256sum }}
         checksum/secret-gardener-dashboard-github: {{ include (print $.Template.BasePath "/secret-github.yaml") . | sha256sum }}
+        {{- if .Values.kubeconfig }}
+        checksum/secret-gardener-dashboard-kubeconfig: {{ include (print $.Template.BasePath "/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
       labels:
         app: gardener-dashboard
         release: {{ .Release.Name }}
@@ -59,9 +62,10 @@ spec:
         secret:
           secretName: gardener-dashboard-kubeconfig
       {{- end }}
-      serviceAccountName: gardener-dashboard
       {{- if .Values.kubeconfig }}
       automountServiceAccountToken: false
+      {{- else }}
+      serviceAccountName: gardener-dashboard
       {{- end }}
       containers:
         - name: gardener-dashboard
