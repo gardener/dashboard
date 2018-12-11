@@ -17,7 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
-const request = require('request')
+const got = require('got')
 const expressJwt = require('express-jwt')
 const jwks = require('jwks-rsa')
 const { JwksError } = jwks
@@ -65,26 +65,25 @@ function jwt (options) {
 
 function getKeysMonkeyPatch (cb) {
   const json = true
-  const strictSSL = _.get(this.options, 'strictSsl', false)
   const headers = _.assign({}, this.options.headers)
   const uri = this.options.jwksUri
   const ca = this.options.ca
   const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
   this.logger(`Fetching keys from '${uri}'`)
-  request({ json, uri, headers, strictSSL, ca, rejectUnauthorized }, (err, res) => {
-    if (err) {
+  got(uri, { json, headers, ca, rejectUnauthorized })
+    .then(res => {
+      const keys = _.get(res, 'body.keys')
+      this.logger('Keys:', keys)
+      return cb(null, keys)
+    })
+    .catch(err => {
+      if (err instanceof got.HTTPError) {
+        this.logger('Http Error:', err.body || err)
+        return cb(new JwksError(_.get(err, 'body.message', err.message)))
+      }
       this.logger('Failure:', err)
-      return cb(err)
-    }
-    const statusCode = res.statusCode
-    if (_.inRange(statusCode, 200, 300)) {
-      this.logger('Keys:', res.body.keys)
-      return cb(null, res.body.keys)
-    }
-    const statusMessage = res.statusMessage || `Http Error ${statusCode}`
-    this.logger('Http Error:', res.body)
-    cb(new JwksError(_.get(res, 'body.message', statusMessage)))
-  })
+      cb(err)
+    })
 }
 
 function jwtSecret (options) {
