@@ -80,6 +80,4 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--" ]
-
-CMD [ "node", "server.js" ]
+ENTRYPOINT [ "/sbin/tini", "--", "node", "server.js" ]
