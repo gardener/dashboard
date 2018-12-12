@@ -31,15 +31,12 @@ function Core ({auth}) {
   return kubernetes.core({auth})
 }
 
-function toTerminalServiceAccountResource ({prefix, name, user, ownerReferences = []}) {
+function toTerminalServiceAccountResource ({prefix, name, user, ownerReferences = [], labels = {}, annotations = {}}) {
   const apiVersion = Resources.ServiceAccount.apiVersion
   const kind = Resources.ServiceAccount.kind
-  const labels = {
-    component: 'dashboard-terminal'
-  }
-  const annotations = {
-    'garden.sapcloud.io/terminal-user': user
-  }
+  labels.component = 'dashboard-terminal'
+  annotations['garden.sapcloud.io/terminal-user'] = user
+
   const metadata = {labels, annotations, ownerReferences}
   if (name) {
     metadata.name = name
@@ -228,7 +225,14 @@ exports.create = async function ({user, namespace, name}) {
       let attachServiceAccountResource
       try {
         // create attach serviceaccount
-        attachServiceAccountResource = await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix: 'terminal-attach-', user: username})})
+        const attachSaLabels = {
+          satype: 'attach'
+        }
+        const heartbeat = Math.floor(new Date() / 1000)
+        const attachSaAnnotations = {
+          'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
+        }
+        attachServiceAccountResource = await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix: 'terminal-attach-', user: username, labels: attachSaLabels, annotations: attachSaAnnotations})})
 
         // create owner ref object, attach-serviceaccount gets owner of all resources created below
         const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
