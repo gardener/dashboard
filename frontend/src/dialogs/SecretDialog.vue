@@ -109,9 +109,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    Alert,
-    errorMessage: undefined,
-    detailedErrorMessage: undefined
+    Alert
   },
   props: {
     value: {

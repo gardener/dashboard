@@ -17,7 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
-const request = require('request')
+const got = require('got')
 const expressJwt = require('express-jwt')
 const jwks = require('jwks-rsa')
 const { JwksError } = jwks
@@ -28,7 +28,7 @@ const { customAddonDefinitions } = require('./services')
 const client = require('prom-client')
 const secretProvider = jwtSecret(config.jwks)
 
-function prometheusMetrics ({timeout = 30000} = {}) {
+function prometheusMetrics ({ timeout = 30000 } = {}) {
   client.collectDefaultMetrics({ timeout })
 
   return (req, res, next) => {
@@ -41,7 +41,7 @@ async function frontendConfig (req, res, next) {
   const user = req.user
   const frontendConfig = _.cloneDeep(config.frontend)
   try {
-    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({user, namespace: 'garden'})
+    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({ user, namespace: 'garden' })
   } catch (err) { /* ignore error */ }
   res.json(frontendConfig)
 }
@@ -51,7 +51,7 @@ function attachAuthorization (req, res, next) {
   if (!/bearer/i.test(scheme)) {
     return next(new Unauthorized('No authorization header with bearer'))
   }
-  req.user.auth = {bearer}
+  req.user.auth = { bearer }
   req.user.id = req.user['email']
 
   next()
@@ -59,32 +59,31 @@ function attachAuthorization (req, res, next) {
 
 function jwt (options) {
   const secret = secretProvider
-  options = _.assign({secret}, config.jwt, options)
+  options = _.assign({ secret }, config.jwt, options)
   return expressJwt(options)
 }
 
 function getKeysMonkeyPatch (cb) {
   const json = true
-  const strictSSL = _.get(this.options, 'strictSsl', false)
   const headers = _.assign({}, this.options.headers)
   const uri = this.options.jwksUri
   const ca = this.options.ca
   const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
   this.logger(`Fetching keys from '${uri}'`)
-  request({json, uri, headers, strictSSL, ca, rejectUnauthorized}, (err, res) => {
-    if (err) {
+  got(uri, { json, headers, ca, rejectUnauthorized })
+    .then(res => {
+      const keys = _.get(res, 'body.keys')
+      this.logger('Keys:', keys)
+      return cb(null, keys)
+    })
+    .catch(err => {
+      if (err instanceof got.HTTPError) {
+        this.logger('Http Error:', err.body || err)
+        return cb(new JwksError(_.get(err, 'body.message', err.message)))
+      }
       this.logger('Failure:', err)
-      return cb(err)
-    }
-    const statusCode = res.statusCode
-    if (_.inRange(statusCode, 200, 300)) {
-      this.logger('Keys:', res.body.keys)
-      return cb(null, res.body.keys)
-    }
-    const statusMessage = res.statusMessage || `Http Error ${statusCode}`
-    this.logger('Http Error:', res.body)
-    cb(new JwksError(_.get(res, 'body.message', statusMessage)))
-  })
+      cb(err)
+    })
 }
 
 function jwtSecret (options) {
@@ -126,8 +125,18 @@ function errorToLocals (err, req) {
   const message = err.message
   let reason = err.reason || 'Internal Error'
   const name = err.name
-  const error = req.app.get('env') === 'development' ? err : {name}
-  let status = err.code || 500
+  const error = req.app.get('env') === 'development' ? err : { name }
+  let status = 500
+  if (_.isInteger(err.code)) {
+    status = err.code
+  } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
+    status = parseInt(err.code)
+  } else {
+    logger.error(`Error with invalid code ${err.code}:`, err.message, err.stack)
+  }
+  if (status < 100 || status >= 600) {
+    status = 500
+  }
   if (_.includes(['UnauthorizedError', 'JwksError', 'SigningKeyNotFoundError'], name)) {
     status = 401
     reason = 'Authentication Error'
@@ -135,7 +144,7 @@ function errorToLocals (err, req) {
   if (status >= 500) {
     logger.error(err.message, err.stack)
   }
-  return {message, reason, status, error}
+  return { message, reason, status, error }
 }
 
 function sendError (err, req, res, next) {

@@ -43,49 +43,61 @@ limitations under the License.
               Table Options
             </v-tooltip>
           </div>
-          <v-list dense>
+          <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
+            <v-list-tile v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
               <v-list-tile-action>
-                <v-checkbox v-model="item.checked" color="cyan darken-2" @click="setColumnChecked(item)"></v-checkbox>
+                <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
               </v-list-tile-action>
-              <v-list-tile-sub-title>{{ item.text }}</v-list-tile-sub-title>
+              <v-list-tile-content class="grey--text text--darken-2">
+                <v-list-tile-title>{{ item.text }}</v-list-tile-title>
+              </v-list-tile-content>
             </v-list-tile>
-            <v-tooltip top>
-              <v-list-tile-action slot="activator">
-                <v-btn block flat class="text-xs-center cyan--text text--darken-2" @click.native.stop @click="resetColumnsChecked">
-                  Reset
-                </v-btn>
-              </v-list-tile-action>
-              <span>Reset to Defaults</span>
-            </v-tooltip>
-            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
-            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
-              <v-list-tile-action>
-                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
-              </v-list-tile-action>
-              <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
+            <v-list-tile>
+              <v-list-tile-content>
+                <v-tooltip top style="width: 100%">
+                  <v-btn slot="activator" block flat class="text-xs-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
+                    Reset
+                  </v-btn>
+                  <span>Reset to Defaults</span>
+                </v-tooltip>
+              </v-list-tile-content>
             </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+          </v-list>
+          <v-list subheader dense v-if="!projectScope">
+            <v-subheader>Filter Table</v-subheader>
+            <v-list-tile @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
               <v-list-tile-action>
-                <v-checkbox
-                  :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
-                  v-model="hideUserIssues"
-                  color="cyan darken-2"
-                  @click="toggleHideUserIssues"></v-checkbox>
+                <v-icon :color="checkboxColor(showOnlyShootsWithIssues)" v-text="checkboxIcon(showOnlyShootsWithIssues)"/>
               </v-list-tile-action>
-              <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
+              <v-list-tile-content class="grey--text text--darken-2">
+                <v-list-tile-title>Show only clusters with issues</v-list-tile-title>
+              </v-list-tile-content>
             </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideDeactivatedReconciliation" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
-              <v-list-tile-action>
-                <v-checkbox
+            <template v-if="isAdmin">
+              <v-list-tile
+                @click.stop="toggleHideUserIssues"
                 :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
-                v-model="hideDeactivatedReconciliation"
-                color="cyan darken-2"
-                @click="toggleHideDeactivatedReconciliation"></v-checkbox>
-              </v-list-tile-action>
-              <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide clusters with deactivated reconciliation</v-list-tile-sub-title>
-            </v-list-tile>
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideUserIssues)" v-text="checkboxIcon(hideUserIssues)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide user issues</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile
+                @click.stop="toggleHideDeactivatedReconciliation"
+                :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideDeactivatedReconciliation)" v-text="checkboxIcon(hideDeactivatedReconciliation)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide clusters with deactivated reconciliation</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
           </v-list>
         </v-menu>
       </v-toolbar>
@@ -126,7 +138,6 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import GPopper from '@/components/GPopper'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -136,7 +147,6 @@ export default {
   name: 'shoot-list',
   components: {
     CreateClusterDialog,
-    GPopper,
     ShootListRow,
     ClusterAccess
   },
@@ -205,6 +215,12 @@ export default {
       this.dialog = null
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
+    },
+    checkboxColor (checked) {
+      return checked ? 'cyan darken-2' : ''
+    },
+    checkboxIcon (checked) {
+      return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
     },
     setColumnChecked (header) {
       header.checked = !header.checked

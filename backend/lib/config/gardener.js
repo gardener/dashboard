@@ -42,16 +42,15 @@ function applySecretToConfig (config, secretsPath, objectPath) {
 }
 
 module.exports = {
-  getDefaults ({env} = process) {
+  getDefaults ({ env } = process) {
     const isProd = env.NODE_ENV === 'production'
-    const port = env.PORT || 3030
     return {
       isProd,
       logLevel: isProd ? 'warn' : 'debug',
-      port
+      port: 3030
     }
   },
-  getFilename ({argv, env} = process) {
+  getFilename ({ argv, env } = process) {
     if (/^test/.test(env.NODE_ENV)) {
       return joinPath(__dirname, 'test.yaml')
     }
@@ -63,12 +62,18 @@ module.exports = {
     }
     return joinPath(homedir(), '.gardener', 'config.yaml')
   },
-  loadConfig (filename, {env} = process) {
-    const config = this.getDefaults({env})
+  loadConfig (filename, { env } = process) {
+    const config = this.getDefaults({ env })
     try {
       if (filename) {
         if (this.existsSync(filename)) {
           _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
+        }
+        if (env.PORT) {
+          const port = parseInt(env.PORT, 10)
+          if (Number.isInteger(port)) {
+            config.port = port
+          }
         }
 
         const secretsPath = joinPath(dirname(filename), 'secrets')

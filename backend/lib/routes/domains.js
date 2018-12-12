@@ -25,7 +25,7 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send(await domains.list({user}))
+      res.send(await domains.list({ user }))
     } catch (err) {
       next(err)
     }

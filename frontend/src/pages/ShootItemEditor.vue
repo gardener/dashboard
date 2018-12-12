@@ -189,6 +189,7 @@ export default {
       if (data) {
         return omit(data, ['info'])
       }
+      return undefined
     },
     containerStyles () {
       return {

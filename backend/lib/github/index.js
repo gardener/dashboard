@@ -24,7 +24,7 @@ const {
   repository: repo
 } = config.gitHub || {}
 
-function searchIssues ({state, title} = {}) {
+function searchIssues ({ state, title } = {}) {
   const q = [
     `repo:${owner}/${repo}`
   ]
@@ -40,7 +40,7 @@ function searchIssues ({state, title} = {}) {
   })
 }
 
-function closeIssue ({number}) {
+function closeIssue ({ number }) {
   return octokit.issues.edit({
     owner,
     repo,
@@ -49,7 +49,7 @@ function closeIssue ({number}) {
   })
 }
 
-function getComments ({number}) {
+function getComments ({ number }) {
   return octokit.createPageStream(octokit.issues.getComments, {
     owner,
     repo,
@@ -57,7 +57,7 @@ function getComments ({number}) {
   })
 }
 
-function createComment ({number}, body) {
+function createComment ({ number }, body) {
   return octokit.issues.createComment({
     owner,
     repo,

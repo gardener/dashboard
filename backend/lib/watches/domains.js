@@ -22,7 +22,7 @@ const { getDomains } = require('../cache')
 
 module.exports = io => {
   const emitter = core.namespaces('garden').secrets.watch({
-    qs: {labelSelector: 'garden.sapcloud.io/role=default-domain'}
+    qs: { labelSelector: 'garden.sapcloud.io/role=default-domain' }
   })
   cacheResource(emitter, getDomains(), 'metadata.name')
 }

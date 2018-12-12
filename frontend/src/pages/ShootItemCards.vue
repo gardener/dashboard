@@ -197,7 +197,7 @@ limitations under the License.
           </v-card-title>
           <v-list subheader>
             <v-subheader>Addons provided by Gardener</v-subheader>
-            <v-list-tile avatar v-for="item in addonList" :key="item.name" v-if="addon(item.name).enabled">
+            <v-list-tile avatar v-for="item in shootAddonList" :key="item.name">
               <v-list-tile-avatar>
                 <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
               </v-list-tile-avatar>
@@ -321,6 +321,7 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import forEach from 'lodash/forEach'
+import filter from 'lodash/filter'
 import {
   getDateFormatted,
   getCloudProviderKind,
@@ -467,6 +468,9 @@ export default {
       return (name) => {
         return this.addons[name] || {}
       }
+    },
+    shootAddonList () {
+      return filter(this.addonList, item => this.addon(item.name).enabled)
     },
     customAddonList () {
       try {

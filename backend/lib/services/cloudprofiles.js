@@ -21,23 +21,23 @@ const { map, pick, assign, get, findIndex, find, filter } = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 const { getCloudProviderKind } = require('../utils')
 
-function fromResource ({cloudProfile: {metadata, spec}, seeds}) {
+function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
   const cloudProviderKind = getCloudProviderKind(spec)
   const keyStoneURL = get(spec, `${cloudProviderKind}.keystoneURL`)
   const name = get(metadata, 'name')
   const displayName = get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
-  metadata = assign(pick(metadata, 'resourceVersion'), {name, cloudProviderKind, displayName})
-  const data = assign(get(spec, `${cloudProviderKind}.constraints`), {seeds, keyStoneURL})
-  return {metadata, data}
+  metadata = assign(pick(metadata, 'resourceVersion'), { name, cloudProviderKind, displayName })
+  const data = assign(get(spec, `${cloudProviderKind}.constraints`), { seeds, keyStoneURL })
+  return { metadata, data }
 }
 
-function fromSeedResource ({metadata, spec}) {
+function fromSeedResource ({ metadata, spec }) {
   metadata = pick(metadata, ['name'])
   const data = get(spec, 'cloud')
-  return {metadata, data}
+  return { metadata, data }
 }
 
-async function getSeedsForCloudProfileName ({seeds, cloudProfileName}) {
+async function getSeedsForCloudProfileName ({ seeds, cloudProfileName }) {
   const predicate = item => get(item, 'spec.cloud.profile') === cloudProfileName
   const seedsForCloudProfileName = filter(seeds, predicate)
 
@@ -52,14 +52,14 @@ exports.list = async function () {
 
   const cloudProfiles = []
   for (const cloudProfile of filteredCloudProfileList) {
-    const seedsForCloudProfile = await getSeedsForCloudProfileName({seeds, cloudProfileName: cloudProfile.metadata.name})
-    cloudProfiles.push(fromResource({cloudProfile, seeds: seedsForCloudProfile}))
+    const seedsForCloudProfile = await getSeedsForCloudProfileName({ seeds, cloudProfileName: cloudProfile.metadata.name })
+    cloudProfiles.push(fromResource({ cloudProfile, seeds: seedsForCloudProfile }))
   }
 
   return Promise.resolve(cloudProfiles)
 }
 
-exports.read = async function ({name}) {
+exports.read = async function ({ name }) {
   const seeds = getVisibleAndNotProtectedSeeds()
 
   const seedWithNameExists = findIndex(seeds, ['spec.cloud.profile', name]) !== -1
@@ -71,6 +71,6 @@ exports.read = async function ({name}) {
   if (!cloudProfile) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
-  const seedsForCloudProfile = await getSeedsForCloudProfileName({seeds, cloudProfileName: name})
-  return Promise.resolve(fromResource({cloudProfile, seeds: seedsForCloudProfile}))
+  const seedsForCloudProfile = await getSeedsForCloudProfileName({ seeds, cloudProfileName: name })
+  return Promise.resolve(fromResource({ cloudProfile, seeds: seedsForCloudProfile }))
 }

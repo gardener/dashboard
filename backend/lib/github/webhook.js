@@ -30,7 +30,7 @@ const { getJournalCache } = require('../cache')
 // router
 const router = exports.router = express.Router()
 router.use(morgan('common', logger))
-router.post('/', bodyParser.json({verify: verifyHubSignature}), handleGithubEvent)
+router.post('/', bodyParser.json({ verify: verifyHubSignature }), handleGithubEvent)
 
 // security
 const defaultSignatureAlgorithm = Buffer.from('73686131', 'hex').toString('ascii')
@@ -75,10 +75,10 @@ function handleGithubEvent (req, res, next) {
     const { action, issue, comment } = req.body
     switch (event) {
       case 'issues':
-        handleIssue({action, issue})
+        handleIssue({ action, issue })
         break
       case 'issue_comment':
-        handleComment({action, issue, comment})
+        handleComment({ action, issue, comment })
         break
       default:
         logger.error(`Unhandled event: ${event}`)
@@ -90,14 +90,14 @@ function handleGithubEvent (req, res, next) {
 }
 exports.handleGithubEvent = handleGithubEvent
 
-function handleIssue ({action, issue}) {
+function handleIssue ({ action, issue }) {
   const cache = getJournalCache()
   issue = fromIssue(issue)
 
   if (action === 'closed') {
-    return cache.removeIssue({issue})
+    return cache.removeIssue({ issue })
   }
-  cache.addOrUpdateIssue({issue})
+  cache.addOrUpdateIssue({ issue })
 
   if (action === 'reopened') {
     const {
@@ -113,7 +113,7 @@ function handleIssue ({action, issue}) {
     }
     process.nextTick(async () => {
       try {
-        await loadIssueComments({number})
+        await loadIssueComments({ number })
       } catch (err) {
         logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
       }
@@ -122,18 +122,18 @@ function handleIssue ({action, issue}) {
 }
 exports.handleIssue = handleIssue
 
-function handleComment ({action, issue, comment}) {
+function handleComment ({ action, issue, comment }) {
   const cache = getJournalCache()
   const {
-    metadata: {namespace, name, number: issueNumber} = {}
+    metadata: { namespace, name, number: issueNumber } = {}
   } = issue = fromIssue(issue) || {}
   comment = fromComment(issueNumber, name, namespace, comment)
 
-  cache.addOrUpdateIssue({issue})
+  cache.addOrUpdateIssue({ issue })
 
   if (action === 'deleted') {
-    return cache.removeComment({issueNumber, comment})
+    return cache.removeComment({ issueNumber, comment })
   }
-  cache.addOrUpdateComment({issueNumber, comment})
+  cache.addOrUpdateComment({ issueNumber, comment })
 }
 exports.handleComment = handleComment
