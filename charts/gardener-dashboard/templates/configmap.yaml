@@ -27,7 +27,11 @@ data:
       ca: {{ toJson .Values.oidc.ca }}
 {{- end }}
       strictSsl: false
+{{- if hasKey .Values.oidc "rejectUnauthorized" }}
+      rejectUnauthorized: {{ .Values.oidc.rejectUnauthorized }}
+{{- else }}
       rejectUnauthorized: true
+{{- end }}
       cache: false
       rateLimit: false
 {{- if .Values.oidc.jwksUri }}
