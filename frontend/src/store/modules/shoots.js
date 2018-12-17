@@ -32,7 +32,8 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy } from '@/utils'
+import { isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy } from '@/utils'
+import semver from 'semver'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -307,11 +308,6 @@ const getSortVal = (item, sortBy) => {
         return 500
       }
       return 700
-    case 'k8sVersion':
-      const k8sVersion = value
-      const availableK8sUpdates = availableK8sUpdatesForShoot(spec)
-      const sortPrefix = availableK8sUpdates ? '_' : ''
-      return `${sortPrefix}${k8sVersion}`
     default:
       return toLower(value)
   }
@@ -325,7 +321,30 @@ const setSortedItems = (state) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
-    state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+    if (sortBy === 'k8sVersion') {
+      const sortedShoots = shoots(state)
+      sortedShoots.sort((a, b) => {
+        const versionA = getRawSortVal(a, sortBy)
+        const versionB = getRawSortVal(b, sortBy)
+
+        const inverse = descending ? -1 : 1
+        if (semver.gt(versionA, versionB)) {
+          return 1 * inverse
+        } else if (semver.lt(versionA, versionB)) {
+          return -1 * inverse
+        } else {
+          if (getRawSortVal(a, 'name') > getRawSortVal(b, 'name')) {
+            return 1
+          } else if (getRawSortVal(a, 'name') < getRawSortVal(b, 'name')) {
+            return -1
+          }
+          return 0
+        }
+      })
+      state.sortedShoots = sortedShoots
+    } else {
+      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+    }
   } else {
     state.sortedShoots = shoots(state)
   }
