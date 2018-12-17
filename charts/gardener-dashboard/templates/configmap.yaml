@@ -72,7 +72,7 @@ data:
 {{- else }}
         scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
 {{- end }}
-{{- if .Values.oidc.loadUserInfo }}
+{{- if hasKey .Values.oidc "loadUserInfo" }}
         loadUserInfo: {{ .Values.oidc.loadUserInfo }}
 {{- else }}
         loadUserInfo: false
