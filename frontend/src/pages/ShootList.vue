@@ -101,7 +101,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -138,6 +138,7 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import pick from 'lodash/pick'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -170,7 +171,7 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
+      pagination: this.$localStorage.getObject('dataTable_pagination') || {  },
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
       renderCreateDialog: false
@@ -178,8 +179,9 @@ export default {
   },
   watch: {
     pagination (value) {
+      console.log('pagination', value);
       if (value) {
-        this.$localStorage.setObject('dataTable_sortBy', { sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER })
+        this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
         this.setShootListSortParams(value)
       }
     },
