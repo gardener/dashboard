@@ -18,6 +18,9 @@ module.exports = {
       },
       '/config.json': {
         target: 'http://localhost:3030'
+      },
+      '/keys': {
+        target: 'http://localhost:3030'
       }
     }
   }

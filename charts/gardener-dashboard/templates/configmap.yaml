@@ -81,6 +81,14 @@ data:
 {{- else }}
         loadUserInfo: false
 {{- end }}
+{{- if .Values.oidc.metadata }}
+        metadata:
+{{ toYaml .Values.oidc.metadata | indent 10 }}
+{{- end }}
+{{- if .Values.oidc.signingKeys }}
+        signingKeys:
+{{ toYaml .Values.oidc.signingKeys | indent 8 }}
+{{- end }}
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}

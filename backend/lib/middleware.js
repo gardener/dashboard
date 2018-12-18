@@ -46,6 +46,16 @@ async function frontendConfig (req, res, next) {
   res.json(frontendConfig)
 }
 
+async function jsonWebKeySet (req, res, next) {
+  try {
+    const { jwksUri, ca, rejectUnauthorized = true } = config.jwks || {}
+    const response = await got(jwksUri, { json: true, ca, rejectUnauthorized })
+    res.json(response.body)
+  } catch (err) {
+    next(err)
+  }
+}
+
 function attachAuthorization (req, res, next) {
   const [scheme, bearer] = req.headers.authorization.split(' ')
   if (!/bearer/i.test(scheme)) {
@@ -192,6 +202,7 @@ module.exports = {
   jwtSecret,
   attachAuthorization,
   frontendConfig,
+  jsonWebKeySet,
   historyFallback,
   notFound,
   sendError,
