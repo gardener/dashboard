@@ -171,7 +171,7 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_pagination') || { },
+      pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
       renderCreateDialog: false
@@ -307,26 +307,8 @@ export default {
         }
       }
     },
-    currentMetadata () {
-      return get(this.selectedItem, 'metadata')
-    },
-    currentStatus () {
-      return get(this.selectedItem, 'status')
-    },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
-    },
-    currentNamespace () {
-      return get(this.selectedItem, 'metadata.namespace')
-    },
-    currentCreatedBy () {
-      return getCreatedBy(this.currentMetadata)
-    },
-    currentInfo () {
-      return get(this.selectedItem, 'info', {})
-    },
-    currentLog () {
-      return get(this.selectedItem, 'spec.status.lastOperation.description')
     },
     headers () {
       return this.allHeaders.filter(e => e.hidden === false)

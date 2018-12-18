@@ -32,7 +32,7 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy } from '@/utils'
+import { isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy, getProjectName } from '@/utils'
 import semver from 'semver'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -65,9 +65,19 @@ const getters = {
         const predicate = item => {
           let found = true
           forEach(state.searchValue, value => {
-            if (!includes(item.metadata.name, value)) {
-              found = false
+            if (includes(getRawVal(item, 'name'), value)) {
+              return
             }
+            if (includes(getRawVal(item, 'project'), value)) {
+              return
+            }
+            if (includes(getRawVal(item, 'createdBy'), value)) {
+              return
+            }
+            if (includes(getRawVal(item, 'k8sVersion'), value)) {
+              return
+            }
+            found = false
           })
           return found
         }
@@ -238,10 +248,10 @@ const difference = (object, base) => {
   return changes(object, base)
 }
 
-const getRawSortVal = (item, sortBy) => {
+const getRawVal = (item, column) => {
   const metadata = item.metadata
   const spec = item.spec
-  switch (sortBy) {
+  switch (column) {
     case 'purpose':
       return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
     case 'lastOperation':
@@ -251,18 +261,18 @@ const getRawSortVal = (item, sortBy) => {
     case 'createdBy':
       return getCreatedBy(metadata)
     case 'project':
-      return metadata.namespace
+      return getProjectName(metadata)
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
       return getCloudProviderKind(spec.cloud)
     default:
-      return metadata[sortBy]
+      return metadata[column]
   }
 }
 
 const getSortVal = (item, sortBy) => {
-  const value = getRawSortVal(item, sortBy)
+  const value = getRawVal(item, sortBy)
   const spec = item.spec
   switch (sortBy) {
     case 'purpose':
@@ -324,8 +334,8 @@ const setSortedItems = (state) => {
     if (sortBy === 'k8sVersion') {
       const sortedShoots = shoots(state)
       sortedShoots.sort((a, b) => {
-        const versionA = getRawSortVal(a, sortBy)
-        const versionB = getRawSortVal(b, sortBy)
+        const versionA = getRawVal(a, sortBy)
+        const versionB = getRawVal(b, sortBy)
 
         const inverse = descending ? -1 : 1
         if (semver.gt(versionA, versionB)) {
@@ -333,9 +343,9 @@ const setSortedItems = (state) => {
         } else if (semver.lt(versionA, versionB)) {
           return -1 * inverse
         } else {
-          if (getRawSortVal(a, 'name') > getRawSortVal(b, 'name')) {
+          if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
             return 1
-          } else if (getRawSortVal(a, 'name') < getRawSortVal(b, 'name')) {
+          } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
             return -1
           }
           return 0
@@ -361,7 +371,7 @@ const putItem = (state, newItem) => {
       } else if (sortBy !== 'lastOperation') { // don't check in this case as most put events will be lastOperation anyway
         const changes = difference(item, newItem)
         const sortBy = get(state, 'sortParams.sortBy')
-        if (!getRawSortVal(changes, sortBy)) {
+        if (!getRawVal(changes, sortBy)) {
           sortRequired = false
         }
       }

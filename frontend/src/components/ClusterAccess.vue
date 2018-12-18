@@ -79,7 +79,7 @@ import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
-import { isHibernated } from '@/utils'
+import { isHibernated, getProjectName } from '@/utils'
 import download from 'downloadjs'
 import { mapGetters } from 'vuex'
 
@@ -100,9 +100,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'projectList'
-    ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
@@ -121,8 +118,8 @@ export default {
     name () {
       return get(this.item, 'metadata.name')
     },
-    namespace () {
-      return get(this.item, 'metadata.namespace')
+    metadata () {
+      return get(this.item, 'metadata')
     },
     info () {
       return get(this.item, 'info', {})
@@ -154,8 +151,7 @@ export default {
       return this.expandKubeconfigIndex === 0
     },
     getQualifiedName () {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      const projectName = project.name || replace(this.namespace, /^garden-/, '')
+      const projectName = getProjectName(this.metadata)
       return `kubeconfig--${projectName}--${this.name}.yaml`
     }
   },
