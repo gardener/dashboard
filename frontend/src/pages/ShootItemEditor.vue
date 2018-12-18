@@ -129,10 +129,8 @@ import isEqual from 'lodash/isEqual'
 import assign from 'lodash/assign'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
-import find from 'lodash/find'
 import pick from 'lodash/pick'
 import noop from 'lodash/noop'
-import replace from 'lodash/replace'
 import isFunction from 'lodash/isFunction'
 
 // js-yaml
@@ -210,8 +208,8 @@ export default {
   },
   methods: {
     getQualifiedName () {
-      const { metadata: { name, namespace } } = this.value
-      const projectName = getProjectName(metadata)
+      const { name, namespace } = get(this, 'value.metadata')
+      const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
     },
     dismissModificationWarning () {

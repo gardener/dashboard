@@ -117,7 +117,6 @@ import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
-import replace from 'lodash/replace'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { getTimestampFormatted,

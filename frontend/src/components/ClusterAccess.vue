@@ -78,10 +78,8 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
-import replace from 'lodash/replace'
 import { isHibernated, getProjectName } from '@/utils'
 import download from 'downloadjs'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {

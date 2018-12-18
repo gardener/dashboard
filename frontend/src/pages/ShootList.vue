@@ -142,7 +142,6 @@ import pick from 'lodash/pick'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
-import { getCreatedBy } from '@/utils'
 
 export default {
   name: 'shoot-list',
