@@ -86,6 +86,8 @@ limitations under the License.
             <div class="content">
               <div class="title">{{username}}</div>
               <div class="caption">{{email}}</div>
+              <div class="caption" v-if="isAdmin">Operator</div>
+              <div class="caption" v-else>Member</div>
             </div>
           </v-card-title>
           <v-card-actions>
@@ -180,6 +182,7 @@ export default {
   .content {
     text-align: center;
     display: block;
+    width: 100%;
   }
 
   .action-button >>> .v-btn__content {
