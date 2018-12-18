@@ -51,12 +51,32 @@ data:
       dashboardUrl:
         pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
       oidc:
+{{- if .Values.oidc.authority }}
+        authority: {{ .Values.oidc.authority }}
+{{- else }}
         authority: {{ .Values.oidc.issuerUrl }}
+{{- end }}
         client_id: {{ .Values.oidc.clientId }}
+{{- if .Values.oidc.redirectUri }}
+        redirect_uri: {{ .Values.oidc.redirectUri }}
+{{- else }}
         redirect_uri: "{{ .Values.oidc.issuerUrl }}/callback"
+{{- end }}
+{{- if .Values.oidc.responseType }}
+        response_type: {{ .Values.oidc.responseType }}
+{{- else }}
         response_type: "token id_token"
+{{- end }}
+{{- if .Values.oidc.scope }}
+        scope: {{ .Values.oidc.scope }}
+{{- else }}
         scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
+{{- end }}
+{{- if hasKey .Values.oidc "loadUserInfo" }}
+        loadUserInfo: {{ .Values.oidc.loadUserInfo }}
+{{- else }}
         loadUserInfo: false
+{{- end }}
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
