@@ -101,7 +101,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -171,7 +171,7 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_pagination') || {  },
+      pagination: this.$localStorage.getObject('dataTable_pagination') || { },
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
       renderCreateDialog: false
@@ -179,7 +179,7 @@ export default {
   },
   watch: {
     pagination (value) {
-      console.log('pagination', value);
+      console.log('pagination', value)
       if (value) {
         this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
         this.setShootListSortParams(value)
