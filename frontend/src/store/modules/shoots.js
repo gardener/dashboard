@@ -32,7 +32,14 @@ import includes from 'lodash/includes'
 import split from 'lodash/split'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot, isHibernated, getCloudProviderKind, isUserError, isReconciliationDeactivated, getCreatedBy } from '@/utils'
+import { availableK8sUpdatesForShoot,
+  isHibernated,
+  getCloudProviderKind,
+  isUserError,
+  isReconciliationDeactivated,
+  isStatusProgressing,
+  getCreatedBy,
+  shootHasIssue } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -52,6 +59,7 @@ const state = {
   searchValue: undefined,
   selection: undefined,
   hideUserIssues: undefined,
+  hideProgressingIssues: undefined,
   hideDeactivatedReconciliation: undefined
 }
 
@@ -69,6 +77,12 @@ const getters = {
             }
           })
           return found
+        }
+        items = filter(items, predicate)
+      }
+      if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+        const predicate = item => {
+          return !isStatusProgressing(get(item, 'metadata', {}))
         }
         items = filter(items, predicate)
       }
@@ -99,6 +113,9 @@ const getters = {
   },
   isHideUserIssues () {
     return state.hideUserIssues
+  },
+  isHideProgressingIssues () {
+    return state.hideProgressingIssues
   },
   isHideDeactivatedReconciliation () {
     return state.hideDeactivatedReconciliation
@@ -218,6 +235,10 @@ const actions = {
   setHideUserIssues ({ commit }, value) {
     commit('SET_HIDE_USER_ISSUES', value)
     return state.hideUserIssues
+  },
+  setHideProgressingIssues ({ commit }, value) {
+    commit('SET_HIDE_PROGRESSING_ISSUES', value)
+    return state.hideProgressingIssues
   },
   setHideDeactivatedReconciliation ({ commit }, value) {
     commit('SET_HIDE_DEACTIVATED_RECONCILIATION', value)
@@ -404,7 +425,7 @@ const mutations = {
         case 'MODIFIED':
           if (rootState.namespace !== '_all' ||
             !rootState.onlyShootsWithIssues ||
-            rootState.onlyShootsWithIssues === !!get(event.object, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'])) {
+            rootState.onlyShootsWithIssues === shootHasIssue(event.object)) {
             // Do not add healthy shoots when onlyShootsWithIssues=true, this can happen when toggeling flag
             if (putItem(state, event.object)) {
               sortRequired = true
@@ -430,6 +451,9 @@ const mutations = {
   },
   SET_HIDE_USER_ISSUES (state, value) {
     state.hideUserIssues = value
+  },
+  SET_HIDE_PROGRESSING_ISSUES (state, value) {
+    state.hideProgressingIssues = value
   },
   SET_HIDE_DEACTIVATED_RECONCILIATION (state, value) {
     state.hideDeactivatedReconciliation = value

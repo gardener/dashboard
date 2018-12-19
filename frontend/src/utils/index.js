@@ -296,9 +296,16 @@ export function isUserError (errorCodes) {
   ]
   return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
 }
+export function shootHasIssue (shoot) {
+  return get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
+}
 
 export function isReconciliationDeactivated (metadata) {
   return get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+}
+
+export function isStatusProgressing (metadata) {
+  return get(metadata, ['labels', 'shoot.garden.sapcloud.io/status']) === 'progressing'
 }
 
 export function isSelfTerminationWarning (expirationTimestamp) {
