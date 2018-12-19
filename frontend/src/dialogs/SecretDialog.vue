@@ -25,7 +25,8 @@ limitations under the License.
         <v-container fill-height>
           <v-layout align-center justify-start row fill-height>
             <v-flex xs1>
-              <v-icon x-large class="white--text infra_icon">{{infraIcon}}</v-icon>
+              <img v-if="infraIcon === 'alicloud'" src="@/assets/alicloud-white.svg" width="42">
+              <v-icon v-else x-large class="white--text infra_icon">{{infraIcon}}</v-icon>
             </v-flex>
             <v-flex>
               <div class="credential_title">{{title}}</div>
