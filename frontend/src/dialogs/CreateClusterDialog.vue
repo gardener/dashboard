@@ -872,26 +872,26 @@ export default {
             }
           }
         case 'alicloud':
-            return {
-              setDefaultZone: this.setDefaultZone,
-              setDefaults: () => {
-                this.infrastructureData = {
-                  networks: {
-                    vpc: {
-                      cidr: '10.250.0.0/16'
-                    },
-                    nodes: '10.250.0.0/16',
-                    pods: '100.96.0.0/11',
-                    services: '100.64.0.0/13',
-                    workers: [
-                      '10.250.0.0/19'
-                    ]
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  vpc: {
+                    cidr: '10.250.0.0/16'
                   },
-                  workers: null,
-                  zones: null
-                }
+                  nodes: '10.250.0.0/16',
+                  pods: '100.96.0.0/11',
+                  services: '100.64.0.0/13',
+                  workers: [
+                    '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
               }
             }
+          }
       }
     },
     createShootResource () {

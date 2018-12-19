@@ -40,7 +40,7 @@ limitations under the License.
             @input="$v.accessKeyId.$touch()"
             @blur="$v.accessKeyId.$touch()"
             counter="128"
-            hint="e.g. AKIAIOSFODNN7EXAMPLE"
+            hint="e.g. QNJebZ17v5Q7pYpP"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -57,7 +57,8 @@ limitations under the License.
             @click:append="() => (hideSecret = !hideSecret)"
             @input="$v.accessKeySecret.$touch()"
             @blur="$v.accessKeySecret.$touch()"
-            hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
+            counter="30"
+            hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -70,7 +71,6 @@ limitations under the License.
 <script>
 import SecretDialog from '@/dialogs/SecretDialog'
 import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-import { alphaNumUnderscore, base64 } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
@@ -80,7 +80,8 @@ const validationErrors = {
     maxLength: 'It exceeds the maximum length of 128 characters.'
   },
   accessKeySecret: {
-    required: 'You can\'t leave this empty.'
+    required: 'You can\'t leave this empty.',
+    minLength: 'It must contain at least 30 characters.'
   }
 }
 
@@ -127,7 +128,8 @@ export default {
           maxLength: maxLength(128)
         },
         accessKeySecret: {
-          required
+          required,
+          minLength: minLength(30)
         }
       }
       return validators
