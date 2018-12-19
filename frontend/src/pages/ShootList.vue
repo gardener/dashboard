@@ -83,7 +83,7 @@ limitations under the License.
                   <v-icon :color="checkboxColor(hideProgressingIssues)" v-text="checkboxIcon(hideProgressingIssues)"/>
                 </v-list-tile-action>
                 <v-list-tile-content class="grey--text text--darken-2">
-                  <v-list-tile-title>Hide progressing shoots</v-list-tile-title>
+                  <v-list-tile-title>Hide progressing clusters</v-list-tile-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-list-tile
@@ -406,9 +406,9 @@ export default {
     headlineSubtitle () {
       let subtitle = ''
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
-        subtitle = 'Cluster Filters: Healthy'
+        subtitle = 'Hide: Healthy Clusters'
         if (this.isHideProgressingIssues) {
-          subtitle += ', Progressing Shoots'
+          subtitle += ', Progressing Clusters'
         }
         if (this.isHideUserIssues) {
           subtitle += ', User Errors'
