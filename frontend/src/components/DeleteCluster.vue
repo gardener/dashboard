@@ -48,14 +48,22 @@ limitations under the License.
                 Created By
               </v-list-tile-sub-title>
               <v-list-tile-title>
-                <account-avatar :account-name="createdBy" :size=22></account-avatar>
+                <account-avatar :account-name="createdBy" :size="22"></account-avatar>
               </v-list-tile-title>
             </v-list-tile-content>
           </v-list>
-          <br />
-          Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
-          <br />
-          <i class="red--text text--darken-2">This action cannot be undone.</i>
+          <p>
+            Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
+          </p>
+          <p>
+            <i class="red--text text--darken-2">This action cannot be undone.</i>
+          </p>
+          <p v-if="isReconciliationDeactivated()">
+            <v-layout row fill-height>
+              <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
+              <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
+            </v-layout>
+          </p>
         </template>
       </confirm-dialog>
     </template>
@@ -68,6 +76,7 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import get from 'lodash/get'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
+import { isReconciliationDeactivated } from '@/utils'
 import {
   getCreatedBy,
   isShootMarkedForDeletion
@@ -149,6 +158,9 @@ export default {
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
+    },
+    isReconciliationDeactivated() {
+      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     },
     reset () {
       this.errorMessage = null
