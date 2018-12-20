@@ -33,16 +33,25 @@ const jwt = require('express-jwt')
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
+// csp sources
 const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
-const issuerUrl = _.get(config, 'jwt.issuer')
-if (issuerUrl) {
-  connectSrc.push(issuerUrl)
+const authorityUrl = _.get(config, 'frontend.oidc.authority')
+if (authorityUrl) {
+  const authorityUrlOrigin = new URL(authorityUrl).origin
+  connectSrc.push(authorityUrlOrigin)
 }
-let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
+const jwksUri = _.get(config, 'jwks.jwksUri')
+if (jwksUri) {
+  const jwksUriOrigin = new URL(jwksUri).origin
+  if (!_.includes(connectSrc, jwksUriOrigin)) {
+    connectSrc.push(jwksUriOrigin)
+  }
+}
+const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
   const gitHubOrigin = new URL(gitHubRepoUrl).origin
-  imgSrc = _.concat(imgSrc, gitHubOrigin)
+  imgSrc.push(gitHubOrigin)
 }
 
 // configure app

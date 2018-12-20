@@ -227,6 +227,9 @@ const getters = {
   isHideUserIssues (state, getters) {
     return getters['shoots/isHideUserIssues']
   },
+  isHideProgressingIssues (state, getters) {
+    return getters['shoots/isHideProgressingIssues']
+  },
   isHideDeactivatedReconciliation (state, getters) {
     return getters['shoots/isHideDeactivatedReconciliation']
   }
@@ -332,6 +335,12 @@ const actions = {
   },
   setHideUserIssues ({ dispatch, commit }, value) {
     return dispatch('shoots/setHideUserIssues', value)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setHideProgressingIssues ({ dispatch, commit }, value) {
+    return dispatch('shoots/setHideProgressingIssues', value)
       .catch(err => {
         dispatch('setError', err)
       })

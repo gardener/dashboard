@@ -76,8 +76,19 @@ limitations under the License.
             </v-list-tile>
             <template v-if="isAdmin">
               <v-list-tile
+                @click.stop="toggleHideProgressingIssues"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideProgressingIssues)" v-text="checkboxIcon(hideProgressingIssues)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide progressing clusters</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile
                 @click.stop="toggleHideUserIssues"
-                :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
                 :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
                 <v-list-tile-action>
                   <v-icon :color="checkboxColor(hideUserIssues)" v-text="checkboxIcon(hideUserIssues)"/>
@@ -88,7 +99,7 @@ limitations under the License.
               </v-list-tile>
               <v-list-tile
                 @click.stop="toggleHideDeactivatedReconciliation"
-                :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
                 :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
                 <v-list-tile-action>
                   <v-icon :color="checkboxColor(hideDeactivatedReconciliation)" v-text="checkboxIcon(hideDeactivatedReconciliation)"/>
@@ -194,6 +205,7 @@ export default {
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
       setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
+      setHideProgressingIssues: 'setHideProgressingIssues',
       setHideUserIssues: 'setHideUserIssues',
       setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
     }),
@@ -258,6 +270,11 @@ export default {
         this.hideUserIssues = !this.hideUserIssues
       }
     },
+    toggleHideProgressingIssues () {
+      if (this.showOnlyShootsWithIssues) {
+        this.hideProgressingIssues = !this.hideProgressingIssues
+      }
+    },
     toggleHideDeactivatedReconciliation () {
       if (this.showOnlyShootsWithIssues) {
         this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
@@ -280,6 +297,7 @@ export default {
       selectedItem: 'selectedShoot',
       isAdmin: 'isAdmin',
       isHideUserIssues: 'isHideUserIssues',
+      isHideProgressingIssues: 'isHideProgressingIssues',
       isHideDeactivatedReconciliation: 'isHideDeactivatedReconciliation'
     }),
     ...mapState([
@@ -329,12 +347,12 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    isHideUserIssuesAndHideDeactedReconciliationDisabled () {
+    isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled () {
       return !this.showOnlyShootsWithIssues
     },
     hideUserIssues: {
       get () {
-        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
           return false
         }
         return this.isHideUserIssues
@@ -343,9 +361,20 @@ export default {
         this.setHideUserIssues(value)
       }
     },
+    hideProgressingIssues: {
+      get () {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
+          return false
+        }
+        return this.isHideProgressingIssues
+      },
+      set (value) {
+        this.setHideProgressingIssues(value)
+      }
+    },
     hideDeactivatedReconciliation: {
       get () {
-        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
           return false
         }
         return this.isHideDeactivatedReconciliation
@@ -355,12 +384,15 @@ export default {
       }
     },
     hideUserIssuesAndHideDeactivatedReconciliationClass () {
-      return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+      return this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
     },
     headlineSubtitle () {
       let subtitle = ''
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
-        subtitle = 'Cluster Filters: Healthy'
+        subtitle = 'Hide: Healthy Clusters'
+        if (this.isHideProgressingIssues) {
+          subtitle += ', Progressing Clusters'
+        }
         if (this.isHideUserIssues) {
           subtitle += ', User Errors'
         }
@@ -373,6 +405,9 @@ export default {
   },
   mounted () {
     this.floatingButton = true
+    if (this.hideProgressingIssues === undefined) {
+      this.hideProgressingIssues = true
+    }
     if (this.hideUserIssues === undefined) {
       this.hideUserIssues = this.isAdmin
     }

@@ -57,7 +57,7 @@ const isUnreservedLabel = _.negate(isReservedLabel)
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   let qs
   if (shootsWithIssuesOnly) {
-    qs = { labelSelector: 'shoot.garden.sapcloud.io/unhealthy=true' }
+    qs = { labelSelector: 'shoot.garden.sapcloud.io/status!=healthy' }
   }
   if (namespace) {
     return Garden(user).namespaces(namespace).shoots.get({ qs })

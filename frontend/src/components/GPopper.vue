@@ -20,7 +20,7 @@ limitations under the License.
     ref="popper"
     trigger="click"
     :options="popperOptions"
-    boundaries-selector=".application"
+    boundaries-selector=".v-content__wrap"
     >
     <div class="popper">
       <v-card>

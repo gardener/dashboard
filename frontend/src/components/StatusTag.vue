@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :title="chipText" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType" :popperPlacement="popperPlacement"></tag>
+  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :isProgressing="isProgressing" :title="chipTitle" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType" :popperPlacement="popperPlacement"></tag>
 </template>
 
 <script>
@@ -44,6 +44,19 @@ export default {
     chipText () {
       return this.tag.text || ''
     },
+    chipTitle () {
+      const text = this.chipText
+      if (this.isError) {
+        return `[ERROR] ${text}`
+      }
+      if (this.isUnknown) {
+        return `[UNKNOWN] ${text}`
+      }
+      if (this.isProgressing) {
+        return `[PROGRESSING] ${text}`
+      }
+      return text
+    },
     chipTextShortened () {
       if (this.$vuetify.breakpoint.mdAndDown) {
         return this.chipText.charAt(0)
@@ -54,22 +67,22 @@ export default {
       return ''
     },
     isError () {
-      switch (this.tag.status) {
-        case 'True':
-          return false
-        case 'False':
-          return true
-        default:
-          return false
+      if (this.tag.status === 'False') {
+        return true
       }
+      return false
     },
     isUnknown () {
-      switch (this.tag.status) {
-        case 'Unknown':
-          return true
-        default:
-          return false
+      if (this.tag.status === 'Unknown') {
+        return true
       }
+      return false
+    },
+    isProgressing () {
+      if (this.tag.status === 'Progressing') {
+        return true
+      }
+      return false
     },
     popperKeyWithType () {
       return `statusTag_${this.popperKey}`
