@@ -33,6 +33,7 @@ limitations under the License.
 
 <script>
 import GPopper from '@/components/GPopper'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -48,6 +49,10 @@ export default {
       required: true
     },
     isUnknown: {
+      type: Boolean,
+      required: false
+    },
+    isProgressing: {
       type: Boolean,
       required: false
     },
@@ -76,6 +81,9 @@ export default {
       if (this.isUnknown) {
         return 'grey lighten-1'
       }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
       return 'cyan darken-2'
     },
     chipTextColor () {
@@ -85,8 +93,14 @@ export default {
       if (this.isUnknown) {
         return 'grey lighten-1'
       }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
       return 'cyan darken-2'
-    }
+    },
+    ...mapGetters([
+      'isAdmin'
+    ])
   }
 }
 </script>

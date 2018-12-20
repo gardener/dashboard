@@ -50,7 +50,7 @@ function getCloudProviderKind (object) {
 }
 
 function shootHasIssue (shoot) {
-  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/unhealthy'], false)
+  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
 module.exports = {
