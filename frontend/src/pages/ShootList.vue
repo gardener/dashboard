@@ -189,7 +189,6 @@ export default {
   },
   watch: {
     pagination (value) {
-      console.log('pagination', value)
       if (value) {
         this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
         this.setShootListSortParams(value)
