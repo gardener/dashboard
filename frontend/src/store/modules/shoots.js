@@ -67,50 +67,7 @@ const state = {
 // getters
 const getters = {
   sortedItems () {
-    return (rootState) => {
-      let items = state.sortedShoots
-      if (state.searchValue) {
-        const predicate = item => {
-          let found = true
-          forEach(state.searchValue, value => {
-            if (includes(getRawVal(item, 'name'), value)) {
-              return
-            }
-            if (includes(getRawVal(item, 'project'), value)) {
-              return
-            }
-            if (includes(getRawVal(item, 'createdBy'), value)) {
-              return
-            }
-            if (includes(getRawVal(item, 'k8sVersion'), value)) {
-              return
-            }
-            found = false
-          })
-          return found
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isStatusProgressing(get(item, 'metadata', {}))
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isUserError(get(item, 'status.lastError.codes', []))
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isReconciliationDeactivated(get(item, 'metadata', {}))
-        }
-        items = filter(items, predicate)
-      }
-      return items
-    }
+    return state.sortedShoots
   },
   itemByNameAndNamespace () {
     return ({ namespace, name }) => {
@@ -151,7 +108,7 @@ const actions = {
         getShoot({ namespace, name, user })
           .then(res => {
             const item = res.data
-            commit('ITEM_PUT', item)
+            commit('ITEM_PUT', { newItem: item, rootState })
           }).then(() => resolve())
           .catch(error => reject(error))
       } else {
@@ -233,26 +190,26 @@ const actions = {
       }
     }
   },
-  setListSortParams ({ commit }, sortParams) {
+  setListSortParams ({ commit, rootState }, sortParams) {
     if (!isEqual(sortParams, state.sortParams)) {
-      commit('SET_SORTPARAMS', pick(sortParams, ['sortBy', 'descending']))
+      commit('SET_SORTPARAMS', { rootState, sortParams: pick(sortParams, ['sortBy', 'descending']) })
     }
   },
-  setListSearchValue ({ commit }, searchValue) {
+  setListSearchValue ({ commit, rootState }, searchValue) {
     if (!isEqual(searchValue, state.searchValue)) {
-      commit('SET_SEARCHVALUE', searchValue)
+      commit('SET_SEARCHVALUE', { rootState, searchValue })
     }
   },
-  setHideUserIssues ({ commit }, value) {
-    commit('SET_HIDE_USER_ISSUES', value)
+  setHideUserIssues ({ commit, rootState }, value) {
+    commit('SET_HIDE_USER_ISSUES', { rootState, value })
     return state.hideUserIssues
   },
-  setHideProgressingIssues ({ commit }, value) {
-    commit('SET_HIDE_PROGRESSING_ISSUES', value)
+  setHideProgressingIssues ({ commit, rootState }, value) {
+    commit('SET_HIDE_PROGRESSING_ISSUES', { rootState, value })
     return state.hideProgressingIssues
   },
-  setHideDeactivatedReconciliation ({ commit }, value) {
-    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', value)
+  setHideDeactivatedReconciliation ({ commit, rootState }, value) {
+    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', { rootState, value })
     return state.hideDeactivatedReconciliation
   }
 }
@@ -348,7 +305,7 @@ const shoots = (state) => {
   return map(Object.keys(state.shoots), (key) => state.shoots[key])
 }
 
-const setSortedItems = (state) => {
+const setSortedItems = (state, rootState) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
@@ -379,6 +336,52 @@ const setSortedItems = (state) => {
   } else {
     state.sortedShoots = shoots(state)
   }
+  applyItemFilters(state, rootState)
+}
+
+const applyItemFilters = (state, rootState) => {
+  let items = state.sortedShoots
+  if (state.searchValue) {
+    const predicate = item => {
+      let found = true
+      forEach(state.searchValue, value => {
+        if (includes(getRawVal(item, 'name'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'project'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'createdBy'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'k8sVersion'), value)) {
+          return
+        }
+        found = false
+      })
+      return found
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isStatusProgressing(get(item, 'metadata', {}))
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isUserError(get(item, 'status.lastError.codes', []))
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isReconciliationDeactivated(get(item, 'metadata', {}))
+    }
+    items = filter(items, predicate)
+  }
+  state.sortedShoots = items
 }
 
 const putItem = (state, newItem) => {
@@ -427,23 +430,23 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
-  SET_SORTPARAMS (state, sortParams) {
+  SET_SORTPARAMS (state, { rootState, sortParams }) {
     state.sortParams = sortParams
-    setSortedItems(state)
+    setSortedItems(state, rootState)
   },
-  SET_SEARCHVALUE (state, searchValue) {
+  SET_SEARCHVALUE (state, { rootState, searchValue }) {
     if (searchValue && searchValue.length > 0) {
       state.searchValue = split(searchValue, ' ')
     } else {
       state.searchValue = undefined
     }
-    setSortedItems(state)
+    applyItemFilters(state, rootState)
   },
-  ITEM_PUT (state, newItem) {
+  ITEM_PUT (state, { newItem, rootState }) {
     const sortRequired = putItem(state, newItem)
 
     if (sortRequired) {
-      setSortedItems(state)
+      setSortedItems(state, rootState)
     }
   },
   HANDLE_EVENTS (state, { rootState, events }) {
@@ -471,21 +474,24 @@ const mutations = {
       }
     })
     if (sortRequired) {
-      setSortedItems(state)
+      setSortedItems(state, rootState)
     }
   },
   CLEAR_ALL (state) {
     state.shoots = {}
     state.sortedShoots = []
   },
-  SET_HIDE_USER_ISSUES (state, value) {
+  SET_HIDE_USER_ISSUES (state, { rootState, value }) {
     state.hideUserIssues = value
+    applyItemFilters(state, rootState)
   },
-  SET_HIDE_PROGRESSING_ISSUES (state, value) {
+  SET_HIDE_PROGRESSING_ISSUES (state, { rootState, value }) {
     state.hideProgressingIssues = value
+    applyItemFilters(state, rootState)
   },
-  SET_HIDE_DEACTIVATED_RECONCILIATION (state, value) {
+  SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
     state.hideDeactivatedReconciliation = value
+    applyItemFilters(state, rootState)
   }
 }
 

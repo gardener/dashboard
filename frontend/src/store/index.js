@@ -105,7 +105,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems'](state)
+    return getters['shoots/sortedItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
