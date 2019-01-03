@@ -112,7 +112,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :hide-actions="hideActions" :total-items="totalItems">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -400,6 +400,12 @@ export default {
         }
       }
       return subtitle
+    },
+    hideActions () {
+      return this.projectScope
+    },
+    totalItems () {
+      return this.hideActions ? -1 : undefined
     }
   },
   mounted () {
