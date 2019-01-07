@@ -76,10 +76,10 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import get from 'lodash/get'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
-import { isReconciliationDeactivated } from '@/utils'
 import {
   getCreatedBy,
-  isShootMarkedForDeletion
+  isShootMarkedForDeletion,
+  isReconciliationDeactivated
 } from '@/utils'
 
 export default {
@@ -159,7 +159,7 @@ export default {
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
     },
-    isReconciliationDeactivated() {
+    isReconciliationDeactivated () {
       return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     },
     reset () {
