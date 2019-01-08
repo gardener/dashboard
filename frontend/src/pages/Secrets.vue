@@ -79,15 +79,22 @@ limitations under the License.
       </template>
     </secret>
 
-    <template v-if="showDisabledCloudProviders">
+    <secret
+    v-if="hasCloudProfileForCloudProviderKind('alicloud')"
+    class="mt-3"
+    infrastructureKey="alicloud"
+    infrastructureName="Alibaba Cloud"
+    secretDescriptorKey="accessKeyID"
+    icon="alicloud"
+    description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
+    color="grey darken-4"
+    @add="onAdd"
+    @toogleHelp="onToogleHelp"
+    @update="onUpdate"
+    @delete="onDelete"
+    ></secret>
 
-      <disabled-secret
-      class="mt-3"
-      infrastructureName="Alibaba Cloud"
-      icon="alibaba-cloud"
-      description="Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials."
-      color="black"
-      ></disabled-secret>
+    <template v-if="showDisabledCloudProviders">
 
       <disabled-secret
       class="mt-3"
@@ -135,6 +142,9 @@ limitations under the License.
     <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret"></openstack-dialog>
     <openstack-help-dialog v-model="dialogState.openstack.help"></openstack-help-dialog>
 
+    <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret"></alicloud-dialog>
+    <alicloud-help-dialog v-model="dialogState.alicloud.help"></alicloud-help-dialog>
+
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
     <v-fab-transition>
@@ -142,6 +152,9 @@ limitations under the License.
         <v-btn slot="activator" class="cyan darken-2" dark fab v-model="dialogState.speedDial">
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
+        </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
+          <img src="@/assets/alicloud-white.svg" width="20">
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="orange" @click="onAdd('openstack')">
           <v-icon>mdi-server-network</v-icon>
@@ -172,6 +185,8 @@ import AzureDialog from '@/dialogs/SecretDialogAzure'
 import AzureHelpDialog from '@/dialogs/SecretDialogAzureHelp'
 import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
+import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
+import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
@@ -189,6 +204,8 @@ export default {
     AwsHelpDialog,
     OpenstackDialog,
     OpenstackHelpDialog,
+    AlicloudDialog,
+    AlicloudHelpDialog,
     DeleteDialog,
     Secret,
     DisabledSecret
@@ -210,6 +227,10 @@ export default {
           help: false
         },
         openstack: {
+          visible: false,
+          help: false
+        },
+        alicloud: {
           visible: false,
           help: false
         },
@@ -269,6 +290,8 @@ export default {
           return '/static/background_gcp.svg'
         case 'openstack':
           return '/static/background_openstack.svg'
+        case 'alicloud':
+          return '/static/background_alicloud.svg'
       }
       return '/static/background_aws.svg'
     },

@@ -32,7 +32,8 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
         <div slot="activator">
-          <infra-icon v-model="row.kind"></infra-icon>
+          <img v-if="row.kind === 'alicloud'" src="@/assets/alicloud.svg" width="20" class="mr-2">
+          <infra-icon v-else v-model="row.kind"></infra-icon>
           {{ row.region }}
         </div>
         <span>{{ row.kind }} [{{ row.region }}]</span>
