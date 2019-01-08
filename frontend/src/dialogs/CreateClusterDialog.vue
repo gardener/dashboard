@@ -738,7 +738,7 @@ export default {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
     },
     sortedCloudProviderKindList () {
-      return intersection(['openstack', 'aws', 'azure', 'gcp', 'alicloud'], this.cloudProviderKindList)
+      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], this.cloudProviderKindList)
     },
     projectName () {
       const predicate = item => item.metadata.namespace === this.namespace
