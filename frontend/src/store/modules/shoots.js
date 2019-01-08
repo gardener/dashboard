@@ -30,7 +30,9 @@ import padStart from 'lodash/padStart'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
+import join from 'lodash/join'
 import semver from 'semver'
+import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
@@ -56,6 +58,7 @@ const findItem = ({ name, namespace }) => {
 const state = {
   shoots: {},
   sortedShoots: [],
+  filteredAndSortedShoots: [],
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
@@ -67,7 +70,7 @@ const state = {
 // getters
 const getters = {
   sortedItems () {
-    return state.sortedShoots
+    return state.filteredAndSortedShoots
   },
   itemByNameAndNamespace () {
     return ({ namespace, name }) => {
@@ -244,6 +247,11 @@ const getRawVal = (item, column) => {
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
       return getCloudProviderKind(spec.cloud)
+    case 'infrastructure_search':
+      return get(spec, 'cloud.profile')
+    case 'journalLabels':
+      const labels = store.getters.journalsLabels(metadata)
+      return join(map(labels, 'name'), ' ')
     default:
       return metadata[column]
   }
@@ -336,10 +344,10 @@ const setSortedItems = (state, rootState) => {
   } else {
     state.sortedShoots = shoots(state)
   }
-  applyItemFilters(state, rootState)
+  setFilteredAndSortedItems(state, rootState)
 }
 
-const applyItemFilters = (state, rootState) => {
+const setFilteredAndSortedItems = (state, rootState) => {
   let items = state.sortedShoots
   if (state.searchValue) {
     const predicate = item => {
@@ -348,13 +356,22 @@ const applyItemFilters = (state, rootState) => {
         if (includes(getRawVal(item, 'name'), value)) {
           return
         }
+        if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+          return
+        }
         if (includes(getRawVal(item, 'project'), value)) {
           return
         }
         if (includes(getRawVal(item, 'createdBy'), value)) {
           return
         }
+        if (includes(getRawVal(item, 'purpose'), value)) {
+          return
+        }
         if (includes(getRawVal(item, 'k8sVersion'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'journalLabels'), value)) {
           return
         }
         found = false
@@ -381,7 +398,8 @@ const applyItemFilters = (state, rootState) => {
     }
     items = filter(items, predicate)
   }
-  state.sortedShoots = items
+
+  state.filteredAndSortedShoots = items
 }
 
 const putItem = (state, newItem) => {
@@ -440,7 +458,7 @@ const mutations = {
     } else {
       state.searchValue = undefined
     }
-    applyItemFilters(state, rootState)
+    setFilteredAndSortedItems(state, rootState)
   },
   ITEM_PUT (state, { newItem, rootState }) {
     const sortRequired = putItem(state, newItem)
@@ -483,15 +501,15 @@ const mutations = {
   },
   SET_HIDE_USER_ISSUES (state, { rootState, value }) {
     state.hideUserIssues = value
-    applyItemFilters(state, rootState)
+    setFilteredAndSortedItems(state, rootState)
   },
   SET_HIDE_PROGRESSING_ISSUES (state, { rootState, value }) {
     state.hideProgressingIssues = value
-    applyItemFilters(state, rootState)
+    setFilteredAndSortedItems(state, rootState)
   },
   SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
     state.hideDeactivatedReconciliation = value
-    applyItemFilters(state, rootState)
+    setFilteredAndSortedItems(state, rootState)
   }
 }
 
