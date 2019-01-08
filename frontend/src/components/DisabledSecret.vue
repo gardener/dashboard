@@ -17,8 +17,7 @@ limitations under the License.
 <template>
   <v-card class="mr-extra card_disabled">
     <v-toolbar :class="toolbarClass" dark>
-      <img v-if="icon === 'alicloud'" src="@/assets/alicloud-white.svg" width="32">
-      <img v-else-if="icon === 'digital-ocean'" src="@/assets/digital-ocean.svg" width="32">
+      <img v-if="icon === 'digital-ocean'" src="@/assets/digital-ocean.svg" width="32">
       <img v-else-if="icon === 'vmware'" src="@/assets/vmware.svg" width="32">
       <img v-else-if="icon === 'china-telecom'" src="@/assets/china-telecom.svg" width="32">
       <v-icon v-else class="white--text pr-2">{{icon}}</v-icon>
