@@ -193,9 +193,10 @@ const actions = {
       }
     }
   },
-  setListSortParams ({ commit, rootState }, sortParams) {
+  setListSortParams ({ commit, rootState }, pagination) {
+    const sortParams = pick(pagination, ['sortBy', 'descending'])
     if (!isEqual(sortParams, state.sortParams)) {
-      commit('SET_SORTPARAMS', { rootState, sortParams: pick(sortParams, ['sortBy', 'descending']) })
+      commit('SET_SORTPARAMS', { rootState, sortParams })
     }
   },
   setListSearchValue ({ commit, rootState }, searchValue) {
@@ -247,8 +248,8 @@ const getRawVal = (item, column) => {
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
       return getCloudProviderKind(spec.cloud)
-    case 'infrastructure_search':
-      return get(spec, 'cloud.profile')
+    case 'infrastructure_region':
+      return get(spec, 'cloud.region')
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
@@ -356,7 +357,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
         if (includes(getRawVal(item, 'name'), value)) {
           return
         }
-        if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+        if (includes(getRawVal(item, 'infrastructure_region'), value)) {
           return
         }
         if (includes(getRawVal(item, 'project'), value)) {

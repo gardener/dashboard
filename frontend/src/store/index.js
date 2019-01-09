@@ -327,8 +327,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, sortParams) {
-    return dispatch('shoots/setListSortParams', sortParams)
+  setShootListSortParams ({ dispatch }, pagination) {
+    return dispatch('shoots/setListSortParams', pagination)
       .catch(err => {
         dispatch('setError', err)
       })
