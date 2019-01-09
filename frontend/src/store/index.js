@@ -58,8 +58,8 @@ const state = {
   sidebar: true,
   user: null,
   loading: false,
-  error: null,
   alert: null,
+  alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null
 }
@@ -201,17 +201,17 @@ const getters = {
   username (state) {
     return get(state, 'user.profile.name')
   },
-  hasError () {
-    return !!state.error
-  },
-  errorMessage () {
-    return get(state, 'error.message', '')
-  },
   alertMessage () {
     return get(state, 'alert.message', '')
   },
   alertType () {
     return get(state, 'alert.type', 'error')
+  },
+  alertBannerMessage () {
+    return get(state, 'alertBanner.message', '')
+  },
+  alertBannerType () {
+    return get(state, 'alertBanner.type', 'error')
   },
   isCurrentNamespace (state, getters) {
     return (namespace) => {
@@ -434,7 +434,7 @@ const actions = {
     commit('SET_CONFIGURATION', value)
 
     if (get(value, 'alert')) {
-      commit('SET_ALERT', get(value, 'alert'))
+      commit('SET_ALERT_BANNER', get(value, 'alert'))
     }
 
     return state.cfg
@@ -491,12 +491,16 @@ const actions = {
     return state.websocketConnectionError
   },
   setError ({ commit }, value) {
-    commit('SET_ERROR', value)
-    return state.error
+    commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
+    return state.alert
   },
   setAlert ({ commit }, value) {
     commit('SET_ALERT', value)
     return state.alert
+  },
+  setAlertBanner ({ commit }, value) {
+    commit('SET_ALERT_BANNER', value)
+    return state.alertBanner
   }
 }
 
@@ -539,11 +543,11 @@ const mutations = {
       state.websocketConnectionError = null
     }
   },
-  SET_ERROR (state, value) {
-    state.error = value
-  },
   SET_ALERT (state, value) {
     state.alert = value
+  },
+  SET_ALERT_BANNER (state, value) {
+    state.alertBanner = value
   }
 }
 
