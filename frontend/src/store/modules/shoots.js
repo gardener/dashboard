@@ -248,8 +248,8 @@ const getRawVal = (item, column) => {
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
       return getCloudProviderKind(spec.cloud)
-    case 'infrastructure_region':
-      return get(spec, 'cloud.region')
+    case 'infrastructure_search':
+      return `${get(spec, 'cloud.region')} ${getCloudProviderKind(spec.cloud)}`
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
@@ -357,7 +357,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
         if (includes(getRawVal(item, 'name'), value)) {
           return
         }
-        if (includes(getRawVal(item, 'infrastructure_region'), value)) {
+        if (includes(getRawVal(item, 'infrastructure_search'), value)) {
           return
         }
         if (includes(getRawVal(item, 'project'), value)) {
