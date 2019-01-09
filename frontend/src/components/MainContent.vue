@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-content>
-    <v-alert :type="alertBannerType" v-model="alertBannerVisible" dismissible>
+    <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
       <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
     </v-alert>
     <router-view></router-view>
@@ -104,5 +104,9 @@ export default {
     p {
       display: inline !important;
     }
+  }
+
+  .alertBanner {
+    margin-top: 0px;
   }
 </style>
