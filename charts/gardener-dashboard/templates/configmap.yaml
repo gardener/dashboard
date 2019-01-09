@@ -26,7 +26,6 @@ data:
 {{- if .Values.oidc.ca }}
       ca: {{ toJson .Values.oidc.ca }}
 {{- end }}
-      strictSsl: false
 {{- if hasKey .Values.oidc "rejectUnauthorized" }}
       rejectUnauthorized: {{ .Values.oidc.rejectUnauthorized }}
 {{- else }}
