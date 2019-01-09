@@ -324,7 +324,7 @@ const setSortedItems = (state, rootState) => {
         const versionA = getRawVal(a, sortBy)
         const versionB = getRawVal(b, sortBy)
 
-        const inverse = descending ? -1 : 1
+        const inverse = descending === 'desc' ? -1 : 1
         if (semver.gt(versionA, versionB)) {
           return 1 * inverse
         } else if (semver.lt(versionA, versionB)) {

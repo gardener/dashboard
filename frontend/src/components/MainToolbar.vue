@@ -87,7 +87,6 @@ limitations under the License.
               <div class="title">{{username}}</div>
               <div class="caption">{{email}}</div>
               <div class="caption" v-if="isAdmin">Operator</div>
-              <div class="caption" v-else>Member</div>
             </div>
           </v-card-title>
           <v-card-actions>

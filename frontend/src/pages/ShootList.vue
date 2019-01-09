@@ -251,8 +251,7 @@ export default {
       }
       this.saveColumnsChecked()
 
-      this.pagination.sortBy = 'name'
-      this.pagination.descending = false
+      this.pagination = { rowsPerPage: 10 }
     },
     loadColumnsChecked () {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
