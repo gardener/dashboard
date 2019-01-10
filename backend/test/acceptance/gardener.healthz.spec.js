@@ -37,7 +37,8 @@ describe('gardener', function () {
         .get('/healthz')
         .then(res => {
           expect(res).to.have.status(200)
-          expect(res.text).to.equal('ok')
+          expect(res).to.be.json
+          expect(res.body).to.eql({status: 'ok'})
         })
     })
   })

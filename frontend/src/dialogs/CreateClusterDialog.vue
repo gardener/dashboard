@@ -61,15 +61,17 @@ limitations under the License.
                       v-model="infrastructureKind"
                       >
                       <template slot="item" slot-scope="data">
-                        <v-list-tile-avatar>
-                          <infra-icon v-model="data.item"></infra-icon>
-                        </v-list-tile-avatar>
+                        <v-list-tile-action>
+                          <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24">
+                          <infra-icon v-else v-model="data.item"></infra-icon>
+                        </v-list-tile-action>
                         <v-list-tile-content>
                           <v-list-tile-title>{{data.item}}</v-list-tile-title>
                         </v-list-tile-content>
                       </template>
                       <template slot="selection" slot-scope="data">
-                        <v-avatar size="30px">
+                        <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24" class="mr-2">
+                        <v-avatar v-else size="30px">
                           <infra-icon v-model="data.item"></infra-icon>
                         </v-avatar>
                         <span class="black--text">
@@ -269,6 +271,21 @@ limitations under the License.
                       </v-btn>
                     </worker-input-openstack>
 
+                    <worker-input-generic :worker.sync="worker" ref="workerInput"
+                      :workers.sync="workers"
+                      :cloudProfileName="cloudProfileName"
+                      v-if="infrastructureKind === 'alicloud'">
+                      <v-btn v-show="index>0 || workers.length>1"
+                        small
+                        slot="action"
+                        outline
+                        icon
+                        class="grey--text lighten-2"
+                        @click.native.stop="workers.splice(index, 1)">
+                        <v-icon>mdi-close</v-icon>
+                      </v-btn>
+                    </worker-input-generic>
+
                   </v-flex>
                 </v-layout>
                 <v-layout row key="1234" class="list-complete-item pt-4 pl-3 ">
@@ -380,9 +397,9 @@ import pick from 'lodash/pick'
 import omit from 'lodash/omit'
 import concat from 'lodash/concat'
 import sample from 'lodash/sample'
+import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import CodeBlock from '@/components/CodeBlock'
 import InfraIcon from '@/components/InfrastructureIcon'
 import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
@@ -497,7 +514,6 @@ export default {
   components: {
     WorkerInputGeneric,
     WorkerInputOpenstack,
-    CodeBlock,
     InfraIcon,
     Alert,
     CloudProfile,
@@ -722,7 +738,7 @@ export default {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
     },
     sortedCloudProviderKindList () {
-      return sortBy(this.cloudProviderKindList)
+      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], this.cloudProviderKindList)
     },
     projectName () {
       const predicate = item => item.metadata.namespace === this.namespace
@@ -844,6 +860,27 @@ export default {
               this.infrastructureData = {
                 networks: {
                   nodes: '10.250.0.0/19',
+                  pods: '100.96.0.0/11',
+                  services: '100.64.0.0/13',
+                  workers: [
+                    '10.250.0.0/19'
+                  ]
+                },
+                workers: null,
+                zones: null
+              }
+            }
+          }
+        case 'alicloud':
+          return {
+            setDefaultZone: this.setDefaultZone,
+            setDefaults: () => {
+              this.infrastructureData = {
+                networks: {
+                  vpc: {
+                    cidr: '10.250.0.0/16'
+                  },
+                  nodes: '10.250.0.0/16',
                   pods: '100.96.0.0/11',
                   services: '100.64.0.0/13',
                   workers: [

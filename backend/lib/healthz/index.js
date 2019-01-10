@@ -17,20 +17,21 @@
 'use strict'
 
 const express = require('express')
-const router = module.exports = express.Router()
+const router = express.Router()
 const kubernetes = require('../kubernetes')
 const { format: fmt } = require('util')
 
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      res.send(await check())
+      await healthCheck()
+      res.send('ok')
     } catch (err) {
       next(err)
     }
   })
 
-async function check () {
+async function healthCheck () {
   let response
   try {
     response = await kubernetes.healthz().healthz.get()
@@ -38,9 +39,12 @@ async function check () {
     throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', error))
   }
 
-  if (response.statusCode === 200) {
-    return 'ok'
-  } else {
+  if (response.statusCode !== 200) {
     throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.body, response.statusCode))
   }
+}
+
+module.exports = {
+  router,
+  healthCheck
 }

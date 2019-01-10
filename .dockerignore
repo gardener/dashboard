@@ -1,4 +1,28 @@
-*/.git*
-*/node_modules
-*/*.md
-*/public
+# Ignore everything
+**
+
+# include backend files and folders
+!backend/package*.json
+!backend/.babelrc
+!backend/.eslintrc.js
+!backend/.nycrc
+!backend/server.js
+!backend/lib
+!backend/test
+
+# include frontend folder
+!frontend/package*.json
+!frontend/.browserslistrc
+!frontend/.editorconfig
+!frontend/.env
+!frontend/.eslintignore
+!frontend/.eslintrc.js
+!frontend/*.config.js
+!frontend/public
+!frontend/src
+!frontend/test
+
+# include metadata files
+!LICENSE.md
+!NOTICE.md
+!VERSION

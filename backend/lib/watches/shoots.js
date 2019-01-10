@@ -35,7 +35,7 @@ module.exports = io => {
 
       const name = event.object.metadata.name
       const namespace = event.object.metadata.namespace
-      const namespacedEvents = {kind: 'shoots', namespaces: {}}
+      const namespacedEvents = { kind: 'shoots', namespaces: {} }
       namespacedEvents.namespaces[namespace] = [event]
       io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
       io.of('/shoots').to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
@@ -45,7 +45,7 @@ module.exports = io => {
 
       if (event.type === 'DELETED') {
         try {
-          await journals.deleteJournals({namespace, name})
+          await journals.deleteJournals({ namespace, name })
         } catch (error) {
           logger.error('failed to delete journals for %s/%s: %s', namespace, name, error)
         }

@@ -2,7 +2,7 @@ apiVersion: {{ include "deploymentversion" . }}
 kind: Deployment
 metadata:
   name: identity
-  namespace: kube-system
+  namespace: {{ .Release.Namespace }}
   labels:
     app: identity
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -18,6 +18,9 @@ spec:
     metadata:
       annotations:
         checksum/configmap-identity-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.kubeconfig }}
+        checksum/secret-identity-kubeconfig: {{ include (print $.Template.BasePath "/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
       labels:
         app: identity
         release: {{ .Release.Name }}
@@ -30,7 +33,16 @@ spec:
             - key: config.yaml
               path: config.yaml
             name: identity-configmap
+        {{- if .Values.kubeconfig }}
+        - name: kubeconfig
+          secret:
+            secretName: identity-kubeconfig
+        {{- end }}
+      {{- if .Values.kubeconfig }}
+      automountServiceAccountToken: false
+      {{- else }}
       serviceAccountName: identity
+      {{- end }}
       containers:
         - name: dex
           command:
@@ -62,3 +74,7 @@ spec:
           volumeMounts:
           - mountPath: /etc/dex
             name: config
+          {{- if .Values.kubeconfig }}
+          - mountPath: /etc/kubeconfig
+            name: kubeconfig
+          {{- end }}

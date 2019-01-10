@@ -28,7 +28,7 @@ router.route('/')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      res.send(await infrastructureSecrets.list({user, namespace}))
+      res.send(await infrastructureSecrets.list({ user, namespace }))
     } catch (err) {
       next(err)
     }
@@ -38,7 +38,7 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const body = req.body
-      res.send(await infrastructureSecrets.create({user, namespace, body}))
+      res.send(await infrastructureSecrets.create({ user, namespace, body }))
     } catch (err) {
       next(err)
     }
@@ -51,7 +51,7 @@ router.route('/:name')
       const namespace = req.params.namespace
       const bindingName = req.params.name
       const body = req.body
-      res.send(await infrastructureSecrets.patch({user, namespace, bindingName, body}))
+      res.send(await infrastructureSecrets.patch({ user, namespace, bindingName, body }))
     } catch (err) {
       next(err)
     }
@@ -61,7 +61,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const bindingName = req.params.name
-      res.send(await infrastructureSecrets.remove({user, namespace, bindingName}))
+      res.send(await infrastructureSecrets.remove({ user, namespace, bindingName }))
     } catch (err) {
       next(err)
     }

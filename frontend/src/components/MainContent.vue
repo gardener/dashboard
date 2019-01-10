@@ -16,12 +16,17 @@ limitations under the License.
 
 <template>
   <v-content>
+    <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
+      <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
+    </v-alert>
     <router-view></router-view>
   </v-content>
 </template>
 
 <script>
 import set from 'lodash/set'
+import { mapGetters, mapActions } from 'vuex'
+import marked from 'marked'
 
 function setElementStyle (element, key, value) {
   if (element) {
@@ -39,7 +44,35 @@ function setWrapElementHeight (element, value) {
 
 export default {
   name: 'main-content',
+  computed: {
+    ...mapGetters([
+      'alertBannerMessage',
+      'alertBannerType'
+    ]),
+    alertBannerVisible: {
+      get () {
+        return !!this.alertBannerMessage
+      },
+      set (value) {
+        if (!value) {
+          this.setAlertBanner(null)
+        }
+      }
+    },
+    alertBannerMessageCompiledMarkdown () {
+      const options = {
+        gfm: true,
+        breaks: true,
+        tables: true,
+        sanitize: true
+      }
+      return marked(this.alertBannerMessage, options)
+    }
+  },
   methods: {
+    ...mapActions([
+      'setAlertBanner'
+    ]),
     getWrapElement () {
       return this.$el.querySelector(':scope > div[class$="wrap"]')
     },
@@ -62,3 +95,18 @@ export default {
   }
 }
 </script>
+
+<style lang="styl">
+  .alertBannerMessage {
+    a {
+      color: white !important;
+    }
+    p {
+      display: inline !important;
+    }
+  }
+
+  .alertBanner {
+    margin-top: 0px;
+  }
+</style>

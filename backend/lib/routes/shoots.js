@@ -28,7 +28,7 @@ router.route('/')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      res.send(await shoots.list({user, namespace}))
+      res.send(await shoots.list({ user, namespace }))
     } catch (err) {
       next(err)
     }
@@ -38,7 +38,7 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const body = req.body
-      res.send(await shoots.create({user, namespace, body}))
+      res.send(await shoots.create({ user, namespace, body }))
     } catch (err) {
       next(err)
     }
@@ -50,7 +50,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await shoots.read({user, namespace, name}))
+      res.send(await shoots.read({ user, namespace, name }))
     } catch (err) {
       next(err)
     }
@@ -61,7 +61,7 @@ router.route('/:name')
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replace({user, namespace, name, body}))
+      res.send(await shoots.replace({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -71,7 +71,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await shoots.remove({user, namespace, name}))
+      res.send(await shoots.remove({ user, namespace, name }))
     } catch (err) {
       next(err)
     }
@@ -84,7 +84,7 @@ router.route('/:name/spec/kubernetes/version')
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceVersion({user, namespace, name, body}))
+      res.send(await shoots.replaceVersion({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -97,7 +97,7 @@ router.route('/:name/spec/maintenance')
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceMaintenance({user, namespace, name, body}))
+      res.send(await shoots.replaceMaintenance({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -110,7 +110,7 @@ router.route('/:name/spec/hibernation/enabled')
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceHibernationEnabled({user, namespace, name, body}))
+      res.send(await shoots.replaceHibernationEnabled({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
@@ -123,7 +123,7 @@ router.route('/:name/metadata/annotations')
       const namespace = req.params.namespace
       const name = req.params.name
       const annotations = req.body
-      res.send(await shoots.patchAnnotations({user, namespace, name, annotations}))
+      res.send(await shoots.patchAnnotations({ user, namespace, name, annotations }))
     } catch (err) {
       next(err)
     }
@@ -135,7 +135,7 @@ router.route('/:name/info')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await shoots.info({user, namespace, name}))
+      res.send(await shoots.info({ user, namespace, name }))
     } catch (err) {
       next(err)
     }

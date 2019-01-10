@@ -29,7 +29,7 @@ const Default = () => import('@/layouts/Default')
 /* Pages */
 const Home = () => import('@/pages/Home')
 const ShootList = () => import('@/pages/ShootList')
-const PlaceholderComponent = { template: '<router-view></router-view>' }
+
 const ShootItemCards = () => import('@/pages/ShootItemCards')
 const ShootItemEditor = () => import('@/pages/ShootItemEditor')
 const ShootItemTerminal = () => import('@/pages/ShootItemTerminal')
@@ -43,15 +43,16 @@ Vue.use(Router)
 export default function createRouter ({ store, userManager }) {
   /* technical components */
   const Logout = {
-    template: '<div/>',
     beforeRouteEnter (to, from, next) {
       signout(userManager)
         .then(() => next('/login'), err => next(err))
+    },
+    render (createElement, { data, children } = {}) {
+      return createElement('div', data, children)
     }
   }
 
   const Callback = {
-    template: '<div/>',
     beforeRouteEnter (to, from, next) {
       return signinCallback(userManager)
         .then(user => store.dispatch('setUser', user))
@@ -60,6 +61,15 @@ export default function createRouter ({ store, userManager }) {
     mounted () {
       // eslint-disable-next-line lodash/prefer-lodash-method
       this.$router.replace('/')
+    },
+    render (createElement, { data, children } = {}) {
+      return createElement('div', data, children)
+    }
+  }
+
+  const PlaceholderComponent = {
+    render (createElement) {
+      return createElement('router-view')
     }
   }
 

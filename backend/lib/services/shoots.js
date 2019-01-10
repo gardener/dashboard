@@ -22,12 +22,12 @@ const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const _ = require('lodash')
 
-function Garden ({auth}) {
-  return kubernetes.garden({auth})
+function Garden ({ auth }) {
+  return kubernetes.garden({ auth })
 }
 
-function Core ({auth}) {
-  return kubernetes.core({auth})
+function Core ({ auth }) {
+  return kubernetes.core({ auth })
 }
 
 function isReserved (key) {
@@ -54,40 +54,40 @@ function isReservedLabel (value, key) {
 
 const isUnreservedLabel = _.negate(isReservedLabel)
 
-exports.list = async function ({user, namespace, shootsWithIssuesOnly = false}) {
+exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   let qs
   if (shootsWithIssuesOnly) {
-    qs = {labelSelector: 'shoot.garden.sapcloud.io/unhealthy=true'}
+    qs = { labelSelector: 'shoot.garden.sapcloud.io/status!=healthy' }
   }
   if (namespace) {
-    return Garden(user).namespaces(namespace).shoots.get({qs})
+    return Garden(user).namespaces(namespace).shoots.get({ qs })
   } else {
     // only works if user is member of garden-administrators (admin)
-    return Garden(user).shoots.get({qs})
+    return Garden(user).shoots.get({ qs })
   }
 }
 
-exports.create = async function ({user, namespace, body}) {
+exports.create = async function ({ user, namespace, body }) {
   const username = user.id
   const finalizers = ['gardener']
   const annotations = {
     'garden.sapcloud.io/createdBy': username
   }
-  body = _.merge({}, body, {metadata: {namespace, finalizers, annotations}})
-  return Garden(user).namespaces(namespace).shoots.post({body})
+  body = _.merge({}, body, { metadata: { namespace, finalizers, annotations } })
+  return Garden(user).namespaces(namespace).shoots.post({ body })
 }
 
-exports.read = async function ({user, namespace, name}) {
-  return Garden(user).namespaces(namespace).shoots.get({name})
+exports.read = async function ({ user, namespace, name }) {
+  return Garden(user).namespaces(namespace).shoots.get({ name })
 }
 
-const patch = exports.patch = async function ({user, namespace, name, body}) {
-  return Garden(user).namespaces(namespace).shoots.mergePatch({name, body})
+const patch = exports.patch = async function ({ user, namespace, name, body }) {
+  return Garden(user).namespaces(namespace).shoots.mergePatch({ name, body })
 }
 
-exports.replace = async function ({user, namespace, name, body}) {
+exports.replace = async function ({ user, namespace, name, body }) {
   const shoots = Garden(user).namespaces(namespace).shoots
-  const { metadata: oldMetadata, kind, apiVersion, status } = await shoots.get({name})
+  const { metadata: oldMetadata, kind, apiVersion, status } = await shoots.get({ name })
   const { metadata: newMetadata, spec } = body
   // labels
   const reservedLabels = _.pickBy(oldMetadata.labels, isReservedLabel)
@@ -98,14 +98,14 @@ exports.replace = async function ({user, namespace, name, body}) {
   const unreservedAnnotations = _.pickBy(newMetadata.annotations, isUnreservedAnnotation)
   const annotations = _.assign(unreservedAnnotations, reservedAnnotations)
   // metadata
-  const metadata = _.assign({}, oldMetadata, {labels, annotations})
+  const metadata = _.assign({}, oldMetadata, { labels, annotations })
   // body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return shoots.put({name, body})
+  return shoots.put({ name, body })
 }
 
-exports.replaceVersion = async function ({user, namespace, name, body}) {
+exports.replaceVersion = async function ({ user, namespace, name, body }) {
   const version = body.version
   const patchOperations = [
     {
@@ -114,10 +114,10 @@ exports.replaceVersion = async function ({user, namespace, name, body}) {
       value: version
     }
   ]
-  return Garden(user).namespaces(namespace).shoots.jsonPatch({name, body: patchOperations})
+  return Garden(user).namespaces(namespace).shoots.jsonPatch({ name, body: patchOperations })
 }
 
-exports.replaceHibernationEnabled = async function ({user, namespace, name, body}) {
+exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
   const enabled = !!body.enabled
   const payload = {
     spec: {
@@ -126,11 +126,11 @@ exports.replaceHibernationEnabled = async function ({user, namespace, name, body
       }
     }
   }
-  return patch({user, namespace, name, body: payload})
+  return patch({ user, namespace, name, body: payload })
 }
 
-exports.replaceMaintenance = async function ({user, namespace, name, body}) {
-  const {timeWindowBegin, timeWindowEnd, updateKubernetesVersion} = body
+exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
+  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
   const payload = {
     spec: {
       maintenance: {
@@ -144,31 +144,31 @@ exports.replaceMaintenance = async function ({user, namespace, name, body}) {
       }
     }
   }
-  return patch({user, namespace, name, body: payload})
+  return patch({ user, namespace, name, body: payload })
 }
 
-const patchAnnotations = async function ({user, namespace, name, annotations}) {
+const patchAnnotations = async function ({ user, namespace, name, annotations }) {
   const body = {
     metadata: {
       annotations: annotations
     }
   }
-  return patch({user, namespace, name, body})
+  return patch({ user, namespace, name, body })
 }
 exports.patchAnnotations = patchAnnotations
 
-exports.remove = async function ({user, namespace, name}) {
+exports.remove = async function ({ user, namespace, name }) {
   const annotations = {
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }
-  await patchAnnotations({user, namespace, name, annotations})
+  await patchAnnotations({ user, namespace, name, annotations })
 
-  return Garden(user).namespaces(namespace).shoots.delete({name})
+  return Garden(user).namespaces(namespace).shoots.delete({ name })
 }
 
-exports.info = async function ({user, namespace, name}) {
+exports.info = async function ({ user, namespace, name }) {
   const core = Core(user)
-  const readKubeconfigPromise = core.ns(namespace).secrets.get({name: `${name}.kubeconfig`})
+  const readKubeconfigPromise = core.ns(namespace).secrets.get({ name: `${name}.kubeconfig` })
     .catch(err => {
       if (err.code === 404) {
         return
@@ -180,7 +180,7 @@ exports.info = async function ({user, namespace, name}) {
     shoot,
     secret
   ] = await Promise.all([
-    this.read({user, namespace, name}),
+    this.read({ user, namespace, name }),
     readKubeconfigPromise
   ])
 
@@ -213,7 +213,7 @@ exports.info = async function ({user, namespace, name}) {
   if (isAdmin) {
     const seedSecretName = _.get(seed, 'spec.secretRef.name')
     const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-    const seedSecret = await core.ns(seedSecretNamespace).secrets.get({name: seedSecretName})
+    const seedSecret = await core.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
       .catch(err => {
         if (err.code === 404) {
           return
@@ -226,7 +226,7 @@ exports.info = async function ({user, namespace, name}) {
 
       const seedShootNS = _.get(shoot, 'status.technicalID')
       if (!_.isEmpty(seedShootNS)) {
-        const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({name: 'monitoring-ingress-credentials'})
+        const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({ name: 'monitoring-ingress-credentials' })
           .catch(err => {
             if (err.code === 404) {
               return

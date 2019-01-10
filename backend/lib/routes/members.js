@@ -28,7 +28,7 @@ router.route('/')
     try {
       const user = req.user
       const namespace = req.params.namespace
-      res.send(await members.list({user, namespace}))
+      res.send(await members.list({ user, namespace }))
     } catch (err) {
       next(err)
     }
@@ -38,7 +38,7 @@ router.route('/')
       const user = req.user
       const namespace = req.params.namespace
       const body = req.body
-      res.send(await members.create({user, namespace, body}))
+      res.send(await members.create({ user, namespace, body }))
     } catch (err) {
       next(err)
     }
@@ -50,7 +50,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await members.get({user, namespace, name}))
+      res.send(await members.get({ user, namespace, name }))
     } catch (err) {
       next(err)
     }
@@ -60,7 +60,7 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await members.remove({user, namespace, name}))
+      res.send(await members.remove({ user, namespace, name }))
     } catch (err) {
       next(err)
     }

@@ -26,9 +26,9 @@ module.exports = {
           schemes: ['https'],
           operationId: 'healthzCheck',
           responses: {
-            '200': {description: 'OK'},
-            '401': {description: 'Unauthorized'},
-            '503': {description: 'Unhealthy'}
+            '200': { description: 'OK' },
+            '401': { description: 'Unauthorized' },
+            '503': { description: 'Unhealthy' }
           }
         }
       }

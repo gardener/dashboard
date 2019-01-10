@@ -58,8 +58,8 @@ const state = {
   sidebar: true,
   user: null,
   loading: false,
-  error: null,
   alert: null,
+  alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null
 }
@@ -105,7 +105,7 @@ const getters = {
     }
   },
   shootList (state, getters) {
-    return getters['shoots/sortedItems'](state)
+    return getters['shoots/sortedItems']
   },
   selectedShoot (state, getters) {
     return getters['shoots/selectedItem']
@@ -201,17 +201,17 @@ const getters = {
   username (state) {
     return get(state, 'user.profile.name')
   },
-  hasError () {
-    return !!state.error
-  },
-  errorMessage () {
-    return get(state, 'error.message', '')
-  },
   alertMessage () {
     return get(state, 'alert.message', '')
   },
   alertType () {
     return get(state, 'alert.type', 'error')
+  },
+  alertBannerMessage () {
+    return get(state, 'alertBanner.message', '')
+  },
+  alertBannerType () {
+    return get(state, 'alertBanner.type', 'error')
   },
   isCurrentNamespace (state, getters) {
     return (namespace) => {
@@ -226,6 +226,9 @@ const getters = {
   },
   isHideUserIssues (state, getters) {
     return getters['shoots/isHideUserIssues']
+  },
+  isHideProgressingIssues (state, getters) {
+    return getters['shoots/isHideProgressingIssues']
   },
   isHideDeactivatedReconciliation (state, getters) {
     return getters['shoots/isHideDeactivatedReconciliation']
@@ -324,14 +327,20 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, sortParams) {
-    return dispatch('shoots/setListSortParams', sortParams)
+  setShootListSortParams ({ dispatch }, pagination) {
+    return dispatch('shoots/setListSortParams', pagination)
       .catch(err => {
         dispatch('setError', err)
       })
   },
   setHideUserIssues ({ dispatch, commit }, value) {
     return dispatch('shoots/setHideUserIssues', value)
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  setHideProgressingIssues ({ dispatch, commit }, value) {
+    return dispatch('shoots/setHideProgressingIssues', value)
       .catch(err => {
         dispatch('setError', err)
       })
@@ -425,7 +434,7 @@ const actions = {
     commit('SET_CONFIGURATION', value)
 
     if (get(value, 'alert')) {
-      commit('SET_ALERT', get(value, 'alert'))
+      commit('SET_ALERT_BANNER', get(value, 'alert'))
     }
 
     return state.cfg
@@ -482,12 +491,16 @@ const actions = {
     return state.websocketConnectionError
   },
   setError ({ commit }, value) {
-    commit('SET_ERROR', value)
-    return state.error
+    commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
+    return state.alert
   },
   setAlert ({ commit }, value) {
     commit('SET_ALERT', value)
     return state.alert
+  },
+  setAlertBanner ({ commit }, value) {
+    commit('SET_ALERT_BANNER', value)
+    return state.alertBanner
   }
 }
 
@@ -530,11 +543,11 @@ const mutations = {
       state.websocketConnectionError = null
     }
   },
-  SET_ERROR (state, value) {
-    state.error = value
-  },
   SET_ALERT (state, value) {
     state.alert = value
+  },
+  SET_ALERT_BANNER (state, value) {
+    state.alertBanner = value
   }
 }
 

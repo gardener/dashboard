@@ -116,6 +116,7 @@ limitations under the License.
 import CopyBtn from '@/components/CopyBtn'
 import { mapGetters } from 'vuex'
 import { replaceShoot } from '@/utils/api'
+import { getProjectName } from '@/utils'
 import download from 'downloadjs'
 
 // codemirror
@@ -128,10 +129,8 @@ import isEqual from 'lodash/isEqual'
 import assign from 'lodash/assign'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
-import find from 'lodash/find'
 import pick from 'lodash/pick'
 import noop from 'lodash/noop'
-import replace from 'lodash/replace'
 import isFunction from 'lodash/isFunction'
 
 // js-yaml
@@ -181,7 +180,6 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'projectList',
       'shootByNamespaceAndName'
     ]),
     value () {
@@ -189,6 +187,7 @@ export default {
       if (data) {
         return omit(data, ['info'])
       }
+      return undefined
     },
     containerStyles () {
       return {
@@ -209,9 +208,8 @@ export default {
   },
   methods: {
     getQualifiedName () {
-      const { metadata: { name, namespace } } = this.value
-      const project = find(this.projectList, ['metadata.namespace', namespace])
-      const projectName = project.name || replace(namespace, /^garden-/, '')
+      const { name, namespace } = get(this, 'value.metadata')
+      const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
     },
     dismissModificationWarning () {

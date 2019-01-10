@@ -16,37 +16,63 @@
 
 'use strict'
 
-const winston = require('winston')
 const config = require('./config')
 
-winston.emitErrs = true
+const LEVELS = {
+  trace: 0,
+  debug: 1,
+  info: 2,
+  warn: 3,
+  error: 4
+}
+const level = LEVELS[process.env.LOG_LEVEL || config.logLevel] || 2
+const silent = /^test/.test(process.env.NODE_ENV)
 
-const transports = [
-  new winston.transports.Console({
-    level: process.env.LOG_LEVEL || config.logLevel,
-    silent: /^test/.test(process.env.NODE_ENV),
-    prettyPrint: true,
-    colorize: true,
-    timestamp: true
-  })
-]
-
-class Stream {
-  constructor (logger) {
-    this.logger = logger
+class Logger {
+  constructor () {
+    const self = this
+    this.stream = {
+      write (message, encoding) {
+        /* jshint unused:false */
+        if (message) {
+          self.http(message.replace(/[\n\s]*$/, ''))
+        }
+      }
+    }
   }
-  write (message, encoding) {
-    /* jshint unused:false */
-    if (message) {
-      this.logger.info(message.replace(/[\n\s]*$/, ''))
+  get ts () {
+    return '\u001b[37m' + new Date().toISOString() + '\u001b[39m'
+  }
+  http (msg, ...args) {
+    if (!silent && level <= LEVELS.warn) {
+      console.log(this.ts + ' - \u001b[35mhttp\u001b[39m:' + msg, ...args)
+    }
+  }
+  log (msg, ...args) {
+    if (!silent && level <= LEVELS.warn) {
+      console.log(this.ts + ' - \u001b[90mlog\u001b[39m: ' + msg, ...args)
+    }
+  }
+  debug (msg, ...args) {
+    if (!silent && level <= LEVELS.debug) {
+      console.debug(this.ts + ' - \u001b[34mdebug\u001b[39m: ' + msg, ...args)
+    }
+  }
+  info (msg, ...args) {
+    if (!silent && level <= LEVELS.info) {
+      console.info(this.ts + ' - \u001b[32minfo\u001b[39m: ' + msg, ...args)
+    }
+  }
+  warn (msg, ...args) {
+    if (!silent && level <= LEVELS.warn) {
+      console.warn(this.ts + ' - \u001b[33mwarn\u001b[39m: ' + msg, ...args)
+    }
+  }
+  error (msg, ...args) {
+    if (!silent && level <= LEVELS.error) {
+      console.error(this.ts + ' - \u001b[31merror\u001b[39m: ' + msg, ...args)
     }
   }
 }
 
-const logger = new winston.Logger({
-  transports: transports,
-  exitOnError: true
-})
-logger.stream = new Stream(logger)
-
-module.exports = logger
+module.exports = new Logger()

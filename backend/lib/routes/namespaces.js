@@ -26,7 +26,7 @@ router.route('/')
     try {
       const user = req.user
       const qs = req.query
-      res.send(await projects.list({user, qs}))
+      res.send(await projects.list({ user, qs }))
     } catch (err) {
       next(err)
     }
@@ -35,7 +35,7 @@ router.route('/')
     try {
       const user = req.user
       const body = req.body
-      res.send(await projects.create({user, body}))
+      res.send(await projects.create({ user, body }))
     } catch (err) {
       next(err)
     }
@@ -46,7 +46,7 @@ router.route('/:namespace')
     try {
       const user = req.user
       const name = req.params.namespace
-      res.send(await projects.read({user, name}))
+      res.send(await projects.read({ user, name }))
     } catch (err) {
       next(err)
     }
@@ -56,7 +56,7 @@ router.route('/:namespace')
       const user = req.user
       const name = req.params.namespace
       const body = req.body
-      res.send(await projects.patch({user, name, body}))
+      res.send(await projects.patch({ user, name, body }))
     } catch (err) {
       next(err)
     }
@@ -65,7 +65,7 @@ router.route('/:namespace')
     try {
       const user = req.user
       const name = req.params.namespace
-      res.send(await projects.remove({user, name}))
+      res.send(await projects.remove({ user, name }))
     } catch (err) {
       next(err)
     }

@@ -20,6 +20,9 @@ spec:
         checksum/configmap-gardener-dashboard-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         checksum/secret-gardener-dashboard-prometheus: {{ include (print $.Template.BasePath "/secret-prometheus.yaml") . | sha256sum }}
         checksum/secret-gardener-dashboard-github: {{ include (print $.Template.BasePath "/secret-github.yaml") . | sha256sum }}
+        {{- if .Values.kubeconfig }}
+        checksum/secret-gardener-dashboard-kubeconfig: {{ include (print $.Template.BasePath "/secret-kubeconfig.yaml") . | sha256sum }}
+        {{- end }}
       labels:
         app: gardener-dashboard
         release: {{ .Release.Name }}
@@ -54,12 +57,19 @@ spec:
           - key: webhookSecret
             path: webhookSecret
       {{- end }}
+      {{- if .Values.kubeconfig }}
+      - name: gardener-dashboard-secret-kubeconfig
+        secret:
+          secretName: gardener-dashboard-kubeconfig
+      {{- end }}
+      {{- if .Values.kubeconfig }}
+      automountServiceAccountToken: false
+      {{- else }}
       serviceAccountName: gardener-dashboard
+      {{- end }}
       containers:
         - name: gardener-dashboard
-          command:
-            - node
-            - server.js
+          args:
             - /etc/gardener-dashboard/config.yaml
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -67,6 +77,32 @@ spec:
             - name: http
               containerPort: {{ .Values.containerPort }}
               protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.kubeconfig }}
+          env:
+          - name: KUBECONFIG
+            value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
+          {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           volumeMounts:
@@ -80,6 +116,11 @@ spec:
           {{- if .Values.gitHub }}
           - name: gardener-dashboard-secret-github
             mountPath: /etc/gardener-dashboard/secrets/gitHub
+            readOnly: true
+          {{- end }}
+          {{- if .Values.kubeconfig }}
+          - name: gardener-dashboard-secret-kubeconfig
+            mountPath: /etc/gardener-dashboard/secrets/kubeconfig
             readOnly: true
           {{- end }}
       restartPolicy: Always
