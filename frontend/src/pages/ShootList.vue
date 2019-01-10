@@ -112,7 +112,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :hide-actions="hideActions" :total-items="totalItems" :rows-per-page-items="[5,10,20]">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -149,10 +149,10 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
+import pick from 'lodash/pick'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
-import { getCreatedBy } from '@/utils'
 
 export default {
   name: 'shoot-list',
@@ -181,7 +181,7 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
+      pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
       renderCreateDialog: false
@@ -190,7 +190,7 @@ export default {
   watch: {
     pagination (value) {
       if (value) {
-        this.$localStorage.setObject('dataTable_sortBy', { sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER })
+        this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
         this.setShootListSortParams(value)
       }
     },
@@ -251,8 +251,7 @@ export default {
       }
       this.saveColumnsChecked()
 
-      this.pagination.sortBy = 'name'
-      this.pagination.descending = false
+      this.pagination = { rowsPerPage: 10 }
     },
     loadColumnsChecked () {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
@@ -323,26 +322,8 @@ export default {
         }
       }
     },
-    currentMetadata () {
-      return get(this.selectedItem, 'metadata')
-    },
-    currentStatus () {
-      return get(this.selectedItem, 'status')
-    },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
-    },
-    currentNamespace () {
-      return get(this.selectedItem, 'metadata.namespace')
-    },
-    currentCreatedBy () {
-      return getCreatedBy(this.currentMetadata)
-    },
-    currentInfo () {
-      return get(this.selectedItem, 'info', {})
-    },
-    currentLog () {
-      return get(this.selectedItem, 'spec.status.lastOperation.description')
     },
     headers () {
       return this.allHeaders.filter(e => e.hidden === false)
@@ -418,6 +399,12 @@ export default {
         }
       }
       return subtitle
+    },
+    hideActions () {
+      return this.projectScope
+    },
+    totalItems () {
+      return this.hideActions ? -1 : undefined
     }
   },
   mounted () {

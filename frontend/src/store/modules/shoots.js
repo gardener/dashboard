@@ -30,15 +30,18 @@ import padStart from 'lodash/padStart'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
+import join from 'lodash/join'
+import semver from 'semver'
+import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { isNotFound } from '@/utils/error'
-import { availableK8sUpdatesForShoot,
-  isHibernated,
+import { isHibernated,
   getCloudProviderKind,
   isUserError,
   isReconciliationDeactivated,
   isStatusProgressing,
   getCreatedBy,
+  getProjectName,
   shootHasIssue } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
@@ -55,6 +58,7 @@ const findItem = ({ name, namespace }) => {
 const state = {
   shoots: {},
   sortedShoots: [],
+  filteredAndSortedShoots: [],
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
@@ -66,40 +70,7 @@ const state = {
 // getters
 const getters = {
   sortedItems () {
-    return (rootState) => {
-      let items = state.sortedShoots
-      if (state.searchValue) {
-        const predicate = item => {
-          let found = true
-          forEach(state.searchValue, value => {
-            if (!includes(item.metadata.name, value)) {
-              found = false
-            }
-          })
-          return found
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isStatusProgressing(get(item, 'metadata', {}))
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isUserError(get(item, 'status.lastError.codes', []))
-        }
-        items = filter(items, predicate)
-      }
-      if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-        const predicate = item => {
-          return !isReconciliationDeactivated(get(item, 'metadata', {}))
-        }
-        items = filter(items, predicate)
-      }
-      return items
-    }
+    return state.filteredAndSortedShoots
   },
   itemByNameAndNamespace () {
     return ({ namespace, name }) => {
@@ -140,7 +111,7 @@ const actions = {
         getShoot({ namespace, name, user })
           .then(res => {
             const item = res.data
-            commit('ITEM_PUT', item)
+            commit('ITEM_PUT', { newItem: item, rootState })
           }).then(() => resolve())
           .catch(error => reject(error))
       } else {
@@ -222,26 +193,27 @@ const actions = {
       }
     }
   },
-  setListSortParams ({ commit }, sortParams) {
+  setListSortParams ({ commit, rootState }, pagination) {
+    const sortParams = pick(pagination, ['sortBy', 'descending'])
     if (!isEqual(sortParams, state.sortParams)) {
-      commit('SET_SORTPARAMS', pick(sortParams, ['sortBy', 'descending']))
+      commit('SET_SORTPARAMS', { rootState, sortParams })
     }
   },
-  setListSearchValue ({ commit }, searchValue) {
+  setListSearchValue ({ commit, rootState }, searchValue) {
     if (!isEqual(searchValue, state.searchValue)) {
-      commit('SET_SEARCHVALUE', searchValue)
+      commit('SET_SEARCHVALUE', { rootState, searchValue })
     }
   },
-  setHideUserIssues ({ commit }, value) {
-    commit('SET_HIDE_USER_ISSUES', value)
+  setHideUserIssues ({ commit, rootState }, value) {
+    commit('SET_HIDE_USER_ISSUES', { rootState, value })
     return state.hideUserIssues
   },
-  setHideProgressingIssues ({ commit }, value) {
-    commit('SET_HIDE_PROGRESSING_ISSUES', value)
+  setHideProgressingIssues ({ commit, rootState }, value) {
+    commit('SET_HIDE_PROGRESSING_ISSUES', { rootState, value })
     return state.hideProgressingIssues
   },
-  setHideDeactivatedReconciliation ({ commit }, value) {
-    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', value)
+  setHideDeactivatedReconciliation ({ commit, rootState }, value) {
+    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', { rootState, value })
     return state.hideDeactivatedReconciliation
   }
 }
@@ -258,10 +230,10 @@ const difference = (object, base) => {
   return changes(object, base)
 }
 
-const getRawSortVal = (item, sortBy) => {
+const getRawVal = (item, column) => {
   const metadata = item.metadata
   const spec = item.spec
-  switch (sortBy) {
+  switch (column) {
     case 'purpose':
       return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
     case 'lastOperation':
@@ -271,18 +243,23 @@ const getRawSortVal = (item, sortBy) => {
     case 'createdBy':
       return getCreatedBy(metadata)
     case 'project':
-      return metadata.namespace
+      return getProjectName(metadata)
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
       return getCloudProviderKind(spec.cloud)
+    case 'infrastructure_search':
+      return `${get(spec, 'cloud.region')} ${getCloudProviderKind(spec.cloud)}`
+    case 'journalLabels':
+      const labels = store.getters.journalsLabels(metadata)
+      return join(map(labels, 'name'), ' ')
     default:
-      return metadata[sortBy]
+      return metadata[column]
   }
 }
 
 const getSortVal = (item, sortBy) => {
-  const value = getRawSortVal(item, sortBy)
+  const value = getRawVal(item, sortBy)
   const spec = item.spec
   switch (sortBy) {
     case 'purpose':
@@ -328,11 +305,6 @@ const getSortVal = (item, sortBy) => {
         return 500
       }
       return 700
-    case 'k8sVersion':
-      const k8sVersion = value
-      const availableK8sUpdates = availableK8sUpdatesForShoot(spec)
-      const sortPrefix = availableK8sUpdates ? '_' : ''
-      return `${sortPrefix}${k8sVersion}`
     default:
       return toLower(value)
   }
@@ -342,14 +314,93 @@ const shoots = (state) => {
   return map(Object.keys(state.shoots), (key) => state.shoots[key])
 }
 
-const setSortedItems = (state) => {
+const setSortedItems = (state, rootState) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
-    state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+    if (sortBy === 'k8sVersion') {
+      const sortedShoots = shoots(state)
+      sortedShoots.sort((a, b) => {
+        const versionA = getRawVal(a, sortBy)
+        const versionB = getRawVal(b, sortBy)
+
+        const inverse = descending === 'desc' ? -1 : 1
+        if (semver.gt(versionA, versionB)) {
+          return 1 * inverse
+        } else if (semver.lt(versionA, versionB)) {
+          return -1 * inverse
+        } else {
+          if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
+            return 1
+          } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
+            return -1
+          }
+          return 0
+        }
+      })
+      state.sortedShoots = sortedShoots
+    } else {
+      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+    }
   } else {
     state.sortedShoots = shoots(state)
   }
+  setFilteredAndSortedItems(state, rootState)
+}
+
+const setFilteredAndSortedItems = (state, rootState) => {
+  let items = state.sortedShoots
+  if (state.searchValue) {
+    const predicate = item => {
+      let found = true
+      forEach(state.searchValue, value => {
+        if (includes(getRawVal(item, 'name'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'project'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'createdBy'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'purpose'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'k8sVersion'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'journalLabels'), value)) {
+          return
+        }
+        found = false
+      })
+      return found
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isStatusProgressing(get(item, 'metadata', {}))
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isUserError(get(item, 'status.lastError.codes', []))
+    }
+    items = filter(items, predicate)
+  }
+  if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    const predicate = item => {
+      return !isReconciliationDeactivated(get(item, 'metadata', {}))
+    }
+    items = filter(items, predicate)
+  }
+
+  state.filteredAndSortedShoots = items
 }
 
 const putItem = (state, newItem) => {
@@ -363,7 +414,7 @@ const putItem = (state, newItem) => {
       } else if (sortBy !== 'lastOperation') { // don't check in this case as most put events will be lastOperation anyway
         const changes = difference(item, newItem)
         const sortBy = get(state, 'sortParams.sortBy')
-        if (!getRawSortVal(changes, sortBy)) {
+        if (!getRawVal(changes, sortBy)) {
           sortRequired = false
         }
       }
@@ -398,23 +449,23 @@ const mutations = {
   SET_SELECTION (state, metadata) {
     state.selection = metadata
   },
-  SET_SORTPARAMS (state, sortParams) {
+  SET_SORTPARAMS (state, { rootState, sortParams }) {
     state.sortParams = sortParams
-    setSortedItems(state)
+    setSortedItems(state, rootState)
   },
-  SET_SEARCHVALUE (state, searchValue) {
+  SET_SEARCHVALUE (state, { rootState, searchValue }) {
     if (searchValue && searchValue.length > 0) {
       state.searchValue = split(searchValue, ' ')
     } else {
       state.searchValue = undefined
     }
-    setSortedItems(state)
+    setFilteredAndSortedItems(state, rootState)
   },
-  ITEM_PUT (state, newItem) {
+  ITEM_PUT (state, { newItem, rootState }) {
     const sortRequired = putItem(state, newItem)
 
     if (sortRequired) {
-      setSortedItems(state)
+      setSortedItems(state, rootState)
     }
   },
   HANDLE_EVENTS (state, { rootState, events }) {
@@ -442,21 +493,24 @@ const mutations = {
       }
     })
     if (sortRequired) {
-      setSortedItems(state)
+      setSortedItems(state, rootState)
     }
   },
   CLEAR_ALL (state) {
     state.shoots = {}
     state.sortedShoots = []
   },
-  SET_HIDE_USER_ISSUES (state, value) {
+  SET_HIDE_USER_ISSUES (state, { rootState, value }) {
     state.hideUserIssues = value
+    setFilteredAndSortedItems(state, rootState)
   },
-  SET_HIDE_PROGRESSING_ISSUES (state, value) {
+  SET_HIDE_PROGRESSING_ISSUES (state, { rootState, value }) {
     state.hideProgressingIssues = value
+    setFilteredAndSortedItems(state, rootState)
   },
-  SET_HIDE_DEACTIVATED_RECONCILIATION (state, value) {
+  SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
     state.hideDeactivatedReconciliation = value
+    setFilteredAndSortedItems(state, rootState)
   }
 }
 

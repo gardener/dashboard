@@ -262,6 +262,14 @@ export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
 }
 
+export function getProjectName (metadata) {
+  const namespace = get(metadata, ['namespace'])
+  const projectList = store.getters.projectList
+  const project = find(projectList, ['metadata.namespace', namespace])
+  const projectName = get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
+  return projectName
+}
+
 export function isHibernated (spec) {
   if (!spec) {
     return false

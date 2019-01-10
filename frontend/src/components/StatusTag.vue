@@ -61,11 +61,8 @@ export default {
       if (this.$vuetify.breakpoint.mdAndDown) {
         return this.chipText.charAt(0)
       }
-      if (this.$vuetify.breakpoint.lgOnly) {
+      if (this.$vuetify.breakpoint.lgAndUp) {
         return split(this.chipText, ' ').shift()
-      }
-      if (this.$vuetify.breakpoint.xlOnly) {
-        return this.chipText
       }
       return ''
     },
