@@ -275,10 +275,8 @@ export function isHibernated (spec) {
     return false
   }
 
-  const kind = getCloudProviderKind(spec.cloud)
-  const workers = get(spec, ['cloud', kind, 'workers'])
   const hibernationEnabled = get(spec, 'hibernation.enabled', false)
-  return hibernationEnabled || some(workers, worker => get(worker, 'autoScalerMax') === 0)
+  return hibernationEnabled
 }
 
 export function canLinkToSeed ({ shootNamespace }) {
