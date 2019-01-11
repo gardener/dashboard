@@ -20,6 +20,7 @@ const kubernetes = require('../kubernetes')
 const { decodeBase64 } = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
+const logger = require('../logger')
 const _ = require('lodash')
 
 function Garden ({ auth }) {
@@ -231,6 +232,7 @@ exports.info = async function ({ user, namespace, name }) {
             if (err.code === 404) {
               return
             }
+            logger.error('failed to fetch monitoring secret: %s', err)
             throw err
           })
         if (monitoringSecret) {
