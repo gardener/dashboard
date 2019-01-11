@@ -25,7 +25,7 @@ const logger = require('./logger')
 const routes = require('./routes')
 const io = require('./io')
 
-const { jwt, attachAuthorization, frontendConfig, notFound, sendError } = require('./middleware')
+const { jwt, attachAuthorization, frontendConfig, jsonWebKeySet, notFound, sendError } = require('./middleware')
 
 // configure router
 const router = express.Router()
@@ -46,5 +46,6 @@ router.use(sendError)
 module.exports = {
   router,
   io,
-  frontendConfig
+  frontendConfig,
+  jsonWebKeySet
 }
