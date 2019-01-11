@@ -68,7 +68,6 @@ export default {
 
           if (breadcrumb === BreadcrumbEnum.USE_ROUTE_PARAM_NAME) {
             const text = this.routeParamName
-            console.log(text, matchedRoute, to)
             crumbs.push({text, to})
           } else if (breadcrumb === BreadcrumbEnum.USE_ROUTE_TITLE) {
             const text = get(matchedRoute, 'meta.title')
