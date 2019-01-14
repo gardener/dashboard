@@ -37,6 +37,20 @@ import last from 'lodash/last'
 import size from 'lodash/size'
 import assign from 'lodash/assign'
 
+/**
+ * @typedef {number} Breadcrumb
+ **/
+
+/**
+ * @readonly
+ * @enum {Breadcrumb}
+ */
+export const BreadcrumbEnum = {
+    USE_ROUTE_TITLE: 1,
+    USE_ROUTE_PARAM_NAME: 2,
+    FALSE: -1
+  }
+
 export default {
   name: 'breadcrumb',
   computed: {
@@ -47,12 +61,18 @@ export default {
       var crumbs = []
       const namespace = this.namespace
       const matched = this.$route.matched
-      matched.forEach(function (matchedRoute) {
-        const hasBreadcrumb = get(matchedRoute, 'meta.breadcrumb')
-        if (hasBreadcrumb) {
-          const text = get(matchedRoute, 'meta.title')
+      matched.forEach((matchedRoute) => {
+        const breadcrumb = get(matchedRoute, 'meta.breadcrumb')
+        if (breadcrumb && breadcrumb !== BreadcrumbEnum.FALSE) {
           const to = namespacedRoute(matchedRoute, namespace)
-          crumbs.push({ text, to })
+
+          if (breadcrumb === BreadcrumbEnum.USE_ROUTE_PARAM_NAME) {
+            const text = this.routeParamName
+            crumbs.push({text, to})
+          } else if (breadcrumb === BreadcrumbEnum.USE_ROUTE_TITLE) {
+            const text = get(matchedRoute, 'meta.title')
+            crumbs.push({text, to})
+          }
         }
       })
 
@@ -69,6 +89,9 @@ export default {
           return 'breadcrumb subheading pointer'
         }
       }
+    },
+    routeParamName () {
+      return get(this.$route.params, 'name')
     }
   }
 }
