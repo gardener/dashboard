@@ -34,7 +34,7 @@ limitations under the License.
           </div>
           <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click="handleLogin()">
             Login
-            <v-icon right dark>mdi-login-variant</v-icon>
+            <v-icon dark>mdi-login-variant</v-icon>
           </div>
         </v-flex>
       </v-layout>
