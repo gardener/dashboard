@@ -169,3 +169,9 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  p {
+    margin-bottom: 0
+  }
+</style>
