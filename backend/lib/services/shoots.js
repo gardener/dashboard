@@ -31,6 +31,35 @@ function Core ({ auth }) {
   return kubernetes.core({ auth })
 }
 
+function getSecret (core, namespace, name) {
+  return core.ns(namespace).secrets.get({ name: name })
+    .catch(err => {
+      if (err.code === 404) {
+        return
+      }
+      logger.error('failed to fetch %s secret: %s', name, err)
+      throw err
+    })
+}
+
+async function assignComponentSecret (core, namespace, component, data) {
+  const secret = await getSecret(core, namespace, `${component}-ingress-credentials`)
+  if (secret) {
+    _
+      .chain(secret)
+      .get('data')
+      .pick('username', 'password')
+      .forEach((value, key) => {
+        if (key === 'password') {
+          data[`${component}_password`] = decodeBase64(value)
+        } else if (key === 'username') {
+          data[`${component}_username`] = decodeBase64(value)
+        }
+      })
+      .commit()
+  }
+}
+
 function isReserved (key) {
   return /garden\.sapcloud\.io\//.test(key)
 }
@@ -214,41 +243,19 @@ exports.info = async function ({ user, namespace, name }) {
   if (isAdmin) {
     const seedSecretName = _.get(seed, 'spec.secretRef.name')
     const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-    const seedSecret = await core.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
-      .catch(err => {
-        if (err.code === 404) {
-          return
-        }
-        throw err
-      })
+    const seedSecret = await getSecret(core, seedSecretNamespace, seedSecretName)
 
     if (seedSecret) {
       const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
 
       const seedShootNS = _.get(shoot, 'status.technicalID')
       if (!_.isEmpty(seedShootNS)) {
-        const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({ name: 'monitoring-ingress-credentials' })
-          .catch(err => {
-            if (err.code === 404) {
-              return
-            }
-            logger.error('failed to fetch monitoring secret: %s', err)
-            throw err
-          })
-        if (monitoringSecret) {
-          _
-            .chain(monitoringSecret)
-            .get('data')
-            .pick('username', 'password')
-            .forEach((value, key) => {
-              if (key === 'password') {
-                data['monitoring_password'] = decodeBase64(value)
-              } else if (key === 'username') {
-                data['monitoring_username'] = decodeBase64(value)
-              }
-            })
-            .commit()
-        }
+        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
+
+        await Promise.all([
+          assignComponentSecret(core, seedShootNS, 'monitoring', data),
+          assignComponentSecret(core, seedShootNS, 'logging', data)
+        ])
       }
     }
   }

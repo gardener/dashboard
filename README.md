@@ -85,7 +85,7 @@ npm run dev --prefix backend
 Run the frontend server with hot reload under localhost:8080.
 
 ```sh
-npm run dev --prefix frontend
+npm run serve --prefix frontend
 ```
 
 All request to */api* and */config.json* with be proxied by default to the backend server.
