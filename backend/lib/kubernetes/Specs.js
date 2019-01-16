@@ -37,7 +37,7 @@ module.exports = {
   APIRegistration: {
     swagger: '2.0',
     paths: {
-      '/apis/apiregistration.k8s.io/v1/apiservices/{name}': {
+      '/apis/apiregistration.k8s.io/v1beta1/apiservices/{name}': {
         'get': {
           'description': 'read the specified APIService',
           'consumes': [
@@ -52,9 +52,9 @@ module.exports = {
             'https'
           ],
           'tags': [
-            'apiregistration_v1'
+            'apiregistration_v1beta1'
           ],
-          'operationId': 'readApiregistrationV1APIService',
+          'operationId': 'readApiregistrationV1beta1APIService',
           'parameters': [
             {
               'uniqueItems': true,
@@ -75,7 +75,7 @@ module.exports = {
             '200': {
               'description': 'OK',
               'schema': {
-                '$ref': '#/definitions/io.k8s.kube-aggregator.pkg.apis.apiregistration.v1.APIService'
+                '$ref': '#/definitions/io.k8s.kube-aggregator.pkg.apis.apiregistration.v1beta1.APIService'
               }
             },
             '401': {
@@ -86,7 +86,7 @@ module.exports = {
           'x-kubernetes-group-version-kind': {
             'group': 'apiregistration.k8s.io',
             'kind': 'APIService',
-            'version': 'v1'
+            'version': 'v1beta1'
           }
         }
       }

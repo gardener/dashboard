@@ -190,8 +190,8 @@ export default {
           if (data.version) {
             this.dashboardVersion = `${data.version}`
           }
-        }).catch (err => {
-          this.setError({ message: 'Failed to fetch version information' })
+        }).catch(error => {
+          this.setError({ message: `Failed to fetch version information. ${error.message}` })
         })
       }
     }
