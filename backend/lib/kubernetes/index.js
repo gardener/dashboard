@@ -157,5 +157,11 @@ module.exports = {
       config: credentials(),
       spec: Specs.Healthz
     })
+  },
+  apiregistration () {
+    return new kubernetesClient.Client({
+      config: credentials(),
+      spec: Specs.APIRegistration
+    })
   }
 }
