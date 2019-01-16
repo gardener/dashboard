@@ -43,7 +43,6 @@ async function fetchGardenerVersion (user) {
     const service = _.get(apiServer, 'body.spec.service')
     const ca = decodeBase64(_.get(apiServer, 'body.spec.caBundle'))
     if (service && ca) {
-      console.log(service, ca)
       const uri = `https://${service.name}.${service.namespace}/version`
       const res = await got(uri, { ca })
       const body = _.get(res, 'body')
