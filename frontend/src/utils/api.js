@@ -164,3 +164,9 @@ export function deleteMember ({ namespace, name, user }) {
 export function getUserInfo ({ user }) {
   return getResource(`/api/user`, user)
 }
+
+/* Terminals */
+
+export function createTerminal ({ namespace, name, user }) {
+  return createResource(`/api/namespaces/${namespace}/terminals/${name}`, user, undefined)
+}

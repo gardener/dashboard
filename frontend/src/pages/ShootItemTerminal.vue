@@ -15,16 +15,46 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout v-resize="onResize" column fill-height class="position-relative">
-    <v-flex ref="container" class="terminal-container" :style="containerStyles"></v-flex>
+  <v-layout ref="layout" v-resize="onResize" column fill-height class="position-relative">
+    <v-snackbar
+      v-model="snackbarTop"
+      :timeout="0"
+      :absolute="true"
+      :auto-height="true"
+      :top="true"
+    >
+      {{ snackbarText }}
+      <v-btn flat color="cyan darken-2" @click="retry()">
+        Retry
+      </v-btn>
+      <v-btn flat color="cyan darken-2" @click="hideSnackbar()">
+        Close
+      </v-btn>
+    </v-snackbar>
+    <v-snackbar
+      v-model="errorSnackbarBottom"
+      :timeout="0"
+      :absolute="true"
+      :auto-height="true"
+      :bottom="true"
+      color="red"
+    >
+      {{ snackbarText }}
+      <v-btn flat @click="hideSnackbar()">
+        Close
+      </v-btn>
+    </v-snackbar>
+    <v-flex ref="container" class="terminal-container"></v-flex>
   </v-layout>
 </template>
 
 <script>
 import 'xterm/dist/xterm.css'
 
-import { mapGetters } from 'vuex'
 import { Terminal } from 'xterm'
+import { createTerminal } from '@/utils/api'
+import get from 'lodash/get'
+import ora from 'ora'
 import * as attach from '@/lib/attach'
 import * as fit from 'xterm/dist/addons/fit/fit'
 import * as search from 'xterm/dist/addons/search/search'
@@ -36,8 +66,6 @@ Terminal.applyAddon(fit)
 Terminal.applyAddon(search)
 Terminal.applyAddon(webLinks)
 Terminal.applyAddon(winptyCompat)
-
-const uri = 'wss://kubernetes:6443/api/v1/namespaces/default/pods/bash-68d67dd789-lswls/attach?container=bash&stdin=true&stdout=true&tty=true'
 
 function encodeBase64 (input) {
   return Buffer.from(input, 'utf8').toString('base64')
@@ -51,37 +79,27 @@ function encodeBase64Url (input) {
   return output
 }
 
-const protocols = [
-  'v4.channel.k8s.io',
-  'v3.channel.k8s.io',
-  'v2.channel.k8s.io',
-  'channel.k8s.io'
-]
-
-const dockerForDesktop = localStorage.getItem('docker-for-desktop')
-if (dockerForDesktop) {
-  const bearer = JSON.parse(dockerForDesktop).token
+function protocols ({ token: bearer }) {
+  const protocols = ['v4.channel.k8s.io']
   protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
+
+  return protocols
+}
+
+function uri ({ namespace, container, server, pod }) {
+  // TODO uribuilder
+  return `wss://${server}/api/v1/namespaces/${namespace}/pods/${pod}/attach?container=${container}&stdin=true&stdout=true&tty=true`
 }
 
 export default {
   name: 'shoot-item-terminal',
   data () {
     return {
-      close: () => {}
-    }
-  },
-  computed: {
-    ...mapGetters([
-      'projectList',
-      'shootByNamespaceAndName'
-    ]),
-    value () {
-      const data = this.shootByNamespaceAndName(this.$route.params)
-      if (data) {
-        const { info, ...value } = data
-        return value
-      }
+      close: () => {},
+      snackbarTop: false,
+      errorSnackbarBottom: false,
+      snackbarText: '',
+      spinner: undefined
     }
   },
   methods: {
@@ -89,33 +107,119 @@ export default {
       if (this.term) {
         this.term.fit()
       }
+    },
+    hideSnackbar () {
+      this.snackbarTop = false
+      this.errorSnackbarBottom = false
+    },
+    showSnackbarTop (text) {
+      this.snackbarTop = true
+      this.setSnackbarTextAndStopSpinner(text)
+    },
+    showErrorSnackbarBottom (text) {
+      this.errorSnackbarBottom = true
+      this.setSnackbarTextAndStopSpinner(text)
+    },
+    setSnackbarTextAndStopSpinner (text) {
+      if (this.spinner) {
+        this.spinner.stop()
+      }
+      this.snackbarText = text
+    },
+    async createTerminal () {
+      const user = this.$store.state.user
+      const { namespace, name } = this.$route.params
+      const { data } = await createTerminal({ name, namespace, user })
+
+      return data
+    },
+    async retry () {
+      this.snackbarTop = false
+      return this.connect()
+    },
+    async connect () {
+      this.spinner.start()
+
+      try {
+        const terminalData = await this.createTerminal()
+
+        let connected = false
+        let tries = 0
+        const RETRY_TIMEOUT_SECONDS = 3
+        const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
+
+        const attachTerminal = () => {
+          tries++
+          const ws = new WebSocket(uri(terminalData), protocols(terminalData))
+          ws.binaryType = 'arraybuffer'
+          ws.onopen = () => {
+            this.term.attach(ws)
+
+            this.spinner.stop()
+            this.hideSnackbar()
+            connected = true
+            tries = 0
+          }
+          ws.onclose = error => {
+            this.close()
+            const wasConnected = connected
+            connected = false
+
+            if (error.code === 1000) { // CLOSE_NORMAL
+              this.showSnackbarTop('Terminal connection lost')
+              return
+            }
+            if (tries >= MAX_TRIES) {
+              this.showSnackbarTop('Could not connect to terminal')
+              return
+            }
+
+            let timeoutSeconds
+            if (wasConnected) {
+              timeoutSeconds = 0
+              // do not start spinner as this would clear the console
+              console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
+            } else { // Try again later
+              timeoutSeconds = RETRY_TIMEOUT_SECONDS
+              this.spinner.start()
+              console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
+            }
+            setTimeout(() => attachTerminal(), timeoutSeconds * 1000)
+          }
+
+          this.close = () => {
+            this.term.detach(ws)
+          }
+        }
+        attachTerminal()
+      } catch (err) {
+        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+      }
     }
   },
-  mounted () {
+  async mounted () {
     // terminal
-    const term = this.term = new Terminal({
-      cols: 80,
-      rows: 24
-    })
+    const term = this.term = new Terminal()
     term.open(this.$refs.container)
     term.winptyCompatInit()
     term.webLinksInit()
-    term.fit()
     term.focus()
-    term.write('If you don\'t see a command prompt, try pressing enter.')
     this.$nextTick(() => {
       term.fit()
     })
-    // websocket
-    const ws = new WebSocket(uri, protocols)
-    ws.binaryType = 'arraybuffer'
-    ws.onopen = function () {
-      term.attach(ws)
-    }
-    // close
-    this.close = () => {
-      term.detach(ws)
-    }
+
+    this.spinner = ora({
+      stream: {
+        write: chunk => this.term.write(chunk.toString()),
+        isTTY: () => true,
+        clearLine: () => this.term.write('\x1bc'), // TODO reset line only
+        cursorTo: to => {}
+      },
+      text: 'Connecting',
+      spinner: 'dots'
+    })
+
+    this.connect()
   },
   beforeDestroy () {
     this.close()
@@ -130,7 +234,6 @@ export default {
       background: #212121;
       height: 100%;
       width: 100%;
-      padding: 5px;
       margin: 0;
   }
   .terminal {

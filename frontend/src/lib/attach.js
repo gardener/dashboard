@@ -1,3 +1,10 @@
+const ReadyStateEnum = {
+  CONNECTING: 0,
+  OPEN: 1,
+  CLOSING: 2,
+  CLOSED: 3
+}
+
 export function attach (term, socket, bidirectional, buffered) {
   bidirectional = typeof bidirectional === 'undefined' ? true : bidirectional
   term.__socket = socket
@@ -84,7 +91,22 @@ export function attach (term, socket, bidirectional, buffered) {
 
   term._core.register(addSocketListener(socket, 'close', () => detach(term, socket)))
   term._core.register(addSocketListener(socket, 'error', () => detach(term, socket)))
+
+  term.fit()
+  // force resize
+  term.__sendResize({ cols: 1, rows: 1 })
+  term.__sendResize({ cols: term.cols, rows: term.rows })
+
   term.on('resize', term.__resizeHandler)
+
+  term.pingIntervalId = setInterval(function ping () {
+    if (socket.readyState === ReadyStateEnum.CONNECTING || socket.readyState === ReadyStateEnum.CLOSED) {
+      console.log('Websocket closing or already closed. Stopping ping')
+      clearTimeout(term.pingIntervalId)
+      return
+    }
+    term.__sendData('') // send empty message to prevent socket connection from getting closed
+  }, 30000)
 }
 
 function addSocketListener (socket, type, handler) {
@@ -100,7 +122,9 @@ function addSocketListener (socket, type, handler) {
 }
 
 export function detach (term, socket) {
+  clearTimeout(term.pingIntervalId)
   term.off('data', term.__sendData)
+  term.off('resize', term.__resizeHandler)
   socket = typeof socket === 'undefined' ? term.__socket : socket
   delete term.__socket
 }
