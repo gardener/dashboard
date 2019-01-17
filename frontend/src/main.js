@@ -14,16 +14,10 @@
 // limitations under the License.
 //
 
-/*
- * The Vue build version to load with the `import` command
- * (runtime-only or standalone) has been set in webpack.base.conf with an alias.
- */
-import { parse as parseUrl } from 'url'
 import includes from 'lodash/includes'
 import assign from 'lodash/assign'
 
 import 'vuetify/dist/vuetify.min.css'
-import '@mdi/font/css/materialdesignicons.css'
 
 const version = isIE()
 
@@ -58,9 +52,9 @@ if (version === false) {
         Oidc.Log.level = Oidc.Log.ERROR
         const userStore = new Oidc.WebStorageStateStore()
         try {
-          const redirectUri = parseUrl(cfg.oidc.redirect_uri)
+          const redirectUri = new URL(cfg.oidc.redirect_uri)
           if (redirectUri) {
-            cfg.oidc.redirect_uri = window.location.origin + redirectUri.path
+            cfg.oidc.redirect_uri = window.location.origin + redirectUri.pathname
           }
         } catch (err) {
           // eslint-disable-next-line no-console

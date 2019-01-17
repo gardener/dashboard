@@ -14,24 +14,70 @@
 # limitations under the License.
 #
 
-FROM node:10.12-alpine
+#### Base ####
+FROM node:10-alpine as base
 
-# Create app directory
-RUN mkdir -p /usr/src/app/public
-WORKDIR      /usr/src/app
+WORKDIR /usr/src/app
 
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
+RUN npm set progress=false \
+    && npm config set depth 0
+
+#### Backend base ####
+FROM base as backend
+
+COPY backend/package*.json ./
+
+RUN npm install --only=production \
+    && cp -R node_modules dist \
+    && npm install
+
+COPY backend ./
+
+RUN npm run lint \
+    && npm run test-cov
+
+#### Frontend  base ####
+FROM base as frontend
+
+COPY frontend/package*.json ./
+
+RUN npm install
+
+COPY frontend ./
+COPY VERSION ../
+
+RUN npm run lint \
+    && npm run test:unit \
+    && npm run build
+
+# Release
+FROM alpine:3.8 as release
+
+RUN addgroup -g 1000 node \
+    && adduser -u 1000 -G node -s /bin/sh -D node \
+    && apk add --no-cache tini
+
+WORKDIR /usr/src/app
+
+ENV NODE_ENV production
 
 ARG PORT=8080
 ENV PORT $PORT
 
-# Install backend app
-COPY backend .
-RUN npm install --production && npm cache clean --force
+COPY --from=backend /usr/local/bin/node /usr/local/bin/
+COPY --from=backend /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
 
-# Install frontend app
-COPY frontend/dist ./public
+COPY backend/package.json ./
+COPY --from=backend /usr/src/app/dist  ./node_modules/
+COPY backend/lib ./lib/
+COPY backend/server.js ./
+
+COPY --from=frontend /usr/src/app/dist ./public/
+
+USER node
 
 EXPOSE $PORT
-CMD ["node","server.js"]
+
+VOLUME ["/home/node"]
+
+ENTRYPOINT [ "/sbin/tini", "--", "node", "server.js" ]

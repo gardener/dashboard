@@ -25,7 +25,7 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      res.send({version, user})
+      res.send({ version, user })
     } catch (err) {
       next(err)
     }

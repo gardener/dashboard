@@ -18,21 +18,28 @@ limitations under the License.
   <span>
     <template v-if="message">
       <g-popper :title="title" :message="message" :toolbarColor="color" :time="time" :popperKey="popperKey" :placement="popperPlacement">
-        <v-chip class="cursor-pointer" slot="popperRef" outline :text-color="chipTextColor" small :color="color">
-          {{chipText}}
-        </v-chip>
+        <v-tooltip slot="popperRef" top>
+          <v-chip class="cursor-pointer" slot="activator" outline :text-color="chipTextColor" small :color="color">
+            {{chipText}}
+          </v-chip>
+          <span>{{title}}</span>
+        </v-tooltip>
       </g-popper>
     </template>
     <template v-else>
-      <v-chip slot="popperRef" outline :text-color="chipTextColor" small :color="color">
-        {{chipText}}
-      </v-chip>
+      <v-tooltip top>
+        <v-chip slot="activator" outline :text-color="chipTextColor" small :color="color">
+          {{chipText}}
+        </v-chip>
+        <span>{{title}}</span>
+      </v-tooltip>
     </template>
   </span>
 </template>
 
 <script>
 import GPopper from '@/components/GPopper'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -48,6 +55,10 @@ export default {
       required: true
     },
     isUnknown: {
+      type: Boolean,
+      required: false
+    },
+    isProgressing: {
       type: Boolean,
       required: false
     },
@@ -76,6 +87,9 @@ export default {
       if (this.isUnknown) {
         return 'grey lighten-1'
       }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
       return 'cyan darken-2'
     },
     chipTextColor () {
@@ -85,15 +99,21 @@ export default {
       if (this.isUnknown) {
         return 'grey lighten-1'
       }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
       return 'cyan darken-2'
-    }
+    },
+    ...mapGetters([
+      'isAdmin'
+    ])
   }
 }
 </script>
 
 <style lang="styl" scoped>
 
-  .cursor-pointer >>> .chip__content {
+  .cursor-pointer >>> .v-chip__content {
     cursor: pointer;
   }
 

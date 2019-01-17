@@ -21,8 +21,8 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const core = require('../kubernetes').core()
 
-exports.list = async function ({user, namespace = 'garden'}) {
-  const {items} = await core.namespaces(namespace).configmaps.get({
+exports.list = async function ({ user, namespace = 'garden' }) {
+  const { items } = await core.namespaces(namespace).configmaps.get({
     qs: {
       labelSelector: 'gardenextensions.sapcloud.io/role=addonDefinitions'
     }

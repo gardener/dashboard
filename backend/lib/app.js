@@ -19,33 +19,47 @@
 const express = require('express')
 const _ = require('lodash')
 const config = require('./config')
-const { parse: parseUrl } = require('url')
 const { resolve, join } = require('path')
 const logger = require('./logger')
 const { notFound, renderError, historyFallback, prometheusMetrics } = require('./middleware')
 const helmet = require('helmet')
 const api = require('./api')
 const githubWebhook = require('./github/webhook')
-const healthz = require('./healthz')
+const { healthCheck } = require('./healthz')
 const port = config.port
+const periodSeconds = _.get(config, 'readinessProbe.periodSeconds', 10)
 const jwt = require('express-jwt')
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
-const issuerUrl = _.get(config, 'jwt.issuer')
-let imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
+// csp sources
+const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
+const authorityUrl = _.get(config, 'frontend.oidc.authority')
+if (authorityUrl) {
+  const authorityUrlOrigin = new URL(authorityUrl).origin
+  connectSrc.push(authorityUrlOrigin)
+}
+const jwksUri = _.get(config, 'jwks.jwksUri')
+if (jwksUri) {
+  const jwksUriOrigin = new URL(jwksUri).origin
+  if (!_.includes(connectSrc, jwksUriOrigin)) {
+    connectSrc.push(jwksUriOrigin)
+  }
+}
+const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
-  const url = parseUrl(gitHubRepoUrl)
-  const gitHubUrl = `${url.protocol}//${url.host}`
-  imgSrc = _.concat(imgSrc, gitHubUrl)
+  const gitHubOrigin = new URL(gitHubRepoUrl).origin
+  imgSrc.push(gitHubOrigin)
 }
 
 // configure app
 const app = express()
 app.set('port', port)
 app.set('logger', logger)
+app.set('healthCheck', healthCheck)
+app.set('periodSeconds ', periodSeconds)
 app.set('io', api.io)
 app.set('trust proxy', 1)
 app.set('etag', false)
@@ -58,7 +72,6 @@ app.use(helmet.hsts())
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
 app.get('/config.json', api.frontendConfig)
-app.use('/healthz', healthz)
 
 if (_.has(config, 'prometheus.secret')) {
   app.get('/metrics',
@@ -71,9 +84,9 @@ app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({
   directives: {
     defaultSrc: ['\'self\''],
-    connectSrc: ['\'self\'', 'wss:', 'ws:', issuerUrl], // TODO allow ws connections only to backend
-    styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
-    fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+    connectSrc,
+    styleSrc: ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com', 'https://cdn.materialdesignicons.com'],
+    fontSrc: ['\'self\'', 'https://fonts.gstatic.com', 'https://cdn.materialdesignicons.com'],
     imgSrc,
     scriptSrc: ['\'self\'', '\'unsafe-eval\''],
     frameAncestors: ['\'none\'']

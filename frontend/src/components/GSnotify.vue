@@ -31,7 +31,6 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'errorMessage',
       'alertMessage',
       'alertType',
       'isWebsocketConnectionError',
@@ -39,12 +38,6 @@ export default {
     ])
   },
   watch: {
-    errorMessage (value) {
-      if (value) {
-        this.showSnotifyToast(value, 'error')
-        this.setError(null)
-      }
-    },
     alertMessage (value) {
       if (value) {
         this.showSnotifyToast(value, this.alertType)
@@ -70,7 +63,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'setError',
       'setAlert'
     ]),
     showSnotifyToast (message, type) {

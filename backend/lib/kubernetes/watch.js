@@ -15,7 +15,8 @@
 //
 
 const { assign, cloneDeep, isFunction, isString, isPlainObject, replace, join, concat, get, set, unset } = require('lodash')
-const { parse, format } = require('url')
+const { format } = require('url')
+const querystring = require('querystring')
 const { EventEmitter } = require('events')
 const WebSocket = require('ws')
 const logger = require('../logger')
@@ -39,7 +40,7 @@ function createError (code, reason) {
   return err
 }
 
-function createErrorEvent ({message, error}) {
+function createErrorEvent ({ message, error }) {
   const type = 'ERROR'
   const annotations = {
     'websocket.sapcloud.io/message': message
@@ -47,13 +48,13 @@ function createErrorEvent ({message, error}) {
   const object = {
     kind: 'Status',
     apiVersion: 'v1',
-    metadata: {annotations},
+    metadata: { annotations },
     status: 'Failure',
     message: error.message,
     reason: error.constructor.name,
     code: 500
   }
-  return {type, object}
+  return { type, object }
 }
 
 function wrap (emitter, ws) {
@@ -113,7 +114,7 @@ function wrap (emitter, ws) {
     try {
       event = JSON.parse(message)
     } catch (error) {
-      event = createErrorEvent({message, error})
+      event = createErrorEvent({ message, error })
     }
     emitter.emit('event', event)
   }
@@ -140,20 +141,19 @@ function wrap (emitter, ws) {
 
 function createWebSocket (resource, options = {}) {
   const api = resource.api
-  const url = parse(api.url)
+  const url = new URL(api.url)
   url.protocol = replace(url.protocol, /^http/, 'ws')
-  url.href = url.path = url.search = undefined
   const qs = {}
   if (options.name) {
     qs.fieldSelector = join(['metadata.name', options.name], '=')
   }
-  url.query = assign(qs, resource.qs, options.qs, {watch: true})
+  url.search = querystring.stringify(assign(qs, resource.qs, options.qs, { watch: true }))
   url.pathname = resource.path
   const { key, cert, ca, strictSSL, auth = {} } = get(api, 'http.requestOptions', {})
   const origin = get(options, 'origin', api.url)
   const rejectUnauthorized = get(options, 'rejectUnauthorized', !strictSSL)
   const headers = {}
-  const websocketOptions = {origin, headers, rejectUnauthorized, key, cert, ca}
+  const websocketOptions = { origin, headers, rejectUnauthorized, key, cert, ca }
   const protocols = []
 
   if (isPlainObject(auth)) {
@@ -177,7 +177,7 @@ function createWebSocket (resource, options = {}) {
     websocketOptions.protocol = join(concat(protocols, 'garden'), ',')
   }
 
-  return new WebSocket(format(url), websocketOptions)
+  return new WebSocket(format(url, { fragment: false, auth: false }), websocketOptions)
 }
 
 async function createWebSocketAsync (resource, options) {
@@ -209,7 +209,7 @@ async function wrapConnectionAsync (emitter, resource, options) {
 function createConnection (resource, options) {
   const emitter = new EventEmitter()
   emitter.resourceName = resource._name
-  const {qs = {}} = options
+  const { qs = {} } = options
   if (!isFunction(qs.resourceVersion)) {
     wrapConnection(emitter, resource, options)
   } else {
@@ -220,10 +220,10 @@ function createConnection (resource, options) {
 
 function watch (options = {}) {
   if (isString(options)) {
-    options = {name: options}
+    options = { name: options }
   }
 
-  const {name, qs, headers, useBearerAuthorizationProtocol, ...rest} = options
+  const { name, qs, headers, useBearerAuthorizationProtocol, ...rest } = options
   const reconnectDefaults = {
     initialDelay: 5e2,
     maxDelay: 15e3,
@@ -235,7 +235,7 @@ function watch (options = {}) {
   const reconnect = inject(createConnection)
   const onConnect = emitter => emitter.on('event', event => reconnector.emit('event', event))
   const reconnector = reconnect(assign(reconnectDefaults, rest), onConnect)
-  reconnector.connect(this, {name, qs, headers, useBearerAuthorizationProtocol})
+  reconnector.connect(this, { name, qs, headers, useBearerAuthorizationProtocol })
   reconnector.resourceName = this._name
   return reconnector
 }

@@ -6,22 +6,16 @@ dashboard:
       version:
         preprocess:
           'inject-commit-hash'
+        inject_effective_version: true
       publish:
         dockerimages:
           dashboard:
             inputs:
               repos:
                 source: ~ # default
-              steps:
-                build: ~
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
-    steps:
-      build:
-        image: &node_image 'node:10.12-alpine'
-        output_dir: 'binary'
-      test:
-        image: *node_image
+    steps: ~
   variants:
     head-update:
       traits:

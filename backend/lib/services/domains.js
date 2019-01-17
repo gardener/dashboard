@@ -19,7 +19,7 @@
 const { map, pick, get } = require('lodash')
 const { getDomains } = require('../cache')
 
-function fromResource ({metadata}) {
+function fromResource ({ metadata }) {
   const domain = get(metadata, ['annotations', 'dns.garden.sapcloud.io/domain'])
   const provider = get(metadata, ['annotations', 'dns.garden.sapcloud.io/provider'])
   const data = {
@@ -28,7 +28,7 @@ function fromResource ({metadata}) {
   }
 
   metadata = pick(metadata, ['name', 'namespace'])
-  return {metadata, data}
+  return { metadata, data }
 }
 
 exports.list = async function () {

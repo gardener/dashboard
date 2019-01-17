@@ -57,4 +57,12 @@ global.chai.use(require('chai-http'))
  */
 const http = require('http')
 const app = require('../../lib/app')
-global.createServer = () => http.createServer(app)
+const { createTerminus } = require('@godaddy/terminus')
+const healthChecks = {
+  '/healthz': app.get('healthCheck')
+}
+const signal = 'SIGTERM'
+global.createServer = () => {
+  process.removeAllListeners(signal)
+  return createTerminus(http.createServer(app), { signal, healthChecks })
+}

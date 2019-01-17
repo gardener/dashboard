@@ -40,9 +40,6 @@ limitations under the License.
 import Clipboard from 'clipboard'
 
 export default {
-  components: {
-    Clipboard
-  },
   props: {
     clipboardText: {
       type: String,

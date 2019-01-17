@@ -20,8 +20,8 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 
-function Authorization ({auth}) {
-  return kubernetes.authorization({auth})
+function Authorization ({ auth }) {
+  return kubernetes.authorization({ auth })
 }
 
 async function hasAuthorization (user, resourceAttributes) {

@@ -24,7 +24,7 @@ function getAuthorization (user) {
       reject(new TypeError('Argument \'user\' must not be null'))
     } else {
       resolve({
-        Authorization: `${user.token_type} ${user.id_token}`
+        Authorization: `Bearer ${user.id_token}`
       })
     }
   })

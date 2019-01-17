@@ -92,13 +92,13 @@ function fromComment (number, name, namespace, item) {
 }
 exports.fromComment = fromComment
 
-function getOpenIssues ({name, namespace} = {}) {
+function getOpenIssues ({ name, namespace } = {}) {
   let title
   if (name && namespace) {
     title = `[${namespace}/${name}]`
   }
   return github
-    .searchIssues({state: 'open', title})
+    .searchIssues({ state: 'open', title })
     .thru(githubIssues => _.map(githubIssues, fromIssue))
 }
 exports.getOpenIssues = getOpenIssues
@@ -106,7 +106,7 @@ exports.getOpenIssues = getOpenIssues
 function loadOpenIssues (...args) {
   return getOpenIssues(...args)
     .reduce((cache, issues) => {
-      cache.addOrUpdateIssues({issues})
+      cache.addOrUpdateIssues({ issues })
       return cache
     }, getJournalCache())
     .then(() => undefined)
@@ -115,13 +115,13 @@ exports.loadOpenIssues = exports.list = loadOpenIssues
 
 function finalizeIssue (number) {
   return Promise.resolve()
-    .then(() => github.createComment({number}, '_[Auto-closed due to Shoot deletion]_'))
-    .then(() => github.closeIssue({number}))
+    .then(() => github.createComment({ number }, '_[Auto-closed due to Shoot deletion]_'))
+    .then(() => github.closeIssue({ number }))
 }
 
-function deleteJournals ({name, namespace}) {
+function deleteJournals ({ name, namespace }) {
   const cache = getJournalCache()
-  const numbers = cache.getIssueNumbersForNameAndNamespace({name, namespace})
+  const numbers = cache.getIssueNumbersForNameAndNamespace({ name, namespace })
   if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
@@ -130,19 +130,19 @@ function deleteJournals ({name, namespace}) {
 }
 exports.deleteJournals = deleteJournals
 
-function getIssueComments ({number}) {
+function getIssueComments ({ number }) {
   const cache = getJournalCache()
-  const {metadata: {name, namespace}} = cache.getIssue(number)
+  const { metadata: { name, namespace } } = cache.getIssue(number)
   return github
-    .getComments({number})
+    .getComments({ number })
     .thru(githubComments => _.map(githubComments, comment => fromComment(number, name, namespace, comment)))
 }
 exports.getIssueComments = getIssueComments
 
-function loadIssueComments ({number}) {
-  return getIssueComments({number})
+function loadIssueComments ({ number }) {
+  return getIssueComments({ number })
     .reduce((cache, comments) => {
-      _.forEach(comments, comment => cache.addOrUpdateComment({issueNumber: number, comment}))
+      _.forEach(comments, comment => cache.addOrUpdateComment({ issueNumber: number, comment }))
       return cache
     }, getJournalCache())
     .then(() => undefined)

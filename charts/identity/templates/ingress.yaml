@@ -2,7 +2,7 @@ apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
   name: identity-ingress
-  namespace: kube-system
+  namespace: {{ .Release.Namespace }}
   labels:
     app: identity
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

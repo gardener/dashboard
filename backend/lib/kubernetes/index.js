@@ -75,17 +75,17 @@ function credentials (options = {}) {
   if (options.key && options.cert) {
     options.auth = undefined
   }
-  return assign({promises}, config(), options)
+  return assign({ promises }, config(), options)
 }
 
 function mergePatch (options, ...rest) {
-  const headers = {'content-type': 'application/merge-patch+json'}
-  return this.patch(merge({headers}, options), ...rest)
+  const headers = { 'content-type': 'application/merge-patch+json' }
+  return this.patch(merge({ headers }, options), ...rest)
 }
 
 function jsonPatch (options, ...rest) {
-  const headers = {'content-type': 'application/json-patch+json'}
-  return this.patch(merge({headers}, options), ...rest)
+  const headers = { 'content-type': 'application/json-patch+json' }
+  return this.patch(merge({ headers }, options), ...rest)
 }
 
 module.exports = {

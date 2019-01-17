@@ -18,7 +18,7 @@ limitations under the License.
   <tr>
     <td class="nowrap" v-if="this.headerVisible['project']">
       <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace:row.namespace } }">
-        {{ projectName }}
+        {{ row.projectName }}
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
@@ -32,7 +32,8 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
         <div slot="activator">
-          <infra-icon v-model="row.kind"></infra-icon>
+          <img v-if="row.kind === 'alicloud'" src="@/assets/alicloud.svg" width="20" class="mr-2">
+          <infra-icon v-else v-model="row.kind"></infra-icon>
           {{ row.region }}
         </div>
         <span>{{ row.kind }} [{{ row.region }}]</span>
@@ -117,7 +118,6 @@ import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
-import replace from 'lodash/replace'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { getTimestampFormatted,
@@ -126,7 +126,8 @@ import { getTimestampFormatted,
   isHibernated,
   isReconciliationDeactivated,
   isShootMarkedForDeletion,
-  isTypeDelete } from '@/utils'
+  isTypeDelete,
+  getProjectName } from '@/utils'
 
 export default {
   components: {
@@ -166,6 +167,7 @@ export default {
       return {
         name: metadata.name,
         namespace: metadata.namespace,
+        projectName: getProjectName(metadata),
         createdBy: getCreatedBy(metadata),
         creationTimestamp: metadata.creationTimestamp,
         expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
@@ -191,9 +193,6 @@ export default {
         headerVisible[header.value] = true
       })
       return headerVisible
-    },
-    projectName () {
-      return replace(this.row.namespace, /^garden-/, '')
     },
     createdAt () {
       return getTimestampFormatted(this.row.creationTimestamp)

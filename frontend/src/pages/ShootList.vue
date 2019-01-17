@@ -43,53 +43,76 @@ limitations under the License.
               Table Options
             </v-tooltip>
           </div>
-          <v-list dense>
+          <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-tile v-for="item in headers" :key="item.text" @click.native.stop @click="setColumnChecked(item)">
+            <v-list-tile v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
               <v-list-tile-action>
-                <v-checkbox v-model="item.checked" color="cyan darken-2" @click="setColumnChecked(item)"></v-checkbox>
+                <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
               </v-list-tile-action>
-              <v-list-tile-sub-title>{{ item.text }}</v-list-tile-sub-title>
+              <v-list-tile-content class="grey--text text--darken-2">
+                <v-list-tile-title>{{ item.text }}</v-list-tile-title>
+              </v-list-tile-content>
             </v-list-tile>
-            <v-tooltip top>
-              <v-list-tile-action slot="activator">
-                <v-btn block flat class="text-xs-center cyan--text text--darken-2" @click.native.stop @click="resetColumnsChecked">
-                  Reset
-                </v-btn>
-              </v-list-tile-action>
-              <span>Reset to Defaults</span>
-            </v-tooltip>
-            <v-subheader v-if="!projectScope">Filter Table</v-subheader>
-            <v-list-tile v-if="!projectScope" @click.native.stop @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues">
+            <v-list-tile>
+              <v-list-tile-content>
+                <v-tooltip top style="width: 100%">
+                  <v-btn slot="activator" block flat class="text-xs-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
+                    Reset
+                  </v-btn>
+                  <span>Reset to Defaults</span>
+                </v-tooltip>
+              </v-list-tile-content>
+            </v-list-tile>
+          </v-list>
+          <v-list subheader dense v-if="!projectScope">
+            <v-subheader>Filter Table</v-subheader>
+            <v-list-tile @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
               <v-list-tile-action>
-                <v-checkbox v-model="showOnlyShootsWithIssues" color="cyan darken-2" @click="showOnlyShootsWithIssues=!showOnlyShootsWithIssues"></v-checkbox>
+                <v-icon :color="checkboxColor(showOnlyShootsWithIssues)" v-text="checkboxIcon(showOnlyShootsWithIssues)"/>
               </v-list-tile-action>
-              <v-list-tile-sub-title>Show only clusters with issues</v-list-tile-sub-title>
+              <v-list-tile-content class="grey--text text--darken-2">
+                <v-list-tile-title>Show only clusters with issues</v-list-tile-title>
+              </v-list-tile-content>
             </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideUserIssues" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
-              <v-list-tile-action>
-                <v-checkbox
-                  :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
-                  v-model="hideUserIssues"
-                  color="cyan darken-2"
-                  @click="toggleHideUserIssues"></v-checkbox>
-              </v-list-tile-action>
-              <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide user issues</v-list-tile-sub-title>
-            </v-list-tile>
-            <v-list-tile v-if="!projectScope && isAdmin" @click.native.stop @click="toggleHideDeactivatedReconciliation" :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
-              <v-list-tile-action>
-                <v-checkbox
-                :disabled="isHideUserIssuesAndHideDeactedReconciliationDisabled"
-                v-model="hideDeactivatedReconciliation"
-                color="cyan darken-2"
-                @click="toggleHideDeactivatedReconciliation"></v-checkbox>
-              </v-list-tile-action>
-              <v-list-tile-sub-title :disabled="!showOnlyShootsWithIssues">Hide clusters with deactivated reconciliation</v-list-tile-sub-title>
-            </v-list-tile>
+            <template v-if="isAdmin">
+              <v-list-tile
+                @click.stop="toggleHideProgressingIssues"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideProgressingIssues)" v-text="checkboxIcon(hideProgressingIssues)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide progressing clusters</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile
+                @click.stop="toggleHideUserIssues"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideUserIssues)" v-text="checkboxIcon(hideUserIssues)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide user issues</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile
+                @click.stop="toggleHideDeactivatedReconciliation"
+                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
+                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(hideDeactivatedReconciliation)" v-text="checkboxIcon(hideDeactivatedReconciliation)"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide clusters with deactivated reconciliation</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </template>
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :search="search" :pagination.sync="pagination" :total-items="items.length" hide-actions must-sort :loading="shootsLoading">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :hide-actions="hideActions" :total-items="totalItems" :rows-per-page-items="[5,10,20]">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -126,17 +149,15 @@ import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
-import GPopper from '@/components/GPopper'
+import pick from 'lodash/pick'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
-import { getCreatedBy } from '@/utils'
 
 export default {
   name: 'shoot-list',
   components: {
     CreateClusterDialog,
-    GPopper,
     ShootListRow,
     ClusterAccess
   },
@@ -160,7 +181,7 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_sortBy') || { rowsPerPage: Number.MAX_SAFE_INTEGER },
+      pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
       cachedItems: null,
       clearSelectedShootTimerID: undefined,
       renderCreateDialog: false
@@ -169,7 +190,7 @@ export default {
   watch: {
     pagination (value) {
       if (value) {
-        this.$localStorage.setObject('dataTable_sortBy', { sortBy: value.sortBy, descending: value.descending, rowsPerPage: Number.MAX_SAFE_INTEGER })
+        this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
         this.setShootListSortParams(value)
       }
     },
@@ -183,6 +204,7 @@ export default {
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
       setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
+      setHideProgressingIssues: 'setHideProgressingIssues',
       setHideUserIssues: 'setHideUserIssues',
       setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
     }),
@@ -206,6 +228,12 @@ export default {
       // Delay resetting shoot so that the dialog does not lose context during closing animation
       this.clearSelectedShootWithDelay()
     },
+    checkboxColor (checked) {
+      return checked ? 'cyan darken-2' : ''
+    },
+    checkboxIcon (checked) {
+      return checked ? 'mdi-checkbox-marked' : 'mdi-checkbox-blank-outline'
+    },
     setColumnChecked (header) {
       header.checked = !header.checked
       this.saveColumnsChecked()
@@ -223,8 +251,7 @@ export default {
       }
       this.saveColumnsChecked()
 
-      this.pagination.sortBy = 'name'
-      this.pagination.descending = false
+      this.pagination = { rowsPerPage: 10 }
     },
     loadColumnsChecked () {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
@@ -239,6 +266,11 @@ export default {
     toggleHideUserIssues () {
       if (this.showOnlyShootsWithIssues) {
         this.hideUserIssues = !this.hideUserIssues
+      }
+    },
+    toggleHideProgressingIssues () {
+      if (this.showOnlyShootsWithIssues) {
+        this.hideProgressingIssues = !this.hideProgressingIssues
       }
     },
     toggleHideDeactivatedReconciliation () {
@@ -263,6 +295,7 @@ export default {
       selectedItem: 'selectedShoot',
       isAdmin: 'isAdmin',
       isHideUserIssues: 'isHideUserIssues',
+      isHideProgressingIssues: 'isHideProgressingIssues',
       isHideDeactivatedReconciliation: 'isHideDeactivatedReconciliation'
     }),
     ...mapState([
@@ -289,26 +322,8 @@ export default {
         }
       }
     },
-    currentMetadata () {
-      return get(this.selectedItem, 'metadata')
-    },
-    currentStatus () {
-      return get(this.selectedItem, 'status')
-    },
     currentName () {
       return get(this.selectedItem, 'metadata.name')
-    },
-    currentNamespace () {
-      return get(this.selectedItem, 'metadata.namespace')
-    },
-    currentCreatedBy () {
-      return getCreatedBy(this.currentMetadata)
-    },
-    currentInfo () {
-      return get(this.selectedItem, 'info', {})
-    },
-    currentLog () {
-      return get(this.selectedItem, 'spec.status.lastOperation.description')
     },
     headers () {
       return this.allHeaders.filter(e => e.hidden === false)
@@ -330,12 +345,12 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    isHideUserIssuesAndHideDeactedReconciliationDisabled () {
+    isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled () {
       return !this.showOnlyShootsWithIssues
     },
     hideUserIssues: {
       get () {
-        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
           return false
         }
         return this.isHideUserIssues
@@ -344,9 +359,20 @@ export default {
         this.setHideUserIssues(value)
       }
     },
+    hideProgressingIssues: {
+      get () {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
+          return false
+        }
+        return this.isHideProgressingIssues
+      },
+      set (value) {
+        this.setHideProgressingIssues(value)
+      }
+    },
     hideDeactivatedReconciliation: {
       get () {
-        if (this.isHideUserIssuesAndHideDeactedReconciliationDisabled) {
+        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
           return false
         }
         return this.isHideDeactivatedReconciliation
@@ -356,12 +382,15 @@ export default {
       }
     },
     hideUserIssuesAndHideDeactivatedReconciliationClass () {
-      return this.isHideUserIssuesAndHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+      return this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
     },
     headlineSubtitle () {
       let subtitle = ''
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
-        subtitle = 'Cluster Filters: Healthy'
+        subtitle = 'Hide: Healthy Clusters'
+        if (this.isHideProgressingIssues) {
+          subtitle += ', Progressing Clusters'
+        }
         if (this.isHideUserIssues) {
           subtitle += ', User Errors'
         }
@@ -370,10 +399,19 @@ export default {
         }
       }
       return subtitle
+    },
+    hideActions () {
+      return this.projectScope
+    },
+    totalItems () {
+      return this.hideActions ? -1 : undefined
     }
   },
   mounted () {
     this.floatingButton = true
+    if (this.hideProgressingIssues === undefined) {
+      this.hideProgressingIssues = true
+    }
     if (this.hideUserIssues === undefined) {
       this.hideUserIssues = this.isAdmin
     }

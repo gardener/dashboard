@@ -27,11 +27,11 @@ const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function Garden ({auth}) {
-  return kubernetes.garden({auth})
+function Garden ({ auth }) {
+  return kubernetes.garden({ auth })
 }
 
-function fromResource ({metadata, spec = {}}) {
+function fromResource ({ metadata, spec = {} }) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
@@ -52,7 +52,7 @@ function fromResource ({metadata, spec = {}}) {
   }
 }
 
-function toResource ({metadata, data = {}}) {
+function toResource ({ metadata, data = {} }) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion } = metadata
   const { createdBy, owner } = data
@@ -91,15 +91,15 @@ function toSubject (username) {
   }
 }
 
-async function validateDeletePreconditions ({user, namespace}) {
-  const shootList = await shoots.list({user, namespace})
+async function validateDeletePreconditions ({ user, namespace }) {
+  const shootList = await shoots.list({ user, namespace })
   if (!_.isEmpty(shootList.items)) {
     throw new PreconditionFailed(`Only empty projects can be deleted`)
   }
 }
 
 async function getProjectNameFromNamespace (namespace) {
-  const ns = await core.namespaces.get({name: namespace})
+  const ns = await core.namespaces.get({ name: namespace })
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
@@ -108,7 +108,7 @@ async function getProjectNameFromNamespace (namespace) {
 }
 exports.getProjectNameFromNamespace = getProjectNameFromNamespace
 
-exports.list = async function ({user, qs = {}}) {
+exports.list = async function ({ user, qs = {} }) {
   const [
     projects,
     isAdmin
@@ -150,55 +150,55 @@ exports.list = async function ({user, qs = {}}) {
     .value()
 }
 
-function isProjectReady ({status: {phase} = {}} = {}) {
+function isProjectReady ({ status: { phase } = {} } = {}) {
   return phase === 'Ready'
 }
 
-exports.create = async function ({user, body}) {
+exports.create = async function ({ user, body }) {
   const name = _.get(body, 'metadata.name')
   _.set(body, 'metadata.namespace', `garden-${name}`)
   _.set(body, 'data.createdBy', user.id)
   const projects = Garden(user).projects
-  let project = await projects.post({body: toResource(body)})
+  let project = await projects.post({ body: toResource(body) })
 
   const watch = exports.watchProject(name)
   const conditionFunction = isProjectReady
   const resourceName = name
   const initializationTimeout = exports.projectInitializationTimeout
-  project = await kubernetes.waitUntilResourceHasCondition({watch, conditionFunction, initializationTimeout, resourceName})
+  project = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, initializationTimeout, resourceName })
 
   return fromResource(project)
 }
 // needs to be exported for testing
-exports.watchProject = name => garden.projects.watch({name})
+exports.watchProject = name => garden.projects.watch({ name })
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
-exports.read = async function ({user, name: namespace}) {
+exports.read = async function ({ user, name: namespace }) {
   const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({name})
+  const project = await projects.get({ name })
   return fromResource(project)
 }
 
-exports.patch = async function ({user, name: namespace, body}) {
+exports.patch = async function ({ user, name: namespace, body }) {
   const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  let project = await projects.get({name})
+  let project = await projects.get({ name })
   // do not update createdBy
   const { metadata, data } = fromResource(project)
   _.assign(data, _.omit(body.data, 'createdBy'))
   project = await projects.mergePatch({
     name,
-    body: toResource({metadata, data})
+    body: toResource({ metadata, data })
   })
   return fromResource(project)
 }
 
-exports.remove = async function ({user, name: namespace}) {
-  await validateDeletePreconditions({user, namespace})
+exports.remove = async function ({ user, name: namespace }) {
+  await validateDeletePreconditions({ user, namespace })
   const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({name})
+  const project = await projects.get({ name })
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)
@@ -210,6 +210,6 @@ exports.remove = async function ({user, name: namespace}) {
       }
     }
   })
-  await projects.delete({name})
+  await projects.delete({ name })
   return fromResource(project)
 }

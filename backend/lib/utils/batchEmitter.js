@@ -20,7 +20,7 @@ const _ = require('lodash')
 const logger = require('../logger')
 
 class AbstractBatchEmitter {
-  constructor ({kind, socket, objectKeyPath = undefined, eventsKind}) {
+  constructor ({ kind, socket, objectKeyPath = undefined, eventsKind }) {
     this.eventsKind = eventsKind
     this.kind = kind
     this.socket = socket
@@ -38,7 +38,7 @@ class AbstractBatchEmitter {
     _
       .chain(objects)
       .map(object => {
-        const event = {type: 'ADDED', object}
+        const event = { type: 'ADDED', object }
         if (this.objectKeyPath) {
           event.objectKey = _.get(object, this.objectKeyPath) // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
         }
@@ -78,12 +78,12 @@ class AbstractBatchEmitter {
 }
 
 class EventsEmitter extends AbstractBatchEmitter {
-  constructor ({kind, socket, objectKeyPath = undefined}) {
-    super({kind, socket, objectKeyPath, eventsKind: 'events'})
+  constructor ({ kind, socket, objectKeyPath = undefined }) {
+    super({ kind, socket, objectKeyPath, eventsKind: 'events' })
   }
 
   emit () {
-    this.socket.emit(this.eventsKind, {kind: this.kind, events: this.events})
+    this.socket.emit(this.eventsKind, { kind: this.kind, events: this.events })
   }
   count () {
     return _.size(this.events)
@@ -97,8 +97,8 @@ class EventsEmitter extends AbstractBatchEmitter {
 }
 
 class NamespacedBatchEmitter extends AbstractBatchEmitter {
-  constructor ({kind, socket, objectKeyPath = undefined}) {
-    super({kind, socket, objectKeyPath, eventsKind: 'namespacedEvents'})
+  constructor ({ kind, socket, objectKeyPath = undefined }) {
+    super({ kind, socket, objectKeyPath, eventsKind: 'namespacedEvents' })
   }
 
   batchEmitObjects (objects, namespace) {
@@ -107,7 +107,7 @@ class NamespacedBatchEmitter extends AbstractBatchEmitter {
   }
 
   emit () {
-    this.socket.emit(this.eventsKind, {kind: this.kind, namespaces: this.namespaces})
+    this.socket.emit(this.eventsKind, { kind: this.kind, namespaces: this.namespaces })
   }
   count () {
     return _.chain(this.namespaces).map(events => events.length).sum().value()
