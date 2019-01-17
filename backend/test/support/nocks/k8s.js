@@ -866,6 +866,25 @@ const stub = {
     return nockWithAuthorization(auth.bearer)
       .get(`/healthz`)
       .reply(200, 'ok')
+  },
+  fetchGardenerVersion ({version}) {
+    const apiServerSpec = {
+      spec: {
+        service: {
+          name: 'gardener-apiserver',
+          namespace: 'gardener'
+        },
+        caBundle: encodeBase64('ca')
+      }
+    }
+    return [
+      nock(url)
+        .get(`/apis/apiregistration.k8s.io/v1beta1/apiservices/v1beta1.garden.sapcloud.io`)
+        .reply(200, apiServerSpec),
+      nock(`https://${apiServerSpec.spec.service.name}.${apiServerSpec.spec.service.namespace}`)
+        .get(`/version`)
+        .reply(200, version)
+    ]
   }
 }
 

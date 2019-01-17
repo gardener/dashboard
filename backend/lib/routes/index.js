@@ -30,14 +30,14 @@ router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user
-      const gardenerVersion = await fetchGardenerVersion(user)
+      const gardenerVersion = await fetchGardenerVersion()
       res.send({ version, gardenerVersion, user })
     } catch (err) {
       next(err)
     }
   })
 
-async function fetchGardenerVersion (user) {
+async function fetchGardenerVersion () {
   try {
     const apiServer = await kubernetes.apiregistration().apis['apiregistration.k8s.io'].v1beta1.apiservices('v1beta1.garden.sapcloud.io').get()
     const service = _.get(apiServer, 'body.spec.service')

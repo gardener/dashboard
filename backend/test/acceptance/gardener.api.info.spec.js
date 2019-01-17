@@ -24,6 +24,7 @@ describe('gardener', function () {
       /* eslint no-unused-expressions: 0 */
 
       const oidc = nocks.oidc
+      const k8s = nocks.k8s
       const email = 'john.doe@example.org'
       let app
 
@@ -100,7 +101,9 @@ describe('gardener', function () {
 
       it('should accept requests with valid bearer', function () {
         const bearer = oidc.sign({email})
+        const gardenerVersion = { major: '1', minor: '0' }
         oidc.stub.getKeys()
+        k8s.stub.fetchGardenerVersion({version: gardenerVersion})
         return chai.request(app)
           .get('/api/info')
           .set('authorization', `Bearer ${bearer}`)
@@ -109,6 +112,8 @@ describe('gardener', function () {
             expect(res).to.have.status(200)
             expect(res).to.be.json
             expect(res.body).to.have.property('version').that.is.equal(version)
+            expect(res.body.gardenerVersion).to.have.property('major').that.is.equal(gardenerVersion.major)
+            expect(res.body.gardenerVersion).to.have.property('minor').that.is.equal(gardenerVersion.minor)
             expect(res.body).to.have.property('user').that.is.an('object')
             expect(res.body.user).to.have.property('email').that.is.equal(email)
           })
