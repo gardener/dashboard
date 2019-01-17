@@ -164,3 +164,7 @@ export function deleteMember ({ namespace, name, user }) {
 export function getUserInfo ({ user }) {
   return getResource(`/api/user`, user)
 }
+
+export function getInfo ({ user }) {
+  return getResource(`/api/info`, user)
+}

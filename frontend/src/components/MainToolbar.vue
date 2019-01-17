@@ -34,10 +34,12 @@ limitations under the License.
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
-              <div class="title">Gardener</div>
-              <div class="caption">The Kubernetes Botanist</div>
+              <div class="title mb-2">Gardener</div>
+              <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
+              <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
             </div>
           </v-card-title>
+          <v-divider></v-divider>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index">
@@ -118,6 +120,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
 import { gravatarUrlIdenticon } from '@/utils'
 import Breadcrumb from '@/components/Breadcrumb'
+import { getInfo } from '@/utils/api'
 
 export default {
   name: 'toolbar',
@@ -127,12 +130,15 @@ export default {
   data () {
     return {
       menu: false,
-      help: false
+      help: false,
+      gardenerVersion: undefined,
+      dashboardVersion: undefined
     }
   },
   methods: {
     ...mapActions([
-      'setSidebar'
+      'setSidebar',
+      'setError'
     ]),
     handleLogout () {
       this.$router.push({ name: 'Logout' })
@@ -172,8 +178,26 @@ export default {
     accountLink () {
       return { name: 'Account', query: this.$route.query }
     }
+  },
+  watch: {
+    help (value) {
+      if (value && !this.dashboardVersion) {
+        getInfo({ user: this.user }).then(res => {
+          const data = get(res, 'data')
+          if (data.gardenerVersion) {
+            this.gardenerVersion = `${data.gardenerVersion.major}.${data.gardenerVersion.minor}`
+          }
+          if (data.version) {
+            this.dashboardVersion = `${data.version}`
+          }
+        }).catch(error => {
+          this.setError({ message: `Failed to fetch version information. ${error.message}` })
+        })
+      }
+    }
   }
 }
+
 </script>
 
 <style lang="styl" scoped>
