@@ -186,7 +186,8 @@ exports.create = async function ({user, namespace, name}) {
   terminalInfo.container = 'terminal'
 
   const seedShootResource = await shoots.read({user, namespace: 'garden', name: _.get(seed, 'metadata.name')})
-  terminalInfo.server = await getShootIngressDomain(seedShootResource)
+  const soilIngressDomain = await getShootIngressDomain(seedShootResource)
+  terminalInfo.server = `api.${soilIngressDomain}`
 
   const seedKubeconfigJson = yaml.safeLoad(seedKubeconfig)
   const seedAPIServer = _.get(_.head(_.get(seedKubeconfigJson, 'clusters')), 'cluster.server')
@@ -203,7 +204,7 @@ exports.create = async function ({user, namespace, name}) {
       logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
       terminalInfo.pod = existingPodName
       const {token} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccount.name})
-      terminalInfo.attachSA = attachServiceAccount.name
+      terminalInfo.attachServiceAccount = attachServiceAccount.name
       terminalInfo.token = token
       return terminalInfo
     }
@@ -237,7 +238,7 @@ exports.create = async function ({user, namespace, name}) {
         uid
       }
     ]
-    terminalInfo.attachSA = attachServiceAccountName
+    terminalInfo.attachServiceAccount = attachServiceAccountName
 
     // create rolebinding for attach-sa
     await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
