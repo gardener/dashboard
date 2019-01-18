@@ -93,7 +93,7 @@ export default function createRouter ({ store, userManager }) {
       }
     },
     {
-      title: 'YAML Editor',
+      title: 'YAML',
       to: ({ params }) => {
         return {
           name: 'ShootItemEditor',
