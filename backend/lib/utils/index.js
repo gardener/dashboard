@@ -19,6 +19,13 @@
 
 const path = require('path')
 const _ = require('lodash')
+const { getSeeds } = require('../cache')
+const kubernetes = require('../kubernetes')
+const { NotFound } = require('../errors')
+
+function Core ({auth}) {
+  return kubernetes.core({auth})
+}
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -53,11 +60,54 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
+async function getShootIngressDomain (shoot) {
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+
+  const name = _.get(shoot, 'metadata.name')
+  const namespace = _.get(shoot, 'metadata.namespace')
+
+  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const projectName = await getProjectNameFromNamespace(namespace)
+
+  return `${name}.${projectName}.${ingressDomain}`
+}
+
+async function getSeedKubeconfigForShoot ({user, shoot}) {
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+
+  const seedSecretName = _.get(seed, 'spec.secretRef.name')
+  const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
+  const seedSecret = await Core(user).ns(seedSecretNamespace).secrets.get({name: seedSecretName})
+    .catch(err => {
+      if (err.code === 404) {
+        return
+      }
+      throw err
+    })
+
+  const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
+  const seedShootNS = _.get(shoot, 'status.technicalID')
+
+  return { seed, seedKubeconfig, seedShootNS }
+}
+
+async function getProjectNameFromNamespace (namespace) {
+  const ns = await kubernetes.core().namespaces.get({ name: namespace })
+  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
+  if (!name) {
+    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+  }
+  return name
+}
+
 module.exports = {
   resolve,
   decodeBase64,
   encodeBase64,
   getCloudProviderKind,
   shootHasIssue,
+  getShootIngressDomain,
+  getSeedKubeconfigForShoot,
+  getProjectNameFromNamespace,
   _config: config
 }

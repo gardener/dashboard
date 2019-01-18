@@ -20,8 +20,8 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
-const core = kubernetes.core()
-const { PreconditionFailed, NotFound } = require('../errors')
+const { getProjectNameFromNamespace } = require('../utils')
+const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 
@@ -97,16 +97,6 @@ async function validateDeletePreconditions ({ user, namespace }) {
     throw new PreconditionFailed(`Only empty projects can be deleted`)
   }
 }
-
-async function getProjectNameFromNamespace (namespace) {
-  const ns = await core.namespaces.get({ name: namespace })
-  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
-  if (!name) {
-    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
-  }
-  return name
-}
-exports.getProjectNameFromNamespace = getProjectNameFromNamespace
 
 exports.list = async function ({ user, qs = {} }) {
   const [

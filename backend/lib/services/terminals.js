@@ -18,18 +18,14 @@
 
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
-const { decodeBase64, encodeBase64 } = require('../utils')
+const { decodeBase64, encodeBase64, getSeedKubeconfigForShoot, getShootIngressDomain } = require('../utils')
+
 const authorization = require('./authorization')
 const shoots = require('./shoots')
-const { getSeeds } = require('../cache')
 const { Forbidden } = require('../errors')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 const logger = require('../logger')
-
-function Core ({auth}) {
-  return kubernetes.core({auth})
-}
 
 function toTerminalServiceAccountResource ({prefix, name, user, ownerReferences = [], labels = {}, annotations = {}}) {
   const apiVersion = Resources.ServiceAccount.apiVersion
@@ -174,26 +170,6 @@ function watchServiceAccount ({client, serviceaccountName}) {
   return client.serviceaccounts.watch({name: serviceaccountName})
 }
 
-async function getSeedKubeconfigForShoot ({user, shoot}) {
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
-
-  const seedSecretName = _.get(seed, 'spec.secretRef.name')
-  const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await Core(user).ns(seedSecretNamespace).secrets.get({name: seedSecretName})
-    .catch(err => {
-      if (err.code === 404) {
-        return
-      }
-      throw err
-    })
-
-  console.log('shoot', shoot)
-  const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  const seedShootNS = _.get(shoot, 'status.technicalID')
-
-  return { seed, seedKubeconfig, seedShootNS }
-}
-
 exports.create = async function ({user, namespace, name}) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
@@ -210,8 +186,7 @@ exports.create = async function ({user, namespace, name}) {
   terminalInfo.container = 'terminal'
 
   const seedShootResource = await shoots.read({user, namespace: 'garden', name: _.get(seed, 'metadata.name')})
-  const soil = _.find(getSeeds(), ['metadata.name', seedShootResource.spec.cloud.seed])
-  terminalInfo.server = `api.${_.get(soil, 'spec.ingressDomain')}`
+  terminalInfo.server = await getShootIngressDomain(seedShootResource)
 
   const seedKubeconfigJson = yaml.safeLoad(seedKubeconfig)
   const seedAPIServer = _.get(_.head(_.get(seedKubeconfigJson, 'clusters')), 'cluster.server')
@@ -228,6 +203,7 @@ exports.create = async function ({user, namespace, name}) {
       logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
       terminalInfo.pod = existingPodName
       const {token} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccount.name})
+      terminalInfo.attachSA = attachServiceAccount.name
       terminalInfo.token = token
       return terminalInfo
     }
@@ -261,6 +237,7 @@ exports.create = async function ({user, namespace, name}) {
         uid
       }
     ]
+    terminalInfo.attachSA = attachServiceAccountName
 
     // create rolebinding for attach-sa
     await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})

@@ -18,9 +18,8 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64 } = require('../utils')
+const { decodeBase64, getProjectNameFromNamespace } = require('../utils')
 const kubernetes = require('../kubernetes')
-const { getProjectNameFromNamespace } = require('./projects')
 const { Conflict } = require('../errors.js')
 
 function Core ({ auth }) {

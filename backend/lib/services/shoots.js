@@ -17,9 +17,9 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64 } = require('../utils')
-const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
+const { decodeBase64, getShootIngressDomain, getSeedKubeconfigForShoot } = require('../utils')
+
 const _ = require('lodash')
 
 function Garden ({ auth }) {
@@ -184,12 +184,8 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
-
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = namespace.replace(/^garden-/, '')
   const data = {
-    seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
+    seedShootIngressDomain: await getShootIngressDomain(shoot)
   }
   if (secret) {
     _
@@ -211,20 +207,9 @@ exports.info = async function ({ user, namespace, name }) {
 
   const isAdmin = await authorization.isAdmin(user)
   if (isAdmin) {
-    const seedSecretName = _.get(seed, 'spec.secretRef.name')
-    const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-    const seedSecret = await core.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
-      .catch(err => {
-        if (err.code === 404) {
-          return
-        }
-        throw err
-      })
+    const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot })
 
-    if (seedSecret) {
-      const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-
-      const seedShootNS = _.get(shoot, 'status.technicalID')
+    if (seedKubeconfig) {
       if (!_.isEmpty(seedShootNS)) {
         const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({ name: 'monitoring-ingress-credentials' })
           .catch(err => {
