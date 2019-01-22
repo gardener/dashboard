@@ -53,6 +53,11 @@ class Logger {
       console.log(this.ts + ' - \u001b[90mlog\u001b[39m: ' + msg, ...args)
     }
   }
+  trace (msg, ...args) {
+    if (!silent && level <= LEVELS.trace) {
+      console.trace(this.ts + ' - \u001b[36mtrace\u001b[39m: ' + msg, ...args)
+    }
+  }
   debug (msg, ...args) {
     if (!silent && level <= LEVELS.debug) {
       console.debug(this.ts + ' - \u001b[34mdebug\u001b[39m: ' + msg, ...args)

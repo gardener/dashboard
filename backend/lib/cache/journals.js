@@ -95,7 +95,7 @@ function init () {
 
   function removeIssue ({ issue }) {
     const issueNumber = issue.metadata.number
-    logger.debug('removing issue', issueNumber, 'and comments')
+    logger.trace('removing issue', issueNumber, 'and comments')
 
     const comments = getCommentsForIssueCache({ issueNumber })
 
@@ -108,7 +108,7 @@ function init () {
 
   function removeComment ({ issueNumber, comment }) {
     const identifier = comment.metadata.id
-    logger.debug('removing comment', identifier, 'of issue', issueNumber)
+    logger.trace('removing comment', identifier, 'of issue', issueNumber)
     const commentsForIssuesCache = getCommentsForIssueCache({ issueNumber })
     _.unset(commentsForIssuesCache, identifier)
     emitCommmentDeleted(comment)
@@ -119,14 +119,14 @@ function init () {
     const cachedItem = cachedList[identifier]
     if (cachedItem) {
       if (isCachedItemOlder(cachedItem, item)) {
-        logger.debug('updating', kind, identifier)
+        logger.trace('updating', kind, identifier)
         cachedList[identifier] = item
         emitModified(kind, item)
       } else {
         logger.warn(`skipped updating ${kind} with id ${identifier} as it was older`)
       }
     } else {
-      logger.debug('adding new', kind, identifier)
+      logger.trace('adding new', kind, identifier)
       cachedList[identifier] = item
       emitAdded(kind, item)
     }
