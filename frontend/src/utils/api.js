@@ -170,3 +170,7 @@ export function getUserInfo ({ user }) {
 export function createTerminal ({ namespace, name, user }) {
   return createResource(`/api/namespaces/${namespace}/terminals/${name}`, user, undefined)
 }
+
+export function heartbeat ({ namespace, name, user }) {
+  return patchResource(`/api/namespaces/${namespace}/terminals/${name}/heartbeat`, user, undefined)
+}

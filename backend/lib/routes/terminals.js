@@ -34,3 +34,15 @@ router.route('/:name')
       next(err)
     }
   })
+
+router.route('/:name/heartbeat')
+  .patch(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await terminals.heartbeat({user, namespace, name}))
+    } catch (err) {
+      next(err)
+    }
+  })

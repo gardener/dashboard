@@ -51,8 +51,10 @@ limitations under the License.
 <script>
 import 'xterm/dist/xterm.css'
 
+import { mapState } from 'vuex'
 import { Terminal } from 'xterm'
-import { createTerminal } from '@/utils/api'
+import { createTerminal, heartbeat } from '@/utils/api'
+import { encodeURIComponents } from '@/utils'
 import get from 'lodash/get'
 import ora from 'ora'
 import * as attach from '@/lib/attach'
@@ -86,8 +88,8 @@ function protocols ({ token: bearer }) {
   return protocols
 }
 
-function uri ({ namespace, container, server, pod }) {
-  // TODO uribuilder
+function uri (terminalData) {
+  const { namespace, container, server, pod } = encodeURIComponents(terminalData)
   return `wss://${server}/api/v1/namespaces/${namespace}/pods/${pod}/attach?container=${container}&stdin=true&stdout=true&tty=true`
 }
 
@@ -100,6 +102,14 @@ export default {
       errorSnackbarBottom: false,
       snackbarText: '',
       spinner: undefined
+    }
+  },
+  computed: {
+    ...mapState([
+      'cfg'
+    ]),
+    pingIntervalSeconds () {
+      return get(this.cfg, 'terminal.pingIntervalSeconds')
     }
   },
   methods: {
@@ -133,6 +143,11 @@ export default {
 
       return data
     },
+    async heartbeat () {
+      const user = this.$store.state.user
+      const { namespace, name } = this.$route.params
+      return heartbeat({ name, namespace, user })
+    },
     async retry () {
       this.snackbarTop = false
       return this.connect()
@@ -152,13 +167,24 @@ export default {
           tries++
           const ws = new WebSocket(uri(terminalData), protocols(terminalData))
           ws.binaryType = 'arraybuffer'
-          ws.onopen = () => {
+          let reconnectTimeoutId
+          let heartbeatIntervalId
+
+          ws.onopen = async () => {
             this.term.attach(ws)
 
             this.spinner.stop()
             this.hideSnackbar()
             connected = true
             tries = 0
+
+            heartbeatIntervalId = setInterval(async () => {
+              try {
+                await this.heartbeat()
+              } catch (err) {
+                console.error('heartbeat failed:', err)
+              }
+            }, 60 * 1000)
           }
           ws.onclose = error => {
             this.close()
@@ -184,10 +210,16 @@ export default {
               this.spinner.start()
               console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
             }
-            setTimeout(() => attachTerminal(), timeoutSeconds * 1000)
+            reconnectTimeoutId = setTimeout(() => attachTerminal(), timeoutSeconds * 1000)
           }
 
           this.close = () => {
+            clearTimeout(reconnectTimeoutId)
+            clearInterval(heartbeatIntervalId)
+
+            if (ws.readyState === attach.ReadyStateEnum.OPEN || ws.readyState === attach.ReadyStateEnum.CONNCTING) {
+              ws.close()
+            }
             this.term.detach(ws)
           }
         }
@@ -198,7 +230,6 @@ export default {
     }
   },
   async mounted () {
-    // terminal
     const term = this.term = new Terminal()
     term.open(this.$refs.container)
     term.winptyCompatInit()

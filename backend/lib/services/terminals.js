@@ -253,7 +253,7 @@ exports.create = async function ({user, namespace, name}) {
     // create kubeconfig for cpaccess-sa and store as secret
     const {token, caData} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: cpServiceAccountName})
     const contextName = `controlplane-${seedShootNS}`
-    const kubeconfig = encodeBase64(kubernetes.getKubeconfigFromServiceAccount({serviceaccountName: cpServiceAccountName, contextName, serviceaccountNamespace: seedShootNS, token, seedAPIServer, caData}))
+    const kubeconfig = encodeBase64(kubernetes.getKubeconfigFromServiceAccount({serviceaccountName: cpServiceAccountName, contextName, serviceaccountNamespace: seedShootNS, token, server: seedAPIServer, caData}))
     await seedK8sCoreClient.secrets.post({body: toSecretResource({name: cpServiceAccountName, user: username, ownerReferences, data: {kubeconfig}})})
 
     // create pod
@@ -278,4 +278,40 @@ exports.create = async function ({user, namespace, name}) {
     }
     throw new Error(`Could not setup Kubernetes Resources for Terminal session. Error: ${e}`)
   }
+}
+
+exports.heartbeat = async function ({user, namespace, name}) {
+  const isAdmin = await authorization.isAdmin(user)
+  const username = user.id
+
+  if (!isAdmin) {
+    throw new Forbidden('Admin privileges required')
+  }
+  // get seed and seed kubeconfig for shoot
+  const shootSpec = await shoots.read({user, namespace, name})
+  const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootSpec })
+
+  const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
+  const qs = { labelSelector: 'component=dashboard-terminal' }
+  const existingPods = await seedK8sCoreClient.pods.get({qs})
+  const existingPodForUser = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username)
+  if (existingPodForUser && _.get(existingPodForUser, 'status.phase') === 'Running') {
+    const attachServiceAccount = _.first(existingPodForUser.metadata.ownerReferences)
+    if (attachServiceAccount) {
+      const attachServiceAccountName = attachServiceAccount.name
+
+      const heartbeat = Math.floor(new Date() / 1000)
+      const attachSaAnnotations = {
+        'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
+      }
+      try {
+        await seedK8sCoreClient.serviceaccounts.mergePatch({ name: attachServiceAccountName, body: { metadata: { annotations: attachSaAnnotations } } })
+        return { heartbeat }
+      } catch (e) {
+        logger.error(`Could not update service account. Error: ${e}`)
+        throw new Error(`Could not update service account`)
+      }
+    }
+  }
+  throw new Error(`Could not determine service account for ${namespace}/${name}`)
 }

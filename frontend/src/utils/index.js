@@ -21,6 +21,7 @@ import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import keys from 'lodash/keys'
+import mapValues from 'lodash/mapValues'
 import intersection from 'lodash/intersection'
 import md5 from 'md5'
 import toLower from 'lodash/toLower'
@@ -345,4 +346,8 @@ export function textColor (color) {
     textColor = `${textColor} text--${colorMod}`
   }
   return textColor
+}
+
+export function encodeURIComponents (obj) {
+  return mapValues(obj, value => encodeURIComponent(value))
 }

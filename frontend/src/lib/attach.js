@@ -1,11 +1,11 @@
-const ReadyStateEnum = {
+export const ReadyStateEnum = {
   CONNECTING: 0,
   OPEN: 1,
   CLOSING: 2,
   CLOSED: 3
 }
 
-export function attach (term, socket, bidirectional, buffered) {
+export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, buffered) {
   bidirectional = typeof bidirectional === 'undefined' ? true : bidirectional
   term.__socket = socket
 
@@ -106,7 +106,7 @@ export function attach (term, socket, bidirectional, buffered) {
       return
     }
     term.__sendData('') // send empty message to prevent socket connection from getting closed
-  }, 30000)
+  }, pingIntervalSeconds * 1000)
 }
 
 function addSocketListener (socket, type, handler) {
@@ -130,8 +130,8 @@ export function detach (term, socket) {
 }
 
 export function apply (terminalConstructor) {
-  terminalConstructor.prototype.attach = function (socket, bidirectional, buffered) {
-    attach(this, socket, bidirectional, buffered)
+  terminalConstructor.prototype.attach = function (socket, pingIntervalSeconds, bidirectional, buffered) {
+    attach(this, socket, pingIntervalSeconds, bidirectional, buffered)
   }
 
   terminalConstructor.prototype.detach = function (socket) {

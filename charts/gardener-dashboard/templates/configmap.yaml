@@ -83,6 +83,10 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
+{{- if .Values.frontendConfig.terminal.pingIntervalSeconds }}
+      terminal:
+        pingIntervalSeconds: {{ .Values.terminal.pingIntervalSeconds }}
+{{- end }}
 {{- if .Values.prometheus }}
     prometheus:
       secret: {{ .Values.prometheus.secret }}
