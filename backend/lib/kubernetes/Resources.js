@@ -32,6 +32,11 @@ module.exports = {
     kind: 'SelfSubjectAccessReview',
     apiVersion: 'authorization.k8s.io/v1'
   },
+  TokenReview: {
+    name: 'tokenreviews',
+    kind: 'TokenReview',
+    apiVersion: 'authentication.k8s.io/v1'
+  },
   RoleBinding: {
     name: 'rolebindings',
     kind: 'RoleBinding',

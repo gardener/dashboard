@@ -137,6 +137,17 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
+  authentication (options) {
+    options = assign(options, {
+      path: 'apis/authentication.k8s.io',
+      version: 'v1',
+      namespaceResources: [],
+      groupResources: [
+        'tokenreviews'
+      ]
+    })
+    return new ApiGroup(credentials(options))
+  },
   authorization (options) {
     options = assign(options, {
       path: 'apis/authorization.k8s.io',
