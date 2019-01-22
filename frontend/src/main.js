@@ -16,6 +16,7 @@
 
 import includes from 'lodash/includes'
 import assign from 'lodash/assign'
+import cloneDeep from 'lodash/cloneDeep'
 
 import 'vuetify/dist/vuetify.min.css'
 
@@ -51,16 +52,17 @@ if (version === false) {
         Oidc.Log.logger = console
         Oidc.Log.level = Oidc.Log.ERROR
         const userStore = new Oidc.WebStorageStateStore()
+        const oidc = cloneDeep(cfg.oidc)
         try {
-          const redirectUri = new URL(cfg.oidc.redirect_uri)
+          const redirectUri = new URL(oidc.redirect_uri)
           if (redirectUri) {
-            cfg.oidc.redirect_uri = window.location.origin + redirectUri.pathname
+            oidc.redirect_uri = window.location.origin + redirectUri.pathname
           }
         } catch (err) {
           // eslint-disable-next-line no-console
           console.error('Invalid redirect URI in OIDC config', err)
         }
-        const userManager = new Oidc.UserManager(assign({ userStore }, cfg.oidc))
+        const userManager = new Oidc.UserManager(assign({ userStore }, oidc))
         const bus = new Vue({})
         Storage.prototype.setObject = function (key, value) {
           this.setItem(key, JSON.stringify(value))
