@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 echo "Looking for expired dashboard terminal serviceaccounts.."
-THRESHOLD=${NO_HEARTBEAT_DELETE_SECONDS-86400}
+THRESHOLD=${NO_HEARTBEAT_DELETE_SECONDS:-86400}
 CURRENTTIMESTAMP="$(date +%s)"
 KUBE_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
 
@@ -26,12 +26,12 @@ echo "Found ${SERVICEACCOUNTSCOUNT} dashboard terminal service accounts"
 COUNT=0
 while [ "${COUNT}" -lt "${SERVICEACCOUNTSCOUNT}" ]
 do
-  echo "Checking serviceaccount ${SANAME}"
-
   SERVICEACCOUNT="$(echo ${SERVICEACCOUNTS} | jq .items[${COUNT}])"
   SANAME="$(echo ${SERVICEACCOUNT} | jq -r .metadata.name)"
   SANAMESPACE="$(echo ${SERVICEACCOUNT} | jq -r .metadata.namespace)"
   SAHEARTBEAT="$(echo ${SERVICEACCOUNT} | jq -r .metadata.annotations[\"garden.sapcloud.io/terminal-heartbeat\"])"
+
+  echo "Checking serviceaccount ${SANAME}"
 
   if [ ! -z "${SANAME}" ] && [ ! -z "${SANAMESPACE}" ]; then
     let SASECSWOHEARTBEAT="${CURRENTTIMESTAMP}-${SAHEARTBEAT}"
