@@ -164,10 +164,10 @@ function createWebSocket (resource, options = {}) {
       if (options.useBearerAuthorizationProtocol === true) {
         protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
       } else {
-        headers.authorization = `bearer ${encodeURIComponent(bearer)}`
+        headers.authorization = `Bearer ${encodeURIComponent(bearer)}`
       }
     } else if (user) {
-      headers.authorization = `basic ${encodeBase64(join([user, pass], ':'))}`
+      headers.authorization = `Basic ${encodeBase64(join([user, pass], ':'))}`
     }
   }
 
