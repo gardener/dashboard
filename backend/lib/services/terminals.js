@@ -240,7 +240,6 @@ exports.create = async function ({user, namespace, name}) {
     // create owner ref object, attach-serviceaccount gets owner of all resources created below
     const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
     const identifier = _.replace(attachServiceAccountName, 'terminal-attach-', '')
-    const name = `terminal-${identifier}`
     const uid = _.get(attachServiceAccountResource, 'metadata.uid')
     const ownerReferences = [
       {
@@ -257,7 +256,7 @@ exports.create = async function ({user, namespace, name}) {
     await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
 
     // create service account used by terminal pod for control plane access
-    const cpServiceAccountName = `terminal-cp-${name}`
+    const cpServiceAccountName = `terminal-cp-${identifier}`
     await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user: username, ownerReferences})})
 
     // create rolebinding for cpaccess-sa
@@ -270,6 +269,7 @@ exports.create = async function ({user, namespace, name}) {
     await seedK8sCoreClient.secrets.post({body: toSecretResource({name: cpServiceAccountName, user: username, ownerReferences, data: {kubeconfig}})})
 
     // create pod
+    const name = `terminal-${identifier}`
     const podResource = await seedK8sCoreClient.pods.post({body: toTerminalPodResource({name, cpSecretName: cpServiceAccountName, user: username, ownerReferences})})
     const attachServiceAccountToken = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName})
     terminalInfo.pod = _.get(podResource, 'metadata.name')
