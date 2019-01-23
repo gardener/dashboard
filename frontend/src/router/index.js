@@ -435,11 +435,16 @@ export default function createRouter ({ store, userManager }) {
               .all(promises)
               .then(() => undefined)
           case 'ShootItem':
-          case 'ShootItemEditor':
             return Promise
               .all([
                 store.dispatch('subscribeShoot', { name: params.name, namespace }),
                 store.dispatch('subscribeComments', { name: params.name, namespace })
+              ])
+              .then(() => undefined)
+          case 'ShootItemEditor':
+            return Promise
+              .all([
+                store.dispatch('subscribeShoot', { name: params.name, namespace })
               ])
               .then(() => undefined)
           case 'Members':
