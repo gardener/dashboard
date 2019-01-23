@@ -21,6 +21,7 @@ import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import concat from 'lodash/concat'
+import get from 'lodash/get'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -73,6 +74,10 @@ export default function createRouter ({ store, userManager }) {
     }
   }
 
+  function terminalEnabled () {
+    return get(store, 'state.cfg.features.terminalEnabled', false)
+  }
+
   const mode = 'history'
 
   /**
@@ -90,7 +95,8 @@ export default function createRouter ({ store, userManager }) {
           name: 'ShootItem',
           params
         }
-      }
+      },
+      visible: () => true
     },
     {
       title: 'YAML',
@@ -99,7 +105,8 @@ export default function createRouter ({ store, userManager }) {
           name: 'ShootItemEditor',
           params
         }
-      }
+      },
+      visible: () => true
     },
     {
       title: 'Terminal',
@@ -108,7 +115,8 @@ export default function createRouter ({ store, userManager }) {
           name: 'ShootItemTerminal',
           params
         }
-      }
+      },
+      visible: () => terminalEnabled()
     }
   ]
 
@@ -239,6 +247,13 @@ export default function createRouter ({ store, userManager }) {
                 toRouteName: 'ShootList',
                 breadcrumb: true,
                 tabs: shootItemTabs
+              },
+              beforeEnter: (to, from, next) => {
+                if (terminalEnabled()) {
+                  next()
+                } else {
+                  next('/')
+                }
               }
             }
           ]

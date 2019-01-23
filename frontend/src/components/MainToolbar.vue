@@ -116,6 +116,7 @@ limitations under the License.
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
+import filter from 'lodash/filter'
 import { gravatarUrlIdenticon } from '@/utils'
 import Breadcrumb from '@/components/Breadcrumb'
 
@@ -159,7 +160,11 @@ export default {
       return this.user.profile.email
     },
     tabs () {
-      return get(this.$route, 'meta.tabs', false)
+      const routeTabs = get(this.$route, 'meta.tabs', false)
+      if (!routeTabs) {
+        return routeTabs
+      }
+      return filter(routeTabs, tab => tab.visible())
     },
     avatarTitle () {
       return `${this.username} (${this.email})`
