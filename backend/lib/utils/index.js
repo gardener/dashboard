@@ -84,6 +84,9 @@ async function getSeedKubeconfigForShoot ({user, shoot}) {
       }
       throw err
     })
+  if (!_.get(seedSecret, 'data')) {
+    return
+  }
 
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
   const seedShootNS = _.get(shoot, 'status.technicalID')

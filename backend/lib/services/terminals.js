@@ -178,22 +178,35 @@ exports.create = async function ({user, namespace, name}) {
     throw new Forbidden('Admin privileges required to create terminal')
   }
   // get seed and seed kubeconfig for shoot
-  const shootSpec = await shoots.read({user, namespace, name})
-  const { seed, seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootSpec })
+  const shootResource = await shoots.read({user, namespace, name})
+  console.log(shootResource)
+  const seedKubeconfigForShoot = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
+  if (!seedKubeconfigForShoot) {
+    throw new Error('could not fetch seed kubeconfig for shoot')
+  }
+  const { seed, seedKubeconfig, seedShootNS } = seedKubeconfigForShoot
 
   const terminalInfo = {}
   terminalInfo.namespace = seedShootNS
   terminalInfo.container = 'terminal'
 
-  const seedShootResource = await shoots.read({user, namespace: 'garden', name: _.get(seed, 'metadata.name')})
-  const soilIngressDomain = await getShootIngressDomain(seedShootResource)
+  let soilIngressDomain
+  if (namespace === 'garden') {
+    const soilSeed = seed
+    const ingressDomain = _.get(soilSeed, 'spec.ingressDomain')
+    soilIngressDomain = `${namespace}.${ingressDomain}`
+  } else {
+    const seedShootResource = await shoots.read({user, namespace: 'garden', name: _.get(seed, 'metadata.name')})
+    soilIngressDomain = await getShootIngressDomain(seedShootResource)
+  }
   terminalInfo.server = `api.${soilIngressDomain}`
 
   const seedKubeconfigJson = yaml.safeLoad(seedKubeconfig)
   const seedAPIServer = _.get(_.head(_.get(seedKubeconfigJson, 'clusters')), 'cluster.server')
 
-  const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
-  const seedK8sRbacClient = kubernetes.rbac(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
+  const fromSeedKubeconfig = kubernetes.fromKubeconfig(seedKubeconfig)
+  const seedK8sCoreClient = kubernetes.core(fromSeedKubeconfig).ns(seedShootNS)
+  const seedK8sRbacClient = kubernetes.rbac(fromSeedKubeconfig).ns(seedShootNS)
   const qs = { labelSelector: 'component=dashboard-terminal' }
   const existingPods = await seedK8sCoreClient.pods.get({qs})
   const existingPodForUser = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username)
@@ -288,8 +301,8 @@ exports.heartbeat = async function ({user, namespace, name}) {
     throw new Forbidden('Admin privileges required')
   }
   // get seed and seed kubeconfig for shoot
-  const shootSpec = await shoots.read({user, namespace, name})
-  const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootSpec })
+  const shootResource = await shoots.read({user, namespace, name})
+  const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
 
   const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
   const qs = { labelSelector: 'component=dashboard-terminal' }
