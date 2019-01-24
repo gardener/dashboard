@@ -245,6 +245,13 @@ limitations under the License.
           <cluster-access :item="item"></cluster-access>
         </v-card>
 
+        <v-card v-show="isLoggingFeatureGateEnabled">
+          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+            Logging
+          </v-card-title>
+          <logging :shootItem="item"></logging>
+        </v-card>
+
         <v-card class="cyan darken-2 mt-3">
           <v-card-title class="subheading white--text">
             Lifecycle
@@ -313,6 +320,7 @@ import Journals from '@/components/Journals'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion'
 import StatusCard from '@/components/StatusCard'
+import Logging from '@/components/Logging'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
@@ -342,6 +350,7 @@ export default {
     TimeString,
     ShootVersion,
     StatusCard,
+    Logging,
     ShootHibernation,
     MaintenanceStart,
     MaintenanceConfiguration,
@@ -416,6 +425,9 @@ export default {
     },
     isInfoAvailable () {
       return !!this.info
+    },
+    isLoggingFeatureGateEnabled () {
+      return !!this.info.logging_username && !!this.info.logging_password
     },
     journals () {
       const params = this.$route.params

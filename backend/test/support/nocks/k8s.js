@@ -440,6 +440,8 @@ const stub = {
     shootPassword,
     monitoringUser,
     monitoringPassword,
+    loggingUser,
+    loggingPassword,
     seedClusterName,
     seedSecretName,
     seedName
@@ -480,6 +482,12 @@ const stub = {
         password: encodeBase64(monitoringPassword)
       }
     }
+    const loggingSecretResult = {
+      data: {
+        username: encodeBase64(loggingUser),
+        password: encodeBase64(loggingPassword)
+      }
+    }
 
     return [nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -492,7 +500,9 @@ const stub = {
       .reply(200, () => seedSecretResult),
     nock(seedServerURL)
       .get(`/api/v1/namespaces/${technicalID}/secrets/monitoring-ingress-credentials`)
-      .reply(200, monitoringSecretResult)]
+      .reply(200, monitoringSecretResult)
+      .get(`/api/v1/namespaces/${technicalID}/secrets/logging-ingress-credentials`)
+      .reply(200, loggingSecretResult)]
   },
   replaceShoot ({bearer, namespace, name, project, createdBy}) {
     const shoot = getShoot({name, project, createdBy})
@@ -856,6 +866,25 @@ const stub = {
     return nockWithAuthorization(auth.bearer)
       .get(`/healthz`)
       .reply(200, 'ok')
+  },
+  fetchGardenerVersion ({version}) {
+    const apiServerSpec = {
+      spec: {
+        service: {
+          name: 'gardener-apiserver',
+          namespace: 'gardener'
+        },
+        caBundle: encodeBase64('ca')
+      }
+    }
+    return [
+      nock(url)
+        .get(`/apis/apiregistration.k8s.io/v1beta1/apiservices/v1beta1.garden.sapcloud.io`)
+        .reply(200, apiServerSpec),
+      nock(`https://${apiServerSpec.spec.service.name}.${apiServerSpec.spec.service.namespace}`)
+        .get(`/version`)
+        .reply(200, version)
+    ]
   }
 }
 

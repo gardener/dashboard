@@ -17,9 +17,10 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
+const { decodeBase64, getSeedKubeconfigForShoot } = require('../utils')
+const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
-const { decodeBase64, getShootIngressDomain, getSeedKubeconfigForShoot } = require('../utils')
-
+const logger = require('../logger')
 const _ = require('lodash')
 
 function Garden ({ auth }) {
@@ -28,6 +29,35 @@ function Garden ({ auth }) {
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
+}
+
+function getSecret (core, namespace, name) {
+  return core.ns(namespace).secrets.get({ name: name })
+    .catch(err => {
+      if (err.code === 404) {
+        return
+      }
+      logger.error('failed to fetch %s secret: %s', name, err)
+      throw err
+    })
+}
+
+async function assignComponentSecret (core, namespace, component, data) {
+  const secret = await getSecret(core, namespace, `${component}-ingress-credentials`)
+  if (secret) {
+    _
+      .chain(secret)
+      .get('data')
+      .pick('username', 'password')
+      .forEach((value, key) => {
+        if (key === 'password') {
+          data[`${component}_password`] = decodeBase64(value)
+        } else if (key === 'username') {
+          data[`${component}_username`] = decodeBase64(value)
+        }
+      })
+      .commit()
+  }
 }
 
 function isReserved (key) {
@@ -184,8 +214,12 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+
+  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const projectName = namespace.replace(/^garden-/, '')
   const data = {
-    seedShootIngressDomain: await getShootIngressDomain(shoot)
+    seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
   }
   if (secret) {
     _
@@ -209,30 +243,13 @@ exports.info = async function ({ user, namespace, name }) {
   if (isAdmin) {
     const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot })
 
-    if (seedKubeconfig) {
-      if (!_.isEmpty(seedShootNS)) {
-        const monitoringSecret = await kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS).secrets.get({ name: 'monitoring-ingress-credentials' })
-          .catch(err => {
-            if (err.code === 404) {
-              return
-            }
-            throw err
-          })
-        if (monitoringSecret) {
-          _
-            .chain(monitoringSecret)
-            .get('data')
-            .pick('username', 'password')
-            .forEach((value, key) => {
-              if (key === 'password') {
-                data['monitoring_password'] = decodeBase64(value)
-              } else if (key === 'username') {
-                data['monitoring_username'] = decodeBase64(value)
-              }
-            })
-            .commit()
-        }
-      }
+    if (seedKubeconfig && !_.isEmpty(seedShootNS)) {
+      const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
+
+      await Promise.all([
+        assignComponentSecret(core, seedShootNS, 'monitoring', data),
+        assignComponentSecret(core, seedShootNS, 'logging', data)
+      ])
     }
   }
 

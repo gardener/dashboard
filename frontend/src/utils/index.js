@@ -33,7 +33,6 @@ import includes from 'lodash/includes'
 import every from 'lodash/every'
 import moment from 'moment-timezone'
 import semver from 'semver'
-import some from 'lodash/some'
 import store from '../store'
 import split from 'lodash/split'
 import last from 'lodash/last'
@@ -276,10 +275,8 @@ export function isHibernated (spec) {
     return false
   }
 
-  const kind = getCloudProviderKind(spec.cloud)
-  const workers = get(spec, ['cloud', kind, 'workers'])
   const hibernationEnabled = get(spec, 'hibernation.enabled', false)
-  return hibernationEnabled || some(workers, worker => get(worker, 'autoScalerMax') === 0)
+  return hibernationEnabled
 }
 
 export function canLinkToSeed ({ shootNamespace }) {

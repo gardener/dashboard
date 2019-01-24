@@ -165,6 +165,12 @@ export function getUserInfo ({ user }) {
   return getResource(`/api/user`, user)
 }
 
+/* Info */
+
+export function getInfo ({ user }) {
+  return getResource(`/api/info`, user)
+}
+
 /* Terminals */
 
 export function createTerminal ({ namespace, name, user }) {

@@ -161,6 +161,12 @@ module.exports = {
       spec: Specs.Healthz
     })
   },
+  apiregistration () {
+    return new kubernetesClient.Client({
+      config: credentials(),
+      spec: Specs.APIRegistration
+    })
+  },
   getKubeconfigFromServiceAccount ({serviceaccountName, contextName = 'default', serviceaccountNamespace, token, server, caData}) {
     const clusterName = 'garden'
     const cluster = {

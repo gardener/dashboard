@@ -166,6 +166,9 @@ const actions = {
 
           const alertmanagerHost = `a.${info.seedShootIngressDomain}`
           info.alertmanagerUrl = `https://${alertmanagerHost}`
+
+          const kibanaHost = `k.${info.seedShootIngressDomain}`
+          info.kibanaUrl = `https://${kibanaHost}`
         }
         return info
       })

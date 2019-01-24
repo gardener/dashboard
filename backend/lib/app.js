@@ -72,6 +72,10 @@ app.use(helmet.hsts())
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
 app.get('/config.json', api.frontendConfig)
+// if CORS is not supported by oidc provider proxy jwks
+if (_.get(config, 'frontend.oidc.metdata.jwks_uri') === '/keys') {
+  app.get('/keys', api.jsonWebKeySet)
+}
 
 if (_.has(config, 'prometheus.secret')) {
   app.get('/metrics',

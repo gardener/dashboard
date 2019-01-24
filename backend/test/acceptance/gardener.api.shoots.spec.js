@@ -145,13 +145,15 @@ describe('gardener', function () {
         const shootPassword = 'shootFooPwd'
         const monitoringUser = 'monitoringFoo'
         const monitoringPassword = 'monitoringFooPwd'
+        const loggingUser = 'loggingBar'
+        const loggingPassword = 'loggingBarPwd'
         const seedClusterName = `${region}.${kind}.example.org`
         const shootServerUrl = 'https://seed.foo.bar:443'
         const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
 
         common.stub.getCloudProfiles(sandbox)
         oidc.stub.getKeys()
-        k8s.stub.getShootInfo({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, seedSecretName, seedName})
+        k8s.stub.getShootInfo({bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName})
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
           .set('authorization', `Bearer ${bearer}`)
@@ -164,6 +166,8 @@ describe('gardener', function () {
             expect(res.body.cluster_password).to.eql(shootPassword)
             expect(res.body.monitoring_username).to.eql(monitoringUser)
             expect(res.body.monitoring_password).to.eql(monitoringPassword)
+            expect(res.body.logging_username).to.eql(loggingUser)
+            expect(res.body.logging_password).to.eql(loggingPassword)
             expect(res.body.serverUrl).to.eql(shootServerUrl)
             expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
           })
