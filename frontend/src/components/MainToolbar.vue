@@ -35,6 +35,7 @@ limitations under the License.
           <v-card-title primary-title>
             <div class="content">
               <div class="title mb-2">Gardener</div>
+              <v-progress-circular size="18" indeterminate v-if="!dashboardVersion"></v-progress-circular>
               <div class="caption" v-if="!!gardenerVersion">API version {{gardenerVersion}}</div>
               <div class="caption" v-if="!!dashboardVersion">Dashboard version {{dashboardVersion}}</div>
             </div>
@@ -185,7 +186,7 @@ export default {
         getInfo({ user: this.user }).then(res => {
           const data = get(res, 'data')
           if (data.gardenerVersion) {
-            this.gardenerVersion = `${data.gardenerVersion.major}.${data.gardenerVersion.minor}`
+            this.gardenerVersion = data.gardenerVersion.gitVersion
           }
           if (data.version) {
             this.dashboardVersion = `${data.version}`
