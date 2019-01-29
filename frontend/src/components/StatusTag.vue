@@ -39,7 +39,6 @@ limitations under the License.
 </template>
 
 <script>
-import split from 'lodash/split'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import GPopper from '@/components/GPopper'
@@ -48,20 +47,20 @@ import { mapGetters } from 'vuex'
 
 const knownConditions = {
   APIServerAvailable: {
-    displayName: "API Server",
-    shortName: "API"
+    displayName: 'API Server',
+    shortName: 'API'
   },
   ControlPlaneHealthy: {
-    displayName: "Control Plane",
-    shortName: "CP"
+    displayName: 'Control Plane',
+    shortName: 'CP'
   },
   EveryNodeReady: {
-    displayName: "Nodes",
-    shortName: "N"
+    displayName: 'Nodes',
+    shortName: 'N'
   },
   SystemComponentsHealthy: {
-    displayName: "System Components",
-    shortName: "SC"
+    displayName: 'System Components',
+    shortName: 'SC'
   }
 }
 
@@ -124,7 +123,7 @@ export default {
       const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
       const name = get(knownConditions, `${type}.displayName`, replace(type, /([a-z])([A-Z])/g, '$1 $2'))
-      const shortName = get(knownConditions, `${type}.shortName`, replace(name,/^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
+      const shortName = get(knownConditions, `${type}.shortName`, replace(name, /^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
 
       return { id, name, shortName, message, lastTransitionTime, lastUpdateTime, status }
     },
