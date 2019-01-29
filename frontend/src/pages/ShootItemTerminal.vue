@@ -145,8 +145,8 @@ export default {
     },
     async heartbeat () {
       const user = this.$store.state.user
-      const { namespace, name } = this.$route.params
-      return heartbeat({ name, namespace, user })
+      const { namespace, name, target } = this.$route.params
+      return heartbeat({ name, namespace, user, target })
     },
     async retry () {
       this.snackbarTop = false

@@ -177,6 +177,6 @@ export function createTerminal ({ namespace, name, target, user }) {
   return createResource(`/api/namespaces/${namespace}/terminals/${name}/${target}`, user, undefined)
 }
 
-export function heartbeat ({ namespace, name, user }) {
-  return patchResource(`/api/namespaces/${namespace}/terminals/${name}/heartbeat`, user, undefined)
+export function heartbeat ({ namespace, name, target, user }) {
+  return patchResource(`/api/namespaces/${namespace}/terminals/${name}/heartbeat/${target}`, user, undefined)
 }
