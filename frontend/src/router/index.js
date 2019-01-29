@@ -110,10 +110,22 @@ export default function createRouter ({ store, userManager }) {
       visible: () => true
     },
     {
-      title: 'Terminal',
+      title: 'CP-Terminal',
       to: ({ params }) => {
+        params.target = 'cp'
         return {
-          name: 'ShootItemTerminal',
+          name: 'ShootItemTerminalCp',
+          params
+        }
+      },
+      visible: () => terminalEnabled()
+    },
+    {
+      title: 'Shoot-Terminal',
+      to: ({ params }) => {
+        params.target = 'shoot'
+        return {
+          name: 'ShootItemTerminalShoot',
           params
         }
       },
@@ -238,13 +250,33 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: ':name/term',
-              name: 'ShootItemTerminal',
+              path: ':name/term/cp',
+              name: 'ShootItemTerminalCp',
               component: ShootItemTerminal,
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Cluster Terminal',
+                title: 'Cluster Terminal Control Plane',
+                toRouteName: 'ShootList',
+                breadcrumb: true,
+                tabs: shootItemTabs
+              },
+              beforeEnter: (to, from, next) => {
+                if (terminalEnabled()) {
+                  next()
+                } else {
+                  next('/')
+                }
+              }
+            },
+            {
+              path: ':name/term/shoot',
+              name: 'ShootItemTerminalShoot',
+              component: ShootItemTerminal,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                title: 'Cluster Terminal Shoot',
                 toRouteName: 'ShootList',
                 breadcrumb: true,
                 tabs: shootItemTabs

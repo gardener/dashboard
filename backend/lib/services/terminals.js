@@ -179,7 +179,6 @@ exports.create = async function ({user, namespace, name}) {
   }
   // get seed and seed kubeconfig for shoot
   const shootResource = await shoots.read({user, namespace, name})
-  console.log(shootResource)
   const seedKubeconfigForShoot = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
   if (!seedKubeconfigForShoot) {
     throw new Error('could not fetch seed kubeconfig for shoot')
@@ -280,7 +279,6 @@ exports.create = async function ({user, namespace, name}) {
     /* If something goes wrong during setting up kubernetes resources, we need to cleanup the serviceaccount (if created)
        This will also delete all other leftovers via the owener refs (cascade delete) */
     const name = _.get(attachServiceAccountResource, 'metadata.name', false)
-    console.log(name)
     try {
       if (name) {
         logger.debug(`Something went wrong during creation of Kubernetes resources. Cleaning up ServiceAccount ${name}..`)

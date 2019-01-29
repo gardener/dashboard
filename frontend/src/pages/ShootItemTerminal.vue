@@ -138,8 +138,8 @@ export default {
     },
     async createTerminal () {
       const user = this.$store.state.user
-      const { namespace, name } = this.$route.params
-      const { data } = await createTerminal({ name, namespace, user })
+      const { namespace, name, target } = this.$route.params
+      const { data } = await createTerminal({ name, namespace, target, user })
 
       return data
     },
