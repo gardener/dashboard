@@ -23,25 +23,27 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
-router.route('/:name')
+router.route('/:name/:type/')
   .post(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await terminals.create({user, namespace, name}))
+      const type = req.params.type
+      res.send(await terminals.create({user, namespace, name, type}))
     } catch (err) {
       next(err)
     }
   })
 
-router.route('/:name/heartbeat')
+router.route('/:name/heartbeat/:type/')
   .patch(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      res.send(await terminals.heartbeat({user, namespace, name}))
+      const type = req.params.type
+      res.send(await terminals.heartbeat({user, namespace, name, type}))
     } catch (err) {
       next(err)
     }
