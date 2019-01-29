@@ -76,9 +76,6 @@ export default {
     idToken () {
       return this.user.id_token || ''
     },
-    expiresIn () {
-      return moment.duration(this.user.expires_in, 'seconds').humanize()
-    },
     expiresAt () {
       return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
     }

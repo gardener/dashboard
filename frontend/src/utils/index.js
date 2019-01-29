@@ -198,15 +198,15 @@ export function getTimestampFormatted (timestamp) {
   return moment(timestamp).format('lll')
 }
 
-export function getTimeStringFrom (time, fromTime) {
+export function getTimeStringFrom (time, fromTime, hideSuffix = false) {
   if (!time) {
     return undefined
   } else {
-    return moment(time).from(fromTime)
+    return moment(time).from(fromTime, hideSuffix)
   }
 }
 
-export function getTimeStringTo (time, toTime) {
+export function getTimeStringTo (time, toTime, hidePrefix = false) {
   if (!time) {
     return undefined
   } else {
@@ -214,7 +214,7 @@ export function getTimeStringTo (time, toTime) {
       // Equal dates result in text "a few seconds ago", this is not we want here...
       toTime.setSeconds(toTime.getSeconds() + 1)
     }
-    return moment(time).to(toTime)
+    return moment(time).to(toTime, hidePrefix)
   }
 }
 

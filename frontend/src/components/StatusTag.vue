@@ -15,17 +15,60 @@ limitations under the License.
 -->
 
 <template>
-  <tag :chipText="chipTextShortened" :isError="isError" :isUnknown="isUnknown" :isProgressing="isProgressing" :title="chipTitle" :message="tag.message" :time="tag.lastTransitionTime" :popperKey="popperKeyWithType" :popperPlacement="popperPlacement"></tag>
+  <span>
+    <template v-if="tag.message">
+      <g-popper @rendered="popperRendered=true" :title="chipTitle" :message="tag.message" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
+        <v-tooltip slot="popperRef" top>
+          <v-chip class="cursor-pointer" slot="activator" outline :text-color="chipTextColor" small :color="color">
+            {{chipText}}
+          </v-chip>
+          <span>{{chipTooltip}}</span>
+        </v-tooltip>
+      </g-popper>
+    </template>
+    <template v-else>
+      <v-tooltip top>
+        <v-chip slot="activator" outline :text-color="chipTextColor" small :color="color">
+          {{chipText}}
+        </v-chip>
+        <span>{{chipTooltip}}</span>
+      </v-tooltip>
+    </template>
+    <time-string v-if="popperRendered" v-show="false" :dateTime="tag.lastTransitionTime" :currentString.sync="lastTransitionString" :pointInTime="-1" :hideSuffix="true"></time-string>
+  </span>
 </template>
 
 <script>
 import split from 'lodash/split'
-import Tag from '@/components/Tag'
 import replace from 'lodash/replace'
+import get from 'lodash/get'
+import GPopper from '@/components/GPopper'
+import TimeString from '@/components/TimeString'
+import { mapGetters } from 'vuex'
+
+const knownConditions = {
+  APIServerAvailable: {
+    displayName: "API Server",
+    shortName: "API"
+  },
+  ControlPlaneHealthy: {
+    displayName: "Control Plane",
+    shortName: "CP"
+  },
+  EveryNodeReady: {
+    displayName: "Nodes",
+    shortName: "N"
+  },
+  SystemComponentsHealthy: {
+    displayName: "System Components",
+    shortName: "SC"
+  }
+}
 
 export default {
   components: {
-    Tag
+    GPopper,
+    TimeString
   },
   props: {
     condition: {
@@ -40,31 +83,21 @@ export default {
       type: String
     }
   },
+  data () {
+    return {
+      popperRendered: false,
+      lastTransitionString: undefined
+    }
+  },
   computed: {
     chipText () {
-      return this.tag.text || ''
+      return this.tag.shortName || ''
     },
     chipTitle () {
-      const text = this.chipText
-      if (this.isError) {
-        return `[ERROR] ${text}`
-      }
-      if (this.isUnknown) {
-        return `[UNKNOWN] ${text}`
-      }
-      if (this.isProgressing) {
-        return `[PROGRESSING] ${text}`
-      }
-      return text
+      return this.generateChipTitle({ name: this.tag.name, timeString: this.lastTransitionString })
     },
-    chipTextShortened () {
-      if (this.$vuetify.breakpoint.mdAndDown) {
-        return this.chipText.charAt(0)
-      }
-      if (this.$vuetify.breakpoint.lgAndUp) {
-        return split(this.chipText, ' ').shift()
-      }
-      return ''
+    chipTooltip () {
+      return this.generateChipTitle({ name: this.tag.name })
     },
     isError () {
       if (this.tag.status === 'False') {
@@ -88,22 +121,74 @@ export default {
       return `statusTag_${this.popperKey}`
     },
     tag () {
-      const { lastTransitionTime, message, status, type } = this.condition
+      const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
-      let text = replace(type, /([a-z])([A-Z])/g, '$1 $2')
-      switch (type) {
-        case 'ControlPlaneHealthy':
-          text = 'Control Plane'
-          break
-        case 'SystemComponentsHealthy':
-          text = 'System Components'
-          break
-        case 'EveryNodeReady':
-          text = 'Nodes'
-          break
+      const name = get(knownConditions, `${type}.displayName`, replace(type, /([a-z])([A-Z])/g, '$1 $2'))
+      const shortName = get(knownConditions, `${type}.shortName`, replace(name,/^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
+
+      return { id, name, shortName, message, lastTransitionTime, lastUpdateTime, status }
+    },
+    color () {
+      if (this.isError) {
+        return 'red'
       }
-      return { id, text, message, lastTransitionTime, status }
+      if (this.isUnknown) {
+        return 'grey lighten-1'
+      }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
+      return 'cyan darken-2'
+    },
+    chipTextColor () {
+      if (this.isError) {
+        return 'red'
+      }
+      if (this.isUnknown) {
+        return 'grey lighten-1'
+      }
+      if (this.isProgressing && this.isAdmin) {
+        return 'blue darken-2'
+      }
+      return 'cyan darken-2'
+    },
+    ...mapGetters([
+      'isAdmin'
+    ])
+  },
+  methods: {
+    generateChipTitle ({ name, timeString }) {
+      let since = ''
+      let errorState
+
+      if (this.isError) {
+        errorState = 'ERROR'
+      }
+      if (this.isUnknown) {
+        errorState = 'UNKNOWN'
+      }
+      if (this.isProgressing) {
+        errorState = 'PROGRESSING'
+      }
+
+      if (!errorState) {
+        return name
+      }
+
+      if (timeString) {
+        since = ` since ${timeString}`
+      }
+
+      return `${name} [${errorState}${since}]`
     }
   }
 }
 </script>
+
+<style lang="styl" scoped>
+
+  .cursor-pointer >>> .v-chip__content {
+    cursor: pointer;
+  }
+
+</style>
