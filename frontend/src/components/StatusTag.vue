@@ -19,7 +19,7 @@ limitations under the License.
     <template v-if="tag.message">
       <g-popper @rendered="popperRendered=true" :title="chipTitle" :message="tag.message" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
         <v-tooltip slot="popperRef" top>
-          <v-chip class="cursor-pointer" slot="activator" outline :text-color="chipTextColor" small :color="color">
+          <v-chip class="cursor-pointer status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
             {{chipText}}
           </v-chip>
           <span>{{chipTooltip}}</span>
@@ -28,7 +28,7 @@ limitations under the License.
     </template>
     <template v-else>
       <v-tooltip top>
-        <v-chip slot="activator" outline :text-color="chipTextColor" small :color="color">
+        <v-chip class="status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
           {{chipText}}
         </v-chip>
         <span>{{chipTooltip}}</span>
@@ -188,6 +188,14 @@ export default {
 
   .cursor-pointer >>> .v-chip__content {
     cursor: pointer;
+  }
+
+  .status-tag {
+    margin: 1px;
+  }
+
+  .status-tag >>> .v-chip__content {
+    margin: -4px;
   }
 
 </style>
