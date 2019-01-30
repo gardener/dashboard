@@ -137,6 +137,17 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
+  apiRegistration (options) {
+    options = assign(options, {
+      path: 'apis/apiregistration.k8s.io',
+      version: 'v1',
+      namespaceResources: [],
+      groupResources: [
+        'apiservices'
+      ]
+    })
+    return new ApiGroup(credentials(options))
+  },
   authentication (options) {
     options = assign(options, {
       path: 'apis/authentication.k8s.io',
@@ -167,12 +178,6 @@ module.exports = {
     return new kubernetesClient.Client({
       config: credentials(),
       spec: Specs.Healthz
-    })
-  },
-  apiregistration () {
-    return new kubernetesClient.Client({
-      config: credentials(),
-      spec: Specs.APIRegistration
     })
   }
 }

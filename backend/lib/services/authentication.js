@@ -17,27 +17,32 @@
 'use strict'
 
 const assert = require('assert').strict
-const _ = require('lodash')
 const { Unauthorized } = require('../errors')
+const logger = require('../logger')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const authentication = kubernetes.authentication()
 
 exports.isAuthenticated = async function ({ token } = {}) {
   const { apiVersion, kind } = Resources.TokenReview
-  const metadata = { name: `token-${Date.now()}` }
-  const body = { kind, apiVersion, metadata, spec: { token } }
-  const response = await authentication.tokenreviews.post({ body })
-  if (_.get(response, 'status.authenticated', false) !== true) {
-    const message = _.get(response, 'status.error')
-    console.error('status', response.status)
-    throw new Unauthorized(message)
+  const body = {
+    kind,
+    apiVersion,
+    metadata: {
+      name: `token-${Date.now()}`
+    },
+    spec: {
+      token
+    }
   }
-  const user = _.get(response, 'status.user')
-  console.error('status', response.status)
-
-  if (!_.has(user, 'username')) {
-    assert.fail(`Token is authenticated but no username has been returned`)
+  try {
+    const { status } = await authentication.tokenreviews.post({ body })
+    const { user = {}, authenticated = false, error = 'User not authenticated' } = status || {}
+    assert.strictEqual(authenticated, true, error)
+    assert.ok(user.username, `User authenticated but username is empty`)
+    return user
+  } catch (err) {
+    logger.error('Authentication Error:', err)
+    throw new Unauthorized(err.message)
   }
-  return user
 }

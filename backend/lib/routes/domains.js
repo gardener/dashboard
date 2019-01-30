@@ -17,10 +17,12 @@
 'use strict'
 
 const express = require('express')
+const { isAuthenticated } = require('../middleware')
 const { domains } = require('../services')
 
 const router = module.exports = express.Router()
 
+router.use(isAuthenticated)
 router.route('/')
   .get(async (req, res, next) => {
     try {

@@ -27,6 +27,11 @@ module.exports = {
     kind: 'Secret',
     apiVersion: 'v1'
   },
+  APIService: {
+    name: 'apiservices',
+    kind: 'APIService',
+    apiVersion: 'apiregistration.k8s.io/v1'
+  },
   SelfSubjectAccessReview: {
     name: 'selfsubjectaccessreviews',
     kind: 'SelfSubjectAccessReview',

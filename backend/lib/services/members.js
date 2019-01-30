@@ -21,7 +21,7 @@ const yaml = require('js-yaml')
 const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
-const { getProjectNameFromNamespace } = require('./projects')
+const { getProjectByNamespace } = require('./projects')
 const { Conflict } = require('../errors.js')
 
 function Core ({ auth }) {
@@ -41,7 +41,7 @@ function fromResource (project = {}) {
     .value()
 }
 
-function getKubeconfig ({ serviceaccountName, projectName, serviceaccountNamespace, token, server, caData }) {
+function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, token, server, caData }) {
   const clusterName = 'garden'
   const cluster = {
     'certificate-authority-data': caData,
@@ -51,7 +51,7 @@ function getKubeconfig ({ serviceaccountName, projectName, serviceaccountNamespa
   const user = {
     token
   }
-  const contextName = projectName || 'default'
+  const contextName = `${clusterName}-${userName}`
   const context = {
     cluster: clusterName,
     user: userName,
@@ -95,10 +95,9 @@ function deleteServiceaccount (core, namespace, name) {
 }
 
 async function setProjectMember (projects, namespace, username) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  const project = await projects.get({ name })
   const members = _.slice(project.spec.members, 0)
   if (_.find(members, ['name', username])) {
     throw new Conflict(`User '${username}' is already member of this project`)
@@ -113,14 +112,13 @@ async function setProjectMember (projects, namespace, username) {
       members
     }
   }
-  return projects.mergePatch({ name, body })
+  return projects.mergePatch({ name: project.metadata.name, body })
 }
 
 async function unsetProjectMember (projects, namespace, username) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  const project = await projects.get({ name })
   const members = _.slice(project.spec.members, 0)
   if (!_.find(members, ['name', username])) {
     return project
@@ -131,17 +129,17 @@ async function unsetProjectMember (projects, namespace, username) {
       members
     }
   }
-  return projects.mergePatch({ name, body })
+  return projects.mergePatch({ name: project.metadata.name, body })
 }
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  return fromResource(await projects.get({ name }))
+  return fromResource(project)
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
@@ -156,7 +154,6 @@ exports.get = async function ({ user, namespace, name: username }) {
     const serviceaccount = await ns.serviceaccounts.get({
       name: serviceaccountName
     })
-    const projectName = await getProjectNameFromNamespace(namespace)
     const api = ns.serviceaccounts.api
     const server = _.get(config, 'apiServerUrl', api.url)
     const secret = await ns.secrets.get({
@@ -165,7 +162,7 @@ exports.get = async function ({ user, namespace, name: username }) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({ serviceaccountName, projectName, serviceaccountNamespace, token, caData, server })
+    member.kubeconfig = getKubeconfig({ serviceaccountName, serviceaccountNamespace, token, caData, server })
   }
   return member
 }

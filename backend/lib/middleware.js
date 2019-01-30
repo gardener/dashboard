@@ -16,17 +16,14 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const _ = require('lodash')
 const got = require('got')
-const expressJwt = require('express-jwt')
-const jwks = require('jwks-rsa')
-const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
 const { NotFound, Unauthorized, InternalServerError } = require('./errors')
-const { customAddonDefinitions } = require('./services')
+const { customAddonDefinitions, authentication } = require('./services')
 const client = require('prom-client')
-const secretProvider = jwtSecret(config.jwks)
 
 function prometheusMetrics ({ timeout = 30000 } = {}) {
   client.collectDefaultMetrics({ timeout })
@@ -56,61 +53,33 @@ async function jsonWebKeySet (req, res, next) {
   }
 }
 
-function attachAuthorization (req, res, next) {
-  const [scheme, bearer] = req.headers.authorization.split(' ')
-  if (!/bearer/i.test(scheme)) {
-    return next(new Unauthorized('No authorization header with bearer'))
+async function isAuthenticated (req, res, next) {
+  try {
+    const user = req.user || {}
+    const { auth = {} } = user
+    assert.ok(auth.bearer, 'No user token is attached to the request')
+    const { username: id, groups } = await authentication.isAuthenticated({ token: auth.bearer })
+    Object.assign(user, { id, groups })
+    next()
+  } catch (err) {
+    next(err)
   }
-  req.user.auth = { bearer }
-  req.user.id = req.user['email']
-
-  next()
 }
 
-function jwt (options) {
-  const secret = secretProvider
-  options = _.assign({ secret }, config.jwt, options)
-  return expressJwt(options)
-}
-
-function getKeysMonkeyPatch (cb) {
-  const json = true
-  const headers = _.assign({}, this.options.headers)
-  const uri = this.options.jwksUri
-  const ca = this.options.ca
-  const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
-  this.logger(`Fetching keys from '${uri}'`)
-  got(uri, { json, headers, ca, rejectUnauthorized })
-    .then(res => {
-      const keys = _.get(res, 'body.keys')
-      this.logger('Keys:', keys)
-      return cb(null, keys)
-    })
-    .catch(err => {
-      if (err instanceof got.HTTPError) {
-        this.logger('Http Error:', err.body || err)
-        return cb(new JwksError(_.get(err, 'body.message', err.message)))
-      }
-      this.logger('Failure:', err)
-      cb(err)
-    })
-}
-
-function jwtSecret (options) {
-  const client = jwks(options)
-  client.getKeys = getKeysMonkeyPatch
-  return function secretProvider (req, header, payload, cb) {
-    // only RS256 is supported.
-    if (_.get(header, 'alg') !== 'RS256') {
-      return cb(new Error('Only RS256 is supported as id_token signing algorithm'))
+function attachAuthorization (req, res, next) {
+  try {
+    const headers = req.headers
+    if (!headers.authorization) {
+      throw new Unauthorized('No HTTP Authorization request header included')
     }
-
-    client.getSigningKey(header.kid, (err, key) => {
-      if (err) {
-        return cb(err)
-      }
-      return cb(null, key.publicKey || key.rsaPublicKey)
-    })
+    const [scheme, token] = headers.authorization.split(' ')
+    if (!/bearer/i.test(scheme)) {
+      throw new Unauthorized('Unsupported HTTP authorization scheme')
+    }
+    req.user = { auth: { bearer: token } }
+    next()
+  } catch (err) {
+    next(err)
   }
 }
 
@@ -198,8 +167,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 module.exports = {
-  jwt,
-  jwtSecret,
+  isAuthenticated,
   attachAuthorization,
   frontendConfig,
   jsonWebKeySet,
