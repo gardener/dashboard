@@ -14,31 +14,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-echo "Looking for expired dashboard terminal serviceaccounts.."
 THRESHOLD=${NO_HEARTBEAT_DELETE_SECONDS:-86400}
-CURRENTTIMESTAMP="$(date +%s)"
+CURRENT_TIMESTAMP="$(date +%s)"
 KUBE_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
 
-SERVICEACCOUNTS="$(curl -sS --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer $KUBE_TOKEN" -H "Accept: application/json" https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_PORT_443_TCP_PORT}/api/v1/serviceaccounts?labelSelector=component%3Ddashboard-terminal%2Csatype%3Dattach -XGET)"
-SERVICEACCOUNTSCOUNT="$(echo ${SERVICEACCOUNTS} | jq .items | jq length)"
+echo "Looking for expired dashboard terminal serviceaccounts.."
+echo "Configured max lifetime without heartbeat: ${THRESHOLD}s"
 
-echo "Found ${SERVICEACCOUNTSCOUNT} dashboard terminal service accounts"
+SERVICEACCOUNTS="$(curl -sS --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer $KUBE_TOKEN" -H "Accept: application/json" https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_PORT_443_TCP_PORT}/api/v1/serviceaccounts?labelSelector=component%3Ddashboard-terminal%2Csatype%3Dattach -XGET)"
+SERVICEACCOUNTS_COUNT="$(echo ${SERVICEACCOUNTS} | jq .items | jq length)"
+
+echo "Found ${SERVICEACCOUNTS_COUNT} dashboard terminal service accounts"
 COUNT=0
-while [ "${COUNT}" -lt "${SERVICEACCOUNTSCOUNT}" ]
+while [ "${COUNT}" -lt "${SERVICEACCOUNTS_COUNT}" ]
 do
   SERVICEACCOUNT="$(echo ${SERVICEACCOUNTS} | jq .items[${COUNT}])"
-  SANAME="$(echo ${SERVICEACCOUNT} | jq -r .metadata.name)"
-  SANAMESPACE="$(echo ${SERVICEACCOUNT} | jq -r .metadata.namespace)"
-  SAHEARTBEAT="$(echo ${SERVICEACCOUNT} | jq -r .metadata.annotations[\"garden.sapcloud.io/terminal-heartbeat\"])"
+  SA_NAME="$(echo ${SERVICEACCOUNT} | jq -r .metadata.name)"
+  SA_NAMESPACE="$(echo ${SERVICEACCOUNT} | jq -r .metadata.namespace)"
+  SA_HEARTBEAT="$(echo ${SERVICEACCOUNT} | jq -r .metadata.annotations[\"garden.sapcloud.io/terminal-heartbeat\"])"
 
-  echo "Checking serviceaccount ${SANAME}"
+  if [ ! -z "${SA_NAME}" ] && [ ! -z "${SA_NAMESPACE}" ]; then
 
-  if [ ! -z "${SANAME}" ] && [ ! -z "${SANAMESPACE}" ]; then
-    let SASECSWOHEARTBEAT="${CURRENTTIMESTAMP}-${SAHEARTBEAT}"
+    let SA_SECS_WO_HEARTBEAT="${CURRENT_TIMESTAMP}-${SA_HEARTBEAT}"
+    echo "Checking serviceaccount ${SA_NAMESPACE}/${SA_NAME}: ${SA_SECS_WO_HEARTBEAT}s since last heartbeat"
 
-    if [ "${SASECSWOHEARTBEAT}" -gt "${THRESHOLD}" ]; then
-      echo "Did not receive heartbeat signal within ${THRESHOLD} seconds. Deleting serviceaccount ${SANAME}"
-      curl -sS --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer ${KUBE_TOKEN}" https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_PORT_443_TCP_PORT}/api/v1/namespaces/${SANAMESPACE}/serviceaccounts/${SANAME} -XDELETE
+    if [ "${SA_SECS_WO_HEARTBEAT}" -gt "${THRESHOLD}" ]; then
+      echo "Did not receive heartbeat signal within ${THRESHOLD} seconds. Deleting serviceaccount ${SA_NAMESPACE}/${SA_NAME}"
+      curl -sS --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer ${KUBE_TOKEN}" https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_PORT_443_TCP_PORT}/api/v1/namespaces/${SA_NAMESPACE}/serviceaccounts/${SA_NAME} -XDELETE
     fi
   fi
   COUNT=$((${COUNT}+1))

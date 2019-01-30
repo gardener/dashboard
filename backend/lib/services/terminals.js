@@ -257,7 +257,7 @@ function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
 
 async function createResourcesForCPTerminal ({seedK8sCoreClient, seedK8sRbacClient, identifier, user, target, ownerReferences}) {
   // create service account used by terminal pod for control plane access
-  const cpServiceAccountName = `terminal-cp-${identifier}`
+  const cpServiceAccountName = `terminal-${identifier}`
   await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user, target, ownerReferences})})
 
   // create rolebinding for cpaccess-sa
