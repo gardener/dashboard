@@ -17,60 +17,70 @@
 'use strict'
 
 const { NotFound } = require('../errors')
-const { map, pick, assign, get, findIndex, find, filter } = require('lodash')
+const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 const { getCloudProviderKind } = require('../utils')
 
 function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
   const cloudProviderKind = getCloudProviderKind(spec)
-  const keyStoneURL = get(spec, `${cloudProviderKind}.keystoneURL`)
-  const name = get(metadata, 'name')
-  const displayName = get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
-  metadata = assign(pick(metadata, 'resourceVersion'), { name, cloudProviderKind, displayName })
-  const data = assign(get(spec, `${cloudProviderKind}.constraints`), { seeds, keyStoneURL })
+  const keyStoneURL = _.get(spec, `${cloudProviderKind}.keystoneURL`)
+  const name = _.get(metadata, 'name')
+  const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
+  const resourceVersion = _.get(metadata, 'resourceVersion')
+  metadata = { name, cloudProviderKind, displayName, resourceVersion }
+  const constraints = _.get(spec, `${cloudProviderKind}.constraints`)
+  const data = { seeds, keyStoneURL, ...constraints }
   return { metadata, data }
 }
 
 function fromSeedResource ({ metadata, spec }) {
-  metadata = pick(metadata, ['name'])
-  const data = get(spec, 'cloud')
+  metadata = _.pick(metadata, ['name'])
+  const data = _.get(spec, 'cloud')
   return { metadata, data }
 }
 
-async function getSeedsForCloudProfileName ({ seeds, cloudProfileName }) {
-  const predicate = item => get(item, 'spec.cloud.profile') === cloudProfileName
-  const seedsForCloudProfileName = filter(seeds, predicate)
-
-  return Promise.resolve(map(seedsForCloudProfileName, fromSeedResource))
+function getSeedsForCloudProfileName ({ seeds, cloudProfileName }) {
+  return _
+    .chain(seeds)
+    .filter(['spec.cloud.profile', cloudProfileName])
+    .map(fromSeedResource)
+    .value()
 }
 
-exports.list = async function () {
+exports.list = function () {
   const seeds = getVisibleAndNotProtectedSeeds()
 
-  const predicate = item => findIndex(seeds, ['spec.cloud.profile', item.metadata.name]) !== -1
-  const filteredCloudProfileList = filter(getCloudProfiles(), predicate)
-
-  const cloudProfiles = []
-  for (const cloudProfile of filteredCloudProfileList) {
-    const seedsForCloudProfile = await getSeedsForCloudProfileName({ seeds, cloudProfileName: cloudProfile.metadata.name })
-    cloudProfiles.push(fromResource({ cloudProfile, seeds: seedsForCloudProfile }))
-  }
-
-  return Promise.resolve(cloudProfiles)
+  const predicate = item => _.findIndex(seeds, ['spec.cloud.profile', item.metadata.name]) !== -1
+  return _
+    .chain(getCloudProfiles())
+    .filter(predicate)
+    .map(cloudProfile => fromResource({
+      cloudProfile,
+      seeds: getSeedsForCloudProfileName({
+        seeds,
+        cloudProfileName: cloudProfile.metadata.name
+      })
+    }))
+    .value()
 }
 
-exports.read = async function ({ name }) {
+exports.read = function ({ name }) {
   const seeds = getVisibleAndNotProtectedSeeds()
 
-  const seedWithNameExists = findIndex(seeds, ['spec.cloud.profile', name]) !== -1
+  const seedWithNameExists = _.findIndex(seeds, ['spec.cloud.profile', name]) !== -1
   if (!seedWithNameExists) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }
 
-  const cloudProfile = find(getCloudProfiles(), ['metadata.name', name])
+  const cloudProfile = _.find(getCloudProfiles(), ['metadata.name', name])
   if (!cloudProfile) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
-  const seedsForCloudProfile = await getSeedsForCloudProfileName({ seeds, cloudProfileName: name })
-  return Promise.resolve(fromResource({ cloudProfile, seeds: seedsForCloudProfile }))
+  return fromResource({
+    cloudProfile,
+    seeds: getSeedsForCloudProfileName({
+      seeds,
+      cloudProfileName: name
+    })
+  })
 }

@@ -175,21 +175,24 @@ async function getCloudProviderKind (cloudProfileName) {
 }
 
 exports.list = async function ({ user, namespace }) {
-  const [
-    cloudProfileList,
-    { items: secretBindingList },
-    { items: secretList }
-  ] = await Promise.all([
-    cloudprofiles.list(),
-    Garden(user).namespaces(namespace).secretbindings.get({}),
-    Core(user).namespaces(namespace).secrets.get({})
-  ])
-
-  return getInfrastructureSecrets({
-    secretBindings: secretBindingList,
-    cloudProfileList,
-    secretList
-  })
+  try {
+    const cloudProfileList = cloudprofiles.list()
+    const [
+      { items: secretList },
+      { items: secretBindings }
+    ] = await Promise.all([
+      Core(user).namespaces(namespace).secrets.get({}),
+      Garden(user).namespaces(namespace).secretbindings.get({})
+    ])
+    return getInfrastructureSecrets({
+      secretBindings,
+      cloudProfileList,
+      secretList
+    })
+  } catch (err) {
+    logger.error(err)
+    throw err
+  }
 }
 
 exports.create = async function ({ user, namespace, body }) {

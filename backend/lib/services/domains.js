@@ -34,5 +34,5 @@ function fromResource ({ metadata }) {
 exports.list = async function () {
   const domains = getDomains()
 
-  return Promise.resolve(map(domains, fromResource))
+  return map(domains, fromResource)
 }
