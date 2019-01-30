@@ -26,24 +26,24 @@ const { Forbidden } = require('../errors')
 const _ = require('lodash')
 const logger = require('../logger')
 
-function toTerminalServiceAccountResource ({prefix, name, user, target, ownerReferences = [], labels = {}, annotations = {}}) {
+function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences = [], labels = {}, annotations = {} }) {
   const apiVersion = Resources.ServiceAccount.apiVersion
   const kind = Resources.ServiceAccount.kind
   labels.component = 'dashboard-terminal'
   annotations['garden.sapcloud.io/terminal-user'] = user
   annotations['garden.sapcloud.io/terminal-target'] = target
 
-  const metadata = {labels, annotations, ownerReferences}
+  const metadata = { labels, annotations, ownerReferences }
   if (name) {
     metadata.name = name
   } else {
     metadata.generateName = prefix
   }
 
-  return {apiVersion, kind, metadata}
+  return { apiVersion, kind, metadata }
 }
 
-function toTerminalRoleBindingResource ({name, user, target, roleName, ownerReferences}) {
+function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerReferences }) {
   const apiVersion = Resources.RoleBinding.apiVersion
   const kind = Resources.RoleBinding.kind
   const labels = {
@@ -53,7 +53,7 @@ function toTerminalRoleBindingResource ({name, user, target, roleName, ownerRefe
     'garden.sapcloud.io/terminal-user': user,
     'garden.sapcloud.io/terminal-target': target
   }
-  const metadata = {name, labels, annotations, ownerReferences}
+  const metadata = { name, labels, annotations, ownerReferences }
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -68,10 +68,10 @@ function toTerminalRoleBindingResource ({name, user, target, roleName, ownerRefe
     }
   ]
 
-  return {apiVersion, kind, metadata, roleRef, subjects}
+  return { apiVersion, kind, metadata, roleRef, subjects }
 }
 
-function toTerminalCPPodResource ({name, saName, user, target, ownerReferences}) {
+function toTerminalCPPodResource ({ name, saName, user, target, ownerReferences }) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -81,7 +81,7 @@ function toTerminalCPPodResource ({name, saName, user, target, ownerReferences})
     'garden.sapcloud.io/terminal-user': user,
     'garden.sapcloud.io/terminal-target': target
   }
-  const metadata = {name, labels, annotations, ownerReferences}
+  const metadata = { name, labels, annotations, ownerReferences }
   const spec = {
     serviceAccountName: saName,
     containers: [
@@ -93,10 +93,10 @@ function toTerminalCPPodResource ({name, saName, user, target, ownerReferences})
       }
     ]
   }
-  return {apiVersion, kind, metadata, spec}
+  return { apiVersion, kind, metadata, spec }
 }
 
-function toTerminalShootPodResource ({name, user, target, ownerReferences}) {
+function toTerminalShootPodResource ({ name, user, target, ownerReferences }) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -106,7 +106,7 @@ function toTerminalShootPodResource ({name, user, target, ownerReferences}) {
     'garden.sapcloud.io/terminal-user': user,
     'garden.sapcloud.io/terminal-target': target
   }
-  const metadata = {name, labels, annotations, ownerReferences}
+  const metadata = { name, labels, annotations, ownerReferences }
   const spec = {
     containers: [
       {
@@ -141,35 +141,35 @@ function toTerminalShootPodResource ({name, user, target, ownerReferences}) {
       }
     ]
   }
-  return {apiVersion, kind, metadata, spec}
+  return { apiVersion, kind, metadata, spec }
 }
 
-async function readServiceAccountToken ({client, serviceaccountName}) {
-  const watch = watchServiceAccount({client, serviceaccountName})
+async function readServiceAccountToken ({ client, serviceaccountName }) {
+  const watch = watchServiceAccount({ client, serviceaccountName })
   const conditionFunction = isServiceAccountReady
   const resourceName = serviceaccountName
-  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({watch, conditionFunction, resourceName})
+  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName })
   const secretName = await _.get(_.first(serviceAccount.secrets), 'name')
   if (secretName && secretName.length > 0) {
-    const secret = await client.secrets.get({name: secretName})
+    const secret = await client.secrets.get({ name: secretName })
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     return { token, caData }
   }
 }
 
-function isServiceAccountReady ({secrets} = {}) {
+function isServiceAccountReady ({ secrets } = {}) {
   const secretName = _.get(_.first(secrets), 'name')
   return (secretName && secretName.length > 0)
 }
 
-function watchServiceAccount ({client, serviceaccountName}) {
-  return client.serviceaccounts.watch({name: serviceaccountName})
+function watchServiceAccount ({ client, serviceaccountName }) {
+  return client.serviceaccounts.watch({ name: serviceaccountName })
 }
 
-async function prepareRequiredResourcesAndClients ({user, namespace, name}) {
+async function prepareRequiredResourcesAndClients ({ user, namespace, name }) {
   // get seed and seed kubeconfig for shoot
-  const shootResource = await shoots.read({user, namespace, name})
+  const shootResource = await shoots.read({ user, namespace, name })
   const seedKubeconfigForShoot = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
   if (!seedKubeconfigForShoot) {
     throw new Error('could not fetch seed kubeconfig for shoot')
@@ -183,7 +183,7 @@ async function prepareRequiredResourcesAndClients ({user, namespace, name}) {
   return { seed, seedShootNS, seedK8sCoreClient, seedK8sRbacClient }
 }
 
-async function initializeTerminalObject ({user, namespace, seed, seedShootNS}) {
+async function initializeTerminalObject ({ user, namespace, seed, seedShootNS }) {
   const terminalInfo = {}
   terminalInfo.namespace = seedShootNS
   terminalInfo.container = 'terminal'
@@ -194,7 +194,7 @@ async function initializeTerminalObject ({user, namespace, seed, seedShootNS}) {
     const ingressDomain = _.get(soilSeed, 'spec.ingressDomain')
     soilIngressDomain = `${namespace}.${ingressDomain}`
   } else {
-    const seedShootResource = await shoots.read({user, namespace: 'garden', name: _.get(seed, 'metadata.name')})
+    const seedShootResource = await shoots.read({ user, namespace: 'garden', name: _.get(seed, 'metadata.name') })
     soilIngressDomain = await getShootIngressDomain(seedShootResource)
   }
 
@@ -202,30 +202,30 @@ async function initializeTerminalObject ({user, namespace, seed, seedShootNS}) {
   return terminalInfo
 }
 
-async function findExistingTerminalPod ({seedK8sCoreClient, username, target}) {
+async function findExistingTerminalPod ({ seedK8sCoreClient, username, target }) {
   const qs = { labelSelector: 'component=dashboard-terminal' }
-  const existingPods = await seedK8sCoreClient.pods.get({qs})
+  const existingPods = await seedK8sCoreClient.pods.get({ qs })
   const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target)
   return existingPod
 }
 
-async function findExistingTerminal ({seedK8sCoreClient, username, target}) {
-  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, target})
+async function findExistingTerminal ({ seedK8sCoreClient, username, target }) {
+  const existingPod = await findExistingTerminalPod({ seedK8sCoreClient, username, target })
   if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
     const existingPodName = existingPod.metadata.name
     const attachServiceAccountResource = _.first(existingPod.metadata.ownerReferences)
     if (attachServiceAccountResource) {
       logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
       const pod = existingPodName
-      const {token} = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountResource.name})
+      const { token } = await readServiceAccountToken({ client: seedK8sCoreClient, serviceaccountName: attachServiceAccountResource.name })
       const attachServiceAccount = attachServiceAccountResource.name
-      return {pod, token, attachServiceAccount}
+      return { pod, token, attachServiceAccount }
     }
   }
   return undefined
 }
 
-async function createAttachServiceAccountResource ({seedK8sCoreClient, target, username}) {
+async function createAttachServiceAccountResource ({ seedK8sCoreClient, target, username }) {
   const attachSaLabels = {
     satype: 'attach'
   }
@@ -238,7 +238,7 @@ async function createAttachServiceAccountResource ({seedK8sCoreClient, target, u
   const labels = attachSaLabels
   const annotations = attachSaAnnotations
 
-  return seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix, user, target, labels, annotations})})
+  return seedK8sCoreClient.serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, user, target, labels, annotations }) })
 }
 
 function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
@@ -255,28 +255,28 @@ function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
   ]
 }
 
-async function createResourcesForCPTerminal ({seedK8sCoreClient, seedK8sRbacClient, identifier, user, target, ownerReferences}) {
+async function createResourcesForCPTerminal ({ seedK8sCoreClient, seedK8sRbacClient, identifier, user, target, ownerReferences }) {
   // create service account used by terminal pod for control plane access
   const cpServiceAccountName = `terminal-${identifier}`
-  await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user, target, ownerReferences})})
+  await seedK8sCoreClient.serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: cpServiceAccountName, user, target, ownerReferences }) })
 
   // create rolebinding for cpaccess-sa
-  await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: cpServiceAccountName, user, target, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences})})
+  await seedK8sRbacClient.rolebindings.post({ body: toTerminalRoleBindingResource({ name: cpServiceAccountName, user, target, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences }) })
 
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalCPPodResource({name, saName: cpServiceAccountName, user, target, ownerReferences})})
+  const podResource = await seedK8sCoreClient.pods.post({ body: toTerminalCPPodResource({ name, saName: cpServiceAccountName, user, target, ownerReferences }) })
   return _.get(podResource, 'metadata.name')
 }
 
-async function createResourcesForShootTerminal ({seedK8sCoreClient, identifier, user, target, ownerReferences}) {
+async function createResourcesForShootTerminal ({ seedK8sCoreClient, identifier, user, target, ownerReferences }) {
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalShootPodResource({name, user, target, ownerReferences})})
+  const podResource = await seedK8sCoreClient.pods.post({ body: toTerminalShootPodResource({ name, user, target, ownerReferences }) })
   return _.get(podResource, 'metadata.name')
 }
 
-exports.create = async function ({user, namespace, name, target}) {
+exports.create = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
@@ -284,11 +284,11 @@ exports.create = async function ({user, namespace, name, target}) {
     throw new Forbidden('Admin privileges required to create terminal')
   }
 
-  const { seed, seedShootNS, seedK8sCoreClient, seedK8sRbacClient } = await prepareRequiredResourcesAndClients({user, namespace, name})
+  const { seed, seedShootNS, seedK8sCoreClient, seedK8sRbacClient } = await prepareRequiredResourcesAndClients({ user, namespace, name })
 
-  const terminalInfo = await initializeTerminalObject({user, namespace, seed, seedShootNS})
+  const terminalInfo = await initializeTerminalObject({ user, namespace, seed, seedShootNS })
 
-  const existingTerminal = await findExistingTerminal({seedK8sCoreClient, username, target})
+  const existingTerminal = await findExistingTerminal({ seedK8sCoreClient, username, target })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
@@ -309,19 +309,19 @@ exports.create = async function ({user, namespace, name, target}) {
     terminalInfo.attachServiceAccount = attachServiceAccountName
 
     // create rolebinding for attach-sa
-    await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, target, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
+    await seedK8sRbacClient.rolebindings.post({ body: toTerminalRoleBindingResource({ name: attachServiceAccountName, user: username, target, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences }) })
 
     let pod
     if (target === 'cp') {
-      pod = await createResourcesForCPTerminal({seedK8sCoreClient, seedK8sRbacClient, identifier, user: username, target, ownerReferences})
+      pod = await createResourcesForCPTerminal({ seedK8sCoreClient, seedK8sRbacClient, identifier, user: username, target, ownerReferences })
     } else if (target === 'shoot') {
-      pod = await createResourcesForShootTerminal({seedK8sCoreClient, identifier, user: username, target, ownerReferences})
+      pod = await createResourcesForShootTerminal({ seedK8sCoreClient, identifier, user: username, target, ownerReferences })
     } else {
       throw new Error(`Unknown terminal target ${target}`)
     }
-    const attachServiceAccountToken = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName})
+    const attachServiceAccountToken = await readServiceAccountToken({ client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName })
 
-    _.assign(terminalInfo, {pod}, {token: attachServiceAccountToken.token})
+    _.assign(terminalInfo, { pod }, { token: attachServiceAccountToken.token })
 
     return terminalInfo
   } catch (e) {
@@ -331,7 +331,7 @@ exports.create = async function ({user, namespace, name, target}) {
     try {
       if (name) {
         logger.debug(`Something went wrong during creation of Kubernetes resources. Cleaning up ServiceAccount ${name}..`)
-        await seedK8sCoreClient.serviceaccounts.delete({name})
+        await seedK8sCoreClient.serviceaccounts.delete({ name })
       }
     } catch (e) {
       logger.error(`Unable to cleanup ServiceAccount ${name}. This may result in leftovers that you need to cleanup manually`)
@@ -340,7 +340,7 @@ exports.create = async function ({user, namespace, name, target}) {
   }
 }
 
-exports.heartbeat = async function ({user, namespace, name, target}) {
+exports.heartbeat = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
@@ -348,11 +348,11 @@ exports.heartbeat = async function ({user, namespace, name, target}) {
     throw new Forbidden('Admin privileges required')
   }
   // get seed and seed kubeconfig for shoot
-  const shootResource = await shoots.read({user, namespace, name})
+  const shootResource = await shoots.read({ user, namespace, name })
   const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
   const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
 
-  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, target})
+  const existingPod = await findExistingTerminalPod({ seedK8sCoreClient, username, target })
   if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
     const attachServiceAccount = _.first(existingPod.metadata.ownerReferences)
     if (attachServiceAccount) {

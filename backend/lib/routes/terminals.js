@@ -30,7 +30,7 @@ router.route('/:name/:target/')
       const namespace = req.params.namespace
       const name = req.params.name
       const target = req.params.target
-      res.send(await terminals.create({user, namespace, name, target}))
+      res.send(await terminals.create({ user, namespace, name, target }))
     } catch (err) {
       next(err)
     }
@@ -43,7 +43,7 @@ router.route('/:name/heartbeat/:target/')
       const namespace = req.params.namespace
       const name = req.params.name
       const target = req.params.target
-      res.send(await terminals.heartbeat({user, namespace, name, target}))
+      res.send(await terminals.heartbeat({ user, namespace, name, target }))
     } catch (err) {
       next(err)
     }

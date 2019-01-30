@@ -23,8 +23,8 @@ const { getSeeds } = require('../cache')
 const kubernetes = require('../kubernetes')
 const { NotFound } = require('../errors')
 
-function Core ({auth}) {
-  return kubernetes.core({auth})
+function Core ({ auth }) {
+  return kubernetes.core({ auth })
 }
 
 function resolve (pathname) {
@@ -72,12 +72,12 @@ async function getShootIngressDomain (shoot) {
   return `${name}.${projectName}.${ingressDomain}`
 }
 
-async function getSeedKubeconfigForShoot ({user, shoot}) {
+async function getSeedKubeconfigForShoot ({ user, shoot }) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await Core(user).ns(seedSecretNamespace).secrets.get({name: seedSecretName})
+  const seedSecret = await Core(user).ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
     .catch(err => {
       if (err.code === 404) {
         return

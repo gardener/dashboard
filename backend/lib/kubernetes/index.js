@@ -167,7 +167,7 @@ module.exports = {
       spec: Specs.APIRegistration
     })
   },
-  getKubeconfigFromServiceAccount ({serviceaccountName, contextName = 'default', serviceaccountNamespace, token, server, caData}) {
+  getKubeconfigFromServiceAccount ({ serviceaccountName, contextName = 'default', serviceaccountNamespace, token, server, caData }) {
     const clusterName = 'garden'
     const cluster = {
       'certificate-authority-data': caData,
@@ -199,7 +199,7 @@ module.exports = {
       'current-context': contextName
     })
   },
-  waitUntilResourceHasCondition ({watch, conditionFunction, initializationTimeout = 5000, resourceName}) {
+  waitUntilResourceHasCondition ({ watch, conditionFunction, initializationTimeout = 5000, resourceName }) {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(() => {
         const duration = `${initializationTimeout} ms`
