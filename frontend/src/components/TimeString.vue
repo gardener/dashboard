@@ -57,7 +57,7 @@ export default {
     currentString: {
       type: String // access the datetime string from outside of the component
     },
-    hideSuffix: {
+    withoutPrefixOrSuffix: {
       type: Boolean,
       default: false
     }
@@ -74,9 +74,9 @@ export default {
       let timeString = ''
       if (this.dateTime && this.currentClockTimer) {
         if (this.negativeRefDate) {
-          timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.hideSuffix)
+          timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.withoutPrefixOrSuffix)
         } else {
-          timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime), this.hideSuffix)
+          timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime), this.withoutPrefixOrSuffix)
         }
       }
 

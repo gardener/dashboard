@@ -34,7 +34,7 @@ limitations under the License.
         <span>{{chipTooltip}}</span>
       </v-tooltip>
     </template>
-    <time-string v-if="popperRendered" v-show="false" :dateTime="tag.lastTransitionTime" :currentString.sync="lastTransitionString" :pointInTime="-1" :hideSuffix="true"></time-string>
+    <time-string v-if="popperRendered" v-show="false" :dateTime="tag.lastTransitionTime" :currentString.sync="lastTransitionString" :pointInTime="-1" :withoutPrefixOrSuffix="true"></time-string>
   </span>
 </template>
 
