@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="operation.lastUpdateTime" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="popperTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <div slot="popperRef" class="shoot-status-div">
       <v-tooltip top>
         <template slot="activator">
