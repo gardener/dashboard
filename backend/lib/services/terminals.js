@@ -26,12 +26,12 @@ const { Forbidden } = require('../errors')
 const _ = require('lodash')
 const logger = require('../logger')
 
-function toTerminalServiceAccountResource ({prefix, name, user, type, ownerReferences = [], labels = {}, annotations = {}}) {
+function toTerminalServiceAccountResource ({prefix, name, user, target, ownerReferences = [], labels = {}, annotations = {}}) {
   const apiVersion = Resources.ServiceAccount.apiVersion
   const kind = Resources.ServiceAccount.kind
   labels.component = 'dashboard-terminal'
   annotations['garden.sapcloud.io/terminal-user'] = user
-  annotations['garden.sapcloud.io/terminal-type'] = type
+  annotations['garden.sapcloud.io/terminal-target'] = target
 
   const metadata = {labels, annotations, ownerReferences}
   if (name) {
@@ -43,7 +43,7 @@ function toTerminalServiceAccountResource ({prefix, name, user, type, ownerRefer
   return {apiVersion, kind, metadata}
 }
 
-function toTerminalRoleBindingResource ({name, user, type, roleName, ownerReferences}) {
+function toTerminalRoleBindingResource ({name, user, target, roleName, ownerReferences}) {
   const apiVersion = Resources.RoleBinding.apiVersion
   const kind = Resources.RoleBinding.kind
   const labels = {
@@ -51,7 +51,7 @@ function toTerminalRoleBindingResource ({name, user, type, roleName, ownerRefere
   }
   const annotations = {
     'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-type': type
+    'garden.sapcloud.io/terminal-target': target
   }
   const metadata = {name, labels, annotations, ownerReferences}
 
@@ -71,7 +71,7 @@ function toTerminalRoleBindingResource ({name, user, type, roleName, ownerRefere
   return {apiVersion, kind, metadata, roleRef, subjects}
 }
 
-function toTerminalCPPodResource ({name, saName, user, type, ownerReferences}) {
+function toTerminalCPPodResource ({name, saName, user, target, ownerReferences}) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -79,7 +79,7 @@ function toTerminalCPPodResource ({name, saName, user, type, ownerReferences}) {
   }
   const annotations = {
     'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-type': type
+    'garden.sapcloud.io/terminal-target': target
   }
   const metadata = {name, labels, annotations, ownerReferences}
   const spec = {
@@ -96,7 +96,7 @@ function toTerminalCPPodResource ({name, saName, user, type, ownerReferences}) {
   return {apiVersion, kind, metadata, spec}
 }
 
-function toTerminalShootPodResource ({name, user, type, ownerReferences}) {
+function toTerminalShootPodResource ({name, user, target, ownerReferences}) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -104,7 +104,7 @@ function toTerminalShootPodResource ({name, user, type, ownerReferences}) {
   }
   const annotations = {
     'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-type': type
+    'garden.sapcloud.io/terminal-target': target
   }
   const metadata = {name, labels, annotations, ownerReferences}
   const spec = {
@@ -202,15 +202,15 @@ async function initializeTerminalObject ({user, namespace, seed, seedShootNS}) {
   return terminalInfo
 }
 
-async function findExistingTerminalPod ({seedK8sCoreClient, username, type}) {
+async function findExistingTerminalPod ({seedK8sCoreClient, username, target}) {
   const qs = { labelSelector: 'component=dashboard-terminal' }
   const existingPods = await seedK8sCoreClient.pods.get({qs})
-  const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-type'] === type)
+  const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target)
   return existingPod
 }
 
-async function findExistingTerminal ({seedK8sCoreClient, username, type}) {
-  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, type})
+async function findExistingTerminal ({seedK8sCoreClient, username, target}) {
+  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, target})
   if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
     const existingPodName = existingPod.metadata.name
     const attachServiceAccountResource = _.first(existingPod.metadata.ownerReferences)
@@ -225,7 +225,7 @@ async function findExistingTerminal ({seedK8sCoreClient, username, type}) {
   return undefined
 }
 
-async function createAttachServiceAccountResource ({seedK8sCoreClient, type, username}) {
+async function createAttachServiceAccountResource ({seedK8sCoreClient, target, username}) {
   const attachSaLabels = {
     satype: 'attach'
   }
@@ -233,12 +233,12 @@ async function createAttachServiceAccountResource ({seedK8sCoreClient, type, use
   const attachSaAnnotations = {
     'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
   }
-  const prefix = `terminal-attach-${type}-`
+  const prefix = `terminal-attach-${target}-`
   const user = username
   const labels = attachSaLabels
   const annotations = attachSaAnnotations
 
-  return seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix, user, type, labels, annotations})})
+  return seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({prefix, user, target, labels, annotations})})
 }
 
 function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
@@ -255,28 +255,28 @@ function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
   ]
 }
 
-async function createResourcesForCPTerminal ({seedK8sCoreClient, seedK8sRbacClient, identifier, user, type, ownerReferences}) {
+async function createResourcesForCPTerminal ({seedK8sCoreClient, seedK8sRbacClient, identifier, user, target, ownerReferences}) {
   // create service account used by terminal pod for control plane access
   const cpServiceAccountName = `terminal-cp-${identifier}`
-  await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user, type, ownerReferences})})
+  await seedK8sCoreClient.serviceaccounts.post({body: toTerminalServiceAccountResource({name: cpServiceAccountName, user, target, ownerReferences})})
 
   // create rolebinding for cpaccess-sa
-  await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: cpServiceAccountName, user, type, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences})})
+  await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: cpServiceAccountName, user, target, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences})})
 
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalCPPodResource({name, saName: cpServiceAccountName, user, type, ownerReferences})})
+  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalCPPodResource({name, saName: cpServiceAccountName, user, target, ownerReferences})})
   return _.get(podResource, 'metadata.name')
 }
 
-async function createResourcesForShootTerminal ({seedK8sCoreClient, identifier, user, type, ownerReferences}) {
+async function createResourcesForShootTerminal ({seedK8sCoreClient, identifier, user, target, ownerReferences}) {
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalShootPodResource({name, user, type, ownerReferences})})
+  const podResource = await seedK8sCoreClient.pods.post({body: toTerminalShootPodResource({name, user, target, ownerReferences})})
   return _.get(podResource, 'metadata.name')
 }
 
-exports.create = async function ({user, namespace, name, type}) {
+exports.create = async function ({user, namespace, name, target}) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
@@ -288,7 +288,7 @@ exports.create = async function ({user, namespace, name, type}) {
 
   const terminalInfo = await initializeTerminalObject({user, namespace, seed, seedShootNS})
 
-  const existingTerminal = await findExistingTerminal({seedK8sCoreClient, username, type})
+  const existingTerminal = await findExistingTerminal({seedK8sCoreClient, username, target})
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
@@ -298,7 +298,7 @@ exports.create = async function ({user, namespace, name, type}) {
 
   let attachServiceAccountResource
   try {
-    attachServiceAccountResource = await createAttachServiceAccountResource({ seedK8sCoreClient, type, username })
+    attachServiceAccountResource = await createAttachServiceAccountResource({ seedK8sCoreClient, target, username })
 
     // all resources created below get the attach service account as owner ref
     const ownerReferences = createOwnerRefArrayForAttachSA(attachServiceAccountResource)
@@ -309,15 +309,15 @@ exports.create = async function ({user, namespace, name, type}) {
     terminalInfo.attachServiceAccount = attachServiceAccountName
 
     // create rolebinding for attach-sa
-    await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, type, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
+    await seedK8sRbacClient.rolebindings.post({body: toTerminalRoleBindingResource({name: attachServiceAccountName, user: username, target, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences})})
 
     let pod
-    if (type === 'cp') {
-      pod = await createResourcesForCPTerminal({seedK8sCoreClient, seedK8sRbacClient, identifier, user: username, type, ownerReferences})
-    } else if (type === 'shoot') {
-      pod = await createResourcesForShootTerminal({seedK8sCoreClient, identifier, user: username, type, ownerReferences})
+    if (target === 'cp') {
+      pod = await createResourcesForCPTerminal({seedK8sCoreClient, seedK8sRbacClient, identifier, user: username, target, ownerReferences})
+    } else if (target === 'shoot') {
+      pod = await createResourcesForShootTerminal({seedK8sCoreClient, identifier, user: username, target, ownerReferences})
     } else {
-      throw new Error(`Unknown terminal type ${type}`)
+      throw new Error(`Unknown terminal target ${target}`)
     }
     const attachServiceAccountToken = await readServiceAccountToken({client: seedK8sCoreClient, serviceaccountName: attachServiceAccountName})
 
@@ -340,7 +340,7 @@ exports.create = async function ({user, namespace, name, type}) {
   }
 }
 
-exports.heartbeat = async function ({user, namespace, name, type}) {
+exports.heartbeat = async function ({user, namespace, name, target}) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
@@ -352,7 +352,7 @@ exports.heartbeat = async function ({user, namespace, name, type}) {
   const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
   const seedK8sCoreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig)).ns(seedShootNS)
 
-  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, type})
+  const existingPod = await findExistingTerminalPod({seedK8sCoreClient, username, target})
   if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
     const attachServiceAccount = _.first(existingPod.metadata.ownerReferences)
     if (attachServiceAccount) {

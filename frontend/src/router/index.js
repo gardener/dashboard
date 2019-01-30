@@ -112,7 +112,6 @@ export default function createRouter ({ store, userManager }) {
     {
       title: 'CP-Terminal',
       to: ({ params }) => {
-        params.target = 'cp'
         return {
           name: 'ShootItemTerminalCp',
           params
@@ -123,7 +122,6 @@ export default function createRouter ({ store, userManager }) {
     {
       title: 'Shoot-Terminal',
       to: ({ params }) => {
-        params.target = 'shoot'
         return {
           name: 'ShootItemTerminalShoot',
           params
@@ -262,6 +260,7 @@ export default function createRouter ({ store, userManager }) {
                 tabs: shootItemTabs
               },
               beforeEnter: (to, from, next) => {
+                to.params.target = 'cp'
                 if (terminalEnabled()) {
                   next()
                 } else {
@@ -282,6 +281,7 @@ export default function createRouter ({ store, userManager }) {
                 tabs: shootItemTabs
               },
               beforeEnter: (to, from, next) => {
+                to.params.target = 'shoot'
                 if (terminalEnabled()) {
                   next()
                 } else {
