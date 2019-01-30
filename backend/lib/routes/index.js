@@ -23,6 +23,7 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const { version } = require('../../package')
+const config = require('../config')
 
 const router = module.exports = express.Router()
 
@@ -57,7 +58,7 @@ async function fetchGardenerVersion () {
   }
 }
 
-module.exports = {
+const moduleExports = {
   '/info': router,
   '/user': require('./userInfo'),
   '/cloudprofiles': require('./cloudprofiles'),
@@ -66,6 +67,9 @@ module.exports = {
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members'),
-  '/namespaces/:namespace/terminals': require('./terminals')
+  '/namespaces/:namespace/members': require('./members')
 }
+if (_.get(config, 'frontend.features.terminalEnabled', false)) {
+  moduleExports['/namespaces/:namespace/terminals'] = require('./terminals')
+}
+module.exports = moduleExports

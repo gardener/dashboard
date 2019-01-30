@@ -76,7 +76,7 @@ export default function createRouter ({ store, userManager }) {
   }
 
   function terminalEnabled () {
-    return get(store, 'state.cfg.features.terminalEnabled', false)
+    return get(store, 'state.cfg.features.terminalEnabled', false) && store.getters.isAdmin
   }
 
   const mode = 'history'
