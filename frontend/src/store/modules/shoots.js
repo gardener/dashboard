@@ -502,6 +502,7 @@ const mutations = {
   CLEAR_ALL (state) {
     state.shoots = {}
     state.sortedShoots = []
+    state.filteredAndSortedShoots = []
   },
   SET_HIDE_USER_ISSUES (state, { rootState, value }) {
     state.hideUserIssues = value
