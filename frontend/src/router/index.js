@@ -229,7 +229,7 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
-                toRouteName: 'ShootItem',
+                toRouteName: 'ShootList',
                 breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               }
@@ -242,7 +242,7 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Editor',
-                toRouteName: 'ShootItemEditor',
+                toRouteName: 'ShootList',
                 breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               }
