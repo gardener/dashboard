@@ -31,6 +31,7 @@ import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
 import join from 'lodash/join'
+import head from 'lodash/head'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -236,6 +237,7 @@ const difference = (object, base) => {
 const getRawVal = (item, column) => {
   const metadata = item.metadata
   const spec = item.spec
+  const status = item.status
   switch (column) {
     case 'purpose':
       return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
@@ -256,6 +258,10 @@ const getRawVal = (item, column) => {
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
+    case 'readiness':
+      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
+      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
+      return lastErrorTransitionTime
     default:
       return metadata[column]
   }
