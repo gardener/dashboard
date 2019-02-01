@@ -148,7 +148,7 @@ async function readServiceAccountToken ({ client, serviceaccountName }) {
   const watch = watchServiceAccount({ client, serviceaccountName })
   const conditionFunction = isServiceAccountReady
   const resourceName = serviceaccountName
-  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName })
+  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, initializationTimeout: 10 * 1000 })
   const secretName = await _.get(_.first(serviceAccount.secrets), 'name')
   if (secretName && secretName.length > 0) {
     const secret = await client.secrets.get({ name: secretName })
@@ -262,6 +262,11 @@ async function createResourcesForCPTerminal ({ seedK8sCoreClient, seedK8sRbacCli
 
   // create rolebinding for namespace admin
   await seedK8sRbacClient.rolebindings.post({ body: toTerminalRoleBindingResource({ name: cpServiceAccountName, user, target, roleName: 'admin', ownerReferences }) })
+
+  // wait until API token is written into service account before creating the pod
+  if (!await readServiceAccountToken({ client: seedK8sCoreClient, serviceaccountName: cpServiceAccountName })) {
+    throw new Error('No API token found for service account %s', cpServiceAccountName)
+  }
 
   // create pod
   const name = `terminal-${identifier}`
