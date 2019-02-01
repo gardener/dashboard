@@ -256,7 +256,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Cluster Terminal Control Plane',
                 toRouteName: 'ShootList',
-                breadcrumb: true,
+                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               },
               beforeEnter: (to, from, next) => {
@@ -277,7 +277,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Cluster Terminal Shoot',
                 toRouteName: 'ShootList',
-                breadcrumb: true,
+                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               },
               beforeEnter: (to, from, next) => {
