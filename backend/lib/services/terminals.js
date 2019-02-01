@@ -260,8 +260,8 @@ async function createResourcesForCPTerminal ({ seedK8sCoreClient, seedK8sRbacCli
   const cpServiceAccountName = `terminal-${identifier}`
   await seedK8sCoreClient.serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: cpServiceAccountName, user, target, ownerReferences }) })
 
-  // create rolebinding for cpaccess-sa
-  await seedK8sRbacClient.rolebindings.post({ body: toTerminalRoleBindingResource({ name: cpServiceAccountName, user, target, roleName: 'garden.sapcloud.io:dashboard-terminal-cpaccess', ownerReferences }) })
+  // create rolebinding for namespace admin
+  await seedK8sRbacClient.rolebindings.post({ body: toTerminalRoleBindingResource({ name: cpServiceAccountName, user, target, roleName: 'admin', ownerReferences }) })
 
   // create pod
   const name = `terminal-${identifier}`
