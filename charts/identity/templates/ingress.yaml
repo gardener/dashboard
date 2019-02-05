@@ -1,3 +1,4 @@
+{{- if .Values.hosts }}
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
@@ -29,3 +30,4 @@ spec:
               servicePort: {{ $.Values.servicePort }}
             path: /
   {{- end }}
+{{- end }}
