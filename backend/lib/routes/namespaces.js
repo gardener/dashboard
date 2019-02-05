@@ -18,11 +18,12 @@
 
 const express = require('express')
 const { projects } = require('../services')
+const { isAuthenticated } = require('../middleware')
 
 const router = module.exports = express.Router()
 
 router.route('/')
-  .get(async (req, res, next) => {
+  .get(isAuthenticated, async (req, res, next) => {
     try {
       const user = req.user
       const qs = req.query

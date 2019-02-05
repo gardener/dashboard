@@ -16,6 +16,12 @@ module.exports = {
         changeOrigin: true,
         ws: true
       },
+      '/auth': {
+        target: 'http://localhost:3030'
+      },
+      '/metrics': {
+        target: 'http://localhost:3030'
+      },
       '/config.json': {
         target: 'http://localhost:3030'
       },

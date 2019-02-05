@@ -15,8 +15,6 @@
 //
 
 import includes from 'lodash/includes'
-import assign from 'lodash/assign'
-import cloneDeep from 'lodash/cloneDeep'
 
 import 'vuetify/dist/vuetify.min.css'
 
@@ -33,7 +31,7 @@ if (version === false) {
       import('./router'),
       import('axios'),
       import('vue-snotify'),
-      import('oidc-client')
+      import('./utils/auth')
     ])
     .then(([
       { default: Vue },
@@ -44,36 +42,29 @@ if (version === false) {
       { default: router },
       { default: axios },
       { default: Snotify },
-      Oidc
+      { UserManager }
     ]) => axios
       .get('/config.json')
       .then(({ data }) => store.dispatch('setConfiguration', data))
       .then(cfg => {
-        Oidc.Log.logger = console
-        Oidc.Log.level = Oidc.Log.ERROR
-        const userStore = new Oidc.WebStorageStateStore()
-        const oidc = cloneDeep(cfg.oidc)
-        try {
-          const redirectUri = new URL(oidc.redirect_uri)
-          if (redirectUri) {
-            oidc.redirect_uri = window.location.origin + redirectUri.pathname
-          }
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error('Invalid redirect URI in OIDC config', err)
-        }
-        const userManager = new Oidc.UserManager(assign({ userStore }, oidc))
+        const userManager = new UserManager({
+          origin: cfg.apiServerUrl
+        })
         const bus = new Vue({})
         Storage.prototype.setObject = function (key, value) {
           this.setItem(key, JSON.stringify(value))
         }
         Storage.prototype.getObject = function (key) {
           const value = this.getItem(key)
-          return value && JSON.parse(value)
+          if (value) {
+            try {
+              return JSON.parse(value)
+            } catch (err) { /* ignore error */ }
+          }
         }
         Object.defineProperties(Vue.prototype, {
-          $userManager: { value: userManager },
           $http: { value: axios },
+          $userManager: { value: userManager },
           $bus: { value: bus },
           $localStorage: { value: window.localStorage }
         })

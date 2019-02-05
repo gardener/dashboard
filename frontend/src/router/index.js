@@ -17,7 +17,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
@@ -44,8 +43,8 @@ export default function createRouter ({ store, userManager }) {
   /* technical components */
   const Logout = {
     beforeRouteEnter (to, from, next) {
-      signout(userManager)
-        .then(() => next('/login'), err => next(err))
+      userManager.signout()
+      next('/login')
     },
     render (createElement, { data, children } = {}) {
       return createElement('div', data, children)
@@ -53,10 +52,14 @@ export default function createRouter ({ store, userManager }) {
   }
 
   const Callback = {
-    beforeRouteEnter (to, from, next) {
-      return signinCallback(userManager)
-        .then(user => store.dispatch('setUser', user))
-        .then(() => next('/'), err => next(err))
+    async beforeRouteEnter (to, from, next) {
+      try {
+        const user = userManager.signinRedirectCallback(to)
+        await store.dispatch('setUser', user)
+        next('/')
+      } catch (err) {
+        next(err)
+      }
     },
     mounted () {
       // eslint-disable-next-line lodash/prefer-lodash-method
@@ -317,36 +320,35 @@ export default function createRouter ({ store, userManager }) {
   const routerOptions = { mode, scrollBehavior, routes }
 
   /* navigation guards */
-  function ensureConfigurationLoaded (to, from, next) {
-    if (store.state.cfg) {
-      return next()
+  async function ensureConfigurationLoaded (to, from, next) {
+    try {
+      if (!store.state.cfg) {
+        await store.dispatch('fetchConfiguration')
+      }
+      next()
+    } catch (err) {
+      next(err)
     }
-    return store
-      .dispatch('fetchConfiguration')
-      .then(() => next(), err => next(err))
   }
 
-  function ensureUserAuthenticatedForNonPublicRoutes (to, from, next) {
-    const meta = to.meta || {}
-    if (meta.public) {
-      return next()
-    }
-    const user = store.state.user
-    if (isUserLoggedIn(user)) {
-      return next()
-    }
-    userManager
-      .getUser()
-      .then(user => {
-        store.dispatch('setUser', user).then(() => {
-          if (isUserLoggedIn(user)) {
-            return next()
-          }
-          return next({
-            name: 'Login'
-          })
-        })
+  async function ensureUserAuthenticatedForNonPublicRoutes (to, from, next) {
+    try {
+      const meta = to.meta || {}
+      if (meta.public) {
+        return next()
+      }
+      if (userManager.isUserLoggedIn()) {
+        if (!store.state.user) {
+          await store.dispatch('setUser', userManager.getUser())
+        }
+        return next()
+      }
+      return next({
+        name: 'Login'
       })
+    } catch (err) {
+      next(err)
+    }
   }
 
   function ensureProjectsLoaded () {
@@ -475,15 +477,12 @@ export default function createRouter ({ store, userManager }) {
 
   /* register navigation guards */
   router.beforeEach((to, from, next) => {
-    console.log('Router beforeEach')
-    store.dispatch('setLoading')
-      .then(() => next(), () => next())
+    store.dispatch('setLoading').then(() => next(), () => next())
   })
   router.beforeEach(ensureConfigurationLoaded)
   router.beforeEach(ensureUserAuthenticatedForNonPublicRoutes)
   router.beforeEach(ensureDataLoaded)
   router.afterEach((to, from) => {
-    console.log('Router afterEach')
     store.dispatch('unsetLoading')
   })
   router.onError(err => {

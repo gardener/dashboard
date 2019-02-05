@@ -15,66 +15,119 @@ limitations under the License.
  -->
 
 <template>
-  <v-app>
-    <v-content class="loginContainer">
-      <v-layout row wrap style="height:100%">
-        <v-flex class="left" xs5>
-          <img src="../assets/logo.svg" class="logo">
-          <h1>Gardener</h1>
-          <h2 style="color:#009F76">The Kubernetes Botanist</h2>
-        </v-flex>
-        <v-flex class="right" xs7>
-          <div row wrap>
-            <h1>Enterprise-Grade Kubernetes Service</h1>
-            <h2>Infrastructure agnostic and working across all major public clouds</h2>
-          </div>
-          <div row wrap class="title mt-5" v-if="landingPageUrl">
-            Discover what our service is about at the
-            <a style="color:#009F76; padding-left:10px" :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>
-          </div>
-          <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click="handleLogin()">
-            Login
-            <v-icon dark>mdi-login-variant</v-icon>
-          </div>
-        </v-flex>
-      </v-layout>
-    </v-content>
-    <v-footer class="pa-4 footer--fixed" app>
-      <img :src="footerLogoUrl" height="30px">
-      <v-spacer></v-spacer>
-      <div>&copy; {{ new Date().getFullYear() }}</div>
-    </v-footer>
-    <vue-snotify></vue-snotify>
-  </v-app>
+<v-app>
+  <v-content app class="loginContainer">
+    <v-layout row wrap style="height: 100%">
+      <v-flex class="left" xs4>
+        <img src="../assets/logo.svg" class="logo">
+        <h1>Gardener</h1>
+        <h2 style="color: #009F76">The Kubernetes Botanist</h2>
+      </v-flex>
+      <v-flex class="right" xs8>
+        <div row wrap>
+          <h1>Enterprise-Grade Kubernetes Service</h1>
+          <h2>Infrastructure agnostic and working across all major public clouds</h2>
+        </div>
+        <div row wrap class="title mt-5" v-if="landingPageUrl">
+          Discover what our service is about at the
+          <a style="color: #009F76; padding-left:10px" :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>
+        </div>
+        <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click="handleLogin()">
+          Login <v-icon dark class="ml-2">mdi-login-variant</v-icon>
+        </div>
+        <div xs5 offset-xs2 right class="loginLink">
+          <a @click.stop="dialog = true">Login with an existing Token</a>
+        </div>
+      </v-flex>
+    </v-layout>
+  </v-content>
+  <v-footer class="pa-4 footer--fixed" app dark>
+    <img :src="footerLogoUrl" height="24">
+    <v-spacer></v-spacer>
+    <div>&copy; {{ new Date().getFullYear() }}</div>
+  </v-footer>
+  <vue-snotify></vue-snotify>
+  <v-dialog v-model="dialog" persistent max-width="480px">
+    <v-card>
+      <v-card-title class="loginTitle">
+        <span class="headline white--text">Login</span>
+      </v-card-title>
+      <v-card-text>
+        <v-text-field v-model="id_token" color="teal darken-2" label="Token" hint="Directly enter a Bearer token trusted by the Kubernetes ApiServer" persistent-hint required></v-text-field>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn flat @click="dialog = false">Cancel</v-btn>
+        <v-btn color="teal darken-2" flat @click="handleTokenLogin()">Ok</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
+</v-app>
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import { signin } from '@/utils/auth'
-import { SnotifyPosition } from 'vue-snotify'
+import {
+  mapState
+} from 'vuex'
+import {
+  getUserInfo
+} from '@/utils/api'
+import {
+  SnotifyPosition
+} from 'vue-snotify'
 
 export default {
+  data() {
+    return {
+      dialog: false,
+      id_token: ''
+    }
+  },
   computed: {
     ...mapState([
       'color',
       'cfg'
     ]),
-    landingPageUrl () {
+    landingPageUrl() {
       return this.cfg.landingPageUrl
     },
-    footerLogoUrl () {
+    footerLogoUrl() {
       return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
     }
   },
   methods: {
-    handleLogin () {
-      signin(this.$userManager)
-        .catch(error => {
-          this.showSnotifyLoginError(error.message)
-          throw error
-        })
+    async handleLogin() {
+      try {
+        this.$userManager.signin()
+      } catch (err) {
+        this.showSnotifyLoginError(err.message)
+      }
     },
-    showSnotifyLoginError (message) {
+    async handleTokenLogin() {
+      try {
+        const user = {
+          id_token: this.id_token
+        }
+        const {
+          data: userInfo
+        } = await getUserInfo({
+          user
+        })
+        user.profile = {
+          name: userInfo.username,
+          groups: userInfo.groups,
+          email: undefined
+        }
+        this.$userManager.setUser(user)
+        await this.$store.dispatch('setUser', user)
+        this.$router.push({
+          name: 'Home'
+        })
+      } catch (err) {
+        this.showSnotifyLoginError(err.message)
+      }
+    },
+    showSnotifyLoginError(message) {
       const config = {
         position: SnotifyPosition.rightBottom,
         timeout: 5000,
@@ -91,7 +144,7 @@ export default {
   bg1 = #24232c
   bg2 = #504e5a
 
-  font1 = #e9e0d5
+  font1 = #ffffff
   font2 = #958071
 
   hexArea = lighten(#D8D7DA,9)
@@ -101,7 +154,11 @@ export default {
     height:100%;
 
     footer {
-      background-color: transparent;
+      background-color: #2c353d;
+    }
+
+    .loginTitle {
+      background-color: #2c353d;
     }
 
     .loginContainer {
@@ -109,7 +166,6 @@ export default {
       height: 100%;
 
       .left {
-        box-shadow: inset -29px 0 29px -19px rgba(0, 0, 0, 0.7);
 
         .logo {
           height: 20vw;
@@ -121,7 +177,7 @@ export default {
 
         h1 {
           font-size: 4vw;
-          font-weight: 300;
+          font-weight: 200;
           width: 100%;
           text-align: center;
           color: font1;
@@ -130,7 +186,7 @@ export default {
 
         h2 {
           font-size: 1.8vw;
-          font-weight: 400;
+          font-weight: 300;
           width: 100%;
           text-align: center;
         }
@@ -153,33 +209,52 @@ export default {
         background-size: 40px 60px;
 
         h1 {
-          font-size: 2.5vw;
+          font-size: 2.8vw;
           width: 100%
           text-align: left;
           font-family: 'Roboto', sans-serif;
           color: bg2;
           white-space: nowrap;
-          font-weight: 400;
+          font-weight: 300;
         }
 
         h2 {
           font-size: 1.6vw;
           width: 100%
           text-align: left;
-          font-weight: 400;
+          font-weight: 300;
         }
 
         .loginButton {
           padding: 10px;
-          background-color: #F1AB1C;
           padding-left: 40px;
+          /* background-color: #F1AB1C; */
           color: white
           font-size: 20px;
           cursor: pointer;
           bottom: 80px;
           position: absolute;
           right: 0px;
-          width: 40%;
+          width: 30%;
+        }
+
+        .loginLink {
+          padding: 5px;
+          padding-left: 10px;
+          background-color: transparent;
+          font-size: 11px;
+          position: absolute;
+          right: 0px;
+          bottom: 50px;
+          width: 30%;
+
+          a {
+            color: #ffb74d;
+          }
+
+          a:hover {
+            color: #2c353d;
+          }
         }
 
         ul {

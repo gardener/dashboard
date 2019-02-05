@@ -14,76 +14,86 @@
 // limitations under the License.
 //
 
+import querystring from 'querystring'
 import decode from 'jwt-decode'
-import constant from 'lodash/constant'
 
-export function clearStaleState (mgr) {
-  return mgr
-    .clearStaleState()
-    .catch((err) => {
-      console.error('clearStateState error', err.message)
-    })
-}
+export class UserManager {
+  constructor (settings = {}) {
+    const origin = settings.origin || window.location.origin
+    this.key = `garden.user:${origin}`
+    this.storage = settings.storage || window.localStorage
+  }
 
-export function removeUser (mgr) {
-  return mgr
-    .removeUser()
-    .catch((err) => {
-      console.error('removeUser error', err.message)
-      throw err
-    })
-}
+  getUser () {
+    try {
+      const value = this.storage.getItem(this.key)
+      if (value) {
+        return JSON.parse(value)
+      }
+    } catch (err) {
+      this.removeUser()
+    }
+  }
 
-export function signout (mgr) {
-  return removeUser(mgr)
-}
+  setUser (user) {
+    if (user) {
+      this.storage.setItem(this.key, JSON.stringify(user))
+    } else {
+      this.removeUser()
+    }
+  }
 
-export function signin (mgr) {
-  return mgr
-    .signinRedirect()
-    .catch((err) => {
-      console.error('signin error', err.message)
-      throw err
-    })
-}
+  removeUser () {
+    this.storage.removeItem(this.key)
+  }
 
-export function signinCallback (mgr) {
-  return mgr
-    .signinRedirectCallback()
-    .catch((err) => {
-      console.error('signinCallback error', err.message)
-      throw err
-    })
+  signout () {
+    this.removeUser()
+  }
+
+  signin () {
+    window.location = '/auth'
+  }
+
+  signinRedirectCallback ({ hash = '' } = {}) {
+    const { username, groups, ...user } = querystring.parse(hash.replace(/^#/, ''))
+    user.profile = {
+      name: username,
+      email: username,
+      groups
+    }
+    this.setUser(user)
+    return user
+  }
+
+  isUserLoggedIn () {
+    const user = this.getUser()
+    if (!user || !user.id_token) {
+      return false
+    }
+    const expiresAt = parseInt(user.expires_at, 10)
+    if (typeof expiresAt === 'number' && !isNaN(expiresAt)) {
+      return 1000 * expiresAt > Date.now()
+    }
+    try {
+      return !isTokenExpired(user.id_token)
+    } catch (err) {
+      return true
+    }
+  }
 }
 
 function getTokenExpirationDate (encodedToken) {
   const token = decode(encodedToken)
-  if (!token.exp) {
-    return null
-  }
   const date = new Date(0)
-  date.setUTCSeconds(token.exp)
+  date.setUTCSeconds(token.exp || 253402297199)
   return date
 }
 
-export function isTokenExpired (token) {
+function isTokenExpired (token) {
   if (!token) {
     return true
   }
   const expirationDate = getTokenExpirationDate(token)
   return expirationDate < new Date()
-}
-
-export function isUserLoggedIn (user) {
-  try {
-    return user ? !isTokenExpired(user.id_token) : false
-  } catch (err) { /* ignore error */ }
-  return false
-}
-
-export function isLoggedIn (mgr) {
-  return mgr
-    .getUser()
-    .then(isUserLoggedIn)
-    .catch(constant(false))
 }

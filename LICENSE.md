@@ -305,13 +305,13 @@ Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>
 ### Frontend
 The Gardener Dashboard frontend depends on the following packages:
 
+[@babel/polyfill](https://github.com/babel/babel)
+Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>
+[MIT License](https://github.com/babel/babel/blob/master/LICENSE)
+
 [axios](https://github.com/axios/axios)
 Copyright (c) 2014-present Matt Zabriskie
 [MIT License](https://github.com/axios/axios/blob/master/LICENSE)
-
-[babel-polyfill](https://github.com/babel/babel)
-Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>
-[MIT License](https://github.com/babel/babel/blob/master/LICENSE)
 
 [clipboard](https://github.com/zenorocha/clipboard.js)
 Copyright (c) 2019 Zeno Rocha <hi@zenorocha.com>
