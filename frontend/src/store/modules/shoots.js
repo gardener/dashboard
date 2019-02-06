@@ -237,7 +237,6 @@ const difference = (object, base) => {
 const getRawVal = (item, column) => {
   const metadata = item.metadata
   const spec = item.spec
-  const status = item.status
   switch (column) {
     case 'purpose':
       return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
@@ -258,10 +257,6 @@ const getRawVal = (item, column) => {
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
-    case 'readiness':
-      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-      return lastErrorTransitionTime
     default:
       return metadata[column]
   }
@@ -270,6 +265,7 @@ const getRawVal = (item, column) => {
 const getSortVal = (item, sortBy) => {
   const value = getRawVal(item, sortBy)
   const spec = item.spec
+  const status = item.status
   switch (sortBy) {
     case 'purpose':
       switch (value) {
@@ -314,6 +310,14 @@ const getSortVal = (item, sortBy) => {
         return 500
       }
       return 700
+    case 'readiness':
+      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
+      let lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
+      if (!lastErrorTransitionTime) {
+        // Healthy clusters should always be ranked after clusters with errors
+        lastErrorTransitionTime = 'Z'
+      }
+      return lastErrorTransitionTime
     default:
       return toLower(value)
   }
