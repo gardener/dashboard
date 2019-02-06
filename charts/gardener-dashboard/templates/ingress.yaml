@@ -24,9 +24,6 @@ spec:
     - host: {{ . }}
       http:
         paths:
-        {{- with $.Values.ingress.additionalHostPaths }}
-{{ toYaml . | indent 10 }}
-        {{- end }}
           - backend:
               serviceName: gardener-dashboard-service
               servicePort: {{ $.Values.servicePort }}
