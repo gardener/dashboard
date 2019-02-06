@@ -369,7 +369,6 @@ const setSortedItems = (state, rootState) => {
           return -1 * inverse
         }
       })
-      console.log('radiness')
       state.sortedShoots = sortedShoots
     } else {
       state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
