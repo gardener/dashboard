@@ -193,7 +193,9 @@ class ShootsSubscription extends AbstractSubscription {
     })
   }
 
-  subscribeShoots ({ namespace, filter }) {
+  async subscribeShoots ({ namespace, filter }) {
+    // immediately clear, also if not authenticated to avoid outdated content is shown to the user
+    await store.dispatch('clearShoots')
     this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
@@ -201,10 +203,7 @@ class ShootsSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, filter } = this.subscribeTo
 
-    await Promise.all([
-      store.dispatch('clearShoots'),
-      store.dispatch('setShootsLoading')
-    ])
+    await store.dispatch('setShootsLoading')
     if (namespace === '_all') {
       this.socket.emit('subscribeAllShoots', { filter })
     } else if (namespace) {
