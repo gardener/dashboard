@@ -312,11 +312,7 @@ const getSortVal = (item, sortBy) => {
       return 700
     case 'readiness':
       const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
-      let lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
-      if (!lastErrorTransitionTime) {
-        // Healthy clusters should always be ranked after clusters with errors
-        lastErrorTransitionTime = 'Z'
-      }
+      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
       return lastErrorTransitionTime
     default:
       return toLower(value)
@@ -331,26 +327,49 @@ const setSortedItems = (state, rootState) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
+    const sortbyNameAsc = (a, b) => {
+      if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
+        return 1
+      } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
+        return -1
+      }
+      return 0
+    }
+    const inverse = descending === 'desc' ? -1 : 1
     if (sortBy === 'k8sVersion') {
       const sortedShoots = shoots(state)
       sortedShoots.sort((a, b) => {
         const versionA = getRawVal(a, sortBy)
         const versionB = getRawVal(b, sortBy)
 
-        const inverse = descending === 'desc' ? -1 : 1
         if (semver.gt(versionA, versionB)) {
           return 1 * inverse
         } else if (semver.lt(versionA, versionB)) {
           return -1 * inverse
         } else {
-          if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
-            return 1
-          } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
-            return -1
-          }
-          return 0
+          return sortbyNameAsc(a, b)
         }
       })
+      state.sortedShoots = sortedShoots
+    } else if (sortBy === 'readiness') {
+      const sortedShoots = shoots(state)
+      sortedShoots.sort((a, b) => {
+        const readinessA = getSortVal(a, sortBy)
+        const readinessB = getSortVal(b, sortBy)
+
+        if (readinessA === readinessB) {
+          return sortbyNameAsc(a, b)
+        } else if (!readinessA) {
+          return 1
+        } else if (!readinessB) {
+          return -1
+        } else if (readinessA > readinessB) {
+          return 1 * inverse
+        } else {
+          return -1 * inverse
+        }
+      })
+      console.log('radiness')
       state.sortedShoots = sortedShoots
     } else {
       state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
