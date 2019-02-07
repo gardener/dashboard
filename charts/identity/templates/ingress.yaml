@@ -28,6 +28,6 @@ spec:
           - backend:
               serviceName: identity-service
               servicePort: {{ $.Values.servicePort }}
-            path: /
+            path: "{{ regexReplaceAll "https://[^/]*(?:/(.+))?" $.Values.issuerUrl "/${1}" }}"
   {{- end }}
 {{- end }}
