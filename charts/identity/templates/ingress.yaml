@@ -12,20 +12,18 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
     kubernetes.io/ingress.class: nginx
+{{- $hostname := regexReplaceAll "https://([^/]*).*" $.Values.issuerUrl "${1}" }}
+{{- $pathname := regexReplaceAll "https://[^/]*(?:/(.+))?" $.Values.issuerUrl "/${1}" }}
 spec:
   tls:
     - secretName: identity-tls
       hosts:
-      {{- range .Values.hosts }}
-        - {{ . }}
-      {{- end }}
+        - {{ $hostname }}
   rules:
-  {{- range .Values.hosts }}
-    - host: {{ . }}
+    - host: {{ $hostname }}
       http:
         paths:
           - backend:
               serviceName: identity-service
               servicePort: {{ $.Values.servicePort }}
-            path: "{{ regexReplaceAll "https://[^/]*(?:/(.+))?" $.Values.issuerUrl "/${1}" }}"
-  {{- end }}
+            path: "{{ $pathname }}"
