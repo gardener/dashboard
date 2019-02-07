@@ -1,4 +1,3 @@
-{{- if .Values.hosts }}
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
@@ -30,4 +29,3 @@ spec:
               servicePort: {{ $.Values.servicePort }}
             path: "{{ regexReplaceAll "https://[^/]*(?:/(.+))?" $.Values.issuerUrl "/${1}" }}"
   {{- end }}
-{{- end }}
