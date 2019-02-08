@@ -29,6 +29,12 @@ limitations under the License.
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
           <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
           <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
+          <v-tab key="hibernation" href="#tab-hibernation" ripple>
+            <v-badge :value="unseenHibernationSchedules">
+              <span slot="badge">1</span>
+              Hibernation
+            </v-badge>
+          </v-tab>
         </v-tabs>
       </v-toolbar>
       <v-tabs-items v-model="activeTab" class="items">
@@ -166,7 +172,7 @@ limitations under the License.
                       color="cyan darken-2"
                       label="Purpose"
                       :items="filteredPurposes"
-                      v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
+                      v-model="purpose"
                       hint="Indicate the importance of the cluster"
                       persistent-hint
                       @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
@@ -359,6 +365,24 @@ limitations under the License.
           </v-card>
 
         </v-tab-item>
+        <v-tab-item key="hibernation" value="tab-hibernation">
+
+          <v-card flat>
+            <v-container fluid>
+              <v-layout row wrap>
+                <hibernation-schedule
+                  ref="hibernationSchedule"
+                  :schedules="hibernationSchedules"
+                  :purpose="purpose"
+                  @valid="onHibernationScheduleValid"
+                  @updateHibernationSchedules="onUpdateHibernationSchedules"
+                  @updateConfirmNoSchedule="onUpdateConfirmNoSchedule"
+                ></hibernation-schedule>
+              </v-layout>
+            </v-container>
+          </v-card>
+
+        </v-tab-item>
       </v-tabs-items>
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
 
@@ -379,6 +403,7 @@ import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
 import CloudProfile from '@/components/CloudProfile'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
+import HibernationSchedule from '@/components/HibernationSchedule'
 import Alert from '@/components/Alert'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -401,7 +426,7 @@ import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import InfraIcon from '@/components/InfrastructureIcon'
-import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors, purposeRequiresHibernationSchedule } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import moment from 'moment-timezone'
 
@@ -496,6 +521,7 @@ const defaultShootDefinition = {
       provider: null,
       domain: null
     },
+    hibernation: {},
     maintenance: {
       timeWindow: {
         begin: null,
@@ -518,7 +544,8 @@ export default {
     Alert,
     CloudProfile,
     MaintenanceComponents,
-    MaintenanceTime
+    MaintenanceTime,
+    HibernationSchedule
   },
   props: {
     value: {
@@ -537,8 +564,11 @@ export default {
       refs_: {},
       validationErrors,
       maintenanceTimeValid: false,
+      hibernationScheduleValid: false,
+      hibernationSchedules: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
+      unseenHibernationSchedules: false
     }
   },
   validations: {
@@ -658,7 +688,6 @@ export default {
         this.selectedSecret = secret
 
         this.setCloudProfileDefaults()
-
         this.setDefaultPurpose()
       }
     },
@@ -678,6 +707,15 @@ export default {
       },
       set (zone) {
         this.infrastructureData.zones = [zone]
+      }
+    },
+    purpose: {
+      get () {
+        return this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']
+      },
+      set (purpose) {
+        this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = purpose
+        this.setDefaultHibernationSchedule()
       }
     },
     infrastructure () {
@@ -732,7 +770,7 @@ export default {
         workersValid = every([].concat(workerInput), isValid)
       }
 
-      return workersValid && this.maintenanceTimeValid && !this.$v.$invalid
+      return workersValid && this.maintenanceTimeValid && this.hibernationScheduleValid && !this.$v.$invalid
     },
     sortedKubernetesVersions () {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
@@ -957,18 +995,10 @@ export default {
 
       this.$nextTick(() => {
         this.$refs.maintenanceTime.reset()
+        this.$refs.hibernationSchedule.reset()
 
-        // randomize maintenance time window
-        const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-        const randomHour = sample(hours)
-        // use local timezone offset
-        const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
-
-        const utcBegin = randomMoment.format('HH0000+0000')
-        randomMoment.add(1, 'h')
-        const utcEnd = randomMoment.format('HH0000+0000')
-
-        this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
+        this.setDefaultMaintenanceTimeWindow()
+        this.setDefaultHibernationSchedule()
       })
 
       this.errorMessage = undefined
@@ -995,7 +1025,43 @@ export default {
       this.secret = head(this.infrastructureSecretsByProfileName)
     },
     setDefaultPurpose () {
-      this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
+      this.purpose = head(this.filteredPurposes)
+    },
+    setDefaultHibernationSchedule () {
+      if (purposeRequiresHibernationSchedule(this.purpose)) {
+        if (isEmpty(this.hibernationSchedules)) {
+          // use local timezone
+          const start = moment.tz('06', 'HH', moment.tz.guess()).utc()
+          const end = moment.tz('20', 'HH', moment.tz.guess()).utc()
+
+          const crontabStart = start.format('0 HH * * 1,2,3,4,5')
+          const crontabEnd = end.format('0 HH * * 1,2,3,4,5')
+          const hibernationSchedule = [
+            {
+              start: crontabStart,
+              end: crontabEnd
+            }
+          ]
+          this.hibernationSchedules = hibernationSchedule
+          this.unseenHibernationSchedules = true
+        }
+      } else if (this.unseenHibernationSchedules) {
+        this.hibernationSchedules = undefined
+        this.unseenHibernationSchedules = false
+      }
+    },
+    setDefaultMaintenanceTimeWindow () {
+      // randomize maintenance time window
+      const hours = [22, 23, 0, 1, 2, 3, 4, 5]
+      const randomHour = sample(hours)
+      // use local timezone offset
+      const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
+
+      const utcBegin = randomMoment.format('HH0000+0000')
+      randomMoment.add(1, 'h')
+      const utcEnd = randomMoment.format('HH0000+0000')
+
+      this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
     },
     setCloudProfileDefaults () {
       this.setDefaultRegion()
@@ -1043,12 +1109,30 @@ export default {
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value
+    },
+    onHibernationScheduleValid (value) {
+      this.hibernationScheduleValid = value
+    },
+    onUpdateHibernationSchedules (value) {
+      this.hibernationSchedules = value
+    },
+    onUpdateConfirmNoSchedule (value) {
+      if (value) {
+        this.shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
+      } else {
+        delete this.shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+      }
     }
   },
   watch: {
     value (newValue) {
       if (newValue === true) {
         this.reset()
+      }
+    },
+    activeTab (value) {
+      if (value === 'tab-hibernation') {
+        this.unseenHibernationSchedules = false
       }
     }
   },

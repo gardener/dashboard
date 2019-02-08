@@ -343,3 +343,13 @@ export function textColor (color) {
   }
   return textColor
 }
+
+export function purposeRequiresHibernationSchedule (purpose) {
+  switch (purpose) {
+    case 'evaluation':
+    case 'development':
+      return true
+    default:
+      return false
+  }
+}
