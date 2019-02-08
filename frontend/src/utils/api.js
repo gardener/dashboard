@@ -174,9 +174,17 @@ export function getInfo ({ user }) {
 /* Terminals */
 
 export function createTerminal ({ namespace, name, target, user }) {
-  return createResource(`/api/namespaces/${namespace}/terminals/${name}/${target}`, user, undefined)
+  if (target === 'garden') {
+    return createResource(`/api/namespaces/${namespace}/terminals/${target}`, user, undefined)
+  } else {
+    return createResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`, user, undefined)
+  }
 }
 
 export function heartbeat ({ namespace, name, target, user }) {
-  return patchResource(`/api/namespaces/${namespace}/terminals/${name}/heartbeat/${target}`, user, undefined)
+  if (target === 'garden') {
+    return patchResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, user, undefined)
+  } else {
+    return patchResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat/${name}`, user, undefined)
+  }
 }

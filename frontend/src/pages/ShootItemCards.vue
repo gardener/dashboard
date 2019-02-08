@@ -236,13 +236,25 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6 v-show="isInfoAvailable">
-        <status-card :shootItem="item"></status-card>
-
+        <v-card>
+          <v-card-title class="subheading white--text cyan darken-2">
+            Control Plane
+          </v-card-title>
+          <control-plane :item="item"></control-plane>
+        </v-card>
+        
         <v-card>
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Access
           </v-card-title>
           <cluster-access :item="item"></cluster-access>
+        </v-card>
+
+        <v-card>
+          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+            Monitoring
+          </v-card-title>
+          <monitoring :shootItem="item"></monitoring>
         </v-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
@@ -315,11 +327,12 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
+import ControlPlane from '@/components/ControlPlane'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion'
-import StatusCard from '@/components/StatusCard'
+import Monitoring from '@/components/Monitoring'
 import Logging from '@/components/Logging'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
@@ -345,11 +358,12 @@ export default {
   name: 'shoot-item',
   components: {
     AccountAvatar,
+    ControlPlane,
     ClusterAccess,
     Journals,
     TimeString,
     ShootVersion,
-    StatusCard,
+    Monitoring,
     Logging,
     ShootHibernation,
     MaintenanceStart,

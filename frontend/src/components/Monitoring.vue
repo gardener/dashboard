@@ -15,45 +15,40 @@ limitations under the License.
 -->
 
 <template>
-  <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 statusTitle">
-      Monitoring
+  <div class="list">
+    <v-card-title class="listItem">
+      <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
+      <div>
+        <span class="grey--text">Status</span><br>
+        <shoot-status
+          class="shootStatus"
+          :operation="lastOperation"
+          :lastError="lastError"
+          :popperKey="`${namespace}/${name}_lastOp`"
+          :isHibernated="isHibernated"
+          :reconciliationDeactivated="reconciliationDeactivated"
+          :shootDeleted="isTypeDelete"
+          popperPlacement="bottom"
+          @titleChange="onShootStatusTitleChange">
+        </shoot-status>
+        <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
+          {{shootStatusTitle}}
+      </div>
     </v-card-title>
-    <div class="list">
-      <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
-        <div>
-          <span class="grey--text">Status</span><br>
-          <shoot-status
-            class="shootStatus"
-            :operation="lastOperation"
-            :lastError="lastError"
-            :popperKey="`${namespace}/${name}_lastOp`"
-            :isHibernated="isHibernated"
-            :reconciliationDeactivated="reconciliationDeactivated"
-            :shootDeleted="isTypeDelete"
-            popperPlacement="bottom"
-            @titleChange="onShootStatusTitleChange">
-          </shoot-status>
-          <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
-            {{shootStatusTitle}}
-        </div>
-      </v-card-title>
+    <v-divider class="my-2" inset></v-divider>
+    <v-card-title class="listItem">
+      <v-icon class="cyan--text text--darken-2 avatar">mdi-speedometer</v-icon>
+      <div>
+        <span class="grey--text">Readiness</span><br>
+        <template v-if="conditions.length === 0">-</template>
+        <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
+      </div>
+    </v-card-title>
+    <template v-if="isAdmin && seedShootIngressDomain">
       <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-speedometer</v-icon>
-        <div>
-          <span class="grey--text">Readiness</span><br>
-          <template v-if="conditions.length === 0">-</template>
-          <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
-        </div>
-      </v-card-title>
-      <template v-if="isAdmin && seedShootIngressDomain">
-        <v-divider class="my-2" inset></v-divider>
-        <cluster-metrics :shootItem="shootItem"></cluster-metrics>
-      </template>
-    </div>
-  </v-card>
+      <cluster-metrics :shootItem="shootItem"></cluster-metrics>
+    </template>
+  </div>
 </template>
 
 <script>

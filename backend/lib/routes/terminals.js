@@ -23,7 +23,7 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
-router.route('/:name/:target/')
+router.route('/:target/:name?/')
   .post(async (req, res, next) => {
     try {
       const user = req.user
@@ -36,7 +36,7 @@ router.route('/:name/:target/')
     }
   })
 
-router.route('/:name/heartbeat/:target/')
+router.route('/:target/heartbeat/:name?/')
   .patch(async (req, res, next) => {
     try {
       const user = req.user

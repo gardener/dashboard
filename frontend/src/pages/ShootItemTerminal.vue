@@ -138,14 +138,14 @@ export default {
     },
     async createTerminal () {
       const user = this.$store.state.user
-      const { namespace, name, target } = this.$route.params
+      const { namespace = undefined, name = undefined, target } = this.$route.params
       const { data } = await createTerminal({ name, namespace, target, user })
 
       return data
     },
     async heartbeat () {
       const user = this.$store.state.user
-      const { namespace, name, target } = this.$route.params
+      const { namespace = undefined, name = undefined, target } = this.$route.params
       return heartbeat({ name, namespace, user, target })
     },
     async retry () {
@@ -230,6 +230,7 @@ export default {
     }
   },
   async mounted () {
+    console.log('test');
     const term = this.term = new Terminal()
     term.open(this.$refs.container)
     term.winptyCompatInit()

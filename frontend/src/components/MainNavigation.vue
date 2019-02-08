@@ -267,11 +267,14 @@ export default {
     getProjectMenuTargetRoute (namespace) {
       let name = routeName(this.$route)
       const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
+      const fallback = 'ShootList'
       if (!nsHasProjectScope) {
         const thisProjectScoped = this.routeMeta.projectScope
         if (thisProjectScoped) {
-          name = 'ShootList'
+          name = fallback
         }
+      } else if (get(this.$route, 'params.name')) {
+        name = fallback
       }
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
     }

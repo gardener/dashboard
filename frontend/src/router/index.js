@@ -20,9 +20,8 @@ import Router from 'vue-router'
 import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
-import concat from 'lodash/concat'
 import get from 'lodash/get'
-import { BreadcrumbEnum } from '@/components/Breadcrumb'
+import concat from 'lodash/concat'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -75,8 +74,8 @@ export default function createRouter ({ store, userManager }) {
     }
   }
 
-  function terminalEnabled () {
-    return get(store, 'state.cfg.features.terminalEnabled', false) && store.getters.isAdmin
+  function hasTerminalAccess () {
+    return store.getters.hasTerminalAccess
   }
 
   const mode = 'history'
@@ -96,8 +95,7 @@ export default function createRouter ({ store, userManager }) {
           name: 'ShootItem',
           params
         }
-      },
-      visible: () => true
+      }
     },
     {
       title: 'YAML',
@@ -106,44 +104,37 @@ export default function createRouter ({ store, userManager }) {
           name: 'ShootItemEditor',
           params
         }
-      },
-      visible: () => true
-    },
-    {
-      title: 'CP-Terminal',
-      to: ({ params }) => {
-        return {
-          name: 'ShootItemTerminalCp',
-          params
-        }
-      },
-      visible: () => terminalEnabled()
-    },
-    {
-      title: 'Shoot-Terminal',
-      to: ({ params }) => {
-        return {
-          name: 'ShootItemTerminalShoot',
-          params
-        }
-      },
-      visible: () => terminalEnabled()
+      }
     }
   ]
+
+  const routeTitle = function () {
+    return this.title
+  }
+
+  const routeParamName = function (route) {
+    return get(route, 'params.name')
+  }
+
+  /** Breadcrumb function
+      @name BreadcrumbFn
+      @function
+      @param {Object} [route] - this.$route
+  */
 
   /**
    * Route Meta fields type definition
    * @typedef {Object} RouteMeta
-   * @prop {boolean} [public]         - Determines whether route needs authorization.
-   * @prop {boolean} [namespaced]     - Determines whether route is namespace specific and has namespace in path.
-   * @prop {boolean} [projectScope]   - Determines whether route can be accessed in context of mutiple projects (_all).
-   * @prop {string}  [toRouteName]    - Sets "to" target name in case navigation is triggered (e.g. due to project change),
-   *                                  this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
-   *                                  Furthermore, it is possible to set a default child route for a top level item.
-   * @prop {string}  [title]          - Main menu title.
-   * @prop {string}  [icon]           - Main menu icon.
-   * @prop {Breadcrumb} [breadcrumb]  - Determines if breadcrumb is visible for route.
-   * @prop {Tab[]}   [tabs]           - Determines the tabs to displayed in the main toolbar extenstion slot.
+   * @prop {boolean} [public]                 - Determines whether route needs authorization.
+   * @prop {boolean} [namespaced]             - Determines whether route is namespace specific and has namespace in path.
+   * @prop {boolean} [projectScope]           - Determines whether route can be accessed in context of mutiple projects (_all).
+   * @prop {string}  [toRouteName]            - Sets "to" target name in case navigation is triggered (e.g. due to project change),
+   *                                            this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
+   *                                            Furthermore, it is possible to set a default child route for a top level item.
+   * @prop {string}  [title]                  - Main menu title.
+   * @prop {string}  [icon]                   - Main menu icon.
+   * @prop {BreadcrumbFn} [breadcrumbTextFn]  - Function that returns the breadcrumb title
+   * @prop {Tab[]}   [tabs]                   - Determines the tabs to displayed in the main toolbar extenstion slot.
    */
 
   const routes = [
@@ -182,7 +173,7 @@ export default function createRouter ({ store, userManager }) {
             title: 'Home',
             namespaced: false,
             projectScope: false,
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           }
         },
         {
@@ -191,7 +182,7 @@ export default function createRouter ({ store, userManager }) {
           component: Account,
           meta: {
             title: 'Account',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE,
+            breadcrumbTextFn: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -208,7 +199,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           },
           children: [
             {
@@ -223,16 +214,65 @@ export default function createRouter ({ store, userManager }) {
             },
             {
               path: ':name',
-              name: 'ShootItem',
-              component: ShootItemCards,
+              component: PlaceholderComponent,
               meta: {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
-                toRouteName: 'ShootList',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
-                tabs: shootItemTabs
-              }
+                toRouteName: 'ShootItem',
+                breadcrumbTextFn: routeParamName
+              },
+              children: [
+                {
+                  path: '',
+                  name: 'ShootItem',
+                  component: ShootItemCards,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    title: 'Cluster Details',
+                    tabs: shootItemTabs
+                  }
+                },
+                {
+                  path: 'term/cp',
+                  name: 'ShootItemTerminalCp',
+                  component: ShootItemTerminal,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    title: 'Control Plane Terminal',
+                    breadcrumbTextFn: routeTitle
+                  },
+                  beforeEnter: (to, from, next) => {
+                    to.params.target = 'cp'
+                    if (hasTerminalAccess()) {
+                      next()
+                    } else {
+                      next('/')
+                    }
+                  }
+                },
+                {
+                  path: 'term/shoot',
+                  name: 'ShootItemTerminalShoot',
+                  component: ShootItemTerminal,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    title: 'Cluster Terminal',
+                    breadcrumbTextFn: routeTitle
+                  },
+                  beforeEnter: (to, from, next) => {
+                    to.params.target = 'shoot'
+                    if (hasTerminalAccess()) {
+                      next()
+                    } else {
+                      next('/')
+                    }
+                  }
+                }
+              ]
             },
             {
               path: ':name/yaml',
@@ -242,51 +282,8 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Editor',
-                toRouteName: 'ShootList',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
+                breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
-              }
-            },
-            {
-              path: ':name/term/cp',
-              name: 'ShootItemTerminalCp',
-              component: ShootItemTerminal,
-              meta: {
-                namespaced: true,
-                projectScope: true,
-                title: 'Cluster Terminal Control Plane',
-                toRouteName: 'ShootList',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
-                tabs: shootItemTabs
-              },
-              beforeEnter: (to, from, next) => {
-                to.params.target = 'cp'
-                if (terminalEnabled()) {
-                  next()
-                } else {
-                  next('/')
-                }
-              }
-            },
-            {
-              path: ':name/term/shoot',
-              name: 'ShootItemTerminalShoot',
-              component: ShootItemTerminal,
-              meta: {
-                namespaced: true,
-                projectScope: true,
-                title: 'Cluster Terminal Shoot',
-                toRouteName: 'ShootList',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
-                tabs: shootItemTabs
-              },
-              beforeEnter: (to, from, next) => {
-                to.params.target = 'shoot'
-                if (terminalEnabled()) {
-                  next()
-                } else {
-                  next('/')
-                }
               }
             }
           ]
@@ -303,7 +300,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: true,
             title: 'Secrets',
             toRouteName: 'Secrets',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           },
           children: [
             {
@@ -323,8 +320,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Secrets',
-                toRouteName: 'Secrets'
+                title: 'Secrets'
               }
             }
           ]
@@ -341,7 +337,7 @@ export default function createRouter ({ store, userManager }) {
               title: 'Members',
               icon: 'mdi-account-multiple-outline'
             },
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           }
         },
         {
@@ -356,7 +352,18 @@ export default function createRouter ({ store, userManager }) {
               title: 'Administration',
               icon: 'mdi-settings'
             },
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
+          }
+        },
+        {
+          path: 'namespace/:namespace/term/:target',
+          name: 'GardenTerminal',
+          component: ShootItemTerminal,
+          meta: {
+            namespaced: false,
+            projectScope: false,
+            title: 'Garden Terminal',
+            breadcrumbTextFn: routeTitle
           }
         }
       ]

@@ -232,6 +232,9 @@ const getters = {
   },
   isHideDeactivatedReconciliation (state, getters) {
     return getters['shoots/isHideDeactivatedReconciliation']
+  },
+  hasTerminalAccess (state, getters) {
+    return get(state, 'cfg.features.terminalEnabled', false) && getters.isAdmin
   }
 }
 

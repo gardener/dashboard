@@ -16,6 +16,15 @@ limitations under the License.
 
 <template>
   <v-list>
+    <template v-if="hasTerminalAccess">
+      <terminal-list-tile
+        :name=name
+        :namespace=namespace
+        route-name="ShootItemTerminalShoot"
+        description="Open terminal into cluster">
+      </terminal-list-tile>
+      <v-divider class="my-2" inset></v-divider>
+    </template>
     <v-list-tile v-show="!!dashboardUrl">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
@@ -77,15 +86,18 @@ limitations under the License.
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
+import TerminalListTile from '@/components/TerminalListTile'
 import get from 'lodash/get'
 import { isHibernated, getProjectName } from '@/utils'
 import download from 'downloadjs'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
     UsernamePassword,
     CodeBlock,
-    CopyBtn
+    CopyBtn,
+    TerminalListTile
   },
   props: {
     item: {
@@ -98,6 +110,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'hasTerminalAccess'
+    ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
@@ -115,6 +130,9 @@ export default {
     },
     name () {
       return get(this.item, 'metadata.name')
+    },
+    namespace () {
+      return get(this.item, 'metadata.namespace')
     },
     metadata () {
       return get(this.item, 'metadata')

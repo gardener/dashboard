@@ -28,9 +28,12 @@ limitations under the License.
         :close-on-content-click="true"
         v-model="help"
         >
-        <v-btn slot="activator" icon class="cyan--text text--darken-2 mr-4" title="Gardener Landing Page">
-          <v-icon medium>help_outline</v-icon>
-        </v-btn>
+        <v-tooltip left slot="activator" open-delay="500">
+          <v-btn slot="activator" icon class="cyan--text text--darken-2">
+            <v-icon medium>help_outline</v-icon>
+          </v-btn>
+          Info
+        </v-tooltip>
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -52,6 +55,19 @@ limitations under the License.
           </template>
         </v-card>
       </v-menu>
+    </div>
+     <v-divider
+      class="mx-3"
+      inset
+      vertical
+    ></v-divider>
+    <div class="text-xs-center">
+      <v-tooltip left slot="activator" open-delay="500">
+        <v-btn slot="activator" icon :to="gardenTerminalLink" class="cyan--text text--darken-2 mr-4">
+          <v-icon medium>mdi-console</v-icon>
+        </v-btn>
+        Garden Cluster Terminal
+      </v-tooltip>
     </div>
     <div class="text-xs-center">
       <v-menu
@@ -108,9 +124,12 @@ limitations under the License.
       </v-menu>
     </div>
     <v-tabs v-if="tabs" slot="extension" slider-color="grey darken-3">
-      <v-tab v-for="(tab, key) in tabs" :to="tab.to($route)" :key="key" ripple>
-        {{tab.title}}
-      </v-tab>
+      <template v-for="(tab, key) in tabs">
+        <v-spacer v-if="tab.spacer" :key="key"></v-spacer>
+        <v-tab :to="tab.to($route)" :key="key" ripple>
+          {{tab.title}}
+        </v-tab>
+      </template>
     </v-tabs>
   </v-toolbar>
 </template>
@@ -166,11 +185,7 @@ export default {
       return this.user.profile.email
     },
     tabs () {
-      const routeTabs = get(this.$route, 'meta.tabs', false)
-      if (!routeTabs) {
-        return routeTabs
-      }
-      return filter(routeTabs, tab => tab.visible())
+      return get(this.$route, 'meta.tabs', false)
     },
     avatarTitle () {
       return `${this.username} (${this.email})`
@@ -182,6 +197,9 @@ export default {
     },
     accountLink () {
       return { name: 'Account', query: this.$route.query }
+    },
+    gardenTerminalLink () {
+      return { name: 'GardenTerminal', params: { target: 'garden', namespace: 'garden' } }
     }
   },
   watch: {
