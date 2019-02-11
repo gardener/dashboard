@@ -28,17 +28,15 @@ limitations under the License.
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-layout>
-      <v-layout v-if="showConfirmNoSchedule" row key="9997" align-center class="pt-4 pl-2">
+      <v-layout row key="9997" align-center class="pt-4">
         <v-flex>
-          <v-checkbox v-model="confirmNoSchedule" color="cyan darken-2" class="mx-2 my-0"></v-checkbox>
-        </v-flex>
-        <v-flex>
-          <span class="no-schedule-title">This <span class="bold">{{purpose}}</span> cluster shall not have a hibernation schedule</span>
-          <p>
-            Non productive clusters get a hibernation schedule by default. This saves costs by automatically hibernating the cluster during non working hours.
-            If you need this cluster to be available at different times, you can adjust the schedule accordingly. If this cluster needs to be avaialable all the time,
-            please check the box above, to avoid getting prompted for setting a hibernation schedule in the future.
-          </p>
+          <v-checkbox
+            :disabled="confirmNoScheduleDeactivated"
+            v-model="confirmNoSchedule"
+            color="cyan darken-2"
+            class="my-0"
+            label="This non productive cluster does not need a hibernation schedule"
+            persistent-hint></v-checkbox>
         </v-flex>
       </v-layout>
       <v-layout v-if="parsedScheduleEvents !== null" row key="9999" class="list-complete-item pt-4">
@@ -79,6 +77,7 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
 import { purposeRequiresHibernationSchedule } from '@/utils'
+import moment from 'moment-timezone'
 
 let currentID = 0
 
@@ -109,12 +108,14 @@ export default {
           valid = false
         }
       })
+      this.$emit('valid', valid)
+
       return valid
     },
-    showConfirmNoSchedule () {
-      return purposeRequiresHibernationSchedule(this.purpose) &&
+    confirmNoScheduleDeactivated () {
+      return !(purposeRequiresHibernationSchedule(this.purpose) &&
         this.parsedScheduleEvents &&
-        this.parsedScheduleEvents.length === 0
+        this.parsedScheduleEvents.length === 0)
     }
   },
   methods: {
@@ -172,11 +173,39 @@ export default {
         set(schedule, name, value)
       }
     },
+    setDefaultHibernationSchedule () {
+      // use local timezone
+      const startMoment = moment.tz('06', 'HH', moment.tz.guess()).utc()
+      const endMoment = moment.tz('20', 'HH', moment.tz.guess()).utc()
+
+      const start = {
+        hour: startMoment.hours(),
+        minute: '0',
+        weekdays: '1,2,3,4,5'
+      }
+      const end = {
+        hour: endMoment.hours(),
+        minute: '0',
+        weekdays: '1,2,3,4,5'
+      }
+
+      const id = 0
+      const valid = true
+      this.parsedScheduleEvents = []
+      this.parsedScheduleEvents = [
+        { start, end, id, valid }
+      ]
+    },
     addSchedule () {
-      const id = this.id()
-      const start = {}
-      const end = {}
-      this.parsedScheduleEvents.push({ start, end, id })
+      if (this.parsedScheduleEvents.length > 0) {
+        const id = this.id()
+        const start = {}
+        const end = {}
+        const valid = false
+        this.parsedScheduleEvents.push({ start, end, id, valid })
+      } else {
+        this.setDefaultHibernationSchedule()
+      }
     },
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
@@ -199,7 +228,6 @@ export default {
     onScheduleEventValid ({ id, valid }) {
       const schedule = find(this.parsedScheduleEvents, { id })
       schedule.valid = valid
-      this.$emit('valid', this.valid)
     },
     emitScheduleCrontabs () {
       if (this.valid) {
@@ -267,16 +295,3 @@ export default {
   }
 }
 </script>
-
-<style lang="styl" scoped>
-
-  .no-schedule-title {
-    font-size: 16px;
-
-    .bold {
-      font-weight: bolder;
-    }
-
-  }
-
-</style>

@@ -33,7 +33,7 @@ limitations under the License.
         </v-toolbar>
         <v-card-text>
           <slot name="content-before"></slot>
-          <pre class="message">{{message}}</pre>
+          <pre class="message" v-if="!!message">{{message}}</pre>
           <slot name="content-after"></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">

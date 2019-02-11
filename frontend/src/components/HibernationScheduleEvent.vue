@@ -212,6 +212,8 @@ export default {
       }
     },
     updateLocalizedTime ({ eventName, localTime, localTimezone }) {
+      this.validateInput()
+
       let utcMoment
       if (localTime && localTimezone) {
         utcMoment = moment.tz(localTime, 'HHmm', localTimezone).utc()
@@ -238,6 +240,8 @@ export default {
       }
     },
     updateSelectedDays ({ selectedDays }) {
+      this.validateInput()
+
       let weekdays
       if (selectedDays) {
         const sortedDays = selectedDays.slice()
@@ -268,7 +272,6 @@ export default {
         this.setLocalizedWakeUpTime(newValue.start)
         this.setLocalizedHibernateTime(newValue.end)
         this.setSelectedDays(newValue)
-        this.validateInput()
       }
     },
     localizedWakeUpTime (value) {
@@ -289,7 +292,6 @@ export default {
     this.setLocalizedWakeUpTime(this.scheduleEvent.start)
     this.setLocalizedHibernateTime(this.scheduleEvent.end)
     this.setSelectedDays(this.scheduleEvent)
-    this.validateInput()
   }
 }
 </script>

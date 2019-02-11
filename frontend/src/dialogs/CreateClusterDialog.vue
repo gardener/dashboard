@@ -29,12 +29,7 @@ limitations under the License.
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
           <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
           <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
-          <v-tab key="hibernation" href="#tab-hibernation" ripple>
-            <v-badge :value="unseenHibernationSchedules">
-              <span slot="badge">1</span>
-              Hibernation
-            </v-badge>
-          </v-tab>
+          <v-tab key="hibernation" href="#tab-hibernation" ripple>Hibernation</v-tab>
         </v-tabs>
       </v-toolbar>
       <v-tabs-items v-model="activeTab" class="items">
@@ -369,6 +364,10 @@ limitations under the License.
 
           <v-card flat>
             <v-container fluid>
+              <v-layout row>
+                <span class="hibernation_title_text">Non productive clusters get a hibernation schedule by default. This saves costs by automatically hibernating the cluster during non working hours.</span>
+              </v-layout>
+              <v-divider class="mt-2"></v-divider>
               <v-layout row wrap>
                 <hibernation-schedule
                   ref="hibernationSchedule"
@@ -384,6 +383,7 @@ limitations under the License.
 
         </v-tab-item>
       </v-tabs-items>
+
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
 
       <v-card-actions>
@@ -567,8 +567,7 @@ export default {
       hibernationScheduleValid: false,
       hibernationSchedules: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined,
-      unseenHibernationSchedules: false
+      detailedErrorMessage: undefined
     }
   },
   validations: {
@@ -1030,24 +1029,12 @@ export default {
     setDefaultHibernationSchedule () {
       if (purposeRequiresHibernationSchedule(this.purpose)) {
         if (isEmpty(this.hibernationSchedules)) {
-          // use local timezone
-          const start = moment.tz('06', 'HH', moment.tz.guess()).utc()
-          const end = moment.tz('20', 'HH', moment.tz.guess()).utc()
-
-          const crontabStart = start.format('0 HH * * 1,2,3,4,5')
-          const crontabEnd = end.format('0 HH * * 1,2,3,4,5')
-          const hibernationSchedule = [
-            {
-              start: crontabStart,
-              end: crontabEnd
-            }
-          ]
-          this.hibernationSchedules = hibernationSchedule
-          this.unseenHibernationSchedules = true
+          this.$nextTick(() => {
+            this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
+          })
         }
-      } else if (this.unseenHibernationSchedules) {
+      } else if (this.hibernationSchedules) {
         this.hibernationSchedules = undefined
-        this.unseenHibernationSchedules = false
       }
     },
     setDefaultMaintenanceTimeWindow () {
@@ -1129,11 +1116,6 @@ export default {
       if (newValue === true) {
         this.reset()
       }
-    },
-    activeTab (value) {
-      if (value === 'tab-hibernation') {
-        this.unseenHibernationSchedules = false
-      }
     }
   },
   created () {
@@ -1190,6 +1172,15 @@ export default {
     .add_worker{
       margin-left: 30px;
       border: 0;
+    }
+
+    .hibernation_title_text {
+      font-size: 16px;
+
+      .bold {
+        font-weight: bolder;
+      }
+
     }
 
   }
