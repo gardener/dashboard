@@ -108,6 +108,27 @@ export default function createRouter ({ store, userManager }) {
     }
   ]
 
+  const shootItemTerminalTabs = [
+    {
+      title: 'Control Plane',
+      to: ({ params }) => {
+        return {
+          name: 'ShootItemTerminalCp',
+          params
+        }
+      }
+    },
+    {
+      title: 'Cluster',
+      to: ({ params }) => {
+        return {
+          name: 'ShootItemTerminalShoot',
+          params
+        }
+      }
+    }
+  ]
+
   const routeTitle = function () {
     return this.title
   }
@@ -240,7 +261,8 @@ export default function createRouter ({ store, userManager }) {
                     namespaced: true,
                     projectScope: true,
                     title: 'Control Plane Terminal',
-                    breadcrumbTextFn: routeTitle
+                    breadcrumbTextFn: routeTitle,
+                    tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
                     to.params.target = 'cp'
@@ -259,7 +281,8 @@ export default function createRouter ({ store, userManager }) {
                     namespaced: true,
                     projectScope: true,
                     title: 'Cluster Terminal',
-                    breadcrumbTextFn: routeTitle
+                    breadcrumbTextFn: routeTitle,
+                    tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
                     to.params.target = 'shoot'
