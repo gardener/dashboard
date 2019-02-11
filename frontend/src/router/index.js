@@ -125,16 +125,14 @@ export default function createRouter ({ store, userManager }) {
   /**
    * Route Meta fields type definition
    * @typedef {Object} RouteMeta
-   * @prop {boolean} [public]                 - Determines whether route needs authorization.
-   * @prop {boolean} [namespaced]             - Determines whether route is namespace specific and has namespace in path.
-   * @prop {boolean} [projectScope]           - Determines whether route can be accessed in context of mutiple projects (_all).
-   * @prop {string}  [toRouteName]            - Sets "to" target name in case navigation is triggered (e.g. due to project change),
-   *                                            this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
-   *                                            Furthermore, it is possible to set a default child route for a top level item.
-   * @prop {string}  [title]                  - Main menu title.
-   * @prop {string}  [icon]                   - Main menu icon.
+   * @prop {boolean} [public]                 - Determines whether route needs authorization
+   * @prop {boolean} [namespaced]             - Determines whether route is namespace specific and has namespace in path
+   * @prop {boolean} [projectScope]           - Determines whether route can be accessed in context of mutiple projects (_all)
+   * @prop {string}  [toRouteName]            - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
+   * @prop {string}  [title]                  - Main menu title
+   * @prop {string}  [icon]                   - Main menu icon
    * @prop {BreadcrumbFn} [breadcrumbTextFn]  - Function that returns the breadcrumb title
-   * @prop {Tab[]}   [tabs]                   - Determines the tabs to displayed in the main toolbar extenstion slot.
+   * @prop {Tab[]}   [tabs]                   - Determines the tabs to displayed in the main toolbar extenstion slot
    */
 
   const routes = [
