@@ -521,7 +521,6 @@ const defaultShootDefinition = {
       provider: null,
       domain: null
     },
-    hibernation: {},
     maintenance: {
       timeWindow: {
         begin: null,
@@ -947,6 +946,11 @@ export default {
       const enabledCustomAddonNames = reduce(customAddons, (accumulator, { enabled }, name) => !enabled ? accumulator : concat(accumulator, name), [])
       if (!isEmpty(enabledCustomAddonNames)) {
         annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
+      }
+      if(!isEmpty(this.hibernationSchedules)) {
+        data.spec.hibernation = {
+          schedules: this.hibernationSchedules
+        }
       }
       return this.createShoot(data)
     },

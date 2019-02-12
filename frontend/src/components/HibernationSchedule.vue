@@ -31,12 +31,13 @@ limitations under the License.
       <v-layout row key="9997" align-center class="pt-4">
         <v-flex>
           <v-checkbox
-            :disabled="confirmNoScheduleDeactivated"
             v-model="confirmNoSchedule"
             color="cyan darken-2"
             class="my-0"
             label="This non productive cluster does not need a hibernation schedule"
-            persistent-hint></v-checkbox>
+            hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
+            persistent-hint>
+          </v-checkbox>
         </v-flex>
       </v-layout>
       <v-layout v-if="parsedScheduleEvents !== null" row key="9999" class="list-complete-item pt-4">
@@ -111,11 +112,6 @@ export default {
       this.$emit('valid', valid)
 
       return valid
-    },
-    confirmNoScheduleDeactivated () {
-      return !(purposeRequiresHibernationSchedule(this.purpose) &&
-        this.parsedScheduleEvents &&
-        this.parsedScheduleEvents.length === 0)
     }
   },
   methods: {
@@ -191,7 +187,6 @@ export default {
 
       const id = 0
       const valid = true
-      this.parsedScheduleEvents = []
       this.parsedScheduleEvents = [
         { start, end, id, valid }
       ]
@@ -290,6 +285,10 @@ export default {
       }
     },
     confirmNoSchedule (value) {
+      if (value) {
+        currentID = 0
+        this.parsedScheduleEvents = []
+      }
       this.$emit('updateConfirmNoSchedule', this.confirmNoSchedule)
     }
   }
