@@ -22,7 +22,7 @@
     "lint": "eslint --ext .js server.js lib",
     "test": "cross-env NODE_ENV=test _mocha test/ test/acceptance/",
     "test-cov": "cross-env NODE_ENV=test nyc _mocha -- test/ test/acceptance/",
-    "bump-version": "bin/bump-version"
+    "sync-version": "bin/sync-version"
   },
   "dependencies": {
     "@godaddy/terminus": "^4.1.0",

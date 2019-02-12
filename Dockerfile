@@ -36,7 +36,7 @@ COPY VERSION ../
 
 RUN npm run lint \
     && npm run test-cov \
-    && npm run bump-version
+    && npm run sync-version
 
 #### Frontend  base ####
 FROM base as frontend
