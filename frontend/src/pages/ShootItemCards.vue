@@ -238,11 +238,11 @@ limitations under the License.
       <v-flex md6 v-show="isInfoAvailable">
         <status-card :shootItem="item"></status-card>
 
-        <v-card>
+        <v-card v-show="clusterAccessHasVisibleProperties">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Access
           </v-card-title>
-          <cluster-access :item="item"></cluster-access>
+          <cluster-access :item="item" @hasVisibleProperties="onClusterAccessHasVisibleProperties"></cluster-access>
         </v-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
@@ -374,7 +374,8 @@ export default {
           title: 'Nginx Ingress',
           description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
         }
-      ]
+      ],
+      clusterAccessHasVisibleProperties: false
     }
   },
   computed: {
@@ -515,12 +516,17 @@ export default {
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
     }
+  },
+  methods: {
+    onClusterAccessHasVisibleProperties(value) {
+      this.clusterAccessHasVisibleProperties = value
+    }
   }
 }
 </script>
 
 <style lang="styl" scoped>
   .subheading.v-card__title {
-    height: 42px;
+    line-height: 10px;
   }
 </style>

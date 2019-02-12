@@ -151,6 +151,9 @@ export default {
     getQualifiedName () {
       const projectName = getProjectName(this.metadata)
       return `kubeconfig--${projectName}--${this.name}.yaml`
+    },
+    hasVisibleProperties() {
+      return !!this.dashboardUrl || (!!this.username && !!this.password) ||!!this.kubeconfig
     }
   },
   methods: {
@@ -173,6 +176,9 @@ export default {
   watch: {
     kubeconfig (value) {
       this.reset()
+    },
+    hasVisibleProperties (value) {
+      this.$emit('hasVisibleProperties', value)
     }
   }
 }
