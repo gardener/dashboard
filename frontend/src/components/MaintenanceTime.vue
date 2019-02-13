@@ -89,6 +89,7 @@ export default {
     },
     reset () {
       this.selectedTimezone = moment.tz.guess()
+      this.setLocalizedTime(this.timeWindowBegin)
       this.validateInput()
     },
     getErrorMessages (field) {
@@ -124,8 +125,7 @@ export default {
     }
   },
   mounted () {
-    this.setLocalizedTime(this.timeWindowBegin)
-    this.validateInput()
+    this.reset()
   }
 }
 </script>

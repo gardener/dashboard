@@ -152,8 +152,8 @@ export default {
       const projectName = getProjectName(this.metadata)
       return `kubeconfig--${projectName}--${this.name}.yaml`
     },
-    hasVisibleProperties() {
-      return !!this.dashboardUrl || (!!this.username && !!this.password) ||!!this.kubeconfig
+    hasVisibleProperties () {
+      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig
     }
   },
   methods: {

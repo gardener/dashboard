@@ -372,10 +372,11 @@ limitations under the License.
                 <hibernation-schedule
                   ref="hibernationSchedule"
                   :schedules="hibernationSchedules"
+                  :noSchedule="!!shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']"
                   :purpose="purpose"
                   @valid="onHibernationScheduleValid"
                   @updateHibernationSchedules="onUpdateHibernationSchedules"
-                  @updateConfirmNoSchedule="onUpdateConfirmNoSchedule"
+                  @updateNoSchedule="onUpdateNoSchedule"
                 ></hibernation-schedule>
               </v-layout>
             </v-container>
@@ -947,7 +948,7 @@ export default {
       if (!isEmpty(enabledCustomAddonNames)) {
         annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
       }
-      if(!isEmpty(this.hibernationSchedules)) {
+      if (!isEmpty(this.hibernationSchedules)) {
         data.spec.hibernation = {
           schedules: this.hibernationSchedules
         }
@@ -1107,7 +1108,7 @@ export default {
     onUpdateHibernationSchedules (value) {
       this.hibernationSchedules = value
     },
-    onUpdateConfirmNoSchedule (value) {
+    onUpdateNoSchedule (value) {
       if (value) {
         this.shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
       } else {

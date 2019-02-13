@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -268,6 +268,9 @@ limitations under the License.
               <v-list-tile-action>
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
               </v-list-tile-action>
+              <v-list-tile-action>
+                <hibernation-configuration :shootItem="item"></hibernation-configuration>
+              </v-list-tile-action>
             </v-list-tile>
 
             <v-divider class="my-2" inset></v-divider>
@@ -279,10 +282,10 @@ limitations under the License.
                 <v-list-tile-title>Maintenance</v-list-tile-title>
               </v-list-tile-content>
               <v-list-tile-action>
-                <maintenance-configuration :shootItem="item"></maintenance-configuration>
+                <maintenance-start :shootItem="item"></maintenance-start>
               </v-list-tile-action>
               <v-list-tile-action>
-                <maintenance-start :shootItem="item"></maintenance-start>
+                <maintenance-configuration :shootItem="item"></maintenance-configuration>
               </v-list-tile-action>
             </v-list-tile>
 
@@ -324,6 +327,7 @@ import Logging from '@/components/Logging'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
+import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
@@ -354,6 +358,7 @@ export default {
     ShootHibernation,
     MaintenanceStart,
     MaintenanceConfiguration,
+    HibernationConfiguration,
     DeleteCluster
   },
   data () {
@@ -518,7 +523,7 @@ export default {
     }
   },
   methods: {
-    onClusterAccessHasVisibleProperties(value) {
+    onClusterAccessHasVisibleProperties (value) {
       this.clusterAccessHasVisibleProperties = value
     }
   }

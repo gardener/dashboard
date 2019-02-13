@@ -55,7 +55,7 @@ limitations under the License.
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
-import { addAnnotation } from '@/utils/api'
+import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
@@ -114,7 +114,7 @@ export default {
 
       const user = this.$store.state.user
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
-      return addAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
+      return addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)

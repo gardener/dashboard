@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ limitations under the License.
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-layout>
-      <v-layout row key="9997" align-center class="pt-4">
+      <v-layout v-if="purposeRequiresHibernationSchedule" row key="9997" align-center class="pt-4">
         <v-flex>
           <v-checkbox
             v-model="confirmNoSchedule"
@@ -55,7 +55,7 @@ limitations under the License.
             @click="addSchedule"
             flat
             class="cyan--text text--darken-2">
-            Add new Schedule
+            Add new Hibernation Schedule
           </v-btn>
         </v-flex>
       </v-layout>
@@ -93,12 +93,15 @@ export default {
     },
     purpose: {
       type: String
+    },
+    noSchedule: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
     return {
-      parsedScheduleEvents: undefined,
-      confirmNoSchedule: false
+      parsedScheduleEvents: undefined
     }
   },
   computed: {
@@ -112,6 +115,21 @@ export default {
       this.$emit('valid', valid)
 
       return valid
+    },
+    confirmNoSchedule: {
+      get () {
+        return this.noSchedule
+      },
+      set (value) {
+        if (value) {
+          currentID = 0
+          this.parsedScheduleEvents = []
+        }
+        this.$emit('updateNoSchedule', value)
+      }
+    },
+    purposeRequiresHibernationSchedule () {
+      return purposeRequiresHibernationSchedule(this.purpose)
     }
   },
   methods: {
@@ -169,6 +187,11 @@ export default {
         set(schedule, name, value)
       }
     },
+    ensureScheduleWeekdaysIsSet (schedule, weekdays1, weekdays2) {
+      if (!get(schedule, weekdays1)) {
+        set(schedule, weekdays1, get(schedule, weekdays2))
+      }
+    },
     setDefaultHibernationSchedule () {
       // use local timezone
       const startMoment = moment.tz('06', 'HH', moment.tz.guess()).utc()
@@ -209,11 +232,13 @@ export default {
       const schedule = find(this.parsedScheduleEvents, { id })
       this.setScheduleProperty(schedule, 'start.hour', utcHour)
       this.setScheduleProperty(schedule, 'start.minute', utcMinute)
+      this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
     },
     onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
       this.setScheduleProperty(schedule, 'end.hour', utcHour)
       this.setScheduleProperty(schedule, 'end.minute', utcMinute)
+      this.ensureScheduleWeekdaysIsSet(schedule, 'end.weekdays', 'start.weekdays')
     },
     onUpdateSelectedDays ({ weekdays, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
@@ -283,13 +308,6 @@ export default {
       if (!purposeRequiresHibernationSchedule(value)) {
         this.confirmNoSchedule = false
       }
-    },
-    confirmNoSchedule (value) {
-      if (value) {
-        currentID = 0
-        this.parsedScheduleEvents = []
-      }
-      this.$emit('updateConfirmNoSchedule', this.confirmNoSchedule)
     }
   }
 }
