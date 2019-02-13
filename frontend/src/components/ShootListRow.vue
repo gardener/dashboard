@@ -23,10 +23,20 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-layout align-center row fill-height class="pa-0 ma-0">
-        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-          {{ row.name }}
-        </router-link>
-        <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+        <v-flex grow>
+          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+            {{ row.name }}
+          </router-link>
+        </v-flex>
+        <v-flex shrink>
+          <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+          <v-tooltip top v-if="isShootHasNoHibernationScheduleWarning">
+            <router-link v-if="isShootHasNoHibernationScheduleWarning" slot="activator" class="no-underline" :to="{ name: 'ShootItemHibernationSettings', params: { name: row.name, namespace:row.namespace } }">
+              <v-icon color="cyan darken-2">mdi-calendar-alert</v-icon>
+            </router-link>
+            <span>This non-productive cluster has no hibernation schedule</span>
+          </v-tooltip>
+        </v-flex>
       </v-layout>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
@@ -127,7 +137,8 @@ import { getTimestampFormatted,
   isReconciliationDeactivated,
   isShootMarkedForDeletion,
   isTypeDelete,
-  getProjectName } from '@/utils'
+  getProjectName,
+  isShootHasNoHibernationScheduleWarning } from '@/utils'
 
 export default {
   components: {
@@ -242,6 +253,9 @@ export default {
       return this.isClusterAccessDialogDisabled
         ? 'Cluster Access'
         : 'Show Cluster Access'
+    },
+    isShootHasNoHibernationScheduleWarning () {
+      return isShootHasNoHibernationScheduleWarning(this.shootItem)
     }
   },
   methods: {
@@ -263,5 +277,9 @@ export default {
 
   .nowrap {
     white-space: nowrap;
+  }
+
+  .no-underline {
+    text-decoration: none;
   }
 </style>

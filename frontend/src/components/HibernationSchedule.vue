@@ -34,7 +34,7 @@ limitations under the License.
             v-model="confirmNoSchedule"
             color="cyan darken-2"
             class="my-0"
-            label="This non productive cluster does not need a hibernation schedule"
+            label="This non-productive cluster does not need a hibernation schedule"
             hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
             persistent-hint>
           </v-checkbox>

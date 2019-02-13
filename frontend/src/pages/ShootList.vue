@@ -112,6 +112,11 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
+      <v-alert :value="numberOfClustersWithoutSchedule > 0" icon="mdi-calendar-alert" color="cyan darken-2" class="my-0" outline>
+        <template v-if="numberOfClustersWithoutSchedule === 1">There is <span class="bold">one</span> non-productive cluster</template>
+        <template v-else>There are <span class="bold">{{numberOfClustersWithoutSchedule}}</span> non-productive clusters</template>
+        without a hibernation schedule in the list. Please check the affected clusters and add a schedule or explicitly opt out in the hibernation schedule settings.
+      </v-alert>
       <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :hide-actions="hideActions" :total-items="totalItems" :rows-per-page-items="[5,10,20]">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
@@ -150,9 +155,11 @@ import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
+import forEach from 'lodash/forEach'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
+import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 
 export default {
   name: 'shoot-list',
@@ -405,6 +412,15 @@ export default {
     },
     totalItems () {
       return this.hideActions ? -1 : undefined
+    },
+    numberOfClustersWithoutSchedule () {
+      let count = 0
+      forEach(this.items, item => {
+        if (isShootHasNoHibernationScheduleWarning(item)) {
+          count++
+        }
+      })
+      return count
     }
   },
   mounted () {
@@ -487,5 +503,9 @@ export default {
 
   >>> .v-input__slot {
     margin: 0px;
+  }
+
+  .bold {
+    font-weight: bolder;
   }
 </style>

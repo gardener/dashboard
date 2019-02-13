@@ -218,6 +218,19 @@ export default function createRouter ({ store, userManager }) {
                 breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               }
+            },
+            {
+              path: ':name/hibernation',
+              name: 'ShootItemHibernationSettings',
+              component: ShootItemCards,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                title: 'Cluster Details',
+                toRouteName: 'ShootItemHibernationSettings',
+                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
+                tabs: shootItemTabs
+              }
             }
           ]
         },
@@ -413,6 +426,7 @@ export default function createRouter ({ store, userManager }) {
               .all(promises)
               .then(() => undefined)
           case 'ShootItem':
+          case 'ShootItemHibernationSettings':
           case 'ShootItemEditor':
             return Promise
               .all([

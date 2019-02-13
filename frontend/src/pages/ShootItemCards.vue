@@ -269,7 +269,7 @@ limitations under the License.
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
               </v-list-tile-action>
               <v-list-tile-action>
-                <hibernation-configuration :shootItem="item"></hibernation-configuration>
+                <hibernation-configuration ref="hibernationConfiguration" :shootItem="item"></hibernation-configuration>
               </v-list-tile-action>
             </v-list-tile>
 
@@ -525,6 +525,11 @@ export default {
   methods: {
     onClusterAccessHasVisibleProperties (value) {
       this.clusterAccessHasVisibleProperties = value
+    }
+  },
+  mounted () {
+    if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
+      this.$refs.hibernationConfiguration.showDialog()
     }
   }
 }

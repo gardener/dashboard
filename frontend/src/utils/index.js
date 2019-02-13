@@ -353,3 +353,19 @@ export function purposeRequiresHibernationSchedule (purpose) {
       return false
   }
 }
+
+export function isShootHasNoHibernationScheduleWarning (shoot) {
+  const annotations = get(shoot, 'metadata.annotations', {})
+  const purpose = annotations['garden.sapcloud.io/purpose']
+  if (purposeRequiresHibernationSchedule(purpose)) {
+    const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+    if (!hasNoScheduleFlag) {
+      const schedules = get(shoot, 'spec.hibernation.schedules', [])
+      const hasSchedules = schedules.length > 0
+      if (!hasSchedules) {
+        return true
+      }
+    }
+  }
+  return false
+}
