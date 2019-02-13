@@ -878,7 +878,7 @@ const stub = {
       }
     }
     return [
-      nock(url)
+      nockWithAuthorization(auth.bearer)
         .get(`/apis/apiregistration.k8s.io/v1beta1/apiservices/v1beta1.garden.sapcloud.io`)
         .reply(200, apiServerSpec),
       nock(`https://${apiServerSpec.spec.service.name}.${apiServerSpec.spec.service.namespace}`)
