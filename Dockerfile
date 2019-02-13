@@ -32,9 +32,11 @@ RUN npm install --only=production \
     && npm install
 
 COPY backend ./
+COPY VERSION ../
 
 RUN npm run lint \
-    && npm run test-cov
+    && npm run test-cov \
+    && npm run sync-version
 
 #### Frontend  base ####
 FROM base as frontend
@@ -67,10 +69,10 @@ ENV PORT $PORT
 COPY --from=backend /usr/local/bin/node /usr/local/bin/
 COPY --from=backend /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
 
-COPY backend/package.json ./
+COPY --from=backend /usr/src/app/package.json ./
 COPY --from=backend /usr/src/app/dist  ./node_modules/
-COPY backend/lib ./lib/
-COPY backend/server.js ./
+COPY --from=backend /usr/src/app/lib ./lib/
+COPY --from=backend /usr/src/app/server.js ./
 
 COPY --from=frontend /usr/src/app/dist ./public/
 
