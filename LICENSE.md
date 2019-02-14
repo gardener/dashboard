@@ -314,7 +314,7 @@ Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>
 [MIT License](https://github.com/babel/babel/blob/master/LICENSE)
 
 [clipboard](https://github.com/zenorocha/clipboard.js)
-Copyright (c) 2018 Zeno Rocha <hi@zenorocha.com>
+Copyright (c) 2019 Zeno Rocha <hi@zenorocha.com>
 [MIT License](https://zenorocha.mit-license.org/)
 
 [codemirror](https://github.com/codemirror/CodeMirror)

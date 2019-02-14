@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,6 +56,10 @@ export default {
     },
     currentString: {
       type: String // access the datetime string from outside of the component
+    },
+    withoutPrefixOrSuffix: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -70,9 +74,9 @@ export default {
       let timeString = ''
       if (this.dateTime && this.currentClockTimer) {
         if (this.negativeRefDate) {
-          timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)))
+          timeString = getTimeStringFrom(new Date(this.dateTime), new Date(Math.max(new Date(this.dateTime), this.currentClockTimer.dateObj)), this.withoutPrefixOrSuffix)
         } else {
-          timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime))
+          timeString = getTimeStringTo(new Date(Math.min(new Date(this.dateTime), this.currentClockTimer.dateObj)), new Date(this.dateTime), this.withoutPrefixOrSuffix)
         }
       }
 

@@ -56,7 +56,7 @@ spec:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /healthz
+              path: "{{ regexReplaceAll "https://[^/]*(/.+)?" .Values.issuerUrl "${1}/healthz" }}"
               port: {{ .Values.containerPort }}
               scheme: HTTP
             initialDelaySeconds: 5

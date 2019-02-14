@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ module.exports = io => {
   const cache = getJournalCache()
   cache.onIssue(event => {
     const room = 'issues'
-    logger.debug(`emitting event to room ${room}`)
+    logger.trace(`emitting event to room ${room}`)
     io.of('/journals').to(room).emit('events', {
       kind: 'issues',
       events: [event]
@@ -40,7 +40,7 @@ module.exports = io => {
   cache.onComment(event => {
     const { namespace, name } = event.object.metadata
     const room = `comments_${namespace}/${name}`
-    logger.debug(`emitting event to room ${room}`)
+    logger.trace(`emitting event to room ${room}`)
     io.of('/journals').to(room).emit('events', {
       kind: 'comments',
       events: [event]

@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,9 +75,6 @@ export default {
     },
     idToken () {
       return this.user.id_token || ''
-    },
-    expiresIn () {
-      return moment.duration(this.user.expires_in, 'seconds').humanize()
     },
     expiresAt () {
       return moment(this.user.expires_at * 1000).format('MMMM Do YYYY, H:mm:ss')
