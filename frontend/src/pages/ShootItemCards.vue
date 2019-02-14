@@ -264,6 +264,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Hibernation</v-list-tile-title>
+                <v-list-tile-sub-title>{{hibernationDescription}}</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
@@ -280,6 +281,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Maintenance</v-list-tile-title>
+                <v-list-tile-sub-title>{{maintenanceDescription}}</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <maintenance-start :shootItem="item"></maintenance-start>
@@ -340,10 +342,12 @@ import {
   canLinkToSeed,
   isSelfTerminationWarning,
   isValidTerminationDate,
-  getTimeStringTo
+  getTimeStringTo,
+  isShootHasNoHibernationScheduleWarning
 } from '@/utils'
 
 import 'codemirror/mode/yaml/yaml.js'
+import moment from 'moment-timezone'
 
 export default {
   name: 'shoot-item',
@@ -520,6 +524,25 @@ export default {
     },
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
+    },
+    hibernationDescription () {
+      if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
+        return 'Hibernation schedule configured'
+      } else if (isShootHasNoHibernationScheduleWarning(this.item)) {
+        return 'Please configure a schedule for this non productive cluster'
+      } else {
+        return 'Cluster does not require a hibernation schedule'
+      }
+    },
+    maintenanceDescription () {
+      const timezone = moment.tz.guess()
+      const maintenanceStart = get(this.item, 'spec.maintenance.timeWindow.begin')
+      const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
+      if (momentObj.isValid()) {
+        const maintenanceStr = momentObj.format('HH:mm')
+        return `Start time: ${maintenanceStr} ${timezone}`
+      }
+      return ''
     }
   },
   methods: {

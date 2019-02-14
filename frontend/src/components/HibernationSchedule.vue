@@ -28,7 +28,7 @@ limitations under the License.
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-layout>
-      <v-layout v-if="purposeRequiresHibernationSchedule" row key="9997" align-center class="pt-4">
+      <v-layout v-if="purposeRequiresHibernationSchedule && !this.parseError" row key="9997" align-center class="pt-4">
         <v-flex>
           <v-checkbox
             v-model="confirmNoSchedule"
@@ -40,7 +40,7 @@ limitations under the License.
           </v-checkbox>
         </v-flex>
       </v-layout>
-      <v-layout v-if="parsedScheduleEvents !== null" row key="9999" class="list-complete-item pt-4">
+      <v-layout v-if="!parseError" row key="9999" class="list-complete-item pt-4">
         <v-flex xs12>
           <v-btn
             small
@@ -60,7 +60,7 @@ limitations under the License.
         </v-flex>
       </v-layout>
     </transition-group>
-    <v-layout v-if="parsedScheduleEvents === null" row key="9998" class="pt-4">
+    <v-layout v-if="parseError" row key="9998" class="pt-4">
       <v-alert :value="true" type="warning">
         One ore more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
@@ -101,7 +101,8 @@ export default {
   },
   data () {
     return {
-      parsedScheduleEvents: undefined
+      parsedScheduleEvents: undefined,
+      parseError: false
     }
   },
   computed: {
@@ -151,7 +152,7 @@ export default {
       const parsedEvents = []
       const eventRegex = /^(?<minute>\d{0,2})\s(?<hour>\d{0,2})\s\*\s\*\s(?<weekdays>[0-6,]+)$/
 
-      let error = false
+      this.parseError = false
       forEach(schedules, schedule => {
         const cronStart = get(schedule, 'start')
         const cronEnd = get(schedule, 'end')
@@ -160,23 +161,23 @@ export default {
 
         if (cronStart && !start) {
           console.warn(`Could not parse start crontab line: ${cronStart}`)
-          error = true
+          this.parseError = true
         }
         if (cronEnd && !end) {
           console.warn(`Could not parse end crontab line: ${cronEnd}`)
-          error = true
+          this.parseError = true
         }
         if (start && end) {
           if (start.weekdays !== end.weekdays) {
             console.warn(`Start weekdays (${start.weekdays}) and end weekdays (${end.weekdays}) do not match. This is currently not supported by the dashboard`)
-            error = true
+            this.parseError = true
           }
         }
         const id = this.id()
         const valid = true
         parsedEvents.push({ start, end, id, valid })
       })
-      if (!error) {
+      if (!this.parseError) {
         this.parsedScheduleEvents = parsedEvents
       } else {
         this.parsedScheduleEvents = null
@@ -276,7 +277,7 @@ export default {
             valid = false
           }
         })
-        if (valid) {
+        if (valid && !this.parseError) {
           this.$emit('updateHibernationSchedules', scheduleCrontabs)
         }
       }
