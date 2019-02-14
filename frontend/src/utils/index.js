@@ -345,6 +345,9 @@ export function textColor (color) {
 }
 
 export function purposeRequiresHibernationSchedule (purpose) {
+  if (isEmpty(purpose)) {
+    return true
+  }
   switch (purpose) {
     case 'evaluation':
     case 'development':

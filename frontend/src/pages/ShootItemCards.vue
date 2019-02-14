@@ -529,9 +529,9 @@ export default {
       if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
         return 'Hibernation schedule configured'
       } else if (isShootHasNoHibernationScheduleWarning(this.item)) {
-        return 'Please configure a schedule for this non productive cluster'
+        return 'Please configure a schedule for this non-productive cluster'
       } else {
-        return 'Cluster does not require a hibernation schedule'
+        return 'No hibernation schedule configured'
       }
     },
     maintenanceDescription () {

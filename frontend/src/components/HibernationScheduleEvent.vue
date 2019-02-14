@@ -49,7 +49,7 @@ limitations under the License.
         clearable
       ></v-text-field>
     </v-flex>
-    <v-flex xs2 class="mr-3">
+    <v-flex xs3 class="mr-3">
       <v-autocomplete
         color="cyan darken-2"
         label="Timezone"
@@ -58,7 +58,7 @@ limitations under the License.
         >
       </v-autocomplete>
     </v-flex>
-    <v-flex xs1 class="mr-3">
+    <v-flex xs1>
       <v-btn
         small
         outline

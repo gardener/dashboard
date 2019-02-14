@@ -30,12 +30,12 @@ limitations under the License.
         </v-flex>
         <v-flex shrink>
           <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
-          <v-tooltip top v-if="isShootHasNoHibernationScheduleWarning">
-            <router-link v-if="isShootHasNoHibernationScheduleWarning" slot="activator" class="no-underline" :to="{ name: 'ShootItemHibernationSettings', params: { name: row.name, namespace:row.namespace } }">
-              <v-icon color="cyan darken-2">mdi-calendar-alert</v-icon>
-            </router-link>
-            <span>This non-productive cluster has no hibernation schedule</span>
-          </v-tooltip>
+          <hibernation-schedule-warning
+            v-if="isShootHasNoHibernationScheduleWarning"
+            :name="row.name"
+            :namespace="row.namespace"
+            :purpose="row.purpose">
+          </hibernation-schedule-warning>
         </v-flex>
       </v-layout>
     </td>
@@ -126,6 +126,7 @@ import ShootVersion from '@/components/ShootVersion'
 import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import HibernationScheduleWarning from '@/components/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
@@ -151,6 +152,7 @@ export default {
     JournalLabels,
     RetryOperation,
     SelfTerminationWarning,
+    HibernationScheduleWarning,
     AccountAvatar,
     DeleteCluster
   },
@@ -277,9 +279,5 @@ export default {
 
   .nowrap {
     white-space: nowrap;
-  }
-
-  .no-underline {
-    text-decoration: none;
   }
 </style>

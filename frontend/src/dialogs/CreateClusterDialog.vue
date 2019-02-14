@@ -364,10 +364,6 @@ limitations under the License.
 
           <v-card flat>
             <v-container fluid>
-              <v-layout row>
-                <span class="hibernation_title_text">Non-productive clusters get a hibernation schedule by default. This saves costs by automatically hibernating the cluster during non working hours.</span>
-              </v-layout>
-              <v-divider class="mt-2"></v-divider>
               <v-layout row wrap>
                 <hibernation-schedule
                   ref="hibernationSchedule"
