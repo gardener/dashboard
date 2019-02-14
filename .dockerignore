@@ -8,6 +8,7 @@
 !backend/.nycrc
 !backend/server.js
 !backend/lib
+!backend/bin
 !backend/test
 
 # include frontend folder

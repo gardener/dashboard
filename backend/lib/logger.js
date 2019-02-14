@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,6 +51,11 @@ class Logger {
   log (msg, ...args) {
     if (!silent && level <= LEVELS.warn) {
       console.log(this.ts + ' - \u001b[90mlog\u001b[39m: ' + msg, ...args)
+    }
+  }
+  trace (msg, ...args) {
+    if (!silent && level <= LEVELS.trace) {
+      console.trace(this.ts + ' - \u001b[36mtrace\u001b[39m: ' + msg, ...args)
     }
   }
   debug (msg, ...args) {

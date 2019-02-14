@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -193,7 +193,9 @@ class ShootsSubscription extends AbstractSubscription {
     })
   }
 
-  subscribeShoots ({ namespace, filter }) {
+  async subscribeShoots ({ namespace, filter }) {
+    // immediately clear, also if not authenticated to avoid outdated content is shown to the user
+    await store.dispatch('clearShoots')
     this.subscribeOnNextTrigger({ namespace, filter })
     this.subscribe()
   }
@@ -201,10 +203,7 @@ class ShootsSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, filter } = this.subscribeTo
 
-    await Promise.all([
-      store.dispatch('clearShoots'),
-      store.dispatch('setShootsLoading')
-    ])
+    await store.dispatch('setShootsLoading')
     if (namespace === '_all') {
       this.socket.emit('subscribeAllShoots', { filter })
     } else if (namespace) {

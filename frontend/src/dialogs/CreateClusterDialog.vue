@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -835,11 +835,9 @@ export default {
                     '10.250.112.0/22'
                   ],
                   nodes: '10.250.0.0/16',
-                  pods: '100.96.0.0/11',
                   public: [
                     '10.250.96.0/22'
                   ],
-                  services: '100.64.0.0/13',
                   workers: [
                     '10.250.0.0/19'
                   ]
@@ -859,8 +857,6 @@ export default {
                     cidr: '10.250.0.0/16'
                   },
                   nodes: '10.250.0.0/19',
-                  pods: '100.96.0.0/11',
-                  services: '100.64.0.0/13',
                   public: '10.250.96.0/22',
                   workers: '10.250.0.0/19'
                 },
@@ -875,8 +871,6 @@ export default {
               this.infrastructureData = {
                 networks: {
                   nodes: '10.250.0.0/19',
-                  pods: '100.96.0.0/11',
-                  services: '100.64.0.0/13',
                   workers: [
                     '10.250.0.0/19'
                   ]
@@ -893,8 +887,6 @@ export default {
               this.infrastructureData = {
                 networks: {
                   nodes: '10.250.0.0/19',
-                  pods: '100.96.0.0/11',
-                  services: '100.64.0.0/13',
                   workers: [
                     '10.250.0.0/19'
                   ]
@@ -914,8 +906,6 @@ export default {
                     cidr: '10.250.0.0/16'
                   },
                   nodes: '10.250.0.0/16',
-                  pods: '100.96.0.0/11',
-                  services: '100.64.0.0/13',
                   workers: [
                     '10.250.0.0/19'
                   ]

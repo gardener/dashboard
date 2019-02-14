@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ function init () {
 
   function removeIssue ({ issue }) {
     const issueNumber = issue.metadata.number
-    logger.debug('removing issue', issueNumber, 'and comments')
+    logger.trace('removing issue', issueNumber, 'and comments')
 
     const comments = getCommentsForIssueCache({ issueNumber })
 
@@ -108,7 +108,7 @@ function init () {
 
   function removeComment ({ issueNumber, comment }) {
     const identifier = comment.metadata.id
-    logger.debug('removing comment', identifier, 'of issue', issueNumber)
+    logger.trace('removing comment', identifier, 'of issue', issueNumber)
     const commentsForIssuesCache = getCommentsForIssueCache({ issueNumber })
     _.unset(commentsForIssuesCache, identifier)
     emitCommmentDeleted(comment)
@@ -119,14 +119,14 @@ function init () {
     const cachedItem = cachedList[identifier]
     if (cachedItem) {
       if (isCachedItemOlder(cachedItem, item)) {
-        logger.debug('updating', kind, identifier)
+        logger.trace('updating', kind, identifier)
         cachedList[identifier] = item
         emitModified(kind, item)
       } else {
         logger.warn(`skipped updating ${kind} with id ${identifier} as it was older`)
       }
     } else {
-      logger.debug('adding new', kind, identifier)
+      logger.trace('adding new', kind, identifier)
       cachedList[identifier] = item
       emitAdded(kind, item)
     }
