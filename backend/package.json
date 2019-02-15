@@ -26,6 +26,7 @@
   "dependencies": {
     "@godaddy/terminus": "^4.1.0",
     "@octokit/rest": "^15.9.4",
+    "better-queue": "^3.8.10",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "es6-error": "^4.1.1",

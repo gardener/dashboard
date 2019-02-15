@@ -74,10 +74,18 @@ async function getShootIngressDomain (shoot) {
 
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  const seedShootNS = _.get(shoot, 'status.technicalID')
 
+  const coreClient = await Core(user)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, user, seed })
+
+  return { seed, seedKubeconfig, seedShootNS }
+}
+
+async function getSeedKubeconfig ({ coreClient, seed }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await Core(user).ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
+  const seedSecret = await coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
     .catch(err => {
       if (err.code === 404) {
         return
@@ -89,9 +97,7 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
   }
 
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  const seedShootNS = _.get(shoot, 'status.technicalID')
-
-  return { seed, seedKubeconfig, seedShootNS }
+  return seedKubeconfig
 }
 
 async function getProjectNameFromNamespace (namespace) {
@@ -110,6 +116,7 @@ module.exports = {
   getCloudProviderKind,
   shootHasIssue,
   getShootIngressDomain,
+  getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,
   _config: config

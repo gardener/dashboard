@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
@@ -16,22 +17,14 @@
 
 'use strict'
 
-const garden = require('../kubernetes').garden()
-const { cacheResource } = require('./common')
-const { getSeeds } = require('../cache')
-const logger = require('../logger')
-const { registerHandler } = require('./common')
-const { bootstrapSeed } = require('../utils/terminalBootstrap')
+const _ = require('lodash')
 
-module.exports = io => {
-  const emitter = garden.seeds.watch()
-  cacheResource(emitter, getSeeds(), 'metadata.name')
-  registerHandler(emitter, async function (event) {
-    if (event.type === 'ERROR') {
-      logger.error('shoots event error', event.object)
-    } else if (event.type === 'ADDED') {
-      const seed = event.object
-      await bootstrapSeed({ seed })
-    }
-  })
+const isSeedNotProtectedAndVisible = item => {
+  const seedProtected = _.get(item, 'spec.protected', true)
+  const seedVisible = _.get(item, 'spec.visible', false)
+  return !seedProtected && seedVisible
+}
+
+module.exports = {
+  isSeedNotProtectedAndVisible
 }

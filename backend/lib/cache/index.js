@@ -15,6 +15,7 @@
 //
 
 const _ = require('lodash')
+const { isSeedNotProtectedAndVisible } = require('../utils')
 
 const cloudProfiles = []
 const seeds = []
@@ -52,12 +53,7 @@ module.exports = {
     return cache.getSeeds()
   },
   getVisibleAndNotProtectedSeeds () {
-    const predicate = item => {
-      const seedProtected = _.get(item, 'spec.protected', true)
-      const seedVisible = _.get(item, 'spec.visible', false)
-      return !seedProtected && seedVisible
-    }
-    return _.filter(cache.getSeeds(), predicate)
+    return _.filter(cache.getSeeds(), isSeedNotProtectedAndVisible)
   },
   getDomains () {
     return cache.getDomains()

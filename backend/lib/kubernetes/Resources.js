@@ -57,6 +57,11 @@ module.exports = {
     kind: 'ServiceAccount',
     apiVersion: 'v1'
   },
+  CronJob: {
+    name: 'cronjobs',
+    kind: 'CronJob',
+    apiVersion: 'batch/v1beta1'
+  },
   Shoot: {
     name: 'shoots',
     kind: 'Shoot',

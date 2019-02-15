@@ -215,10 +215,10 @@ async function getRequiredResourcesAndClients ({ user, namespace, name }) {
   const { seed, seedKubeconfig, seedShootNS } = seedKubeconfigForShoot
 
   const fromSeedKubeconfig = kubernetes.fromKubeconfig(seedKubeconfig)
-  const seedK8sCoreClient = kubernetes.core(fromSeedKubeconfig)
-  const seedK8sRbacClient = kubernetes.rbac(fromSeedKubeconfig)
+  const seedCoreClient = kubernetes.core(fromSeedKubeconfig)
+  const seedRbacClient = kubernetes.rbac(fromSeedKubeconfig)
 
-  return { seed, seedShootNS, seedK8sCoreClient, seedK8sRbacClient }
+  return { seed, seedShootNS, seedCoreClient, seedRbacClient }
 }
 
 async function initializeGardenTerminalObject ({ namespace }) {
@@ -354,10 +354,10 @@ exports.create = async function ({ user, namespace, name, target }) {
     rbacClient = rbac()
     targetNamespace = namespace
   } else {
-    const { seed, seedShootNS, seedK8sCoreClient, seedK8sRbacClient } = await getRequiredResourcesAndClients({ user, namespace, name })
+    const { seed, seedShootNS, seedCoreClient, seedRbacClient } = await getRequiredResourcesAndClients({ user, namespace, name })
     terminalInfo = await initializeSeedTerminalObject({ user, namespace, seed, seedShootNS })
-    coreClient = seedK8sCoreClient
-    rbacClient = seedK8sRbacClient
+    coreClient = seedCoreClient
+    rbacClient = seedRbacClient
     targetNamespace = seedShootNS
   }
 
