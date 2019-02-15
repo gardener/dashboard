@@ -17,9 +17,6 @@ resources:
   requests:
     cpu: 100m
     memory: 64Mi
-hosts:
-  - identity.ingress.example.org
-  - identity.example.org
 issuerUrl: https://identity.ingress.example.org
 
 #kubeconfig: kubeconfig-to-external-cluster (optionally, if not given in-cluster config is used)

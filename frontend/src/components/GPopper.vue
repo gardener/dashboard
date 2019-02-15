@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,12 +41,14 @@ limitations under the License.
                 &nbsp;
               </template>
               <lazy-component @show="showPlaceholder=false">
-                <time-string :dateTime="time" :pointInTime="-1"></time-string>
+                <span v-if="!!time.caption">{{time.caption}}</span>
+                <time-string :dateTime="time.dateTime" :pointInTime="-1"></time-string>
               </lazy-component>
             </div>
           </div>
         </v-card-text>
       </v-card>
+      <lazy-component @show="emitRendered()"></lazy-component>
     </div>
     <template slot="reference">
       <slot name="popperRef"></slot>
@@ -72,6 +74,9 @@ export default {
     TimeString
   },
   props: {
+    value: {
+      type: Boolean
+    },
     popperKey: {
       type: String,
       required: true
@@ -89,7 +94,7 @@ export default {
       required: false
     },
     time: {
-      type: String
+      type: Object
     },
     placement: {
       type: String,
@@ -131,6 +136,9 @@ export default {
         data.arrowStyles = Object.assign(data.arrowStyles, { borderColor })
       }
       return data
+    },
+    emitRendered () {
+      this.$emit('rendered')
     }
   },
   created () {

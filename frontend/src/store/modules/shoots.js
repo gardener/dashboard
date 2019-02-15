@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
 import join from 'lodash/join'
+import head from 'lodash/head'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -264,6 +265,7 @@ const getRawVal = (item, column) => {
 const getSortVal = (item, sortBy) => {
   const value = getRawVal(item, sortBy)
   const spec = item.spec
+  const status = item.status
   switch (sortBy) {
     case 'purpose':
       switch (value) {
@@ -308,6 +310,10 @@ const getSortVal = (item, sortBy) => {
         return 500
       }
       return 700
+    case 'readiness':
+      const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
+      const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
+      return lastErrorTransitionTime
     default:
       return toLower(value)
   }
@@ -321,24 +327,46 @@ const setSortedItems = (state, rootState) => {
   const sortBy = get(state, 'sortParams.sortBy')
   const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
   if (sortBy) {
+    const sortbyNameAsc = (a, b) => {
+      if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
+        return 1
+      } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
+        return -1
+      }
+      return 0
+    }
+    const inverse = descending === 'desc' ? -1 : 1
     if (sortBy === 'k8sVersion') {
       const sortedShoots = shoots(state)
       sortedShoots.sort((a, b) => {
         const versionA = getRawVal(a, sortBy)
         const versionB = getRawVal(b, sortBy)
 
-        const inverse = descending === 'desc' ? -1 : 1
         if (semver.gt(versionA, versionB)) {
           return 1 * inverse
         } else if (semver.lt(versionA, versionB)) {
           return -1 * inverse
         } else {
-          if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
-            return 1
-          } else if (getRawVal(a, 'name') < getRawVal(b, 'name')) {
-            return -1
-          }
-          return 0
+          return sortbyNameAsc(a, b)
+        }
+      })
+      state.sortedShoots = sortedShoots
+    } else if (sortBy === 'readiness') {
+      const sortedShoots = shoots(state)
+      sortedShoots.sort((a, b) => {
+        const readinessA = getSortVal(a, sortBy)
+        const readinessB = getSortVal(b, sortBy)
+
+        if (readinessA === readinessB) {
+          return sortbyNameAsc(a, b)
+        } else if (!readinessA) {
+          return 1
+        } else if (!readinessB) {
+          return -1
+        } else if (readinessA > readinessB) {
+          return 1 * inverse
+        } else {
+          return -1 * inverse
         }
       })
       state.sortedShoots = sortedShoots

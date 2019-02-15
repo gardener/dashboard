@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ function registerHandler (emitter, handler) {
         const metadata = event.object.metadata
         const name = get(metadata, 'name')
         const namespace = get(metadata, 'namespace', '')
-        logger.debug('%s to %s: %s/%s', type, emitter.resourceName, namespace, name)
+        logger.trace('%s to %s: %s/%s', type, emitter.resourceName, namespace, name)
         handler(event)
       } else {
         const status = event.object
@@ -84,7 +84,7 @@ function cacheResource (resourceEmitter, cache, keyPath) {
         cache.splice(index, 1)
       }
     }
-    logger.debug(resourceEmitter.resourceName, cache.length)
+    logger.trace(resourceEmitter.resourceName, cache.length)
   })
 }
 exports.cacheResource = cacheResource

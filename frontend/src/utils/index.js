@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -199,15 +199,15 @@ export function getTimestampFormatted (timestamp) {
   return moment(timestamp).format('lll')
 }
 
-export function getTimeStringFrom (time, fromTime) {
+export function getTimeStringFrom (time, fromTime, withoutSuffix = false) {
   if (!time) {
     return undefined
   } else {
-    return moment(time).from(fromTime)
+    return moment(time).from(fromTime, withoutSuffix)
   }
 }
 
-export function getTimeStringTo (time, toTime) {
+export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   if (!time) {
     return undefined
   } else {
@@ -215,7 +215,7 @@ export function getTimeStringTo (time, toTime) {
       // Equal dates result in text "a few seconds ago", this is not we want here...
       toTime.setSeconds(toTime.getSeconds() + 1)
     }
-    return moment(time).to(toTime)
+    return moment(time).to(toTime, withoutPrefix)
   }
 }
 
