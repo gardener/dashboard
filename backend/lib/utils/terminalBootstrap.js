@@ -198,7 +198,7 @@ function bootstrapSeed ({ seed }) {
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
     return
   }
-  if (isSeedNotProtectedAndVisible(seed)) {
+  if (!isSeedNotProtectedAndVisible(seed)) {
     return
   }
 

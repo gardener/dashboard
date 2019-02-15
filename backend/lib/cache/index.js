@@ -15,7 +15,7 @@
 //
 
 const _ = require('lodash')
-const { isSeedNotProtectedAndVisible } = require('../utils')
+const { isSeedNotProtectedAndVisible } = require('../utils/seeds')
 
 const cloudProfiles = []
 const seeds = []
