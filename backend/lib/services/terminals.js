@@ -20,7 +20,11 @@ const _ = require('lodash')
 
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
-const { decodeBase64, getSeedKubeconfigForShoot, getShootIngressDomain } = require('../utils')
+const { decodeBase64,
+  getSeedKubeconfigForShoot,
+  getShootIngressDomain,
+  createOwnerRefArrayForServiceAccount
+} = require('../utils')
 const config = require('../config')
 const authorization = require('./authorization')
 const shoots = require('./shoots')
@@ -292,20 +296,6 @@ async function createAttachServiceAccountResource ({ coreClient, targetNamespace
   return coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, user, target, labels, annotations }) })
 }
 
-function createOwnerRefArrayForAttachSA (attachServiceAccountResource) {
-  const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
-  const uid = _.get(attachServiceAccountResource, 'metadata.uid')
-  return [
-    {
-      apiVersion: attachServiceAccountResource.apiVersion,
-      controller: true,
-      kind: attachServiceAccountResource.kind,
-      name: attachServiceAccountName,
-      uid
-    }
-  ]
-}
-
 async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, identifier, user, target, ownerReferences }) {
   // create service account used by terminal pod for control plane access
   const adminServiceAccountName = `terminal-${identifier}`
@@ -374,7 +364,7 @@ exports.create = async function ({ user, namespace, name, target }) {
     attachServiceAccountResource = await createAttachServiceAccountResource({ coreClient, targetNamespace, target, username })
 
     // all resources created below get the attach service account as owner ref
-    const ownerReferences = createOwnerRefArrayForAttachSA(attachServiceAccountResource)
+    const ownerReferences = createOwnerRefArrayForServiceAccount(attachServiceAccountResource)
 
     const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
     const identifier = _.replace(attachServiceAccountName, 'terminal-attach-', '')

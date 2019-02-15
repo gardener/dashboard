@@ -109,6 +109,20 @@ async function getProjectNameFromNamespace (namespace) {
   return name
 }
 
+function createOwnerRefArrayForServiceAccount (serviceAccountResource) {
+  const serviceAccountName = _.get(serviceAccountResource, 'metadata.name')
+  const uid = _.get(serviceAccountResource, 'metadata.uid')
+  return [
+    {
+      apiVersion: serviceAccountResource.apiVersion,
+      controller: true,
+      kind: serviceAccountResource.kind,
+      name: serviceAccountName,
+      uid
+    }
+  ]
+}
+
 module.exports = {
   resolve,
   decodeBase64,
@@ -119,5 +133,6 @@ module.exports = {
   getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,
+  createOwnerRefArrayForServiceAccount,
   _config: config
 }

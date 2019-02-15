@@ -21,8 +21,10 @@ const Queue = require('better-queue')
 const _ = require('lodash')
 const logger = require('../logger')
 const config = require('../config')
-const { getSeedKubeconfig } = require('../utils')
-const { isSeedNotProtectedAndVisible } = require('../utils/seeds')
+const {
+  getSeedKubeconfig,
+  createOwnerRefArrayForServiceAccount
+} = require('../utils')
 const kubernetes = require('../kubernetes')
 const {
   toClusterRoleResource,
@@ -44,7 +46,7 @@ const CLUSTER_ROLE_BINDING_NAME_CLEANUP = CLUSTER_ROLE_NAME_CLEANUP
 const SERVICEACCOUNT_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP_NAME
 const CRONJOB_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP_NAME
 
-async function replaceClusterroleAttach ({ rbacClient }) {
+async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
   const name = 'garden.sapcloud.io:dashboard-terminal-attach'
   const component = COMPONENT_TERMINAL
   const rules = [
@@ -60,10 +62,10 @@ async function replaceClusterroleAttach ({ rbacClient }) {
       ]
     }
   ]
-  return rbacClient.clusterrole.put({ name, body: toClusterRoleResource({ name, component, rules }) })
+  return rbacClient.clusterrole.put({ name, body: toClusterRoleResource({ name, component, rules, ownerReferences }) })
 }
 
-async function replaceClusterroleCleanup ({ rbacClient }) {
+async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
   const name = CLUSTER_ROLE_NAME_CLEANUP
   const component = COMPONENT_TERMINAL_CLEANUP_NAME
   const rules = [
@@ -80,15 +82,15 @@ async function replaceClusterroleCleanup ({ rbacClient }) {
       ]
     }
   ]
-  return rbacClient.clusterrole.put({ name, body: toClusterRoleResource({ name, component, rules }) })
+  return rbacClient.clusterrole.put({ name, body: toClusterRoleResource({ name, component, rules, ownerReferences }) })
 }
 
-async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespace }) {
+async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespace, ownerReferences }) {
   const name = CLUSTER_ROLE_BINDING_NAME_CLEANUP
   const clusterRoleName = CLUSTER_ROLE_NAME_CLEANUP
   const component = COMPONENT_TERMINAL_CLEANUP_NAME
 
-  return rbacClient.clusterrolebinding.put({ name, body: toClusterRoleBindingResource({ name, clusterRoleName, component, saName, saNamespace }) })
+  return rbacClient.clusterrolebinding.put({ name, body: toClusterRoleBindingResource({ name, clusterRoleName, component, saName, saNamespace, ownerReferences }) })
 }
 
 async function replaceServiceAccountCleanup ({ coreClient }) {
@@ -102,7 +104,7 @@ async function replaceServiceAccountCleanup ({ coreClient }) {
   return replaceResource({ client, name, body })
 }
 
-async function replaceCronJobCleanup ({ batchClient, saName }) {
+async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) {
   const name = CRONJOB_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
   const component = COMPONENT_TERMINAL_CLEANUP_NAME
@@ -138,7 +140,7 @@ async function replaceCronJobCleanup ({ batchClient, saName }) {
     }
   }
 
-  const body = toCronjobResource({ name, component, cronSpec })
+  const body = toCronjobResource({ name, component, cronSpec, ownerReferences })
   const client = batchClient.ns(namespace).cronjob
 
   return replaceResource({ client, name, body })
@@ -174,11 +176,15 @@ var bootstrapQueue = new Queue(async function (seed, cb) {
     const seedRbacClient = kubernetes.rbac(fromSeedKubeconfig)
     const seedBatchClient = kubernetes.batch(fromSeedKubeconfig)
 
-    await replaceClusterroleCleanup({ rbacClient: seedRbacClient })
-    await replaceClusterroleAttach({ rbacClient: seedRbacClient })
-    const { metadata: { name: saName, namespace: saNamespace } } = await replaceServiceAccountCleanup({ coreClient: seedCoreClient })
-    await replaceClusterroleBindingCleanup({ rbacClient: seedRbacClient, saName, saNamespace })
-    await replaceCronJobCleanup({ batchClient: seedBatchClient, saName })
+    // TODO maybe it makes more sense that the cleanup component itself sets up the required resources
+    const serviceAccountResource = await replaceServiceAccountCleanup({ coreClient: seedCoreClient })
+    const { metadata: { name: saName, namespace: saNamespace } } = serviceAccountResource
+    const ownerReferences = createOwnerRefArrayForServiceAccount(serviceAccountResource)
+    await replaceClusterroleCleanup({ rbacClient: seedRbacClient, ownerReferences })
+    await replaceClusterroleBindingCleanup({ rbacClient: seedRbacClient, saName, saNamespace, ownerReferences })
+    await replaceCronJobCleanup({ batchClient: seedBatchClient, saName, ownerReferences })
+
+    await replaceClusterroleAttach({ rbacClient: seedRbacClient, ownerReferences }) // TODO use same owner ref as cleanup resources??
 
     cb(null, null)
   } catch (error) {
@@ -188,7 +194,7 @@ var bootstrapQueue = new Queue(async function (seed, cb) {
 }, options)
 
 function bootstrapSeed ({ seed }) {
-  const terminalBoostrapDisabled = _.get(config, 'terminal.bootstrapResourcesDisabled', false)
+  const terminalBoostrapDisabled = _.get(config, 'terminal.bootstrapResourcesDisabled', true) // TODO enable by default
   if (terminalBoostrapDisabled) {
     return
   }
@@ -196,9 +202,6 @@ function bootstrapSeed ({ seed }) {
   if (isBootstrapDisabledForSeed) {
     const name = _.get(seed, 'metadata.name')
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
-    return
-  }
-  if (!isSeedNotProtectedAndVisible(seed)) {
     return
   }
 
