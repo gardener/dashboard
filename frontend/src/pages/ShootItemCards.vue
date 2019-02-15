@@ -268,9 +268,6 @@ limitations under the License.
               <v-list-tile-action>
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
               </v-list-tile-action>
-              <v-list-tile-action>
-                <maintenance-configuration :shootItem="item"></maintenance-configuration>
-              </v-list-tile-action>
             </v-list-tile>
 
             <v-divider class="my-2" inset></v-divider>
@@ -282,10 +279,10 @@ limitations under the License.
                 <v-list-tile-title>Maintenance</v-list-tile-title>
               </v-list-tile-content>
               <v-list-tile-action>
-                <maintenance-start :shootItem="item"></maintenance-start>
+                <maintenance-configuration :shootItem="item"></maintenance-configuration>
               </v-list-tile-action>
               <v-list-tile-action>
-                <maintenance-configuration :shootItem="item"></maintenance-configuration>
+                <maintenance-start :shootItem="item"></maintenance-start>
               </v-list-tile-action>
             </v-list-tile>
 
