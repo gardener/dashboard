@@ -23,6 +23,7 @@ const logger = require('../logger')
 const config = require('../config')
 const {
   getSeedKubeconfig,
+  getShootIngressDomainForSeed,
   createOwnerRefArrayForServiceAccount
 } = require('../utils')
 const kubernetes = require('../kubernetes')
@@ -30,21 +31,27 @@ const {
   toClusterRoleResource,
   toClusterRoleBindingResource,
   toServiceAccountResource,
-  toCronjobResource
+  toCronjobResource,
+  toIngressResource
 } = require('./terminalResources')
+const shoots = require('../services/shoots')
 
 function core () {
   return kubernetes.core()
 }
 
+function garden () {
+  return kubernetes.garden()
+}
+
 const COMPONENT_TERMINAL = 'dashboard-terminal'
-const COMPONENT_TERMINAL_CLEANUP_NAME = 'dashboard-terminal-cleanup'
+const COMPONENT_TERMINAL_CLEANUP = 'dashboard-terminal-cleanup'
 
 const GARDEN_NAMESPACE = 'garden'
 const CLUSTER_ROLE_NAME_CLEANUP = 'garden.sapcloud.io:dashboard-terminal-cleanup'
 const CLUSTER_ROLE_BINDING_NAME_CLEANUP = CLUSTER_ROLE_NAME_CLEANUP
-const SERVICEACCOUNT_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP_NAME
-const CRONJOB_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP_NAME
+const SERVICEACCOUNT_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP
+const CRONJOB_NAME_CLEANUP = COMPONENT_TERMINAL_CLEANUP
 
 async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
   const name = 'garden.sapcloud.io:dashboard-terminal-attach'
@@ -67,7 +74,7 @@ async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
 
 async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
   const name = CLUSTER_ROLE_NAME_CLEANUP
-  const component = COMPONENT_TERMINAL_CLEANUP_NAME
+  const component = COMPONENT_TERMINAL_CLEANUP
   const rules = [
     {
       apiGroups: [
@@ -88,7 +95,7 @@ async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
 async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespace, ownerReferences }) {
   const name = CLUSTER_ROLE_BINDING_NAME_CLEANUP
   const clusterRoleName = CLUSTER_ROLE_NAME_CLEANUP
-  const component = COMPONENT_TERMINAL_CLEANUP_NAME
+  const component = COMPONENT_TERMINAL_CLEANUP
 
   return rbacClient.clusterrolebinding.put({ name, body: toClusterRoleBindingResource({ name, clusterRoleName, component, saName, saNamespace, ownerReferences }) })
 }
@@ -96,7 +103,7 @@ async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespa
 async function replaceServiceAccountCleanup ({ coreClient }) {
   const name = SERVICEACCOUNT_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
-  const component = COMPONENT_TERMINAL_CLEANUP_NAME
+  const component = COMPONENT_TERMINAL_CLEANUP
 
   const body = toServiceAccountResource({ name, component })
   const client = coreClient.ns(namespace).serviceaccounts
@@ -107,12 +114,12 @@ async function replaceServiceAccountCleanup ({ coreClient }) {
 async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) {
   const name = CRONJOB_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
-  const component = COMPONENT_TERMINAL_CLEANUP_NAME
+  const component = COMPONENT_TERMINAL_CLEANUP
   const image = 'psutter/gardener-cleanup-terminal:latest' // TODO
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
 
-  const cronSpec = {
+  const spec = {
     concurrencyPolicy: 'Forbid',
     schedule,
     jobTemplate: {
@@ -121,7 +128,7 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
           spec: {
             containers: [
               {
-                name: COMPONENT_TERMINAL_CLEANUP_NAME,
+                name: COMPONENT_TERMINAL_CLEANUP,
                 image,
                 imagePullPolicy: 'Always',
                 env: [
@@ -140,8 +147,53 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
     }
   }
 
-  const body = toCronjobResource({ name, component, cronSpec, ownerReferences })
+  const body = toCronjobResource({ name, component, spec, ownerReferences })
   const client = batchClient.ns(namespace).cronjob
+
+  return replaceResource({ client, name, body })
+}
+
+async function replaceIngressApiServer ({ extensionClient, namespace, host, ownerReferences }) {
+  const name = 'apiserver'
+  const component = COMPONENT_TERMINAL
+
+  const annotations = {
+    'certmanager.k8s.io/cluster-issuer': 'lets-encrypt',
+    'kubernetes.io/ingress.class': 'nginx',
+    'certmanager.k8s.io/acme-challenge-type': 'dns01',
+    'certmanager.k8s.io/acme-dns01-provider': 'route53',
+    'nginx.ingress.kubernetes.io/backend-protocol': 'HTTPS'
+  }
+
+  const spec = {
+    rules: [
+      {
+        host,
+        http: {
+          paths: [
+            {
+              backend: {
+                serviceName: 'kube-apiserver',
+                servicePort: 443
+              },
+              path: '/'
+            }
+          ]
+        }
+      }
+    ],
+    tls: [
+      {
+        hosts: [
+          host
+        ],
+        secretName: 'apiserver-tls'
+      }
+    ]
+  }
+
+  const body = toIngressResource({ name, component, annotations, spec, ownerReferences })
+  const client = extensionClient.ns(namespace).ingress
 
   return replaceResource({ client, name, body })
 }
@@ -185,6 +237,36 @@ var bootstrapQueue = new Queue(async function (seed, cb) {
     await replaceCronJobCleanup({ batchClient: seedBatchClient, saName, ownerReferences })
 
     await replaceClusterroleAttach({ rbacClient: seedRbacClient, ownerReferences }) // TODO use same owner ref as cleanup resources??
+
+    // replace ingress for api-server on soil in seedShootNS
+    let seedShootResource
+    try {
+      seedShootResource = await shoots.read({ gardenClient: garden(), namespace: 'garden', name })
+    } catch (err) {
+      if (err.code !== 404) {
+        throw err
+      }
+      // else (404): there is no shoot resource for seed, which means it's the soil
+    }
+    if (seedShootResource) {
+      // fetch soil's seed resource
+      const soilName = _.get(seedShootResource, 'spec.cloud.seed')
+      const soilSeedResource = await garden().seeds.get({ name: soilName })
+
+      // calculate ingress domain
+      const soilIngressDomain = await getShootIngressDomainForSeed(seedShootResource, soilSeedResource)
+      const apiserverHost = `api.${soilIngressDomain}`
+
+      // get client
+      const seed = soilSeedResource
+      const soilKubeconfig = await getSeedKubeconfig({ coreClient, seed })
+      const fromSoilKubeconfig = kubernetes.fromKubeconfig(soilKubeconfig)
+      const soilExtensionClient = kubernetes.extensions(fromSoilKubeconfig)
+
+      // replace ingress api-server resource
+      const seedShootNS = _.get(seedShootResource, 'status.technicalID')
+      await replaceIngressApiServer({ extensionClient: soilExtensionClient, namespace: seedShootNS, host: apiserverHost }) // TODO owner reference ?
+    }
 
     cb(null, null)
   } catch (error) {

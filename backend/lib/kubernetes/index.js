@@ -109,6 +109,9 @@ module.exports = {
     return new Apps(credentials(options))
   },
   extensions (options) {
+    options = assign(options, {
+      version: 'v1beta1'
+    })
     return new Extensions(credentials(options))
   },
   rbac (options) {

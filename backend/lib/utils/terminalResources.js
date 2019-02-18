@@ -93,7 +93,7 @@ function toServiceAccountResource ({
 function toCronjobResource ({
   name,
   component,
-  cronSpec,
+  spec,
   annotations = {},
   ownerReferences = [],
   labels = {}
@@ -104,12 +104,30 @@ function toCronjobResource ({
 
   const metadata = { name, labels, annotations, ownerReferences }
 
-  return { apiVersion, kind, metadata, spec: cronSpec }
+  return { apiVersion, kind, metadata, spec }
+}
+
+function toIngressResource ({
+  name,
+  component,
+  spec,
+  annotations = {},
+  ownerReferences = [],
+  labels = {}
+}) {
+  const apiVersion = Resources.Ingress.apiVersion
+  const kind = Resources.Ingress.kind
+  labels.component = component
+
+  const metadata = { name, labels, annotations, ownerReferences }
+
+  return { apiVersion, kind, metadata, spec }
 }
 
 module.exports = {
   toClusterRoleResource,
   toClusterRoleBindingResource,
   toServiceAccountResource,
-  toCronjobResource
+  toCronjobResource,
+  toIngressResource
 }

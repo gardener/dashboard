@@ -63,6 +63,10 @@ function shootHasIssue (shoot) {
 async function getShootIngressDomain (shoot) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
+  return getShootIngressDomainForSeed(shoot, seed)
+}
+
+async function getShootIngressDomainForSeed (shoot, seed) {
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
 
@@ -76,8 +80,8 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
   const seedShootNS = _.get(shoot, 'status.technicalID')
 
-  const coreClient = await Core(user)
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, user, seed })
+  const coreClient = Core(user)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
 
   return { seed, seedKubeconfig, seedShootNS }
 }
@@ -130,6 +134,7 @@ module.exports = {
   getCloudProviderKind,
   shootHasIssue,
   getShootIngressDomain,
+  getShootIngressDomainForSeed,
   getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,

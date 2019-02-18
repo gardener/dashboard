@@ -57,6 +57,11 @@ module.exports = {
     kind: 'ServiceAccount',
     apiVersion: 'v1'
   },
+  Ingress: {
+    name: 'ingresses',
+    kind: 'Ingress',
+    apiVersion: 'extensions/v1beta1'
+  },
   CronJob: {
     name: 'cronjobs',
     kind: 'CronJob',
