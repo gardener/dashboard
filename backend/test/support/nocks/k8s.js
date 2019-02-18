@@ -214,16 +214,16 @@ function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, b
   return {metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret}
 }
 
-function validateCanDeleteShootsInAllNamespacesRequest (selfSubjectAccessReview) {
+function validateCanGetSecretsInAllNamespacesRequest (selfSubjectAccessReview) {
   const {namespace, verb, resource, group} = selfSubjectAccessReview.spec.resourceAttributes
-  return !namespace && group === 'garden.sapcloud.io' && resource === 'shoots' && verb === 'delete'
+  return !namespace && group === '' && resource === 'secrets' && verb === 'get'
 }
 
-function canDeleteShootsInAllNamespacesReply (uri, selfSubjectAccessReview) {
+function canGetSecretsInAllNamespacesReply (uri, selfSubjectAccessReview) {
   const [, token] = _.split(this.req.headers.authorization, ' ', 2)
   const payload = jwt.decode(token)
   const allowed = _.includes(gardenAdministrators, payload.email)
-  return [200, _.assign({}, selfSubjectAccessReview, {status: {allowed}})]
+  return [200, _.assign({}, selfSubjectAccessReview, { status: { allowed } })]
 }
 
 function readProject (namespace) {
@@ -675,8 +675,8 @@ const stub = {
   getProjects ({bearer}) {
     return [
       nockWithAuthorization(bearer)
-        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
-        .reply(canDeleteShootsInAllNamespacesReply),
+        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanGetSecretsInAllNamespacesRequest)
+        .reply(canGetSecretsInAllNamespacesReply),
       nockWithAuthorization(auth.bearer)
         .get('/apis/garden.sapcloud.io/v1beta1/projects')
         .reply(200, {

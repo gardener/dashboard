@@ -108,7 +108,7 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
   const name = CRONJOB_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
   const component = COMPONENT_TERMINAL_CLEANUP_NAME
-  const image = 'psutter/gardener-cleanup-terminal:latest' // TODO 
+  const image = 'psutter/gardener-cleanup-terminal:latest' // TODO
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
 
