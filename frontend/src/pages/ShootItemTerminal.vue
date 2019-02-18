@@ -230,7 +230,6 @@ export default {
     }
   },
   async mounted () {
-    console.log('test');
     const term = this.term = new Terminal()
     term.open(this.$refs.container)
     term.winptyCompatInit()
