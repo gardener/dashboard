@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-container fluid >
+  <v-layout>
     <transition-group name="list">
       <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
         <hibernation-schedule-event
@@ -66,7 +66,7 @@ limitations under the License.
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-layout>
-  </v-container>
+  </v-layout>
 </template>
 
 <script>
@@ -79,8 +79,6 @@ import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import moment from 'moment-timezone'
-
-let currentID = 0
 
 export default {
   name: 'hibernation-schedule',
@@ -102,7 +100,8 @@ export default {
   data () {
     return {
       parsedScheduleEvents: undefined,
-      parseError: false
+      parseError: false,
+      currentID: 0
     }
   },
   computed: {
@@ -145,12 +144,12 @@ export default {
       })
     },
     clearParsedScheduleEvents () {
-      currentID = 0
+      this.currentID = 0 // Schedule Event Ids need to be stable
       this.parsedScheduleEvents = []
     },
     id () {
-      currentID++
-      return currentID
+      this.currentID++
+      return this.currentID
     },
     parseSchedules (schedules) {
       this.clearParsedScheduleEvents()
