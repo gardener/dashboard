@@ -198,8 +198,8 @@ export default {
     },
     setDefaultHibernationSchedule () {
       // use local timezone
-      const startMoment = moment.tz('06', 'HH', moment.tz.guess()).utc()
-      const endMoment = moment.tz('20', 'HH', moment.tz.guess()).utc()
+      const startMoment = moment.tz('19', 'HH', moment.tz.guess()).utc()
+      const endMoment = moment.tz('07', 'HH', moment.tz.guess()).utc()
 
       const start = {
         hour: startMoment.hours(),
@@ -233,15 +233,15 @@ export default {
     },
     onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      this.setScheduleProperty(schedule, 'start.hour', utcHour)
-      this.setScheduleProperty(schedule, 'start.minute', utcMinute)
-      this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
-    },
-    onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
-      const schedule = find(this.parsedScheduleEvents, { id })
       this.setScheduleProperty(schedule, 'end.hour', utcHour)
       this.setScheduleProperty(schedule, 'end.minute', utcMinute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'end.weekdays', 'start.weekdays')
+    },
+    onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
+      const schedule = find(this.parsedScheduleEvents, { id })
+      this.setScheduleProperty(schedule, 'start.hour', utcHour)
+      this.setScheduleProperty(schedule, 'start.minute', utcMinute)
+      this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
     },
     onUpdateSelectedDays ({ weekdays, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })

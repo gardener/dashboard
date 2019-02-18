@@ -32,7 +32,7 @@ limitations under the License.
     <v-flex xs2 class="mr-3">
       <v-text-field
         color="cyan darken-2"
-        label="Wake up Cluster at"
+        label="Wake up at"
         v-model="localizedWakeUpTime"
         :error-messages="getErrorMessages('localizedWakeUpTime')"
         type="time"
@@ -42,7 +42,7 @@ limitations under the License.
     <v-flex xs2 class="mr-3">
       <v-text-field
         color="cyan darken-2"
-        label="Hibernate Cluster at"
+        label="Hibernate at"
         v-model="localizedHibernateTime"
         :error-messages="getErrorMessages('localizedHibernateTime')"
         type="time"
@@ -173,8 +173,8 @@ export default {
   methods: {
     reset () {
       this.selectedTimezone = moment.tz.guess()
-      this.setLocalizedWakeUpTime(this.scheduleEvent.start)
-      this.setLocalizedHibernateTime(this.scheduleEvent.end)
+      this.setLocalizedWakeUpTime(this.scheduleEvent.end)
+      this.setLocalizedHibernateTime(this.scheduleEvent.start)
       this.setSelectedDays(this.scheduleEvent)
       this.validateInput()
     },
@@ -272,8 +272,8 @@ export default {
     scheduleEvent: {
       deep: true,
       handler (newValue, oldValue) {
-        this.setLocalizedWakeUpTime(newValue.start)
-        this.setLocalizedHibernateTime(newValue.end)
+        this.setLocalizedWakeUpTime(newValue.end)
+        this.setLocalizedHibernateTime(newValue.start)
         this.setSelectedDays(newValue)
       }
     },
