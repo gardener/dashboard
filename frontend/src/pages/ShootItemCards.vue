@@ -273,7 +273,6 @@ limitations under the License.
                 <hibernation-configuration ref="hibernationConfiguration" :shootItem="item"></hibernation-configuration>
               </v-list-tile-action>
             </v-list-tile>
-
             <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
