@@ -138,7 +138,6 @@ limitations under the License.
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import filter from 'lodash/filter'
 import { gravatarUrlIdenticon } from '@/utils'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
