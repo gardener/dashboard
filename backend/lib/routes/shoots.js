@@ -129,6 +129,20 @@ router.route('/:name/spec/hibernation/schedules')
     }
   })
 
+router.route('/:name/spec/cloud/:infrastructureKind/workers')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const infrastructureKind = req.infrastructureKind
+      const body = req.body
+      res.send(await shoots.replaceWorkers({ user, namespace, infrastructureKind, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 router.route('/:name/metadata/annotations')
   .patch(async (req, res, next) => {
     try {

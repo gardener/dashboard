@@ -115,6 +115,10 @@ export function updateShootHibernation ({ namespace, name, user, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, user, data)
 }
 
+export function updateWorkers ({ namespace, name, user, infrastructureKind, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/${infrastructureKind}/workers`, user, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles ({ user }) {

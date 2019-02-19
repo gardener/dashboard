@@ -73,6 +73,26 @@ limitations under the License.
             <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
+                <v-icon class="cyan--text text--darken-2">mdi-server</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-sub-title>Worker Groups</v-list-tile-sub-title>
+                <v-list-tile-title>
+                  <worker-group
+                  v-for="workerGroup in workerGroups"
+                  :workerGroup="workerGroup"
+                  :key="workerGroup.name"
+                  ></worker-group>
+                </v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <worker-configuration :shootItem="item"></worker-configuration>
+              </v-list-tile-action>
+            </v-list-tile>
+
+            <v-divider class="my-2" inset></v-divider>
+            <v-list-tile>
+              <v-list-tile-action>
                 <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
               </v-list-tile-action>
               <v-list-tile-content>
@@ -331,6 +351,8 @@ import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
 import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
+import WorkerGroup from '@/components/WorkerGroup'
+import WorkerConfiguration from '@/components/WorkerConfiguration'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
@@ -363,7 +385,9 @@ export default {
     MaintenanceStart,
     MaintenanceConfiguration,
     HibernationConfiguration,
-    DeleteCluster
+    DeleteCluster,
+    WorkerGroup,
+    WorkerConfiguration
   },
   data () {
     return {
@@ -543,6 +567,10 @@ export default {
         return `Start time: ${maintenanceStr} ${timezone}`
       }
       return ''
+    },
+    workerGroups () {
+      const kind = this.getCloudProviderKind
+      return get(this.item, `spec.cloud.${kind}.workers`, [])
     }
   },
   methods: {

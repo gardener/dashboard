@@ -227,6 +227,9 @@ export default {
       this.$emit('valid', workersValid)
 
       return workersValid
+    },
+    reset () {
+      this.setInternalWorkers(this.workers)
     }
   },
   mounted () {

@@ -171,6 +171,20 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   return patch({ user, namespace, name, body: payload })
 }
 
+exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
+  const workers = body
+  const payload = {
+    spec: {
+      cloud: {
+        infrastructureKind: {
+          workers
+        }
+      }
+    }
+  }
+  return patch({ user, namespace, name, body: payload })
+}
+
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
   const payload = {
