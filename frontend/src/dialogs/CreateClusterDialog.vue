@@ -297,7 +297,7 @@ import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import InfraIcon from '@/components/InfrastructureIcon'
-import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors, purposeRequiresHibernationSchedule, shortRandomString } from '@/utils'
+import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors, shortRandomString } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 import moment from 'moment-timezone'
 
@@ -848,15 +848,9 @@ export default {
       this.purpose = head(this.filteredPurposes)
     },
     setDefaultHibernationSchedule () {
-      if (purposeRequiresHibernationSchedule(this.purpose)) {
-        if (isEmpty(this.hibernationSchedules)) {
-          this.$nextTick(() => {
-            this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
-          })
-        }
-      } else if (this.hibernationSchedules) {
-        this.hibernationSchedules = undefined
-      }
+      this.$nextTick(() => {
+        this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
+      })
     },
     setDefaultMaintenanceTimeWindow () {
       // randomize maintenance time window

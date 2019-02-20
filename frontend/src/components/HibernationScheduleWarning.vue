@@ -21,8 +21,8 @@ limitations under the License.
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
   <div slot="content-before" class="message">
-    Non-productive clusters get a hibernation schedule by default. This saves costs by automatically hibernating the cluster during non working hours.
-    However, this <span class="bold">{{purpose}}</span> cluster does not have a hibernation schedule. Please navigate to the cluster details page to
+    <span class="bold">{{capitalizedPurpose}}</span> clusters get a hibernation schedule by default. This saves costs by automatically hibernating the cluster during non working hours.
+    However, this cluster does not have a hibernation schedule. Please navigate to the cluster details page to
     <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">
       configure
     </router-link>
@@ -38,6 +38,7 @@ limitations under the License.
 
 <script>
 import GPopper from '@/components/GPopper'
+import capitalize from 'lodash/capitalize'
 
 export default {
   name: 'hibernationschedulewarning',
@@ -58,6 +59,9 @@ export default {
   computed: {
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
+    },
+    capitalizedPurpose () {
+      return capitalize(this.purpose)
     }
   }
 }
