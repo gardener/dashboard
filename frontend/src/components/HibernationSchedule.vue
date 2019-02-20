@@ -75,7 +75,6 @@ import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
-import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
 import { purposeRequiresHibernationSchedule } from '@/utils'
@@ -205,7 +204,7 @@ export default {
       }
     },
     setDefaultHibernationSchedule () {
-      const defaultHibernationCrontab = find(this.cfg.defaultHibernationSchedules, ({ purposes }) => includes(purposes, this.purpose))
+      const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       const cronStart = get(defaultHibernationCrontab, 'start')
       const cronEnd = get(defaultHibernationCrontab, 'end')
       let start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
