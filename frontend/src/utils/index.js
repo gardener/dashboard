@@ -29,6 +29,7 @@ import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
+import flatMap from 'lodash/flatMap'
 import every from 'lodash/every'
 import moment from 'moment-timezone'
 import semver from 'semver'
@@ -345,16 +346,14 @@ export function textColor (color) {
 }
 
 export function purposeRequiresHibernationSchedule (purpose) {
-  if (isEmpty(purpose)) {
-    return true
-  }
-  switch (purpose) {
-    case 'evaluation':
-    case 'development':
+  const defaultHibernationSchedules = get(store, 'state.cfg.defaultHibernationSchedules')
+  if (defaultHibernationSchedules) {
+    if (isEmpty(purpose)) {
       return true
-    default:
-      return false
+    }
+    return includes(flatMap(defaultHibernationSchedules, 'purposes'), purpose)
   }
+  return false
 }
 
 export function isShootHasNoHibernationScheduleWarning (shoot) {

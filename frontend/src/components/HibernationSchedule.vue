@@ -54,7 +54,7 @@ limitations under the License.
           v-model="confirmNoSchedule"
           color="cyan darken-2"
           class="my-0"
-          label="This non-productive cluster does not need a hibernation schedule"
+          :label="noScheduleCheckboxLabel"
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
           persistent-hint>
         </v-checkbox>
@@ -75,12 +75,16 @@ import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
+import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 import isEqual from 'lodash/isEqual'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import moment from 'moment-timezone'
+import { mapState } from 'vuex'
 
 let currentID = 0
+
+const scheduleCrontabRegex = /^(?<minute>\d{0,2})\s(?<hour>\d{0,2})\s\*\s\*\s(?<weekdays>[0-6,]+)$/
 
 export default {
   name: 'hibernation-schedule',
@@ -106,6 +110,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     valid () {
       let valid = true
       forEach(this.parsedScheduleEvents, schedule => {
@@ -132,6 +139,9 @@ export default {
       return purposeRequiresHibernationSchedule(this.purpose) &&
       isEmpty(this.parsedScheduleEvents) &&
       !this.parseError
+    },
+    noScheduleCheckboxLabel () {
+      return `This ${this.purpose} cluster does not need a hibernation schedule`
     }
   },
   methods: {
@@ -155,14 +165,12 @@ export default {
     parseSchedules (schedules) {
       this.clearParsedScheduleEvents()
 
-      const eventRegex = /^(?<minute>\d{0,2})\s(?<hour>\d{0,2})\s\*\s\*\s(?<weekdays>[0-6,]+)$/
-
       this.parseError = false
       forEach(schedules, schedule => {
         const cronStart = get(schedule, 'start')
         const cronEnd = get(schedule, 'end')
-        const start = get(eventRegex.exec(cronStart), 'groups')
-        const end = get(eventRegex.exec(cronEnd), 'groups')
+        const start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
+        const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
 
         if (cronStart && !start) {
           console.warn(`Could not parse start crontab line: ${cronStart}`)
@@ -197,25 +205,36 @@ export default {
       }
     },
     setDefaultHibernationSchedule () {
-      // use local timezone
-      const startMoment = moment.tz('19', 'HH', moment.tz.guess()).utc()
-      const endMoment = moment.tz('07', 'HH', moment.tz.guess()).utc()
+      const defaultHibernationCrontab = find(this.cfg.defaultHibernationSchedules, ({ purposes }) => includes(purposes, this.purpose))
+      const cronStart = get(defaultHibernationCrontab, 'start')
+      const cronEnd = get(defaultHibernationCrontab, 'end')
+      let start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
+      let end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
 
-      const start = {
-        hour: startMoment.hours(),
-        minute: '0',
-        weekdays: '1,2,3,4,5'
+      // Convert configured default schedule to local timezone
+      let startMoment, endMoment
+      if (start) {
+        startMoment = moment.tz(start.hour, 'HH', moment.tz.guess()).utc()
+        start = {
+          hour: startMoment.hours(),
+          minute: start.minute,
+          weekdays: start.weekdays
+        }
       }
-      const end = {
-        hour: endMoment.hours(),
-        minute: '0',
-        weekdays: '1,2,3,4,5'
+      if (end) {
+        endMoment = moment.tz(end.hour, 'HH', moment.tz.guess()).utc()
+        end = {
+          hour: endMoment.hours(),
+          minute: end.minute,
+          weekdays: end.weekdays
+        }
       }
-
       this.clearParsedScheduleEvents()
-      const id = this.id()
-      const valid = true
-      this.parsedScheduleEvents.push({ start, end, id, valid })
+      if (start || end) {
+        const id = this.id()
+        const valid = true
+        this.parsedScheduleEvents.push({ start, end, id, valid })
+      }
     },
     addSchedule () {
       if (!isEmpty(this.parsedScheduleEvents)) {

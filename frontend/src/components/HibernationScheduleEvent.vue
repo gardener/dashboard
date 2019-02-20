@@ -200,7 +200,7 @@ export default {
     },
     setLocalizedWakeUpTime (utcCronTime) {
       const localizedTime = this.getLocalizedTime(utcCronTime)
-      if (localizedTime && localizedTime !== this.localizedWakeUpTime) {
+      if (localizedTime !== this.localizedWakeUpTime) {
         // Only set if value actually changed in parent component
         // Vue component would reset input focus otherwise
         this.localizedWakeUpTime = localizedTime
@@ -208,7 +208,7 @@ export default {
     },
     setLocalizedHibernateTime (utcCronTime) {
       const localizedTime = this.getLocalizedTime(utcCronTime)
-      if (localizedTime && localizedTime !== this.localizedHibernateTime) {
+      if (localizedTime !== this.localizedHibernateTime) {
         // Only set if value actually changed in parent component
         // Vue component would reset input focus otherwise
         this.localizedHibernateTime = localizedTime

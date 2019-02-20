@@ -47,8 +47,8 @@ limitations under the License.
                   <v-list-tile-sub-title>Cluster Termination</v-list-tile-sub-title>
                   <v-list-tile-title>
                     <v-layout align-center row fill-height class="pa-0 ma-0">
-                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2">mdi-information</v-icon>
-                      <v-icon v-else color="warning">mdi-alert-circle</v-icon>
+                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
+                      <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
                       <span class="pl-2">{{selfTerminationMessage}}</span>
                     </v-layout>
                   </v-list-tile-title>
@@ -264,7 +264,13 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Hibernation</v-list-tile-title>
-                <v-list-tile-sub-title>{{hibernationDescription}}</v-list-tile-sub-title>
+                <v-list-tile-sub-title>
+                  <v-layout v-if="isShootHasNoHibernationScheduleWarning" align-center row fill-height class="pa-0 ma-0">
+                    <v-icon small color="cyan darken-2">mdi-calendar-alert</v-icon>
+                    <span class="pl-2">{{hibernationDescription}}</span>
+                  </v-layout>
+                  <span v-else>{{hibernationDescription}}</span>
+                </v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
@@ -527,8 +533,8 @@ export default {
     hibernationDescription () {
       if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
         return 'Hibernation schedule configured'
-      } else if (isShootHasNoHibernationScheduleWarning(this.item)) {
-        return 'Please configure a schedule for this non-productive cluster'
+      } else if (this.isShootHasNoHibernationScheduleWarning) {
+        return `Please configure a schedule for this ${this.purpose} cluster`
       } else {
         return 'No hibernation schedule configured'
       }
@@ -542,6 +548,9 @@ export default {
         return `Start time: ${maintenanceStr} ${timezone}`
       }
       return ''
+    },
+    isShootHasNoHibernationScheduleWarning () {
+      return isShootHasNoHibernationScheduleWarning(this.item)
     }
   },
   methods: {
