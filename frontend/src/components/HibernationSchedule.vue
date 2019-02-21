@@ -140,7 +140,8 @@ export default {
       !this.parseError
     },
     noScheduleCheckboxLabel () {
-      return `This ${this.purpose} cluster does not need a hibernation schedule`
+      const purpose = this.purpose || ''
+      return `This ${purpose} cluster does not need a hibernation schedule`
     }
   },
   methods: {
@@ -204,47 +205,55 @@ export default {
       }
     },
     setDefaultHibernationSchedule () {
-      const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
-      const cronStart = get(defaultHibernationCrontab, 'start')
-      const cronEnd = get(defaultHibernationCrontab, 'end')
-      let start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
-      let end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
-
-      // Convert configured default schedule to local timezone
-      let startMoment, endMoment
-      if (start) {
-        startMoment = moment.tz(start.hour, 'HH', moment.tz.guess()).utc()
-        start = {
-          hour: startMoment.hours(),
-          minute: start.minute,
-          weekdays: start.weekdays
-        }
-      }
-      if (end) {
-        endMoment = moment.tz(end.hour, 'HH', moment.tz.guess()).utc()
-        end = {
-          hour: endMoment.hours(),
-          minute: end.minute,
-          weekdays: end.weekdays
-        }
-      }
       this.clearParsedScheduleEvents()
-      if (start || end) {
-        const id = this.id()
-        const valid = true
-        this.parsedScheduleEvents.push({ start, end, id, valid })
+
+      const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
+      if (defaultHibernationCrontab) {
+        const cronStart = get(defaultHibernationCrontab, 'start')
+        const cronEnd = get(defaultHibernationCrontab, 'end')
+        let start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
+        let end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
+
+        // Convert configured default schedule to local timezone
+        let startMoment, endMoment
+        if (start) {
+          startMoment = moment.tz(start.hour, 'HH', moment.tz.guess()).utc()
+          start = {
+            hour: startMoment.hours(),
+            minute: start.minute,
+            weekdays: start.weekdays
+          }
+        }
+        if (end) {
+          endMoment = moment.tz(end.hour, 'HH', moment.tz.guess()).utc()
+          end = {
+            hour: endMoment.hours(),
+            minute: end.minute,
+            weekdays: end.weekdays
+          }
+        }
+        if (start || end) {
+          const id = this.id()
+          const valid = true
+          this.parsedScheduleEvents.push({ start, end, id, valid })
+        }
+      } else {
+        this.addEmptySchedule()
       }
     },
     addSchedule () {
       if (!isEmpty(this.parsedScheduleEvents)) {
-        const id = this.id()
-        const start = {}
-        const end = {}
-        const valid = false
-        this.parsedScheduleEvents.push({ start, end, id, valid })
+        this.addEmptySchedule()
       } else {
         this.setDefaultHibernationSchedule()
       }
+    },
+    addEmptySchedule () {
+      const id = this.id()
+      const start = {}
+      const end = {}
+      const valid = false
+      this.parsedScheduleEvents.push({ start, end, id, valid })
     },
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
