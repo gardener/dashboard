@@ -79,7 +79,7 @@ limitations under the License.
 </template>
 
 <script>
-import { getValidationErrors, setInputFocus, setDelayedInputFocus } from '@/utils'
+import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import moment from 'moment-timezone'
 import join from 'lodash/join'
@@ -89,7 +89,6 @@ import padStart from 'lodash/padStart'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
-import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   selectedDays: {
@@ -263,16 +262,16 @@ export default {
     removeScheduleEvent () {
       this.$emit('removeScheduleEvent')
     },
-    validateIfNothingFocused() {
+    validateIfNothingFocused () {
       this.$nextTick(() => {
-        if(!get(this, '$refs.selectedDays.isFocused') &&
+        if (!get(this, '$refs.selectedDays.isFocused') &&
             !get(this, '$refs.localizedWakeUpTime.isFocused') &&
             !get(this, '$refs.localizedHibernateTime.isFocused')) {
           this.validateInput()
         }
       })
     },
-    validateField(field) {
+    validateField (field) {
       this.$v[field].$touch()
       this.emitValid()
     },
@@ -282,7 +281,7 @@ export default {
       this.$v.localizedHibernateTime.$touch()
       this.emitValid()
     },
-    emitValid() {
+    emitValid () {
       this.$nextTick(() => {
         const id = this.id
         const valid = !this.$v.$invalid

@@ -313,7 +313,7 @@ export default {
 
       this.valid = valid
       this.$emit('valid', this.valid)
-    },
+    }
   },
   mounted () {
     this.parseSchedules(this.schedules)
