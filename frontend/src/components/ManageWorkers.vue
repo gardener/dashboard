@@ -149,7 +149,8 @@ export default {
   data () {
     return {
       internalWorkers: undefined,
-      currentID: 0
+      currentID: 0,
+      valid: false
     }
   },
   computed: {
@@ -204,15 +205,13 @@ export default {
       this.addWorker()
     },
     emitWorkers () {
-      if (this.valid) {
-        const workers = []
-        forEach(this.internalWorkers, internalWorker => {
-          const worker = assign({}, internalWorker)
-          delete worker.id
-          workers.push(worker)
-        })
-        this.$emit('updateWorkers', workers)
-      }
+      const workers = []
+      forEach(this.internalWorkers, internalWorker => {
+        const worker = assign({}, internalWorker)
+        delete worker.id
+        workers.push(worker)
+      })
+      this.$emit('updateWorkers', workers)
     },
     validateWorkers () {
       const workerInput = this.$refs.workerInput
@@ -226,6 +225,7 @@ export default {
       }
       this.$emit('valid', workersValid)
 
+      this.valid = workersValid
       return workersValid
     },
     reset () {
@@ -239,8 +239,10 @@ export default {
     internalWorkers: {
       deep: true,
       handler (value, oldValue) {
-        this.validateWorkers()
         this.emitWorkers()
+        this.$nextTick(() => {
+          this.validateWorkers()
+        })
       }
     },
     workers: {

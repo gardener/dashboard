@@ -119,7 +119,7 @@ export default {
     },
     updateWorkers () {
       const user = this.$store.state.user
-      return updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, workers: this.workers })
+      return updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, data: this.workers })
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)

@@ -173,16 +173,14 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
 
 exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
   const workers = body
-  const payload = {
-    spec: {
-      cloud: {
-        infrastructureKind: {
-          workers
-        }
-      }
+  const patchOperations = [
+    {
+      op: 'replace',
+      path: `/spec/cloud/${infrastructureKind}/workers`,
+      value: workers
     }
-  }
-  return patch({ user, namespace, name, body: payload })
+  ]
+  return Garden(user).namespaces(namespace).shoots.jsonPatch({ name, body: patchOperations })
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {

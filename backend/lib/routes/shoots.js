@@ -135,7 +135,7 @@ router.route('/:name/spec/cloud/:infrastructureKind/workers')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      const infrastructureKind = req.infrastructureKind
+      const infrastructureKind = req.params.infrastructureKind
       const body = req.body
       res.send(await shoots.replaceWorkers({ user, namespace, infrastructureKind, name, body }))
     } catch (err) {
