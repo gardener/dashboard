@@ -555,10 +555,11 @@ export default {
       return isValidTerminationDate(this.expirationTimestamp)
     },
     hibernationDescription () {
+      const purpose = this.purpose || ''
       if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
         return 'Hibernation schedule configured'
       } else if (this.isShootHasNoHibernationScheduleWarning) {
-        return `Please configure a schedule for this ${this.purpose} cluster`
+        return `Please configure a schedule for this ${purpose} cluster`
       } else {
         return 'No hibernation schedule configured'
       }

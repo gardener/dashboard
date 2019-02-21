@@ -20,6 +20,9 @@ limitations under the License.
       <v-select
       color="cyan darken-2"
       v-model="selectedDays"
+      ref="selectedDays"
+      @blur="validateIfNothingFocused"
+      @input="validateField('selectedDays')"
       :items="weekdays"
       :error-messages="getErrorMessages('selectedDays')"
       chips
@@ -34,9 +37,11 @@ limitations under the License.
         color="cyan darken-2"
         label="Wake up at"
         v-model="localizedWakeUpTime"
+        ref="localizedWakeUpTime"
+        @blur="validateIfNothingFocused"
+        @input="validateField('localizedWakeUpTime')"
         :error-messages="getErrorMessages('localizedWakeUpTime')"
         type="time"
-        clearable
       ></v-text-field>
     </v-flex>
     <v-flex xs2 class="mr-3">
@@ -44,9 +49,11 @@ limitations under the License.
         color="cyan darken-2"
         label="Hibernate at"
         v-model="localizedHibernateTime"
+        ref="localizedHibernateTime"
+        @blur="validateIfNothingFocused"
+        @input="validateField('localizedHibernateTime')"
         :error-messages="getErrorMessages('localizedHibernateTime')"
         type="time"
-        clearable
       ></v-text-field>
     </v-flex>
     <v-flex xs3 class="mr-3">
@@ -72,7 +79,7 @@ limitations under the License.
 </template>
 
 <script>
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import moment from 'moment-timezone'
 import join from 'lodash/join'
@@ -82,6 +89,7 @@ import padStart from 'lodash/padStart'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
+import isEmpty from 'lodash/isEmpty'
 
 const validationErrors = {
   selectedDays: {
@@ -176,19 +184,11 @@ export default {
       this.setLocalizedWakeUpTime(this.scheduleEvent.end)
       this.setLocalizedHibernateTime(this.scheduleEvent.start)
       this.setSelectedDays(this.scheduleEvent)
-      this.validateInput()
+
+      setDelayedInputFocus(this, 'selectedDays')
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
-    },
-    validateInput () {
-      this.$v.selectedDays.$touch()
-      this.$v.localizedWakeUpTime.$touch()
-      this.$v.localizedHibernateTime.$touch()
-
-      const id = this.id
-      const valid = !this.$v.$invalid
-      this.$emit('valid', { id, valid })
     },
     getLocalizedTime (utcCronTime) {
       if (get(utcCronTime, 'hour') && get(utcCronTime, 'minute')) {
@@ -215,8 +215,6 @@ export default {
       }
     },
     updateLocalizedTime ({ eventName, localTime, localTimezone }) {
-      this.validateInput()
-
       let utcMoment
       if (localTime && localTimezone) {
         utcMoment = moment.tz(localTime, 'HHmm', localTimezone).utc()
@@ -243,8 +241,6 @@ export default {
       }
     },
     updateSelectedDays ({ selectedDays }) {
-      this.validateInput()
-
       let weekdays
       if (selectedDays) {
         const sortedDays = selectedDays.slice()
@@ -266,6 +262,32 @@ export default {
     },
     removeScheduleEvent () {
       this.$emit('removeScheduleEvent')
+    },
+    validateIfNothingFocused() {
+      this.$nextTick(() => {
+        if(!get(this, '$refs.selectedDays.isFocused') &&
+            !get(this, '$refs.localizedWakeUpTime.isFocused') &&
+            !get(this, '$refs.localizedHibernateTime.isFocused')) {
+          this.validateInput()
+        }
+      })
+    },
+    validateField(field) {
+      this.$v[field].$touch()
+      this.emitValid()
+    },
+    validateInput () {
+      this.$v.selectedDays.$touch()
+      this.$v.localizedWakeUpTime.$touch()
+      this.$v.localizedHibernateTime.$touch()
+      this.emitValid()
+    },
+    emitValid() {
+      this.$nextTick(() => {
+        const id = this.id
+        const valid = !this.$v.$invalid
+        this.$emit('valid', { id, valid })
+      })
     }
   },
   watch: {
