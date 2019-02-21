@@ -105,24 +105,14 @@ export default {
   data () {
     return {
       parsedScheduleEvents: undefined,
-      parseError: false
+      parseError: false,
+      valid: true
     }
   },
   computed: {
     ...mapState([
       'cfg'
     ]),
-    valid () {
-      let valid = true
-      forEach(this.parsedScheduleEvents, schedule => {
-        if (!schedule.valid) {
-          valid = false
-        }
-      })
-      this.$emit('valid', valid)
-
-      return valid
-    },
     confirmNoSchedule: {
       get () {
         return this.noSchedule
@@ -278,6 +268,8 @@ export default {
     onScheduleEventValid ({ id, valid }) {
       const schedule = find(this.parsedScheduleEvents, { id })
       schedule.valid = valid
+
+      this.validateInput()
     },
     emitScheduleCrontabs () {
       if (this.valid) {
@@ -310,7 +302,18 @@ export default {
           this.$emit('updateHibernationSchedules', scheduleCrontabs)
         }
       }
-    }
+    },
+    validateInput () {
+      let valid = true
+      forEach(this.parsedScheduleEvents, schedule => {
+        if (!schedule.valid) {
+          valid = false
+        }
+      })
+
+      this.valid = valid
+      this.$emit('valid', this.valid)
+    },
   },
   mounted () {
     this.parseSchedules(this.schedules)
@@ -322,6 +325,7 @@ export default {
         if (!isEmpty(value)) {
           this.confirmNoSchedule = false
         }
+        this.validateInput()
 
         this.emitScheduleCrontabs()
       }
