@@ -21,8 +21,8 @@ limitations under the License.
       color="cyan darken-2"
       v-model="selectedDays"
       ref="selectedDays"
-      @blur="validateIfNothingFocused"
-      @input="validateField('selectedDays')"
+      @blur="touchIfNothingFocused"
+      @input="$v.selectedDays.$touch()"
       :items="weekdays"
       :error-messages="getErrorMessages('selectedDays')"
       chips
@@ -38,8 +38,8 @@ limitations under the License.
         label="Wake up at"
         v-model="localizedWakeUpTime"
         ref="localizedWakeUpTime"
-        @blur="validateIfNothingFocused"
-        @input="validateField('localizedWakeUpTime')"
+        @blur="touchIfNothingFocused"
+        @input="$v.localizedWakeUpTime.$touch()"
         :error-messages="getErrorMessages('localizedWakeUpTime')"
         type="time"
       ></v-text-field>
@@ -50,8 +50,8 @@ limitations under the License.
         label="Hibernate at"
         v-model="localizedHibernateTime"
         ref="localizedHibernateTime"
-        @blur="validateIfNothingFocused"
-        @input="validateField('localizedHibernateTime')"
+        @blur="touchIfNothingFocused"
+        @input="$v.localizedHibernateTime.$touch()"
         :error-messages="getErrorMessages('localizedHibernateTime')"
         type="time"
       ></v-text-field>
@@ -262,31 +262,18 @@ export default {
     removeScheduleEvent () {
       this.$emit('removeScheduleEvent')
     },
-    validateIfNothingFocused () {
-      this.$nextTick(() => {
-        if (!get(this, '$refs.selectedDays.isFocused') &&
-            !get(this, '$refs.localizedWakeUpTime.isFocused') &&
-            !get(this, '$refs.localizedHibernateTime.isFocused')) {
-          this.validateInput()
-        }
-      })
+    touchIfNothingFocused () {
+      if (!get(this, '$refs.selectedDays.isFocused') &&
+          !get(this, '$refs.localizedWakeUpTime.isFocused') &&
+          !get(this, '$refs.localizedHibernateTime.isFocused')) {
+        this.$v.selectedDays.$touch()
+        this.$v.localizedWakeUpTime.$touch()
+        this.$v.localizedHibernateTime.$touch()
+      }
     },
-    validateField (field) {
-      this.$v[field].$touch()
-      this.emitValid()
-    },
-    validateInput () {
-      this.$v.selectedDays.$touch()
-      this.$v.localizedWakeUpTime.$touch()
-      this.$v.localizedHibernateTime.$touch()
-      this.emitValid()
-    },
-    emitValid () {
-      this.$nextTick(() => {
-        const id = this.id
-        const valid = !this.$v.$invalid
-        this.$emit('valid', { id, valid })
-      })
+    emitValid (valid) {
+      const id = this.id
+      this.$emit('valid', { id, valid })
     }
   },
   watch: {
@@ -310,6 +297,12 @@ export default {
     },
     selectedDays (value) {
       this.updateSelectedDays({ selectedDays: value })
+    },
+    $v: {
+      deep: true,
+      handler (newValue, oldValue) {
+        this.emitValid(!newValue.$invalid)
+      }
     }
   },
   mounted () {

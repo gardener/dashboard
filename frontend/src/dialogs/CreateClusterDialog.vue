@@ -247,11 +247,9 @@ limitations under the License.
             <v-container>
               <hibernation-schedule
                 ref="hibernationSchedule"
-                :schedules="hibernationSchedules"
                 :noSchedule="!!shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']"
                 :purpose="purpose"
                 @valid="onHibernationScheduleValid"
-                @updateHibernationSchedules="onUpdateHibernationSchedules"
                 @updateNoSchedule="onUpdateNoSchedule"
               ></hibernation-schedule>
           </v-container>
@@ -424,7 +422,6 @@ export default {
       validationErrors,
       maintenanceTimeValid: false,
       hibernationScheduleValid: false,
-      hibernationSchedules: undefined,
       workersValid: false,
       workers: undefined,
       errorMessage: undefined,
@@ -776,9 +773,10 @@ export default {
       if (!isEmpty(enabledCustomAddonNames)) {
         annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
       }
-      if (!isEmpty(this.hibernationSchedules)) {
+      const hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+      if (!isEmpty(hibernationSchedules)) {
         data.spec.hibernation = {
-          schedules: this.hibernationSchedules
+          schedules: hibernationSchedules
         }
       }
       return this.createShoot(data)
@@ -815,7 +813,7 @@ export default {
 
       this.$nextTick(() => {
         this.$refs.maintenanceTime.reset()
-        this.$refs.hibernationSchedule.reset() // TODO: DO WE NEED THIS?
+        this.$refs.hibernationSchedule.reset()
 
         this.setDefaultMaintenanceTimeWindow()
         this.setDefaultHibernationSchedule()
@@ -848,9 +846,7 @@ export default {
       this.purpose = head(this.filteredPurposes)
     },
     setDefaultHibernationSchedule () {
-      this.$nextTick(() => {
-        this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
-      })
+      this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
     },
     setDefaultMaintenanceTimeWindow () {
       // randomize maintenance time window
@@ -915,9 +911,6 @@ export default {
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
-    },
-    onUpdateHibernationSchedules (value) {
-      this.hibernationSchedules = value
     },
     onUpdateNoSchedule (value) {
       if (value) {
