@@ -68,59 +68,59 @@ spec:
       serviceAccountName: gardener-dashboard
       {{- end }}
       containers:
-        - name: gardener-dashboard
-          args:
-            - /etc/gardener-dashboard/config.yaml
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.containerPort }}
-              protocol: TCP
-          {{- if .Values.livenessProbe.enabled }}
-          livenessProbe:
-            tcpSocket:
-              port: http
-            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.livenessProbe.successThreshold }}
-            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.readinessProbe.enabled }}
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: http
-            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.readinessProbe.successThreshold }}
-            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
-          {{- end }}
-          {{- if .Values.kubeconfig }}
-          env:
-          - name: KUBECONFIG
-            value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
-          {{- end }}
-          resources:
+      - name: gardener-dashboard
+        args:
+        - /etc/gardener-dashboard/config.yaml
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.containerPort }}
+          protocol: TCP
+        {{- if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.kubeconfig }}
+        env:
+        - name: KUBECONFIG
+          value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
+        {{- end }}
+        resources:
 {{ toYaml .Values.resources | indent 12 }}
-          volumeMounts:
-          - name: gardener-dashboard-config
-            mountPath: /etc/gardener-dashboard
-          {{- if .Values.prometheus }}
-          - name: gardener-dashboard-secret-prometheus
-            mountPath: /etc/gardener-dashboard/secrets/prometheus
-            readOnly: true
-          {{- end }}
-          {{- if .Values.gitHub }}
-          - name: gardener-dashboard-secret-github
-            mountPath: /etc/gardener-dashboard/secrets/gitHub
-            readOnly: true
-          {{- end }}
-          {{- if .Values.kubeconfig }}
-          - name: gardener-dashboard-secret-kubeconfig
-            mountPath: /etc/gardener-dashboard/secrets/kubeconfig
-            readOnly: true
-          {{- end }}
+        volumeMounts:
+        - name: gardener-dashboard-config
+          mountPath: /etc/gardener-dashboard
+        {{- if .Values.prometheus }}
+        - name: gardener-dashboard-secret-prometheus
+          mountPath: /etc/gardener-dashboard/secrets/prometheus
+          readOnly: true
+        {{- end }}
+        {{- if .Values.gitHub }}
+        - name: gardener-dashboard-secret-github
+          mountPath: /etc/gardener-dashboard/secrets/gitHub
+          readOnly: true
+        {{- end }}
+        {{- if .Values.kubeconfig }}
+        - name: gardener-dashboard-secret-kubeconfig
+          mountPath: /etc/gardener-dashboard/secrets/kubeconfig
+          readOnly: true
+        {{- end }}
       restartPolicy: Always

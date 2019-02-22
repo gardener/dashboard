@@ -14,20 +14,20 @@ metadata:
   {{- end }}
 spec:
   tls:
-    - secretName: gardener-dashboard-tls
-      hosts:
-      {{- range .Values.hosts }}
-        - {{ . }}
-      {{- end }}
+  - secretName: gardener-dashboard-tls
+    hosts:
+    {{- range .Values.hosts }}
+    - {{ . }}
+    {{- end }}
   rules:
   {{- range .Values.hosts }}
-    - host: {{ . }}
-      http:
-        paths:
-          - backend:
-              serviceName: gardener-dashboard-service
-              servicePort: {{ $.Values.servicePort }}
-            path: /
+  - host: {{ . }}
+    http:
+      paths:
+      - backend:
+          serviceName: gardener-dashboard-service
+          servicePort: {{ $.Values.servicePort }}
+        path: /
   {{- end }}
 {{- if .Values.terminal.gardenClusterKubeApiserver }}
 ---
@@ -47,19 +47,19 @@ metadata:
   {{- end }}
 spec:
   tls:
-    - secretName: dashboard-terminal-kube-apiserver-tls
-      hosts:
-      {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
-        - {{ . }}
-      {{- end }}
+  - secretName: dashboard-terminal-kube-apiserver-tls
+    hosts:
+    {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
+    - {{ . }}
+    {{- end }}
   rules:
   {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
-    - host: {{ . }}
-      http:
-        paths:
-          - backend:
-              serviceName: {{ required ".Values.terminal.gardenClusterKubeApiserver.serviceName is required" $.Values.terminal.gardenClusterKubeApiserver.serviceName }}
-              servicePort: {{ required ".Values.terminal.gardenClusterKubeApiserver.servicePort is required" $.Values.terminal.gardenClusterKubeApiserver.servicePort }}
-            path: /
+  - host: {{ . }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ required ".Values.terminal.gardenClusterKubeApiserver.serviceName is required" $.Values.terminal.gardenClusterKubeApiserver.serviceName }}
+          servicePort: {{ required ".Values.terminal.gardenClusterKubeApiserver.servicePort is required" $.Values.terminal.gardenClusterKubeApiserver.servicePort }}
+        path: /
   {{- end }}
 {{- end }}
