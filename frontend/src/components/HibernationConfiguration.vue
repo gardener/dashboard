@@ -40,11 +40,10 @@ limitations under the License.
         <v-layout row wrap>
           <hibernation-schedule
             ref="hibernationSchedule"
-            :schedules="hibernationSchedules"
+            :scheduleCrontab="hibernationSchedules"
             :noSchedule="noScheduleAnnotation"
             :purpose="shootPurpose"
             @valid="onHibernationScheduleValid"
-            @updateHibernationSchedules="onUpdateHibernationSchedules"
             @updateNoSchedule="onUpdateNoSchedule"
           ></hibernation-schedule>
         </v-layout>
@@ -117,6 +116,7 @@ export default {
     updateHibernationSchedules () {
       const user = this.$store.state.user
       const noScheduleAnnotation = { 'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.noScheduleAnnotation ? 'true' : null }
+      this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
       return updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
         .then(() => addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation }))
         .then(() => this.hideDialog())

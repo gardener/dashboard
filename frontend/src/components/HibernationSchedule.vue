@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-container fluid >
+  <div>
     <transition-group name="list">
       <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
         <hibernation-schedule-event
@@ -66,7 +66,7 @@ limitations under the License.
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-layout>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -91,7 +91,7 @@ export default {
     HibernationScheduleEvent
   },
   props: {
-    schedules: {
+    scheduleCrontab: {
       type: Array
     },
     purpose: {
@@ -136,7 +136,7 @@ export default {
   },
   methods: {
     reset () {
-      this.parseSchedules(this.schedules)
+      this.parseSchedules(this.scheduleCrontabs)
 
       this.$nextTick(() => {
         forEach(this.$refs.scheduleEvents, (scheduleEventComponent) => {
@@ -183,6 +183,7 @@ export default {
       if (this.parseError) {
         this.clearParsedScheduleEvents()
       }
+      this.validateInput()
     },
     setScheduleProperty (schedule, name, value) {
       if (get(schedule, name) !== value) {
@@ -227,15 +228,17 @@ export default {
           const valid = true
           this.parsedScheduleEvents.push({ start, end, id, valid })
         }
-      } else {
-        this.addEmptySchedule()
       }
     },
     addSchedule () {
       if (!isEmpty(this.parsedScheduleEvents)) {
         this.addEmptySchedule()
       } else {
-        this.setDefaultHibernationSchedule()
+        if (!isEmpty(get(this.cfg.defaultHibernationSchedule, this.purpose))) {
+          this.setDefaultHibernationSchedule()
+        } else {
+          this.addEmptySchedule()
+        }
       }
     },
     addEmptySchedule () {
@@ -271,7 +274,7 @@ export default {
 
       this.validateInput()
     },
-    emitScheduleCrontabs () {
+    getScheduleCrontabs () {
       if (this.valid) {
         const crontabFromParsedScheduleEvent = parsedScheduleEvent => {
           if (parsedScheduleEvent && parsedScheduleEvent.hour && parsedScheduleEvent.minute && parsedScheduleEvent.weekdays) {
@@ -299,7 +302,9 @@ export default {
           }
         })
         if (valid && !this.parseError) {
-          this.$emit('updateHibernationSchedules', scheduleCrontabs)
+          return scheduleCrontabs
+        } else {
+          return this.scheduleCrontabs
         }
       }
     },
@@ -316,7 +321,7 @@ export default {
     }
   },
   mounted () {
-    this.parseSchedules(this.schedules)
+    this.parseSchedules(this.scheduleCrontabs)
   },
   watch: {
     parsedScheduleEvents: {
@@ -325,12 +330,9 @@ export default {
         if (!isEmpty(value)) {
           this.confirmNoSchedule = false
         }
-        this.validateInput()
-
-        this.emitScheduleCrontabs()
       }
     },
-    schedules: {
+    scheduleCrontabs: {
       deep: true,
       handler (value, oldValue) {
         if (!isEqual(value, oldValue)) {

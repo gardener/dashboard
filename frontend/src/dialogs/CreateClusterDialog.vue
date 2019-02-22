@@ -363,21 +363,16 @@ limitations under the License.
         <v-tab-item key="hibernation" value="tab-hibernation">
 
           <v-card flat>
-            <v-container fluid>
-              <v-layout row wrap>
-                <hibernation-schedule
-                  ref="hibernationSchedule"
-                  :schedules="hibernationSchedules"
-                  :noSchedule="!!shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']"
-                  :purpose="purpose"
-                  @valid="onHibernationScheduleValid"
-                  @updateHibernationSchedules="onUpdateHibernationSchedules"
-                  @updateNoSchedule="onUpdateNoSchedule"
-                ></hibernation-schedule>
-              </v-layout>
+            <v-container>
+              <hibernation-schedule
+                ref="hibernationSchedule"
+                :noSchedule="!!shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']"
+                :purpose="purpose"
+                @valid="onHibernationScheduleValid"
+                @updateNoSchedule="onUpdateNoSchedule"
+              ></hibernation-schedule>
             </v-container>
           </v-card>
-
         </v-tab-item>
       </v-tabs-items>
 
@@ -561,7 +556,8 @@ export default {
       validationErrors,
       maintenanceTimeValid: false,
       hibernationScheduleValid: false,
-      hibernationSchedules: undefined,
+      workersValid: false,
+      workers: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -934,9 +930,10 @@ export default {
       if (!isEmpty(enabledCustomAddonNames)) {
         annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
       }
-      if (!isEmpty(this.hibernationSchedules)) {
+      const hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+      if (!isEmpty(hibernationSchedules)) {
         data.spec.hibernation = {
-          schedules: this.hibernationSchedules
+          schedules: hibernationSchedules
         }
       }
       return this.createShoot(data)
@@ -1018,9 +1015,7 @@ export default {
       this.purpose = head(this.filteredPurposes)
     },
     setDefaultHibernationSchedule () {
-      this.$nextTick(() => {
-        this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
-      })
+      this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
     },
     setDefaultMaintenanceTimeWindow () {
       // randomize maintenance time window
@@ -1084,9 +1079,6 @@ export default {
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
-    },
-    onUpdateHibernationSchedules (value) {
-      this.hibernationSchedules = value
     },
     onUpdateNoSchedule (value) {
       if (value) {
