@@ -242,7 +242,7 @@ limitations under the License.
           </v-card-title>
           <control-plane :item="item"></control-plane>
         </v-card>
-        
+
         <v-card>
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Access

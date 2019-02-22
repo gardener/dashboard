@@ -56,7 +56,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-    'hasTerminalAccess'
+      'hasTerminalAccess'
     ]),
     to () {
       const param = { name: this.name, namespace: this.namespace }

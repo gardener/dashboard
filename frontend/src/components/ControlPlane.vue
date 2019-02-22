@@ -16,10 +16,10 @@ limitations under the License.
 
 <template>
   <v-list v-if="hasTerminalAccess">
-    <terminal-list-tile 
-      :name=name 
-      :namespace=namespace 
-      route-name="ShootItemTerminalCp" 
+    <terminal-list-tile
+      :name=name
+      :namespace=namespace
+      route-name="ShootItemTerminalCp"
       description="Open terminal into cluster's control plane running on it's seed">
     </terminal-list-tile>
   </v-list>
@@ -49,6 +49,6 @@ export default {
     namespace () {
       return get(this.item, 'metadata.namespace')
     }
-  },
+  }
 }
 </script>
