@@ -27,6 +27,16 @@ module.exports = {
     kind: 'Secret',
     apiVersion: 'v1'
   },
+  Endpoint: {
+    name: 'endpoints',
+    kind: 'Endpoints',
+    apiVersion: 'v1'
+  },
+  Service: {
+    name: 'services',
+    kind: 'Service',
+    apiVersion: 'v1'
+  },
   SelfSubjectAccessReview: {
     name: 'selfsubjectaccessreviews',
     kind: 'SelfSubjectAccessReview',

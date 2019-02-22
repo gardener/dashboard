@@ -29,3 +29,37 @@ spec:
               servicePort: {{ $.Values.servicePort }}
             path: /
   {{- end }}
+{{- if .Values.terminal.gardenClusterKubeApiserver }}
+---
+apiVersion: {{ include "ingressversion" . }}
+kind: Ingress
+metadata:
+  name: dashboard-terminal-kube-apiserver-ingress
+  namespace: {{ required ".Values.terminal.gardenClusterKubeApiserver.namespace is required" .Values.terminal.gardenClusterKubeApiserver.namespace }}
+  labels:
+    app: gardener-dashboard
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  {{- with .Values.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+  {{- end }}
+spec:
+  tls:
+    - secretName: dashboard-terminal-kube-apiserver-tls
+      hosts:
+      {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
+        - {{ . }}
+      {{- end }}
+  rules:
+  {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - backend:
+              serviceName: {{ required ".Values.terminal.gardenClusterKubeApiserver.serviceName is required" $.Values.terminal.gardenClusterKubeApiserver.serviceName }}
+              servicePort: {{ required ".Values.terminal.gardenClusterKubeApiserver.servicePort is required" $.Values.terminal.gardenClusterKubeApiserver.servicePort }}
+            path: /
+  {{- end }}
+{{- end }}

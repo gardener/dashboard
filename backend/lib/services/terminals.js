@@ -230,11 +230,11 @@ async function initializeGardenTerminalObject ({ namespace }) {
   terminalInfo.namespace = namespace
   terminalInfo.container = 'terminal'
 
-  const apiServerUrl = _.get(config, 'apiServerUrl')
-  if (!apiServerUrl) {
-    throw new Error('no apiServerUrl config found')
+  const apiserverHost = _.first(_.get(config, 'terminal.gardenClusterKubeApiserver.hosts'))
+  if (!apiserverHost) {
+    throw new Error('no terminal.gardenClusterKubeApiserver.hosts config found')
   }
-  terminalInfo.server = new URL(apiServerUrl).hostname
+  terminalInfo.server = apiserverHost
   return terminalInfo
 }
 

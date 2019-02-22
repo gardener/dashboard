@@ -31,7 +31,7 @@ module.exports = io => {
       logger.error('shoots event error', event.object)
     } else if (event.type === 'ADDED') {
       const seed = event.object
-      await bootstrapSeed({ seed })
+      bootstrapSeed({ seed })
     }
   })
 }

@@ -76,6 +76,15 @@ async function getShootIngressDomainForSeed (shoot, seed) {
   return `${name}.${projectName}.${ingressDomain}`
 }
 
+async function getSoilIngressDomainForSeed (seed) {
+  const namespace = 'garden'
+
+  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const projectName = await getProjectNameFromNamespace(namespace)
+
+  return `${projectName}.${ingressDomain}`
+}
+
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
   const seedShootNS = _.get(shoot, 'status.technicalID')
@@ -135,6 +144,7 @@ module.exports = {
   shootHasIssue,
   getShootIngressDomain,
   getShootIngressDomainForSeed,
+  getSoilIngressDomainForSeed,
   getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,

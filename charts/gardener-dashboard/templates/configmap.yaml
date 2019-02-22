@@ -114,3 +114,24 @@ data:
         token: {{ .Values.gitHub.authentication.token }}
       {{- end }}
 {{- end }}
+    {{- if .Values.terminal }}
+    terminal:
+      {{- if .Values.terminal.bootstrap }}
+      bootstrap:
+        {{- if .Values.terminal.bootstrap.disabled }}
+        disabled: {{ .Values.terminal.bootstrap.disabled }}
+        {{- end }}
+        {{- if .Values.terminal.bootstrap.apiserverIngress }}
+        apiserverIngress:
+          {{- with .Values.terminal.bootstrap.apiserverIngress.annotations }}
+          annotations:
+{{ toYaml . | indent 12 }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      gardenClusterKubeApiserver:
+        {{- with .Values.terminal.gardenClusterKubeApiserver.hosts }}
+        hosts:
+{{ toYaml . | indent 10 }}
+        {{- end }}
+    {{- end }}

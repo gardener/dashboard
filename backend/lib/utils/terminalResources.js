@@ -124,10 +124,48 @@ function toIngressResource ({
   return { apiVersion, kind, metadata, spec }
 }
 
+function toServiceResource ({
+  name,
+  namespace,
+  component,
+  spec,
+  annotations = {},
+  ownerReferences = [],
+  labels = {}
+}) {
+  const apiVersion = Resources.Service.apiVersion
+  const kind = Resources.Service.kind
+  labels.component = component
+
+  const metadata = { name, namespace, labels, annotations, ownerReferences }
+
+  return { apiVersion, kind, metadata, spec }
+}
+
+function toEndpointResource ({
+  name,
+  namespace,
+  component,
+  subsets,
+  annotations = {},
+  ownerReferences = [],
+  labels = {}
+}) {
+  const apiVersion = Resources.Endpoint.apiVersion
+  const kind = Resources.Endpoint.kind
+  labels.component = component
+
+  const metadata = { name, namespace, labels, annotations, ownerReferences }
+
+  return { apiVersion, kind, metadata, subsets }
+}
+
 module.exports = {
   toClusterRoleResource,
   toClusterRoleBindingResource,
   toServiceAccountResource,
   toCronjobResource,
-  toIngressResource
+  toIngressResource,
+  toEndpointResource,
+  toServiceResource
 }
