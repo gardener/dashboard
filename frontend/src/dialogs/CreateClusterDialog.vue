@@ -1139,20 +1139,10 @@ export default {
       }
     }
 
-    .add_worker{
+    .add_worker {
       margin-left: 30px;
       border: 0;
     }
-
-    .hibernation_title_text {
-      font-size: 16px;
-
-      .bold {
-        font-weight: bolder;
-      }
-
-    }
-
   }
 
 </style>

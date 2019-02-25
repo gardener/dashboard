@@ -179,11 +179,6 @@ export default {
       }
       this.validateInput()
     },
-    setScheduleProperty (schedule, name, value) {
-      if (get(schedule, name) !== value) {
-        set(schedule, name, value)
-      }
-    },
     ensureScheduleWeekdaysIsSet (schedule, weekdays1, weekdays2) {
       if (!get(schedule, weekdays1)) {
         set(schedule, weekdays1, get(schedule, weekdays2))
@@ -247,6 +242,11 @@ export default {
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
       this.validateInput()
+    },
+    setScheduleProperty (schedule, name, value) {
+      if (get(schedule, name) !== value) {
+        set(schedule, name, value)
+      }
     },
     onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
