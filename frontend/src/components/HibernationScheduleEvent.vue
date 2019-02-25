@@ -226,6 +226,8 @@ export default {
         utcMinute = utcMoment.format('mm')
       }
       const id = this.id
+      const valid = !this.$v.$invalid
+      this.$emit('valid', { id, valid })
       this.$emit(eventName, { utcHour, utcMinute, id })
     },
     setSelectedDays (scheduleEvent) {
@@ -257,6 +259,8 @@ export default {
         weekdays = join(sortedDays, ',')
       }
       const id = this.id
+      const valid = !this.$v.$invalid
+      this.$emit('valid', { id, valid })
       this.$emit('updateSelectedDays', { weekdays, id })
     },
     removeScheduleEvent () {
@@ -270,10 +274,6 @@ export default {
         this.$v.localizedWakeUpTime.$touch()
         this.$v.localizedHibernateTime.$touch()
       }
-    },
-    emitValid (valid) {
-      const id = this.id
-      this.$emit('valid', { id, valid })
     }
   },
   watch: {
@@ -297,12 +297,6 @@ export default {
     },
     selectedDays (value) {
       this.updateSelectedDays({ selectedDays: value })
-    },
-    $v: {
-      deep: true,
-      handler (newValue, oldValue) {
-        this.emitValid(!newValue.$invalid)
-      }
     }
   },
   mounted () {

@@ -106,24 +106,15 @@ export default {
     return {
       parsedScheduleEvents: undefined,
       parseError: false,
-      valid: true
+      currentID: 0,
+      valid: true,
+      confirmNoSchedule: false
     }
   },
   computed: {
     ...mapState([
       'cfg'
     ]),
-    confirmNoSchedule: {
-      get () {
-        return this.noSchedule
-      },
-      set (value) {
-        if (value) {
-          this.clearParsedScheduleEvents()
-        }
-        this.$emit('updateNoSchedule', value)
-      }
-    },
     showNoScheduleCheckbox () {
       return purposeRequiresHibernationSchedule(this.purpose) &&
       isEmpty(this.parsedScheduleEvents) &&
@@ -136,7 +127,7 @@ export default {
   },
   methods: {
     reset () {
-      this.parseSchedules(this.scheduleCrontabs)
+      this.parseSchedules(this.scheduleCrontab)
 
       this.$nextTick(() => {
         forEach(this.$refs.scheduleEvents, (scheduleEventComponent) => {
@@ -183,6 +174,9 @@ export default {
       if (this.parseError) {
         this.clearParsedScheduleEvents()
       }
+      if (!isEmpty(this.parsedScheduleEvents)) {
+        this.confirmNoSchedule = false
+      }
       this.validateInput()
     },
     setScheduleProperty (schedule, name, value) {
@@ -227,6 +221,7 @@ export default {
           const id = this.id()
           const valid = true
           this.parsedScheduleEvents.push({ start, end, id, valid })
+          this.confirmNoSchedule = false
         }
       }
     },
@@ -247,9 +242,11 @@ export default {
       const end = {}
       const valid = false
       this.parsedScheduleEvents.push({ start, end, id, valid })
+      this.confirmNoSchedule = false
     },
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
+      this.validateInput()
     },
     onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
@@ -274,7 +271,7 @@ export default {
 
       this.validateInput()
     },
-    getScheduleCrontabs () {
+    getScheduleCrontab () {
       if (this.valid) {
         const crontabFromParsedScheduleEvent = parsedScheduleEvent => {
           if (parsedScheduleEvent && parsedScheduleEvent.hour && parsedScheduleEvent.minute && parsedScheduleEvent.weekdays) {
@@ -282,31 +279,34 @@ export default {
           }
           return null
         }
-        const scheduleCrontabs = []
+        const scheduleCrontab = []
         let valid = true
         forEach(this.parsedScheduleEvents, parsedScheduleEvent => {
           const start = crontabFromParsedScheduleEvent(parsedScheduleEvent.start)
           const end = crontabFromParsedScheduleEvent(parsedScheduleEvent.end)
 
-          const scheduleCrontab = {}
+          const crontabLine = {}
           if (start) {
-            scheduleCrontab.start = start
+            crontabLine.start = start
           }
           if (end) {
-            scheduleCrontab.end = end
+            crontabLine.end = end
           }
           if (start || end) {
-            scheduleCrontabs.push(scheduleCrontab)
+            scheduleCrontab.push(crontabLine)
           } else {
             valid = false
           }
         })
         if (valid && !this.parseError) {
-          return scheduleCrontabs
+          return scheduleCrontab
         } else {
-          return this.scheduleCrontabs
+          return this.scheduleCrontab
         }
       }
+    },
+    getNoHibernationSchedule () {
+      return this.confirmNoSchedule
     },
     validateInput () {
       let valid = true
@@ -321,18 +321,11 @@ export default {
     }
   },
   mounted () {
-    this.parseSchedules(this.scheduleCrontabs)
+    this.parseSchedules(this.scheduleCrontab)
+    this.confirmNoSchedule = this.noSchedule
   },
   watch: {
-    parsedScheduleEvents: {
-      deep: true,
-      handler (value, oldValue) {
-        if (!isEmpty(value)) {
-          this.confirmNoSchedule = false
-        }
-      }
-    },
-    scheduleCrontabs: {
+    scheduleCrontab: {
       deep: true,
       handler (value, oldValue) {
         if (!isEqual(value, oldValue)) {
@@ -344,6 +337,9 @@ export default {
       if (!purposeRequiresHibernationSchedule(value)) {
         this.confirmNoSchedule = false
       }
+    },
+    noSchedule (value) {
+      this.confirmNoSchedule = value
     }
   }
 }

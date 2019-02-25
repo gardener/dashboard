@@ -366,10 +366,8 @@ limitations under the License.
             <v-container>
               <hibernation-schedule
                 ref="hibernationSchedule"
-                :noSchedule="!!shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']"
                 :purpose="purpose"
                 @valid="onHibernationScheduleValid"
-                @updateNoSchedule="onUpdateNoSchedule"
               ></hibernation-schedule>
             </v-container>
           </v-card>
@@ -556,8 +554,6 @@ export default {
       validationErrors,
       maintenanceTimeValid: false,
       hibernationScheduleValid: false,
-      workersValid: false,
-      workers: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -935,6 +931,8 @@ export default {
         data.spec.hibernation = {
           schedules: hibernationSchedules
         }
+      } else if (this.$refs.hibernationSchedule.getNoHibernationSchedule()) {
+        annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
       }
       return this.createShoot(data)
     },
@@ -1015,7 +1013,9 @@ export default {
       this.purpose = head(this.filteredPurposes)
     },
     setDefaultHibernationSchedule () {
-      this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
+      this.$nextTick(() => {
+        this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
+      })
     },
     setDefaultMaintenanceTimeWindow () {
       // randomize maintenance time window
@@ -1079,13 +1079,6 @@ export default {
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
-    },
-    onUpdateNoSchedule (value) {
-      if (value) {
-        this.shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
-      } else {
-        delete this.shootDefinition.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-      }
     }
   },
   watch: {
