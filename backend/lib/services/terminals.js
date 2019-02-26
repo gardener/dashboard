@@ -113,7 +113,7 @@ function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, ta
   return { apiVersion, kind, metadata, roleRef, subjects }
 }
 
-function toTerminalPodResource ({ name, saName, user, target, ownerReferences }) {
+function toTerminalPodResource ({ name, terminalImage, saName, user, target, ownerReferences }) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -129,7 +129,7 @@ function toTerminalPodResource ({ name, saName, user, target, ownerReferences })
     containers: [
       {
         name: 'terminal',
-        image: 'psutter/toolbelt',
+        image: terminalImage,
         stdin: true,
         tty: true
       }
@@ -138,7 +138,7 @@ function toTerminalPodResource ({ name, saName, user, target, ownerReferences })
   return { apiVersion, kind, metadata, spec }
 }
 
-function toTerminalShootPodResource ({ name, user, target, ownerReferences }) {
+function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerReferences }) {
   const apiVersion = Resources.Pod.apiVersion
   const kind = Resources.Pod.kind
   const labels = {
@@ -153,7 +153,7 @@ function toTerminalShootPodResource ({ name, user, target, ownerReferences }) {
     containers: [
       {
         name: 'terminal',
-        image: 'psutter/toolbelt',
+        image: terminalImage,
         stdin: true,
         tty: true,
         volumeMounts: [
@@ -296,15 +296,14 @@ async function createAttachServiceAccountResource ({ coreClient, targetNamespace
   return coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, user, target, labels, annotations }) })
 }
 
-async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, identifier, user, target, ownerReferences }) {
+async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, identifier, user, target, terminalImage, ownerReferences }) {
   // create service account used by terminal pod for control plane access
   const adminServiceAccountName = `terminal-${identifier}`
   await coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: adminServiceAccountName, user, target, ownerReferences }) })
 
-  // create rolebinding for namespace admin
-  if (target === 'garden') {
+  if (target === 'garden') { // create rolebinding for cluster admin
     await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: adminServiceAccountName, targetNamespace, user, target, roleName: 'cluster-admin', ownerReferences }) })
-  } else {
+  } else { // create rolebinding for namespace admin
     await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, user, target, roleName: 'admin', ownerReferences }) })
   }
 
@@ -315,14 +314,14 @@ async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, 
 
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalPodResource({ name, saName: adminServiceAccountName, user, target, ownerReferences }) })
+  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalPodResource({ name, terminalImage, saName: adminServiceAccountName, user, target, ownerReferences }) })
   return _.get(podResource, 'metadata.name')
 }
 
-async function createPodForShootTerminal ({ coreClient, targetNamespace, identifier, user, target, ownerReferences }) {
+async function createPodForShootTerminal ({ coreClient, targetNamespace, identifier, user, target, terminalImage, ownerReferences }) {
   // create pod
   const name = `terminal-${identifier}`
-  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalShootPodResource({ name, user, target, ownerReferences }) })
+  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalShootPodResource({ name, user, target, terminalImage, ownerReferences }) })
   return _.get(podResource, 'metadata.name')
 }
 
@@ -374,11 +373,16 @@ exports.create = async function ({ user, namespace, name, target }) {
     // create rolebinding for attach-sa
     await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: attachServiceAccountName, user: username, target, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences }) })
 
+    const terminalImage = _.get(config, 'terminal.operator.image')
+    if (!terminalImage) {
+      throw new Error('no terminal operator image configured')
+    }
+
     let pod
     if (target === 'cp' || target === 'garden') {
-      pod = await createPodForTerminal({ coreClient, rbacClient, targetNamespace, identifier, user: username, target, ownerReferences })
+      pod = await createPodForTerminal({ coreClient, rbacClient, targetNamespace, identifier, user: username, target, terminalImage, ownerReferences })
     } else if (target === 'shoot') {
-      pod = await createPodForShootTerminal({ coreClient, targetNamespace, identifier, user: username, target, ownerReferences })
+      pod = await createPodForShootTerminal({ coreClient, targetNamespace, identifier, user: username, target, terminalImage, ownerReferences })
     } else {
       throw new Error(`Unknown terminal target ${target}`)
     }

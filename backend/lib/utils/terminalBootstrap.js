@@ -124,7 +124,7 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
   const name = CRONJOB_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
   const component = COMPONENT_TERMINAL
-  const image = 'psutter/gardener-cleanup-terminal:latest' // TODO
+  const image = _.get(config, 'terminal.cleanup.image')
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
 
@@ -396,6 +396,11 @@ function verifyRequiredSeedConfigExists () {
 
   if (_.isEmpty(config, 'terminal.bootstrap.apiserverIngress.annotations')) {
     logger.error('no terminal.bootstrap.apiserverIngress.annotations config found')
+    requiredConfigExists = false
+  }
+
+  if (_.isEmpty(config, 'terminal.cleanup.image')) {
+    logger.error('no terminal.cleanup.image config found')
     requiredConfigExists = false
   }
 

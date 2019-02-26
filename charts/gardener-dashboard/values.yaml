@@ -85,6 +85,16 @@ readinessProbe:
   successThreshold: 1
 
 terminal:
+  operator:
+    image:
+      repository: eu.gcr.io/gardener-project/gardener/ops-toolbelt
+      tag: 0.1.0
+  cleanup:
+    schedule: "*/5 * * * *"
+    noHeartbeatDeleteSeconds: 300
+    image:
+      repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-cleanup
+      tag: 1.0.0
   bootstrap:
     disabled: true
     apiserverIngress:

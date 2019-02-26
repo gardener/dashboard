@@ -91,9 +91,11 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
+{{- if .Values.frontendConfig.terminal }}
 {{- if .Values.frontendConfig.terminal.pingIntervalSeconds }}
       terminal:
-        pingIntervalSeconds: {{ .Values.terminal.pingIntervalSeconds }}
+        pingIntervalSeconds: {{ .Values.frontendConfig.terminal.pingIntervalSeconds }}
+{{- end }}
 {{- end }}
 {{- if .Values.prometheus }}
     prometheus:
@@ -116,6 +118,16 @@ data:
 {{- end }}
     {{- if .Values.terminal }}
     terminal:
+      operator:
+        image: {{ .Values.terminal.operator.image.repository }}{{- if .Values.terminal.operator.image.tag }}:{{ .Values.terminal.operator.image.tag }}{{- end }}
+      cleanup:
+        image: {{ .Values.terminal.cleanup.image.repository }}{{- if .Values.terminal.cleanup.image.tag }}:{{ .Values.terminal.cleanup.image.tag }}{{- end }}
+        {{- if .Values.terminal.cleanup.schedule }}
+        schedule: {{ .Values.terminal.cleanup.schedule }}
+        {{- end}}
+         {{- if .Values.terminal.cleanup.noHeartbeatDeleteSeconds }}
+        noHeartbeatDeleteSeconds: {{ .Values.terminal.cleanup.noHeartbeatDeleteSeconds }}
+        {{- end}}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
         {{- if .Values.terminal.bootstrap.disabled }}

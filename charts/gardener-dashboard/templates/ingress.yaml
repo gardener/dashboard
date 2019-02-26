@@ -29,6 +29,7 @@ spec:
           servicePort: {{ $.Values.servicePort }}
         path: /
   {{- end }}
+{{- if .Values.terminal }}
 {{- if .Values.terminal.gardenClusterKubeApiserver }}
 ---
 apiVersion: {{ include "ingressversion" . }}
@@ -62,4 +63,5 @@ spec:
           servicePort: {{ required ".Values.terminal.gardenClusterKubeApiserver.servicePort is required" $.Values.terminal.gardenClusterKubeApiserver.servicePort }}
         path: /
   {{- end }}
+{{- end }}
 {{- end }}
