@@ -16,6 +16,16 @@ limitations under the License.
 
 <template>
   <v-list>
+    <v-list-tile v-show="!hasVisibleProperties">
+      <v-list-tile-action>
+        <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-title>
+          Access information currently not available
+        </v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
     <v-list-tile v-show="!!dashboardUrl">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
@@ -176,9 +186,6 @@ export default {
   watch: {
     kubeconfig (value) {
       this.reset()
-    },
-    hasVisibleProperties (value) {
-      this.$emit('hasVisibleProperties', value)
     }
   }
 }
