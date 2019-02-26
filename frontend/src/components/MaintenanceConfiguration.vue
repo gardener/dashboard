@@ -84,16 +84,12 @@ export default {
         timeWindowBegin: undefined,
         timeWindowEnd: undefined,
         updateKubernetesVersion: false
-      }
+      },
+      icon: 'mdi-settings-outline',
+      caption: 'Configure Maintenance'
     }
   },
   computed: {
-    icon () {
-      return 'mdi-settings-outline'
-    },
-    caption () {
-      return 'Configure Maintenance'
-    },
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },

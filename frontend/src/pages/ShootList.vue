@@ -489,7 +489,4 @@ export default {
     margin: 0px;
   }
 
-  .bold {
-    font-weight: bolder;
-  }
 </style>

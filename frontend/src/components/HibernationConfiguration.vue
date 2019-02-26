@@ -77,16 +77,12 @@ export default {
       detailedErrorMessage: null,
       hibernationScheduleValid: false,
       hibernationSchedules: undefined,
-      noScheduleAnnotation: false
+      noScheduleAnnotation: false,
+      caption: 'Configure Hibernation Schedule',
+      icon: 'mdi-settings-outline'
     }
   },
   computed: {
-    icon () {
-      return 'mdi-settings-outline'
-    },
-    caption () {
-      return 'Configure Hibernation Schedule'
-    },
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },

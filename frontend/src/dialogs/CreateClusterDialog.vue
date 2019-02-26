@@ -418,7 +418,6 @@ import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/val
 import InfraIcon from '@/components/InfrastructureIcon'
 import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import moment from 'moment-timezone'
 
 const semSort = require('semver-sort')
 
@@ -604,7 +603,8 @@ export default {
   computed: {
     ...mapState([
       'user',
-      'namespace'
+      'namespace',
+      'localTimezone'
     ]),
     ...mapGetters([
       'cloudProfileByName',
@@ -1018,17 +1018,7 @@ export default {
       })
     },
     setDefaultMaintenanceTimeWindow () {
-      // randomize maintenance time window
-      const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-      const randomHour = sample(hours)
-      // use local timezone offset
-      const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
-
-      const utcBegin = randomMoment.format('HH0000+0000')
-      randomMoment.add(1, 'h')
-      const utcEnd = randomMoment.format('HH0000+0000')
-
-      this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
+      this.$refs.maintenanceTime.setDefaultMaintenanceTimeWindow()
     },
     setCloudProfileDefaults () {
       this.setDefaultRegion()

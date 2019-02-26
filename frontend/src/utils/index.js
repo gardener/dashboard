@@ -360,12 +360,8 @@ export function isShootHasNoHibernationScheduleWarning (shoot) {
   const purpose = annotations['garden.sapcloud.io/purpose']
   if (purposeRequiresHibernationSchedule(purpose)) {
     const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-    if (!hasNoScheduleFlag) {
-      const schedules = get(shoot, 'spec.hibernation.schedules', [])
-      const hasSchedules = schedules.length > 0
-      if (!hasSchedules) {
-        return true
-      }
+    if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
+      return true
     }
   }
   return false

@@ -323,7 +323,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
@@ -399,7 +399,9 @@ export default {
       'namespaces',
       'customAddonDefinitionList'
     ]),
-
+    ...mapState([
+      'localTimezone'
+    ]),
     getCloudProviderKind () {
       return getCloudProviderKind(get(this.item, 'spec.cloud'))
     },
@@ -537,7 +539,7 @@ export default {
       }
     },
     maintenanceDescription () {
-      const timezone = moment.tz.guess()
+      const timezone = this.localTimezone
       const maintenanceStart = get(this.item, 'spec.maintenance.timeWindow.begin')
       const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
       if (momentObj.isValid()) {
