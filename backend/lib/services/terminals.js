@@ -25,6 +25,9 @@ const { decodeBase64,
   getShootIngressDomain,
   createOwnerRefArrayForServiceAccount
 } = require('../utils')
+const {
+  toPodResource
+} = require('../utils/terminalResources')
 const config = require('../config')
 const authorization = require('./authorization')
 const shoots = require('./shoots')
@@ -39,12 +42,18 @@ function rbac () {
   return kubernetes.rbac()
 }
 
+function getAnnotationTerminalUserAndTarget ({ user, target }) {
+  return {
+    'garden.sapcloud.io/terminal-user': user,
+    'garden.sapcloud.io/terminal-target': target
+  }
+}
+
 function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences = [], labels = {}, annotations = {} }) {
   const apiVersion = Resources.ServiceAccount.apiVersion
   const kind = Resources.ServiceAccount.kind
   labels.component = 'dashboard-terminal'
-  annotations['garden.sapcloud.io/terminal-user'] = user
-  annotations['garden.sapcloud.io/terminal-target'] = target
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const metadata = { labels, annotations, ownerReferences }
   if (name) {
@@ -62,10 +71,9 @@ function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerRef
   const labels = {
     component: 'dashboard-terminal'
   }
-  const annotations = {
-    'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-target': target
-  }
+  const annotations = {}
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+
   const metadata = { name, labels, annotations, ownerReferences }
 
   const roleRef = {
@@ -90,10 +98,9 @@ function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, ta
   const labels = {
     component: 'dashboard-terminal'
   }
-  const annotations = {
-    'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-target': target
-  }
+  const annotations = {}
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+
   const metadata = { name, labels, annotations, ownerReferences }
 
   const roleRef = {
@@ -114,16 +121,10 @@ function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, ta
 }
 
 function toTerminalPodResource ({ name, terminalImage, saName, user, target, ownerReferences }) {
-  const apiVersion = Resources.Pod.apiVersion
-  const kind = Resources.Pod.kind
-  const labels = {
-    component: 'dashboard-terminal'
-  }
-  const annotations = {
-    'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-target': target
-  }
-  const metadata = { name, labels, annotations, ownerReferences }
+  const component = 'dashboard-terminal'
+  const annotations = {}
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+
   const spec = {
     serviceAccountName: saName,
     containers: [
@@ -135,20 +136,14 @@ function toTerminalPodResource ({ name, terminalImage, saName, user, target, own
       }
     ]
   }
-  return { apiVersion, kind, metadata, spec }
+  return toPodResource({ name, component, annotations, spec, ownerReferences })
 }
 
 function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerReferences }) {
-  const apiVersion = Resources.Pod.apiVersion
-  const kind = Resources.Pod.kind
-  const labels = {
-    component: 'dashboard-terminal'
-  }
-  const annotations = {
-    'garden.sapcloud.io/terminal-user': user,
-    'garden.sapcloud.io/terminal-target': target
-  }
-  const metadata = { name, labels, annotations, ownerReferences }
+  const component = 'dashboard-terminal'
+  const annotations = {}
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+
   const spec = {
     containers: [
       {
@@ -183,7 +178,7 @@ function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerR
       }
     ]
   }
-  return { apiVersion, kind, metadata, spec }
+  return toPodResource({ name, component, annotations, spec, ownerReferences })
 }
 
 async function readServiceAccountToken ({ client, targetNamespace, serviceaccountName }) {
@@ -301,10 +296,10 @@ async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, 
   const adminServiceAccountName = `terminal-${identifier}`
   await coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: adminServiceAccountName, user, target, ownerReferences }) })
 
-  if (target === 'garden') { // create rolebinding for cluster admin
+  if (target === 'garden') { // create cluster rolebinding for cluster admin
     await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: adminServiceAccountName, targetNamespace, user, target, roleName: 'cluster-admin', ownerReferences }) })
-  } else { // create rolebinding for namespace admin
-    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, user, target, roleName: 'admin', ownerReferences }) })
+  } else { // create rolebinding for namespace cluster-admin
+    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, user, target, roleName: 'cluster-admin', ownerReferences }) })
   }
 
   // wait until API token is written into service account before creating the pod

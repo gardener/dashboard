@@ -128,6 +128,11 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
 
+  const securityContext = {
+    runAsUser: 1000,
+    runAsNonRoot: true,
+    readOnlyRootFilesystem: true
+  }
   const spec = {
     concurrencyPolicy: 'Forbid',
     schedule,
@@ -139,15 +144,17 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
               {
                 name: TERMINAL_CLEANUP,
                 image,
-                imagePullPolicy: 'Always',
+                imagePullPolicy: 'IfNotPresent',
                 env: [
                   {
                     name: 'NO_HEARTBEAT_DELETE_SECONDS',
                     value: noHeartbeatDeleteSeconds
                   }
                 ]
+                // TODO limit resources
               }
             ],
+            securityContext,
             restartPolicy: 'OnFailure',
             serviceAccountName: saName
           }
@@ -387,19 +394,19 @@ function isTerminalBootstrapDisabled () {
   return _.get(config, 'terminal.bootstrap.disabled', true) // TODO enable by default
 }
 
-function verifyRequiredSeedConfigExists () {
+function verifyRequiredConfigExists () {
   if (isTerminalBootstrapDisabled()) {
     logger.debug('terminal bootstrap disabled by config')
     return false // no further checks needed, bootstrapping is disabled
   }
   let requiredConfigExists = true
 
-  if (_.isEmpty(config, 'terminal.bootstrap.apiserverIngress.annotations')) {
+  if (_.isEmpty(_.get(config, 'terminal.bootstrap.apiserverIngress.annotations'))) {
     logger.error('no terminal.bootstrap.apiserverIngress.annotations config found')
     requiredConfigExists = false
   }
 
-  if (_.isEmpty(config, 'terminal.cleanup.image')) {
+  if (_.isEmpty(_.get(config, 'terminal.cleanup.image'))) {
     logger.error('no terminal.cleanup.image config found')
     requiredConfigExists = false
   }
@@ -411,7 +418,7 @@ function bootstrapSeed ({ seed }) {
   if (isTerminalBootstrapDisabled()) {
     return
   }
-  if (!requiredSeedConfigExists) {
+  if (!requiredConfigExists) {
     return
   }
   const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'garden.sapcloud.io/terminal-bootstrap-resources-disabled'], false)
@@ -435,7 +442,7 @@ async function bootstrapGardener () {
   await bootstrapAttachResources({ rbacClient, ownerReferences })
 }
 
-const requiredSeedConfigExists = verifyRequiredSeedConfigExists()
+const requiredConfigExists = verifyRequiredConfigExists()
 
 const options = {}
 var bootstrapQueue = new Queue(async (seed, cb) => {
@@ -448,7 +455,7 @@ var bootstrapQueue = new Queue(async (seed, cb) => {
   }
 }, options)
 
-if (!isTerminalBootstrapDisabled()) {
+if (!isTerminalBootstrapDisabled() && requiredConfigExists) {
   bootstrapGardener()
     .catch(error => {
       logger.error('failed to bootstrap terminal resources for garden cluster', error)

@@ -16,6 +16,9 @@
 //
 
 'use strict'
+
+const _ = require('lodash')
+
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 
@@ -27,12 +30,10 @@ function toClusterRoleResource ({
   annotations = {},
   ownerReferences = []
 }) {
-  const apiVersion = Resources.ClusterRole.apiVersion
-  const kind = Resources.ClusterRole.kind
-  labels.component = component
+  const resource = Resources.ClusterRole
+  const data = { rules }
 
-  const metadata = { name, labels, annotations, ownerReferences }
-  return { apiVersion, kind, metadata, rules }
+  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
 }
 
 function toClusterRoleBindingResource ({
@@ -45,12 +46,7 @@ function toClusterRoleBindingResource ({
   labels = {},
   ownerReferences = []
 }) {
-  const apiVersion = Resources.ClusterRoleBinding.apiVersion
-  const kind = Resources.ClusterRoleBinding.kind
-  labels.component = component
-
-  const metadata = { name, labels, annotations, ownerReferences }
-
+  const resource = Resources.ClusterRoleBinding
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
     kind: Resources.ClusterRole.kind,
@@ -64,8 +60,9 @@ function toClusterRoleBindingResource ({
       namespace: saNamespace
     }
   ]
+  const data = { roleRef, subjects }
 
-  return { apiVersion, kind, metadata, roleRef, subjects }
+  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
 }
 
 function toServiceAccountResource ({
@@ -76,18 +73,10 @@ function toServiceAccountResource ({
   annotations = {},
   ownerReferences = []
 }) {
-  const apiVersion = Resources.ServiceAccount.apiVersion
-  const kind = Resources.ServiceAccount.kind
-  labels.component = component
+  const resource = Resources.ServiceAccount
+  const generateName = prefix
 
-  const metadata = { labels, annotations, ownerReferences }
-  if (name) {
-    metadata.name = name
-  } else {
-    metadata.generateName = prefix
-  }
-
-  return { apiVersion, kind, metadata }
+  return toResource({ resource, name, generateName, component, annotations, labels, ownerReferences })
 }
 
 function toCronjobResource ({
@@ -98,13 +87,10 @@ function toCronjobResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const apiVersion = Resources.CronJob.apiVersion
-  const kind = Resources.CronJob.kind
-  labels.component = component
+  const resource = Resources.CronJob
+  const data = { spec }
 
-  const metadata = { name, labels, annotations, ownerReferences }
-
-  return { apiVersion, kind, metadata, spec }
+  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
 }
 
 function toIngressResource ({
@@ -115,13 +101,10 @@ function toIngressResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const apiVersion = Resources.Ingress.apiVersion
-  const kind = Resources.Ingress.kind
-  labels.component = component
+  const resource = Resources.Ingress
+  const data = { spec }
 
-  const metadata = { name, labels, annotations, ownerReferences }
-
-  return { apiVersion, kind, metadata, spec }
+  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
 }
 
 function toServiceResource ({
@@ -133,13 +116,10 @@ function toServiceResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const apiVersion = Resources.Service.apiVersion
-  const kind = Resources.Service.kind
-  labels.component = component
+  const resource = Resources.Service
+  const data = { spec }
 
-  const metadata = { name, namespace, labels, annotations, ownerReferences }
-
-  return { apiVersion, kind, metadata, spec }
+  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
 }
 
 function toEndpointResource ({
@@ -151,13 +131,58 @@ function toEndpointResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const apiVersion = Resources.Endpoint.apiVersion
-  const kind = Resources.Endpoint.kind
+  const resource = Resources.Endpoint
+  const data = { subsets }
+
+  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
+}
+
+function toPodResource ({
+  name,
+  namespace,
+  component,
+  annotations,
+  labels,
+  spec,
+  ownerReferences
+}) {
+  const resource = Resources.Pod
+  const data = { spec }
+
+  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
+}
+
+function toResource ({
+  resource,
+  name,
+  generateName,
+  namespace,
+  component,
+  annotations = {},
+  labels = {},
+  ownerReferences,
+  data
+}) {
+  const apiVersion = resource.apiVersion
+  const kind = resource.kind
   labels.component = component
 
-  const metadata = { name, namespace, labels, annotations, ownerReferences }
+  const metadata = { labels, annotations, ownerReferences }
+  if (name) {
+    metadata.name = name
+  }
+  if (generateName) {
+    metadata.generateName = generateName
+  }
+  if (namespace) {
+    metadata.namespace = namespace
+  }
 
-  return { apiVersion, kind, metadata, subsets }
+  const resourceBody = { apiVersion, kind, metadata }
+
+  _.assign(resourceBody, data)
+
+  return resourceBody
 }
 
 module.exports = {
@@ -167,5 +192,6 @@ module.exports = {
   toCronjobResource,
   toIngressResource,
   toEndpointResource,
-  toServiceResource
+  toServiceResource,
+  toPodResource
 }
