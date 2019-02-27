@@ -61,8 +61,8 @@ limitations under the License.
       </v-flex>
     </v-layout>
     <v-layout row v-if="parseError" class="pt-2">
-      <v-alert :value="true" type="warning">
-        One ore more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
+      <v-alert :value="true" type="warning" outline>
+        One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-layout>
@@ -76,10 +76,11 @@ import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
-import isEqual from 'lodash/isEqual'
+import padStart from 'lodash/padStart'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import moment from 'moment-timezone'
 import { mapState } from 'vuex'
+const uuidv4 = require('uuid/v4')
 
 const scheduleCrontabRegex = /^(?<minute>\d{0,2})\s(?<hour>\d{0,2})\s\*\s\*\s(?<weekdays>[0-6,]+)$/
 
@@ -104,14 +105,14 @@ export default {
     return {
       parsedScheduleEvents: undefined,
       parseError: false,
-      currentID: 0,
       valid: true,
       confirmNoSchedule: false
     }
   },
   computed: {
     ...mapState([
-      'cfg'
+      'cfg',
+      'localTimezone'
     ]),
     showNoScheduleCheckbox () {
       return purposeRequiresHibernationSchedule(this.purpose) &&
@@ -133,95 +134,74 @@ export default {
         })
       })
     },
-    clearParsedScheduleEvents () {
-      this.currentID = 0 // Schedule Event Ids need to be stable
-      this.parsedScheduleEvents = []
-    },
     id () {
-      this.currentID++
-      return this.currentID
+      return uuidv4()
     },
-    parseSchedules (schedules) {
-      this.clearParsedScheduleEvents()
+    parsedScheduleEventFromCrontabBlock (crontabBlock) {
+      const cronStart = get(crontabBlock, 'start')
+      const cronEnd = get(crontabBlock, 'end')
+      const start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
+      const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
 
-      this.parseError = false
-      forEach(schedules, schedule => {
-        const cronStart = get(schedule, 'start')
-        const cronEnd = get(schedule, 'end')
-        const start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
-        const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
-
-        if (cronStart && !start) {
-          console.warn(`Could not parse start crontab line: ${cronStart}`)
+      if (cronStart && !start) {
+        console.warn(`Could not parse start crontab line: ${start}`)
+        this.parseError = true
+      }
+      if (cronEnd && !end) {
+        console.warn(`Could not parse end crontab line: ${cronEnd}`)
+        this.parseError = true
+      }
+      if (start && end) {
+        if (start.weekdays !== end.weekdays) {
+          console.warn(`Start weekdays (${start.weekdays}) and end weekdays (${end.weekdays}) do not match. This is currently not supported by the dashboard`)
           this.parseError = true
         }
-        if (cronEnd && !end) {
-          console.warn(`Could not parse end crontab line: ${cronEnd}`)
-          this.parseError = true
-        }
-        if (start && end) {
-          if (start.weekdays !== end.weekdays) {
-            console.warn(`Start weekdays (${start.weekdays}) and end weekdays (${end.weekdays}) do not match. This is currently not supported by the dashboard`)
-            this.parseError = true
-          }
-        }
+      }
+      if ((start || end) && !this.parseError) {
         const id = this.id()
         const valid = true
-        this.parsedScheduleEvents.push({ start, end, id, valid })
-      })
-      if (this.parseError) {
-        this.clearParsedScheduleEvents()
+        return { start, end, id, valid }
       }
+      return undefined
+    },
+    parseSchedules (scheduleCrontab) {
+      this.parseError = false
+      const parsedScheduleEvents = []
+      forEach(scheduleCrontab, crontabBlock => {
+        const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(crontabBlock)
+        if (parsedScheduleEvent) {
+          parsedScheduleEvents.push(parsedScheduleEvent)
+        }
+      })
+      this.setParsedSchedules(parsedScheduleEvents)
+    },
+    setDefaultHibernationSchedule () {
+      const convertScheduleEventLineToLocalTimezone = ({ parsedScheduleEvent, line }) => {
+        const scheduleEventLine = parsedScheduleEvent[line]
+        if (scheduleEventLine) {
+          const localMoment = moment.tz(`${padStart(scheduleEventLine.hour, 2, '0')}${padStart(scheduleEventLine.minute, 2, '0')}`, 'HHmm', this.localTimezone).utc()
+          scheduleEventLine.hour = localMoment.format('HH')
+          scheduleEventLine.minute = localMoment.format('mm')
+        }
+      }
+
+      const defaultHibernationCrontabBlock = get(this.cfg.defaultHibernationSchedule, this.purpose)
+      this.parseError = false
+      const parsedScheduleEvents = []
+      const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(defaultHibernationCrontabBlock)
+      if (parsedScheduleEvent) {
+        convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'start' })
+        convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'end' })
+        parsedScheduleEvents.push(parsedScheduleEvent)
+      }
+      this.setParsedSchedules(parsedScheduleEvents)
+    },
+    setParsedSchedules (parsedScheduleEvents) {
+      this.parsedScheduleEvents = parsedScheduleEvents
       if (!isEmpty(this.parsedScheduleEvents)) {
         this.confirmNoSchedule = false
       }
       this.validateInput()
-    },
-    setScheduleProperty (schedule, name, value) {
-      if (get(schedule, name) !== value) {
-        set(schedule, name, value)
-      }
-    },
-    ensureScheduleWeekdaysIsSet (schedule, weekdays1, weekdays2) {
-      if (!get(schedule, weekdays1)) {
-        set(schedule, weekdays1, get(schedule, weekdays2))
-      }
-    },
-    setDefaultHibernationSchedule () {
-      this.clearParsedScheduleEvents()
-
-      const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
-      if (defaultHibernationCrontab) {
-        const cronStart = get(defaultHibernationCrontab, 'start')
-        const cronEnd = get(defaultHibernationCrontab, 'end')
-        let start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
-        let end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
-
-        // Convert configured default schedule to local timezone
-        let startMoment, endMoment
-        if (start) {
-          startMoment = moment.tz(start.hour, 'HH', moment.tz.guess()).utc()
-          start = {
-            hour: startMoment.hours(),
-            minute: start.minute,
-            weekdays: start.weekdays
-          }
-        }
-        if (end) {
-          endMoment = moment.tz(end.hour, 'HH', moment.tz.guess()).utc()
-          end = {
-            hour: endMoment.hours(),
-            minute: end.minute,
-            weekdays: end.weekdays
-          }
-        }
-        if (start || end) {
-          const id = this.id()
-          const valid = true
-          this.parsedScheduleEvents.push({ start, end, id, valid })
-          this.confirmNoSchedule = false
-        }
-      }
     },
     addSchedule () {
       if (!isEmpty(this.parsedScheduleEvents)) {
@@ -246,22 +226,27 @@ export default {
       this.parsedScheduleEvents.splice(index, 1)
       this.validateInput()
     },
+    ensureScheduleWeekdaysIsSet (schedule, weekdays1, weekdays2) {
+      if (!get(schedule, weekdays1)) {
+        set(schedule, weekdays1, get(schedule, weekdays2))
+      }
+    },
     onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      this.setScheduleProperty(schedule, 'end.hour', utcHour)
-      this.setScheduleProperty(schedule, 'end.minute', utcMinute)
+      set(schedule, 'end.hour', utcHour)
+      set(schedule, 'end.minute', utcMinute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'end.weekdays', 'start.weekdays')
     },
     onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      this.setScheduleProperty(schedule, 'start.hour', utcHour)
-      this.setScheduleProperty(schedule, 'start.minute', utcMinute)
+      set(schedule, 'start.hour', utcHour)
+      set(schedule, 'start.minute', utcMinute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
     },
     onUpdateSelectedDays ({ weekdays, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      this.setScheduleProperty(schedule, 'start.weekdays', weekdays)
-      this.setScheduleProperty(schedule, 'end.weekdays', weekdays)
+      set(schedule, 'start.weekdays', weekdays)
+      set(schedule, 'end.weekdays', weekdays)
     },
     onScheduleEventValid ({ id, valid }) {
       const schedule = find(this.parsedScheduleEvents, { id })
@@ -271,27 +256,24 @@ export default {
     },
     getScheduleCrontab () {
       if (this.valid) {
-        const crontabFromParsedScheduleEvent = parsedScheduleEvent => {
-          if (parsedScheduleEvent && parsedScheduleEvent.hour && parsedScheduleEvent.minute && parsedScheduleEvent.weekdays) {
-            return `${parsedScheduleEvent.minute} ${parsedScheduleEvent.hour} * * ${parsedScheduleEvent.weekdays}`
+        const crontabLineFromParsedScheduleEvent = ({ crontabBlock, parsedScheduleEvent, line }) => {
+          const { weekdays, hour, minute } = get(parsedScheduleEvent, line, {})
+          if (parsedScheduleEvent && hour && minute && weekdays) {
+            crontabBlock[line] = `${minute} ${hour} * * ${weekdays}`
           }
-          return null
+        }
+        const crontabBlockFromScheduleEvent = parsedScheduleEvent => {
+          const crontabBlock = {}
+          crontabLineFromParsedScheduleEvent({ crontabBlock, parsedScheduleEvent, line: 'start' })
+          crontabLineFromParsedScheduleEvent({ crontabBlock, parsedScheduleEvent, line: 'end' })
+          return crontabBlock
         }
         const scheduleCrontab = []
         let valid = true
         forEach(this.parsedScheduleEvents, parsedScheduleEvent => {
-          const start = crontabFromParsedScheduleEvent(parsedScheduleEvent.start)
-          const end = crontabFromParsedScheduleEvent(parsedScheduleEvent.end)
-
-          const crontabLine = {}
-          if (start) {
-            crontabLine.start = start
-          }
-          if (end) {
-            crontabLine.end = end
-          }
-          if (start || end) {
-            scheduleCrontab.push(crontabLine)
+          const crontabBlock = crontabBlockFromScheduleEvent(parsedScheduleEvent)
+          if (!isEmpty(crontabBlock)) {
+            scheduleCrontab.push(crontabBlock)
           } else {
             valid = false
           }
@@ -321,24 +303,6 @@ export default {
   mounted () {
     this.parseSchedules(this.scheduleCrontab)
     this.confirmNoSchedule = this.noSchedule
-  },
-  watch: {
-    scheduleCrontab: {
-      deep: true,
-      handler (value, oldValue) {
-        if (!isEqual(value, oldValue)) {
-          this.parseSchedules(value)
-        }
-      }
-    },
-    purpose (value) {
-      if (!purposeRequiresHibernationSchedule(value)) {
-        this.confirmNoSchedule = false
-      }
-    },
-    noSchedule (value) {
-      this.confirmNoSchedule = value
-    }
   }
 }
 </script>

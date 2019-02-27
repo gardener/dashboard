@@ -21,7 +21,7 @@ limitations under the License.
     </v-card-title>
 
     <v-container>
-      <span style="font-weight: 700">{{login}}</span> created this
+      <span class="font-weight-bold">{{login}}</span> created this
       <a :href="journalHtmlUrl" target="_blank" class="cyan--text text--darken-2">journal</a>
       <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-string :dateTime="journal.metadata.created_at" :pointInTime="-1"></time-string>

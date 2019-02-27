@@ -22,8 +22,9 @@ limitations under the License.
       v-model="selectedDays"
       ref="selectedDays"
       @blur="touchIfNothingFocused"
-      @input="$v.selectedDays.$touch()"
+      @input="onInputSelectedDays"
       :items="weekdays"
+      return-object
       :error-messages="getErrorMessages('selectedDays')"
       chips
       label="Weekdays on which this rule shall be active"
@@ -39,7 +40,7 @@ limitations under the License.
         v-model="localizedWakeUpTime"
         ref="localizedWakeUpTime"
         @blur="touchIfNothingFocused"
-        @input="$v.localizedWakeUpTime.$touch()"
+        @input="onInputLocalizedWakeUpTime"
         :error-messages="getErrorMessages('localizedWakeUpTime')"
         type="time"
       ></v-text-field>
@@ -51,7 +52,7 @@ limitations under the License.
         v-model="localizedHibernateTime"
         ref="localizedHibernateTime"
         @blur="touchIfNothingFocused"
-        @input="$v.localizedHibernateTime.$touch()"
+        @input="onInputLocalizedHibernateTime"
         :error-messages="getErrorMessages('localizedHibernateTime')"
         type="time"
       ></v-text-field>
@@ -81,6 +82,7 @@ limitations under the License.
 <script>
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
+import { mapState } from 'vuex'
 import moment from 'moment-timezone'
 import join from 'lodash/join'
 import split from 'lodash/split'
@@ -89,6 +91,7 @@ import padStart from 'lodash/padStart'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
+import sortBy from 'lodash/sortBy'
 
 const validationErrors = {
   selectedDays: {
@@ -126,12 +129,21 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'localTimezone'
+    ]),
     id () {
       return this.scheduleEvent.id
     }
   },
   data () {
     return {
+      validationErrors,
+      timezones: moment.tz.names(),
+      selectedTimezone: this.localTimezone,
+      localizedWakeUpTime: null,
+      localizedHibernateTime: null,
+      selectedDays: null,
       weekdays: [
         {
           text: 'Monday',
@@ -168,20 +180,14 @@ export default {
           value: 0,
           sortValue: 7
         }
-      ],
-      validationErrors,
-      timezones: moment.tz.names(),
-      selectedTimezone: moment.tz.guess(),
-      localizedWakeUpTime: null,
-      localizedHibernateTime: null,
-      selectedDays: null
+      ]
     }
   },
   methods: {
     reset () {
-      this.selectedTimezone = moment.tz.guess()
-      this.setLocalizedWakeUpTime(this.scheduleEvent.end)
-      this.setLocalizedHibernateTime(this.scheduleEvent.start)
+      this.selectedTimezone = this.localTimezone
+      this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
+      this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
       this.setSelectedDays(this.scheduleEvent)
 
       setDelayedInputFocus(this, 'selectedDays')
@@ -197,26 +203,10 @@ export default {
         }
       }
     },
-    setLocalizedWakeUpTime (utcCronTime) {
-      const localizedTime = this.getLocalizedTime(utcCronTime)
-      if (localizedTime !== this.localizedWakeUpTime) {
-        // Only set if value actually changed in parent component
-        // Vue component would reset input focus otherwise
-        this.localizedWakeUpTime = localizedTime
-      }
-    },
-    setLocalizedHibernateTime (utcCronTime) {
-      const localizedTime = this.getLocalizedTime(utcCronTime)
-      if (localizedTime !== this.localizedHibernateTime) {
-        // Only set if value actually changed in parent component
-        // Vue component would reset input focus otherwise
-        this.localizedHibernateTime = localizedTime
-      }
-    },
-    updateLocalizedTime ({ eventName, localTime, localTimezone }) {
+    updateLocalizedTime ({ eventName, localTime }) {
       let utcMoment
-      if (localTime && localTimezone) {
-        utcMoment = moment.tz(localTime, 'HHmm', localTimezone).utc()
+      if (localTime && this.selectedTimezone) {
+        utcMoment = moment.tz(localTime, 'HHmm', this.selectedTimezone).utc()
       }
 
       let utcHour
@@ -233,7 +223,7 @@ export default {
     setSelectedDays (scheduleEvent) {
       const days = get(scheduleEvent, 'start.weekdays', get(scheduleEvent, 'end.weekdays'))
       if (days) {
-        const daysArray = map(split(days, ','), day => parseInt(day))
+        const daysArray = map(split(days, ','), day => find(this.weekdays, { 'value': parseInt(day) }))
         if (!isEqual(daysArray, this.selectedDays)) {
           this.selectedDays = daysArray
         }
@@ -241,22 +231,11 @@ export default {
         this.selectedDays = null
       }
     },
-    updateSelectedDays ({ selectedDays }) {
+    updateSelectedDays () {
       let weekdays
-      if (selectedDays) {
-        const sortedDays = selectedDays.slice()
-        sortedDays.sort((a, b) => {
-          const aVal = get(find(this.weekdays, { value: a }), 'sortValue')
-          const bVal = get(find(this.weekdays, { value: b }), 'sortValue')
-
-          if (aVal > bVal) {
-            return 1
-          } else if (aVal < bVal) {
-            return -1
-          }
-          return 0
-        })
-        weekdays = join(sortedDays, ',')
+      if (this.selectedDays) {
+        this.selectedDays = sortBy(this.selectedDays, 'sortValue')
+        weekdays = join(map(this.selectedDays, 'value'), ',')
       }
       const id = this.id
       const valid = !this.$v.$invalid
@@ -274,29 +253,22 @@ export default {
         this.$v.localizedWakeUpTime.$touch()
         this.$v.localizedHibernateTime.$touch()
       }
-    }
-  },
-  watch: {
-    scheduleEvent: {
-      deep: true,
-      handler (newValue, oldValue) {
-        this.setLocalizedWakeUpTime(newValue.end)
-        this.setLocalizedHibernateTime(newValue.start)
-        this.setSelectedDays(newValue)
-      }
     },
-    localizedWakeUpTime (value) {
-      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: value, localTimezone: this.selectedTimezone })
+    onInputSelectedDays () {
+      this.$v.selectedDays.$touch()
+      this.updateSelectedDays()
     },
-    localizedHibernateTime (value) {
-      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: value, localTimezone: this.selectedTimezone })
+    onInputLocalizedWakeUpTime () {
+      this.$v.localizedWakeUpTime.$touch()
+      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime })
     },
-    selectedTimezone (value) {
-      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime, localTimezone: value })
-      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime, localTimezone: value })
+    onInputLocalizedHibernateTime () {
+      this.$v.localizedWakeUpTime.$touch()
+      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime })
     },
-    selectedDays (value) {
-      this.updateSelectedDays({ selectedDays: value })
+    onInputSelectedTimezone () {
+      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime })
+      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime })
     }
   },
   mounted () {

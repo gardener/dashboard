@@ -21,8 +21,8 @@ limitations under the License.
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
   <div slot="content-before" class="message">
-    To reduce expenses, <span class="bold">{{purposeText}}</span> clusters get a hibernation schedule by default.
-    However, this cluster does not have a hibernation schedule. Please navigate to the cluster details page to
+    To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
+    Please navigate to the cluster details page to
     <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">
       configure
     </router-link>
@@ -69,9 +69,6 @@ export default {
 <style lang="styl" scoped>
   .cursor-pointer {
     cursor: pointer;
-  }
-  .bold {
-    font-weight: bold;
   }
   .message {
     text-align: left;

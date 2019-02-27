@@ -255,14 +255,14 @@ limitations under the License.
 
       </v-flex>
 
-      <v-flex md6 v-show="isInfoAvailable">
+      <v-flex md6>
         <status-card :shootItem="item"></status-card>
 
-        <v-card v-show="clusterAccessHasVisibleProperties">
+        <v-card>
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Access
           </v-card-title>
-          <cluster-access :item="item" @hasVisibleProperties="onClusterAccessHasVisibleProperties"></cluster-access>
+          <cluster-access :item="item"></cluster-access>
         </v-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
@@ -343,7 +343,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
@@ -412,8 +412,7 @@ export default {
           title: 'Nginx Ingress',
           description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
         }
-      ],
-      clusterAccessHasVisibleProperties: false
+      ]
     }
   },
   computed: {
@@ -424,7 +423,9 @@ export default {
       'namespaces',
       'customAddonDefinitionList'
     ]),
-
+    ...mapState([
+      'localTimezone'
+    ]),
     getCloudProviderKind () {
       return getCloudProviderKind(get(this.item, 'spec.cloud'))
     },
@@ -461,9 +462,6 @@ export default {
     },
     item () {
       return get(this, 'value', {})
-    },
-    isInfoAvailable () {
-      return !!this.info
     },
     isLoggingFeatureGateEnabled () {
       return !!this.info.logging_username && !!this.info.logging_password
@@ -565,7 +563,7 @@ export default {
       }
     },
     maintenanceDescription () {
-      const timezone = moment.tz.guess()
+      const timezone = this.localTimezone
       const maintenanceStart = get(this.item, 'spec.maintenance.timeWindow.begin')
       const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
       if (momentObj.isValid()) {
@@ -580,11 +578,6 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.item)
-    }
-  },
-  methods: {
-    onClusterAccessHasVisibleProperties (value) {
-      this.clusterAccessHasVisibleProperties = value
     }
   },
   mounted () {

@@ -227,7 +227,6 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
-                toRouteName: 'ShootItemHibernationSettings',
                 breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
                 tabs: shootItemTabs
               }
