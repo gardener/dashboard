@@ -155,6 +155,7 @@ export default {
     },
     async connect () {
       this.spinner.start()
+      this.spinner.text = 'Preparing terminal session'
 
       try {
         const terminalData = await this.createTerminal()
