@@ -91,6 +91,10 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
+{{- if .Values.terminal }}
+      features:
+        terminalEnabled: true
+{{- end }}
 {{- if .Values.frontendConfig.terminal }}
 {{- if .Values.frontendConfig.terminal.pingIntervalSeconds }}
       terminal:
