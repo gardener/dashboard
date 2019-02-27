@@ -18,8 +18,8 @@
 'use strict'
 const Queue = require('better-queue')
 const isIp = require('is-ip')
-
 const _ = require('lodash')
+
 const logger = require('../logger')
 const config = require('../config')
 const {
@@ -29,6 +29,7 @@ const {
   createOwnerRefArrayForServiceAccount
 } = require('../utils')
 const kubernetes = require('../kubernetes')
+const Resources = kubernetes.Resources
 const {
   toClusterRoleResource,
   toClusterRoleBindingResource,
@@ -103,7 +104,21 @@ async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespa
   const clusterRoleName = CLUSTER_ROLE_NAME_CLEANUP
   const component = COMPONENT_TERMINAL
 
-  const body = toClusterRoleBindingResource({ name, clusterRoleName, component, saName, saNamespace, ownerReferences })
+  const roleRef = {
+    apiGroup: Resources.ClusterRole.apiGroup,
+    kind: Resources.ClusterRole.kind,
+    name: clusterRoleName
+  }
+
+  const subjects = [
+    {
+      kind: Resources.ServiceAccount.kind,
+      name: saName,
+      namespace: saNamespace
+    }
+  ]
+
+  const body = toClusterRoleBindingResource({ name, component, roleRef, subjects, ownerReferences })
   const client = rbacClient.clusterrolebinding
 
   return replaceResource({ client, name, body })

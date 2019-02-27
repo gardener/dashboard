@@ -26,6 +26,9 @@ const { decodeBase64,
   createOwnerRefArrayForServiceAccount
 } = require('../utils')
 const {
+  toServiceAccountResource,
+  toRoleBindingResource,
+  toClusterRoleBindingResource,
   toPodResource
 } = require('../utils/terminalResources')
 const config = require('../config')
@@ -49,32 +52,17 @@ function getAnnotationTerminalUserAndTarget ({ user, target }) {
   }
 }
 
-function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences = [], labels = {}, annotations = {} }) {
-  const apiVersion = Resources.ServiceAccount.apiVersion
-  const kind = Resources.ServiceAccount.kind
-  labels.component = 'dashboard-terminal'
+function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences, labels, annotations }) {
+  const component = 'dashboard-terminal'
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
-  const metadata = { labels, annotations, ownerReferences }
-  if (name) {
-    metadata.name = name
-  } else {
-    metadata.generateName = prefix
-  }
-
-  return { apiVersion, kind, metadata }
+  return toServiceAccountResource({ prefix, name, component, labels, annotations, ownerReferences })
 }
 
 function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerReferences }) {
-  const apiVersion = Resources.RoleBinding.apiVersion
-  const kind = Resources.RoleBinding.kind
-  const labels = {
-    component: 'dashboard-terminal'
-  }
+  const component = 'dashboard-terminal'
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
-
-  const metadata = { name, labels, annotations, ownerReferences }
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -89,19 +77,13 @@ function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerRef
     }
   ]
 
-  return { apiVersion, kind, metadata, roleRef, subjects }
+  return toRoleBindingResource({ name, component, annotations, subjects, roleRef, ownerReferences })
 }
 
 function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, target, roleName, ownerReferences }) {
-  const apiVersion = Resources.ClusterRoleBinding.apiVersion
-  const kind = Resources.ClusterRoleBinding.kind
-  const labels = {
-    component: 'dashboard-terminal'
-  }
+  const component = 'dashboard-terminal'
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
-
-  const metadata = { name, labels, annotations, ownerReferences }
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -117,13 +99,13 @@ function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, ta
     }
   ]
 
-  return { apiVersion, kind, metadata, roleRef, subjects }
+  return toClusterRoleBindingResource({ name, component, roleRef, subjects, annotations, ownerReferences })
 }
 
 function toTerminalPodResource ({ name, terminalImage, saName, user, target, ownerReferences }) {
   const component = 'dashboard-terminal'
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const spec = {
     serviceAccountName: saName,
@@ -142,7 +124,7 @@ function toTerminalPodResource ({ name, terminalImage, saName, user, target, own
 function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerReferences }) {
   const component = 'dashboard-terminal'
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({user, target}))
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const spec = {
     containers: [

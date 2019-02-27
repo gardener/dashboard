@@ -38,28 +38,29 @@ function toClusterRoleResource ({
 
 function toClusterRoleBindingResource ({
   name,
-  clusterRoleName,
   component,
-  saName,
-  saNamespace,
+  roleRef,
+  subjects,
   annotations = {},
   labels = {},
   ownerReferences = []
 }) {
   const resource = Resources.ClusterRoleBinding
-  const roleRef = {
-    apiGroup: Resources.ClusterRole.apiGroup,
-    kind: Resources.ClusterRole.kind,
-    name: clusterRoleName
-  }
+  const data = { roleRef, subjects }
 
-  const subjects = [
-    {
-      kind: Resources.ServiceAccount.kind,
-      name: saName,
-      namespace: saNamespace
-    }
-  ]
+  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+}
+
+function toRoleBindingResource ({
+  name,
+  component,
+  annotations = {},
+  labels = {},
+  subjects,
+  roleRef,
+  ownerReferences
+}) {
+  const resource = Resources.RoleBinding
   const data = { roleRef, subjects }
 
   return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
@@ -188,6 +189,7 @@ function toResource ({
 module.exports = {
   toClusterRoleResource,
   toClusterRoleBindingResource,
+  toRoleBindingResource,
   toServiceAccountResource,
   toCronjobResource,
   toIngressResource,
