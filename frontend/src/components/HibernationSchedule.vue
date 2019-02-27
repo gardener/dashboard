@@ -296,7 +296,7 @@ export default {
         }
       })
 
-      this.valid = valid
+      this.valid = valid && !this.parseError
       this.$emit('valid', this.valid)
     }
   },
