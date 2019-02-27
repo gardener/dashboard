@@ -97,11 +97,12 @@ export default {
   name: 'shoot-item-terminal',
   data () {
     return {
-      close: () => {},
+      close: () => this.cancelConnect = true,
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
-      spinner: undefined
+      spinner: undefined,
+      cancelConnect: false
     }
   },
   computed: {
@@ -164,6 +165,11 @@ export default {
         const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
 
         const attachTerminal = () => {
+          this.spinner.text = 'Connecting'
+          if (this.cancelConnect) {
+            return
+          }
+
           tries++
           const ws = new WebSocket(uri(terminalData), protocols(terminalData))
           ws.binaryType = 'arraybuffer'
@@ -171,6 +177,10 @@ export default {
           let heartbeatIntervalId
 
           ws.onopen = async () => {
+            if (this.cancelConnect) {
+              this.close()
+              return
+            }
             this.term.attach(ws)
 
             this.spinner.stop()
@@ -246,14 +256,14 @@ export default {
         clearLine: () => this.term.write('\x1bc'), // TODO reset line only
         cursorTo: to => {}
       },
-      text: 'Connecting',
       spinner: 'dots'
     })
 
     this.connect()
   },
-  beforeDestroy () {
+  beforeRouteLeave (to, from, next) {
     this.close()
+    next()
   }
 }
 </script>
