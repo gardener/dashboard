@@ -109,8 +109,8 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    pingIntervalSeconds () {
-      return get(this.cfg, 'terminal.pingIntervalSeconds')
+    heartbeatIntervalSeconds () {
+      return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
     }
   },
   methods: {
@@ -194,7 +194,7 @@ export default {
               } catch (err) {
                 console.error('heartbeat failed:', err)
               }
-            }, 60 * 1000)
+            }, this.heartbeatIntervalSeconds * 1000)
           }
           ws.onclose = error => {
             this.close()

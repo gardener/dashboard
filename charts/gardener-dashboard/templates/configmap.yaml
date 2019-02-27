@@ -96,9 +96,9 @@ data:
         terminalEnabled: true
 {{- end }}
 {{- if .Values.frontendConfig.terminal }}
-{{- if .Values.frontendConfig.terminal.pingIntervalSeconds }}
+{{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
       terminal:
-        pingIntervalSeconds: {{ .Values.frontendConfig.terminal.pingIntervalSeconds }}
+        heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
 {{- end }}
 {{- end }}
 {{- if .Values.prometheus }}

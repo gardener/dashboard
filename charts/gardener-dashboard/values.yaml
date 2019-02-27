@@ -55,7 +55,7 @@ frontendConfig:
     url: https://github.com/gardener/gardener/issues
   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
   terminal:
-    pingIntervalSeconds: 30
+    heartbeatIntervalSeconds: 60
 gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
