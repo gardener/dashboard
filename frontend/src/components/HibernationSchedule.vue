@@ -138,27 +138,26 @@ export default {
       return uuidv4()
     },
     parsedScheduleEventFromCrontabBlock (crontabBlock) {
-      const cronStart = crontabBlock.start
-      const cronEnd = crontabBlock.end
+      const cronStart = get(crontabBlock, 'start')
+      const cronEnd = get(crontabBlock, 'end')
       const start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
       const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
-      let parseError = false
 
       if (cronStart && !start) {
         console.warn(`Could not parse start crontab line: ${start}`)
-        parseError = true
+        this.parseError = true
       }
       if (cronEnd && !end) {
         console.warn(`Could not parse end crontab line: ${cronEnd}`)
-        parseError = true
+        this.parseError = true
       }
       if (start && end) {
         if (start.weekdays !== end.weekdays) {
           console.warn(`Start weekdays (${start.weekdays}) and end weekdays (${end.weekdays}) do not match. This is currently not supported by the dashboard`)
-          parseError = true
+          this.parseError = true
         }
       }
-      if ((start || end) && !parseError) {
+      if ((start || end) && !this.parseError) {
         const id = this.id()
         const valid = true
         return { start, end, id, valid }
@@ -172,8 +171,6 @@ export default {
         const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(crontabBlock)
         if (parsedScheduleEvent) {
           parsedScheduleEvents.push(parsedScheduleEvent)
-        } else {
-          this.parseError = true
         }
       })
       this.setParsedSchedules(parsedScheduleEvents)
@@ -196,8 +193,6 @@ export default {
         convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'start' })
         convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'end' })
         parsedScheduleEvents.push(parsedScheduleEvent)
-      } else {
-        this.parseError = true
       }
       this.setParsedSchedules(parsedScheduleEvents)
     },
