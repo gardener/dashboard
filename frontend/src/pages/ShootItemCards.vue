@@ -236,7 +236,7 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6 v-show="isInfoAvailable">
-        <v-card>
+        <v-card v-if="hasTerminalAccess">
           <v-card-title class="subheading white--text cyan darken-2">
             Control Plane
           </v-card-title>
@@ -397,6 +397,7 @@ export default {
       'journalsByNamespaceAndName',
       'isAdmin',
       'namespaces',
+      'hasTerminalAccess',
       'customAddonDefinitionList'
     ]),
 
