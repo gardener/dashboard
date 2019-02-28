@@ -56,9 +56,9 @@ frontendConfig:
   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
   defaultHibernationSchedule:
     evaluation:
-      start: 00 17 * * 1,2,3,4,5
+    - start: 00 17 * * 1,2,3,4,5
     development:
-      start: 00 17 * * 1,2,3,4,5
+    - start: 00 17 * * 1,2,3,4,5
       end: 00 08 * * 1,2,3,4,5
     production: ~
 
