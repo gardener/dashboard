@@ -275,7 +275,6 @@ export default {
           if (parsedScheduleEventEnd) {
             crontabBlock.end = parsedScheduleEventEnd
           }
-          crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'end' })
           return crontabBlock
         }
         const scheduleCrontab = []
