@@ -275,6 +275,8 @@ export default {
         }
       } else if (get(this.$route, 'params.name')) {
         name = fallback
+      } else if (get(this.$route, 'name') === 'GardenTerminal') {
+        name = fallback
       }
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
     }

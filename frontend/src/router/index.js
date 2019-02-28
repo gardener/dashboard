@@ -381,7 +381,7 @@ export default function createRouter ({ store, userManager }) {
           name: 'GardenTerminal',
           component: ShootItemTerminal,
           meta: {
-            namespaced: false,
+            namespaced: true,
             projectScope: false,
             title: 'Garden Terminal',
             breadcrumbTextFn: routeTitle
