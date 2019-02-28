@@ -72,6 +72,7 @@ limitations under the License.
 <script>
 import HibernationScheduleEvent from '@/components/HibernationScheduleEvent'
 import forEach from 'lodash/forEach'
+import map from 'lodash/map'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
@@ -134,9 +135,6 @@ export default {
         })
       })
     },
-    id () {
-      return uuidv4()
-    },
     parsedScheduleEventFromCrontabBlock (crontabBlock) {
       const cronStart = get(crontabBlock, 'start')
       const cronEnd = get(crontabBlock, 'end')
@@ -144,7 +142,7 @@ export default {
       const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
 
       if (cronStart && !start) {
-        console.warn(`Could not parse start crontab line: ${start}`)
+        console.warn(`Could not parse start crontab line: ${cronStart}`)
         this.parseError = true
       }
       if (cronEnd && !end) {
@@ -157,8 +155,12 @@ export default {
           this.parseError = true
         }
       }
-      if ((start || end) && !this.parseError) {
-        const id = this.id()
+      if (!cronStart && !cronEnd) {
+        console.warn(`No start or end value in crontab block`)
+        this.parseError = true
+      }
+      if (!this.parseError) {
+        const id = uuidv4()
         const valid = true
         return { start, end, id, valid }
       }
@@ -166,40 +168,39 @@ export default {
     },
     parseSchedules (scheduleCrontab) {
       this.parseError = false
-      const parsedScheduleEvents = []
-      forEach(scheduleCrontab, crontabBlock => {
-        const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(crontabBlock)
-        if (parsedScheduleEvent) {
-          parsedScheduleEvents.push(parsedScheduleEvent)
-        }
+      const parsedScheduleEvents = map(scheduleCrontab, crontabBlock => {
+        return this.parsedScheduleEventFromCrontabBlock(crontabBlock)
       })
       this.setParsedSchedules(parsedScheduleEvents)
     },
     setDefaultHibernationSchedule () {
-      const convertScheduleEventLineToLocalTimezone = ({ parsedScheduleEvent, line }) => {
-        const scheduleEventLine = parsedScheduleEvent[line]
+      const convertScheduleEventLineToLocalTimezone = (scheduleEventLine) => {
         if (scheduleEventLine) {
           const localMoment = moment.tz(`${padStart(scheduleEventLine.hour, 2, '0')}${padStart(scheduleEventLine.minute, 2, '0')}`, 'HHmm', this.localTimezone).utc()
           scheduleEventLine.hour = localMoment.format('HH')
           scheduleEventLine.minute = localMoment.format('mm')
         }
+        return scheduleEventLine
       }
 
-      const defaultHibernationCrontabBlock = get(this.cfg.defaultHibernationSchedule, this.purpose)
+      const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
-      const parsedScheduleEvents = []
-      const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(defaultHibernationCrontabBlock)
-      if (parsedScheduleEvent) {
-        convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'start' })
-        convertScheduleEventLineToLocalTimezone({ parsedScheduleEvent, line: 'end' })
-        parsedScheduleEvents.push(parsedScheduleEvent)
-      }
+      const parsedScheduleEvents = map(defaultHibernationCrontab, crontabBlock => {
+        const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(crontabBlock)
+        if (parsedScheduleEvent) {
+          parsedScheduleEvent.start = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['start'])
+          parsedScheduleEvent.end = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['end'])
+          return parsedScheduleEvent
+        }
+      })
       this.setParsedSchedules(parsedScheduleEvents)
     },
     setParsedSchedules (parsedScheduleEvents) {
-      this.parsedScheduleEvents = parsedScheduleEvents
-      if (!isEmpty(this.parsedScheduleEvents)) {
-        this.confirmNoSchedule = false
+      if (!this.parseError) {
+        this.parsedScheduleEvents = parsedScheduleEvents
+        if (!isEmpty(this.parsedScheduleEvents)) {
+          this.confirmNoSchedule = false
+        }
       }
       this.validateInput()
     },
@@ -215,7 +216,7 @@ export default {
       }
     },
     addEmptySchedule () {
-      const id = this.id()
+      const id = uuidv4()
       const start = {}
       const end = {}
       const valid = false
@@ -259,13 +260,20 @@ export default {
         const crontabLineFromParsedScheduleEvent = ({ crontabBlock, parsedScheduleEvent, line }) => {
           const { weekdays, hour, minute } = get(parsedScheduleEvent, line, {})
           if (parsedScheduleEvent && hour && minute && weekdays) {
-            crontabBlock[line] = `${minute} ${hour} * * ${weekdays}`
+            return `${minute} ${hour} * * ${weekdays}`
           }
         }
         const crontabBlockFromScheduleEvent = parsedScheduleEvent => {
           const crontabBlock = {}
-          crontabLineFromParsedScheduleEvent({ crontabBlock, parsedScheduleEvent, line: 'start' })
-          crontabLineFromParsedScheduleEvent({ crontabBlock, parsedScheduleEvent, line: 'end' })
+          const parsedScheduleEventStart = crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'start' })
+          if (parsedScheduleEventStart) {
+            crontabBlock.start = parsedScheduleEventStart
+          }
+          const parsedScheduleEventEnd = crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'end' })
+          if (parsedScheduleEventEnd) {
+            crontabBlock.end = parsedScheduleEventEnd
+          }
+          crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'end' })
           return crontabBlock
         }
         const scheduleCrontab = []
