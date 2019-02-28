@@ -197,9 +197,12 @@ export default {
     },
     getLocalizedTime (utcCronTime) {
       if (get(utcCronTime, 'hour') && get(utcCronTime, 'minute')) {
-        const momentObj = moment.tz(`${padStart(utcCronTime.hour, 2, '0')}${padStart(utcCronTime.minute, 2, '0')}+0000`, 'HHmmZ', this.selectedTimezone)
-        if (momentObj.isValid()) {
-          return momentObj.format('HH:mm')
+        const utcMoment = moment.utc()
+        utcMoment.hour(utcCronTime.hour)
+        utcMoment.minute(utcCronTime.minute)
+        const localMoment = utcMoment.tz(this.localTimezone)
+        if (localMoment.isValid()) {
+          return localMoment.format('HH:mm')
         }
       }
     },

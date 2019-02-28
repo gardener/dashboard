@@ -77,7 +77,6 @@ import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
-import padStart from 'lodash/padStart'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import moment from 'moment-timezone'
 import { mapState } from 'vuex'
@@ -176,9 +175,12 @@ export default {
     setDefaultHibernationSchedule () {
       const convertScheduleEventLineToLocalTimezone = (scheduleEventLine) => {
         if (scheduleEventLine) {
-          const localMoment = moment.tz(`${padStart(scheduleEventLine.hour, 2, '0')}${padStart(scheduleEventLine.minute, 2, '0')}`, 'HHmm', this.localTimezone).utc()
-          scheduleEventLine.hour = localMoment.format('HH')
-          scheduleEventLine.minute = localMoment.format('mm')
+          const localMoment = moment.tz(this.localTimezone)
+          localMoment.hour(scheduleEventLine.hour)
+          localMoment.minute(scheduleEventLine.minute)
+          const utcMoment = localMoment.utc()
+          scheduleEventLine.hour = utcMoment.format('HH')
+          scheduleEventLine.minute = utcMoment.format('mm')
         }
         return scheduleEventLine
       }
