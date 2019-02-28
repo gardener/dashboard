@@ -166,9 +166,14 @@ function toResource ({
 }) {
   const apiVersion = resource.apiVersion
   const kind = resource.kind
+
   labels.component = component
 
-  const metadata = { labels, annotations, ownerReferences }
+  const metadata = {
+    labels,
+    annotations,
+    ownerReferences
+  }
   if (name) {
     metadata.name = name
   }
@@ -179,8 +184,11 @@ function toResource ({
     metadata.namespace = namespace
   }
 
-  const resourceBody = { apiVersion, kind, metadata }
-
+  const resourceBody = {
+    apiVersion,
+    kind,
+    metadata
+  }
   _.assign(resourceBody, data)
 
   return resourceBody
