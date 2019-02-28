@@ -203,6 +203,8 @@ export default {
         if (!isEmpty(this.parsedScheduleEvents)) {
           this.confirmNoSchedule = false
         }
+      } else {
+        this.parsedScheduleEvents = []
       }
       this.validateInput()
     },
@@ -224,6 +226,7 @@ export default {
       const valid = false
       this.parsedScheduleEvents.push({ start, end, id, valid })
       this.confirmNoSchedule = false
+      this.validateInput()
     },
     onRemoveSchedule (index) {
       this.parsedScheduleEvents.splice(index, 1)
