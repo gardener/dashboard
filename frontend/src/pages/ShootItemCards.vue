@@ -236,7 +236,7 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6>
-        <v-card v-if="hasTerminalAccess" class="mb-3">
+        <v-card v-if="canRenderControlPlane" class="mb-3">
           <v-card-title class="subheading white--text cyan darken-2">
             Control Plane
           </v-card-title>
@@ -354,6 +354,7 @@ import includes from 'lodash/includes'
 import find from 'lodash/find'
 import forEach from 'lodash/forEach'
 import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 import {
   getDateFormatted,
   getCloudProviderKind,
@@ -565,6 +566,9 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.item)
+    },
+    canRenderControlPlane () {
+      return !isEmpty(this.item) && this.hasTerminalAccess
     }
   },
   mounted () {

@@ -26,7 +26,7 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="hasTerminalAccess">
+    <template v-if="canRenderControlPlane">
       <terminal-list-tile
         :name=name
         :namespace=namespace
@@ -98,6 +98,7 @@ import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import { isHibernated, getProjectName } from '@/utils'
 import download from 'downloadjs'
 import { mapGetters } from 'vuex'
@@ -181,7 +182,10 @@ export default {
       return `kubeconfig--${projectName}--${this.name}.yaml`
     },
     hasVisibleProperties () {
-      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.hasTerminalAccess
+      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.canRenderControlPlane
+    },
+    canRenderControlPlane () {
+      return !isEmpty(this.item) && this.hasTerminalAccess
     }
   },
   methods: {
