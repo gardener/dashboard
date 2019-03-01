@@ -97,7 +97,7 @@ export default {
   name: 'shoot-item-terminal',
   data () {
     return {
-      close: () => this.cancelConnect = true,
+      close: () => { this.cancelConnect = true },
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
