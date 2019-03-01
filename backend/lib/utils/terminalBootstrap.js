@@ -292,7 +292,7 @@ async function handleSeed (seed, cb) {
   logger.debug(`creating / updating resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed, waitUntilAvailable: true })
   if (!seedKubeconfig) { // TODO retry later?
     throw new Error(`could not get kubeconfig for seed ${name}`)
   }
@@ -436,7 +436,7 @@ function bootstrapSeed ({ seed }) {
   if (!requiredConfigExists) {
     return
   }
-  const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'garden.sapcloud.io/terminal-bootstrap-resources-disabled'], false)
+  const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'dashboard.garden.sapcloud.io/terminal-bootstrap-resources-disabled'], false)
   if (isBootstrapDisabledForSeed) {
     const name = _.get(seed, 'metadata.name')
     logger.debug(`terminal bootstrap disabled for seed ${name}`)

@@ -95,10 +95,16 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
   return { seed, seedKubeconfig, seedShootNS }
 }
 
-async function getSeedKubeconfig ({ coreClient, seed }) {
+async function getSeedKubeconfig ({ coreClient, seed, waitUntilAvailable = false }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
+  let fetchSecret
+  if (waitUntilAvailable) {
+    fetchSecret = getSecretWaitUntilAvailable({ coreClient, namespace: seedSecretNamespace, secretName: seedSecretName })
+  } else {
+    fetchSecret = coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
+  }
+  const seedSecret = await fetchSecret
     .catch(err => {
       if (err.code === 404) {
         return
@@ -111,6 +117,16 @@ async function getSeedKubeconfig ({ coreClient, seed }) {
 
   const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
   return seedKubeconfig
+}
+
+async function getSecretWaitUntilAvailable ({ coreClient, namespace, secretName }) {
+  const watch = coreClient.ns(namespace).secrets.watch({ name: secretName })
+  const secretExists = secret => { // TODO or just return true as condition is anyhow only called on ADDED and MODIFIED events
+    return _.get(secret, 'metadata.name') === secretName
+  }
+  const resourceName = secretName
+  const secret = await kubernetes.waitUntilResourceExists({ watch, conditionFunction: secretExists, resourceName, waitTimeout: 10 * 1000 })
+  return secret
 }
 
 async function getProjectNameFromNamespace (namespace) {

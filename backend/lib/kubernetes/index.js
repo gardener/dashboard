@@ -26,7 +26,11 @@ const kubernetesClient = require('kubernetes-client')
 const yaml = require('js-yaml')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
-const { GatewayTimeout, InternalServerError } = require('../errors')
+const {
+  GatewayTimeout,
+  InternalServerError,
+  NotFound
+} = require('../errors')
 const logger = require('../logger')
 
 const {
@@ -86,6 +90,56 @@ function mergePatch (options, ...rest) {
 function jsonPatch (options, ...rest) {
   const headers = { 'content-type': 'application/json-patch+json' }
   return this.patch(merge({ headers }, options), ...rest)
+}
+
+function _waitUntilResourceHasCondition ({ watch, conditionFunction, waitTimeout = 5000, resourceName, onTimeoutError }) {
+  return new Promise((resolve, reject) => { // TODO on error, reject promise?
+    const timeoutId = setTimeout(() => {
+      const error = onTimeoutError()
+      done(error)
+    }, waitTimeout)
+
+    function done (err, obj) {
+      clearTimeout(timeoutId)
+
+      watch.removeListener('event', onEvent)
+      watch.removeListener('error', onError)
+      watch.removeListener('disconnect', onDisconnect)
+
+      watch.reconnect = false
+      watch.disconnect()
+      if (err) {
+        return reject(err)
+      }
+      resolve(obj)
+    }
+
+    function onEvent (event) {
+      switch (event.type) {
+        case 'ADDED':
+        case 'MODIFIED':
+          if (conditionFunction(event.object)) {
+            done(null, event.object)
+          }
+          break
+        case 'DELETED':
+          done(new InternalServerError(`Resource "${resourceName}" has been deleted`))
+          break
+      }
+    }
+
+    function onError (err) {
+      logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
+    }
+
+    function onDisconnect (err) {
+      done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
+    }
+
+    watch.on('event', onEvent)
+    watch.on('error', onError)
+    watch.on('disconnect', onDisconnect)
+  })
 }
 
 module.exports = {
@@ -205,53 +259,20 @@ module.exports = {
       'current-context': contextName
     })
   },
-  waitUntilResourceHasCondition ({ watch, conditionFunction, initializationTimeout = 5000, resourceName }) {
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        const duration = `${initializationTimeout} ms`
-        done(new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${duration}`))
-      }, initializationTimeout)
 
-      function done (err, serviceaccount) {
-        clearTimeout(timeoutId)
+  async waitUntilResourceExists ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
+    const onTimeoutError = () => {
+      const duration = `${waitTimeout} ms`
+      return new NotFound(`Resource "${resourceName}" could not be found after waiting for ${duration}`)
+    }
+    return _waitUntilResourceHasCondition({ watch, conditionFunction, waitTimeout, resourceName, onTimeoutError })
+  },
 
-        watch.removeListener('event', onEvent)
-        watch.removeListener('error', onError)
-        watch.removeListener('disconnect', onDisconnect)
-
-        watch.reconnect = false
-        watch.disconnect()
-        if (err) {
-          return reject(err)
-        }
-        resolve(serviceaccount)
-      }
-
-      function onEvent (event) {
-        switch (event.type) {
-          case 'ADDED':
-          case 'MODIFIED':
-            if (conditionFunction(event.object)) {
-              done(null, event.object)
-            }
-            break
-          case 'DELETED':
-            done(new InternalServerError(`Resource "${resourceName}" has been deleted`))
-            break
-        }
-      }
-
-      function onError (err) {
-        logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
-      }
-
-      function onDisconnect (err) {
-        done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
-      }
-
-      watch.on('event', onEvent)
-      watch.on('error', onError)
-      watch.on('disconnect', onDisconnect)
-    })
+  async waitUntilResourceHasCondition ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
+    const onTimeoutError = () => {
+      const duration = `${waitTimeout} ms`
+      return new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${duration}`)
+    }
+    return _waitUntilResourceHasCondition({ watch, conditionFunction, waitTimeout, resourceName, onTimeoutError })
   }
 }

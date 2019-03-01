@@ -167,7 +167,7 @@ async function readServiceAccountToken ({ client, targetNamespace, serviceaccoun
   const watch = watchServiceAccount({ client, targetNamespace, serviceaccountName })
   const conditionFunction = isServiceAccountReady
   const resourceName = serviceaccountName
-  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, initializationTimeout: 10 * 1000 })
+  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
   const secretName = await _.get(_.first(serviceAccount.secrets), 'name')
   if (secretName && secretName.length > 0) {
     const secret = await client.ns(targetNamespace).secrets.get({ name: secretName })

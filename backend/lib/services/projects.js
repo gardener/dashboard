@@ -154,8 +154,8 @@ exports.create = async function ({ user, body }) {
   const watch = exports.watchProject(name)
   const conditionFunction = isProjectReady
   const resourceName = name
-  const initializationTimeout = exports.projectInitializationTimeout
-  project = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, initializationTimeout, resourceName })
+  const waitTimeout = exports.projectInitializationTimeout
+  project = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, waitTimeout, resourceName })
 
   return fromResource(project)
 }
