@@ -236,7 +236,7 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6 v-show="isInfoAvailable">
-        <v-card v-if="hasTerminalAccess">
+        <v-card v-if="hasTerminalAccess" class="mb-3">
           <v-card-title class="subheading white--text cyan darken-2">
             Control Plane
           </v-card-title>
@@ -244,7 +244,7 @@ limitations under the License.
         </v-card>
 
         <v-card>
-          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
           <cluster-access :item="item"></cluster-access>
