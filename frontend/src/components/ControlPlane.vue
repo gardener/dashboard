@@ -19,7 +19,7 @@ limitations under the License.
     <terminal-list-tile
       :name=name
       :namespace=namespace
-      route-name="ShootItemTerminalCp"
+      target="cp"
       description="Open terminal into cluster's control plane running on it's seed">
     </terminal-list-tile>
   </v-list>

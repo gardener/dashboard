@@ -88,7 +88,7 @@ function protocols ({ token: bearer }) {
   return protocols
 }
 
-function uri (terminalData) {
+function attachUri (terminalData) {
   const { namespace, container, server, pod } = encodeURIComponents(terminalData)
   return `wss://${server}/api/v1/namespaces/${namespace}/pods/${pod}/attach?container=${container}&stdin=true&stdout=true&tty=true`
 }
@@ -172,7 +172,7 @@ export default {
           }
 
           tries++
-          const ws = new WebSocket(uri(terminalData), protocols(terminalData))
+          const ws = new WebSocket(attachUri(terminalData), protocols(terminalData))
           ws.binaryType = 'arraybuffer'
           let reconnectTimeoutId
           let heartbeatIntervalId
@@ -262,9 +262,8 @@ export default {
 
     this.connect()
   },
-  beforeRouteLeave (to, from, next) {
+  beforeDestroy () {
     this.close()
-    next()
   }
 }
 </script>

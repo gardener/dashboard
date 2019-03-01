@@ -22,6 +22,7 @@ import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
 import concat from 'lodash/concat'
+import cloneDeep from 'lodash/cloneDeep'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -111,18 +112,22 @@ export default function createRouter ({ store, userManager }) {
   const shootItemTerminalTabs = [
     {
       title: 'Control Plane',
-      to: ({ params }) => {
+      to: (route) => {
+        const params = cloneDeep(route.params)
+        params.target = 'cp'
         return {
-          name: 'ShootItemTerminalCp',
+          name: 'ShootItemTerminal',
           params
         }
       }
     },
     {
       title: 'Cluster',
-      to: ({ params }) => {
+      to: (route) => {
+        const params = cloneDeep(route.params)
+        params.target = 'shoot'
         return {
-          name: 'ShootItemTerminalShoot',
+          name: 'ShootItemTerminal',
           params
         }
       }
@@ -137,8 +142,22 @@ export default function createRouter ({ store, userManager }) {
     return get(route, 'params.name')
   }
 
-  /** Breadcrumb function
-      @name BreadcrumbFn
+  const terminalBreadcrumbTitle = function (route) {
+    const target = get(route, 'params.target')
+    switch (target) {
+      case 'cp':
+        return 'Control Plane Terminal'
+      case 'shoot':
+        return 'Cluster Terminal'
+      case 'garden':
+        return 'Garden Cluster Terminal'
+      default:
+        return undefined
+    }
+  }
+
+  /** Route function
+      @name RouteFn
       @function
       @param {Object} [route] - this.$route
   */
@@ -146,14 +165,15 @@ export default function createRouter ({ store, userManager }) {
   /**
    * Route Meta fields type definition
    * @typedef {Object} RouteMeta
-   * @prop {boolean} [public]                 - Determines whether route needs authorization
-   * @prop {boolean} [namespaced]             - Determines whether route is namespace specific and has namespace in path
-   * @prop {boolean} [projectScope]           - Determines whether route can be accessed in context of mutiple projects (_all)
-   * @prop {string}  [toRouteName]            - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
-   * @prop {string}  [title]                  - Main menu title
-   * @prop {string}  [icon]                   - Main menu icon
-   * @prop {BreadcrumbFn} [breadcrumbTextFn]  - Function that returns the breadcrumb title
-   * @prop {Tab[]}   [tabs]                   - Determines the tabs to displayed in the main toolbar extenstion slot
+   * @prop {boolean} [public]                   - Determines whether route needs authorization
+   * @prop {boolean} [namespaced]               - Determines whether route is namespace specific and has namespace in path
+   * @prop {boolean} [projectScope]             - Determines whether route can be accessed in context of mutiple projects (_all)
+   * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
+   * @prop {string}  [title]                    - Main menu title
+   * @prop {string}  [icon]                     - Main menu icon
+   * @prop {RouteFn} [breadcrumbTextFn]         - Function that returns the breadcrumb title
+   * @prop {RouteFn} [additionalRouteParamsFn]  - Function that returns an object with additional route params that is used for the navigation
+   * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
    */
 
   const routes = [
@@ -254,38 +274,16 @@ export default function createRouter ({ store, userManager }) {
                   }
                 },
                 {
-                  path: 'term/cp',
-                  name: 'ShootItemTerminalCp',
+                  path: 'term/:target',
+                  name: 'ShootItemTerminal',
                   component: ShootItemTerminal,
                   meta: {
                     namespaced: true,
                     projectScope: true,
-                    title: 'Control Plane Terminal',
-                    breadcrumbTextFn: routeTitle,
+                    breadcrumbTextFn: terminalBreadcrumbTitle,
                     tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
-                    to.params.target = 'cp'
-                    if (hasTerminalAccess()) {
-                      next()
-                    } else {
-                      next('/')
-                    }
-                  }
-                },
-                {
-                  path: 'term/shoot',
-                  name: 'ShootItemTerminalShoot',
-                  component: ShootItemTerminal,
-                  meta: {
-                    namespaced: true,
-                    projectScope: true,
-                    title: 'Cluster Terminal',
-                    breadcrumbTextFn: routeTitle,
-                    tabs: shootItemTerminalTabs
-                  },
-                  beforeEnter: (to, from, next) => {
-                    to.params.target = 'shoot'
                     if (hasTerminalAccess()) {
                       next()
                     } else {
@@ -302,7 +300,6 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Cluster Editor',
                 breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
               }
@@ -382,9 +379,20 @@ export default function createRouter ({ store, userManager }) {
           component: ShootItemTerminal,
           meta: {
             namespaced: true,
-            projectScope: false,
-            title: 'Garden Terminal',
-            breadcrumbTextFn: routeTitle
+            projectScope: true,
+            breadcrumbTextFn: terminalBreadcrumbTitle,
+            additionalRouteParamsFn: () => { return { target: 'garden' } },
+            menu: {
+              title: 'Garden Cluster',
+              icon: 'mdi-console'
+            }
+          },
+          beforeEnter: (to, from, next) => {
+            if (hasTerminalAccess()) {
+              next()
+            } else {
+              next('/')
+            }
           }
         }
       ]

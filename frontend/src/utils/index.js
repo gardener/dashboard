@@ -19,6 +19,7 @@
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
+import assign from 'lodash/assign'
 import head from 'lodash/head'
 import keys from 'lodash/keys'
 import mapValues from 'lodash/mapValues'
@@ -161,12 +162,49 @@ export function routes (router, includeRoutesWithProjectScope) {
   return filter(defaultRoute.children, hasMenu)
 }
 
-export function namespacedRoute (route, namespace) {
-  const name = routeName(route)
+function findRouteWithName (routes, routeName) {
+  if (!routes) {
+    return
+  }
+
+  let foundRoute
+  forEach(routes, route => {
+    if (route.name === routeName) {
+      foundRoute = route
+      return false // exit early
+    }
+    foundRoute = findRouteWithName(route.children, routeName)
+    if (foundRoute) {
+      return false // exit early
+    }
+  })
+
+  if (!foundRoute) {
+    console.error(`could not find route with name ${name}`)
+  }
+
+  return foundRoute
+}
+
+export function namespacedRouteWithName (routes, routeName, namespace, name) {
+  const route = findRouteWithName(routes, routeName)
+  return namespacedRoute(route, namespace, name)
+}
+
+export function namespacedRoute (route, namespace, name = undefined) {
   const params = {
     namespace: namespace
   }
-  return { name, params }
+  if (name) {
+    params.name = name
+  }
+
+  const additionalRouteParamsFn = get(route, 'meta.additionalRouteParamsFn')
+  if (additionalRouteParamsFn) {
+    assign(params, additionalRouteParamsFn(route))
+  }
+
+  return { name: routeName(route), params }
 }
 
 export function routeName (route) {

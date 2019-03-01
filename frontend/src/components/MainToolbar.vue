@@ -19,7 +19,7 @@ limitations under the License.
     <v-toolbar-side-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-toolbar-side-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
-    <div class="text-xs-center" v-if="helpMenuItems.length">
+    <div class="text-xs-center mr-4" v-if="helpMenuItems.length">
       <v-menu
         offset-y
         open-on-click
@@ -56,19 +56,6 @@ limitations under the License.
           </template>
         </v-card>
       </v-menu>
-    </div>
-     <v-divider
-      class="mx-3"
-      inset
-      vertical
-    ></v-divider>
-    <div class="text-xs-center">
-      <v-tooltip left slot="activator" open-delay="500">
-        <v-btn slot="activator" icon :to="gardenTerminalLink" class="cyan--text text--darken-2 mr-4">
-          <v-icon medium>mdi-console</v-icon>
-        </v-btn>
-        Garden Cluster Terminal
-      </v-tooltip>
     </div>
     <div class="text-xs-center">
       <v-menu
@@ -197,9 +184,6 @@ export default {
     },
     accountLink () {
       return { name: 'Account', query: this.$route.query }
-    },
-    gardenTerminalLink () {
-      return { name: 'GardenTerminal', params: { target: 'garden', namespace: 'garden' } }
     }
   },
   watch: {

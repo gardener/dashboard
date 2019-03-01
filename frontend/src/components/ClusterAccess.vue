@@ -20,7 +20,7 @@ limitations under the License.
       <terminal-list-tile
         :name=name
         :namespace=namespace
-        route-name="ShootItemTerminalShoot"
+        target="shoot"
         description="Open terminal into cluster">
       </terminal-list-tile>
       <v-divider class="my-2" inset></v-divider>

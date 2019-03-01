@@ -38,6 +38,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import { namespacedRouteWithName } from '@/utils'
 
 export default {
   props: {
@@ -47,7 +48,7 @@ export default {
     namespace: {
       type: String
     },
-    routeName: {
+    target: {
       type: String
     },
     description: {
@@ -59,8 +60,9 @@ export default {
       'hasTerminalAccess'
     ]),
     to () {
-      const param = { name: this.name, namespace: this.namespace }
-      return { name: this.routeName, param }
+      const namespacedRoute = namespacedRouteWithName(this.$router.options.routes, 'ShootItemTerminal', this.namespace, this.name)
+      namespacedRoute.params.target = this.target
+      return namespacedRoute
     }
   }
 }
