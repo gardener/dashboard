@@ -15,34 +15,100 @@ limitations under the License.
 -->
 
 <template>
-  <v-tooltip top>
-    <v-chip slot="activator" small class="my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
-    <span v-for="(line,index) in description" :key="index">{{line}}<br /></span>
-  </v-tooltip>
+  <g-popper
+    :title="workerGroup.name"
+    toolbarColor="cyan darken-2"
+    :popperKey="`worker_group_${workerGroup.name}`"
+
+  >
+    <v-layout row
+     slot="content-before"
+     v-for="(line,index) in description"
+     :key="index"
+     fill-height
+     align-center>
+     <v-icon class="cyan--text text--darken-2 ma-1">{{line.icon}}</v-icon>
+     <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
+    </v-layout>
+    <v-tooltip top slot="popperRef">
+      <v-chip slot="activator" small class="my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
+      <span v-for="(line,index) in description" :key="index">{{line.title}}: {{line.value}}<br /></span>
+    </v-tooltip>
+  </g-popper>
 </template>
 
 <script>
 
+import GPopper from '@/components/GPopper'
+import find from 'lodash/find'
+import { mapGetters } from 'vuex'
+
 export default {
+  name: 'worker-group',
+  components: {
+    GPopper
+  },
   props: {
     workerGroup: {
       type: Object
+    },
+    cloudProfileName: {
+      type: String
     }
   },
   computed: {
+    ...mapGetters([
+      'machineTypesByCloudProfileName',
+      'volumeTypesByCloudProfileName'
+    ]),
+    machineTypes () {
+      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+    },
+    volumeTypes () {
+      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+    },
     description () {
       const description = []
       if (this.workerGroup.machineType) {
-        description.push(`Machine Type: ${this.workerGroup.machineType}`)
+        const machineType = find(this.machineTypes, { name: this.workerGroup.machineType })
+        description.push({
+          icon: 'mdi-speedometer',
+          title: 'Machine Type',
+          value: machineType.name,
+          description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory}`
+        })
       }
       if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
-        description.push(`Volume Type: ${this.workerGroup.volumeType} (${this.workerGroup.volumeSize})`)
+        const volumeType = find(this.volumeTypes, { name: this.workerGroup.volumeType })
+        description.push({
+          icon: 'mdi-harddisk',
+          title: 'Volume Type',
+          value: `${volumeType.name} / ${this.workerGroup.volumeSize}`,
+          description: `(Class: ${volumeType.class})`
+        })
       }
       if (this.workerGroup.autoScalerMin && this.workerGroup.autoScalerMax) {
-        description.push(`Autoscaler Min: ${this.workerGroup.autoScalerMin} / Max: ${this.workerGroup.autoScalerMax}`)
+        description.push({
+          icon: 'mdi-arrow-expand-all',
+          title: 'Autoscaler Min',
+          value: `${this.workerGroup.autoScalerMin} / Max: ${this.workerGroup.autoScalerMax}`
+        })
       }
       return description
     }
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  .message {
+    text-align: left;
+    min-width: 250px;
+    max-width: 800px;
+    white-space: normal;
+    overflow-y: auto;
+  }
+</style>

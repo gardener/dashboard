@@ -1,0 +1,203 @@
+<!--
+Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<template>
+  <v-card>
+    <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+      Details
+    </v-card-title>
+    <div class="list">
+      <v-card-title class="listItem">
+        <v-icon class="cyan--text text--darken-2 avatar">info_outline</v-icon>
+        <v-flex class="pa-0">
+          <span class="grey--text">Name</span><br>
+          <span class="subheading">{{metadata.name}}</span>
+        </v-flex>
+      </v-card-title>
+
+      <template v-if="expirationTimestamp">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-clock-outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">Cluster Termination</span><br>
+            <v-layout align-center row fill-height class="pa-0 ma-0">
+              <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
+              <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
+              <span class="pl-2 subheading">{{selfTerminationMessage}}</span>
+            </v-layout>
+          </v-flex>
+        </v-card-title>
+      </template>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem pr-0">
+        <v-icon class="cyan--text text--darken-2 avatar">mdi-cube-outline</v-icon>
+        <v-flex class="pa-0">
+          <span class="grey--text">Kubernetes Version</span><br>
+          <span class="subheading">{{k8sVersion}}</span>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <shoot-version :shoot-item="shootItem" :chip-style="false"></shoot-version>
+        </v-flex>
+      </v-card-title>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem pr-0">
+        <v-icon class="cyan--text text--darken-2 avatar">mdi-server</v-icon>
+        <v-flex grow class="pa-0">
+          <span class="grey--text">Worker Groups</span><br>
+          <worker-group
+          v-for="workerGroup in workerGroups"
+          :workerGroup="workerGroup"
+          :cloudProfileName="cloudProfileName"
+          :key="workerGroup.name"
+          ></worker-group>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <worker-configuration :shootItem="shootItem"></worker-configuration>
+        </v-flex>
+      </v-card-title>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem">
+        <v-icon class="cyan--text text--darken-2 avatar">perm_identity</v-icon>
+        <v-flex class="pa-0">
+          <span class="grey--text">Created by</span><br>
+          <account-avatar :account-name="createdBy" :mail-to="true"></account-avatar>
+          <v-tooltip top>
+            <template slot="activator">
+              <span class="grey--text">Created at</span><br>
+              <span class="subheading">{{created}}</span>
+            </template>
+            <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
+          </v-tooltip>
+        </v-flex>
+      </v-card-title>
+
+      <template v-if="!!purpose">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem">
+          <v-icon class="cyan--text text--darken-2 avatar">label_outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">Purpose</span><br>
+            <span class="subheading">{{purpose}}</span>
+          </v-flex>
+        </v-card-title>
+      </template>
+    </div>
+  </v-card>
+</template>
+
+<script>
+
+import AccountAvatar from '@/components/AccountAvatar'
+import TimeString from '@/components/TimeString'
+import WorkerGroup from '@/components/WorkerGroup'
+import WorkerConfiguration from '@/components/WorkerConfiguration'
+import ShootVersion from '@/components/ShootVersion'
+import get from 'lodash/get'
+import {
+  getDateFormatted,
+  isSelfTerminationWarning,
+  isValidTerminationDate,
+  getTimeStringTo,
+  getCloudProviderKind
+} from '@/utils'
+
+export default {
+  components: {
+    AccountAvatar,
+    TimeString,
+    WorkerGroup,
+    WorkerConfiguration,
+    ShootVersion
+  },
+  props: {
+    shootItem: {
+      type: Object
+    }
+  },
+  computed: {
+    metadata () {
+      return get(this.shootItem, 'metadata', {})
+    },
+    annotations () {
+      return this.metadata.annotations || {}
+    },
+    k8sVersion () {
+      return get(this.shootItem, 'spec.kubernetes.version')
+    },
+    purpose () {
+      return this.annotations['garden.sapcloud.io/purpose']
+    },
+    createdBy () {
+      return this.annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
+    },
+    created () {
+      return getDateFormatted(this.metadata.creationTimestamp)
+    },
+    expirationTimestamp () {
+      return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
+    },
+    selfTerminationMessage () {
+      if (this.isValidTerminationDate) {
+        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
+      } else {
+        return 'This cluster is about to self terminate'
+      }
+    },
+    isSelfTerminationWarning () {
+      return isSelfTerminationWarning(this.expirationTimestamp)
+    },
+    isValidTerminationDate () {
+      return isValidTerminationDate(this.expirationTimestamp)
+    },
+    getCloudProviderKind () {
+      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
+    },
+    workerGroups () {
+      const kind = this.getCloudProviderKind
+      return get(this.shootItem, `spec.cloud.${kind}.workers`, [])
+    },
+    cloudProfileName () {
+      return get(this.shootItem, 'spec.cloud.profile')
+    }
+  }
+}
+</script>
+
+<style lang="styl" scoped>
+
+  .cardTitle {
+    line-height: 10px;
+  }
+
+  .listItem {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+
+  .list {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .avatar {
+    padding-right: 33px;
+  }
+
+</style>

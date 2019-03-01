@@ -79,16 +79,12 @@ export default {
       errorMessage: null,
       detailedErrorMessage: null,
       workersValid: false,
-      workers: undefined
+      workers: undefined,
+      icon: 'mdi-settings-outline',
+      caption: 'Configure Workers'
     }
   },
   computed: {
-    icon () {
-      return 'mdi-settings-outline'
-    },
-    caption () {
-      return 'Configure Workers'
-    },
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },

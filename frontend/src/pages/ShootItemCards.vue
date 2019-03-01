@@ -18,118 +18,7 @@ limitations under the License.
   <v-container fluid grid-list-lg>
     <v-layout d-flex wrap row>
       <v-flex md6>
-
-        <v-card class="cyan darken-2">
-          <v-card-title class="subheading white--text">
-            Details
-          </v-card-title>
-          <v-list>
-
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">info_outline</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Name</v-list-tile-sub-title>
-                <v-list-tile-title>
-                  {{metadata.name}}
-                </v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <template v-if="expirationTimestamp">
-              <v-divider class="my-2" inset></v-divider>
-              <v-list-tile>
-                <v-list-tile-action>
-                  <v-icon class="cyan--text text--darken-2">mdi-clock-outline</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-sub-title>Cluster Termination</v-list-tile-sub-title>
-                  <v-list-tile-title>
-                    <v-layout align-center row fill-height class="pa-0 ma-0">
-                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
-                      <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
-                      <span class="pl-2">{{selfTerminationMessage}}</span>
-                    </v-layout>
-                  </v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-
-            <v-divider class="my-2" inset></v-divider>
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-cube-outline</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Kubernetes Version</v-list-tile-sub-title>
-                <v-list-tile-title>{{k8sVersion}}</v-list-tile-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
-                <shoot-version :shoot-item="item" :chip-style="false"></shoot-version>
-              </v-list-tile-action>
-            </v-list-tile>
-
-            <v-divider class="my-2" inset></v-divider>
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">mdi-server</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Worker Groups</v-list-tile-sub-title>
-                <v-list-tile-title>
-                  <worker-group
-                  v-for="workerGroup in workerGroups"
-                  :workerGroup="workerGroup"
-                  :key="workerGroup.name"
-                  ></worker-group>
-                </v-list-tile-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
-                <worker-configuration :shootItem="item"></worker-configuration>
-              </v-list-tile-action>
-            </v-list-tile>
-
-            <v-divider class="my-2" inset></v-divider>
-            <v-list-tile>
-              <v-list-tile-action>
-                <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-sub-title>Created by</v-list-tile-sub-title>
-                <v-list-tile-title><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <v-list-tile>
-              <v-list-tile-action>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-tooltip top>
-                  <template slot="activator">
-                    <v-list-tile-sub-title>Created at</v-list-tile-sub-title>
-                    <v-list-tile-title>{{created}}</v-list-tile-title>
-                  </template>
-                  <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
-                </v-tooltip>
-              </v-list-tile-content>
-            </v-list-tile>
-
-            <template v-if="!!purpose">
-              <v-divider class="my-2" inset></v-divider>
-              <v-list-tile>
-                <v-list-tile-action>
-                  <v-icon class="cyan--text text--darken-2">label_outline</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-sub-title>Purpose</v-list-tile-sub-title>
-                  <v-list-tile-title>{{purpose}}</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-            </template>
-
-          </v-list>
-        </v-card>
+        <shoot-details-card :shootItem="item"></shoot-details-card>
 
         <v-card class="cyan darken-2 mt-3">
           <v-card-title class="subheading white--text">
@@ -344,11 +233,8 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapState } from 'vuex'
-import AccountAvatar from '@/components/AccountAvatar'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
-import TimeString from '@/components/TimeString'
-import ShootVersion from '@/components/ShootVersion'
 import StatusCard from '@/components/StatusCard'
 import Logging from '@/components/Logging'
 import ShootHibernation from '@/components/ShootHibernation'
@@ -356,20 +242,15 @@ import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
 import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
-import WorkerGroup from '@/components/WorkerGroup'
-import WorkerConfiguration from '@/components/WorkerConfiguration'
+import ShootDetailsCard from '@/components/ShootDetailsCard'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import forEach from 'lodash/forEach'
 import filter from 'lodash/filter'
 import {
-  getDateFormatted,
   getCloudProviderKind,
   canLinkToSeed,
-  isSelfTerminationWarning,
-  isValidTerminationDate,
-  getTimeStringTo,
   isShootHasNoHibernationScheduleWarning
 } from '@/utils'
 
@@ -379,20 +260,16 @@ import moment from 'moment-timezone'
 export default {
   name: 'shoot-item',
   components: {
-    AccountAvatar,
+    ShootDetailsCard,
     ClusterAccess,
     Journals,
-    TimeString,
-    ShootVersion,
     StatusCard,
     Logging,
     ShootHibernation,
     MaintenanceStart,
     MaintenanceConfiguration,
     HibernationConfiguration,
-    DeleteCluster,
-    WorkerGroup,
-    WorkerConfiguration
+    DeleteCluster
   },
   data () {
     return {
@@ -476,15 +353,6 @@ export default {
     annotations () {
       return this.metadata.annotations || {}
     },
-    createdBy () {
-      return this.annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
-    },
-    created () {
-      return getDateFormatted(this.metadata.creationTimestamp)
-    },
-    expirationTimestamp () {
-      return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
-    },
     domain () {
       return get(this.item, 'spec.dns.domain')
     },
@@ -536,22 +404,6 @@ export default {
         return []
       }
     },
-    k8sVersion () {
-      return get(this.item, 'spec.kubernetes.version')
-    },
-    selfTerminationMessage () {
-      if (this.isValidTerminationDate) {
-        return `This cluster will self terminate ${getTimeStringTo(new Date(), new Date(this.expirationTimestamp))}`
-      } else {
-        return 'This cluster is about to self terminate'
-      }
-    },
-    isSelfTerminationWarning () {
-      return isSelfTerminationWarning(this.expirationTimestamp)
-    },
-    isValidTerminationDate () {
-      return isValidTerminationDate(this.expirationTimestamp)
-    },
     hibernationDescription () {
       const purpose = this.purpose || ''
       if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
@@ -571,10 +423,6 @@ export default {
         return `Start time: ${maintenanceStr} ${timezone}`
       }
       return ''
-    },
-    workerGroups () {
-      const kind = this.getCloudProviderKind
-      return get(this.item, `spec.cloud.${kind}.workers`, [])
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.item)

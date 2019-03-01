@@ -56,9 +56,6 @@ export default {
     }
   },
   computed: {
-    popperKeyWithType () {
-      return `shootStatus_${this.popperKey}`
-    },
     purposeText () {
       return this.purpose || ''
     }
