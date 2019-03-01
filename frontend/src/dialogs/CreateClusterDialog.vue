@@ -29,6 +29,7 @@ limitations under the License.
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
           <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
           <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
+          <v-tab key="hibernation" href="#tab-hibernation" ripple>Hibernation</v-tab>
         </v-tabs>
       </v-toolbar>
       <v-tabs-items v-model="activeTab" class="items">
@@ -166,7 +167,7 @@ limitations under the License.
                       color="cyan darken-2"
                       label="Purpose"
                       :items="filteredPurposes"
-                      v-model="shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']"
+                      v-model="purpose"
                       hint="Indicate the importance of the cluster"
                       persistent-hint
                       @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
@@ -359,7 +360,20 @@ limitations under the License.
           </v-card>
 
         </v-tab-item>
+        <v-tab-item key="hibernation" value="tab-hibernation">
+
+          <v-card flat>
+            <v-container>
+              <hibernation-schedule
+                ref="hibernationSchedule"
+                :purpose="purpose"
+                @valid="onHibernationScheduleValid"
+              ></hibernation-schedule>
+            </v-container>
+          </v-card>
+        </v-tab-item>
       </v-tabs-items>
+
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
 
       <v-card-actions>
@@ -379,6 +393,7 @@ import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
 import CloudProfile from '@/components/CloudProfile'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
+import HibernationSchedule from '@/components/HibernationSchedule'
 import Alert from '@/components/Alert'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -403,7 +418,6 @@ import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/val
 import InfraIcon from '@/components/InfrastructureIcon'
 import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import moment from 'moment-timezone'
 
 const semSort = require('semver-sort')
 
@@ -518,7 +532,8 @@ export default {
     Alert,
     CloudProfile,
     MaintenanceComponents,
-    MaintenanceTime
+    MaintenanceTime,
+    HibernationSchedule
   },
   props: {
     value: {
@@ -537,6 +552,7 @@ export default {
       refs_: {},
       validationErrors,
       maintenanceTimeValid: false,
+      hibernationScheduleValid: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -587,7 +603,8 @@ export default {
   computed: {
     ...mapState([
       'user',
-      'namespace'
+      'namespace',
+      'localTimezone'
     ]),
     ...mapGetters([
       'cloudProfileByName',
@@ -658,7 +675,6 @@ export default {
         this.selectedSecret = secret
 
         this.setCloudProfileDefaults()
-
         this.setDefaultPurpose()
       }
     },
@@ -678,6 +694,15 @@ export default {
       },
       set (zone) {
         this.infrastructureData.zones = [zone]
+      }
+    },
+    purpose: {
+      get () {
+        return this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose']
+      },
+      set (purpose) {
+        this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = purpose
+        this.setDefaultHibernationSchedule()
       }
     },
     infrastructure () {
@@ -732,7 +757,7 @@ export default {
         workersValid = every([].concat(workerInput), isValid)
       }
 
-      return workersValid && this.maintenanceTimeValid && !this.$v.$invalid
+      return workersValid && this.maintenanceTimeValid && this.hibernationScheduleValid && !this.$v.$invalid
     },
     sortedKubernetesVersions () {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
@@ -901,6 +926,14 @@ export default {
       if (!isEmpty(enabledCustomAddonNames)) {
         annotations['gardenextensions.sapcloud.io/addons'] = JSON.stringify(enabledCustomAddonNames)
       }
+      const hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+      if (!isEmpty(hibernationSchedules)) {
+        data.spec.hibernation = {
+          schedules: hibernationSchedules
+        }
+      } else if (this.$refs.hibernationSchedule.getNoHibernationSchedule()) {
+        annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
+      }
       return this.createShoot(data)
     },
     addWorker () {
@@ -947,18 +980,10 @@ export default {
 
       this.$nextTick(() => {
         this.$refs.maintenanceTime.reset()
+        this.$refs.hibernationSchedule.reset()
 
-        // randomize maintenance time window
-        const hours = [22, 23, 0, 1, 2, 3, 4, 5]
-        const randomHour = sample(hours)
-        // use local timezone offset
-        const randomMoment = moment.tz(randomHour, 'HH', moment.tz.guess()).utc()
-
-        const utcBegin = randomMoment.format('HH0000+0000')
-        randomMoment.add(1, 'h')
-        const utcEnd = randomMoment.format('HH0000+0000')
-
-        this.onUpdateMaintenanceWindow({ utcBegin, utcEnd })
+        this.setDefaultMaintenanceTimeWindow()
+        this.setDefaultHibernationSchedule()
       })
 
       this.errorMessage = undefined
@@ -985,7 +1010,15 @@ export default {
       this.secret = head(this.infrastructureSecretsByProfileName)
     },
     setDefaultPurpose () {
-      this.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'] = head(this.filteredPurposes)
+      this.purpose = head(this.filteredPurposes)
+    },
+    setDefaultHibernationSchedule () {
+      this.$nextTick(() => {
+        this.$refs.hibernationSchedule.setDefaultHibernationSchedule()
+      })
+    },
+    setDefaultMaintenanceTimeWindow () {
+      this.$refs.maintenanceTime.setDefaultMaintenanceTimeWindow()
     },
     setCloudProfileDefaults () {
       this.setDefaultRegion()
@@ -1033,6 +1066,9 @@ export default {
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value
+    },
+    onHibernationScheduleValid (value) {
+      this.hibernationScheduleValid = value
     }
   },
   watch: {
@@ -1093,11 +1129,10 @@ export default {
       }
     }
 
-    .add_worker{
+    .add_worker {
       margin-left: 30px;
       border: 0;
     }
-
   }
 
 </style>

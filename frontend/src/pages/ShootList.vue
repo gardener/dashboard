@@ -488,4 +488,5 @@ export default {
   >>> .v-input__slot {
     margin: 0px;
   }
+
 </style>
