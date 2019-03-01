@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-layout>
-    <v-flex xs5 class="mr-3">
+    <v-flex xs6 class="mr-3">
       <v-select
       color="cyan darken-2"
       v-model="selectedDays"
@@ -63,6 +63,7 @@ limitations under the License.
         label="Timezone"
         :items="timezones"
         v-model="selectedTimezone"
+        @input="onInputSelectedTimezone"
         >
       </v-autocomplete>
     </v-flex>
