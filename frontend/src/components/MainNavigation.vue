@@ -122,14 +122,16 @@ limitations under the License.
           </v-list-tile-content>
         </v-list-tile>
         <template v-if="namespace">
-          <v-list-tile v-for="(route, index) in routes" :to="namespacedRoute(route)" :key="index">
-            <v-list-tile-action>
-              <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <template v-for="(route, index) in routes">
+            <v-list-tile v-if="route.meta.menu.visible()" :to="namespacedRoute(route)" :key="index">
+              <v-list-tile-action>
+                <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+          </template>
         </template>
       </v-list>
 

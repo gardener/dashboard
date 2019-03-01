@@ -232,7 +232,8 @@ export default function createRouter ({ store, userManager }) {
           meta: {
             menu: {
               title: 'Clusters',
-              icon: 'mdi-hexagon-multiple'
+              icon: 'mdi-hexagon-multiple',
+              visible: () => true
             },
             namespaced: true,
             projectScope: false,
@@ -312,7 +313,8 @@ export default function createRouter ({ store, userManager }) {
           meta: {
             menu: {
               title: 'Secrets',
-              icon: 'mdi-key'
+              icon: 'mdi-key',
+              visible: () => true
             },
             namespaced: true,
             projectScope: true,
@@ -353,7 +355,8 @@ export default function createRouter ({ store, userManager }) {
             title: 'Members',
             menu: {
               title: 'Members',
-              icon: 'mdi-account-multiple-outline'
+              icon: 'mdi-account-multiple-outline',
+              visible: () => true
             },
             breadcrumbTextFn: routeTitle
           }
@@ -368,7 +371,8 @@ export default function createRouter ({ store, userManager }) {
             title: 'Administration',
             menu: {
               title: 'Administration',
-              icon: 'mdi-settings'
+              icon: 'mdi-settings',
+              visible: () => true
             },
             breadcrumbTextFn: routeTitle
           }
@@ -384,7 +388,8 @@ export default function createRouter ({ store, userManager }) {
             additionalRouteParamsFn: () => { return { target: 'garden' } },
             menu: {
               title: 'Garden Cluster',
-              icon: 'mdi-console'
+              icon: 'mdi-console',
+              visible: () => hasTerminalAccess()
             }
           },
           beforeEnter: (to, from, next) => {
