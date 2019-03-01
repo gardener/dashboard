@@ -30,10 +30,7 @@ limitations under the License.
      <v-icon class="cyan--text text--darken-2 ma-1">{{line.icon}}</v-icon>
      <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
     </v-layout>
-    <v-tooltip top slot="popperRef">
-      <v-chip slot="activator" small class="my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
-      <span v-for="(line,index) in description" :key="index">{{line.title}}: {{line.value}}<br /></span>
-    </v-tooltip>
+    <v-chip slot="popperRef" small class="my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
   </g-popper>
 </template>
 
@@ -75,7 +72,7 @@ export default {
           icon: 'mdi-speedometer',
           title: 'Machine Type',
           value: machineType.name,
-          description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory}`
+          description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
         })
       }
       if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
