@@ -28,7 +28,7 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import { isReconciliationDeactivated } from '@/utils'
-import { addAnnotation } from '@/utils/api'
+import { addShootAnnotation } from '@/utils/api'
 
 export default {
   props: {
@@ -76,7 +76,7 @@ export default {
       const name = this.name
 
       const retryAnnotation = { 'shoot.garden.sapcloud.io/operation': 'retry' }
-      return addAnnotation({ namespace, name, user, data: retryAnnotation })
+      return addShootAnnotation({ namespace, name, user, data: retryAnnotation })
         .then(() => {
           this.retryingOperation = false
         })

@@ -47,8 +47,8 @@ limitations under the License.
                   <v-list-tile-sub-title>Cluster Termination</v-list-tile-sub-title>
                   <v-list-tile-title>
                     <v-layout align-center row fill-height class="pa-0 ma-0">
-                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2">mdi-information</v-icon>
-                      <v-icon v-else color="warning">mdi-alert-circle</v-icon>
+                      <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
+                      <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
                       <span class="pl-2">{{selfTerminationMessage}}</span>
                     </v-layout>
                   </v-list-tile-title>
@@ -235,7 +235,7 @@ limitations under the License.
 
       </v-flex>
 
-      <v-flex md6 v-show="isInfoAvailable">
+      <v-flex md6>
         <v-card v-if="hasTerminalAccess" class="mb-3">
           <v-card-title class="subheading white--text cyan darken-2">
             Control Plane
@@ -276,12 +276,21 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Hibernation</v-list-tile-title>
+                <v-list-tile-sub-title>
+                  <v-layout v-if="isShootHasNoHibernationScheduleWarning" align-center row fill-height class="pa-0 ma-0">
+                    <v-icon small color="cyan darken-2">mdi-calendar-alert</v-icon>
+                    <span class="pl-2">{{hibernationDescription}}</span>
+                  </v-layout>
+                  <span v-else>{{hibernationDescription}}</span>
+                </v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <shoot-hibernation :shootItem="item"></shoot-hibernation>
               </v-list-tile-action>
+              <v-list-tile-action>
+                <hibernation-configuration ref="hibernationConfiguration" :shootItem="item"></hibernation-configuration>
+              </v-list-tile-action>
             </v-list-tile>
-
             <v-divider class="my-2" inset></v-divider>
             <v-list-tile>
               <v-list-tile-action>
@@ -289,12 +298,13 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Maintenance</v-list-tile-title>
+                <v-list-tile-sub-title>{{maintenanceDescription}}</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
-                <maintenance-configuration :shootItem="item"></maintenance-configuration>
+                <maintenance-start :shootItem="item"></maintenance-start>
               </v-list-tile-action>
               <v-list-tile-action>
-                <maintenance-start :shootItem="item"></maintenance-start>
+                <maintenance-configuration :shootItem="item"></maintenance-configuration>
               </v-list-tile-action>
             </v-list-tile>
 
@@ -325,7 +335,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import ControlPlane from '@/components/ControlPlane'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -337,6 +347,7 @@ import Logging from '@/components/Logging'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
+import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
@@ -349,10 +360,12 @@ import {
   canLinkToSeed,
   isSelfTerminationWarning,
   isValidTerminationDate,
-  getTimeStringTo
+  getTimeStringTo,
+  isShootHasNoHibernationScheduleWarning
 } from '@/utils'
 
 import 'codemirror/mode/yaml/yaml.js'
+import moment from 'moment-timezone'
 
 export default {
   name: 'shoot-item',
@@ -368,6 +381,7 @@ export default {
     ShootHibernation,
     MaintenanceStart,
     MaintenanceConfiguration,
+    HibernationConfiguration,
     DeleteCluster
   },
   data () {
@@ -400,7 +414,9 @@ export default {
       'hasTerminalAccess',
       'customAddonDefinitionList'
     ]),
-
+    ...mapState([
+      'localTimezone'
+    ]),
     getCloudProviderKind () {
       return getCloudProviderKind(get(this.item, 'spec.cloud'))
     },
@@ -437,9 +453,6 @@ export default {
     },
     item () {
       return get(this, 'value', {})
-    },
-    isInfoAvailable () {
-      return !!this.info
     },
     isLoggingFeatureGateEnabled () {
       return !!this.info.logging_username && !!this.info.logging_password
@@ -529,6 +542,34 @@ export default {
     },
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
+    },
+    hibernationDescription () {
+      const purpose = this.purpose || ''
+      if (get(this.item, 'spec.hibernation.schedules', []).length > 0) {
+        return 'Hibernation schedule configured'
+      } else if (this.isShootHasNoHibernationScheduleWarning) {
+        return `Please configure a schedule for this ${purpose} cluster`
+      } else {
+        return 'No hibernation schedule configured'
+      }
+    },
+    maintenanceDescription () {
+      const timezone = this.localTimezone
+      const maintenanceStart = get(this.item, 'spec.maintenance.timeWindow.begin')
+      const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
+      if (momentObj.isValid()) {
+        const maintenanceStr = momentObj.format('HH:mm')
+        return `Start time: ${maintenanceStr} ${timezone}`
+      }
+      return ''
+    },
+    isShootHasNoHibernationScheduleWarning () {
+      return isShootHasNoHibernationScheduleWarning(this.item)
+    }
+  },
+  mounted () {
+    if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
+      this.$refs.hibernationConfiguration.showDialog()
     }
   }
 }
@@ -536,6 +577,6 @@ export default {
 
 <style lang="styl" scoped>
   .subheading.v-card__title {
-    height: 42px;
+    line-height: 10px;
   }
 </style>

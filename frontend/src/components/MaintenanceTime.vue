@@ -41,8 +41,10 @@ limitations under the License.
 
 <script>
 import moment from 'moment-timezone'
+import { mapState } from 'vuex'
 import { getValidationErrors } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
+import sample from 'lodash/sample'
 
 const validationErrors = {
   timeWindowBegin: {
@@ -58,6 +60,11 @@ export default {
       default: ''
     }
   },
+  computed: {
+    ...mapState([
+      'localTimezone'
+    ])
+  },
   validations: {
     timeWindowBegin: {
       required
@@ -65,7 +72,7 @@ export default {
   },
   data () {
     return {
-      selectedTimezone: moment.tz.guess(),
+      selectedTimezone: this.localTimezone,
       timezones: moment.tz.names(),
       validationErrors,
       localizedMaintenanceBegin: undefined
@@ -88,7 +95,8 @@ export default {
       this.$emit('updateMaintenanceWindow', { utcBegin, utcEnd })
     },
     reset () {
-      this.selectedTimezone = moment.tz.guess()
+      this.selectedTimezone = this.localTimezone
+      this.setLocalizedTime(this.timeWindowBegin)
       this.validateInput()
     },
     getErrorMessages (field) {
@@ -109,6 +117,15 @@ export default {
           this.localizedMaintenanceBegin = newLocalizedTimeWindowBegin
         }
       }
+    },
+    setDefaultMaintenanceTimeWindow () {
+      // randomize maintenance time window
+      const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
+      const randomHour = sample(hours)
+      // use local timezone offset
+      const localBegin = `${randomHour}00`
+
+      this.updateMaintenanceWindow({ localBegin, localTimezone: this.selectedTimezone })
     }
   },
   watch: {
@@ -124,8 +141,7 @@ export default {
     }
   },
   mounted () {
-    this.setLocalizedTime(this.timeWindowBegin)
-    this.validateInput()
+    this.reset()
   }
 }
 </script>

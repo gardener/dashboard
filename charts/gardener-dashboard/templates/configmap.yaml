@@ -100,6 +100,9 @@ data:
       terminal:
         heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
 {{- end }}
+{{- if .Values.frontendConfig.defaultHibernationSchedule }}
+      defaultHibernationSchedule:
+{{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
 {{- end }}
 {{- if .Values.prometheus }}
     prometheus:

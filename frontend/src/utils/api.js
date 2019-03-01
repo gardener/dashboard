@@ -87,7 +87,7 @@ export function replaceShoot ({ namespace, name, user, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, user, data)
 }
 
-export function addAnnotation ({ namespace, name, user, data }) {
+export function addShootAnnotation ({ namespace, name, user, data }) {
   return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, user, data)
 }
 
@@ -105,6 +105,10 @@ export function updateShootVersion ({ namespace, name, user, data }) {
 
 export function updateMaintenance ({ namespace, name, user, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, user, data)
+}
+
+export function updateHibernationSchedules ({ namespace, name, user, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`, user, data)
 }
 
 export function updateShootHibernation ({ namespace, name, user, data }) {

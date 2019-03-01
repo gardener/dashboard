@@ -304,6 +304,17 @@ export default function createRouter ({ store, userManager }) {
                 breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
               }
+            },
+            {
+              path: ':name/hibernation',
+              name: 'ShootItemHibernationSettings',
+              component: ShootItemCards,
+              meta: {
+                namespaced: true,
+                projectScope: true,
+                breadcrumbTextFn: routeParamName,
+                tabs: shootItemTabs
+              }
             }
           ]
         },
@@ -524,6 +535,7 @@ export default function createRouter ({ store, userManager }) {
               .all(promises)
               .then(() => undefined)
           case 'ShootItem':
+          case 'ShootItemHibernationSettings':
             return Promise
               .all([
                 store.dispatch('subscribeShoot', { name: params.name, namespace }),

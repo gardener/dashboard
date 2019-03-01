@@ -27,7 +27,7 @@ limitations under the License.
       :confirm-disabled="!valid"
       v-model="dialog"
       :cancel="hideDialog"
-      :ok="updateMaintenance"
+      :ok="updateHibernationSchedules"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
@@ -38,15 +38,13 @@ limitations under the License.
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <v-layout row wrap>
-          <maintenance-time
-            ref="maintenanceTime"
-            :time-window-begin="data.timeWindowBegin"
-            @updateMaintenanceWindow="onUpdateMaintenanceWindow"
-            @valid="onMaintenanceTimeValid"
-          ></maintenance-time>
-          <maintenance-components
-            :update-kubernetes-version="data.updateKubernetesVersion"
-            @updateKubernetesVersion="onUpdateKubernetesVersion"></maintenance-components>
+          <hibernation-schedule
+            ref="hibernationSchedule"
+            :scheduleCrontab="hibernationSchedules"
+            :noSchedule="noScheduleAnnotation"
+            :purpose="shootPurpose"
+            @valid="onHibernationScheduleValid"
+          ></hibernation-schedule>
         </v-layout>
       </template>
     </confirm-dialog>
@@ -55,19 +53,17 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
-import MaintenanceTime from '@/components/MaintenanceTime'
-import { updateMaintenance } from '@/utils/api'
+import HibernationSchedule from '@/components/HibernationSchedule'
+import { updateHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 
 export default {
-  name: 'maintenance-configuration',
+  name: 'hibernation-configuration',
   components: {
     ConfirmDialog,
-    MaintenanceComponents,
-    MaintenanceTime
+    HibernationSchedule
   },
   props: {
     shootItem: {
@@ -79,25 +75,25 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      maintenanceTimeValid: false,
-      data: {
-        timeWindowBegin: undefined,
-        timeWindowEnd: undefined,
-        updateKubernetesVersion: false
-      },
-      icon: 'mdi-settings-outline',
-      caption: 'Configure Maintenance'
+      hibernationScheduleValid: false,
+      hibernationSchedules: undefined,
+      noScheduleAnnotation: false,
+      caption: 'Configure Hibernation Schedule',
+      icon: 'mdi-settings-outline'
     }
   },
   computed: {
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },
+    shootPurpose () {
+      return get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
+    },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
     },
     valid () {
-      return this.maintenanceTimeValid
+      return this.hibernationScheduleValid
     },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
@@ -112,9 +108,12 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    updateMaintenance () {
+    updateHibernationSchedules () {
       const user = this.$store.state.user
-      return updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
+      const noScheduleAnnotation = { 'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null }
+      this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+      return updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
+        .then(() => addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation }))
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)
@@ -126,25 +125,20 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-      this.maintenanceTimeValid = false
+      this.hibernationScheduleValid = false
 
-      this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
-      this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
-      this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+      this.hibernationSchedules = get(this.shootItem, 'spec.hibernation.schedules')
+      this.noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
 
       this.$nextTick(() => {
-        this.$refs.maintenanceTime.reset()
+        this.$refs.hibernationSchedule.reset()
       })
     },
-    onUpdateKubernetesVersion (value) {
-      this.data.updateKubernetesVersion = value
+    onUpdateHibernationSchedules (value) {
+      this.hibernationSchedules = value
     },
-    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
-      this.data.timeWindowBegin = utcBegin
-      this.data.timeWindowEnd = utcEnd
-    },
-    onMaintenanceTimeValid (value) {
-      this.maintenanceTimeValid = value
+    onHibernationScheduleValid (value) {
+      this.hibernationScheduleValid = value
     }
   }
 }
