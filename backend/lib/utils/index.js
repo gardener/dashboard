@@ -98,7 +98,7 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
 async function getSeedKubeconfig ({ coreClient, seed }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
+  const seedSecret = await coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
     .catch(err => {
       if (err.code === 404) {
         return
