@@ -113,6 +113,7 @@ terminal:
         certmanager.k8s.io/cluster-issuer: lets-encrypt
         certmanager.k8s.io/acme-challenge-type: dns01
         certmanager.k8s.io/acme-dns01-provider: route53
+    queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
   gardenClusterKubeApiserver:
     namespace: default
     serviceName: kubernetes

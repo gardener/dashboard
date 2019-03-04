@@ -260,14 +260,6 @@ module.exports = {
     })
   },
 
-  async waitUntilResourceExists ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
-    const onTimeoutError = () => {
-      const duration = `${waitTimeout} ms`
-      return new NotFound(`Resource "${resourceName}" could not be found after waiting for ${duration}`)
-    }
-    return _waitUntilResourceHasCondition({ watch, conditionFunction, waitTimeout, resourceName, onTimeoutError })
-  },
-
   async waitUntilResourceHasCondition ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
     const onTimeoutError = () => {
       const duration = `${waitTimeout} ms`

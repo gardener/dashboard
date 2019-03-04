@@ -100,6 +100,7 @@ data:
       terminal:
         heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
 {{- end }}
+{{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
 {{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
@@ -146,6 +147,10 @@ data:
           annotations:
 {{ toYaml . | indent 12 }}
           {{- end }}
+        {{- end }}
+        {{- if .Values.terminal.bootstrap.queueOptions }}
+        queueOptions:
+{{ toYaml .Values.terminal.bootstrap.queueOptions | indent 10 }}
         {{- end }}
       {{- end }}
       gardenClusterKubeApiserver:

@@ -279,7 +279,7 @@ async function handleSeed (seed, cb) {
   logger.debug(`creating / updating resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed, waitUntilAvailable: true })
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
   if (!seedKubeconfig) { // TODO retry later?
     throw new Error(`could not get kubeconfig for seed ${name}`)
   }
@@ -447,6 +447,7 @@ async function bootstrapGardener () {
 const requiredConfigExists = verifyRequiredConfigExists()
 
 const options = {}
+_.assign(options, _.get(config, 'terminal.bootstrap.queueOptions'))
 var bootstrapQueue = new Queue(async (seed, cb) => {
   try {
     await handleSeed(seed)
