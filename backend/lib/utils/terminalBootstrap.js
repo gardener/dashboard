@@ -41,8 +41,6 @@ const {
 } = require('./terminalResources')
 const shoots = require('../services/shoots')
 
-const COMPONENT_TERMINAL = 'dashboard-terminal'
-
 const TERMINAL_CLEANUP = 'dashboard-terminal-cleanup'
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
@@ -54,7 +52,6 @@ const CRONJOB_NAME_CLEANUP = TERMINAL_CLEANUP
 
 async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
   const name = 'garden.sapcloud.io:dashboard-terminal-attach'
-  const component = COMPONENT_TERMINAL
   const rules = [
     {
       apiGroups: [
@@ -69,7 +66,7 @@ async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
     }
   ]
 
-  const body = toClusterRoleResource({ name, component, rules, ownerReferences })
+  const body = toClusterRoleResource({ name, rules, ownerReferences })
   const client = rbacClient.clusterrole
 
   return replaceResource({ client, name, body })
@@ -77,7 +74,6 @@ async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
 
 async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
   const name = CLUSTER_ROLE_NAME_CLEANUP
-  const component = COMPONENT_TERMINAL
   const rules = [
     {
       apiGroups: [
@@ -93,7 +89,7 @@ async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
     }
   ]
 
-  const body = toClusterRoleResource({ name, component, rules, ownerReferences })
+  const body = toClusterRoleResource({ name, rules, ownerReferences })
   const client = rbacClient.clusterrole
 
   return replaceResource({ client, name, body })
@@ -102,7 +98,6 @@ async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
 async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespace, ownerReferences }) {
   const name = CLUSTER_ROLE_BINDING_NAME_CLEANUP
   const clusterRoleName = CLUSTER_ROLE_NAME_CLEANUP
-  const component = COMPONENT_TERMINAL
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -118,7 +113,7 @@ async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespa
     }
   ]
 
-  const body = toClusterRoleBindingResource({ name, component, roleRef, subjects, ownerReferences })
+  const body = toClusterRoleBindingResource({ name, roleRef, subjects, ownerReferences })
   const client = rbacClient.clusterrolebinding
 
   return replaceResource({ client, name, body })
@@ -127,9 +122,8 @@ async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespa
 async function replaceServiceAccountCleanup ({ coreClient }) {
   const name = SERVICEACCOUNT_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
-  const component = COMPONENT_TERMINAL
 
-  const body = toServiceAccountResource({ name, component })
+  const body = toServiceAccountResource({ name })
   const client = coreClient.ns(namespace).serviceaccounts
 
   return replaceResource({ client, name, body })
@@ -138,7 +132,6 @@ async function replaceServiceAccountCleanup ({ coreClient }) {
 async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) {
   const name = CRONJOB_NAME_CLEANUP
   const namespace = GARDEN_NAMESPACE
-  const component = COMPONENT_TERMINAL
   const image = _.get(config, 'terminal.cleanup.image')
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
@@ -178,15 +171,13 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
     }
   }
 
-  const body = toCronjobResource({ name, component, spec, ownerReferences })
+  const body = toCronjobResource({ name, spec, ownerReferences })
   const client = batchClient.ns(namespace).cronjob
 
   return replaceResource({ client, name, body })
 }
 
 async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences }) {
-  const component = COMPONENT_TERMINAL
-
   const annotations = _.get(config, 'terminal.bootstrap.apiserverIngress.annotations')
 
   const spec = {
@@ -216,15 +207,13 @@ async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extens
     ]
   }
 
-  const body = toIngressResource({ name, component, annotations, spec, ownerReferences })
+  const body = toIngressResource({ name, annotations, spec, ownerReferences })
   const client = extensionClient.ns(namespace).ingress
 
   return replaceResource({ client, name, body })
 }
 
 async function replaceEndpointKubeApiserver ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, ip, ownerReferences }) {
-  const component = COMPONENT_TERMINAL
-
   // TODO label role: apiserver ?
   const subsets = [
     {
@@ -242,15 +231,13 @@ async function replaceEndpointKubeApiserver ({ name = TERMINAL_KUBE_APISERVER, c
     }
   ]
 
-  const body = toEndpointResource({ name, namespace, component, subsets, ownerReferences })
+  const body = toEndpointResource({ name, namespace, subsets, ownerReferences })
   const client = coreClient.ns(namespace).endpoints
 
   return replaceResource({ client, name, body })
 }
 
 async function replaceServiceKubeApiserver ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences }) {
-  const component = COMPONENT_TERMINAL
-
   let type
   if (externalName) {
     type = 'ExternalName'
@@ -269,7 +256,7 @@ async function replaceServiceKubeApiserver ({ name = TERMINAL_KUBE_APISERVER, co
     externalName // optional
   }
 
-  const body = toServiceResource({ name, namespace, component, spec, ownerReferences })
+  const body = toServiceResource({ name, namespace, spec, ownerReferences })
   const client = coreClient.ns(namespace).services
 
   return replaceResource({ client, name, body })

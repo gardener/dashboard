@@ -26,6 +26,7 @@ const { decodeBase64,
   createOwnerRefArrayForServiceAccount
 } = require('../utils')
 const {
+  COMPONENT_TERMINAL,
   toServiceAccountResource,
   toRoleBindingResource,
   toClusterRoleBindingResource,
@@ -53,14 +54,12 @@ function getAnnotationTerminalUserAndTarget ({ user, target }) {
 }
 
 function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences, labels, annotations }) {
-  const component = 'dashboard-terminal'
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
-  return toServiceAccountResource({ prefix, name, component, labels, annotations, ownerReferences })
+  return toServiceAccountResource({ prefix, name, labels, annotations, ownerReferences })
 }
 
 function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerReferences }) {
-  const component = 'dashboard-terminal'
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
@@ -77,11 +76,10 @@ function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerRef
     }
   ]
 
-  return toRoleBindingResource({ name, component, annotations, subjects, roleRef, ownerReferences })
+  return toRoleBindingResource({ name, annotations, subjects, roleRef, ownerReferences })
 }
 
 function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, target, roleName, ownerReferences }) {
-  const component = 'dashboard-terminal'
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
@@ -99,11 +97,10 @@ function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, ta
     }
   ]
 
-  return toClusterRoleBindingResource({ name, component, roleRef, subjects, annotations, ownerReferences })
+  return toClusterRoleBindingResource({ name, roleRef, subjects, annotations, ownerReferences })
 }
 
 function toTerminalPodResource ({ name, terminalImage, saName, user, target, ownerReferences }) {
-  const component = 'dashboard-terminal'
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
@@ -118,11 +115,10 @@ function toTerminalPodResource ({ name, terminalImage, saName, user, target, own
       }
     ]
   }
-  return toPodResource({ name, component, annotations, spec, ownerReferences })
+  return toPodResource({ name, annotations, spec, ownerReferences })
 }
 
 function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerReferences }) {
-  const component = 'dashboard-terminal'
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
@@ -160,7 +156,7 @@ function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerR
       }
     ]
   }
-  return toPodResource({ name, component, annotations, spec, ownerReferences })
+  return toPodResource({ name, annotations, spec, ownerReferences })
 }
 
 async function readServiceAccountToken ({ client, targetNamespace, serviceaccountName }) {
@@ -235,7 +231,7 @@ async function initializeSeedTerminalObject ({ user, namespace, seed, seedShootN
 }
 
 async function findExistingTerminalPod ({ coreClient, targetNamespace, username, target }) {
-  const qs = { labelSelector: 'component=dashboard-terminal' }
+  const qs = { labelSelector: `component=${COMPONENT_TERMINAL}` }
   const existingPods = await coreClient.ns(targetNamespace).pods.get({ qs })
   const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target)
   return existingPod

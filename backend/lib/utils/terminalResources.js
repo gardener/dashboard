@@ -22,9 +22,10 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 
+const COMPONENT_TERMINAL = 'dashboard-terminal'
+
 function toClusterRoleResource ({
   name,
-  component,
   rules,
   labels = {},
   annotations = {},
@@ -33,12 +34,11 @@ function toClusterRoleResource ({
   const resource = Resources.ClusterRole
   const data = { rules }
 
-  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, annotations, labels, ownerReferences, data })
 }
 
 function toClusterRoleBindingResource ({
   name,
-  component,
   roleRef,
   subjects,
   annotations = {},
@@ -48,12 +48,11 @@ function toClusterRoleBindingResource ({
   const resource = Resources.ClusterRoleBinding
   const data = { roleRef, subjects }
 
-  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, annotations, labels, ownerReferences, data })
 }
 
 function toRoleBindingResource ({
   name,
-  component,
   annotations = {},
   labels = {},
   subjects,
@@ -63,13 +62,12 @@ function toRoleBindingResource ({
   const resource = Resources.RoleBinding
   const data = { roleRef, subjects }
 
-  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, annotations, labels, ownerReferences, data })
 }
 
 function toServiceAccountResource ({
   prefix,
   name,
-  component,
   labels = {},
   annotations = {},
   ownerReferences = []
@@ -77,12 +75,11 @@ function toServiceAccountResource ({
   const resource = Resources.ServiceAccount
   const generateName = prefix
 
-  return toResource({ resource, name, generateName, component, annotations, labels, ownerReferences })
+  return toResource({ resource, name, generateName, annotations, labels, ownerReferences })
 }
 
 function toCronjobResource ({
   name,
-  component,
   spec,
   annotations = {},
   ownerReferences = [],
@@ -91,12 +88,11 @@ function toCronjobResource ({
   const resource = Resources.CronJob
   const data = { spec }
 
-  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, annotations, labels, ownerReferences, data })
 }
 
 function toIngressResource ({
   name,
-  component,
   spec,
   annotations = {},
   ownerReferences = [],
@@ -105,13 +101,12 @@ function toIngressResource ({
   const resource = Resources.Ingress
   const data = { spec }
 
-  return toResource({ resource, name, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, annotations, labels, ownerReferences, data })
 }
 
 function toServiceResource ({
   name,
   namespace,
-  component,
   spec,
   annotations = {},
   ownerReferences = [],
@@ -120,13 +115,12 @@ function toServiceResource ({
   const resource = Resources.Service
   const data = { spec }
 
-  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
 }
 
 function toEndpointResource ({
   name,
   namespace,
-  component,
   subsets,
   annotations = {},
   ownerReferences = [],
@@ -135,13 +129,12 @@ function toEndpointResource ({
   const resource = Resources.Endpoint
   const data = { subsets }
 
-  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
 }
 
 function toPodResource ({
   name,
   namespace,
-  component,
   annotations,
   labels,
   spec,
@@ -150,7 +143,7 @@ function toPodResource ({
   const resource = Resources.Pod
   const data = { spec }
 
-  return toResource({ resource, name, namespace, component, annotations, labels, ownerReferences, data })
+  return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
 }
 
 function toResource ({
@@ -158,7 +151,6 @@ function toResource ({
   name,
   generateName,
   namespace,
-  component,
   annotations = {},
   labels = {},
   ownerReferences,
@@ -167,7 +159,7 @@ function toResource ({
   const apiVersion = resource.apiVersion
   const kind = resource.kind
 
-  labels.component = component
+  labels.component = COMPONENT_TERMINAL
 
   const metadata = {
     labels,
@@ -195,6 +187,7 @@ function toResource ({
 }
 
 module.exports = {
+  COMPONENT_TERMINAL,
   toClusterRoleResource,
   toClusterRoleBindingResource,
   toRoleBindingResource,
