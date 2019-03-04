@@ -254,6 +254,7 @@ limitations under the License.
           </v-card>
         </v-tab-item>
       </v-tabs-items>
+
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
       <v-card-actions>
         <v-spacer></v-spacer>
