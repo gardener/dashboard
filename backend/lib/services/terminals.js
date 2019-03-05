@@ -59,41 +59,41 @@ function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerRe
   return toServiceAccountResource({ prefix, name, labels, annotations, ownerReferences })
 }
 
-function toTerminalRoleBindingResource ({ name, user, target, roleName, ownerReferences }) {
+function toTerminalRoleBindingResource ({ name, saName, user, target, clusterRoleName, ownerReferences }) {
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
     kind: Resources.ClusterRole.kind,
-    name: roleName
+    name: clusterRoleName
   }
 
   const subjects = [
     {
       kind: Resources.ServiceAccount.kind,
-      name
+      name: saName
     }
   ]
 
   return toRoleBindingResource({ name, annotations, subjects, roleRef, ownerReferences })
 }
 
-function toTerminalClusterRoleBindingResource ({ name, user, targetNamespace, target, roleName, ownerReferences }) {
+function toTerminalClusterRoleBindingResource ({ name, saName, saNamespace, user, target, clusterRoleName, ownerReferences }) {
   const annotations = {}
   _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
     kind: Resources.ClusterRole.kind,
-    name: roleName
+    name: clusterRoleName
   }
 
   const subjects = [
     {
       kind: Resources.ServiceAccount.kind,
-      name,
-      namespace: targetNamespace
+      name: saName,
+      namespace: saNamespace
     }
   ]
 
@@ -274,10 +274,11 @@ async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, 
   const adminServiceAccountName = `terminal-${identifier}`
   await coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: adminServiceAccountName, user, target, ownerReferences }) })
 
-  if (target === 'garden') { // create cluster rolebinding for cluster admin
-    await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: adminServiceAccountName, targetNamespace, user, target, roleName: 'cluster-admin', ownerReferences }) })
+  const clusterRoleName = 'cluster-admin'
+  if (target === 'garden') { // create cluster rolebinding for cluster-admin
+    await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: adminServiceAccountName, saName: adminServiceAccountName, saNamespace: targetNamespace, user, target, clusterRoleName, ownerReferences }) })
   } else { // create rolebinding for namespace cluster-admin
-    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, user, target, roleName: 'cluster-admin', ownerReferences }) })
+    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, saName: adminServiceAccountName, user, target, clusterRoleName, ownerReferences }) })
   }
 
   // wait until API token is written into service account before creating the pod
@@ -344,7 +345,8 @@ exports.create = async function ({ user, namespace, name, target }) {
     terminalInfo.attachServiceAccount = attachServiceAccountName
 
     // create rolebinding for attach-sa
-    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: attachServiceAccountName, user: username, target, roleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences }) })
+    const name = attachServiceAccountName
+    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name, saName: attachServiceAccountName, user: username, target, clusterRoleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences }) })
 
     const terminalImage = _.get(config, 'terminal.operator.image')
     if (!terminalImage) {

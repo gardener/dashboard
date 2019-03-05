@@ -367,17 +367,17 @@ async function bootstrapIngressAndHeadlessServiceForSoilOnSoil ({ coreClient, so
   })
 }
 
-async function bootstrapIngressAndHeadlessService ({ name, coreClient, extensionClient, namespace, apiserverHostname, ingressDomain, clusterNameForLog }) {
+async function bootstrapIngressAndHeadlessService ({ coreClient, extensionClient, namespace, apiserverHostname, ingressDomain, clusterNameForLog }) {
   let service
   // replace headless service
   if (isIp(apiserverHostname)) {
     const ip = apiserverHostname
     await replaceEndpointKubeApiserver({ coreClient, namespace, ip })
 
-    service = await replaceServiceKubeApiserver({ name, coreClient, namespace })
+    service = await replaceServiceKubeApiserver({ coreClient, namespace })
   } else {
     const externalName = apiserverHostname
-    service = await replaceServiceKubeApiserver({ name, coreClient, namespace, externalName })
+    service = await replaceServiceKubeApiserver({ coreClient, namespace, externalName })
   }
   const serviceName = service.metadata.name
 
@@ -385,7 +385,6 @@ async function bootstrapIngressAndHeadlessService ({ name, coreClient, extension
 
   await replaceIngressApiServer({
     extensionClient,
-    name,
     namespace,
     serviceName,
     host: apiserverIngressHost
