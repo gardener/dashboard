@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { credentials } = require('../../../lib/kubernetes')
+const { credentials, Resources } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
 const jwt = require('jsonwebtoken')
 const clientConfig = credentials()
@@ -117,13 +117,13 @@ const infrastructureSecretList = [
 ]
 
 const serviceAccountList = [
-  getServiceAccount('garden-foo', 'robot-foo'),
-  getServiceAccount('garden-bar', 'robot-bar')
+  getServiceAccount('garden-foo', 'robot'),
+  getServiceAccount('garden-bar', 'robot')
 ]
 
 const serviceAccountSecretList = [
-  getServiceAccountSecret('garden-foo', 'robot-foo'),
-  getServiceAccountSecret('garden-bar', 'robot-bar')
+  getServiceAccountSecret('garden-foo', 'robot'),
+  getServiceAccountSecret('garden-bar', 'robot')
 ]
 
 const gardenAdministrators = ['admin@example.org']
@@ -214,16 +214,40 @@ function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, b
   return {metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret}
 }
 
-function validateCanDeleteShootsInAllNamespacesRequest (selfSubjectAccessReview) {
-  const {namespace, verb, resource, group} = selfSubjectAccessReview.spec.resourceAttributes
-  return !namespace && group === 'garden.sapcloud.io' && resource === 'shoots' && verb === 'delete'
+function canCreateProjects (scope) {
+  return scope
+    .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
+      const { namespace, verb, resource, group } = body.spec.resourceAttributes
+      return !namespace && group === 'garden.sapcloud.io' && resource === 'projects' && verb === 'create'
+    })
+    .reply(200, function (body) {
+      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+      const payload = jwt.decode(token)
+      const allowed = _.endsWith(payload.id, 'example.org')
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
 }
 
-function canDeleteShootsInAllNamespacesReply (uri, selfSubjectAccessReview) {
-  const [, token] = _.split(this.req.headers.authorization, ' ', 2)
-  const payload = jwt.decode(token)
-  const allowed = _.includes(gardenAdministrators, payload.id)
-  return [200, _.assign({}, selfSubjectAccessReview, {status: {allowed}})]
+function canDeleteShootsInAllNamespaces (scope) {
+  return scope
+    .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
+      const { namespace, verb, resource, group } = body.spec.resourceAttributes
+      return !namespace && group === 'garden.sapcloud.io' && resource === 'shoots' && verb === 'delete'
+    })
+    .reply(200, function (body) {
+      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+      const payload = jwt.decode(token)
+      const allowed = _.includes(gardenAdministrators, payload.id)
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
 }
 
 function readProject (namespace) {
@@ -673,10 +697,10 @@ const stub = {
       })
   },
   getProjects ({bearer}) {
+    const scope = nockWithAuthorization(bearer)
+    canDeleteShootsInAllNamespaces(scope)
     return [
-      nockWithAuthorization(bearer)
-        .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, validateCanDeleteShootsInAllNamespacesRequest)
-        .reply(canDeleteShootsInAllNamespacesReply),
+      scope,
       nockWithAuthorization(auth.bearer)
         .get('/apis/garden.sapcloud.io/v1beta1/projects')
         .reply(200, {
@@ -843,22 +867,28 @@ const stub = {
     ]
   },
   getMember ({bearer, namespace, name: username}) {
-    const scopes = []
+    const project = readProject(namespace)
+    const name = project.metadata.name
+    const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
+    const scope = nockWithAuthorization(bearer)
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    const scopes = [
+      nockWithAuthorization(auth.bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-    if (serviceAccountNamespace === namespace) {
+    if (serviceAccountNamespace === namespace && isMember) {
       const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
       const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
-      scopes.push(...[
-        nockWithAuthorization(auth.bearer)
-          .get(`/api/v1/namespaces/${namespace}`)
-          .reply(200, () => getProjectNamespace(namespace)),
-        nockWithAuthorization(bearer)
-          .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
-          .reply(200, serviceAccount)
-          .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
-          .reply(200, serviceAccountSecret)
-      ])
+      scope
+        .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
+        .reply(200, serviceAccount)
+        .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
+        .reply(200, serviceAccountSecret)
     }
     return scopes
   },
@@ -867,23 +897,47 @@ const stub = {
       .get(`/healthz`)
       .reply(200, 'ok')
   },
-  fetchGardenerVersion ({version}) {
-    const apiServerSpec = {
-      spec: {
-        service: {
-          name: 'gardener-apiserver',
-          namespace: 'gardener'
-        },
-        caBundle: encodeBase64('ca')
-      }
+  fetchGardenerVersion ({ version }) {
+    const service = {
+      name: 'gardener-apiserver',
+      namespace: 'gardener'
     }
+    const caBundle = encodeBase64('ca')
+    const body = { spec: { service, caBundle } }
+    const serviceUrl = `https://${service.name}.${service.namespace}`
+    const statusCode = !version ? 404 : 200
     return [
       nockWithAuthorization(auth.bearer)
-        .get(`/apis/apiregistration.k8s.io/v1beta1/apiservices/v1beta1.garden.sapcloud.io`)
-        .reply(200, apiServerSpec),
-      nock(`https://${apiServerSpec.spec.service.name}.${apiServerSpec.spec.service.namespace}`)
+        .get('/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.garden.sapcloud.io')
+        .reply(200, body),
+      nock(serviceUrl)
         .get(`/version`)
-        .reply(200, version)
+        .reply(statusCode, version)
+    ]
+  },
+  getUserInfo ({ bearer, username, authenticated = true }) {
+    const user = authenticated ? {
+      username,
+      groups: [
+        'system:authenticated',
+        'employee'
+      ]
+    } : {}
+    const scope = nockWithAuthorization(bearer)
+    canDeleteShootsInAllNamespaces(scope)
+    canCreateProjects(scope)
+    return [
+      scope,
+      nockWithAuthorization(auth.bearer)
+        .post('/apis/authentication.k8s.io/v1/tokenreviews')
+        .reply(200, () => {
+          return {
+            status: {
+              user,
+              authenticated
+            }
+          }
+        })
     ]
   }
 }

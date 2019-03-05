@@ -20,14 +20,7 @@ limitations under the License.
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
     <div class="text-xs-center" v-if="helpMenuItems.length">
-      <v-menu
-        offset-y
-        open-on-click
-        :nudge-bottom="12"
-        transition="slide-y-transition"
-        :close-on-content-click="true"
-        v-model="help"
-        >
+      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
         <v-btn slot="activator" icon class="cyan--text text--darken-2 mr-4" title="Gardener Landing Page">
           <v-icon medium>help_outline</v-icon>
         </v-btn>
@@ -55,23 +48,16 @@ limitations under the License.
       </v-menu>
     </div>
     <div class="text-xs-center">
-      <v-menu
-        offset-y
-        open-on-click
-        :nudge-bottom="12"
-        transition="slide-y-transition"
-        :close-on-content-click="true"
-        v-model="menu"
-      >
+      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="menu">
         <v-tooltip left slot="activator" open-delay="500">
           <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>
             <v-icon slot="badge" small dark>supervisor_account</v-icon>
             <v-avatar size="40px">
-              <img :src="avatar"/>
+              <img :src="avatarUrl" />
             </v-avatar>
           </v-badge>
           <v-avatar v-else slot="activator" size="40px">
-            <img :src="avatar"/>
+            <img :src="avatarUrl" />
           </v-avatar>
           <span v-if="isAdmin">
             {{avatarTitle}}
@@ -87,8 +73,8 @@ limitations under the License.
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
-              <div class="title">{{username}}</div>
-              <div class="caption">{{email}}</div>
+              <div class="title">{{displayName}}</div>
+              <div class="caption">{{username}}</div>
               <div class="caption" v-if="isAdmin">Operator</div>
             </div>
           </v-card-title>
@@ -119,7 +105,6 @@ limitations under the License.
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import get from 'lodash/get'
-import { gravatarUrlIdenticon } from '@/utils'
 import Breadcrumb from '@/components/Breadcrumb'
 import { getInfo } from '@/utils/api'
 
@@ -142,7 +127,7 @@ export default {
       'setError'
     ]),
     handleLogout () {
-      this.$router.push({ name: 'Logout' })
+      this.$userManager.signout()
     }
   },
   computed: {
@@ -154,22 +139,28 @@ export default {
     ]),
     ...mapGetters([
       'username',
+      'displayName',
+      'avatarUrl',
       'isAdmin'
     ]),
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
     },
     avatar () {
-      return gravatarUrlIdenticon(this.email)
+      return this.avatarUrl
     },
     email () {
-      return this.user.profile.email
+      return this.user.email
     },
     tabs () {
       return get(this.$route, 'meta.tabs', false)
     },
     avatarTitle () {
-      return `${this.username} (${this.email})`
+      let title = this.displayName
+      if (this.username) {
+        title += ' (' + this.username + ')'
+      }
+      return title
     },
     helpTarget () {
       return (item) => {
@@ -177,28 +168,37 @@ export default {
       }
     },
     accountLink () {
-      return { name: 'Account', query: this.$route.query }
+      return {
+        name: 'Account',
+        query: this.$route.query
+      }
     }
   },
   watch: {
-    help (value) {
+    async help (value) {
       if (value && !this.dashboardVersion) {
-        getInfo({ user: this.user }).then(res => {
-          const data = get(res, 'data')
-          if (data.gardenerVersion) {
-            this.gardenerVersion = data.gardenerVersion.gitVersion
+        try {
+          const {
+            data: {
+              gardenerVersion,
+              version
+            } = {}
+          } = await getInfo()
+          if (gardenerVersion) {
+            this.gardenerVersion = `${gardenerVersion.major}.${gardenerVersion.minor}`
           }
-          if (data.version) {
-            this.dashboardVersion = `${data.version}`
+          if (version) {
+            this.dashboardVersion = `${version}`
           }
-        }).catch(error => {
-          this.setError({ message: `Failed to fetch version information. ${error.message}` })
-        })
+        } catch (err) {
+          this.setError({
+            message: `Failed to fetch version information. ${err.message}`
+          })
+        }
       }
     }
   }
 }
-
 </script>
 
 <style lang="styl" scoped>

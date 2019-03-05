@@ -17,38 +17,18 @@
 import io from 'socket.io-client'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
-import concat from 'lodash/concat'
 import Emitter from 'component-emitter'
-import { ThrottledNamespacedEventEmitter } from './ThrottledEmitter'
+import ThrottledNamespacedEventEmitter from './ThrottledEmitter'
 import store from '../store'
 
-class SocketAuthenticator {
+class Connector {
   constructor (socket) {
-    this.authenticated = false
-    this.auth = {
-      bearer: undefined
-    }
     this.socket = socket
     this.handlers = []
   }
 
   addHandler (handler) {
-    this.handlers = concat(this.handlers, handler)
-  }
-
-  authenticate () {
-    console.log(`socket connection ${this.socket.id} authenticating`)
-    if (this.auth.bearer) {
-      this.socket.emit('authentication', this.auth)
-    }
-  }
-
-  onAuthenticated () {
-    this.authenticated = true
-    console.log(`socket connection ${this.socket.id} authenticated`)
-    store.dispatch('unsetWebsocketConnectionError')
-
-    forEach(this.handlers, handler => handler.onAuthenticated())
+    this.handlers.push(handler)
   }
 
   onConnect (attempt) {
@@ -57,32 +37,33 @@ class SocketAuthenticator {
     } else {
       console.log(`socket connection ${this.socket.id} established`)
     }
-    this.authenticate()
+    store.dispatch('unsetWebsocketConnectionError')
+    forEach(this.handlers, handler => handler.onConnect())
   }
 
   onDisconnect (reason) {
     console.error(`socket connection lost because`, reason)
-    this.authenticated = false
     store.dispatch('setWebsocketConnectionError', { reason })
-
     forEach(this.handlers, handler => handler.onDisconnect())
   }
 
-  setUser (user) {
-    user = user || {}
-    const id_token = user.id_token
-    /* eslint camelcase: off */
-    if (!id_token) {
-      console.log(`Disconnect socket ${this.socket.id} because ID token is empty`)
-      this.auth.bearer = undefined
+  get connected () {
+    return this.socket.connected
+  }
+
+  disconnect () {
+    console.log(`Disconnect socket ${this.socket.id}`)
+    if (this.socket.connected) {
       this.socket.disconnect()
-    } else if (!this.socket.connected) {
-      this.auth.bearer = id_token
+    }
+  }
+
+  connect (forceful) {
+    if (!this.socket.connected) {
       this.socket.connect()
-    } else if (this.auth.bearer !== id_token) {
-      console.log(`Socket ${this.socket.id} connected but has different ID token`)
-      this.auth.bearer = id_token
-      const onDisconnect = (reason) => {
+    } else if (forceful === true) {
+      console.log(`Forcefully reconnecting Socket ${this.socket.id}`)
+      const onDisconnect = reason => {
         console.log('onDisconnect', reason)
         if (reason === 'io client disconnect') {
           clearTimeout(timeoutId)
@@ -100,14 +81,17 @@ class SocketAuthenticator {
 }
 
 class AbstractSubscription {
-  constructor (socketAuthenticator) {
-    socketAuthenticator.addHandler(this)
+  constructor (connector) {
+    connector.addHandler(this)
 
-    this.socketAuthenticator = socketAuthenticator
-    this.socket = this.socketAuthenticator.socket
+    this.connector = connector
   }
 
-  onAuthenticated () {
+  get socket () {
+    return this.connector.socket
+  }
+
+  onConnect () {
     if (this.subscribeTo) {
       this.subscribe()
     }
@@ -120,7 +104,7 @@ class AbstractSubscription {
   async subscribe () {
     if (this.subscribeTo) {
       if (!this.subscribedTo || !isEqual(this.subscribedTo, this.subscribeTo)) {
-        if (this.socketAuthenticator.authenticated) {
+        if (this.connector.connected) {
           if (await this._subscribe()) {
             this.subscribed()
           }
@@ -137,7 +121,7 @@ class AbstractSubscription {
 
   unsubscribe () {
     this.subscribeTo = undefined
-    if (this.socketAuthenticator.authenticated) {
+    if (this.connector.connected) {
       if (this.subscribedTo) {
         if (this._unsubscribe()) {
           this.subscribedTo = undefined
@@ -161,7 +145,7 @@ class AbstractSubscription {
   }
 
   /*
-  * subscribeOnNextTrigger: trigger could be onAuthenticated or by calling subscribe
+  * subscribeOnNextTrigger: trigger could be onConnect or by calling subscribe
   */
   subscribeOnNextTrigger (subscription = this.subscribeTo || this.subscribedTo) {
     if (!subscription) {
@@ -173,8 +157,8 @@ class AbstractSubscription {
 }
 
 class ShootsSubscription extends AbstractSubscription {
-  constructor (socketAuthenticator) {
-    super(socketAuthenticator)
+  constructor (connector) {
+    super(connector)
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
@@ -217,8 +201,8 @@ class ShootsSubscription extends AbstractSubscription {
 }
 
 class ShootSubscription extends AbstractSubscription {
-  constructor (socketAuthenticator) {
-    super(socketAuthenticator)
+  constructor (connector) {
+    super(connector)
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
@@ -256,25 +240,24 @@ class ShootSubscription extends AbstractSubscription {
 }
 
 class AbstractJournalsSubscription extends AbstractSubscription {
-  constructor (socketAuthenticator) {
-    super(socketAuthenticator)
+  constructor (connector) {
+    super(connector)
 
     this.socket.on('events', ({ kind, events }) => {
       this.emit(kind, events)
     })
   }
 
-  setUser (user) {
-    if (!store.getters.isAdmin) {
-      return
+  connect (forceful) {
+    if (store.getters.isAdmin) {
+      super.connect(forceful)
     }
-    super.setUser(user)
   }
 }
 
 class IssuesSubscription extends AbstractJournalsSubscription {
-  onAuthenticated () {
-    super.onAuthenticated()
+  onConnect () {
+    super.onConnect()
 
     if (store.getters.isAdmin && !this.subscribedTo) {
       this.subscribeIssues()
@@ -336,62 +319,63 @@ const socketConfig = {
   autoConnect: false
 }
 
-const shootsSocketAuthenticator = new SocketAuthenticator(io(`${url}/shoots`, socketConfig))
-const journalsSocketAuthenticator = new SocketAuthenticator(io(`${url}/journals`, socketConfig))
+const shootsConnector = new Connector(io(`${url}/shoots`, socketConfig))
+const journalsConnector = new Connector(io(`${url}/journals`, socketConfig))
 
-const shootsEmitter = Emitter(new ShootsSubscription(shootsSocketAuthenticator))
-const shootEmitter = Emitter(new ShootSubscription(shootsSocketAuthenticator))
-const journalIssuesEmitter = Emitter(new IssuesSubscription(journalsSocketAuthenticator))
-const journalCommentsEmitter = Emitter(new CommentsSubscription(journalsSocketAuthenticator))
+const shootsEmitter = Emitter(new ShootsSubscription(shootsConnector))
+const shootEmitter = Emitter(new ShootSubscription(shootsConnector))
+const journalIssuesEmitter = Emitter(new IssuesSubscription(journalsConnector))
+const journalCommentsEmitter = Emitter(new CommentsSubscription(journalsConnector))
 
-const socketAuthenticators = [shootsSocketAuthenticator, journalsSocketAuthenticator]
+const connectors = [shootsConnector, journalsConnector]
 
 /* Web Socket Connection */
 
-forEach(socketAuthenticators, emitter => {
-  emitter.socket.on('connect', attempt => emitter.onConnect(attempt))
-  emitter.socket.on('reconnect', attempt => emitter.onConnect(attempt))
-  emitter.socket.on('authenticated', () => emitter.onAuthenticated())
-  emitter.socket.on('disconnect', reason => emitter.onDisconnect(reason))
-  emitter.socket.on('connect_error', err => {
+forEach(connectors, connector => {
+  const socket = connector.socket
+  socket.on('connect', attempt => connector.onConnect(attempt))
+  socket.on('reconnect', attempt => connector.onConnect(attempt))
+  socket.on('disconnect', reason => connector.onDisconnect(reason))
+  socket.on('connect_error', err => {
     console.error(`socket connection error ${err}`)
   })
-  emitter.socket.on('connect_timeout', () => {
-    console.error(`socket ${emitter.socket.id} connection timeout`)
+  socket.on('connect_timeout', () => {
+    console.error(`socket ${socket.id} connection timeout`)
   })
-  emitter.socket.on('reconnect_attempt', () => {
-    console.log(`socket ${emitter.socket.id} reconnect attempt`)
+  socket.on('reconnect_attempt', () => {
+    console.log(`socket ${socket.id} reconnect attempt`)
   })
-  emitter.socket.on('reconnecting', attempt => {
+  socket.on('reconnecting', attempt => {
     store.dispatch('setWebsocketConnectionError', { reconnectAttempt: attempt })
-    console.log(`socket ${emitter.socket.id} reconnecting attempt number '${attempt}'`)
+    console.log(`socket ${socket.id} reconnecting attempt number '${attempt}'`)
   })
-  emitter.socket.on('reconnect_error', err => {
-    console.error(`socket ${emitter.socket.id} reconnect error ${err}`)
+  socket.on('reconnect_error', err => {
+    console.error(`socket ${socket.id} reconnect error ${err}`)
   })
-  emitter.socket.on('reconnect_failed', () => {
-    console.error(`socket ${emitter.socket.id} couldn't reconnect`)
+  socket.on('reconnect_failed', () => {
+    console.error(`socket ${socket.id} couldn't reconnect`)
   })
-  emitter.socket.on('error', err => {
-    console.error(`socket ${emitter.socket.id} error ${err}`)
+  socket.on('error', err => {
+    console.error(`socket ${socket.id} error ${err}`)
   })
-  emitter.socket.on('subscription_error', error => {
+  socket.on('subscription_error', error => {
     const { kind, code, message } = error
-    console.error(`socket ${emitter.socket.id} ${kind} subscription error: ${message} (${code})`)
+    console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
     store.dispatch('setError', error)
   })
 })
 
 const wrapper = {
-  setUser (user) {
-    forEach(socketAuthenticators, emitter => emitter.setUser(user))
+  connect (forceful) {
+    forEach(connectors, connector => connector.connect(forceful))
+  },
+  disconnect () {
+    forEach(connectors, connector => connector.disconnect())
   },
   shootsEmitter,
   shootEmitter,
   journalIssuesEmitter,
   journalCommentsEmitter
 }
-
-window.GARDEN = { emitter: shootsEmitter }
 
 export default wrapper

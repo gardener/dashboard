@@ -42,7 +42,7 @@ exports.isAuthenticated = async function ({ token } = {}) {
     assert.ok(user.username, `User authenticated but username is empty`)
     return user
   } catch (err) {
-    logger.error('Authentication Error:', err)
+    logger.error('Authentication Error:', err.message)
     throw new Unauthorized(err.message)
   }
 }

@@ -56,18 +56,41 @@ global.chai.use(require('chai-http'))
  * HTTP server object for testing to allow closing
  */
 const http = require('http')
-const app = require('../../lib/app')
 const { createTerminus } = require('@godaddy/terminus')
-const healthChecks = {
-  '/healthz': app.get('healthCheck')
-}
+const app = require('../../lib/app')
+const healthChecks = { '/healthz': app.get('healthCheck') }
 const signal = 'SIGTERM'
 global.createServer = () => {
   process.removeAllListeners(signal)
-  return createTerminus(http.createServer(app), { signal, healthChecks })
+  const server = createTerminus(http.createServer(app), { signal, healthChecks })
+  return new Request(server)
 }
-global.request = async (app, method, url, user) => {
-  return global.chai.request(app)[method](url)
-    .set('x-requested-with', 'XMLHttpRequest')
-    .set('cookie', await user.cookie)
+
+class Request {
+  constructor (server) {
+    this.server = server
+  }
+  get (url) {
+    return chai.request(this.server)
+      .get(url)
+      .set('x-requested-with', 'XMLHttpRequest')
+  }
+  put (url) {
+    return chai.request(this.server)
+      .put(url)
+      .set('x-requested-with', 'XMLHttpRequest')
+  }
+  delete (url) {
+    return chai.request(this.server)
+      .delete(url)
+      .set('x-requested-with', 'XMLHttpRequest')
+  }
+  post (url) {
+    return chai.request(this.server)
+      .post(url)
+      .set('x-requested-with', 'XMLHttpRequest')
+  }
+  close () {
+    this.server.close()
+  }
 }

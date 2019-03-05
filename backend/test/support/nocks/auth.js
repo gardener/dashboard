@@ -19,7 +19,8 @@
 const { split, reduce } = require('lodash')
 const { sign, encrypt, cookieHeaderPayload, cookieSignatureToken } = require('../../../lib/security')
 
-async function getCookieValue (bearer) {
+async function getCookieValue (token) {
+  const bearer = await token
   const [ header, payload, signature ] = split(bearer, '.')
   const encrypted = await encrypt(bearer)
   const cookies = {
@@ -36,16 +37,14 @@ async function getCookieValue (bearer) {
 }
 
 module.exports = {
-  createUser (data) {
-    const bearer = sign(data)
+  createUser ({ id, aud = [ 'gardener' ], ...rest }, invalid) {
+    const secret = invalid === true ? 'invalid-secret' : undefined
+    const bearer = sign({ id, aud, ...rest }, secret)
     return {
       get cookie () {
         return getCookieValue(bearer)
       },
       get bearer () {
-        return bearer
-      },
-      toString () {
         return bearer
       }
     }

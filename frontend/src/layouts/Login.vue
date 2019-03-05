@@ -32,11 +32,11 @@ limitations under the License.
           Discover what our service is about at the
           <a style="color: #009F76; padding-left:10px" :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>
         </div>
-        <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click="handleLogin()">
+        <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click.stop="handleLogin(primaryLoginType)">
           Login <v-icon dark class="ml-2">mdi-login-variant</v-icon>
         </div>
-        <div xs5 offset-xs2 right class="loginLink">
-          <a @click.stop="dialog = true">Login with an existing Token</a>
+        <div v-if="showTokenLoginLink" xs5 offset-xs2 right class="loginLink">
+          <a @click.stop="handleLogin('token')">Directly enter a Bearer Token</a>
         </div>
       </v-flex>
     </v-layout>
@@ -53,12 +53,23 @@ limitations under the License.
         <span class="headline white--text">Login</span>
       </v-card-title>
       <v-card-text>
-        <v-text-field v-model="id_token" color="teal darken-2" label="Token" hint="Directly enter a Bearer token trusted by the Kubernetes ApiServer" persistent-hint required></v-text-field>
+        <v-text-field
+          v-model="token"
+          color="grey"
+          :append-icon="showToken ? 'visibility' : 'visibility_off'"
+          :type="showToken ? 'text' : 'password'"
+          outline
+          label="Token"
+          hint="Directly enter a Bearer Token trusted by the Kubernetes ApiServer"
+          persistent-hint
+          @click:append="showToken = !showToken"
+          required>
+        </v-text-field>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click="dialog = false">Cancel</v-btn>
-        <v-btn color="teal darken-2" flat @click="handleTokenLogin()">Ok</v-btn>
+        <v-btn flat @click="closeDialog">Cancel</v-btn>
+        <v-btn color="teal darken-2" flat @click="submitToken">Ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -66,68 +77,90 @@ limitations under the License.
 </template>
 
 <script>
-import {
-  mapState
-} from 'vuex'
-import {
-  getUserInfo
-} from '@/utils/api'
-import {
-  SnotifyPosition
-} from 'vue-snotify'
+import { mapState, mapActions } from 'vuex'
+import { SnotifyPosition } from 'vue-snotify'
 
 export default {
-  data() {
+  data () {
     return {
       dialog: false,
-      id_token: ''
+      showToken: false,
+      token: ''
     }
   },
   computed: {
     ...mapState([
       'color',
-      'cfg'
+      'cfg',
+      'user'
     ]),
-    landingPageUrl() {
+    primaryLoginType () {
+      return this.cfg.primaryLoginType || 'oidc'
+    },
+    showTokenLoginLink () {
+      return this.primaryLoginType === 'oidc'
+    },
+    landingPageUrl () {
       return this.cfg.landingPageUrl
     },
-    footerLogoUrl() {
+    footerLogoUrl () {
       return this.cfg.footerLogoUrl || '/static/sap-logo.svg'
     }
   },
+  mounted () {
+    if (this.user) {
+      this.unsetUser()
+    }
+  },
+  beforeRouteEnter (to, from, next) {
+    let err
+    if (/^#.+/.test(to.hash)) {
+      const searchParams = new URLSearchParams(to.hash.substring(1))
+      if (searchParams.has('error')) {
+        err = new Error(searchParams.get('error'))
+      }
+    }
+    next(vm => {
+      if (err) {
+        vm.showSnotifyLoginError(err.message)
+        vm.$router.replace('/login')
+      }
+    })
+  },
   methods: {
-    async handleLogin() {
-      try {
-        this.$userManager.signin()
-      } catch (err) {
-        this.showSnotifyLoginError(err.message)
+    ...mapActions([
+      'unsetUser'
+    ]),
+    handleLogin (loginType) {
+      if (loginType === 'token') {
+        this.dialog = true
+      } else {
+        try {
+          this.$userManager.signin()
+        } catch (err) {
+          this.showSnotifyLoginError(err.message)
+        }
       }
     },
-    async handleTokenLogin() {
+    closeDialog () {
+      this.dialog = false
+      this.token = undefined
+    },
+    async submitToken () {
       try {
-        const user = {
-          id_token: this.id_token
-        }
-        const {
-          data: userInfo
-        } = await getUserInfo({
-          user
-        })
-        user.profile = {
-          name: userInfo.username,
-          groups: userInfo.groups,
-          email: undefined
-        }
-        this.$userManager.setUser(user)
-        await this.$store.dispatch('setUser', user)
+        const token = this.token
+        this.token = undefined
+        await this.$userManager.signin(token)
+        this.dialog = false
         this.$router.push({
           name: 'Home'
         })
       } catch (err) {
+        this.dialog = false
         this.showSnotifyLoginError(err.message)
       }
     },
-    showSnotifyLoginError(message) {
+    showSnotifyLoginError (message) {
       const config = {
         position: SnotifyPosition.rightBottom,
         timeout: 5000,
@@ -249,11 +282,11 @@ export default {
           width: 30%;
 
           a {
-            color: #ffb74d;
+            color: #cfcfcf;
           }
 
           a:hover {
-            color: #2c353d;
+            color: #ffb74d;
           }
         }
 

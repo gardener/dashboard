@@ -41,34 +41,6 @@ Vue.use(Router)
 
 export default function createRouter ({ store, userManager }) {
   /* technical components */
-  const Logout = {
-    beforeRouteEnter (to, from, next) {
-      userManager.signout()
-      next('/login')
-    },
-    render (createElement, { data, children } = {}) {
-      return createElement('div', data, children)
-    }
-  }
-
-  const Callback = {
-    async beforeRouteEnter (to, from, next) {
-      try {
-        const user = userManager.signinRedirectCallback(to)
-        await store.dispatch('setUser', user)
-        next('/')
-      } catch (err) {
-        next(err)
-      }
-    },
-    mounted () {
-      // eslint-disable-next-line lodash/prefer-lodash-method
-      this.$router.replace('/')
-    },
-    render (createElement, { data, children } = {}) {
-      return createElement('div', data, children)
-    }
-  }
 
   const PlaceholderComponent = {
     render (createElement) {
@@ -138,21 +110,6 @@ export default function createRouter ({ store, userManager }) {
       path: '/login',
       name: 'Login',
       component: Login,
-      meta: {
-        public: true
-      }
-    },
-    {
-      path: '/logout',
-      name: 'Logout',
-      component: Logout,
-      meta: {
-        public: true
-      }
-    },
-    {
-      path: '/callback',
-      component: Callback,
       meta: {
         public: true
       }
@@ -338,8 +295,10 @@ export default function createRouter ({ store, userManager }) {
         return next()
       }
       if (userManager.isUserLoggedIn()) {
-        if (!store.state.user) {
-          await store.dispatch('setUser', userManager.getUser())
+        const user = userManager.getUser()
+        const storedUser = store.state.user
+        if (!storedUser || storedUser.iat !== user.iat) {
+          await store.dispatch('setUser', user)
         }
         return next()
       }

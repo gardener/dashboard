@@ -14,86 +14,52 @@
 // limitations under the License.
 //
 
-import querystring from 'querystring'
+import Vue from 'vue'
 import decode from 'jwt-decode'
+import { createTokenReview } from './api'
 
 export class UserManager {
-  constructor (settings = {}) {
-    const origin = settings.origin || window.location.origin
-    this.key = `garden.user:${origin}`
-    this.storage = settings.storage || window.localStorage
+  constructor () {
+    this.origin = window.location.origin
+    this.key = 'gHdrPyl'
   }
 
   getUser () {
     try {
-      const value = this.storage.getItem(this.key)
+      const value = Vue.cookie.get(this.key)
       if (value) {
-        return JSON.parse(value)
+        return decode(value)
       }
-    } catch (err) {
-      this.removeUser()
-    }
-  }
-
-  setUser (user) {
-    if (user) {
-      this.storage.setItem(this.key, JSON.stringify(user))
-    } else {
-      this.removeUser()
-    }
+    } catch { /* ignore error */ }
+    return null
   }
 
   removeUser () {
-    this.storage.removeItem(this.key)
+    Vue.cookie.delete(this.key)
   }
 
   signout () {
     this.removeUser()
+    window.location = this.origin + '/auth/logout'
   }
 
-  signin () {
-    window.location = '/auth'
-  }
-
-  signinRedirectCallback ({ hash = '' } = {}) {
-    const { username, groups, ...user } = querystring.parse(hash.replace(/^#/, ''))
-    user.profile = {
-      name: username,
-      email: username,
-      groups
+  signin (token) {
+    if (token) {
+      return createTokenReview({ token })
     }
-    this.setUser(user)
-    return user
+    window.location = this.origin + '/auth'
   }
 
   isUserLoggedIn () {
-    const user = this.getUser()
-    if (!user || !user.id_token) {
-      return false
-    }
-    const expiresAt = parseInt(user.expires_at, 10)
-    if (typeof expiresAt === 'number' && !isNaN(expiresAt)) {
-      return 1000 * expiresAt > Date.now()
-    }
     try {
-      return !isTokenExpired(user.id_token)
-    } catch (err) {
-      return true
-    }
+      const user = this.getUser()
+      if (user) {
+        const exp = user.exp
+        if (typeof exp === 'number' && !isNaN(exp)) {
+          return 1000 * exp > Date.now()
+        }
+      }
+    } catch (err) { /* ignore error */ }
+    return false
   }
-}
-
-function getTokenExpirationDate (encodedToken) {
-  const token = decode(encodedToken)
-  const date = new Date(0)
-  date.setUTCSeconds(token.exp || 253402297199)
-  return date
-}
-
-function isTokenExpired (token) {
-  if (!token) {
-    return true
-  }
-  const expirationDate = getTokenExpirationDate(token)
-  return expirationDate < new Date()
 }

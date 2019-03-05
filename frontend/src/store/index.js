@@ -19,12 +19,13 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
+import { gravatarUrlGeneric, displayName, fullDisplayName } from '@/utils'
+import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
 import merge from 'lodash/merge'
@@ -37,8 +38,6 @@ import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
-
-import { getUserInfo } from '@/utils/api'
 
 Vue.use(Vuex)
 
@@ -192,16 +191,28 @@ const getters = {
     }
   },
   isAdmin (state) {
-    return get(state.user, 'info.isAdmin', false)
+    return get(state.user, 'isAdmin', false)
   },
   canCreateProject (state) {
-    return get(state.user, 'info.canCreateProject', false)
+    return get(state.user, 'canCreateProject', false)
   },
   journalList (state) {
     return state.journals.all
   },
   username (state) {
-    return get(state, 'user.profile.name')
+    const user = state.user
+    return user ? user.email || user.id : ''
+  },
+  avatarUrl (state, getters) {
+    return gravatarUrlGeneric(getters.username)
+  },
+  displayName (state) {
+    const user = state.user
+    return user ? user.name || displayName(user.id) : ''
+  },
+  fullDisplayName (state) {
+    const user = state.user
+    return user ? user.name || fullDisplayName(user.id) : ''
   },
   alertMessage () {
     return get(state, 'alert.message', '')
@@ -215,10 +226,17 @@ const getters = {
   alertBannerType () {
     return get(state, 'alertBanner.type', 'error')
   },
-  isCurrentNamespace (state, getters) {
-    return (namespace) => {
-      return (state.namespace === '_all' && includes(getters.namespaces, namespace)) || namespace === state.namespace
+  currentNamespaces (state, getters) {
+    if (state.namespace === '_all') {
+      return getters.namespaces
     }
+    if (state.namespace) {
+      return [state.namespace]
+    }
+    return []
+  },
+  isCurrentNamespace (state, getters) {
+    return namespace => includes(getters.currentNamespaces, namespace)
   },
   isWebsocketConnectionError () {
     return get(state, 'websocketConnectionError') !== null
@@ -450,16 +468,11 @@ const actions = {
     return state.onlyShootsWithIssues
   },
   setUser ({ dispatch, commit }, value) {
-    return getUserInfo({ user: value })
-      .then(res => {
-        value.info = res.data
-        commit('SET_USER', value)
-      }).catch(err => {
-        commit('SET_USER', value)
-        dispatch('setError', err)
-      }).then(() => {
-        return state.user
-      })
+    commit('SET_USER', value)
+    return state.user
+  },
+  unsetUser ({ dispatch, commit }) {
+    commit('SET_USER', null)
   },
   setSidebar ({ commit }, value) {
     commit('SET_SIDEBAR', value)
@@ -527,7 +540,11 @@ const mutations = {
   },
   SET_USER (state, value) {
     state.user = value
-    EmitterWrapper.setUser(value)
+    if (value) {
+      EmitterWrapper.connect()
+    } else {
+      EmitterWrapper.disconnect()
+    }
   },
   SET_SIDEBAR (state, value) {
     state.sidebar = value
@@ -572,17 +589,16 @@ const store = new Vuex.Store({
 })
 
 /* Shoots */
-const shootNamespacedEventsHandler = namespacedEvents => {
-  let eventsToHandle = []
-  mapKeys(namespacedEvents, (events, namespace) => {
-    if (store.getters.isCurrentNamespace(namespace)) {
-      eventsToHandle = concat(eventsToHandle, events)
+for (const kind of ['shoots', 'shoot']) {
+  EmitterWrapper[`${kind}Emitter`].on(kind, namespacedEvents => {
+    const iteratee = (accumulator, namespace) => {
+      const events = namespacedEvents[namespace]
+      return events ? concat(accumulator, events) : accumulator
     }
+    const events = reduce(store.getters.currentNamespaces, iteratee, [])
+    store.commit('shoots/HANDLE_EVENTS', { rootState: state, events })
   })
-  store.commit('shoots/HANDLE_EVENTS', { rootState: state, events: eventsToHandle })
 }
-EmitterWrapper.shootsEmitter.on('shoots', shootNamespacedEventsHandler)
-EmitterWrapper.shootEmitter.on('shoot', shootNamespacedEventsHandler)
 
 /* Journal Issues */
 EmitterWrapper.journalIssuesEmitter.on('issues', events => {

@@ -75,6 +75,7 @@ module.exports = {
             config.port = port
           }
         }
+        config.frontend.primaryLoginType = config.oidc ? 'oidc' : 'token'
 
         const secretsPath = joinPath(dirname(filename), 'secrets')
         applySecretToConfig(config, secretsPath, 'prometheus.secret')

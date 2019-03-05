@@ -51,7 +51,7 @@ async function fetchGardenerVersion () {
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    if (err.code === 'ENOTFOUND' || err.code === 404) {
+    if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
       return undefined
     }
     throw err

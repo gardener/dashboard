@@ -39,6 +39,7 @@
     "semver-sort": "0.0.4",
     "socket.io-client": "^2.2.0",
     "vue": "^2.5.22",
+    "vue-cookie": "^1.1.4",
     "vue-lazyload": "^1.2.6",
     "vue-popperjs": "^1.5.2",
     "vue-router": "^3.0.1",

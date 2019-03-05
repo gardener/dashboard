@@ -95,7 +95,8 @@ limitations under the License.
                 {{displayName(name)}}
               </v-list-tile-title>
               <v-list-tile-sub-title>
-                <a :href="'mailto:'+name" class="cyan--text text--darken-2">{{name}}</a>
+                <a v-if="isEmail(name)" :href="`mailto:${name}`" class="cyan--text text--darken-2">{{name}}</a>
+                <span v-else class="pl-2">{{name}}</span>
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
@@ -156,7 +157,7 @@ limitations under the License.
           >
 
             <v-list-tile-avatar>
-              <img :src="robohashUrl(name)" />
+              <img :src="avatarUrl(name)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
@@ -244,8 +245,8 @@ import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
   emailToDisplayName,
-  gravatarUrlIdenticon,
-  gravatarUrlRobohash,
+  gravatarUrlGeneric,
+  isEmail,
   serviceAccountToDisplayName
 } from '@/utils'
 import { getMember } from '@/utils/api'
@@ -282,6 +283,24 @@ export default {
       'memberList',
       'projectList'
     ]),
+    helpDialogType () {
+      if (this.memberHelpDialog) {
+        return 'user'
+      }
+      if (this.serviceAccountHelpDialog) {
+        return 'service'
+      }
+      return undefined
+    },
+    addDialogType () {
+      if (this.memberAddDialog) {
+        return 'user'
+      }
+      if (this.serviceAccountAddDialog) {
+        return 'service'
+      }
+      return undefined
+    },
     project () {
       const predicate = project => project.metadata.namespace === this.namespace
       return find(this.projectList, predicate)
@@ -301,11 +320,11 @@ export default {
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
-      const predicate = email => {
+      const predicate = value => {
         if (!this.userFilter) {
           return true
         }
-        const name = replace(email, /@.*$/, '')
+        const name = replace(value, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
@@ -342,17 +361,17 @@ export default {
     openserviceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    displayName (email) {
-      return emailToDisplayName(email)
+    displayName (username) {
+      return emailToDisplayName(username)
     },
-    isOwner (email) {
-      return this.owner === toLower(email)
+    isOwner (username) {
+      return this.owner === toLower(username)
     },
-    avatarUrl (email) {
-      return gravatarUrlIdenticon(email)
+    isEmail (username) {
+      return isEmail(username)
     },
-    robohashUrl (value) {
-      return gravatarUrlRobohash(value)
+    avatarUrl (username) {
+      return gravatarUrlGeneric(username)
     },
     async downloadKubeconfig (name) {
       const namespace = this.namespace

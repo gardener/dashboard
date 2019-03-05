@@ -16,28 +16,17 @@
 
 'use strict'
 
-describe('gardener', function () {
-  describe('config.json', function () {
-    /* eslint no-unused-expressions: 0 */
-    let app
+module.exports = function ({ server }) {
+  /* eslint no-unused-expressions: 0 */
 
-    before(function () {
-      app = global.createServer()
-    })
+  it('should return the frontend configuration', async function () {
+    const res = await server
+      .get('/config.json')
 
-    after(function () {
-      app.close()
-    })
-
-    it('should return the frontend configuration', function () {
-      return chai.request(app)
-        .get('/config.json')
-        .then(res => {
-          expect(res).to.have.status(200)
-          expect(res).to.be.json
-          expect(res.body).to.have.property('oidc').that.is.an('object')
-          expect(res.body.oidc).to.have.property('client_id').that.is.equal('gardener')
-        })
-    })
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.property('helpMenuItems').that.is.an('array')
+    expect(res.body.helpMenuItems).to.have.length(3)
+    expect(res.body.landingPageUrl).to.equal('https://gardener.cloud/')
   })
-})
+}

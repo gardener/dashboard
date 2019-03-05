@@ -27,13 +27,14 @@ limitations under the License.
           <v-text-field
             v-if="isUserDialog"
             color="green darken-2"
-            ref="email"
-            label="Email"
-            v-model="email"
-            :error-messages="emailErrors"
-            @input="$v.email.$touch()"
-            @blur="$v.email.$touch()"
+            ref="username"
+            label="User"
+            v-model="username"
+            :error-messages="usernameErrors"
+            @input="$v.username.$touch()"
             @keyup.enter="submit()"
+            hint="Enter the name of a user who should become member of this project"
+            persistent-hint
             tabindex="1"
           ></v-text-field>
           <v-text-field
@@ -44,8 +45,9 @@ limitations under the License.
             v-model="serviceAccountName"
             :error-messages="serviceAccountNameErrors"
             @input="$v.serviceAccountName.$touch()"
-            @blur="$v.serviceAccountName.$touch()"
             @keyup.enter="submit()"
+            hint="Enter the name of a Kubernetes Service Account"
+            persistent-hint
             tabindex="1"
           ></v-text-field>
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
@@ -62,7 +64,7 @@ limitations under the License.
 <script>
 import toLower from 'lodash/toLower'
 import { mapActions, mapState, mapGetters } from 'vuex'
-import { required, email } from 'vuelidate/lib/validators'
+import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import Alert from '@/components/Alert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
@@ -72,7 +74,7 @@ import startsWith from 'lodash/startsWith'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 
-const defaultEmail = ''
+const defaultUsername = ''
 const defaultServiceName = 'robot'
 
 export default {
@@ -92,7 +94,7 @@ export default {
   },
   data () {
     return {
-      email: defaultEmail,
+      username: defaultUsername,
       serviceAccountName: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -101,9 +103,8 @@ export default {
   validations () {
     if (this.isUserDialog) {
       return {
-        email: {
+        username: {
           required,
-          email,
           unique: unique('projectMembersNames')
         }
       }
@@ -133,19 +134,16 @@ export default {
         this.$emit('input', value)
       }
     },
-    emailErrors () {
+    usernameErrors () {
       const errors = []
-      if (!this.$v.email.$dirty) {
+      if (!this.$v.username.$dirty) {
         return errors
       }
-      if (!this.$v.email.required) {
-        errors.push('E-mail address is required')
+      if (!this.$v.username.required) {
+        errors.push('User is required')
       }
-      if (!this.$v.email.email) {
-        errors.push('Must be a valid e-mail address')
-      }
-      if (!this.$v.email.unique) {
-        errors.push(`User '${this.email}' is already member of this project.`)
+      if (!this.$v.username.unique) {
+        errors.push(`User '${this.username}' is already member of this project.`)
       }
       return errors
     },
@@ -161,7 +159,7 @@ export default {
         errors.push('Must contain only alphanumeric characters or hypen')
       }
       if (!this.$v.serviceAccountName.unique) {
-        errors.push(`serviceAccount '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`)
+        errors.push(`Service Account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`)
       }
       return errors
     },
@@ -176,7 +174,7 @@ export default {
     },
     textField () {
       if (this.isUserDialog) {
-        return this.$refs.email
+        return this.$refs.username
       } else if (this.isServiceDialog) {
         return this.$refs.serviceAccountName
       }
@@ -214,34 +212,35 @@ export default {
     hide () {
       this.visible = false
     },
-    submit () {
+    async submit () {
       this.$v.$touch()
-      const hide = () => this.hide()
       if (this.valid) {
-        this.save()
-          .then(hide)
-          .catch(err => {
-            const errorDetails = errorDetailsFromError(err)
-            if (isConflict(err)) {
-              if (this.isUserDialog) {
-                this.errorMessage = `User '${this.email}' is already member of this project.`
-              } else if (this.isServiceDialog) {
-                this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
-              }
-            } else {
-              this.errorMessage = 'Failed to add project member'
+        try {
+          await this.save()
+          this.hide()
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          if (isConflict(err)) {
+            if (this.isUserDialog) {
+              this.errorMessage = `User '${this.username}' is already member of this project.`
+            } else if (this.isServiceDialog) {
+              this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
             }
-            this.detailedErrorMessage = errorDetails.detailedMessage
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          })
+          } else {
+            this.errorMessage = 'Failed to add project member'
+          }
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        }
       }
     },
     cancel () {
-      this.hide()
+      this.$v.$reset()
+      this.$nextTick(() => this.hide())
     },
     reset () {
       this.$v.$reset()
-      this.email = defaultEmail
+      this.username = defaultUsername
       this.serviceAccountName = this.defaultServiceName()
 
       this.errorMessage = undefined
@@ -259,8 +258,8 @@ export default {
     },
     save () {
       if (this.isUserDialog) {
-        const email = toLower(this.email)
-        return this.addMember(email)
+        const username = toLower(this.username)
+        return this.addMember(username)
       } else if (this.isServiceDialog) {
         const namespace = this.namespace
         const name = toLower(this.serviceAccountName)

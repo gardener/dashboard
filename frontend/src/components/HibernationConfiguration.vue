@@ -108,19 +108,31 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    updateHibernationSchedules () {
-      const user = this.$store.state.user
-      const noScheduleAnnotation = { 'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null }
-      this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-      return updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
-        .then(() => addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation }))
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save hibernation configuration'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+    async updateHibernationSchedules () {
+      try {
+        const user = this.$store.state.user
+        const noScheduleAnnotation = {
+          'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null
+        }
+        this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+        const result = await updateHibernationSchedules({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: this.hibernationSchedules
         })
+        await addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: noScheduleAnnotation
+        })
+        this.hideDialog()
+        return result
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Could not save hibernation configuration'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     reset () {
       this.errorMessage = null

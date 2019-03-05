@@ -18,28 +18,16 @@
 
 const k8s = nocks.k8s
 
-describe('gardener', function () {
-  describe('healthz', function () {
-    /* eslint no-unused-expressions: 0 */
-    let app
+module.exports = function ({ server }) {
+  /* eslint no-unused-expressions: 0 */
 
-    before(function () {
-      app = global.createServer()
-    })
+  it('should return the backend healthz status', async function () {
+    k8s.stub.healthz()
+    const res = await server
+      .get('/healthz')
 
-    after(function () {
-      app.close()
-    })
-
-    it('should return the backend healthz status', function () {
-      k8s.stub.healthz()
-      return chai.request(app)
-        .get('/healthz')
-        .then(res => {
-          expect(res).to.have.status(200)
-          expect(res).to.be.json
-          expect(res.body).to.eql({status: 'ok'})
-        })
-    })
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql({ status: 'ok' })
   })
-})
+}

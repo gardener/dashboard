@@ -125,7 +125,13 @@ export default {
     },
     updateShootHibernation () {
       const user = this.$store.state.user
-      updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
+      updateShootHibernation({
+        namespace: this.shootNamespace,
+        name: this.shootName,
+        data: {
+          enabled: this.enableHibernation
+        }
+      })
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)

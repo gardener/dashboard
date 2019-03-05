@@ -16,10 +16,9 @@
 
 'use strict'
 
-const { split, noop, trim } = require('lodash')
+const { split, join, noop, trim, isPlainObject } = require('lodash')
 const { promisify } = require('util')
-const jwt = require('express-jwt')
-const jsonwebtoken = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const { Issuer } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const crypto = require('crypto')
@@ -27,9 +26,11 @@ const base64url = require('base64url')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('./services')
-const { Forbidden } = require('./errors')
+const { Forbidden, Unauthorized } = require('./errors')
 const { secret, oidc = {} } = require('./config')
 
+const jwtSign = promisify(jwt.sign)
+const jwtVerify = promisify(jwt.verify)
 const randomBytes = promisify(crypto.randomBytes)
 const pbkdf2 = promisify(crypto.pbkdf2)
 
@@ -48,6 +49,7 @@ const cookieHeaderPayload = 'gHdrPyl'
 const cookieSignatureToken = 'gSgnTkn'
 
 const cookieMaxAge = 30 * 60 * 1000
+const audience = [ 'gardener' ]
 
 let clientPromise
 
@@ -119,14 +121,14 @@ async function authorizeToken (req, res) {
     name,
     email
   }
-  const [ header, payload, signature ] = sign(user, { expiresIn }).split('.')
+  const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
   const encryptedBearer = await encrypt(bearer)
-  res.cookie(cookieHeaderPayload, `${header}.${payload}`, {
+  res.cookie(cookieHeaderPayload, join([header, payload], '.'), {
     secure,
     maxAge: cookieMaxAge,
     sameSite: true
   })
-  res.cookie(cookieSignatureToken, `${signature}.${encryptedBearer}`, {
+  res.cookie(cookieSignatureToken, join([signature, encryptedBearer], '.'), {
     secure,
     httpOnly: true,
     expires: undefined,
@@ -158,23 +160,31 @@ function isXmlHttpRequest ({ headers = {} }) {
   return headers['x-requested-with'] === 'XMLHttpRequest'
 }
 
+function getToken ({ cookies = {}, headers = {} }) {
+  const { authorization = '' } = headers
+  if (authorization.startsWith('Bearer ')) {
+    return authorization.substring(7)
+  }
+  const [ header, payload ] = split(cookies[cookieHeaderPayload], '.')
+  const [ signature ] = split(cookies[cookieSignatureToken], '.')
+  if (header && payload && signature) {
+    return join([ header, payload, signature ], '.')
+  }
+  return null
+}
+
 function authenticate () {
-  const verifyToken = promisify(jwt({
-    secret,
-    credentialsRequired: false,
-    getToken (req) {
-      const { authorization = '' } = req.headers
-      if (authorization.startsWith('Bearer ')) {
-        return authorization.substring(7)
-      }
-      const [ header, payload ] = split(req.cookies[cookieHeaderPayload], '.')
-      const [ signature ] = split(req.cookies[cookieSignatureToken], '.')
-      if (header && payload && signature) {
-        return [ header, payload, signature ].join('.')
-      }
-      return null
+  const verifyToken = async (req, res) => {
+    const token = getToken(req)
+    if (!token) {
+      throw new Unauthorized('No authorization token was found')
     }
-  }))
+    try {
+      req.user = await verify(token, { audience })
+    } catch (err) {
+      throw new Unauthorized(err.message)
+    }
+  }
   const csrfProtection = (req, res) => {
     if (!isHttpMethodSafe(req) && !isXmlHttpRequest(req)) {
       throw new Forbidden('Request has been blocked by CSRF protection')
@@ -294,19 +304,30 @@ async function decrypt (data) {
   return text
 }
 
-function sign (payload, { expiresIn = '1d', ...rest } = {}) {
-  return jsonwebtoken.sign(payload, secret, { expiresIn, ...rest })
+function sign (payload, secretOrPrivateKey, options) {
+  if (isPlainObject(secretOrPrivateKey)) {
+    options = secretOrPrivateKey
+    secretOrPrivateKey = undefined
+  }
+  if (!secretOrPrivateKey) {
+    secretOrPrivateKey = secret
+  }
+  const { expiresIn = '1d', ...rest } = options || {}
+  return jwtSign(payload, secretOrPrivateKey, { expiresIn, ...rest })
+}
+
+function verify (token, options) {
+  return jwtVerify(token, secret, options)
 }
 
 function decode (token) {
-  return jsonwebtoken.decode(token) || {}
+  return jwt.decode(token) || {}
 }
 
 module.exports = {
   cookieHeaderPayload,
   cookieSignatureToken,
   sign,
-  decode,
   encrypt,
   decrypt,
   clearCookies,

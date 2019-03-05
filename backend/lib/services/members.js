@@ -22,7 +22,7 @@ const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const { getProjectByNamespace } = require('./projects')
-const { Conflict } = require('../errors.js')
+const { Conflict, NotFound } = require('../errors.js')
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
@@ -41,7 +41,7 @@ function fromResource (project = {}) {
     .value()
 }
 
-function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, token, server, caData }) {
+function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectName = 'default', token, server, caData }) {
   const clusterName = 'garden'
   const cluster = {
     'certificate-authority-data': caData,
@@ -51,7 +51,7 @@ function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, token, se
   const user = {
     token
   }
-  const contextName = `${clusterName}-${userName}`
+  const contextName = `${clusterName}-${projectName}-${userName}`
   const context = {
     cluster: clusterName,
     user: userName,
@@ -143,11 +143,21 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-  const member = {
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
+  // name of the project
+  const projectName = project.metadata.name
+  // find member of project
+  const member = _.find(project.spec.members, {
     name: username,
     kind: 'User'
+  })
+  if (!member) {
+    throw new NotFound(`User ${username} is not a member of project ${projectName}`)
   }
+  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
     const ns = core.namespaces(namespace)
@@ -162,7 +172,7 @@ exports.get = async function ({ user, namespace, name: username }) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({ serviceaccountName, serviceaccountNamespace, token, caData, server })
+    member.kubeconfig = getKubeconfig({ serviceaccountName, serviceaccountNamespace, projectName, token, caData, server })
   }
   return member
 }

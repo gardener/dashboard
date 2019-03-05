@@ -23,11 +23,15 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
+function getToken ({ auth = {} } = {}) {
+  return auth.bearer
+}
+
 router.route('/')
   .get(async (req, res, next) => {
     try {
       const user = req.user || {}
-      const { auth: { bearer: token } = {} } = user
+      const token = getToken(user)
       const [
         userData,
         isAdmin,
@@ -45,4 +49,12 @@ router.route('/')
     } catch (err) {
       next(err)
     }
+  })
+
+router.route('/token')
+  .get(async (req, res, next) => {
+    const token = getToken(req.user)
+    res.send({
+      token
+    })
   })

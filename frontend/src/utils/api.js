@@ -16,103 +16,88 @@
 
 import axios from 'axios'
 
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
+
 /* General Purpose */
 
-function getAuthorization (user) {
-  return new Promise((resolve, reject) => {
-    if (!user) {
-      reject(new TypeError('Argument \'user\' must not be null'))
-    } else {
-      resolve({
-        Authorization: `Bearer ${user.id_token}`
-      })
-    }
-  })
+function getResource (url) {
+  return axios.get(url)
 }
 
-function getResource (url, user) {
-  return getAuthorization(user)
-    .then((headers) => axios.get(url, { headers }))
+function deleteResource (url) {
+  return axios.delete(url)
 }
 
-function deleteResource (url, user) {
-  return getAuthorization(user)
-    .then((headers) => axios.delete(url, { headers }))
+function createResource (url, data) {
+  return axios.post(url, data)
 }
 
-function createResource (url, user, data) {
-  return getAuthorization(user)
-    .then((headers) => axios.post(url, data, { headers }))
+function updateResource (url, data) {
+  return axios.put(url, data)
 }
 
-function updateResource (url, user, data) {
-  return getAuthorization(user)
-    .then((headers) => axios.put(url, data, { headers }))
-}
-
-function patchResource (url, user, data) {
-  return getAuthorization(user)
-    .then((headers) => axios.patch(url, data, { headers }))
+function patchResource (url, data) {
+  return axios.patch(url, data)
 }
 
 /* Infrastructures Secrets */
 
-export function getInfrastructureSecrets ({ namespace, user }) {
-  return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`, user)
+export function getInfrastructureSecrets ({ namespace }) {
+  return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`)
 }
 
-export function updateInfrastructureSecret ({ namespace, bindingName, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, user, data)
+export function updateInfrastructureSecret ({ namespace, bindingName, data }) {
+  return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, data)
 }
 
-export function createInfrastructureSecret ({ namespace, user, data }) {
-  return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, user, data)
+export function createInfrastructureSecret ({ namespace, data }) {
+  return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, data)
 }
 
-export function deleteInfrastructureSecret ({ namespace, bindingName, user }) {
-  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, user)
+export function deleteInfrastructureSecret ({ namespace, bindingName }) {
+  return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
 }
 
 /* Shoot Clusters */
 
-export function createShoot ({ namespace, user, data }) {
-  return createResource(`/api/namespaces/${namespace}/shoots`, user, data)
+export function createShoot ({ namespace, data }) {
+  return createResource(`/api/namespaces/${namespace}/shoots`, data)
 }
 
-export function deleteShoot ({ namespace, name, user }) {
-  return deleteResource(`/api/namespaces/${namespace}/shoots/${name}`, user)
+export function deleteShoot ({ namespace, name }) {
+  return deleteResource(`/api/namespaces/${namespace}/shoots/${name}`)
 }
 
-export function replaceShoot ({ namespace, name, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, user, data)
+export function replaceShoot ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
 }
 
-export function addShootAnnotation ({ namespace, name, user, data }) {
+export function addShootAnnotation ({ namespace, name, data }) {
   return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, user, data)
 }
 
-export function getShoot ({ namespace, name, user }) {
-  return getResource(`/api/namespaces/${namespace}/shoots/${name}`, user)
+export function getShoot ({ namespace, name }) {
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}`)
 }
 
-export function getShootInfo ({ namespace, name, user }) {
-  return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`, user)
+export function getShootInfo ({ namespace, name }) {
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`)
 }
 
-export function updateShootVersion ({ namespace, name, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, user, data)
+export function updateShootVersion ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, data)
 }
 
-export function updateMaintenance ({ namespace, name, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, user, data)
+export function updateMaintenance ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, data)
 }
 
-export function updateHibernationSchedules ({ namespace, name, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`, user, data)
+export function updateHibernationSchedules ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`, data)
 }
 
-export function updateShootHibernation ({ namespace, name, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, user, data)
+export function updateShootHibernation ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, data)
 }
 
 export function updateWorkers ({ namespace, name, user, infrastructureKind, data }) {
@@ -122,57 +107,61 @@ export function updateWorkers ({ namespace, name, user, infrastructureKind, data
 /* Cloud Profiles */
 
 export function getCloudprofiles ({ user }) {
-  return getResource(`/api/cloudprofiles`, user)
+  return getResource(`/api/cloudprofiles`)
 }
 
 /* Domains */
 
 export function getDomains ({ user }) {
-  return getResource(`/api/domains`, user)
+  return getResource(`/api/domains`)
 }
 
 /* Projects */
 
 export function getProjects ({ user }) {
-  return getResource(`/api/namespaces`, user)
+  return getResource(`/api/namespaces`)
 }
 
 export function createProject ({ user, data }) {
-  return createResource(`/api/namespaces`, user, data)
+  return createResource(`/api/namespaces`, data)
 }
 
-export function updateProject ({ namespace, user, data }) {
-  return updateResource(`/api/namespaces/${namespace}`, user, data)
+export function updateProject ({ namespace, data }) {
+  return updateResource(`/api/namespaces/${namespace}`, data)
 }
 
-export function deleteProject ({ namespace, user }) {
-  return deleteResource(`/api/namespaces/${namespace}`, user)
+export function deleteProject ({ namespace }) {
+  return deleteResource(`/api/namespaces/${namespace}`)
 }
 
 /* Members */
 
-export function getMembers ({ namespace, user }) {
-  return getResource(`/api/namespaces/${namespace}/members`, user)
+export function getMembers ({ namespace }) {
+  return getResource(`/api/namespaces/${namespace}/members`)
 }
 
-export function addMember ({ namespace, user, data }) {
-  return createResource(`/api/namespaces/${namespace}/members`, user, data)
+export function addMember ({ namespace, data }) {
+  return createResource(`/api/namespaces/${namespace}/members`, data)
 }
 
-export function getMember ({ namespace, name, user }) {
-  return getResource(`/api/namespaces/${namespace}/members/${name}`, user)
+export function getMember ({ namespace, name }) {
+  return getResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
-export function deleteMember ({ namespace, name, user }) {
-  return deleteResource(`/api/namespaces/${namespace}/members/${name}`, user)
+export function deleteMember ({ namespace, name }) {
+  return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
 /* User */
-
-export function getUserInfo ({ user }) {
-  return getResource(`/api/user`, user)
+export function createTokenReview (data) {
+  return createResource('/auth', data)
 }
 
-export function getInfo ({ user }) {
-  return getResource(`/api/info`, user)
+export function getToken () {
+  return getResource('/api/user/token')
+}
+
+/* Status Info */
+export function getInfo () {
+  return getResource(`/api/info`)
 }

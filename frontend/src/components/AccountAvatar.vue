@@ -19,17 +19,13 @@ limitations under the License.
     <v-avatar :size="size">
       <img :src="avatarUrl"/>
     </v-avatar>
-    <a v-if="mailTo && canMailTo" :href="`mailto:${accountName}`" class="pl-2 cyan--text text--darken-2">{{accountName}}</a>
+    <a v-if="mailTo && isEmail" :href="`mailto:${accountName}`" class="pl-2 cyan--text text--darken-2">{{accountName}}</a>
     <span v-else class="pl-2">{{accountName}}</span>
   </div>
 </template>
 
 <script>
-import {
-  gravatarUrlIdenticon,
-  gravatarUrlRobohash
-} from '@/utils'
-import startsWith from 'lodash/startsWith'
+import { gravatarUrlGeneric, isEmail } from '@/utils'
 
 export default {
   props: {
@@ -48,29 +44,10 @@ export default {
   },
   computed: {
     avatarUrl () {
-      if (!this.accountName) {
-        return undefined
-      }
-
-      if (this.isServiceAccount) {
-        return this.robohashUrl(this.accountName)
-      } else {
-        return this.identIconUrl(this.accountName)
-      }
+      return gravatarUrlGeneric(this.accountName, this.size * 2)
     },
-    isServiceAccount () {
-      return startsWith(this.accountName, 'system:serviceaccount:')
-    },
-    canMailTo () {
-      return !this.isServiceAccount
-    }
-  },
-  methods: {
-    identIconUrl (email) {
-      return gravatarUrlIdenticon(email, this.size * 2)
-    },
-    robohashUrl (value) {
-      return gravatarUrlRobohash(value, this.size * 2)
+    isEmail () {
+      return isEmail(this.accountName)
     }
   }
 }
