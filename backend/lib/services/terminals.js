@@ -239,11 +239,15 @@ async function findExistingTerminalPod ({ coreClient, targetNamespace, username,
 
 async function findExistingTerminal ({ coreClient, targetNamespace, username, target }) {
   const existingPod = await findExistingTerminalPod({ coreClient, targetNamespace, username, target })
-  if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
+  const isRunningOrPending = pod => {
+    const phase = _.get(pod, 'status.phase')
+    return phase === 'Running' || phase === 'Pending'
+  }
+  if (isRunningOrPending(existingPod)) {
     const existingPodName = existingPod.metadata.name
     const attachServiceAccountResource = _.first(existingPod.metadata.ownerReferences)
     if (attachServiceAccountResource) {
-      logger.debug(`Found running Pod for User ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
+      logger.debug(`Found Pod for user ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
       const pod = existingPodName
       const { token } = await readServiceAccountToken({ client: coreClient, targetNamespace, serviceaccountName: attachServiceAccountResource.name })
       const attachServiceAccount = attachServiceAccountResource.name
