@@ -21,7 +21,7 @@ const _ = require('lodash')
 const config = require('./config')
 const { resolve, join } = require('path')
 const logger = require('./logger')
-const { notFound, renderError, historyFallback, prometheusMetrics } = require('./middleware')
+const { notFound, renderError, historyFallback } = require('./middleware')
 const helmet = require('helmet')
 const api = require('./api')
 const auth = require('./auth')
@@ -29,25 +29,12 @@ const githubWebhook = require('./github/webhook')
 const { healthCheck } = require('./healthz')
 const port = config.port
 const periodSeconds = _.get(config, 'readinessProbe.periodSeconds', 10)
-const jwt = require('express-jwt')
 
 // resolve pathnames
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 // csp sources
 const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
-const authorityUrl = _.get(config, 'frontend.oidc.authority')
-if (authorityUrl) {
-  const authorityUrlOrigin = new URL(authorityUrl).origin
-  connectSrc.push(authorityUrlOrigin)
-}
-const jwksUri = _.get(config, 'jwks.jwksUri')
-if (jwksUri) {
-  const jwksUriOrigin = new URL(jwksUri).origin
-  if (!_.includes(connectSrc, jwksUriOrigin)) {
-    connectSrc.push(jwksUriOrigin)
-  }
-}
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
@@ -67,24 +54,13 @@ app.set('etag', false)
 app.set('x-powered-by', false)
 
 app.use(helmet.dnsPrefetchControl())
+app.use(helmet.permittedCrossDomainPolicies())
 app.use(helmet.noSniff())
 app.use(helmet.hsts())
-
 app.use('/auth', auth.router)
 app.use('/api', api.router)
 app.use('/webhook', githubWebhook.router)
 app.get('/config.json', api.frontendConfig)
-// if CORS is not supported by oidc provider proxy jwks
-if (_.get(config, 'frontend.oidc.metdata.jwks_uri') === '/keys') {
-  app.get('/keys', api.jsonWebKeySet)
-}
-
-if (_.has(config, 'prometheus.secret')) {
-  app.get('/metrics',
-    jwt({ secret: config.prometheus.secret }),
-    prometheusMetrics()
-  )
-}
 
 app.use(helmet.xssFilter())
 app.use(helmet.contentSecurityPolicy({

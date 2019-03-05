@@ -21,14 +21,12 @@ const got = require('got')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
-const { isAuthenticated } = require('../middleware')
 const { version } = require('../../package')
 
 const apiRegistration = kubernetes.apiRegistration()
 
 const router = module.exports = express.Router()
 
-router.use(isAuthenticated)
 router.route('/')
   .get(async (req, res, next) => {
     try {

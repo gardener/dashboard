@@ -16,30 +16,42 @@
 
 'use strict'
 
-const querystring = require('querystring')
 const express = require('express')
-const { Issuer } = require('openid-client')
-const { authentication } = require('./services')
-/* eslint-disable camelcase */
-const { oidc: { issuer, redirect_uri, scope, client_id, client_secret } = {} } = require('./config')
-const response_type = 'code'
-/* eslint-enable camelcase */
+const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const {
+  authorizationUrl,
+  authorizationCallback,
+  authorizeToken,
+  clearCookies
+} = require('./security')
 
 // configure router
 const router = exports.router = express.Router()
 
-const clientPromise = (async () => {
-  const { Client } = await Issuer.discover(issuer)
-  const client = new Client({client_id, client_secret})
-  client.CLOCK_TOLERANCE = 15
-  return client
-})()
-
+router.use(cookieParser())
+router.use(bodyParser.json())
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const client = await clientPromise
-      res.redirect(client.authorizationUrl({ redirect_uri, scope }))
+      res.redirect(await authorizationUrl(req, res))
+    } catch (err) {
+      next(err)
+    }
+  })
+  .post(async (req, res, next) => {
+    try {
+      res.send(await authorizeToken(req, res))
+    } catch (err) {
+      next(err)
+    }
+  })
+
+router.route('/logout')
+  .get((req, res, next) => {
+    try {
+      clearCookies(res)
+      res.redirect(`/`)
     } catch (err) {
       next(err)
     }
@@ -48,13 +60,9 @@ router.route('/')
 router.route('/callback')
   .get(async (req, res, next) => {
     try {
-      const client = await clientPromise
-      const tokenSet = await client.authorizationCallback(redirect_uri, req.query, { response_type, state: '' })
-      const { username, groups } = await authentication.isAuthenticated({ token: tokenSet.id_token })
-      tokenSet.username = username
-      tokenSet.groups = groups
-      res.redirect(`/callback#${querystring.stringify(tokenSet)}`)
+      await authorizationCallback(req, res)
+      res.redirect(`/`)
     } catch (err) {
-      next(err)
+      res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
     }
   })

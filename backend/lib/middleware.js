@@ -16,71 +16,19 @@
 
 'use strict'
 
-const assert = require('assert').strict
 const _ = require('lodash')
-const got = require('got')
 const config = require('./config')
 const logger = require('./logger')
-const { NotFound, Unauthorized, InternalServerError } = require('./errors')
-const { customAddonDefinitions, authentication } = require('./services')
-const client = require('prom-client')
-
-function prometheusMetrics ({ timeout = 30000 } = {}) {
-  client.collectDefaultMetrics({ timeout })
-
-  return (req, res, next) => {
-    res.set('Content-Type', client.register.contentType)
-    res.end(client.register.metrics())
-  }
-}
+const { NotFound, InternalServerError } = require('./errors')
+const { customAddonDefinitions } = require('./services')
 
 async function frontendConfig (req, res, next) {
   const user = req.user
-  const frontendConfig = _.cloneDeep(config.frontend)
+  const frontendConfig = {}
   try {
     frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({ user, namespace: 'garden' })
   } catch (err) { /* ignore error */ }
-  res.json(frontendConfig)
-}
-
-async function jsonWebKeySet (req, res, next) {
-  try {
-    const { jwksUri, ca, rejectUnauthorized = true } = config.jwks || {}
-    const response = await got(jwksUri, { json: true, ca, rejectUnauthorized })
-    res.json(response.body)
-  } catch (err) {
-    next(err)
-  }
-}
-
-async function isAuthenticated (req, res, next) {
-  try {
-    const user = req.user || {}
-    const { auth = {} } = user
-    assert.ok(auth.bearer, 'No user token is attached to the request')
-    const { username: id, groups } = await authentication.isAuthenticated({ token: auth.bearer })
-    Object.assign(user, { id, groups })
-    next()
-  } catch (err) {
-    next(err)
-  }
-}
-
-function attachAuthorization (req, res, next) {
-  try {
-    const headers = req.headers
-    if (!headers.authorization) {
-      throw new Unauthorized('No HTTP Authorization request header included')
-    }
-    const [scheme, token] = headers.authorization.split(' ')
-    if (!/bearer/i.test(scheme)) {
-      throw new Unauthorized('Unsupported HTTP authorization scheme')
-    }
-    req.user = { auth: { bearer: token } }
-    next()
-  } catch (err) {
-    next(err)
-  }
+  res.json(Object.assign(frontendConfig, config.frontend))
 }
 
 function historyFallback (filename) {
@@ -167,14 +115,10 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 module.exports = {
-  isAuthenticated,
-  attachAuthorization,
   frontendConfig,
-  jsonWebKeySet,
   historyFallback,
   notFound,
   sendError,
   renderError,
-  ErrorTemplate,
-  prometheusMetrics
+  ErrorTemplate
 }

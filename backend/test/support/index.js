@@ -66,3 +66,8 @@ global.createServer = () => {
   process.removeAllListeners(signal)
   return createTerminus(http.createServer(app), { signal, healthChecks })
 }
+global.request = async (app, method, url, user) => {
+  return global.chai.request(app)[method](url)
+    .set('x-requested-with', 'XMLHttpRequest')
+    .set('cookie', await user.cookie)
+}

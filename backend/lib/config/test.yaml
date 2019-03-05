@@ -9,25 +9,14 @@ gitHub:
   webhookSecret: 776562686f6f6b536563726574
   authentication:
     token: 746f6b656e
-jwks:
-  strictSsl: false
-  rejectUnauthorized: true
-  cache: false
-  rateLimit: false
-  jwksRequestsPerMinute: 5
-  jwksUri: https://kubernetes:32001/keys
-jwt:
-  audience: &client_id gardener
-  issuer: &issuer https://kubernetes:32001
-  algorithms: [ RS256 ]
+secret: oB5Z24dPnebXcDL3lmEFsiw2lHW7QxDnBjrl9C9dtKJUUhg5
+oidc:
+  issuer: https://kubernetes:32001
+  client_id: dashboard
+  client_secret: jtSvBp5yrcr5csfhfJ7HfrknDy
+  redirect_uri: http://localhost:8080/auth/callback
+  scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
 frontend:
-  oidc:
-    authority: *issuer
-    client_id: *client_id
-    redirect_uri: http://localhost:8080/callback
-    response_type: 'token id_token'
-    scope: 'openid email profile audience:server:client_id:gardener audience:server:client_id:kube-kubectl'
-    loadUserInfo: false
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
   landingPageUrl: https://gardener.cloud/

@@ -222,7 +222,7 @@ function validateCanDeleteShootsInAllNamespacesRequest (selfSubjectAccessReview)
 function canDeleteShootsInAllNamespacesReply (uri, selfSubjectAccessReview) {
   const [, token] = _.split(this.req.headers.authorization, ' ', 2)
   const payload = jwt.decode(token)
-  const allowed = _.includes(gardenAdministrators, payload.email)
+  const allowed = _.includes(gardenAdministrators, payload.id)
   return [200, _.assign({}, selfSubjectAccessReview, {status: {allowed}})]
 }
 

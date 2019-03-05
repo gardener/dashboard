@@ -22,23 +22,24 @@ const services = require('../../lib/services')
 
 describe('gardener', function () {
   describe('api', function () {
-    describe('projects', function () {
+    describe.only('projects', function () {
       /* eslint no-unused-expressions: 0 */
-      const oidc = nocks.oidc
+      const auth = nocks.auth
       const k8s = nocks.k8s
       const sandbox = sinon.createSandbox()
       const name = 'foo'
       const namespace = `garden-${name}`
-      const metadata = {name}
+      const metadata = { name }
       const username = `${name}@example.org`
-      const email = username
-      const bearer = oidc.sign({email})
-      const adminBearer = oidc.sign({email: 'admin@example.org'})
+      const id = username
+      const user = auth.createUser({ id })
+      const bearer = user.bearer
+      const admin = auth.createUser({ id: 'admin@example.org' })
       const role = 'project'
       const owner = 'owner'
       const description = 'description'
       const purpose = 'purpose'
-      const data = {owner, description, purpose}
+      const data = { owner, description, purpose }
       let app
 
       before(function () {
@@ -53,70 +54,58 @@ describe('gardener', function () {
         verifyAndRestore(sandbox)
       })
 
-      it('should return two projects', function () {
-        oidc.stub.getKeys()
-        k8s.stub.getProjects({bearer})
-        return chai.request(app)
+      it('should return two projects', async function () {
+        k8s.stub.getProjects({ bearer })
+        const res = await chai.request(app)
           .get('/api/namespaces')
-          .set('authorization', `Bearer ${bearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body).to.have.length(2)
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body).to.have.length(2)
       })
 
-      it('should return all projects', function () {
-        oidc.stub.getKeys()
-        k8s.stub.getProjects({bearer: adminBearer})
-        return chai.request(app)
+      it('should return all projects', async function () {
+        k8s.stub.getProjects({ bearer: admin.bearer })
+        const res = await chai.request(app)
           .get('/api/namespaces')
-          .set('authorization', `Bearer ${adminBearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body).to.have.length(3)
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await admin.cookie)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body).to.have.length(3)
       })
 
-      it('should return the foo project', function () {
+      it('should return the foo project', async function () {
         const resourceVersion = 42
-        oidc.stub.getKeys()
-        k8s.stub.getProject({bearer, name, namespace})
-        return chai.request(app)
+        k8s.stub.getProject({ bearer, name, namespace })
+        const res = await chai.request(app)
           .get(`/api/namespaces/${namespace}`)
-          .set('authorization', `Bearer ${bearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
       })
 
-      it('should reject request with authorization error', function () {
-        const bearer = oidc.sign({email: 'baz@example.org'})
-        oidc.stub.getKeys()
-        k8s.stub.getProject({bearer, name, namespace, unauthorized: true})
-        return chai.request(app)
+      it('should reject request with authorization error', async function () {
+        const user = auth.createUser({ id: 'baz@example.org' })
+        const bearer = user.bearer
+        k8s.stub.getProject({ bearer, name, namespace, unauthorized: true })
+        const res = await chai.request(app)
           .get(`/api/namespaces/${namespace}`)
-          .set('authorization', `Bearer ${bearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(403)
-            expect(res).to.be.json
-            expect(res.body.status).to.equal(403)
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+        expect(res).to.have.status(403)
+        expect(res).to.be.json
+        expect(res.body.status).to.equal(403)
       })
 
-      it('should create a project', function () {
+      it('should create a project', async function () {
         const createdBy = username
         const resourceVersion = 42
         const timeout = 30
-        oidc.stub.getKeys()
-        k8s.stub.createProject({bearer, resourceVersion})
+        k8s.stub.createProject({ bearer, resourceVersion })
 
         // watch project stub
         const project = k8s.getProject({
@@ -143,26 +132,24 @@ describe('gardener', function () {
         const watchStub = sandbox.stub(services.projects, 'watchProject')
           .callsFake(() => reconnectorStub.start())
 
-        return chai.request(app)
+        const res = await chai.request(app)
           .post('/api/namespaces')
-          .set('authorization', `Bearer ${bearer}`)
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
           .send({metadata, data})
-          .catch(err => err.response)
-          .then(res => {
-            expect(watchStub).to.have.callCount(1)
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-            expect(res.body.data).to.eql({createdBy, owner, description, purpose})
-          })
+
+        expect(watchStub).to.have.callCount(1)
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
+        expect(res.body.data).to.eql({createdBy, owner, description, purpose})
       })
 
-      it('should timeout when creating a project', function () {
+      it('should timeout when creating a project', async function () {
         const createdBy = username
         const resourceVersion = 42
         const timeout = 30
-        oidc.stub.getKeys()
-        k8s.stub.createProject({bearer, resourceVersion})
+        k8s.stub.createProject({ bearer, resourceVersion })
 
         // watch project stub
         const project = k8s.getProject({
@@ -189,51 +176,47 @@ describe('gardener', function () {
         const watchStub = sandbox.stub(services.projects, 'watchProject')
           .callsFake(() => reconnectorStub.start())
 
-        return chai.request(app)
+        const res = await chai.request(app)
           .post('/api/namespaces')
-          .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, data})
-          .catch(err => err.response)
-          .then(res => {
-            expect(watchStub).to.have.callCount(1)
-            expect(res).to.have.status(504)
-            expect(res).to.be.json
-            expect(res.body.message).to.equal(`Project could not be initialized within ${timeout} ms`)
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+          .send({ metadata, data })
+
+        expect(watchStub).to.have.callCount(1)
+        expect(res).to.have.status(504)
+        expect(res).to.be.json
+        expect(res.body.message).to.equal(`Project could not be initialized within ${timeout} ms`)
       })
 
-      it('should patch a project', function () {
+      it('should patch a project', async function () {
         const resourceVersion = 43
         const createdBy = k8s.readProject(namespace).spec.createdBy.name
+        k8s.stub.patchProject({ bearer, namespace, resourceVersion })
 
-        oidc.stub.getKeys()
-        k8s.stub.patchProject({bearer, namespace, resourceVersion})
-        return chai.request(app)
+        const res = await chai.request(app)
           .put(`/api/namespaces/${namespace}`)
-          .set('authorization', `Bearer ${bearer}`)
-          .send({metadata, data})
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-            expect(res.body.data).to.eql({createdBy, owner, description, purpose})
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+          .send({ metadata, data })
+
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
+        expect(res.body.data).to.eql({createdBy, owner, description, purpose})
       })
 
-      it('should delete a project', function () {
-        oidc.stub.getKeys()
-        k8s.stub.deleteProject({bearer, namespace})
-        return chai.request(app)
+      it('should delete a project', async function () {
+        k8s.stub.deleteProject({ bearer, namespace })
+
+        const res = await chai.request(app)
           .delete(`/api/namespaces/${namespace}`)
-          .set('authorization', `Bearer ${bearer}`)
-          .catch(err => err.response)
-          .then(res => {
-            expect(res).to.have.status(200)
-            expect(res).to.be.json
-            expect(res.body.metadata.name).to.equal(name)
-            expect(res.body.metadata.namespace).to.equal(namespace)
-          })
+          .set('x-requested-with', 'XMLHttpRequest')
+          .set('cookie', await user.cookie)
+
+        expect(res).to.have.status(200)
+        expect(res).to.be.json
+        expect(res.body.metadata.name).to.equal(name)
+        expect(res.body.metadata.namespace).to.equal(namespace)
       })
     })
   })

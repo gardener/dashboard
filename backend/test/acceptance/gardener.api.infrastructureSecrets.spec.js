@@ -23,7 +23,7 @@ describe('gardener', function () {
   describe('api', function () {
     describe('infrastructureSecrets', function () {
       /* eslint no-unused-expressions: 0 */
-      const oidc = nocks.oidc
+      const auth = nocks.auth
       const k8s = nocks.k8s
       const name = 'bar'
       const project = 'foo'
@@ -33,8 +33,9 @@ describe('gardener', function () {
       const cloudProviderKind = 'infra1'
       const metadata = {name, bindingName, cloudProfileName}
       const username = `${name}@example.org`
-      const email = username
-      const bearer = oidc.sign({email})
+      const id = username
+      const user = auth.createUser({ id })
+      const bearer = user.bearer
       const key = 'myKey'
       const secret = 'mySecret'
       const data = {key, secret}
@@ -57,8 +58,7 @@ describe('gardener', function () {
       it('should return three infrastructure secrets', function () {
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: false})
+        k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: false })
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
           .set('authorization', `Bearer ${bearer}`)
@@ -76,8 +76,7 @@ describe('gardener', function () {
       it('should return no infrastructure secrets', function () {
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.getInfrastructureSecrets({bearer, namespace, empty: true})
+        k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: true })
         return chai.request(app)
           .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
           .set('authorization', `Bearer ${bearer}`)
@@ -92,8 +91,7 @@ describe('gardener', function () {
       it('should create a infrastructure secret', function () {
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.createInfrastructureSecret({bearer, namespace, data, cloudProfileName, resourceVersion})
+        k8s.stub.createInfrastructureSecret({ bearer, namespace, data, cloudProfileName, resourceVersion })
         return chai.request(app)
           .post(`/api/namespaces/${namespace}/infrastructure-secrets`)
           .set('authorization', `Bearer ${bearer}`)
@@ -111,8 +109,7 @@ describe('gardener', function () {
       it('should patch an own infrastructure secret', function () {
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.patchInfrastructureSecret({bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
+        k8s.stub.patchInfrastructureSecret({ bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion })
         return chai.request(app)
           .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -131,8 +128,7 @@ describe('gardener', function () {
         const otherNamespace = 'garden-bar'
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.patchSharedInfrastructureSecret({bearer, namespace: otherNamespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion})
+        k8s.stub.patchSharedInfrastructureSecret({ bearer, namespace: otherNamespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion })
         return chai.request(app)
           .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -146,8 +142,7 @@ describe('gardener', function () {
       it('should delete an own infrastructure secret', function () {
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.deleteInfrastructureSecret({bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
+        k8s.stub.deleteInfrastructureSecret({ bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
         return chai.request(app)
           .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
@@ -163,8 +158,7 @@ describe('gardener', function () {
         const otherNamespace = 'garden-bar'
         common.stub.getQuotas(sandbox)
         common.stub.getCloudProfiles(sandbox)
-        oidc.stub.getKeys()
-        k8s.stub.deleteSharedInfrastructureSecret({bearer, namespace: otherNamespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion})
+        k8s.stub.deleteSharedInfrastructureSecret({ bearer, namespace: otherNamespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
         return chai.request(app)
           .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
           .set('authorization', `Bearer ${bearer}`)
