@@ -356,18 +356,16 @@ async function bootstrapIngressAndHeadlessServiceForSoilOnSoil ({ coreClient, so
   const namespace = 'garden'
   const soilApiserverHostname = new URL(soilClientConfig.url).hostname
   const soilIngressDomain = await getSoilIngressDomainForSeed(soilSeedResource)
-  const clusterNameForLog = soilSeedResource.metadata.name
   await bootstrapIngressAndHeadlessService({
     coreClient: soilCoreClient,
     extensionClient: soilExtensionClient,
     namespace,
     apiserverHostname: soilApiserverHostname,
-    ingressDomain: soilIngressDomain,
-    clusterNameForLog
+    ingressDomain: soilIngressDomain
   })
 }
 
-async function bootstrapIngressAndHeadlessService ({ coreClient, extensionClient, namespace, apiserverHostname, ingressDomain, clusterNameForLog }) {
+async function bootstrapIngressAndHeadlessService ({ coreClient, extensionClient, namespace, apiserverHostname, ingressDomain }) {
   let service
   // replace headless service
   if (isIp(apiserverHostname)) {
