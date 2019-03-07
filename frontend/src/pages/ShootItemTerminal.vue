@@ -81,16 +81,39 @@ function encodeBase64Url (input) {
   return output
 }
 
-function protocols ({ token: bearer }) {
+function remoteCommandAttachOrExecuteProtocols ({ token }) {
   const protocols = ['v4.channel.k8s.io']
-  protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
+  addBearerToken(protocols, token)
 
+  return protocols
+}
+
+function watchPodProtocols ({ token }) {
+  const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
+  addBearerToken(protocols, token)
+
+  return protocols
+}
+
+function addBearerToken (protocols, bearer) {
+  protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
   return protocols
 }
 
 function attachUri (terminalData) {
   const { namespace, container, server, pod } = encodeURIComponents(terminalData)
   return `wss://${server}/api/v1/namespaces/${namespace}/pods/${pod}/attach?container=${container}&stdin=true&stdout=true&tty=true`
+}
+
+function watchPodUri (terminalData) {
+  const { namespace, server, pod } = encodeURIComponents(terminalData)
+  return `wss://${server}/api/v1/namespaces/${namespace}/pods?fieldSelector=metadata.name%3D${pod}&watch=true`
+}
+
+function closeWsIfNotClosed (ws) {
+  if (ws.readyState === attach.ReadyStateEnum.OPEN || ws.readyState === attach.ReadyStateEnum.CONNECTING) {
+    ws.close()
+  }
 }
 
 export default {
@@ -165,14 +188,25 @@ export default {
         const RETRY_TIMEOUT_SECONDS = 3
         const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
 
-        const attachTerminal = () => {
-          this.spinner.text = 'Connecting'
+        const attachTerminal = async () => {
           if (this.cancelConnect) {
             return
           }
 
           tries++
-          const ws = new WebSocket(attachUri(terminalData), protocols(terminalData))
+
+          try {
+            await this.waitUntilPodIsRunning(terminalData, 60)
+          } catch (err) {
+            console.error('failed to wait until pod is running', err)
+            this.showSnackbarTop('Could not connect to terminal')
+            return
+          }
+          if (this.cancelConnect) {
+            return
+          }
+
+          const ws = new WebSocket(attachUri(terminalData), remoteCommandAttachOrExecuteProtocols(terminalData))
           ws.binaryType = 'arraybuffer'
           let reconnectTimeoutId
           let heartbeatIntervalId
@@ -221,23 +255,70 @@ export default {
               this.spinner.start()
               console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
             }
-            reconnectTimeoutId = setTimeout(() => attachTerminal(), timeoutSeconds * 1000)
+            reconnectTimeoutId = setTimeout(async () => attachTerminal(), timeoutSeconds * 1000)
           }
 
           this.close = () => {
             clearTimeout(reconnectTimeoutId)
             clearInterval(heartbeatIntervalId)
 
-            if (ws.readyState === attach.ReadyStateEnum.OPEN || ws.readyState === attach.ReadyStateEnum.CONNCTING) {
-              ws.close()
-            }
+            closeWsIfNotClosed(ws)
             this.term.detach(ws)
           }
         }
-        attachTerminal()
+        return attachTerminal()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
       }
+    },
+    async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
+      return new Promise((resolve, reject) => {
+        const ws = new WebSocket(watchPodUri(terminalData), watchPodProtocols(terminalData))
+        const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
+
+        ws.addEventListener('message', ({ data: message }) => {
+          let event
+          try {
+            event = JSON.parse(message)
+          } catch (error) {
+            console.error('could not parse message')
+            return
+          }
+          const phase = get(event.object, 'status.phase')
+          switch (phase) {
+            case 'Failed':
+            case 'Terminating':
+            case 'Completed':
+              closeWsIfNotClosed(ws, new Error(`Pod is in phase ${phase}`))
+              return
+          }
+          if (event.type === 'DELETED') {
+            closeWsIfNotClosed(ws, new Error('pod deleted'))
+            return
+          }
+
+          this.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
+          if (phase === 'Running') {
+            closeAndResolve(ws)
+          }
+        })
+        ws.onclose = error => {
+          closeAndReject(ws, error)
+        }
+
+        const closeAndReject = (ws, error) => {
+          clearTimeout(isRunningTimeoutId)
+          closeWsIfNotClosed(ws)
+
+          reject(error)
+        }
+        const closeAndResolve = (ws) => {
+          clearTimeout(isRunningTimeoutId)
+          closeWsIfNotClosed(ws)
+
+          resolve()
+        }
+      })
     }
   },
   async mounted () {

@@ -63,6 +63,17 @@ async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
       verbs: [
         'get'
       ]
+    },
+    {
+      apiGroups: [
+        ''
+      ],
+      resources: [
+        'pods'
+      ],
+      verbs: [
+        'watch'
+      ]
     }
   ]
 
