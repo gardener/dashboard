@@ -66,7 +66,10 @@ const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
 
 const minVolumeSize = key => withParams({ type: 'minVolumeSize', key },
   function (value) {
-    return minValue(key)(parseSize(value))
+    if (this.volumeInCloudProfile) {
+      return minValue(key)(parseSize(value))
+    }
+    return true
   }
 )
 

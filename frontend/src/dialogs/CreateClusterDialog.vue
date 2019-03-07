@@ -198,11 +198,9 @@ limitations under the License.
             <v-container>
               <manage-workers
               ref="manageWorkers"
-              :workers="workers"
               :infrastructureKind="infrastructureKind"
               :cloudProfileName="cloudProfileName"
               @valid="onWorkersValid"
-              @updateWorkers="onUpdateWorkers"
              ></manage-workers>
            </v-container>
           </v-card>
@@ -421,7 +419,6 @@ export default {
       maintenanceTimeValid: false,
       hibernationScheduleValid: false,
       workersValid: false,
-      workers: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -761,7 +758,8 @@ export default {
       const data = cloneDeep(this.shootDefinition)
       const annotations = data.metadata.annotations
       const infrastructureData = cloneDeep(this.infrastructureData)
-      infrastructureData.workers = this.workers
+      const workers = this.$refs.manageWorkers.getWorkers()
+      infrastructureData.workers = workers
       data.spec.cloud[this.infrastructureKind] = infrastructureData
       // transform addons specification
       const standardAddonNames = map(standardAddonDefinitionList, 'name')
@@ -907,9 +905,6 @@ export default {
     },
     onWorkersValid (value) {
       this.workersValid = value
-    },
-    onUpdateWorkers (value) {
-      this.workers = value
     }
   },
   watch: {

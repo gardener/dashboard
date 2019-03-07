@@ -21,7 +21,7 @@ limitations under the License.
       <v-text-field
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.name')"
-        @input="$v.worker.name.$touch()"
+        @input="onInputName"
         @blur="$v.worker.name.$touch()"
         v-model="worker.name"
         counter="15"
@@ -32,23 +32,27 @@ limitations under the License.
     <v-flex xs2  class="ml-3">
       <machine-type
       :machineTypes="machineTypes"
-      :worker="worker">
+      :worker="worker"
+      @updateMachineType="onUpdateMachineType"
+      @valid="onMachineTypeValid">
       </machine-type>
     </v-flex>
 
-    <v-flex xs2  class="ml-5">
+    <v-flex xs2  v-if="volumeInCloudProfile" class="ml-5">
       <volume-type
       :volumeTypes="volumeTypes"
-      :worker="worker">
+      :worker="worker"
+      @updateVolumeType="onUpdateVolumeType"
+      @valid="onVolumeTypeValid">
       </volume-type>
     </v-flex>
 
-    <v-flex xs1  class="ml-3">
+    <v-flex v-if="volumeInCloudProfile" xs1  class="ml-3">
       <size-input
         min="1"
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.volumeSize')"
-        @input="$v.worker.volumeSize.$touch()"
+        @input="onInputVolumeSize"
         @blur="$v.worker.volumeSize.$touch()"
         label="Volume Size"
         v-model="worker.volumeSize"
@@ -60,7 +64,7 @@ limitations under the License.
         min="0"
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMin')"
-        @input="$v.worker.autoScalerMin.$touch()"
+        @input="onInputAutoscalerMin"
         @blur="$v.worker.autoScalerMin.$touch()"
         type="number"
         v-model="innerMin"
@@ -72,7 +76,7 @@ limitations under the License.
         min="0"
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.autoScalerMax')"
-        @input="$v.worker.autoScalerMax.$touch()"
+        @input="onInputAutoscalerMax"
         @blur="$v.worker.autoScalerMax.$touch()"
         type="number"
         v-model="innerMax"
@@ -90,6 +94,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import isEmpty from 'lodash/isEmpty'
 import SizeInput from '@/components/VolumeSizeInput'
 import MachineType from '@/components/MachineType'
 import VolumeType from '@/components/VolumeType'
@@ -135,12 +140,6 @@ const validations = {
     },
     autoScalerMax: {
       minValue: minValue(0)
-    },
-    machineType: {
-      required
-    },
-    volumeType: {
-      required
     }
   }
 }
@@ -166,7 +165,10 @@ export default {
   },
   data () {
     return {
-      validationErrors
+      validationErrors,
+      valid: undefined,
+      machineTypeValid: true,
+      volumeTypeValid: true
     }
   },
   validations,
@@ -181,6 +183,9 @@ export default {
     },
     volumeTypes () {
       return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+    },
+    volumeInCloudProfile () {
+      return !isEmpty(this.volumeTypes)
     },
 
     innerMin: {
@@ -206,11 +211,60 @@ export default {
       }
     }
   },
-
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
+    },
+    onInputName () {
+      this.$v.worker.name.$touch()
+      this.$emit('updateName', { name: this.worker.name, id: this.worker.id })
+      this.validateInput()
+    },
+    onUpdateMachineType () {
+      this.$emit('updateMachineType', { machineType: this.worker.machineType, id: this.worker.id })
+      this.validateInput()
+    },
+    onUpdateVolumeType () {
+      this.$emit('updateVolumeType', { volumeType: this.worker.volumeType, id: this.worker.id })
+      this.validateInput()
+    },
+    onInputVolumeSize () {
+      this.$v.worker.volumeSize.$touch()
+      this.$emit('updateVolumeSize', { volumeSize: this.worker.volumeSize, id: this.worker.id })
+      this.validateInput()
+    },
+    onInputAutoscalerMin () {
+      this.$v.worker.autoScalerMin.$touch()
+      this.$emit('updateAutoscalerMin', { autoScalerMin: this.worker.autoScalerMin, id: this.worker.id })
+      this.validateInput()
+    },
+    onInputAutoscalerMax () {
+      this.$v.worker.autoScalerMax.$touch()
+      this.$emit('updateAutoscalerMax', { autoScalerMax: this.worker.autoScalerMax, id: this.worker.id })
+      this.validateInput()
+    },
+    onMachineTypeValid ({ valid }) {
+      if (this.machineTypeValid !== valid) {
+        this.machineTypeValid = valid
+        this.validateInput()
+      }
+    },
+    onVolumeTypeValid ({ valid }) {
+      if (this.volumeTypeValid !== valid) {
+        this.volumeTypeValid = valid
+        this.validateInput()
+      }
+    },
+    validateInput () {
+      const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid
+      if (this.valid !== valid) {
+        this.valid = valid
+        this.$emit('valid', { id: this.worker.id, valid: this.valid })
+      }
     }
+  },
+  mounted () {
+    this.validateInput()
   }
 }
 </script>

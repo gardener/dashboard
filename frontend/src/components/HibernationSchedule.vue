@@ -127,12 +127,6 @@ export default {
   methods: {
     reset () {
       this.parseSchedules(this.scheduleCrontab)
-
-      this.$nextTick(() => {
-        forEach(this.$refs.scheduleEvents, (scheduleEventComponent) => {
-          scheduleEventComponent.reset()
-        })
-      })
     },
     parsedScheduleEventFromCrontabBlock (crontabBlock) {
       const cronStart = get(crontabBlock, 'start')

@@ -45,7 +45,6 @@ limitations under the License.
             :infrastructureKind="infrastructureKind"
             :cloudProfileName="cloudProfileName"
             @valid="onWorkersValid"
-            @updateWorkers="onUpdateWorkers"
            ></manage-workers>
          </v-container>
         </v-layout>
@@ -115,6 +114,7 @@ export default {
     },
     updateWorkers () {
       const user = this.$store.state.user
+      this.workers = this.$refs.manageWorkers.getWorkers()
       return updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, data: this.workers })
         .then(() => this.hideDialog())
         .catch((err) => {

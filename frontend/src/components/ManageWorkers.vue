@@ -18,10 +18,18 @@ limitations under the License.
   <transition-group name="list">
     <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id"  class="list-item pt-2">
       <v-flex pa-1 >
-        <worker-input-generic :worker.sync="worker" ref="workerInput"
-          :workers.sync="internalWorkers"
+        <worker-input-generic
+          ref="workerInput"
+          :worker="worker"
+          :workers="internalWorkers"
           :cloudProfileName="cloudProfileName"
-          v-if="infrastructureKind === 'aws'">
+          @updateName="onUpdateWorkerName"
+          @updateMachineType="onUpdateWorkerMachineType"
+          @updateVolumeType="onUpdateWorkerVolumeType"
+          @updateVolumeSize="onUpdateWorkerVolumeSize"
+          @updateAutoscalerMin="onUpdateWorkerAutoscalerMin"
+          @updateAutoscalerMax="onUpdateWorkerAutoscalerMax"
+          @valid="onWorkerValid">
           <v-btn v-show="index>0 || internalWorkers.length>1"
             small
             slot="action"
@@ -32,67 +40,6 @@ limitations under the License.
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </worker-input-generic>
-
-        <worker-input-generic :worker.sync="worker" ref="workerInput"
-          :workers.sync="internalWorkers"
-          :cloudProfileName="cloudProfileName"
-          v-if="infrastructureKind === 'azure'">
-          <v-btn v-show="index>0 || internalWorkers.length>1"
-            small
-            slot="action"
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </worker-input-generic>
-
-        <worker-input-generic :worker.sync="worker" ref="workerInput"
-          :workers.sync="internalWorkers"
-          :cloudProfileName="cloudProfileName"
-          v-if="infrastructureKind === 'gcp'">
-          <v-btn v-show="index>0 || internalWorkers.length>1"
-            small
-            slot="action"
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </worker-input-generic>
-
-        <worker-input-openstack :worker.sync="worker" ref="workerInput"
-          :workers.sync="internalWorkers"
-          :cloudProfileName="cloudProfileName"
-          v-if="infrastructureKind === 'openstack'">
-          <v-btn v-show="index>0 || internalWorkers.length>1"
-            small
-            slot="action"
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </worker-input-openstack>
-
-        <worker-input-generic :worker.sync="worker" ref="workerInput"
-          :workers.sync="internalWorkers"
-          :cloudProfileName="cloudProfileName"
-          v-if="infrastructureKind === 'alicloud'">
-          <v-btn v-show="index>0 || internalWorkers.length>1"
-            small
-            slot="action"
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </worker-input-generic>
-
       </v-flex>
     </v-layout>
     <v-layout row key="addWorker" class="list-item pt-2">
@@ -119,21 +66,20 @@ limitations under the License.
 
 <script>
 import WorkerInputGeneric from '@/components/WorkerInputGeneric'
-import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
 import { mapGetters } from 'vuex'
 import { shortRandomString } from '@/utils'
-import isEqual from 'lodash/isEqual'
 import forEach from 'lodash/forEach'
-import every from 'lodash/every'
 import get from 'lodash/get'
+import find from 'lodash/find'
 import head from 'lodash/head'
+import pick from 'lodash/pick'
 import assign from 'lodash/assign'
+const uuidv4 = require('uuid/v4')
 
 export default {
   name: 'manage-workers',
   components: {
-    WorkerInputGeneric,
-    WorkerInputOpenstack
+    WorkerInputGeneric
   },
   props: {
     workers: {
@@ -149,7 +95,6 @@ export default {
   data () {
     return {
       internalWorkers: undefined,
-      currentID: 0,
       valid: false
     }
   },
@@ -167,92 +112,95 @@ export default {
     }
   },
   methods: {
-    id () {
-      this.currentID++
-      return this.currentID
-    },
-    clearInternalWorkers () {
-      this.currentID = 0 // Worker Ids need to be stable
-      this.internalWorkers = []
-    },
     setInternalWorkers (workers) {
-      this.clearInternalWorkers()
+      this.internalWorkers = []
       if (workers) {
         forEach(workers, worker => {
-          const id = this.id()
+          const id = uuidv4()
           const internalWorker = assign({}, worker, { id })
           this.internalWorkers.push(internalWorker)
         })
       }
+      this.validateInput()
     },
     addWorker () {
-      const id = this.id()
+      const id = uuidv4()
+      const volumeType = get(head(this.volumeTypes), 'name')
+      const volumeSize = volumeType ? '50Gi' : undefined
       this.internalWorkers.push({
         id,
         name: `worker-${shortRandomString(5)}`,
         machineType: get(head(this.machineTypes), 'name'),
-        volumeType: get(head(this.volumeTypes), 'name'),
-        volumeSize: '50Gi',
+        volumeType,
+        volumeSize,
         autoScalerMin: 1,
         autoScalerMax: 2
       })
+      this.validateInput()
     },
     onRemoveWorker (index) {
       this.internalWorkers.splice(index, 1)
+      this.validateInput()
     },
     setDefaultWorker () {
-      this.clearInternalWorkers()
+      this.internalWorkers = []
       this.addWorker()
     },
-    emitWorkers () {
+    onUpdateWorkerName ({ name, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.name = name
+    },
+    onUpdateWorkerMachineType ({ machineType, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.machineType = machineType
+    },
+    onUpdateWorkerVolumeType ({ volumeType, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.volumeType = volumeType
+    },
+    onUpdateWorkerVolumeSize ({ volumeSize, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.volumeSize = volumeSize
+    },
+    onUpdateWorkerAutoscalerMin ({ autoScalerMin, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.autoScalerMin = autoScalerMin
+    },
+    onUpdateWorkerAutoscalerMax ({ autoScalerMax, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.autoScalerMax = autoScalerMax
+    },
+    onWorkerValid ({ valid, id }) {
+      const worker = find(this.internalWorkers, { id })
+      worker.valid = valid
+
+      this.validateInput()
+    },
+    getWorkers () {
       const workers = []
       forEach(this.internalWorkers, internalWorker => {
-        const worker = assign({}, internalWorker)
-        delete worker.id
+        const worker = pick(internalWorker, 'name', 'machineType', 'volumeType', 'volumeSize', 'autoScalerMin', 'autoScalerMax')
         workers.push(worker)
       })
-      this.$emit('updateWorkers', workers)
-    },
-    validateWorkers () {
-      const workerInput = this.$refs.workerInput
-
-      var workersValid = true
-      if (workerInput) {
-        const isValid = (element, index, array) => {
-          return !element.$v.$invalid
-        }
-        workersValid = every([].concat(workerInput), isValid)
-      }
-      this.$emit('valid', workersValid)
-
-      this.valid = workersValid
-      return workersValid
+      return workers
     },
     reset () {
       this.setInternalWorkers(this.workers)
+    },
+    validateInput () {
+      let valid = true
+      forEach(this.internalWorkers, worker => {
+        if (!worker.valid) {
+          valid = false
+        }
+      })
+
+      this.valid = valid
+      this.$emit('valid', this.valid)
     }
   },
   mounted () {
     this.setInternalWorkers(this.workers)
-  },
-  watch: {
-    internalWorkers: {
-      deep: true,
-      handler (value, oldValue) {
-        this.emitWorkers()
-        this.$nextTick(() => {
-          this.validateWorkers()
-        })
-      }
-    },
-    workers: {
-      deep: true,
-      handler (value, oldValue) {
-        if (!isEqual(value, oldValue)) {
-          this.setInternalWorkers(value)
-        }
-      }
-    }
   }
 }
 </script>
