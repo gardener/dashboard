@@ -26,7 +26,7 @@ limitations under the License.
           <v-tabs-slider color="yellow"></v-tabs-slider>
           <v-tab key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tab>
           <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
-          <v-tab key="addons" href="#tab-addons" ripple>Addons</v-tab>
+          <v-tab key="addons" href="#tab-addons" ripple>Add-ons</v-tab>
           <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
           <v-tab key="hibernation" href="#tab-hibernation" ripple>Hibernation</v-tab>
         </v-tabs>
@@ -338,15 +338,15 @@ const standardAddonDefinitionList = [
   {
     name: 'kubernetes-dashboard',
     title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters.',
+    description: 'General-purpose web UI for Kubernetes clusters',
     visible: true,
     enabled: true
   },
   {
     name: 'nginx-ingress',
-    title: 'Nginx Ingress',
-    description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.',
-    visible: false,
+    title: 'Nginx Ingress (Deprecated)',
+    description: 'This add-on is deprecated and will be removed in the future. You can install it or an alternative ingress controller always manually. If you choose to install it with the cluster, please note that Gardener will include it in its reconciliation and you can’t configure or override it’s configuration.',
+    visible: true,
     enabled: true
   }
 ]
@@ -915,7 +915,7 @@ export default {
     }
   },
   created () {
-    // add custom addons to default shootDefinition
+    // add custom add-ons to default shootDefinition
     forEach(this.customAddonDefinitionList, ({ name }) => {
       defaultShootDefinition.spec.addons[name] = {
         enabled: false

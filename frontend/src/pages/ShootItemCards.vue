@@ -102,10 +102,10 @@ limitations under the License.
 
         <v-card class="cyan darken-2 mt-3">
           <v-card-title class="subheading white--text" >
-            Addons
+            Add-ons
           </v-card-title>
           <v-list subheader>
-            <v-subheader>Addons provided by Gardener</v-subheader>
+            <v-subheader>Add-ons provided by Gardener</v-subheader>
             <v-list-tile avatar v-for="item in shootAddonList" :key="item.name">
               <v-list-tile-avatar>
                 <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
@@ -127,7 +127,7 @@ limitations under the License.
           <template v-if="customAddonList.length">
             <v-divider></v-divider>
             <v-list subheader>
-            <v-subheader>Custom addons</v-subheader>
+            <v-subheader>Custom add-ons</v-subheader>
             <v-list-tile avatar v-for="item in customAddonList" :key="item.name">
               <v-list-tile-avatar>
                 <v-icon class="cyan--text text--darken-2">mdi-puzzle</v-icon>
@@ -277,7 +277,7 @@ export default {
         {
           name: 'kubernetes-dashboard',
           title: 'Dashboard',
-          description: 'General-purpose web UI for Kubernetes clusters.'
+          description: 'General-purpose web UI for Kubernetes clusters'
         },
         {
           name: 'monocular',
@@ -286,8 +286,8 @@ export default {
         },
         {
           name: 'nginx-ingress',
-          title: 'Nginx Ingress',
-          description: 'An Ingress is a Kubernetes resource that lets you configure an HTTP load balancer for your Kubernetes services. Such a load balancer usually exposes your services to clients outside of your Kubernetes cluster.'
+          title: 'Nginx Ingress (Deprecated)',
+          description: 'This add-on is deprecated and will be removed in the future. You can install it or an alternative ingress controller always manually. If you choose to install it with the cluster, please note that Gardener will include it in its reconciliation and you can’t configure or override it’s configuration.'
         }
       ]
     }

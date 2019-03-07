@@ -256,7 +256,7 @@ function setupShootsNamespace (shootsNsp) {
         socket.emit('subscription_error', {
           kind,
           code: error.code,
-          message: 'Failed to fetch shoot'
+          message: 'Failed to fetch cluster'
         })
       }
       batchEmitter.flush()
