@@ -159,14 +159,26 @@ function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerR
   return toPodResource({ name, annotations, spec, ownerReferences })
 }
 
-async function readServiceAccountToken ({ client, targetNamespace, serviceaccountName }) {
-  const watch = watchServiceAccount({ client, targetNamespace, serviceaccountName })
-  const conditionFunction = isServiceAccountReady
-  const resourceName = serviceaccountName
-  const serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
-  const secretName = await _.get(_.first(serviceAccount.secrets), 'name')
-  if (secretName && secretName.length > 0) {
-    const secret = await client.ns(targetNamespace).secrets.get({ name: secretName })
+async function readServiceAccountToken ({ coreClient, targetNamespace, serviceaccountName, waitUntilReady = true }) {
+  let serviceAccount
+  if (waitUntilReady) {
+    const resourceName = serviceaccountName
+    const conditionFunction = isServiceAccountReady
+    const watch = coreClient.ns(targetNamespace).serviceaccounts.watch({ name: serviceaccountName })
+    serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
+  } else {
+    try {
+      serviceAccount = await coreClient.ns(targetNamespace).serviceaccounts.get({ name: serviceaccountName })
+    } catch (err) {
+      if (err.code !== 404) {
+        throw err
+      }
+    }
+  }
+  const secrets = _.get(serviceAccount, 'secrets')
+  const secretName = _.get(_.first(secrets), 'name')
+  if (!_.isEmpty(secretName)) {
+    const secret = await coreClient.ns(targetNamespace).secrets.get({ name: secretName })
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     return { token, caData }
@@ -175,11 +187,7 @@ async function readServiceAccountToken ({ client, targetNamespace, serviceaccoun
 
 function isServiceAccountReady ({ secrets } = {}) {
   const secretName = _.get(_.first(secrets), 'name')
-  return (secretName && secretName.length > 0)
-}
-
-function watchServiceAccount ({ client, targetNamespace, serviceaccountName }) {
-  return client.ns(targetNamespace).serviceaccounts.watch({ name: serviceaccountName })
+  return !_.isEmpty(secretName)
 }
 
 async function getRequiredResourcesAndClients ({ user, namespace, name }) {
@@ -253,9 +261,15 @@ async function findExistingTerminal ({ coreClient, targetNamespace, username, ta
     return undefined
   }
 
-  logger.debug(`Found Pod for user ${username}: ${existingPodName}. Re-using Pod for terminal session..`)
   const pod = existingPodName
-  const { token } = await readServiceAccountToken({ client: coreClient, targetNamespace, serviceaccountName: attachServiceAccountResource.name })
+  const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: attachServiceAccountResource.name, waitUntilReady })
+  const token = _.get(serviceAccountTokenObj, 'token')
+  if (_.isEmpty(token)) {
+    return undefined
+  }
+
+  logger.debug(`Found terminal session for user ${username}: ${existingPodName}`)
   const attachServiceAccount = attachServiceAccountResource.name
   return { pod, token, attachServiceAccount }
 }
@@ -289,7 +303,7 @@ async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, 
   }
 
   // wait until API token is written into service account before creating the pod
-  if (!await readServiceAccountToken({ client: coreClient, targetNamespace, serviceaccountName: adminServiceAccountName })) {
+  if (!await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: adminServiceAccountName })) {
     throw new Error('No API token found for service account %s', adminServiceAccountName)
   }
 
@@ -337,7 +351,7 @@ exports.create = async function ({ user, namespace, name, target }) {
     return terminalInfo
   }
 
-  logger.debug(`No running Pod found for user ${username}. Creating new Pod and required Resources..`)
+  logger.debug(`No running pod found for user ${username}. Creating new pod and required resources..`)
 
   let attachServiceAccountResource
   try {
@@ -368,7 +382,7 @@ exports.create = async function ({ user, namespace, name, target }) {
     } else {
       throw new Error(`Unknown terminal target ${target}`)
     }
-    const attachServiceAccountToken = await readServiceAccountToken({ client: coreClient, targetNamespace, serviceaccountName: attachServiceAccountName })
+    const attachServiceAccountToken = await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: attachServiceAccountName })
 
     _.assign(terminalInfo, { pod }, { token: attachServiceAccountToken.token })
 
