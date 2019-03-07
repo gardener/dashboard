@@ -74,6 +74,13 @@ export default {
           value: machineType.name,
           description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
         })
+        if (machineType.volumeType && machineType.volumeSize) {
+          description.push({
+            icon: 'mdi-harddisk',
+            title: 'Volume Type',
+            value: `${machineType.volumeType} / ${machineType.volumeSize}`
+          })
+        }
       }
       if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
         const volumeType = find(this.volumeTypes, { name: this.workerGroup.volumeType })
