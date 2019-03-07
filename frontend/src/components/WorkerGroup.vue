@@ -30,7 +30,7 @@ limitations under the License.
      <v-icon class="cyan--text text--darken-2 ma-1">{{line.icon}}</v-icon>
      <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
     </v-layout>
-    <v-chip slot="popperRef" small class="my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
+    <v-chip slot="popperRef" small class="cursor-pointer my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
   </g-popper>
 </template>
 
@@ -105,14 +105,7 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-  .cursor-pointer {
+  .cursor-pointer >>> .v-chip__content {
     cursor: pointer;
-  }
-  .message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    white-space: normal;
-    overflow-y: auto;
   }
 </style>
