@@ -269,7 +269,6 @@ export default {
 }
 </script>
 
-
 <style lang="styl" scoped>
   .autoscaler {
     min-width: 90px;
