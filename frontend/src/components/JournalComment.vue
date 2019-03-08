@@ -99,7 +99,7 @@ export default {
     /* not needed for chrome, but kept for firefox */
     word-wrap: break-word;
     /* does not work with firefox */
-    word-break: break-word; 
+    word-break: break-word;
   }
 
   >>> .flex {
