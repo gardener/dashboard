@@ -32,22 +32,18 @@ limitations under the License.
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
-      max-width=850
+      max-width=1000
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <v-layout row wrap>
-          <v-container>
-            <manage-workers
-            ref="manageWorkers"
-            :workers="workers"
-            :infrastructureKind="infrastructureKind"
-            :cloudProfileName="cloudProfileName"
-            @valid="onWorkersValid"
-           ></manage-workers>
-         </v-container>
-        </v-layout>
+        <manage-workers
+        ref="manageWorkers"
+        :workers="workers"
+        :infrastructureKind="infrastructureKind"
+        :cloudProfileName="cloudProfileName"
+        @valid="onWorkersValid"
+       ></manage-workers>
       </template>
     </confirm-dialog>
   </div>

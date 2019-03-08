@@ -17,30 +17,28 @@ limitations under the License.
 <template>
   <transition-group name="list">
     <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id"  class="list-item pt-2">
-      <v-flex pa-1 >
-        <worker-input-generic
-          ref="workerInput"
-          :worker="worker"
-          :workers="internalWorkers"
-          :cloudProfileName="cloudProfileName"
-          @updateName="onUpdateWorkerName"
-          @updateMachineType="onUpdateWorkerMachineType"
-          @updateVolumeType="onUpdateWorkerVolumeType"
-          @updateVolumeSize="onUpdateWorkerVolumeSize"
-          @updateAutoscalerMin="onUpdateWorkerAutoscalerMin"
-          @updateAutoscalerMax="onUpdateWorkerAutoscalerMax"
-          @valid="onWorkerValid">
-          <v-btn v-show="index>0 || internalWorkers.length>1"
-            small
-            slot="action"
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="onRemoveWorker(index)">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </worker-input-generic>
-      </v-flex>
+      <worker-input-generic
+        ref="workerInput"
+        :worker="worker"
+        :workers="internalWorkers"
+        :cloudProfileName="cloudProfileName"
+        @updateName="onUpdateWorkerName"
+        @updateMachineType="onUpdateWorkerMachineType"
+        @updateVolumeType="onUpdateWorkerVolumeType"
+        @updateVolumeSize="onUpdateWorkerVolumeSize"
+        @updateAutoscalerMin="onUpdateWorkerAutoscalerMin"
+        @updateAutoscalerMax="onUpdateWorkerAutoscalerMax"
+        @valid="onWorkerValid">
+        <v-btn v-show="index>0 || internalWorkers.length>1"
+          small
+          slot="action"
+          outline
+          icon
+          class="grey--text lighten-2"
+          @click.native.stop="onRemoveWorker(index)">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </worker-input-generic>
     </v-layout>
     <v-layout row key="addWorker" class="list-item pt-2">
       <v-flex xs12>
@@ -50,7 +48,7 @@ limitations under the License.
           outline
           fab
           icon
-          class="cyan darken-2">
+          class="cyan darken-2 ml-1">
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn

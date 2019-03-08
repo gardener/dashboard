@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-layout row>
     <v-flex xs1 class="mt-1"><v-avatar class="cyan darken-2"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
-    <v-flex xs2 class="ml-2">
+    <v-flex xs2>
       <v-text-field
         color="cyan darken-2"
         :error-messages="getErrorMessages('worker.name')"
@@ -29,7 +29,7 @@ limitations under the License.
       </v-text-field>
     </v-flex>
 
-    <v-flex xs2  class="ml-3">
+    <v-flex xs2 class="ml-3">
       <machine-type
       :machineTypes="machineTypes"
       :worker="worker"
@@ -38,7 +38,7 @@ limitations under the License.
       </machine-type>
     </v-flex>
 
-    <v-flex xs2  v-if="volumeInCloudProfile" class="ml-5">
+    <v-flex xs2 v-if="volumeInCloudProfile" class="ml-3">
       <volume-type
       :volumeTypes="volumeTypes"
       :worker="worker"
@@ -59,7 +59,7 @@ limitations under the License.
       ></size-input>
     </v-flex>
 
-    <v-flex xs1 class="ml-3">
+    <v-flex xs1 grow class="ml-3 autoscaler">
       <v-text-field
         min="0"
         color="cyan darken-2"
@@ -71,7 +71,7 @@ limitations under the License.
         label="Autoscaler Min."></v-text-field>
     </v-flex>
 
-    <v-flex xs1 class="ml-3">
+    <v-flex xs1 grow class="ml-3 autoscaler">
       <v-text-field
         min="0"
         color="cyan darken-2"
@@ -80,11 +80,11 @@ limitations under the License.
         @blur="$v.worker.autoScalerMax.$touch()"
         type="number"
         v-model="innerMax"
-        label="Max."
+        label="Autoscaler Max."
       ></v-text-field>
     </v-flex>
 
-    <v-flex xs1 class="ml-2 mt-2">
+    <v-flex shrink class="ml-3 mt-2">
       <slot name="action">
       </slot>
     </v-flex>
@@ -268,3 +268,10 @@ export default {
   }
 }
 </script>
+
+
+<style lang="styl" scoped>
+  .autoscaler {
+    min-width: 90px;
+  }
+</style>
