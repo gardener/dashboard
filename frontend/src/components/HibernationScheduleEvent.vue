@@ -144,6 +144,7 @@ export default {
       localizedWakeUpTime: null,
       localizedHibernateTime: null,
       selectedDays: null,
+      valid: undefined,
       weekdays: [
         {
           text: 'Monday',
@@ -184,14 +185,6 @@ export default {
     }
   },
   methods: {
-    reset () {
-      this.selectedTimezone = this.localTimezone
-      this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
-      this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
-      this.setSelectedDays(this.scheduleEvent)
-
-      setDelayedInputFocus(this, 'selectedDays')
-    },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
@@ -219,9 +212,8 @@ export default {
         utcMinute = utcMoment.format('mm')
       }
       const id = this.id
-      const valid = !this.$v.$invalid
-      this.$emit('valid', { id, valid })
       this.$emit(eventName, { utcHour, utcMinute, id })
+      this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
       const days = get(scheduleEvent, 'start.weekdays', get(scheduleEvent, 'end.weekdays'))
@@ -241,9 +233,8 @@ export default {
         weekdays = join(map(this.selectedDays, 'value'), ',')
       }
       const id = this.id
-      const valid = !this.$v.$invalid
-      this.$emit('valid', { id, valid })
       this.$emit('updateSelectedDays', { weekdays, id })
+      this.validateInput()
     },
     removeScheduleEvent () {
       this.$emit('removeScheduleEvent')
@@ -272,10 +263,21 @@ export default {
     onInputSelectedTimezone () {
       this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime })
       this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime })
+    },
+    validateInput () {
+      if (this.valid !== !this.$v.$invalid) {
+        this.valid = !this.$v.$invalid
+        this.$emit('valid', { id: this.id, valid: this.valid })
+      }
     }
   },
   mounted () {
-    this.reset()
+    this.selectedTimezone = this.localTimezone
+    this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
+    this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
+    this.setSelectedDays(this.scheduleEvent)
+
+    setDelayedInputFocus(this, 'selectedDays')
   }
 }
 </script>

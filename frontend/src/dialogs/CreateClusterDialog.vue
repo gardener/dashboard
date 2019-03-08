@@ -17,7 +17,6 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" persistent max-width="1200" content-class="dialogContainer">
     <v-card flat>
-
       <v-toolbar dense class="draken-1 header">
         <v-toolbar-side-icon><v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon></v-toolbar-side-icon>
         <v-toolbar-title>
@@ -37,7 +36,6 @@ limitations under the License.
           <v-card flat>
             <v-container fluid>
               <v-card-text>
-
                 <v-layout row>
                   <v-flex xs3>
                     <v-text-field
@@ -52,7 +50,6 @@ limitations under the License.
                       ></v-text-field>
                   </v-flex>
                 </v-layout>
-
                 <v-layout row class="mt-2">
                   <v-flex xs3>
                     <v-select
@@ -81,10 +78,8 @@ limitations under the License.
                       </template>
                     </v-select>
                   </v-flex>
-
                   <v-flex xs1 v-show="cloudProfiles.length !== 1">
                   </v-flex>
-
                   <v-flex xs3 v-show="cloudProfiles.length !== 1">
                     <cloud-profile
                       ref="cloudProfile"
@@ -94,10 +89,8 @@ limitations under the License.
                       color="cyan darken-2">
                     </cloud-profile>
                   </v-flex>
-
                   <v-flex xs1>
                   </v-flex>
-
                   <v-flex xs3>
                     <v-select
                       color="cyan darken-2"
@@ -123,7 +116,6 @@ limitations under the License.
                     </v-select>
                   </v-flex>
                 </v-layout>
-
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
@@ -150,7 +142,6 @@ limitations under the License.
                       ></v-select>
                   </v-flex>
                 </v-layout>
-
                 <v-layout row>
                   <v-flex xs3>
                     <v-select
@@ -175,7 +166,6 @@ limitations under the License.
                       ></v-select>
                   </v-flex>
                 </v-layout>
-
                 <template v-if="infrastructureKind === 'openstack'">
                   <v-layout row>
                     <v-flex xs3>
@@ -203,124 +193,19 @@ limitations under the License.
             </v-container>
           </v-card>
         </v-tab-item>
-
         <v-tab-item key="worker" value="tab-worker">
-
           <v-card flat>
-            <v-container fluid >
-              <transition-group name="list-complete">
-                <v-layout row v-for="(worker, index) in workers" :key="worker.id"  class="list-complete-item pt-4 pl-3">
-                  <v-flex pa-1 >
-
-                    <worker-input-generic :worker.sync="worker" ref="workerInput"
-                      :workers.sync="workers"
-                      :cloudProfileName="cloudProfileName"
-                      v-if="infrastructureKind === 'aws'">
-                      <v-btn v-show="index>0 || workers.length>1"
-                        small
-                        slot="action"
-                        outline
-                        icon
-                        class="grey--text lighten-2"
-                        @click.native.stop="workers.splice(index, 1)">
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </worker-input-generic>
-
-                    <worker-input-generic :worker.sync="worker" ref="workerInput"
-                      :workers.sync="workers"
-                      :cloudProfileName="cloudProfileName"
-                      v-if="infrastructureKind === 'azure'">
-                      <v-btn v-show="index>0 || workers.length>1"
-                        small
-                        slot="action"
-                        outline
-                        icon
-                        class="grey--text lighten-2"
-                        @click.native.stop="workers.splice(index, 1)">
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </worker-input-generic>
-
-                    <worker-input-generic :worker.sync="worker" ref="workerInput"
-                      :workers.sync="workers"
-                      :cloudProfileName="cloudProfileName"
-                      v-if="infrastructureKind === 'gcp'">
-                      <v-btn v-show="index>0 || workers.length>1"
-                        small
-                        slot="action"
-                        outline
-                        icon
-                        class="grey--text lighten-2"
-                        @click.native.stop="workers.splice(index, 1)">
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </worker-input-generic>
-
-                    <worker-input-openstack :worker.sync="worker" ref="workerInput"
-                      :workers.sync="workers"
-                      :cloudProfileName="cloudProfileName"
-                      v-if="infrastructureKind === 'openstack'">
-                      <v-btn v-show="index>0 || workers.length>1"
-                        small
-                        slot="action"
-                        outline
-                        icon
-                        class="grey--text lighten-2"
-                        @click.native.stop="workers.splice(index, 1)">
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </worker-input-openstack>
-
-                    <worker-input-generic :worker.sync="worker" ref="workerInput"
-                      :workers.sync="workers"
-                      :cloudProfileName="cloudProfileName"
-                      v-if="infrastructureKind === 'alicloud'">
-                      <v-btn v-show="index>0 || workers.length>1"
-                        small
-                        slot="action"
-                        outline
-                        icon
-                        class="grey--text lighten-2"
-                        @click.native.stop="workers.splice(index, 1)">
-                        <v-icon>mdi-close</v-icon>
-                      </v-btn>
-                    </worker-input-generic>
-
-                  </v-flex>
-                </v-layout>
-                <v-layout row key="1234" class="list-complete-item pt-4 pl-3 ">
-
-                  <v-flex xs1>
-                    <v-btn
-                      small
-                      @click="addWorker"
-                      outline
-                      fab
-                      icon
-                      class="cyan darken-2">
-                      <v-icon class="cyan--text text--darken-2">add</v-icon>
-                    </v-btn>
-                  </v-flex>
-
-                  <v-flex xs1 class="mt-2">
-                    <v-btn
-                      @click="addWorker"
-                      flat
-                      class="cyan--text text--darken-2">
-                      Add Worker Group
-                    </v-btn>
-                  </v-flex>
-
-                </v-layout>
-              </transition-group>
-            </v-container>
+            <v-container>
+              <manage-workers
+              ref="manageWorkers"
+              :infrastructureKind="infrastructureKind"
+              :cloudProfileName="cloudProfileName"
+              @valid="onWorkersValid"
+             ></manage-workers>
+           </v-container>
           </v-card>
-
         </v-tab-item>
-
         <v-tab-item key="addons" value="tab-addons">
-
           <v-card flat>
             <v-container>
               <v-list three-line class="mr-extra">
@@ -338,30 +223,24 @@ limitations under the License.
               </v-list>
             </v-container>
           </v-card>
-
         </v-tab-item>
-
         <v-tab-item key="maintenance" value="tab-maintenance">
-
           <v-card flat>
-            <v-container fluid>
-              <v-layout row wrap>
-                <maintenance-time
-                  ref="maintenanceTime"
-                  :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
-                  @updateMaintenanceWindow="onUpdateMaintenanceWindow"
-                  @valid="onMaintenanceTimeValid"
-                ></maintenance-time>
-                <maintenance-components
-                  :update-kubernetes-version="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"
-                  @updateKubernetesVersion="onUpdateKubernetesVersion"></maintenance-components>
-              </v-layout>
+            <v-container>
+              <maintenance-time
+                ref="maintenanceTime"
+                :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
+                @updateMaintenanceWindow="onUpdateMaintenanceWindow"
+                @valid="onMaintenanceTimeValid"
+              ></maintenance-time>
+              <maintenance-components
+                :update-kubernetes-version="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"
+                @updateKubernetesVersion="onUpdateKubernetesVersion"
+              ></maintenance-components>
             </v-container>
           </v-card>
-
         </v-tab-item>
         <v-tab-item key="hibernation" value="tab-hibernation">
-
           <v-card flat>
             <v-container>
               <hibernation-schedule
@@ -375,7 +254,6 @@ limitations under the License.
       </v-tabs-items>
 
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
-
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
@@ -388,12 +266,11 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import WorkerInputGeneric from '@/components/WorkerInputGeneric'
-import WorkerInputOpenstack from '@/components/WorkerInputOpenstack'
 import CloudProfile from '@/components/CloudProfile'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import HibernationSchedule from '@/components/HibernationSchedule'
+import ManageWorkers from '@/components/ManageWorkers'
 import Alert from '@/components/Alert'
 import find from 'lodash/find'
 import get from 'lodash/get'
@@ -401,7 +278,6 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import map from 'lodash/map'
 import cloneDeep from 'lodash/cloneDeep'
-import every from 'lodash/every'
 import noop from 'lodash/noop'
 import isEmpty from 'lodash/isEmpty'
 import forEach from 'lodash/forEach'
@@ -416,20 +292,10 @@ import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import InfraIcon from '@/components/InfrastructureIcon'
-import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors } from '@/utils'
+import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors, shortRandomString } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
 const semSort = require('semver-sort')
-
-function shortRandomString (length) {
-  const start = 'abcdefghijklmnopqrstuvwxyz'
-  const possible = start + '0123456789'
-  var text = start.charAt(Math.floor(Math.random() * start.length))
-  for (var i = 0; i < (length - 1); i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-  }
-  return text
-}
 
 const validationErrors = {
   shootDefinition: {
@@ -526,14 +392,13 @@ const defaultShootDefinition = {
 export default {
   name: 'create-cluster-dialog',
   components: {
-    WorkerInputGeneric,
-    WorkerInputOpenstack,
     InfraIcon,
     Alert,
     CloudProfile,
     MaintenanceComponents,
     MaintenanceTime,
-    HibernationSchedule
+    HibernationSchedule,
+    ManageWorkers
   },
   props: {
     value: {
@@ -553,6 +418,7 @@ export default {
       validationErrors,
       maintenanceTimeValid: false,
       hibernationScheduleValid: false,
+      workersValid: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -608,8 +474,6 @@ export default {
     ]),
     ...mapGetters([
       'cloudProfileByName',
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName',
       'cloudProfilesByCloudProviderKind',
       'regionsByCloudProfileName',
       'loadBalancerProviderNamesByCloudProfileName',
@@ -714,17 +578,8 @@ export default {
     cloudProfileNames () {
       return map(this.cloudProfiles, 'metadata.name')
     },
-    workers () {
-      return get(this.infrastructureData, 'workers', [])
-    },
     addons () {
       return get(this.shootDefinition, 'spec.addons', {})
-    },
-    machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
-    },
-    volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
     },
     regions () {
       return this.regionsByCloudProfileName(this.cloudProfileName)
@@ -747,17 +602,7 @@ export default {
       return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
     },
     valid () {
-      const workerInput = this.refs_.workerInput
-
-      var workersValid = true
-      if (workerInput) {
-        const isValid = (element, index, array) => {
-          return !element.$v.$invalid
-        }
-        workersValid = every([].concat(workerInput), isValid)
-      }
-
-      return workersValid && this.maintenanceTimeValid && this.hibernationScheduleValid && !this.$v.$invalid
+      return this.workersValid && this.maintenanceTimeValid && this.hibernationScheduleValid && !this.$v.$invalid
     },
     sortedKubernetesVersions () {
       return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
@@ -913,9 +758,8 @@ export default {
       const data = cloneDeep(this.shootDefinition)
       const annotations = data.metadata.annotations
       const infrastructureData = cloneDeep(this.infrastructureData)
-      forEach(infrastructureData.workers, worker => {
-        delete worker.id
-      })
+      const workers = this.$refs.manageWorkers.getWorkers()
+      infrastructureData.workers = workers
       data.spec.cloud[this.infrastructureKind] = infrastructureData
       // transform addons specification
       const standardAddonNames = map(standardAddonDefinitionList, 'name')
@@ -935,18 +779,6 @@ export default {
         annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule'] = 'true'
       }
       return this.createShoot(data)
-    },
-    addWorker () {
-      const id = shortRandomString(5)
-      this.infrastructureData.workers.push({
-        id,
-        name: `worker-${id}`,
-        machineType: get(head(this.machineTypes), 'name'),
-        volumeType: get(head(this.volumeTypes), 'name'),
-        volumeSize: '50Gi',
-        autoScalerMin: 1,
-        autoScalerMax: 2
-      })
     },
     createClicked () {
       Promise.resolve()
@@ -1037,8 +869,9 @@ export default {
       this.infrastructureData.loadBalancerProvider = head(this.loadBalancerProviderNames)
     },
     setDefaultWorker () {
-      this.infrastructureData.workers = []
-      this.addWorker()
+      this.$nextTick(() => {
+        this.$refs.manageWorkers.setDefaultWorker()
+      })
     },
     setDefaultRegion () {
       this.region = head(this.regions)
@@ -1069,6 +902,9 @@ export default {
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
+    },
+    onWorkersValid (value) {
+      this.workersValid = value
     }
   },
   watch: {
@@ -1127,11 +963,6 @@ export default {
       >>> .v-card__text{
         padding:0;
       }
-    }
-
-    .add_worker {
-      margin-left: 30px;
-      border: 0;
     }
   }
 

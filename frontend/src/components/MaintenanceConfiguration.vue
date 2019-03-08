@@ -37,17 +37,16 @@ limitations under the License.
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <v-layout row wrap>
-          <maintenance-time
-            ref="maintenanceTime"
-            :time-window-begin="data.timeWindowBegin"
-            @updateMaintenanceWindow="onUpdateMaintenanceWindow"
-            @valid="onMaintenanceTimeValid"
-          ></maintenance-time>
-          <maintenance-components
-            :update-kubernetes-version="data.updateKubernetesVersion"
-            @updateKubernetesVersion="onUpdateKubernetesVersion"></maintenance-components>
-        </v-layout>
+        <maintenance-time
+          ref="maintenanceTime"
+          :time-window-begin="data.timeWindowBegin"
+          @updateMaintenanceWindow="onUpdateMaintenanceWindow"
+          @valid="onMaintenanceTimeValid"
+        ></maintenance-time>
+        <maintenance-components
+          :update-kubernetes-version="data.updateKubernetesVersion"
+          @updateKubernetesVersion="onUpdateKubernetesVersion">
+        </maintenance-components>
       </template>
     </confirm-dialog>
   </div>

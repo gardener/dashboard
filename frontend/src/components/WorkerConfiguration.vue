@@ -27,25 +27,23 @@ limitations under the License.
       :confirm-disabled="!valid"
       v-model="dialog"
       :cancel="hideDialog"
-      :ok="updateHibernationSchedules"
+      :ok="updateWorkers"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
-      max-width=850
+      max-width=1000
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <v-layout row wrap>
-          <hibernation-schedule
-            ref="hibernationSchedule"
-            :scheduleCrontab="hibernationSchedules"
-            :noSchedule="noScheduleAnnotation"
-            :purpose="shootPurpose"
-            @valid="onHibernationScheduleValid"
-          ></hibernation-schedule>
-        </v-layout>
+        <manage-workers
+        ref="manageWorkers"
+        :workers="workers"
+        :infrastructureKind="infrastructureKind"
+        :cloudProfileName="cloudProfileName"
+        @valid="onWorkersValid"
+       ></manage-workers>
       </template>
     </confirm-dialog>
   </div>
@@ -53,17 +51,17 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import HibernationSchedule from '@/components/HibernationSchedule'
-import { updateHibernationSchedules, addShootAnnotation } from '@/utils/api'
+import ManageWorkers from '@/components/ManageWorkers'
+import { updateWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
+import { isShootMarkedForDeletion, getCloudProviderKind } from '@/utils'
 import get from 'lodash/get'
 
 export default {
-  name: 'hibernation-configuration',
+  name: 'worker-configuration',
   components: {
     ConfirmDialog,
-    HibernationSchedule
+    ManageWorkers
   },
   props: {
     shootItem: {
@@ -75,28 +73,30 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      hibernationScheduleValid: false,
-      hibernationSchedules: undefined,
-      noScheduleAnnotation: false,
-      caption: 'Configure Hibernation Schedule',
-      icon: 'mdi-settings-outline'
+      workersValid: false,
+      workers: undefined,
+      icon: 'mdi-settings-outline',
+      caption: 'Configure Workers'
     }
   },
   computed: {
     shootName () {
       return get(this.shootItem, 'metadata.name')
     },
-    shootPurpose () {
-      return get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
-    },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
     },
     valid () {
-      return this.hibernationScheduleValid
+      return this.workersValid
     },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
+    },
+    infrastructureKind () {
+      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
+    },
+    cloudProfileName () {
+      return get(this.shootItem, 'spec.cloud.profile')
     }
   },
   methods: {
@@ -108,16 +108,14 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    updateHibernationSchedules () {
+    updateWorkers () {
       const user = this.$store.state.user
-      const noScheduleAnnotation = { 'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null }
-      this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-      return updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
-        .then(() => addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation }))
+      this.workers = this.$refs.manageWorkers.getWorkers()
+      return updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, data: this.workers })
         .then(() => this.hideDialog())
         .catch((err) => {
           const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save hibernation configuration'
+          this.errorMessage = 'Could not save worker configuration'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         })
@@ -125,20 +123,16 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-      this.hibernationScheduleValid = false
+      this.workersValid = false
 
-      this.hibernationSchedules = get(this.shootItem, 'spec.hibernation.schedules')
-      this.noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+      this.workers = get(this.shootItem, `spec.cloud.${this.infrastructureKind}.workers`)
 
       this.$nextTick(() => {
-        this.$refs.hibernationSchedule.reset()
+        this.$refs.manageWorkers.reset()
       })
     },
-    onUpdateHibernationSchedules (value) {
-      this.hibernationSchedules = value
-    },
-    onHibernationScheduleValid (value) {
-      this.hibernationScheduleValid = value
+    onWorkersValid (value) {
+      this.workersValid = value
     }
   }
 }
