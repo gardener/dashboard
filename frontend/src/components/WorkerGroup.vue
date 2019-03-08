@@ -94,8 +94,8 @@ export default {
       if (this.workerGroup.autoScalerMin && this.workerGroup.autoScalerMax) {
         description.push({
           icon: 'mdi-arrow-expand-all',
-          title: 'Autoscaler Min',
-          value: `${this.workerGroup.autoScalerMin} / Max: ${this.workerGroup.autoScalerMax}`
+          title: 'Autoscaler',
+          value: `Min. ${this.workerGroup.autoScalerMin} / Max. ${this.workerGroup.autoScalerMax}`
         })
       }
       return description

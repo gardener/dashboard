@@ -59,7 +59,7 @@ limitations under the License.
       ></size-input>
     </v-flex>
 
-    <v-flex xs1 grow class="ml-3 autoscaler">
+    <v-flex xs1 class="ml-3 autoscaler">
       <v-text-field
         min="0"
         color="cyan darken-2"
@@ -71,7 +71,7 @@ limitations under the License.
         label="Autoscaler Min."></v-text-field>
     </v-flex>
 
-    <v-flex xs1 grow class="ml-3 autoscaler">
+    <v-flex xs1 class="ml-3 autoscaler">
       <v-text-field
         min="0"
         color="cyan darken-2"
@@ -84,7 +84,7 @@ limitations under the License.
       ></v-text-field>
     </v-flex>
 
-    <v-flex shrink class="ml-3 mt-2">
+    <v-flex class="ml-3 mt-2">
       <slot name="action">
       </slot>
     </v-flex>
@@ -167,8 +167,8 @@ export default {
     return {
       validationErrors,
       valid: undefined,
-      machineTypeValid: true,
-      volumeTypeValid: true
+      machineTypeValid: undefined,
+      volumeTypeValid: true // selection not shown in all cases, default to true
     }
   },
   validations,

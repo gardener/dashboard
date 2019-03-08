@@ -32,7 +32,6 @@ const validationErrors = {
       required: 'Machine Type is required'
     }
   }
-
 }
 
 const validations = {

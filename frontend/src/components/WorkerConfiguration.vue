@@ -131,9 +131,6 @@ export default {
         this.$refs.manageWorkers.reset()
       })
     },
-    onUpdateWorkers (value) {
-      this.workers = value
-    },
     onWorkersValid (value) {
       this.workersValid = value
     }
