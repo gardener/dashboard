@@ -23,10 +23,20 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-layout align-center row fill-height class="pa-0 ma-0">
-        <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-          {{ row.name }}
-        </router-link>
-        <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+        <v-flex grow>
+          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
+            {{ row.name }}
+          </router-link>
+        </v-flex>
+        <v-flex shrink>
+          <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+          <hibernation-schedule-warning
+            v-if="isShootHasNoHibernationScheduleWarning"
+            :name="row.name"
+            :namespace="row.namespace"
+            :purpose="row.purpose">
+          </hibernation-schedule-warning>
+        </v-flex>
       </v-layout>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
@@ -116,6 +126,7 @@ import ShootVersion from '@/components/ShootVersion'
 import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/JournalLabels'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
+import HibernationScheduleWarning from '@/components/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
@@ -127,7 +138,8 @@ import { getTimestampFormatted,
   isReconciliationDeactivated,
   isShootMarkedForDeletion,
   isTypeDelete,
-  getProjectName } from '@/utils'
+  getProjectName,
+  isShootHasNoHibernationScheduleWarning } from '@/utils'
 
 export default {
   components: {
@@ -140,6 +152,7 @@ export default {
     JournalLabels,
     RetryOperation,
     SelfTerminationWarning,
+    HibernationScheduleWarning,
     AccountAvatar,
     DeleteCluster
   },
@@ -242,6 +255,9 @@ export default {
       return this.isClusterAccessDialogDisabled
         ? 'Cluster Access'
         : 'Show Cluster Access'
+    },
+    isShootHasNoHibernationScheduleWarning () {
+      return isShootHasNoHibernationScheduleWarning(this.shootItem)
     }
   },
   methods: {

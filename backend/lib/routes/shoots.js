@@ -116,6 +116,33 @@ router.route('/:name/spec/hibernation/enabled')
     }
   })
 
+router.route('/:name/spec/hibernation/schedules')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.replaceHibernationSchedules({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
+router.route('/:name/spec/cloud/:infrastructureKind/workers')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const infrastructureKind = req.params.infrastructureKind
+      const body = req.body
+      res.send(await shoots.replaceWorkers({ user, namespace, infrastructureKind, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 router.route('/:name/metadata/annotations')
   .patch(async (req, res, next) => {
     try {

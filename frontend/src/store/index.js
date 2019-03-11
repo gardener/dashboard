@@ -28,6 +28,7 @@ import mapKeys from 'lodash/mapKeys'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
 import merge from 'lodash/merge'
+import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
@@ -61,7 +62,8 @@ const state = {
   alert: null,
   alertBanner: null,
   shootsLoading: false,
-  websocketConnectionError: null
+  websocketConnectionError: null,
+  localTimezone: moment.tz.guess()
 }
 
 const getFilterValue = (state) => {

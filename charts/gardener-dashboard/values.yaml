@@ -54,6 +54,14 @@ frontendConfig:
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+  defaultHibernationSchedule:
+    evaluation:
+    - start: 00 17 * * 1,2,3,4,5
+    development:
+    - start: 00 17 * * 1,2,3,4,5
+      end: 00 08 * * 1,2,3,4,5
+    production: ~
+
 gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg

@@ -343,3 +343,36 @@ export function textColor (color) {
   }
   return textColor
 }
+
+export function purposeRequiresHibernationSchedule (purpose) {
+  const defaultHibernationSchedules = get(store, 'state.cfg.defaultHibernationSchedule')
+  if (defaultHibernationSchedules) {
+    if (isEmpty(purpose)) {
+      return true
+    }
+    return !isEmpty(get(defaultHibernationSchedules, purpose))
+  }
+  return false
+}
+
+export function isShootHasNoHibernationScheduleWarning (shoot) {
+  const annotations = get(shoot, 'metadata.annotations', {})
+  const purpose = annotations['garden.sapcloud.io/purpose']
+  if (purposeRequiresHibernationSchedule(purpose)) {
+    const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+    if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
+      return true
+    }
+  }
+  return false
+}
+
+export function shortRandomString (length) {
+  const start = 'abcdefghijklmnopqrstuvwxyz'
+  const possible = start + '0123456789'
+  var text = start.charAt(Math.floor(Math.random() * start.length))
+  for (var i = 0; i < (length - 1); i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+  }
+  return text
+}

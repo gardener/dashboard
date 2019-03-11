@@ -159,6 +159,30 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
   return patch({ user, namespace, name, body: payload })
 }
 
+exports.replaceHibernationSchedules = async function ({ user, namespace, name, body }) {
+  const schedules = body
+  const payload = {
+    spec: {
+      hibernation: {
+        schedules
+      }
+    }
+  }
+  return patch({ user, namespace, name, body: payload })
+}
+
+exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
+  const workers = body
+  const patchOperations = [
+    {
+      op: 'replace',
+      path: `/spec/cloud/${infrastructureKind}/workers`,
+      value: workers
+    }
+  ]
+  return Garden(user).namespaces(namespace).shoots.jsonPatch({ name, body: patchOperations })
+}
+
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
   const payload = {
