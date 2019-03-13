@@ -110,12 +110,11 @@ export default {
     },
     async updateHibernationSchedules () {
       try {
-        const user = this.$store.state.user
         const noScheduleAnnotation = {
           'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null
         }
         this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-        const result = await updateHibernationSchedules({
+        await updateHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: this.hibernationSchedules
@@ -126,7 +125,6 @@ export default {
           data: noScheduleAnnotation
         })
         this.hideDialog()
-        return result
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = 'Could not save hibernation configuration'

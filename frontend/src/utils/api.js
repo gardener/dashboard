@@ -73,7 +73,7 @@ export function replaceShoot ({ namespace, name, data }) {
 }
 
 export function addShootAnnotation ({ namespace, name, data }) {
-  return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, user, data)
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, data)
 }
 
 export function getShoot ({ namespace, name }) {
