@@ -78,7 +78,6 @@ module.exports = {
         config.frontend.primaryLoginType = config.oidc ? 'oidc' : 'token'
 
         const secretsPath = joinPath(dirname(filename), 'secrets')
-        applySecretToConfig(config, secretsPath, 'prometheus.secret')
         applySecretToConfig(config, secretsPath, 'gitHub.webhookSecret')
         applySecretToConfig(config, secretsPath, 'gitHub.authentication.username')
         applySecretToConfig(config, secretsPath, 'gitHub.authentication.token')
