@@ -18,7 +18,12 @@ resources:
     cpu: 100m
     memory: 64Mi
 issuerUrl: https://identity.ingress.example.org
-ingressAnnotations: {}
+
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/use-port-in-redirects: "true"
+    kubernetes.io/ingress.class: nginx
 
 #kubeconfig: kubeconfig-to-external-cluster (optionally, if not given in-cluster config is used)
 
@@ -56,4 +61,3 @@ tls:
     -----BEGIN RSA PRIVATE KEY-----
     Li4u
     -----END RSA PRIVATE KEY-----
-    
