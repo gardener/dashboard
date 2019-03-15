@@ -28,8 +28,7 @@ const Resources = require('./Resources')
 const Specs = require('./Specs')
 const {
   GatewayTimeout,
-  InternalServerError,
-  NotFound
+  InternalServerError
 } = require('../errors')
 const logger = require('../logger')
 
@@ -227,20 +226,20 @@ module.exports = {
       spec: Specs.APIRegistration
     })
   },
-  getKubeconfigFromServiceAccount ({ serviceaccountName, contextName = 'default', serviceaccountNamespace, token, server, caData }) {
+  getKubeconfigFromServiceAccount ({ serviceAccountName, contextName = 'default', serviceAccountNamespace, token, server, caData }) {
     const clusterName = 'garden'
     const cluster = {
       'certificate-authority-data': caData,
       server
     }
-    const userName = serviceaccountName
+    const userName = serviceAccountName
     const user = {
       token
     }
     const context = {
       cluster: clusterName,
       user: userName,
-      namespace: serviceaccountNamespace
+      namespace: serviceAccountNamespace
     }
     return yaml.safeDump({
       kind: 'Config',

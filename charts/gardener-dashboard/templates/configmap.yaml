@@ -153,9 +153,15 @@ data:
 {{ toYaml .Values.terminal.bootstrap.queueOptions | indent 10 }}
         {{- end }}
       {{- end }}
-      gardenClusterKubeApiserver:
-        {{- with .Values.terminal.gardenClusterKubeApiserver.hosts }}
-        hosts:
-{{ toYaml . | indent 8 }}
+      gardenCluster:
+        seed: {{ .Values.terminal.gardenCluster.seed }}
+        namespace: {{ .Values.terminal.gardenCluster.namespace }}
+        {{- if .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
+        virtualGardenKubeconfigName: {{ .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
         {{- end }}
+        kubeApiserver:
+          {{- with .Values.terminal.gardenCluster.kubeApiserver.hosts }}
+          hosts:
+{{ toYaml . | indent 10 }}
+          {{- end }}
     {{- end }}

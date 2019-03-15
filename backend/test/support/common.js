@@ -17,9 +17,9 @@
 'use strict'
 const _ = require('lodash')
 const { EventEmitter } = require('events')
-const {_cache: cache} = require('../../lib/cache')
+const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
-const { _config: config } = require('../../lib/utils')
+const { _cloudProvider: cloudProvider } = require('../../lib/utils')
 
 function getSeed (name, profileName, region, kind, seedProtected = false, seedVisible = true) {
   return {
@@ -115,8 +115,8 @@ const quotaList = [
 
 const stub = {
   getCloudProfiles (sandbox) {
-    const getcloudProviderKindListStub = sandbox.stub(config, 'getCloudProviderKindList')
-    getcloudProviderKindListStub.returns(['infra1', 'infra2', 'infra3'])
+    const getKindList = sandbox.stub(cloudProvider, 'getKindList')
+    getKindList.returns(['infra1', 'infra2', 'infra3'])
 
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
     getCloudProfilesStub.returns(cloudProfileList)

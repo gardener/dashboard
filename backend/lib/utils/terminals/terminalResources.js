@@ -19,8 +19,10 @@
 
 const _ = require('lodash')
 
-const kubernetes = require('../kubernetes')
+const kubernetes = require('../../kubernetes')
 const Resources = kubernetes.Resources
+const { encodeBase64 } = require('..')
+const { UnprocessableEntity } = require('../../errors')
 
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 
@@ -146,6 +148,21 @@ function toPodResource ({
   return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
 }
 
+function toSecretResource ({ name, namespace, annotations, labels, ownerReferences, rawData }) {
+  const resource = Resources.Secret
+  let encodedData
+  try {
+    encodedData = _.mapValues(rawData, encodeBase64)
+  } catch (err) {
+    throw new UnprocessableEntity('Failed to encode "base64" secret data')
+  }
+  const data = {
+    type: 'Opaque',
+    data: encodedData
+  }
+  return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
+}
+
 function toResource ({
   resource,
   name,
@@ -196,5 +213,6 @@ module.exports = {
   toIngressResource,
   toEndpointResource,
   toServiceResource,
-  toPodResource
+  toPodResource,
+  toSecretResource
 }

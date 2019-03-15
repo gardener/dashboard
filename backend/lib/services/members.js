@@ -109,16 +109,16 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   const member = {
     name: username,
     kind: 'User'
   }
-  if (serviceaccountNamespace === namespace) {
+  if (serviceAccountNamespace === namespace) {
     const core = Core(user)
     const ns = core.namespaces(namespace)
     const serviceaccount = await ns.serviceaccounts.get({
-      name: serviceaccountName
+      name: serviceAccountName
     })
     const projectName = await getProjectNameFromNamespace(namespace)
     const api = ns.serviceaccounts.api
@@ -129,7 +129,7 @@ exports.get = async function ({ user, namespace, name: username }) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceaccountName, contextName: projectName, serviceaccountNamespace, token, caData, server })
+    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName: projectName, serviceAccountNamespace, token, caData, server })
   }
   return member
 }

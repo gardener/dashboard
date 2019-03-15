@@ -20,10 +20,13 @@ const _ = require('lodash')
 
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
-const { decodeBase64,
-  getSeedKubeconfigForShoot,
+const {
+  getSeedKubeconfig,
   getShootIngressDomain,
-  createOwnerRefArrayForServiceAccount
+  createOwnerRefArrayForResource,
+  getConfigValue,
+  readServiceAccountToken,
+  getTargetClusterClientConfig
 } = require('../utils')
 const {
   COMPONENT_TERMINAL,
@@ -31,37 +34,51 @@ const {
   toRoleBindingResource,
   toClusterRoleBindingResource,
   toPodResource
-} = require('../utils/terminalResources')
-const config = require('../config')
+} = require('../utils/terminals/terminalResources')
+const {
+  CLUSTER_ROLE_TERMINAL_ATTACH,
+  createKubeconfig,
+  SaTypeEnum
+} = require('../utils/terminals')
+const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const shoots = require('./shoots')
 const { Forbidden } = require('../errors')
 const logger = require('../logger')
 
-function core () {
-  return kubernetes.core()
+const TERMINAL_CONTAINER_NAME = 'terminal'
+
+function Core ({ auth }) {
+  return kubernetes.core({ auth })
 }
 
-function rbac () {
-  return kubernetes.rbac()
-}
-
-function getAnnotationTerminalUserAndTarget ({ user, target }) {
-  return {
-    'garden.sapcloud.io/terminal-user': user,
+function getAnnotationTerminalUserAndTarget ({ username, target, targetClusterNamespace }) {
+  const annotation = {
+    'garden.sapcloud.io/terminal-user': username,
     'garden.sapcloud.io/terminal-target': target
   }
+  if (targetClusterNamespace) {
+    _.assign(annotation, { 'garden.sapcloud.io/terminal-target-cluster-ns': targetClusterNamespace })
+  }
+  return annotation
 }
 
-function toTerminalServiceAccountResource ({ prefix, name, user, target, ownerReferences, labels, annotations }) {
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
+function toTerminalServiceAccountResource ({ prefix, name, saType, username, target, ownerReferences, labels = {}, annotations = {} }) {
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
+  _.assign(labels, { saType })
+
+  const heartbeat = Math.floor(new Date() / 1000)
+  const attachSaAnnotations = {
+    'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
+  }
+  _.assign(annotations, attachSaAnnotations)
 
   return toServiceAccountResource({ prefix, name, labels, annotations, ownerReferences })
 }
 
-function toTerminalRoleBindingResource ({ name, saName, user, target, clusterRoleName, ownerReferences }) {
+function toTerminalRoleBindingResource ({ name, saName, username, target, clusterRoleName, ownerReferences }) {
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -79,9 +96,9 @@ function toTerminalRoleBindingResource ({ name, saName, user, target, clusterRol
   return toRoleBindingResource({ name, annotations, subjects, roleRef, ownerReferences })
 }
 
-function toTerminalClusterRoleBindingResource ({ name, saName, saNamespace, user, target, clusterRoleName, ownerReferences }) {
+function toTerminalClusterRoleBindingResource ({ name, saName, saNamespace, username, target, clusterRoleName, ownerReferences }) {
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
 
   const roleRef = {
     apiGroup: Resources.ClusterRole.apiGroup,
@@ -100,57 +117,39 @@ function toTerminalClusterRoleBindingResource ({ name, saName, saNamespace, user
   return toClusterRoleBindingResource({ name, roleRef, subjects, annotations, ownerReferences })
 }
 
-function toTerminalPodResource ({ name, terminalImage, saName, user, target, ownerReferences }) {
+function toTerminalPodResource ({ name, username, target, targetClusterNamespace, terminalImage, ownerReferences, kubeconfigSecretName }) {
   const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
-
-  const spec = {
-    serviceAccountName: saName,
-    containers: [
-      {
-        name: 'terminal',
-        image: terminalImage,
-        stdin: true,
-        tty: true
-      }
-    ]
-  }
-  return toPodResource({ name, annotations, spec, ownerReferences })
-}
-
-function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerReferences }) {
-  const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ user, target }))
+  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target, targetClusterNamespace }))
 
   const spec = {
     containers: [
       {
-        name: 'terminal',
+        name: TERMINAL_CONTAINER_NAME,
         image: terminalImage,
         stdin: true,
         tty: true,
         volumeMounts: [
           {
-            name: 'shoot-kubeconfig',
-            mountPath: '/mnt/.kube-shoot'
+            name: 'kubeconfig',
+            mountPath: '/mnt/.kube'
           }
         ],
         env: [
           {
             name: 'KUBECONFIG',
-            value: '/mnt/.kube-shoot/kubeconfig.yaml'
+            value: '/mnt/.kube/config'
           }
         ]
       }
     ],
     volumes: [
       {
-        name: 'shoot-kubeconfig',
+        name: 'kubeconfig',
         secret: {
-          secretName: 'kubecfg',
+          secretName: kubeconfigSecretName,
           items: [{
             key: 'kubeconfig',
-            path: 'kubeconfig.yaml'
+            path: 'config'
           }]
         }
       }
@@ -159,78 +158,20 @@ function toTerminalShootPodResource ({ name, user, target, terminalImage, ownerR
   return toPodResource({ name, annotations, spec, ownerReferences })
 }
 
-async function readServiceAccountToken ({ coreClient, targetNamespace, serviceaccountName, waitUntilReady = true }) {
-  let serviceAccount
-  if (waitUntilReady) {
-    const resourceName = serviceaccountName
-    const conditionFunction = isServiceAccountReady
-    const watch = coreClient.ns(targetNamespace).serviceaccounts.watch({ name: serviceaccountName })
-    serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
-  } else {
-    try {
-      serviceAccount = await coreClient.ns(targetNamespace).serviceaccounts.get({ name: serviceaccountName })
-    } catch (err) {
-      if (err.code !== 404) {
-        throw err
-      }
-    }
+async function initializeSeedTerminalObject ({ user, seed, scheduleNamespace }) {
+  const terminalInfo = {
+    namespace: scheduleNamespace,
+    container: TERMINAL_CONTAINER_NAME
   }
-  const secrets = _.get(serviceAccount, 'secrets')
-  const secretName = _.get(_.first(secrets), 'name')
-  if (!_.isEmpty(secretName)) {
-    const secret = await coreClient.ns(targetNamespace).secrets.get({ name: secretName })
-    const token = decodeBase64(secret.data.token)
-    const caData = secret.data['ca.crt']
-    return { token, caData }
-  }
-}
 
-function isServiceAccountReady ({ secrets } = {}) {
-  const secretName = _.get(_.first(secrets), 'name')
-  return !_.isEmpty(secretName)
-}
-
-async function getRequiredResourcesAndClients ({ user, namespace, name }) {
-  // get seed and seed kubeconfig for shoot
-  const shootResource = await shoots.read({ user, namespace, name })
-  const seedKubeconfigForShoot = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
-  if (!seedKubeconfigForShoot) {
-    throw new Error('could not fetch seed kubeconfig for shoot')
-  }
-  const { seed, seedKubeconfig, seedShootNS } = seedKubeconfigForShoot
-
-  const fromSeedKubeconfig = kubernetes.fromKubeconfig(seedKubeconfig)
-  const seedCoreClient = kubernetes.core(fromSeedKubeconfig)
-  const seedRbacClient = kubernetes.rbac(fromSeedKubeconfig)
-
-  return { seed, seedShootNS, seedCoreClient, seedRbacClient }
-}
-
-async function initializeGardenTerminalObject ({ namespace }) {
-  const terminalInfo = {}
-  terminalInfo.namespace = namespace
-  terminalInfo.container = 'terminal'
-
-  const apiserverHost = _.first(_.get(config, 'terminal.gardenClusterKubeApiserver.hosts'))
-  if (!apiserverHost) {
-    throw new Error('no terminal.gardenClusterKubeApiserver.hosts config found')
-  }
-  terminalInfo.server = apiserverHost
-  return terminalInfo
-}
-
-async function initializeSeedTerminalObject ({ user, namespace, seed, seedShootNS }) {
-  const terminalInfo = {}
-  terminalInfo.namespace = seedShootNS
-  terminalInfo.container = 'terminal'
-
+  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil'
   let soilIngressDomain
-  if (namespace === 'garden') {
+  if (isSoil) {
     const soilSeed = seed
     const ingressDomain = _.get(soilSeed, 'spec.ingressDomain')
-    soilIngressDomain = `${namespace}.${ingressDomain}`
+    soilIngressDomain = `garden.${ingressDomain}`
   } else {
-    const seedShootResource = await shoots.read({ user, namespace: 'garden', name: _.get(seed, 'metadata.name') })
+    const seedShootResource = await readShoot({ user, namespace: 'garden', name: _.get(seed, 'metadata.name') })
     soilIngressDomain = await getShootIngressDomain(seedShootResource)
   }
 
@@ -238,15 +179,26 @@ async function initializeSeedTerminalObject ({ user, namespace, seed, seedShootN
   return terminalInfo
 }
 
-async function findExistingTerminalPod ({ coreClient, targetNamespace, username, target }) {
+async function readShoot ({ user, namespace, name }) {
+  try {
+    return await shoots.read({ user, namespace, name })
+  } catch (err) {
+    if (err.code !== 404) {
+      throw err
+    }
+    return undefined
+  }
+}
+
+async function findExistingTerminalPod ({ coreClient, scheduleNamespace, username, target, targetClusterNamespace }) {
   const qs = { labelSelector: `component=${COMPONENT_TERMINAL}` }
-  const existingPods = await coreClient.ns(targetNamespace).pods.get({ qs })
-  const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target)
+  const existingPods = await coreClient.ns(scheduleNamespace).pods.get({ qs })
+  const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target && item.metadata.annotations['garden.sapcloud.io/terminal-target-cluster-ns'] === targetClusterNamespace)
   return existingPod
 }
 
-async function findExistingTerminal ({ coreClient, targetNamespace, username, target }) {
-  const existingPod = await findExistingTerminalPod({ coreClient, targetNamespace, username, target })
+async function findExistingTerminal ({ coreClient, scheduleNamespace, username, target, targetClusterNamespace }) {
+  const existingPod = await findExistingTerminalPod({ coreClient, scheduleNamespace, username, target, targetClusterNamespace })
   const isRunningOrPending = pod => {
     const phase = _.get(pod, 'status.phase')
     return phase === 'Running' || phase === 'Pending'
@@ -260,10 +212,9 @@ async function findExistingTerminal ({ coreClient, targetNamespace, username, ta
   if (!attachServiceAccountResource) {
     return undefined
   }
-
   const pod = existingPodName
   const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
-  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: attachServiceAccountResource.name, waitUntilReady })
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccountResource.name, waitUntilReady })
   const token = _.get(serviceAccountTokenObj, 'token')
   if (_.isEmpty(token)) {
     return undefined
@@ -274,49 +225,15 @@ async function findExistingTerminal ({ coreClient, targetNamespace, username, ta
   return { pod, token, attachServiceAccount }
 }
 
-async function createAttachServiceAccountResource ({ coreClient, targetNamespace, target, username }) {
-  const attachSaLabels = {
-    satype: 'attach'
-  }
-  const heartbeat = Math.floor(new Date() / 1000)
-  const attachSaAnnotations = {
-    'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
-  }
+async function createAttachServiceAccountResource ({ coreClient, scheduleNamespace, target, username }) {
   const prefix = `terminal-attach-${target}-`
-  const user = username
-  const labels = attachSaLabels
-  const annotations = attachSaAnnotations
 
-  return coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, user, target, labels, annotations }) })
+  return coreClient.ns(scheduleNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, username, target, saType: SaTypeEnum.attach }) })
 }
 
-async function createPodForTerminal ({ coreClient, rbacClient, targetNamespace, identifier, user, target, terminalImage, ownerReferences }) {
-  // create service account used by terminal pod for control plane access
-  const adminServiceAccountName = `terminal-${identifier}`
-  await coreClient.ns(targetNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: adminServiceAccountName, user, target, ownerReferences }) })
-
-  const clusterRoleName = 'cluster-admin'
-  if (target === 'garden') { // create cluster rolebinding for cluster-admin
-    await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: adminServiceAccountName, saName: adminServiceAccountName, saNamespace: targetNamespace, user, target, clusterRoleName, ownerReferences }) })
-  } else { // create rolebinding for namespace cluster-admin
-    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: adminServiceAccountName, saName: adminServiceAccountName, user, target, clusterRoleName, ownerReferences }) })
-  }
-
-  // wait until API token is written into service account before creating the pod
-  if (!await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: adminServiceAccountName })) {
-    throw new Error('No API token found for service account %s', adminServiceAccountName)
-  }
-
-  // create pod
+async function createTerminalPod ({ coreClient, scheduleNamespace, targetClusterNamespace, identifier, username, target, terminalImage, ownerReferences, kubeconfigSecretName }) {
   const name = `terminal-${identifier}`
-  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalPodResource({ name, terminalImage, saName: adminServiceAccountName, user, target, ownerReferences }) })
-  return _.get(podResource, 'metadata.name')
-}
-
-async function createPodForShootTerminal ({ coreClient, targetNamespace, identifier, user, target, terminalImage, ownerReferences }) {
-  // create pod
-  const name = `terminal-${identifier}`
-  const podResource = await coreClient.ns(targetNamespace).pods.post({ body: toTerminalShootPodResource({ name, user, target, terminalImage, ownerReferences }) })
+  const podResource = await coreClient.ns(scheduleNamespace).pods.post({ body: toTerminalPodResource({ name, username, target, targetClusterNamespace, terminalImage, ownerReferences, kubeconfigSecretName }) })
   return _.get(podResource, 'metadata.name')
 }
 
@@ -328,24 +245,61 @@ exports.create = async function ({ user, namespace, name, target }) {
     throw new Forbidden('Admin privileges required to create terminal')
   }
 
-  let coreClient
-  let rbacClient
-  let terminalInfo
-  let targetNamespace
+  const { clientConfig, scheduleNamespace, targetClusterNamespace, kubeconfigSecretName, seed } = await getContext({ user, namespace, name, target })
+
+  const terminalInfo = await initializeSeedTerminalObject({ user, seed, scheduleNamespace })
+  return getOrCreateTerminalSession({ clientConfig, terminalInfo, scheduleNamespace, targetClusterNamespace, username, target, kubeconfigSecretName })
+}
+
+async function getContext ({ user, namespace, name, target }) {
+  let scheduleNamespace
+  let kubeconfigSecretName
+  let targetClusterNamespace
+  let seedName
   if (target === 'garden') {
-    terminalInfo = await initializeGardenTerminalObject({ namespace })
-    coreClient = core()
-    rbacClient = rbac()
-    targetNamespace = namespace
+    seedName = getConfigValue({ path: 'terminal.gardenCluster.seed' })
+    scheduleNamespace = getConfigValue({ path: 'terminal.gardenCluster.namespace' })
+    kubeconfigSecretName = getConfigValue({ path: 'terminal.gardenCluster.virtualGardenKubeconfigName', required: false })
+    targetClusterNamespace = namespace
   } else {
-    const { seed, seedShootNS, seedCoreClient, seedRbacClient } = await getRequiredResourcesAndClients({ user, namespace, name })
-    terminalInfo = await initializeSeedTerminalObject({ user, namespace, seed, seedShootNS })
-    coreClient = seedCoreClient
-    rbacClient = seedRbacClient
-    targetNamespace = seedShootNS
+    const shootResource = await shoots.read({ user, namespace, name })
+    const seedShootNS = getSeedShootNamespace(shootResource)
+    scheduleNamespace = seedShootNS
+    seedName = shootResource.spec.cloud.seed
+
+    if (target === 'shoot') {
+      kubeconfigSecretName = 'kubecfg'
+      targetClusterNamespace = 'default'
+    } else { // target cp
+      targetClusterNamespace = seedShootNS
+    }
   }
 
-  const existingTerminal = await findExistingTerminal({ coreClient, targetNamespace, username, target })
+  const seed = _.find(getSeeds(), ['metadata.name', seedName])
+  if (!seed) {
+    throw new Error(`Could not find seed with name ${seedName}`)
+  }
+
+  const gardenCoreClient = Core(user)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient: gardenCoreClient, seed })
+  if (!seedKubeconfig) {
+    throw new Error('could not fetch seed kubeconfig')
+  }
+  const clientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
+
+  return {
+    clientConfig,
+    scheduleNamespace,
+    targetClusterNamespace,
+    kubeconfigSecretName,
+    seed
+  }
+}
+
+async function getOrCreateTerminalSession ({ clientConfig, terminalInfo, scheduleNamespace, targetClusterNamespace, username, target, kubeconfigSecretName }) {
+  const coreClient = kubernetes.core(clientConfig)
+
+  const existingTerminal = await findExistingTerminal({ coreClient, scheduleNamespace, username, target, targetClusterNamespace })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
@@ -353,38 +307,53 @@ exports.create = async function ({ user, namespace, name, target }) {
 
   logger.debug(`No running pod found for user ${username}. Creating new pod and required resources..`)
 
+  const rbacClient = kubernetes.rbac(clientConfig)
+  terminalInfo = createTerminalSession({ clientConfig, coreClient, rbacClient, kubeconfigSecretName, scheduleNamespace, targetClusterNamespace, target, username, terminalInfo })
+  return terminalInfo
+}
+
+function getSeedShootNamespace (shoot) {
+  const seedShootNS = _.get(shoot, 'status.technicalID')
+  if (_.isEmpty(seedShootNS)) {
+    throw new Error(`could not determine namespace in seed for shoot ${shoot.metadata.name}`)
+  }
+  return seedShootNS
+}
+
+async function createTerminalSession ({ clientConfig, coreClient, rbacClient, kubeconfigSecretName, scheduleNamespace, targetClusterNamespace, target, username, terminalInfo }) {
   let attachServiceAccountResource
   try {
-    attachServiceAccountResource = await createAttachServiceAccountResource({ coreClient, targetNamespace, target, username })
+    attachServiceAccountResource = await createAttachServiceAccountResource({ coreClient, scheduleNamespace, target, username })
 
     // all resources created below get the attach service account as owner ref
-    const ownerReferences = createOwnerRefArrayForServiceAccount(attachServiceAccountResource)
+    const ownerReferences = createOwnerRefArrayForResource(attachServiceAccountResource)
 
     const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
-    const identifier = _.replace(attachServiceAccountName, 'terminal-attach-', '')
-
+    const identifier = identifierFromAttachServiceAccount(attachServiceAccountName)
     terminalInfo.attachServiceAccount = attachServiceAccountName
 
     // create rolebinding for attach-sa
-    const name = attachServiceAccountName
-    await rbacClient.ns(targetNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name, saName: attachServiceAccountName, user: username, target, clusterRoleName: 'garden.sapcloud.io:dashboard-terminal-attach', ownerReferences }) })
+    await rbacClient.ns(scheduleNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: attachServiceAccountName, saName: attachServiceAccountName, username, target, clusterRoleName: CLUSTER_ROLE_TERMINAL_ATTACH, ownerReferences }) })
 
-    const terminalImage = _.get(config, 'terminal.operator.image')
-    if (!terminalImage) {
-      throw new Error('no terminal operator image configured')
-    }
+    const terminalImage = getConfigValue({ path: 'terminal.operator.image' })
 
-    let pod
-    if (target === 'cp' || target === 'garden') {
-      pod = await createPodForTerminal({ coreClient, rbacClient, targetNamespace, identifier, user: username, target, terminalImage, ownerReferences })
-    } else if (target === 'shoot') {
-      pod = await createPodForShootTerminal({ coreClient, targetNamespace, identifier, user: username, target, terminalImage, ownerReferences })
+    if (_.isEmpty(kubeconfigSecretName)) {
+      const server = clientConfig.url // TODO local service?
+      kubeconfigSecretName = await createInClusterKubeconfig({ saCoreClient: coreClient, saRbacClient: rbacClient, kubecfgCoreClient: coreClient, serviceAccountNamespace: scheduleNamespace, username, target, saOwnerReferences: ownerReferences, kubecfgNamespace: scheduleNamespace, kubecfgOwnerReferences: ownerReferences, identifier, server })
     } else {
-      throw new Error(`Unknown terminal target ${target}`)
+      const targetClusterClientConfig = await getTargetClusterClientConfig({ coreClient, namespace: scheduleNamespace, kubeconfigSecretName })
+      const targetClusterCoreClient = kubernetes.core(targetClusterClientConfig)
+      const targetClusterRbacClient = kubernetes.rbac(targetClusterClientConfig)
+      const server = targetClusterClientConfig.url
+      // maybe split in two methods
+      kubeconfigSecretName = await createInClusterKubeconfig({ saCoreClient: targetClusterCoreClient, saRbacClient: targetClusterRbacClient, kubecfgCoreClient: coreClient, serviceAccountNamespace: targetClusterNamespace, username, target, saOwnerReferences: undefined, kubecfgNamespace: scheduleNamespace, kubecfgOwnerReferences: ownerReferences, identifier, server }) // as this is a different cluster we can't set the owner reference of the attach SA
     }
-    const attachServiceAccountToken = await readServiceAccountToken({ coreClient, targetNamespace, serviceaccountName: attachServiceAccountName })
 
-    _.assign(terminalInfo, { pod }, { token: attachServiceAccountToken.token })
+    const pod = await createTerminalPod({ coreClient, scheduleNamespace, targetClusterNamespace, identifier, username, target, terminalImage, ownerReferences, kubeconfigSecretName })
+
+    const attachServiceAccountToken = await readServiceAccountToken({ coreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccountName })
+
+    _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token })
 
     return terminalInfo
   } catch (e) {
@@ -394,13 +363,51 @@ exports.create = async function ({ user, namespace, name, target }) {
     try {
       if (name) {
         logger.debug(`Something went wrong during creation of Kubernetes resources. Cleaning up ServiceAccount ${name}..`)
-        await coreClient.ns(targetNamespace).serviceaccounts.delete({ name })
+        await coreClient.ns(scheduleNamespace).serviceaccounts.delete({ name })
       }
     } catch (e) {
       logger.error(`Unable to cleanup ServiceAccount ${name}. This may result in leftovers that you need to cleanup manually`)
     }
     throw new Error(`Could not setup Kubernetes Resources for Terminal session. Error: ${e}`)
   }
+}
+
+function identifierFromAttachServiceAccount (attachServiceAccountName) {
+  return _.replace(attachServiceAccountName, 'terminal-attach-', '')
+}
+
+function accessServiceAccountNameFromIdentifier (identifier) {
+  return `terminal-${identifier}`
+}
+
+async function createInClusterKubeconfig ({ saCoreClient, saRbacClient, kubecfgCoreClient, serviceAccountNamespace, saOwnerReferences, username, target, kubecfgNamespace, kubecfgOwnerReferences, identifier, server }) {
+  const serviceAccountName = accessServiceAccountNameFromIdentifier(identifier)
+
+  const serviceAccountTokenObj = await createAdminServiceAccount({ coreClient: saCoreClient, rbacClient: saRbacClient, namespace: serviceAccountNamespace, serviceAccountName, username, target, ownerReferences: saOwnerReferences, identifier, server })
+
+  const kubeconfigName = await createKubeconfig({ coreClient: kubecfgCoreClient, namespace: kubecfgNamespace, serviceAccountTokenObj, serviceAccountName, serviceAccountNamespace, target, username, server, ownerReferences: kubecfgOwnerReferences })
+  return kubeconfigName
+}
+
+async function createAdminServiceAccount ({ coreClient, rbacClient, namespace, serviceAccountName, username, target, ownerReferences }) {
+  const adminServiceAccountResource = await coreClient.ns(namespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: serviceAccountName, saType: SaTypeEnum.access, username, target, ownerReferences }) })
+
+  const adminSaOwnerRefs = createOwnerRefArrayForResource(adminServiceAccountResource)
+
+  // TODO do not use namespace-scoped resources as owner of cluster-scoped resources
+  const clusterRoleName = 'cluster-admin'
+  if (target === 'garden' || target === 'shoot') { // create cluster rolebinding for cluster-admin
+    await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: serviceAccountName, saName: serviceAccountName, saNamespace: namespace, username, target, clusterRoleName, ownerReferences: adminSaOwnerRefs }) })
+  } else { // create rolebinding for namespace cluster-admin
+    await rbacClient.ns(namespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: serviceAccountName, saName: serviceAccountName, username, target, clusterRoleName, ownerReferences: adminSaOwnerRefs }) })
+  }
+
+  // wait until API token is written into service account before creating the pod
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, namespace, serviceAccountName })
+  if (!serviceAccountTokenObj) {
+    throw new Error('No API token found for service account %s', serviceAccountName)
+  }
+  return serviceAccountTokenObj
 }
 
 exports.heartbeat = async function ({ user, namespace, name, target }) {
@@ -411,37 +418,40 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
     throw new Forbidden('Admin privileges required')
   }
 
-  let coreClient
-  let targetNamespace
-  if (target === 'garden') {
-    coreClient = core()
-    targetNamespace = namespace
-  } else {
-    // get seed and seed kubeconfig for shoot
-    const shootResource = await shoots.read({ user, namespace, name })
-    const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot: shootResource })
-    coreClient = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
-    targetNamespace = seedShootNS
+  const { clientConfig, scheduleNamespace, targetClusterNamespace, kubeconfigSecretName } = await getContext({ user, namespace, name, target })
+  const coreClient = kubernetes.core(clientConfig)
+
+  const existingPod = await findExistingTerminalPod({ coreClient, scheduleNamespace, username, target, targetClusterNamespace })
+  if (_.get(existingPod, 'status.phase') !== 'Running') {
+    throw new Error(`Can't process heartbeat, cannot find running pod for ${namespace}/${name}`)
   }
 
-  const existingPod = await findExistingTerminalPod({ coreClient, targetNamespace, username, target })
-  if (existingPod && _.get(existingPod, 'status.phase') === 'Running') {
-    const attachServiceAccount = _.first(existingPod.metadata.ownerReferences)
-    if (attachServiceAccount) {
-      const attachServiceAccountName = attachServiceAccount.name
+  const attachServiceAccount = _.first(existingPod.metadata.ownerReferences)
+  if (attachServiceAccount) {
+    const attachServiceAccountName = attachServiceAccount.name
 
-      const heartbeat = Math.floor(new Date() / 1000)
-      const attachSaAnnotations = {
-        'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
-      }
-      try {
-        await coreClient.ns(targetNamespace).serviceaccounts.mergePatch({ name: attachServiceAccountName, body: { metadata: { annotations: attachSaAnnotations } } })
-        return { heartbeat }
-      } catch (e) {
-        logger.error(`Could not update service account. Error: ${e}`)
-        throw new Error(`Could not update service account`)
-      }
+    const heartbeat = Math.floor(new Date() / 1000)
+
+    replaceHeartbeatOnServiceAccount({ coreClient, namespace: scheduleNamespace, name: attachServiceAccountName, heartbeat })
+    if (kubeconfigSecretName) { // heartbeat in virtual garden cluster
+      const identifier = identifierFromAttachServiceAccount(attachServiceAccountName)
+      const accessServiceAccountName = accessServiceAccountNameFromIdentifier(identifier)
+      const targetClusterClientConfig = await getTargetClusterClientConfig({ coreClient, namespace: scheduleNamespace, kubeconfigSecretName })
+      const targetClusterCoreClient = kubernetes.core(targetClusterClientConfig)
+      replaceHeartbeatOnServiceAccount({ coreClient: targetClusterCoreClient, namespace, name: accessServiceAccountName, heartbeat })
     }
+    return { heartbeat }
   }
-  throw new Error(`Could not determine service account for ${namespace}/${name}`)
+}
+
+async function replaceHeartbeatOnServiceAccount ({ coreClient, namespace, name, heartbeat }) {
+  const annotations = {
+    'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
+  }
+  try {
+    await coreClient.ns(namespace).serviceaccounts.mergePatch({ name, body: { metadata: { annotations } } })
+  } catch (e) {
+    logger.error(`Could not update service account. Error: ${e}`)
+    throw new Error(`Could not update service account`)
+  }
 }

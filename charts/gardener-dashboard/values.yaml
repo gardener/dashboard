@@ -114,21 +114,26 @@ terminal:
         certmanager.k8s.io/acme-challenge-type: dns01
         certmanager.k8s.io/acme-dns01-provider: route53
     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
-  gardenClusterKubeApiserver:
-    namespace: default
-    serviceName: kubernetes
-    servicePort: 443
-    hosts:
-      - api.example.org
-    tls: # Needs to be a browser-trusted certificate!
-      crt: |
-        -----BEGIN CERTIFICATE-----
-        Li4u
-        -----END CERTIFICATE-----
-        -----BEGIN CERTIFICATE-----
-        Li4u
-        -----END CERTIFICATE-----
-      key: |
-        -----BEGIN RSA PRIVATE KEY-----
-        Li4u
-        -----END RSA PRIVATE KEY-----
+
+  gardenCluster:
+    seed: myseed
+    namespace: garden
+    virtualGardenKubeconfigName: virtual-garden-kubeconfig # only set in case of virtual garden
+    kubeApiserver:
+      namespace: garden
+      serviceName: virtual-garden-kube-apiserver
+      servicePort: 443
+      hosts:
+        - api.example.org
+      tls: # Needs to be a browser-trusted certificate!
+        crt: |
+          -----BEGIN CERTIFICATE-----
+          Li4u
+          -----END CERTIFICATE-----
+          -----BEGIN CERTIFICATE-----
+          Li4u
+          -----END CERTIFICATE-----
+        key: |
+          -----BEGIN RSA PRIVATE KEY-----
+          Li4u
+          -----END RSA PRIVATE KEY-----

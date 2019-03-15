@@ -30,13 +30,14 @@ spec:
         path: /
   {{- end }}
 {{- if .Values.terminal }}
-{{- if .Values.terminal.gardenClusterKubeApiserver }}
+{{- if .Values.terminal.gardenCluster }}
+{{- if .Values.terminal.gardenCluster.kubeApiserver }}
 ---
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
   name: dashboard-terminal-kube-apiserver-ingress
-  namespace: {{ required ".Values.terminal.gardenClusterKubeApiserver.namespace is required" .Values.terminal.gardenClusterKubeApiserver.namespace }}
+  namespace: {{ required ".Values.terminal.gardenCluster.kubeApiserver.namespace is required" .Values.terminal.gardenCluster.kubeApiserver.namespace }}
   labels:
     app: gardener-dashboard
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -50,18 +51,19 @@ spec:
   tls:
   - secretName: dashboard-terminal-kube-apiserver-tls
     hosts:
-    {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
+    {{- range .Values.terminal.gardenCluster.kubeApiserver.hosts }}
     - {{ . }}
     {{- end }}
   rules:
-  {{- range .Values.terminal.gardenClusterKubeApiserver.hosts }}
+  {{- range .Values.terminal.gardenCluster.kubeApiserver.hosts }}
   - host: {{ . }}
     http:
       paths:
       - backend:
-          serviceName: {{ required ".Values.terminal.gardenClusterKubeApiserver.serviceName is required" $.Values.terminal.gardenClusterKubeApiserver.serviceName }}
-          servicePort: {{ required ".Values.terminal.gardenClusterKubeApiserver.servicePort is required" $.Values.terminal.gardenClusterKubeApiserver.servicePort }}
+          serviceName: {{ required ".Values.terminal.gardenCluster.kubeApiserver.serviceName is required" $.Values.terminal.gardenCluster.kubeApiserver.serviceName }}
+          servicePort: {{ required ".Values.terminal.gardenCluster.kubeApiserver.servicePort is required" $.Values.terminal.gardenCluster.kubeApiserver.servicePort }}
         path: /
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

@@ -20,15 +20,18 @@ const Queue = require('better-queue')
 const isIp = require('is-ip')
 const _ = require('lodash')
 
-const logger = require('../logger')
-const config = require('../config')
+const logger = require('../../logger')
+const config = require('../../config')
 const {
   getSeedKubeconfig,
   getShootIngressDomainForSeed,
   getSoilIngressDomainForSeed,
-  createOwnerRefArrayForServiceAccount
-} = require('../utils')
-const kubernetes = require('../kubernetes')
+  createOwnerRefArrayForResource,
+  getConfigValue,
+  readServiceAccountToken,
+  getTargetClusterClientConfig
+} = require('..')
+const kubernetes = require('../../kubernetes')
 const Resources = kubernetes.Resources
 const {
   toClusterRoleResource,
@@ -39,19 +42,25 @@ const {
   toEndpointResource,
   toServiceResource
 } = require('./terminalResources')
-const shoots = require('../services/shoots')
+const shoots = require('../../services/shoots')
+const {
+  CLUSTER_ROLE_TERMINAL_ATTACH,
+  replaceResource,
+  createKubeconfig,
+  SaTypeEnum
+} = require('../terminals')
 
 const TERMINAL_CLEANUP = 'dashboard-terminal-cleanup'
+const TERMINAL_CLEANUP_GARDEN = 'dashboard-terminal-cleanup-garden'
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
 const GARDEN_NAMESPACE = 'garden'
 const CLUSTER_ROLE_NAME_CLEANUP = 'garden.sapcloud.io:dashboard-terminal-cleanup'
-const CLUSTER_ROLE_BINDING_NAME_CLEANUP = CLUSTER_ROLE_NAME_CLEANUP
-const SERVICEACCOUNT_NAME_CLEANUP = TERMINAL_CLEANUP
-const CRONJOB_NAME_CLEANUP = TERMINAL_CLEANUP
+const CLUSTER_ROLE_BINDING_NAME_CLEANUP = 'garden.sapcloud.io:dashboard-terminal-cleanup'
+const CLUSTER_ROLE_BINDING_NAME_CLEANUP_GARDEN = 'garden.sapcloud.io:dashboard-terminal-cleanup-garden'
 
 async function replaceClusterroleAttach ({ rbacClient, ownerReferences }) {
-  const name = 'garden.sapcloud.io:dashboard-terminal-attach'
+  const name = CLUSTER_ROLE_TERMINAL_ATTACH
   const rules = [
     {
       apiGroups: [
@@ -106,8 +115,7 @@ async function replaceClusterroleCleanup ({ rbacClient, ownerReferences }) {
   return replaceResource({ client, name, body })
 }
 
-async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespace, ownerReferences }) {
-  const name = CLUSTER_ROLE_BINDING_NAME_CLEANUP
+async function replaceClusterroleBindingCleanup ({ rbacClient, name, saName, saNamespace, ownerReferences }) {
   const clusterRoleName = CLUSTER_ROLE_NAME_CLEANUP
 
   const roleRef = {
@@ -130,19 +138,14 @@ async function replaceClusterroleBindingCleanup ({ rbacClient, saName, saNamespa
   return replaceResource({ client, name, body })
 }
 
-async function replaceServiceAccountCleanup ({ coreClient }) {
-  const name = SERVICEACCOUNT_NAME_CLEANUP
-  const namespace = GARDEN_NAMESPACE
-
-  const body = toServiceAccountResource({ name })
+async function replaceServiceAccountCleanup ({ coreClient, name, namespace, ownerReferences }) {
+  const body = toServiceAccountResource({ name, ownerReferences })
   const client = coreClient.ns(namespace).serviceaccounts
 
   return replaceResource({ client, name, body })
 }
 
-async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) {
-  const name = CRONJOB_NAME_CLEANUP
-  const namespace = GARDEN_NAMESPACE
+async function replaceCronJobCleanup ({ batchClient, name, namespace, kubeconfigSecretName, saType, ownerReferences }) {
   const image = _.get(config, 'terminal.cleanup.image')
   const noHeartbeatDeleteSeconds = String(_.get(config, 'terminal.cleanup.noHeartbeatDeleteSeconds', 300))
   const schedule = _.get(config, 'terminal.cleanup.schedule', '*/5 * * * *')
@@ -152,39 +155,67 @@ async function replaceCronJobCleanup ({ batchClient, saName, ownerReferences }) 
     runAsNonRoot: true,
     readOnlyRootFilesystem: true
   }
+
+  const cleanupContainer = {
+    name: TERMINAL_CLEANUP,
+    image,
+    imagePullPolicy: 'IfNotPresent',
+    env: [
+      {
+        name: 'NO_HEARTBEAT_DELETE_SECONDS',
+        value: noHeartbeatDeleteSeconds
+      }
+    ]
+    // TODO limit resources
+  }
+
+  const podSpec = {
+    containers: [
+      cleanupContainer
+    ],
+    securityContext,
+    restartPolicy: 'OnFailure'
+  }
+
   const spec = {
     concurrencyPolicy: 'Forbid',
     schedule,
     jobTemplate: {
       spec: {
         template: {
-          spec: {
-            containers: [
-              {
-                name: TERMINAL_CLEANUP,
-                image,
-                imagePullPolicy: 'IfNotPresent',
-                env: [
-                  {
-                    name: 'NO_HEARTBEAT_DELETE_SECONDS',
-                    value: noHeartbeatDeleteSeconds
-                  }
-                ]
-                // TODO limit resources
-              }
-            ],
-            securityContext,
-            restartPolicy: 'OnFailure',
-            serviceAccountName: saName
-          }
+          spec: podSpec
         }
       }
     }
   }
 
+  _.assign(cleanupContainer, {
+    volumeMounts: [
+      {
+        name: 'kubeconfig',
+        mountPath: `/config/${saType}`
+      }
+    ]
+  })
+  _.assign(podSpec, {
+    volumes: [
+      {
+        name: 'kubeconfig',
+        secret: {
+          secretName: kubeconfigSecretName,
+          items: [{
+            key: 'kubeconfig',
+            path: 'config'
+          }]
+        }
+      }
+    ]
+  })
+
   const body = toCronjobResource({ name, spec, ownerReferences })
   const client = batchClient.ns(namespace).cronjob
 
+  // TODO revive dead cronjob by deleting and recreating it as there is currently no other way to resume it https://github.com/kubernetes/kubernetes/issues/42649
   return replaceResource({ client, name, body })
 }
 
@@ -273,34 +304,27 @@ async function replaceServiceKubeApiserver ({ name = TERMINAL_KUBE_APISERVER, co
   return replaceResource({ client, name, body })
 }
 
-async function replaceResource ({ client, name, body }) {
-  try {
-    await client.get({ name })
-    return client.mergePatch({ name, body })
-  } catch (err) {
-    if (err.code === 404) {
-      return client.post({ body })
-    }
-    throw err
-  }
-}
-
 async function handleSeed (seed, cb) {
   const name = seed.metadata.name
-  logger.debug(`creating / updating resources on seed ${name} for webterminals`)
+  logger.debug(`replacing resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
-  if (!seedKubeconfig) { // TODO retry later?
+  if (!seedKubeconfig) {
     throw new Error(`could not get kubeconfig for seed ${name}`)
   }
-  const fromSeedKubeconfig = kubernetes.fromKubeconfig(seedKubeconfig)
-  const seedCoreClient = kubernetes.core(fromSeedKubeconfig)
-  const seedRbacClient = kubernetes.rbac(fromSeedKubeconfig)
-  const seedBatchClient = kubernetes.batch(fromSeedKubeconfig)
+  const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
+  const seedCoreClient = kubernetes.core(seedClientConfig)
+  const seedRbacClient = kubernetes.rbac(seedClientConfig)
+  const seedBatchClient = kubernetes.batch(seedClientConfig)
 
-  const ownerReferences = await bootstrapCleanupResourcesAndGetOwnerRefs({ coreClient: seedCoreClient, rbacClient: seedRbacClient, batchClient: seedBatchClient })
-  await bootstrapAttachResources({ rbacClient: seedRbacClient, ownerReferences })
+  const namespace = GARDEN_NAMESPACE
+
+  // create cleanup resources
+  const kubeconfigSecretName = await createCleanupKubeconfig({ saClientConfig: seedClientConfig, saCoreClient: seedCoreClient, saRbacClient: seedRbacClient, kubecfgCoreClient: seedCoreClient, name: TERMINAL_CLEANUP, namespace, clusterRolebindingName: CLUSTER_ROLE_BINDING_NAME_CLEANUP })
+  await replaceCronJobCleanup({ batchClient: seedBatchClient, name: TERMINAL_CLEANUP, namespace, kubeconfigSecretName, saType: SaTypeEnum.attach }) // TODO ownerReference
+
+  await bootstrapAttachResources({ rbacClient: seedRbacClient }) // TODO ownerReferences
 
   // now make sure we expose the kube-apiserver with a browser-trusted certificate
   const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil'
@@ -312,15 +336,21 @@ async function handleSeed (seed, cb) {
   }
 }
 
-async function bootstrapCleanupResourcesAndGetOwnerRefs ({ coreClient, rbacClient, batchClient }) {
-  const serviceAccountResource = await replaceServiceAccountCleanup({ coreClient })
-  const { metadata: { name: saName, namespace: saNamespace } } = serviceAccountResource
-  const ownerReferences = createOwnerRefArrayForServiceAccount(serviceAccountResource)
-  await replaceClusterroleCleanup({ rbacClient, ownerReferences })
-  await replaceClusterroleBindingCleanup({ rbacClient, saName, saNamespace, ownerReferences })
-  await replaceCronJobCleanup({ batchClient, saName, ownerReferences })
+async function createCleanupKubeconfig ({ saClientConfig, saCoreClient, saRbacClient, kubecfgCoreClient, name, namespace, clusterRolebindingName }) {
+  const clusterRoleResource = await replaceClusterroleCleanup({ rbacClient: saRbacClient })
+  const ownerReferences = createOwnerRefArrayForResource(clusterRoleResource)
+  const { metadata: { name: saName, namespace: saNamespace } } = await replaceServiceAccountCleanup({ coreClient: saCoreClient, name, namespace, ownerReferences })
+  await replaceClusterroleBindingCleanup({ rbacClient: saRbacClient, name: clusterRolebindingName, saName, saNamespace, ownerReferences })
 
-  return ownerReferences
+  // TODO get rid of the watch closed 1006 log messages
+  // wait until API token is written into service account before creating the pod
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient: saCoreClient, namespace, serviceAccountName: saName })
+  if (!serviceAccountTokenObj) {
+    throw new Error('No API token found for service account %s', saName)
+  }
+  const server = saClientConfig.url
+  const kubeconfigName = await createKubeconfig({ coreClient: kubecfgCoreClient, namespace, serviceAccountTokenObj, serviceAccountName: saName, serviceAccountNamespace: saNamespace, target: 'cleanup', server }) // TODO owner reference! pass only if on same cluster as where the secret was created!
+  return kubeconfigName
 }
 
 async function bootstrapAttachResources ({ rbacClient, ownerReferences }) {
@@ -409,17 +439,20 @@ function verifyRequiredConfigExists () {
     logger.debug('terminal bootstrap disabled by config')
     return false // no further checks needed, bootstrapping is disabled
   }
+  const requiredConfigs = [
+    'terminal.bootstrap.apiserverIngress.annotations',
+    'terminal.cleanup.image',
+    'terminal.gardenCluster.seed',
+    'terminal.gardenCluster.namespace'
+  ]
+
   let requiredConfigExists = true
-
-  if (_.isEmpty(_.get(config, 'terminal.bootstrap.apiserverIngress.annotations'))) {
-    logger.error('no terminal.bootstrap.apiserverIngress.annotations config found')
-    requiredConfigExists = false
-  }
-
-  if (_.isEmpty(_.get(config, 'terminal.cleanup.image'))) {
-    logger.error('no terminal.cleanup.image config found')
-    requiredConfigExists = false
-  }
+  _.forEach(requiredConfigs, requiredConfig => {
+    if (_.isEmpty(_.get(config, requiredConfig))) {
+      logger.error(`required terminal config '${requiredConfig}' not found`)
+      requiredConfigExists = false
+    }
+  })
 
   return requiredConfigExists
 }
@@ -444,12 +477,51 @@ function bootstrapSeed ({ seed }) {
 async function bootstrapGardener () {
   console.log('bootstrapping garden cluster')
 
-  const coreClient = kubernetes.core()
-  const rbacClient = kubernetes.rbac()
-  const batchClient = kubernetes.batch()
+  const seedName = getConfigValue({ path: 'terminal.gardenCluster.seed' })
+  const scheduleNamespace = getConfigValue({ path: 'terminal.gardenCluster.namespace' })
+  const virtualGardenKubeconfigName = getConfigValue({ path: 'terminal.gardenCluster.virtualGardenKubeconfigName', required: false })
 
-  const ownerReferences = await bootstrapCleanupResourcesAndGetOwnerRefs({ coreClient, rbacClient, batchClient })
-  await bootstrapAttachResources({ rbacClient, ownerReferences })
+  const gardenClient = kubernetes.garden()
+  const gardenCoreClient = kubernetes.core()
+  const gardenRbacClient = kubernetes.rbac()
+
+  const seed = await getSeed({ gardenClient, name: seedName })
+  if (!seed) {
+    throw new Error(`Could not find seed with name ${seedName}`)
+  }
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient: gardenCoreClient, seed })
+  if (!seedKubeconfig) {
+    throw new Error('could not fetch seed kubeconfig')
+  }
+  const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
+  const seedCoreClient = kubernetes.core(seedClientConfig)
+  const seedRbacClient = kubernetes.rbac(seedClientConfig)
+  const seedBatchClient = kubernetes.batch(seedClientConfig)
+
+  const gardenClientConfig = await getTargetClusterClientConfig({ coreClient: seedCoreClient, namespace: scheduleNamespace, kubeconfigSecretName: virtualGardenKubeconfigName })
+  if (!gardenClientConfig) {
+    throw new Error('could not initialize gardenClientConfig')
+  }
+
+  // TODO create cleanup kubeconfig for saType attach in case the cluster is not a seed cluster
+  // create cleanup resources
+  // await createCleanupKubeconfig({ saClientConfig: seedClientConfig, saCoreClient: seedCoreClient, saRbacClient: seedRbacClient, kubecfgCoreClient: seedCoreClient, name: TERMINAL_CLEANUP, namespace: scheduleNamespace, clusterRolebindingName: CLUSTER_ROLE_BINDING_NAME_CLEANUP }) // TODO bootstrapping for cleaning up in-cluster service accounts already handled as cluster is a seed cluster, kubeconfig instead of seed(name) in terminal config?
+  const cleanupKubeconfigSecretName = await createCleanupKubeconfig({ saClientConfig: gardenClientConfig, saCoreClient: gardenCoreClient, saRbacClient: gardenRbacClient, kubecfgCoreClient: seedCoreClient, name: TERMINAL_CLEANUP_GARDEN, namespace: scheduleNamespace, clusterRolebindingName: CLUSTER_ROLE_BINDING_NAME_CLEANUP_GARDEN })
+  await replaceCronJobCleanup({ batchClient: seedBatchClient, name: TERMINAL_CLEANUP_GARDEN, namespace: scheduleNamespace, kubeconfigSecretName: cleanupKubeconfigSecretName, saType: SaTypeEnum.access }) // TODO ownerReference
+
+  await bootstrapAttachResources({ rbacClient: seedRbacClient }) // TODO ownerReference
+}
+
+async function getSeed ({ gardenClient, name }) {
+  try {
+    return await gardenClient.seeds.get({ name })
+  } catch (err) {
+    if (err.code !== 404) {
+      throw err
+    } else {
+      return undefined
+    }
+  }
 }
 
 const requiredConfigExists = verifyRequiredConfigExists()

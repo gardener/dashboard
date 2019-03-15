@@ -22,6 +22,7 @@ const _ = require('lodash')
 const { getSeeds } = require('../cache')
 const kubernetes = require('../kubernetes')
 const { NotFound } = require('../errors')
+const config = require('../config')
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
@@ -45,14 +46,14 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-const config = {
-  getCloudProviderKindList () {
+const cloudProvider = {
+  getKindList () {
     return ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
   }
 }
 
 function getCloudProviderKind (object) {
-  const cloudProviderKinds = config.getCloudProviderKindList()
+  const cloudProviderKinds = cloudProvider.getKindList()
   return _.head(_.intersection(_.keys(object), cloudProviderKinds))
 }
 
@@ -98,19 +99,26 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
 async function getSeedKubeconfig ({ coreClient, seed }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  const seedSecret = await coreClient.ns(seedSecretNamespace).secrets.get({ name: seedSecretName })
-    .catch(err => {
-      if (err.code === 404) {
-        return
-      }
-      throw err
-    })
-  if (!_.get(seedSecret, 'data')) {
-    return
-  }
+  return getKubeconfig({ coreClient, secretName: seedSecretName, secretNamepsace: seedSecretNamespace })
+}
 
-  const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
-  return seedKubeconfig
+async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
+  try {
+    const secret = await coreClient.ns(secretNamepsace).secrets.get({ name: secretName })
+
+    const kubeConfigBase64 = _.get(secret, 'data.kubeconfig')
+    if (!kubeConfigBase64) {
+      return
+    }
+
+    const kubeconfig = decodeBase64(secret.data.kubeconfig)
+    return kubeconfig
+  } catch (err) {
+    if (err.code === 404) {
+      return
+    }
+    throw err
+  }
 }
 
 async function getProjectNameFromNamespace (namespace) {
@@ -122,18 +130,79 @@ async function getProjectNameFromNamespace (namespace) {
   return name
 }
 
-function createOwnerRefArrayForServiceAccount (serviceAccountResource) {
-  const serviceAccountName = _.get(serviceAccountResource, 'metadata.name')
-  const uid = _.get(serviceAccountResource, 'metadata.uid')
+function createOwnerRefArrayForResource (resource) {
+  const name = _.get(resource, 'metadata.name')
+  const uid = _.get(resource, 'metadata.uid')
   return [
     {
-      apiVersion: serviceAccountResource.apiVersion,
+      apiVersion: resource.apiVersion,
       controller: true,
-      kind: serviceAccountResource.kind,
-      name: serviceAccountName,
+      kind: resource.kind,
+      name,
       uid
     }
   ]
+}
+
+function getConfigValue ({ path, defaultValue = undefined, required = true }) {
+  const value = _.get(config, path, defaultValue)
+  if (required && !value) {
+    throw new Error(`no config with ${path} found`)
+  }
+  return value
+}
+
+async function readServiceAccountToken ({ coreClient, namespace, serviceAccountName, waitUntilReady = true }) {
+  let serviceAccount
+  if (waitUntilReady) {
+    const resourceName = serviceAccountName
+    const conditionFunction = isServiceAccountReady
+    const watch = coreClient.ns(namespace).serviceaccounts.watch({ name: serviceAccountName })
+    serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
+  } else {
+    try {
+      serviceAccount = await coreClient.ns(namespace).serviceaccounts.get({ name: serviceAccountName })
+    } catch (err) {
+      if (err.code !== 404) {
+        throw err
+      }
+    }
+  }
+  const secrets = _.get(serviceAccount, 'secrets')
+  const secretName = _.get(_.first(secrets), 'name')
+  if (_.isEmpty(secretName)) {
+    return
+  }
+
+  const secret = await coreClient.ns(namespace).secrets.get({ name: secretName })
+  const token = decodeBase64(secret.data.token)
+  const caData = secret.data['ca.crt']
+  return { token, caData }
+}
+
+function isServiceAccountReady ({ secrets } = {}) {
+  const secretName = _.get(_.first(secrets), 'name')
+  return !_.isEmpty(secretName)
+}
+
+async function getTargetClusterClientConfig ({ coreClient, namespace, kubeconfigSecretName }) {
+  const kubeconfig = await readSecretKubeconfig({ coreClient, namespace, secretName: kubeconfigSecretName })
+  return kubernetes.fromKubeconfig(kubeconfig)
+}
+
+async function readSecretKubeconfig ({ coreClient, namespace, secretName }) {
+  let secret
+  try {
+    secret = await coreClient.namespaces(namespace).secrets.get({ name: secretName })
+  } catch (err) {
+    if (err.code === 404) {
+      return undefined
+    } else {
+      throw err
+    }
+  }
+  const kubeconfig = decodeBase64(secret.data.kubeconfig)
+  return kubeconfig
 }
 
 module.exports = {
@@ -145,9 +214,13 @@ module.exports = {
   getShootIngressDomain,
   getShootIngressDomainForSeed,
   getSoilIngressDomainForSeed,
+  getKubeconfig,
   getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,
-  createOwnerRefArrayForServiceAccount,
-  _config: config
+  createOwnerRefArrayForResource,
+  getConfigValue,
+  readServiceAccountToken,
+  getTargetClusterClientConfig,
+  _cloudProvider: cloudProvider
 }

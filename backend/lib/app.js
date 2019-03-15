@@ -34,7 +34,7 @@ const jwt = require('express-jwt')
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 // csp sources
-const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
+const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const authorityUrl = _.get(config, 'frontend.oidc.authority')
 if (authorityUrl) {
   const authorityUrlOrigin = new URL(authorityUrl).origin
