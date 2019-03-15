@@ -18,6 +18,7 @@ resources:
     cpu: 100m
     memory: 64Mi
 issuerUrl: https://identity.ingress.example.org
+ingressAnnotations: {}
 
 #kubeconfig: kubeconfig-to-external-cluster (optionally, if not given in-cluster config is used)
 
@@ -55,3 +56,4 @@ tls:
     -----BEGIN RSA PRIVATE KEY-----
     Li4u
     -----END RSA PRIVATE KEY-----
+    
