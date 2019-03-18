@@ -128,23 +128,19 @@ export default {
     reset () {
       this.parseSchedules(this.scheduleCrontab)
     },
-    parsedScheduleEventFromCrontabBlock (crontabBlock) {
-      const cronStart = get(crontabBlock, 'start')
-      const cronEnd = get(crontabBlock, 'end')
-      const startRegexResult = scheduleCrontabRegex.exec(cronStart)
-      const endRegexResult = scheduleCrontabRegex.exec(cronEnd)
-      const objFromRegexResult = (regexResult) => {
-        if (regexResult && regexResult.length === 4) {
-          return {
-            minute: regexResult[1],
-            hour: regexResult[2],
-            weekdays: regexResult[3]
-          }
-        }
-        return undefined
+    scheduleEventObjFromRegex (regex) {
+      const regexResult = scheduleCrontabRegex.exec(regex)
+      if (regexResult) {
+        const [, minute, hour, weekdays] = regexResult
+        return { minute, hour, weekdays }
       }
-      const start = objFromRegexResult(startRegexResult)
-      const end = objFromRegexResult(endRegexResult)
+      return undefined
+    },
+    parsedScheduleEventFromCrontabBlock (crontabBlock) {
+      const cronStart = crontabBlock.start
+      const cronEnd = crontabBlock.end
+      const start = this.scheduleEventObjFromRegex(cronStart)
+      const end = this.scheduleEventObjFromRegex(cronEnd)
 
       if (cronStart && !start) {
         console.warn(`Could not parse start crontab line: ${cronStart}`)
