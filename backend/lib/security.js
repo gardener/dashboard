@@ -27,7 +27,7 @@ const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
-const { secret, oidc = {} } = require('./config')
+const { secret, cookieMaxAge = 1800, oidc = {} } = require('./config')
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -39,17 +39,13 @@ const {
   redirect_uri: redirectUri,
   scope,
   client_id: clientId,
-  client_secret: clientSecret
+  client_secret: clientSecret // ,rejectUnauthorized, ca
 } = oidc
-const responseType = 'code'
 const secure = process.env.NODE_ENV === 'development' ? /^https:/.test(redirectUri) : true
 
-const cookieState = 'gState'
-const cookieHeaderPayload = 'gHdrPyl'
-const cookieSignatureToken = 'gSgnTkn'
-
-const cookieMaxAge = 30 * 60 * 1000
-const audience = [ 'gardener' ]
+const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+const COOKIE_SIGNATURE_TOKEN = 'gSgnTkn'
+const GARDENER_AUDIENCE = 'gardener'
 
 let clientPromise
 
@@ -78,24 +74,11 @@ function getIssuerClient () {
 }
 
 async function authorizationUrl (req, res) {
-  const [
-    client,
-    bytes
-  ] = await Promise.all([
-    getIssuerClient(),
-    randomBytes(16)
-  ])
-  const state = bytes.toString('hex')
-  res.cookie(cookieState, state, {
-    secure,
-    httpOnly: true,
-    expires: undefined,
-    overwrite: true
-  })
+  const client = await exports.getIssuerClient()
+
   return client.authorizationUrl({
-    redirect_uri: redirectUri,
-    scope,
-    state
+    redirect_uri: redirectUri || req.protocol + '://' + req.get('host') + '/auth/callback',
+    scope
   })
 }
 
@@ -121,14 +104,15 @@ async function authorizeToken (req, res) {
     name,
     email
   }
+  const audience = [ GARDENER_AUDIENCE ]
   const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
   const encryptedBearer = await encrypt(bearer)
-  res.cookie(cookieHeaderPayload, join([header, payload], '.'), {
+  res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
-    maxAge: cookieMaxAge,
+    maxAge: cookieMaxAge * 1000,
     sameSite: true
   })
-  res.cookie(cookieSignatureToken, join([signature, encryptedBearer], '.'), {
+  res.cookie(COOKIE_SIGNATURE_TOKEN, join([signature, encryptedBearer], '.'), {
     secure,
     httpOnly: true,
     expires: undefined,
@@ -138,15 +122,13 @@ async function authorizeToken (req, res) {
 }
 
 async function authorizationCallback (req, res) {
-  const client = await getIssuerClient()
-  const state = req.cookies[cookieState]
-  res.clearCookie(cookieState)
+  const client = await exports.getIssuerClient()
+  const { code } = req.query
   const {
     id_token: token,
     expires_in: expiresIn
-  } = await client.authorizationCallback(redirectUri, req.query, {
-    response_type: responseType,
-    state
+  } = await client.authorizationCallback(redirectUri, { code }, {
+    response_type: 'code'
   })
   req.body = { token, expiresIn }
   await authorizeToken(req, res)
@@ -165,8 +147,8 @@ function getToken ({ cookies = {}, headers = {} }) {
   if (authorization.startsWith('Bearer ')) {
     return authorization.substring(7)
   }
-  const [ header, payload ] = split(cookies[cookieHeaderPayload], '.')
-  const [ signature ] = split(cookies[cookieSignatureToken], '.')
+  const [ header, payload ] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
+  const [ signature ] = split(cookies[COOKIE_SIGNATURE_TOKEN], '.')
   if (header && payload && signature) {
     return join([ header, payload, signature ], '.')
   }
@@ -180,29 +162,35 @@ function authenticate () {
       throw new Unauthorized('No authorization token was found')
     }
     try {
+      const audience = [ GARDENER_AUDIENCE ]
       req.user = await verify(token, { audience })
     } catch (err) {
       throw new Unauthorized(err.message)
     }
   }
   const csrfProtection = (req, res) => {
+    /**
+     * According to the OWASP Document "Cross-Site Request Forgery Prevention"
+     * the ["Use of Custom Request Headers"](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md#use-of-custom-request-headers)
+     * is an alternate defense that is particularly well suited for AJAX/XHR endpoints.
+     */
     if (!isHttpMethodSafe(req) && !isXmlHttpRequest(req)) {
       throw new Forbidden('Request has been blocked by CSRF protection')
     }
   }
   const setUserAuth = async (req, res) => {
     const { cookies = {}, user = {} } = req
-    const [ , encryptedBearer ] = split(cookies[cookieSignatureToken], '.')
+    const [ , encryptedBearer ] = split(cookies[COOKIE_SIGNATURE_TOKEN], '.')
     if (encryptedBearer) {
       const bearer = await decrypt(encryptedBearer)
       user.auth = { bearer }
     }
   }
   const renewCookie = (req, res) => {
-    const value = req.cookies[cookieHeaderPayload]
-    res.cookie(cookieHeaderPayload, value, {
+    const value = req.cookies[COOKIE_HEADER_PAYLOAD]
+    res.cookie(COOKIE_HEADER_PAYLOAD, value, {
       secure,
-      maxAge: cookieMaxAge,
+      maxAge: cookieMaxAge * 1000,
       sameSite: true
     })
   }
@@ -237,10 +225,8 @@ function authenticateSocket (options) {
 }
 
 function clearCookies (res) {
-  if (typeof res.clearCookie === 'function') {
-    res.clearCookie(cookieHeaderPayload)
-    res.clearCookie(cookieSignatureToken)
-  }
+  res.clearCookie(COOKIE_HEADER_PAYLOAD)
+  res.clearCookie(COOKIE_SIGNATURE_TOKEN)
 }
 
 const numberOfIterations = 2145
@@ -324,10 +310,13 @@ function decode (token) {
   return jwt.decode(token) || {}
 }
 
-module.exports = {
-  cookieHeaderPayload,
-  cookieSignatureToken,
+module.exports = exports = {
+  getIssuerClient,
+  COOKIE_HEADER_PAYLOAD,
+  COOKIE_SIGNATURE_TOKEN,
   sign,
+  decode,
+  verify,
   encrypt,
   decrypt,
   clearCookies,

@@ -16,38 +16,68 @@
 
 'use strict'
 
-const { chain, endsWith, replace, set, isPlainObject, split, forEach } = require('lodash')
-const { readdirSync } = require('fs')
-const { join } = require('path')
-
-function importTest (name, filename, server) {
-  describe(name, () => require(`./acceptance/${filename}.spec.js`)(server))
-}
+const app = require('../lib/app')
 
 describe('acceptance', function () {
-  const server = createServer()
+  const agent = global.createAgent(app)
   const sandbox = sinon.createSandbox()
+  const context = { agent, sandbox }
 
   after(function () {
-    server.close()
+    agent.close()
   })
 
   afterEach(function () {
-    verifyAndRestore(sandbox)
+    global.verifyAndRestore(sandbox)
   })
 
-  chain(readdirSync(join(__dirname, 'acceptance')))
-    .filter(filename => endsWith(filename, '.spec.js'))
-    .map(filename => replace(filename, /\.spec\.js$/, ''))
-    .reduce((accumulator, path) => set(accumulator, split(path, '.', 2), path), {})
-    .forEach((value, key) => {
-      if (isPlainObject(value)) {
-        describe(key, function () {
-          forEach(value, (value, key) => importTest(key, value, { server, sandbox }))
-        })
-      } else {
-        importTest(key, value, { server, sandbox })
-      }
+  describe('api', function () {
+    describe('cloudprofiles', function () {
+      require('./acceptance/api.cloudprofiles.spec.js')(context)
     })
-    .commit()
+
+    describe('domains', function () {
+      require('./acceptance/api.domains.spec.js')(context)
+    })
+
+    describe('info', function () {
+      require('./acceptance/api.info.spec.js')(context)
+    })
+
+    describe('infrastructureSecrets', function () {
+      require('./acceptance/api.infrastructureSecrets.spec.js')(context)
+    })
+
+    describe('members', function () {
+      require('./acceptance/api.members.spec.js')(context)
+    })
+
+    describe('projects', function () {
+      require('./acceptance/api.projects.spec.js')(context)
+    })
+
+    describe('shoots', function () {
+      require('./acceptance/api.shoots.spec.js')(context)
+    })
+
+    describe('user', function () {
+      require('./acceptance/api.user.spec.js')(context)
+    })
+  })
+
+  describe('auth', function () {
+    require('./acceptance/auth.spec.js')(context)
+  })
+
+  describe('config', function () {
+    require('./acceptance/config.spec.js')(context)
+  })
+
+  describe('healthz', function () {
+    require('./acceptance/healthz.spec.js')(context)
+  })
+
+  describe('webhook', function () {
+    require('./acceptance/webhook.spec.js')(context)
+  })
 })

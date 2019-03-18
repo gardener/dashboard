@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 
-module.exports = function ({ server }) {
+module.exports = function ({ agent }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const k8s = nocks.k8s
@@ -34,7 +34,7 @@ module.exports = function ({ server }) {
   it('should return two project members', async function () {
     const bearer = await user.bearer
     k8s.stub.getMembers({ bearer, namespace })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
 
@@ -47,7 +47,7 @@ module.exports = function ({ server }) {
     const bearer = await user.bearer
     const namespace = 'garden-baz'
     k8s.stub.getMembers({ bearer, namespace })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
 
@@ -61,7 +61,7 @@ module.exports = function ({ server }) {
     const serviceAccountName = 'robot'
     const name = `system:serviceaccount:${namespace}:${serviceAccountName}`
     k8s.stub.getMember({ bearer, namespace, name })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
 
@@ -76,7 +76,7 @@ module.exports = function ({ server }) {
     const bearer = await user.bearer
     const name = 'baz@example.org'
     k8s.stub.addMember({ bearer, namespace, name })
-    const res = await server
+    const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
       .send({ metadata, name })
@@ -90,7 +90,7 @@ module.exports = function ({ server }) {
     const bearer = await user.bearer
     const name = 'foo@example.org'
     k8s.stub.addMember({ bearer, namespace, name })
-    const res = await server
+    const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
       .send({ metadata, name })
@@ -101,7 +101,7 @@ module.exports = function ({ server }) {
     const bearer = await user.bearer
     const name = 'bar@example.org'
     k8s.stub.removeMember({ bearer, namespace, name })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
 
@@ -114,7 +114,7 @@ module.exports = function ({ server }) {
     const bearer = await user.bearer
     const name = 'baz@example.org'
     k8s.stub.removeMember({ bearer, namespace, name })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
 

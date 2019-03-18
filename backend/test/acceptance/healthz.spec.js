@@ -18,12 +18,12 @@
 
 const k8s = nocks.k8s
 
-module.exports = function ({ server }) {
+module.exports = function ({ agent }) {
   /* eslint no-unused-expressions: 0 */
 
   it('should return the backend healthz status', async function () {
     k8s.stub.healthz()
-    const res = await server
+    const res = await agent
       .get('/healthz')
 
     expect(res).to.have.status(200)

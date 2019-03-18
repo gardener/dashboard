@@ -15,65 +15,65 @@ limitations under the License.
  -->
 
 <template>
-<v-app>
-  <v-content app class="loginContainer">
-    <v-layout row wrap style="height: 100%">
-      <v-flex class="left" xs4>
-        <img src="../assets/logo.svg" class="logo">
-        <h1>Gardener</h1>
-        <h2 style="color: #009F76">The Kubernetes Botanist</h2>
-      </v-flex>
-      <v-flex class="right" xs8>
-        <div row wrap>
-          <h1>Enterprise-Grade Kubernetes Service</h1>
-          <h2>Infrastructure agnostic and working across all major public clouds</h2>
-        </div>
-        <div row wrap class="title mt-5" v-if="landingPageUrl">
-          Discover what our service is about at the
-          <a style="color: #009F76; padding-left:10px" :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>
-        </div>
-        <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click.stop="handleLogin(primaryLoginType)">
-          Login <v-icon dark class="ml-2">mdi-login-variant</v-icon>
-        </div>
-        <div v-if="showTokenLoginLink" xs5 offset-xs2 right class="loginLink">
-          <a @click.stop="handleLogin('token')">Directly enter a Bearer Token</a>
-        </div>
-      </v-flex>
-    </v-layout>
-  </v-content>
-  <v-footer class="pa-4 footer--fixed" app dark>
-    <img :src="footerLogoUrl" height="24">
-    <v-spacer></v-spacer>
-    <div>&copy; {{ new Date().getFullYear() }}</div>
-  </v-footer>
-  <vue-snotify></vue-snotify>
-  <v-dialog v-model="dialog" persistent max-width="480px">
-    <v-card>
-      <v-card-title class="loginTitle">
-        <span class="headline white--text">Login</span>
-      </v-card-title>
-      <v-card-text>
-        <v-text-field
-          v-model="token"
-          color="grey"
-          :append-icon="showToken ? 'visibility' : 'visibility_off'"
-          :type="showToken ? 'text' : 'password'"
-          outline
-          label="Token"
-          hint="Directly enter a Bearer Token trusted by the Kubernetes ApiServer"
-          persistent-hint
-          @click:append="showToken = !showToken"
-          required>
-        </v-text-field>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click="closeDialog">Cancel</v-btn>
-        <v-btn color="teal darken-2" flat @click="submitToken">Ok</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-</v-app>
+  <v-app>
+    <v-content app class="loginContainer">
+      <v-layout row wrap style="height: 100%">
+        <v-flex class="left" xs4>
+          <img src="../assets/logo.svg" class="logo">
+          <h1>Gardener</h1>
+          <h2 style="color: #009F76">The Kubernetes Botanist</h2>
+        </v-flex>
+        <v-flex class="right" xs8>
+          <div row wrap>
+            <h1>Enterprise-Grade Kubernetes Service</h1>
+            <h2>Infrastructure agnostic and working across all major public clouds</h2>
+          </div>
+          <div row wrap class="title mt-5" v-if="landingPageUrl">
+            Discover what our service is about at the
+            <a style="color: #009F76; padding-left:10px" :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>
+          </div>
+          <div xs5 offset-xs2 right class="orange lighten-2 loginButton elevation-2" @click.stop="handleLogin(primaryLoginType)">
+            Login <v-icon dark class="ml-2">mdi-login-variant</v-icon>
+          </div>
+          <div v-if="showTokenLoginLink" xs5 offset-xs2 right class="loginLink">
+            <a @click.stop="handleLogin('token')">Directly enter a Bearer Token</a>
+          </div>
+        </v-flex>
+      </v-layout>
+    </v-content>
+    <v-footer class="pa-4 footer--fixed" app dark>
+      <img :src="footerLogoUrl" height="24">
+      <v-spacer></v-spacer>
+      <div>&copy; {{ new Date().getFullYear() }}</div>
+    </v-footer>
+    <vue-snotify></vue-snotify>
+    <v-dialog v-model="dialog" persistent max-width="480px">
+      <v-card>
+        <v-card-title class="loginTitle">
+          <span class="headline white--text">Login</span>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="token"
+            color="grey"
+            :append-icon="showToken ? 'visibility' : 'visibility_off'"
+            :type="showToken ? 'text' : 'password'"
+            outline
+            label="Token"
+            hint="Directly enter a Bearer Token trusted by the Kubernetes ApiServer"
+            persistent-hint
+            @click:append="showToken = !showToken"
+            required>
+          </v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click="closeDialog">Cancel</v-btn>
+          <v-btn color="teal darken-2" flat @click="submitToken">Ok</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-app>
 </template>
 
 <script>
@@ -136,7 +136,7 @@ export default {
         this.dialog = true
       } else {
         try {
-          this.$userManager.signin()
+          this.$userManager.signinWithOidc()
         } catch (err) {
           this.showSnotifyLoginError(err.message)
         }
@@ -150,7 +150,7 @@ export default {
       try {
         const token = this.token
         this.token = undefined
-        await this.$userManager.signin(token)
+        await this.$userManager.signinWithToken(token)
         this.dialog = false
         this.$router.push({
           name: 'Home'

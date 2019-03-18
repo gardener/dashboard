@@ -220,7 +220,7 @@ function canCreateProjects (scope) {
       const { namespace, verb, resource, group } = body.spec.resourceAttributes
       return !namespace && group === 'garden.sapcloud.io' && resource === 'projects' && verb === 'create'
     })
-    .reply(200, function (body) {
+    .reply(200, function (uri, body) {
       const [, token] = _.split(this.req.headers.authorization, ' ', 2)
       const payload = jwt.decode(token)
       const allowed = _.endsWith(payload.id, 'example.org')
@@ -229,6 +229,25 @@ function canCreateProjects (scope) {
           allowed
         }
       }, body)
+    })
+}
+
+function reviewToken (scope) {
+  return scope
+    .post('/apis/authentication.k8s.io/v1/tokenreviews')
+    .reply(200, function (uri, body) {
+      const { spec: { token } } = body
+      const payload = jwt.decode(token)
+      const authenticated = _.endsWith(payload.id, 'example.org')
+      const username = payload.id
+      const groups = payload.groups
+      const user = authenticated ? { username, groups } : {}
+      return {
+        status: {
+          user,
+          authenticated
+        }
+      }
     })
 }
 
@@ -343,7 +362,8 @@ function getShoot ({
   profile = 'infra1-profileName',
   region = 'foo-west',
   bindingName = 'foo-secret',
-  seed = 'infra1-seed'
+  seed = 'infra1-seed',
+  hibernation = { enabled: false }
 }) {
   const shoot = {
     metadata: {
@@ -354,6 +374,7 @@ function getShoot ({
       }
     },
     spec: {
+      hibernation,
       cloud: {
         profile,
         region,
@@ -415,8 +436,8 @@ const stub = {
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, shoots)
   },
-  getShoot ({bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName}) {
-    const shoot = getShoot({namespace, name, createdBy, purpose, kind, profile, region, bindingName})
+  getShoot ({ bearer, namespace, name, ...rest }) {
+    const shoot = getShoot({ namespace, name, ...rest })
 
     return nockWithAuthorization(bearer)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -548,6 +569,59 @@ const stub = {
         if (payload.op === 'replace' && payload.path === '/spec/kubernetes/version') {
           shoot.spec.kubernetes = _.assign({}, shoot.spec.kubernetes, payload.value)
         }
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replaceWorkers ({bearer, namespace, name, project, workers}) {
+    const shoot = getShoot({name, project})
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        const payload = _.head(body)
+        console.log(payload)
+        if (payload.op === 'replace' && payload.path === '/spec/cloud/fooInfra/workers') {
+          shoot.spec.cloud.fooInfra.workers = workers
+        }
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  patchShootAnnotations ({ bearer, namespace, name, project, createdBy }) {
+    const shoot = getShoot({ name, project, createdBy })
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.metadata.annotations = Object.assign({}, shoot.metadata.annotations, body.metadata.annotations)
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replaceMaintenance ({bearer, namespace, name, project}) {
+    const shoot = getShoot({name, project})
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.spec.maintenance = body.spec.maintenance
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replaceHibernationSchedules ({ bearer, namespace, name, project }) {
+    const shoot = getShoot({name, project})
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.spec.hibernation.schedules = body.spec.hibernation.schedules
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replaceHibernationEnabled ({ bearer, namespace, name, project }) {
+    const shoot = getShoot({name, project})
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.spec.hibernation.enabled = body.spec.hibernation.enabled
         return true
       })
       .reply(200, () => shoot)
@@ -915,30 +989,13 @@ const stub = {
         .reply(statusCode, version)
     ]
   },
-  getUserInfo ({ bearer, username, authenticated = true }) {
-    const user = authenticated ? {
-      username,
-      groups: [
-        'system:authenticated',
-        'employee'
-      ]
-    } : {}
+  getUserInfo ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canDeleteShootsInAllNamespaces(scope)
     canCreateProjects(scope)
-    return [
-      scope,
-      nockWithAuthorization(auth.bearer)
-        .post('/apis/authentication.k8s.io/v1/tokenreviews')
-        .reply(200, () => {
-          return {
-            status: {
-              user,
-              authenticated
-            }
-          }
-        })
-    ]
+    const adminScope = nockWithAuthorization(auth.bearer)
+    reviewToken(adminScope)
+    return [ scope, adminScope ]
   }
 }
 
@@ -946,6 +1003,7 @@ module.exports = {
   url,
   projectList,
   getProject,
+  getShoot,
   readProject,
   readProjectMembers,
   auth,

@@ -16,11 +16,11 @@
 
 'use strict'
 
-module.exports = function ({ server }) {
+module.exports = function ({ agent }) {
   /* eslint no-unused-expressions: 0 */
 
   it('should return the frontend configuration', async function () {
-    const res = await server
+    const res = await agent
       .get('/config.json')
 
     expect(res).to.have.status(200)

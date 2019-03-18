@@ -7,7 +7,7 @@
 //
 //      http://www.apache.org/licenses/LICENSE-2.0
 //
-// Unless required by serverlicable law or agreed to in writing, software
+// Unless required by agentlicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const common = require('../support/common')
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const k8s = nocks.k8s
@@ -43,7 +43,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: false })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
 
@@ -60,7 +60,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getInfrastructureSecrets({ bearer, namespace, empty: true })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
 
@@ -74,7 +74,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.createInfrastructureSecret({ bearer, namespace, data, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .post(`/api/namespaces/${namespace}/infrastructure-secrets`)
       .set('cookie', await user.cookie)
       .send({ metadata, data })
@@ -91,7 +91,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.patchInfrastructureSecret({ bearer, namespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
       .send({ metadata, data })
@@ -109,7 +109,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.patchSharedInfrastructureSecret({ bearer, namespace: otherNamespace, name, bindingName, bindingNamespace: namespace, data, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
       .send({metadata, data})
@@ -122,7 +122,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.deleteInfrastructureSecret({ bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
 
@@ -137,7 +137,7 @@ module.exports = function ({ server, sandbox }) {
     common.stub.getQuotas(sandbox)
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.deleteSharedInfrastructureSecret({ bearer, namespace: otherNamespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
 
@@ -147,7 +147,7 @@ module.exports = function ({ server, sandbox }) {
   it('should not delete infrastructure secret if referenced by shoot', async function () {
     const bearer = await user.bearer
     k8s.stub.deleteInfrastructureSecretReferencedByShoot({ bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
 

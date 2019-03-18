@@ -20,7 +20,7 @@ const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const k8s = nocks.k8s
@@ -40,7 +40,7 @@ module.exports = function ({ server, sandbox }) {
   it('should return two projects', async function () {
     const bearer = await user.bearer
     k8s.stub.getProjects({ bearer })
-    const res = await server
+    const res = await agent
       .get('/api/namespaces')
       .set('cookie', await user.cookie)
 
@@ -52,7 +52,7 @@ module.exports = function ({ server, sandbox }) {
   it('should return all projects', async function () {
     const bearer = await admin.bearer
     k8s.stub.getProjects({ bearer })
-    const res = await server
+    const res = await agent
       .get('/api/namespaces')
       .set('cookie', await admin.cookie)
 
@@ -65,7 +65,7 @@ module.exports = function ({ server, sandbox }) {
     const bearer = await user.bearer
     const resourceVersion = 42
     k8s.stub.getProject({ bearer, name, namespace })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}`)
       .set('cookie', await user.cookie)
 
@@ -78,7 +78,7 @@ module.exports = function ({ server, sandbox }) {
     const user = auth.createUser({ id: 'baz@example.org' })
     const bearer = await user.bearer
     k8s.stub.getProject({ bearer, name, namespace, unauthorized: true })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}`)
       .set('cookie', await user.cookie)
 
@@ -119,7 +119,7 @@ module.exports = function ({ server, sandbox }) {
     const watchStub = sandbox.stub(services.projects, 'watchProject')
       .callsFake(() => reconnectorStub.start())
 
-    const res = await server
+    const res = await agent
       .post('/api/namespaces')
       .set('cookie', await user.cookie)
       .send({ metadata, data })
@@ -163,7 +163,7 @@ module.exports = function ({ server, sandbox }) {
     const watchStub = sandbox.stub(services.projects, 'watchProject')
       .callsFake(() => reconnectorStub.start())
 
-    const res = await server
+    const res = await agent
       .post('/api/namespaces')
       .set('cookie', await user.cookie)
       .send({ metadata, data })
@@ -180,7 +180,7 @@ module.exports = function ({ server, sandbox }) {
     const createdBy = k8s.readProject(namespace).spec.createdBy.name
     k8s.stub.patchProject({ bearer, namespace, resourceVersion })
 
-    const res = await server
+    const res = await agent
       .put(`/api/namespaces/${namespace}`)
       .set('cookie', await user.cookie)
       .send({ metadata, data })
@@ -195,7 +195,7 @@ module.exports = function ({ server, sandbox }) {
     const bearer = await user.bearer
     k8s.stub.deleteProject({ bearer, namespace })
 
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}`)
       .set('cookie', await user.cookie)
 

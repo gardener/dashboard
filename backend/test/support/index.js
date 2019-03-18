@@ -53,44 +53,7 @@ global.chai.use(require('sinon-chai'))
 global.chai.use(require('chai-http'))
 
 /*!
- * HTTP server object for testing to allow closing
+ * Test Agent
  */
-const http = require('http')
-const { createTerminus } = require('@godaddy/terminus')
-const app = require('../../lib/app')
-const healthChecks = { '/healthz': app.get('healthCheck') }
-const signal = 'SIGTERM'
-global.createServer = () => {
-  process.removeAllListeners(signal)
-  const server = createTerminus(http.createServer(app), { signal, healthChecks })
-  return new Request(server)
-}
-
-class Request {
-  constructor (server) {
-    this.server = server
-  }
-  get (url) {
-    return chai.request(this.server)
-      .get(url)
-      .set('x-requested-with', 'XMLHttpRequest')
-  }
-  put (url) {
-    return chai.request(this.server)
-      .put(url)
-      .set('x-requested-with', 'XMLHttpRequest')
-  }
-  delete (url) {
-    return chai.request(this.server)
-      .delete(url)
-      .set('x-requested-with', 'XMLHttpRequest')
-  }
-  post (url) {
-    return chai.request(this.server)
-      .post(url)
-      .set('x-requested-with', 'XMLHttpRequest')
-  }
-  close () {
-    this.server.close()
-  }
-}
+global.TestAgent = require('./TestAgent')
+global.createAgent = app => new global.TestAgent(app)

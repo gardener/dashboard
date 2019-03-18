@@ -10,6 +10,7 @@ gitHub:
   authentication:
     token: 746f6b656e
 secret: oB5Z24dPnebXcDL3lmEFsiw2lHW7QxDnBjrl9C9dtKJUUhg5
+cookieMaxAge: 1800
 oidc:
   issuer: https://kubernetes:32001
   client_id: dashboard

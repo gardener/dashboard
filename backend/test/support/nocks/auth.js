@@ -17,15 +17,15 @@
 'use strict'
 
 const { split, reduce } = require('lodash')
-const { sign, encrypt, cookieHeaderPayload, cookieSignatureToken } = require('../../../lib/security')
+const { sign, encrypt, COOKIE_HEADER_PAYLOAD, COOKIE_SIGNATURE_TOKEN } = require('../../../lib/security')
 
 async function getCookieValue (token) {
   const bearer = await token
   const [ header, payload, signature ] = split(bearer, '.')
   const encrypted = await encrypt(bearer)
   const cookies = {
-    [cookieHeaderPayload]: `${header}.${payload}`,
-    [cookieSignatureToken]: `${signature}.${encrypted}`
+    [COOKIE_HEADER_PAYLOAD]: `${header}.${payload}`,
+    [COOKIE_SIGNATURE_TOKEN]: `${signature}.${encrypted}`
   }
   return reduce(cookies, (accumulator, value, key) => {
     if (accumulator) {

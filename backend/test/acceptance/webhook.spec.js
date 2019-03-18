@@ -59,7 +59,7 @@ class CacheEvent {
   }
 }
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   let cache
 
@@ -101,7 +101,7 @@ module.exports = function ({ server, sandbox }) {
       cache.emitter.once('issue', event => { issueEvent = event })
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))
@@ -127,7 +127,7 @@ module.exports = function ({ server, sandbox }) {
       cache.emitter.once('issue', event => { issueEvent = event })
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))
@@ -152,7 +152,7 @@ module.exports = function ({ server, sandbox }) {
       cache.emitter.once('issue', event => { issueEvent = event })
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))
@@ -178,7 +178,7 @@ module.exports = function ({ server, sandbox }) {
       const commentEventPromise = new CacheEvent({cache, type: 'comment', id: 1}).startWaiting()
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))
@@ -236,7 +236,7 @@ module.exports = function ({ server, sandbox }) {
       cache.emitter.once('comment', event => { commentEvent = event })
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))
@@ -270,7 +270,7 @@ module.exports = function ({ server, sandbox }) {
       cache.emitter.once('comment', event => { commentEvent = event })
       let res
       try {
-        res = await server
+        res = await agent
           .post('/webhook')
           .set('x-github-event', githubEvent)
           .set('x-hub-signature', createHubSignature(webhookSecret, body))

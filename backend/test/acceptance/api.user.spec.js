@@ -16,7 +16,7 @@
 
 'use strict'
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const k8s = nocks.k8s
@@ -24,12 +24,11 @@ module.exports = function ({ server, sandbox }) {
   const username = `${name}@example.org`
   const id = username
   const user = auth.createUser({ id })
-  const groups = [ 'system:authenticated', 'employee' ]
 
   it('should return information about the user', async function () {
     const bearer = await user.bearer
     k8s.stub.getUserInfo({ bearer, username })
-    const res = await server
+    const res = await agent
       .get('/api/user')
       .set('cookie', await user.cookie)
 
@@ -38,14 +37,13 @@ module.exports = function ({ server, sandbox }) {
     expect(res.body).to.eql({
       isAdmin: false,
       canCreateProject: true,
-      username,
-      groups
+      username
     })
   })
 
   it('should return the bearer token of the user', async function () {
     const bearer = await user.bearer
-    const res = await server
+    const res = await agent
       .get('/api/user/token')
       .set('cookie', await user.cookie)
 

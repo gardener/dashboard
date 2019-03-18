@@ -18,7 +18,7 @@
 
 const common = require('../support/common')
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const k8s = nocks.k8s
@@ -26,12 +26,8 @@ module.exports = function ({ server, sandbox }) {
   const project = 'foo'
   const namespace = `garden-${project}`
   const username = `${name}@example.org`
-  const purpose = 'fooPurpose'
+  const purpose = 'foo-purpose'
   const createdBy = username
-  const annotations = {
-    'garden.sapcloud.io/createdBy': createdBy,
-    'garden.sapcloud.io/purpose': purpose
-  }
   const id = username
   const user = auth.createUser({ id })
   const kind = 'infra1'
@@ -40,24 +36,24 @@ module.exports = function ({ server, sandbox }) {
   const seedName = 'infra1-seed'
   const seedSecretName = `seedsecret-${seedName}`
   const profile = 'infra1-profileName'
-  const spec = {
-    cloud: {
-      profile,
-      region,
-      seed: seedName,
-      secretBindingRef: {
-        name: secret,
-        namespace
-      }
-    }
-  }
+  const { spec, metadata: { annotations } } = k8s.getShoot({
+    namespace,
+    name,
+    createdBy,
+    purpose,
+    kind,
+    profile,
+    region,
+    bindingName: secret,
+    seed: seedName
+  })
   spec.cloud[kind] = {}
   const resourceVersion = 42
 
   it('should return three shoots', async function () {
     const bearer = await user.bearer
     k8s.stub.getShoots({bearer, namespace})
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
 
@@ -70,7 +66,7 @@ module.exports = function ({ server, sandbox }) {
     const bearer = await user.bearer
     const finalizers = ['gardener']
     k8s.stub.createShoot({bearer, namespace, name, spec, resourceVersion})
-    const res = await server
+    const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
       .send({metadata: {
@@ -90,7 +86,7 @@ module.exports = function ({ server, sandbox }) {
   it('should return a shoot', async function () {
     const bearer = await user.bearer
     k8s.stub.getShoot({ bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName: secret })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
 
@@ -107,7 +103,7 @@ module.exports = function ({ server, sandbox }) {
     }
 
     k8s.stub.deleteShoot({ bearer, namespace, name, resourceVersion })
-    const res = await server
+    const res = await agent
       .delete(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
 
@@ -130,7 +126,7 @@ module.exports = function ({ server, sandbox }) {
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
-    const res = await server
+    const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
       .set('cookie', await user.cookie)
 
@@ -158,9 +154,8 @@ module.exports = function ({ server, sandbox }) {
         foo: 'bar'
       }
     }
-    common.stub.getCloudProfiles(sandbox)
     k8s.stub.replaceShoot({ bearer, namespace, name, project, createdBy })
-    const res = await server
+    const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
       .send({
@@ -186,9 +181,8 @@ module.exports = function ({ server, sandbox }) {
   it('should replace shoot kubernetes version', async function () {
     const bearer = await user.bearer
     const version = { version: '1.10.1' }
-    common.stub.getCloudProfiles(sandbox)
-    k8s.stub.replaceShootK8sVersion({bearer, namespace, name, project, createdBy})
-    const res = await server
+    k8s.stub.replaceShootK8sVersion({ bearer, namespace, name, project, createdBy })
+    const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`)
       .set('cookie', await user.cookie)
       .send({ version })
@@ -196,5 +190,94 @@ module.exports = function ({ server, sandbox }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body.spec.kubernetes.version).to.eql(version.version)
+  })
+
+  it('should replace shoot maintenance data', async function () {
+    const bearer = await user.bearer
+    const maintenance = {
+      timeWindow: {
+        begin: '230000+0000',
+        end: '000000+0000'
+      },
+      autoUpdate: {
+        kubernetesVersion: true
+      }
+    }
+    k8s.stub.replaceMaintenance({ bearer, namespace, name, project })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`)
+      .set('cookie', await user.cookie)
+      .send({
+        timeWindowBegin: maintenance.timeWindow.begin,
+        timeWindowEnd: maintenance.timeWindow.end,
+        updateKubernetesVersion: maintenance.autoUpdate.kubernetesVersion
+      })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.maintenance).to.eql(maintenance)
+  })
+
+  it('should replace shoot workers', async function () {
+    const bearer = await user.bearer
+    const worker = {
+      name: 'worker-g5rk1'
+    }
+    const workers = [ worker ]
+    k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/fooInfra/workers`)
+      .set('cookie', await user.cookie)
+      .send(workers)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.cloud.fooInfra.workers).to.eql(workers)
+  })
+
+  it('should replace hibernation enabled', async function () {
+    const bearer = await user.bearer
+    const enabled = true
+    k8s.stub.replaceHibernationEnabled({ bearer, namespace, name, project })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`)
+      .set('cookie', await user.cookie)
+      .send({ enabled })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.hibernation.enabled).to.equal(enabled)
+  })
+
+  it('should replace hibernation schedules', async function () {
+    const bearer = await user.bearer
+    const schedule = {
+      start: '00 17 * * 1,2,3,4,5,6',
+      end: '00 08 * * 1,2,3,4,5,6'
+    }
+    const hibernationSchedules = [ schedule ]
+    k8s.stub.replaceHibernationSchedules({ bearer, namespace, name, project })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`)
+      .set('cookie', await user.cookie)
+      .send(hibernationSchedules)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.hibernation.schedules).to.eql(hibernationSchedules)
+  })
+
+  it('should patch annotations', async function () {
+    const bearer = await user.bearer
+    const patchedAnnotations = { foo: 'bar' }
+    k8s.stub.patchShootAnnotations({ bearer, namespace, name, project, createdBy })
+    const res = await agent
+      .patch(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`)
+      .set('cookie', await user.cookie)
+      .send(patchedAnnotations)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.metadata.annotations).to.eql(Object.assign({}, annotations, patchedAnnotations))
   })
 }

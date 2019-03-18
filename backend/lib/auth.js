@@ -48,10 +48,10 @@ router.route('/')
   })
 
 router.route('/logout')
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
     try {
       clearCookies(res)
-      res.redirect(`/`)
+      res.redirect(`/login`)
     } catch (err) {
       next(err)
     }

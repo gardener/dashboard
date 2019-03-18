@@ -18,15 +18,16 @@ import Vue from 'vue'
 import decode from 'jwt-decode'
 import { createTokenReview } from './api'
 
+const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
+
 export class UserManager {
   constructor () {
     this.origin = window.location.origin
-    this.key = 'gHdrPyl'
   }
 
   getUser () {
     try {
-      const value = Vue.cookie.get(this.key)
+      const value = Vue.cookie.get(COOKIE_HEADER_PAYLOAD)
       if (value) {
         return decode(value)
       }
@@ -35,7 +36,7 @@ export class UserManager {
   }
 
   removeUser () {
-    Vue.cookie.delete(this.key)
+    Vue.cookie.delete(COOKIE_HEADER_PAYLOAD)
   }
 
   signout () {
@@ -43,11 +44,12 @@ export class UserManager {
     window.location = this.origin + '/auth/logout'
   }
 
-  signin (token) {
-    if (token) {
-      return createTokenReview({ token })
-    }
+  signinWithOidc () {
     window.location = this.origin + '/auth'
+  }
+
+  signinWithToken (token) {
+    return createTokenReview({ token })
   }
 
   isUserLoggedIn () {

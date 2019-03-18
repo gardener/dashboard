@@ -71,9 +71,6 @@ gitHub:
     username: dashboard
     token: dummytoken
 
-prometheus:
-  secret: secret
-
 livenessProbe:
   enabled: true
   initialDelaySeconds: 15

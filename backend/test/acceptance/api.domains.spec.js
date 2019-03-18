@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const common = require('../support/common')
 
-module.exports = function ({ server, sandbox }) {
+module.exports = function ({ agent, sandbox }) {
   /* eslint no-unused-expressions: 0 */
   const auth = nocks.auth
   const username = 'john.doe@example.org'
@@ -28,7 +28,7 @@ module.exports = function ({ server, sandbox }) {
 
   it('should return all domains', async function () {
     common.stub.getDomains(sandbox)
-    const res = await server
+    const res = await agent
       .get('/api/domains')
       .set('cookie', await user.cookie)
 
