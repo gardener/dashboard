@@ -60,7 +60,7 @@ class Client {
 
 async function getIssuerClient (user) {
   const client = new Client({ user, ...oidc })
-  client.CLOCK_TOLERANCE = 15
+  client.CLOCK_TOLERANCE = oidc.clockTolerance || 30
   return client
 }
 
@@ -86,6 +86,20 @@ module.exports = function ({ agent, sandbox }) {
     expect(url.searchParams.get('client_id')).to.equal(oidc.client_id)
     expect(url.searchParams.get('redirect_uri')).to.equal(oidc.redirect_uri)
     expect(url.searchParams.get('scope')).to.equal(oidc.scope)
+  })
+
+  it('should fail to redirect to authorization url', async function () {
+    const message = 'Issuer not available'
+    const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').throws('IssuerClientError', message)
+
+    const res = await agent
+      .get('/auth')
+      .redirects(0)
+      .send()
+
+    expect(getIssuerClientStub).to.be.calledOnce
+    expect(res).to.have.status(302)
+    expect(res).to.redirectTo(`/login#error=${encodeURIComponent(message)}`)
   })
 
   it('should redirect to home after successful authorization', async function () {

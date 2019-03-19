@@ -31,7 +31,7 @@ function fromResource ({ metadata }) {
   return { metadata, data }
 }
 
-exports.list = async function () {
+exports.list = function () {
   const domains = getDomains()
 
   return map(domains, fromResource)

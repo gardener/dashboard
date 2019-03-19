@@ -23,6 +23,10 @@ describe('acceptance', function () {
   const sandbox = sinon.createSandbox()
   const context = { agent, sandbox }
 
+  before(function () {
+    nocks()
+  })
+
   after(function () {
     agent.close()
   })
@@ -75,6 +79,10 @@ describe('acceptance', function () {
 
   describe('healthz', function () {
     require('./acceptance/healthz.spec.js')(context)
+  })
+
+  describe('security', function () {
+    require('./acceptance/security.spec.js')(context)
   })
 
   describe('webhook', function () {

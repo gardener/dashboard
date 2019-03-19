@@ -40,9 +40,13 @@ tls:
     Li4u
     -----END RSA PRIVATE KEY-----
 
+secret: ~
+cookieMaxAge: 1800
 oidc:
   issuerUrl: https://identity.ingress.example.org
   clientId: dashboard
+  clientSecret: ~
+  redirect_uri: https://dashboard.ingress.example.org/auth/callback
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener

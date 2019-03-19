@@ -17,28 +17,28 @@
 'use strict'
 
 const nock = require('nock')
+const { oidc = {} } = require('../../../lib/config')
 
-exports = module.exports = init
-exports.auth = require('./auth')
-exports.k8s = require('./k8s')
-exports.oidc = require('./oidc')
-exports.github = require('./github')
-exports.verifyAndCleanAll = verifyAndCleanAll
-
-function init () {
-  nock.disableNetConnect()
-  nock.enableNetConnect('127.0.0.1')
-  return exports
+const stub = {
+  getIssuerClient () {
+    const issuerUrl = oidc.issuer
+    return nock(issuerUrl)
+      .get('/.well-known/openid-configuration')
+      .reply(200, () => {
+        return {
+          issuer: issuerUrl,
+          authorization_endpoint: `${issuerUrl}/authorize`,
+          token_endpoint: `${issuerUrl}/token`,
+          jwks_uri: `${issuerUrl}/keys`,
+          response_types_supported: [ 'code' ],
+          id_token_signing_alg_values_supported: [ 'RS256' ],
+          scopes_supported: [ 'openid', 'email', 'profile' ],
+          claims_supported: [ 'aud', 'email', 'email_verified', 'exp', 'iat', 'iss', 'name', 'sub' ]
+        }
+      })
+  }
 }
 
-function verifyAndCleanAll () {
-  try {
-    // eslint-disable-next-line no-unused-expressions
-    expect(nock.isDone()).to.be.true
-  } catch (err) {
-    console.error('pending mocks:', nock.pendingMocks())
-    throw err
-  } finally {
-    nock.cleanAll()
-  }
+module.exports = {
+  stub
 }

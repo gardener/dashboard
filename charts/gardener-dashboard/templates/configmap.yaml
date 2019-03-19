@@ -17,6 +17,27 @@ data:
     apiServerUrl: {{ .Values.apiServerUrl }}
     readinessProbe:
       periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+{{- if .Values.gitHub }}
+    gitHub:
+      apiUrl: {{ .Values.gitHub.apiUrl }}
+      {{- if .Values.gitHub.ca }}
+      ca: {{ toJson .Values.gitHub.ca }}
+      {{- end }}
+      org: {{ .Values.gitHub.org }}
+      repository: {{ .Values.gitHub.repository }}
+      webhookSecret: {{ .Values.gitHub.webhookSecret }}
+      {{- if .Values.gitHub.authentication }}
+      authentication:
+        username: {{ .Values.gitHub.authentication.username }}
+        token: {{ .Values.gitHub.authentication.token }}
+      {{- end }}
+{{- end }}
+    secret: {{ required ".Values.secret is required" .Values.secret }}
+{{- if .Values.oidc.cookieMaxAge }}
+    cookieMaxAge: {{ .Values.cookieMaxAge }}
+{{- else }}
+    cookieMaxAge: 1800
+{{- end }}
 {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
@@ -24,19 +45,24 @@ data:
       client_secret: {{ required ".Values.oidc.clientSecret is required" .Values.oidc.clientSecret }}
 {{- if .Values.oidc.redirectUri }}
       redirect_uri: {{ .Values.oidc.redirectUri }}
+{{- else }}
+      redirect_uri: https://{{ first .Values.hosts }}/auth/callback
 {{- end }}
 {{- if .Values.oidc.scope }}
       scope: {{ .Values.oidc.scope }}
 {{- else }}
       scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
 {{- end }}
-{{- if .Values.oidc.ca }}
-      ca: {{ toJson .Values.oidc.ca }}
-{{- end }}
 {{- if hasKey .Values.oidc "rejectUnauthorized" }}
       rejectUnauthorized: {{ .Values.oidc.rejectUnauthorized }}
 {{- else }}
       rejectUnauthorized: true
+{{- end }}
+{{- if .Values.oidc.ca }}
+      ca: {{ toJson .Values.oidc.ca }}
+{{- end }}
+{{- if .Values.oidc.clockTolerance }}
+      clockTolerance: {{ .Values.oidc.clockTolerance }}
 {{- end }}
 {{- end }}
     frontend:
@@ -60,19 +86,4 @@ data:
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
 {{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
-{{- end }}
-{{- if .Values.gitHub }}
-    gitHub:
-      apiUrl: {{ .Values.gitHub.apiUrl }}
-      {{- if .Values.gitHub.ca }}
-      ca: {{ toJson .Values.gitHub.ca }}
-      {{- end }}
-      org: {{ .Values.gitHub.org }}
-      repository: {{ .Values.gitHub.repository }}
-      webhookSecret: {{ .Values.gitHub.webhookSecret }}
-      {{- if .Values.gitHub.authentication }}
-      authentication:
-        username: {{ .Values.gitHub.authentication.username }}
-        token: {{ .Values.gitHub.authentication.token }}
-      {{- end }}
 {{- end }}

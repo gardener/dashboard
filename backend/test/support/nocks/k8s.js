@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { credentials, Resources } = require('../../../lib/kubernetes')
+const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
 const jwt = require('jsonwebtoken')
 const clientConfig = credentials()
@@ -578,7 +578,6 @@ const stub = {
     return nockWithAuthorization(bearer)
       .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         const payload = _.head(body)
-        console.log(payload)
         if (payload.op === 'replace' && payload.path === '/spec/cloud/fooInfra/workers') {
           shoot.spec.cloud.fooInfra.workers = workers
         }

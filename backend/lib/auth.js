@@ -36,7 +36,7 @@ router.route('/')
     try {
       res.redirect(await authorizationUrl(req, res))
     } catch (err) {
-      next(err)
+      res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
     }
   })
   .post(async (req, res, next) => {

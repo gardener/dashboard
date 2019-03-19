@@ -16,29 +16,20 @@
 
 'use strict'
 
-const nock = require('nock')
+const oidc = nocks.oidc
+const { oidc: { rejectUnauthorized, ca } = {} } = require('../../lib/config')
+const security = require('../../lib/security')
 
-exports = module.exports = init
-exports.auth = require('./auth')
-exports.k8s = require('./k8s')
-exports.oidc = require('./oidc')
-exports.github = require('./github')
-exports.verifyAndCleanAll = verifyAndCleanAll
+module.exports = function ({ agent }) {
+  /* eslint no-unused-expressions: 0 */
 
-function init () {
-  nock.disableNetConnect()
-  nock.enableNetConnect('127.0.0.1')
-  return exports
-}
-
-function verifyAndCleanAll () {
-  try {
-    // eslint-disable-next-line no-unused-expressions
-    expect(nock.isDone()).to.be.true
-  } catch (err) {
-    console.error('pending mocks:', nock.pendingMocks())
-    throw err
-  } finally {
-    nock.cleanAll()
-  }
+  it('should return the oidc issuer client', async function () {
+    oidc.stub.getIssuerClient()
+    const client = await security.getIssuerClient()
+    expect(client.issuer.httpOptions()).to.include({
+      followRedirect: false,
+      rejectUnauthorized,
+      ca
+    })
+  })
 }

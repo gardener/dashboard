@@ -39,8 +39,16 @@ const {
   redirect_uri: redirectUri,
   scope,
   client_id: clientId,
-  client_secret: clientSecret // ,rejectUnauthorized, ca
+  client_secret: clientSecret,
+  rejectUnauthorized = true,
+  ca
 } = oidc
+const defaultHttpOptions = { rejectUnauthorized }
+if (ca) {
+  defaultHttpOptions.ca = ca
+}
+Issuer.defaultHttpOptions = defaultHttpOptions
+
 const secure = process.env.NODE_ENV === 'development' ? /^https:/.test(redirectUri) : true
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
@@ -49,9 +57,13 @@ const GARDENER_AUDIENCE = 'gardener'
 
 let clientPromise
 
+function discoverIssuer (url) {
+  return Issuer.discover(url)
+}
+
 function discoverClient () {
   return pRetry(async () => {
-    const { Client } = await Issuer.discover(issuer)
+    const { Client } = await discoverIssuer(issuer)
     const client = new Client({
       client_id: clientId,
       client_secret: clientSecret
@@ -75,9 +87,8 @@ function getIssuerClient () {
 
 async function authorizationUrl (req, res) {
   const client = await exports.getIssuerClient()
-
   return client.authorizationUrl({
-    redirect_uri: redirectUri || req.protocol + '://' + req.get('host') + '/auth/callback',
+    redirect_uri: redirectUri,
     scope
   })
 }
@@ -266,22 +277,22 @@ async function decrypt (data) {
   const buffer = base64url.toBuffer(data)
   let start
   let end = 0
-  // salt
+
   start = end
   end += saltLength
   const salt = buffer.slice(start, end)
-  // iv
+
   start = end
   end += ivLength
   const iv = buffer.slice(start, end)
-  // tag
+
   start = end
   end += tagLength
   const tag = buffer.slice(start, end)
-  // encrypted text
+
   start = end
   const encryptedText = buffer.slice(start)
-  // key
+
   const key = await pbkdf2(secret, salt, numberOfIterations, keyLength, digest)
   // decrypt text
   const decipher = crypto.createDecipheriv(algorithm, key, iv)
@@ -311,6 +322,7 @@ function decode (token) {
 }
 
 module.exports = exports = {
+  discoverIssuer,
   getIssuerClient,
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE_TOKEN,

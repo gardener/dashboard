@@ -49,10 +49,11 @@ function getSeedsForCloudProfileName ({ seeds, cloudProfileName }) {
 
 exports.list = function () {
   const seeds = getVisibleAndNotProtectedSeeds()
+  const cloudProfiles = getCloudProfiles()
 
   const predicate = item => _.findIndex(seeds, ['spec.cloud.profile', item.metadata.name]) !== -1
   return _
-    .chain(getCloudProfiles())
+    .chain(cloudProfiles)
     .filter(predicate)
     .map(cloudProfile => fromResource({
       cloudProfile,
