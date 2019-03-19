@@ -129,7 +129,7 @@ exports.get = async function ({ user, namespace, name: username }) {
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     member.kind = 'ServiceAccount'
-    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName: projectName, serviceAccountNamespace, token, caData, server })
+    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName: projectName, contextNamespace: serviceAccountNamespace, token, caData, server })
   }
   return member
 }

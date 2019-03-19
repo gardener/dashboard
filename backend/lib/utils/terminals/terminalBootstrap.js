@@ -349,7 +349,7 @@ async function createCleanupKubeconfig ({ saClientConfig, saCoreClient, saRbacCl
     throw new Error('No API token found for service account %s', saName)
   }
   const server = saClientConfig.url
-  const kubeconfigName = await createKubeconfig({ coreClient: kubecfgCoreClient, namespace, serviceAccountTokenObj, serviceAccountName: saName, serviceAccountNamespace: saNamespace, target: 'cleanup', server }) // TODO owner reference! pass only if on same cluster as where the secret was created!
+  const kubeconfigName = await createKubeconfig({ coreClient: kubecfgCoreClient, namespace, serviceAccountTokenObj, serviceAccountName: saName, contextNamespace: saNamespace, target: 'cleanup', server }) // TODO owner reference! pass only if on same cluster as where the secret was created!
   return kubeconfigName
 }
 

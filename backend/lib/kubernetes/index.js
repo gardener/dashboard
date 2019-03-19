@@ -226,7 +226,7 @@ module.exports = {
       spec: Specs.APIRegistration
     })
   },
-  getKubeconfigFromServiceAccount ({ serviceAccountName, contextName = 'default', serviceAccountNamespace, token, server, caData }) {
+  getKubeconfigFromServiceAccount ({ serviceAccountName, contextName = 'default', contextNamespace, token, server, caData }) {
     const clusterName = 'garden'
     const cluster = {
       'certificate-authority-data': caData,
@@ -239,7 +239,7 @@ module.exports = {
     const context = {
       cluster: clusterName,
       user: userName,
-      namespace: serviceAccountNamespace
+      namespace: contextNamespace
     }
     return yaml.safeDump({
       kind: 'Config',

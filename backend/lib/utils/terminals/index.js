@@ -29,12 +29,12 @@ const SaTypeEnum = {
   access: 'access'
 }
 
-async function createKubeconfig ({ coreClient, namespace, serviceAccountTokenObj, serviceAccountName, serviceAccountNamespace, target, server, ownerReferences }) {
+async function createKubeconfig ({ coreClient, namespace, serviceAccountTokenObj, serviceAccountName, contextNamespace, target, server, ownerReferences }) {
   const name = `${serviceAccountName}.kubeconfig`
 
   const { token, caData } = serviceAccountTokenObj
-  const contextName = `${target}-${serviceAccountNamespace}`
-  const kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName, serviceAccountNamespace, token, server, caData })
+  const contextName = `${target}-${contextNamespace}`
+  const kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName, contextNamespace, token, server, caData })
 
   const client = coreClient.namespace(namespace).secrets
   const body = toSecretResource({ name, ownerReferences, rawData: { kubeconfig } }) // TODO pass username?
