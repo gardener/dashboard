@@ -108,20 +108,19 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    async updateHibernationSchedules () {
+    updateHibernationSchedules () {
       const user = this.$store.state.user
       const noScheduleAnnotation = { 'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null }
       this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-      try {
-        await updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not save hibernation configuration'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
+      return updateHibernationSchedules({ namespace: this.shootNamespace, name: this.shootName, user, data: this.hibernationSchedules })
+        .then(() => addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: noScheduleAnnotation }))
+        .then(() => this.hideDialog())
+        .catch((err) => {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save hibernation configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        })
     },
     reset () {
       this.errorMessage = null

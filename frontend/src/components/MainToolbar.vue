@@ -181,19 +181,19 @@ export default {
     }
   },
   watch: {
-    async help (value) {
+    help (value) {
       if (value && !this.dashboardVersion) {
-        try {
-          const { data } = await getInfo({ user: this.user })
+        getInfo({ user: this.user }).then(res => {
+          const data = get(res, 'data')
           if (data.gardenerVersion) {
             this.gardenerVersion = data.gardenerVersion.gitVersion
           }
           if (data.version) {
             this.dashboardVersion = `${data.version}`
           }
-        } catch (error) {
+        }).catch(error => {
           this.setError({ message: `Failed to fetch version information. ${error.message}` })
-        }
+        })
       }
     }
   }
