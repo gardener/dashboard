@@ -17,10 +17,11 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
+      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isReconciliationDeactivated">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isReconcileToBeScheduled">Requesting to schedule cluster reconcile</span>
+      <span v-else-if="isReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
       <span v-else>{{caption}}</span>
     </v-tooltip>
     <confirm-dialog
@@ -51,7 +52,7 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
+import { isShootMarkedForDeletion, isReconciliationDeactivated } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 
@@ -88,6 +89,9 @@ export default {
     },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
+    },
+    isReconciliationDeactivated () {
+      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
