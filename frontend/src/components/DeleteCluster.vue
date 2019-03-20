@@ -149,15 +149,16 @@ export default {
     ...mapActions([
       'deleteShoot'
     ]),
-    deletionConfirmed () {
-      this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Cluster deletion failed'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async deletionConfirmed () {
+      try {
+        await this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Cluster deletion failed'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     isReconciliationDeactivated () {
       return isReconciliationDeactivated(get(this.shootItem, 'metadata'))

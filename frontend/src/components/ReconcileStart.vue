@@ -102,23 +102,24 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    triggerReconcile () {
+    async triggerReconcile () {
       this.reconcileTriggered = true
       this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
       const user = this.$store.state.user
       const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
-      return addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: reconcile })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not trigger reconcile'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      try {
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: reconcile })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Could not trigger reconcile'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-          this.reconcileTriggered = false
-          this.currentGeneration = null
-        })
+        this.reconcileTriggered = false
+        this.currentGeneration = null
+      }
     },
     reset () {
       this.errorMessage = null

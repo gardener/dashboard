@@ -123,20 +123,21 @@ export default {
       this.errorMessage = null
       this.detailedErrorMessage = null
     },
-    updateShootHibernation () {
+    async updateShootHibernation () {
       const user = this.$store.state.user
-      updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          if (!this.isHibernated) {
-            this.errorMessage = 'Could not hibernate cluster'
-          } else {
-            this.errorMessage = 'Could not wake up cluster from hibernation'
-          }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+      try {
+        await updateShootHibernation({ namespace: this.shootNamespace, name: this.shootName, user, data: { enabled: this.enableHibernation } })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        if (!this.isHibernated) {
+          this.errorMessage = 'Could not hibernate cluster'
+        } else {
+          this.errorMessage = 'Could not wake up cluster from hibernation'
+        }
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     }
   },
   watch: {

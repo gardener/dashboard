@@ -103,17 +103,17 @@ export default {
     hide () {
       this.visible = false
     },
-    onDeleteSecret () {
+    async onDeleteSecret () {
       const bindingName = get(this.secret, 'metadata.bindingName')
-      this
-        .deleteSecret(bindingName)
-        .then(() => this.hide())
-        .catch(err => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to delete Infrastructure Secret.'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+      try {
+        this.deleteSecret(bindingName)
+        this.hide()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Failed to delete Infrastructure Secret.'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     reset () {
       this.errorMessage = undefined
