@@ -154,6 +154,7 @@ import toLower from 'lodash/toLower'
 import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -267,11 +268,14 @@ export default {
     getProjectMenuTargetRoute (namespace) {
       let name = routeName(this.$route)
       const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
+      const fallback = 'ShootList'
       if (!nsHasProjectScope) {
         const thisProjectScoped = this.routeMeta.projectScope
         if (thisProjectScoped) {
-          name = 'ShootList'
+          name = fallback
         }
+      } else if (!isEmpty(this.$route, 'params.name')) {
+        name = fallback
       }
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
     }
