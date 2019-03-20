@@ -409,3 +409,13 @@ export function isShootHasNoHibernationScheduleWarning (shoot) {
   }
   return false
 }
+
+export function shortRandomString (length) {
+  const start = 'abcdefghijklmnopqrstuvwxyz'
+  const possible = start + '0123456789'
+  var text = start.charAt(Math.floor(Math.random() * start.length))
+  for (var i = 0; i < (length - 1); i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length))
+  }
+  return text
+}

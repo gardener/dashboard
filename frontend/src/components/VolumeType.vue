@@ -6,7 +6,7 @@
     item-value="name"
     v-model="worker.volumeType"
     :error-messages="getErrorMessages('worker.volumeType')"
-    @input="$v.worker.volumeType.$touch()"
+    @input="onInputVolumeType"
     @blur="$v.worker.volumeType.$touch()"
     label="Volume Type">
     <template slot="item" slot-scope="data">
@@ -49,17 +49,30 @@ export default {
   },
   data () {
     return {
-      validationErrors
+      validationErrors,
+      valid: undefined
     }
   },
   validations,
   methods: {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
+    },
+    onInputVolumeType () {
+      this.$v.worker.volumeType.$touch()
+      this.$emit('updateVolumeType', this.worker.volumeType)
+      this.validateInput()
+    },
+    validateInput () {
+      if (this.valid !== !this.$v.$invalid) {
+        this.valid = !this.$v.$invalid
+        this.$emit('valid', { id: this.worker.id, valid: this.valid })
+      }
     }
   },
   mounted () {
     this.$v.$touch()
+    this.validateInput()
   }
 }
 </script>
