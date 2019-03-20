@@ -212,6 +212,7 @@ limitations under the License.
               </v-list-tile-action>
               <v-list-tile-content>
                 <v-list-tile-title>Reconcile</v-list-tile-title>
+                <v-list-tile-sub-title>{{reconcileDescription}}</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <reconcile-start :shootItem="item"></reconcile-start>
@@ -265,7 +266,8 @@ import filter from 'lodash/filter'
 import {
   getCloudProviderKind,
   canLinkToSeed,
-  isShootHasNoHibernationScheduleWarning
+  isShootHasNoHibernationScheduleWarning,
+  isReconciliationDeactivated
 } from '@/utils'
 
 import 'codemirror/mode/yaml/yaml.js'
@@ -438,6 +440,16 @@ export default {
         return `Start time: ${maintenanceStr} ${timezone}`
       }
       return ''
+    },
+    reconcileDescription () {
+      if (this.isReconciliationDeactivated) {
+        return 'Reconciliation deactivated'
+      } else {
+        return 'Cluster reconciliation will be triggered regularly'
+      }
+    },
+    isReconciliationDeactivated () {
+      return isReconciliationDeactivated(get(this.item, 'metadata'))
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.item)

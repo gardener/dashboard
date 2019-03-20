@@ -40,7 +40,8 @@ limitations under the License.
       <template slot="message">
         <v-layout row wrap>
           <v-flex>
-            <div class="subheading pt-3">Do you want to trigger reconcile of your cluster?</div>
+            <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconcile schedule?<br />
+            </div>
           </v-flex>
         </v-layout>
       </template>
