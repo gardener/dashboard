@@ -106,7 +106,7 @@ export default {
     async onDeleteSecret () {
       const bindingName = get(this.secret, 'metadata.bindingName')
       try {
-        this.deleteSecret(bindingName)
+        await this.deleteSecret(bindingName)
         this.hide()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

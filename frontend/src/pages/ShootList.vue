@@ -212,7 +212,7 @@ export default {
       switch (args.action) {
         case 'access':
           try {
-            this.setSelectedShoot(args.shootItem.metadata)
+            await this.setSelectedShoot(args.shootItem.metadata)
             this.dialog = args.action
           } catch (error) {
             // Currently not handled
