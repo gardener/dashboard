@@ -69,13 +69,13 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      reconcileTriggered: false
+      reconcileTriggered: false,
+      currentGeneration: null
     }
   },
   computed: {
     isReconcileToBeScheduled () {
-      // TODO we need a better way to track the Reconcile status instead of checking the operation annotation
-      return get(this.shootItem, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/operation']) === 'reconcile'
+      return get(this.shootItem, 'metadata.generation') === this.currentGeneration
     },
     caption () {
       return 'Trigger Reconcile'
@@ -100,6 +100,7 @@ export default {
     },
     triggerReconcile () {
       this.reconcileTriggered = true
+      this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
       const user = this.$store.state.user
       const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
@@ -112,6 +113,7 @@ export default {
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
           this.reconcileTriggered = false
+          this.currentGeneration = null
         })
     },
     reset () {
@@ -124,6 +126,7 @@ export default {
       const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
       if (isReconcileScheduled) {
         this.reconcileTriggered = false
+        this.currentGeneration = null
 
         if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
           const config = {
