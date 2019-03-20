@@ -208,13 +208,15 @@ export default {
       setHideUserIssues: 'setHideUserIssues',
       setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
     }),
-    showDialog (args) {
+    async showDialog (args) {
       switch (args.action) {
         case 'access':
-          this.setSelectedShoot(args.shootItem.metadata)
-            .then(() => {
-              this.dialog = args.action
-            })
+          try {
+            await this.setSelectedShoot(args.shootItem.metadata)
+            this.dialog = args.action
+          } catch (error) {
+            // Currently not handled
+          }
           break
         case 'create':
           this.renderCreateDialog = true
