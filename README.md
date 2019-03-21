@@ -31,8 +31,9 @@ A local configuration example for [minikube](https://github.com/kubernetes/minik
 port: 3030
 logLevel: debug
 logFormat: text
+apiServerUrl: https://minikube # garden cluster kube-apiserver url
 jwt:
-  audience: gardener
+  audience: dashboard
   issuer: &issuer https://minikube:32001
   algorithms: [ RS256 ]
 jwks:
@@ -40,7 +41,6 @@ jwks:
     -----BEGIN CERTIFICATE-----
     MIIC5z...
     -----END CERTIFICATE-----
-  strictSsl: false
   rejectUnauthorized: true
   cache: false
   rateLimit: false
@@ -49,29 +49,20 @@ jwks:
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
-  kubernetesVersions:
-  - 1.8.4
-  - 1.7.9
-  cloudProviders:
-    aws:
-      volumeTypes:
-      - gp2
-      machineTypes:
-      - m4.large
-      - m4.xlarge
-    openstack:
-      volumeTypes:
-      - default
-      machineTypes:
-      - medium_2_4
-      - medium_4_8
   oidc:
     authority: *issuer
-    client_id: gardener
+    client_id: dashboard
     redirect_uri: http://localhost:8080/callback
     response_type: 'token id_token'
-    scope: 'openid email profile groups audience:server:client_id:gardener audience:server:client_id:kube-kubectl'
+    scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
     loadUserInfo: false
+  defaultHibernationSchedule:
+    evaluation:
+    - start: 00 17 * * 1,2,3,4,5
+    development:
+    - start: 00 17 * * 1,2,3,4,5
+      end: 00 08 * * 1,2,3,4,5
+    production: ~
 ```
 
 ## Run locally <small style="color: grey; font-size: 0.7em">(during development)</small>
