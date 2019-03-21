@@ -20,8 +20,8 @@ import Router from 'vue-router'
 import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
+import get from 'lodash/get'
 import concat from 'lodash/concat'
-import { BreadcrumbEnum } from '@/components/Breadcrumb'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -103,19 +103,31 @@ export default function createRouter ({ store, userManager }) {
     }
   ]
 
+  const routeTitle = function () {
+    return this.title
+  }
+
+  const routeParamName = function (route) {
+    return get(route, 'params.name')
+  }
+
+  /** Route function
+      @name RouteFn
+      @function
+      @param {Object} [route] - this.$route
+  */
+
   /**
    * Route Meta fields type definition
    * @typedef {Object} RouteMeta
-   * @prop {boolean} [public]         - Determines whether route needs authorization.
-   * @prop {boolean} [namespaced]     - Determines whether route is namespace specific and has namespace in path.
-   * @prop {boolean} [projectScope]   - Determines whether route can be accessed in context of mutiple projects (_all).
-   * @prop {string}  [toRouteName]    - Sets "to" target name in case navigation is triggered (e.g. due to project change),
-   *                                  this way it is possible to e.g. navigate back to shoot list from shoot details on project change.
-   *                                  Furthermore, it is possible to set a default child route for a top level item.
-   * @prop {string}  [title]          - Main menu title.
-   * @prop {string}  [icon]           - Main menu icon.
-   * @prop {Breadcrumb} [breadcrumb]  - Determines if breadcrumb is visible for route.
-   * @prop {Tab[]}   [tabs]           - Determines the tabs to displayed in the main toolbar extenstion slot.
+   * @prop {boolean} [public]                   - Determines whether route needs authorization
+   * @prop {boolean} [namespaced]               - Determines whether route is namespace specific and has namespace in path
+   * @prop {boolean} [projectScope]             - Determines whether route can be accessed in context of mutiple projects (_all)
+   * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
+   * @prop {string}  [title]                    - Main menu title
+   * @prop {string}  [icon]                     - Main menu icon
+   * @prop {RouteFn} [breadcrumbTextFn]         - Function that returns the breadcrumb title
+   * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
    */
 
   const routes = [
@@ -154,7 +166,7 @@ export default function createRouter ({ store, userManager }) {
             title: 'Home',
             namespaced: false,
             projectScope: false,
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           }
         },
         {
@@ -163,7 +175,7 @@ export default function createRouter ({ store, userManager }) {
           component: Account,
           meta: {
             title: 'Account',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE,
+            breadcrumbTextFn: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -180,7 +192,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           },
           children: [
             {
@@ -202,7 +214,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootItem',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
+                breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
               }
             },
@@ -213,9 +225,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Cluster Editor',
-                toRouteName: 'ShootItemEditor',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
+                breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
               }
             },
@@ -226,8 +236,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Cluster Details',
-                breadcrumb: BreadcrumbEnum.USE_ROUTE_PARAM_NAME,
+                breadcrumbTextFn: routeParamName,
                 tabs: shootItemTabs
               }
             }
@@ -245,7 +254,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: true,
             title: 'Secrets',
             toRouteName: 'Secrets',
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           },
           children: [
             {
@@ -265,8 +274,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                title: 'Secrets',
-                toRouteName: 'Secrets'
+                title: 'Secrets'
               }
             }
           ]
@@ -283,7 +291,7 @@ export default function createRouter ({ store, userManager }) {
               title: 'Members',
               icon: 'mdi-account-multiple-outline'
             },
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           }
         },
         {
@@ -298,7 +306,7 @@ export default function createRouter ({ store, userManager }) {
               title: 'Administration',
               icon: 'mdi-settings'
             },
-            breadcrumb: BreadcrumbEnum.USE_ROUTE_TITLE
+            breadcrumbTextFn: routeTitle
           }
         }
       ]
@@ -426,12 +434,14 @@ export default function createRouter ({ store, userManager }) {
               .then(() => undefined)
           case 'ShootItem':
           case 'ShootItemHibernationSettings':
-          case 'ShootItemEditor':
             return Promise
               .all([
                 store.dispatch('subscribeShoot', { name: params.name, namespace }),
                 store.dispatch('subscribeComments', { name: params.name, namespace })
               ])
+              .then(() => undefined)
+          case 'ShootItemEditor':
+            return store.dispatch('subscribeShoot', { name: params.name, namespace })
               .then(() => undefined)
           case 'Members':
           case 'Administration':

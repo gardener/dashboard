@@ -162,9 +162,11 @@ export function routes (router, includeRoutesWithProjectScope) {
 
 export function namespacedRoute (route, namespace) {
   const name = routeName(route)
+
   const params = {
     namespace: namespace
   }
+
   return { name, params }
 }
 
