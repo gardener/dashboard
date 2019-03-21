@@ -94,7 +94,7 @@ describe('gardener', function () {
           .then(res => {
             expect(res).to.have.status(401)
             expect(res).to.be.json
-            expect(res.body.error).to.have.property('name').that.is.equal('UnauthorizedError')
+            expect(res.body.error).to.have.property('name').that.is.eql('UnauthorizedError')
             expect(res.body.message).to.include('issuer invalid')
           })
       })
