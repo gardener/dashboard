@@ -17,14 +17,51 @@
 import get from 'lodash/get'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
+import replace from 'lodash/replace'
+import split from 'lodash/split'
+import join from 'lodash/join'
+import uniq from 'lodash/uniq'
 const uuidv4 = require('uuid/v4')
 
-const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s([0-6,]+)$/
+const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|Mon|Tue|Wed|Thu|Fri|Sat|Sun)+)$/
 
 function scheduleEventObjFromRegex (regex) {
   const regexResult = scheduleCrontabRegex.exec(regex)
   if (regexResult) {
-    const [, minute, hour, weekdays] = regexResult
+    let [, minute, hour, weekdays] = regexResult
+
+    // replace weekday shortnames, * and 7 with default integer values
+    const intVals = {
+      'Mon': 1,
+      'Tue': 2,
+      'Wed': 3,
+      'Thu': 4,
+      'Fri': 5,
+      'Sat': 6,
+      'Sun': 7,
+      '7': 0,
+      '*': '1,2,3,4,5,6,0'
+    }
+    weekdays = replace(weekdays, /[7*]|Mon|Tue|Wed|Thu|Fri|Sat|Sun/g, weekday => {
+      return intVals[weekday]
+    })
+
+    // resolve intervals
+    weekdays = replace(weekdays, /[0-6]+-[0-6]/g, weekdayInterval => {
+      const [leftVal, rightVal] = split(weekdayInterval, '-')
+      let flatWeekdays = []
+      for (var weekday = leftVal; weekday <= rightVal; weekday++) {
+        flatWeekdays.push(weekday)
+      }
+
+      return join(flatWeekdays, ',')
+    })
+
+    // remove duplicates
+    weekdays = split(weekdays, ',')
+    weekdays = uniq(weekdays)
+    weekdays = join(weekdays, ',')
+
     return { minute, hour, weekdays }
   }
   return undefined

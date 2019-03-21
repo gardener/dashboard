@@ -48,31 +48,75 @@ describe('utils', function () {
       })
     })
 
-    describe('#crontabFromParsedScheduleEvents', function () {
-      it('should produce a crontab from an array of parsedScheduleEvents', function () {
-        const parsedScheduleEvents = [
-          {
-            start: { hour: '17', minute: '00', weekdays: '1,2,3,4,5' },
-            end: { hour: '08', minute: '00', weekdays: '1,2,3,4,5' }
-          },
-          {
-            start: { hour: '22', minute: '00', weekdays: '6,0' }
-          }
-        ]
+    it('should parse a crontab block with weekday intervals', function () {
+      const crontabBlock = {
+        end: '30 07 * * 1-2,3,4-6,0'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '07', minute: '30', weekdays: '1,2,3,4,5,6,0' })
+    })
 
-        const { scheduleCrontab } = crontabFromParsedScheduleEvents(parsedScheduleEvents)
-        const expectedCrontab = [
-          {
-            start: '00 17 * * 1,2,3,4,5',
-            end: '00 08 * * 1,2,3,4,5'
-          },
-          {
-            start: '00 22 * * 6,0'
-          }
-        ]
-        expect(scheduleCrontab).to.be.an.instanceof(Array)
-        expect(scheduleCrontab).to.have.deep.members(expectedCrontab)
-      })
+    it('should parse a crontab block with weekday shortnames and non-standard sunday (7)', function () {
+      const crontabBlock = {
+        start: '00 20 * * Mon,Tue,7'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,0' })
+    })
+
+    it('should parse a crontab block with all weekdays (*)', function () {
+      const crontabBlock = {
+        start: '00 20 * * *'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,3,4,5,6,0' })
+    })
+
+    it('should parse a crontab block and remove duplicate weekdays', function () {
+      const crontabBlock = {
+        end: '12 09 * * 1,1,Mon,Tue-Thu,4-6,7'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '09', minute: '12', weekdays: '1,2,3,4,5,6,0' })
+    })
+  })
+
+  describe('#crontabFromParsedScheduleEvents', function () {
+    it('should produce a crontab from an array of parsedScheduleEvents', function () {
+      const parsedScheduleEvents = [
+        {
+          start: { hour: '17', minute: '00', weekdays: '1,2,3,4,5' },
+          end: { hour: '08', minute: '00', weekdays: '1,2,3,4,5' }
+        },
+        {
+          start: { hour: '22', minute: '00', weekdays: '6,0' }
+        }
+      ]
+
+      const { scheduleCrontab } = crontabFromParsedScheduleEvents(parsedScheduleEvents)
+      const expectedCrontab = [
+        {
+          start: '00 17 * * 1,2,3,4,5',
+          end: '00 08 * * 1,2,3,4,5'
+        },
+        {
+          start: '00 22 * * 6,0'
+        }
+      ]
+      expect(scheduleCrontab).to.be.an.instanceof(Array)
+      expect(scheduleCrontab).to.have.deep.members(expectedCrontab)
     })
   })
 })
