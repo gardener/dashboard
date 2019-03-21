@@ -17,17 +17,18 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
+      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isReconciliationDeactivated">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
-      <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
+      <span v-if="isReconcileToBeScheduled">Requesting to schedule cluster reconcile</span>
+      <span v-else-if="isReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
       <span v-else>{{caption}}</span>
     </v-tooltip>
     <confirm-dialog
-      confirmButtonText="Schedule Now"
+      confirmButtonText="Trigger Now"
       v-model="dialog"
       :cancel="hideDialog"
-      :ok="triggerMaintenance"
+      :ok="triggerReconcile"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
@@ -39,13 +40,9 @@ limitations under the License.
       <template slot="message">
         <v-layout row wrap>
           <v-flex>
-            <div class="subheading pt-3">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+            <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
+            </div>
           </v-flex>
-          <maintenance-components
-            title="The following updates will be performed"
-            :update-kubernetes-version="updateKubernetesVersion"
-            :selectable="false"
-          ></maintenance-components>
         </v-layout>
       </template>
     </confirm-dialog>
@@ -54,17 +51,15 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
+import { isShootMarkedForDeletion, isReconciliationDeactivated } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
 
 export default {
   components: {
-    ConfirmDialog,
-    MaintenanceComponents
+    ConfirmDialog
   },
   props: {
     shootItem: {
@@ -76,17 +71,16 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      osUpdates: true, // won't change
-      maintenanceTriggered: false
+      reconcileTriggered: false,
+      currentGeneration: null
     }
   },
   computed: {
-    isMaintenanceToBeScheduled () {
-      // TODO we need a better way to track the maintenance status instead of checking the operation annotation
-      return get(this.shootItem, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/operation']) === 'maintain'
+    isReconcileToBeScheduled () {
+      return get(this.shootItem, 'metadata.generation') === this.currentGeneration
     },
     caption () {
-      return 'Schedule Maintenance'
+      return 'Trigger Reconcile'
     },
     shootName () {
       return get(this.shootItem, 'metadata.name')
@@ -94,11 +88,11 @@ export default {
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
     },
-    updateKubernetesVersion () {
-      return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-    },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
+    },
+    isReconciliationDeactivated () {
+      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -109,21 +103,23 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    async triggerMaintenance () {
-      this.maintenanceTriggered = true
+    async triggerReconcile () {
+      this.reconcileTriggered = true
+      this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
       const user = this.$store.state.user
-      const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
+      const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: reconcile })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not start maintenance'
+        this.errorMessage = 'Could not trigger reconcile'
         this.detailedErrorMessage = errorDetails.detailedMessage
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.maintenanceTriggered = false
+        this.reconcileTriggered = false
+        this.currentGeneration = null
       }
     },
     reset () {
@@ -132,10 +128,11 @@ export default {
     }
   },
   watch: {
-    isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
-      const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
-      if (isMaintenanceScheduled) {
-        this.maintenanceTriggered = false
+    isReconcileToBeScheduled (reconcileToBeScheduled) {
+      const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
+      if (isReconcileScheduled) {
+        this.reconcileTriggered = false
+        this.currentGeneration = null
 
         if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
           const config = {
@@ -143,7 +140,7 @@ export default {
             timeout: 5000,
             showProgressBar: false
           }
-          this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
+          this.$snotify.success(`Reconcile triggered for ${this.shootName}`, config)
         }
       }
     }

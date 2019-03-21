@@ -156,6 +156,7 @@ import toLower from 'lodash/toLower'
 import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -275,7 +276,7 @@ export default {
         if (thisProjectScoped) {
           name = fallback
         }
-      } else if (get(this.$route, 'params.name')) {
+      } else if (!isEmpty(this.$route, 'params.name')) {
         name = fallback
       } else if (get(this.$route, 'name') === 'GardenTerminal') {
         name = fallback

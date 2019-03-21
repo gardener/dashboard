@@ -543,10 +543,7 @@ export default function createRouter ({ store, userManager }) {
               ])
               .then(() => undefined)
           case 'ShootItemEditor':
-            return Promise
-              .all([
-                store.dispatch('subscribeShoot', { name: params.name, namespace })
-              ])
+            return store.dispatch('subscribeShoot', { name: params.name, namespace })
               .then(() => undefined)
           case 'Members':
           case 'Administration':
