@@ -167,24 +167,22 @@ export default {
       this.deleteConfirm = false
       this.edit = false
     },
-    onDeleteProject () {
-      this
-        .deleteProject(this.project)
-        .then(() => {
-          this.hide()
-          if (this.projectList.length > 0) {
-            const p1 = this.projectList[0]
-            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-          } else {
-            this.$router.push({ name: 'Home', params: { } })
-          }
-        })
-        .catch(err => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to delete project.'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async onDeleteProject () {
+      try {
+        await this.deleteProject(this.project)
+        this.hide()
+        if (this.projectList.length > 0) {
+          const p1 = this.projectList[0]
+          this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+        } else {
+          this.$router.push({ name: 'Home', params: { } })
+        }
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Failed to delete project.'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     }
   },
   mounted () {

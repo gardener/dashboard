@@ -37,20 +37,6 @@ import last from 'lodash/last'
 import size from 'lodash/size'
 import assign from 'lodash/assign'
 
-/**
- * @typedef {number} Breadcrumb
- **/
-
-/**
- * @readonly
- * @enum {Breadcrumb}
- */
-export const BreadcrumbEnum = {
-  USE_ROUTE_TITLE: 1,
-  USE_ROUTE_PARAM_NAME: 2,
-  FALSE: -1
-}
-
 export default {
   name: 'breadcrumb',
   computed: {
@@ -62,17 +48,10 @@ export default {
       const namespace = this.namespace
       const matched = this.$route.matched
       matched.forEach((matchedRoute) => {
-        const breadcrumb = get(matchedRoute, 'meta.breadcrumb')
-        if (breadcrumb && breadcrumb !== BreadcrumbEnum.FALSE) {
+        if (get(matchedRoute, 'meta.breadcrumbTextFn')) {
+          const text = matchedRoute.meta.breadcrumbTextFn(this.$route)
           const to = namespacedRoute(matchedRoute, namespace)
-
-          if (breadcrumb === BreadcrumbEnum.USE_ROUTE_PARAM_NAME) {
-            const text = this.routeParamName
-            crumbs.push({ text, to })
-          } else if (breadcrumb === BreadcrumbEnum.USE_ROUTE_TITLE) {
-            const text = get(matchedRoute, 'meta.title')
-            crumbs.push({ text, to })
-          }
+          crumbs.push({ text, to })
         }
       })
 

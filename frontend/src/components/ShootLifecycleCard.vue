@@ -55,6 +55,20 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
+        <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
+        <v-flex grow class="pa-0">
+          <span class="grey--text">Reconcile</span><br>
+          <span class="subheading">{{reconcileDescription}}</span>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <v-layout row>
+            <reconcile-start :shootItem="shootItem"></reconcile-start>
+          </v-layout>
+        </v-flex>
+      </v-card-title>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
         <v-flex grow class="pa-0">
           <span class="subheading">Delete Cluster</span><br>
@@ -74,12 +88,13 @@ limitations under the License.
 import { mapState } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
-import { isShootHasNoHibernationScheduleWarning } from '@/utils'
+import { isShootHasNoHibernationScheduleWarning, isReconciliationDeactivated } from '@/utils'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
 import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
+import ReconcileStart from '@/components/ReconcileStart'
 
 export default {
   components: {
@@ -87,7 +102,8 @@ export default {
     MaintenanceStart,
     MaintenanceConfiguration,
     HibernationConfiguration,
-    DeleteCluster
+    DeleteCluster,
+    ReconcileStart
   },
   props: {
     shootItem: {
@@ -123,6 +139,16 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
+    },
+    reconcileDescription () {
+      if (this.isReconciliationDeactivated) {
+        return 'Reconciliation deactivated'
+      } else {
+        return 'Cluster reconciliation will be triggered regularly'
+      }
+    },
+    isReconciliationDeactivated () {
+      return isReconciliationDeactivated(get(this.item, 'metadata'))
     }
   }
 }

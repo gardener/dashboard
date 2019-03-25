@@ -780,19 +780,17 @@ export default {
       }
       return this.createShoot(data)
     },
-    createClicked () {
-      Promise.resolve()
-        .then(() => this.createShootResource())
-        .then(() => {
-          this.$emit('created')
-          this.$emit('close', false)
-        })
-        .catch(err => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = `Failed to create cluster.`
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async createClicked () {
+      try {
+        await this.createShootResource()
+        this.$emit('created')
+        this.$emit('close', false)
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = `Failed to create cluster.`
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     cancelClicked () {
       this.$emit('close', true)

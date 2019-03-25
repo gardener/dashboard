@@ -82,7 +82,7 @@ import moment from 'moment-timezone'
 import { mapState } from 'vuex'
 const uuidv4 = require('uuid/v4')
 
-const scheduleCrontabRegex = /^(?<minute>\d{0,2})\s(?<hour>\d{0,2})\s\*\s\*\s(?<weekdays>[0-6,]+)$/
+const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s([0-6,]+)$/
 
 export default {
   name: 'hibernation-schedule',
@@ -128,11 +128,19 @@ export default {
     reset () {
       this.parseSchedules(this.scheduleCrontab)
     },
+    scheduleEventObjFromRegex (regex) {
+      const regexResult = scheduleCrontabRegex.exec(regex)
+      if (regexResult) {
+        const [, minute, hour, weekdays] = regexResult
+        return { minute, hour, weekdays }
+      }
+      return undefined
+    },
     parsedScheduleEventFromCrontabBlock (crontabBlock) {
-      const cronStart = get(crontabBlock, 'start')
-      const cronEnd = get(crontabBlock, 'end')
-      const start = get(scheduleCrontabRegex.exec(cronStart), 'groups')
-      const end = get(scheduleCrontabRegex.exec(cronEnd), 'groups')
+      const cronStart = crontabBlock.start
+      const cronEnd = crontabBlock.end
+      const start = this.scheduleEventObjFromRegex(cronStart)
+      const end = this.scheduleEventObjFromRegex(cronEnd)
 
       if (cronStart && !start) {
         console.warn(`Could not parse start crontab line: ${cronStart}`)
