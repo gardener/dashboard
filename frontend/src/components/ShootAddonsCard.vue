@@ -27,8 +27,8 @@ limitations under the License.
             <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
           </v-flex>
           <v-flex class="pa-0">
-            <span class="grey--text">{{item.title}}</span><br>
-            <span class="subheading">{{item.description}}</span>
+            <span class="subheading">{{item.title}}</span><br>
+            <span class="grey--text">{{item.description}}</span>
           </v-flex>
           <v-flex shrink class="pa-0">
             <template v-if="componentUrl(item.name)">
@@ -49,8 +49,8 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
             </v-flex>
             <v-flex class="pa-0">
-              <span class="grey--text">{{item.title}}</span><br>
-              <span class="subheading">{{item.description}}</span>
+              <span class="subheading">{{item.title}}</span><br>
+              <span class="grey--text">{{item.description}}</span>
             </v-flex>
           </v-layout>
         </v-card-title>

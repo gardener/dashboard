@@ -23,12 +23,12 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-sleep</v-icon>
         <v-flex grow class="pa-0">
-          <span class="grey--text">Hibernation</span><br>
+          <span class="subheading">Hibernation</span><br>
           <v-layout v-if="isShootHasNoHibernationScheduleWarning" align-center row fill-height class="ma-0">
             <v-icon small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
-            <span class="subheading">{{hibernationDescription}}</span>
+            <span class="grey--text">{{hibernationDescription}}</span>
           </v-layout>
-          <span v-else class="subheading">{{hibernationDescription}}</span>
+          <span v-else class="grey--text">{{hibernationDescription}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -42,8 +42,8 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-wrench-outline</v-icon>
         <v-flex grow class="pa-0">
-          <span class="grey--text">Maintenance</span><br>
-          <span class="subheading">{{maintenanceDescription}}</span>
+          <span class="subheading">Maintenance</span><br>
+          <span class="grey--text">{{maintenanceDescription}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -57,8 +57,8 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
         <v-flex grow class="pa-0">
-          <span class="grey--text">Reconcile</span><br>
-          <span class="subheading">{{reconcileDescription}}</span>
+          <span class="subheading">Reconcile</span><br>
+          <span class="grey--text">{{reconcileDescription}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -72,6 +72,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
         <v-flex grow class="pa-0">
           <span class="subheading">Delete Cluster</span><br>
+          <span class="grey--text">Mark this shoot for deletion</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
