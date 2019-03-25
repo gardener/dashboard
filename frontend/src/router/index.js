@@ -56,7 +56,10 @@ export default function createRouter ({ store, userManager }) {
     beforeRouteEnter (to, from, next) {
       return signinCallback(userManager)
         .then(user => store.dispatch('setUser', user))
-        .then(() => next('/'), err => next(err))
+        .then(user => {
+          const redirectTo = get(user, 'state.redirectTo', '/')
+          next(redirectTo)
+        }, err => next(err))
     },
     mounted () {
       // eslint-disable-next-line lodash/prefer-lodash-method
@@ -342,9 +345,13 @@ export default function createRouter ({ store, userManager }) {
           if (isUserLoggedIn(user)) {
             return next()
           }
-          return next({
+          const toRoute = {
             name: 'Login'
-          })
+          }
+          if (to.path !== '/') {
+            toRoute.query = { redirectTo: to.path }
+          }
+          return next(toRoute)
         })
       })
   }

@@ -38,9 +38,9 @@ export function signout (mgr) {
   return removeUser(mgr)
 }
 
-export function signin (mgr) {
+export function signin (mgr, redirectTo) {
   return mgr
-    .signinRedirect()
+    .signinRedirect({ data: { redirectTo } })
     .catch((err) => {
       console.error('signin error', err.message)
       throw err

@@ -68,7 +68,8 @@ export default {
   },
   methods: {
     handleLogin () {
-      signin(this.$userManager)
+      const { redirectTo } = this.$route.query
+      signin(this.$userManager, redirectTo)
         .catch(error => {
           this.showSnotifyLoginError(error.message)
           throw error
