@@ -21,28 +21,30 @@ import replace from 'lodash/replace'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import uniq from 'lodash/uniq'
+import toUpper from 'lodash/toUpper'
 const uuidv4 = require('uuid/v4')
 
-const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|Mon|Tue|Wed|Thu|Fri|Sat|Sun)+)$/
+const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
 
-function scheduleEventObjFromRegex (regex) {
-  const regexResult = scheduleCrontabRegex.exec(regex)
+function scheduleEventObjFromRegex (regexVal) {
+  const upperRegexVal = toUpper(regexVal)
+  const regexResult = scheduleCrontabRegex.exec(upperRegexVal)
   if (regexResult) {
     let [, minute, hour, weekdays] = regexResult
 
     // replace weekday shortnames, * and 7 with default integer values
     const intVals = {
-      'Mon': 1,
-      'Tue': 2,
-      'Wed': 3,
-      'Thu': 4,
-      'Fri': 5,
-      'Sat': 6,
-      'Sun': 7,
+      'MON': 1,
+      'TUE': 2,
+      'WED': 3,
+      'THU': 4,
+      'FRI': 5,
+      'SAT': 6,
+      'SUN': 7,
       '7': 0,
       '*': '1,2,3,4,5,6,0'
     }
-    weekdays = replace(weekdays, /[7*]|Mon|Tue|Wed|Thu|Fri|Sat|Sun/g, weekday => {
+    weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => {
       return intVals[weekday]
     })
 

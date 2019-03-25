@@ -61,13 +61,13 @@ describe('utils', function () {
 
     it('should parse a crontab block with weekday shortnames and non-standard sunday (7)', function () {
       const crontabBlock = {
-        start: '00 20 * * Mon,Tue,7'
+        start: '00 20 * * mon,TUE,wEd,Thu,7'
       }
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
-      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,0' })
+      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,3,4,0' })
     })
 
     it('should parse a crontab block with all weekdays (*)', function () {

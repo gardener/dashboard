@@ -276,6 +276,7 @@ export default {
     this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
     this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
+    this.updateSelectedDays() // trigger sort
 
     setDelayedInputFocus(this, 'selectedDays')
   }
