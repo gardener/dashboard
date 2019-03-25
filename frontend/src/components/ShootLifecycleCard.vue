@@ -72,7 +72,6 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
         <v-flex grow class="pa-0">
           <span class="subheading">Delete Cluster</span><br>
-          <span class="grey--text">Mark this shoot for deletion</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>

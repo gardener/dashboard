@@ -78,18 +78,22 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">perm_identity</v-icon>
-        <v-flex class="pa-0">
-          <span class="grey--text">Created by</span><br>
-          <account-avatar :account-name="createdBy" :mail-to="true"></account-avatar>
-          <v-tooltip top>
-            <template slot="activator">
-              <span class="grey--text">Created at</span><br>
-              <span class="subheading">{{created}}</span>
-            </template>
-            <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
-          </v-tooltip>
-        </v-flex>
+        <v-layout>
+          <v-flex shrink justify-center class="pr-0 pt-3">
+            <v-icon class="cyan--text text--darken-2 avatar">perm_identity</v-icon>
+          </v-flex>
+          <v-flex class="pa-0">
+            <span class="grey--text">Created by</span><br>
+            <account-avatar :account-name="createdBy" :mail-to="true"></account-avatar>
+            <v-tooltip top>
+              <template slot="activator">
+                <span class="grey--text">Created at</span><br>
+                <span class="subheading">{{created}}</span>
+              </template>
+              <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
+            </v-tooltip>
+          </v-flex>
+        </v-layout>
       </v-card-title>
 
       <template v-if="!!purpose">
