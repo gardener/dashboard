@@ -146,21 +146,11 @@ export default {
     helpMenuItems () {
       return this.cfg.helpMenuItems || {}
     },
-    avatar () {
-      return this.avatarUrl
-    },
-    email () {
-      return this.user.email
-    },
     tabs () {
       return get(this.$route, 'meta.tabs', false)
     },
     avatarTitle () {
-      let title = this.displayName
-      if (this.username) {
-        title += ' (' + this.username + ')'
-      }
-      return title
+      return `${this.displayName} (${this.username})`
     },
     helpTarget () {
       return (item) => {

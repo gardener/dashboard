@@ -58,24 +58,9 @@ class Connector {
     }
   }
 
-  connect (forceful) {
+  connect () {
     if (!this.socket.connected) {
       this.socket.connect()
-    } else if (forceful === true) {
-      console.log(`Forcefully reconnecting Socket ${this.socket.id}`)
-      const onDisconnect = reason => {
-        console.log('onDisconnect', reason)
-        if (reason === 'io client disconnect') {
-          clearTimeout(timeoutId)
-          this.socket.connect()
-        }
-      }
-      const onTimeout = () => {
-        this.socket.off('disconnect', onDisconnect)
-      }
-      const timeoutId = setTimeout(onTimeout, 1000)
-      this.socket.once('disconnect', onDisconnect)
-      this.socket.disconnect()
     }
   }
 }
@@ -247,12 +232,6 @@ class AbstractJournalsSubscription extends AbstractSubscription {
       this.emit(kind, events)
     })
   }
-
-  connect (forceful) {
-    if (store.getters.isAdmin) {
-      super.connect(forceful)
-    }
-  }
 }
 
 class IssuesSubscription extends AbstractJournalsSubscription {
@@ -327,11 +306,9 @@ const shootEmitter = Emitter(new ShootSubscription(shootsConnector))
 const journalIssuesEmitter = Emitter(new IssuesSubscription(journalsConnector))
 const journalCommentsEmitter = Emitter(new CommentsSubscription(journalsConnector))
 
-const connectors = [shootsConnector, journalsConnector]
-
 /* Web Socket Connection */
 
-forEach(connectors, connector => {
+forEach([shootsConnector, journalsConnector], connector => {
   const socket = connector.socket
   socket.on('connect', attempt => connector.onConnect(attempt))
   socket.on('reconnect', attempt => connector.onConnect(attempt))
@@ -367,10 +344,14 @@ forEach(connectors, connector => {
 
 const wrapper = {
   connect (forceful) {
-    forEach(connectors, connector => connector.connect(forceful))
+    shootsConnector.connect()
+    if (store.getters.isAdmin) {
+      journalsConnector.connect()
+    }
   },
   disconnect () {
-    forEach(connectors, connector => connector.disconnect())
+    shootsConnector.disconnect()
+    journalsConnector.disconnect()
   },
   shootsEmitter,
   shootEmitter,

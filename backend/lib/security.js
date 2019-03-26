@@ -22,6 +22,7 @@ const jwt = require('jsonwebtoken')
 const { Issuer } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const crypto = require('crypto')
+const uuidv1 = require('uuid/v1')
 const base64url = require('base64url')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
@@ -309,8 +310,8 @@ function sign (payload, secretOrPrivateKey, options) {
   if (!secretOrPrivateKey) {
     secretOrPrivateKey = secret
   }
-  const { expiresIn = '1d', ...rest } = options || {}
-  return jwtSign(payload, secretOrPrivateKey, { expiresIn, ...rest })
+  const { expiresIn = '1d', jwtid = uuidv1(), ...rest } = options || {}
+  return jwtSign(payload, secretOrPrivateKey, { expiresIn, jwtid, ...rest })
 }
 
 function verify (token, options) {

@@ -33,7 +33,7 @@ limitations under the License.
             :error-messages="usernameErrors"
             @input="$v.username.$touch()"
             @keyup.enter="submit()"
-            hint="Enter the name of a user who should become member of this project"
+            hint="Enter the username who should become member of this project"
             persistent-hint
             tabindex="1"
           ></v-text-field>

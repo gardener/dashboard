@@ -157,6 +157,7 @@ module.exports = function ({ agent, sandbox }) {
     const [ signature, encryptedBearer ] = cookieSignatureToken.value.split('.')
     const token = [ header, payload, signature ].join('.')
     const tokenPayload = security.decode(token)
+    expect(tokenPayload.jti).to.match(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     expect(cookieHeaderPayload.sameSite).to.equal('Strict')
     expect(cookieHeaderPayload.maxAge).to.equal(1800)
     expect(cookieSignatureToken.sameSite).to.equal('Strict')

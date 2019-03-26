@@ -588,25 +588,33 @@ const store = new Vuex.Store({
   plugins
 })
 
+const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper
+
 /* Shoots */
-for (const kind of ['shoots', 'shoot']) {
-  EmitterWrapper[`${kind}Emitter`].on(kind, namespacedEvents => {
-    const iteratee = (accumulator, namespace) => {
-      const events = namespacedEvents[namespace]
-      return events ? concat(accumulator, events) : accumulator
-    }
-    const events = reduce(store.getters.currentNamespaces, iteratee, [])
-    store.commit('shoots/HANDLE_EVENTS', { rootState: state, events })
-  })
+function flattenNamespacedEvents (namespacedEvents) {
+  const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
+  return reduce(store.getters.currentNamespaces, concatEventsForNamespace, [])
 }
+shootsEmitter.on('shoots', namespacedEvents => {
+  store.commit('shoots/HANDLE_EVENTS', {
+    rootState: state,
+    events: flattenNamespacedEvents(namespacedEvents)
+  })
+})
+shootEmitter.on('shoot', namespacedEvents => {
+  store.commit('shoots/HANDLE_EVENTS', {
+    rootState: state,
+    events: flattenNamespacedEvents(namespacedEvents)
+  })
+})
 
 /* Journal Issues */
-EmitterWrapper.journalIssuesEmitter.on('issues', events => {
+journalIssuesEmitter.on('issues', events => {
   store.commit('journals/HANDLE_ISSUE_EVENTS', events)
 })
 
 /* Journal Comments */
-EmitterWrapper.journalCommentsEmitter.on('comments', events => {
+journalCommentsEmitter.on('comments', events => {
   store.commit('journals/HANDLE_COMMENTS_EVENTS', events)
 })
 

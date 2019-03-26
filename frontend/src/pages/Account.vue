@@ -31,14 +31,14 @@ limitations under the License.
               <account-avatar :account-name="username" mailTo :size="32"/>
             </p>
           </v-flex>
-          <v-flex v-if="!!name" md6 xs12>
+          <v-flex v-if="!!fullDisplayName" md6 xs12>
             <label class="caption grey--text text--darken-2">Display Name</label>
-            <p class="subheading">{{name}}</p>
+            <p class="subheading">{{fullDisplayName}}</p>
           </v-flex>
           <v-flex md6 xs12>
             <label class="caption grey--text text--darken-2">Groups</label>
             <p>
-              <v-chip v-for="(group, index) in groups" :key="index" outline text-color="grey darken-2">{{group}}</v-chip>
+              <v-chip v-for="(group, index) in groups" :key="index" label small outline color="black">{{group}}</v-chip>
             </p>
           </v-flex>
           <v-flex md6 xs12>
@@ -95,9 +95,6 @@ export default {
     },
     id () {
       return this.user.id
-    },
-    name () {
-      return this.fullDisplayName
     },
     groups () {
       return this.user.groups

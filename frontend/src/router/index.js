@@ -297,7 +297,7 @@ export default function createRouter ({ store, userManager }) {
       if (userManager.isUserLoggedIn()) {
         const user = userManager.getUser()
         const storedUser = store.state.user
-        if (!storedUser || storedUser.iat !== user.iat) {
+        if (!storedUser || storedUser.jti !== user.jti) {
           await store.dispatch('setUser', user)
         }
         return next()

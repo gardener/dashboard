@@ -61,7 +61,7 @@ limitations under the License.
           v-model="userFilter"
           @keyup.esc="userFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openAddMemberDialog">
+        <v-btn icon @click.native.stop="openMemberAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openMemberHelpDialog">
@@ -77,31 +77,31 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in sortedAndFilteredMemberList">
+        <template v-for="(username, index) in sortedAndFilteredMemberList">
           <v-divider
             v-if="index > 0"
             inset
-            :key="`${name}-dividerKey`"
+            :key="`${username}-dividerKey`"
           ></v-divider>
           <v-list-tile
             avatar
-            :key="name"
+            :key="username"
           >
             <v-list-tile-avatar>
-              <img :src="avatarUrl(name)" />
+              <img :src="avatarUrl(username)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
-                {{displayName(name)}}
+                {{displayName(username)}}
               </v-list-tile-title>
               <v-list-tile-sub-title>
-                <a v-if="isEmail(name)" :href="`mailto:${name}`" class="cyan--text text--darken-2">{{name}}</a>
-                <span v-else class="pl-2">{{name}}</span>
+                <a v-if="isEmail(username)" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
+                <span v-else class="pl-2">{{username}}</span>
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(username)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <span>Delete Member</span>
@@ -129,10 +129,10 @@ limitations under the License.
           v-model="serviceFilter"
           @keyup.esc="serviceFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openAddserviceAccountDialog">
+        <v-btn icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openserviceAccountHelpDialog">
+        <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
@@ -145,31 +145,31 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in sortedAndFilteredserviceAccountList">
+        <template v-for="(username, index) in sortedAndFilteredServiceAccountList">
           <v-divider
             v-if="index > 0"
             inset
-            :key="`${name}-dividerKey`"
+            :key="`${username}-dividerKey`"
           ></v-divider>
           <v-list-tile
             avatar
-            :key="name"
+            :key="username"
           >
 
             <v-list-tile-avatar>
-              <img :src="avatarUrl(name)" />
+              <img :src="avatarUrl(username)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
-                {{name.replace(/^system:serviceaccount:[^:]+:/, '').toUpperCase()}}
+                {{displayName(username)}}
               </v-list-tile-title>
               <v-list-tile-sub-title>
-                {{name}}
+                {{username}}
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
+                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(username)">
                   <v-icon>mdi-download</v-icon>
                 </v-btn>
                 <span>Download Kubeconfig</span>
@@ -177,7 +177,7 @@ limitations under the License.
             </v-list-tile-action>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
+                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(username)">
                   <v-icon>visibility</v-icon>
                 </v-btn>
                 <span>Show Kubeconfig</span>
@@ -185,7 +185,7 @@ limitations under the License.
             </v-list-tile-action>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(username)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <span>Delete Service Account</span>
@@ -220,10 +220,10 @@ limitations under the License.
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" light @click="openAddserviceAccountDialog">
+        <v-btn fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" @click="openAddMemberDialog">
+        <v-btn fab small color="grey lighten-2" @click="openMemberAddDialog">
           <v-icon color="green darken-2">person</v-icon>
         </v-btn>
       </v-speed-dial>
@@ -244,7 +244,7 @@ import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
-  emailToDisplayName,
+  displayName,
   gravatarUrlGeneric,
   isEmail,
   serviceAccountToDisplayName
@@ -283,24 +283,6 @@ export default {
       'memberList',
       'projectList'
     ]),
-    helpDialogType () {
-      if (this.memberHelpDialog) {
-        return 'user'
-      }
-      if (this.serviceAccountHelpDialog) {
-        return 'service'
-      }
-      return undefined
-    },
-    addDialogType () {
-      if (this.memberAddDialog) {
-        return 'user'
-      }
-      if (this.serviceAccountAddDialog) {
-        return 'service'
-      }
-      return undefined
-    },
     project () {
       const predicate = project => project.metadata.namespace === this.namespace
       return find(this.projectList, predicate)
@@ -329,7 +311,7 @@ export default {
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
     },
-    sortedAndFilteredserviceAccountList () {
+    sortedAndFilteredServiceAccountList () {
       const predicate = service => {
         if (!this.serviceFilter) {
           return true
@@ -349,20 +331,20 @@ export default {
       'deleteMember',
       'setError'
     ]),
-    openAddMemberDialog () {
+    openMemberAddDialog () {
       this.memberAddDialog = true
-    },
-    openAddserviceAccountDialog () {
-      this.serviceAccountAddDialog = true
     },
     openMemberHelpDialog () {
       this.memberHelpDialog = true
     },
-    openserviceAccountHelpDialog () {
+    openServiceAccountAddDialog () {
+      this.serviceAccountAddDialog = true
+    },
+    openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
     displayName (username) {
-      return emailToDisplayName(username)
+      return displayName(username)
     },
     isOwner (username) {
       return this.owner === toLower(username)
