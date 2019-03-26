@@ -81,7 +81,6 @@ export default {
   name: 'shoot-item',
   components: {
     ControlPlane,
-    Journals,
     ShootDetailsCard,
     ShootInfrastructureCard,
     ShootAddonsCard,
