@@ -407,14 +407,14 @@ const actions = {
   createShoot ({ dispatch, commit }, data) {
     return dispatch('shoots/create', data)
       .then(res => {
-        dispatch('setAlert', { message: 'Shoot created', type: 'success' })
+        dispatch('setAlert', { message: 'Cluster created', type: 'success' })
         return res
       })
   },
   deleteShoot ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/delete', { name, namespace })
       .then(res => {
-        dispatch('setAlert', { message: 'Shoot marked for deletion', type: 'success' })
+        dispatch('setAlert', { message: 'Cluster marked for deletion', type: 'success' })
         return res
       })
   },

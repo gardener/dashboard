@@ -22,7 +22,6 @@ limitations under the License.
       slot="item"
       :to="item.to"
       :class="textClass(item)"
-      tag="span"
     >
       {{ item.text }}
     </router-link>
@@ -88,6 +87,7 @@ export default {
 
   .breadcrumb {
     color: black;
+    text-decoration:none;
   }
 
 </style>
