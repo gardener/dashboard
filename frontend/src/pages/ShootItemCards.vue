@@ -26,14 +26,14 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6>
-        <monitoring-card :shootItem="item"></monitoring-card>
-
         <v-card>
-          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
           <cluster-access :item="item"></cluster-access>
         </v-card>
+
+        <monitoring-card :shootItem="item" class="mt-3"></monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
@@ -44,7 +44,7 @@ limitations under the License.
 
         <shoot-lifecycle-card :shootItem="item" class="mt-3"></shoot-lifecycle-card>
 
-        <journals v-if="isAdmin" :journals="journals" :shoot="item"></journals>
+        <journals v-if="isAdmin" :journals="journals" :shoot="item" class="mt-3"></journals>
 
       </v-flex>
 
