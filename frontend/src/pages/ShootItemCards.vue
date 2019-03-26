@@ -26,7 +26,7 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6>
-        <status-card :shootItem="item"></status-card>
+        <monitoring-card :shootItem="item"></monitoring-card>
 
         <v-card>
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
@@ -58,7 +58,7 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import ClusterAccess from '@/components/ClusterAccess'
 import Journals from '@/components/Journals'
-import StatusCard from '@/components/StatusCard'
+import MonitoringCard from '@/components/MonitoringCard'
 import Logging from '@/components/Logging'
 import ShootDetailsCard from '@/components/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootInfrastructureCard'
@@ -77,7 +77,7 @@ export default {
     ShootLifecycleCard,
     ClusterAccess,
     Journals,
-    StatusCard,
+    MonitoringCard,
     Logging
   },
   computed: {
