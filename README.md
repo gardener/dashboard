@@ -10,20 +10,29 @@
 
 ### Install
 
-Install client and server dependencies
+Install client dependencies
 
 ```sh
-npm install --prefix frontend
-npm install --prefix backend
+pushd frontend
+npm install
+popd
+```
+
+Install server dependencies
+
+```sh
+pushd backend
+npm install
+popd
 ```
 
 ### Configuration
 
 #### KUBECONFIG
-If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in *${HOME}/.kube/config* or by the *KUBECONFIG* environment variable.
+If the dashboard is not running in the Garden Cluster you have to point the kubeconfig to Garden Cluster. This can be done in the default kubeconfig file in `${HOME}/.kube/config` or by the `KUBECONFIG` environment variable.
 
 #### GARDENER_CONFIG
-The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable *GARDENER_CONFIG* at the server process. If nothing is specified the default location is *${HOME}/.gardener/config.yaml*.
+The configuration file of the Gardener Dashboard can be specified as first command line argument or as environment variable `GARDENER_CONFIG` at the server process. If nothing is specified the default location is `${HOME}/.gardener/config.yaml`.
 
 A local configuration example for [minikube](https://github.com/kubernetes/minikube) and [dex](https://github.com/coreos/dex) could look like follows:
 
@@ -31,31 +40,19 @@ A local configuration example for [minikube](https://github.com/kubernetes/minik
 port: 3030
 logLevel: debug
 logFormat: text
-apiServerUrl: https://minikube # garden cluster kube-apiserver url
-jwt:
-  audience: dashboard
-  issuer: &issuer https://minikube:32001
-  algorithms: [ RS256 ]
-jwks:
-  ca: |
-    -----BEGIN CERTIFICATE-----
-    MIIC5z...
-    -----END CERTIFICATE-----
-  rejectUnauthorized: true
-  cache: false
-  rateLimit: false
-  jwksRequestsPerMinute: 5
-  jwksUri: https://minikube:32001/keys
+apiServerUrl: https://minkube    # garden cluster kube-apiserver url
+secret: c2VjcmV0                 # symetric key used for encryption
+cookieMaxAge: 1800
+oidc:
+  issuer: https://minikube:32001
+  client_id: dashboard
+  client_secret: c2VjcmV0       # oauth client secret
+  redirect_uri: http://localhost:8080/auth/callback
+  scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
+  clockTolerance: 15
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
-  oidc:
-    authority: *issuer
-    client_id: dashboard
-    redirect_uri: http://localhost:8080/callback
-    response_type: 'token id_token'
-    scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
-    loadUserInfo: false
   defaultHibernationSchedule:
     evaluation:
     - start: 00 17 * * 1,2,3,4,5
@@ -67,39 +64,49 @@ frontend:
 
 ## Run locally <small style="color: grey; font-size: 0.7em">(during development)</small>
 
-Run the backend server with hot reload under localhost:3030.
+Run local backend server with hot reload listening on port `3030`.
 
 ```sh
-npm run dev --prefix backend
+cd backend
+npm run dev
 ```
 
-Run the frontend server with hot reload under localhost:8080.
+Run local frontend server with hot reload istening on port `8080`.
 
 ```sh
-npm run serve --prefix frontend
+cd frontend
+npm run serve
 ```
 
-All request to */api* and */config.json* with be proxied by default to the backend server.
+All request to `/api`, `/auth` and `/config.json` will be proxied by default to the backend server.
 
 ## Build
 
-Build frontend artifacts for production with minification
+Build docker image locally.
 
 ```sh
 make build
 ```
 
-The build results will be written to *frontend/dist*. The static resource path *public* of the backend server is symlinked to this directory.
+## Push
 
-## Release
-
-Publish a new container image and publish to Google Container Registry.
+Push docker image to Google Container Registry.
 
 ```sh
 npm run build --prefix frontend
 ```
 
-This expects valid GCR credentials located at *${HOME}/.config/gcloud/gcr-readwrite.json*. It will build a new image and pushes it to the container registry.
+This command expects a valid gcloud configuration named `gardener`.
+
+```sh
+gcloud config configurations describe gardener
+is_active: true
+name: gardener
+properties:
+  core:
+    account: john.doe@example.org
+    project: johndoe-1008
+```
 
 ## People
 
