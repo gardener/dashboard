@@ -44,8 +44,12 @@ export class UserManager {
     window.location = this.origin + '/auth/logout'
   }
 
-  signinWithOidc () {
-    window.location = this.origin + '/auth'
+  signinWithOidc (redirectPath) {
+    let path = '/auth'
+    if (redirectPath) {
+      path += `?redirectPath=${encodeURIComponent(redirectPath)}`
+    }
+    window.location = this.origin + path
   }
 
   signinWithToken (token) {

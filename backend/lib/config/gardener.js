@@ -20,28 +20,47 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 const { existsSync, readFileSync } = require('fs')
 const { homedir } = require('os')
-const { join: joinPath, dirname } = require('path')
+const { join: joinPath } = require('path')
 
-/*
-objectPath: foo.bar.foobar
-pathToSecret: <secretsPath>/foo/bar/foobar
-*/
-function buildPathToSecret (secretsPath, objectPath) {
-  const pathToSecret = joinPath(secretsPath, ..._.toPath(objectPath))
-  return pathToSecret
+const environmentVariableDefinitions = {
+  SECRET_KEY_VALUE: 'secret',
+  OIDC_CLIENT_ID: 'oidc.client_id',
+  OIDC_CLIENT_SECRET: 'oidc.client_secret',
+  GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',
+  GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
+  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret',
+  LOG_LEVEL: 'logLevel',
+  PORT: {
+    type: 'Integer',
+    path: 'port'
+  }
 }
 
-function applySecretToConfig (config, secretsPath, objectPath) {
-  const pathToSecret = buildPathToSecret(secretsPath, objectPath)
-
-  const secretExists = existsSync(pathToSecret)
-  if (secretExists) {
-    const secretValue = readFileSync(pathToSecret, 'utf8')
-    _.set(config, objectPath, secretValue)
+function getEnvironmentVariable (env, name, type) {
+  let value = env[name]
+  switch (type) {
+    case 'Integer':
+      value = parseInt(value, 10)
+      return Number.isInteger(value) ? value : undefined
+    default:
+      return value
   }
 }
 
 module.exports = {
+  assignEnvironmentVariables (config, env) {
+    _.forEach(environmentVariableDefinitions, (path, name) => {
+      let type = 'String'
+      if (_.isPlainObject(path)) {
+        type = path.type
+        path = path.path
+      }
+      const value = getEnvironmentVariable(env, name, type)
+      if (value) {
+        _.set(config, path, value)
+      }
+    })
+  },
   getDefaults ({ env } = process) {
     const isProd = env.NODE_ENV === 'production'
     return {
@@ -64,27 +83,16 @@ module.exports = {
   },
   loadConfig (filename, { env } = process) {
     const config = this.getDefaults({ env })
-    try {
-      if (filename) {
+    if (filename) {
+      try {
         if (this.existsSync(filename)) {
           _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
         }
-        if (env.PORT) {
-          const port = parseInt(env.PORT, 10)
-          if (Number.isInteger(port)) {
-            config.port = port
-          }
-        }
-        config.frontend.primaryLoginType = config.oidc ? 'oidc' : 'token'
-
-        const secretsPath = joinPath(dirname(filename), 'secrets')
-        applySecretToConfig(config, secretsPath, 'gitHub.webhookSecret')
-        applySecretToConfig(config, secretsPath, 'gitHub.authentication.username')
-        applySecretToConfig(config, secretsPath, 'gitHub.authentication.token')
-      }
-    } catch (err) { /* ignore */ }
-
-    if (!config.gitHub && _.get(config, 'frontend.gitHubRepoUrl')) {
+        _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
+      } catch (err) { /* ignore */ }
+    }
+    this.assignEnvironmentVariables(config, env)
+    if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {
       _.unset(config, 'frontend.gitHubRepoUrl')
     }
     return config

@@ -21,7 +21,7 @@ const security = require('../../lib/security')
 const setCookieParser = require('set-cookie-parser')
 const ZERO_DATE = new Date(0)
 const OTAC = 'jd93ke'
-const { COOKIE_HEADER_PAYLOAD, COOKIE_SIGNATURE_TOKEN } = security
+const { COOKIE_HEADER_PAYLOAD, COOKIE_SIGNATURE, COOKIE_TOKEN } = security
 
 class Client {
   constructor ({
@@ -148,20 +148,24 @@ module.exports = function ({ agent, sandbox }) {
     expect(res).to.have.status(200)
     const {
       [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
-      [COOKIE_SIGNATURE_TOKEN]: cookieSignatureToken
+      [COOKIE_SIGNATURE]: cookieSignature,
+      [COOKIE_TOKEN]: cookieToken
     } = setCookieParser.parse(res, {
       decodeValues: true,
       map: true
     })
     const [ header, payload ] = cookieHeaderPayload.value.split('.')
-    const [ signature, encryptedBearer ] = cookieSignatureToken.value.split('.')
+    const signature = cookieSignature.value
+    const encryptedBearer = cookieToken.value
     const token = [ header, payload, signature ].join('.')
     const tokenPayload = security.decode(token)
     expect(tokenPayload.jti).to.match(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     expect(cookieHeaderPayload.sameSite).to.equal('Strict')
     expect(cookieHeaderPayload.maxAge).to.equal(1800)
-    expect(cookieSignatureToken.sameSite).to.equal('Strict')
-    expect(cookieSignatureToken.httpOnly).to.equal(true)
+    expect(cookieSignature.sameSite).to.equal('Strict')
+    expect(cookieSignature.httpOnly).to.equal(true)
+    expect(cookieToken.sameSite).to.equal('Strict')
+    expect(cookieToken.httpOnly).to.equal(true)
     expect(await security.verify(token)).to.be.eql(tokenPayload)
     expect(await security.decrypt(encryptedBearer)).to.equal(bearer)
     expect(res).to.be.json
@@ -179,14 +183,17 @@ module.exports = function ({ agent, sandbox }) {
     expect(res).to.redirectTo('/login')
     const {
       [COOKIE_HEADER_PAYLOAD]: cookieHeaderPayload,
-      [COOKIE_SIGNATURE_TOKEN]: cookieSignatureToken
+      [COOKIE_SIGNATURE]: cookieSignature,
+      [COOKIE_TOKEN]: cookieToken
     } = setCookieParser.parse(res, {
       decodeValues: true,
       map: true
     })
     expect(cookieHeaderPayload.value).to.be.empty
     expect(cookieHeaderPayload.expires).to.eql(ZERO_DATE)
-    expect(cookieSignatureToken.value).to.be.empty
-    expect(cookieSignatureToken.expires).to.eql(ZERO_DATE)
+    expect(cookieSignature.value).to.be.empty
+    expect(cookieSignature.expires).to.eql(ZERO_DATE)
+    expect(cookieToken.value).to.be.empty
+    expect(cookieToken.expires).to.eql(ZERO_DATE)
   })
 }

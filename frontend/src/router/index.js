@@ -302,6 +302,7 @@ export default function createRouter ({ store, userManager }) {
         }
         return next()
       }
+      store.commit('SET_REDIRECT_PATH', to.path)
       return next({
         name: 'Login'
       })

@@ -90,7 +90,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapMutations } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 
 export default {
@@ -105,7 +105,8 @@ export default {
     ...mapState([
       'color',
       'cfg',
-      'user'
+      'user',
+      'redirectPath'
     ]),
     primaryLoginType () {
       return this.cfg.primaryLoginType || 'oidc'
@@ -142,12 +143,17 @@ export default {
     ...mapActions([
       'unsetUser'
     ]),
+    ...mapMutations([
+      'UNSET_REDIRECT_PATH'
+    ]),
     handleLogin (loginType) {
       if (loginType === 'token') {
         this.dialog = true
       } else {
         try {
-          this.$userManager.signinWithOidc()
+          const redirectPath = this.redirectPath || '/'
+          this.UNSET_REDIRECT_PATH()
+          this.$userManager.signinWithOidc(redirectPath)
         } catch (err) {
           this.showSnotifyLoginError(err.message)
         }
@@ -163,9 +169,9 @@ export default {
         this.token = undefined
         await this.$userManager.signinWithToken(token)
         this.dialog = false
-        this.$router.push({
-          name: 'Home'
-        })
+        const redirectPath = this.redirectPath || '/'
+        this.UNSET_REDIRECT_PATH()
+        this.$router.push(redirectPath)
       } catch (err) {
         this.dialog = false
         this.showSnotifyLoginError(err.message)

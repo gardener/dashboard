@@ -60,8 +60,8 @@ router.route('/logout')
 router.route('/callback')
   .get(async (req, res, next) => {
     try {
-      await authorizationCallback(req, res)
-      res.redirect(`/`)
+      const { redirectPath = '/' } = await authorizationCallback(req, res)
+      res.redirect(redirectPath)
     } catch (err) {
       res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
     }
