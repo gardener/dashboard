@@ -93,7 +93,7 @@ make build
 Push docker image to Google Container Registry.
 
 ```sh
-npm run build --prefix frontend
+make push
 ```
 
 This command expects a valid gcloud configuration named `gardener`.
