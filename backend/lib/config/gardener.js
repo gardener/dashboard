@@ -16,6 +16,7 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const _ = require('lodash')
 const yaml = require('js-yaml')
 const { existsSync, readFileSync } = require('fs')
@@ -95,6 +96,16 @@ module.exports = {
     if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {
       _.unset(config, 'frontend.gitHubRepoUrl')
     }
+    const requiredConfigurationProperties = [
+      'sessionSecret',
+      'oidc.issuer',
+      'oidc.client_id',
+      'oidc.client_secret',
+      'oidc.redirect_uri'
+    ]
+    _.forEach(requiredConfigurationProperties, path => {
+      assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
+    })
     return config
   },
   existsSync,
