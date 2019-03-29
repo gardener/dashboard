@@ -28,7 +28,7 @@ const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication, authorization } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
-const { secret, cookieMaxAge = 1800, oidc = {} } = require('./config')
+const { sessionSecret, cookieMaxAge = 1800, oidc = {} } = require('./config')
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -57,9 +57,8 @@ const GARDENER_AUDIENCE = 'gardener'
 
 const symetricKeyPromise = JWK.asKey({
   kty: 'oct',
-  kid: 'gardener-dashboard-secret',
-  use: 'enc',
-  k: normalizeKeyValue(secret)
+  kid: 'session-secret',
+  k: ensureBase64urlEncoding(sessionSecret)
 })
 
 let clientPromise
@@ -104,7 +103,7 @@ function decodeState (state) {
   }
 }
 
-function normalizeKeyValue (input) {
+function ensureBase64urlEncoding (input) {
   if (base64url(base64url.decode(input)) === input) {
     return input
   }
@@ -299,14 +298,14 @@ function sign (payload, secretOrPrivateKey, options) {
     secretOrPrivateKey = undefined
   }
   if (!secretOrPrivateKey) {
-    secretOrPrivateKey = secret
+    secretOrPrivateKey = sessionSecret
   }
   const { expiresIn = '1d', jwtid = uuidv1(), ...rest } = options || {}
   return jwtSign(payload, secretOrPrivateKey, { expiresIn, jwtid, ...rest })
 }
 
 function verify (token, options) {
-  return jwtVerify(token, secret, options)
+  return jwtVerify(token, sessionSecret, options)
 }
 
 function decode (token) {

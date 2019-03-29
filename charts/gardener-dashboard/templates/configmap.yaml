@@ -25,15 +25,8 @@ data:
       {{- end }}
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
-      webhookSecret: {{ .Values.gitHub.webhookSecret }}
-      {{- if .Values.gitHub.authentication }}
-      authentication:
-        username: {{ .Values.gitHub.authentication.username }}
-        token: {{ .Values.gitHub.authentication.token }}
-      {{- end }}
 {{- end }}
-    secret: {{ required ".Values.secret is required" .Values.secret }}
-{{- if .Values.oidc.cookieMaxAge }}
+{{- if .Values.cookieMaxAge }}
     cookieMaxAge: {{ .Values.cookieMaxAge }}
 {{- else }}
     cookieMaxAge: 1800
@@ -41,8 +34,6 @@ data:
 {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
-      client_id: {{ required ".Values.oidc.clientId is required" .Values.oidc.clientId }}
-      client_secret: {{ required ".Values.oidc.clientSecret is required" .Values.oidc.clientSecret }}
 {{- if .Values.oidc.redirectUri }}
       redirect_uri: {{ .Values.oidc.redirectUri }}
 {{- else }}

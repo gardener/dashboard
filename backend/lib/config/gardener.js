@@ -23,7 +23,7 @@ const { homedir } = require('os')
 const { join: joinPath } = require('path')
 
 const environmentVariableDefinitions = {
-  SECRET_KEY_VALUE: 'secret',
+  SESSION_SECRET: 'sessionSecret',
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret',
   GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',

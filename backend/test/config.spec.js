@@ -111,16 +111,16 @@ describe('config', function () {
       it('should return the config in development environment', function () {
         const env = {
           NODE_ENV: 'development',
-          SECRET_KEY_VALUE: 'secret'
+          SESSION_SECRET: 'secret'
         }
         const filename = 'filename'
-        const fileData = 'secret: ~'
+        const fileData = 'sessionSecret: ~'
         const existsSyncStub = sandbox.stub(gardener, 'existsSync')
         existsSyncStub.withArgs(filename).returns(true)
         const readFileSyncStub = sandbox.stub(gardener, 'readFileSync')
         readFileSyncStub.withArgs(filename, 'utf8').returns(fileData)
         const config = gardener.loadConfig(filename, {env})
-        expect(config.secret).to.equal(env.SECRET_KEY_VALUE)
+        expect(config.sessionSecret).to.equal(env.SESSION_SECRET)
         expect(config.logLevel).to.equal('debug')
       })
     })

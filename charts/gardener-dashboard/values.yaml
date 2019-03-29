@@ -40,7 +40,7 @@ tls:
     Li4u
     -----END RSA PRIVATE KEY-----
 
-secret: ~
+sessionSecret: ~
 cookieMaxAge: 1800
 oidc:
   issuerUrl: https://identity.ingress.example.org

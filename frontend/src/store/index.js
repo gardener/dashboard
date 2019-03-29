@@ -598,20 +598,20 @@ const store = new Vuex.Store({
 const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper
 
 /* Shoots */
-function flattenNamespacedEvents (namespacedEvents) {
+function filterNamespacedEvents (namespacedEvents) {
   const concatEventsForNamespace = (accumulator, namespace) => concat(accumulator, namespacedEvents[namespace] || [])
   return reduce(store.getters.currentNamespaces, concatEventsForNamespace, [])
 }
 shootsEmitter.on('shoots', namespacedEvents => {
   store.commit('shoots/HANDLE_EVENTS', {
     rootState: state,
-    events: flattenNamespacedEvents(namespacedEvents)
+    events: filterNamespacedEvents(namespacedEvents)
   })
 })
 shootEmitter.on('shoot', namespacedEvents => {
   store.commit('shoots/HANDLE_EVENTS', {
     rootState: state,
-    events: flattenNamespacedEvents(namespacedEvents)
+    events: filterNamespacedEvents(namespacedEvents)
   })
 })
 
