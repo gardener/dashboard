@@ -21,7 +21,11 @@ limitations under the License.
         <v-icon class="white--text pr-2">{{icon}}</v-icon>
         <v-toolbar-title>User Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <copy-btn :clipboard-text="idToken" copy-success-text="Copied ID Token to clipboard!"></copy-btn>
+        <copy-btn
+          :clipboard-text="idToken"
+          tooltip-text="Copy ID Token to clipboard"
+          copy-success-text="Copied ID Token to clipboard!">
+        </copy-btn>
       </v-toolbar>
       <v-card-text>
         <v-layout row wrap>
@@ -38,7 +42,7 @@ limitations under the License.
           <v-flex md6 xs12>
             <label class="caption grey--text text--darken-2">Groups</label>
             <p>
-              <v-chip v-for="(group, index) in groups" :key="index" label small outline color="black">{{group}}</v-chip>
+              <v-chip v-for="(group, index) in groups" :key="index" label small outline disabled color="black">{{group}}</v-chip>
             </p>
           </v-flex>
           <v-flex md6 xs12>

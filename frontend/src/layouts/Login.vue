@@ -62,11 +62,12 @@ limitations under the License.
     <vue-snotify></vue-snotify>
     <v-dialog v-model="dialog" persistent max-width="480px">
       <v-card>
-        <v-card-title class="loginTitle">
+        <v-card-title class="orange lighten-1">
           <span class="headline white--text">Login</span>
         </v-card-title>
         <v-card-text>
           <v-text-field
+            ref="token"
             v-model="token"
             color="grey"
             :append-icon="showToken ? 'visibility' : 'visibility_off'"
@@ -92,6 +93,7 @@ limitations under the License.
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
+import { setInputFocus } from '@/utils'
 
 export default {
   data () {
@@ -149,6 +151,7 @@ export default {
     handleLogin (loginType) {
       if (loginType === 'token') {
         this.dialog = true
+        setInputFocus(this, 'token')
       } else {
         try {
           const redirectPath = this.redirectPath || '/'
