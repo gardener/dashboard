@@ -74,7 +74,7 @@ limitations under the License.
             :type="showToken ? 'text' : 'password'"
             outline
             label="Token"
-            hint="Enter a Bearer Token trusted by the Kubernetes ApiServer"
+            hint="Enter a bearer token trusted by the Kubernetes API server"
             persistent-hint
             @click:append="showToken = !showToken"
             required>
