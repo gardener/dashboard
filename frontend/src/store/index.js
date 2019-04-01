@@ -547,12 +547,6 @@ const mutations = {
       EmitterWrapper.disconnect()
     }
   },
-  SET_REDIRECT_PATH (state, value) {
-    state.redirectPath = value
-  },
-  UNSET_REDIRECT_PATH (state) {
-    state.redirectPath = null
-  },
   SET_SIDEBAR (state, value) {
     state.sidebar = value
   },

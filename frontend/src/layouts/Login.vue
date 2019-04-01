@@ -91,8 +91,9 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
+import get from 'lodash/get'
 import { setInputFocus } from '@/utils'
 
 export default {
@@ -107,9 +108,11 @@ export default {
     ...mapState([
       'color',
       'cfg',
-      'user',
-      'redirectPath'
+      'user'
     ]),
+    redirectPath () {
+      return get(this.$route.query, 'redirectPath', '/')
+    },
     primaryLoginType () {
       return this.cfg.primaryLoginType || 'oidc'
     },
@@ -145,18 +148,13 @@ export default {
     ...mapActions([
       'unsetUser'
     ]),
-    ...mapMutations([
-      'UNSET_REDIRECT_PATH'
-    ]),
     handleLogin (loginType) {
       if (loginType === 'token') {
         this.dialog = true
         setInputFocus(this, 'token')
       } else {
         try {
-          const redirectPath = this.redirectPath || '/'
-          this.UNSET_REDIRECT_PATH()
-          this.$userManager.signinWithOidc(redirectPath)
+          this.$userManager.signinWithOidc(this.redirectPath)
         } catch (err) {
           this.showSnotifyLoginError(err.message)
         }
@@ -172,9 +170,7 @@ export default {
         this.token = undefined
         await this.$userManager.signinWithToken(token)
         this.dialog = false
-        const redirectPath = this.redirectPath || '/'
-        this.UNSET_REDIRECT_PATH()
-        this.$router.push(redirectPath)
+        this.$router.push(this.redirectPath)
       } catch (err) {
         this.dialog = false
         this.showSnotifyLoginError(err.message)

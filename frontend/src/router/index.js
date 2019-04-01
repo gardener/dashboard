@@ -290,7 +290,7 @@ export default function createRouter ({ store, userManager }) {
 
   async function ensureUserAuthenticatedForNonPublicRoutes (to, from, next) {
     try {
-      const meta = to.meta || {}
+      const { meta = {}, path } = to
       if (meta.public) {
         return next()
       }
@@ -302,9 +302,10 @@ export default function createRouter ({ store, userManager }) {
         }
         return next()
       }
-      store.commit('SET_REDIRECT_PATH', to.path)
+      const query = path !== '/' ? { redirectPath: path } : undefined
       return next({
-        name: 'Login'
+        name: 'Login',
+        query
       })
     } catch (err) {
       next(err)
