@@ -285,7 +285,7 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const isError = operation.state === 'Failed' || get(item, 'status.lastError')
       const userError = isUserError(get(item, 'status.lastError.codes', []))
-      const ignoredFromReconciliation = get(item, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+      const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
         if (isError) {
