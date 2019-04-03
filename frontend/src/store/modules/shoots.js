@@ -254,6 +254,8 @@ const getRawVal = (item, column) => {
       return getCloudProviderKind(spec.cloud)
     case 'infrastructure_search':
       return `${get(spec, 'cloud.region')} ${getCloudProviderKind(spec.cloud)}`
+    case 'seed':
+      return get(spec, 'cloud.seed')
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
@@ -389,6 +391,9 @@ const setFilteredAndSortedItems = (state, rootState) => {
           return
         }
         if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'seed'), value)) {
           return
         }
         if (includes(getRawVal(item, 'project'), value)) {
