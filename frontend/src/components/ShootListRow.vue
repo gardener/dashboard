@@ -50,9 +50,12 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
-      <div>
-        {{row.seed}}
-      </div>
+      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.seed, namespace:'garden' } }">
+        <span>{{row.seed}}</span>
+      </router-link>
+      <template v-else>
+        <span>{{row.seed}}</span>
+      </template>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="row.createdBy"></account-avatar>
@@ -136,7 +139,8 @@ import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import { getTimestampFormatted,
+import {
+  getTimestampFormatted,
   getCloudProviderKind,
   getCreatedBy,
   isHibernated,
@@ -144,7 +148,9 @@ import { getTimestampFormatted,
   isShootMarkedForDeletion,
   isTypeDelete,
   getProjectName,
-  isShootHasNoHibernationScheduleWarning } from '@/utils'
+  isShootHasNoHibernationScheduleWarning,
+  canLinkToSeed
+} from '@/utils'
 
 export default {
   components: {
@@ -264,6 +270,9 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
+    },
+    canLinkToSeed () {
+      return canLinkToSeed({ shootNamespace: this.row.namespace })
     }
   },
   methods: {
