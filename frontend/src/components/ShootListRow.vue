@@ -49,6 +49,11 @@ limitations under the License.
         <span>{{ row.kind }} [{{ row.region }}]</span>
       </v-tooltip>
     </td>
+    <td class="nowrap" v-if="this.headerVisible['seed']">
+      <div>
+        {{row.seed}}
+      </div>
+    </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="row.createdBy"></account-avatar>
     </td>
@@ -197,7 +202,8 @@ export default {
         lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
         journalsLabels: this.journalsLabels(this.shootItem.metadata),
         // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
-        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration')
+        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration'),
+        seed: get(spec, 'cloud.seed')
       }
     },
     headerVisible () {
