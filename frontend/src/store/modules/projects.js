@@ -33,8 +33,7 @@ const getters = {
 // actions
 const actions = {
   getAll ({ commit, rootState }) {
-    const user = rootState.user
-    return getProjects({ user })
+    return getProjects()
       .then(res => {
         const list = res.data
         commit('RECEIVE', list)

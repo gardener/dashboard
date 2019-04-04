@@ -107,10 +107,9 @@ export default {
       this.reconcileTriggered = true
       this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
-      const user = this.$store.state.user
       const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: reconcile })
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

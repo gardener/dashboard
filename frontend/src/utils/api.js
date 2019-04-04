@@ -106,23 +106,23 @@ export function updateWorkers ({ namespace, name, infrastructureKind, data }) {
 
 /* Cloud Profiles */
 
-export function getCloudprofiles ({ user }) {
+export function getCloudprofiles () {
   return getResource(`/api/cloudprofiles`)
 }
 
 /* Domains */
 
-export function getDomains ({ user }) {
+export function getDomains () {
   return getResource(`/api/domains`)
 }
 
 /* Projects */
 
-export function getProjects ({ user }) {
+export function getProjects () {
   return getResource(`/api/namespaces`)
 }
 
-export function createProject ({ user, data }) {
+export function createProject ({ data }) {
   return createResource(`/api/namespaces`, data)
 }
 
