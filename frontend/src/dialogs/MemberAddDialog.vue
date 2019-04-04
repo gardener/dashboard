@@ -68,9 +68,8 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import Alert from '@/components/Alert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount } from '@/utils'
 import filter from 'lodash/filter'
-import startsWith from 'lodash/startsWith'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 
@@ -197,12 +196,10 @@ export default {
       return ''
     },
     serviceAccountNames () {
-      const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
-      return map(filter(this.memberList, predicate), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
+      return map(filter(this.memberList, isServiceAccount), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
     },
     projectMembersNames () {
-      const predicate = username => !startsWith(username, 'system:serviceaccount:')
-      return filter(this.memberList, predicate)
+      return filter(this.memberList, !isServiceAccount)
     }
   },
   methods: {

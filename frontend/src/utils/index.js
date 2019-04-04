@@ -328,7 +328,7 @@ export function availableK8sUpdatesForShoot (spec) {
 }
 
 export function getCreatedBy (metadata) {
-  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
+  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
 export function getProjectName (metadata) {
@@ -400,6 +400,14 @@ export function isShootMarkedForDeletion (metadata) {
 
 export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
+}
+
+export function isServiceAccount (member) {
+  return startsWith(member.username, 'system:serviceaccount:')
+}
+
+export function isServiceAccountFromNamespace (username, namespace) {
+  return startsWith(username, `system:serviceaccount:${namespace}:`)
 }
 
 // expect colors to be in format <color> <optional:modifier>
