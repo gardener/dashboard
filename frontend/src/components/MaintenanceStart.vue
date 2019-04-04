@@ -112,10 +112,9 @@ export default {
     async triggerMaintenance () {
       this.maintenanceTriggered = true
 
-      const user = this.$store.state.user
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
       try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

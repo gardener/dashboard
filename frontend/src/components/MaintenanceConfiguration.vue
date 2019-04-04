@@ -112,9 +112,8 @@ export default {
       this.dialog = false
     },
     async updateMaintenance () {
-      const user = this.$store.state.user
       try {
-        await updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
+        await updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
