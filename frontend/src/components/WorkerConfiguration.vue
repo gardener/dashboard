@@ -110,9 +110,8 @@ export default {
     },
     async updateWorkers () {
       try {
-        const user = this.$store.state.user
         this.workers = this.$refs.manageWorkers.getWorkers()
-        await updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, data: this.workers })
+        await updateWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

@@ -204,8 +204,7 @@ export default {
     },
     async versionUpdateConfirmed () {
       try {
-        const user = this.$store.state.user
-        await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, user, data: { version: this.selectedVersion } })
+        await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
         this.hideUpdateDialog()
       } catch (err) {
         this.updateErrorMessage = 'Update Kubernetes version failed'

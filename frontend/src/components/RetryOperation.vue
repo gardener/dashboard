@@ -71,13 +71,12 @@ export default {
     async onRetryOperation () {
       this.retryingOperation = true
 
-      const user = this.$store.state.user
       const namespace = this.namespace
       const name = this.name
 
       const retryAnnotation = { 'shoot.garden.sapcloud.io/operation': 'retry' }
       try {
-        await addShootAnnotation({ namespace, name, user, data: retryAnnotation })
+        await addShootAnnotation({ namespace, name, data: retryAnnotation })
       } catch (err) {
         console.log('failed to retry operation', err)
 
