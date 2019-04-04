@@ -16,30 +16,37 @@
 
 'use strict'
 
+import moment from 'moment-timezone'
+import semver from 'semver'
+import md5 from 'md5'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import keys from 'lodash/keys'
+import map from 'lodash/map'
 import intersection from 'lodash/intersection'
-import md5 from 'md5'
 import toLower from 'lodash/toLower'
+import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
+import words from 'lodash/words'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import every from 'lodash/every'
-import moment from 'moment-timezone'
-import semver from 'semver'
-import store from '../store'
+import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
+import join from 'lodash/join'
 import last from 'lodash/last'
+import compact from 'lodash/compact'
+import store from '../store'
 
-export function emailToDisplayName (email) {
-  if (email) {
-    const [, givenName, familyName] = /^([^.]+)(?:\.([^@]+))?@.*$/.exec(email) || []
-    return familyName ? `${capitalize(familyName)}, ${capitalize(givenName)}` : capitalize(givenName)
+export function emailToDisplayName (value) {
+  if (value) {
+    const names = map(words(replace(value, /@.*$/, '')), capitalize)
+    const givenName = names.shift()
+    return join(compact([ join(names, ' '), givenName ]), ', ')
   }
 }
 
@@ -136,16 +143,77 @@ export function setInputFocus (vm, fieldName) {
   }
 }
 
+export function fullDisplayName (username) {
+  if (!username) {
+    return ''
+  }
+  if (isEmail(username)) {
+    return emailToDisplayName(username)
+  }
+  if (isServiceaccount(username)) {
+    const [ namespace, serviceaccount ] = split(username, ':', 4).slice(2)
+    return toUpper(`${namespace} / ${serviceaccount}`)
+  }
+  return username
+}
+
+export function displayName (username) {
+  if (!username) {
+    return ''
+  }
+  if (isEmail(username)) {
+    return emailToDisplayName(username)
+  }
+  if (isServiceaccount(username)) {
+    const [ , serviceaccount ] = split(username, ':', 4).slice(2)
+    return toUpper(serviceaccount)
+  }
+  return username
+}
+
 export function parseSize (value) {
   return parseInt(replace(value, /(^.+\D)(\d+)(\D.+$)/i, '$2'))
+}
+
+export function isEmail (value) {
+  return /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)
+}
+
+export function isServiceaccount (value, namespace) {
+  let prefix = 'system:serviceaccount:'
+  if (namespace) {
+    prefix += namespace + ':'
+  }
+  return startsWith(value, prefix)
+}
+
+export function gravatarUrlGeneric (username, size = 128) {
+  if (!username) {
+    return gravatarUrlMp('undefined', size)
+  }
+  if (isEmail(username)) {
+    return gravatarUrlIdenticon(username, size)
+  }
+  if (isServiceaccount(username)) {
+    return gravatarUrlRobohash(username, size)
+  }
+  return gravatarUrlRetro(username, size)
+}
+
+export function gravatarUrlMp (username, size = 128) {
+  return gravatarUrl(username, 'mp', size)
+}
+
+export function gravatarUrlRetro (username, size = 128) {
+  return gravatarUrl(username, 'retro', size)
 }
 
 export function gravatarUrlIdenticon (email, size = 128) {
   return gravatarUrl(email, 'identicon', size)
 }
 
-export function gravatarUrlRobohash (email, size = 128) {
-  return gravatarUrl(email, 'robohash', size)
+export function gravatarUrlRobohash (username, size = 128) {
+  return gravatarUrl(username, 'robohash', size)
 }
 
 export function gravatarUrl (value, image, size) {

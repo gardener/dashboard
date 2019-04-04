@@ -16,30 +16,20 @@
 
 'use strict'
 
-const k8s = nocks.k8s
+const oidc = nocks.oidc
+const { oidc: { rejectUnauthorized, ca } = {} } = require('../../lib/config')
+const security = require('../../lib/security')
 
-describe('gardener', function () {
-  describe('healthz', function () {
-    /* eslint no-unused-expressions: 0 */
-    let app
+module.exports = function ({ agent }) {
+  /* eslint no-unused-expressions: 0 */
 
-    before(function () {
-      app = global.createServer()
-    })
-
-    after(function () {
-      app.close()
-    })
-
-    it('should return the backend healthz status', function () {
-      k8s.stub.healthz()
-      return chai.request(app)
-        .get('/healthz')
-        .then(res => {
-          expect(res).to.have.status(200)
-          expect(res).to.be.json
-          expect(res.body).to.eql({status: 'ok'})
-        })
+  it('should return the oidc issuer client', async function () {
+    oidc.stub.getIssuerClient()
+    const client = await security.getIssuerClient()
+    expect(client.issuer.httpOptions()).to.include({
+      followRedirect: false,
+      rejectUnauthorized,
+      ca
     })
   })
-})
+}

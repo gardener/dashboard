@@ -16,49 +16,8 @@
 
 'use strict'
 
-const express = require('express')
-const got = require('got')
-const _ = require('lodash')
-const logger = require('../logger')
-const { decodeBase64 } = require('../utils')
-const kubernetes = require('../kubernetes')
-const { version } = require('../../package')
-
-const router = module.exports = express.Router()
-
-router.route('/')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const gardenerVersion = await fetchGardenerVersion()
-      res.send({ version, gardenerVersion, user })
-    } catch (err) {
-      next(err)
-    }
-  })
-
-async function fetchGardenerVersion () {
-  try {
-    const apiServer = await kubernetes.apiregistration().apis['apiregistration.k8s.io'].v1beta1.apiservices('v1beta1.garden.sapcloud.io').get()
-    const service = _.get(apiServer, 'body.spec.service')
-    const ca = decodeBase64(_.get(apiServer, 'body.spec.caBundle'))
-    if (service && ca) {
-      const uri = `https://${service.name}.${service.namespace}/version`
-      const res = await got(uri, { ca })
-      const body = _.get(res, 'body')
-      return JSON.parse(body)
-    }
-  } catch (err) {
-    logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    if (err.code === 'ENOTFOUND') {
-      return undefined
-    }
-    throw err
-  }
-}
-
 module.exports = {
-  '/info': router,
+  '/info': require('./info'),
   '/user': require('./userInfo'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/domains': require('./domains'),

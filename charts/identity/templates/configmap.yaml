@@ -30,7 +30,7 @@ data:
     - id: dashboard
       redirectURIs:
       {{- range .Values.dashboardOrigins }}
-        - "{{ . }}/callback"
+        - "{{ . }}/auth/callback"
       {{- end }}
       name: Gardener Dashboard
       secret: {{ .Values.dashboardClientSecret }}

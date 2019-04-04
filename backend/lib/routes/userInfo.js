@@ -18,27 +18,43 @@
 
 const express = require('express')
 
-const { authorization } = require('../services')
+const { authentication, authorization } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
+function getToken ({ auth = {} } = {}) {
+  return auth.bearer
+}
+
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const user = req.user
+      const user = req.user || {}
+      const token = getToken(user)
       const [
+        userData,
         isAdmin,
         canCreateProject
       ] = await Promise.all([
+        authentication.isAuthenticated({ token }),
         authorization.isAdmin(user),
         authorization.canCreateProject(user)
       ])
       res.send({
         isAdmin,
-        canCreateProject
+        canCreateProject,
+        ...userData
       })
     } catch (err) {
       next(err)
     }
+  })
+
+router.route('/token')
+  .get(async (req, res, next) => {
+    const token = getToken(req.user)
+    res.send({
+      token
+    })
   })

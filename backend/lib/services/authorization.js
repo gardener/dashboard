@@ -29,12 +29,19 @@ async function hasAuthorization (user, resourceAttributes) {
     return false
   }
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
-  const body = { kind, apiVersion, spec: { resourceAttributes } }
+  const body = {
+    kind,
+    apiVersion,
+    spec: {
+      resourceAttributes
+    }
+  }
   const response = await Authorization(user).selfsubjectaccessreviews.post({ body })
   return _.get(response, 'status.allowed', false)
 }
+exports.hasAuthorization = hasAuthorization
 
-exports.isAdmin = async function (user) {
+exports.isAdmin = function (user) {
   // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
     verb: 'delete',
@@ -43,7 +50,7 @@ exports.isAdmin = async function (user) {
   })
 }
 
-exports.canCreateProject = async function (user) {
+exports.canCreateProject = function (user) {
   return hasAuthorization(user, {
     verb: 'create',
     group: 'garden.sapcloud.io',
