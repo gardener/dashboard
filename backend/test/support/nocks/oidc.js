@@ -16,57 +16,29 @@
 
 'use strict'
 
-const _ = require('lodash')
 const nock = require('nock')
-const jsonwebtoken = require('jsonwebtoken')
-const keypair = require('keypair')
-const crypto = require('crypto')
-const { pem2jwk } = require('pem-jwk')
-const config = require('../../../lib/config')
-
-const issuer = config.jwt.issuer
-const bits = 1024
-const e = 0x10001
-const use = 'sig'
-const alg = _.first(config.jwt.algorithms)
-const expiresIn = 24 * 60 * 60
-const audience = [config.jwt.audience]
-const pairs = [
-  {kid: randomKid(), ...keypair({bits, e})},
-  {kid: randomKid(), ...keypair({bits, e})}
-]
-const invalidPair = {kid: randomKid(), ...keypair({bits, e})}
-const keys = _
-  .chain(pairs)
-  .map(pair => ({use, alg, kid: pair.kid, ...pem2jwk(pair.public)}))
-  .value()
-
-function randomKid () {
-  return crypto.randomBytes(20).toString('hex')
-}
-
-function sign (payload, invalid = false) {
-  const index = Math.round(Math.random())
-  const pair = !invalid ? pairs[index] : invalidPair
-  return jsonwebtoken.sign({aud: audience, iss: issuer, ...payload}, pair.private, {algorithm: alg, keyid: pair.kid, expiresIn})
-}
+const { oidc = {} } = require('../../../lib/config')
 
 const stub = {
-  getKeys () {
-    return nock(issuer)
-      .replyContentLength()
-      .get('/keys')
-      .reply(200, {keys})
+  getIssuerClient () {
+    const issuerUrl = oidc.issuer
+    return nock(issuerUrl)
+      .get('/.well-known/openid-configuration')
+      .reply(200, () => {
+        return {
+          issuer: issuerUrl,
+          authorization_endpoint: `${issuerUrl}/authorize`,
+          token_endpoint: `${issuerUrl}/token`,
+          jwks_uri: `${issuerUrl}/keys`,
+          response_types_supported: [ 'code' ],
+          id_token_signing_alg_values_supported: [ 'RS256' ],
+          scopes_supported: [ 'openid', 'email', 'profile' ],
+          claims_supported: [ 'aud', 'email', 'email_verified', 'exp', 'iat', 'iss', 'name', 'sub' ]
+        }
+      })
   }
 }
 
 module.exports = {
-  kid: pairs[0].kid,
-  alg,
-  issuer,
-  audience,
-  expiresIn,
-  keys,
-  sign,
   stub
 }

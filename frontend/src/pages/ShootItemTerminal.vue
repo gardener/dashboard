@@ -161,16 +161,14 @@ export default {
       this.snackbarText = text
     },
     async createTerminal () {
-      const user = this.$store.state.user
       const { namespace = undefined, name = undefined, target } = this.$route.params
-      const { data } = await createTerminal({ name, namespace, target, user })
+      const { data } = await createTerminal({ name, namespace, target })
 
       return data
     },
     async heartbeat () {
-      const user = this.$store.state.user
       const { namespace = undefined, name = undefined, target } = this.$route.params
-      return heartbeat({ name, namespace, user, target })
+      return heartbeat({ name, namespace, target })
     },
     async retry () {
       this.snackbarTop = false

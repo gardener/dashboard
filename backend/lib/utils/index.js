@@ -122,12 +122,17 @@ async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
 }
 
 async function getProjectNameFromNamespace (namespace) {
+  const project = getProjectByNamespace(namespace)
+  return project.metadata.name
+}
+
+async function getProjectByNamespace (projects, namespace) {
   const ns = await kubernetes.core().namespaces.get({ name: namespace })
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
   }
-  return name
+  return projects.get({ name })
 }
 
 function createOwnerRefArrayForResource (resource) {
@@ -218,6 +223,7 @@ module.exports = {
   getSeedKubeconfig,
   getSeedKubeconfigForShoot,
   getProjectNameFromNamespace,
+  getProjectByNamespace,
   createOwnerRefArrayForResource,
   getConfigValue,
   readServiceAccountToken,

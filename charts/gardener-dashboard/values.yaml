@@ -40,9 +40,18 @@ tls:
     Li4u
     -----END RSA PRIVATE KEY-----
 
+# sessionSecret is used for signing and encrytion of session data
+sessionSecret: ~
+# cookieMaxAge is cookie session lifetime in number of seconds
+cookieMaxAge: 1800
 oidc:
   issuerUrl: https://identity.ingress.example.org
+  # clientId is the public identifier of the gardener-dashboard aplication
   clientId: dashboard
+  # clientId is the private secret of the gardener-dashboard aplication
+  clientSecret: ~
+  # redirect_uri is the endpoint receiving the OTAC from the OpenID provider after successful login
+  redirect_uri: https://dashboard.ingress.example.org/auth/callback
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener
@@ -72,9 +81,6 @@ gitHub:
   authentication:
     username: dashboard
     token: dummytoken
-
-prometheus:
-  secret: secret
 
 livenessProbe:
   enabled: true

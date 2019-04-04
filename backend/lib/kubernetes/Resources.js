@@ -37,10 +37,20 @@ module.exports = {
     kind: 'Service',
     apiVersion: 'v1'
   },
+  APIService: {
+    name: 'apiservices',
+    kind: 'APIService',
+    apiVersion: 'apiregistration.k8s.io/v1'
+  },
   SelfSubjectAccessReview: {
     name: 'selfsubjectaccessreviews',
     kind: 'SelfSubjectAccessReview',
     apiVersion: 'authorization.k8s.io/v1'
+  },
+  TokenReview: {
+    name: 'tokenreviews',
+    kind: 'TokenReview',
+    apiVersion: 'authentication.k8s.io/v1'
   },
   RoleBinding: {
     name: 'rolebindings',

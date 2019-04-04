@@ -20,7 +20,7 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
-const { getProjectNameFromNamespace } = require('../utils')
+const { getProjectByNamespace } = require('../utils')
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
@@ -164,31 +164,29 @@ exports.watchProject = name => garden.projects.watch({ name })
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  let project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
+  const name = project.metadata.name
   // do not update createdBy
   const { metadata, data } = fromResource(project)
   _.assign(data, _.omit(body.data, 'createdBy'))
-  project = await projects.mergePatch({
+  return fromResource(await projects.mergePatch({
     name,
     body: toResource({ metadata, data })
-  })
-  return fromResource(project)
+  }))
 }
 
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
+  const name = project.metadata.name
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)

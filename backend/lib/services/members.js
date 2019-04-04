@@ -18,9 +18,9 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, getProjectNameFromNamespace } = require('../utils')
+const { decodeBase64, getProjectByNamespace } = require('../utils')
 const kubernetes = require('../kubernetes')
-const { Conflict } = require('../errors.js')
+const { Conflict, NotFound } = require('../errors.js')
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
@@ -59,10 +59,9 @@ function deleteServiceaccount (core, namespace, name) {
 }
 
 async function setProjectMember (projects, namespace, username) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  const project = await projects.get({ name })
   const members = _.slice(project.spec.members, 0)
   if (_.find(members, ['name', username])) {
     throw new Conflict(`User '${username}' is already member of this project`)
@@ -77,14 +76,13 @@ async function setProjectMember (projects, namespace, username) {
       members
     }
   }
-  return projects.mergePatch({ name, body })
+  return projects.mergePatch({ name: project.metadata.name, body })
 }
 
 async function unsetProjectMember (projects, namespace, username) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  const project = await projects.get({ name })
   const members = _.slice(project.spec.members, 0)
   if (!_.find(members, ['name', username])) {
     return project
@@ -95,32 +93,41 @@ async function unsetProjectMember (projects, namespace, username) {
       members
     }
   }
-  return projects.mergePatch({ name, body })
+  return projects.mergePatch({ name: project.metadata.name, body })
 }
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  // get name of project
-  const name = await getProjectNameFromNamespace(namespace)
   // create garden client for current user
   const projects = Garden(user).projects
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
   // get project members from project
-  return fromResource(await projects.get({ name }))
+  return fromResource(project)
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
-  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-  const member = {
+  // create garden client for current user
+  const projects = Garden(user).projects
+  // get project
+  const project = await getProjectByNamespace(projects, namespace)
+  // name of the project
+  const projectName = project.metadata.name
+  // find member of project
+  const member = _.find(project.spec.members, {
     name: username,
     kind: 'User'
+  })
+  if (!member) {
+    throw new NotFound(`User ${username} is not a member of project ${projectName}`)
   }
+  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceAccountNamespace === namespace) {
     const core = Core(user)
     const ns = core.namespaces(namespace)
     const serviceaccount = await ns.serviceaccounts.get({
       name: serviceAccountName
     })
-    const projectName = await getProjectNameFromNamespace(namespace)
     const api = ns.serviceaccounts.api
     const server = _.get(config, 'apiServerUrl', api.url)
     const secret = await ns.secrets.get({
@@ -128,8 +135,10 @@ exports.get = async function ({ user, namespace, name: username }) {
     })
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
+    const clusterName = 'garden'
+    const contextName = `${clusterName}-${projectName}-${username}`
     member.kind = 'ServiceAccount'
-    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName: projectName, contextNamespace: serviceAccountNamespace, token, caData, server })
+    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName, contextNamespace: serviceAccountNamespace, token, caData, server })
   }
   return member
 }

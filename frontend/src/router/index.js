@@ -17,7 +17,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
@@ -44,30 +43,6 @@ Vue.use(Router)
 
 export default function createRouter ({ store, userManager }) {
   /* technical components */
-  const Logout = {
-    beforeRouteEnter (to, from, next) {
-      signout(userManager)
-        .then(() => next('/login'), err => next(err))
-    },
-    render (createElement, { data, children } = {}) {
-      return createElement('div', data, children)
-    }
-  }
-
-  const Callback = {
-    beforeRouteEnter (to, from, next) {
-      return signinCallback(userManager)
-        .then(user => store.dispatch('setUser', user))
-        .then(() => next('/'), err => next(err))
-    },
-    mounted () {
-      // eslint-disable-next-line lodash/prefer-lodash-method
-      this.$router.replace('/')
-    },
-    render (createElement, { data, children } = {}) {
-      return createElement('div', data, children)
-    }
-  }
 
   const PlaceholderComponent = {
     render (createElement) {
@@ -181,21 +156,6 @@ export default function createRouter ({ store, userManager }) {
       path: '/login',
       name: 'Login',
       component: Login,
-      meta: {
-        public: true
-      }
-    },
-    {
-      path: '/logout',
-      name: 'Logout',
-      component: Logout,
-      meta: {
-        public: true
-      }
-    },
-    {
-      path: '/callback',
-      component: Callback,
       meta: {
         public: true
       }
@@ -419,36 +379,39 @@ export default function createRouter ({ store, userManager }) {
   const routerOptions = { mode, scrollBehavior, routes }
 
   /* navigation guards */
-  function ensureConfigurationLoaded (to, from, next) {
-    if (store.state.cfg) {
-      return next()
+  async function ensureConfigurationLoaded (to, from, next) {
+    try {
+      if (!store.state.cfg) {
+        await store.dispatch('fetchConfiguration')
+      }
+      next()
+    } catch (err) {
+      next(err)
     }
-    return store
-      .dispatch('fetchConfiguration')
-      .then(() => next(), err => next(err))
   }
 
-  function ensureUserAuthenticatedForNonPublicRoutes (to, from, next) {
-    const meta = to.meta || {}
-    if (meta.public) {
-      return next()
-    }
-    const user = store.state.user
-    if (isUserLoggedIn(user)) {
-      return next()
-    }
-    userManager
-      .getUser()
-      .then(user => {
-        store.dispatch('setUser', user).then(() => {
-          if (isUserLoggedIn(user)) {
-            return next()
-          }
-          return next({
-            name: 'Login'
-          })
-        })
+  async function ensureUserAuthenticatedForNonPublicRoutes (to, from, next) {
+    try {
+      const { meta = {}, path } = to
+      if (meta.public) {
+        return next()
+      }
+      if (userManager.isUserLoggedIn()) {
+        const user = userManager.getUser()
+        const storedUser = store.state.user
+        if (!storedUser || storedUser.jti !== user.jti) {
+          await store.dispatch('setUser', user)
+        }
+        return next()
+      }
+      const query = path !== '/' ? { redirectPath: path } : undefined
+      return next({
+        name: 'Login',
+        query
       })
+    } catch (err) {
+      next(err)
+    }
   }
 
   function ensureProjectsLoaded () {
@@ -577,15 +540,12 @@ export default function createRouter ({ store, userManager }) {
 
   /* register navigation guards */
   router.beforeEach((to, from, next) => {
-    console.log('Router beforeEach')
-    store.dispatch('setLoading')
-      .then(() => next(), () => next())
+    store.dispatch('setLoading').then(() => next(), () => next())
   })
   router.beforeEach(ensureConfigurationLoaded)
   router.beforeEach(ensureUserAuthenticatedForNonPublicRoutes)
   router.beforeEach(ensureDataLoaded)
   router.afterEach((to, from) => {
-    console.log('Router afterEach')
     store.dispatch('unsetLoading')
   })
   router.onError(err => {

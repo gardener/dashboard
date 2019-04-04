@@ -19,25 +19,21 @@
 const _ = require('lodash')
 const morgan = require('morgan')
 const express = require('express')
-const cors = require('cors')
 const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
 const logger = require('./logger')
 const routes = require('./routes')
+const { authenticate } = require('./security')
 const io = require('./io')
-
-const { jwt, attachAuthorization, frontendConfig, jsonWebKeySet, notFound, sendError } = require('./middleware')
+const { frontendConfig, notFound, sendError } = require('./middleware')
 
 // configure router
 const router = express.Router()
 
 router.use(morgan('common', logger))
-router.use(bodyParser.urlencoded({
-  extended: false
-}))
+router.use(cookieParser())
 router.use(bodyParser.json())
-router.use(cors())
-router.use(jwt())
-router.use(attachAuthorization)
+router.use(authenticate())
 _.each(routes, (value, key) => router.use(key, value))
 router.use(notFound)
 router.use(sendError)
@@ -46,6 +42,5 @@ router.use(sendError)
 module.exports = {
   router,
   io,
-  frontendConfig,
-  jsonWebKeySet
+  frontendConfig
 }

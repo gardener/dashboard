@@ -199,6 +199,28 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
+  apiRegistration (options) {
+    options = assign(options, {
+      path: 'apis/apiregistration.k8s.io',
+      version: 'v1',
+      namespaceResources: [],
+      groupResources: [
+        'apiservices'
+      ]
+    })
+    return new ApiGroup(credentials(options))
+  },
+  authentication (options) {
+    options = assign(options, {
+      path: 'apis/authentication.k8s.io',
+      version: 'v1',
+      namespaceResources: [],
+      groupResources: [
+        'tokenreviews'
+      ]
+    })
+    return new ApiGroup(credentials(options))
+  },
   authorization (options) {
     options = assign(options, {
       path: 'apis/authorization.k8s.io',
@@ -220,25 +242,19 @@ module.exports = {
       spec: Specs.Healthz
     })
   },
-  apiregistration () {
-    return new kubernetesClient.Client({
-      config: credentials(),
-      spec: Specs.APIRegistration
-    })
-  },
   getKubeconfigFromServiceAccount ({ serviceAccountName, contextName = 'default', contextNamespace, token, server, caData }) {
-    const clusterName = 'garden'
+    const clusterName = 'garden' // TODO as parameter
     const cluster = {
       'certificate-authority-data': caData,
       server
     }
-    const userName = serviceAccountName
+    const username = serviceAccountName
     const user = {
       token
     }
     const context = {
       cluster: clusterName,
-      user: userName,
+      user: username,
       namespace: contextNamespace
     }
     return yaml.safeDump({
@@ -249,7 +265,7 @@ module.exports = {
       }],
       users: [{
         user,
-        name: userName
+        name: username
       }],
       contexts: [{
         context,
@@ -258,7 +274,6 @@ module.exports = {
       'current-context': contextName
     })
   },
-
   async waitUntilResourceHasCondition ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
     const onTimeoutError = () => {
       const duration = `${waitTimeout} ms`
