@@ -498,12 +498,12 @@ const stub = {
     monitoringPassword,
     loggingUser,
     loggingPassword,
-    seedClusterName,
     seedSecretName,
     seedName
   }) {
     const seedServerURL = 'https://seed.foo.bar:8443'
     const technicalID = `shoot--${project}--${name}`
+    const projectResource = readProject(namespace)
 
     const shootResult = getShoot({name, project, kind, region, seed: seedName})
     shootResult.status = {
@@ -546,6 +546,10 @@ const stub = {
     }
 
     return [nockWithAuthorization(bearer)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(200, () => getProjectNamespace(namespace))
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project}`)
+      .reply(200, () => projectResource)
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shootResult)
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)

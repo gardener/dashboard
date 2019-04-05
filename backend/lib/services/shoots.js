@@ -17,7 +17,7 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64 } = require('../utils')
+const { decodeBase64, getProjectByNamespace } = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
@@ -241,7 +241,10 @@ exports.info = async function ({ user, namespace, name }) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = namespace.replace(/^garden-/, '')
+  const projects = Garden(user).projects
+  const namespaces = core.namespaces
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
+  const projectName = project.metadata.name
   const data = {
     seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
   }

@@ -20,9 +20,10 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
-const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
+const { PreconditionFailed, GatewayTimeout, InternalServerError } = require('../errors')
 const logger = require('../logger')
 const shoots = require('./shoots')
+const { getProjectByNamespace } = require('../utils')
 const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
@@ -101,16 +102,6 @@ async function validateDeletePreconditions ({ user, namespace }) {
     throw new PreconditionFailed(`Only empty projects can be deleted`)
   }
 }
-
-async function getProjectByNamespace (projects, namespaces, namespace) {
-  const ns = await namespaces.get({ name: namespace })
-  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
-  if (!name) {
-    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
-  }
-  return projects.get({ name })
-}
-exports.getProjectByNamespace = getProjectByNamespace
 
 exports.list = async function ({ user, qs = {} }) {
   const [

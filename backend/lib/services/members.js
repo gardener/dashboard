@@ -19,9 +19,8 @@
 const _ = require('lodash')
 const yaml = require('js-yaml')
 const config = require('../config')
-const { decodeBase64 } = require('../utils')
+const { decodeBase64, getProjectByNamespace } = require('../utils')
 const kubernetes = require('../kubernetes')
-const { getProjectByNamespace } = require('./projects')
 const { Conflict, NotFound } = require('../errors.js')
 
 function Core ({ auth }) {
