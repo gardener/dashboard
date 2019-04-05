@@ -40,8 +40,7 @@ const getters = {
 const actions = {
   getAll: ({ commit, rootState }) => {
     const namespace = rootState.namespace
-    const user = rootState.user
-    return getInfrastructureSecrets({ user, namespace })
+    return getInfrastructureSecrets({ namespace })
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all
@@ -52,19 +51,17 @@ const actions = {
       })
   },
   update: ({ commit, rootState }, { metadata, data }) => {
-    const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
     const bindingName = metadata.bindingName
-    return updateInfrastructureSecret({ user, namespace, bindingName, data: { metadata, data } })
+    return updateInfrastructureSecret({ namespace, bindingName, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
       })
   },
   create: ({ commit, rootState }, { metadata, data }) => {
-    const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
-    return createInfrastructureSecret({ user, namespace, data: { metadata, data } })
+    return createInfrastructureSecret({ namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
@@ -72,8 +69,7 @@ const actions = {
   },
   delete ({ dispatch, commit, rootState }, bindingName) {
     const namespace = rootState.namespace
-    const user = rootState.user
-    return deleteInfrastructureSecret({ namespace, bindingName, user })
+    return deleteInfrastructureSecret({ namespace, bindingName })
       .then(res => {
         commit('ITEM_DELETED', res.data)
         return res.data

@@ -105,11 +105,9 @@ const actions = {
     return getters.items
   },
   get ({ dispatch, commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-
     const getShootIfNecessary = new Promise(async (resolve, reject) => {
       if (!findItem({ name, namespace })) {
-        getShoot({ namespace, name, user })
+        getShoot({ namespace, name })
           .then(res => {
             const item = res.data
             commit('ITEM_PUT', { newItem: item, rootState })
@@ -132,20 +130,17 @@ const actions = {
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
-    const user = rootState.user
-    return createShoot({ namespace, user, data })
+    return createShoot({ namespace, data })
   },
   delete ({ dispatch, commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-    return deleteShoot({ namespace, name, user })
+    return deleteShoot({ namespace, name })
   },
   /**
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
   getInfo ({ commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-    return getShootInfo({ namespace, name, user })
+    return getShootInfo({ namespace, name })
       .then(res => res.data)
       .then(info => {
         if (info.serverUrl) {
