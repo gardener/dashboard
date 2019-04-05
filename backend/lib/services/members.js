@@ -122,9 +122,9 @@ function deleteServiceaccount (core, namespace, name) {
     })
 }
 
-async function setProjectMember (projects, namespace, username) {
+async function setProjectMember (projects, namespaces, namespace, username) {
   // get project
-  const project = await getProjectByNamespace(projects, namespace)
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   // get project members from project
   const members = _.slice(project.spec.members, 0)
   if (_.find(members, ['name', username])) {
@@ -143,9 +143,9 @@ async function setProjectMember (projects, namespace, username) {
   return projects.mergePatch({ name: project.metadata.name, body })
 }
 
-async function unsetProjectMember (projects, namespace, username) {
+async function unsetProjectMember (projects, namespaces, namespace, username) {
   // get project
-  const project = await getProjectByNamespace(projects, namespace)
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   // get project members from project
   const members = _.slice(project.spec.members, 0)
   if (!_.find(members, ['name', username])) {
@@ -162,21 +162,22 @@ async function unsetProjectMember (projects, namespace, username) {
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  // create garden client for current user
   const projects = Garden(user).projects
+  const namespaces = Core(user).namespaces
 
-  const project = await getProjectByNamespace(projects, namespace)
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
 
+  // get project members from project
   return fromResource(project, serviceAccountList)
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
-  // create garden client for current user
   const projects = Garden(user).projects
-  // get project
-  const project = await getProjectByNamespace(projects, namespace)
-  // name of the project
+  const namespaces = Core(user).namespaces
+
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
+
   const projectName = project.metadata.name
   // find member of project
   const member = _.find(project.spec.members, {
@@ -208,28 +209,31 @@ exports.get = async function ({ user, namespace, name: username }) {
 
 exports.create = async function ({ user, namespace, body: { name: username } }) {
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  const core = Core(user)
   if (serviceaccountNamespace === namespace) {
-    const core = Core(user)
     await createServiceaccount(core, serviceaccountNamespace, serviceaccountName, user)
   }
   const projects = Garden(user).projects
+  const namespaces = core.namespaces
 
-  const project = await setProjectMember(projects, namespace, username) // assign user to project
+  // assign user to project
+  const project = await setProjectMember(projects, namespaces, namespace, username)
   const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
   return fromResource(project, serviceAccountList)
 }
 
 exports.remove = async function ({ user, namespace, name: username }) {
   const projects = Garden(user).projects
+  const namespaces = Core(user).namespaces
 
-  const project = await unsetProjectMember(projects, namespace, username) // unassign user from project
-  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
-
+  // unassign user from project
+  const project = await unsetProjectMember(projects, namespaces, namespace, username)
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
     await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
   }
 
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
   return fromResource(project, serviceAccountList)
 }

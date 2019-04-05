@@ -20,13 +20,16 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
-const core = kubernetes.core()
 const { PreconditionFailed, NotFound, GatewayTimeout, InternalServerError } = require('../errors')
 const logger = require('../logger')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
+
+function Core ({ auth }) {
+  return kubernetes.core({ auth })
+}
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -99,8 +102,8 @@ async function validateDeletePreconditions ({ user, namespace }) {
   }
 }
 
-async function getProjectByNamespace (projects, namespace) {
-  const ns = await core.namespaces.get({ name: namespace })
+async function getProjectByNamespace (projects, namespaces, namespace) {
+  const ns = await namespaces.get({ name: namespace })
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
@@ -223,13 +226,17 @@ exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
   const projects = Garden(user).projects
-  const project = await getProjectByNamespace(projects, namespace)
+  const namespaces = Core(user).namespaces
+
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
   const projects = Garden(user).projects
-  const project = await getProjectByNamespace(projects, namespace)
+  const namespaces = Core(user).namespaces
+
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   const name = project.metadata.name
   // do not update createdBy
   const { metadata, data } = fromResource(project)
@@ -243,7 +250,9 @@ exports.patch = async function ({ user, name: namespace, body }) {
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
   const projects = Garden(user).projects
-  const project = await getProjectByNamespace(projects, namespace)
+  const namespaces = Core(user).namespaces
+
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   const name = project.metadata.name
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
