@@ -122,7 +122,7 @@ async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
 }
 
 async function getProjectNameFromNamespace (namespace) {
-  const project = getProjectByNamespace(namespace)
+  const project = await getProjectByNamespace(namespace)
   return project.metadata.name
 }
 
