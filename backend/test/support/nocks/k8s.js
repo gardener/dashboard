@@ -995,6 +995,11 @@ const stub = {
     const adminScope = nockWithAuthorization(auth.bearer)
     reviewToken(adminScope)
     return [ scope, adminScope ]
+  },
+  authorizeToken () {
+    const adminScope = nockWithAuthorization(auth.bearer)
+    reviewToken(adminScope)
+    return adminScope
   }
 }
 

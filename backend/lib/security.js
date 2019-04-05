@@ -126,22 +126,13 @@ async function authorizationUrl (req, res) {
 async function authorizeToken (req, res) {
   const { token, expiresIn } = req.body
   const bearer = trim(token)
-  const auth = { bearer }
-  const [
-    { username: id, groups },
-    isAdmin,
-    canCreateProject
-  ] = await Promise.all([
-    authentication.isAuthenticated({ token: bearer }),
-    authorization.isAdmin({ auth }),
-    authorization.canCreateProject({ auth })
-  ])
+
+  const { username: id, groups } = await authentication.isAuthenticated({ token: bearer })
+
   const { name, email } = decode(bearer)
   const user = {
     id,
     groups,
-    isAdmin,
-    canCreateProject,
     name,
     email
   }

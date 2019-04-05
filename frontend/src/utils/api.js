@@ -157,6 +157,10 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
+export function getUserInfo () {
+  return getResource('/api/user')
+}
+
 export function getToken () {
   return getResource('/api/user/token')
 }
