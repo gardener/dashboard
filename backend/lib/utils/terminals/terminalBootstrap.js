@@ -370,7 +370,9 @@ async function bootstrapIngressForSeedOnSoil ({ gardenClient, coreClient, seedNa
   const soilExtensionClient = kubernetes.extensions(soilClientConfig)
 
   // calculate ingress domain
-  const soilIngressDomain = await getShootIngressDomainForSeed(seedShootResource, soilSeedResource)
+  const projectsClient = kubernetes.garden().projects
+  const namespacesClient = kubernetes.core().namespaces
+  const soilIngressDomain = await getShootIngressDomainForSeed(projectsClient, namespacesClient, seedShootResource, soilSeedResource)
   const apiserverIngressHost = `api.${soilIngressDomain}`
 
   // replace ingress apiserver resource
@@ -389,6 +391,9 @@ async function bootstrapIngressForSeedOnSoil ({ gardenClient, coreClient, seedNa
 }
 
 async function bootstrapIngressAndHeadlessServiceForSoilOnSoil ({ coreClient, soilSeedResource }) {
+  const projectsClient = kubernetes.garden().projects
+  const namespacesClient = kubernetes.core().namespaces
+
   const soilKubeconfig = await getSeedKubeconfig({ coreClient, seed: soilSeedResource })
   const soilClientConfig = kubernetes.fromKubeconfig(soilKubeconfig)
   const soilCoreClient = kubernetes.core(soilClientConfig)
@@ -396,7 +401,7 @@ async function bootstrapIngressAndHeadlessServiceForSoilOnSoil ({ coreClient, so
 
   const namespace = 'garden'
   const soilApiserverHostname = new URL(soilClientConfig.url).hostname
-  const soilIngressDomain = await getSoilIngressDomainForSeed(soilSeedResource)
+  const soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeedResource)
   await bootstrapIngressAndHeadlessService({
     coreClient: soilCoreClient,
     extensionClient: soilExtensionClient,

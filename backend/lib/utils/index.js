@@ -61,27 +61,27 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
-async function getShootIngressDomain (shoot) {
+async function getShootIngressDomain (projects, namespaces, shoot) {
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
-  return getShootIngressDomainForSeed(shoot, seed)
+  return getShootIngressDomainForSeed(projects, namespaces, shoot, seed)
 }
 
-async function getShootIngressDomainForSeed (shoot, seed) {
+async function getShootIngressDomainForSeed (projects, namespaces, shoot, seed) {
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = await getProjectNameFromNamespace(namespace)
+  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
 
   return `${name}.${projectName}.${ingressDomain}`
 }
 
-async function getSoilIngressDomainForSeed (seed) {
+async function getSoilIngressDomainForSeed (projects, namespaces, seed) {
   const namespace = 'garden'
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = await getProjectNameFromNamespace(namespace)
+  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
 
   return `${projectName}.${ingressDomain}`
 }
@@ -121,13 +121,13 @@ async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
   }
 }
 
-async function getProjectNameFromNamespace (namespace) {
-  const project = await getProjectByNamespace(namespace)
+async function getProjectNameFromNamespace (projects, namespaces, namespace) {
+  const project = await getProjectByNamespace(projects, namespaces, namespace)
   return project.metadata.name
 }
 
-async function getProjectByNamespace (projects, namespace) {
-  const ns = await kubernetes.core().namespaces.get({ name: namespace })
+async function getProjectByNamespace (projects, namespaces, namespace) {
+  const ns = await namespaces.get({ name: namespace })
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)

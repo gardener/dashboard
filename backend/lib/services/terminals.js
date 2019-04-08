@@ -26,7 +26,8 @@ const {
   createOwnerRefArrayForResource,
   getConfigValue,
   readServiceAccountToken,
-  getTargetClusterClientConfig
+  getTargetClusterClientConfig,
+  getSoilIngressDomainForSeed
 } = require('../utils')
 const {
   COMPONENT_TERMINAL,
@@ -47,6 +48,10 @@ const { Forbidden } = require('../errors')
 const logger = require('../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
+
+function Garden ({ auth }) {
+  return kubernetes.garden({ auth })
+}
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
@@ -166,13 +171,14 @@ async function initializeSeedTerminalObject ({ user, seed, scheduleNamespace }) 
 
   const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil'
   let soilIngressDomain
+  const projectsClient = Garden(user).projects
+  const namespacesClient = kubernetes.core().namespaces // TODO Currently there is no other way.. but do not use admin!
   if (isSoil) {
     const soilSeed = seed
-    const ingressDomain = _.get(soilSeed, 'spec.ingressDomain')
-    soilIngressDomain = `garden.${ingressDomain}`
+    soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeed)
   } else {
     const seedShootResource = await readShoot({ user, namespace: 'garden', name: _.get(seed, 'metadata.name') })
-    soilIngressDomain = await getShootIngressDomain(seedShootResource)
+    soilIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, seedShootResource)
   }
 
   terminalInfo.server = `api.${soilIngressDomain}`
