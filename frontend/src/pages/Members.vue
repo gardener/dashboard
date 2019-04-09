@@ -258,10 +258,10 @@ export default {
       return toLower(this.projectData.owner)
     },
     serviceAccountList () {
-      return filter(this.memberList, isServiceAccount)
+      return filter(this.memberList, ({ username }) => isServiceAccount(username))
     },
     memberListWithoutOwner () {
-      const predicate = member => !this.isOwner(member) && !isServiceAccount(member)
+      const predicate = ({ username }) => !this.isOwner(username) && !isServiceAccount(username)
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
@@ -309,8 +309,8 @@ export default {
     displayName (username) {
       return displayName(username)
     },
-    isOwner (member) {
-      return this.owner === toLower(member.username)
+    isOwner (username) {
+      return this.owner === toLower(username)
     },
     isEmail (username) {
       return isEmail(username)

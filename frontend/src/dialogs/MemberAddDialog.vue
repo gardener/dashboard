@@ -199,7 +199,7 @@ export default {
       return map(filter(this.memberList, isServiceAccount), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
     },
     projectMembersNames () {
-      return filter(this.memberList, !isServiceAccount)
+      return filter(this.memberList, ({ username }) => !isServiceAccount(username))
     }
   },
   methods: {

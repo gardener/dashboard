@@ -195,7 +195,7 @@ export default {
       return map(this.projectList, 'metadata.name')
     },
     ownerItems () {
-      const members = filter(this.memberList, !isServiceAccount)
+      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
       const owner = get(this.project, 'data.owner')
       if (!owner || includes(members, owner)) {
         return members
