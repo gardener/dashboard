@@ -126,8 +126,8 @@ limitations under the License.
           label="Search"
           solo
           clearable
-          v-model="serviceFilter"
-          @keyup.esc="serviceFilter=''"
+          v-model="serviceAccountFilter"
+          @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
         <v-btn icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
@@ -231,7 +231,7 @@ export default {
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
       userFilter: '',
-      serviceFilter: '',
+      serviceAccountFilter: '',
       fab: false,
       floatingButton: false,
       currentServiceAccountName: undefined,
@@ -265,22 +265,22 @@ export default {
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
-      const predicate = value => {
+      const predicate = ({ username }) => {
         if (!this.userFilter) {
           return true
         }
-        const name = replace(value, /@.*$/, '')
+        const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
     },
     sortedAndFilteredServiceAccountList () {
-      const predicate = service => {
-        if (!this.serviceFilter) {
+      const predicate = ({ username }) => {
+        if (!this.serviceAccountFilter) {
           return true
         }
-        const name = serviceAccountToDisplayName(service.username)
-        return includes(toLower(name), toLower(this.serviceFilter))
+        const name = serviceAccountToDisplayName(username)
+        return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate))
     },
