@@ -346,9 +346,6 @@ export default {
         this.kubeconfigDialog = true
       }
     },
-    isServiceAccountFromCurrentNamespace (name) {
-      return isServiceAccountFromNamespace(name, this.namespace)
-    },
     onDelete (username) {
       this.deleteMember(username)
     }
