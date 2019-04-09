@@ -32,12 +32,32 @@ function Garden ({ auth }) {
   return kubernetes.garden({ auth })
 }
 
-function fromResource (project = {}) {
+function toServiceAccountName ({ metadata: { name, namespace } }) {
+  return `system:serviceaccount:${namespace}:${name}`
+}
+
+function fromResource (project = {}, serviceAccounts = []) {
+  const serviceAccountsMetadata = _
+    .chain(serviceAccounts)
+    .map(serviceAccount => [
+      toServiceAccountName(serviceAccount),
+      {
+        createdBy: _.get(serviceAccount, ['metadata', 'annotations', 'garden.sapcloud.io/createdBy']),
+        creationTimestamp: serviceAccount.metadata.creationTimestamp
+      }
+    ])
+    .fromPairs()
+    .value()
+
   return _
     .chain(project)
     .get('spec.members')
     .filter(['kind', 'User'])
     .map('name')
+    .map(username => ({
+      username,
+      ...serviceAccountsMetadata[username]
+    }))
     .value()
 }
 
@@ -75,8 +95,16 @@ function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectNa
   })
 }
 
-function createServiceaccount (core, namespace, name) {
-  const body = { metadata: { name, namespace } }
+function createServiceaccount (core, namespace, name, user) {
+  const body = {
+    metadata: {
+      name,
+      namespace,
+      annotations: {
+        'garden.sapcloud.io/createdBy': user.id
+      }
+    }
+  }
   return core.namespaces(namespace).serviceaccounts.post({
     body
   })
@@ -136,10 +164,11 @@ async function unsetProjectMember (projects, namespace, username) {
 exports.list = async function ({ user, namespace }) {
   // create garden client for current user
   const projects = Garden(user).projects
-  // get project
+
   const project = await getProjectByNamespace(projects, namespace)
-  // get project members from project
-  return fromResource(project)
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+
+  return fromResource(project, serviceAccountList)
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
@@ -181,24 +210,26 @@ exports.create = async function ({ user, namespace, body: { name: username } }) 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
-    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName)
+    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName, user)
   }
-  // create garden client for current user
   const projects = Garden(user).projects
-  // assign user to project
-  const project = await setProjectMember(projects, namespace, username)
-  return fromResource(project)
+
+  const project = await setProjectMember(projects, namespace, username) // assign user to project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+  return fromResource(project, serviceAccountList)
 }
 
 exports.remove = async function ({ user, namespace, name: username }) {
-  // create garden client for current user
   const projects = Garden(user).projects
-  // unassign user from project
-  const project = await unsetProjectMember(projects, namespace, username)
+
+  const project = await unsetProjectMember(projects, namespace, username) // unassign user from project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
     await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
   }
-  return fromResource(project)
+
+  return fromResource(project, serviceAccountList)
 }

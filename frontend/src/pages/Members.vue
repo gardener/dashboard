@@ -77,7 +77,7 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(username, index) in sortedAndFilteredMemberList">
+        <template v-for="({ username }, index) in sortedAndFilteredMemberList">
           <v-divider
             v-if="index > 0"
             inset
@@ -126,8 +126,8 @@ limitations under the License.
           label="Search"
           solo
           clearable
-          v-model="serviceFilter"
-          @keyup.esc="serviceFilter=''"
+          v-model="serviceAccountFilter"
+          @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
         <v-btn icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
@@ -145,54 +145,15 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(username, index) in sortedAndFilteredServiceAccountList">
-          <v-divider
-            v-if="index > 0"
-            inset
-            :key="`${username}-dividerKey`"
-          ></v-divider>
-          <v-list-tile
-            avatar
-            :key="username"
-          >
-
-            <v-list-tile-avatar>
-              <img :src="avatarUrl(username)" />
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>
-                {{displayName(username)}}
-              </v-list-tile-title>
-              <v-list-tile-sub-title>
-                {{username}}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(username)">
-                  <v-icon>mdi-download</v-icon>
-                </v-btn>
-                <span>Download Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(username)">
-                  <v-icon>visibility</v-icon>
-                </v-btn>
-                <span>Show Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(username)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-                <span>Delete Service Account</span>
-              </v-tooltip>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
+        <member-service-accounts-row
+          v-for="(member, index) in sortedAndFilteredServiceAccountList"
+          :member="member"
+          :firstRow="index === 0"
+          :key="member.username"
+          @onDownload="onDownload"
+          @onKubeconfig="onKubeconfig"
+          @onDelete="onDelete"
+        ></member-service-accounts-row>
       </v-list>
     </v-card>
 
@@ -236,28 +197,31 @@ import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import replace from 'lodash/replace'
 import sortBy from 'lodash/sortBy'
-import startsWith from 'lodash/startsWith'
 import find from 'lodash/find'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
+import CodeBlock from '@/components/CodeBlock'
+import MemberServiceAccountsRow from '@/components/MemberServiceAccountsRow'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
-  serviceAccountToDisplayName
+  serviceAccountToDisplayName,
+  isServiceAccount,
+  isServiceAccountFromNamespace
 } from '@/utils'
 import { getMember } from '@/utils/api'
-import CodeBlock from '@/components/CodeBlock'
 
 export default {
   name: 'members',
   components: {
     MemberAddDialog,
     MemberHelpDialog,
-    CodeBlock
+    CodeBlock,
+    MemberServiceAccountsRow
   },
   data () {
     return {
@@ -267,7 +231,7 @@ export default {
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
       userFilter: '',
-      serviceFilter: '',
+      serviceAccountFilter: '',
       fab: false,
       floatingButton: false,
       currentServiceAccountName: undefined,
@@ -294,30 +258,29 @@ export default {
       return toLower(this.projectData.owner)
     },
     serviceAccountList () {
-      const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
-      return filter(this.memberList, predicate)
+      return filter(this.memberList, ({ username }) => isServiceAccount(username))
     },
     memberListWithoutOwner () {
-      const predicate = username => !this.isOwner(username) && !startsWith(username, 'system:serviceaccount:')
+      const predicate = ({ username }) => !this.isOwner(username) && !isServiceAccount(username)
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
-      const predicate = value => {
+      const predicate = ({ username }) => {
         if (!this.userFilter) {
           return true
         }
-        const name = replace(value, /@.*$/, '')
+        const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
     },
     sortedAndFilteredServiceAccountList () {
-      const predicate = service => {
-        if (!this.serviceFilter) {
+      const predicate = ({ username }) => {
+        if (!this.serviceAccountFilter) {
           return true
         }
-        const name = serviceAccountToDisplayName(service)
-        return includes(toLower(name), toLower(this.serviceFilter))
+        const name = serviceAccountToDisplayName(username)
+        return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate))
     },

@@ -20,7 +20,7 @@ limitations under the License.
       <img :src="avatarUrl"/>
     </v-avatar>
     <a v-if="mailTo && isEmail" :href="`mailto:${accountName}`" class="pl-2 cyan--text text--darken-2">{{accountName}}</a>
-    <span v-else class="pl-2">{{accountName}}</span>
+    <span v-else class="pl-2">{{accountName || '-unknown-'}}</span>
   </div>
 </template>
 
