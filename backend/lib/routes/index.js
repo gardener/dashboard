@@ -18,7 +18,7 @@
 
 module.exports = {
   '/info': require('./info'),
-  '/user': require('./userInfo'),
+  '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/domains': require('./domains'),
   '/shoots': require('./shoots'),
