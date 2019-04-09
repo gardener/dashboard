@@ -988,13 +988,11 @@ const stub = {
         .reply(statusCode, version)
     ]
   },
-  getUserInfo ({ bearer }) {
+  getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canDeleteShootsInAllNamespaces(scope)
     canCreateProjects(scope)
-    const adminScope = nockWithAuthorization(auth.bearer)
-    reviewToken(adminScope)
-    return [ scope, adminScope ]
+    return scope
   },
   authorizeToken () {
     const adminScope = nockWithAuthorization(auth.bearer)

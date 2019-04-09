@@ -21,7 +21,7 @@ import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
 import concat from 'lodash/concat'
-import { getUserInfo } from '@/utils/api'
+import { getPrivileges } from '@/utils/api'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -299,7 +299,7 @@ export default function createRouter ({ store, userManager }) {
         const user = userManager.getUser()
         const storedUser = store.state.user
         if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin, canCreateProject } } = await getUserInfo()
+          const { data: { isAdmin, canCreateProject } } = await getPrivileges()
 
           await store.dispatch('setUser', { ...user, isAdmin, canCreateProject })
         }

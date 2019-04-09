@@ -26,7 +26,7 @@ const uuidv1 = require('uuid/v1')
 const base64url = require('base64url')
 const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
-const { authentication, authorization } = require('./services')
+const { authentication } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
 const { sessionSecret, cookieMaxAge = 1800, oidc = {} } = require('./config')
 
