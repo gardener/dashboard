@@ -95,7 +95,7 @@ function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectNa
   })
 }
 
-function createServiceaccount (user, core, namespace, name) {
+function createServiceaccount (core, namespace, name, user) {
   const body = {
     metadata: {
       name,
@@ -165,13 +165,8 @@ exports.list = async function ({ user, namespace }) {
   // create garden client for current user
   const projects = Garden(user).projects
 
-  const [
-    project,
-    { items: serviceAccountList }
-  ] = await Promise.all([
-    getProjectByNamespace(projects, namespace),
-    Core(user).namespaces(namespace).serviceaccounts.get({})
-  ])
+  const project = await getProjectByNamespace(projects, namespace)
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
 
   return fromResource(project, serviceAccountList)
 }
@@ -215,30 +210,21 @@ exports.create = async function ({ user, namespace, body: { name: username } }) 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)
-    await createServiceaccount(user, core, serviceaccountNamespace, serviceaccountName)
+    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName, user)
   }
   const projects = Garden(user).projects
 
-  const [
-    project,
-    { items: serviceAccountList }
-  ] = await Promise.all([
-    await setProjectMember(projects, namespace, username), // assign user to project
-    Core(user).namespaces(namespace).serviceaccounts.get({})
-  ])
+  const project = await setProjectMember(projects, namespace, username) // assign user to project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
   return fromResource(project, serviceAccountList)
 }
 
 exports.remove = async function ({ user, namespace, name: username }) {
   const projects = Garden(user).projects
 
-  const [
-    project,
-    { items: serviceAccountList }
-  ] = await Promise.all([
-    await unsetProjectMember(projects, namespace, username), // unassign user from project
-    Core(user).namespaces(namespace).serviceaccounts.get({})
-  ])
+  const project = await unsetProjectMember(projects, namespace, username) // unassign user from project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const core = Core(user)

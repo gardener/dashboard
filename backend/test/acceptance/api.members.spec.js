@@ -83,7 +83,7 @@ module.exports = function ({ agent }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(_.concat(members, 'baz@example.org'))
+    expect(res.body).to.eql(_.concat(members, { username: 'baz@example.org' }))
   })
 
   it('should not add member that is already a project member', async function () {
@@ -107,7 +107,7 @@ module.exports = function ({ agent }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(_.without(members, name))
+    expect(res.body).to.eql(_.filter(members, ({ username }) => username !== name))
   })
 
   it('should not delete member that is not a project member', async function () {
