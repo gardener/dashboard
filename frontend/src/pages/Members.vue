@@ -210,8 +210,7 @@ import {
   gravatarUrlGeneric,
   isEmail,
   serviceAccountToDisplayName,
-  isServiceAccount,
-  isServiceAccountFromNamespace
+  isServiceAccount
 } from '@/utils'
 import { getMember } from '@/utils/api'
 
