@@ -800,7 +800,7 @@ export default {
 
       this.activeTab = 'tab-infra'
 
-      this.selectedSecret = undefined  // pragma: whitelist secret
+      this.selectedSecret = undefined // pragma: whitelist secret
       this.shootDefinition = cloneDeep(defaultShootDefinition)
 
       this.setDefaultInfrastructureKind()
