@@ -37,7 +37,7 @@ function getSecret (core, namespace, name) {
       if (err.code === 404) {
         return
       }
-      logger.error('failed to fetch %s secret: %s', name, err)
+      logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
       throw err
     })
 }

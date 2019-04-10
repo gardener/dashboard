@@ -410,7 +410,7 @@ export default {
     return {
       shootDefinition: undefined,
       infrastructureData: undefined,
-      selectedSecret: undefined,
+      selectedSecret: undefined, // pragma: whitelist secret
       selectedInfrastructureKind: undefined,
       activeTab: 'tab-infra',
       purposes: ['evaluation', 'development', 'production'],
@@ -536,7 +536,7 @@ export default {
         }
         this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
 
-        this.selectedSecret = secret
+        this.selectedSecret = secret // pragma: whitelist secret
 
         this.setCloudProfileDefaults()
         this.setDefaultPurpose()
@@ -800,7 +800,7 @@ export default {
 
       this.activeTab = 'tab-infra'
 
-      this.selectedSecret = undefined
+      this.selectedSecret = undefined  // pragma: whitelist secret
       this.shootDefinition = cloneDeep(defaultShootDefinition)
 
       this.setDefaultInfrastructureKind()

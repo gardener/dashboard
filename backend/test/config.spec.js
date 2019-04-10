@@ -63,10 +63,10 @@ describe('config', function () {
     describe('#loadConfig', function () {
       const sandbox = sinon.createSandbox()
       const requiredEnvironmentVariables = {
-        SESSION_SECRET: 'secret',
+        SESSION_SECRET: 'secret', // pragma: whitelist secret
         OIDC_ISSUER: 'issuer',
         OIDC_CLIENT_ID: 'client_id',
-        OIDC_CLIENT_SECRET: 'client_secret',
+        OIDC_CLIENT_SECRET: 'client_secret', // pragma: whitelist secret
         OIDC_REDIRECT_URI: 'redirect_uri'
       }
 

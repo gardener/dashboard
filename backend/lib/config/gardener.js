@@ -24,14 +24,14 @@ const { homedir } = require('os')
 const { join: joinPath } = require('path')
 
 const environmentVariableDefinitions = {
-  SESSION_SECRET: 'sessionSecret',
+  SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
-  OIDC_CLIENT_SECRET: 'oidc.client_secret',
+  OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
   OIDC_REDIRECT_URI: 'oidc.redirect_uri',
   GITHUB_AUTHENTICATION_USERNAME: 'gitHub.authentication.username',
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
-  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret',
+  GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
   LOG_LEVEL: 'logLevel',
   PORT: {
     type: 'Integer',
