@@ -154,6 +154,13 @@ class PreconditionFailed extends HttpClientError {
 }
 exports.PreconditionFailed = PreconditionFailed
 
+class UnsupportedMediaType extends HttpClientError {
+  constructor (message) {
+    super(415, 'Unsupported Media Type', message)
+  }
+}
+exports.UnsupportedMediaType = UnsupportedMediaType
+
 class UnprocessableEntity extends HttpClientError {
   constructor (message) {
     super(422, 'Unprocessable Entity', message)

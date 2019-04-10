@@ -19,8 +19,9 @@
 const nock = require('nock')
 
 exports = module.exports = init
-exports.oidc = require('./oidc')
+exports.auth = require('./auth')
 exports.k8s = require('./k8s')
+exports.oidc = require('./oidc')
 exports.github = require('./github')
 exports.verifyAndCleanAll = verifyAndCleanAll
 

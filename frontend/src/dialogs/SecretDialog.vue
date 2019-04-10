@@ -258,28 +258,27 @@ export default {
     cancel () {
       this.hide()
     },
-    submit () {
+    async submit () {
       this.$v.$touch()
       if (this.valid) {
-        this.save()
-          .then(secret => {
-            this.hide()
-          })
-          .catch(err => {
-            const errorDetails = errorDetailsFromError(err)
-            if (this.isCreateMode) {
-              if (isConflict(err)) {
-                this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
-                setInputFocus(this, 'secretName')
-              } else {
-                this.errorMessage = 'Failed to create Infrastructure Secret.'
-              }
+        try {
+          await this.save()
+          this.hide()
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          if (this.isCreateMode) {
+            if (isConflict(err)) {
+              this.errorMessage = `Infrastructure Secret name '${this.secretName}' is already taken. Please try a different name.`
+              setInputFocus(this, 'secretName')
             } else {
-              this.errorMessage = 'Failed to update Infrastructure Secret.'
+              this.errorMessage = 'Failed to create Infrastructure Secret.'
             }
-            this.detailedErrorMessage = errorDetails.detailedMessage
-            console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          })
+          } else {
+            this.errorMessage = 'Failed to update Infrastructure Secret.'
+          }
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        }
       }
     },
     save () {

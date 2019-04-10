@@ -16,20 +16,8 @@
 
 'use strict'
 
-const express = require('express')
-const router = express.Router()
 const kubernetes = require('../kubernetes')
 const { format: fmt } = require('util')
-
-router.route('/')
-  .get(async (req, res, next) => {
-    try {
-      await healthCheck()
-      res.send('ok')
-    } catch (err) {
-      next(err)
-    }
-  })
 
 async function healthCheck () {
   let response
@@ -45,6 +33,5 @@ async function healthCheck () {
 }
 
 module.exports = {
-  router,
   healthCheck
 }

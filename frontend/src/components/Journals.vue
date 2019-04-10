@@ -20,7 +20,7 @@ limitations under the License.
       <journal :journal="journal"></journal>
     </v-card>
     <v-card v-if="journals.length === 0 && !!gitHubRepoUrl">
-      <v-card-title class="subheading white--text cyan darken-2 mt-3 journalTitle">
+      <v-card-title class="subheading white--text cyan darken-2 journalTitle">
         Journal
       </v-card-title>
       <v-card-actions>

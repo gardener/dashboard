@@ -109,21 +109,21 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    triggerMaintenance () {
+    async triggerMaintenance () {
       this.maintenanceTriggered = true
 
-      const user = this.$store.state.user
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
-      return addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, user, data: maintain })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not start maintenance'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      try {
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Could not start maintenance'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-          this.maintenanceTriggered = false
-        })
+        this.maintenanceTriggered = false
+      }
     },
     reset () {
       this.errorMessage = null

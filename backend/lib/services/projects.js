@@ -99,15 +99,15 @@ async function validateDeletePreconditions ({ user, namespace }) {
   }
 }
 
-async function getProjectNameFromNamespace (namespace) {
+async function getProjectByNamespace (projects, namespace) {
   const ns = await core.namespaces.get({ name: namespace })
   const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
   if (!name) {
     throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
   }
-  return name
+  return projects.get({ name })
 }
-exports.getProjectNameFromNamespace = getProjectNameFromNamespace
+exports.getProjectByNamespace = getProjectByNamespace
 
 exports.list = async function ({ user, qs = {} }) {
   const [
@@ -222,31 +222,29 @@ exports.watchProject = name => garden.projects.watch({ name })
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  let project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
+  const name = project.metadata.name
   // do not update createdBy
   const { metadata, data } = fromResource(project)
   _.assign(data, _.omit(body.data, 'createdBy'))
-  project = await projects.mergePatch({
+  return fromResource(await projects.mergePatch({
     name,
     body: toResource({ metadata, data })
-  })
-  return fromResource(project)
+  }))
 }
 
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
-  const name = await getProjectNameFromNamespace(namespace)
   const projects = Garden(user).projects
-  const project = await projects.get({ name })
+  const project = await getProjectByNamespace(projects, namespace)
+  const name = project.metadata.name
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)

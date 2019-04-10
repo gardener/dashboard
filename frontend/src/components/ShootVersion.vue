@@ -202,15 +202,15 @@ export default {
 
       this.$refs.shootVersionUpdate.reset()
     },
-    versionUpdateConfirmed () {
-      const user = this.$store.state.user
-      updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, user, data: { version: this.selectedVersion } })
-        .then(() => this.hideUpdateDialog())
-        .catch((err) => {
-          this.updateErrorMessage = 'Update Kubernetes version failed'
-          this.updateDetailedErrorMessage = err.message
-          console.error('Update shoot version failed with error:', err)
-        })
+    async versionUpdateConfirmed () {
+      try {
+        await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
+        this.hideUpdateDialog()
+      } catch (err) {
+        this.updateErrorMessage = 'Update Kubernetes version failed'
+        this.updateDetailedErrorMessage = err.message
+        console.error('Update shoot version failed with error:', err)
+      }
     }
   }
 }

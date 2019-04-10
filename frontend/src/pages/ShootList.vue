@@ -169,6 +169,7 @@ export default {
         { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
         { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
         { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'SEED', value: 'seed', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },
@@ -208,13 +209,15 @@ export default {
       setHideUserIssues: 'setHideUserIssues',
       setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
     }),
-    showDialog (args) {
+    async showDialog (args) {
       switch (args.action) {
         case 'access':
-          this.setSelectedShoot(args.shootItem.metadata)
-            .then(() => {
-              this.dialog = args.action
-            })
+          try {
+            await this.setSelectedShoot(args.shootItem.metadata)
+            this.dialog = args.action
+          } catch (error) {
+            // Currently not handled
+          }
           break
         case 'create':
           this.renderCreateDialog = true

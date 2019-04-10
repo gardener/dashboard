@@ -23,10 +23,14 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
-router.route('/')
+function getToken ({ auth = {} } = {}) {
+  return auth.bearer
+}
+
+router.route('/privileges')
   .get(async (req, res, next) => {
     try {
-      const user = req.user
+      const user = req.user || {}
       const [
         isAdmin,
         canCreateProject
@@ -41,4 +45,12 @@ router.route('/')
     } catch (err) {
       next(err)
     }
+  })
+
+router.route('/token')
+  .get(async (req, res, next) => {
+    const token = getToken(req.user)
+    res.send({
+      token
+    })
   })

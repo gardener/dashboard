@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <span>
+  <span v-if="visible">
     <template v-if="tag.message">
       <g-popper @rendered="popperRendered=true" :title="chipTitle" :message="tag.message" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
         <v-tooltip slot="popperRef" top>
@@ -52,7 +52,8 @@ const knownConditions = {
   },
   ControlPlaneHealthy: {
     displayName: 'Control Plane',
-    shortName: 'CP'
+    shortName: 'CP',
+    showAdminOnly: true
   },
   EveryNodeReady: {
     displayName: 'Nodes',
@@ -122,8 +123,8 @@ export default {
     tag () {
       const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
-      const name = get(knownConditions, `${type}.displayName`, replace(type, /([a-z])([A-Z])/g, '$1 $2'))
-      const shortName = get(knownConditions, `${type}.shortName`, replace(name, /^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
+      const name = get(knownConditions, [type, 'displayName'], replace(type, /([a-z])([A-Z])/g, '$1 $2'))
+      const shortName = get(knownConditions, [type, 'shortName'], replace(name, /^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
 
       return { id, name, shortName, message, lastTransitionTime, lastUpdateTime, status }
     },
@@ -150,6 +151,13 @@ export default {
         return 'blue darken-2'
       }
       return 'cyan darken-2'
+    },
+    visible () {
+      if (!this.isAdmin) {
+        const { type } = this.condition
+        return !get(knownConditions, [type, 'showAdminOnly'], false)
+      }
+      return true
     },
     ...mapGetters([
       'isAdmin'

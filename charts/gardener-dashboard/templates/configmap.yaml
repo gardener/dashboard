@@ -17,26 +17,44 @@ data:
     apiServerUrl: {{ .Values.apiServerUrl }}
     readinessProbe:
       periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-    jwt:
-      audience: {{ .Values.oidc.clientId }}
-      issuer: {{ .Values.oidc.issuerUrl }}
-      algorithms:
-      - RS256
-    jwks:
-{{- if .Values.oidc.ca }}
-      ca: {{ toJson .Values.oidc.ca }}
+{{- if .Values.gitHub }}
+    gitHub:
+      apiUrl: {{ .Values.gitHub.apiUrl }}
+      {{- if .Values.gitHub.ca }}
+      ca: {{ toJson .Values.gitHub.ca }}
+      {{- end }}
+      org: {{ .Values.gitHub.org }}
+      repository: {{ .Values.gitHub.repository }}
+{{- end }}
+{{- if .Values.cookieMaxAge }}
+    cookieMaxAge: {{ .Values.cookieMaxAge }}
+{{- else }}
+    cookieMaxAge: 1800
+{{- end }}
+{{- if .Values.oidc }}
+    oidc:
+      issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
+{{- if .Values.oidc.redirectUri }}
+      redirect_uri: {{ .Values.oidc.redirectUri }}
+{{- else }}
+      redirect_uri: https://{{ first .Values.hosts }}/auth/callback
+{{- end }}
+{{- if .Values.oidc.scope }}
+      scope: {{ .Values.oidc.scope }}
+{{- else }}
+      scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
 {{- end }}
 {{- if hasKey .Values.oidc "rejectUnauthorized" }}
       rejectUnauthorized: {{ .Values.oidc.rejectUnauthorized }}
 {{- else }}
       rejectUnauthorized: true
 {{- end }}
-      cache: false
-      rateLimit: false
-{{- if .Values.oidc.jwksUri }}
-      jwksUri: {{ .Values.oidc.jwksUri }}
-{{- else }}
-      jwksUri: "{{ .Values.oidc.issuerUrl }}/keys"
+{{- if .Values.oidc.ca }}
+      ca: {{ toJson .Values.oidc.ca }}
+{{- end }}
+{{- if .Values.oidc.clockTolerance }}
+      clockTolerance: {{ .Values.oidc.clockTolerance }}
+{{- end }}
 {{- end }}
     frontend:
 {{- if .Values.frontendConfig.landingPageUrl }}
@@ -53,64 +71,10 @@ data:
 {{- end }}
       dashboardUrl:
         pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
-      oidc:
-{{- if .Values.oidc.authority }}
-        authority: {{ .Values.oidc.authority }}
-{{- else }}
-        authority: {{ .Values.oidc.issuerUrl }}
-{{- end }}
-        client_id: {{ .Values.oidc.clientId }}
-{{- if .Values.oidc.redirectUri }}
-        redirect_uri: {{ .Values.oidc.redirectUri }}
-{{- else }}
-        redirect_uri: "{{ .Values.oidc.issuerUrl }}/callback"
-{{- end }}
-{{- if .Values.oidc.responseType }}
-        response_type: {{ .Values.oidc.responseType }}
-{{- else }}
-        response_type: "token id_token"
-{{- end }}
-{{- if .Values.oidc.scope }}
-        scope: {{ .Values.oidc.scope }}
-{{- else }}
-        scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
-{{- end }}
-{{- if hasKey .Values.oidc "loadUserInfo" }}
-        loadUserInfo: {{ .Values.oidc.loadUserInfo }}
-{{- else }}
-        loadUserInfo: false
-{{- end }}
-{{- if .Values.oidc.metadata }}
-        metadata:
-{{ toYaml .Values.oidc.metadata | indent 10 }}
-{{- end }}
-{{- if .Values.oidc.signingKeys }}
-        signingKeys:
-{{ toYaml .Values.oidc.signingKeys | indent 8 }}
-{{- end }}
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
 {{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
-{{- end }}
-{{- if .Values.prometheus }}
-    prometheus:
-      secret: {{ .Values.prometheus.secret }}
-{{- end }}
-{{- if .Values.gitHub }}
-    gitHub:
-      apiUrl: {{ .Values.gitHub.apiUrl }}
-      {{- if .Values.gitHub.ca }}
-      ca: {{ toJson .Values.gitHub.ca }}
-      {{- end }}
-      org: {{ .Values.gitHub.org }}
-      repository: {{ .Values.gitHub.repository }}
-      webhookSecret: {{ .Values.gitHub.webhookSecret }}
-      {{- if .Values.gitHub.authentication }}
-      authentication:
-        username: {{ .Values.gitHub.authentication.username }}
-        token: {{ .Values.gitHub.authentication.token }}
-      {{- end }}
 {{- end }}

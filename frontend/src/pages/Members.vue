@@ -61,7 +61,7 @@ limitations under the License.
           v-model="userFilter"
           @keyup.esc="userFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openAddMemberDialog">
+        <v-btn icon @click.native.stop="openMemberAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openMemberHelpDialog">
@@ -77,30 +77,31 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in sortedAndFilteredMemberList">
+        <template v-for="({ username }, index) in sortedAndFilteredMemberList">
           <v-divider
             v-if="index > 0"
             inset
-            :key="`${name}-dividerKey`"
+            :key="`${username}-dividerKey`"
           ></v-divider>
           <v-list-tile
             avatar
-            :key="name"
+            :key="username"
           >
             <v-list-tile-avatar>
-              <img :src="avatarUrl(name)" />
+              <img :src="avatarUrl(username)" />
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
-                {{displayName(name)}}
+                {{displayName(username)}}
               </v-list-tile-title>
               <v-list-tile-sub-title>
-                <a :href="'mailto:'+name" class="cyan--text text--darken-2">{{name}}</a>
+                <a v-if="isEmail(username)" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
+                <span v-else class="pl-2">{{username}}</span>
               </v-list-tile-sub-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
+                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(username)">
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <span>Delete Member</span>
@@ -125,13 +126,13 @@ limitations under the License.
           label="Search"
           solo
           clearable
-          v-model="serviceFilter"
-          @keyup.esc="serviceFilter=''"
+          v-model="serviceAccountFilter"
+          @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openAddserviceAccountDialog">
+        <v-btn icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openserviceAccountHelpDialog">
+        <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
@@ -144,54 +145,15 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="(name, index) in sortedAndFilteredserviceAccountList">
-          <v-divider
-            v-if="index > 0"
-            inset
-            :key="`${name}-dividerKey`"
-          ></v-divider>
-          <v-list-tile
-            avatar
-            :key="name"
-          >
-
-            <v-list-tile-avatar>
-              <img :src="robohashUrl(name)" />
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>
-                {{name.replace(/^system:serviceaccount:[^:]+:/, '').toUpperCase()}}
-              </v-list-tile-title>
-              <v-list-tile-sub-title>
-                {{name}}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload(name)">
-                  <v-icon>mdi-download</v-icon>
-                </v-btn>
-                <span>Download Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig(name)">
-                  <v-icon>visibility</v-icon>
-                </v-btn>
-                <span>Show Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(name)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-                <span>Delete Service Account</span>
-              </v-tooltip>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
+        <member-service-accounts-row
+          v-for="(member, index) in sortedAndFilteredServiceAccountList"
+          :member="member"
+          :firstRow="index === 0"
+          :key="member.username"
+          @onDownload="onDownload"
+          @onKubeconfig="onKubeconfig"
+          @onDelete="onDelete"
+        ></member-service-accounts-row>
       </v-list>
     </v-card>
 
@@ -219,10 +181,10 @@ limitations under the License.
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" light @click="openAddserviceAccountDialog">
+        <v-btn fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" @click="openAddMemberDialog">
+        <v-btn fab small color="grey lighten-2" @click="openMemberAddDialog">
           <v-icon color="green darken-2">person</v-icon>
         </v-btn>
       </v-speed-dial>
@@ -235,28 +197,30 @@ import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import replace from 'lodash/replace'
 import sortBy from 'lodash/sortBy'
-import startsWith from 'lodash/startsWith'
 import find from 'lodash/find'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
+import CodeBlock from '@/components/CodeBlock'
+import MemberServiceAccountsRow from '@/components/MemberServiceAccountsRow'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
-  emailToDisplayName,
-  gravatarUrlIdenticon,
-  gravatarUrlRobohash,
-  serviceAccountToDisplayName
+  displayName,
+  gravatarUrlGeneric,
+  isEmail,
+  serviceAccountToDisplayName,
+  isServiceAccount
 } from '@/utils'
 import { getMember } from '@/utils/api'
-import CodeBlock from '@/components/CodeBlock'
 
 export default {
   name: 'members',
   components: {
     MemberAddDialog,
     MemberHelpDialog,
-    CodeBlock
+    CodeBlock,
+    MemberServiceAccountsRow
   },
   data () {
     return {
@@ -266,7 +230,7 @@ export default {
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
       userFilter: '',
-      serviceFilter: '',
+      serviceAccountFilter: '',
       fab: false,
       floatingButton: false,
       currentServiceAccountName: undefined,
@@ -293,30 +257,29 @@ export default {
       return toLower(this.projectData.owner)
     },
     serviceAccountList () {
-      const predicate = username => startsWith(username, `system:serviceaccount:${this.namespace}:`)
-      return filter(this.memberList, predicate)
+      return filter(this.memberList, ({ username }) => isServiceAccount(username))
     },
     memberListWithoutOwner () {
-      const predicate = username => !this.isOwner(username) && !startsWith(username, 'system:serviceaccount:')
+      const predicate = ({ username }) => !this.isOwner(username) && !isServiceAccount(username)
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
-      const predicate = email => {
+      const predicate = ({ username }) => {
         if (!this.userFilter) {
           return true
         }
-        const name = replace(email, /@.*$/, '')
+        const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
     },
-    sortedAndFilteredserviceAccountList () {
-      const predicate = service => {
-        if (!this.serviceFilter) {
+    sortedAndFilteredServiceAccountList () {
+      const predicate = ({ username }) => {
+        if (!this.serviceAccountFilter) {
           return true
         }
-        const name = serviceAccountToDisplayName(service)
-        return includes(toLower(name), toLower(this.serviceFilter))
+        const name = serviceAccountToDisplayName(username)
+        return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate))
     },
@@ -330,29 +293,29 @@ export default {
       'deleteMember',
       'setError'
     ]),
-    openAddMemberDialog () {
+    openMemberAddDialog () {
       this.memberAddDialog = true
-    },
-    openAddserviceAccountDialog () {
-      this.serviceAccountAddDialog = true
     },
     openMemberHelpDialog () {
       this.memberHelpDialog = true
     },
-    openserviceAccountHelpDialog () {
+    openServiceAccountAddDialog () {
+      this.serviceAccountAddDialog = true
+    },
+    openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    displayName (email) {
-      return emailToDisplayName(email)
+    displayName (username) {
+      return displayName(username)
     },
-    isOwner (email) {
-      return this.owner === toLower(email)
+    isOwner (username) {
+      return this.owner === toLower(username)
     },
-    avatarUrl (email) {
-      return gravatarUrlIdenticon(email)
+    isEmail (username) {
+      return isEmail(username)
     },
-    robohashUrl (value) {
-      return gravatarUrlRobohash(value)
+    avatarUrl (username) {
+      return gravatarUrlGeneric(username)
     },
     async downloadKubeconfig (name) {
       const namespace = this.namespace

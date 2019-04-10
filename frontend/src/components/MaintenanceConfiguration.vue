@@ -111,16 +111,16 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    updateMaintenance () {
-      const user = this.$store.state.user
-      return updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, user, data: this.data })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save maintenance configuration'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async updateMaintenance () {
+      try {
+        await updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Could not save maintenance configuration'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     reset () {
       this.errorMessage = null

@@ -67,24 +67,14 @@ class ThrottledEmitter {
   }
 }
 
-// class ThrottledEventEmitter extends ThrottledEmitter {
-//   appendValue (objectKind, events) {
-//     this.eventsBuffer[objectKind] = get(this.eventsBuffer, objectKind, [])
-//     this.eventsBuffer[objectKind] = this._replaceOldEventsWithSameKey(this.eventsBuffer[objectKind], events)
-//   }
-// }
-
 class ThrottledNamespacedEventEmitter extends ThrottledEmitter {
   appendValue (objectKind, namespaces) {
     forEach(namespaces, (events, namespace) => {
       this.eventsBuffer[objectKind] = get(this.eventsBuffer, objectKind, {})
       this.eventsBuffer[objectKind][namespace] = get(this.eventsBuffer, `${objectKind}.${namespace}`, [])
-
       this.eventsBuffer[objectKind][namespace] = this._replaceOldEventsWithSameKey(this.eventsBuffer[objectKind][namespace], events)
     })
   }
 }
 
-export {
-  ThrottledNamespacedEventEmitter
-}
+export default ThrottledNamespacedEventEmitter

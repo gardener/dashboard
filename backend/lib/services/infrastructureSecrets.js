@@ -150,7 +150,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
         if (!cloudProviderKind) {
           throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName))
         }
-        const secret = _.find(secretList, ['metadata.name', secretName])
+        const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
         if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
           throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
         }
@@ -175,21 +175,24 @@ async function getCloudProviderKind (cloudProfileName) {
 }
 
 exports.list = async function ({ user, namespace }) {
-  const [
-    cloudProfileList,
-    { items: secretBindingList },
-    { items: secretList }
-  ] = await Promise.all([
-    cloudprofiles.list(),
-    Garden(user).namespaces(namespace).secretbindings.get({}),
-    Core(user).namespaces(namespace).secrets.get({})
-  ])
-
-  return getInfrastructureSecrets({
-    secretBindings: secretBindingList,
-    cloudProfileList,
-    secretList
-  })
+  try {
+    const cloudProfileList = cloudprofiles.list()
+    const [
+      { items: secretList },
+      { items: secretBindings }
+    ] = await Promise.all([
+      Core(user).namespaces(namespace).secrets.get({}),
+      Garden(user).namespaces(namespace).secretbindings.get({})
+    ])
+    return getInfrastructureSecrets({
+      secretBindings,
+      cloudProfileList,
+      secretList
+    })
+  } catch (err) {
+    logger.error(err)
+    throw err
+  }
 }
 
 exports.create = async function ({ user, namespace, body }) {

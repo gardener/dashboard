@@ -29,8 +29,7 @@ const getters = {
 // actions
 const actions = {
   getAll: ({ commit, rootState }) => {
-    const user = rootState.user
-    return getDomains({ user })
+    return getDomains()
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all

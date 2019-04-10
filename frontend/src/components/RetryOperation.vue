@@ -68,24 +68,21 @@ export default {
     }
   },
   methods: {
-    onRetryOperation () {
+    async onRetryOperation () {
       this.retryingOperation = true
 
-      const user = this.$store.state.user
       const namespace = this.namespace
       const name = this.name
 
       const retryAnnotation = { 'shoot.garden.sapcloud.io/operation': 'retry' }
-      return addShootAnnotation({ namespace, name, user, data: retryAnnotation })
-        .then(() => {
-          this.retryingOperation = false
-        })
-        .catch(err => {
-          console.log('failed to retry operation', err)
+      try {
+        await addShootAnnotation({ namespace, name, data: retryAnnotation })
+      } catch (err) {
+        console.log('failed to retry operation', err)
 
-          this.retryingOperation = false
-          this.$store.dispatch('setError', err)
-        })
+        this.$store.dispatch('setError', err)
+      }
+      this.retryingOperation = false
     }
   }
 }

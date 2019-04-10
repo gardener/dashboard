@@ -108,17 +108,17 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    updateWorkers () {
-      const user = this.$store.state.user
-      this.workers = this.$refs.manageWorkers.getWorkers()
-      return updateWorkers({ namespace: this.shootNamespace, name: this.shootName, user, infrastructureKind: this.infrastructureKind, data: this.workers })
-        .then(() => this.hideDialog())
-        .catch((err) => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save worker configuration'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async updateWorkers () {
+      try {
+        this.workers = this.$refs.manageWorkers.getWorkers()
+        await updateWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
+        this.hideDialog()
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = 'Could not save worker configuration'
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     reset () {
       this.errorMessage = null

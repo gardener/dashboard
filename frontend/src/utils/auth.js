@@ -14,76 +14,58 @@
 // limitations under the License.
 //
 
+import Vue from 'vue'
 import decode from 'jwt-decode'
-import constant from 'lodash/constant'
+import { createTokenReview } from './api'
 
-export function clearStaleState (mgr) {
-  return mgr
-    .clearStaleState()
-    .catch((err) => {
-      console.error('clearStateState error', err.message)
-    })
-}
+const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 
-export function removeUser (mgr) {
-  return mgr
-    .removeUser()
-    .catch((err) => {
-      console.error('removeUser error', err.message)
-      throw err
-    })
-}
+export class UserManager {
+  constructor () {
+    this.origin = window.location.origin
+  }
 
-export function signout (mgr) {
-  return removeUser(mgr)
-}
-
-export function signin (mgr) {
-  return mgr
-    .signinRedirect()
-    .catch((err) => {
-      console.error('signin error', err.message)
-      throw err
-    })
-}
-
-export function signinCallback (mgr) {
-  return mgr
-    .signinRedirectCallback()
-    .catch((err) => {
-      console.error('signinCallback error', err.message)
-      throw err
-    })
-}
-
-function getTokenExpirationDate (encodedToken) {
-  const token = decode(encodedToken)
-  if (!token.exp) {
+  getUser () {
+    try {
+      const value = Vue.cookie.get(COOKIE_HEADER_PAYLOAD)
+      if (value) {
+        return decode(value)
+      }
+    } catch { /* ignore error */ }
     return null
   }
-  const date = new Date(0)
-  date.setUTCSeconds(token.exp)
-  return date
-}
 
-export function isTokenExpired (token) {
-  if (!token) {
-    return true
+  removeUser () {
+    Vue.cookie.delete(COOKIE_HEADER_PAYLOAD)
   }
-  const expirationDate = getTokenExpirationDate(token)
-  return expirationDate < new Date()
-}
 
-export function isUserLoggedIn (user) {
-  try {
-    return user ? !isTokenExpired(user.id_token) : false
-  } catch (err) { /* ignore error */ }
-  return false
-}
+  signout () {
+    this.removeUser()
+    window.location = this.origin + '/auth/logout'
+  }
 
-export function isLoggedIn (mgr) {
-  return mgr
-    .getUser()
-    .then(isUserLoggedIn)
-    .catch(constant(false))
+  signinWithOidc (redirectPath) {
+    let path = '/auth'
+    if (redirectPath) {
+      path += `?redirectPath=${encodeURIComponent(redirectPath)}`
+    }
+    window.location = this.origin + path
+  }
+
+  signinWithToken (token) {
+    return createTokenReview({ token })
+  }
+
+  isUserLoggedIn () {
+    try {
+      const user = this.getUser()
+      if (user) {
+        const exp = user.exp
+        if (typeof exp === 'number' && !isNaN(exp)) {
+          return 1000 * exp > Date.now()
+        }
+      }
+    } catch (err) { /* ignore error */ }
+    return false
+  }
 }

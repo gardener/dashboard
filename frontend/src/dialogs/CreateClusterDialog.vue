@@ -410,7 +410,7 @@ export default {
     return {
       shootDefinition: undefined,
       infrastructureData: undefined,
-      selectedSecret: undefined,
+      selectedSecret: undefined, // pragma: whitelist secret
       selectedInfrastructureKind: undefined,
       activeTab: 'tab-infra',
       purposes: ['evaluation', 'development', 'production'],
@@ -536,7 +536,7 @@ export default {
         }
         this.shootDefinition.spec.cloud.secretBindingRef = secretBindingRef
 
-        this.selectedSecret = secret
+        this.selectedSecret = secret // pragma: whitelist secret
 
         this.setCloudProfileDefaults()
         this.setDefaultPurpose()
@@ -780,19 +780,17 @@ export default {
       }
       return this.createShoot(data)
     },
-    createClicked () {
-      Promise.resolve()
-        .then(() => this.createShootResource())
-        .then(() => {
-          this.$emit('created')
-          this.$emit('close', false)
-        })
-        .catch(err => {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = `Failed to create cluster.`
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-        })
+    async createClicked () {
+      try {
+        await this.createShootResource()
+        this.$emit('created')
+        this.$emit('close', false)
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = `Failed to create cluster.`
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     },
     cancelClicked () {
       this.$emit('close', true)
@@ -802,7 +800,7 @@ export default {
 
       this.activeTab = 'tab-infra'
 
-      this.selectedSecret = undefined
+      this.selectedSecret = undefined  // pragma: whitelist secret
       this.shootDefinition = cloneDeep(defaultShootDefinition)
 
       this.setDefaultInfrastructureKind()

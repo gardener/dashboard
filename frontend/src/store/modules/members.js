@@ -28,8 +28,7 @@ const getters = {}
 const actions = {
   getAll: ({ commit, rootState }) => {
     const namespace = rootState.namespace
-    const user = rootState.user
-    return getMembers({ namespace, user })
+    return getMembers({ namespace })
       .then(res => {
         commit('RECEIVE', res.data)
         return state.all
@@ -41,17 +40,15 @@ const actions = {
   },
   add: ({ commit, rootState }, name) => {
     const namespace = rootState.namespace
-    const user = rootState.user
     const data = { name }
-    return addMember({ namespace, user, data })
+    return addMember({ namespace, data })
       .then(res => {
         commit('RECEIVE', res.data)
       })
   },
   delete: ({ commit, rootState }, name) => {
     const namespace = rootState.namespace
-    const user = rootState.user
-    return deleteMember({ namespace, name, user })
+    return deleteMember({ namespace, name })
       .then(res => {
         commit('RECEIVE', res.data)
       })
