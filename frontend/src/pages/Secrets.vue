@@ -212,7 +212,7 @@ export default {
   },
   data () {
     return {
-      selectedSecret: {},  // pragma: whitelist secret
+      selectedSecret: {}, // pragma: whitelist secret
       dialogState: {
         aws: {
           visible: false,
@@ -268,16 +268,16 @@ export default {
       this.dialogState[infrastructureKind].help = false
     },
     onAdd (infrastructureKind) {
-      this.selectedSecret = undefined  // pragma: whitelist secret
+      this.selectedSecret = undefined // pragma: whitelist secret
       this.dialogState[infrastructureKind].visible = true
     },
     onUpdate (row) {
       const kind = row.metadata.cloudProviderKind
-      this.selectedSecret = row  // pragma: whitelist secret
+      this.selectedSecret = row // pragma: whitelist secret
       this.dialogState[kind].visible = true
     },
     onDelete (row) {
-      this.selectedSecret = row  // pragma: whitelist secret
+      this.selectedSecret = row // pragma: whitelist secret
       this.dialogState.deleteConfirm = true
     },
     backgroundForCloudProviderKind (kind) {
