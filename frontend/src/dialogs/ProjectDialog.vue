@@ -122,14 +122,13 @@ limitations under the License.
 import { mapActions, mapGetters } from 'vuex'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus } from '@/utils'
+import { getValidationErrors, setInputFocus, isServiceAccount } from '@/utils'
 import map from 'lodash/map'
 import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import concat from 'lodash/concat'
 import filter from 'lodash/filter'
-import startsWith from 'lodash/startsWith'
 import Alert from '@/components/Alert'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
@@ -196,8 +195,7 @@ export default {
       return map(this.projectList, 'metadata.name')
     },
     ownerItems () {
-      const predicate = username => !startsWith(username, 'system:serviceaccount:')
-      const members = filter(this.memberList, predicate)
+      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
       const owner = get(this.project, 'data.owner')
       if (!owner || includes(members, owner)) {
         return members

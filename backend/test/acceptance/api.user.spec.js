@@ -27,17 +27,16 @@ module.exports = function ({ agent, sandbox }) {
 
   it('should return information about the user', async function () {
     const bearer = await user.bearer
-    k8s.stub.getUserInfo({ bearer, username })
+    k8s.stub.getPrivileges({ bearer })
     const res = await agent
-      .get('/api/user')
+      .get('/api/user/privileges')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.eql({
       isAdmin: false,
-      canCreateProject: true,
-      username
+      canCreateProject: true
     })
   })
 

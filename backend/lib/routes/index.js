@@ -21,7 +21,7 @@ const config = require('../config')
 
 const moduleExports = {
   '/info': require('./info'),
-  '/user': require('./userInfo'),
+  '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/domains': require('./domains'),
   '/shoots': require('./shoots'),

@@ -150,7 +150,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
         if (!cloudProviderKind) {
           throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName))
         }
-        const secret = _.find(secretList, ['metadata.name', secretName])
+        const secret = _.find(secretList, ['metadata.name', secretName]) // pragma: whitelist secret
         if (secretBinding.metadata.namespace === secretBinding.secretRef.namespace && !secret) {
           throw new Error(fmt('Secret missing for secretbinding in own namespace. Skipping infrastructure secret with name %s', secretName))
         }

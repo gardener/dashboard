@@ -157,6 +157,10 @@ export function createTokenReview (data) {
   return createResource('/auth', data)
 }
 
+export function getPrivileges () {
+  return getResource('/api/user/privileges')
+}
+
 export function getToken () {
   return getResource('/api/user/token')
 }

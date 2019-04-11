@@ -39,7 +39,7 @@ async function getCookieValue (token) {
 
 module.exports = {
   createUser ({ id, aud = [ 'gardener' ], ...rest }, invalid) {
-    const secret = invalid === true ? 'invalid-secret' : undefined
+    const secret = invalid === true ? 'invalid-secret' : undefined // pragma: whitelist secret
     const bearer = sign({ id, aud, ...rest }, secret)
     return {
       get cookie () {

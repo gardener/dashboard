@@ -104,8 +104,7 @@ module.exports = function ({ agent, sandbox }) {
 
   it('should redirect to home after successful authorization', async function () {
     const getIssuerClientStub = sandbox.stub(security, 'getIssuerClient').callsFake(() => getIssuerClient(user))
-    const bearer = await user.bearer
-    k8s.stub.getUserInfo({ bearer })
+    k8s.stub.authorizeToken()
 
     const res = await agent
       .get(`/auth/callback?code=${OTAC}`)
@@ -139,7 +138,7 @@ module.exports = function ({ agent, sandbox }) {
 
   it('should successfully login with a given token', async function () {
     const bearer = await user.bearer
-    k8s.stub.getUserInfo({ bearer })
+    k8s.stub.authorizeToken()
 
     const res = await agent
       .post(`/auth`)

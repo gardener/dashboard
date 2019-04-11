@@ -152,7 +152,7 @@ export function fullDisplayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceaccount(username)) {
+  if (isServiceAccount(username)) {
     const [ namespace, serviceaccount ] = split(username, ':', 4).slice(2)
     return toUpper(`${namespace} / ${serviceaccount}`)
   }
@@ -166,7 +166,7 @@ export function displayName (username) {
   if (isEmail(username)) {
     return emailToDisplayName(username)
   }
-  if (isServiceaccount(username)) {
+  if (isServiceAccount(username)) {
     const [ , serviceaccount ] = split(username, ':', 4).slice(2)
     return toUpper(serviceaccount)
   }
@@ -181,14 +181,6 @@ export function isEmail (value) {
   return /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(value)
 }
 
-export function isServiceaccount (value, namespace) {
-  let prefix = 'system:serviceaccount:'
-  if (namespace) {
-    prefix += namespace + ':'
-  }
-  return startsWith(value, prefix)
-}
-
 export function gravatarUrlGeneric (username, size = 128) {
   if (!username) {
     return gravatarUrlMp('undefined', size)
@@ -196,7 +188,7 @@ export function gravatarUrlGeneric (username, size = 128) {
   if (isEmail(username)) {
     return gravatarUrlIdenticon(username, size)
   }
-  if (isServiceaccount(username)) {
+  if (isServiceAccount(username)) {
     return gravatarUrlRobohash(username, size)
   }
   return gravatarUrlRetro(username, size)
@@ -365,7 +357,7 @@ export function availableK8sUpdatesForShoot (spec) {
 }
 
 export function getCreatedBy (metadata) {
-  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'], '-unknown-')
+  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
 export function getProjectName (metadata) {
@@ -437,6 +429,14 @@ export function isShootMarkedForDeletion (metadata) {
 
 export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
+}
+
+export function isServiceAccount (username) {
+  return startsWith(username, 'system:serviceaccount:')
+}
+
+export function isServiceAccountFromNamespace (username, namespace) {
+  return startsWith(username, `system:serviceaccount:${namespace}:`)
 }
 
 // expect colors to be in format <color> <optional:modifier>

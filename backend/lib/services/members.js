@@ -30,17 +30,79 @@ function Garden ({ auth }) {
   return kubernetes.garden({ auth })
 }
 
-function fromResource (project = {}) {
+function toServiceAccountName ({ metadata: { name, namespace } }) {
+  return `system:serviceaccount:${namespace}:${name}`
+}
+
+function fromResource (project = {}, serviceAccounts = []) {
+  const serviceAccountsMetadata = _
+    .chain(serviceAccounts)
+    .map(serviceAccount => [
+      toServiceAccountName(serviceAccount),
+      {
+        createdBy: _.get(serviceAccount, ['metadata', 'annotations', 'garden.sapcloud.io/createdBy']),
+        creationTimestamp: serviceAccount.metadata.creationTimestamp
+      }
+    ])
+    .fromPairs()
+    .value()
+
   return _
     .chain(project)
     .get('spec.members')
     .filter(['kind', 'User'])
     .map('name')
+    .map(username => ({
+      username,
+      ...serviceAccountsMetadata[username]
+    }))
     .value()
 }
 
-function createServiceaccount (core, namespace, name) {
-  const body = { metadata: { name, namespace } }
+function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectName = 'default', token, server, caData }) {
+  const clusterName = 'garden'
+  const cluster = {
+    'certificate-authority-data': caData,
+    server
+  }
+  const userName = serviceaccountName
+  const user = {
+    token
+  }
+  const contextName = `${clusterName}-${projectName}-${userName}`
+  const context = {
+    cluster: clusterName,
+    user: userName,
+    namespace: serviceaccountNamespace
+  }
+  return yaml.safeDump({
+    kind: 'Config',
+    clusters: [{
+      cluster,
+      name: clusterName
+    }],
+    users: [{
+      user,
+      name: userName
+    }],
+    contexts: [{
+      context,
+      name: contextName
+    }],
+    'current-context': contextName
+  })
+}
+
+function createServiceaccount (core, namespace, name, user) {
+  const body = {
+    metadata: {
+      name,
+      namespace,
+      annotations: {
+        'garden.sapcloud.io/createdBy': user.id
+      }
+    }
+  }
   return core.namespaces(namespace).serviceaccounts.post({
     body
   })
@@ -102,9 +164,10 @@ exports.list = async function ({ user, namespace }) {
   const namespaces = Core(user).namespaces
 
   const project = await getProjectByNamespace(projects, namespaces, namespace)
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
 
   // get project members from project
-  return fromResource(project)
+  return fromResource(project, serviceAccountList)
 }
 
 exports.get = async function ({ user, namespace, name: username }) {
@@ -149,26 +212,29 @@ exports.create = async function ({ user, namespace, body: { name: username } }) 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   const core = Core(user)
   if (serviceaccountNamespace === namespace) {
-    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName)
+    const core = Core(user)
+    await createServiceaccount(core, serviceaccountNamespace, serviceaccountName, user)
   }
   const projects = Garden(user).projects
   const namespaces = core.namespaces
 
-  // assign user to project
-  const project = await setProjectMember(projects, namespaces, namespace, username)
-  return fromResource(project)
+  const project = await setProjectMember(projects, namespaces, namespace, username) // assign user to project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+  return fromResource(project, serviceAccountList)
 }
 
 exports.remove = async function ({ user, namespace, name: username }) {
   const projects = Garden(user).projects
   const namespaces = Core(user).namespaces
 
-  // unassign user from project
-  const project = await unsetProjectMember(projects, namespaces, namespace, username)
+  const project = await unsetProjectMember(projects, namespaces, namespace, username) // unassign user from project
+  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
     const namespaces = Core(user).namespaces
     await deleteServiceaccount(namespaces, serviceaccountNamespace, serviceaccountName)
   }
-  return fromResource(project)
+
+  return fromResource(project, serviceAccountList)
 }

@@ -284,7 +284,7 @@ function getProjectMembers (project) {
   return _
     .chain(project)
     .get('spec.members')
-    .map('name')
+    .map(({ name: username }) => ({ username }))
     .value()
 }
 
@@ -414,6 +414,17 @@ function getKubeconfig ({server, name}) {
     users: [{user, name}],
     'current-context': name
   })
+}
+
+function getServiceAccountsForNamespace (scope, namespace, additionalServiceAccounts) {
+  const items = _
+    .chain(serviceAccountList)
+    .concat(additionalServiceAccounts)
+    .filter(['metadata.namespace', namespace])
+    .value()
+  scope
+    .get(`/api/v1/namespaces/${namespace}/serviceaccounts`)
+    .reply(200, () => ({ items }))
 }
 
 function authorizationHeader (bearer) {
@@ -870,13 +881,16 @@ const stub = {
   getMembers ({bearer, namespace}) {
     const project = readProject(namespace)
     if (project) {
+      const scope = nockWithAuthorization(bearer)
+        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project.metadata.name}`)
+        .reply(200, () => project)
+      getServiceAccountsForNamespace(scope, namespace)
+
       return [
         nockWithAuthorization(auth.bearer)
           .get(`/api/v1/namespaces/${namespace}`)
           .reply(200, () => getProjectNamespace(namespace)),
-        nockWithAuthorization(bearer)
-          .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project.metadata.name}`)
-          .reply(200, () => project)
+        scope
       ]
     }
     return nockWithAuthorization(auth.bearer)
@@ -905,6 +919,7 @@ const stub = {
           return true
         })
         .reply(200, () => newProject)
+      getServiceAccountsForNamespace(scope, namespace)
     }
     return [
       nockWithAuthorization(auth.bearer)
@@ -932,6 +947,7 @@ const stub = {
         })
         .reply(200, () => newProject)
     }
+    getServiceAccountsForNamespace(scope, namespace)
     return [
       nockWithAuthorization(auth.bearer)
         .get(`/api/v1/namespaces/${namespace}`)
@@ -988,13 +1004,16 @@ const stub = {
         .reply(statusCode, version)
     ]
   },
-  getUserInfo ({ bearer }) {
+  getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canDeleteShootsInAllNamespaces(scope)
     canCreateProjects(scope)
+    return scope
+  },
+  authorizeToken () {
     const adminScope = nockWithAuthorization(auth.bearer)
     reviewToken(adminScope)
-    return [ scope, adminScope ]
+    return adminScope
   }
 }
 

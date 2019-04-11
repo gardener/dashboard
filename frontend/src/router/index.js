@@ -22,6 +22,7 @@ import head from 'lodash/head'
 import get from 'lodash/get'
 import concat from 'lodash/concat'
 import cloneDeep from 'lodash/cloneDeep'
+import { getPrivileges } from '@/utils/api'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -400,7 +401,9 @@ export default function createRouter ({ store, userManager }) {
         const user = userManager.getUser()
         const storedUser = store.state.user
         if (!storedUser || storedUser.jti !== user.jti) {
-          await store.dispatch('setUser', user)
+          const { data: { isAdmin, canCreateProject } } = await getPrivileges()
+
+          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject })
         }
         return next()
       }
