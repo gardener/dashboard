@@ -143,6 +143,7 @@ export default {
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
+        crontabBlock.location = this.localTimezone
         const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
           parsedScheduleEvent.location = this.localTimezone

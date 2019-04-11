@@ -205,7 +205,7 @@ export default {
       }
     },
     getTime (cronTime) {
-      if (cronTime) {
+      if (cronTime && cronTime.hour && cronTime.minute) {
         const momentObj = moment()
         momentObj.hour(cronTime.hour)
         momentObj.minute(cronTime.minute)

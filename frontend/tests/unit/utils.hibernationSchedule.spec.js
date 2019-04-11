@@ -58,7 +58,7 @@ describe('utils', function () {
       })
     })
 
-    it('should parse a crontab block with weekday intervals', function () {
+    it('should parse a crontab block with weekday intervals and single weekday', function () {
       const crontabBlock = {
         end: '30 07 * * 1-2,3,4-6,0',
         location: 'Europe/Berlin'
@@ -68,6 +68,19 @@ describe('utils', function () {
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
       expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '07', minute: '30', weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
+    })
+
+    it('should parse a crontab block with weekday intervals and single weekday in between and wrong order', function () {
+      const crontabBlock = {
+        end: '30 07 * * 1-2,Sun,3-5',
+        location: 'Europe/Berlin'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '07', minute: '30', weekdays: '1,2,0,3,4,5' }) // UI will handle correct sorting
       expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
     })
 
@@ -97,16 +110,29 @@ describe('utils', function () {
       expect(scheduleEvent).to.have.property('location').that.is.eql(localTimezone)
     })
 
-    it('should parse a crontab block and remove duplicate weekdays', function () {
+    it('should parse a crontab block and remove duplicate weekdays and wrong order', function () {
       const crontabBlock = {
-        end: '12 09 * * 1,1,Mon,Tue-Thu,4-6,7',
+        end: '12 09 * * 1,1,Mon,7,Tue-Thu,4-6',
         location: 'Europe/Berlin'
       }
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
-      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '09', minute: '12', weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '09', minute: '12', weekdays: '1,0,2,3,4,5,6' }) // UI will handle correct sorting
+      expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
+    })
+
+    it('should parse a crontab block and translate all weekdays in correct integers', function () {
+      const crontabBlock = {
+        end: '12 09 * * Mon,Tue,Wed,Thu,Fri,Sat,Sun',
+        location: 'Europe/Berlin'
+      }
+      const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+      expect(scheduleEvents).to.be.an.instanceof(Array)
+      expect(scheduleEvents).to.have.length(1)
+      let scheduleEvent = scheduleEvents[0]
+      expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '09', minute: '12', weekdays: '1,2,3,4,5,6,0' }) // UI will handle correct sorting
       expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
     })
   })

@@ -42,7 +42,7 @@ function scheduleEventObjFromRegex (regexVal) {
       'THU': 4,
       'FRI': 5,
       'SAT': 6,
-      'SUN': 7,
+      'SUN': 0,
       '7': 0,
       '*': '1,2,3,4,5,6,0'
     }
