@@ -16,6 +16,10 @@
 
 import { expect } from 'chai'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
+import store from '../../src/store'
+import moment from 'moment-timezone'
+
+const localTimezone = store.state.localTimezone
 
 describe('utils', function () {
   describe('hibernationSchedule', function () {
@@ -35,21 +39,22 @@ describe('utils', function () {
         expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
       })
 
-      it('should parse a crontab block with different weekdays', function () {
+      it('should parse a crontab block with different weekdays and no location', function () {
         const crontabBlock = {
           start: '00 17 * * 1,2,3,4,5',
-          end: '00 08 * * 1,2,4,6',
-          location: 'America/Los_Angeles'
+          end: '00 08 * * 1,2,4,6'
         }
+        const expectedStartMoment = moment.utc('1700', 'HHmm')
+        const expectedEndMoment = moment.utc('0800', 'HHmm')
         const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         expect(scheduleEvents).to.be.an.instanceof(Array)
         expect(scheduleEvents).to.have.length(2)
         let scheduleEvent = scheduleEvents[0]
-        expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '17', minute: '00', weekdays: '1,2,3,4,5' })
-        expect(scheduleEvent).to.have.property('location').that.is.eql('America/Los_Angeles')
+        expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5' })
+        expect(scheduleEvent).to.have.property('location').that.is.eql(localTimezone)
         scheduleEvent = scheduleEvents[1]
-        expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '08', minute: '00', weekdays: '1,2,4,6' })
-        expect(scheduleEvent).to.have.property('location').that.is.eql('America/Los_Angeles')
+        expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: expectedEndMoment.tz(localTimezone).format('HH'), minute: expectedEndMoment.tz(localTimezone).format('mm'), weekdays: '1,2,4,6' })
+        expect(scheduleEvent).to.have.property('location').that.is.eql(localTimezone)
       })
     })
 
@@ -83,12 +88,13 @@ describe('utils', function () {
       const crontabBlock = {
         start: '00 20 * * *'
       }
+      const expectedStartMoment = moment.utc('2000', 'HHmm')
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
-      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,3,4,5,6,0' })
-      expect(scheduleEvent).to.have.property('location').that.is.eql('UTC')
+      expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: expectedStartMoment.tz(localTimezone).format('HH'), minute: expectedStartMoment.tz(localTimezone).format('mm'), weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql(localTimezone)
     })
 
     it('should parse a crontab block and remove duplicate weekdays', function () {
