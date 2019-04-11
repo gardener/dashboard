@@ -23,7 +23,8 @@ describe('utils', function () {
       it('should parse a simple crontab block', function () {
         const crontabBlock = {
           start: '00 17 * * 1,2,3,4,5',
-          end: '00 08 * * 1,2,3,4,5'
+          end: '00 08 * * 1,2,3,4,5',
+          location: 'Europe/Berlin'
         }
         const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         expect(scheduleEvents).to.be.an.instanceof(Array)
@@ -31,46 +32,54 @@ describe('utils', function () {
         const scheduleEvent = scheduleEvents[0]
         expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '17', minute: '00', weekdays: '1,2,3,4,5' })
         expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '08', minute: '00', weekdays: '1,2,3,4,5' })
+        expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
       })
 
       it('should parse a crontab block with different weekdays', function () {
         const crontabBlock = {
           start: '00 17 * * 1,2,3,4,5',
-          end: '00 08 * * 1,2,4,6'
+          end: '00 08 * * 1,2,4,6',
+          location: 'America/Los_Angeles'
         }
         const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         expect(scheduleEvents).to.be.an.instanceof(Array)
         expect(scheduleEvents).to.have.length(2)
         let scheduleEvent = scheduleEvents[0]
         expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '17', minute: '00', weekdays: '1,2,3,4,5' })
+        expect(scheduleEvent).to.have.property('location').that.is.eql('America/Los_Angeles')
         scheduleEvent = scheduleEvents[1]
         expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '08', minute: '00', weekdays: '1,2,4,6' })
+        expect(scheduleEvent).to.have.property('location').that.is.eql('America/Los_Angeles')
       })
     })
 
     it('should parse a crontab block with weekday intervals', function () {
       const crontabBlock = {
-        end: '30 07 * * 1-2,3,4-6,0'
+        end: '30 07 * * 1-2,3,4-6,0',
+        location: 'Europe/Berlin'
       }
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
       expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '07', minute: '30', weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
     })
 
     it('should parse a crontab block with weekday shortnames and non-standard sunday (7)', function () {
       const crontabBlock = {
-        start: '00 20 * * mon,TUE,wEd,Thu,7'
+        start: '00 20 * * mon,TUE,wEd,Thu,7',
+        location: 'America/Los_Angeles'
       }
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
       expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,3,4,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql('America/Los_Angeles')
     })
 
-    it('should parse a crontab block with all weekdays (*)', function () {
+    it('should parse a crontab block with all weekdays (*) and no location', function () {
       const crontabBlock = {
         start: '00 20 * * *'
       }
@@ -79,17 +88,20 @@ describe('utils', function () {
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
       expect(scheduleEvent).to.have.property('start').that.is.eql({ hour: '20', minute: '00', weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql('UTC')
     })
 
     it('should parse a crontab block and remove duplicate weekdays', function () {
       const crontabBlock = {
-        end: '12 09 * * 1,1,Mon,Tue-Thu,4-6,7'
+        end: '12 09 * * 1,1,Mon,Tue-Thu,4-6,7',
+        location: 'Europe/Berlin'
       }
       const scheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
       expect(scheduleEvents).to.be.an.instanceof(Array)
       expect(scheduleEvents).to.have.length(1)
       let scheduleEvent = scheduleEvents[0]
       expect(scheduleEvent).to.have.property('end').that.is.eql({ hour: '09', minute: '12', weekdays: '1,2,3,4,5,6,0' })
+      expect(scheduleEvent).to.have.property('location').that.is.eql('Europe/Berlin')
     })
   })
 
@@ -98,10 +110,12 @@ describe('utils', function () {
       const parsedScheduleEvents = [
         {
           start: { hour: '17', minute: '00', weekdays: '1,2,3,4,5' },
-          end: { hour: '08', minute: '00', weekdays: '1,2,3,4,5' }
+          end: { hour: '08', minute: '00', weekdays: '1,2,3,4,5' },
+          location: 'Europe/Berlin'
         },
         {
-          start: { hour: '22', minute: '00', weekdays: '6,0' }
+          start: { hour: '22', minute: '00', weekdays: '6,0' },
+          location: 'America/Los_Angeles'
         }
       ]
 
@@ -109,10 +123,12 @@ describe('utils', function () {
       const expectedCrontab = [
         {
           start: '00 17 * * 1,2,3,4,5',
-          end: '00 08 * * 1,2,3,4,5'
+          end: '00 08 * * 1,2,3,4,5',
+          location: 'Europe/Berlin'
         },
         {
-          start: '00 22 * * 6,0'
+          start: '00 22 * * 6,0',
+          location: 'America/Los_Angeles'
         }
       ]
       expect(scheduleCrontab).to.be.an.instanceof(Array)

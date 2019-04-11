@@ -25,6 +25,7 @@ limitations under the License.
           @updateWakeUpTime="onUpdateWakeUpTime"
           @updateHibernateTime="onUpdateHibernateTime"
           @updateSelectedDays="onUpdateSelectedDays"
+          @updateLocation="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-layout>
@@ -79,7 +80,6 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-import moment from 'moment-timezone'
 import { mapState } from 'vuex'
 const uuidv4 = require('uuid/v4')
 
@@ -140,25 +140,12 @@ export default {
       }
     },
     setDefaultHibernationSchedule () {
-      const convertScheduleEventLineToLocalTimezone = (scheduleEventLine) => {
-        if (scheduleEventLine) {
-          const localMoment = moment.tz(this.localTimezone)
-          localMoment.hour(scheduleEventLine.hour)
-          localMoment.minute(scheduleEventLine.minute)
-          const utcMoment = localMoment.utc()
-          scheduleEventLine.hour = utcMoment.format('HH')
-          scheduleEventLine.minute = utcMoment.format('mm')
-        }
-        return scheduleEventLine
-      }
-
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
       const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
         const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
         forEach(parsedScheduleEvents, parsedScheduleEvent => {
-          parsedScheduleEvent.start = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['start'])
-          parsedScheduleEvent.end = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['end'])
+          parsedScheduleEvent.location = this.localTimezone
         })
         return parsedScheduleEvents
       })
@@ -190,8 +177,9 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
+      const location = this.localTimezone
       const valid = false
-      this.parsedScheduleEvents.push({ start, end, id, valid })
+      this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false
       this.validateInput()
     },
@@ -204,17 +192,21 @@ export default {
         set(schedule, weekdays1, get(schedule, weekdays2))
       }
     },
-    onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
+    onUpdateWakeUpTime ({ hour, minute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      set(schedule, 'end.hour', utcHour)
-      set(schedule, 'end.minute', utcMinute)
+      set(schedule, 'end.hour', hour)
+      set(schedule, 'end.minute', minute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'end.weekdays', 'start.weekdays')
     },
-    onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
+    onUpdateHibernateTime ({ hour, minute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      set(schedule, 'start.hour', utcHour)
-      set(schedule, 'start.minute', utcMinute)
+      set(schedule, 'start.hour', hour)
+      set(schedule, 'start.minute', minute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
+    },
+    onUpdateLocation ({ location, id }) {
+      const schedule = find(this.parsedScheduleEvents, { id })
+      set(schedule, 'location', location)
     },
     onUpdateSelectedDays ({ weekdays, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })

@@ -72,6 +72,7 @@ function scheduleEventObjFromRegex (regexVal) {
 export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
   const cronStart = crontabBlock.start
   const cronEnd = crontabBlock.end
+  const location = get(crontabBlock, 'location', 'UTC')
   const start = scheduleEventObjFromRegex(cronStart)
   const end = scheduleEventObjFromRegex(cronEnd)
   let parseError = false
@@ -90,10 +91,10 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
     const scheduleEvents = []
     const valid = true
     if (start && end && start.weekdays !== end.weekdays) {
-      scheduleEvents.push({ start, id: uuidv4(), valid })
-      scheduleEvents.push({ end, id: uuidv4(), valid })
+      scheduleEvents.push({ start, location, id: uuidv4(), valid })
+      scheduleEvents.push({ end, location, id: uuidv4(), valid })
     } else {
-      scheduleEvents.push({ start, end, id: uuidv4(), valid })
+      scheduleEvents.push({ start, end, location, id: uuidv4(), valid })
     }
     return scheduleEvents
   }
@@ -117,6 +118,7 @@ function crontabBlockFromScheduleEvent (parsedScheduleEvent) {
   if (parsedScheduleEventEnd) {
     crontabBlock.end = parsedScheduleEventEnd
   }
+  crontabBlock.location = parsedScheduleEvent.location
   return crontabBlock
 }
 
