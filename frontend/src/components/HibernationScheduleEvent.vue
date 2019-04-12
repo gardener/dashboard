@@ -37,11 +37,11 @@ limitations under the License.
       <v-text-field
         color="cyan darken-2"
         label="Wake up at"
-        v-model="localizedWakeUpTime"
-        ref="localizedWakeUpTime"
+        v-model="wakeUpTime"
+        ref="wakeUpTime"
         @blur="touchIfNothingFocused"
-        @input="onInputLocalizedWakeUpTime"
-        :error-messages="getErrorMessages('localizedWakeUpTime')"
+        @input="onInputWakeUpTime"
+        :error-messages="getErrorMessages('wakeUpTime')"
         type="time"
       ></v-text-field>
     </v-flex>
@@ -49,11 +49,11 @@ limitations under the License.
       <v-text-field
         color="cyan darken-2"
         label="Hibernate at"
-        v-model="localizedHibernateTime"
-        ref="localizedHibernateTime"
+        v-model="hibernateTime"
+        ref="hibernateTime"
         @blur="touchIfNothingFocused"
-        @input="onInputLocalizedHibernateTime"
-        :error-messages="getErrorMessages('localizedHibernateTime')"
+        @input="onInputHibernateTime"
+        :error-messages="getErrorMessages('hibernateTime')"
         type="time"
       ></v-text-field>
     </v-flex>
@@ -97,11 +97,14 @@ const validationErrors = {
   selectedDays: {
     required: 'Weekdays is required'
   },
-  localizedHibernateTime: {
+  hibernateTime: {
     required: 'You need to specify at least hibernation or wake up time'
   },
-  localizedWakeUpTime: {
+  wakeUpTime: {
     required: 'You need to specify at least hibernation or wake up time'
+  },
+  selectedTimezone: {
+    required: 'Timezone is required'
   }
 }
 
@@ -117,15 +120,18 @@ export default {
     selectedDays: {
       required
     },
-    localizedHibernateTime: {
+    hibernateTime: {
       required: requiredIf(function () {
-        return !this.localizedWakeUpTime
+        return !this.wakeUpTime
       })
     },
-    localizedWakeUpTime: {
+    wakeUpTime: {
       required: requiredIf(function () {
-        return !this.localizedHibernateTime
+        return !this.hibernateTime
       })
+    },
+    selectedTimezone: {
+      required
     }
   },
   computed: {
@@ -140,9 +146,9 @@ export default {
     return {
       validationErrors,
       timezones: moment.tz.names(),
-      selectedTimezone: this.localTimezone,
-      localizedWakeUpTime: null,
-      localizedHibernateTime: null,
+      selectedTimezone: null,
+      wakeUpTime: null,
+      hibernateTime: null,
       selectedDays: null,
       valid: undefined,
       weekdays: [
@@ -188,31 +194,29 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    getLocalizedTime (utcCronTime) {
-      if (get(utcCronTime, 'hour') && get(utcCronTime, 'minute')) {
-        const utcMoment = moment.utc()
-        utcMoment.hour(utcCronTime.hour)
-        utcMoment.minute(utcCronTime.minute)
-        const localMoment = utcMoment.tz(this.localTimezone)
-        if (localMoment.isValid()) {
-          return localMoment.format('HH:mm')
+    updateTime ({ eventName, time }) {
+      const momentObj = moment(time, 'HHmm')
+      const hour = momentObj.format('HH')
+      const minute = momentObj.format('mm')
+      const id = this.id
+      if (momentObj.isValid()) {
+        this.$emit(eventName, { hour, minute, id })
+        this.validateInput()
+      }
+    },
+    getTime ({ hour, minute } = {}) {
+      if (hour && minute) {
+        const momentObj = moment()
+        momentObj.hour(hour)
+        momentObj.minute(minute)
+        if (momentObj.isValid()) {
+          return momentObj.format('HH:mm')
         }
       }
     },
-    updateLocalizedTime ({ eventName, localTime }) {
-      let utcMoment
-      if (localTime && this.selectedTimezone) {
-        utcMoment = moment.tz(localTime, 'HHmm', this.selectedTimezone).utc()
-      }
-
-      let utcHour
-      let utcMinute
-      if (utcMoment && utcMoment.isValid()) {
-        utcHour = utcMoment.format('HH')
-        utcMinute = utcMoment.format('mm')
-      }
+    updateLocation (location) {
       const id = this.id
-      this.$emit(eventName, { utcHour, utcMinute, id })
+      this.$emit('updateLocation', { location, id })
       this.validateInput()
     },
     setSelectedDays (scheduleEvent) {
@@ -241,28 +245,27 @@ export default {
     },
     touchIfNothingFocused () {
       if (!get(this, '$refs.selectedDays.isFocused') &&
-          !get(this, '$refs.localizedWakeUpTime.isFocused') &&
-          !get(this, '$refs.localizedHibernateTime.isFocused')) {
+          !get(this, '$refs.wakeUpTime.isFocused') &&
+          !get(this, '$refs.hibernateTime.isFocused')) {
         this.$v.selectedDays.$touch()
-        this.$v.localizedWakeUpTime.$touch()
-        this.$v.localizedHibernateTime.$touch()
+        this.$v.wakeUpTime.$touch()
+        this.$v.hibernateTime.$touch()
       }
     },
     onInputSelectedDays () {
       this.$v.selectedDays.$touch()
       this.updateSelectedDays()
     },
-    onInputLocalizedWakeUpTime () {
-      this.$v.localizedWakeUpTime.$touch()
-      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime })
+    onInputWakeUpTime () {
+      this.$v.wakeUpTime.$touch()
+      this.updateTime({ eventName: 'updateWakeUpTime', time: this.wakeUpTime })
     },
-    onInputLocalizedHibernateTime () {
-      this.$v.localizedWakeUpTime.$touch()
-      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime })
+    onInputHibernateTime () {
+      this.$v.wakeUpTime.$touch()
+      this.updateTime({ eventName: 'updateHibernateTime', time: this.hibernateTime })
     },
     onInputSelectedTimezone () {
-      this.updateLocalizedTime({ eventName: 'updateWakeUpTime', localTime: this.localizedWakeUpTime })
-      this.updateLocalizedTime({ eventName: 'updateHibernateTime', localTime: this.localizedHibernateTime })
+      this.updateLocation(this.selectedTimezone)
     },
     validateInput () {
       if (this.valid !== !this.$v.$invalid) {
@@ -272,10 +275,11 @@ export default {
     }
   },
   mounted () {
-    this.selectedTimezone = this.localTimezone
-    this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
-    this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
+    this.selectedTimezone = this.scheduleEvent.location
+    this.wakeUpTime = this.getTime(this.scheduleEvent.end)
+    this.hibernateTime = this.getTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
+    this.updateSelectedDays() // trigger sort
 
     setDelayedInputFocus(this, 'selectedDays')
   }

@@ -25,6 +25,7 @@ limitations under the License.
           @updateWakeUpTime="onUpdateWakeUpTime"
           @updateHibernateTime="onUpdateHibernateTime"
           @updateSelectedDays="onUpdateSelectedDays"
+          @updateLocation="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-layout>
@@ -72,17 +73,15 @@ limitations under the License.
 <script>
 import HibernationScheduleEvent from '@/components/HibernationScheduleEvent'
 import forEach from 'lodash/forEach'
-import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import { purposeRequiresHibernationSchedule } from '@/utils'
-import moment from 'moment-timezone'
+import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { mapState } from 'vuex'
 const uuidv4 = require('uuid/v4')
-
-const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s([0-6,]+)$/
 
 export default {
   name: 'hibernation-schedule',
@@ -128,74 +127,28 @@ export default {
     reset () {
       this.parseSchedules(this.scheduleCrontab)
     },
-    scheduleEventObjFromRegex (regex) {
-      const regexResult = scheduleCrontabRegex.exec(regex)
-      if (regexResult) {
-        const [, minute, hour, weekdays] = regexResult
-        return { minute, hour, weekdays }
-      }
-      return undefined
-    },
-    parsedScheduleEventFromCrontabBlock (crontabBlock) {
-      const cronStart = crontabBlock.start
-      const cronEnd = crontabBlock.end
-      const start = this.scheduleEventObjFromRegex(cronStart)
-      const end = this.scheduleEventObjFromRegex(cronEnd)
-
-      if (cronStart && !start) {
-        console.warn(`Could not parse start crontab line: ${cronStart}`)
-        this.parseError = true
-      }
-      if (cronEnd && !end) {
-        console.warn(`Could not parse end crontab line: ${cronEnd}`)
-        this.parseError = true
-      }
-      if (start && end) {
-        if (start.weekdays !== end.weekdays) {
-          console.warn(`Start weekdays (${start.weekdays}) and end weekdays (${end.weekdays}) do not match. This is currently not supported by the dashboard`)
-          this.parseError = true
-        }
-      }
-      if (!cronStart && !cronEnd) {
-        console.warn(`No start or end value in crontab block`)
-        this.parseError = true
-      }
-      if (!this.parseError) {
-        const id = uuidv4()
-        const valid = true
-        return { start, end, id, valid }
-      }
-      return undefined
-    },
     parseSchedules (scheduleCrontab) {
-      this.parseError = false
-      const parsedScheduleEvents = map(scheduleCrontab, crontabBlock => {
-        return this.parsedScheduleEventFromCrontabBlock(crontabBlock)
-      })
-      this.setParsedSchedules(parsedScheduleEvents)
+      try {
+        this.parseError = false
+        const parsedScheduleEvents = flatMap(scheduleCrontab, crontabBlock => {
+          return parsedScheduleEventsFromCrontabBlock(crontabBlock)
+        })
+        this.setParsedSchedules(parsedScheduleEvents)
+      } catch (error) {
+        console.warn(error)
+        this.parseError = true
+      }
     },
     setDefaultHibernationSchedule () {
-      const convertScheduleEventLineToLocalTimezone = (scheduleEventLine) => {
-        if (scheduleEventLine) {
-          const localMoment = moment.tz(this.localTimezone)
-          localMoment.hour(scheduleEventLine.hour)
-          localMoment.minute(scheduleEventLine.minute)
-          const utcMoment = localMoment.utc()
-          scheduleEventLine.hour = utcMoment.format('HH')
-          scheduleEventLine.minute = utcMoment.format('mm')
-        }
-        return scheduleEventLine
-      }
-
       const defaultHibernationCrontab = get(this.cfg.defaultHibernationSchedule, this.purpose)
       this.parseError = false
-      const parsedScheduleEvents = map(defaultHibernationCrontab, crontabBlock => {
-        const parsedScheduleEvent = this.parsedScheduleEventFromCrontabBlock(crontabBlock)
-        if (parsedScheduleEvent) {
-          parsedScheduleEvent.start = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['start'])
-          parsedScheduleEvent.end = convertScheduleEventLineToLocalTimezone(parsedScheduleEvent['end'])
-          return parsedScheduleEvent
-        }
+      const parsedScheduleEvents = flatMap(defaultHibernationCrontab, crontabBlock => {
+        crontabBlock.location = this.localTimezone
+        const parsedScheduleEvents = parsedScheduleEventsFromCrontabBlock(crontabBlock)
+        forEach(parsedScheduleEvents, parsedScheduleEvent => {
+          parsedScheduleEvent.location = this.localTimezone
+        })
+        return parsedScheduleEvents
       })
       this.setParsedSchedules(parsedScheduleEvents)
     },
@@ -225,8 +178,9 @@ export default {
       const id = uuidv4()
       const start = {}
       const end = {}
+      const location = this.localTimezone
       const valid = false
-      this.parsedScheduleEvents.push({ start, end, id, valid })
+      this.parsedScheduleEvents.push({ start, end, location, id, valid })
       this.confirmNoSchedule = false
       this.validateInput()
     },
@@ -239,17 +193,21 @@ export default {
         set(schedule, weekdays1, get(schedule, weekdays2))
       }
     },
-    onUpdateWakeUpTime ({ utcHour, utcMinute, id }) {
+    onUpdateWakeUpTime ({ hour, minute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      set(schedule, 'end.hour', utcHour)
-      set(schedule, 'end.minute', utcMinute)
+      set(schedule, 'end.hour', hour)
+      set(schedule, 'end.minute', minute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'end.weekdays', 'start.weekdays')
     },
-    onUpdateHibernateTime ({ utcHour, utcMinute, id }) {
+    onUpdateHibernateTime ({ hour, minute, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
-      set(schedule, 'start.hour', utcHour)
-      set(schedule, 'start.minute', utcMinute)
+      set(schedule, 'start.hour', hour)
+      set(schedule, 'start.minute', minute)
       this.ensureScheduleWeekdaysIsSet(schedule, 'start.weekdays', 'end.weekdays')
+    },
+    onUpdateLocation ({ location, id }) {
+      const schedule = find(this.parsedScheduleEvents, { id })
+      set(schedule, 'location', location)
     },
     onUpdateSelectedDays ({ weekdays, id }) {
       const schedule = find(this.parsedScheduleEvents, { id })
@@ -264,34 +222,7 @@ export default {
     },
     getScheduleCrontab () {
       if (this.valid) {
-        const crontabLineFromParsedScheduleEvent = ({ crontabBlock, parsedScheduleEvent, line }) => {
-          const { weekdays, hour, minute } = get(parsedScheduleEvent, line, {})
-          if (parsedScheduleEvent && hour && minute && weekdays) {
-            return `${minute} ${hour} * * ${weekdays}`
-          }
-        }
-        const crontabBlockFromScheduleEvent = parsedScheduleEvent => {
-          const crontabBlock = {}
-          const parsedScheduleEventStart = crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'start' })
-          if (parsedScheduleEventStart) {
-            crontabBlock.start = parsedScheduleEventStart
-          }
-          const parsedScheduleEventEnd = crontabLineFromParsedScheduleEvent({ parsedScheduleEvent, line: 'end' })
-          if (parsedScheduleEventEnd) {
-            crontabBlock.end = parsedScheduleEventEnd
-          }
-          return crontabBlock
-        }
-        const scheduleCrontab = []
-        let valid = true
-        forEach(this.parsedScheduleEvents, parsedScheduleEvent => {
-          const crontabBlock = crontabBlockFromScheduleEvent(parsedScheduleEvent)
-          if (!isEmpty(crontabBlock)) {
-            scheduleCrontab.push(crontabBlock)
-          } else {
-            valid = false
-          }
-        })
+        const { scheduleCrontab, valid } = crontabFromParsedScheduleEvents(this.parsedScheduleEvents)
         if (valid && !this.parseError) {
           return scheduleCrontab
         } else {
