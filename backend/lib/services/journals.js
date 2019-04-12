@@ -103,13 +103,12 @@ function getOpenIssues ({ name, namespace } = {}) {
 }
 exports.getOpenIssues = getOpenIssues
 
-function loadOpenIssues (...args) {
+async function loadOpenIssues (...args) {
   return getOpenIssues(...args)
     .reduce((cache, issues) => {
       cache.addOrUpdateIssues({ issues })
       return cache
     }, getJournalCache())
-    .then(() => undefined)
 }
 exports.loadOpenIssues = exports.list = loadOpenIssues
 
@@ -149,12 +148,11 @@ function getIssueComments ({ number }) {
 }
 exports.getIssueComments = getIssueComments
 
-function loadIssueComments ({ number }) {
+async function loadIssueComments ({ number }) {
   return getIssueComments({ number })
     .reduce((cache, comments) => {
       _.forEach(comments, comment => cache.addOrUpdateComment({ issueNumber: number, comment }))
       return cache
     }, getJournalCache())
-    .then(() => undefined)
 }
 exports.loadIssueComments = loadIssueComments
