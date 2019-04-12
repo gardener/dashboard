@@ -20,7 +20,9 @@ import isEmpty from 'lodash/isEmpty'
 import replace from 'lodash/replace'
 import split from 'lodash/split'
 import join from 'lodash/join'
+import map from 'lodash/map'
 import uniq from 'lodash/uniq'
+import range from 'lodash/range'
 import toUpper from 'lodash/toUpper'
 import moment from 'moment-timezone'
 import store from '../store'
@@ -46,19 +48,12 @@ function scheduleEventObjFromRegex (regexVal) {
       '7': 0,
       '*': '1,2,3,4,5,6,0'
     }
-    weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => {
-      return intVals[weekday]
-    })
+    weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => intVals[weekday])
 
     // resolve intervals
-    weekdays = replace(weekdays, /[0-6]+-[0-6]/g, weekdayInterval => {
+    weekdays = replace(weekdays, /[0-6]-[0-6]/g, weekdayInterval => {
       const [leftVal, rightVal] = split(weekdayInterval, '-')
-      let flatWeekdays = []
-      for (var weekday = leftVal; weekday <= rightVal; weekday++) {
-        flatWeekdays.push(weekday)
-      }
-
-      return join(flatWeekdays, ',')
+      return join(range(~~leftVal, ~~rightVal + 1), ',')
     })
 
     // remove duplicates
@@ -97,30 +92,24 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
     end = convertScheduleEventObjToLocalTimezone(end)
   }
 
-  let parseError = false
-
   if (cronStart && !start) {
-    parseError = `Could not parse start crontab line: ${cronStart}`
+    throw new Error(`Could not parse start crontab line: ${cronStart}`)
   }
   if (cronEnd && !end) {
-    parseError = `Could not parse end crontab line: ${cronEnd}`
-    parseError = true
+    throw new Error(`Could not parse end crontab line: ${cronEnd}`)
   }
   if (!cronStart && !cronEnd) {
-    parseError = `No start or end value in crontab block`
+    throw new Error(`No start or end value in crontab block`)
   }
-  if (!parseError) {
-    const scheduleEvents = []
-    const valid = true
-    if (start && end && start.weekdays !== end.weekdays) {
-      scheduleEvents.push({ start, location, id: uuidv4(), valid })
-      scheduleEvents.push({ end, location, id: uuidv4(), valid })
-    } else {
-      scheduleEvents.push({ start, end, location, id: uuidv4(), valid })
-    }
-    return scheduleEvents
+  const scheduleEvents = []
+  const valid = true
+  if (start && end && start.weekdays !== end.weekdays) {
+    scheduleEvents.push({ start, location, id: uuidv4(), valid })
+    scheduleEvents.push({ end, location, id: uuidv4(), valid })
+  } else {
+    scheduleEvents.push({ start, end, location, id: uuidv4(), valid })
   }
-  throw new Error(parseError)
+  return scheduleEvents
 }
 
 function crontabLineFromParsedScheduleEvent ({ crontabBlock, parsedScheduleEvent, line }) {
