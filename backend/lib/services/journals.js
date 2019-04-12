@@ -103,20 +103,29 @@ function getOpenIssues ({ name, namespace } = {}) {
 }
 exports.getOpenIssues = getOpenIssues
 
-function loadOpenIssues (...args) {
+async function loadOpenIssues (...args) {
   return getOpenIssues(...args)
     .reduce((cache, issues) => {
       cache.addOrUpdateIssues({ issues })
       return cache
     }, getJournalCache())
-    .then(() => undefined)
 }
 exports.loadOpenIssues = exports.list = loadOpenIssues
 
-function finalizeIssue (number) {
-  return Promise.resolve()
-    .then(() => github.createComment({ number }, '_[Auto-closed due to Shoot deletion]_'))
-    .then(() => github.closeIssue({ number }))
+async function finalizeIssue (number) {
+  const { data: githubIssue } = await github.getIssue({ number })
+  const issue = fromIssue(githubIssue)
+
+  if (issue.metadata.state === 'closed') {
+    logger.debug('Journal already closed. Removing from cache..')
+    const cache = getJournalCache()
+    cache.removeIssue({ issue })
+
+    return
+  }
+
+  await github.createComment({ number }, '_[Auto-closed due to Shoot deletion]_')
+  await github.closeIssue({ number })
 }
 
 function deleteJournals ({ name, namespace }) {
@@ -125,7 +134,7 @@ function deleteJournals ({ name, namespace }) {
   if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
-  logger.debug('deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, numbers)
+  logger.debug('Deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, _.join(numbers, ', '))
   return Promise.all(_.map(numbers, finalizeIssue))
 }
 exports.deleteJournals = deleteJournals
@@ -139,12 +148,11 @@ function getIssueComments ({ number }) {
 }
 exports.getIssueComments = getIssueComments
 
-function loadIssueComments ({ number }) {
+async function loadIssueComments ({ number }) {
   return getIssueComments({ number })
     .reduce((cache, comments) => {
       _.forEach(comments, comment => cache.addOrUpdateComment({ issueNumber: number, comment }))
       return cache
     }, getJournalCache())
-    .then(() => undefined)
 }
 exports.loadIssueComments = loadIssueComments
