@@ -28,6 +28,7 @@ const pRetry = require('p-retry')
 const pTimeout = require('p-timeout')
 const { authentication } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
+const logger = require('./logger')
 const { sessionSecret, cookieMaxAge = 1800, oidc = {} } = require('./config')
 
 const jwtSign = promisify(jwt.sign)
@@ -48,7 +49,10 @@ if (ca) {
 }
 Issuer.defaultHttpOptions = defaultHttpOptions
 
-const secure = process.env.NODE_ENV === 'development' ? /^https:/.test(redirectUri) : true
+const secure = /^https:/.test(redirectUri)
+if (!secure && process.env.NODE_ENV === 'production') {
+  logger.warn('The Gardener Dashboard is running in production but you don\'t use Transport Layer Security (TLS) to secure the connection and the data')
+}
 
 const COOKIE_HEADER_PAYLOAD = 'gHdrPyl'
 const COOKIE_SIGNATURE = 'gSgn'

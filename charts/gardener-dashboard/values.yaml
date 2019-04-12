@@ -48,7 +48,7 @@ oidc:
   issuerUrl: https://identity.ingress.example.org
   # clientId is the public identifier of the gardener-dashboard aplication
   clientId: dashboard
-  # clientId is the private secret of the gardener-dashboard aplication
+  # clientSecret is the private secret of the gardener-dashboard aplication
   clientSecret: ~
   # redirectUri is the endpoint receiving the OTAC from the OpenID provider after successful login
   redirectUri: https://dashboard.ingress.example.org/auth/callback
