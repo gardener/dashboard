@@ -73,7 +73,7 @@ function scheduleEventObjFromRegex (regexVal) {
 
 function convertScheduleEventObjToLocalTimezone (scheduleObj) {
   if (scheduleObj) {
-    const localTimezone = get(store, 'state.localTimezone')
+    const localTimezone = store.state.localTimezone
     const momentObj = moment.utc()
     momentObj.hour(scheduleObj.hour)
     momentObj.minute(scheduleObj.minute)
@@ -92,7 +92,7 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
   let end = scheduleEventObjFromRegex(cronEnd)
 
   if (!location) {
-    location = get(store, 'state.localTimezone')
+    location = store.state.localTimezone
     start = convertScheduleEventObjToLocalTimezone(start)
     end = convertScheduleEventObjToLocalTimezone(end)
   }

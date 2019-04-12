@@ -195,25 +195,24 @@ export default {
       return getValidationErrors(this, field)
     },
     updateTime ({ eventName, time }) {
-      let momentObj = moment(time, 'HHmm')
-      let hour = momentObj.format('HH')
-      let minute = momentObj.format('mm')
+      const momentObj = moment(time, 'HHmm')
+      const hour = momentObj.format('HH')
+      const minute = momentObj.format('mm')
       const id = this.id
       if (momentObj.isValid()) {
         this.$emit(eventName, { hour, minute, id })
         this.validateInput()
       }
     },
-    getTime (cronTime) {
-      if (cronTime && cronTime.hour && cronTime.minute) {
+    getTime ({ hour, minute } = {}) {
+      if (hour && minute) {
         const momentObj = moment()
-        momentObj.hour(cronTime.hour)
-        momentObj.minute(cronTime.minute)
+        momentObj.hour(hour)
+        momentObj.minute(minute)
         if (momentObj.isValid()) {
           return momentObj.format('HH:mm')
         }
       }
-      return undefined
     },
     updateLocation (location) {
       const id = this.id
