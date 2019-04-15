@@ -14,270 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
-<template>
-  <v-dialog v-model="visible" persistent max-width="1200" content-class="dialogContainer">
-    <v-card flat>
-      <v-toolbar dense class="draken-1 header">
-        <v-toolbar-side-icon><v-icon x-large class="white--text">mdi-hexagon-multiple</v-icon></v-toolbar-side-icon>
-        <v-toolbar-title>
-          <span>Create Cluster</span>
-        </v-toolbar-title>
-        <v-tabs dark slot="extension" v-model="activeTab">
-          <v-tabs-slider color="yellow"></v-tabs-slider>
-          <v-tab key="infra"  href="#tab-infra"  ripple>Infrastructure</v-tab>
-          <v-tab key="worker" href="#tab-worker" ripple>Worker</v-tab>
-          <v-tab key="addons" href="#tab-addons" ripple>Add-ons</v-tab>
-          <v-tab key="maintenance" href="#tab-maintenance" ripple>Maintenance</v-tab>
-          <v-tab key="hibernation" href="#tab-hibernation" ripple>Hibernation</v-tab>
-        </v-tabs>
-      </v-toolbar>
-      <v-tabs-items v-model="activeTab" class="items">
-        <v-tab-item key="infra" value="tab-infra">
-          <v-card flat>
-            <v-container fluid>
-              <v-card-text>
-                <v-layout row>
-                  <v-flex xs3>
-                    <v-text-field
-                      ref="name"
-                      color="cyan darken-2"
-                      label="Cluster Name"
-                      counter="10"
-                      v-model="clusterName"
-                      :error-messages="getErrorMessages('shootDefinition.metadata.name')"
-                      @input="$v.shootDefinition.metadata.name.$touch()"
-                      @blur="$v.shootDefinition.metadata.name.$touch()"
-                      ></v-text-field>
-                  </v-flex>
-                </v-layout>
-                <v-layout row class="mt-2">
-                  <v-flex xs3>
-                    <v-select
-                      color="cyan darken-2"
-                      label="Infrastructure"
-                      :items="sortedCloudProviderKindList"
-                      v-model="infrastructureKind"
-                      >
-                      <template slot="item" slot-scope="data">
-                        <v-list-tile-action>
-                          <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24">
-                          <infra-icon v-else v-model="data.item"></infra-icon>
-                        </v-list-tile-action>
-                        <v-list-tile-content>
-                          <v-list-tile-title>{{data.item}}</v-list-tile-title>
-                        </v-list-tile-content>
-                      </template>
-                      <template slot="selection" slot-scope="data">
-                        <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24" class="mr-2">
-                        <v-avatar v-else size="30px">
-                          <infra-icon v-model="data.item"></infra-icon>
-                        </v-avatar>
-                        <span class="black--text">
-                          {{data.item}}
-                        </span>
-                      </template>
-                    </v-select>
-                  </v-flex>
-                  <v-flex xs1 v-show="cloudProfiles.length !== 1">
-                  </v-flex>
-                  <v-flex xs3 v-show="cloudProfiles.length !== 1">
-                    <cloud-profile
-                      ref="cloudProfile"
-                      v-model="cloudProfileName"
-                      :isCreateMode="true"
-                      :cloudProfiles="cloudProfiles"
-                      color="cyan darken-2">
-                    </cloud-profile>
-                  </v-flex>
-                  <v-flex xs1>
-                  </v-flex>
-                  <v-flex xs3>
-                    <v-select
-                      color="cyan darken-2"
-                      label="Secret"
-                      :items="infrastructureSecretsByProfileName"
-                      v-model="secret"
-                      :error-messages="getErrorMessages('shootDefinition.spec.cloud.secretBindingRef.name')"
-                      @input="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
-                      @blur="$v.shootDefinition.spec.cloud.secretBindingRef.name.$touch()"
-                      persistent-hint
-                      :hint="secretHint"
-                      >
-                      <template slot="item" slot-scope="data">
-                        {{get(data.item, 'metadata.name')}}
-                        <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
-                      </template>
-                      <template slot="selection" slot-scope="data">
-                        <span class="black--text">
-                          {{get(data.item, 'metadata.name')}}
-                        </span>
-                        <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
-                      </template>
-                    </v-select>
-                  </v-flex>
-                </v-layout>
-                <v-layout row>
-                  <v-flex xs3>
-                    <v-select
-                      color="cyan darken-2"
-                      label="Region"
-                      :items="regions"
-                      v-model="region"
-                      :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
-                      @input="$v.shootDefinition.spec.cloud.region.$touch()"
-                      @blur="$v.shootDefinition.spec.cloud.region.$touch()"
-                      ></v-select>
-                  </v-flex>
-                  <v-flex xs1>
-                  </v-flex>
-                  <v-flex xs3 v-if="infrastructureKind !== 'azure'">
-                    <v-select
-                      color="cyan darken-2"
-                      label="Zone"
-                      :items="zones"
-                      :error-messages="getErrorMessages('infrastructureData.zones')"
-                      v-model="zone"
-                      @input="$v.infrastructureData.zones.$touch()"
-                      @blur="$v.infrastructureData.zones.$touch()"
-                      ></v-select>
-                  </v-flex>
-                </v-layout>
-                <v-layout row>
-                  <v-flex xs3>
-                    <v-select
-                      color="cyan darken-2"
-                      label="Kubernetes"
-                      :items="sortedKubernetesVersions"
-                      v-model="shootDefinition.spec.kubernetes.version"
-                      ></v-select>
-                  </v-flex>
-                  <v-flex xs1>
-                  </v-flex>
-                  <v-flex xs3>
-                    <v-select
-                      color="cyan darken-2"
-                      label="Purpose"
-                      :items="filteredPurposes"
-                      v-model="purpose"
-                      hint="Indicate the importance of the cluster"
-                      persistent-hint
-                      @input="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
-                      @blur="$v.shootDefinition.metadata.annotations['garden.sapcloud.io/purpose'].$touch()"
-                      ></v-select>
-                  </v-flex>
-                </v-layout>
-                <template v-if="infrastructureKind === 'openstack'">
-                  <v-layout row>
-                    <v-flex xs3>
-                      <v-select
-                      color="cyan darken-2"
-                      label="Floating Pools"
-                      :items="floatingPoolNames"
-                      v-model="infrastructureData.floatingPoolName"
-                      ></v-select>
-                    </v-flex>
-                    <v-flex xs1>
-                    </v-flex>
-                    <v-flex xs3>
-                      <v-select
-                      color="cyan darken-2"
-                      label="Load Balancer Providers"
-                      :items="loadBalancerProviderNames"
-                      v-model="infrastructureData.loadBalancerProvider"
-                      persistent-hint
-                      ></v-select>
-                    </v-flex>
-                  </v-layout>
-                </template>
-              </v-card-text>
-            </v-container>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item key="worker" value="tab-worker">
-          <v-card flat>
-            <v-container>
-              <manage-workers
-              ref="manageWorkers"
-              :infrastructureKind="infrastructureKind"
-              :cloudProfileName="cloudProfileName"
-              @valid="onWorkersValid"
-             ></manage-workers>
-           </v-container>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item key="addons" value="tab-addons">
-          <v-card flat>
-            <v-container>
-              <v-list three-line class="mr-extra">
-                <v-list-tile class="list-complete-item"
-                  v-for="addonDefinition in addonDefinitionList"
-                  :key="addonDefinition.name">
-                  <v-list-tile-action>
-                    <v-checkbox color="cyan darken-2" v-model="addons[addonDefinition.name].enabled"></v-checkbox>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                    <v-list-tile-title >{{addonDefinition.title}}</v-list-tile-title>
-                    <v-list-tile-sub-title>{{addonDefinition.description}}</v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
-              </v-list>
-            </v-container>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item key="maintenance" value="tab-maintenance">
-          <v-card flat>
-            <v-container>
-              <maintenance-time
-                ref="maintenanceTime"
-                :time-window-begin="shootDefinition.spec.maintenance.timeWindow.begin"
-                @updateMaintenanceWindow="onUpdateMaintenanceWindow"
-                @valid="onMaintenanceTimeValid"
-              ></maintenance-time>
-              <maintenance-components
-                :update-kubernetes-version="shootDefinition.spec.maintenance.autoUpdate.kubernetesVersion"
-                @updateKubernetesVersion="onUpdateKubernetesVersion"
-              ></maintenance-components>
-            </v-container>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item key="hibernation" value="tab-hibernation">
-          <v-card flat>
-            <v-container>
-              <hibernation-schedule
-                ref="hibernationSchedule"
-                :purpose="purpose"
-                @valid="onHibernationScheduleValid"
-              ></hibernation-schedule>
-            </v-container>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
-
-      <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
-      </v-card-actions>
-
-    </v-card>
-  </v-dialog>
-</template>
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
 import CloudProfile from '@/components/CloudProfile'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
-import MaintenanceTime from '@/components/MaintenanceTime'
-import HibernationSchedule from '@/components/HibernationSchedule'
-import ManageWorkers from '@/components/ManageWorkers'
+
 import Alert from '@/components/Alert'
 import find from 'lodash/find'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import map from 'lodash/map'
-import cloneDeep from 'lodash/cloneDeep'
 import noop from 'lodash/noop'
 import isEmpty from 'lodash/isEmpty'
 import forEach from 'lodash/forEach'
@@ -291,114 +38,17 @@ import sample from 'lodash/sample'
 import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import InfraIcon from '@/components/InfrastructureIcon'
-import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors, shortRandomString } from '@/utils'
+import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors,  } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
-const semSort = require('semver-sort')
 
-const validationErrors = {
-  shootDefinition: {
-    metadata: {
-      name: {
-        required: 'Name is required',
-        maxLength: 'Name ist too long',
-        resourceName: 'Name must only be lowercase letters, numbers and hyphens',
-        unique: 'Cluster name must be unique',
-        noConsecutiveHyphen: 'Cluster name must not contain consecutive hyphens',
-        noStartEndHyphen: 'Cluster name must not start or end with a hyphen'
-      },
-      annotations: {
-        'garden.sapcloud.io/purpose': {
-          required: 'Purpose is required'
-        }
-      }
-    },
-    spec: {
-      cloud: {
-        secretBindingRef: {
-          name: {
-            required: 'Secret is required'
-          }
-        },
-        region: {
-          required: 'Region is required'
-        }
-      }
-    }
-  },
-  infrastructureData: {
-    zones: {
-      zonesNotEmpty: 'Zone is required'
-    }
-  }
-}
 
-const standardAddonDefinitionList = [
-  {
-    name: 'kubernetes-dashboard',
-    title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters',
-    visible: true,
-    enabled: true
-  },
-  {
-    name: 'nginx-ingress',
-    title: 'Nginx Ingress (Deprecated)',
-    description: 'This add-on is deprecated and will be removed in the future. You can install it or an alternative ingress controller always manually. If you choose to install it with the cluster, please note that Gardener will include it in its reconciliation and you can’t configure or override it’s configuration.',
-    visible: true,
-    enabled: true
-  }
-]
-
-const defaultShootDefinition = {
-  apiVersion: 'garden.sapcloud.io/v1beta1',
-  kind: 'Shoot',
-  metadata: {
-    name: null,
-    namespace: null,
-    annotations: {
-      'garden.sapcloud.io/purpose': null
-    }
-  },
-  spec: {
-    cloud: {
-      profile: null,
-      region: null,
-      secretBindingRef: {
-        name: null
-      }
-    },
-    kubernetes: {
-      version: null
-    },
-    dns: {
-      provider: null,
-      domain: null
-    },
-    maintenance: {
-      timeWindow: {
-        begin: null,
-        end: null
-      },
-      autoUpdate: {
-        kubernetesVersion: true
-      }
-    },
-    addons: reduce(standardAddonDefinitionList, (addons, { name, enabled }) => set(addons, name, { enabled }), {})
-  }
-}
 
 export default {
-  name: 'create-cluster-dialog',
+  name: 'create-shoot-dialog',
   components: {
-    InfraIcon,
     Alert,
-    CloudProfile,
-    MaintenanceComponents,
-    MaintenanceTime,
-    HibernationSchedule,
-    ManageWorkers
+    CloudProfile
   },
   props: {
     value: {
@@ -473,19 +123,8 @@ export default {
       'localTimezone'
     ]),
     ...mapGetters([
-      'cloudProfileByName',
-      'cloudProfilesByCloudProviderKind',
-      'regionsByCloudProfileName',
-      'loadBalancerProviderNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileName',
-      'cloudProviderKindList',
-      'kubernetesVersions',
       'infrastructureSecretsByInfrastructureKind',
-      'infrastructureSecretsByCloudProfileName',
-      'projectList',
       'domainList',
-      'shootByNamespaceAndName',
-      'customAddonDefinitionList'
     ]),
     visible: {
       get () {
@@ -581,20 +220,6 @@ export default {
     addons () {
       return get(this.shootDefinition, 'spec.addons', {})
     },
-    regions () {
-      return this.regionsByCloudProfileName(this.cloudProfileName)
-    },
-    loadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
-    },
-    floatingPoolNames () {
-      return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
-    },
-    zones () {
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      const predicate = item => item.region === this.region
-      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
-    },
     infrastructureSecretsByKind () {
       return this.infrastructureSecretsByInfrastructureKind(this.infrastructureKind)
     },
@@ -604,12 +229,7 @@ export default {
     valid () {
       return this.workersValid && this.maintenanceTimeValid && this.hibernationScheduleValid && !this.$v.$invalid
     },
-    sortedKubernetesVersions () {
-      return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
-    },
-    sortedCloudProviderKindList () {
-      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], this.cloudProviderKindList)
-    },
+
     projectName () {
       const predicate = item => item.metadata.namespace === this.namespace
       const project = find(this.projectList, predicate)
@@ -620,35 +240,9 @@ export default {
         return isOwnSecretBinding(secret)
       }
     },
-    selfTerminationDays () {
-      const clusterLifetimeDays = function (quotas, scope) {
-        const predicate = item => get(item, 'spec.scope') === scope
-        return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
-      }
 
-      const quotas = get(this.selectedSecret, 'quotas')
-      let terminationDays = clusterLifetimeDays(quotas, 'project')
-      if (!terminationDays) {
-        terminationDays = clusterLifetimeDays(quotas, 'secret')
-      }
 
-      return terminationDays
-    },
-    filteredPurposes () {
-      return this.selfTerminationDays ? ['evaluation'] : this.purposes
-    },
-    addonDefinitionList () {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
-      return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
-    },
-    secretHint () {
-      if (this.selfTerminationDays) {
-        return `The selected secret has an associated quota that will cause the cluster to self terminate after ${this.selfTerminationDays} days`
-      } else {
-        return undefined
-      }
-    }
+
   },
   methods: {
     ...mapActions([
@@ -657,103 +251,7 @@ export default {
     get (object, path, defaultValue) {
       return get(object, path, defaultValue)
     },
-    getInfraHandler () {
-      switch (this.infrastructureKind) {
-        case 'aws':
-          return {
-            setDefaultZone: this.setDefaultZone,
-            setDefaults: () => {
-              this.infrastructureData = {
-                networks: {
-                  vpc: {
-                    cidr: '10.250.0.0/16'
-                  },
-                  internal: [
-                    '10.250.112.0/22'
-                  ],
-                  nodes: '10.250.0.0/16',
-                  public: [
-                    '10.250.96.0/22'
-                  ],
-                  workers: [
-                    '10.250.0.0/19'
-                  ]
-                },
-                workers: null,
-                zones: null
-              }
-            }
-          }
-        case 'azure':
-          return {
-            setDefaultZone: noop,
-            setDefaults: () => {
-              this.infrastructureData = {
-                networks: {
-                  vnet: {
-                    cidr: '10.250.0.0/16'
-                  },
-                  nodes: '10.250.0.0/19',
-                  public: '10.250.96.0/22',
-                  workers: '10.250.0.0/19'
-                },
-                workers: null
-              }
-            }
-          }
-        case 'gcp':
-          return {
-            setDefaultZone: this.setDefaultZone,
-            setDefaults: () => {
-              this.infrastructureData = {
-                networks: {
-                  nodes: '10.250.0.0/19',
-                  workers: [
-                    '10.250.0.0/19'
-                  ]
-                },
-                workers: null,
-                zones: null
-              }
-            }
-          }
-        case 'openstack':
-          return {
-            setDefaultZone: this.setDefaultZone,
-            setDefaults: () => {
-              this.infrastructureData = {
-                networks: {
-                  nodes: '10.250.0.0/19',
-                  workers: [
-                    '10.250.0.0/19'
-                  ]
-                },
-                workers: null,
-                zones: null
-              }
-            }
-          }
-        case 'alicloud':
-          return {
-            setDefaultZone: this.setDefaultZone,
-            setDefaults: () => {
-              this.infrastructureData = {
-                networks: {
-                  vpc: {
-                    cidr: '10.250.0.0/16'
-                  },
-                  nodes: '10.250.0.0/16',
-                  workers: [
-                    '10.250.0.0/19'
-                  ]
-                },
-                workers: null,
-                zones: null
-              }
-            }
-          }
-      }
-    },
+
     createShootResource () {
       const data = cloneDeep(this.shootDefinition)
       const annotations = data.metadata.annotations
@@ -780,21 +278,7 @@ export default {
       }
       return this.createShoot(data)
     },
-    async createClicked () {
-      try {
-        await this.createShootResource()
-        this.$emit('created')
-        this.$emit('close', false)
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = `Failed to create cluster.`
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
-    },
-    cancelClicked () {
-      this.$emit('close', true)
-    },
+
     reset () {
       this.$v.$touch()
 
@@ -895,15 +379,7 @@ export default {
       this.shootDefinition.spec.maintenance.timeWindow.begin = utcBegin
       this.shootDefinition.spec.maintenance.timeWindow.end = utcEnd
     },
-    onMaintenanceTimeValid (value) {
-      this.maintenanceTimeValid = value
-    },
-    onHibernationScheduleValid (value) {
-      this.hibernationScheduleValid = value
-    },
-    onWorkersValid (value) {
-      this.workersValid = value
-    }
+
   },
   watch: {
     value (newValue) {

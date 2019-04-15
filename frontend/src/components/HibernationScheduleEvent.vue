@@ -81,7 +81,7 @@ limitations under the License.
 </template>
 
 <script>
-import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { mapState } from 'vuex'
 import moment from 'moment-timezone'
@@ -276,8 +276,6 @@ export default {
     this.localizedWakeUpTime = this.getLocalizedTime(this.scheduleEvent.end)
     this.localizedHibernateTime = this.getLocalizedTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
-
-    setDelayedInputFocus(this, 'selectedDays')
   }
 }
 </script>

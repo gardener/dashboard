@@ -234,6 +234,9 @@ const getters = {
   },
   isHideDeactivatedReconciliation (state, getters) {
     return getters['shoots/isHideDeactivatedReconciliation']
+  },
+  getCreateShootResource (state, getters) {
+    return getters['shoots/getCreateShootResource']
   }
 }
 
@@ -358,6 +361,9 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  setCreateShootResource ({ dispatch }, data) {
+    return dispatch('shoots/setCreateShootResource', data)
   },
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)

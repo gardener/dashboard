@@ -43,6 +43,7 @@ limitations under the License.
     <v-layout row key="addWorker" class="list-item pt-2">
       <v-flex xs12>
         <v-btn
+          :disabled="!(machineTypes.length > 0)"
           small
           @click="addWorker"
           outline
@@ -52,6 +53,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn
+          :disabled="!(machineTypes.length > 0)"
           @click="addWorker"
           flat
           class="cyan--text text--darken-2">
@@ -82,9 +84,6 @@ export default {
   props: {
     workers: {
       type: Array
-    },
-    infrastructureKind: {
-      type: String
     },
     cloudProfileName: {
       type: String
@@ -199,6 +198,11 @@ export default {
   },
   mounted () {
     this.setInternalWorkers(this.workers)
+  },
+  watch: {
+    cloudProfileName (newValue) {
+      this.setDefaultWorker()
+    }
   }
 }
 </script>

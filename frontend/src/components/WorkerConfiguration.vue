@@ -40,7 +40,6 @@ limitations under the License.
         <manage-workers
         ref="manageWorkers"
         :workers="workers"
-        :infrastructureKind="infrastructureKind"
         :cloudProfileName="cloudProfileName"
         @valid="onWorkersValid"
        ></manage-workers>

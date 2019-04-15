@@ -35,6 +35,7 @@ import head from 'lodash/head'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import { getShootResourceSkeleton } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   getCloudProviderKind,
@@ -65,7 +66,8 @@ const state = {
   selection: undefined,
   hideUserIssues: undefined,
   hideProgressingIssues: undefined,
-  hideDeactivatedReconciliation: undefined
+  hideDeactivatedReconciliation: undefined,
+  createShootResource: getShootResourceSkeleton()
 }
 
 // getters
@@ -91,6 +93,9 @@ const getters = {
   },
   isHideDeactivatedReconciliation () {
     return state.hideDeactivatedReconciliation
+  },
+  getCreateShootResource () {
+    return state.createShootResource
   }
 }
 
@@ -219,6 +224,11 @@ const actions = {
   setHideDeactivatedReconciliation ({ commit, rootState }, value) {
     commit('SET_HIDE_DEACTIVATED_RECONCILIATION', { rootState, value })
     return state.hideDeactivatedReconciliation
+  },
+  setCreateShootResource ({ commit }, data) {
+    commit('SET_CREATE_SHOOT_RESOURCE', { data })
+
+    return state.createShootResource
   }
 }
 
@@ -543,6 +553,9 @@ const mutations = {
   SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
     state.hideDeactivatedReconciliation = value
     setFilteredAndSortedItems(state, rootState)
+  },
+  SET_CREATE_SHOOT_RESOURCE (state, { data }) {
+    state.createShootResource = data
   }
 }
 

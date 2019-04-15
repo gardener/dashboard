@@ -21,7 +21,9 @@ limitations under the License.
         color="cyan darken-2"
         label="Maintenance Start Time"
         v-model="localizedMaintenanceBegin"
-        :error-messages="getErrorMessages('timeWindowBegin')"
+        :error-messages="getErrorMessages('localizedMaintenanceBegin')"
+        @input="onInputLocalizedMaintenanceBegin"
+        @blur="$v.localizedMaintenanceBegin.$touch()"
         type="time"
         persistent-hint
         hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
@@ -47,7 +49,7 @@ import { required } from 'vuelidate/lib/validators'
 import sample from 'lodash/sample'
 
 const validationErrors = {
-  timeWindowBegin: {
+  localizedMaintenanceBegin: {
     required: 'Maintenance start time is required'
   }
 }
@@ -56,8 +58,7 @@ export default {
   name: 'maintenance-time',
   props: {
     timeWindowBegin: {
-      type: String,
-      default: ''
+      type: String
     }
   },
   computed: {
@@ -66,7 +67,7 @@ export default {
     ])
   },
   validations: {
-    timeWindowBegin: {
+    localizedMaintenanceBegin: {
       required
     }
   },
@@ -75,37 +76,43 @@ export default {
       selectedTimezone: this.localTimezone,
       timezones: moment.tz.names(),
       validationErrors,
-      localizedMaintenanceBegin: undefined
+      localizedMaintenanceBegin: undefined,
+      valid: undefined
     }
   },
   methods: {
-    updateMaintenanceWindow ({ localBegin, localTimezone }) {
-      let utcMoment
-      if (localBegin && localTimezone) {
-        utcMoment = moment.tz(localBegin, 'HHmm', localTimezone).utc()
-      }
+    getUTCMaintenanceWindow () {
+      if (this.localizedMaintenanceBegin && this.selectedTimezone) {
+        const utcMoment = moment.tz(this.localizedMaintenanceBegin, 'HH:mm', this.selectedTimezone).utc()
 
-      let utcBegin
-      let utcEnd
-      if (utcMoment && utcMoment.isValid()) {
-        utcBegin = utcMoment.format('HHmm00+0000')
-        utcMoment.add(1, 'h')
-        utcEnd = utcMoment.format('HHmm00+0000')
+        let utcBegin
+        let utcEnd
+        if (utcMoment && utcMoment.isValid()) {
+          utcBegin = utcMoment.format('HHmm00+0000')
+          utcMoment.add(1, 'h')
+          utcEnd = utcMoment.format('HHmm00+0000')
+        }
+        return { utcBegin, utcEnd }
       }
-      this.$emit('updateMaintenanceWindow', { utcBegin, utcEnd })
+      return undefined
     },
     reset () {
       this.selectedTimezone = this.localTimezone
-      this.setLocalizedTime(this.timeWindowBegin)
+      if (!this.timeWindowBegin) {
+        this.setDefaultMaintenanceTimeWindow()
+      } else {
+        this.setLocalizedTime(this.timeWindowBegin)
+      }
       this.validateInput()
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
     validateInput () {
-      this.$v.timeWindowBegin.$touch()
-
-      this.$emit('valid', !this.$v.$invalid)
+      if (this.valid !== !this.$v.$invalid) {
+        this.valid = !this.$v.$invalid
+        this.$emit('valid', this.valid)
+      }
     },
     setLocalizedTime (utcTime) {
       const momentObj = moment.tz(utcTime, 'HHmmZ', this.selectedTimezone)
@@ -123,21 +130,19 @@ export default {
       const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
       const randomHour = sample(hours)
       // use local timezone offset
-      const localBegin = `${randomHour}00`
+      const localBegin = `${randomHour}:00`
 
-      this.updateMaintenanceWindow({ localBegin, localTimezone: this.selectedTimezone })
+      this.localizedMaintenanceBegin = localBegin
+    },
+    onInputLocalizedMaintenanceBegin () {
+      this.$v.localizedMaintenanceBegin.$touch()
+      this.validateInput()
     }
   },
   watch: {
-    timeWindowBegin (value) {
-      this.setLocalizedTime(value)
+    timeWindowBegin (utcBegin) {
+      this.setLocalizedTime(utcBegin)
       this.validateInput()
-    },
-    localizedMaintenanceBegin (value) {
-      this.updateMaintenanceWindow({ localBegin: value, localTimezone: this.selectedTimezone })
-    },
-    selectedTimezone (value) {
-      this.updateMaintenanceWindow({ localBegin: this.localizedMaintenanceBegin, localTimezone: value })
     }
   },
   mounted () {

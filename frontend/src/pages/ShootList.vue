@@ -132,11 +132,11 @@ limitations under the License.
       </v-dialog>
 
       <template v-if="renderCreateDialog">
-        <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
+        <create-shoot-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-shoot-dialog>
       </template>
     </v-card>
     <v-fab-transition>
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showDialog({action: 'create'})">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'CreateShoot', params: {  namespace: $route.params.namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -151,13 +151,11 @@ import map from 'lodash/map'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
 import ShootListRow from '@/components/ShootListRow'
-import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
 
 export default {
   name: 'shoot-list',
   components: {
-    CreateClusterDialog,
     ShootListRow,
     ClusterAccess
   },

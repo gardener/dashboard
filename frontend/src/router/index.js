@@ -21,7 +21,6 @@ import { signinCallback, signout, isUserLoggedIn } from '@/utils/auth'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
-import concat from 'lodash/concat'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -29,8 +28,8 @@ const Default = () => import('@/layouts/Default')
 
 /* Pages */
 const Home = () => import('@/pages/Home')
+const CreateShoot = () => import('@/pages/CreateShoot')
 const ShootList = () => import('@/pages/ShootList')
-
 const ShootItemCards = () => import('@/pages/ShootItemCards')
 const ShootItemEditor = () => import('@/pages/ShootItemEditor')
 const Secrets = () => import('@/pages/Secrets')
@@ -97,6 +96,26 @@ export default function createRouter ({ store, userManager }) {
       to: ({ params }) => {
         return {
           name: 'ShootItemEditor',
+          params
+        }
+      }
+    }
+  ]
+  const createShootTabs = [
+    {
+      title: 'Overview',
+      to: ({ params }) => {
+        return {
+          name: 'CreateShoot',
+          params
+        }
+      }
+    },
+    {
+      title: 'YAML',
+      to: ({ params }) => {
+        return {
+          name: 'CreateShootEditor',
           params
         }
       }
@@ -204,6 +223,44 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: false,
                 title: 'Project Clusters'
               }
+            },
+            {
+              path: 'create',
+              component: PlaceholderComponent,
+              meta: {
+                namespaced: true,
+                projectScope: false,
+                title: 'Create Cluster',
+                toRouteName: 'CreateShoot',
+                breadcrumbTextFn: routeTitle
+              },
+              children: [
+                {
+                  path: 'ui',
+                  name: 'CreateShoot',
+                  component: CreateShoot,
+                  meta: {
+                    namespaced: true,
+                    projectScope: false,
+                    title: 'Create Cluster',
+                    toRouteName: 'CreateShoot',
+                    breadcrumbTextFn: routeTitle,
+                    tabs: createShootTabs
+                  }
+                },
+                {
+                  path: 'yaml',
+                  name: 'CreateShootEditor',
+                  component: ShootItemEditor,
+                  meta: {
+                    namespaced: true,
+                    projectScope: false,
+                    title: 'Create Cluster Editor',
+                    breadcrumbTextFn: routeTitle,
+                    tabs: createShootTabs
+                  }
+                }
+              ]
             },
             {
               path: ':name',
@@ -417,6 +474,7 @@ export default function createRouter ({ store, userManager }) {
             return undefined
           case 'Secrets':
           case 'Secret':
+          case 'CreateShoot':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets'),
@@ -424,13 +482,7 @@ export default function createRouter ({ store, userManager }) {
               ])
               .then(() => undefined)
           case 'ShootList':
-            const promises = []
-            concat(promises, store.dispatch('subscribeShoots'))
-            if (namespace !== '_all') {
-              concat(promises, store.dispatch('fetchInfrastructureSecrets'))
-            }
-            return Promise
-              .all(promises)
+            return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)
           case 'ShootItem':
           case 'ShootItemHibernationSettings':

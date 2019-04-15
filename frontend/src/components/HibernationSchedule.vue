@@ -317,6 +317,11 @@ export default {
   mounted () {
     this.parseSchedules(this.scheduleCrontab)
     this.confirmNoSchedule = this.noSchedule
+  },
+  watch: {
+    purpose (newValue) {
+      this.setDefaultHibernationSchedule()
+    }
   }
 }
 </script>

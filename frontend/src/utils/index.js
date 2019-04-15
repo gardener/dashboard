@@ -378,3 +378,22 @@ export function shortRandomString (length) {
   }
   return text
 }
+
+export function selfTerminationDaysForSecret (secret) {
+  const clusterLifetimeDays = function (quotas, scope) {
+    const predicate = item => get(item, 'spec.scope') === scope
+    return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+  }
+
+  const quotas = get(secret, 'quotas')
+  let terminationDays = clusterLifetimeDays(quotas, 'project')
+  if (!terminationDays) {
+    terminationDays = clusterLifetimeDays(quotas, 'secret')
+  }
+
+  return terminationDays
+}
+
+export function purposesForSecret (secret) {
+  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production']
+}

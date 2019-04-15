@@ -114,7 +114,7 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 import { getProjectName } from '@/utils'
 import download from 'downloadjs'
@@ -180,10 +180,19 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'shootByNamespaceAndName'
+      'shootByNamespaceAndName',
+      'getCreateShootResource'
     ]),
+    isCreateMode() {
+      return (get(this.$route, 'name') === 'CreateShootEditor')
+    },
     value () {
-      const data = this.shootByNamespaceAndName(this.$route.params)
+      let data
+      if (this.isCreateMode) {
+        data = this.getCreateShootResource
+      } else {
+        data = this.shootByNamespaceAndName(this.$route.params)
+      }
       if (data) {
         return omit(data, ['info'])
       }
@@ -207,6 +216,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'setCreateShootResource'
+    ]),
     getQualifiedName () {
       const { name, namespace } = get(this, 'value.metadata')
       const projectName = getProjectName({ namespace })
@@ -227,12 +239,18 @@ export default {
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
-        const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const data = pick(jsyaml.safeLoad(this.getContent()), paths)
-        const user = this.$store.state.user
-        const { metadata: { namespace, name } } = this.value
-        const { data: value } = await replaceShoot({ namespace, name, user, data })
-        this.update(value)
+        if (this.isCreateMode) {
+          const data = jsyaml.safeLoad(this.getContent())
+          this.setCreateShootResource(data)
+          this.update(data)
+        } else {
+          const paths = ['spec', 'metadata.labels', 'metadata.annotations']
+          const data = pick(jsyaml.safeLoad(this.getContent()), paths)
+          const user = this.$store.state.user
+          const { metadata: { namespace, name } } = this.value
+          const { data: value } = await replaceShoot({ namespace, name, user, data })
+          this.update(value)
+        }
         this.snackbarColor = 'success'
         this.snackbarText = `Cluster specification has been successfully updated`
         this.snackbar = true

@@ -36,7 +36,7 @@ limitations under the License.
         </v-list-tile>
         <v-list-tile class="list-complete-item" v-if="selectable || updateVersion">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="updateVersion"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -59,7 +59,7 @@ export default {
   props: {
     updateKubernetesVersion: {
       type: Boolean,
-      default: false
+      default: true
     },
     title: {
       type: String,
@@ -72,17 +72,13 @@ export default {
   },
   data () {
     return {
-      osUpdates: true
+      osUpdates: true,
+      k8sUpdates: this.updateKubernetesVersion
     }
   },
-  computed: {
-    updateVersion: {
-      get () {
-        return this.updateKubernetesVersion
-      },
-      set (value) {
-        this.$emit('updateKubernetesVersion', value)
-      }
+  methods: {
+    getComponentUpdates () {
+      return { k8sUpdates: this.k8sUpdates }
     }
   }
 }
