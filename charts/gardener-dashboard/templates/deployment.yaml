@@ -51,76 +51,76 @@ spec:
       serviceAccountName: gardener-dashboard
       {{- end }}
       containers:
-      - name: gardener-dashboard
-        args:
-        - /etc/gardener-dashboard/config.yaml
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - name: http
-          containerPort: {{ .Values.containerPort }}
-          protocol: TCP
-        {{- if .Values.livenessProbe.enabled }}
-        livenessProbe:
-          tcpSocket:
-            port: http
-          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
-          successThreshold: {{ .Values.livenessProbe.successThreshold }}
-          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
-        {{- end }}
-        {{- if .Values.readinessProbe.enabled }}
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: http
-          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
-          successThreshold: {{ .Values.readinessProbe.successThreshold }}
-          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
-        {{- end }}
-        env:
-        - name: SESSION_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-sessionSecret
-              key: keyValue
-        {{- if .Values.oidc }}
-        - name: OIDC_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-oidc
-              key: client_id
-        - name: OIDC_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-oidc
-              key: client_secret
-        {{- end }}
-        {{- if .Values.gitHub }}
-        - name: GITHUB_AUTHENTICATION_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-github
-              key: authentication.username
-        - name: GITHUB_AUTHENTICATION_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-github
-              key: authentication.token
-        - name: GITHUB_WEBHOOK_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: gardener-dashboard-github
-              key: webhookSecret
-        {{- end }}
-        {{- if .Values.kubeconfig }}
-        - name: KUBECONFIG
-          value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
-        {{- end }}
-        resources:
+        - name: gardener-dashboard
+          args:
+            - /etc/gardener-dashboard/config.yaml
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          {{- end }}
+          env:
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-sessionsecret
+                key: keyValue
+          {{- if .Values.oidc }}
+          - name: OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_id
+          - name: OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_secret
+          {{- end }}
+          {{- if .Values.gitHub }}
+          - name: GITHUB_AUTHENTICATION_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.username
+          - name: GITHUB_AUTHENTICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.token
+          - name: GITHUB_WEBHOOK_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: webhookSecret
+          {{- end }}
+          {{- if .Values.kubeconfig }}
+          - name: KUBECONFIG
+            value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
+          {{- end }}
+          resources:
 {{ toYaml .Values.resources | indent 12 }}
         volumeMounts:
         - name: gardener-dashboard-config
