@@ -167,6 +167,7 @@ export default {
         { text: 'PROJECT', value: 'project', align: 'left', checked: false, defaultChecked: true, hidden: false },
         { text: 'NAME', value: 'name', align: 'left', checked: false, defaultChecked: true, hidden: false },
         { text: 'INFRASTRUCTURE', value: 'infrastructure', align: 'left', checked: false, defaultChecked: true, hidden: false },
+        { text: 'SEED', value: 'seed', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'CREATED BY', value: 'createdBy', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'CREATED AT', value: 'createdAt', align: 'left', checked: false, defaultChecked: false, hidden: false },
         { text: 'PURPOSE', value: 'purpose', align: 'center', checked: false, defaultChecked: true, hidden: false },

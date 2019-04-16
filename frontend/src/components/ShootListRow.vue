@@ -49,6 +49,14 @@ limitations under the License.
         <span>{{ row.kind }} [{{ row.region }}]</span>
       </v-tooltip>
     </td>
+    <td class="nowrap" v-if="this.headerVisible['seed']">
+      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.seed, namespace:'garden' } }">
+        <span>{{row.seed}}</span>
+      </router-link>
+      <template v-else>
+        <span>{{row.seed}}</span>
+      </template>
+    </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="row.createdBy"></account-avatar>
     </td>
@@ -131,7 +139,8 @@ import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
-import { getTimestampFormatted,
+import {
+  getTimestampFormatted,
   getCloudProviderKind,
   getCreatedBy,
   isHibernated,
@@ -139,7 +148,9 @@ import { getTimestampFormatted,
   isShootMarkedForDeletion,
   isTypeDelete,
   getProjectName,
-  isShootHasNoHibernationScheduleWarning } from '@/utils'
+  isShootHasNoHibernationScheduleWarning,
+  canLinkToSeed
+} from '@/utils'
 
 export default {
   components: {
@@ -197,7 +208,8 @@ export default {
         lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
         journalsLabels: this.journalsLabels(this.shootItem.metadata),
         // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
-        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration')
+        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration'),
+        seed: get(spec, 'cloud.seed')
       }
     },
     headerVisible () {
@@ -258,6 +270,9 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
+    },
+    canLinkToSeed () {
+      return canLinkToSeed({ shootNamespace: this.row.namespace })
     }
   },
   methods: {

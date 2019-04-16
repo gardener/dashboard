@@ -123,7 +123,8 @@ import {
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
-  getCloudProviderKind
+  getCloudProviderKind,
+  getCreatedBy
 } from '@/utils'
 
 export default {
@@ -153,7 +154,7 @@ export default {
       return this.annotations['garden.sapcloud.io/purpose']
     },
     createdBy () {
-      return this.annotations['garden.sapcloud.io/createdBy'] || '-unknown-'
+      return getCreatedBy(this.metadata)
     },
     created () {
       return getDateFormatted(this.metadata.creationTimestamp)

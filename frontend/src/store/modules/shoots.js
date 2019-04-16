@@ -110,11 +110,9 @@ const actions = {
     return getters.items
   },
   get ({ dispatch, commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-
     const getShootIfNecessary = new Promise(async (resolve, reject) => {
       if (!findItem({ name, namespace })) {
-        getShoot({ namespace, name, user })
+        getShoot({ namespace, name })
           .then(res => {
             const item = res.data
             commit('ITEM_PUT', { newItem: item, rootState })
@@ -137,20 +135,17 @@ const actions = {
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
-    const user = rootState.user
-    return createShoot({ namespace, user, data })
+    return createShoot({ namespace, data })
   },
   delete ({ dispatch, commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-    return deleteShoot({ namespace, name, user })
+    return deleteShoot({ namespace, name })
   },
   /**
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
   getInfo ({ commit, rootState }, { name, namespace }) {
-    const user = rootState.user
-    return getShootInfo({ namespace, name, user })
+    return getShootInfo({ namespace, name })
       .then(res => res.data)
       .then(info => {
         if (info.serverUrl) {
@@ -264,6 +259,8 @@ const getRawVal = (item, column) => {
       return getCloudProviderKind(spec.cloud)
     case 'infrastructure_search':
       return `${get(spec, 'cloud.region')} ${getCloudProviderKind(spec.cloud)}`
+    case 'seed':
+      return get(spec, 'cloud.seed')
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
@@ -295,7 +292,7 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const isError = operation.state === 'Failed' || get(item, 'status.lastError')
       const userError = isUserError(get(item, 'status.lastError.codes', []))
-      const ignoredFromReconciliation = get(item, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/ignore']) === 'true'
+      const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
         if (isError) {
@@ -399,6 +396,9 @@ const setFilteredAndSortedItems = (state, rootState) => {
           return
         }
         if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+          return
+        }
+        if (includes(getRawVal(item, 'seed'), value)) {
           return
         }
         if (includes(getRawVal(item, 'project'), value)) {

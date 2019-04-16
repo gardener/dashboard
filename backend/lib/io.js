@@ -18,9 +18,10 @@
 
 const _ = require('lodash')
 const socketIO = require('socket.io')
-const socketIOAuth = require('socketio-auth')
 const logger = require('./logger')
-const { jwt } = require('./middleware')
+const { authenticateSocket } = require('./security')
+const { Forbidden } = require('./errors')
+
 const { projects, shoots, journals, authorization } = require('./services')
 const { getIssueComments } = journals
 const { isAdmin } = authorization
@@ -28,40 +29,17 @@ const watches = require('./watches')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
 const { getJournalCache } = require('./cache')
 
-const jwtIO = jwt({
-  resultProperty: 'user',
-  getToken (req) {
-    return req.auth.bearer
-  }
-})
-
 function socketAuthentication (nsp) {
-  socketIOAuth(nsp, {
-    timeout: 5000,
-    authenticate (socket, data, cb) {
-      logger.debug('Socket %s authenticating', socket.id)
-      const bearer = data.bearer || data.token
-      const auth = { bearer }
-      const req = { auth }
-      const res = {}
-      const next = (err) => {
-        const user = res.user
-        if (user) {
-          user.auth = auth
-          user.id = user['email']
-        } else {
-          logger.error('Socket %s: no user on response object', socket.id)
-        }
-        if (err) {
-          logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
-          return cb(err)
-        }
-        logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
-        socket.client.user = user
-
-        cb(null, true)
-      }
-      jwtIO(req, res, next)
+  const authenticate = authenticateSocket()
+  nsp.use(async (socket, next) => {
+    logger.debug('Socket %s authenticating', socket.id)
+    try {
+      const user = await authenticate(socket)
+      logger.debug('Socket %s authenticated (user %s)', socket.id, user.id)
+      next()
+    } catch (err) {
+      logger.error('Socket %s authentication failed: "%s"', socket.id, err.message)
+      next(new Forbidden(err.message))
     }
   })
 }

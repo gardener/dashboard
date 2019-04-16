@@ -40,6 +40,14 @@ function searchIssues ({ state, title } = {}) {
   })
 }
 
+function getIssue ({ number }) {
+  return octokit.issues.get({
+    owner,
+    repo,
+    number
+  })
+}
+
 function closeIssue ({ number }) {
   return octokit.issues.edit({
     owner,
@@ -69,6 +77,7 @@ function createComment ({ number }, body) {
 module.exports = {
   searchIssues,
   closeIssue,
+  getIssue,
   getComments,
   createComment
 }

@@ -16,10 +16,10 @@ module.exports = {
         changeOrigin: true,
         ws: true
       },
-      '/config.json': {
+      '/auth': {
         target: 'http://localhost:3030'
       },
-      '/keys': {
+      '/config.json': {
         target: 'http://localhost:3030'
       }
     }

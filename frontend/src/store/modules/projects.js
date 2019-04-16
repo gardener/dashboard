@@ -33,8 +33,7 @@ const getters = {
 // actions
 const actions = {
   getAll ({ commit, rootState }) {
-    const user = rootState.user
-    return getProjects({ user })
+    return getProjects()
       .then(res => {
         const list = res.data
         commit('RECEIVE', list)
@@ -42,28 +41,23 @@ const actions = {
       })
   },
   create ({ commit, rootState }, { metadata, data }) {
-    const user = rootState.user
-    const owner = user.profile.email
-    data = assign({}, data, { owner })
-    return createProject({ user, data: { metadata, data } })
+    return createProject({ data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
       })
   },
   update ({ commit, rootState }, { metadata, data }) {
-    const user = rootState.user
     const namespace = metadata.namespace || rootState.namespace
-    return updateProject({ namespace, user, data: { metadata, data } })
+    return updateProject({ namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data
       })
   },
   delete: ({ commit, rootState }, { metadata }) => {
-    const user = rootState.user
     const namespace = metadata.namespace
-    return deleteProject({ namespace, user })
+    return deleteProject({ namespace })
       .then(res => {
         commit('ITEM_DELETED', metadata)
         return state.all

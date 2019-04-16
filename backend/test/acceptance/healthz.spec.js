@@ -16,28 +16,18 @@
 
 'use strict'
 
-describe('gardener', function () {
-  describe('config.json', function () {
-    /* eslint no-unused-expressions: 0 */
-    let app
+const k8s = nocks.k8s
 
-    before(function () {
-      app = global.createServer()
-    })
+module.exports = function ({ agent }) {
+  /* eslint no-unused-expressions: 0 */
 
-    after(function () {
-      app.close()
-    })
+  it('should return the backend healthz status', async function () {
+    k8s.stub.healthz()
+    const res = await agent
+      .get('/healthz')
 
-    it('should return the frontend configuration', function () {
-      return chai.request(app)
-        .get('/config.json')
-        .then(res => {
-          expect(res).to.have.status(200)
-          expect(res).to.be.json
-          expect(res.body).to.have.property('oidc').that.is.an('object')
-          expect(res.body.oidc).to.have.property('client_id').that.is.equal('gardener')
-        })
-    })
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql({ status: 'ok' })
   })
-})
+}

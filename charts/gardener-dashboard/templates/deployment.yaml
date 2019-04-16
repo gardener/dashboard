@@ -18,8 +18,13 @@ spec:
     metadata:
       annotations:
         checksum/configmap-gardener-dashboard-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret-gardener-dashboard-prometheus: {{ include (print $.Template.BasePath "/secret-prometheus.yaml") . | sha256sum }}
+        checksum/secret-gardener-dashboard-sessionSecret: {{ include (print $.Template.BasePath "/secret-sessionSecret.yaml") . | sha256sum }}
+        {{- if .Values.oidc }}
+        checksum/secret-gardener-dashboard-oidc: {{ include (print $.Template.BasePath "/secret-oidc.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.github }}
         checksum/secret-gardener-dashboard-github: {{ include (print $.Template.BasePath "/secret-github.yaml") . | sha256sum }}
+        {{- end }}
         {{- if .Values.kubeconfig }}
         checksum/secret-gardener-dashboard-kubeconfig: {{ include (print $.Template.BasePath "/secret-kubeconfig.yaml") . | sha256sum }}
         {{- end }}
@@ -35,28 +40,6 @@ spec:
           - key: config.yaml
             path: config.yaml
           defaultMode: 420
-      {{- if .Values.prometheus }}
-      - name: gardener-dashboard-secret-prometheus
-        secret:
-          secretName: gardener-dashboard-prometheus
-          defaultMode: 256
-          items:
-          - key: prometheusSecret
-            path: secret
-      {{- end }}
-      {{- if .Values.gitHub }}
-      - name: gardener-dashboard-secret-github
-        secret:
-          secretName: gardener-dashboard-github
-          defaultMode: 256
-          items:
-          - key: authentication.username
-            path: authentication/username
-          - key: authentication.token
-            path: authentication/token
-          - key: webhookSecret
-            path: webhookSecret
-      {{- end }}
       {{- if .Values.kubeconfig }}
       - name: gardener-dashboard-secret-kubeconfig
         secret:
@@ -98,8 +81,42 @@ spec:
             successThreshold: {{ .Values.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           {{- end }}
-          {{- if .Values.kubeconfig }}
           env:
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-sessionSecret
+                key: keyValue
+          {{- if .Values.oidc }}
+          - name: OIDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_id
+          - name: OIDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-oidc
+                key: client_secret
+          {{- end }}
+          {{- if .Values.gitHub }}
+          - name: GITHUB_AUTHENTICATION_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.username
+          - name: GITHUB_AUTHENTICATION_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: authentication.token
+          - name: GITHUB_WEBHOOK_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: gardener-dashboard-github
+                key: webhookSecret
+          {{- end }}
+          {{- if .Values.kubeconfig }}
           - name: KUBECONFIG
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
@@ -108,16 +125,6 @@ spec:
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard
-          {{- if .Values.prometheus }}
-          - name: gardener-dashboard-secret-prometheus
-            mountPath: /etc/gardener-dashboard/secrets/prometheus
-            readOnly: true
-          {{- end }}
-          {{- if .Values.gitHub }}
-          - name: gardener-dashboard-secret-github
-            mountPath: /etc/gardener-dashboard/secrets/gitHub
-            readOnly: true
-          {{- end }}
           {{- if .Values.kubeconfig }}
           - name: gardener-dashboard-secret-kubeconfig
             mountPath: /etc/gardener-dashboard/secrets/kubeconfig

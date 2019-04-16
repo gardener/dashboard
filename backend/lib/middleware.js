@@ -17,101 +17,18 @@
 'use strict'
 
 const _ = require('lodash')
-const got = require('got')
-const expressJwt = require('express-jwt')
-const jwks = require('jwks-rsa')
-const { JwksError } = jwks
 const config = require('./config')
 const logger = require('./logger')
-const { NotFound, Unauthorized, InternalServerError } = require('./errors')
+const { NotFound, InternalServerError } = require('./errors')
 const { customAddonDefinitions } = require('./services')
-const client = require('prom-client')
-const secretProvider = jwtSecret(config.jwks)
-
-function prometheusMetrics ({ timeout = 30000 } = {}) {
-  client.collectDefaultMetrics({ timeout })
-
-  return (req, res, next) => {
-    res.set('Content-Type', client.register.contentType)
-    res.end(client.register.metrics())
-  }
-}
 
 async function frontendConfig (req, res, next) {
   const user = req.user
-  const frontendConfig = _.cloneDeep(config.frontend)
+  const frontendConfig = {}
   try {
     frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({ user, namespace: 'garden' })
   } catch (err) { /* ignore error */ }
-  res.json(frontendConfig)
-}
-
-async function jsonWebKeySet (req, res, next) {
-  try {
-    const { jwksUri, ca, rejectUnauthorized = true } = config.jwks || {}
-    const response = await got(jwksUri, { json: true, ca, rejectUnauthorized })
-    res.json(response.body)
-  } catch (err) {
-    next(err)
-  }
-}
-
-function attachAuthorization (req, res, next) {
-  const [scheme, bearer] = req.headers.authorization.split(' ')
-  if (!/bearer/i.test(scheme)) {
-    return next(new Unauthorized('No authorization header with bearer'))
-  }
-  req.user.auth = { bearer }
-  req.user.id = req.user['email']
-
-  next()
-}
-
-function jwt (options) {
-  const secret = secretProvider
-  options = _.assign({ secret }, config.jwt, options)
-  return expressJwt(options)
-}
-
-function getKeysMonkeyPatch (cb) {
-  const json = true
-  const headers = _.assign({}, this.options.headers)
-  const uri = this.options.jwksUri
-  const ca = this.options.ca
-  const rejectUnauthorized = _.get(this.options, 'rejectUnauthorized', true)
-  this.logger(`Fetching keys from '${uri}'`)
-  got(uri, { json, headers, ca, rejectUnauthorized })
-    .then(res => {
-      const keys = _.get(res, 'body.keys')
-      this.logger('Keys:', keys)
-      return cb(null, keys)
-    })
-    .catch(err => {
-      if (err instanceof got.HTTPError) {
-        this.logger('Http Error:', err.body || err)
-        return cb(new JwksError(_.get(err, 'body.message', err.message)))
-      }
-      this.logger('Failure:', err)
-      cb(err)
-    })
-}
-
-function jwtSecret (options) {
-  const client = jwks(options)
-  client.getKeys = getKeysMonkeyPatch
-  return function secretProvider (req, header, payload, cb) {
-    // only RS256 is supported.
-    if (_.get(header, 'alg') !== 'RS256') {
-      return cb(new Error('Only RS256 is supported as id_token signing algorithm'))
-    }
-
-    client.getSigningKey(header.kid, (err, key) => {
-      if (err) {
-        return cb(err)
-      }
-      return cb(null, key.publicKey || key.rsaPublicKey)
-    })
-  }
+  res.json(Object.assign(frontendConfig, config.frontend))
 }
 
 function historyFallback (filename) {
@@ -198,15 +115,10 @@ const ErrorTemplate = _.template(`<!doctype html>
 </html>`)
 
 module.exports = {
-  jwt,
-  jwtSecret,
-  attachAuthorization,
   frontendConfig,
-  jsonWebKeySet,
   historyFallback,
   notFound,
   sendError,
   renderError,
-  ErrorTemplate,
-  prometheusMetrics
+  ErrorTemplate
 }

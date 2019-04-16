@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.28.0",
+  "version": "1.30.0",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "repository": {
@@ -35,11 +35,11 @@
     "marked": "^0.5.1",
     "md5": "^2.2.1",
     "moment-timezone": "^0.5.21",
-    "oidc-client": "^1.5.4",
     "semver": "^5.5.1",
     "semver-sort": "0.0.4",
     "socket.io-client": "^2.2.0",
     "vue": "^2.5.22",
+    "vue-cookie": "^1.1.4",
     "vue-lazyload": "^1.2.6",
     "vue-popperjs": "^1.5.2",
     "vue-router": "^3.0.1",

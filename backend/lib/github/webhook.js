@@ -129,6 +129,11 @@ function handleComment ({ action, issue, comment }) {
   } = issue = fromIssue(issue) || {}
   comment = fromComment(issueNumber, name, namespace, comment)
 
+  if (!cache.getIssue(issueNumber)) {
+    logger.debug('skipping github event issue_comment for issue number %s', issueNumber)
+    return
+  }
+
   cache.addOrUpdateIssue({ issue })
 
   if (action === 'deleted') {

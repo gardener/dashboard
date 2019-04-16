@@ -239,6 +239,7 @@ export default {
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
+
         if (this.isCreateMode) {
           const data = jsyaml.safeLoad(this.getContent())
           this.setCreateShootResource(data)
@@ -246,9 +247,8 @@ export default {
         } else {
           const paths = ['spec', 'metadata.labels', 'metadata.annotations']
           const data = pick(jsyaml.safeLoad(this.getContent()), paths)
-          const user = this.$store.state.user
           const { metadata: { namespace, name } } = this.value
-          const { data: value } = await replaceShoot({ namespace, name, user, data })
+          const { data: value } = await replaceShoot({ namespace, name, data })
           this.update(value)
         }
         this.snackbarColor = 'success'
