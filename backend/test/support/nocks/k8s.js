@@ -1006,7 +1006,7 @@ const stub = {
   },
   getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
-    canDeleteShootsInAllNamespaces(scope)
+    canGetSecretsInAllNamespaces(scope)
     canCreateProjects(scope)
     return scope
   },

@@ -59,40 +59,6 @@ function fromResource (project = {}, serviceAccounts = []) {
     .value()
 }
 
-function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectName = 'default', token, server, caData }) {
-  const clusterName = 'garden'
-  const cluster = {
-    'certificate-authority-data': caData,
-    server
-  }
-  const userName = serviceaccountName
-  const user = {
-    token
-  }
-  const contextName = `${clusterName}-${projectName}-${userName}`
-  const context = {
-    cluster: clusterName,
-    user: userName,
-    namespace: serviceaccountNamespace
-  }
-  return yaml.safeDump({
-    kind: 'Config',
-    clusters: [{
-      cluster,
-      name: clusterName
-    }],
-    users: [{
-      user,
-      name: userName
-    }],
-    contexts: [{
-      context,
-      name: contextName
-    }],
-    'current-context': contextName
-  })
-}
-
 function createServiceaccount (core, namespace, name, user) {
   const body = {
     metadata: {
@@ -232,8 +198,8 @@ exports.remove = async function ({ user, namespace, name: username }) {
 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
-    const namespaces = Core(user).namespaces
-    await deleteServiceaccount(namespaces, serviceaccountNamespace, serviceaccountName)
+    const core = Core(user)
+    await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
   }
 
   return fromResource(project, serviceAccountList)
