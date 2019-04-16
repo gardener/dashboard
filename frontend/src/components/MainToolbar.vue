@@ -175,7 +175,7 @@ export default {
             } = {}
           } = await getInfo()
           if (gardenerVersion) {
-            this.gardenerVersion = `${gardenerVersion.major}.${gardenerVersion.minor}`
+            this.gardenerVersion = gardenerVersion.gitVersion
           }
           if (version) {
             this.dashboardVersion = `${version}`
