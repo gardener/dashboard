@@ -145,20 +145,20 @@ async function authorizeToken (req, res) {
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     maxAge: cookieMaxAge * 1000,
-    sameSite: true
+    sameSite: 'Lax'
   })
   const encryptedBearer = await encrypt(bearer)
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: true
+    sameSite: 'Lax'
   })
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
     expires: undefined,
-    sameSite: true
+    sameSite: 'Lax'
   })
   return user
 }
@@ -234,7 +234,7 @@ function authenticate () {
     res.cookie(COOKIE_HEADER_PAYLOAD, value, {
       secure,
       maxAge: cookieMaxAge * 1000,
-      sameSite: true
+      sameSite: 'Lax'
     })
   }
   return async (req, res, next) => {
