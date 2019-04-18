@@ -280,8 +280,6 @@ export default {
     this.hibernateTime = this.getTime(this.scheduleEvent.start)
     this.setSelectedDays(this.scheduleEvent)
     this.updateSelectedDays() // trigger sort
-
-    setDelayedInputFocus(this, 'selectedDays')
   }
 }
 </script>

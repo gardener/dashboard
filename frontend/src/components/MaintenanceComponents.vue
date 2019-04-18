@@ -79,6 +79,9 @@ export default {
   methods: {
     getComponentUpdates () {
       return { k8sUpdates: this.k8sUpdates }
+    },
+    setComponentUpdates ({ k8sUpdates }) {
+      this.k8sUpdates = k8sUpdates
     }
   }
 }

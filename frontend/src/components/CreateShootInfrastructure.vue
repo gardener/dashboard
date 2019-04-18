@@ -363,6 +363,17 @@ export default {
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName
       }
+    },
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, zones, region, floatingPoolName, loadBalancerProviderName }) {
+      this.infrastructureKind = infrastructureKind
+      this.cloudProfileName = cloudProfileName
+      this.secret = secret
+      this.zones = zones
+      this.region = region
+      this.floatingPoolName = floatingPoolName
+      this.loadBalancerProviderName = loadBalancerProviderName
+
+      this.validateInput()
     }
   }
 }

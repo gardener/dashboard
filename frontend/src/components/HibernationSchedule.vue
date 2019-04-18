@@ -233,6 +233,9 @@ export default {
     getNoHibernationSchedule () {
       return this.confirmNoSchedule
     },
+    setNoHibernationSchedule (noSchedule) {
+      this.confirmNoSchedule = noSchedule
+    },
     validateInput () {
       let valid = true
       forEach(this.parsedScheduleEvents, schedule => {
@@ -247,7 +250,7 @@ export default {
   },
   mounted () {
     this.parseSchedules(this.scheduleCrontab)
-    this.confirmNoSchedule = this.noSchedule
+    this.setNoHibernationSchedule(this.noSchedule)
   },
   watch: {
     purpose (newValue) {

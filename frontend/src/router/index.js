@@ -186,42 +186,29 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'create',
-              component: PlaceholderComponent,
+              path: 'create/ui',
+              name: 'CreateShoot',
+              component: CreateShoot,
               meta: {
                 namespaced: true,
                 projectScope: false,
                 title: 'Create Cluster',
                 toRouteName: 'CreateShoot',
-                breadcrumbTextFn: routeTitle
-              },
-              children: [
-                {
-                  path: 'ui',
-                  name: 'CreateShoot',
-                  component: CreateShoot,
-                  meta: {
-                    namespaced: true,
-                    projectScope: false,
-                    title: 'Create Cluster',
-                    toRouteName: 'CreateShoot',
-                    breadcrumbTextFn: routeTitle,
-                    tabs: createShootTabs
-                  }
-                },
-                {
-                  path: 'yaml',
-                  name: 'CreateShootEditor',
-                  component: ShootItemEditor,
-                  meta: {
-                    namespaced: true,
-                    projectScope: false,
-                    title: 'Create Cluster Editor',
-                    breadcrumbTextFn: routeTitle,
-                    tabs: createShootTabs
-                  }
-                }
-              ]
+                breadcrumbTextFn: routeTitle,
+                tabs: createShootTabs
+              }
+            },
+            {
+              path: 'create/yaml',
+              name: 'CreateShootEditor',
+              component: ShootItemEditor,
+              meta: {
+                namespaced: true,
+                projectScope: false,
+                title: 'Create Cluster Editor',
+                breadcrumbTextFn: routeTitle,
+                tabs: createShootTabs
+              }
             },
             {
               path: ':name',

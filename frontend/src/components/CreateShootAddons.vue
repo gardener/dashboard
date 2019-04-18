@@ -40,6 +40,7 @@ import concat from 'lodash/concat'
 import reduce from 'lodash/reduce'
 import set from 'lodash/set'
 import filter from 'lodash/filter'
+import assign from 'lodash/assign'
 
 const standardAddonDefinitionList = [
   {
@@ -90,6 +91,9 @@ export default {
     },
     getAddons () {
       return this.addons
+    },
+    updateAddons (addons) {
+      assign(this.addons, addons)
     }
   }
 }

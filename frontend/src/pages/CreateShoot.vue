@@ -112,8 +112,9 @@ import Alert from '@/components/Alert'
 import { mapActions, mapGetters } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
+import find from 'lodash/find'
 import { errorDetailsFromError } from '@/utils/error'
-import { getShootResourceSkeleton, getCloudProviderTemplate } from '@/utils/createShoot'
+import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
 
 export default {
@@ -144,7 +145,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getCreateShootResource'
+      'getCreateShootResource',
+      'infrastructureSecretsByCloudProfileName'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -183,8 +185,9 @@ export default {
       this.hibernationScheduleValid = value
     },
     updateShootResourceWithUIComponents () {
-      // TODO:   floatingPoolName: loadBalancerProviderName
       const shootResource = this.getCreateShootResource
+
+      // TODO:   floatingPoolName: loadBalancerProviderName
       const { infrastructureKind, cloudProfileName, region, secret, zones } = this.$refs.infrastructure.getInfrastructureData()
       const secretBindingRef = {
         name: get(secret, 'metadata.bindingName')
@@ -194,10 +197,10 @@ export default {
       set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
       if (getCloudProviderKind(get(shootResource, 'spec.cloud')) !== infrastructureKind) {
         // !Infrastructure changed
-        set(shootResource, ['spec.cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+        set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
       }
       // TODO: AZURE?
-      set(shootResource, ['spec.cloud', infrastructureKind, 'zones'], zones)
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
       set(shootResource, 'metadata.name', name)
@@ -205,10 +208,10 @@ export default {
       set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
 
       const workers = this.$refs.manageWorkers.getWorkers()
-      set(shootResource, ['spec.cloud', infrastructureKind, 'workers'], workers)
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
 
       const addons = this.$refs.addons.getAddons()
-      set(shootResource, ['spec.addons'], addons)
+      set(shootResource, 'spec.addons', addons)
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
       const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
@@ -221,72 +224,58 @@ export default {
           kubernetesVersion: k8sUpdates
         }
       }
-      set(shootResource, ['spec.maintenance'], maintenance)
+      set(shootResource, 'spec.maintenance', maintenance)
 
       const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
-      set(shootResource, ['spec.hibernation.schedule'], hibernationSchedule)
+      set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
       const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
-      if(noHibernationSchedule) {
+      if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
         delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
       }
     },
     updateUIComponentsWithShootResource () {
-      // TODO:   floatingPoolName: loadBalancerProviderName
       const shootResource = this.getCreateShootResource
-      const { infrastructureKind, cloudProfileName, region, secret, zones } = this.$refs.infrastructure.getInfrastructureData()
-      const secretBindingRef = {
-        name: get(secret, 'metadata.bindingName')
-      }
-      set(shootResource, 'spec.cloud.profile', cloudProfileName)
-      set(shootResource, 'spec.cloud.region', region)
-      set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
-      if (getCloudProviderKind(get(shootResource, 'spec.cloud')) !== infrastructureKind) {
-        // !Infrastructure changed
-        set(shootResource, ['spec.cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
-      }
+
+      // TODO:   floatingPoolName: loadBalancerProviderName
+
+      const infrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
+      const cloudProfileName = get(shootResource, 'spec.cloud.profile')
+      const region = get(shootResource, 'spec.cloud.region')
+      const secretBindingName = get(shootResource, 'spec.cloud.secretBindingRef.name')
+      const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
+
       // TODO: AZURE?
-      set(shootResource, ['spec.cloud', infrastructureKind, 'zones'], zones)
+      const zones = get(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'])
+      this.$refs.infrastructure.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones })
 
-      const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
-      set(shootResource, 'metadata.name', name)
-      set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
-      set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+      const name = get(shootResource, 'metadata.name')
+      const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
+      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
+      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose })
 
-      const workers = this.$refs.manageWorkers.getWorkers()
-      set(shootResource, ['spec.cloud', infrastructureKind, 'workers'], workers)
+      const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
+      this.$refs.manageWorkers.setInternalWorkers(workers)
 
-      const addons = this.$refs.addons.getAddons()
-      set(shootResource, ['spec.addons'], addons)
+      const addons = get(shootResource, 'spec.addons')
+      this.$refs.addons.updateAddons(addons)
+      // TODO: change set to assign where applicable (when setting whole objects...)
 
-      const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
-      const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
-      const maintenance = {
-        timeWindow: {
-          begin: utcBegin,
-          end: utcEnd
-        },
-        autoUpdate: {
-          kubernetesVersion: k8sUpdates
-        }
-      }
-      set(shootResource, ['spec.maintenance'], maintenance)
+      const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
+      const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.k8sUpdates')
+      this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates })
 
-      const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
-      set(shootResource, ['spec.hibernation.schedule'], hibernationSchedule)
-      const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
-      if(noHibernationSchedule) {
-        set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
-      } else {
-        delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-      }
+      const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
+      this.$refs.hibernationSchedule.parseSchedules(hibernationSchedule)
+      const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
+      this.$refs.hibernationSchedule.setNoHibernationSchedule(noHibernationSchedule)
     },
     async createClicked () {
       this.updateShootResourceWithUIComponents()
 
       try {
-        console.log(this.getCreateShootResource);
         // await this.createShoot(this.shootResource)
         // TODO: navigate to new shoot
       } catch (err) {
@@ -298,7 +287,20 @@ export default {
     },
     cancelClicked () {
       // TODO: Navigate back to shoot list
+    },
+    infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
+      const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
+      return find(secrets, ['metadata.bindingName', secretBindingName])
     }
+  },
+  beforeRouteLeave (to, from, next) {
+    if (to.name === 'CreateShootEditor') {
+      this.updateShootResourceWithUIComponents()
+    }
+    next()
+  },
+  mounted () {
+    this.updateUIComponentsWithShootResource()
   }
 }
 </script>

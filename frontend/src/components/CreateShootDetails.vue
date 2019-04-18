@@ -66,6 +66,7 @@ import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import cloneDeep from 'lodash/cloneDeep'
 import head from 'lodash/head'
+import isEmpty from 'lodash/isEmpty'
 
 const semSort = require('semver-sort')
 
@@ -122,7 +123,7 @@ export default {
   data () {
     return {
       validationErrors,
-      name: shortRandomString(10),
+      name: undefined,
       kubernetesVersion: undefined,
       purpose: undefined,
       valid: false
@@ -181,6 +182,15 @@ export default {
         kubernetesVersion: this.kubernetesVersion,
         purpose: this.purpose
       }
+    },
+    setDetailsData ({ name, kubernetesVersion, purpose }) {
+      if (isEmpty(name)) {
+        this.name = shortRandomString(10)
+      } else {
+        this.name = name
+      }
+      this.kubernetesVersion = kubernetesVersion
+      this.purpose = purpose
     }
   },
   watch: {

@@ -183,7 +183,7 @@ export default {
       'shootByNamespaceAndName',
       'getCreateShootResource'
     ]),
-    isCreateMode() {
+    isCreateMode () {
       return (get(this.$route, 'name') === 'CreateShootEditor')
     },
     value () {
