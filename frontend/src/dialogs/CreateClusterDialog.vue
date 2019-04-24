@@ -60,18 +60,14 @@ limitations under the License.
                       >
                       <template slot="item" slot-scope="data">
                         <v-list-tile-action>
-                          <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24">
-                          <infra-icon v-else v-model="data.item"></infra-icon>
+                          <infra-icon v-model="data.item"></infra-icon>
                         </v-list-tile-action>
                         <v-list-tile-content>
                           <v-list-tile-title>{{data.item}}</v-list-tile-title>
                         </v-list-tile-content>
                       </template>
                       <template slot="selection" slot-scope="data">
-                        <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24" class="mr-2">
-                        <v-avatar v-else size="30px">
-                          <infra-icon v-model="data.item"></infra-icon>
-                        </v-avatar>
+                        <infra-icon v-model="data.item" content-class="mr-2"></infra-icon>
                         <span class="black--text">
                           {{data.item}}
                         </span>

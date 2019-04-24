@@ -22,7 +22,7 @@ limitations under the License.
     :secret="secret"
     cloudProviderKind="alicloud"
     color="grey darken-4"
-    infraIcon="alicloud"
+    infraIcon="alicloud-white"
     backgroundSrc="/static/background_alicloud.svg"
     createTitle="Add new Alibaba Cloud Secret"
     replaceTitle="Replace Alibaba Cloud Secret"
