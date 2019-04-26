@@ -41,9 +41,6 @@ import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/val
 import { setDelayedInputFocus, isOwnSecretBinding, getValidationErrors,  } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
 
-
-
-
 export default {
   name: 'create-shoot-dialog',
   components: {

@@ -23,8 +23,7 @@ limitations under the License.
       <v-card-text>
         <create-shoot-infrastructure
           ref="infrastructure"
-          @updateCloudProfileName="onUpdateCloudProfileName"
-          @updateSecret="onUpdateSecret"
+          :userInterActionBus="userInterActionBus"
           @valid="onInfrastructureValid"
           ></create-shoot-infrastructure>
       </v-card-text>
@@ -36,9 +35,7 @@ limitations under the License.
       <v-card-text>
         <create-shoot-details
           ref="clusterDetails"
-          :cloudProfileName="cloudProfileName"
-          :secret="secret"
-          @updatePurpose="onUpdatePurpose"
+          :userInterActionBus="userInterActionBus"
           @valid="onDetailsValid"
           ></create-shoot-details>
       </v-card-text>
@@ -50,7 +47,7 @@ limitations under the License.
       <v-card-text>
         <manage-workers
         ref="manageWorkers"
-        :cloudProfileName="cloudProfileName"
+        :userInterActionBus="userInterActionBus"
         @valid="onWorkersValid"
        ></manage-workers>
      </v-card-text>
@@ -86,7 +83,7 @@ limitations under the License.
       <v-card-text>
         <hibernation-schedule
           ref="hibernationSchedule"
-          :purpose="purpose"
+          :userInterActionBus="userInterActionBus"
           @valid="onHibernationScheduleValid"
         ></hibernation-schedule>
      </v-card-text>
@@ -113,9 +110,11 @@ import { mapActions, mapGetters } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import cloneDeep from 'lodash/cloneDeep'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
+const EventEmitter = require('events')
 
 export default {
   name: 'create-cluster',
@@ -131,9 +130,7 @@ export default {
   },
   data () {
     return {
-      cloudProfileName: undefined,
-      secret: undefined,
-      purpose: undefined,
+      userInterActionBus: new EventEmitter(),
       infrastructureValid: undefined,
       detailsValid: undefined,
       workersValid: undefined,
@@ -158,17 +155,9 @@ export default {
   },
   methods: {
     ...mapActions([
-      'createShoot'
+      'createShoot',
+      'setCreateShootResource'
     ]),
-    onUpdateCloudProfileName (cloudProfileName) {
-      this.cloudProfileName = cloudProfileName
-    },
-    onUpdateSecret (secret) {
-      this.secret = secret
-    },
-    onUpdatePurpose (purpose) {
-      this.purpose = purpose
-    },
     onInfrastructureValid (value) {
       this.infrastructureValid = value
     },
@@ -185,7 +174,7 @@ export default {
       this.hibernationScheduleValid = value
     },
     updateShootResourceWithUIComponents () {
-      const shootResource = this.getCreateShootResource
+      const shootResource = cloneDeep(this.getCreateShootResource)
 
       // TODO:   floatingPoolName: loadBalancerProviderName
       const { infrastructureKind, cloudProfileName, region, secret, zones } = this.$refs.infrastructure.getInfrastructureData()
@@ -234,6 +223,7 @@ export default {
       } else {
         delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
       }
+      this.setCreateShootResource(shootResource)
     },
     updateUIComponentsWithShootResource () {
       const shootResource = this.getCreateShootResource
@@ -253,10 +243,11 @@ export default {
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
       const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
-      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose })
+      this.purpose = purpose
+      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
       const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
-      this.$refs.manageWorkers.setInternalWorkers(workers)
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName })
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)
@@ -268,9 +259,8 @@ export default {
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates })
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
-      this.$refs.hibernationSchedule.parseSchedules(hibernationSchedule)
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
-      this.$refs.hibernationSchedule.setNoHibernationSchedule(noHibernationSchedule)
+      this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
       this.updateShootResourceWithUIComponents()

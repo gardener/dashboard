@@ -40,9 +40,6 @@ limitations under the License.
         <v-layout row wrap>
           <hibernation-schedule
             ref="hibernationSchedule"
-            :scheduleCrontab="hibernationSchedules"
-            :noSchedule="noScheduleAnnotation"
-            :purpose="shootPurpose"
             @valid="onHibernationScheduleValid"
           ></hibernation-schedule>
         </v-layout>
@@ -85,9 +82,6 @@ export default {
   computed: {
     shootName () {
       return get(this.shootItem, 'metadata.name')
-    },
-    shootPurpose () {
-      return get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
     },
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
@@ -139,9 +133,9 @@ export default {
 
       this.hibernationSchedules = get(this.shootItem, 'spec.hibernation.schedules')
       this.noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-
+      const purpose = get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
       this.$nextTick(() => {
-        this.$refs.hibernationSchedule.reset()
+        this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule: this.hibernationSchedules, noHibernationSchedule: this.noScheduleAnnotation, purpose })
       })
     },
     onUpdateHibernationSchedules (value) {

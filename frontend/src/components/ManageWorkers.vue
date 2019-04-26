@@ -82,17 +82,16 @@ export default {
     WorkerInputGeneric
   },
   props: {
-    workers: {
-      type: Array
-    },
-    cloudProfileName: {
-      type: String
+    userInterActionBus: {
+      type: Object
     }
   },
   data () {
     return {
       internalWorkers: undefined,
-      valid: false
+      valid: false,
+      cloudProfileName: undefined,
+      workers: undefined
     }
   },
   computed: {
@@ -181,9 +180,6 @@ export default {
       })
       return workers
     },
-    reset () {
-      this.setInternalWorkers(this.workers)
-    },
     validateInput () {
       let valid = true
       forEach(this.internalWorkers, worker => {
@@ -194,14 +190,18 @@ export default {
 
       this.valid = valid
       this.$emit('valid', this.valid)
+    },
+    setWorkersData ({ workers, cloudProfileName }) {
+      this.cloudProfileName = cloudProfileName
+      this.setInternalWorkers(workers)
     }
   },
   mounted () {
-    this.setInternalWorkers(this.workers)
-  },
-  watch: {
-    cloudProfileName (newValue) {
-      this.setDefaultWorker()
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+        this.cloudProfileName = cloudProfileName
+        this.setDefaultWorker()
+      })
     }
   }
 }

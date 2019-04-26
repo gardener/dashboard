@@ -89,15 +89,8 @@ export default {
     HibernationScheduleEvent
   },
   props: {
-    scheduleCrontab: {
-      type: Array
-    },
-    purpose: {
-      type: String
-    },
-    noSchedule: {
-      type: Boolean,
-      default: false
+    userInterActionBus: {
+      type: Object
     }
   },
   data () {
@@ -105,7 +98,10 @@ export default {
       parsedScheduleEvents: undefined,
       parseError: false,
       valid: true,
-      confirmNoSchedule: false
+      confirmNoSchedule: false,
+      scheduleCrontab: undefined,
+      purpose: undefined,
+      noSchedule: undefined
     }
   },
   computed: {
@@ -124,9 +120,6 @@ export default {
     }
   },
   methods: {
-    reset () {
-      this.parseSchedules(this.scheduleCrontab)
-    },
     parseSchedules (scheduleCrontab) {
       try {
         this.parseError = false
@@ -246,15 +239,19 @@ export default {
 
       this.valid = valid && !this.parseError
       this.$emit('valid', this.valid)
+    },
+    setScheduleData ({ hibernationSchedule, noHibernationSchedule, purpose }) {
+      this.purpose = purpose
+      this.parseSchedules(hibernationSchedule)
+      this.setNoHibernationSchedule(noHibernationSchedule)
     }
   },
   mounted () {
-    this.parseSchedules(this.scheduleCrontab)
-    this.setNoHibernationSchedule(this.noSchedule)
-  },
-  watch: {
-    purpose (newValue) {
-      this.setDefaultHibernationSchedule()
+    if (this.userInterActionBus) {
+      this.userInterActionBus.on('updatePurpose', purpose => {
+        this.purpose = purpose
+        this.setDefaultHibernationSchedule()
+      })
     }
   }
 }

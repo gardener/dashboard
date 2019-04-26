@@ -33,7 +33,7 @@ limitations under the License.
     <v-flex xs3>
       <v-select
         color="cyan darken-2"
-        label="Kubernetes"
+        label="Kubernetes Version"
         :items="sortedKubernetesVersions"
         v-model="kubernetesVersion"
         :error-messages="getErrorMessages('kubernetesVersion')"
@@ -111,13 +111,9 @@ export default {
   components: {
   },
   props: {
-    secret: {
+    userInterActionBus: {
       type: Object,
-      required: false
-    },
-    cloudProfileName: {
-      type: String,
-      required: false
+      required: true
     }
   },
   data () {
@@ -126,7 +122,9 @@ export default {
       name: undefined,
       kubernetesVersion: undefined,
       purpose: undefined,
-      valid: false
+      valid: false,
+      cloudProfileName: undefined,
+      secret: undefined
     }
   },
   validations,
@@ -148,17 +146,15 @@ export default {
     },
     onInputName () {
       this.$v.name.$touch()
-      // this.$emit('updateName', this.name)
       this.validateInput()
     },
     onInputKubernetesVersion () {
       this.$v.kubernetesVersion.$touch()
-      // this.$emit('updateKubernetesVersion', this.kubernetesVersion)
       this.validateInput()
     },
     onInputPurpose () {
       this.$v.name.$touch()
-      this.$emit('updatePurpose', this.purpose)
+      this.userInterActionBus.emit('updatePurpose', this.purpose)
       this.validateInput()
     },
     validateInput () {
@@ -183,23 +179,27 @@ export default {
         purpose: this.purpose
       }
     },
-    setDetailsData ({ name, kubernetesVersion, purpose }) {
+    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret }) {
       if (isEmpty(name)) {
         this.name = shortRandomString(10)
       } else {
         this.name = name
       }
+      this.cloudProfileName = cloudProfileName
+      this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.purpose = purpose
     }
   },
-  watch: {
-    secret (newValue) {
+  mounted () {
+    this.userInterActionBus.on('updateSecret', secret => {
+      this.secret = secret
       this.setDefaultPurpose()
-    },
-    cloudProfileName (newValue) {
+    })
+    this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+      this.cloudProfileName = cloudProfileName
       this.setDefaultKubernetesVersion()
-    }
+    })
   }
 }
 </script>

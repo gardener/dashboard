@@ -214,7 +214,10 @@ export default {
     InfraIcon
   },
   props: {
-
+    userInterActionBus: {
+      type: Object,
+      required: true
+    }
   },
   data () {
     return {
@@ -306,37 +309,32 @@ export default {
     },
     onInputInfrastructureKind () {
       this.$v.infrastructureKind.$touch()
-      // this.$emit('updateInfrastructureKind', this.infrastructureKind)
       this.setDefaultCloudProfile()
       this.validateInput()
     },
     onInputSecret () {
       this.$v.secret.$touch()
-      this.$emit('updateSecret', this.secret)
+      this.userInterActionBus.emit('updateSecret', this.secret)
       this.validateInput()
     },
     onInputRegion () {
       this.$v.secret.$touch()
-      // this.$emit('updateInfrastructureRegion', this.region)
       this.validateInput()
     },
     onInputZones () {
       this.$v.secret.$touch()
-      // this.$emit('updateInfrastructureZones', this.zones)
       this.validateInput()
     },
     onInputFloatingPoolName () {
       this.$v.floatingPoolName.$touch()
-      // this.$emit('updateFloatingPoolName', this.floatingPoolName)
       this.validateInput()
     },
     onInputLoadBalancerProviderName () {
       this.$v.loadBalancerProviderName.$touch()
-      // this.$emit('updateLoadBalancerProvider', this.loadBalancerProviderName)
       this.validateInput()
     },
     onUpdateCloudProfileName () {
-      this.$emit('updateCloudProfileName', this.cloudProfileName)
+      this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
       this.validateInput()
     },

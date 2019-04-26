@@ -39,8 +39,6 @@ limitations under the License.
       <template slot="message">
         <manage-workers
         ref="manageWorkers"
-        :workers="workers"
-        :cloudProfileName="cloudProfileName"
         @valid="onWorkersValid"
        ></manage-workers>
       </template>
@@ -124,10 +122,9 @@ export default {
       this.detailedErrorMessage = null
       this.workersValid = false
 
-      this.workers = get(this.shootItem, `spec.cloud.${this.infrastructureKind}.workers`)
-
+      const workers = get(this.shootItem, `spec.cloud.${this.infrastructureKind}.workers`)
       this.$nextTick(() => {
-        this.$refs.manageWorkers.reset()
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.cloudProfileName })
       })
     },
     onWorkersValid (value) {
