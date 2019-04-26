@@ -85,7 +85,7 @@ spec:
           - name: SESSION_SECRET
             valueFrom:
               secretKeyRef:
-                name: gardener-dashboard-sessionSecret
+                name: gardener-dashboard-sessionsecret
                 key: keyValue
           {{- if .Values.oidc }}
           - name: OIDC_CLIENT_ID
