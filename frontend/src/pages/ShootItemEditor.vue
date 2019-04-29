@@ -30,7 +30,7 @@ limitations under the License.
     </v-flex>
     <v-flex :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
-        <v-flex d-flex class="divider-right">
+        <v-flex v-if="!isCreateMode" d-flex class="divider-right">
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="clean" @click="save">
               <v-icon small>mdi-content-save</v-icon>
@@ -81,7 +81,7 @@ limitations under the License.
         </v-flex>
         <v-flex d-flex xs12>
         </v-flex>
-        <v-flex d-flex fill-height align-center class="divider-left">
+        <v-flex v-if="!isCreateMode" d-flex fill-height align-center class="divider-left">
           <v-tooltip top :color="hasConflict ? 'error' : ''">
             <div slot="activator" class="px-3 py-2">
             <v-icon :class="hasConflict ? 'error--text' : 'success--text'">
@@ -250,10 +250,11 @@ export default {
           const { metadata: { namespace, name } } = this.value
           const { data: value } = await replaceShoot({ namespace, name, data })
           this.update(value)
+
+          this.snackbarColor = 'success'
+          this.snackbarText = `Cluster specification has been successfully updated`
+          this.snackbar = true
         }
-        this.snackbarColor = 'success'
-        this.snackbarText = `Cluster specification has been successfully updated`
-        this.snackbar = true
       } catch (err) {
         this.alert = true
         this.alertType = 'error'
@@ -462,6 +463,10 @@ export default {
     }
   },
   async beforeRouteLeave (to, from, next) {
+    if (this.isCreateMode) {
+      await this.save()
+      return next()
+    }
     if (this.clean) {
       return next()
     }

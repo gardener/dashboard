@@ -110,6 +110,7 @@ import { mapActions, mapGetters } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
@@ -176,20 +177,28 @@ export default {
     updateShootResourceWithUIComponents () {
       const shootResource = cloneDeep(this.getCreateShootResource)
 
-      // TODO:   floatingPoolName: loadBalancerProviderName
-      const { infrastructureKind, cloudProfileName, region, secret, zones } = this.$refs.infrastructure.getInfrastructureData()
+      const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructure.getInfrastructureData()
       const secretBindingRef = {
         name: get(secret, 'metadata.bindingName')
       }
       set(shootResource, 'spec.cloud.profile', cloudProfileName)
       set(shootResource, 'spec.cloud.region', region)
       set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
-      if (getCloudProviderKind(get(shootResource, 'spec.cloud')) !== infrastructureKind) {
-        // !Infrastructure changed
+      const oldInfrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
+      if (oldInfrastructureKind !== infrastructureKind) {
+        // Infrastructure changed
+        delete shootResource.spec.cloud[oldInfrastructureKind]
         set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
       }
-      // TODO: AZURE?
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+      if (!isEmpty(floatingPoolName)) {
+        set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
+      }
+      if (!isEmpty(loadBalancerProviderName)) {
+        set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
+      }
+      if (!isEmpty(zones)) {
+        set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+      }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
       set(shootResource, 'metadata.name', name)
@@ -228,17 +237,17 @@ export default {
     updateUIComponentsWithShootResource () {
       const shootResource = this.getCreateShootResource
 
-      // TODO:   floatingPoolName: loadBalancerProviderName
-
       const infrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
       const cloudProfileName = get(shootResource, 'spec.cloud.profile')
       const region = get(shootResource, 'spec.cloud.region')
       const secretBindingName = get(shootResource, 'spec.cloud.secretBindingRef.name')
       const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
 
-      // TODO: AZURE?
       const zones = get(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'])
-      this.$refs.infrastructure.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones })
+      const floatingPoolName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'])
+      const loadBalancerProviderName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'])
+
+      this.$refs.infrastructure.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName })
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
@@ -251,7 +260,6 @@ export default {
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)
-      // TODO: change set to assign where applicable (when setting whole objects...)
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.k8sUpdates')

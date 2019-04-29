@@ -154,6 +154,7 @@ import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret }
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import sample from 'lodash/sample'
 import find from 'lodash/find'
 import intersection from 'lodash/intersection'
@@ -295,7 +296,9 @@ export default {
       this.onInputSecret()
       this.region = head(this.allRegions)
       this.onInputRegion()
-      this.zones = [sample(this.allZones)]
+      if (!isEmpty(this.allZones)) {
+        this.zones = [sample(this.allZones)]
+      }
       this.onInputZones()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
