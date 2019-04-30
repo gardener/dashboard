@@ -122,11 +122,13 @@ limitations under the License.
                       color="cyan darken-2"
                       label="Region"
                       :items="regions"
+                      :hint="regionHint"
+                      persistent-hint
                       v-model="region"
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
                       @input="$v.shootDefinition.spec.cloud.region.$touch()"
-                      @blur="$v.shootDefinition.spec.cloud.region.$touch()"
-                      ></v-select>
+                      @blur="$v.shootDefinition.spec.cloud.region.$touch()">
+                    </v-select>
                   </v-flex>
                   <v-flex xs1>
                   </v-flex>
@@ -470,7 +472,8 @@ export default {
     ...mapState([
       'user',
       'namespace',
-      'localTimezone'
+      'localTimezone',
+      'cfg'
     ]),
     ...mapGetters([
       'cloudProfileByName',
@@ -582,7 +585,24 @@ export default {
       return get(this.shootDefinition, 'spec.addons', {})
     },
     regions () {
-      return this.regionsByCloudProfileName(this.cloudProfileName)
+      const { regionsWithSeed, regionsWithoutSeed } = this.regionsByCloudProfileName(this.cloudProfileName)
+      const regions = [{ header: 'Regions with seed' }]
+      forEach(regionsWithSeed, region => {
+        regions.push({ text: region, hasSeed: true })
+      })
+      if (!isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion') {
+        regions.push({ header: 'Regions without seed' })
+        forEach(regionsWithoutSeed, region => {
+          regions.push({ text: region, hasSeed: false })
+        })
+      }
+      return regions
+    },
+    regionHint () {
+      if (find(this.regions, { text: this.region, hasSeed: false })) {
+        return 'Selected region does not have a dedicated seed. Seed will be selected based on configured policy.'
+      }
+      return undefined
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
@@ -872,7 +892,7 @@ export default {
       })
     },
     setDefaultRegion () {
-      this.region = head(this.regions)
+      this.region = get(this.regions[1], 'text')
     },
     setDefaultKubernetesVersion () {
       this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)

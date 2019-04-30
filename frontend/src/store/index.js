@@ -29,6 +29,7 @@ import includes from 'lodash/includes'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
 import merge from 'lodash/merge'
+import difference from 'lodash/difference'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -138,7 +139,10 @@ const getters = {
   regionsByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+      const regionsWithSeed = uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+      const allRegions = uniq(map(get(cloudProfile, 'data.zones'), 'region'))
+      const regionsWithoutSeed = difference(allRegions, regionsWithSeed)
+      return { regionsWithSeed, regionsWithoutSeed }
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {
