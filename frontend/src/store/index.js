@@ -387,6 +387,9 @@ const actions = {
   setCreateShootResource ({ dispatch }, data) {
     return dispatch('shoots/setCreateShootResource', data)
   },
+  resetCreateShootResource ({ dispatch }) {
+    return dispatch('shoots/resetCreateShootResource')
+  },
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)
       .then(res => {

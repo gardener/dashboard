@@ -224,6 +224,11 @@ const actions = {
     commit('SET_CREATE_SHOOT_RESOURCE', { data })
 
     return state.createShootResource
+  },
+  resetCreateShootResource ({ commit }) {
+    commit('RESET_CREATE_SHOOT_RESOURCE')
+
+    return state.createShootResource
   }
 }
 
@@ -556,6 +561,9 @@ const mutations = {
   },
   SET_CREATE_SHOOT_RESOURCE (state, { data }) {
     state.createShootResource = data
+  },
+  RESET_CREATE_SHOOT_RESOURCE (state) {
+    state.createShootResource = getShootResourceSkeleton()
   }
 }
 

@@ -240,21 +240,15 @@ export default {
           return
         }
 
-        if (this.isCreateMode) {
-          const data = jsyaml.safeLoad(this.getContent())
-          this.setCreateShootResource(data)
-          this.update(data)
-        } else {
-          const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-          const data = pick(jsyaml.safeLoad(this.getContent()), paths)
-          const { metadata: { namespace, name } } = this.value
-          const { data: value } = await replaceShoot({ namespace, name, data })
-          this.update(value)
+        const paths = ['spec', 'metadata.labels', 'metadata.annotations']
+        const data = pick(jsyaml.safeLoad(this.getContent()), paths)
+        const { metadata: { namespace, name } } = this.value
+        const { data: value } = await replaceShoot({ namespace, name, data })
+        this.update(value)
 
-          this.snackbarColor = 'success'
-          this.snackbarText = `Cluster specification has been successfully updated`
-          this.snackbar = true
-        }
+        this.snackbarColor = 'success'
+        this.snackbarText = `Cluster specification has been successfully updated`
+        this.snackbar = true
       } catch (err) {
         this.alert = true
         this.alertType = 'error'
@@ -464,8 +458,16 @@ export default {
   },
   async beforeRouteLeave (to, from, next) {
     if (this.isCreateMode) {
-      await this.save()
-      return next()
+      try {
+        const data = await jsyaml.safeLoad(this.getContent())
+        this.setCreateShootResource(data)
+        return next()
+      } catch (err) {
+        this.alert = true
+        this.alertType = 'error'
+        this.alertMessage = get(err, 'response.data.message', err.message)
+        return next(false)
+      }
     }
     if (this.clean) {
       return next()

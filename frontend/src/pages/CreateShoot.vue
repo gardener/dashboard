@@ -90,8 +90,8 @@ limitations under the License.
     </v-card>
     <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
     <v-layout justify-end>
-      <v-btn @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
+      <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
+      <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
     </v-layout>
   </v-container>
 </template>
@@ -106,12 +106,15 @@ import MaintenanceTime from '@/components/MaintenanceTime'
 import HibernationSchedule from '@/components/HibernationSchedule'
 import ManageWorkers from '@/components/ManageWorkers'
 import Alert from '@/components/Alert'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import assignWith from 'lodash/assignWith'
+import isUndefined from 'lodash/isUndefined'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
@@ -142,6 +145,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'namespace'
+    ]),
     ...mapGetters([
       'getCreateShootResource',
       'infrastructureSecretsByCloudProfileName'
@@ -157,7 +163,8 @@ export default {
   methods: {
     ...mapActions([
       'createShoot',
-      'setCreateShootResource'
+      'setCreateShootResource',
+      'resetCreateShootResource'
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
@@ -206,6 +213,13 @@ export default {
       set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
 
       const workers = this.$refs.manageWorkers.getWorkers()
+      const oldWorkers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
+      forEach(workers, worker => {
+        const oldWorker = find(oldWorkers, { name: worker.name })
+        assignWith(worker, oldWorker, (objValue, srcValue) => {
+          return isUndefined(objValue) ? srcValue : objValue
+        })
+      })
       set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
 
       const addons = this.$refs.addons.getAddons()
@@ -232,7 +246,10 @@ export default {
       } else {
         delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
       }
+
       this.setCreateShootResource(shootResource)
+
+      return shootResource
     },
     updateUIComponentsWithShootResource () {
       const shootResource = this.getCreateShootResource
@@ -271,11 +288,17 @@ export default {
       this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
     },
     async createClicked () {
-      this.updateShootResourceWithUIComponents()
+      const shootResource = this.updateShootResourceWithUIComponents()
 
       try {
-        // await this.createShoot(this.shootResource)
-        // TODO: navigate to new shoot
+        await this.createShoot(shootResource)
+        this.$router.push({
+          name: 'ShootItem',
+          params: {
+            namespace: this.namespace,
+            name: shootResource.metadata.name
+          }
+        })
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
         this.errorMessage = `Failed to create cluster.`
@@ -284,7 +307,12 @@ export default {
       }
     },
     cancelClicked () {
-      // TODO: Navigate back to shoot list
+      this.$router.push({
+        name: 'ShootList',
+        params: {
+          namespace: this.namespace
+        }
+      })
     },
     infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
@@ -294,6 +322,8 @@ export default {
   beforeRouteLeave (to, from, next) {
     if (to.name === 'CreateShootEditor') {
       this.updateShootResourceWithUIComponents()
+    } else {
+      this.resetCreateShootResource()
     }
     next()
   },

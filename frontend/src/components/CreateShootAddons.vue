@@ -41,6 +41,7 @@ import reduce from 'lodash/reduce'
 import set from 'lodash/set'
 import filter from 'lodash/filter'
 import assign from 'lodash/assign'
+import cloneDeep from 'lodash/cloneDeep'
 
 const standardAddonDefinitionList = [
   {
@@ -93,7 +94,7 @@ export default {
       return this.addons
     },
     updateAddons (addons) {
-      assign(this.addons, addons)
+      assign(this.addons, cloneDeep(addons))
     }
   }
 }
