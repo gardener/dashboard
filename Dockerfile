@@ -15,7 +15,7 @@
 #
 
 #### Base ####
-FROM node:10.15.3-alpine as base
+FROM node:10-alpine as base
 
 WORKDIR /usr/src/app
 

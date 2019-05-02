@@ -18,11 +18,8 @@
 
 const { version } = require('../../package')
 
-module.exports = function info ({ agent }) {
+module.exports = function info({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
-
-  const auth = nocks.auth
-  const k8s = nocks.k8s
   const username = 'john.doe@example.org'
   const id = username
   const aud = [ 'gardener' ]
