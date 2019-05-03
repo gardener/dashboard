@@ -586,12 +586,16 @@ export default {
     },
     regions () {
       const { regionsWithSeed, regionsWithoutSeed } = this.regionsByCloudProfileName(this.cloudProfileName)
-      const regions = [{ header: 'Regions with seed' }]
+      const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+      const regions = []
+      if (regionsWithSeed.length > 0) {
+        regions.push({ header: 'Recommended Regions (with dedicated Seed)' })
+      }
       forEach(regionsWithSeed, region => {
         regions.push({ text: region, hasSeed: true })
       })
-      if (!isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion') {
-        regions.push({ header: 'Regions without seed' })
+      if (showAllRegions && regionsWithoutSeed.length > 0) {
+        regions.push({ header: 'Regions without dedicated Seed' })
         forEach(regionsWithoutSeed, region => {
           regions.push({ text: region, hasSeed: false })
         })
@@ -600,7 +604,7 @@ export default {
     },
     regionHint () {
       if (find(this.regions, { text: this.region, hasSeed: false })) {
-        return 'Selected region does not have a dedicated seed. Seed will be selected based on configured policy.'
+        return 'Seed hosting this cluster\'s control plane will be selected according to configured policy.'
       }
       return undefined
     },
@@ -892,7 +896,7 @@ export default {
       })
     },
     setDefaultRegion () {
-      this.region = get(this.regions[1], 'text')
+      this.region = get(find(this.regions, ['hasSeed', true]), 'text')
     },
     setDefaultKubernetesVersion () {
       this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
