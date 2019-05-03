@@ -227,15 +227,16 @@ export default {
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
       const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+      const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
+      autoUpdate.kubernetesVersion = k8sUpdates
       const maintenance = {
         timeWindow: {
           begin: utcBegin,
           end: utcEnd
         },
-        autoUpdate: {
-          kubernetesVersion: k8sUpdates
-        }
+        autoUpdate
       }
+
       set(shootResource, 'spec.maintenance', maintenance)
 
       const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
@@ -279,7 +280,7 @@ export default {
       this.$refs.addons.updateAddons(addons)
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
-      const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.k8sUpdates')
+      const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates })
 
