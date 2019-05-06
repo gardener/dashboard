@@ -156,16 +156,16 @@ limitations under the License.
         <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
           <infra-icon value="alicloud-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small color="#ED1944" @click="onAdd('openstack')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small :color="infrastructureColor('openstack')" @click="onAdd('openstack')">
           <infra-icon value="openstack-white" :width="20"></infra-icon>
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click="onAdd('gcp')">
           <infra-icon value="gcp-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small color="#2075b8" @click="onAdd('azure')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small :color="infrastructureColor('azure')" @click="onAdd('azure')">
           <infra-icon value="azure-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small color="#ff9900" @click="onAdd('aws')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small :color="infrastructureColor('aws')" @click="onAdd('aws')">
           <infra-icon value="aws-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>
@@ -176,7 +176,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecretBinding, infrastructureColor } from '@/utils'
 import GcpDialog from '@/dialogs/SecretDialogGcp'
 import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
 import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
@@ -302,6 +302,9 @@ export default {
     },
     isOwnSecretBinding (secret) {
       return isOwnSecretBinding(secret)
+    },
+    infrastructureColor (kind) {
+      return infrastructureColor(kind)
     }
   },
   mounted () {
