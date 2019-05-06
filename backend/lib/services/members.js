@@ -162,10 +162,11 @@ async function unsetProjectMember (projects, namespaces, namespace, username) {
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
   const projects = Garden(user).projects
-  const namespaces = Core(user).namespaces
+  const core = Core(user)
+  const namespaces = core.namespaces
 
   const project = await getProjectByNamespace(projects, namespaces, namespace)
-  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+  const { items: serviceAccountList } = await core.namespaces(namespace).serviceaccounts.get({})
 
   // get project members from project
   return fromResource(project, serviceAccountList)
@@ -217,22 +218,22 @@ exports.create = async function ({ user, namespace, body: { name: username } }) 
 
   // assign user to project
   const project = await setProjectMember(projects, namespaces, namespace, username)
-  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+  const { items: serviceAccountList } = await core.namespaces(namespace).serviceaccounts.get({})
   return fromResource(project, serviceAccountList)
 }
 
 exports.remove = async function ({ user, namespace, name: username }) {
   const projects = Garden(user).projects
-  const namespaces = Core(user).namespaces
+  const core = Core(user)
+  const namespaces = core.namespaces
 
   // unassign user from project
   const project = await unsetProjectMember(projects, namespaces, namespace, username)
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
   if (serviceaccountNamespace === namespace) {
-    const core = Core(user)
     await deleteServiceaccount(core, serviceaccountNamespace, serviceaccountName)
   }
 
-  const { items: serviceAccountList } = await Core(user).namespaces(namespace).serviceaccounts.get({})
+  const { items: serviceAccountList } = await core.namespaces(namespace).serviceaccounts.get({})
   return fromResource(project, serviceAccountList)
 }
