@@ -24,7 +24,7 @@ limitations under the License.
               <v-flex grow>
                 <img src="../assets/logo.svg" class="logo">
                 <h1>Gardener</h1>
-                <h2>The Kubernetes Botanist</h2>
+                <h2>Universal Kubernetes at Scale</h2>
             </v-flex>
             <v-flex shrink pl-2>
               <img :src="footerLogoUrl" height="24">
