@@ -34,7 +34,7 @@
             <rect id="Rectangle-134-Copy" fill="#999999" x="0" y="-4" width="720" height="207"></rect>
             <g id="Rectangle-140" transform="translate(787.537320, 84.537320) rotate(-45.000000) translate(-787.537320, -84.537320) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                <use fill="#F0AB00" fill-rule="evenodd" xlink:href="#path-1"></use>
+                <use fill="#ED1944" fill-rule="evenodd" xlink:href="#path-1"></use>
             </g>
             <g id="Rectangle-133-Copy-4" transform="translate(673.539252, -136.729460) rotate(-44.000000) translate(-673.539252, 136.729460) ">
                 <use fill="black" fill-opacity="1" filter="url(#filter-4)" xlink:href="#path-3"></use>
@@ -48,7 +48,7 @@
                 <use fill="black" fill-opacity="1" filter="url(#filter-8)" xlink:href="#path-7"></use>
                 <use fill="#666666" fill-rule="evenodd" xlink:href="#path-7"></use>
             </g>
-            <rect id="Rectangle-133-Copy-5" fill="#F0AB00" transform="translate(151.747902, 52.975521) rotate(-44.000000) translate(-151.747902, -52.975521) " x="-67.0240475" y="-312.127463" width="437.543898" height="730.205969"></rect>
+            <rect id="Rectangle-133-Copy-5" fill="#ED1944" transform="translate(151.747902, 52.975521) rotate(-44.000000) translate(-151.747902, -52.975521) " x="-67.0240475" y="-312.127463" width="437.543898" height="730.205969"></rect>
         </g>
     </g>
 </svg>

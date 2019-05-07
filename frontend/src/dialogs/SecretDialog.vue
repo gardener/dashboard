@@ -25,8 +25,7 @@ limitations under the License.
         <v-container fill-height>
           <v-layout align-center justify-start row fill-height>
             <v-flex xs1>
-              <img v-if="infraIcon === 'alicloud'" src="@/assets/alicloud-white.svg" width="42">
-              <v-icon v-else x-large class="white--text infra_icon">{{infraIcon}}</v-icon>
+              <infra-icon v-model="infraIcon" :width="42"></infra-icon>
             </v-flex>
             <v-flex>
               <div class="credential_title">{{title}}</div>
@@ -95,6 +94,7 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import Alert from '@/components/Alert'
+import InfraIcon from '@/components/InfrastructureIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
@@ -110,7 +110,8 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    Alert
+    Alert,
+    InfraIcon
   },
   props: {
     value: {
@@ -342,10 +343,6 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-
-  .infra_icon {
-    font-size:90px
-  }
 
   .credential_title {
     font-size:30px

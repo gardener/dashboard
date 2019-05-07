@@ -22,7 +22,7 @@ limitations under the License.
     :secret="secret"
     cloudProviderKind="aws"
     color="orange darken-2"
-    infraIcon="mdi-amazon"
+    infraIcon="aws-white"
     backgroundSrc="/static/background_aws.svg"
     createTitle="Add new AWS Secret"
     replaceTitle="Replace AWS Secret"

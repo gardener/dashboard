@@ -22,7 +22,7 @@ limitations under the License.
     :secret="secret"
     cloudProviderKind="azure"
     color="blue"
-    infraIcon="mdi-microsoft"
+    infraIcon="azure-white"
     backgroundSrc="/static/background_azure.svg"
     createTitle="Add new Azure Secret"
     replaceTitle="Replace Azure Secret"
