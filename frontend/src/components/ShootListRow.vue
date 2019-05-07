@@ -43,7 +43,7 @@ limitations under the License.
       <v-tooltip top>
         <v-layout align-center justify-start row fill-height slot="activator">
           <infra-icon v-model="row.kind" content-class="mr-2"></infra-icon>
-          {{ row.region }}
+          <div>{{ row.region }}</div>
         </v-layout>
         <span>{{ row.kind }} [{{ row.region }}]</span>
       </v-tooltip>
