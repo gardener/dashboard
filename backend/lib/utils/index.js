@@ -19,6 +19,7 @@
 
 const path = require('path')
 const _ = require('lodash')
+const { NotFound } = require('../errors')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -53,11 +54,21 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
+async function getProjectByNamespace (projects, namespaces, namespace) {
+  const ns = await namespaces.get({ name: namespace })
+  const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
+  if (!name) {
+    throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+  }
+  return projects.get({ name })
+}
+
 module.exports = {
   resolve,
   decodeBase64,
   encodeBase64,
   getCloudProviderKind,
   shootHasIssue,
+  getProjectByNamespace,
   _config: config
 }
