@@ -43,18 +43,5 @@ export default {
     .container {
       padding: 16px;
     }
-
-    .openstack-bgcolor {
-      background-color: #ED1944
-    }
-
-    .azure-bgcolor {
-      background-color: #2075b8
-    }
-
-    .aws-bgcolor {
-      background-color: #ff9900
-    }
-
   }
 </style>
