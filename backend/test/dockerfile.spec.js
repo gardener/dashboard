@@ -16,7 +16,6 @@
 
 'use strict'
 
-const assert = require('assert').strict
 const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
@@ -47,12 +46,12 @@ const activeNodeReleases = {
   }
 }
 
-async function getNodeDockerfile(nodeVersion) {
+async function getNodeDockerfile (nodeVersion) {
   const { body } = await httpClient.get(`/${nodeVersion}/alpine/Dockerfile`)
   return DockerfileParser.parse(body)
 }
 
-async function getDashboardDockerfile() {
+async function getDashboardDockerfile () {
   const filename = path.join(__dirname, '..', '..', 'Dockerfile')
   const data = await readFile(filename, 'utf8')
   return DockerfileParser.parse(data)
@@ -63,7 +62,7 @@ describe('dockerfile', function () {
 
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
-    
+
     expect(dashboardDockerfile.getFROMs()).to.have.length(4)
     const buildStages = _
       .chain(dashboardDockerfile.getFROMs())
