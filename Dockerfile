@@ -33,6 +33,7 @@ RUN npm install --only=production \
 
 COPY backend ./
 COPY VERSION ../
+COPY Dockerfile ../
 
 RUN npm run lint \
     && npm run test-cov \
