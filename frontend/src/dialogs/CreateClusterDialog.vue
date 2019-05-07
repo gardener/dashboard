@@ -117,7 +117,7 @@ limitations under the License.
                   </v-flex>
                 </v-layout>
                 <v-layout row>
-                  <v-flex xs3>
+                  <v-flex xs3 mb-3>
                     <v-select
                       color="cyan darken-2"
                       label="Region"
@@ -589,13 +589,13 @@ export default {
       const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
       const regions = []
       if (regionsWithSeed.length > 0) {
-        regions.push({ header: 'Recommended Regions (with dedicated Seed)' })
+        regions.push({ header: 'Recommended Regions (API server in same region)' })
       }
       forEach(regionsWithSeed, region => {
         regions.push({ text: region, hasSeed: true })
       })
       if (showAllRegions && regionsWithoutSeed.length > 0) {
-        regions.push({ header: 'Regions without dedicated Seed' })
+        regions.push({ header: 'Supported Regions (API server in another region)' })
         forEach(regionsWithoutSeed, region => {
           regions.push({ text: region, hasSeed: false })
         })
@@ -604,9 +604,9 @@ export default {
     },
     regionHint () {
       if (find(this.regions, { text: this.region, hasSeed: false })) {
-        return 'Seed hosting this cluster\'s control plane will be selected according to configured policy.'
+        return 'API server in another region than your workers (longer latency; picked by Gardener based on internal considerations, e.g. geographic proximity)'
       }
-      return undefined
+      return 'API server in same region as your workers (optimal latency)'
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
