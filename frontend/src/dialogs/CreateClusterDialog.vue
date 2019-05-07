@@ -113,16 +113,18 @@ limitations under the License.
                   </v-flex>
                 </v-layout>
                 <v-layout row>
-                  <v-flex xs3>
+                  <v-flex xs3 mb-3>
                     <v-select
                       color="cyan darken-2"
                       label="Region"
-                      :items="regions"
+                      :items="regionItems"
+                      :hint="regionHint"
+                      persistent-hint
                       v-model="region"
                       :error-messages="getErrorMessages('shootDefinition.spec.cloud.region')"
                       @input="$v.shootDefinition.spec.cloud.region.$touch()"
-                      @blur="$v.shootDefinition.spec.cloud.region.$touch()"
-                      ></v-select>
+                      @blur="$v.shootDefinition.spec.cloud.region.$touch()">
+                    </v-select>
                   </v-flex>
                   <v-flex xs1>
                   </v-flex>
@@ -284,6 +286,7 @@ import pick from 'lodash/pick'
 import omit from 'lodash/omit'
 import concat from 'lodash/concat'
 import sample from 'lodash/sample'
+import includes from 'lodash/includes'
 import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -466,12 +469,14 @@ export default {
     ...mapState([
       'user',
       'namespace',
-      'localTimezone'
+      'localTimezone',
+      'cfg'
     ]),
     ...mapGetters([
       'cloudProfileByName',
       'cloudProfilesByCloudProviderKind',
-      'regionsByCloudProfileName',
+      'regionsWithSeedByCloudProfileName',
+      'regionsWithoutSeedByCloudProfileName',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName',
       'cloudProviderKindList',
@@ -577,8 +582,34 @@ export default {
     addons () {
       return get(this.shootDefinition, 'spec.addons', {})
     },
-    regions () {
-      return this.regionsByCloudProfileName(this.cloudProfileName)
+    regionsWithSeed () {
+      return this.regionsWithSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionsWithoutSeed () {
+      return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionItems () {
+      const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+      const regionItems = []
+      if (!isEmpty(this.regionsWithSeed)) {
+        regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
+      }
+      forEach(this.regionsWithSeed, region => {
+        regionItems.push({ text: region })
+      })
+      if (showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
+        regionItems.push({ header: 'Supported Regions (API servers in another region)' })
+        forEach(this.regionsWithoutSeed, region => {
+          regionItems.push({ text: region })
+        })
+      }
+      return regionItems
+    },
+    regionHint () {
+      if (includes(this.regionsWithSeed, this.region)) {
+        return 'API servers in same region as your workers (optimal if you require a low latency)'
+      }
+      return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
@@ -868,7 +899,7 @@ export default {
       })
     },
     setDefaultRegion () {
-      this.region = head(this.regions)
+      this.region = head(this.regionsWithSeed)
     },
     setDefaultKubernetesVersion () {
       this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
