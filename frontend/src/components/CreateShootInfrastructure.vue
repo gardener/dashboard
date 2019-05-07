@@ -29,18 +29,14 @@ limitations under the License.
           >
           <template slot="item" slot-scope="data">
             <v-list-tile-action>
-              <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24">
-              <infra-icon v-else v-model="data.item"></infra-icon>
+              <infra-icon v-model="data.item"></infra-icon>
             </v-list-tile-action>
             <v-list-tile-content>
               <v-list-tile-title>{{data.item}}</v-list-tile-title>
             </v-list-tile-content>
           </template>
           <template slot="selection" slot-scope="data">
-            <img v-if="data.item === 'alicloud'" src="@/assets/alicloud.svg" width="24" class="mr-2">
-            <v-avatar v-else size="30px">
-              <infra-icon v-model="data.item"></infra-icon>
-            </v-avatar>
+            <infra-icon v-model="data.item" content-class="mr-2"></infra-icon>
             <span class="black--text">
               {{data.item}}
             </span>
@@ -92,7 +88,9 @@ limitations under the License.
         <v-select
           color="cyan darken-2"
           label="Region"
-          :items="allRegions"
+          :items="regionItems"
+          :hint="regionHint"
+          persistent-hint
           v-model="region"
           :error-messages="getErrorMessages('region')"
           @input="onInputRegion"
@@ -157,8 +155,10 @@ import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import sample from 'lodash/sample'
 import find from 'lodash/find'
+import includes from 'lodash/includes'
+import forEach from 'lodash/forEach'
 import intersection from 'lodash/intersection'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 const validationErrors = {
   infrastructureKind: {
@@ -236,11 +236,15 @@ export default {
   },
   validations,
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     ...mapGetters([
       'cloudProviderKindList',
       'cloudProfilesByCloudProviderKind',
       'infrastructureSecretsByCloudProfileName',
-      'regionsByCloudProfileName',
+      'regionsWithSeedByCloudProfileName',
+      'regionsWithoutSeedByCloudProfileName',
       'cloudProfileByName',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName'
@@ -261,8 +265,34 @@ export default {
         return undefined
       }
     },
-    allRegions () {
-      return this.regionsByCloudProfileName(this.cloudProfileName)
+    regionsWithSeed () {
+      return this.regionsWithSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionsWithoutSeed () {
+      return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionItems () {
+      const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+      const regionItems = []
+      if (!isEmpty(this.regionsWithSeed)) {
+        regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
+      }
+      forEach(this.regionsWithSeed, region => {
+        regionItems.push({ text: region })
+      })
+      if (showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
+        regionItems.push({ header: 'Supported Regions (API servers in another region)' })
+        forEach(this.regionsWithoutSeed, region => {
+          regionItems.push({ text: region })
+        })
+      }
+      return regionItems
+    },
+    regionHint () {
+      if (includes(this.regionsWithSeed, this.region)) {
+        return 'API servers in same region as your workers (optimal if you require a low latency)'
+      }
+      return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
     allZones () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
@@ -294,11 +324,8 @@ export default {
     setDefaultsDependingOnCloudProfile () {
       this.secret = head(this.infrastructureSecretsByProfileName)
       this.onInputSecret()
-      this.region = head(this.allRegions)
+      this.region = head(this.regionsWithSeed)
       this.onInputRegion()
-      if (!isEmpty(this.allZones)) {
-        this.zones = [sample(this.allZones)]
-      }
       this.onInputZones()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
@@ -309,6 +336,9 @@ export default {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
       this.setDefaultsDependingOnCloudProfile()
+    },
+    setDefaultZone () {
+      this.zones = [sample(this.allZones)]
     },
     onInputInfrastructureKind () {
       this.$v.infrastructureKind.$touch()
@@ -322,6 +352,7 @@ export default {
     },
     onInputRegion () {
       this.$v.secret.$touch()
+      this.setDefaultZone()
       this.validateInput()
     },
     onInputZones () {
