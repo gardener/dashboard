@@ -21,7 +21,7 @@
 !frontend/*.config.js
 !frontend/public
 !frontend/src
-!frontend/test
+!frontend/tests
 
 # include metadata files
 !LICENSE.md
