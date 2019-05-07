@@ -604,9 +604,9 @@ export default {
     },
     regionHint () {
       if (find(this.regions, { text: this.region, hasSeed: false })) {
-        return 'API servers in another region than your workers (supported, expect somewhat higher latency, picked by Gardener based on internal considerations, e.g. geographic proximity)'
+        return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
       }
-      return 'API servers in same region as your workers (recommended, optimal if you require low latency)'
+      return 'API servers in same region as your workers (optimal if you require a low latency)'
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
