@@ -589,13 +589,13 @@ export default {
       const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
       const regions = []
       if (regionsWithSeed.length > 0) {
-        regions.push({ header: 'Recommended Regions (API server in same region)' })
+        regions.push({ header: 'Recommended Regions (API servers in same region)' })
       }
       forEach(regionsWithSeed, region => {
         regions.push({ text: region, hasSeed: true })
       })
       if (showAllRegions && regionsWithoutSeed.length > 0) {
-        regions.push({ header: 'Supported Regions (API server in another region)' })
+        regions.push({ header: 'Supported Regions (API servers in another region)' })
         forEach(regionsWithoutSeed, region => {
           regions.push({ text: region, hasSeed: false })
         })
@@ -604,9 +604,9 @@ export default {
     },
     regionHint () {
       if (find(this.regions, { text: this.region, hasSeed: false })) {
-        return 'API server in another region than your workers (longer latency; picked by Gardener based on internal considerations, e.g. geographic proximity)'
+        return 'API servers in another region than your workers (supported, expect somewhat higher latency, picked by Gardener based on internal considerations, e.g. geographic proximity)'
       }
-      return 'API server in same region as your workers (optimal latency)'
+      return 'API servers in same region as your workers (recommended, optimal if you require low latency)'
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
