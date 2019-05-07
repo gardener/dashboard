@@ -22,7 +22,7 @@ limitations under the License.
     :secret="secret"
     cloudProviderKind="gcp"
     color="green"
-    infraIcon="mdi-google"
+    infraIcon="gcp-white"
     backgroundSrc="/static/background_gcp.svg"
     createTitle="Add new Google Secret"
     replaceTitle="Replace Google Secret"

@@ -21,10 +21,10 @@ limitations under the License.
     v-if="hasCloudProfileForCloudProviderKind('aws')"
     infrastructureKey="aws"
     infrastructureName="Amazon Web Services"
-    icon="mdi-amazon"
+    icon="aws-white"
     secretDescriptorKey="accessKeyID"
     description="Before you can provision and access a Kubernetes cluster on AWS, you need to add account credentials."
-    color="orange darken-2"
+    color="aws-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -36,10 +36,10 @@ limitations under the License.
     class="mt-3"
     infrastructureKey="azure"
     infrastructureName="Microsoft Azure Cloud"
-    icon="mdi-microsoft"
+    icon="azure-white"
     secretDescriptorKey="subscriptionID"
     description="Make sure that the new credentials have the correct permission on Azure."
-    color="blue"
+    color="azure-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -51,7 +51,7 @@ limitations under the License.
     class="mt-3"
     infrastructureKey="gcp"
     infrastructureName="Google Cloud Platform"
-    icon="mdi-google"
+    icon="gcp-white"
     secretDescriptorKey="project"
     description="Make sure that the new credentials have the correct permission on GCP."
     color="green"
@@ -66,9 +66,9 @@ limitations under the License.
     class="mt-3"
     infrastructureKey="openstack"
     infrastructureName="OpenStack"
-    icon="mdi-server-network"
+    icon="openstack-white"
     description="Make sure that the new credentials have the correct OpenStack permissions"
-    color="orange"
+    color="openstack-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -85,7 +85,7 @@ limitations under the License.
     infrastructureKey="alicloud"
     infrastructureName="Alibaba Cloud"
     secretDescriptorKey="accessKeyID"
-    icon="alicloud"
+    icon="alicloud-white"
     description="Make sure that the new credentials have the correct Alibaba Cloud permissions"
     color="grey darken-4"
     @add="onAdd"
@@ -154,19 +154,19 @@ limitations under the License.
           <v-icon>close</v-icon>
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
-          <img src="@/assets/alicloud-white.svg" width="20">
+          <infra-icon value="alicloud-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="orange" @click="onAdd('openstack')">
-          <v-icon>mdi-server-network</v-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small :color="infrastructureColor('openstack')" @click="onAdd('openstack')">
+          <infra-icon value="openstack-white" :width="20"></infra-icon>
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click="onAdd('gcp')">
-          <v-icon>mdi-google</v-icon>
+          <infra-icon value="gcp-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="blue" @click="onAdd('azure')">
-          <v-icon>mdi-microsoft</v-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small :color="infrastructureColor('azure')" @click="onAdd('azure')">
+          <infra-icon value="azure-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="orange darken-2" @click="onAdd('aws')">
-          <v-icon>mdi-amazon</v-icon>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small :color="infrastructureColor('aws')" @click="onAdd('aws')">
+          <infra-icon value="aws-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>
@@ -176,7 +176,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding } from '@/utils'
+import { isOwnSecretBinding, infrastructureColor } from '@/utils'
 import GcpDialog from '@/dialogs/SecretDialogGcp'
 import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
 import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
@@ -190,6 +190,7 @@ import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
+import InfraIcon from '@/components/InfrastructureIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 
@@ -208,7 +209,8 @@ export default {
     AlicloudHelpDialog,
     DeleteDialog,
     Secret,
-    DisabledSecret
+    DisabledSecret,
+    InfraIcon
   },
   data () {
     return {
@@ -300,6 +302,9 @@ export default {
     },
     isOwnSecretBinding (secret) {
       return isOwnSecretBinding(secret)
+    },
+    infrastructureColor (kind) {
+      return infrastructureColor(kind)
     }
   },
   mounted () {

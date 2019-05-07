@@ -414,6 +414,17 @@ export function textColor (color) {
   return textColor
 }
 
+export function infrastructureColor (kind) {
+  switch (kind) {
+    case 'openstack':
+      return '#ED1944'
+    case 'azure':
+      return '#2075b8'
+    case 'aws':
+      return '#ff9900'
+  }
+}
+
 export function purposeRequiresHibernationSchedule (purpose) {
   const defaultHibernationSchedules = get(store, 'state.cfg.defaultHibernationSchedule')
   if (defaultHibernationSchedules) {
