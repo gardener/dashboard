@@ -136,13 +136,18 @@ const getters = {
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
-  regionsByCloudProfileName (state, getters) {
+  regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const regionsWithSeed = uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+      return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+    }
+  },
+  regionsWithoutSeedByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const allRegions = uniq(map(get(cloudProfile, 'data.zones'), 'region'))
-      const regionsWithoutSeed = difference(allRegions, regionsWithSeed)
-      return { regionsWithSeed, regionsWithoutSeed }
+      const regionsWithoutSeed = difference(allRegions, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+      return regionsWithoutSeed
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {

@@ -121,7 +121,7 @@ limitations under the License.
                     <v-select
                       color="cyan darken-2"
                       label="Region"
-                      :items="regions"
+                      :items="regionItems"
                       :hint="regionHint"
                       persistent-hint
                       v-model="region"
@@ -290,6 +290,7 @@ import pick from 'lodash/pick'
 import omit from 'lodash/omit'
 import concat from 'lodash/concat'
 import sample from 'lodash/sample'
+import includes from 'lodash/includes'
 import intersection from 'lodash/intersection'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -478,7 +479,8 @@ export default {
     ...mapGetters([
       'cloudProfileByName',
       'cloudProfilesByCloudProviderKind',
-      'regionsByCloudProfileName',
+      'regionsWithSeedByCloudProfileName',
+      'regionsWithoutSeedByCloudProfileName',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName',
       'cloudProviderKindList',
@@ -584,29 +586,34 @@ export default {
     addons () {
       return get(this.shootDefinition, 'spec.addons', {})
     },
-    regions () {
-      const { regionsWithSeed, regionsWithoutSeed } = this.regionsByCloudProfileName(this.cloudProfileName)
+    regionsWithSeed () {
+      return this.regionsWithSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionsWithoutSeed () {
+      return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
+    },
+    regionItems () {
       const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
-      const regions = []
-      if (regionsWithSeed.length > 0) {
-        regions.push({ header: 'Recommended Regions (API servers in same region)' })
+      const regionItems = []
+      if (!isEmpty(this.regionsWithSeed)) {
+        regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
       }
-      forEach(regionsWithSeed, region => {
-        regions.push({ text: region, hasSeed: true })
+      forEach(this.regionsWithSeed, region => {
+        regionItems.push({ text: region })
       })
-      if (showAllRegions && regionsWithoutSeed.length > 0) {
-        regions.push({ header: 'Supported Regions (API servers in another region)' })
-        forEach(regionsWithoutSeed, region => {
-          regions.push({ text: region, hasSeed: false })
+      if (showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
+        regionItems.push({ header: 'Supported Regions (API servers in another region)' })
+        forEach(this.regionsWithoutSeed, region => {
+          regionItems.push({ text: region })
         })
       }
-      return regions
+      return regionItems
     },
     regionHint () {
-      if (find(this.regions, { text: this.region, hasSeed: false })) {
-        return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
+      if (includes(this.regionsWithSeed, this.region)) {
+        return 'API servers in same region as your workers (optimal if you require a low latency)'
       }
-      return 'API servers in same region as your workers (optimal if you require a low latency)'
+      return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
     loadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
@@ -896,7 +903,7 @@ export default {
       })
     },
     setDefaultRegion () {
-      this.region = get(find(this.regions, ['hasSeed', true]), 'text')
+      this.region = head(this.regionsWithSeed)
     },
     setDefaultKubernetesVersion () {
       this.shootDefinition.spec.kubernetes.version = head(this.sortedKubernetesVersions)
