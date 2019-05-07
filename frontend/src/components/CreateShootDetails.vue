@@ -60,7 +60,7 @@ limitations under the License.
 
 <script>
 
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import { getValidationErrors, purposesForSecret, shortRandomString } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
@@ -129,6 +129,9 @@ export default {
   },
   validations,
   computed: {
+    ...mapState([
+      'namespace'
+    ]),
     ...mapGetters([
       'kubernetesVersions',
       'shootByNamespaceAndName'
