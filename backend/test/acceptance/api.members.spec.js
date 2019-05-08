@@ -18,10 +18,8 @@
 
 const _ = require('lodash')
 
-module.exports = function ({ agent }) {
+module.exports = function ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
-  const auth = nocks.auth
-  const k8s = nocks.k8s
   const name = 'bar'
   const project = 'foo'
   const namespace = `garden-${project}`

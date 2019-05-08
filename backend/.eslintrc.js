@@ -25,7 +25,6 @@ module.exports = {
     chai: true,
     expect: true,
     sinon: true,
-    nocks: true,
     support: true
   }
 }
