@@ -33,6 +33,7 @@ RUN npm install --only=production \
 
 COPY backend ./
 COPY VERSION ../
+COPY Dockerfile ../
 
 RUN npm run lint \
     && npm run test-cov \
@@ -53,11 +54,11 @@ RUN npm run lint \
     && npm run build
 
 # Release
-FROM alpine:3.8 as release
+FROM alpine:3.9 as release
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
-    && apk add --no-cache tini
+    && apk add --no-cache tini libstdc++
 
 WORKDIR /usr/src/app
 
@@ -67,7 +68,6 @@ ARG PORT=8080
 ENV PORT $PORT
 
 COPY --from=backend /usr/local/bin/node /usr/local/bin/
-COPY --from=backend /usr/lib/libgcc* /usr/lib/libstdc* /usr/lib/
 
 COPY --from=backend /usr/src/app/package.json ./
 COPY --from=backend /usr/src/app/dist  ./node_modules/

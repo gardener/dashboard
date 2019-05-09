@@ -451,6 +451,17 @@ export function textColor (color) {
   return textColor
 }
 
+export function infrastructureColor (kind) {
+  switch (kind) {
+    case 'openstack':
+      return '#ED1944'
+    case 'azure':
+      return '#2075b8'
+    case 'aws':
+      return '#ff9900'
+  }
+}
+
 export function encodeURIComponents (obj) {
   return mapValues(obj, value => encodeURIComponent(value))
 }

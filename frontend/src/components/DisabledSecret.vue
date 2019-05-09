@@ -17,10 +17,7 @@ limitations under the License.
 <template>
   <v-card class="mr-extra card_disabled">
     <v-toolbar :class="toolbarClass" dark>
-      <img v-if="icon === 'digital-ocean'" src="@/assets/digital-ocean.svg" width="32">
-      <img v-else-if="icon === 'vmware'" src="@/assets/vmware.svg" width="32">
-      <img v-else-if="icon === 'china-telecom'" src="@/assets/china-telecom.svg" width="32">
-      <v-icon v-else class="white--text pr-2">{{icon}}</v-icon>
+      <infra-icon v-model="icon" :width="32"></infra-icon>
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn disabled icon>
@@ -39,7 +36,12 @@ limitations under the License.
 </template>
 
 <script>
+import InfraIcon from '@/components/InfrastructureIcon'
+
 export default {
+  components: {
+    InfraIcon
+  },
   props: {
     icon: {
       type: String,

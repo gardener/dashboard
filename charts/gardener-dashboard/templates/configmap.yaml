@@ -129,3 +129,6 @@ data:
       defaultHibernationSchedule:
 {{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
 {{- end }}
+{{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
+      seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}
+{{- end }}

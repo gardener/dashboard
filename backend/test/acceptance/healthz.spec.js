@@ -16,9 +16,7 @@
 
 'use strict'
 
-const k8s = nocks.k8s
-
-module.exports = function ({ agent }) {
+module.exports = function ({ agent, k8s }) {
   /* eslint no-unused-expressions: 0 */
 
   it('should return the backend healthz status', async function () {

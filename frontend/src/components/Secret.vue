@@ -19,8 +19,7 @@ limitations under the License.
 
     <!-- Header -->
     <v-toolbar :class="toolbarClass" dark>
-      <img v-if="icon === 'alicloud'" src="@/assets/alicloud-white.svg" width="32">
-      <v-icon v-else class="white--text pr-2">{{icon}}</v-icon>
+      <infra-icon v-model="icon" :width="32"></infra-icon>
       <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
@@ -59,10 +58,12 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
+import InfraIcon from '@/components/InfrastructureIcon'
 
 export default {
   components: {
-    SecretRow
+    SecretRow,
+    InfraIcon
   },
   props: {
     infrastructureKey: {

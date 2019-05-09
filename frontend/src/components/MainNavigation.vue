@@ -30,7 +30,7 @@ limitations under the License.
           <a href="/">
             <img src="../assets/logo.svg" class="logo">
             <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
-            <h2>The Kubernetes Botanist</h2>
+            <h2>Universal Kubernetes at Scale</h2>
           </a>
 
         </div>

@@ -15,46 +15,60 @@ limitations under the License.
 -->
 
 <template>
-  <v-icon :class="iconClass" style="font-size:1.5em">{{icon}}</v-icon>
+  <span>
+    <img v-if="iconSrc" :src="iconSrc" :width="width" :class="contentClass" style="vertical-align:middle">
+    <v-icon v-else :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
+  </span>
 </template>
 
 <script>
+
 export default {
-  props: ['value'],
+  props: {
+    value: {
+      type: String,
+      required: true
+    },
+    width: {
+      type: Number,
+      default: 20
+    },
+    contentClass: {
+      type: String,
+      default: ''
+    }
+  },
   computed: {
-    icon () {
+    iconSrc () {
       switch (this.value) {
         case 'azure':
-          return 'mdi-microsoft'
+          return require('@/assets/azure.svg')
+        case 'azure-white':
+          return require('@/assets/azure-white.svg')
         case 'aws':
-          return 'mdi-amazon'
+          return require('@/assets/aws.svg')
+        case 'aws-white':
+          return require('@/assets/aws-white.svg')
         case 'gcp':
-          return 'mdi-google'
+          return require('@/assets/gcp.svg')
+        case 'gcp-white':
+          return require('@/assets/gcp-white.svg')
         case 'openstack':
-          return 'mdi-server-network'
+          return require('@/assets/openstack.svg')
+        case 'openstack-white':
+          return require('@/assets/openstack-white.svg')
+        case 'alicloud':
+          return require('@/assets/alicloud.svg')
+        case 'alicloud-white':
+          return require('@/assets/alicloud-white.svg')
+        case 'digital-ocean':
+          return require('@/assets/digital-ocean.svg')
+        case 'vmware':
+          return require('@/assets/vmware.svg')
+        case 'china-telecom':
+          return require('@/assets/china-telecom.svg')
       }
-      return 'mdi-amazon'
-    },
-    iconClass () {
-      return `${this.kindColor}--text mr-1`
-    },
-    kindColor () {
-      var kindColor
-      switch (this.value) {
-        case 'aws':
-          kindColor = 'orange'
-          break
-        case 'gcp':
-          kindColor = 'green'
-          break
-        case 'azure':
-          kindColor = 'blue'
-          break
-        case 'openstack':
-          kindColor = 'orange'
-          break
-      }
-      return kindColor
+      return undefined
     }
   }
 }

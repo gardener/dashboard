@@ -20,19 +20,19 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const garden = kubernetes.garden()
-const { getProjectByNamespace } = require('../utils')
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
+const { getProjectByNamespace } = require('../utils')
 const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
-}
-
 function Core ({ auth }) {
   return kubernetes.core({ auth })
+}
+
+function Garden ({ auth }) {
+  return kubernetes.garden({ auth })
 }
 
 function fromResource ({ metadata, spec = {} }) {

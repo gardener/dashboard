@@ -17,22 +17,30 @@
 'use strict'
 
 const app = require('../lib/app')
+const { k8s, auth, oidc, github, setup, teardown, verifyAndCleanAll } = require('./support/nocks')
 
 describe('acceptance', function () {
   const agent = global.createAgent(app)
   const sandbox = sinon.createSandbox()
-  const context = { agent, sandbox }
+  const context = { agent, sandbox, k8s, auth, oidc, github }
 
   before(function () {
-    nocks()
+    setup()
   })
 
   after(function () {
     agent.close()
+    teardown()
   })
 
   afterEach(function () {
-    global.verifyAndRestore(sandbox)
+    try {
+      verifyAndCleanAll()
+    } finally {
+      if (sandbox) {
+        sandbox.restore()
+      }
+    }
   })
 
   describe('api', function () {
