@@ -29,8 +29,8 @@ function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
   const resourceVersion = _.get(metadata, 'resourceVersion')
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
   const constraints = _.get(spec, [cloudProviderKind, 'constraints'])
-  const countUpdateDomains = _.get(spec, [cloudProviderKind, 'countUpdateDomains'])
-  const data = { seeds, keyStoneURL, ...constraints, countUpdateDomains }
+  const countFaultDomains = _.get(spec, [cloudProviderKind, 'countFaultDomains'])
+  const data = { seeds, keyStoneURL, ...constraints, countFaultDomains }
   return { metadata, data }
 }
 

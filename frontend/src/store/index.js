@@ -145,7 +145,7 @@ const getters = {
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const regionsInCloudProfile = get(cloudProfile, 'data.zones', get(cloudProfile, 'data.countUpdateDomains'))
+      const regionsInCloudProfile = get(cloudProfile, 'data.zones', get(cloudProfile, 'data.countFaultDomains'))
       const allRegions = uniq(map(regionsInCloudProfile, 'region'))
       const regionsWithoutSeed = difference(allRegions, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
       return regionsWithoutSeed
