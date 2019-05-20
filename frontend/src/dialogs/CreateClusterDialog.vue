@@ -337,14 +337,14 @@ const standardAddonDefinitionList = [
   {
     name: 'kubernetes-dashboard',
     title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters',
+    description: 'General-purpose web UI for Kubernetes clusters.',
     visible: true,
     enabled: true
   },
   {
     name: 'nginx-ingress',
     title: 'Nginx Ingress (Deprecated)',
-    description: 'This add-on is deprecated and will be removed in the future. You can install it or an alternative ingress controller always manually. If you choose to install it with the cluster, please note that Gardener will include it in its reconciliation and you can’t configure or override it’s configuration.',
+    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
     visible: true,
     enabled: true
   }
