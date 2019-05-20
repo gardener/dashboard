@@ -28,8 +28,9 @@ function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
   const resourceVersion = _.get(metadata, 'resourceVersion')
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
-  const constraints = _.get(spec, `${cloudProviderKind}.constraints`)
-  const data = { seeds, keyStoneURL, ...constraints }
+  const constraints = _.get(spec, [cloudProviderKind, 'constraints'])
+  const countFaultDomains = _.get(spec, [cloudProviderKind, 'countFaultDomains'])
+  const data = { seeds, keyStoneURL, ...constraints, countFaultDomains }
   return { metadata, data }
 }
 

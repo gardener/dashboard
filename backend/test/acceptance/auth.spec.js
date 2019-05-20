@@ -64,11 +64,10 @@ async function getIssuerClient (user) {
   return client
 }
 
-module.exports = function ({ agent, sandbox }) {
+module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
 
-  const { createUser } = nocks.auth
-  const k8s = nocks.k8s
+  const { createUser } = auth
   const username = 'foo@example.org'
   const user = createUser({ id: username })
 

@@ -19,10 +19,8 @@
 const _ = require('lodash')
 const common = require('../support/common')
 
-module.exports = function ({ agent, sandbox }) {
+module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
-  const auth = nocks.auth
-  const k8s = nocks.k8s
   const name = 'bar'
   const project = 'foo'
   const namespace = `garden-${project}`

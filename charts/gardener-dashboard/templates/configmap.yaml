@@ -76,7 +76,7 @@ data:
 {{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
-{{ toYaml .Values.frontendConfig.defaultHibernationSchedule | indent 8 }}
+{{ toYaml .Values.frontendConfig.defaultHibernationSchedule | trim | indent 8 }}
 {{- end }}
 {{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
       seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}

@@ -20,10 +20,8 @@ const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
 
-module.exports = function ({ agent, sandbox }) {
+module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
-  const auth = nocks.auth
-  const k8s = nocks.k8s
   const name = 'foo'
   const namespace = `garden-${name}`
   const metadata = { name }

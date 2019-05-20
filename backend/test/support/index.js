@@ -26,19 +26,7 @@ delete process.env.https_proxy
 /*!
  * Common modules
  */
-
 global.sinon = require('sinon')
-global.nocks = require('./nocks')()
-function verifyAndRestore (sandbox) {
-  try {
-    global.nocks.verifyAndCleanAll()
-  } finally {
-    if (sandbox) {
-      sandbox.restore()
-    }
-  }
-}
-global.verifyAndRestore = verifyAndRestore
 
 /*!
  * Attach chai to global

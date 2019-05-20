@@ -196,13 +196,15 @@ export default {
     },
     updateTime ({ eventName, time }) {
       const momentObj = moment(time, 'HHmm')
-      const hour = momentObj.format('HH')
-      const minute = momentObj.format('mm')
+      let hour
+      let minute
       const id = this.id
       if (momentObj.isValid()) {
-        this.$emit(eventName, { hour, minute, id })
-        this.validateInput()
+        hour = momentObj.format('HH')
+        minute = momentObj.format('mm')
       }
+      this.$emit(eventName, { hour, minute, id })
+      this.validateInput()
     },
     getTime ({ hour, minute } = {}) {
       if (hour && minute) {

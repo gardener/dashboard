@@ -16,11 +16,10 @@
 
 'use strict'
 
-const oidc = nocks.oidc
 const { oidc: { rejectUnauthorized, ca } = {} } = require('../../lib/config')
 const security = require('../../lib/security')
 
-module.exports = function ({ agent }) {
+module.exports = function ({ agent, oidc }) {
   /* eslint no-unused-expressions: 0 */
 
   it('should return the oidc issuer client', async function () {

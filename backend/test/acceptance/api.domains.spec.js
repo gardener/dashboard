@@ -19,9 +19,8 @@
 const _ = require('lodash')
 const common = require('../support/common')
 
-module.exports = function ({ agent, sandbox }) {
+module.exports = function ({ agent, sandbox, auth }) {
   /* eslint no-unused-expressions: 0 */
-  const auth = nocks.auth
   const username = 'john.doe@example.org'
   const id = username
   const user = auth.createUser({ id })

@@ -18,18 +18,23 @@
 
 const nock = require('nock')
 
-exports = module.exports = init
+exports = module.exports = setup
 exports.auth = require('./auth')
 exports.k8s = require('./k8s')
 exports.oidc = require('./oidc')
 exports.github = require('./github')
-exports.verifyAndCleanAll = verifyAndCleanAll
 
-function init () {
+function setup () {
   nock.disableNetConnect()
   nock.enableNetConnect('127.0.0.1')
-  return exports
 }
+exports.setup = setup
+
+function teardown () {
+  nock.cleanAll()
+  nock.enableNetConnect()
+}
+exports.teardown = teardown
 
 function verifyAndCleanAll () {
   try {
@@ -42,3 +47,4 @@ function verifyAndCleanAll () {
     nock.cleanAll()
   }
 }
+exports.verifyAndCleanAll = verifyAndCleanAll

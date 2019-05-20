@@ -261,9 +261,7 @@ const getRawVal = (item, column) => {
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
-      return getCloudProviderKind(spec.cloud)
-    case 'infrastructure_search':
-      return `${get(spec, 'cloud.region')} ${getCloudProviderKind(spec.cloud)}`
+      return `${getCloudProviderKind(spec.cloud)} ${get(spec, 'cloud.region')}`
     case 'seed':
       return get(spec, 'cloud.seed')
     case 'journalLabels':
@@ -400,7 +398,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
         if (includes(getRawVal(item, 'name'), value)) {
           return
         }
-        if (includes(getRawVal(item, 'infrastructure_search'), value)) {
+        if (includes(getRawVal(item, 'infrastructure'), value)) {
           return
         }
         if (includes(getRawVal(item, 'seed'), value)) {

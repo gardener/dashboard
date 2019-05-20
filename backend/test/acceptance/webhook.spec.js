@@ -20,7 +20,6 @@ const _ = require('lodash')
 const common = require('../support/common')
 const { createHubSignature } = require('../../lib/github/webhook')
 const { loadOpenIssues } = require('../../lib/services/journals')
-const { webhookSecret, createGithubIssue, createGithubComment, githubIssueList, githubIssueCommentList, formatTime } = nocks.github
 
 class CacheEvent {
   constructor ({ cache, type, id, timeout = 1000 }) {
@@ -59,13 +58,15 @@ class CacheEvent {
   }
 }
 
-module.exports = function ({ agent, sandbox }) {
+module.exports = function ({ agent, sandbox, github }) {
   /* eslint no-unused-expressions: 0 */
+  const { webhookSecret, createGithubIssue, createGithubComment, githubIssueList, githubIssueCommentList, formatTime } = github
+
   let cache
 
   beforeEach(async function () {
     cache = common.stub.getJournalCache(sandbox)
-    nocks.github.stub.getIssues({state: 'open'})
+    github.stub.getIssues({state: 'open'})
     await loadOpenIssues()
   })
 
@@ -172,7 +173,7 @@ module.exports = function ({ agent, sandbox }) {
     it('should handle github webhook event "issues" action "reopened"', async function () {
       githubIssue = _.set(closedGithubIssue, 'state', 'open')
       const body = JSON.stringify({action: 'reopened', issue: githubIssue})
-      nocks.github.stub.getComments({number: githubIssue.number})
+      github.stub.getComments({number: githubIssue.number})
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
       const commentEventPromise = new CacheEvent({cache, type: 'comment', id: 1}).startWaiting()
