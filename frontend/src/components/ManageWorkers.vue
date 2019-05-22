@@ -72,7 +72,7 @@ import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import head from 'lodash/head'
-import pick from 'lodash/pick'
+import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 const uuidv4 = require('uuid/v4')
 
@@ -175,7 +175,7 @@ export default {
     getWorkers () {
       const workers = []
       forEach(this.internalWorkers, internalWorker => {
-        const worker = pick(internalWorker, 'name', 'machineType', 'volumeType', 'volumeSize', 'autoScalerMin', 'autoScalerMax')
+        const worker = omit(internalWorker, 'id')
         workers.push(worker)
       })
       return workers
