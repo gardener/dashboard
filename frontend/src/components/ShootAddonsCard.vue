@@ -88,7 +88,7 @@ export default {
         },
         {
           name: 'nginx-ingress',
-          title: 'Nginx Ingress (Deprecated)',
+          title: 'Nginx Ingress',
           description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.'
         }
       ]
