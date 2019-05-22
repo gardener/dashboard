@@ -117,19 +117,14 @@ const patch = exports.patch = async function ({ user, namespace, name, body }) {
 
 exports.replace = async function ({ user, namespace, name, body }) {
   const shoots = Garden(user).namespaces(namespace).shoots
-  const { metadata: oldMetadata, kind, apiVersion, status } = await shoots.get({ name })
-  const { metadata: newMetadata, spec } = body
-  // labels
-  const reservedLabels = _.pickBy(oldMetadata.labels, isReservedLabel)
-  const unreservedLabels = _.pickBy(newMetadata.labels, isUnreservedLabel)
-  const labels = _.assign(unreservedLabels, reservedLabels)
-  // annotations
-  const reservedAnnotations = _.pickBy(oldMetadata.annotations, isReservedAnnotation)
-  const unreservedAnnotations = _.pickBy(newMetadata.annotations, isUnreservedAnnotation)
-  const annotations = _.assign(unreservedAnnotations, reservedAnnotations)
-  // metadata
-  const metadata = _.assign({}, oldMetadata, { labels, annotations })
-  // body
+  const { metadata, kind, apiVersion, status } = await shoots.get({ name })
+  const {
+    metadata: { labels, annotations },
+    spec
+  } = body
+  // assign new labels and annotations to metadata
+  Object.assign(metadata, { labels, annotations })
+  // compose new body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
   return shoots.put({ name, body })
