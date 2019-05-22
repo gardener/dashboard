@@ -21,11 +21,22 @@ limitations under the License.
         Infrastructure
       </v-card-title>
       <v-card-text>
-        <create-shoot-infrastructure
-          ref="infrastructure"
+        <create-shoot-select-infrastructure
           :userInterActionBus="userInterActionBus"
           @valid="onInfrastructureValid"
-          ></create-shoot-infrastructure>
+          ></create-shoot-select-infrastructure>
+      </v-card-text>
+    </v-card>
+    <v-card flat>
+      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        Infrastructure Details
+      </v-card-title>
+      <v-card-text>
+        <create-shoot-infrastructure-details
+          ref="infrastructureDetails"
+          :userInterActionBus="userInterActionBus"
+          @valid="onInfrastructureValid"
+          ></create-shoot-infrastructure-details>
       </v-card-text>
     </v-card>
     <v-card flat class="mt-3">
@@ -98,7 +109,8 @@ limitations under the License.
 
 <script>
 
-import CreateShootInfrastructure from '@/components/CreateShootInfrastructure'
+import CreateShootSelectInfrastructure from '@/components/CreateShootSelectInfrastructure'
+import CreateShootInfrastructureDetails from '@/components/CreateShootInfrastructureDetails'
 import CreateShootDetails from '@/components/CreateShootDetails'
 import CreateShootAddons from '@/components/CreateShootAddons'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
@@ -110,10 +122,8 @@ import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
 import find from 'lodash/find'
-import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import isUndefined from 'lodash/isUndefined'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
@@ -122,7 +132,8 @@ const EventEmitter = require('events')
 export default {
   name: 'create-cluster',
   components: {
-    CreateShootInfrastructure,
+    CreateShootSelectInfrastructure,
+    CreateShootInfrastructureDetails,
     CreateShootDetails,
     CreateShootAddons,
     MaintenanceComponents,
@@ -135,6 +146,7 @@ export default {
     return {
       userInterActionBus: new EventEmitter(),
       infrastructureValid: undefined,
+      infrastructureDetailsValid: undefined,
       detailsValid: undefined,
       workersValid: undefined,
       maintenanceTimeValid: undefined,
@@ -153,6 +165,7 @@ export default {
     ]),
     valid () {
       return this.infrastructureValid &&
+        this.infrastructureDetailsValid &&
         this.detailsValid &&
         this.workersValid &&
         this.maintenanceTimeValid &&
@@ -167,6 +180,9 @@ export default {
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
+    },
+    onInfrastructureDetailsValid (value) {
+      this.infrastructureDetailsValid = value
     },
     onDetailsValid (value) {
       this.detailsValid = value
@@ -183,7 +199,7 @@ export default {
     updateShootResourceWithUIComponents () {
       const shootResource = cloneDeep(this.getCreateShootResource)
 
-      const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructure.getInfrastructureData()
+      const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
       const secretBindingRef = {
         name: get(secret, 'metadata.bindingName')
       }
@@ -257,7 +273,7 @@ export default {
       const floatingPoolName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'])
       const loadBalancerProviderName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'])
 
-      this.$refs.infrastructure.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName })
+      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName })
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
