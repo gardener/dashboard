@@ -34,7 +34,7 @@ limitations under the License.
         <v-select
           color="cyan darken-2"
           label="Secret"
-          :items="infrastructureSecretsByProfileName"
+          :items="secretItems"
           v-model="secret"
           :error-messages="getErrorMessages('secret')"
           @input="onInputSecret"
@@ -43,8 +43,14 @@ limitations under the License.
           :hint="secretHint"
           >
           <template slot="item" slot-scope="data">
-            {{get(data.item, 'metadata.name')}}
-            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+            <template v-if="isAddNewSecret(data.item)">
+              <v-icon>mdi-plus</v-icon>
+              <span class="pl-2">{{get(data.item, 'title')}}</span>
+            </template>
+            <template v-else>
+              {{get(data.item, 'metadata.name')}}
+              <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+            </template>
           </template>
           <template slot="selection" slot-scope="data">
             <span class="black--text">
@@ -113,11 +119,13 @@ limitations under the License.
         </v-flex>
       </v-layout>
     </template>
+    <secret-dialog-wrapper :dialogState="addSecretDialogState"></secret-dialog-wrapper>
   </div>
 </template>
 
 <script>
 import CloudProfile from '@/components/CloudProfile'
+import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
 import sortBy from 'lodash/sortBy'
@@ -125,6 +133,7 @@ import head from 'lodash/head'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import sample from 'lodash/sample'
+import concat from 'lodash/concat'
 import find from 'lodash/find'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
@@ -175,7 +184,8 @@ const validations = {
 export default {
   name: 'create-shoot-infrastructure',
   components: {
-    CloudProfile
+    CloudProfile,
+    SecretDialogWrapper
   },
   props: {
     userInterActionBus: {
@@ -194,7 +204,29 @@ export default {
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
       valid: false,
-      cloudProfileValid: true // selection not shown in all cases, default to true
+      cloudProfileValid: true, // selection not shown in all cases, default to true
+      addSecretDialogState: {
+        aws: {
+          visible: false,
+          help: false
+        },
+        azure: {
+          visible: false,
+          help: false
+        },
+        gcp: {
+          visible: false,
+          help: false
+        },
+        openstack: {
+          visible: false,
+          help: false
+        },
+        alicloud: {
+          visible: false,
+          help: false
+        }
+      }
     }
   },
   validations,
@@ -216,6 +248,16 @@ export default {
     },
     infrastructureSecretsByProfileName () {
       return this.infrastructureSecretsByCloudProfileName(this.cloudProfileName)
+    },
+    secretItems () {
+      if (!isEmpty(this.infrastructureKind)) {
+        return concat(this.infrastructureSecretsByProfileName, {
+          value: 'ADD_NEW_SECRET',
+          title: 'Add new Secret'
+        })
+      } else {
+        return this.infrastructureSecretsByProfileName
+      }
     },
     secretHint () {
       if (this.selfTerminationDays) {
@@ -300,9 +342,16 @@ export default {
       this.zones = [sample(this.allZones)]
     },
     onInputSecret () {
-      this.$v.secret.$touch()
-      this.userInterActionBus.emit('updateSecret', this.secret)
-      this.validateInput()
+      if (this.isAddNewSecret(this.secret)) {
+        this.onAddSecret()
+        this.$nextTick(() => {
+          this.secret = head(this.infrastructureSecretsByProfileName)
+        })
+      } else {
+        this.$v.secret.$touch()
+        this.userInterActionBus.emit('updateSecret', this.secret)
+        this.validateInput()
+      }9
     },
     onInputRegion () {
       this.$v.secret.$touch()
@@ -360,6 +409,12 @@ export default {
       this.loadBalancerProviderName = loadBalancerProviderName
 
       this.validateInput()
+    },
+    isAddNewSecret (item) {
+      return (item && item.value === 'ADD_NEW_SECRET') || item === 'ADD_NEW_SECRET'
+    },
+    onAddSecret () {
+      this.addSecretDialogState[this.infrastructureKind].visible = true
     }
   },
   mounted () {

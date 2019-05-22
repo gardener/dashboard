@@ -35,7 +35,7 @@ limitations under the License.
         <create-shoot-infrastructure-details
           ref="infrastructureDetails"
           :userInterActionBus="userInterActionBus"
-          @valid="onInfrastructureValid"
+          @valid="onInfrastructureDetailsValid"
           ></create-shoot-infrastructure-details>
       </v-card-text>
     </v-card>
