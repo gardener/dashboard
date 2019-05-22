@@ -113,7 +113,6 @@ import find from 'lodash/find'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
-import assignWith from 'lodash/assignWith'
 import isUndefined from 'lodash/isUndefined'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
@@ -213,13 +212,6 @@ export default {
       set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
 
       const workers = this.$refs.manageWorkers.getWorkers()
-      const oldWorkers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
-      forEach(workers, worker => {
-        const oldWorker = find(oldWorkers, { name: worker.name })
-        assignWith(worker, oldWorker, (objValue, srcValue) => {
-          return isUndefined(objValue) ? srcValue : objValue
-        })
-      })
       set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
 
       const addons = this.$refs.addons.getAddons()
