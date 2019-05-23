@@ -119,7 +119,7 @@ limitations under the License.
         </v-flex>
       </v-layout>
     </template>
-    <secret-dialog-wrapper :dialogState="addSecretDialogState"></secret-dialog-wrapper>
+    <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
   </div>
 </template>
 
@@ -137,6 +137,9 @@ import concat from 'lodash/concat'
 import find from 'lodash/find'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
+import cloneDeep from 'lodash/cloneDeep'
+import differenceWith from 'lodash/differenceWith'
+import isEqual from 'lodash/isEqual'
 import { mapGetters, mapState } from 'vuex'
 
 const validationErrors = {
@@ -226,7 +229,8 @@ export default {
           visible: false,
           help: false
         }
-      }
+      },
+      secretItemsBeforeAdd: undefined
     }
   },
   validations,
@@ -351,7 +355,7 @@ export default {
         this.$v.secret.$touch()
         this.userInterActionBus.emit('updateSecret', this.secret)
         this.validateInput()
-      }9
+      }
     },
     onInputRegion () {
       this.$v.secret.$touch()
@@ -414,7 +418,14 @@ export default {
       return (item && item.value === 'ADD_NEW_SECRET') || item === 'ADD_NEW_SECRET'
     },
     onAddSecret () {
+      this.secretItemsBeforeAdd = cloneDeep(this.secretItems)
       this.addSecretDialogState[this.infrastructureKind].visible = true
+    },
+    onSecretDialogClosed (infrastructureKind) {
+      const newSecret = head(differenceWith(this.secretItems, this.secretItemsBeforeAdd, isEqual))
+      if (newSecret) {
+        this.secret = newSecret
+      }
     }
   },
   mounted () {

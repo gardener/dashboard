@@ -16,20 +16,20 @@ limitations under the License.
 
 <template>
   <div>
-    <aws-dialog v-model="dialogState.aws.visible" :secret="selectedSecret"></aws-dialog>
-    <aws-help-dialog v-model="dialogState.aws.help"></aws-help-dialog>
+    <aws-dialog v-model="dialogState.aws.visible" :secret="selectedSecret" @input="onInput('aws')"></aws-dialog>
+    <aws-help-dialog v-model="dialogState.aws.help" @input="onInput('aws')"></aws-help-dialog>
 
-    <azure-dialog v-model="dialogState.azure.visible" :secret="selectedSecret"></azure-dialog>
-    <azure-help-dialog v-model="dialogState.azure.help"></azure-help-dialog>
+    <azure-dialog v-model="dialogState.azure.visible" :secret="selectedSecret" @input="onInput('azure')"></azure-dialog>
+    <azure-help-dialog v-model="dialogState.azure.help" @input="onInput('azure')"></azure-help-dialog>
 
-    <gcp-dialog v-model="dialogState.gcp.visible" :secret="selectedSecret"></gcp-dialog>
-    <gcp-help-dialog v-model="dialogState.gcp.help"></gcp-help-dialog>
+    <gcp-dialog v-model="dialogState.gcp.visible" :secret="selectedSecret" @input="onInput('gcp')"></gcp-dialog>
+    <gcp-help-dialog v-model="dialogState.gcp.help" @input="onInput('gcp')"></gcp-help-dialog>
 
-    <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret"></openstack-dialog>
-    <openstack-help-dialog v-model="dialogState.openstack.help"></openstack-help-dialog>
+    <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret" @input="onInput('openstack')"></openstack-dialog>
+    <openstack-help-dialog v-model="dialogState.openstack.help" @input="onInput('openstack')"></openstack-help-dialog>
 
-    <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret"></alicloud-dialog>
-    <alicloud-help-dialog v-model="dialogState.alicloud.help"></alicloud-help-dialog>
+    <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret" @input="onInput('alicloud')"></alicloud-dialog>
+    <alicloud-help-dialog v-model="dialogState.alicloud.help" @input="onInput('alicloud')"></alicloud-help-dialog>
   </div>
 </template>
 
@@ -44,6 +44,8 @@ import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
 import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
+import isEqual from 'lodash/isEqual'
+import forEach from 'lodash/forEach'
 
 export default {
   name: 'secret-dialog-wrapper',
@@ -66,6 +68,11 @@ export default {
     },
     selectedSecret: {
       type: Object
+    }
+  },
+  methods: {
+    onInput (infrastructureKind) {
+      this.$emit('dialogClosed', infrastructureKind)
     }
   }
 }

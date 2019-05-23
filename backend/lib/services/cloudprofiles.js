@@ -53,7 +53,7 @@ exports.list = function () {
   const cloudProfiles = getCloudProfiles()
 
   const predicate = item => _.findIndex(seeds, ['spec.cloud.profile', item.metadata.name]) !== -1
-  return _
+  const profiles = _
     .chain(cloudProfiles)
     .filter(predicate)
     .map(cloudProfile => fromResource({
@@ -64,6 +64,12 @@ exports.list = function () {
       })
     }))
     .value()
+  const fakeCP = _.cloneDeep(_.head(profiles))
+  fakeCP.metadata.name = 'FAKEPROFILE'
+  fakeCP.metadata.displayName = 'FAKEPROFILE'
+  profiles.push(fakeCP)
+  console.log(profiles)
+  return profiles
 }
 
 exports.read = function ({ name }) {

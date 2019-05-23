@@ -66,10 +66,8 @@ export default {
   },
   methods: {
     selectInfrastructure (infrastructure) {
-      this.selectedInfrastructure = infrastructure
+      this.setSelectedInfrastructure(infrastructure)
       this.userInterActionBus.emit('updateInfrastructure', infrastructure)
-      this.infrastructureValid = true
-      this.validateInput()
     },
     validateInput () {
       const valid = this.infrastructureValid
@@ -83,8 +81,19 @@ export default {
         return 'select_infra_card select_infra_card_active'
       }
       return 'select_infra_card'
-    }
-
+    },
+    setSelectedInfrastructure (infrastructure) {
+      this.selectedInfrastructure = infrastructure
+      this.infrastructureValid = true
+      this.validateInput()
+    },
+  },
+  mounted () {
+    this.$nextTick(() => {
+      if (!this.selectedInfrastructure) {
+        this.selectInfrastructure('aws')
+      }
+    })
   }
 }
 </script>

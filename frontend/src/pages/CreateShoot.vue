@@ -22,6 +22,7 @@ limitations under the License.
       </v-card-title>
       <v-card-text>
         <create-shoot-select-infrastructure
+          ref="infrastructure"
           :userInterActionBus="userInterActionBus"
           @valid="onInfrastructureValid"
           ></create-shoot-select-infrastructure>
@@ -264,6 +265,8 @@ export default {
       const shootResource = this.getCreateShootResource
 
       const infrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
+      this.$refs.infrastructure.setSelectedInfrastructure(infrastructureKind)
+
       const cloudProfileName = get(shootResource, 'spec.cloud.profile')
       const region = get(shootResource, 'spec.cloud.region')
       const secretBindingName = get(shootResource, 'spec.cloud.secretBindingRef.name')
