@@ -168,8 +168,16 @@ export default {
     },
     onWorkerValid ({ valid, id }) {
       const worker = find(this.internalWorkers, { id })
+      const wasValid = worker.valid
       worker.valid = valid
-
+      if (valid !== wasValid) {
+        // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
+        // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
+        // on component which did not report valid = false in the first place
+        forEach(this.$refs.workerInput, workerInput => {
+          workerInput.validateInput()
+        })
+      }
       this.validateInput()
     },
     getWorkers () {

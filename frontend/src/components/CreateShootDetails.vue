@@ -192,6 +192,8 @@ export default {
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.purpose = purpose
+
+      this.validateInput()
     }
   },
   mounted () {

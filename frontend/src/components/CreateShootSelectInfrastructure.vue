@@ -91,6 +91,7 @@ export default {
   mounted () {
     this.$nextTick(() => {
       if (!this.selectedInfrastructure) {
+        // TODO: introduce default infrastructure / secret settings (as annotation on project resource)
         this.selectInfrastructure('aws')
       }
     })
