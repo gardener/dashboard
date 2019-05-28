@@ -60,30 +60,6 @@ async function assignComponentSecret (core, namespace, component, data) {
   }
 }
 
-function isReserved (key) {
-  return /garden\.sapcloud\.io\//.test(key)
-}
-
-function isReservedException (key) {
-  return _.includes([
-    'shoot.garden.sapcloud.io/ignore',
-    'garden.sapcloud.io/purpose',
-    'shoot.garden.sapcloud.io/operation'
-  ], key)
-}
-
-function isReservedAnnotation (value, key) {
-  return isReserved(key) && !isReservedException(key)
-}
-
-const isUnreservedAnnotation = _.negate(isReservedAnnotation)
-
-function isReservedLabel (value, key) {
-  return isReserved(key)
-}
-
-const isUnreservedLabel = _.negate(isReservedLabel)
-
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   let qs
   if (shootsWithIssuesOnly) {
