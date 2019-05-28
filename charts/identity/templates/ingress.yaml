@@ -16,7 +16,7 @@ metadata:
 {{- $pathname := regexReplaceAll "https://[^/]*(?:/(.+))?" $.Values.issuerUrl "/${1}" }}
 spec:
   tls:
-    - secretName: identity-tls
+    - secretName: {{ .Values.tlsSecretName | default "identity-tls" }}
       hosts:
         - {{ $hostname }}
   rules:
