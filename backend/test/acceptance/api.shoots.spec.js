@@ -172,7 +172,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const expPurpose = metadata.annotations['garden.sapcloud.io/purpose']
     expect(actPurpose).to.equal(expPurpose)
     const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/createdBy']
-    const expCreatedBy = 'bar@example.org'
+    const expCreatedBy = 'baz@example.org'
     expect(actCreatedBy).to.equal(expCreatedBy)
   })
 
