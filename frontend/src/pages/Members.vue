@@ -280,13 +280,13 @@ export default {
     },
     allEmails () {
       const emails = []
-      forEach(this.memberList, ({username}) => {
+      forEach(this.memberList, ({ username }) => {
         if (!isEmail(username)) {
           return false
         }
         emails.push(username)
       })
-      return join(emails, ";")
+      return join(emails, ';')
     },
     sortedAndFilteredServiceAccountList () {
       const predicate = ({ username }) => {
