@@ -61,6 +61,9 @@ limitations under the License.
           v-model="userFilter"
           @keyup.esc="userFilter=''"
         ></v-text-field>
+        <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
+          <v-icon class="white--text">mdi-email-outline</v-icon>
+        </v-btn>
         <v-btn icon @click.native.stop="openMemberAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
@@ -200,6 +203,8 @@ import sortBy from 'lodash/sortBy'
 import find from 'lodash/find'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
+import forEach from 'lodash/forEach'
+import join from 'lodash/join'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
@@ -272,6 +277,16 @@ export default {
         return includes(toLower(name), toLower(this.userFilter))
       }
       return sortBy(filter(this.memberListWithoutOwner, predicate))
+    },
+    allEmails () {
+      const emails = []
+      forEach(this.memberList, ({username}) => {
+        if (!isEmail(username)) {
+          return false
+        }
+        emails.push(username)
+      })
+      return join(emails, ";")
     },
     sortedAndFilteredServiceAccountList () {
       const predicate = ({ username }) => {
