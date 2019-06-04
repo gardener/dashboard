@@ -239,6 +239,9 @@ export default {
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
         }
+        if (this.isCreateMode) {
+          return
+        }
 
         const paths = ['spec', 'metadata.labels', 'metadata.annotations']
         const data = pick(jsyaml.safeLoad(this.getContent()), paths)
