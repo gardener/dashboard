@@ -23,9 +23,7 @@ limitations under the License.
   <div slot="content-before" class="message">
     To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
     Please navigate to the cluster details page to
-    <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">
-      configure
-    </router-link>
+    <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
     a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
   </div>
     <v-tooltip top slot="popperRef">
