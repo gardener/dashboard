@@ -28,18 +28,6 @@ limitations under the License.
           ></create-shoot-select-infrastructure>
       </v-card-text>
     </v-card>
-    <v-card flat>
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Infrastructure Details
-      </v-card-title>
-      <v-card-text>
-        <create-shoot-infrastructure-details
-          ref="infrastructureDetails"
-          :userInterActionBus="userInterActionBus"
-          @valid="onInfrastructureDetailsValid"
-          ></create-shoot-infrastructure-details>
-      </v-card-text>
-    </v-card>
     <v-card flat class="mt-3">
       <v-card-title class="subheading white--text cyan darken-2 cardTitle">
         Cluster Details
@@ -50,6 +38,18 @@ limitations under the License.
           :userInterActionBus="userInterActionBus"
           @valid="onDetailsValid"
           ></create-shoot-details>
+      </v-card-text>
+    </v-card>
+    <v-card flat class="mt-3">
+      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        Infrastructure Details
+      </v-card-title>
+      <v-card-text>
+        <create-shoot-infrastructure-details
+          ref="infrastructureDetails"
+          :userInterActionBus="userInterActionBus"
+          @valid="onInfrastructureDetailsValid"
+          ></create-shoot-infrastructure-details>
       </v-card-text>
     </v-card>
     <v-card flat class="mt-3">

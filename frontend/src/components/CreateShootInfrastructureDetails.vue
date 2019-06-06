@@ -28,9 +28,7 @@ limitations under the License.
           color="cyan darken-2">
         </cloud-profile>
       </v-flex>
-      <v-flex xs1 v-show="cloudProfiles.length > 1">
-      </v-flex>
-      <v-flex xs3>
+      <v-flex xs3 :offset-xs1="cloudProfiles.length > 1">
         <v-select
           color="cyan darken-2"
           label="Secret"
@@ -75,9 +73,7 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex xs1>
-      </v-flex>
-      <v-flex xs3 v-if="infrastructureKind !== 'azure'">
+      <v-flex xs3 offset-xs1 v-if="infrastructureKind !== 'azure'">
         <v-select
           color="cyan darken-2"
           label="Zone"
@@ -103,9 +99,7 @@ limitations under the License.
           @blur="$v.floatingPoolName.$touch()"
           ></v-select>
         </v-flex>
-        <v-flex xs1>
-        </v-flex>
-        <v-flex xs3>
+        <v-flex xs3 offset-xs1>
           <v-select
           color="cyan darken-2"
           label="Load Balancer Providers"

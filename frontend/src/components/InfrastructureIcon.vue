@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <span>
-    <img v-if="iconSrc" :src="iconSrc" :width="width" :class="contentClass" style="vertical-align:middle">
+    <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
     <v-icon v-else :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
   </span>
 </template>
@@ -30,8 +30,10 @@ export default {
       required: true
     },
     width: {
-      type: Number,
-      default: 20
+      type: Number
+    },
+    height: {
+      type: Number
     },
     contentClass: {
       type: String,
@@ -69,6 +71,15 @@ export default {
           return require('@/assets/china-telecom.svg')
       }
       return undefined
+    },
+    getHeight () {
+      return this.height
+    },
+    getWidth () {
+      if (!this.width && !this.height) {
+        return 20
+      }
+      return this.width
     }
   }
 }

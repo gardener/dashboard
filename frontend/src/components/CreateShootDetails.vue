@@ -28,9 +28,7 @@ limitations under the License.
         @blur="$v.name.$touch()"
         ></v-text-field>
     </v-flex>
-    <v-flex xs1>
-    </v-flex>
-    <v-flex xs3>
+    <v-flex xs3 offset-xs1>
       <v-select
         color="cyan darken-2"
         label="Kubernetes Version"
@@ -41,9 +39,7 @@ limitations under the License.
         @blur="$v.kubernetesVersion.$touch()"
         ></v-select>
     </v-flex>
-    <v-flex xs1>
-    </v-flex>
-    <v-flex xs3>
+    <v-flex xs3 offset-xs1>
       <v-select
         color="cyan darken-2"
         label="Purpose"
