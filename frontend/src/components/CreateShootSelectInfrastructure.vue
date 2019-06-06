@@ -86,7 +86,7 @@ export default {
       this.selectedInfrastructure = infrastructure
       this.infrastructureValid = true
       this.validateInput()
-    },
+    }
   },
   mounted () {
     this.$nextTick(() => {

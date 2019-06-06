@@ -44,8 +44,6 @@ import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
 import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
-import isEqual from 'lodash/isEqual'
-import forEach from 'lodash/forEach'
 
 export default {
   name: 'secret-dialog-wrapper',
