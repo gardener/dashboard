@@ -130,10 +130,6 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :item="selectedItem"></cluster-access>
         </v-card>
       </v-dialog>
-
-      <template v-if="renderCreateDialog">
-        <create-shoot-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-shoot-dialog>
-      </template>
     </v-card>
     <v-fab-transition>
       <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'CreateShoot', params: {  namespace: $route.params.namespace } }">
@@ -182,8 +178,7 @@ export default {
       tableMenu: false,
       pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
       cachedItems: null,
-      clearSelectedShootTimerID: undefined,
-      renderCreateDialog: false
+      clearSelectedShootTimerID: undefined
     }
   },
   watch: {
@@ -216,12 +211,6 @@ export default {
           } catch (error) {
             // Currently not handled
           }
-          break
-        case 'create':
-          this.renderCreateDialog = true
-          this.$nextTick(() => {
-            this.dialog = args.action
-          })
       }
     },
     hideDialog () {
@@ -303,16 +292,6 @@ export default {
       'shootsLoading',
       'onlyShootsWithIssues'
     ]),
-    createDialog: {
-      get () {
-        return this.dialog === 'create'
-      },
-      set (value) {
-        if (!value) {
-          this.hideDialog()
-        }
-      }
-    },
     clusterAccessDialog: {
       get () {
         return this.dialog === 'access'
@@ -439,11 +418,6 @@ export default {
     this.cachedItems = this.mappedItems.slice(0)
     this.search = null
     next()
-  },
-  created () {
-    this.$bus.$on('esc-pressed', () => {
-      this.hideDialog()
-    })
   }
 }
 </script>
