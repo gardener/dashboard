@@ -72,6 +72,7 @@ limitations under the License.
                 v-model="projectFilter"
                 ref="projectFilter"
                 @keyup.esc="projectFilter = ''"
+                @keyup.enter="onProjectFilterSubmit()"
                 autofocus
               >
               </v-text-field>
@@ -157,6 +158,7 @@ import includes from 'lodash/includes'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
+import head from 'lodash/head'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -262,6 +264,16 @@ export default {
     onProjectSelect (project) {
       this.projectMenu = false
       this.project = project
+    },
+    onProjectFilterSubmit () {
+      this.$nextTick(() => { // give events time to react (if v-list tile is active)
+        if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
+          const project = head(this.sortedAndFilteredProjectList)
+          if (project) {
+            this.onProjectSelect(project)
+          }
+        }
+      })
     },
     openProjectDialog () {
       this.projectMenu = false

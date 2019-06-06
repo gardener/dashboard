@@ -150,6 +150,11 @@ export default {
     isReconciliationDeactivated () {
       return isReconciliationDeactivated(get(this.item, 'metadata'))
     }
+  },
+  methods: {
+    showHibernationConfigurationDialog () {
+      this.$refs.hibernationConfiguration.showDialog()
+    }
   }
 }
 </script>
