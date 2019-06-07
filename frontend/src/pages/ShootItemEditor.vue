@@ -92,6 +92,10 @@ limitations under the License.
             <span v-else>Cluster resource can be saved<br>without any conflicts</span>
           </v-tooltip>
         </v-flex>
+        <v-flex v-if="isCreateMode" d-flex fill-height align-center class="divider-left">
+          <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
+          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
+        </v-flex>
       </v-layout>
     </v-flex>
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
@@ -114,9 +118,10 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 import { getProjectName } from '@/utils'
+import { errorDetailsFromError } from '@/utils/error'
 import download from 'downloadjs'
 
 // codemirror
@@ -179,6 +184,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'namespace'
+    ]),
     ...mapGetters([
       'shootByNamespaceAndName',
       'getCreateShootResource'
@@ -217,7 +225,9 @@ export default {
   },
   methods: {
     ...mapActions([
-      'setCreateShootResource'
+      'setCreateShootResource',
+      'createShoot',
+      'resetCreateShootResource'
     ]),
     getQualifiedName () {
       const { name, namespace } = get(this, 'value.metadata')
@@ -432,6 +442,33 @@ export default {
       this.snackbarColor = 'error'
       this.snackbarText = 'Copy to clipboard failed'
       this.snackbar = true
+    },
+    async createClicked () {
+      const shootResource = jsyaml.safeLoad(this.getContent())
+
+      try {
+        await this.createShoot(shootResource)
+        this.$router.push({
+          name: 'ShootItem',
+          params: {
+            namespace: this.namespace,
+            name: shootResource.metadata.name
+          }
+        })
+      } catch (err) {
+        const errorDetails = errorDetailsFromError(err)
+        this.errorMessage = `Failed to create cluster.`
+        this.detailedErrorMessage = errorDetails.detailedMessage
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
+    },
+    cancelClicked () {
+      this.$router.push({
+        name: 'ShootList',
+        params: {
+          namespace: this.namespace
+        }
+      })
     }
   },
   mounted () {
@@ -461,15 +498,19 @@ export default {
   },
   async beforeRouteLeave (to, from, next) {
     if (this.isCreateMode) {
-      try {
-        const data = await jsyaml.safeLoad(this.getContent())
-        this.setCreateShootResource(data)
-        return next()
-      } catch (err) {
-        this.alert = true
-        this.alertType = 'error'
-        this.alertMessage = get(err, 'response.data.message', err.message)
-        return next(false)
+      if (to.name === 'CreateShoot') {
+        try {
+          const data = await jsyaml.safeLoad(this.getContent())
+          this.setCreateShootResource(data)
+          return next()
+        } catch (err) {
+          this.alert = true
+          this.alertType = 'error'
+          this.alertMessage = get(err, 'response.data.message', err.message)
+          return next(false)
+        }
+      } else {
+        this.resetCreateShootResource()
       }
     }
     if (this.clean) {

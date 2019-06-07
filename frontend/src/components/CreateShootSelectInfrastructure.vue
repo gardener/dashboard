@@ -26,7 +26,7 @@ limitations under the License.
         >
         <v-layout align-center justify-center fill-height column>
           <v-flex grow>
-            <infra-icon :value="infrastructureKind" height="60"></infra-icon>
+            <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
           </v-flex>
           <v-flex shrink mt-2>
             <span class="subheading">{{infrastructureKind}}</span>
@@ -43,7 +43,7 @@ import intersection from 'lodash/intersection'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'create-shoot-infrastructure',
+  name: 'create-shoot-select-infrastructure',
   components: {
     InfraIcon
   },
@@ -110,6 +110,7 @@ export default {
     opacity: 0.8;
     cursor: pointer;
     margin: 10px 20px 10px;
+    min-width: 120px;
   }
 
   .select_infra_card:hover {
