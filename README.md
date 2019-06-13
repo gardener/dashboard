@@ -41,7 +41,7 @@ port: 3030
 logLevel: debug
 logFormat: text
 apiServerUrl: https://minkube    # garden cluster kube-apiserver url
-sessionSecret: c2VjcmV0                 # symetric key used for encryption
+sessionSecret: c2VjcmV0          # symetric key used for encryption
 cookieMaxAge: 1800
 oidc:
   issuer: https://minikube:32001
