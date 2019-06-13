@@ -259,7 +259,7 @@ exports.info = async function ({ user, namespace, name }) {
 
         await Promise.all([
           assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data),
+          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
         ])
       }
     }
