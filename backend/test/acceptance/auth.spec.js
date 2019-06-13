@@ -159,7 +159,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const tokenPayload = security.decode(token)
     expect(tokenPayload.jti).to.match(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     expect(cookieHeaderPayload.sameSite).to.equal('Lax')
-    expect(cookieHeaderPayload.maxAge).to.equal(1800)
+    expect(cookieHeaderPayload.httpOnly).to.be.undefined
     expect(cookieSignature.sameSite).to.equal('Lax')
     expect(cookieSignature.httpOnly).to.equal(true)
     expect(cookieToken.sameSite).to.equal('Lax')

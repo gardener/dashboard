@@ -29,7 +29,7 @@ const pTimeout = require('p-timeout')
 const { authentication } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
 const logger = require('./logger')
-const { sessionSecret, cookieMaxAge = 1800, oidc = {} } = require('./config')
+const { sessionSecret, oidc = {} } = require('./config')
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -41,7 +41,8 @@ const {
   client_id: clientId,
   client_secret: clientSecret,
   rejectUnauthorized = true,
-  ca
+  ca,
+  clockTolerance = 15
 } = oidc
 const httpOptions = {
   followRedirect: false,
@@ -71,7 +72,7 @@ let clientPromise
 
 function overrideHttpOptions () {
   this[custom.http_options] = options => Object.assign({}, options, httpOptions)
-  this[custom.clock_tolerance] = 15
+  this[custom.clock_tolerance] = clockTolerance
 }
 overrideHttpOptions.call(Issuer)
 
@@ -152,16 +153,16 @@ async function authorizeToken (req, res) {
   const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
-    maxAge: cookieMaxAge * 1000,
+    expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = await encrypt(bearer)
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
   })
+  const encryptedBearer = await encrypt(bearer)
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
@@ -239,20 +240,11 @@ function authenticate () {
       user.auth = { bearer }
     }
   }
-  const renewCookie = (req, res) => {
-    const value = req.cookies[COOKIE_HEADER_PAYLOAD]
-    res.cookie(COOKIE_HEADER_PAYLOAD, value, {
-      secure,
-      maxAge: cookieMaxAge * 1000,
-      sameSite: 'Lax'
-    })
-  }
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
       await verifyToken(req, res)
       await setUserAuth(req, res)
-      renewCookie(req, res)
       next()
     } catch (err) {
       clearCookies(res)
