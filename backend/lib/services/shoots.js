@@ -42,8 +42,8 @@ function getSecret (core, namespace, name) {
     })
 }
 
-async function assignComponentSecret (core, namespace, component, data) {
-  const secret = await getSecret(core, namespace, `${component}-ingress-credentials`)
+async function assignComponentSecret (core, namespace, component, secretName, data) {
+  const secret = await getSecret(core, namespace, secretName)
   if (secret) {
     _
       .chain(secret)
@@ -216,6 +216,13 @@ exports.info = async function ({ user, namespace, name }) {
   const namespaces = core.namespaces
   const project = await getProjectByNamespace(projects, namespaces, namespace)
   const projectName = project.metadata.name
+
+  const monitoringComponent = 'monitoring'
+  const loggingComponent = 'logging'
+  const monitoringIngressSecretName = 'monitoring-ingress-credentials'
+  const loggingIngressUserSecretName = name + '.logging'
+  const loggingIngressAdminSecretName = 'logging-ingress-credentials'
+
   const data = {
     seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
   }
@@ -251,11 +258,13 @@ exports.info = async function ({ user, namespace, name }) {
         const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
 
         await Promise.all([
-          assignComponentSecret(core, seedShootNS, 'monitoring', data),
-          assignComponentSecret(core, seedShootNS, 'logging', data)
+          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
+          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data),
         ])
       }
     }
+  } else {
+    await assignComponentSecret(core, namespace, loggingComponent, loggingIngressUserSecretName, data)
   }
 
   return data
