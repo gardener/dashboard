@@ -153,7 +153,7 @@ const actions = {
 
         if (info.seedShootIngressDomain) {
           const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
-          const grafanaHost = `g.${info.seedShootIngressDomain}`
+          const grafanaHost = `g-operators.${info.seedShootIngressDomain}`
           info.grafanaUrl = `https://${grafanaHost}${grafanaPathname}`
           info.grafanaUrlText = `https://${grafanaHost}`
 
