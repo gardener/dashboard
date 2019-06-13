@@ -19,7 +19,7 @@
 const { split, join, noop, trim, isPlainObject } = require('lodash')
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
-const { Issuer } = require('openid-client')
+const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
 const { JWK, JWE } = require('node-jose')
 const uuidv1 = require('uuid/v1')
@@ -43,11 +43,13 @@ const {
   rejectUnauthorized = true,
   ca
 } = oidc
-const defaultHttpOptions = { rejectUnauthorized }
-if (ca) {
-  defaultHttpOptions.ca = ca
+const httpOptions = {
+  followRedirect: false,
+  rejectUnauthorized
 }
-Issuer.defaultHttpOptions = defaultHttpOptions
+if (ca) {
+  httpOptions.ca = ca
+}
 
 const secure = /^https:/.test(redirectUri)
 if (!secure && process.env.NODE_ENV === 'production') {
@@ -67,6 +69,12 @@ const symetricKeyPromise = JWK.asKey({
 
 let clientPromise
 
+function overrideHttpOptions () {
+  this[custom.http_options] = options => Object.assign({}, options, httpOptions)
+  this[custom.clock_tolerance] = 15
+}
+overrideHttpOptions.call(Issuer)
+
 function discoverIssuer (url) {
   return Issuer.discover(url)
 }
@@ -78,7 +86,7 @@ function discoverClient () {
       client_id: clientId,
       client_secret: clientSecret
     })
-    client.CLOCK_TOLERANCE = 15
+    overrideHttpOptions.call(client)
     return client
   }, {
     forever: true,
@@ -166,12 +174,14 @@ async function authorizeToken (req, res) {
 async function authorizationCallback (req, res) {
   const client = await exports.getIssuerClient()
   const { code, state } = req.query
+  const parameters = { code }
+  const checks = {
+    response_type: 'code'
+  }
   const {
     id_token: token,
     expires_in: expiresIn
-  } = await client.authorizationCallback(redirectUri, { code }, {
-    response_type: 'code'
-  })
+  } = await client.callback(redirectUri, parameters, checks)
   req.body = { token, expiresIn }
   await authorizeToken(req, res)
   return decodeState(state)

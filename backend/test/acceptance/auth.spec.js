@@ -46,7 +46,7 @@ class Client {
     params.append('response_type', 'code')
     return url.toString()
   }
-  async authorizationCallback (redirectUri, { code }, { response_type: responseType }) {
+  async callback (redirectUri, { code }, { response_type: responseType }) {
     expect(code).to.equal(OTAC)
     expect(responseType).to.equal('code')
     const bearer = await this.user.bearer
