@@ -311,6 +311,15 @@ export default function createRouter ({ store, userManager }) {
         query
       })
     } catch (err) {
+      const { response: { status, data = {} } = {} } = err
+      if (status === 401) {
+        userManager.removeUser()
+        const hash = data.message ? `#error=${encodeURIComponent(data.message)}` : undefined
+        return next({
+          name: 'Login',
+          hash
+        })
+      }
       next(err)
     }
   }
