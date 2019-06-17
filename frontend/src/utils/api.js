@@ -152,6 +152,24 @@ export function deleteMember ({ namespace, name }) {
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
+/* Viewers */
+
+export function getViewers ({ namespace }) {
+  return getResource(`/api/namespaces/${namespace}/viewers`)
+}
+
+export function addViewer ({ namespace, data }) {
+  return createResource(`/api/namespaces/${namespace}/viewers`, data)
+}
+
+export function getViewer ({ namespace, name }) {
+  return getResource(`/api/namespaces/${namespace}/viewers/${name}`)
+}
+
+export function deleteViewer ({ namespace, name }) {
+  return deleteResource(`/api/namespaces/${namespace}/viewers/${name}`)
+}
+
 /* User */
 export function createTokenReview (data) {
   return createResource('/auth', data)

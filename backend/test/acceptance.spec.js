@@ -64,6 +64,10 @@ describe('acceptance', function () {
       require('./acceptance/api.members.spec.js')(context)
     })
 
+    describe('viewers', function () {
+      require('./acceptance/api.viewers.spec.js')(context)
+    })
+
     describe('projects', function () {
       require('./acceptance/api.projects.spec.js')(context)
     })

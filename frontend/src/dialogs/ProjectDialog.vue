@@ -181,7 +181,8 @@ export default {
   computed: {
     ...mapGetters([
       'projectList',
-      'memberList'
+      'memberList',
+      'viewerList'
     ]),
     visible: {
       get () {

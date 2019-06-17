@@ -28,15 +28,15 @@ const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function Core ({ auth }) {
+function Core({ auth }) {
   return kubernetes.core({ auth })
 }
 
-function Garden ({ auth }) {
+function Garden({ auth }) {
   return kubernetes.garden({ auth })
 }
 
-function fromResource ({ metadata, spec = {} }) {
+function fromResource({ metadata, spec = {} }) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
@@ -57,7 +57,7 @@ function fromResource ({ metadata, spec = {} }) {
   }
 }
 
-function toResource ({ metadata, data = {} }) {
+function toResource({ metadata, data = {} }) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion } = metadata
   const { createdBy, owner } = data
@@ -82,11 +82,11 @@ function toResource ({ metadata, data = {} }) {
   }
 }
 
-function fromSubject ({ name } = {}) {
+function fromSubject({ name } = {}) {
   return name
 }
 
-function toSubject (username) {
+function toSubject(username) {
   if (username) {
     return {
       apiGroup: 'rbac.authorization.k8s.io',
@@ -96,7 +96,7 @@ function toSubject (username) {
   }
 }
 
-async function validateDeletePreconditions ({ user, namespace }) {
+async function validateDeletePreconditions({ user, namespace }) {
   const shootList = await shoots.list({ user, namespace })
   if (!_.isEmpty(shootList.items)) {
     throw new PreconditionFailed(`Only empty projects can be deleted`)
@@ -122,6 +122,16 @@ exports.list = async function ({ user, qs = {} }) {
     .gte(0)
     .value()
 
+  const isViewerOf = project => _
+    .chain(project)
+    .get('spec.viewers')
+    .findIndex({
+      kind: 'User',
+      name: user.id
+    })
+    .gte(0)
+    .value()
+
   const phases = _
     .chain(qs)
     .get('phase', 'Ready')
@@ -132,7 +142,7 @@ exports.list = async function ({ user, qs = {} }) {
     .chain(projects)
     .get('items')
     .filter(project => {
-      if (!isAdmin && !isMemberOf(project)) {
+      if (!isAdmin && !isMemberOf(project) && !isViewerOf(project)) {
         return false
       }
       if (!_.isEmpty(phases)) {
@@ -145,11 +155,11 @@ exports.list = async function ({ user, qs = {} }) {
     .value()
 }
 
-function isProjectReady ({ status: { phase } = {} } = {}) {
+function isProjectReady({ status: { phase } = {} } = {}) {
   return phase === 'Ready'
 }
 
-function waitUntilProjectIsReady (name) {
+function waitUntilProjectIsReady(name) {
   const reconnector = exports.watchProject(name)
   const projectInitializationTimeout = exports.projectInitializationTimeout
 
@@ -159,7 +169,7 @@ function waitUntilProjectIsReady (name) {
       done(new GatewayTimeout(`Project could not be initialized within ${duration}`))
     }, projectInitializationTimeout)
 
-    function done (err, project) {
+    function done(err, project) {
       clearTimeout(timeoutId)
 
       reconnector.removeListener('event', onEvent)
@@ -174,7 +184,7 @@ function waitUntilProjectIsReady (name) {
       resolve(project)
     }
 
-    function onEvent (event) {
+    function onEvent(event) {
       switch (event.type) {
         case 'ADDED':
         case 'MODIFIED':
@@ -188,11 +198,11 @@ function waitUntilProjectIsReady (name) {
       }
     }
 
-    function onError (err) {
+    function onError(err) {
       logger.error(`Error watching project "%s": %s`, name, err.message)
     }
 
-    function onDisconnect (err) {
+    function onDisconnect(err) {
       done(err || new InternalServerError(`Watch for project "${name}" has been disconnected`))
     }
 

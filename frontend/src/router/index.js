@@ -35,6 +35,7 @@ const ShootItemCards = () => import('@/pages/ShootItemCards')
 const ShootItemEditor = () => import('@/pages/ShootItemEditor')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
+const Viewers = () => import('@/pages/Viewers')
 const Account = () => import('@/pages/Account')
 const Administration = () => import('@/pages/Administration')
 
@@ -256,6 +257,21 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
+          path: 'namespace/:namespace/viewers',
+          name: 'Viewers',
+          component: Viewers,
+          meta: {
+            namespaced: true,
+            projectScope: true,
+            title: 'Viewers',
+            menu: {
+              title: 'Viewers',
+              icon: 'mdi-account-multiple-outline'
+            },
+            breadcrumbTextFn: routeTitle
+          }
+        },
+        {
           path: 'namespace/:namespace/administration',
           name: 'Administration',
           component: Administration,
@@ -414,6 +430,13 @@ export default function createRouter ({ store, userManager }) {
             return Promise
               .all([
                 store.dispatch('fetchMembers'),
+                store.dispatch('subscribeShoots')
+              ])
+              .then(() => undefined)
+          case 'Viewers':
+            return Promise
+              .all([
+                store.dispatch('fetchViewers'),
                 store.dispatch('subscribeShoots')
               ])
               .then(() => undefined)

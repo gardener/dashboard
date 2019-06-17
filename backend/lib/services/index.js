@@ -21,6 +21,7 @@ module.exports = {
   shoots: require('./shoots'),
   infrastructureSecrets: require('./infrastructureSecrets'),
   members: require('./members'),
+  viewers: require('./viewers'),
   authorization: require('./authorization'),
   authentication: require('./authentication'),
   journals: require('./journals'),

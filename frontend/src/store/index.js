@@ -37,6 +37,7 @@ import cloudProfiles from './modules/cloudProfiles'
 import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
+import viewers from './modules/viewers'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 
@@ -121,6 +122,9 @@ const getters = {
   },
   memberList (state, getters) {
     return state.members.all
+  },
+  viewerList (state, getters) {
+    return state.viewers.all
   },
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
@@ -303,6 +307,12 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  fetchViewers ({ dispatch, commit }) {
+    return dispatch('viewers/getAll')
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
   fetchInfrastructureSecrets ({ dispatch, commit }) {
     return dispatch('infrastructureSecrets/getAll')
       .catch(err => {
@@ -464,6 +474,23 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
+  addViewer ({ dispatch, commit }, name) {
+    return dispatch('viewers/add', name)
+      .then(res => {
+        dispatch('setAlert', { message: 'Viewer added', type: 'success' })
+        return res
+      })
+  },
+  deleteViewer ({ dispatch, commit }, name) {
+    return dispatch('viewers/delete', name)
+      .then(res => {
+        dispatch('setAlert', { message: 'Viewer deleted', type: 'success' })
+        return res
+      })
+      .catch(err => {
+        dispatch('setError', { message: `Delete viewer failed. ${err.message}` })
+      })
+  },
   setConfiguration ({ commit }, value) {
     commit('SET_CONFIGURATION', value)
 
@@ -592,6 +619,7 @@ const store = new Vuex.Store({
   modules: {
     projects,
     members,
+    viewers,
     cloudProfiles,
     domains,
     shoots,

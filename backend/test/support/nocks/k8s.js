@@ -52,6 +52,10 @@ const projectList = [
       'bar@example.org',
       'system:serviceaccount:garden-foo:robot'
     ],
+    viewers: [
+      'barv@example.org',
+      'system:serviceaccount:garden-foo:robotv'
+    ],
     description: 'foo-description',
     purpose: 'foo-purpose'
   }),
@@ -62,6 +66,10 @@ const projectList = [
     members: [
       'foo@example.org',
       'system:serviceaccount:garden-bar:robot'
+    ],
+    viewers: [
+      'foov@example.org',
+      'system:serviceaccount:garden-bar:robotv'
     ],
     description: 'bar-description',
     purpose: 'bar-purpose'
@@ -118,12 +126,16 @@ const infrastructureSecretList = [
 
 const serviceAccountList = [
   getServiceAccount('garden-foo', 'robot'),
-  getServiceAccount('garden-bar', 'robot')
+  getServiceAccount('garden-foo', 'robotv'),
+  getServiceAccount('garden-bar', 'robot'),
+  getServiceAccount('garden-bar', 'robotv')
 ]
 
 const serviceAccountSecretList = [
   getServiceAccountSecret('garden-foo', 'robot'),
-  getServiceAccountSecret('garden-bar', 'robot')
+  getServiceAccountSecret('garden-foo', 'robotv'),
+  getServiceAccountSecret('garden-bar', 'robot'),
+  getServiceAccountSecret('garden-bar', 'robotv')
 ]
 
 const gardenAdministrators = ['admin@example.org']
@@ -288,6 +300,18 @@ function getProjectMembers (project) {
     .value()
 }
 
+function readProjectViewers (namespace) {
+  return getProjectViewers(readProject(namespace))
+}
+
+function getProjectViewers (project) {
+  return _
+    .chain(project)
+    .get('spec.viewers')
+    .map(({ name: username }) => ({ username }))
+    .value()
+}
+
 function getInfrastructureSecret (namespace, name, profileName, data = {}) {
   return {
     metadata: {
@@ -318,6 +342,12 @@ function getProject ({name, namespace, createdBy, owner, members = [], descripti
     .uniq()
     .map(getUser)
     .value()
+  viewers = _
+    .chain(viewers)
+    .uniq()
+    .map(getUser)
+    .value()
+
   owner = getUser(owner)
   createdBy = getUser(createdBy)
   return {
@@ -329,6 +359,7 @@ function getProject ({name, namespace, createdBy, owner, members = [], descripti
       createdBy,
       owner,
       members,
+      viewers,
       purpose,
       description
     },
@@ -970,6 +1001,108 @@ const stub = {
     ]
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace && isMember) {
+      const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
+      const serviceAccountSecretName = _.first(serviceAccount.secrets).name
+      const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
+      scope
+        .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
+        .reply(200, serviceAccount)
+        .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
+        .reply(200, serviceAccountSecret)
+    }
+    return scopes
+  },
+  getViewers ({bearer, namespace}) {
+    const project = readProject(namespace)
+    if (project) {
+      const scope = nockWithAuthorization(bearer)
+        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project.metadata.name}`)
+        .reply(200, () => project)
+      getServiceAccountsForNamespace(scope, namespace)
+
+      return [
+        nockWithAuthorization(bearer)
+          .get(`/api/v1/namespaces/${namespace}`)
+          .reply(200, () => getProjectNamespace(namespace))
+      ]
+    }
+    return nockWithAuthorization(bearer)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(404, () => {
+        return {
+          message: 'Namespace not found'
+        }
+      })
+  },
+  addViewer ({bearer, namespace, name: username}) {
+    const project = readProject(namespace)
+    const newProject = _.cloneDeep(project)
+    const name = project.metadata.name
+
+    const scope = nockWithAuthorization(bearer)
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    if (!_.find(project.spec.viewers, ['name', username])) {
+      scope
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          if (!_.find(body.spec.viewers, ['name', username])) {
+            return false
+          }
+          newProject.spec.viewers = body.spec.viewers
+          return true
+        })
+        .reply(200, () => newProject)
+      getServiceAccountsForNamespace(scope, namespace)
+    }
+    return [
+      nockWithAuthorization(bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
+  },
+  removeViewer ({bearer, namespace, name: username}) {
+    const project = readProject(namespace)
+    const newProject = _.cloneDeep(project)
+    const name = project.metadata.name
+
+    const scope = nockWithAuthorization(bearer)
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    if (_.find(project.spec.viewers, ['name', username])) {
+      scope
+        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+          if (_.find(body.spec.viewers, ['name', username])) {
+            return false
+          }
+          newProject.spec.viewers = body.spec.viewers
+          return true
+        })
+        .reply(200, () => newProject)
+    }
+    getServiceAccountsForNamespace(scope, namespace)
+    return [
+      nockWithAuthorization(bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
+  },
+  getViewer ({bearer, namespace, name: username}) {
+    const project = readProject(namespace)
+    const name = project.metadata.name
+    const isViewer = _.findIndex(project.spec.viewers, ['name', username]) !== -1
+    const scope = nockWithAuthorization(bearer)
+      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    const scopes = [
+      nockWithAuthorization(bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+    if (serviceAccountNamespace === namespace && isViewer) {
       const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
       const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
