@@ -217,6 +217,10 @@ const getters = {
     const user = state.user
     return user ? user.email || user.id : ''
   },
+  userExpiresAt (state) {
+    const user = state.user
+    return user ? user.exp * 1000 : 0
+  },
   avatarUrl (state, getters) {
     return gravatarUrlGeneric(getters.username)
   },
@@ -600,6 +604,10 @@ const store = new Vuex.Store({
   },
   strict: debug,
   plugins
+})
+
+store.watch(getters.userExpiresAt, time => {
+  console.log('User expires in', new Date(time))
 })
 
 const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper

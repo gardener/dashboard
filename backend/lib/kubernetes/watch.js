@@ -17,8 +17,6 @@
 const { assign, cloneDeep, isFunction, isString, isPlainObject, replace, join, concat, get, set, unset } = require('lodash')
 const querystring = require('querystring')
 const { EventEmitter } = require('events')
-const http = require('http')
-const https = require('https')
 const net = require('net')
 const WebSocket = require('ws')
 const logger = require('../logger')
@@ -146,7 +144,6 @@ function createWebSocket (resource, options = {}) {
   const url = new URL(api.url)
   const origin = get(options, 'origin', url.origin)
   url.protocol = replace(url.protocol, /^http/, 'ws')
-  const Agent = url.protocol === 'wss:' ? https.Agent : http.Agent
   const qs = {}
   if (options.name) {
     qs.fieldSelector = join(['metadata.name', options.name], '=')
@@ -158,9 +155,7 @@ function createWebSocket (resource, options = {}) {
   const headers = {}
   const websocketOptions = { origin, headers, rejectUnauthorized, key, cert, ca }
   if (net.isIP(url.hostname) !== 0) {
-    websocketOptions.agent = new Agent({
-      servername: ''
-    })
+    websocketOptions.servername = ''
   }
   const protocols = []
 
