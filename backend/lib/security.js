@@ -21,7 +21,7 @@ const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
 const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
-const { JWK, JWE } = require('node-jose')
+const { JWK, JWE } = require('@panva/jose')
 const uuidv1 = require('uuid/v1')
 const base64url = require('base64url')
 const pRetry = require('p-retry')
@@ -62,10 +62,9 @@ const COOKIE_SIGNATURE = 'gSgn'
 const COOKIE_TOKEN = 'gTkn'
 const GARDENER_AUDIENCE = 'gardener'
 
-const symetricKeyPromise = JWK.asKey({
-  kty: 'oct',
+const symetricKey = JWK.importKey(decodeSecret(sessionSecret), {
   kid: 'session-secret',
-  k: ensureBase64urlEncoding(sessionSecret)
+  use: 'enc'
 })
 
 let clientPromise
@@ -116,14 +115,16 @@ function decodeState (state) {
   }
 }
 
-function ensureBase64urlEncoding (input) {
-  if (base64url(base64url.decode(input)) === input) {
-    return input
+function decodeSecret (input) {
+  let value = base64url.decode(input)
+  if (base64url(value) === input) {
+    return value
   }
-  if (Buffer.from(input, 'base64').toString('base64') === input) {
-    return base64url.fromBase64(input)
+  value = Buffer.from(input, 'base64')
+  if (value.toString('base64') === input) {
+    return value
   }
-  return base64url(input)
+  return Buffer.from(input)
 }
 
 async function authorizationUrl (req, res) {
@@ -162,7 +163,7 @@ async function authorizeToken (req, res) {
     expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = await encrypt(bearer)
+  const encryptedBearer = encrypt(bearer)
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
@@ -236,7 +237,7 @@ function authenticate () {
     const { cookies = {}, user = {} } = req
     const encryptedBearer = cookies[COOKIE_TOKEN]
     if (encryptedBearer) {
-      const bearer = await decrypt(encryptedBearer)
+      const bearer = decrypt(encryptedBearer)
       user.auth = { bearer }
     }
   }
@@ -275,18 +276,12 @@ function clearCookies (res) {
   res.clearCookie(COOKIE_TOKEN)
 }
 
-async function encrypt (text) {
-  const options = {
-    format: 'compact'
-  }
-  const key = await symetricKeyPromise
-  return JWE.createEncrypt(options, key).update(text).final()
+function encrypt (text) {
+  return JWE.encrypt(text, symetricKey)
 }
 
-async function decrypt (data) {
-  const key = await symetricKeyPromise
-  const { payload } = await JWE.createDecrypt(key).decrypt(data)
-  return payload.toString('ascii')
+function decrypt (data) {
+  return JWE.decrypt(data, symetricKey).toString('ascii')
 }
 
 function sign (payload, secretOrPrivateKey, options) {
