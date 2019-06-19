@@ -48,16 +48,27 @@ limitations under the License.
       <template v-if="showSeedInfo">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
-          <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
-          <v-flex class="pa-0">
-            <span class="grey--text">Seed</span><br>
-            <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
-              <span class="subheading">{{seed}}</span>
-            </router-link>
-            <template v-else>
-              <span class="subheading">{{seed}}</span>
-            </template>
-          </v-flex>
+          <v-layout>
+            <v-flex shrink justify-center class="pr-0 pt-3">
+              <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
+            </v-flex>
+            <v-flex class="pa-0">
+              <span class="grey--text">Seed</span><br>
+              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
+                <span class="subheading">{{seed}}</span><br>
+              </router-link>
+              <template v-else>
+                <span class="subheading">{{seed}}</span><br>
+              </template>
+              <v-layout row>
+                <v-flex>
+                  <span class="grey--text">Technical Id</span><br>
+                  <span class="subheading">{{technicalId}}</span>
+                </v-flex>
+                <copy-btn :clipboard-text="technicalId"></copy-btn>
+              </v-layout>
+            </v-flex>
+          </v-layout>
         </v-card-title>
       </template>
 
@@ -90,12 +101,16 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
+import CopyBtn from '@/components/CopyBtn'
 import {
   getCloudProviderKind,
   canLinkToSeed
 } from '@/utils'
 
 export default {
+  components: {
+    CopyBtn
+  },
   props: {
     shootItem: {
       type: Object
@@ -116,6 +131,9 @@ export default {
     },
     cidr () {
       return get(this.shootItem, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
+    },
+    technicalId () {
+      return get(this.shootItem, `status.technicalID`)
     },
     seed () {
       return get(this.shootItem, 'spec.cloud.seed')

@@ -56,6 +56,12 @@ limitations under the License.
         <span>{{row.seed}}</span>
       </template>
     </td>
+    <td class="nowrap" v-if="this.headerVisible['technicalId']">
+      <v-layout align-center justify-start row fill-height slot="activator">
+        <span>{{row.technicalId}}</span>
+        <copy-btn :clipboard-text="row.technicalId"></copy-btn>
+      </v-layout>
+    </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="row.createdBy"></account-avatar>
     </td>
@@ -132,6 +138,7 @@ import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion'
 import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/JournalLabels'
+import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
@@ -164,7 +171,8 @@ export default {
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,
-    DeleteCluster
+    DeleteCluster,
+    CopyBtn
   },
   props: {
     shootItem: {
@@ -208,7 +216,8 @@ export default {
         journalsLabels: this.journalsLabels(this.shootItem.metadata),
         // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
         reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration'),
-        seed: get(spec, 'cloud.seed')
+        seed: get(spec, 'cloud.seed'),
+        technicalId: get(status, 'technicalID')
       }
     },
     headerVisible () {
