@@ -606,10 +606,6 @@ const store = new Vuex.Store({
   plugins
 })
 
-store.watch(getters.userExpiresAt, time => {
-  console.log('User expires in', new Date(time))
-})
-
 const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper
 
 /* Shoots */

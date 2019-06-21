@@ -17,6 +17,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
+import moment from 'moment-timezone'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
@@ -276,6 +277,20 @@ export default function createRouter ({ store, userManager }) {
   const zeroPoint = { x: 0, y: 0 }
   const scrollBehavior = (to, from, savedPosition) => savedPosition || zeroPoint
   const routerOptions = { mode, scrollBehavior, routes }
+
+  /* automatic signout when token expires */
+  let timeoutID
+  store.watch((state, getters) => getters.userExpiresAt, expirationTime => {
+    if (timeoutID) {
+      clearTimeout(timeoutID)
+    }
+    const currentTime = Date.now()
+    if (expirationTime && expirationTime > currentTime) {
+      const delay = expirationTime - currentTime
+      console.log(`automatic signout ${moment.duration(delay).humanize(true)}`)
+      timeoutID = setTimeout(() => userManager.signout(), delay)
+    }
+  })
 
   /* navigation guards */
   async function ensureConfigurationLoaded (to, from, next) {
