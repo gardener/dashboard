@@ -232,16 +232,16 @@ const getters = {
     const user = state.user
     return user ? user.name || fullDisplayName(user.id) : ''
   },
-  alertMessage () {
+  alertMessage (state) {
     return get(state, 'alert.message', '')
   },
-  alertType () {
+  alertType (state) {
     return get(state, 'alert.type', 'error')
   },
-  alertBannerMessage () {
+  alertBannerMessage (state) {
     return get(state, 'alertBanner.message', '')
   },
-  alertBannerType () {
+  alertBannerType (state) {
     return get(state, 'alertBanner.type', 'error')
   },
   currentNamespaces (state, getters) {
@@ -256,10 +256,10 @@ const getters = {
   isCurrentNamespace (state, getters) {
     return namespace => includes(getters.currentNamespaces, namespace)
   },
-  isWebsocketConnectionError () {
+  isWebsocketConnectionError (state) {
     return get(state, 'websocketConnectionError') !== null
   },
-  websocketConnectAttempt () {
+  websocketConnectAttempt (state) {
     return get(state, 'websocketConnectionError.reconnectAttempt')
   },
   isHideUserIssues (state, getters) {
