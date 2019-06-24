@@ -62,8 +62,7 @@ const COOKIE_SIGNATURE = 'gSgn'
 const COOKIE_TOKEN = 'gTkn'
 const GARDENER_AUDIENCE = 'gardener'
 
-const symetricKey = JWK.importKey(decodeSecret(sessionSecret), {
-  kid: 'session-secret',
+const symetricKey = JWK.asKey(decodeSecret(sessionSecret), {
   use: 'enc'
 })
 
