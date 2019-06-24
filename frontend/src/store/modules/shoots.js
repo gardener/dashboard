@@ -152,19 +152,15 @@ const actions = {
         }
 
         if (info.seedShootIngressDomain) {
-          const grafanaPathname = get(rootState.cfg, 'grafanaUrl.pathname', '')
-          const grafanaHost = `g-operators.${info.seedShootIngressDomain}`
-          info.grafanaUrl = `https://${grafanaHost}${grafanaPathname}`
-          info.grafanaUrlText = `https://${grafanaHost}`
+          const baseHost = info.seedShootIngressDomain
+          info.grafanaUrlUsers = `https://g-users.${baseHost}`
+          info.grafanaUrlOperators = `https://g-operators.${baseHost}`
 
-          const prometheusHost = `p.${info.seedShootIngressDomain}`
-          info.prometheusUrl = `https://${prometheusHost}`
+          info.prometheusUrl = `https://p.${baseHost}`
 
-          const alertmanagerHost = `a.${info.seedShootIngressDomain}`
-          info.alertmanagerUrl = `https://${alertmanagerHost}`
+          info.alertmanagerUrl = `https://a.${baseHost}`
 
-          const kibanaHost = `k.${info.seedShootIngressDomain}`
-          info.kibanaUrl = `https://${kibanaHost}`
+          info.kibanaUrl = `https://k.${baseHost}`
         }
         return info
       })

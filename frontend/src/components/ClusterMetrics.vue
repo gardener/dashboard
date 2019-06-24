@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile>
+    <v-list-tile v-if="isAdmin">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
       </v-list-tile-action>
@@ -24,14 +24,29 @@ limitations under the License.
         <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
         <v-list-tile-title>
           <v-tooltip v-if="isHibernated" top>
-            <span slot="activator">{{grafanaUrlText}}</span>
+            <span slot="activator">{{grafanaUrlOperators}}</span>
             Grafana is not running for hibernated clusters
           </v-tooltip>
-          <a v-else :href="grafanaUrl" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlText}}</a>
+          <a v-else :href="grafanaUrlOperators" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlOperators}}</a>
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-list-tile>
+    <v-list-tile v-else>
+      <v-list-tile-action>
+        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
+        <v-list-tile-title>
+          <v-tooltip v-if="isHibernated" top>
+            <span slot="activator">{{grafanaUrlUsers}}</span>
+            Grafana is not running for hibernated clusters
+          </v-tooltip>
+          <a v-else :href="grafanaUrlUsers" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlUsers}}</a>
+        </v-list-tile-title>
+      </v-list-tile-content>
+    </v-list-tile>
+    <v-list-tile v-if="isAdmin">
       <v-list-tile-action>
       </v-list-tile-action>
       <v-list-tile-content>
@@ -45,7 +60,7 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-list-tile>
+    <v-list-tile v-if="isAdmin">
       <v-list-tile-action>
       </v-list-tile-action>
       <v-list-tile-content>
@@ -68,6 +83,7 @@ limitations under the License.
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import { isHibernated } from '@/utils'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -80,11 +96,14 @@ export default {
     }
   },
   computed: {
-    grafanaUrl () {
-      return get(this.shootItem, 'info.grafanaUrl', '')
+    ...mapGetters([
+      'isAdmin'
+    ]),
+    grafanaUrlOperators () {
+      return get(this.shootItem, 'info.grafanaUrlOperators', '')
     },
-    grafanaUrlText () {
-      return get(this.shootItem, 'info.grafanaUrlText', '')
+    grafanaUrlUsers () {
+      return get(this.shootItem, 'info.grafanaUrlUsers', '')
     },
     prometheusUrl () {
       return get(this.shootItem, 'info.prometheusUrl', '')

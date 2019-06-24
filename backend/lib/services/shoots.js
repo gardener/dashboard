@@ -221,6 +221,7 @@ exports.info = async function ({ user, namespace, name }) {
   const loggingComponent = 'logging'
   const monitoringIngressSecretName = 'monitoring-ingress-credentials'
   const loggingIngressUserSecretName = name + '.logging'
+  const monitoringIngressUserSecretName = name + '.monitoring'
   const loggingIngressAdminSecretName = 'logging-ingress-credentials'
 
   const data = {
@@ -264,7 +265,10 @@ exports.info = async function ({ user, namespace, name }) {
       }
     }
   } else {
-    await assignComponentSecret(core, namespace, loggingComponent, loggingIngressUserSecretName, data)
+    await Promise.all([
+      assignComponentSecret(core, namespace, monitoringComponent, monitoringIngressUserSecretName, data),
+      assignComponentSecret(core, namespace, loggingComponent, loggingIngressUserSecretName, data)
+    ])
   }
 
   return data
