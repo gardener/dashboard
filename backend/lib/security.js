@@ -17,6 +17,7 @@
 'use strict'
 
 const { split, join, noop, trim, isPlainObject } = require('lodash')
+const assert = require('assert').strict
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
 const { Issuer, custom } = require('openid-client')
@@ -235,10 +236,12 @@ function authenticate () {
   const setUserAuth = async (req, res) => {
     const { cookies = {}, user = {} } = req
     const encryptedBearer = cookies[COOKIE_TOKEN]
-    if (encryptedBearer) {
-      const bearer = decrypt(encryptedBearer)
-      user.auth = { bearer }
+    if (!encryptedBearer) {
+      throw new Unauthorized('No bearer token found in request')
     }
+    const bearer = decrypt(encryptedBearer)
+    assert.ok(bearer, 'The decrypted bearer token must not be empty')
+    user.auth = { bearer }
   }
   return async (req, res, next) => {
     try {
