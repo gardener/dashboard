@@ -105,6 +105,18 @@ limitations under the License.
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
       <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
     </v-layout>
+    <v-dialog v-model="dialog" persistent scrollable max-width="360px" @keydown.esc="resolveAction(false)">
+      <v-card>
+        <v-card-title primary-title class="orange darken-2 grey--text text--lighten-4 headline" v-text="action.title"></v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 80px;" v-html="action.text"></v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn flat @click="resolveAction(false)" color="primary">{{action.noButtonText}}</v-btn>
+          <v-btn flat @click="resolveAction(true)" color="secondary">{{action.yesButtonText}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -125,6 +137,9 @@ import get from 'lodash/get'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import noop from 'lodash/noop'
+import assign from 'lodash/assign'
+import isFunction from 'lodash/isFunction'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
@@ -153,7 +168,16 @@ export default {
       maintenanceTimeValid: undefined,
       hibernationScheduleValid: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
+      dialog: false,
+      action: {
+        id: '',
+        title: '',
+        text: '',
+        yesButtonText: '',
+        noButtonText: '',
+        resolve: noop
+      }
     }
   },
   computed: {
@@ -318,6 +342,27 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
+    resolveAction (value) {
+      this.dialog = false
+      if (isFunction(this.action.resolve)) {
+        const resolve = this.action.resolve
+        this.action.resolve = undefined
+        resolve(value)
+      }
+    },
+    confirmNavigation () {
+      this.dialog = true
+      return new Promise(resolve => {
+        assign(this.action, {
+          id: 'navigation',
+          title: 'Leave Create Cluster Page?',
+          text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
+          yesButtonText: 'Leave',
+          noButtonText: 'Cancel',
+          resolve
+        })
+      })
+    },
     cancelClicked () {
       this.$router.push({
         name: 'ShootList',
@@ -331,10 +376,13 @@ export default {
       return find(secrets, ['metadata.bindingName', secretBindingName])
     }
   },
-  beforeRouteLeave (to, from, next) {
+  async beforeRouteLeave (to, from, next) {
     if (to.name === 'CreateShootEditor') {
       this.updateShootResourceWithUIComponents()
     } else {
+      if (!await this.confirmNavigation()) {
+        return
+      }
       this.resetCreateShootResource()
     }
     next()

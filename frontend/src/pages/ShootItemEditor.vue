@@ -407,13 +407,26 @@ export default {
         resolve(value)
       }
     },
-    confirmNavigation () {
+    confirmEditorNavigation () {
       this.dialog = true
       return new Promise(resolve => {
         assign(this.action, {
           id: 'navigation',
           title: 'Leave Editor?',
           text: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?',
+          yesButtonText: 'Leave',
+          noButtonText: 'Cancel',
+          resolve
+        })
+      })
+    },
+    confirmCreateNavigation () {
+      this.dialog = true
+      return new Promise(resolve => {
+        assign(this.action, {
+          id: 'navigation',
+          title: 'Leave Create Cluster Page?',
+          text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
           yesButtonText: 'Leave',
           noButtonText: 'Cancel',
           resolve
@@ -510,21 +523,26 @@ export default {
           return next(false)
         }
       } else {
+        if (!await this.confirmCreateNavigation()) {
+          return
+        }
         this.resetCreateShootResource()
       }
-    }
-    if (this.clean) {
-      return next()
-    }
-    try {
-      if (await this.confirmNavigation()) {
-        next()
-      } else {
-        this.focus()
-        next(false)
+      next()
+    } else {
+      if (this.clean) {
+        return next()
       }
-    } catch (err) {
-      next(err)
+      try {
+        if (await this.confirmEditorNavigation()) {
+          next()
+        } else {
+          this.focus()
+          next(false)
+        }
+      } catch (err) {
+        next(err)
+      }
     }
   },
   beforeDestroy () {
