@@ -3,7 +3,8 @@
   "env": {
     "test": {
       "plugins": [
-        "istanbul"
+        "istanbul",
+        "@babel/plugin-proposal-class-properties"
       ]
     }
   }

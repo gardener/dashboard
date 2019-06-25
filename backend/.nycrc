@@ -1,12 +1,16 @@
 {
-  "require": [
-    "babel-register",
-    "babel-polyfill"
+  "all": true,
+  "check-coverage": true,
+  "lines": 67,
+  "statements": 67,
+  "functions": 60,
+  "branches": 40,
+  "include": [
+    "server.js",
+    "lib/**/*.js"
   ],
   "reporter": [
     "html",
-    "text"
-  ],
-  "sourceMap": false,
-  "instrument": false
+    "text-summary"
+  ]
 }
