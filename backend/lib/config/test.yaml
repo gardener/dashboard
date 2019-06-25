@@ -10,7 +10,6 @@ gitHub:
   authentication:
     token: 746f6b656e
 sessionSecret: oB5Z24dPnebXcDL3lmEFsiw2lHW7QxDnBjrl9C9dtKJUUhg5
-cookieMaxAge: 1800
 oidc:
   issuer: https://kubernetes:32001
   rejectUnauthorized: true
@@ -22,7 +21,7 @@ oidc:
   client_secret: jtSvBp5yrcr5csfhfJ7HfrknDy
   redirect_uri: http://localhost:8080/auth/callback
   scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
-  clockTolerance: 15
+  clockTolerance: 42
 frontend:
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/

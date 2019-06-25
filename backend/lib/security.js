@@ -17,11 +17,12 @@
 'use strict'
 
 const { split, join, noop, trim, isPlainObject } = require('lodash')
+const assert = require('assert').strict
 const { promisify } = require('util')
 const jwt = require('jsonwebtoken')
-const { Issuer } = require('openid-client')
+const { Issuer, custom } = require('openid-client')
 const cookieParser = require('cookie-parser')
-const { JWK, JWE } = require('node-jose')
+const { JWK, JWE } = require('@panva/jose')
 const uuidv1 = require('uuid/v1')
 const base64url = require('base64url')
 const pRetry = require('p-retry')
@@ -29,7 +30,7 @@ const pTimeout = require('p-timeout')
 const { authentication } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
 const logger = require('./logger')
-const { sessionSecret, cookieMaxAge = 1800, oidc = {} } = require('./config')
+const { sessionSecret, oidc = {} } = require('./config')
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -41,13 +42,16 @@ const {
   client_id: clientId,
   client_secret: clientSecret,
   rejectUnauthorized = true,
-  ca
+  ca,
+  clockTolerance = 15
 } = oidc
-const defaultHttpOptions = { rejectUnauthorized }
-if (ca) {
-  defaultHttpOptions.ca = ca
+const httpOptions = {
+  followRedirect: false,
+  rejectUnauthorized
 }
-Issuer.defaultHttpOptions = defaultHttpOptions
+if (ca) {
+  httpOptions.ca = ca
+}
 
 const secure = /^https:/.test(redirectUri)
 if (!secure && process.env.NODE_ENV === 'production') {
@@ -59,13 +63,17 @@ const COOKIE_SIGNATURE = 'gSgn'
 const COOKIE_TOKEN = 'gTkn'
 const GARDENER_AUDIENCE = 'gardener'
 
-const symetricKeyPromise = JWK.asKey({
-  kty: 'oct',
-  kid: 'session-secret',
-  k: ensureBase64urlEncoding(sessionSecret)
+const symetricKey = JWK.asKey(decodeSecret(sessionSecret), {
+  use: 'enc'
 })
 
 let clientPromise
+
+function overrideHttpOptions () {
+  this[custom.http_options] = options => Object.assign({}, options, httpOptions)
+  this[custom.clock_tolerance] = clockTolerance
+}
+overrideHttpOptions.call(Issuer)
 
 function discoverIssuer (url) {
   return Issuer.discover(url)
@@ -78,7 +86,7 @@ function discoverClient () {
       client_id: clientId,
       client_secret: clientSecret
     })
-    client.CLOCK_TOLERANCE = 15
+    overrideHttpOptions.call(client)
     return client
   }, {
     forever: true,
@@ -107,14 +115,16 @@ function decodeState (state) {
   }
 }
 
-function ensureBase64urlEncoding (input) {
-  if (base64url(base64url.decode(input)) === input) {
-    return input
+function decodeSecret (input) {
+  let value = base64url.decode(input)
+  if (base64url(value) === input) {
+    return value
   }
-  if (Buffer.from(input, 'base64').toString('base64') === input) {
-    return base64url.fromBase64(input)
+  value = Buffer.from(input, 'base64')
+  if (value.toString('base64') === input) {
+    return value
   }
-  return base64url(input)
+  return Buffer.from(input)
 }
 
 async function authorizationUrl (req, res) {
@@ -144,16 +154,16 @@ async function authorizeToken (req, res) {
   const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
-    maxAge: cookieMaxAge * 1000,
+    expires: undefined,
     sameSite: 'Lax'
   })
-  const encryptedBearer = await encrypt(bearer)
   res.cookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
   })
+  const encryptedBearer = encrypt(bearer)
   res.cookie(COOKIE_TOKEN, encryptedBearer, {
     secure,
     httpOnly: true,
@@ -166,12 +176,14 @@ async function authorizeToken (req, res) {
 async function authorizationCallback (req, res) {
   const client = await exports.getIssuerClient()
   const { code, state } = req.query
+  const parameters = { code }
+  const checks = {
+    response_type: 'code'
+  }
   const {
     id_token: token,
     expires_in: expiresIn
-  } = await client.authorizationCallback(redirectUri, { code }, {
-    response_type: 'code'
-  })
+  } = await client.callback(redirectUri, parameters, checks)
   req.body = { token, expiresIn }
   await authorizeToken(req, res)
   return decodeState(state)
@@ -224,25 +236,18 @@ function authenticate () {
   const setUserAuth = async (req, res) => {
     const { cookies = {}, user = {} } = req
     const encryptedBearer = cookies[COOKIE_TOKEN]
-    if (encryptedBearer) {
-      const bearer = await decrypt(encryptedBearer)
-      user.auth = { bearer }
+    if (!encryptedBearer) {
+      throw new Unauthorized('No bearer token found in request')
     }
-  }
-  const renewCookie = (req, res) => {
-    const value = req.cookies[COOKIE_HEADER_PAYLOAD]
-    res.cookie(COOKIE_HEADER_PAYLOAD, value, {
-      secure,
-      maxAge: cookieMaxAge * 1000,
-      sameSite: 'Lax'
-    })
+    const bearer = decrypt(encryptedBearer)
+    assert.ok(bearer, 'The decrypted bearer token must not be empty')
+    user.auth = { bearer }
   }
   return async (req, res, next) => {
     try {
       csrfProtection(req, res)
       await verifyToken(req, res)
       await setUserAuth(req, res)
-      renewCookie(req, res)
       next()
     } catch (err) {
       clearCookies(res)
@@ -273,18 +278,12 @@ function clearCookies (res) {
   res.clearCookie(COOKIE_TOKEN)
 }
 
-async function encrypt (text) {
-  const options = {
-    format: 'compact'
-  }
-  const key = await symetricKeyPromise
-  return JWE.createEncrypt(options, key).update(text).final()
+function encrypt (text) {
+  return JWE.encrypt(text, symetricKey)
 }
 
-async function decrypt (data) {
-  const key = await symetricKeyPromise
-  const { payload } = await JWE.createDecrypt(key).decrypt(data)
-  return payload.toString('ascii')
+function decrypt (data) {
+  return JWE.decrypt(data, symetricKey).toString('ascii')
 }
 
 function sign (payload, secretOrPrivateKey, options) {

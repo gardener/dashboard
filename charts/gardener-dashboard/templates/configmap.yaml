@@ -26,11 +26,6 @@ data:
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
 {{- end }}
-{{- if .Values.cookieMaxAge }}
-    cookieMaxAge: {{ .Values.cookieMaxAge }}
-{{- else }}
-    cookieMaxAge: 1800
-{{- end }}
 {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}

@@ -39,9 +39,13 @@ export class UserManager {
     Vue.cookie.delete(COOKIE_HEADER_PAYLOAD)
   }
 
-  signout () {
+  signout (err) {
     this.removeUser()
-    window.location = this.origin + '/auth/logout'
+    let path = '/auth/logout'
+    if (err) {
+      path += `?error[message]=${encodeURIComponent(err.message)}`
+    }
+    window.location = this.origin + path
   }
 
   signinWithOidc (redirectPath) {

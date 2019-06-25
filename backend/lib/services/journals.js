@@ -92,23 +92,23 @@ function fromComment (number, name, namespace, item) {
 }
 exports.fromComment = fromComment
 
-function getOpenIssues ({ name, namespace } = {}) {
+async function getOpenIssues ({ name, namespace } = {}) {
   let title
   if (name && namespace) {
     title = `[${namespace}/${name}]`
   }
-  return github
-    .searchIssues({ state: 'open', title })
-    .thru(githubIssues => _.map(githubIssues, fromIssue))
+  const githubIssues = await github.searchIssues({ state: 'open', title })
+  return _.map(githubIssues, fromIssue)
 }
 exports.getOpenIssues = getOpenIssues
 
 async function loadOpenIssues (...args) {
-  return getOpenIssues(...args)
-    .reduce((cache, issues) => {
-      cache.addOrUpdateIssues({ issues })
-      return cache
-    }, getJournalCache())
+  const issues = await getOpenIssues(...args)
+  const cache = getJournalCache()
+  for (const issue of issues) {
+    cache.addOrUpdateIssue({ issue })
+  }
+  return issues
 }
 exports.loadOpenIssues = exports.list = loadOpenIssues
 
@@ -139,20 +139,20 @@ function deleteJournals ({ name, namespace }) {
 }
 exports.deleteJournals = deleteJournals
 
-function getIssueComments ({ number }) {
+async function getIssueComments ({ number }) {
   const cache = getJournalCache()
   const { metadata: { name, namespace } } = cache.getIssue(number)
-  return github
-    .getComments({ number })
-    .thru(githubComments => _.map(githubComments, comment => fromComment(number, name, namespace, comment)))
+  const githubComments = await github.getComments({ number })
+  return _.map(githubComments, githubComment => fromComment(number, name, namespace, githubComment))
 }
 exports.getIssueComments = getIssueComments
 
 async function loadIssueComments ({ number }) {
-  return getIssueComments({ number })
-    .reduce((cache, comments) => {
-      _.forEach(comments, comment => cache.addOrUpdateComment({ issueNumber: number, comment }))
-      return cache
-    }, getJournalCache())
+  const comments = await getIssueComments({ number })
+  const cache = getJournalCache()
+  for (const comment of comments) {
+    cache.addOrUpdateComment({ issueNumber: number, comment })
+  }
+  return comments
 }
 exports.loadIssueComments = loadIssueComments
