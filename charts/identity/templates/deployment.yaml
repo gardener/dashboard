@@ -43,6 +43,8 @@ spec:
       {{- else }}
       serviceAccountName: identity
       {{- end }}
+      dnsPolicy: ClusterFirst
+      terminationGracePeriodSeconds: 30
       containers:
         - name: dex
           command:
@@ -51,8 +53,6 @@ spec:
             - /etc/dex/config.yaml
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          dnsPolicy: ClusterFirst
-          terminationGracePeriodSeconds: 30
           livenessProbe:
             failureThreshold: 3
             httpGet:
