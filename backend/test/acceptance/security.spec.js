@@ -31,6 +31,6 @@ module.exports = function ({ agent, oidc }) {
       rejectUnauthorized,
       ca
     })
-    expect(client[custom.clock_tolerance]).to.equal(15)
+    expect(client[custom.clock_tolerance]).to.equal(42)
   })
 }

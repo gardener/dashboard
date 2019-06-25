@@ -155,6 +155,7 @@ function createWebSocket (resource, options = {}) {
   const headers = {}
   const websocketOptions = { origin, headers, rejectUnauthorized, key, cert, ca }
   if (net.isIP(url.hostname) !== 0) {
+    //  Use empty string '' to disable sending the SNI extension (https://nodejs.org/api/https.html#https_new_agent_options)
     websocketOptions.servername = ''
   }
   const protocols = []

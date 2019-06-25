@@ -285,10 +285,14 @@ export default function createRouter ({ store, userManager }) {
       clearTimeout(timeoutID)
     }
     const currentTime = Date.now()
-    if (expirationTime && expirationTime > currentTime) {
-      const delay = expirationTime - currentTime
-      console.log(`automatic signout ${moment.duration(delay).humanize(true)}`)
-      timeoutID = setTimeout(() => userManager.signout(), delay)
+    if (expirationTime) {
+      if (expirationTime > currentTime) {
+        const delay = expirationTime - currentTime
+        console.log(`automatic signout ${moment.duration(delay).humanize(true)}`)
+        timeoutID = setTimeout(() => userManager.signout(), delay)
+      } else {
+        console.error(`Expiration time of a new token is not expected to be in the past`)
+      }
     }
   })
 
@@ -328,12 +332,7 @@ export default function createRouter ({ store, userManager }) {
     } catch (err) {
       const { response: { status, data = {} } = {} } = err
       if (status === 401) {
-        userManager.removeUser()
-        const hash = data.message ? `#error=${encodeURIComponent(data.message)}` : undefined
-        return next({
-          name: 'Login',
-          hash
-        })
+        return userManager.signout(new Error(data.message))
       }
       next(err)
     }
