@@ -26,7 +26,7 @@ limitations under the License.
             @click.native.stop="projectDialog = true"
           >
             <v-icon class="red--text text--darken-2">mdi-plus</v-icon>
-            <span class="ml-2">Create your first Project</span>
+            <span class="ml-2">{{createProjectBtnText}}</span>
           </v-btn>
           <span>You are not authorized to create projects</span>
         </v-tooltip>
@@ -39,6 +39,7 @@ limitations under the License.
 
 <script>
 import { mapState, mapGetters } from 'vuex'
+import isEmpty from 'lodash/isEmpty'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
 export default {
@@ -59,8 +60,20 @@ export default {
     ...mapGetters([
       'username',
       'canCreateProject',
-      'namespaces'
-    ])
+      'namespaces',
+      'projectList'
+    ]),
+    hasProjects () {
+      return !isEmpty(this.projectList)
+    },
+    createProjectBtnText () {
+      return this.hasProjects ? 'Create Project' : 'Create your first Project'
+    }
+  },
+  mounted () {
+    if (this.$route.path === '/namespace/create/ui') {
+      this.projectDialog = true
+    }
   },
   methods: {
     onProjectCreated ({ metadata } = {}) {
