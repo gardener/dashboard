@@ -15,5 +15,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gardener-dashboard
-  namespace: garden
+  namespace: {{ .Release.Namespace }}
 {{- end }}

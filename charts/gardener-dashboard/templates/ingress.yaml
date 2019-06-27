@@ -2,7 +2,7 @@ apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
   name: gardener-dashboard-ingress
-  namespace: garden
+  namespace: {{ .Release.Namespace }}
   labels:
     app: gardener-dashboard
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
