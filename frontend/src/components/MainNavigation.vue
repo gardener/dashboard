@@ -105,7 +105,7 @@ limitations under the License.
                 @click.stop="openProjectDialog"
               >
                 <v-icon>add</v-icon>
-                <span class="ml-2">Create new Project</span>
+                <span class="ml-2">Create Project</span>
               </v-btn>
               <span>You are not authorized to create projects</span>
             </v-tooltip>

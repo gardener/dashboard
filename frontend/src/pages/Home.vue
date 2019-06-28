@@ -22,10 +22,12 @@ limitations under the License.
         <v-tooltip top :disabled="canCreateProject">
           <v-btn
             slot="activator"
+            flat
+            class="text-xs-left teal--text"
             :disabled="!canCreateProject"
             @click.native.stop="projectDialog = true"
           >
-            <v-icon class="red--text text--darken-2">mdi-plus</v-icon>
+            <v-icon>add</v-icon>
             <span class="ml-2">{{createProjectBtnText}}</span>
           </v-btn>
           <span>You are not authorized to create projects</span>
