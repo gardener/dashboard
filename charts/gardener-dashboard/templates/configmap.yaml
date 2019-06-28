@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gardener-dashboard-configmap
-  namespace: garden
+  namespace: {{ .Release.Namespace }}
   labels:
     app: gardener-dashboard
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -25,11 +25,6 @@ data:
       {{- end }}
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
-{{- end }}
-{{- if .Values.cookieMaxAge }}
-    cookieMaxAge: {{ .Values.cookieMaxAge }}
-{{- else }}
-    cookieMaxAge: 1800
 {{- end }}
 {{- if .Values.oidc }}
     oidc:

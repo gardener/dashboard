@@ -15,9 +15,9 @@
 //
 
 const { assign, cloneDeep, isFunction, isString, isPlainObject, replace, join, concat, get, set, unset } = require('lodash')
-const { format } = require('url')
 const querystring = require('querystring')
 const { EventEmitter } = require('events')
+const net = require('net')
 const WebSocket = require('ws')
 const logger = require('../logger')
 const inject = require('reconnect-core')
@@ -142,6 +142,7 @@ function wrap (emitter, ws) {
 function createWebSocket (resource, options = {}) {
   const api = resource.api
   const url = new URL(api.url)
+  const origin = get(options, 'origin', url.origin)
   url.protocol = replace(url.protocol, /^http/, 'ws')
   const qs = {}
   if (options.name) {
@@ -150,10 +151,13 @@ function createWebSocket (resource, options = {}) {
   url.search = querystring.stringify(assign(qs, resource.qs, options.qs, { watch: true }))
   url.pathname = resource.path
   const { key, cert, ca, strictSSL, auth = {} } = get(api, 'http.requestOptions', {})
-  const origin = get(options, 'origin', api.url)
   const rejectUnauthorized = get(options, 'rejectUnauthorized', !strictSSL)
   const headers = {}
   const websocketOptions = { origin, headers, rejectUnauthorized, key, cert, ca }
+  if (net.isIP(url.hostname) !== 0) {
+    //  Use empty string '' to disable sending the SNI extension (https://nodejs.org/api/https.html#https_new_agent_options)
+    websocketOptions.servername = ''
+  }
   const protocols = []
 
   if (isPlainObject(auth)) {
@@ -177,7 +181,7 @@ function createWebSocket (resource, options = {}) {
     websocketOptions.protocol = join(concat(protocols, 'garden'), ',')
   }
 
-  return new WebSocket(format(url, { fragment: false, auth: false }), websocketOptions)
+  return new WebSocket(url, websocketOptions)
 }
 
 async function createWebSocketAsync (resource, options) {

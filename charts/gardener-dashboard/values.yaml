@@ -42,8 +42,6 @@ tls:
 
 # sessionSecret is used for signing and encrytion of session data
 sessionSecret: ~
-# cookieMaxAge is cookie session lifetime in number of seconds
-cookieMaxAge: 1800
 oidc:
   issuerUrl: https://identity.ingress.example.org
   # clientId is the public identifier of the gardener-dashboard aplication

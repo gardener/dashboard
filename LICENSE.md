@@ -224,6 +224,10 @@ Copyright (c) 2012 Cloud9 IDE, Inc. (Mike de Boer)\
 Copyright (c) 2017-2018 Octokit contributors\
 [MIT License](https://github.com/octokit/rest.js/blob/master/LICENSE)
 
+- [@panva/jose](https://github.com/panva/jose)\
+Copyright (c) 2018 Filip Skokan
+[MIT License](https://github.com/panva/jose/blob/master/LICENSE.md)
+
 - [base64url](https://github.com/brianloveswords/base64url)\
 Copyright (c) 2013–2016 Brian J. Brennan\
 [MIT License](https://github.com/brianloveswords/base64url/blob/master/LICENSE)
@@ -280,9 +284,6 @@ Copyright JS Foundation and other contributors <https://js.foundation/>\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/morgan/blob/master/LICENSE)
-
-- [node-jose](https://github.com/cisco/node-jose)\
-[Apache License 2.0](https://github.com/cisco/node-jose/blob/master/LICENSE)
 
 - [openid-client](https://github.com/panva/node-openid-client)\
 Copyright (c) 2016 Filip Skokan\

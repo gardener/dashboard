@@ -16,6 +16,7 @@
 
 const { assign, merge } = require('lodash')
 const { existsSync } = require('fs')
+const net = require('net')
 
 const BaseObject = require('kubernetes-client/lib/base')
 BaseObject.prototype.watch = require('./watch')
@@ -78,7 +79,15 @@ function credentials (options = {}) {
   if (options.key && options.cert) {
     options.auth = undefined
   }
-  return assign({ promises }, config(), options)
+  options = assign({ promises }, config(), options)
+  const url = new URL(options.url)
+  if (net.isIP(url.hostname) !== 0) {
+    //  Use empty string '' to disable sending the SNI extension (https://nodejs.org/api/https.html#https_new_agent_options)
+    options.request = {
+      servername: ''
+    }
+  }
+  return options
 }
 
 function mergePatch (options, ...rest) {

@@ -48,7 +48,7 @@ limitations under the License.
           <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
         </div>
       </v-card-title>
-      <template v-if="isAdmin && seedShootIngressDomain">
+      <template v-if="seedShootIngressDomain">
         <v-divider class="my-2" inset></v-divider>
         <cluster-metrics :shootItem="shootItem"></cluster-metrics>
       </template>
@@ -65,7 +65,6 @@ import get from 'lodash/get'
 import { isHibernated,
   isReconciliationDeactivated,
   isTypeDelete } from '@/utils'
-import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -85,9 +84,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters([
-      'isAdmin'
-    ]),
     lastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
     },

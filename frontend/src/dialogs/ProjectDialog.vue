@@ -19,7 +19,7 @@ limitations under the License.
     <v-card class="project">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-cube</v-icon>
-        <span v-if="isCreateMode">Create new Project</span>
+        <span v-if="isCreateMode">Create Project</span>
         <span v-else>Update Project</span>
       </v-card-title>
       <v-card-text style="height: 300px; position: relative">

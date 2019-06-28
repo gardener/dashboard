@@ -34,42 +34,43 @@ function searchIssues ({ state, title } = {}) {
   if (title) {
     q.push(`${title} in:title`)
   }
-  return octokit.createPageStream(octokit.search.issues, {
-    path_to_items: 'items',
+  const options = octokit.search.issuesAndPullRequests.endpoint.merge({
     q: q.join(' ')
   })
+  return octokit.paginate(options)
 }
 
 function getIssue ({ number }) {
   return octokit.issues.get({
     owner,
     repo,
-    number
+    issue_number: number
   })
 }
 
 function closeIssue ({ number }) {
-  return octokit.issues.edit({
+  return octokit.issues.update({
     owner,
     repo,
-    number,
+    issue_number: number,
     state: 'closed'
   })
 }
 
 function getComments ({ number }) {
-  return octokit.createPageStream(octokit.issues.getComments, {
+  const options = octokit.issues.listComments.endpoint.merge({
     owner,
     repo,
-    number
+    issue_number: number
   })
+  return octokit.paginate(options)
 }
 
 function createComment ({ number }, body) {
   return octokit.issues.createComment({
     owner,
     repo,
-    number,
+    issue_number: number,
     body
   })
 }

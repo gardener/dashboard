@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.32.0",
+  "version": "1.33.0",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "repository": {
@@ -68,7 +68,7 @@
     "vue-template-compiler": "^2.5.22"
   },
   "engines": {
-    "node": ">= 10.10.0",
-    "npm": ">= 6.4.1"
+    "node": ">= 12.3.1",
+    "npm": ">= 6.9.0"
   }
 }
