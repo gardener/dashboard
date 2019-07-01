@@ -69,9 +69,14 @@ const symetricKey = JWK.asKey(decodeSecret(sessionSecret), {
 
 let clientPromise
 
+/**
+ * (Customizing HTTP Requests)[https://github.com/panva/node-openid-client/blob/master/docs/README.md#customizing-http-requests]
+ * Issuer constructor : override http request options for issuer discovery
+ * Issuer instance    : override http request options for accessing the jwks endpoint
+ * Client instance    : override http request options for token endpoint requests
+ */
 function overrideHttpOptions () {
   this[custom.http_options] = options => Object.assign({}, options, httpOptions)
-  this[custom.clock_tolerance] = clockTolerance
 }
 overrideHttpOptions.call(Issuer)
 
@@ -79,14 +84,16 @@ function discoverIssuer (url) {
   return Issuer.discover(url)
 }
 
-function discoverClient () {
+function discoverClient (url) {
   return pRetry(async () => {
-    const { Client } = await discoverIssuer(issuer)
-    const client = new Client({
+    const issuer = await discoverIssuer(url)
+    overrideHttpOptions.call(issuer)
+    const client = new issuer.Client({
       client_id: clientId,
       client_secret: clientSecret
     })
     overrideHttpOptions.call(client)
+    client[custom.clock_tolerance] = clockTolerance
     return client
   }, {
     forever: true,
@@ -96,11 +103,11 @@ function discoverClient () {
   })
 }
 
-function getIssuerClient () {
+function getIssuerClient (url = issuer) {
   if (!clientPromise) {
-    clientPromise = discoverClient()
+    clientPromise = discoverClient(url)
   }
-  return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${issuer} not available`)
+  return pTimeout(clientPromise, 1000, `OpenID Connect Issuer ${url} not available`)
 }
 
 function encodeState (data = {}) {
