@@ -162,6 +162,17 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
+          path: 'namespace/create/ui',
+          name: 'CreateProject',
+          component: Home,
+          meta: {
+            title: 'Create Project',
+            breadcrumbTextFn: routeTitle,
+            namespaced: false,
+            projectScope: false
+          }
+        },
+        {
           path: 'namespace/:namespace/shoots',
           component: PlaceholderComponent,
           meta: {
