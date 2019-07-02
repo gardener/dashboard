@@ -71,8 +71,8 @@ limitations under the License.
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
         </v-container>
       </v-card-text>
-      <v-alert :value="!isCreateMode" type="warning">
-        The new secret should be part of the same account as the one that gets replaced
+      <v-alert :value="!isCreateMode && relatedShootCount >1" type="warning">
+        This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -93,6 +93,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
+import filter from 'lodash/filter'
 import Alert from '@/components/Alert'
 import InfraIcon from '@/components/InfrastructureIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
@@ -173,7 +174,8 @@ export default {
     ]),
     ...mapGetters([
       'infrastructureSecretList',
-      'cloudProfilesByCloudProviderKind'
+      'cloudProfilesByCloudProviderKind',
+      'shootList'
     ]),
     cloudProfileName: {
       get () {
@@ -235,6 +237,19 @@ export default {
     },
     textColor () {
       return textColor(this.color)
+    },
+    relatedShootCount () {
+      return this.shootsByInfrastructureSecret.length
+    },
+    shootsByInfrastructureSecret () {
+      const secretName = get(this.secret, 'metadata.name')
+      if (secretName) {
+        const predicate = item => {
+          return get(item, 'spec.cloud.secretBindingRef.name') === secretName
+        }
+        return filter(this.shootList, predicate)
+      }
+      return []
     }
   },
   methods: {
