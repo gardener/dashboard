@@ -71,7 +71,7 @@ limitations under the License.
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
         </v-container>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount >1" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 1" type="warning">
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>
