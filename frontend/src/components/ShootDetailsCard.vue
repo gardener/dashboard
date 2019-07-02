@@ -98,11 +98,16 @@ limitations under the License.
 
       <template v-if="!!purpose">
         <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem">
+        <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">label_outline</v-icon>
           <v-flex class="pa-0">
             <span class="grey--text">Purpose</span><br>
             <span class="subheading">{{purpose}}</span>
+          </v-flex>
+          <v-flex shrink class="pa-0">
+            <v-layout row>
+              <purpose-configuration :shootItem="shootItem"></purpose-configuration>
+            </v-layout>
           </v-flex>
         </v-card-title>
       </template>
@@ -116,6 +121,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import TimeString from '@/components/TimeString'
 import WorkerGroup from '@/components/WorkerGroup'
 import WorkerConfiguration from '@/components/WorkerConfiguration'
+import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion'
 import get from 'lodash/get'
 import {
@@ -133,6 +139,7 @@ export default {
     TimeString,
     WorkerGroup,
     WorkerConfiguration,
+    PurposeConfiguration,
     ShootVersion
   },
   props: {
