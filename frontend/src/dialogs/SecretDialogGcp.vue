@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout row>
-        <v-flex xs12>
+      <v-layout column>
+        <v-flex>
           <v-textarea
             ref="serviceAccountKey"
             color="green"
