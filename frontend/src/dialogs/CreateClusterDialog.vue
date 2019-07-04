@@ -198,6 +198,7 @@ limitations under the License.
               ref="manageWorkers"
               :infrastructureKind="infrastructureKind"
               :cloudProfileName="cloudProfileName"
+              :zone="zone"
               @valid="onWorkersValid"
              ></manage-workers>
            </v-container>
@@ -559,6 +560,7 @@ export default {
       },
       set (zone) {
         this.infrastructureData.zones = [zone]
+        this.removeInvalidWorkerMachineTypesAndVolumeTypes()
       }
     },
     purpose: {
@@ -911,6 +913,11 @@ export default {
       } else {
         this.infrastructureData.zones = []
       }
+    },
+    removeInvalidWorkerMachineTypesAndVolumeTypes () {
+      this.$nextTick(() => {
+        this.$refs.manageWorkers.removeInvalidWorkerMachineTypesAndVolumeTypes()
+      })
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)

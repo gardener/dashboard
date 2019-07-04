@@ -70,6 +70,7 @@ export default {
       this.validateInput()
     },
     validateInput () {
+      this.valid = this.valid && this.worker.valid && !this.$v.$invalid
       if (this.valid !== !this.$v.$invalid) {
         this.valid = !this.$v.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })

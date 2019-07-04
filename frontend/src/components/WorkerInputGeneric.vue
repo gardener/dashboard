@@ -95,6 +95,9 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import get from 'lodash/get'
 import SizeInput from '@/components/VolumeSizeInput'
 import MachineType from '@/components/MachineType'
 import VolumeType from '@/components/VolumeType'
@@ -159,7 +162,13 @@ export default {
       type: Array,
       required: true
     },
+    infrastructureKind: {
+      type: String
+    },
     cloudProfileName: {
+      type: String
+    },
+    zone: {
       type: String
     }
   },
@@ -179,10 +188,22 @@ export default {
     ]),
 
     machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      switch (this.infrastructureKind) {
+        case 'alicloud':
+          let allMachineTypesByCloudProfileName = this.machineTypesByCloudProfileName(this.cloudProfileName)
+          return filter(allMachineTypesByCloudProfileName, machineType => includes(get(machineType, 'zones'), this.zone) === true)
+        default:
+          return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      }
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      switch (this.infrastructureKind) {
+        case 'alicloud':
+          let allVolumeTypesByCloudProfileName = this.volumeTypesByCloudProfileName(this.cloudProfileName)
+          return filter(allVolumeTypesByCloudProfileName, volumeType => includes(get(volumeType, 'zones'), this.zone) === true)
+        default:
+          return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      }
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
@@ -244,18 +265,21 @@ export default {
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {
+      this.machineTypeValid = !this.$v.$invalid && this.machineTypeValid && this.worker.valid
       if (this.machineTypeValid !== valid) {
         this.machineTypeValid = valid
         this.validateInput()
       }
     },
     onVolumeTypeValid ({ valid }) {
+      this.volumeTypeValid = !this.$v.$invalid && this.volumeTypeValid && this.worker.valid
       if (this.volumeTypeValid !== valid) {
         this.volumeTypeValid = valid
         this.validateInput()
       }
     },
     validateInput () {
+      this.valid = !this.$v.$invalid && this.valid && this.worker.valid && this.machineTypeValid && this.volumeTypeValid
       const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid
       if (this.valid !== valid) {
         this.valid = valid

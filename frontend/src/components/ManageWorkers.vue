@@ -21,7 +21,9 @@ limitations under the License.
         ref="workerInput"
         :worker="worker"
         :workers="internalWorkers"
+        :infrastructureKind="infrastructureKind"
         :cloudProfileName="cloudProfileName"
+        :zone="zone"
         @updateName="onUpdateWorkerName"
         @updateMachineType="onUpdateWorkerMachineType"
         @updateVolumeType="onUpdateWorkerVolumeType"
@@ -72,6 +74,8 @@ import find from 'lodash/find'
 import head from 'lodash/head'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -88,6 +92,9 @@ export default {
     },
     cloudProfileName: {
       type: String
+    },
+    zone: {
+      type: String
     }
   },
   data () {
@@ -103,10 +110,22 @@ export default {
       'volumeTypesByCloudProfileName'
     ]),
     machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      switch (this.infrastructureKind) {
+        case 'alicloud':
+          let allMachineTypesByCloudProfileName = this.machineTypesByCloudProfileName(this.cloudProfileName)
+          return filter(allMachineTypesByCloudProfileName, machineType => includes(get(machineType, 'zones'), this.zone) === true)
+        default:
+          return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      }
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      switch (this.infrastructureKind) {
+        case 'alicloud':
+          let allVolumeTypesByCloudProfileName = this.volumeTypesByCloudProfileName(this.cloudProfileName)
+          return filter(allVolumeTypesByCloudProfileName, volumeType => includes(get(volumeType, 'zones'), this.zone) === true)
+        default:
+          return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      }
     }
   },
   methods: {
@@ -143,6 +162,29 @@ export default {
     setDefaultWorker () {
       this.internalWorkers = []
       this.addWorker()
+    },
+    removeInvalidWorkerMachineTypesAndVolumeTypes () {
+      let machineTypeNames = []
+      let volumeTypeNames = []
+      forEach(this.machineTypes, machineType => {
+        const machineTypeName = get(machineType, 'name')
+        machineTypeNames.push(machineTypeName)
+      })
+      forEach(this.volumeTypes, volumeType => {
+        const volumeTypeName = get(volumeType, 'name')
+        volumeTypeNames.push(volumeTypeName)
+      })
+      forEach(this.internalWorkers, worker => {
+        if (includes(machineTypeNames, worker.machineType) === false) {
+          worker.machineType = undefined
+          worker.valid = false
+        }
+        if (includes(volumeTypeNames, worker.volumeType) === false) {
+          worker.volumeType = undefined
+          worker.valid = false
+        }
+      })
+      this.validateInput()
     },
     onUpdateWorkerName ({ name, id }) {
       const worker = find(this.internalWorkers, { id })
