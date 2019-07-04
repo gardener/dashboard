@@ -56,7 +56,7 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
-import { updateMaintenance } from '@/utils/api'
+import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
@@ -113,7 +113,7 @@ export default {
     },
     async updateMaintenance () {
       try {
-        await updateMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

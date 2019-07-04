@@ -20,7 +20,16 @@ limitations under the License.
       Add-ons
     </v-card-title>
     <div class="list">
-      <v-subheader>Add-ons provided by Gardener</v-subheader>
+      <v-subheader class="pr-1">
+        <v-flex grow class="pa-0">
+          Add-ons provided by Gardener
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <v-layout row>
+            <addon-configuration :shootItem="shootItem"></addon-configuration>
+          </v-layout>
+        </v-flex>
+      </v-subheader>
       <v-card-title class="listItem" v-for="item in shootAddonList" :key="item.name">
         <v-layout row class="mb-3">
           <v-flex shrink justify-center class="pr-0">
@@ -39,35 +48,21 @@ limitations under the License.
           </v-flex>
         </v-layout>
       </v-card-title>
-
-      <template v-if="customAddonList.length">
-        <v-divider class="my-2" inset></v-divider>
-        <v-subheader>Custom add-ons</v-subheader>
-        <v-card-title class="listItem" v-for="item in customAddonList" :key="item.name">
-          <v-layout row class="mb-3">
-            <v-flex shrink justify-center class="pr-0">
-              <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
-            </v-flex>
-            <v-flex class="pa-0">
-              <span class="subheading">{{item.title}}</span><br>
-              <span class="grey--text">{{item.description}}</span>
-            </v-flex>
-          </v-layout>
-        </v-card-title>
-      </template>
     </div>
   </v-card>
 </template>
 
 <script>
 
-import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import filter from 'lodash/filter'
-import forEach from 'lodash/forEach'
-import find from 'lodash/find'
+import AddonConfiguration from '@/components/AddonConfiguration'
+import { shootAddonList } from '@/utils'
 
 export default {
+  components: {
+    AddonConfiguration
+  },
   props: {
     shootItem: {
       type: Object
@@ -75,29 +70,10 @@ export default {
   },
   data () {
     return {
-      addonList: [
-        {
-          name: 'kubernetes-dashboard',
-          title: 'Dashboard',
-          description: 'General-purpose web UI for Kubernetes clusters.'
-        },
-        {
-          name: 'monocular',
-          title: 'Monocular',
-          description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
-        },
-        {
-          name: 'nginx-ingress',
-          title: 'Nginx Ingress',
-          description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.'
-        }
-      ]
+
     }
   },
   computed: {
-    ...mapGetters([
-      'customAddonDefinitionList'
-    ]),
     addons () {
       return get(this.shootItem, 'spec.addons', {})
     },
@@ -107,7 +83,7 @@ export default {
       }
     },
     shootAddonList () {
-      return filter(this.addonList, item => this.addon(item.name).enabled)
+      return filter(shootAddonList, item => this.addon(item.name).enabled)
     },
     componentUrl () {
       return (name) => {
@@ -117,21 +93,6 @@ export default {
           default:
             return undefined
         }
-      }
-    },
-    customAddonList () {
-      try {
-        const customAddonNames = JSON.parse(this.annotations['gardenextensions.sapcloud.io/addons'])
-        const list = []
-        forEach(customAddonNames, name => {
-          const item = find(this.customAddonDefinitionList, ['name', name])
-          if (item) {
-            list.push(item)
-          }
-        })
-        return list
-      } catch (err) {
-        return []
       }
     },
     monocularUrl () {

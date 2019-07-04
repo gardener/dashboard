@@ -23,7 +23,7 @@ limitations under the License.
         <v-checkbox
           color="cyan darken-2"
           v-model="addons[addonDefinition.name].enabled"
-          @input="onInputAddons"></v-checkbox>
+        ></v-checkbox>
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title >{{addonDefinition.title}}</v-list-tile-title>
@@ -35,33 +35,15 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapState } from 'vuex'
-import find from 'lodash/find'
-import concat from 'lodash/concat'
 import reduce from 'lodash/reduce'
 import set from 'lodash/set'
 import filter from 'lodash/filter'
 import assign from 'lodash/assign'
 import cloneDeep from 'lodash/cloneDeep'
-
-const standardAddonDefinitionList = [
-  {
-    name: 'kubernetes-dashboard',
-    title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters',
-    visible: true,
-    enabled: true
-  },
-  {
-    name: 'nginx-ingress',
-    title: 'Nginx Ingress',
-    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
-    visible: true,
-    enabled: true
-  }
-]
+import { shootAddonList } from '@/utils'
 
 export default {
-  name: 'create-shoot-addons',
+  name: 'manage-shoot-addons',
   components: {
   },
   props: {
@@ -69,33 +51,35 @@ export default {
   },
   data () {
     return {
-      addons: reduce(standardAddonDefinitionList, (addons, { name, enabled }) => set(addons, name, { enabled }), {})
+      addons: undefined,
+      addonDefinitionList: undefined
     }
   },
   computed: {
     ...mapGetters([
-      'customAddonDefinitionList',
       'projectList'
     ]),
     ...mapState([
       'namespace'
-    ]),
-    addonDefinitionList () {
-      const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      const customAddons = /#enableCustomAddons/i.test(project.data.purpose) ? this.customAddonDefinitionList : []
-      return concat(filter(standardAddonDefinitionList, 'visible'), customAddons)
-    }
+    ])
   },
   methods: {
-    onInputAddons () {
-      // this.$emit('updateAddons', this.addons)
-    },
     getAddons () {
       return this.addons
     },
     updateAddons (addons) {
+      this.resetAddonList(addons)
       assign(this.addons, cloneDeep(addons))
+    },
+    resetAddonList (addons) {
+      this.addonDefinitionList = filter(shootAddonList, addon => {
+        return addon.visible === true || (addons && !!addons[addon.name])
+      })
     }
+  },
+  mounted () {
+    this.resetAddonList()
+    this.addons = reduce(this.addonDefinitionList, (addons, { name, enabled }) => set(addons, name, { enabled }), {})
   }
 }
 </script>

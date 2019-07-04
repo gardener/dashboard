@@ -51,7 +51,7 @@ limitations under the License.
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import HibernationSchedule from '@/components/HibernationSchedule'
-import { updateHibernationSchedules, addShootAnnotation } from '@/utils/api'
+import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
@@ -108,7 +108,7 @@ export default {
           'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null
         }
         this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-        await updateHibernationSchedules({
+        await updateShootHibernationSchedules({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: this.hibernationSchedules

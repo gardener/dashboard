@@ -88,11 +88,11 @@ export function updateShootVersion ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, data)
 }
 
-export function updateMaintenance ({ namespace, name, data }) {
+export function updateShootMaintenance ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, data)
 }
 
-export function updateHibernationSchedules ({ namespace, name, data }) {
+export function updateShootHibernationSchedules ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`, data)
 }
 
@@ -100,8 +100,12 @@ export function updateShootHibernation ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, data)
 }
 
-export function updateWorkers ({ namespace, name, infrastructureKind, data }) {
+export function updateShootWorkers ({ namespace, name, infrastructureKind, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/${infrastructureKind}/workers`, data)
+}
+
+export function updateShootAddons ({ namespace, name, data }) {
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
 }
 
 /* Cloud Profiles */

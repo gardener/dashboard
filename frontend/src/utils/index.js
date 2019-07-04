@@ -477,3 +477,25 @@ export function selfTerminationDaysForSecret (secret) {
 export function purposesForSecret (secret) {
   return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production']
 }
+
+export const shootAddonList = [
+  {
+    name: 'kubernetes-dashboard',
+    title: 'Dashboard',
+    description: 'General-purpose web UI for Kubernetes clusters.',
+    visible: true,
+    enabled: true
+  },
+  {
+    name: 'monocular',
+    title: 'Monocular',
+    description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
+  },
+  {
+    name: 'nginx-ingress',
+    title: 'Nginx Ingress',
+    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
+    visible: true,
+    enabled: true
+  }
+]

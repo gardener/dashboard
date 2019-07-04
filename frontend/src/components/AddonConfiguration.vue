@@ -24,10 +24,9 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"
-      :confirm-disabled="!valid"
       v-model="dialog"
       :cancel="hideDialog"
-      :ok="updatePurpose"
+      :ok="updateAddons"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
@@ -37,14 +36,9 @@ limitations under the License.
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <v-layout row wrap>
-          <v-select
-            color="cyan darken-2"
-            label="Purpose"
-            :items="purposes"
-            v-model="purpose"
-            hint="Indicate the importance of the cluster"
-            persistent-hint
-            ></v-select>
+          <manage-shoot-addons
+            ref="addons"
+           ></manage-shoot-addons>
         </v-layout>
       </template>
     </confirm-dialog>
@@ -53,15 +47,17 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { addShootAnnotation } from '@/utils/api'
+import ManageShootAddons from '@/components/ManageShootAddons'
+import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion, purposesForSecret } from '@/utils'
+import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 
 export default {
-  name: 'purpose-configuration',
+  name: 'addon-configuration',
   components: {
-    ConfirmDialog
+    ConfirmDialog,
+    ManageShootAddons
   },
   props: {
     shootItem: {
@@ -73,8 +69,8 @@ export default {
       dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      purpose: null,
-      caption: 'Configure Purpose',
+      addons: null,
+      caption: 'Configure Add-ons',
       icon: 'mdi-settings-outline'
     }
   },
@@ -85,17 +81,8 @@ export default {
     shootNamespace () {
       return get(this.shootItem, 'metadata.namespace')
     },
-    valid () {
-      return !!this.purpose
-    },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
-    },
-    purposes () {
-      return purposesForSecret(this.secret)
-    },
-    secret () {
-      return get(this.shootItem, 'spec.cloud.secretBindingRef.name')
     }
   },
   methods: {
@@ -107,20 +94,14 @@ export default {
     hideDialog () {
       this.dialog = false
     },
-    async updatePurpose () {
+    async updateAddons () {
       try {
-        const purposeAnnotation = {
-          'garden.sapcloud.io/purpose': this.purpose
-        }
-        await addShootAnnotation({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: purposeAnnotation
-        })
+        this.addons = this.$refs.addons.getAddons()
+        await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not update purpose'
+        this.errorMessage = 'Could not update addons'
         this.detailedErrorMessage = errorDetails.detailedMessage
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
@@ -129,7 +110,9 @@ export default {
       this.errorMessage = null
       this.detailedErrorMessage = null
 
-      this.purpose = get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
+      this.$nextTick(() => {
+        this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
+      })
     }
   }
 }

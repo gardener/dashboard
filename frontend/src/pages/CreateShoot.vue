@@ -69,9 +69,9 @@ limitations under the License.
         Add-Ons
       </v-card-title>
       <v-card-text>
-        <create-shoot-addons
+        <manage-shoot-addons
           ref="addons"
-         ></create-shoot-addons>
+         ></manage-shoot-addons>
      </v-card-text>
     </v-card>
     <v-card flat class="mt-3">
@@ -125,7 +125,7 @@ limitations under the License.
 import CreateShootSelectInfrastructure from '@/components/CreateShootSelectInfrastructure'
 import CreateShootInfrastructureDetails from '@/components/CreateShootInfrastructureDetails'
 import CreateShootDetails from '@/components/CreateShootDetails'
-import CreateShootAddons from '@/components/CreateShootAddons'
+import ManageShootAddons from '@/components/ManageShootAddons'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import HibernationSchedule from '@/components/HibernationSchedule'
@@ -151,7 +151,7 @@ export default {
     CreateShootSelectInfrastructure,
     CreateShootInfrastructureDetails,
     CreateShootDetails,
-    CreateShootAddons,
+    ManageShootAddons,
     MaintenanceComponents,
     MaintenanceTime,
     HibernationSchedule,

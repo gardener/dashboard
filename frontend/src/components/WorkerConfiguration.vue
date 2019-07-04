@@ -49,7 +49,7 @@ limitations under the License.
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import ManageWorkers from '@/components/ManageWorkers'
-import { updateWorkers } from '@/utils/api'
+import { updateShootWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion, getCloudProviderKind } from '@/utils'
 import get from 'lodash/get'
@@ -108,7 +108,7 @@ export default {
     async updateWorkers () {
       try {
         this.workers = this.$refs.manageWorkers.getWorkers()
-        await updateWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
+        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
         this.hideDialog()
       } catch (err) {
         const errorDetails = errorDetailsFromError(err)

@@ -142,6 +142,16 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   return patch({ user, namespace, name, body: payload })
 }
 
+exports.replaceAddons = async function ({ user, namespace, name, body }) {
+  const addons = body
+  const payload = {
+    spec: {
+      addons
+    }
+  }
+  return patch({ user, namespace, name, body: payload })
+}
+
 exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
   const workers = body
   const patchOperations = [
