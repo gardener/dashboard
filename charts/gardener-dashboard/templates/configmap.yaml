@@ -55,14 +55,6 @@ data:
     terminal:
       operator:
         image: {{ .Values.terminal.operator.image.repository }}{{- if .Values.terminal.operator.image.tag }}:{{ .Values.terminal.operator.image.tag }}{{- end }}
-      cleanup:
-        image: {{ .Values.terminal.cleanup.image.repository }}{{- if .Values.terminal.cleanup.image.tag }}:{{ .Values.terminal.cleanup.image.tag }}{{- end }}
-        {{- if .Values.terminal.cleanup.schedule }}
-        schedule: {{ .Values.terminal.cleanup.schedule }}
-        {{- end}}
-         {{- if .Values.terminal.cleanup.noHeartbeatDeleteSeconds }}
-        noHeartbeatDeleteSeconds: {{ .Values.terminal.cleanup.noHeartbeatDeleteSeconds }}
-        {{- end}}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
         {{- if .Values.terminal.bootstrap.disabled }}
@@ -86,8 +78,8 @@ data:
         {{- if .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
         virtualGardenKubeconfigName: {{ .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
         {{- end }}
-        kubeApiserver:
-          {{- with .Values.terminal.gardenCluster.kubeApiserver.hosts }}
+        kubeApiServer:
+          {{- with .Values.terminal.gardenCluster.kubeApiServer.hosts }}
           hosts:
 {{ toYaml . | indent 10 }}
           {{- end }}

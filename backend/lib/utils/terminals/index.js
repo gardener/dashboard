@@ -17,32 +17,6 @@
 
 'use strict'
 
-const kubernetes = require('../../kubernetes')
-const {
-  toSecretResource
-} = require('./terminalResources')
-
-const CLUSTER_ROLE_TERMINAL_ATTACH = 'garden.sapcloud.io:dashboard-terminal-attach'
-
-const SaTypeEnum = {
-  attach: 'attach',
-  access: 'access'
-}
-
-async function createKubeconfig ({ coreClient, namespace, serviceAccountTokenObj, serviceAccountName, contextNamespace, target, server, ownerReferences }) {
-  const name = `${serviceAccountName}.kubeconfig`
-
-  const { token, caData } = serviceAccountTokenObj
-  const contextName = `${target}-${contextNamespace}`
-  const kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName, contextNamespace, token, server, caData })
-
-  const client = coreClient.namespace(namespace).secrets
-  const body = toSecretResource({ name, ownerReferences, rawData: { kubeconfig } }) // TODO pass username?
-  await replaceResource({ client, name, body })
-
-  return name
-}
-
 async function replaceResource ({ client, name, body }) {
   try {
     await client.get({ name })
@@ -56,8 +30,5 @@ async function replaceResource ({ client, name, body }) {
 }
 
 module.exports = {
-  CLUSTER_ROLE_TERMINAL_ATTACH,
-  replaceResource,
-  createKubeconfig,
-  SaTypeEnum
+  replaceResource
 }

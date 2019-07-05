@@ -102,12 +102,6 @@ terminal:
     image:
       repository: eu.gcr.io/gardener-project/gardener/ops-toolbelt
       tag: 0.1.0
-  cleanup:
-    schedule: "*/5 * * * *"
-    noHeartbeatDeleteSeconds: 300
-    image:
-      repository: eu.gcr.io/gardener-project/gardener/dashboard-terminal-cleanup
-      tag: 1.0.0
   bootstrap:
     disabled: true
     apiserverIngress:
@@ -124,7 +118,7 @@ terminal:
     seed: myseed
     namespace: garden
     virtualGardenKubeconfigName: virtual-garden-kubeconfig # only set in case of virtual garden
-    kubeApiserver:
+    kubeApiServer:
       namespace: garden
       serviceName: virtual-garden-kube-apiserver
       servicePort: 443

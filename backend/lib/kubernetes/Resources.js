@@ -116,5 +116,10 @@ module.exports = {
     name: 'projects',
     kind: 'Project',
     apiVersion: 'garden.sapcloud.io/v1beta1'
+  },
+  Terminal: {
+    name: 'terminals',
+    kind: 'Terminal',
+    apiVersion: 'extensions.gardener.cloud/v1alpha1'
   }
 }

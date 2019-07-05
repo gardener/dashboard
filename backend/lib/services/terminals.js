@@ -23,29 +23,21 @@ const Resources = kubernetes.Resources
 const {
   getSeedKubeconfig,
   getShootIngressDomain,
-  createOwnerRefArrayForResource,
   getConfigValue,
   readServiceAccountToken,
-  getTargetClusterClientConfig,
+  // getTargetClusterClientConfig,
   getSoilIngressDomainForSeed
 } = require('../utils')
 const {
   COMPONENT_TERMINAL,
-  toServiceAccountResource,
-  toRoleBindingResource,
-  toClusterRoleBindingResource,
-  toPodResource
+  toTerminalResource
 } = require('../utils/terminals/terminalResources')
-const {
-  CLUSTER_ROLE_TERMINAL_ATTACH,
-  createKubeconfig,
-  SaTypeEnum
-} = require('../utils/terminals')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const shoots = require('./shoots')
 const { Forbidden } = require('../errors')
 const logger = require('../logger')
+const fnv = require('fnv-plus')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -53,136 +45,68 @@ function Garden ({ auth }) {
   return kubernetes.garden({ auth })
 }
 
+function Gardenext ({ auth }) {
+  return kubernetes.gardenext({ auth })
+}
+
 function Core ({ auth }) {
   return kubernetes.core({ auth })
 }
 
-function getAnnotationTerminalUserAndTarget ({ username, target, kubecfgCtxNamespaceTargetCluster }) {
-  const annotation = {
-    'garden.sapcloud.io/terminal-user': username,
-    'garden.sapcloud.io/terminal-target': target
-  }
-  if (kubecfgCtxNamespaceTargetCluster) {
-    _.assign(annotation, { 'garden.sapcloud.io/kubecfg-ctx-ns-terminal-target-cluster': kubecfgCtxNamespaceTargetCluster })
-  }
-  return annotation
-}
-
-function toTerminalServiceAccountResource ({ prefix, name, saType, username, target, ownerReferences, labels = {}, annotations = {} }) {
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
-  _.assign(labels, { saType })
-
-  const heartbeat = Math.floor(new Date() / 1000)
-  const attachSaAnnotations = {
-    'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
-  }
-  _.assign(annotations, attachSaAnnotations)
-
-  return toServiceAccountResource({ prefix, name, labels, annotations, ownerReferences })
-}
-
-function toTerminalRoleBindingResource ({ name, saName, username, target, clusterRoleName, ownerReferences }) {
-  const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
-
-  const roleRef = {
-    apiGroup: Resources.ClusterRole.apiGroup,
-    kind: Resources.ClusterRole.kind,
-    name: clusterRoleName
-  }
-
-  const subjects = [
-    {
-      kind: Resources.ServiceAccount.kind,
-      name: saName
-    }
-  ]
-
-  return toRoleBindingResource({ name, annotations, subjects, roleRef, ownerReferences })
-}
-
-function toTerminalClusterRoleBindingResource ({ name, saName, saNamespace, username, target, clusterRoleName, ownerReferences }) {
-  const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target }))
-
-  const roleRef = {
-    apiGroup: Resources.ClusterRole.apiGroup,
-    kind: Resources.ClusterRole.kind,
-    name: clusterRoleName
-  }
-
-  const subjects = [
-    {
-      kind: Resources.ServiceAccount.kind,
-      name: saName,
-      namespace: saNamespace
-    }
-  ]
-
-  return toClusterRoleBindingResource({ name, roleRef, subjects, annotations, ownerReferences })
-}
-
-function toTerminalPodResource ({ name, username, target, kubecfgCtxNamespaceTargetCluster, terminalImage, ownerReferences, kubeconfigSecretName }) {
-  const annotations = {}
-  _.assign(annotations, getAnnotationTerminalUserAndTarget({ username, target, kubecfgCtxNamespaceTargetCluster }))
-
-  const spec = {
-    containers: [
-      {
-        name: TERMINAL_CONTAINER_NAME,
-        image: terminalImage,
-        stdin: true,
-        tty: true,
-        volumeMounts: [
-          {
-            name: 'kubeconfig',
-            mountPath: '/mnt/.kube'
-          }
-        ],
-        env: [
-          {
-            name: 'KUBECONFIG',
-            value: '/mnt/.kube/config'
-          }
-        ]
-      }
-    ],
-    volumes: [
-      {
-        name: 'kubeconfig',
-        secret: {
-          secretName: kubeconfigSecretName,
-          items: [{
-            key: 'kubeconfig',
-            path: 'config'
-          }]
-        }
-      }
-    ]
-  }
-  return toPodResource({ name, annotations, spec, ownerReferences })
-}
-
-async function initializeSeedTerminalObject ({ user, seed, scheduleNamespace }) {
-  const terminalInfo = {
+function initializeTerminalObject ({ user, scheduleNamespace, kubeApiServer }) {
+  return {
     namespace: scheduleNamespace,
-    container: TERMINAL_CONTAINER_NAME
+    container: TERMINAL_CONTAINER_NAME,
+    server: kubeApiServer
   }
+}
 
-  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil'
+async function existsShoot ({ gardenClient, seedName }) {
+  try {
+    await shoots.read({ gardenClient, namespace: 'garden', name: seedName })
+    return true
+  } catch (err) {
+    if (err.code === 404) {
+      return false
+    }
+    throw err
+  }
+}
+
+async function getTerminalIngress ({ user, seed }) {
+  const gardenClient = Garden(user)
+  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await existsShoot({ gardenClient, seedName: seed.metadata.name })
   let soilIngressDomain
-  const projectsClient = Garden(user).projects
-  const namespacesClient = kubernetes.core().namespaces // TODO Currently there is no other way.. but do not use admin!
+  let serviceName
+  let namespace
+  const projectsClient = gardenClient.projects
+  const namespacesClient = Core(user).namespaces
   if (isSoil) {
     const soilSeed = seed
     soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeed)
+    namespace = 'garden'
   } else {
-    const seedShootResource = await readShoot({ user, namespace: 'garden', name: _.get(seed, 'metadata.name') })
+    const seedName = seed.metadata.name
+    const seedShootResource = await readShoot({ user, namespace: 'garden', name: seedName })
     soilIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, seedShootResource)
-  }
 
-  terminalInfo.server = `api.${soilIngressDomain}`
-  return terminalInfo
+    const seedShootNS = _.get(seedShootResource, 'status.technicalID')
+    if (!seedShootNS) {
+      throw new Error(`could not get namespace for seed ${seedName} on soil`)
+    }
+
+    serviceName = 'kube-apiserver'
+    namespace = seedShootNS
+  }
+  const secretRef = _.get(seed, 'spec.secretRef')
+
+  const host = `api.${soilIngressDomain}`
+  return {
+    namespace,
+    host,
+    serviceName,
+    secretRef
+  }
 }
 
 async function readShoot ({ user, namespace, name }) {
@@ -196,92 +120,141 @@ async function readShoot ({ user, namespace, name }) {
   }
 }
 
-async function findExistingTerminalPod ({ coreClient, scheduleNamespace, username, target, kubecfgCtxNamespaceTargetCluster }) {
-  const qs = { labelSelector: `component=${COMPONENT_TERMINAL}` }
-  const existingPods = await coreClient.ns(scheduleNamespace).pods.get({ qs })
-  const existingPod = _.find(existingPods.items, item => item.metadata.annotations['garden.sapcloud.io/terminal-user'] === username && item.metadata.annotations['garden.sapcloud.io/terminal-target'] === target && item.metadata.annotations['garden.sapcloud.io/kubecfg-ctx-ns-terminal-target-cluster'] === kubecfgCtxNamespaceTargetCluster)
-  return existingPod
+async function findExistingTerminalResource ({ gardenextClient, username, namespace, name, target }) {
+  let selectors = [
+    `component=${COMPONENT_TERMINAL}`,
+    `garden.sapcloud.io/targetType=${target}`,
+    `garden.sapcloud.io/createdBy=${fnv.hash(username, 64).str()}`
+  ]
+  if (!_.isEmpty(name)) {
+    selectors = _.concat(selectors, `garden.sapcloud.io/name=${name}`)
+  }
+  const qs = { labelSelector: selectors.join(',') }
+  try {
+    let { items: existingTerminals } = await gardenextClient.ns(namespace).terminals.get({ qs })
+    existingTerminals = _.filter(existingTerminals, terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
+    const existingTerminal = _.find(existingTerminals, item => item.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
+    return existingTerminal
+  } catch (e) {
+    throw e
+  }
 }
 
-async function findExistingTerminal ({ coreClient, scheduleNamespace, username, target, kubecfgCtxNamespaceTargetCluster }) {
-  const existingPod = await findExistingTerminalPod({ coreClient, scheduleNamespace, username, target, kubecfgCtxNamespaceTargetCluster })
-  const isRunningOrPending = pod => {
-    const phase = _.get(pod, 'status.phase')
-    return phase === 'Running' || phase === 'Pending'
-  }
-  if (!isRunningOrPending(existingPod)) {
-    return undefined
-  }
+async function findExistingTerminal ({ gardenextClient, hostCoreClient, scheduleNamespace, username, namespace, name, target }) {
+  let existingTerminal = await findExistingTerminalResource({ gardenextClient, username, namespace, name, target })
 
-  const existingPodName = existingPod.metadata.name
-  const attachServiceAccountResource = _.first(existingPod.metadata.ownerReferences)
-  if (!attachServiceAccountResource) {
+  if (!existingTerminal) {
     return undefined
   }
-  const pod = existingPodName
+  if (!isTerminalReady(existingTerminal)) {
+    // TODO handle timeout?
+    existingTerminal = readTerminalUntilReady({ gardenextClient, namespace, name })
+  }
+  const pod = existingTerminal.status.podName
+  const attachServiceAccount = existingTerminal.status.attachServiceAccountName
+
   const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
-  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccountResource.name, waitUntilReady })
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
   const token = _.get(serviceAccountTokenObj, 'token')
   if (_.isEmpty(token)) {
+    // TODO delete terminal resource?
     return undefined
   }
 
-  logger.debug(`Found terminal session for user ${username}: ${existingPodName}`)
-  const attachServiceAccount = attachServiceAccountResource.name
+  logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
   return { pod, token, attachServiceAccount }
-}
-
-async function createAttachServiceAccountResource ({ coreClient, scheduleNamespace, target, username }) {
-  const prefix = `terminal-attach-${target}-`
-
-  return coreClient.ns(scheduleNamespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ prefix, username, target, saType: SaTypeEnum.attach }) })
-}
-
-async function createTerminalPod ({ coreClient, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, identifier, username, target, terminalImage, ownerReferences, kubeconfigSecretName }) {
-  const name = `terminal-${identifier}`
-  const podResource = await coreClient.ns(scheduleNamespace).pods.post({ body: toTerminalPodResource({ name, username, target, kubecfgCtxNamespaceTargetCluster, terminalImage, ownerReferences, kubeconfigSecretName }) })
-  return _.get(podResource, 'metadata.name')
 }
 
 exports.create = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  if (!isAdmin) {
-    throw new Forbidden('Admin privileges required to create terminal')
+  ensureTerminalAllowed({ isAdmin, target })
+
+  const context = await getContext({ user, namespace, name, target })
+  const { scheduleNamespace, hostClientConfig, kubeApiServer } = context
+
+  const terminalInfo = initializeTerminalObject({ user, scheduleNamespace, kubeApiServer })
+  return getOrCreateTerminalSession({ user, hostClientConfig, terminalInfo, scheduleNamespace, username, namespace, name, target, context })
+}
+
+async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
+  const qs = { labelSelector: 'runtime=garden' }
+  return gardenCoreClient.ns('garden').secrets.get({ qs })
+}
+
+async function getGardenRuntimeClusterSecretRef ({ gardenCoreClient }) {
+  const { items: runtimeSecrets } = await getRuntimeClusterSecrets({ gardenCoreClient })
+  const secret = _.head(runtimeSecrets)
+  if (!secret) {
+    throw new Error('could not fetch garden runtime secret')
   }
-
-  const { clientConfig, scheduleNamespace, accessServiceAccountNamespace, kubecfgCtxNamespaceTargetCluster, kubeconfigSecretName, seed } = await getContext({ user, namespace, name, target })
-
-  const terminalInfo = await initializeSeedTerminalObject({ user, seed, scheduleNamespace })
-  return getOrCreateTerminalSession({ clientConfig, terminalInfo, scheduleNamespace, accessServiceAccountNamespace, kubecfgCtxNamespaceTargetCluster, username, target, kubeconfigSecretName })
+  const { metadata: { name, namespace } } = secret
+  return {
+    name,
+    namespace
+  }
 }
 
 async function getContext ({ user, namespace, name, target }) {
   let scheduleNamespace
-  let kubeconfigSecretName
+  let targetCredentials
+  let hostSecretRef
   let kubecfgCtxNamespaceTargetCluster
   let seedName
-  let accessServiceAccountNamespace // not set if accessServiceAccountNamespace is false
+  let bindingKind
+  let targetNamespace
+  let kubeApiServer
+
+  const gardenCoreClient = Core(user)
+
   if (target === 'garden') {
     seedName = getConfigValue({ path: 'terminal.gardenCluster.seed' })
     scheduleNamespace = getConfigValue({ path: 'terminal.gardenCluster.namespace' })
-    kubeconfigSecretName = getConfigValue({ path: 'terminal.gardenCluster.virtualGardenKubeconfigName', required: false })
-    accessServiceAccountNamespace = 'garden' // Do not use namespace in case of admin terminal as project members could read the secret
+    kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
     kubecfgCtxNamespaceTargetCluster = namespace
+    targetNamespace = 'garden'
+
+    targetCredentials = {
+      serviceAccountRef: {
+        name: getConfigValue({ path: 'terminal.gardenCluster.serviceAccountName', defaultValue: 'dashboard-terminal-admin' }),
+        namespace: 'garden'
+      }
+    }
+    hostSecretRef = await getGardenRuntimeClusterSecretRef({ gardenCoreClient })
+
+    bindingKind = 'ClusterRoleBinding'
   } else {
     const shootResource = await shoots.read({ user, namespace, name })
     const seedShootNS = getSeedShootNamespace(shootResource)
     scheduleNamespace = seedShootNS
     seedName = shootResource.spec.cloud.seed
+    const seed = _.find(getSeeds(), ['metadata.name', seedName])
+
+    const { host } = await getTerminalIngress({ user, seed })
+    kubeApiServer = host
+
+    hostSecretRef = _.get(seed, 'spec.secretRef')
 
     if (target === 'shoot') {
-      kubeconfigSecretName = 'kubecfg'
-      accessServiceAccountNamespace = undefined // TODO garden?
+      targetNamespace = undefined // this will create a temporary namespace
       kubecfgCtxNamespaceTargetCluster = 'default'
+
+      targetCredentials = {
+        secretRef: {
+          name: `${name}.kubeconfig`,
+          namespace
+        }
+      }
+      bindingKind = 'ClusterRoleBinding'
     } else { // target cp
-      accessServiceAccountNamespace = seedShootNS // TODO use garden namespace?
       kubecfgCtxNamespaceTargetCluster = seedShootNS
+      targetNamespace = seedShootNS
+
+      targetCredentials = {
+        secretRef: _.get(seed, 'spec.secretRef')
+      }
+      bindingKind = 'RoleBinding'
     }
   }
 
@@ -290,36 +263,135 @@ async function getContext ({ user, namespace, name, target }) {
     throw new Error(`Could not find seed with name ${seedName}`)
   }
 
-  const gardenCoreClient = Core(user)
   const seedKubeconfig = await getSeedKubeconfig({ coreClient: gardenCoreClient, seed })
   if (!seedKubeconfig) {
     throw new Error('could not fetch seed kubeconfig')
   }
-  const clientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
+  const hostClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
 
+  return { seed, kubeApiServer, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace, hostClientConfig }
+}
+
+async function createTerminal ({ gardenextClient, user, namespace, name, target, context }) {
+  const { scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, bindingKind, targetNamespace, hostSecretRef } = context
+
+  const containerImage = getConfigValue({ path: 'terminal.operator.image' })
+
+  // const terminalIngress = await getTerminalIngress({ user, seed })
+
+  const podLabels = getPodLabels(target)
+
+  // const ingress = createIngress({ ...terminalIngress })
+  const terminalHost = createHost({ namespace: scheduleNamespace, secretRef: hostSecretRef, containerImage, podLabels })
+  const terminalTarget = createTarget({ kubeconfigContextNamespace: kubecfgCtxNamespaceTargetCluster, credentials: targetCredentials, bindingKind, namespace: targetNamespace })
+
+  const labels = {
+    'garden.sapcloud.io/targetType': target,
+    'garden.sapcloud.io/targetNamespace': fnv.hash(terminalTarget.kubeconfigContextNamespace, 64).str(),
+    'garden.sapcloud.io/createdBy': fnv.hash(user.id, 64).str()
+  }
+  if (!_.isEmpty(name)) {
+    labels['garden.sapcloud.io/name'] = name
+  }
+  const annotations = {
+    'garden.sapcloud.io/targetNamespace': terminalTarget.kubeconfigContextNamespace
+  }
+  const prefix = `term-${target}-`
+  const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
+
+  return gardenextClient.ns(namespace).terminals.post({ body: terminalResource })
+}
+
+function getPodLabels (target) {
+  let labels = {
+    'networking.gardener.cloud/to-dns': 'allowed',
+    'networking.gardener.cloud/to-public-networks': 'allowed',
+    'networking.gardener.cloud/to-private-networks': 'allowed'
+  }
+  switch (target) {
+    case 'garden':
+      labels = {} // no network restrictions for now
+      break
+    case 'cp':
+      labels['networking.gardener.cloud/to-seed-apiserver'] = 'allowed'
+      break
+    case 'shoot':
+      labels['networking.gardener.cloud/to-shoot-apiserver'] = 'allowed'
+      labels['networking.gardener.cloud/to-shoot-networks'] = 'allowed'
+      break
+  }
+  return labels
+}
+
+// function createIngress ({ namespace, secretRef, serviceName, host }) {
+//   return {
+//     credentials: {
+//       secretRef
+//     },
+//     namespace,
+//     kubeApiServer: {
+//       serviceName,
+//       host
+//     }
+//   }
+// }
+
+function createHost ({ secretRef, namespace, containerImage, podLabels }) {
+  const host = {
+    credentials: {
+      secretRef
+    },
+    namespace,
+    pod: {
+      labels: podLabels,
+      containerImage
+    }
+  }
+
+  return host
+}
+
+function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, namespace }) {
+  const temporaryNamespace = _.isEmpty(namespace)
   return {
-    clientConfig,
-    scheduleNamespace,
-    accessServiceAccountNamespace,
-    kubecfgCtxNamespaceTargetCluster,
-    kubeconfigSecretName,
-    seed
+    credentials,
+    kubeconfigContextNamespace,
+    bindingKind,
+    roleName: 'cluster-admin',
+    namespace,
+    temporaryNamespace
   }
 }
 
-async function getOrCreateTerminalSession ({ clientConfig, terminalInfo, scheduleNamespace, accessServiceAccountNamespace, kubecfgCtxNamespaceTargetCluster, username, target, kubeconfigSecretName }) {
-  const coreClient = kubernetes.core(clientConfig)
+function isTerminalReady (terminal) {
+  return !_.isEmpty(_.get(terminal, 'status.podName')) && !_.isEmpty(_.get(terminal, 'status.attachServiceAccountName'))
+}
 
-  const existingTerminal = await findExistingTerminal({ coreClient, scheduleNamespace, username, target, kubecfgCtxNamespaceTargetCluster })
+async function readTerminalUntilReady ({ gardenextClient, namespace, name }) {
+  const conditionFunction = isTerminalReady
+  const watch = gardenextClient.ns(namespace).terminals.watch({ name })
+  return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
+}
+
+async function getOrCreateTerminalSession ({ user, hostClientConfig, terminalInfo, scheduleNamespace, username, namespace, name, target, context }) {
+  const gardenextClient = Gardenext(user)
+  const hostCoreClient = kubernetes.core(hostClientConfig)
+
+  const existingTerminal = await findExistingTerminal({ gardenextClient, hostCoreClient, scheduleNamespace, username, namespace, name, target })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
   }
 
-  logger.debug(`No running pod found for user ${username}. Creating new pod and required resources..`)
+  logger.debug(`No terminal found for user ${username}. Creating new..`)
+  let terminalResource = await createTerminal({ gardenextClient, user, namespace, name, target, context })
 
-  const rbacClient = kubernetes.rbac(clientConfig)
-  terminalInfo = createTerminalSession({ clientConfig, coreClient, rbacClient, kubeconfigSecretName, scheduleNamespace, accessServiceAccountNamespace, kubecfgCtxNamespaceTargetCluster, target, username, terminalInfo })
+  terminalResource = await readTerminalUntilReady({ gardenextClient, namespace, name: terminalResource.metadata.name })
+
+  const attachServiceAccountToken = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: scheduleNamespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
+
+  const pod = terminalResource.status.podName
+  _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token })
   return terminalInfo
 }
 
@@ -331,138 +403,34 @@ function getSeedShootNamespace (shoot) {
   return seedShootNS
 }
 
-async function createTerminalSession ({ clientConfig, coreClient, rbacClient, kubeconfigSecretName, scheduleNamespace, accessServiceAccountNamespace, kubecfgCtxNamespaceTargetCluster, target, username, terminalInfo }) {
-  let attachServiceAccountResource
-  try {
-    attachServiceAccountResource = await createAttachServiceAccountResource({ coreClient, scheduleNamespace, target, username })
-
-    // all resources created below get the attach service account as owner ref
-    const ownerReferences = createOwnerRefArrayForResource(attachServiceAccountResource)
-
-    const attachServiceAccountName = _.get(attachServiceAccountResource, 'metadata.name')
-    const identifier = identifierFromAttachServiceAccount(attachServiceAccountName)
-    terminalInfo.attachServiceAccount = attachServiceAccountName
-
-    // create rolebinding for attach-sa
-    await rbacClient.ns(scheduleNamespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: attachServiceAccountName, saName: attachServiceAccountName, username, target, clusterRoleName: CLUSTER_ROLE_TERMINAL_ATTACH, ownerReferences }) })
-
-    const terminalImage = getConfigValue({ path: 'terminal.operator.image' })
-
-    if (_.isEmpty(kubeconfigSecretName)) {
-      const server = clientConfig.url // TODO local service?
-      kubeconfigSecretName = await createInClusterKubeconfig({ saCoreClient: coreClient, saRbacClient: rbacClient, kubecfgCoreClient: coreClient, serviceAccountNamespace: accessServiceAccountNamespace, username, target, saOwnerReferences: ownerReferences, kubecfgNamespace: scheduleNamespace, kubecfgCtxNamespaceTargetCluster, kubecfgOwnerReferences: ownerReferences, identifier, server })
-    } else if (accessServiceAccountNamespace) {
-      const targetClusterClientConfig = await getTargetClusterClientConfig({ coreClient, namespace: scheduleNamespace, kubeconfigSecretName })
-      const targetClusterCoreClient = kubernetes.core(targetClusterClientConfig)
-      const targetClusterRbacClient = kubernetes.rbac(targetClusterClientConfig)
-      const server = targetClusterClientConfig.url
-      // maybe split in two methods
-      kubeconfigSecretName = await createInClusterKubeconfig({ saCoreClient: targetClusterCoreClient, saRbacClient: targetClusterRbacClient, kubecfgCoreClient: coreClient, serviceAccountNamespace: accessServiceAccountNamespace, username, target, saOwnerReferences: undefined, kubecfgNamespace: scheduleNamespace, kubecfgCtxNamespaceTargetCluster, kubecfgOwnerReferences: ownerReferences, identifier, server }) // as this is a different cluster we can't set the owner reference of the attach SA
-    }
-
-    const pod = await createTerminalPod({ coreClient, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, identifier, username, target, terminalImage, ownerReferences, kubeconfigSecretName })
-
-    const attachServiceAccountToken = await readServiceAccountToken({ coreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccountName })
-
-    _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token })
-
-    return terminalInfo
-  } catch (e) {
-    /* If something goes wrong during setting up kubernetes resources, we need to cleanup the serviceaccount (if created)
-       This will also delete all other leftovers via the owener refs (cascade delete) */
-    const name = _.get(attachServiceAccountResource, 'metadata.name', false)
-    try {
-      if (name) {
-        logger.debug(`Something went wrong during creation of Kubernetes resources. Cleaning up ServiceAccount ${name}..`)
-        await coreClient.ns(scheduleNamespace).serviceaccounts.delete({ name })
-      }
-    } catch (e) {
-      logger.error(`Unable to cleanup ServiceAccount ${name}. This may result in leftovers that you need to cleanup manually`)
-    }
-    throw new Error(`Could not setup Kubernetes Resources for Terminal session. Error: ${e}`)
+function ensureTerminalAllowed ({ isAdmin }) {
+  const terminalAllowed = isAdmin
+  if (!terminalAllowed) {
+    throw new Forbidden('Terminal usage is not allowed for this target')
   }
-}
-
-function identifierFromAttachServiceAccount (attachServiceAccountName) {
-  return _.replace(attachServiceAccountName, 'terminal-attach-', '')
-}
-
-function accessServiceAccountNameFromIdentifier (identifier) {
-  return `terminal-${identifier}`
-}
-
-async function createInClusterKubeconfig ({ saCoreClient, saRbacClient, kubecfgCoreClient, serviceAccountNamespace, saOwnerReferences, username, target, kubecfgNamespace, kubecfgCtxNamespaceTargetCluster, kubecfgOwnerReferences, identifier, server }) {
-  const serviceAccountName = accessServiceAccountNameFromIdentifier(identifier)
-
-  const serviceAccountTokenObj = await createAdminServiceAccount({ coreClient: saCoreClient, rbacClient: saRbacClient, namespace: serviceAccountNamespace, serviceAccountName, username, target, ownerReferences: saOwnerReferences, identifier, server })
-
-  const kubeconfigName = await createKubeconfig({ coreClient: kubecfgCoreClient, namespace: kubecfgNamespace, serviceAccountTokenObj, serviceAccountName, contextNamespace: kubecfgCtxNamespaceTargetCluster, target, username, server, ownerReferences: kubecfgOwnerReferences })
-  return kubeconfigName
-}
-
-async function createAdminServiceAccount ({ coreClient, rbacClient, namespace, serviceAccountName, username, target, ownerReferences }) {
-  const adminServiceAccountResource = await coreClient.ns(namespace).serviceaccounts.post({ body: toTerminalServiceAccountResource({ name: serviceAccountName, saType: SaTypeEnum.access, username, target, ownerReferences }) })
-
-  const adminSaOwnerRefs = createOwnerRefArrayForResource(adminServiceAccountResource)
-
-  // TODO do not use namespace-scoped resources as owner of cluster-scoped resources
-  const clusterRoleName = 'cluster-admin'
-  if (target === 'garden' || target === 'shoot') { // create cluster rolebinding for cluster-admin
-    await rbacClient.clusterrolebindings.post({ body: toTerminalClusterRoleBindingResource({ name: serviceAccountName, saName: serviceAccountName, saNamespace: namespace, username, target, clusterRoleName, ownerReferences: adminSaOwnerRefs }) })
-  } else { // create rolebinding for namespace cluster-admin
-    await rbacClient.ns(namespace).rolebindings.post({ body: toTerminalRoleBindingResource({ name: serviceAccountName, saName: serviceAccountName, username, target, clusterRoleName, ownerReferences: adminSaOwnerRefs }) })
-  }
-
-  // wait until API token is written into service account before creating the pod
-  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient, namespace, serviceAccountName })
-  if (!serviceAccountTokenObj) {
-    throw new Error('No API token found for service account %s', serviceAccountName)
-  }
-  return serviceAccountTokenObj
 }
 
 exports.heartbeat = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  if (!isAdmin) {
-    throw new Forbidden('Admin privileges required')
+  ensureTerminalAllowed({ isAdmin, target })
+
+  const gardenextClient = Gardenext(user)
+
+  const terminal = await findExistingTerminalResource({ gardenextClient, username, namespace, name, target })
+  if (!terminal) {
+    throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
   }
 
-  const { clientConfig, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, kubeconfigSecretName, accessServiceAccountNamespace } = await getContext({ user, namespace, name, target })
-  const coreClient = kubernetes.core(clientConfig)
-
-  const existingPod = await findExistingTerminalPod({ coreClient, scheduleNamespace, username, target, kubecfgCtxNamespaceTargetCluster })
-  if (_.get(existingPod, 'status.phase') !== 'Running') {
-    throw new Error(`Can't process heartbeat, cannot find running pod for ${namespace}/${name}`)
-  }
-
-  const attachServiceAccount = _.first(existingPod.metadata.ownerReferences)
-  if (attachServiceAccount) {
-    const attachServiceAccountName = attachServiceAccount.name
-
-    const heartbeat = Math.floor(new Date() / 1000)
-
-    replaceHeartbeatOnServiceAccount({ coreClient, namespace: scheduleNamespace, name: attachServiceAccountName, heartbeat })
-    if (kubeconfigSecretName && accessServiceAccountNamespace) {
-      const identifier = identifierFromAttachServiceAccount(attachServiceAccountName)
-      const accessServiceAccountName = accessServiceAccountNameFromIdentifier(identifier)
-      const targetClusterClientConfig = await getTargetClusterClientConfig({ coreClient, namespace: scheduleNamespace, kubeconfigSecretName })
-      const targetClusterCoreClient = kubernetes.core(targetClusterClientConfig)
-      replaceHeartbeatOnServiceAccount({ coreClient: targetClusterCoreClient, namespace: accessServiceAccountNamespace, name: accessServiceAccountName, heartbeat })
-    }
-    return { heartbeat }
-  }
-}
-
-async function replaceHeartbeatOnServiceAccount ({ coreClient, namespace, name, heartbeat }) {
   const annotations = {
-    'garden.sapcloud.io/terminal-heartbeat': `${heartbeat}`
+    'terminal.garden.sapcloud.io/operation': `keepalive`
   }
   try {
-    await coreClient.ns(namespace).serviceaccounts.mergePatch({ name, body: { metadata: { annotations } } })
+    const name = terminal.metadata.name
+    await gardenextClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
   } catch (e) {
-    logger.error(`Could not update service account. Error: ${e}`)
-    throw new Error(`Could not update service account`)
+    logger.error(`Could not update terminal on heartbeat. Error: ${e}`)
+    throw new Error(`Could not update terminal on heartbeat`)
   }
 }

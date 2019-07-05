@@ -208,6 +208,18 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
+  gardenext (options) {
+    const resources = [
+      Resources.Terminal.name
+    ]
+    options = assign(options, {
+      path: 'apis/extensions.gardener.cloud',
+      version: 'v1alpha1',
+      namespaceResources: resources,
+      groupResources: resources
+    })
+    return new ApiGroup(credentials(options))
+  },
   apiRegistration (options) {
     options = assign(options, {
       path: 'apis/apiregistration.k8s.io',

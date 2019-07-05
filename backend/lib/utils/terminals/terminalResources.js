@@ -26,73 +26,6 @@ const { UnprocessableEntity } = require('../../errors')
 
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 
-function toClusterRoleResource ({
-  name,
-  rules,
-  labels = {},
-  annotations = {},
-  ownerReferences = []
-}) {
-  const resource = Resources.ClusterRole
-  const data = { rules }
-
-  return toResource({ resource, name, annotations, labels, ownerReferences, data })
-}
-
-function toClusterRoleBindingResource ({
-  name,
-  roleRef,
-  subjects,
-  annotations = {},
-  labels = {},
-  ownerReferences = []
-}) {
-  const resource = Resources.ClusterRoleBinding
-  const data = { roleRef, subjects }
-
-  return toResource({ resource, name, annotations, labels, ownerReferences, data })
-}
-
-function toRoleBindingResource ({
-  name,
-  annotations = {},
-  labels = {},
-  subjects,
-  roleRef,
-  ownerReferences
-}) {
-  const resource = Resources.RoleBinding
-  const data = { roleRef, subjects }
-
-  return toResource({ resource, name, annotations, labels, ownerReferences, data })
-}
-
-function toServiceAccountResource ({
-  prefix,
-  name,
-  labels = {},
-  annotations = {},
-  ownerReferences = []
-}) {
-  const resource = Resources.ServiceAccount
-  const generateName = prefix
-
-  return toResource({ resource, name, generateName, annotations, labels, ownerReferences })
-}
-
-function toCronjobResource ({
-  name,
-  spec,
-  annotations = {},
-  ownerReferences = [],
-  labels = {}
-}) {
-  const resource = Resources.CronJob
-  const data = { spec }
-
-  return toResource({ resource, name, annotations, labels, ownerReferences, data })
-}
-
 function toIngressResource ({
   name,
   spec,
@@ -134,20 +67,6 @@ function toEndpointResource ({
   return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
 }
 
-function toPodResource ({
-  name,
-  namespace,
-  annotations,
-  labels,
-  spec,
-  ownerReferences
-}) {
-  const resource = Resources.Pod
-  const data = { spec }
-
-  return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
-}
-
 function toSecretResource ({ name, namespace, annotations, labels, ownerReferences, rawData }) {
   const resource = Resources.Secret
   let encodedData
@@ -161,6 +80,13 @@ function toSecretResource ({ name, namespace, annotations, labels, ownerReferenc
     data: encodedData
   }
   return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
+}
+
+function toTerminalResource ({ prefix, namespace, annotations, labels, ownerReferences, host, target }) {
+  const resource = Resources.Terminal
+  const data = { spec: { host, target } }
+
+  return toResource({ resource, generateName: prefix, namespace, annotations, labels, ownerReferences, data })
 }
 
 function toResource ({
@@ -205,14 +131,9 @@ function toResource ({
 
 module.exports = {
   COMPONENT_TERMINAL,
-  toClusterRoleResource,
-  toClusterRoleBindingResource,
-  toRoleBindingResource,
-  toServiceAccountResource,
-  toCronjobResource,
   toIngressResource,
   toEndpointResource,
   toServiceResource,
-  toPodResource,
-  toSecretResource
+  toSecretResource,
+  toTerminalResource
 }

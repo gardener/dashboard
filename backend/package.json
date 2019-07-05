@@ -35,7 +35,7 @@
     "express": "^4.17.1",
     "got": "^9.6.0",
     "helmet": "^3.18.0",
-    "is-ip": "^2.0.0",
+    "fnv-plus": "^1.2.12",
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^8.5.1",
     "kubernetes-client": "^5.4.0",

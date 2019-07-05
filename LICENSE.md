@@ -256,10 +256,6 @@ Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/got/blob/master/license)
 
-- [is-ip](https://github.com/sindresorhus/is-ip)\
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
-[MIT License](https://github.com/sindresorhus/is-ip/blob/master/license)
-
 - [helmet](https://github.com/helmetjs/helmet)\
 Copyright (c) 2012-2018 Evan Hahn, Adam Baldwin\
 [MIT License](https://github.com/helmetjs/helmet/blob/master/LICENSE)

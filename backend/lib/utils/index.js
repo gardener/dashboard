@@ -122,8 +122,20 @@ async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
 }
 
 async function getProjectNameFromNamespace (projects, namespaces, namespace) {
-  const project = await getProjectByNamespace(projects, namespaces, namespace)
-  return project.metadata.name
+  try {
+    const project = await getProjectByNamespace(projects, namespaces, namespace)
+    return project.metadata.name
+  } catch (e) {
+    if (e.code === 404) {
+      /*
+        fallback: there is no corresponding project, use namespace name
+        the community installer currently does not create a project resource for the garden namespace
+        because of https://github.com/gardener/gardener/issues/879
+      */
+      return namespace
+    }
+    throw e
+  }
 }
 
 async function getProjectByNamespace (projects, namespaces, namespace) {
