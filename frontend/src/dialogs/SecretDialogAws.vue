@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout row>
-        <v-flex xs8>
+      <v-layout column>
+        <v-flex>
           <v-text-field
             color="orange darken-2"
             ref="accessKeyId"
@@ -43,10 +43,7 @@ limitations under the License.
             hint="e.g. AKIAIOSFODNN7EXAMPLE"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="orange darken-2"
             v-model="secretAccessKey"

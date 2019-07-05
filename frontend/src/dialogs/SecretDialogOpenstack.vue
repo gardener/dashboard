@@ -30,8 +30,8 @@ limitations under the License.
     @cloudProfileName="onCloudProfileNameUpdate">
 
     <template slot="data-slot">
-      <v-layout row>
-        <v-flex xs8>
+      <v-layout column>
+        <v-flex>
           <v-text-field
             color="black"
             ref="domainName"
@@ -42,10 +42,7 @@ limitations under the License.
             @blur="$v.domainName.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="black"
             ref="tenantName"
@@ -56,10 +53,7 @@ limitations under the License.
             @blur="$v.tenantName.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="black"
             v-model="keystoneUrl"
@@ -67,10 +61,7 @@ limitations under the License.
             disabled
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
           color="black"
           v-model="username"
@@ -80,10 +71,7 @@ limitations under the License.
           @blur="$v.username.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="black"
             v-model="password"

@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="800">
+  <v-dialog v-model="visible" max-width="600">
     <v-card>
       <v-img
         class="white--text"
@@ -35,45 +35,45 @@ limitations under the License.
       </v-img>
 
       <v-card-text>
-        <form>
-          <v-container fluid>
-            <v-layout row>
-              <v-flex xs5>
-                <template v-if="isCreateMode">
-                  <v-text-field
-                    :color="color"
-                    ref="secretName"
-                    v-model="secretName"
-                    label="Secret Name"
-                    :error-messages="getErrorMessages('secretName')"
-                    @input="$v.secretName.$touch()"
-                    @blur="$v.secretName.$touch()"
-                  ></v-text-field>
-                </template>
-                <template v-else>
-                  <div class="title pb-3">{{secretName}}</div>
-                </template>
-              </v-flex>
-            </v-layout>
+        <v-container fluid>
+          <v-layout row>
+            <v-flex>
+              <template v-if="isCreateMode">
+                <v-text-field
+                  :color="color"
+                  ref="secretName"
+                  v-model="secretName"
+                  label="Secret Name"
+                  :error-messages="getErrorMessages('secretName')"
+                  @input="$v.secretName.$touch()"
+                  @blur="$v.secretName.$touch()"
+                ></v-text-field>
+              </template>
+              <template v-else>
+                <div class="title pb-3">{{secretName}}</div>
+              </template>
+            </v-flex>
+          </v-layout>
 
-            <v-layout row v-show="cloudProfiles.length !== 1">
-              <v-flex xs5>
-                <cloud-profile
-                  ref="cloudProfile"
-                  v-model="cloudProfileName"
-                  :isCreateMode="isCreateMode"
-                  :cloudProfiles="cloudProfiles"
-                  :color="color">
-                </cloud-profile>
-              </v-flex>
-            </v-layout>
+          <v-layout row v-show="cloudProfiles.length !== 1">
+            <v-flex>
+              <cloud-profile
+                ref="cloudProfile"
+                v-model="cloudProfileName"
+                :isCreateMode="isCreateMode"
+                :cloudProfiles="cloudProfiles"
+                :color="color">
+              </cloud-profile>
+            </v-flex>
+          </v-layout>
 
-            <slot name="data-slot"></slot>
-            <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
-          </v-container>
-        </form>
+          <slot name="data-slot"></slot>
+          <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+        </v-container>
       </v-card-text>
-
+      <v-alert :value="!isCreateMode && relatedShootCount > 1" type="warning">
+        This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
+      </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native="cancel">Cancel</v-btn>
@@ -93,6 +93,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
+import filter from 'lodash/filter'
 import Alert from '@/components/Alert'
 import InfraIcon from '@/components/InfrastructureIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
@@ -173,7 +174,8 @@ export default {
     ]),
     ...mapGetters([
       'infrastructureSecretList',
-      'cloudProfilesByCloudProviderKind'
+      'cloudProfilesByCloudProviderKind',
+      'shootList'
     ]),
     cloudProfileName: {
       get () {
@@ -235,6 +237,19 @@ export default {
     },
     textColor () {
       return textColor(this.color)
+    },
+    relatedShootCount () {
+      return this.shootsByInfrastructureSecret.length
+    },
+    shootsByInfrastructureSecret () {
+      const secretName = get(this.secret, 'metadata.name')
+      if (secretName) {
+        const predicate = item => {
+          return get(item, 'spec.cloud.secretBindingRef.name') === secretName
+        }
+        return filter(this.shootList, predicate)
+      }
+      return []
     }
   },
   methods: {

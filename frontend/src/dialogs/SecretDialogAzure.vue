@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout row>
-        <v-flex xs8>
+      <v-layout column>
+        <v-flex>
           <v-text-field
             color="blue"
             ref="clientId"
@@ -41,10 +41,7 @@ limitations under the License.
             @blur="$v.clientId.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="blue"
             v-model="clientSecret"
@@ -57,10 +54,7 @@ limitations under the License.
             @blur="$v.clientSecret.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="blue"
             v-model="tenantId"
@@ -70,10 +64,7 @@ limitations under the License.
             @blur="$v.tenantId.$touch()"
           ></v-text-field>
         </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="blue"
             v-model="subscriptionId"
