@@ -262,14 +262,8 @@ const getters = {
   websocketConnectAttempt (state) {
     return get(state, 'websocketConnectionError.reconnectAttempt')
   },
-  isHideUserIssues (state, getters) {
-    return getters['shoots/isHideUserIssues']
-  },
-  isHideProgressingIssues (state, getters) {
-    return getters['shoots/isHideProgressingIssues']
-  },
-  isHideDeactivatedReconciliation (state, getters) {
-    return getters['shoots/isHideDeactivatedReconciliation']
+  getShootListFilters (state, getters) {
+    return getters['shoots/getShootListFilters']
   }
 }
 
@@ -371,8 +365,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setHideUserIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideUserIssues', value)
+  setShootListFilters ({ dispatch, commit }, value) {
+    return dispatch('shoots/setShootListFilters', value)
       .catch(err => {
         dispatch('setError', err)
       })

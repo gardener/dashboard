@@ -76,36 +76,47 @@ limitations under the License.
             </v-list-tile>
             <template v-if="isAdmin">
               <v-list-tile
-                @click.stop="toggleHideProgressingIssues"
-                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
-                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                @click.stop="toggleFilter('progressing')"
+                :disabled="filtersDisabled"
+                :class="disabledFilterClass">
                 <v-list-tile-action>
-                  <v-icon :color="checkboxColor(hideProgressingIssues)" v-text="checkboxIcon(hideProgressingIssues)"/>
+                  <v-icon :color="checkboxColor(isFilterActive('progressing'))" v-text="checkboxIcon(isFilterActive('progressing'))"/>
                 </v-list-tile-action>
                 <v-list-tile-content class="grey--text text--darken-2">
                   <v-list-tile-title>Hide progressing clusters</v-list-tile-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-list-tile
-                @click.stop="toggleHideUserIssues"
-                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
-                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                @click.stop="toggleFilter('userIssues')"
+                :disabled="filtersDisabled"
+                :class="disabledFilterClass">
                 <v-list-tile-action>
-                  <v-icon :color="checkboxColor(hideUserIssues)" v-text="checkboxIcon(hideUserIssues)"/>
+                  <v-icon :color="checkboxColor(isFilterActive('userIssues'))" v-text="checkboxIcon(isFilterActive('userIssues'))"/>
                 </v-list-tile-action>
                 <v-list-tile-content class="grey--text text--darken-2">
                   <v-list-tile-title>Hide user issues</v-list-tile-title>
                 </v-list-tile-content>
               </v-list-tile>
               <v-list-tile
-                @click.stop="toggleHideDeactivatedReconciliation"
-                :disabled="isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled"
-                :class="hideUserIssuesAndHideDeactivatedReconciliationClass">
+                @click.stop="toggleFilter('deactivatedReconciliation')"
+                :disabled="filtersDisabled"
+                :class="disabledFilterClass">
                 <v-list-tile-action>
-                  <v-icon :color="checkboxColor(hideDeactivatedReconciliation)" v-text="checkboxIcon(hideDeactivatedReconciliation)"/>
+                  <v-icon :color="checkboxColor(isFilterActive('deactivatedReconciliation'))" v-text="checkboxIcon(isFilterActive('deactivatedReconciliation'))"/>
                 </v-list-tile-action>
                 <v-list-tile-content class="grey--text text--darken-2">
                   <v-list-tile-title>Hide clusters with deactivated reconciliation</v-list-tile-title>
+                </v-list-tile-content>
+              </v-list-tile>
+              <v-list-tile
+                @click.stop="toggleFilter('hasJournals')"
+                :disabled="filtersDisabled"
+                :class="disabledFilterClass">
+                <v-list-tile-action>
+                  <v-icon :color="checkboxColor(isFilterActive('hasJournals'))" v-text="checkboxIcon(isFilterActive('hasJournals'))"/>
+                </v-list-tile-action>
+                <v-list-tile-content class="grey--text text--darken-2">
+                  <v-list-tile-title>Hide clusters with journal entries</v-list-tile-title>
                 </v-list-tile-content>
               </v-list-tile>
             </template>
@@ -150,6 +161,7 @@ import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
+import cloneDeep from 'lodash/cloneDeep'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -206,9 +218,7 @@ export default {
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
       setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
-      setHideProgressingIssues: 'setHideProgressingIssues',
-      setHideUserIssues: 'setHideUserIssues',
-      setHideDeactivatedReconciliation: 'setHideDeactivatedReconciliation'
+      setShootListFilters: 'setShootListFilters'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -267,20 +277,16 @@ export default {
         }
       }
     },
-    toggleHideUserIssues () {
+    toggleFilter (key) {
       if (this.showOnlyShootsWithIssues) {
-        this.hideUserIssues = !this.hideUserIssues
+        const filters = cloneDeep(this.getShootListFilters)
+        filters[key] = !filters[key]
+        this.setShootListFilters(filters)
       }
     },
-    toggleHideProgressingIssues () {
-      if (this.showOnlyShootsWithIssues) {
-        this.hideProgressingIssues = !this.hideProgressingIssues
-      }
-    },
-    toggleHideDeactivatedReconciliation () {
-      if (this.showOnlyShootsWithIssues) {
-        this.hideDeactivatedReconciliation = !this.hideDeactivatedReconciliation
-      }
+    isFilterActive (key) {
+      const filters = this.getShootListFilters
+      return get(filters, key, false)
     },
     setSelectedShoot (selectedShoot) {
       clearTimeout(this.clearSelectedShootTimerID)
@@ -298,9 +304,7 @@ export default {
       item: 'shootByNamespaceAndName',
       selectedItem: 'selectedShoot',
       isAdmin: 'isAdmin',
-      isHideUserIssues: 'isHideUserIssues',
-      isHideProgressingIssues: 'isHideProgressingIssues',
-      isHideDeactivatedReconciliation: 'isHideDeactivatedReconciliation'
+      getShootListFilters: 'getShootListFilters'
     }),
     ...mapState([
       'shootsLoading',
@@ -349,57 +353,27 @@ export default {
     items () {
       return this.cachedItems || this.mappedItems
     },
-    isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled () {
+    filtersDisabled () {
       return !this.showOnlyShootsWithIssues
     },
-    hideUserIssues: {
-      get () {
-        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
-          return false
-        }
-        return this.isHideUserIssues
-      },
-      set (value) {
-        this.setHideUserIssues(value)
-      }
-    },
-    hideProgressingIssues: {
-      get () {
-        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
-          return false
-        }
-        return this.isHideProgressingIssues
-      },
-      set (value) {
-        this.setHideProgressingIssues(value)
-      }
-    },
-    hideDeactivatedReconciliation: {
-      get () {
-        if (this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled) {
-          return false
-        }
-        return this.isHideDeactivatedReconciliation
-      },
-      set (value) {
-        this.setHideDeactivatedReconciliation(value)
-      }
-    },
-    hideUserIssuesAndHideDeactivatedReconciliationClass () {
-      return this.isHideProgressingIssuesHideUserIssuesHideDeactedReconciliationDisabled ? 'disabled_filter' : ''
+    disabledFilterClass () {
+      return this.filtersDisabled ? 'disabled_filter' : ''
     },
     headlineSubtitle () {
       let subtitle = ''
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
         subtitle = 'Hide: Healthy Clusters'
-        if (this.isHideProgressingIssues) {
+        if (this.isFilterActive('progressing')) {
           subtitle += ', Progressing Clusters'
         }
-        if (this.isHideUserIssues) {
+        if (this.isFilterActive('userIssues')) {
           subtitle += ', User Errors'
         }
-        if (this.isHideDeactivatedReconciliation) {
+        if (this.isFilterActive('deactivatedReconciliation')) {
           subtitle += ', Deactivated Reconciliation'
+        }
+        if (this.isFilterActive('hasJournals')) {
+          subtitle += ', Has Journals'
         }
       }
       return subtitle
@@ -413,15 +387,6 @@ export default {
   },
   mounted () {
     this.floatingButton = true
-    if (this.hideProgressingIssues === undefined) {
-      this.hideProgressingIssues = true
-    }
-    if (this.hideUserIssues === undefined) {
-      this.hideUserIssues = this.isAdmin
-    }
-    if (this.hideDeactivatedReconciliation === undefined) {
-      this.hideDeactivatedReconciliation = this.isAdmin
-    }
     this.loadColumnsChecked()
   },
   beforeUpdate () {

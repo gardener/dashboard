@@ -63,9 +63,7 @@ const state = {
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
-  hideUserIssues: undefined,
-  hideProgressingIssues: undefined,
-  hideDeactivatedReconciliation: undefined
+  shootListFilters: undefined
 }
 
 // getters
@@ -83,14 +81,16 @@ const getters = {
       return findItem(state.selection)
     }
   },
-  isHideUserIssues () {
-    return state.hideUserIssues
-  },
-  isHideProgressingIssues () {
-    return state.hideProgressingIssues
-  },
-  isHideDeactivatedReconciliation () {
-    return state.hideDeactivatedReconciliation
+  getShootListFilters () {
+    if (!state.shootListFilters) {
+      return {
+        progressing: true,
+        userIssues: store.getters['isAdmin'],
+        deactivatedReconciliation: store.getters['isAdmin'],
+        hasJournals: false
+      }
+    }
+    return state.shootListFilters
   }
 }
 
@@ -199,17 +199,9 @@ const actions = {
       commit('SET_SEARCHVALUE', { rootState, searchValue })
     }
   },
-  setHideUserIssues ({ commit, rootState }, value) {
-    commit('SET_HIDE_USER_ISSUES', { rootState, value })
-    return state.hideUserIssues
-  },
-  setHideProgressingIssues ({ commit, rootState }, value) {
-    commit('SET_HIDE_PROGRESSING_ISSUES', { rootState, value })
-    return state.hideProgressingIssues
-  },
-  setHideDeactivatedReconciliation ({ commit, rootState }, value) {
-    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', { rootState, value })
-    return state.hideDeactivatedReconciliation
+  setShootListFilters ({ commit, rootState }, value) {
+    commit('SET_SHOOT_LIST_FILTERS', { rootState, value })
+    return state.shootListFilters
   }
 }
 
@@ -406,23 +398,31 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     items = filter(items, predicate)
   }
-  if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isStatusProgressing(get(item, 'metadata', {}))
+  if (rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    if (get(state, 'shootListFilters.progressing', false)) {
+      const predicate = item => {
+        return !isStatusProgressing(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
-  }
-  if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isUserError(get(item, 'status.lastError.codes', []))
+    if (get(state, 'shootListFilters.userIssues', false)) {
+      const predicate = item => {
+        return !isUserError(get(item, 'status.lastError.codes', []))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
-  }
-  if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isReconciliationDeactivated(get(item, 'metadata', {}))
+    if (get(state, 'shootListFilters.deactivatedReconciliation', false)) {
+      const predicate = item => {
+        return !isReconciliationDeactivated(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
+    if (get(state, 'shootListFilters.hasJournals', false)) {
+      const predicate = item => {
+        return !(store.getters['journals/lastUpdated'](get(item, 'metadata', {})) !== undefined)
+      }
+      items = filter(items, predicate)
+    }
   }
 
   state.filteredAndSortedShoots = items
@@ -526,16 +526,8 @@ const mutations = {
     state.sortedShoots = []
     state.filteredAndSortedShoots = []
   },
-  SET_HIDE_USER_ISSUES (state, { rootState, value }) {
-    state.hideUserIssues = value
-    setFilteredAndSortedItems(state, rootState)
-  },
-  SET_HIDE_PROGRESSING_ISSUES (state, { rootState, value }) {
-    state.hideProgressingIssues = value
-    setFilteredAndSortedItems(state, rootState)
-  },
-  SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
-    state.hideDeactivatedReconciliation = value
+  SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
+    state.shootListFilters = value
     setFilteredAndSortedItems(state, rootState)
   }
 }
