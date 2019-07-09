@@ -117,20 +117,20 @@ terminal:
   gardenCluster:
     namespace: garden
     kubeApiServer:
-      namespace: garden
-      serviceName: virtual-garden-kube-apiserver
-      servicePort: 443
+      # namespace: garden
+      # serviceName: virtual-garden-kube-apiserver
+      # servicePort: 443
       hosts:
         - api.example.org
-      tls: # Needs to be a browser-trusted certificate!
-        crt: |
-          -----BEGIN CERTIFICATE-----
-          Li4u
-          -----END CERTIFICATE-----
-          -----BEGIN CERTIFICATE-----
-          Li4u
-          -----END CERTIFICATE-----
-        key: |
-          -----BEGIN RSA PRIVATE KEY-----
-          Li4u
-          -----END RSA PRIVATE KEY-----
+      # tls: # Needs to be a browser-trusted certificate!
+      #   crt: |
+      #     -----BEGIN CERTIFICATE-----
+      #     Li4u
+      #     -----END CERTIFICATE-----
+      #     -----BEGIN CERTIFICATE-----
+      #     Li4u
+      #     -----END CERTIFICATE-----
+      #   key: |
+      #     -----BEGIN RSA PRIVATE KEY-----
+      #     Li4u
+      #     -----END RSA PRIVATE KEY-----
