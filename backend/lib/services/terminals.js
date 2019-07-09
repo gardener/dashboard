@@ -52,9 +52,8 @@ function Core ({ auth }) {
   return kubernetes.core({ auth })
 }
 
-function initializeTerminalObject ({ user, scheduleNamespace, kubeApiServer }) {
+function initializeTerminalObject ({ scheduleNamespace, kubeApiServer }) {
   return {
-    namespace: scheduleNamespace,
     container: TERMINAL_CONTAINER_NAME,
     server: kubeApiServer
   }
@@ -141,7 +140,7 @@ async function findExistingTerminalResource ({ gardendashboardClient, username, 
   }
 }
 
-async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, scheduleNamespace, username, namespace, name, target }) {
+async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, username, namespace, name, target }) {
   let existingTerminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, target })
 
   if (!existingTerminal) {
@@ -149,13 +148,14 @@ async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, sc
   }
   if (!isTerminalReady(existingTerminal)) {
     // TODO handle timeout?
-    existingTerminal = readTerminalUntilReady({ gardendashboardClient, namespace, name })
+    existingTerminal = await readTerminalUntilReady({ gardendashboardClient, namespace, name })
   }
   const pod = existingTerminal.status.podName
   const attachServiceAccount = existingTerminal.status.attachServiceAccountName
+  const hostNamespace = existingTerminal.spec.host.namespace
 
   const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
-  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: scheduleNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
+  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: hostNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
   const token = _.get(serviceAccountTokenObj, 'token')
   if (_.isEmpty(token)) {
     // TODO delete terminal resource?
@@ -163,7 +163,7 @@ async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, sc
   }
 
   logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
-  return { pod, token, attachServiceAccount }
+  return { pod, token, attachServiceAccount, namespace: hostNamespace }
 }
 
 exports.create = async function ({ user, namespace, name, target }) {
@@ -173,10 +173,9 @@ exports.create = async function ({ user, namespace, name, target }) {
   ensureTerminalAllowed({ isAdmin, target })
 
   const context = await getContext({ user, namespace, name, target })
-  const { scheduleNamespace, kubeApiServer } = context
 
-  const terminalInfo = initializeTerminalObject({ user, scheduleNamespace, kubeApiServer })
-  return getOrCreateTerminalSession({ user, terminalInfo, scheduleNamespace, username, namespace, name, target, context })
+  const terminalInfo = initializeTerminalObject(context)
+  return getOrCreateTerminalSession({ user, terminalInfo, username, namespace, name, target, context })
 }
 
 async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
@@ -359,14 +358,14 @@ async function readTerminalUntilReady ({ gardendashboardClient, namespace, name 
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
 
-async function getOrCreateTerminalSession ({ user, terminalInfo, scheduleNamespace, username, namespace, name, target, context }) {
+async function getOrCreateTerminalSession ({ user, terminalInfo, username, namespace, name, target, context }) {
   const gardendashboardClient = Gardendashboard(user)
   const gardenCoreClient = Core(user)
 
   const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...context.hostSecretRef })
   const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
-  const existingTerminal = await findExistingTerminal({ gardendashboardClient, hostCoreClient, scheduleNamespace, username, namespace, name, target })
+  const existingTerminal = await findExistingTerminal({ gardendashboardClient, hostCoreClient, username, namespace, name, target })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
@@ -377,10 +376,10 @@ async function getOrCreateTerminalSession ({ user, terminalInfo, scheduleNamespa
 
   terminalResource = await readTerminalUntilReady({ gardendashboardClient, namespace, name: terminalResource.metadata.name })
 
-  const attachServiceAccountToken = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: scheduleNamespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
+  const attachServiceAccountToken = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
 
   const pod = terminalResource.status.podName
-  _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token })
+  _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token, namespace: terminalResource.spec.host.namespace })
   return terminalInfo
 }
 
