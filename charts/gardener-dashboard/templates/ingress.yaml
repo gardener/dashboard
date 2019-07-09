@@ -32,14 +32,16 @@ spec:
 {{- if .Values.terminal }}
 {{- if .Values.terminal.gardenCluster }}
 {{- if .Values.terminal.gardenCluster.kubeApiServer }}
+{{- if .Values.terminal.gardenCluster.kubeApiServer.serviceName }}
 ---
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
   name: dashboard-terminal-kube-apiserver-ingress
-  namespace: {{ required ".Values.terminal.gardenCluster.kubeApiServer.namespace is required" .Values.terminal.gardenCluster.kubeApiServer.namespace }}
+  namespace: {{ .Values.terminal.gardenCluster.kubeApiServer.namespace }}
   labels:
     app: gardener-dashboard
+    component: dashboard-terminal
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
@@ -60,10 +62,11 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: {{ required ".Values.terminal.gardenCluster.kubeApiServer.serviceName is required" $.Values.terminal.gardenCluster.kubeApiServer.serviceName }}
-          servicePort: {{ required ".Values.terminal.gardenCluster.kubeApiServer.servicePort is required" $.Values.terminal.gardenCluster.kubeApiServer.servicePort }}
+          serviceName: {{ .Values.terminal.gardenCluster.kubeApiServer.serviceName }}
+          servicePort: {{ .Values.terminal.gardenCluster.kubeApiServer.servicePort }}
         path: /
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

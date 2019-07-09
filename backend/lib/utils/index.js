@@ -99,12 +99,12 @@ async function getSeedKubeconfigForShoot ({ user, shoot }) {
 async function getSeedKubeconfig ({ coreClient, seed }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-  return getKubeconfig({ coreClient, secretName: seedSecretName, secretNamepsace: seedSecretNamespace })
+  return getKubeconfig({ coreClient, name: seedSecretName, namespace: seedSecretNamespace })
 }
 
-async function getKubeconfig ({ coreClient, secretName, secretNamepsace }) {
+async function getKubeconfig ({ coreClient, name, namespace }) {
   try {
-    const secret = await coreClient.ns(secretNamepsace).secrets.get({ name: secretName })
+    const secret = await coreClient.ns(namespace).secrets.get({ name })
 
     const kubeConfigBase64 = _.get(secret, 'data.kubeconfig')
     if (!kubeConfigBase64) {

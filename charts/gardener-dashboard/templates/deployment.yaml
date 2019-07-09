@@ -121,13 +121,13 @@ spec:
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-        volumeMounts:
-        - name: gardener-dashboard-config
-          mountPath: /etc/gardener-dashboard
-        {{- if .Values.kubeconfig }}
-        - name: gardener-dashboard-secret-kubeconfig
-          mountPath: /etc/gardener-dashboard/secrets/kubeconfig
-          readOnly: true
-        {{- end }}
+{{ toYaml .Values.resources | trim | indent 12 }}
+          volumeMounts:
+          - name: gardener-dashboard-config
+            mountPath: /etc/gardener-dashboard
+          {{- if .Values.kubeconfig }}
+          - name: gardener-dashboard-secret-kubeconfig
+            mountPath: /etc/gardener-dashboard/secrets/kubeconfig
+            readOnly: true
+          {{- end }}
       restartPolicy: Always

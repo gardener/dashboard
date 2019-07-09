@@ -239,9 +239,7 @@ function verifyRequiredConfigExists () {
     return false // no further checks needed, bootstrapping is disabled
   }
   const requiredConfigs = [
-    'terminal.bootstrap.apiserverIngress.annotations',
-    'terminal.gardenCluster.seed',
-    'terminal.gardenCluster.namespace'
+    'terminal.bootstrap.apiserverIngress.annotations'
   ]
 
   let requiredConfigExists = true

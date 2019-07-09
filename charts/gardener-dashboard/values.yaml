@@ -115,9 +115,7 @@ terminal:
     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
 
   gardenCluster:
-    seed: myseed
     namespace: garden
-    virtualGardenKubeconfigName: virtual-garden-kubeconfig # only set in case of virtual garden
     kubeApiServer:
       namespace: garden
       serviceName: virtual-garden-kube-apiserver

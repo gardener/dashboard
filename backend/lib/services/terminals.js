@@ -21,11 +21,10 @@ const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
 const {
-  getSeedKubeconfig,
+  getKubeconfig,
   getShootIngressDomain,
   getConfigValue,
   readServiceAccountToken,
-  // getTargetClusterClientConfig,
   getSoilIngressDomainForSeed
 } = require('../utils')
 const {
@@ -105,7 +104,9 @@ async function getTerminalIngress ({ user, seed }) {
     namespace,
     host,
     serviceName,
-    secretRef
+    credentials: {
+      secretRef
+    }
   }
 }
 
@@ -172,10 +173,10 @@ exports.create = async function ({ user, namespace, name, target }) {
   ensureTerminalAllowed({ isAdmin, target })
 
   const context = await getContext({ user, namespace, name, target })
-  const { scheduleNamespace, hostClientConfig, kubeApiServer } = context
+  const { scheduleNamespace, kubeApiServer } = context
 
   const terminalInfo = initializeTerminalObject({ user, scheduleNamespace, kubeApiServer })
-  return getOrCreateTerminalSession({ user, hostClientConfig, terminalInfo, scheduleNamespace, username, namespace, name, target, context })
+  return getOrCreateTerminalSession({ user, terminalInfo, scheduleNamespace, username, namespace, name, target, context })
 }
 
 async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
@@ -201,7 +202,6 @@ async function getContext ({ user, namespace, name, target }) {
   let targetCredentials
   let hostSecretRef
   let kubecfgCtxNamespaceTargetCluster
-  let seedName
   let bindingKind
   let targetNamespace
   let kubeApiServer
@@ -209,8 +209,7 @@ async function getContext ({ user, namespace, name, target }) {
   const gardenCoreClient = Core(user)
 
   if (target === 'garden') {
-    seedName = getConfigValue({ path: 'terminal.gardenCluster.seed' })
-    scheduleNamespace = getConfigValue({ path: 'terminal.gardenCluster.namespace' })
+    scheduleNamespace = undefined // this will create a temporary namespace
     kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
     kubecfgCtxNamespaceTargetCluster = namespace
     targetNamespace = 'garden'
@@ -228,7 +227,7 @@ async function getContext ({ user, namespace, name, target }) {
     const shootResource = await shoots.read({ user, namespace, name })
     const seedShootNS = getSeedShootNamespace(shootResource)
     scheduleNamespace = seedShootNS
-    seedName = shootResource.spec.cloud.seed
+    const seedName = shootResource.spec.cloud.seed
     const seed = _.find(getSeeds(), ['metadata.name', seedName])
 
     const { host } = await getTerminalIngress({ user, seed })
@@ -258,18 +257,7 @@ async function getContext ({ user, namespace, name, target }) {
     }
   }
 
-  const seed = _.find(getSeeds(), ['metadata.name', seedName])
-  if (!seed) {
-    throw new Error(`Could not find seed with name ${seedName}`)
-  }
-
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient: gardenCoreClient, seed })
-  if (!seedKubeconfig) {
-    throw new Error('could not fetch seed kubeconfig')
-  }
-  const hostClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
-
-  return { seed, kubeApiServer, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace, hostClientConfig }
+  return { kubeApiServer, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace }
 }
 
 async function createTerminal ({ gardenextClient, user, namespace, name, target, context }) {
@@ -323,11 +311,9 @@ function getPodLabels (target) {
   return labels
 }
 
-// function createIngress ({ namespace, secretRef, serviceName, host }) {
+// function createIngress ({ namespace, credentials, serviceName, host }) {
 //   return {
-//     credentials: {
-//       secretRef
-//     },
+//     credentials,
 //     namespace,
 //     kubeApiServer: {
 //       serviceName,
@@ -337,18 +323,18 @@ function getPodLabels (target) {
 // }
 
 function createHost ({ secretRef, namespace, containerImage, podLabels }) {
-  const host = {
+  const temporaryNamespace = _.isEmpty(namespace)
+  return {
     credentials: {
       secretRef
     },
     namespace,
+    temporaryNamespace,
     pod: {
       labels: podLabels,
       containerImage
     }
   }
-
-  return host
 }
 
 function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, namespace }) {
@@ -373,9 +359,12 @@ async function readTerminalUntilReady ({ gardenextClient, namespace, name }) {
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
 
-async function getOrCreateTerminalSession ({ user, hostClientConfig, terminalInfo, scheduleNamespace, username, namespace, name, target, context }) {
+async function getOrCreateTerminalSession ({ user, terminalInfo, scheduleNamespace, username, namespace, name, target, context }) {
   const gardenextClient = Gardenext(user)
-  const hostCoreClient = kubernetes.core(hostClientConfig)
+  const gardenCoreClient = Core(user)
+
+  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...context.hostSecretRef })
+  const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
   const existingTerminal = await findExistingTerminal({ gardenextClient, hostCoreClient, scheduleNamespace, username, namespace, name, target })
   if (existingTerminal) {

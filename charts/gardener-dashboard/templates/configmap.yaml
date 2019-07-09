@@ -57,31 +57,25 @@ data:
         image: {{ .Values.terminal.operator.image }}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
-        {{- if .Values.terminal.bootstrap.disabled }}
         disabled: {{ .Values.terminal.bootstrap.disabled }}
-        {{- end }}
         {{- if .Values.terminal.bootstrap.apiserverIngress }}
         apiserverIngress:
           {{- with .Values.terminal.bootstrap.apiserverIngress.annotations }}
           annotations:
-{{ toYaml . | indent 12 }}
+{{ toYaml . | trim | indent 12 }}
           {{- end }}
         {{- end }}
         {{- if .Values.terminal.bootstrap.queueOptions }}
         queueOptions:
-{{ toYaml .Values.terminal.bootstrap.queueOptions | indent 10 }}
+{{ toYaml .Values.terminal.bootstrap.queueOptions | trim | indent 10 }}
         {{- end }}
       {{- end }}
       gardenCluster:
-        seed: {{ .Values.terminal.gardenCluster.seed }}
         namespace: {{ .Values.terminal.gardenCluster.namespace }}
-        {{- if .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
-        virtualGardenKubeconfigName: {{ .Values.terminal.gardenCluster.virtualGardenKubeconfigName }}
-        {{- end }}
         kubeApiServer:
           {{- with .Values.terminal.gardenCluster.kubeApiServer.hosts }}
           hosts:
-{{ toYaml . | indent 10 }}
+{{ toYaml . | trim | indent 10 }}
           {{- end }}
     {{- end }}
     frontend:
