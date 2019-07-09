@@ -54,7 +54,7 @@ data:
     {{- if .Values.terminal }}
     terminal:
       operator:
-        image: {{ .Values.terminal.operator.image.repository }}{{- if .Values.terminal.operator.image.tag }}:{{ .Values.terminal.operator.image.tag }}{{- end }}
+        image: {{ .Values.terminal.operator.image }}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
         {{- if .Values.terminal.bootstrap.disabled }}
