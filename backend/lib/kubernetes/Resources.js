@@ -120,6 +120,6 @@ module.exports = {
   Terminal: {
     name: 'terminals',
     kind: 'Terminal',
-    apiVersion: 'extensions.gardener.cloud/v1alpha1'
+    apiVersion: 'dashboard.gardener.cloud/v1alpha1'
   }
 }
