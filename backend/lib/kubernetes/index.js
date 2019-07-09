@@ -208,12 +208,12 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
-  gardenext (options) {
+  gardendashboard (options) {
     const resources = [
       Resources.Terminal.name
     ]
     options = assign(options, {
-      path: 'apis/extensions.gardener.cloud',
+      path: 'apis/dashboard.gardener.cloud',
       version: 'v1alpha1',
       namespaceResources: resources,
       groupResources: resources
