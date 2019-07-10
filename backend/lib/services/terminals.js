@@ -182,7 +182,7 @@ async function getGardenRuntimeClusterSecretRef ({ gardenCoreClient }) {
 }
 
 async function getContext ({ user, namespace, name, target }) {
-  let scheduleNamespace
+  let hostNamespace
   let targetCredentials
   let hostSecretRef
   let kubecfgCtxNamespaceTargetCluster
@@ -193,7 +193,7 @@ async function getContext ({ user, namespace, name, target }) {
   const gardenCoreClient = Core(user)
 
   if (target === 'garden') {
-    scheduleNamespace = undefined // this will create a temporary namespace
+    hostNamespace = undefined // this will create a temporary namespace
     kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
     kubecfgCtxNamespaceTargetCluster = namespace
     targetNamespace = 'garden'
@@ -210,7 +210,7 @@ async function getContext ({ user, namespace, name, target }) {
   } else {
     const shootResource = await shoots.read({ user, namespace, name })
     const seedShootNS = getSeedShootNamespace(shootResource)
-    scheduleNamespace = seedShootNS
+    hostNamespace = seedShootNS
     const seedName = shootResource.spec.cloud.seed
     const seed = _.find(getSeeds(), ['metadata.name', seedName])
 
@@ -240,17 +240,17 @@ async function getContext ({ user, namespace, name, target }) {
     }
   }
 
-  return { kubeApiServer, scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace }
+  return { kubeApiServer, hostNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace }
 }
 
 async function createTerminal ({ gardendashboardClient, user, namespace, name, target, context }) {
-  const { scheduleNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, bindingKind, targetNamespace, hostSecretRef } = context
+  const { hostNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, bindingKind, targetNamespace, hostSecretRef } = context
 
   const containerImage = getConfigValue({ path: 'terminal.operator.image' })
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: scheduleNamespace, secretRef: hostSecretRef, containerImage, podLabels })
+  const terminalHost = createHost({ namespace: hostNamespace, secretRef: hostSecretRef, containerImage, podLabels })
   const terminalTarget = createTarget({ kubeconfigContextNamespace: kubecfgCtxNamespaceTargetCluster, credentials: targetCredentials, bindingKind, namespace: targetNamespace })
 
   const labels = {
