@@ -52,7 +52,7 @@ function Core ({ auth }) {
   return kubernetes.core({ auth })
 }
 
-function initializeTerminalObject ({ scheduleNamespace, kubeApiServer }) {
+function initializeTerminalObject ({ kubeApiServer }) {
   return {
     container: TERMINAL_CONTAINER_NAME,
     server: kubeApiServer
@@ -71,18 +71,15 @@ async function existsShoot ({ gardenClient, seedName }) {
   }
 }
 
-async function getTerminalIngress ({ user, seed }) {
+async function getKubeApiServerHost ({ user, seed }) {
   const gardenClient = Garden(user)
   const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await existsShoot({ gardenClient, seedName: seed.metadata.name })
   let soilIngressDomain
-  let serviceName
-  let namespace
   const projectsClient = gardenClient.projects
   const namespacesClient = Core(user).namespaces
   if (isSoil) {
     const soilSeed = seed
     soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeed)
-    namespace = 'garden'
   } else {
     const seedName = seed.metadata.name
     const seedShootResource = await readShoot({ user, namespace: 'garden', name: seedName })
@@ -92,21 +89,9 @@ async function getTerminalIngress ({ user, seed }) {
     if (!seedShootNS) {
       throw new Error(`could not get namespace for seed ${seedName} on soil`)
     }
-
-    serviceName = 'kube-apiserver'
-    namespace = seedShootNS
   }
-  const secretRef = _.get(seed, 'spec.secretRef')
 
-  const host = `api.${soilIngressDomain}`
-  return {
-    namespace,
-    host,
-    serviceName,
-    credentials: {
-      secretRef
-    }
-  }
+  return `api.${soilIngressDomain}`
 }
 
 async function readShoot ({ user, namespace, name }) {
@@ -229,8 +214,7 @@ async function getContext ({ user, namespace, name, target }) {
     const seedName = shootResource.spec.cloud.seed
     const seed = _.find(getSeeds(), ['metadata.name', seedName])
 
-    const { host } = await getTerminalIngress({ user, seed })
-    kubeApiServer = host
+    kubeApiServer = await getKubeApiServerHost({ user, seed })
 
     hostSecretRef = _.get(seed, 'spec.secretRef')
 
@@ -264,11 +248,8 @@ async function createTerminal ({ gardendashboardClient, user, namespace, name, t
 
   const containerImage = getConfigValue({ path: 'terminal.operator.image' })
 
-  // const terminalIngress = await getTerminalIngress({ user, seed })
-
   const podLabels = getPodLabels(target)
 
-  // const ingress = createIngress({ ...terminalIngress })
   const terminalHost = createHost({ namespace: scheduleNamespace, secretRef: hostSecretRef, containerImage, podLabels })
   const terminalTarget = createTarget({ kubeconfigContextNamespace: kubecfgCtxNamespaceTargetCluster, credentials: targetCredentials, bindingKind, namespace: targetNamespace })
 
@@ -309,17 +290,6 @@ function getPodLabels (target) {
   }
   return labels
 }
-
-// function createIngress ({ namespace, credentials, serviceName, host }) {
-//   return {
-//     credentials,
-//     namespace,
-//     kubeApiServer: {
-//       serviceName,
-//       host
-//     }
-//   }
-// }
 
 function createHost ({ secretRef, namespace, containerImage, podLabels }) {
   const temporaryNamespace = _.isEmpty(namespace)
