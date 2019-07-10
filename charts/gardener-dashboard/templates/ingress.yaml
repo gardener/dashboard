@@ -62,8 +62,8 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: {{ .Values.terminal.gardenCluster.kubeApiServer.serviceName }}
-          servicePort: {{ .Values.terminal.gardenCluster.kubeApiServer.servicePort }}
+          serviceName: {{ $.Values.terminal.gardenCluster.kubeApiServer.serviceName }}
+          servicePort: {{ $.Values.terminal.gardenCluster.kubeApiServer.servicePort | default 443 }}
         path: /
   {{- end }}
 {{- end }}
