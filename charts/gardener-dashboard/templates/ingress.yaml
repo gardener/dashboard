@@ -37,7 +37,7 @@ spec:
 apiVersion: {{ include "ingressversion" . }}
 kind: Ingress
 metadata:
-  name: dashboard-terminal-kube-apiserver-ingress
+  name: dashboard-terminal-gardener-kube-apiserver-ingress
   namespace: {{ .Values.terminal.gardenCluster.kubeApiServer.namespace }}
   labels:
     app: gardener-dashboard
@@ -51,7 +51,7 @@ metadata:
   {{- end }}
 spec:
   tls:
-  - secretName: dashboard-terminal-kube-apiserver-tls
+  - secretName: dashboard-terminal-gardener-kube-apiserver-tls
     hosts:
     {{- range .Values.terminal.gardenCluster.kubeApiServer.hosts }}
     - {{ . }}
