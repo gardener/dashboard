@@ -42,7 +42,7 @@ limitations under the License.
                 <v-text-field
                   :color="color"
                   ref="secretName"
-                  v-model="secretName"
+                  v-model.trim="secretName"
                   label="Secret Name"
                   :error-messages="getErrorMessages('secretName')"
                   @input="$v.secretName.$touch()"
