@@ -43,64 +43,92 @@ function patchResource (url, data) {
 /* Infrastructures Secrets */
 
 export function getInfrastructureSecrets ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
   return getResource(`/api/namespaces/${namespace}/infrastructure-secrets`)
 }
 
 export function updateInfrastructureSecret ({ namespace, bindingName, data }) {
+  namespace = encodeURIComponent(namespace)
+  bindingName = encodeURIComponent(bindingName)
   return updateResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`, data)
 }
 
 export function createInfrastructureSecret ({ namespace, data }) {
+  namespace = encodeURIComponent(namespace)
   return createResource(`/api/namespaces/${namespace}/infrastructure-secrets`, data)
 }
 
 export function deleteInfrastructureSecret ({ namespace, bindingName }) {
+  namespace = encodeURIComponent(namespace)
+  bindingName = encodeURIComponent(bindingName)
   return deleteResource(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
 }
 
 /* Shoot Clusters */
 
 export function createShoot ({ namespace, data }) {
+  namespace = encodeURIComponent(namespace)
   return createResource(`/api/namespaces/${namespace}/shoots`, data)
 }
 
 export function deleteShoot ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return deleteResource(`/api/namespaces/${namespace}/shoots/${name}`)
 }
 
 export function replaceShoot ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}`, data)
 }
 
 export function addShootAnnotation ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, data)
 }
 
 export function getShoot ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return getResource(`/api/namespaces/${namespace}/shoots/${name}`)
 }
 
 export function getShootInfo ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`)
 }
 
 export function updateShootVersion ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/kubernetes/version`, data)
 }
 
 export function updateMaintenance ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, data)
 }
 
 export function updateHibernationSchedules ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`, data)
 }
 
 export function updateShootHibernation ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, data)
 }
 
 export function updateWorkers ({ namespace, name, infrastructureKind, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  infrastructureKind = encodeURIComponent(infrastructureKind)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/${infrastructureKind}/workers`, data)
 }
 
@@ -127,28 +155,36 @@ export function createProject ({ data }) {
 }
 
 export function updateProject ({ namespace, data }) {
+  namespace = encodeURIComponent(namespace)
   return updateResource(`/api/namespaces/${namespace}`, data)
 }
 
 export function deleteProject ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
   return deleteResource(`/api/namespaces/${namespace}`)
 }
 
 /* Members */
 
 export function getMembers ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
   return getResource(`/api/namespaces/${namespace}/members`)
 }
 
 export function addMember ({ namespace, data }) {
+  namespace = encodeURIComponent(namespace)
   return createResource(`/api/namespaces/${namespace}/members`, data)
 }
 
 export function getMember ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return getResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
 export function deleteMember ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
   return deleteResource(`/api/namespaces/${namespace}/members/${name}`)
 }
 
