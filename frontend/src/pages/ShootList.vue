@@ -111,7 +111,8 @@ limitations under the License.
               <v-list-tile
                 @click.stop="toggleFilter('hasJournals')"
                 :disabled="filtersDisabled"
-                :class="disabledFilterClass">
+                :class="disabledFilterClass"
+                v-if="!!gitHubRepoUrl">
                 <v-list-tile-action>
                   <v-icon :color="checkboxColor(isFilterActive('hasJournals'))" v-text="checkboxIcon(isFilterActive('hasJournals'))"/>
                 </v-list-tile-action>
@@ -272,8 +273,18 @@ export default {
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
 
-        if (get(header, 'adminOnly', false)) {
+        if (!header.hidden && get(header, 'adminOnly', false)) {
           header.hidden = !this.isAdmin
+        }
+      }
+    },
+    hideNotAvailableColumns () {
+      for (const header of this.allHeaders) {
+        if (header.value === 'journalLabels') {
+          header.hidden = !this.gitHubRepoUrl
+        }
+        if (header.value === 'journal') {
+          header.hidden = !this.gitHubRepoUrl
         }
       }
     },
@@ -308,7 +319,8 @@ export default {
     }),
     ...mapState([
       'shootsLoading',
-      'onlyShootsWithIssues'
+      'onlyShootsWithIssues',
+      'cfg'
     ]),
     createDialog: {
       get () {
@@ -383,11 +395,15 @@ export default {
     },
     totalItems () {
       return this.hideActions ? -1 : undefined
+    },
+    gitHubRepoUrl () {
+      return this.cfg.gitHubRepoUrl
     }
   },
   mounted () {
     this.floatingButton = true
     this.loadColumnsChecked()
+    this.hideNotAvailableColumns()
   },
   beforeUpdate () {
     const predicate = item => item.value === 'project'
