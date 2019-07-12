@@ -82,14 +82,6 @@ const getters = {
     }
   },
   getShootListFilters () {
-    if (!state.shootListFilters) {
-      return {
-        progressing: true,
-        userIssues: store.getters['isAdmin'],
-        deactivatedReconciliation: store.getters['isAdmin'],
-        hasJournals: false
-      }
-    }
     return state.shootListFilters
   }
 }
@@ -202,6 +194,12 @@ const actions = {
   setShootListFilters ({ commit, rootState }, value) {
     commit('SET_SHOOT_LIST_FILTERS', { rootState, value })
     return state.shootListFilters
+  },
+  setShootListFilter ({ commit, rootState }, filterValue) {
+    if (state.shootListFilters) {
+      commit('SET_SHOOT_LIST_FILTER', { rootState, filterValue })
+      return state.shootListFilters
+    }
   }
 }
 
@@ -528,6 +526,11 @@ const mutations = {
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
     state.shootListFilters = value
+    setFilteredAndSortedItems(state, rootState)
+  },
+  SET_SHOOT_LIST_FILTER (state, { rootState, filterValue }) {
+    const { filter, value } = filterValue
+    state.shootListFilters[filter] = value
     setFilteredAndSortedItems(state, rootState)
   }
 }

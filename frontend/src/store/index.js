@@ -371,6 +371,12 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  setShootListFilter ({ dispatch, commit }, { filter, value }) {
+    return dispatch('shoots/setShootListFilter', { filter, value })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
   setHideProgressingIssues ({ dispatch, commit }, value) {
     return dispatch('shoots/setHideProgressingIssues', value)
       .catch(err => {

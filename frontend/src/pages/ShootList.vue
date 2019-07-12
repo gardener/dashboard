@@ -142,7 +142,6 @@ limitations under the License.
           <cluster-access ref="clusterAccess" :item="selectedItem"></cluster-access>
         </v-card>
       </v-dialog>
-
       <template v-if="renderCreateDialog">
         <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
       </template>
@@ -162,7 +161,7 @@ import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
-import cloneDeep from 'lodash/cloneDeep'
+import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
 import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
 import ClusterAccess from '@/components/ClusterAccess'
@@ -219,7 +218,8 @@ export default {
       setShootListSortParams: 'setShootListSortParams',
       setShootListSearchValue: 'setShootListSearchValue',
       setOnlyShootsWithIssues: 'setOnlyShootsWithIssues',
-      setShootListFilters: 'setShootListFilters'
+      setShootListFilters: 'setShootListFilters',
+      setShootListFilter: 'setShootListFilter'
     }),
     async showDialog (args) {
       switch (args.action) {
@@ -290,9 +290,8 @@ export default {
     },
     toggleFilter (key) {
       if (this.showOnlyShootsWithIssues) {
-        const filters = cloneDeep(this.getShootListFilters)
-        filters[key] = !filters[key]
-        this.setShootListFilters(filters)
+        const filters = this.getShootListFilters
+        this.setShootListFilter({ filter: key, value: !filters[key] })
       }
     },
     isFilterActive (key) {
@@ -372,23 +371,23 @@ export default {
       return this.filtersDisabled ? 'disabled_filter' : ''
     },
     headlineSubtitle () {
-      let subtitle = ''
+      const subtitle = []
       if (!this.projectScope && this.showOnlyShootsWithIssues) {
-        subtitle = 'Hide: Healthy Clusters'
+        subtitle.push('Hide: Healthy Clusters')
         if (this.isFilterActive('progressing')) {
-          subtitle += ', Progressing Clusters'
+          subtitle.push('Progressing Clusters')
         }
         if (this.isFilterActive('userIssues')) {
-          subtitle += ', User Errors'
+          subtitle.push('User Errors')
         }
         if (this.isFilterActive('deactivatedReconciliation')) {
-          subtitle += ', Deactivated Reconciliation'
+          subtitle.push('Deactivated Reconciliation')
         }
         if (this.isFilterActive('hasJournals')) {
-          subtitle += ', Has Journals'
+          subtitle.push('Has Journals')
         }
       }
-      return subtitle
+      return join(subtitle, ', ')
     },
     hideActions () {
       return this.projectScope
@@ -404,6 +403,12 @@ export default {
     this.floatingButton = true
     this.loadColumnsChecked()
     this.hideNotAvailableColumns()
+    this.setShootListFilters({
+      progressing: true,
+      userIssues: this.isAdmin,
+      deactivatedReconciliation: this.isAdmin,
+      hasJournals: false
+    })
   },
   beforeUpdate () {
     const predicate = item => item.value === 'project'
