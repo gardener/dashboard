@@ -22,7 +22,7 @@ limitations under the License.
 
         <shoot-infrastructure-card :shootItem="item" class="mt-3"></shoot-infrastructure-card>
 
-        <shoot-addons-card :shootItem="item" class="mt-3"></shoot-addons-card>
+        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
       </v-flex>
 
       <v-flex md6>
@@ -42,8 +42,6 @@ limitations under the License.
           <logging :shootItem="item"></logging>
         </v-card>
 
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
-
         <journals v-if="isAdmin" :journals="journals" :shoot="item" class="mt-3"></journals>
 
       </v-flex>
@@ -62,7 +60,6 @@ import MonitoringCard from '@/components/MonitoringCard'
 import Logging from '@/components/Logging'
 import ShootDetailsCard from '@/components/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootInfrastructureCard'
-import ShootAddonsCard from '@/components/ShootAddonsCard'
 import ShootLifecycleCard from '@/components/ShootLifecycleCard'
 import get from 'lodash/get'
 
@@ -73,7 +70,6 @@ export default {
   components: {
     ShootDetailsCard,
     ShootInfrastructureCard,
-    ShootAddonsCard,
     ShootLifecycleCard,
     ClusterAccess,
     Journals,

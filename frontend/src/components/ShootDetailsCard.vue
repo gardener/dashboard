@@ -111,6 +111,20 @@ limitations under the License.
           </v-flex>
         </v-card-title>
       </template>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem pr-1">
+        <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
+        <v-flex class="pa-0">
+          <span class="grey--text">Addons</span><br>
+          <span class="subheading">{{shootAddons}}</span>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <v-layout row>
+            <addon-configuration :shootItem="shootItem"></addon-configuration>
+          </v-layout>
+        </v-flex>
+      </v-card-title>
     </div>
   </v-card>
 </template>
@@ -123,14 +137,19 @@ import WorkerGroup from '@/components/WorkerGroup'
 import WorkerConfiguration from '@/components/WorkerConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion'
+import AddonConfiguration from '@/components/AddonConfiguration'
 import get from 'lodash/get'
+import join from 'lodash/join'
+import filter from 'lodash/filter'
+import map from 'lodash/map'
 import {
   getDateFormatted,
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
   getCloudProviderKind,
-  getCreatedBy
+  getCreatedBy,
+  shootAddonList
 } from '@/utils'
 
 export default {
@@ -140,6 +159,7 @@ export default {
     WorkerGroup,
     WorkerConfiguration,
     PurposeConfiguration,
+    AddonConfiguration,
     ShootVersion
   },
   props: {
@@ -191,6 +211,21 @@ export default {
     },
     cloudProfileName () {
       return get(this.shootItem, 'spec.cloud.profile')
+    },
+    addons () {
+      return get(this.shootItem, 'spec.addons', {})
+    },
+    addon () {
+      return (name) => {
+        return this.addons[name] || {}
+      }
+    },
+    shootAddons () {
+      const addons = join(map(filter(shootAddonList, item => this.addon(item.name).enabled), "title"), ", ")
+      if (addons.length > 0) {
+        return addons
+      }
+      return "No addons configured"
     }
   }
 }
