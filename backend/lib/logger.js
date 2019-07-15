@@ -20,13 +20,13 @@ const { get } = require('lodash')
 const config = require('./config')
 
 const LEVELS = {
-  trace: 0,
-  debug: 1,
-  info: 2,
-  warn: 3,
-  error: 4
+  trace: 1,
+  debug: 2,
+  info: 3,
+  warn: 4,
+  error: 5
 }
-const level = get(LEVELS, process.env.LOG_LEVEL || config.logLevel, 2)
+const level = get(LEVELS, process.env.LOG_LEVEL || config.logLevel, 3)
 const silent = /^test/.test(process.env.NODE_ENV)
 
 class Logger {
@@ -45,7 +45,7 @@ class Logger {
     return '\u001b[37m' + new Date().toISOString() + '\u001b[39m'
   }
   request ({ id, uri, method, httpVersion, user, headers, body }) {
-    if (!silent && level <= LEVELS.debug) {
+    if (!silent && level <= LEVELS.trace) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
       const host = headers.host || '-'
       let msg = `${method} ${uri.path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
@@ -56,7 +56,7 @@ class Logger {
     }
   }
   response ({ id, statusCode, reasonPhrase = '', httpVersion, headers, body }) {
-    if (!silent && level <= LEVELS.debug) {
+    if (!silent && level <= LEVELS.trace) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${reasonPhrase} [${id}]`
       if (body && statusCode >= 300) {
         msg += ' ' + body.toString('utf8')

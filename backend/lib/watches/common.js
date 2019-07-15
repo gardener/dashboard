@@ -49,10 +49,6 @@ function registerHandler (emitter, handler) {
     const type = event.type
     if (events.includes(type)) {
       if (type !== 'ERROR') {
-        const metadata = event.object.metadata
-        const name = get(metadata, 'name')
-        const namespace = get(metadata, 'namespace', '')
-        logger.trace('%s to %s: %s/%s', type, emitter.resourceName, namespace, name)
         handler(event)
       } else {
         const status = event.object
@@ -84,7 +80,6 @@ function cacheResource (resourceEmitter, cache, keyPath) {
         cache.splice(index, 1)
       }
     }
-    logger.trace(resourceEmitter.resourceName, cache.length)
   })
 }
 exports.cacheResource = cacheResource
