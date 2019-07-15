@@ -37,7 +37,7 @@
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^8.5.1",
     "kubernetes-client": "^5.4.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "morgan": "^1.9.1",
     "openid-client": "^3.1.1",
     "p-retry": "^3.0.1",
