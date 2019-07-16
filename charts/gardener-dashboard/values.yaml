@@ -52,6 +52,8 @@ oidc:
   redirectUri: https://dashboard.ingress.example.org/auth/callback
 
 frontendConfig:
+  # features:
+  #   terminalEnabled: true
   landingPageUrl: https://github.com/gardener
   helpMenuItems:
   - title: Getting Started
@@ -97,37 +99,37 @@ readinessProbe:
   failureThreshold: 6
   successThreshold: 1
 
-terminal:
-  operator:
-    image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:0.1.0
-  bootstrap:
-    disabled: true
-    apiserverIngress:
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        nginx.ingress.kubernetes.io/backend-protocol: HTTPS
-        certmanager.k8s.io/cluster-issuer: lets-encrypt
-        certmanager.k8s.io/acme-challenge-type: dns01
-        certmanager.k8s.io/acme-dns01-provider: route53
-    queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
+# terminal:
+#   operator:
+#     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:0.1.0
+#   bootstrap:
+#     disabled: true
+#     apiserverIngress:
+#       annotations:
+#         kubernetes.io/ingress.class: nginx
+#         nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+#         certmanager.k8s.io/cluster-issuer: lets-encrypt
+#         certmanager.k8s.io/acme-challenge-type: dns01
+#         certmanager.k8s.io/acme-dns01-provider: route53
+#     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
 
-  gardenCluster:
-    namespace: garden
-    kubeApiServer:
-      # namespace: garden
-      # serviceName: virtual-garden-kube-apiserver
-      # servicePort: 443
-      hosts:
-        - api.example.org
-      # tls: # Needs to be a browser-trusted certificate!
-      #   crt: |
-      #     -----BEGIN CERTIFICATE-----
-      #     Li4u
-      #     -----END CERTIFICATE-----
-      #     -----BEGIN CERTIFICATE-----
-      #     Li4u
-      #     -----END CERTIFICATE-----
-      #   key: |
-      #     -----BEGIN RSA PRIVATE KEY-----
-      #     Li4u
-      #     -----END RSA PRIVATE KEY-----
+#   gardenCluster:
+#     namespace: garden
+#     kubeApiServer:
+#       namespace: garden
+#       serviceName: virtual-garden-kube-apiserver
+#       servicePort: 443
+#       hosts:
+#         - api.example.org
+#       tls: # Needs to be a browser-trusted certificate!
+#         crt: |
+#           -----BEGIN CERTIFICATE-----
+#           Li4u
+#           -----END CERTIFICATE-----
+#           -----BEGIN CERTIFICATE-----
+#           Li4u
+#           -----END CERTIFICATE-----
+#         key: |
+#           -----BEGIN RSA PRIVATE KEY-----
+#           Li4u
+#           -----END RSA PRIVATE KEY-----
