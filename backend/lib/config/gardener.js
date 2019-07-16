@@ -33,6 +33,10 @@ const environmentVariableDefinitions = {
   GITHUB_AUTHENTICATION_TOKEN: 'gitHub.authentication.token',
   GITHUB_WEBHOOK_SECRET: 'gitHub.webhookSecret', // pragma: whitelist secret
   LOG_LEVEL: 'logLevel',
+  LOG_HTTP_REQUEST_BODY: {
+    type: 'Boolean',
+    path: 'logHttpRequestBody'
+  },
   PORT: {
     type: 'Integer',
     path: 'port'
@@ -45,6 +49,8 @@ function getEnvironmentVariable (env, name, type) {
     case 'Integer':
       value = parseInt(value, 10)
       return Number.isInteger(value) ? value : undefined
+    case 'Boolean':
+      return value === 'true'
     default:
       return value
   }

@@ -49,7 +49,7 @@ class Logger {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
       const host = headers.host || '-'
       let msg = `${method} ${uri.path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
-      if (body) {
+      if (config.logHttpRequestBody === true && body) {
         msg += ' ' + body.toString('utf8')
       }
       console.log(this.ts + ' - \u001b[42mreq\u001b[49m: ' + msg)
@@ -76,7 +76,7 @@ class Logger {
   }
   trace (msg, ...args) {
     if (!silent && level <= LEVELS.trace) {
-      console.trace(this.ts + ' - \u001b[36mtrace\u001b[39m: ' + msg, ...args)
+      console.log(this.ts + ' - \u001b[36mtrace\u001b[39m: ' + msg, ...args)
     }
   }
   debug (msg, ...args) {
