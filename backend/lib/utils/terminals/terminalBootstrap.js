@@ -230,7 +230,7 @@ async function bootstrapIngressAndHeadlessService ({ coreClient, extensionClient
 }
 
 function isTerminalBootstrapDisabled () {
-  return _.get(config, 'terminal.bootstrap.disabled', true) // TODO enable by default
+  return _.get(config, 'terminal.bootstrap.disabled', true)
 }
 
 function verifyRequiredConfigExists () {
