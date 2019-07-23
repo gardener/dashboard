@@ -377,18 +377,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setHideProgressingIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideProgressingIssues', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  setHideDeactivatedReconciliation ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideDeactivatedReconciliation', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   setShootListSearchValue ({ dispatch }, searchValue) {
     return dispatch('shoots/setListSearchValue', searchValue)
       .catch(err => {
