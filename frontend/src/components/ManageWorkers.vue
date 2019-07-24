@@ -136,7 +136,15 @@ export default {
     },
     onRemoveWorker (index) {
       this.internalWorkers.splice(index, 1)
-      this.validateInput()
+      this.$nextTick(() => {
+        // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
+        // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
+        // on component which did not report valid = false in the first place
+        forEach(this.$refs.workerInput, workerInput => {
+          workerInput.validateInput()
+        })
+        this.validateInput()
+      })
     },
     setDefaultWorker () {
       this.internalWorkers = []
@@ -183,7 +191,7 @@ export default {
     getWorkers () {
       const workers = []
       forEach(this.internalWorkers, internalWorker => {
-        const worker = omit(internalWorker, 'id')
+        const worker = omit(internalWorker, ['id', 'valid'])
         workers.push(worker)
       })
       return workers

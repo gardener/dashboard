@@ -65,11 +65,11 @@ export default {
   },
   methods: {
     getAddons () {
-      return this.addons
+      return cloneDeep(this.addons)
     },
     updateAddons (addons) {
       this.resetAddonList(addons)
-      assign(this.addons, cloneDeep(addons))
+      assign(this.addons, cloneDeep(this.addons))
     },
     resetAddonList (addons) {
       this.addonDefinitionList = filter(shootAddonList, addon => {

@@ -137,6 +137,7 @@ import get from 'lodash/get'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import isEqual from 'lodash/isEqual'
 import noop from 'lodash/noop'
 import assign from 'lodash/assign'
 import isFunction from 'lodash/isFunction'
@@ -177,7 +178,9 @@ export default {
         yesButtonText: '',
         noButtonText: '',
         resolve: noop
-      }
+      },
+      isShootCreated: false,
+      initialShootContent: undefined
     }
   },
   computed: {
@@ -195,6 +198,9 @@ export default {
         this.workersValid &&
         this.maintenanceTimeValid &&
         this.hibernationScheduleValid
+    },
+    isShootContentDirty () {
+      return !isEqual(this.initialShootContent, this.yamlFromUIComponents())
     }
   },
   methods: {
@@ -221,7 +227,7 @@ export default {
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
     },
-    updateShootResourceWithUIComponents () {
+    yamlFromUIComponents () {
       const shootResource = cloneDeep(this.getCreateShootResource)
 
       const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
@@ -281,8 +287,11 @@ export default {
         delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
       }
 
+      return shootResource
+    },
+    updateShootResourceWithUIComponents () {
+      const shootResource = this.yamlFromUIComponents()
       this.setCreateShootResource(shootResource)
-
       return shootResource
     },
     updateUIComponentsWithShootResource () {
@@ -328,6 +337,7 @@ export default {
 
       try {
         await this.createShoot(shootResource)
+        this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',
           params: {
@@ -351,17 +361,38 @@ export default {
       }
     },
     confirmNavigation () {
-      this.dialog = true
-      return new Promise(resolve => {
-        assign(this.action, {
-          id: 'navigation',
-          title: 'Leave Create Cluster Page?',
-          text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-          yesButtonText: 'Leave',
-          noButtonText: 'Cancel',
-          resolve
+      if (!this.isShootCreated && this.isShootContentDirty) {
+        this.dialog = true
+        return new Promise(resolve => {
+          assign(this.action, {
+            id: 'navigation',
+            title: 'Leave Create Cluster Page?',
+            text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
+            yesButtonText: 'Leave',
+            noButtonText: 'Cancel',
+            resolve
+          })
         })
-      })
+      } else {
+        return true
+      }
+    },
+    confirmNavigateToYamlIfInvalid () {
+      if (!this.valid) {
+        this.dialog = true
+        return new Promise(resolve => {
+          assign(this.action, {
+            id: 'yamlnavigation',
+            title: 'Validation Errors',
+            text: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may loose data.',
+            yesButtonText: 'Continue',
+            noButtonText: 'Cancel',
+            resolve
+          })
+        })
+      } else {
+        return true
+      }
     },
     cancelClicked () {
       this.$router.push({
@@ -378,6 +409,9 @@ export default {
   },
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'CreateShootEditor') {
+      if (!await this.confirmNavigateToYamlIfInvalid()) {
+        return
+      }
       this.updateShootResourceWithUIComponents()
     } else {
       if (!await this.confirmNavigation()) {
@@ -389,6 +423,10 @@ export default {
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
+
+    this.$nextTick(() => {
+      this.initialShootContent = this.yamlFromUIComponents()
+    })
   }
 }
 </script>
