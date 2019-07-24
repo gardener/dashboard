@@ -25,6 +25,7 @@ const { join: joinPath } = require('path')
 
 const environmentVariableDefinitions = {
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
+  AUTH_COOKIE_DOMAIN: 'auth.cookieDomain',
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret

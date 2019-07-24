@@ -30,7 +30,11 @@ const pTimeout = require('p-timeout')
 const { authentication } = require('./services')
 const { Forbidden, Unauthorized } = require('./errors')
 const logger = require('./logger')
-const { sessionSecret, oidc = {} } = require('./config')
+const {
+  sessionSecret,
+  oidc = {},
+  auth: { cookieDomain } = {}
+} = require('./config')
 
 const jwtSign = promisify(jwt.sign)
 const jwtVerify = promisify(jwt.verify)
@@ -134,8 +138,7 @@ function decodeSecret (input) {
   return Buffer.from(input)
 }
 
-async function authorizationUrl (req, res) {
-  const state = encodeState(req.query)
+async function authorizationUrl (state) {
   const client = await exports.getIssuerClient()
   return client.authorizationUrl({
     redirect_uri: redirectUri,
@@ -144,10 +147,8 @@ async function authorizationUrl (req, res) {
   })
 }
 
-async function authorizeToken (req, res) {
-  const { token, expiresIn } = req.body
+async function authorizeToken ({ token, expiresIn }, setCookie) {
   const bearer = trim(token)
-
   const { username: id, groups } = await authentication.isAuthenticated({ token: bearer })
 
   const { name, email } = decode(bearer)
@@ -159,30 +160,38 @@ async function authorizeToken (req, res) {
   }
   const audience = [ GARDENER_AUDIENCE ]
   const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
-  res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
+  setCookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
     sameSite: 'Lax'
   })
-  res.cookie(COOKIE_SIGNATURE, signature, {
-    secure,
-    httpOnly: true,
-    expires: undefined,
-    sameSite: 'Lax'
-  })
-  const encryptedBearer = encrypt(bearer)
-  res.cookie(COOKIE_TOKEN, encryptedBearer, {
+  setCookie(COOKIE_SIGNATURE, signature, {
     secure,
     httpOnly: true,
     expires: undefined,
     sameSite: 'Lax'
   })
+  if (cookieDomain) {
+    setCookie(COOKIE_TOKEN, bearer, {
+      secure,
+      domain: cookieDomain,
+      httpOnly: true,
+      expires: undefined,
+      sameSite: 'Lax'
+    })
+  } else {
+    setCookie(COOKIE_TOKEN, encrypt(bearer), {
+      secure,
+      httpOnly: true,
+      expires: undefined,
+      sameSite: 'Lax'
+    })
+  }
   return user
 }
 
-async function authorizationCallback (req, res) {
+async function authorizationCallback (code, setCookie) {
   const client = await exports.getIssuerClient()
-  const { code, state } = req.query
   const parameters = { code }
   const checks = {
     response_type: 'code'
@@ -191,9 +200,7 @@ async function authorizationCallback (req, res) {
     id_token: token,
     expires_in: expiresIn
   } = await client.callback(redirectUri, parameters, checks)
-  req.body = { token, expiresIn }
-  await authorizeToken(req, res)
-  return decodeState(state)
+  return authorizeToken({ token, expiresIn }, setCookie)
 }
 
 function isHttpMethodSafe ({ method }) {
@@ -242,11 +249,11 @@ function authenticate () {
   }
   const setUserAuth = async (req, res) => {
     const { cookies = {}, user = {} } = req
-    const encryptedBearer = cookies[COOKIE_TOKEN]
-    if (!encryptedBearer) {
+    const token = cookies[COOKIE_TOKEN]
+    if (!token) {
       throw new Unauthorized('No bearer token found in request')
     }
-    const bearer = decrypt(encryptedBearer)
+    const bearer = split(token, '.').length === 3 ? token : decrypt(token)
     assert.ok(bearer, 'The decrypted bearer token must not be empty')
     user.auth = { bearer }
   }
@@ -257,7 +264,7 @@ function authenticate () {
       await setUserAuth(req, res)
       next()
     } catch (err) {
-      clearCookies(res)
+      clearCookies(res.clearCookie.bind(res))
       next(err)
     }
   }
@@ -279,10 +286,10 @@ function authenticateSocket (options) {
   }
 }
 
-function clearCookies (res) {
-  res.clearCookie(COOKIE_HEADER_PAYLOAD)
-  res.clearCookie(COOKIE_SIGNATURE)
-  res.clearCookie(COOKIE_TOKEN)
+function clearCookies (clearCookie) {
+  for (const name of [ COOKIE_HEADER_PAYLOAD, COOKIE_SIGNATURE, COOKIE_TOKEN ]) {
+    clearCookie(name)
+  }
 }
 
 function encrypt (text) {
@@ -319,6 +326,8 @@ module.exports = exports = {
   COOKIE_HEADER_PAYLOAD,
   COOKIE_SIGNATURE,
   COOKIE_TOKEN,
+  encodeState,
+  decodeState,
   sign,
   decode,
   verify,

@@ -23,7 +23,9 @@ const {
   authorizationUrl,
   authorizationCallback,
   authorizeToken,
-  clearCookies
+  clearCookies,
+  encodeState,
+  decodeState
 } = require('./security')
 
 // configure router
@@ -33,15 +35,16 @@ router.use(cookieParser())
 router.use(bodyParser.json())
 router.route('/')
   .get(async (req, res, next) => {
+    const { failureRedirect = '/login' } = req.query
     try {
-      res.redirect(await authorizationUrl(req, res))
+      res.redirect(await authorizationUrl(encodeState(req.query)))
     } catch (err) {
-      res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
+      res.redirect(`${failureRedirect}#error=${encodeURIComponent(err.message)}`)
     }
   })
   .post(async (req, res, next) => {
     try {
-      res.send(await authorizeToken(req, res))
+      res.send(await authorizeToken(req.body, res.cookie.bind(res)))
     } catch (err) {
       next(err)
     }
@@ -50,10 +53,10 @@ router.route('/')
 router.route('/logout')
   .get(async (req, res, next) => {
     try {
-      clearCookies(res)
-      const { error = {} } = req.query
+      clearCookies(res.clearCookie.bind(res))
+      const { returnTo = '/login', error = {} } = req.query
       const hash = error.message ? `#error=${encodeURIComponent(error.message)}` : ''
-      res.redirect(`/login${hash}`)
+      res.redirect(`${returnTo}${hash}`)
     } catch (err) {
       next(err)
     }
@@ -61,10 +64,24 @@ router.route('/logout')
 
 router.route('/callback')
   .get(async (req, res, next) => {
+    let failureRedirect = '/login'
+    let successRedirect = '/'
     try {
-      const { redirectPath = '/' } = await authorizationCallback(req, res)
-      res.redirect(redirectPath)
+      const { code, state } = req.query
+      const authQuery = decodeState(state)
+      // use failureRedirect from state
+      if (authQuery.failureRedirect) {
+        failureRedirect = authQuery.failureRedirect
+      }
+      // use successRedirect from state
+      if (authQuery.redirectPath) {
+        successRedirect = authQuery.redirectPath
+      } else if (authQuery.successRedirect) {
+        successRedirect = authQuery.successRedirect
+      }
+      await authorizationCallback(code, res.cookie.bind(res))
+      res.redirect(successRedirect)
     } catch (err) {
-      res.redirect(`/login#error=${encodeURIComponent(err.message)}`)
+      res.redirect(`${failureRedirect}#error=${encodeURIComponent(err.message)}`)
     }
   })
