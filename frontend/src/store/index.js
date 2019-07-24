@@ -259,14 +259,8 @@ const getters = {
   websocketConnectAttempt (state) {
     return get(state, 'websocketConnectionError.reconnectAttempt')
   },
-  isHideUserIssues (state, getters) {
-    return getters['shoots/isHideUserIssues']
-  },
-  isHideProgressingIssues (state, getters) {
-    return getters['shoots/isHideProgressingIssues']
-  },
-  isHideDeactivatedReconciliation (state, getters) {
-    return getters['shoots/isHideDeactivatedReconciliation']
+  getShootListFilters (state, getters) {
+    return getters['shoots/getShootListFilters']
   },
   getCreateShootResource (state, getters) {
     return getters['shoots/getCreateShootResource']
@@ -371,20 +365,14 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setHideUserIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideUserIssues', value)
+  setShootListFilters ({ dispatch, commit }, value) {
+    return dispatch('shoots/setShootListFilters', value)
       .catch(err => {
         dispatch('setError', err)
       })
   },
-  setHideProgressingIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideProgressingIssues', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  setHideDeactivatedReconciliation ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideDeactivatedReconciliation', value)
+  setShootListFilter ({ dispatch, commit }, { filter, value }) {
+    return dispatch('shoots/setShootListFilter', { filter, value })
       .catch(err => {
         dispatch('setError', err)
       })

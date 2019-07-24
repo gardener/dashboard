@@ -33,7 +33,7 @@ limitations under the License.
                     xs5
                     ref="projectName"
                     label="Name"
-                    v-model="projectName"
+                    v-model.trim="projectName"
                     :error-messages="getFieldValidationErrors('projectName')"
                     @input="$v.projectName.$touch()"
                     @blur="$v.projectName.$touch()"

@@ -309,6 +309,10 @@ Copyright (c) 2010-2016 Robert Kieffer and other contributors\
 Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>\
 [MIT License](https://github.com/websockets/ws/blob/master/LICENSE)
 
+- [x509.js](https://github.com/encharm/x509.js)\
+Copyright (c) 2014 Code Charm\
+[MIT License](https://github.com/encharm/x509.js/blob/master/LICENSE)
+
 ### Frontend
 The Gardener Dashboard frontend depends on the following packages:
 

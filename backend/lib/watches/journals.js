@@ -31,7 +31,6 @@ module.exports = io => {
   const cache = getJournalCache()
   cache.onIssue(event => {
     const room = 'issues'
-    logger.trace(`emitting event to room ${room}`)
     io.of('/journals').to(room).emit('events', {
       kind: 'issues',
       events: [event]
@@ -40,7 +39,6 @@ module.exports = io => {
   cache.onComment(event => {
     const { namespace, name } = event.object.metadata
     const room = `comments_${namespace}/${name}`
-    logger.trace(`emitting event to room ${room}`)
     io.of('/journals').to(room).emit('events', {
       kind: 'comments',
       events: [event]

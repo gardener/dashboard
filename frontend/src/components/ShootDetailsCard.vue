@@ -221,11 +221,11 @@ export default {
       }
     },
     shootAddons () {
-      const addons = join(map(filter(shootAddonList, item => this.addon(item.name).enabled), "title"), ", ")
+      const addons = join(map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title'), ', ')
       if (addons.length > 0) {
         return addons
       }
-      return "No addons configured"
+      return 'No addons configured'
     }
   }
 }
