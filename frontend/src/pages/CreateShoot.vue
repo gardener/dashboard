@@ -384,7 +384,7 @@ export default {
           assign(this.action, {
             id: 'yamlnavigation',
             title: 'Validation Errors',
-            text: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may loose data.',
+            text: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.',
             yesButtonText: 'Continue',
             noButtonText: 'Cancel',
             resolve

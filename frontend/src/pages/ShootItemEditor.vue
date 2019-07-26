@@ -16,10 +16,16 @@ limitations under the License.
 
 <template>
   <v-layout column fill-height class="position-relative">
-    <v-flex v-if="!clean && modificationWarning" class="shrink">
+    <v-flex v-if="!clean && !isCreateMode && modificationWarning" class="shrink">
       <v-alert :value="modificationWarning" @input="dismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
         By modifying the resource directly you may cause serious problems in your cluster.
         We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
+      </v-alert>
+    </v-flex>
+    <v-flex v-if="!clean && isCreateMode && createWarning" class="shrink">
+      <v-alert :value="createWarning" @input="dismissCreateWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
+        By modifying the resource directly you may create an invalid cluster resource.
+        If the resource is invalid, you may lose data when switching back to the overview page.
       </v-alert>
     </v-flex>
     <v-flex ref="container" :style="containerStyles"></v-flex>
@@ -27,6 +33,9 @@ limitations under the License.
       <v-alert v-model="alert" :type="alertType" dismissible transition="reverse-slide-y-transition" class="ma-0">
         {{alertMessage}}
       </v-alert>
+    </v-flex>
+    <v-flex>
+      <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
     </v-flex>
     <v-flex :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
@@ -118,6 +127,7 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import Alert from '@/components/Alert'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 import { getProjectName } from '@/utils'
@@ -149,13 +159,15 @@ function safeDump (value) {
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    Alert
   },
   name: 'shoot-item-editor',
   data () {
     return {
       conflictPath: null,
       modificationWarning: true,
+      createWarning: true,
       alert: false,
       alertMessage: '',
       alertType: 'error',
@@ -180,7 +192,9 @@ export default {
       },
       generation: undefined,
       lineHeight: 21,
-      toolbarHeight: 48
+      toolbarHeight: 48,
+      errorMessage: undefined,
+      detailedErrorMessage: undefined
     }
   },
   computed: {
@@ -237,6 +251,10 @@ export default {
     dismissModificationWarning () {
       this.modificationWarning = false
       this.$localStorage.setItem('showShootEditorWarning', 'false')
+    },
+    dismissCreateWarning () {
+      this.createWarning = false
+      this.$localStorage.setItem('showShootCreateEditorWarning', 'false')
     },
     async save () {
       try {
@@ -485,8 +503,10 @@ export default {
     }
   },
   mounted () {
-    const value = this.$localStorage.getItem('showShootEditorWarning')
-    this.modificationWarning = value === null || value === 'true'
+    const modificationWarning = this.$localStorage.getItem('showShootEditorWarning')
+    this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
+    const createWarning = this.$localStorage.getItem('showShootCreateEditorWarning')
+    this.createWarning = createWarning === null || createWarning === 'true'
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
