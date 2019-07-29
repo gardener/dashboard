@@ -35,6 +35,7 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
+import DOMPurify from 'dompurify'
 import marked from 'marked'
 import TimeString from '@/components/TimeString'
 
@@ -53,10 +54,10 @@ export default {
       const options = {
         gfm: true,
         breaks: true,
-        tables: true,
-        sanitize: true
+        tables: true
       }
-      return marked(get(this.comment, 'data.body', ''), options)
+      const dirty = marked(get(this.comment, 'data.body', ''), options)
+      return DOMPurify.sanitize(dirty)
     },
     login () {
       return get(this.comment, 'data.user.login')
