@@ -34,7 +34,7 @@ limitations under the License.
         {{alertMessage}}
       </v-alert>
     </v-flex>
-    <v-flex>
+    <v-flex v-if="errorMessage" class="shrink">
       <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
     </v-flex>
     <v-flex :style="toolbarStyles">
@@ -194,7 +194,8 @@ export default {
       lineHeight: 21,
       toolbarHeight: 48,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
+      isShootCreated: false
     }
   },
   computed: {
@@ -439,17 +440,21 @@ export default {
       })
     },
     confirmCreateNavigation () {
-      this.dialog = true
-      return new Promise(resolve => {
-        assign(this.action, {
-          id: 'navigation',
-          title: 'Leave Create Cluster Page?',
-          text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-          yesButtonText: 'Leave',
-          noButtonText: 'Cancel',
-          resolve
+      if (!this.isShootCreated) {
+        this.dialog = true
+        return new Promise(resolve => {
+          assign(this.action, {
+            id: 'navigation',
+            title: 'Leave Create Cluster Page?',
+            text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
+            yesButtonText: 'Leave',
+            noButtonText: 'Cancel',
+            resolve
+          })
         })
-      })
+      } else {
+        return true
+      }
     },
     confirmOverwrite () {
       this.dialog = true
@@ -479,6 +484,7 @@ export default {
 
       try {
         await this.createShoot(shootResource)
+        this.isShootCreated = true
         this.$router.push({
           name: 'ShootItem',
           params: {
