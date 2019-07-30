@@ -161,6 +161,9 @@ export default {
     },
     cloudProfileName: {
       type: String
+    },
+    zones: {
+      type: Array
     }
   },
   data () {
@@ -174,15 +177,14 @@ export default {
   validations,
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName'
+      'machineTypesByCloudProfileNameAndZones',
+      'volumeTypesByCloudProfileNameAndZones'
     ]),
-
     machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)

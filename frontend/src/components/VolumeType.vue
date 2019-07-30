@@ -21,6 +21,9 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
+import includes from 'lodash/includes'
+import map from 'lodash/map'
+
 const validationErrors = {
   worker: {
     volumeType: {
@@ -73,6 +76,14 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
+  },
+  watch: {
+    volumeTypes (updatedVolumeTypes) {
+      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volumeType)) {
+        this.worker.volumeType = undefined
+        this.onInputVolumeType()
+      }
+    }
   }
 }
 </script>

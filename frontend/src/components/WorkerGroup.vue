@@ -55,14 +55,14 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName'
+      'machineTypesByCloudProfileNameAndZones',
+      'volumeTypesByCloudProfileNameAndZones'
     ]),
     machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
     },
     description () {
       const description = []

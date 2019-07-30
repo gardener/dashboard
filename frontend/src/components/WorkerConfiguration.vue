@@ -94,6 +94,9 @@ export default {
     },
     cloudProfileName () {
       return get(this.shootItem, 'spec.cloud.profile')
+    },
+    zones () {
+      return get(this.shootItem, ['spec', 'cloud', this.cloudProfileName, 'zones'])
     }
   },
   methods: {
@@ -124,7 +127,7 @@ export default {
 
       const workers = get(this.shootItem, `spec.cloud.${this.infrastructureKind}.workers`)
       this.$nextTick(() => {
-        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.cloudProfileName })
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.cloudProfileName, zones: this.zones })
       })
     },
     onWorkersValid (value) {

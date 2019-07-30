@@ -358,6 +358,7 @@ export default {
     },
     onInputZones () {
       this.$v.secret.$touch()
+      this.userInterActionBus.emit('updateZones', this.zones)
       this.validateInput()
     },
     onInputFloatingPoolName () {

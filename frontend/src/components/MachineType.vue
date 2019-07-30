@@ -25,6 +25,8 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
+import includes from 'lodash/includes'
+import map from 'lodash/map'
 
 const validationErrors = {
   worker: {
@@ -79,6 +81,14 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
+  },
+  watch: {
+    machineTypes (updatedMachineTypes) {
+      if (!includes(map(updatedMachineTypes, 'name'), this.worker.machineType)) {
+        this.worker.machineType = undefined
+        this.onInputMachineType()
+      }
+    }
   }
 }
 </script>

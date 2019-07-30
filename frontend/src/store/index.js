@@ -30,6 +30,8 @@ import some from 'lodash/some'
 import concat from 'lodash/concat'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
+import forEach from 'lodash/forEach'
+import isEmpty from 'lodash/isEmpty'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -71,6 +73,22 @@ const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
+const machineAndVolumeTypePredicate = (item, zones) => {
+  let valid = true
+  const itemZones = get(item, 'zones')
+  if (!isEmpty(itemZones) && !isEmpty(zones)) {
+    forEach(zones, zone => {
+      if (includes(get(item, 'zones'), zone) !== true) {
+        valid = false
+      }
+    })
+  }
+  if (get(item, 'usable', true) !== true) {
+    valid = false
+  }
+  return valid
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -93,18 +111,18 @@ const getters = {
       return filter(state.cloudProfiles.all, predicate)
     }
   },
-  machineTypesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
+  machineTypesByCloudProfileNameAndZones (state, getters) {
+    return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => get(machineType, 'usable', true) === true)
+      return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, zones))
     }
   },
-  volumeTypesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
+  volumeTypesByCloudProfileNameAndZones (state, getters) {
+    return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const volumeTypes = get(cloudProfile, 'data.volumeTypes')
-      return filter(volumeTypes, volumeType => get(volumeType, 'usable', true) === true)
+      return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, zones))
     }
   },
   shootList (state, getters) {

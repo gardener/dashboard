@@ -318,7 +318,7 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
       const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)

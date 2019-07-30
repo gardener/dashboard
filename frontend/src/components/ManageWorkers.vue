@@ -22,6 +22,7 @@ limitations under the License.
         :worker="worker"
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
+        :zones="zones"
         @updateName="onUpdateWorkerName"
         @updateMachineType="onUpdateWorkerMachineType"
         @updateVolumeType="onUpdateWorkerVolumeType"
@@ -91,20 +92,21 @@ export default {
       internalWorkers: undefined,
       valid: false,
       cloudProfileName: undefined,
+      zones: undefined,
       workers: undefined
     }
   },
   computed: {
     ...mapGetters([
       'cloudProfileByName',
-      'machineTypesByCloudProfileName',
-      'volumeTypesByCloudProfileName'
+      'machineTypesByCloudProfileNameAndZones',
+      'volumeTypesByCloudProfileNameAndZones'
     ]),
     machineTypes () {
-      return this.machineTypesByCloudProfileName(this.cloudProfileName)
+      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileName(this.cloudProfileName)
+      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     }
   },
   methods: {
@@ -207,8 +209,9 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName }) {
+    setWorkersData ({ workers, cloudProfileName, zones }) {
       this.cloudProfileName = cloudProfileName
+      this.zones = zones
       this.setInternalWorkers(workers)
     }
   },
@@ -216,7 +219,13 @@ export default {
     if (this.userInterActionBus) {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.cloudProfileName = cloudProfileName
-        this.setDefaultWorker()
+        this.$nextTick(() => {
+          // set worker when all props (including zone) have been updated
+          this.setDefaultWorker()
+        })
+      })
+      this.userInterActionBus.on('updateZones', zones => {
+        this.zones = zones
       })
     }
   }
