@@ -25,11 +25,9 @@ limitations under the License.
     <confirm-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updateHibernationSchedules"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
       max-width=850
@@ -69,7 +67,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       hibernationScheduleValid: false,
@@ -94,36 +91,34 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async updateHibernationSchedules () {
-      try {
-        const noScheduleAnnotation = {
-          'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
         }
-        this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
-        await updateShootHibernationSchedules({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: this.hibernationSchedules
-        })
-        await addShootAnnotation({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: noScheduleAnnotation
-        })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not save hibernation configuration'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      })) {
+        try {
+          const noScheduleAnnotation = {
+            'dashboard.garden.sapcloud.io/no-hibernation-schedule': this.$refs.hibernationSchedule.getNoHibernationSchedule() ? 'true' : null
+          }
+          this.hibernationSchedules = this.$refs.hibernationSchedule.getScheduleCrontab()
+          await updateShootHibernationSchedules({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: this.hibernationSchedules
+          })
+          await addShootAnnotation({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: noScheduleAnnotation
+          })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save hibernation configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
       }
     },
     reset () {
@@ -137,9 +132,6 @@ export default {
       this.$nextTick(() => {
         this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule: this.hibernationSchedules, noHibernationSchedule: this.noScheduleAnnotation, purpose })
       })
-    },
-    onUpdateHibernationSchedules (value) {
-      this.hibernationSchedules = value
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value

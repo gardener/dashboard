@@ -47,16 +47,14 @@ limitations under the License.
       <span>{{tooltipText}}</span>
     </v-tooltip>
     <confirm-dialog
-      :confirm="confirm"
+      :confirmValue="confirm"
       confirmButtonText="Update"
-      v-model="updateDialog"
-      :cancel="hideUpdateDialog"
-      :ok="versionUpdateConfirmed"
       :confirmDisabled="selectedVersionInvalid"
       :errorMessage.sync="updateErrorMessage"
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
+      ref="confirmDialog"
       >
       <template slot="caption">Update Cluster</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -124,7 +122,6 @@ export default {
   },
   data () {
     return {
-      updateDialog: false,
       selectedVersion: undefined,
       selectedVersionType: undefined,
       selectedVersionInvalid: true,
@@ -187,30 +184,31 @@ export default {
     onConfirmRequired (value) {
       this.confirmRequired = value
     },
-    showUpdateDialog () {
+    async showUpdateDialog (reset = true) {
       if (this.canUpdate) {
-        this.updateDialog = true
+        if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+          if (reset) {
+            this.reset()
+          }
+        })) {
+          try {
+            await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
+          } catch (err) {
+            this.updateErrorMessage = 'Update Kubernetes version failed'
+            this.updateDetailedErrorMessage = err.message
+            console.error('Update shoot version failed with error:', err)
+            this.showUpdateDialog(false)
+          }
+        }
       }
-    },
-    hideUpdateDialog () {
-      this.updateDialog = false
-      this.reset()
     },
     reset () {
       const defaultData = this.$options.data.apply(this)
       Object.assign(this.$data, defaultData)
 
-      this.$refs.shootVersionUpdate.reset()
-    },
-    async versionUpdateConfirmed () {
-      try {
-        await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
-        this.hideUpdateDialog()
-      } catch (err) {
-        this.updateErrorMessage = 'Update Kubernetes version failed'
-        this.updateDetailedErrorMessage = err.message
-        console.error('Update shoot version failed with error:', err)
-      }
+      this.$nextTick(() => {
+        this.$refs.shootVersionUpdate.reset()
+      })
     }
   }
 }

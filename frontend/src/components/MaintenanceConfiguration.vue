@@ -25,11 +25,9 @@ limitations under the License.
     <confirm-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updateMaintenance"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
       max-width=850
@@ -40,13 +38,12 @@ limitations under the License.
         <maintenance-time
           ref="maintenanceTime"
           :time-window-begin="data.timeWindowBegin"
-          @updateMaintenanceWindow="onUpdateMaintenanceWindow"
           @valid="onMaintenanceTimeValid"
         ></maintenance-time>
         <maintenance-components
+          ref="maintenanceComponents"
           :update-kubernetes-version="data.updateKubernetesVersion"
-          @updateKubernetesVersion="onUpdateKubernetesVersion">
-        </maintenance-components>
+        ></maintenance-components>
       </template>
     </confirm-dialog>
   </div>
@@ -60,6 +57,7 @@ import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
+import assign from 'lodash/assign'
 
 export default {
   name: 'maintenance-configuration',
@@ -75,10 +73,9 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      maintenanceTimeValid: false,
+      maintenanceTimeValid: true,
       data: {
         timeWindowBegin: undefined,
         timeWindowEnd: undefined,
@@ -103,29 +100,34 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async updateMaintenance () {
-      try {
-        await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not save maintenance configuration'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+          const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+          assign(this.data, {
+            timeWindowBegin: utcBegin,
+            timeWindowEnd: utcEnd,
+            updateKubernetesVersion: k8sUpdates
+          })
+          await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save maintenance configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
       }
     },
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-      this.maintenanceTimeValid = false
+      this.maintenanceTimeValid = true
 
       this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
       this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
@@ -133,14 +135,8 @@ export default {
 
       this.$nextTick(() => {
         this.$refs.maintenanceTime.reset()
+        this.$refs.maintenanceComponents.reset()
       })
-    },
-    onUpdateKubernetesVersion (value) {
-      this.data.updateKubernetesVersion = value
-    },
-    onUpdateMaintenanceWindow ({ utcBegin, utcEnd }) {
-      this.data.timeWindowBegin = utcBegin
-      this.data.timeWindowEnd = utcEnd
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value

@@ -23,7 +23,7 @@ limitations under the License.
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip top>
-          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog" slot="activator">
             <v-icon>delete</v-icon>
           </v-btn>
           <span v-if="isDeleteButtonDisabled">You can only delete projects that do not contain clusters</span>
@@ -75,12 +75,10 @@ limitations under the License.
     </v-fab-transition>
 
     <confirm-dialog
-      v-model="deleteConfirm"
       defaultColor="red"
-      :cancel="hide"
-      :ok="onDeleteProject"
       :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage">
+      :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="confirmDialog">
       <div slot="caption">
         Confirm Delete
       </div>
@@ -114,7 +112,6 @@ export default {
   data () {
     return {
       edit: false,
-      deleteConfirm: false,
       floatingButton: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -161,28 +158,33 @@ export default {
     ...mapActions([
       'deleteProject'
     ]),
-    hide () {
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          await this.deleteProject(this.project)
+          if (this.projectList.length > 0) {
+            const p1 = this.projectList[0]
+            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+          } else {
+            this.$router.push({ name: 'Home', params: { } })
+          }
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Failed to delete project.'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
+      }
+    },
+    reset () {
       this.errorMessage = undefined
       this.detailedMessage = undefined
-      this.deleteConfirm = false
       this.edit = false
-    },
-    async onDeleteProject () {
-      try {
-        await this.deleteProject(this.project)
-        this.hide()
-        if (this.projectList.length > 0) {
-          const p1 = this.projectList[0]
-          this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-        } else {
-          this.$router.push({ name: 'Home', params: { } })
-        }
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Failed to delete project.'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
     }
   },
   mounted () {

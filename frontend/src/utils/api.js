@@ -108,6 +108,7 @@ export function updateShootVersion ({ namespace, name, data }) {
 }
 
 export function updateShootMaintenance ({ namespace, name, data }) {
+  console.log(namespace, name, data)
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, data)

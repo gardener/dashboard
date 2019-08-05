@@ -25,9 +25,7 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Schedule Now"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="triggerMaintenance"
+      ref="confirmDialog"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
@@ -73,7 +71,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       osUpdates: true, // won't change
@@ -102,27 +99,25 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async triggerMaintenance () {
-      this.maintenanceTriggered = true
+    async showDialog (reset) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        this.maintenanceTriggered = true
 
-      const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
-      try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not start maintenance'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-
-        this.maintenanceTriggered = false
+        const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
+        try {
+          await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not start maintenance'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.maintenanceTriggered = false
+          this.showDialog(false)
+        }
       }
     },
     reset () {

@@ -23,15 +23,13 @@ limitations under the License.
       {{caption}}
     </v-tooltip>
     <confirm-dialog
-      :confirm="confirm"
+      :confirmValue="confirm"
       :confirmButtonText="confirmText"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updateShootHibernation"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
+      ref="confirmDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -66,7 +64,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       enableHibernation: false
@@ -114,41 +111,42 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-      this.enableHibernation = !this.isHibernated
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          await updateShootHibernation({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: {
+              enabled: this.enableHibernation
+            }
+          })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          if (!this.isHibernated) {
+            this.errorMessage = 'Could not hibernate cluster'
+          } else {
+            this.errorMessage = 'Could not wake up cluster from hibernation'
+          }
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
+      }
     },
-    hideDialog () {
-      this.dialog = false
+    reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-    },
-    async updateShootHibernation () {
-      try {
-        await updateShootHibernation({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: {
-            enabled: this.enableHibernation
-          }
-        })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        if (!this.isHibernated) {
-          this.errorMessage = 'Could not hibernate cluster'
-        } else {
-          this.errorMessage = 'Could not wake up cluster from hibernation'
-        }
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
     }
   },
   watch: {
     isHibernated (value) {
       // hide dialog if hibernation state changes
-      this.hideDialog()
+      this.$refs.confirmDialog.hideDialog()
     }
   }
 }

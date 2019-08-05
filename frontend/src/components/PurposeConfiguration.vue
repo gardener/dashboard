@@ -25,13 +25,11 @@ limitations under the License.
     <confirm-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updatePurpose"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
+      ref="confirmDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -70,7 +68,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       purpose: null,
@@ -99,30 +96,28 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async updatePurpose () {
-      try {
-        const purposeAnnotation = {
-          'garden.sapcloud.io/purpose': this.purpose
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
         }
-        await addShootAnnotation({
-          namespace: this.shootNamespace,
-          name: this.shootName,
-          data: purposeAnnotation
-        })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not update purpose'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      })) {
+        try {
+          const purposeAnnotation = {
+            'garden.sapcloud.io/purpose': this.purpose
+          }
+          await addShootAnnotation({
+            namespace: this.shootNamespace,
+            name: this.shootName,
+            data: purposeAnnotation
+          })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not update purpose'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
       }
     },
     reset () {

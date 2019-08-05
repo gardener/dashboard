@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="value" persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
+  <v-dialog v-model="visible" persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
     <v-card>
       <v-card-title :class="titleColorClass">
         <div class="headline">
@@ -31,7 +31,7 @@ limitations under the License.
         </slot>
         <v-text-field
           @keyup.enter="okClicked()"
-          v-if="confirm && !confirmDisabled"
+          v-if="confirmValue && !confirmDisabled"
           ref="deleteDialogInput"
           :hint="hint"
           persistent-hint
@@ -46,8 +46,8 @@ limitations under the License.
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-        <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>{{confirmButtonText}}</v-btn>
+        <v-btn flat @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
+        <v-btn flat @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -56,6 +56,8 @@ limitations under the License.
 <script>
 import { setDelayedInputFocus } from '@/utils'
 import Alert from '@/components/Alert'
+import noop from 'lodash/noop'
+import isFunction from 'lodash/isFunction'
 
 export default {
   name: 'confirm-dialog',
@@ -63,19 +65,7 @@ export default {
     Alert
   },
   props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    ok: {
-      type: Function,
-      required: true
-    },
-    cancel: {
-      type: Function,
-      required: true
-    },
-    confirm: {
+    confirmValue: {
       type: String
     },
     confirmDisabled: {
@@ -99,6 +89,10 @@ export default {
       type: String,
       default: 'Confirm'
     },
+    cancelButtonText: {
+      type: String,
+      default: 'Cancel'
+    },
     maxWidth: {
       type: String,
       default: '500'
@@ -106,25 +100,20 @@ export default {
   },
   data () {
     return {
-      userInput: ''
-    }
-  },
-  watch: {
-    value (value) {
-      if (value) {
-        this.onShow()
-      }
+      userInput: '',
+      visible: false,
+      resolve: noop
     }
   },
   computed: {
     hasError () {
-      return this.confirm && this.confirm !== this.userInput
+      return this.confirmValue && this.confirmValue !== this.userInput
     },
     hint () {
       if (this.userInput.length === 0) {
-        return `Type '${this.confirm}' to confirm`
-      } else if (this.userInput !== this.confirm) {
-        return `Your input did not match with required phrase '${this.confirm}'`
+        return `Type '${this.confirmValue}' to confirm`
+      } else if (this.userInput !== this.confirmValue) {
+        return `Your input did not match with required phrase '${this.confirmValue}'`
       }
       return ''
     },
@@ -145,16 +134,36 @@ export default {
       }
     },
     titleColorClass () {
-      return this.confirm ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
+      return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
     },
     textColorClass () {
-      return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
+      return this.confirmValue ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
     },
     valid () {
       return !this.confirmDisabled && !this.hasError
     }
   },
   methods: {
+    confirmWithDialog (resetFunction) {
+      this.visible = true
+
+      if (isFunction(resetFunction)) {
+        resetFunction()
+      }
+
+      this.userInput = ''
+
+      // we must delay the "focus" handling because the dialog.open is animated
+      // and the 'autofocus' property didn't work in this case.
+      setDelayedInputFocus(this, 'deleteDialogInput')
+
+      return new Promise(resolve => {
+        this.resolve = resolve
+      })
+    },
+    hideDialog () {
+      this.visible = false
+    },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
         case 'red':
@@ -175,21 +184,13 @@ export default {
           return 'cyan--text text--darken-2'
       }
     },
-    cancelClicked () {
-      if (this.cancel) {
-        this.cancel()
+    resolveAction (value) {
+      this.visible = false
+      if (isFunction(this.resolve)) {
+        const resolve = this.resolve
+        this.resolve = undefined
+        resolve(value)
       }
-    },
-    okClicked () {
-      if (this.ok && this.valid) {
-        this.ok()
-      }
-    },
-    onShow () {
-      // we must delay the "focus" handling because the dialog.open is animated
-      // and the 'autofocus' property didn't work in this case.
-      this.userInput = ''
-      setDelayedInputFocus(this, 'deleteDialogInput')
     }
   }
 }

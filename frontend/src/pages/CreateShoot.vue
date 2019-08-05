@@ -105,18 +105,17 @@ limitations under the License.
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
       <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
     </v-layout>
-    <v-dialog v-model="dialog" persistent scrollable max-width="360px" @keydown.esc="resolveAction(false)">
-      <v-card>
-        <v-card-title primary-title class="orange darken-2 grey--text text--lighten-4 headline" v-text="action.title"></v-card-title>
-        <v-divider></v-divider>
-        <v-card-text style="height: 80px;" v-html="action.text"></v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn flat @click="resolveAction(false)" color="primary">{{action.noButtonText}}</v-btn>
-          <v-btn flat @click="resolveAction(true)" color="secondary">{{action.yesButtonText}}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <confirm-dialog
+      ref="confirmDialog"
+      :confirmButtonText="confirmYesButtonText"
+      max-width=400
+      defaultColor="orange"
+      >
+      <template slot="caption">{{confirmCaption}}</template>
+      <template slot="message">
+        <div v-html="confirmMessage"></div>
+      </template>
+    </confirm-dialog>
   </v-container>
 </template>
 
@@ -131,6 +130,7 @@ import MaintenanceTime from '@/components/MaintenanceTime'
 import HibernationSchedule from '@/components/HibernationSchedule'
 import ManageWorkers from '@/components/ManageWorkers'
 import Alert from '@/components/Alert'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
@@ -138,9 +138,6 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
-import noop from 'lodash/noop'
-import assign from 'lodash/assign'
-import isFunction from 'lodash/isFunction'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
@@ -157,7 +154,8 @@ export default {
     MaintenanceTime,
     HibernationSchedule,
     ManageWorkers,
-    Alert
+    Alert,
+    ConfirmDialog
   },
   data () {
     return {
@@ -170,15 +168,9 @@ export default {
       hibernationScheduleValid: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      dialog: false,
-      action: {
-        id: '',
-        title: '',
-        text: '',
-        yesButtonText: '',
-        noButtonText: '',
-        resolve: noop
-      },
+      confirmCaption: undefined,
+      confirmMessage: undefined,
+      confirmYesButtonText: undefined,
       isShootCreated: false,
       initialShootContent: undefined
     }
@@ -317,9 +309,6 @@ export default {
       this.purpose = purpose
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
-      const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
-
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)
 
@@ -331,6 +320,9 @@ export default {
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
       this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
+
+      const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
     },
     async createClicked () {
       const shootResource = this.updateShootResourceWithUIComponents()
@@ -352,47 +344,17 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    resolveAction (value) {
-      this.dialog = false
-      if (isFunction(this.action.resolve)) {
-        const resolve = this.action.resolve
-        this.action.resolve = undefined
-        resolve(value)
-      }
-    },
     confirmNavigation () {
-      if (!this.isShootCreated && this.isShootContentDirty) {
-        this.dialog = true
-        return new Promise(resolve => {
-          assign(this.action, {
-            id: 'navigation',
-            title: 'Leave Create Cluster Page?',
-            text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-            yesButtonText: 'Leave',
-            noButtonText: 'Cancel',
-            resolve
-          })
-        })
-      } else {
-        return true
-      }
+      this.confirmCaption = 'Leave Create Cluster Page?'
+      this.confirmMessage = 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
+      this.confirmYesButtonText = 'Leave'
+      return this.$refs.confirmDialog.confirmWithDialog()
     },
     confirmNavigateToYamlIfInvalid () {
-      if (!this.valid) {
-        this.dialog = true
-        return new Promise(resolve => {
-          assign(this.action, {
-            id: 'yamlnavigation',
-            title: 'Validation Errors',
-            text: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.',
-            yesButtonText: 'Continue',
-            noButtonText: 'Cancel',
-            resolve
-          })
-        })
-      } else {
-        return true
-      }
+      this.confirmCaption = 'Validation Errors'
+      this.confirmMessage = 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
+      this.confirmYesButtonText = 'Continue'
+      return this.$refs.confirmDialog.confirmWithDialog()
     },
     cancelClicked () {
       this.$router.push({
@@ -405,28 +367,40 @@ export default {
     infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
       return find(secrets, ['metadata.bindingName', secretBindingName])
+    },
+    setInitialShootContent () {
+      this.initialShootContent = this.yamlFromUIComponents()
+      const infrastructureKind = getCloudProviderKind(get(this.initialShootContent, 'spec.cloud'))
+      if (isEmpty(get(this.initialShootContent, ['spec', 'cloud', infrastructureKind, 'workers']))) {
+        // when workers are set, initialization is completed
+        setTimeout(() => {
+          this.setInitialShootContent()
+        }, 100)
+      }
     }
   },
   async beforeRouteLeave (to, from, next) {
     if (to.name === 'CreateShootEditor') {
-      if (!await this.confirmNavigateToYamlIfInvalid()) {
-        return
+      if (!this.valid) {
+        if (!await this.confirmNavigateToYamlIfInvalid()) {
+          return next(false)
+        }
       }
       this.updateShootResourceWithUIComponents()
+      return next()
     } else {
-      if (!await this.confirmNavigation()) {
-        return
+      if (!this.isShootCreated && this.isShootContentDirty) {
+        if (!await this.confirmNavigation()) {
+          return next(false)
+        }
       }
       this.resetCreateShootResource()
+      return next()
     }
-    next()
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
-
-    this.$nextTick(() => {
-      this.initialShootContent = this.yamlFromUIComponents()
-    })
+    this.setInitialShootContent()
   }
 }
 </script>

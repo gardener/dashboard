@@ -24,11 +24,9 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updateAddons"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
       >
@@ -86,24 +84,22 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async updateAddons () {
-      try {
-        this.addons = this.$refs.addons.getAddons()
-        await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not update addons'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          this.addons = this.$refs.addons.getAddons()
+          await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not update addons'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
       }
     },
     reset () {

@@ -25,14 +25,12 @@ limitations under the License.
     <confirm-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="updateWorkers"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
       max-width=1000
+      ref="confirmDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -67,7 +65,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       workersValid: false,
@@ -100,24 +97,22 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async updateWorkers () {
-      try {
-        this.workers = this.$refs.manageWorkers.getWorkers()
-        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not save worker configuration'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          this.workers = this.$refs.manageWorkers.getWorkers()
+          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not save worker configuration'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
       }
     },
     reset () {

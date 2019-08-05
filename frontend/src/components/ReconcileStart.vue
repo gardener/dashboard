@@ -26,14 +26,12 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Trigger Now"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="triggerReconcile"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
       max-width="850"
+      ref="confirmDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -68,7 +66,6 @@ export default {
   },
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
       reconcileTriggered: false,
@@ -96,29 +93,28 @@ export default {
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    async triggerReconcile () {
-      this.reconcileTriggered = true
-      this.currentGeneration = get(this.shootItem, 'metadata.generation')
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        this.reconcileTriggered = true
+        this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
-      const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
-      try {
-        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not trigger reconcile'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
+        try {
+          await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Could not trigger reconcile'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.reconcileTriggered = false
-        this.currentGeneration = null
+          this.reconcileTriggered = false
+          this.currentGeneration = null
+          this.showDialog(false)
+        }
       }
     },
     reset () {

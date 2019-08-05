@@ -34,7 +34,7 @@ limitations under the License.
             </v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile class="list-complete-item" v-if="selectable || updateVersion">
+        <v-list-tile class="list-complete-item" v-if="selectable || k8sUpdates">
           <v-list-tile-action>
             <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
@@ -82,6 +82,9 @@ export default {
     },
     setComponentUpdates ({ k8sUpdates }) {
       this.k8sUpdates = k8sUpdates
+    },
+    reset () {
+      this.k8sUpdates = this.updateKubernetesVersion
     }
   }
 }

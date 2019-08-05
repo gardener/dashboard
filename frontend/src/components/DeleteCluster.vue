@@ -32,12 +32,10 @@ limitations under the License.
 
     <template v-if="renderDialog">
       <confirm-dialog
-        :confirm="shootName"
-        v-model="dialog"
-        :cancel="hideDialog"
-        :ok="deletionConfirmed"
+        :confirmValue="shootName"
         :errorMessage.sync="errorMessage"
         :detailedErrorMessage.sync="detailedErrorMessage"
+        ref="confirmDialog"
       >
         <template slot="caption">Delete Cluster</template>
         <template slot="affectedObjectName">{{shootName}}</template>
@@ -103,7 +101,6 @@ export default {
   data () {
     return {
       renderDialog: false,
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null
     }
@@ -139,27 +136,26 @@ export default {
         this.showDialog()
       })
     },
-    showDialog () {
-      this.dialog = true
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
+    async showDialog (reset = true) {
+      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (reset) {
+          this.reset()
+        }
+      })) {
+        try {
+          await this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Cluster deletion failed'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog(false)
+        }
+      }
     },
     ...mapActions([
       'deleteShoot'
     ]),
-    async deletionConfirmed () {
-      try {
-        await this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
-        this.hideDialog()
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Cluster deletion failed'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
-    },
     isReconciliationDeactivated () {
       return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     },

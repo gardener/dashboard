@@ -110,24 +110,24 @@ limitations under the License.
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-    <v-dialog v-model="dialog" persistent scrollable max-width="360px" @keydown.esc="resolveAction(false)">
-      <v-card>
-        <v-card-title primary-title class="orange darken-2 grey--text text--lighten-4 headline" v-text="action.title"></v-card-title>
-        <v-divider></v-divider>
-        <v-card-text style="height: 80px;" v-html="action.text"></v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn flat @click="resolveAction(false)" color="primary">{{action.noButtonText}}</v-btn>
-          <v-btn flat @click="resolveAction(true)" color="secondary">{{action.yesButtonText}}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <confirm-dialog
+      ref="confirmDialog"
+      :confirmButtonText="confirmYesButtonText"
+      max-width=400
+      defaultColor="orange"
+      >
+      <template slot="caption">{{confirmCaption}}</template>
+      <template slot="message">
+        <div v-html="confirmMessage"></div>
+      </template>
+    </confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import Alert from '@/components/Alert'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 import { getProjectName } from '@/utils'
@@ -141,12 +141,9 @@ import 'codemirror/lib/codemirror.css'
 
 // lodash
 import isEqual from 'lodash/isEqual'
-import assign from 'lodash/assign'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
 import pick from 'lodash/pick'
-import noop from 'lodash/noop'
-import isFunction from 'lodash/isFunction'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -160,7 +157,8 @@ function safeDump (value) {
 export default {
   components: {
     CopyBtn,
-    Alert
+    Alert,
+    ConfirmDialog
   },
   name: 'shoot-item-editor',
   data () {
@@ -172,15 +170,9 @@ export default {
       alertMessage: '',
       alertType: 'error',
       snackbar: false,
-      dialog: false,
-      action: {
-        id: '',
-        title: '',
-        text: '',
-        yesButtonText: '',
-        noButtonText: '',
-        resolve: noop
-      },
+      confirmCaption: undefined,
+      confirmMessage: undefined,
+      confirmYesButtonText: undefined,
       snackbarTimeout: 3000,
       snackbarColor: undefined,
       snackbarText: '',
@@ -418,56 +410,23 @@ export default {
         this.setContent(safeDump(value))
       }
     },
-    resolveAction (value) {
-      this.dialog = false
-      if (isFunction(this.action.resolve)) {
-        const resolve = this.action.resolve
-        this.action.resolve = undefined
-        resolve(value)
-      }
-    },
     confirmEditorNavigation () {
-      this.dialog = true
-      return new Promise(resolve => {
-        assign(this.action, {
-          id: 'navigation',
-          title: 'Leave Editor?',
-          text: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?',
-          yesButtonText: 'Leave',
-          noButtonText: 'Cancel',
-          resolve
-        })
-      })
+      this.confirmCaption = 'Leave Editor?'
+      this.confirmMessage = 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?'
+      this.confirmYesButtonText = 'Leave'
+      return this.$refs.confirmDialog.confirmWithDialog()
     },
     confirmCreateNavigation () {
-      if (!this.isShootCreated) {
-        this.dialog = true
-        return new Promise(resolve => {
-          assign(this.action, {
-            id: 'navigation',
-            title: 'Leave Create Cluster Page?',
-            text: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?',
-            yesButtonText: 'Leave',
-            noButtonText: 'Cancel',
-            resolve
-          })
-        })
-      } else {
-        return true
-      }
+      this.confirmCaption = 'Leave Create Cluster Page?'
+      this.confirmMessage = 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
+      this.confirmYesButtonText = 'Leave'
+      return this.$refs.confirmDialog.confirmWithDialog()
     },
     confirmOverwrite () {
-      this.dialog = true
-      return new Promise(resolve => {
-        assign(this.action, {
-          id: 'save',
-          title: 'Confirm Overwrite',
-          text: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?',
-          yesButtonText: 'Save',
-          noButtonText: 'Cancel',
-          resolve
-        })
-      })
+      this.confirmCaption = 'Confirm Overwrite'
+      this.confirmMessage = 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
+      this.confirmYesButtonText = 'Save'
+      return this.$refs.confirmDialog.confirmWithDialog()
     },
     onCopy () {
       this.snackbarColor = undefined
@@ -549,12 +508,17 @@ export default {
           return next(false)
         }
       } else {
-        if (!await this.confirmCreateNavigation()) {
-          return
+        if (this.isShootCreated) {
+          this.resetCreateShootResource()
+          return next()
         }
-        this.resetCreateShootResource()
+        if (!await this.confirmCreateNavigation()) {
+          return next(false)
+        } else {
+          this.resetCreateShootResource()
+          return next()
+        }
       }
-      next()
     } else {
       if (this.clean) {
         return next()
