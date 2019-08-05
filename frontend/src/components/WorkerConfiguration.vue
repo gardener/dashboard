@@ -93,7 +93,7 @@ export default {
       return get(this.shootItem, 'spec.cloud.profile')
     },
     zones () {
-      return get(this.shootItem, ['spec', 'cloud', this.cloudProfileName, 'zones'])
+      return get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'zones'])
     }
   },
   methods: {

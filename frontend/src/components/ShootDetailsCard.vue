@@ -78,13 +78,13 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
-        <v-layout>
+        <v-layout class="py-2">
           <v-flex shrink justify-center class="pr-0 pt-3">
             <v-icon class="cyan--text text--darken-2 avatar">perm_identity</v-icon>
           </v-flex>
           <v-flex class="pa-0">
             <span class="grey--text">Created by</span><br>
-            <account-avatar :account-name="createdBy" :mail-to="true"></account-avatar>
+            <account-avatar :account-name="createdBy" :mail-to="true" class="pb-3"></account-avatar>
             <v-tooltip top>
               <template slot="activator">
                 <span class="grey--text">Created at</span><br>

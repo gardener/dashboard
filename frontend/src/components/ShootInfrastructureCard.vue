@@ -20,35 +20,29 @@ limitations under the License.
       Infrastructure
     </v-card-title>
     <div class="list">
+
       <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">cloud_queue</v-icon>
-        <v-flex class="pa-0">
-          <span class="grey--text">Provider</span><br>
-          <v-tooltip top open-delay="500">
-            <span slot="activator" class="subheading">{{getCloudProviderKind}}</span>
-            <span>Provider</span>
-          </v-tooltip>
-          /
-          <v-tooltip top open-delay="500">
-            <span slot="activator" class="subheading">{{region}}</span>
-            <span>Region</span>
-          </v-tooltip>
-          <template v-if="!!secret">
-            /
-            <v-tooltip top open-delay="500">
-              <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: secret, namespace } }">
-                <span class="subheading">{{secret}}</span>
-              </router-link>
-              <span>Used Credential</span>
-            </v-tooltip>
-          </template>
-        </v-flex>
+        <v-layout class="py-2">
+          <v-flex shrink justify-center class="pr-0 pt-3">
+            <v-icon class="cyan--text text--darken-2 avatar">cloud_queue</v-icon>
+          </v-flex>
+          <v-flex class="pa-0">
+            <span class="grey--text">Provider / Credential</span><br>
+            <span class="subheading">{{getCloudProviderKind}} / {{secret}}</span>
+            <v-layout row>
+              <v-flex>
+                <span class="grey--text">Region / Zone</span><br>
+                <span class="subheading">{{region}} / {{zones}}</span>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
       </v-card-title>
 
       <template v-if="showSeedInfo">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
-          <v-layout>
+          <v-layout class="py-2">
             <v-flex shrink justify-center class="pr-0 pt-3">
               <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
             </v-flex>
@@ -100,6 +94,7 @@ limitations under the License.
 
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
+import join from 'lodash/join'
 import includes from 'lodash/includes'
 import CopyBtn from '@/components/CopyBtn'
 import {
@@ -126,11 +121,17 @@ export default {
     region () {
       return get(this.shootItem, 'spec.cloud.region')
     },
+    zones () {
+      return join(get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'zones']), ', ')
+    },
+    infrastructureKind () {
+      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
+    },
     secret () {
       return get(this.shootItem, 'spec.cloud.secretBindingRef.name')
     },
     cidr () {
-      return get(this.shootItem, `spec.cloud.${this.getCloudProviderKind}.networks.nodes`)
+      return get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'networks', 'nodes'])
     },
     technicalId () {
       return get(this.shootItem, `status.technicalID`)
