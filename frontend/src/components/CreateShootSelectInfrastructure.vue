@@ -38,7 +38,7 @@ limitations under the License.
 </template>
 
 <script>
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 import intersection from 'lodash/intersection'
 import { mapGetters } from 'vuex'
 

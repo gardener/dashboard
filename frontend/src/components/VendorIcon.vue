@@ -69,6 +69,12 @@ export default {
           return require('@/assets/vmware.svg')
         case 'china-telecom':
           return require('@/assets/china-telecom.svg')
+        case 'coreos':
+          return require('@/assets/coreos.svg')
+        case 'suse':
+          return require('@/assets/suse.svg')
+        case 'ubuntu':
+          return require('@/assets/ubuntu.svg')
       }
       return undefined
     },

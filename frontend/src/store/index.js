@@ -125,6 +125,26 @@ const getters = {
       return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, zones))
     }
   },
+  machineImagesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const machineImages = get(cloudProfile, 'data.machineImages')
+      const allMachineImages = []
+      forEach(machineImages, machineImage => {
+        forEach(machineImage.versions, version => {
+          if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
+            allMachineImages.push({
+              name: machineImage.name,
+              version: version.version,
+              expirationDate: version.expirationDate
+            })
+          }
+        })
+      })
+
+      return allMachineImages
+    }
+  },
   shootList (state, getters) {
     return getters['shoots/sortedItems']
   },

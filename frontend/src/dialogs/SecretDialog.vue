@@ -95,7 +95,7 @@ import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
 import Alert from '@/components/Alert'
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {

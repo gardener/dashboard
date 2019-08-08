@@ -130,7 +130,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'

@@ -39,6 +39,7 @@ limitations under the License.
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
 import { mapGetters } from 'vuex'
+import { getTimestampFormatted } from '@/utils'
 
 export default {
   name: 'worker-group',
@@ -56,13 +57,17 @@ export default {
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones'
+      'volumeTypesByCloudProfileNameAndZones',
+      'machineImagesByCloudProfileName'
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
     },
     volumeTypes () {
       return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+    },
+    machineImages () {
+      return this.machineImagesByCloudProfileName(this.cloudProfileName)
     },
     description () {
       const description = []
@@ -91,11 +96,30 @@ export default {
           description: `(Class: ${volumeType.class})`
         })
       }
+      if (this.workerGroup.machineImage) {
+        const machineImage = find(this.machineImages, { name: this.workerGroup.machineImage.name })
+        const machineImageDescription = {
+          icon: 'mdi-blur-radial',
+          title: 'Machine Image',
+          value: `${machineImage.name} | Version: ${machineImage.version}`
+        }
+        if (machineImage.expirationDate) {
+          machineImageDescription.description = `(Expiration Date: ${getTimestampFormatted(machineImage.expirationDate)})`
+        }
+        description.push(machineImageDescription)
+      }
       if (this.workerGroup.autoScalerMin && this.workerGroup.autoScalerMax) {
         description.push({
           icon: 'mdi-arrow-expand-all',
           title: 'Autoscaler',
           value: `Min. ${this.workerGroup.autoScalerMin} / Max. ${this.workerGroup.autoScalerMax}`
+        })
+      }
+      if (this.workerGroup.maxSurge) {
+        description.push({
+          icon: 'mdi-current-ac',
+          title: 'Max. Surge',
+          value: `${this.workerGroup.maxSurge}`
         })
       }
       return description

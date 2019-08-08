@@ -167,7 +167,7 @@ import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 

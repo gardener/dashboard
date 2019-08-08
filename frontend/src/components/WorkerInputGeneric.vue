@@ -15,80 +15,110 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row>
-    <v-flex xs1 class="mt-1"><v-avatar class="cyan darken-2"><v-icon class="white--text">mdi-server</v-icon></v-avatar></v-flex>
-    <v-flex xs2>
-      <v-text-field
-        color="cyan darken-2"
-        :error-messages="getErrorMessages('worker.name')"
-        @input="onInputName"
-        @blur="$v.worker.name.$touch()"
-        v-model="worker.name"
-        counter="15"
-        label="Group Name">
-      </v-text-field>
+  <v-layout row class="mb-3">
+    <v-flex xs1 class="mt-1">
+      <v-avatar class="cyan darken-2">
+        <v-icon class="white--text">mdi-server</v-icon>
+      </v-avatar>
     </v-flex>
+    <v-layout column>
+      <v-layout row>
+        <v-flex xs2>
+          <v-text-field
+            color="cyan darken-2"
+            :error-messages="getErrorMessages('worker.name')"
+            @input="onInputName"
+            @blur="$v.worker.name.$touch()"
+            v-model="worker.name"
+            counter="15"
+            label="Group Name">
+          </v-text-field>
+        </v-flex>
 
-    <v-flex xs2 class="ml-3">
-      <machine-type
-      :machineTypes="machineTypes"
-      :worker="worker"
-      @updateMachineType="onUpdateMachineType"
-      @valid="onMachineTypeValid">
-      </machine-type>
-    </v-flex>
+        <v-flex xs2 class="ml-3">
+          <machine-type
+          :machineTypes="machineTypes"
+          :worker="worker"
+          @updateMachineType="onUpdateMachineType"
+          @valid="onMachineTypeValid">
+          </machine-type>
+        </v-flex>
 
-    <v-flex xs2 v-if="volumeInCloudProfile" class="ml-3">
-      <volume-type
-      :volumeTypes="volumeTypes"
-      :worker="worker"
-      @updateVolumeType="onUpdateVolumeType"
-      @valid="onVolumeTypeValid">
-      </volume-type>
-    </v-flex>
+        <v-flex xs2 v-if="volumeInCloudProfile" class="ml-3">
+          <volume-type
+          :volumeTypes="volumeTypes"
+          :worker="worker"
+          @updateVolumeType="onUpdateVolumeType"
+          @valid="onVolumeTypeValid">
+          </volume-type>
+        </v-flex>
 
-    <v-flex v-if="volumeInCloudProfile" xs1  class="ml-3">
-      <size-input
-        min="1"
-        color="cyan darken-2"
-        :error-messages="getErrorMessages('worker.volumeSize')"
-        @input="onInputVolumeSize"
-        @blur="$v.worker.volumeSize.$touch()"
-        label="Volume Size"
-        v-model="worker.volumeSize"
-      ></size-input>
-    </v-flex>
+        <v-flex v-if="volumeInCloudProfile" xs1  class="ml-3">
+          <size-input
+            min="1"
+            color="cyan darken-2"
+            :error-messages="getErrorMessages('worker.volumeSize')"
+            @input="onInputVolumeSize"
+            @blur="$v.worker.volumeSize.$touch()"
+            label="Volume Size"
+            v-model="worker.volumeSize"
+          ></size-input>
+        </v-flex>
 
-    <v-flex xs1 class="ml-3 autoscaler">
-      <v-text-field
-        min="0"
-        color="cyan darken-2"
-        :error-messages="getErrorMessages('worker.autoScalerMin')"
-        @input="onInputAutoscalerMin"
-        @blur="$v.worker.autoScalerMin.$touch()"
-        type="number"
-        v-model="innerMin"
-        label="Autoscaler Min."></v-text-field>
-    </v-flex>
+        <v-flex class="ml-3 mt-2">
+          <slot name="action">
+          </slot>
+        </v-flex>
+      </v-layout>
 
-    <v-flex xs1 class="ml-3 autoscaler">
-      <v-text-field
-        min="0"
-        color="cyan darken-2"
-        :error-messages="getErrorMessages('worker.autoScalerMax')"
-        @input="onInputAutoscalerMax"
-        @blur="$v.worker.autoScalerMax.$touch()"
-        type="number"
-        v-model="innerMax"
-        label="Autoscaler Max."
-      ></v-text-field>
-    </v-flex>
+      <v-layout row>
+        <v-flex xs3>
+          <machine-image
+          :machineImages="machineImages"
+          :worker="worker"
+          @updateMachineImage="onUpdateMachineImage"
+          @valid="onMachineImageValid">
+          </machine-image>
+        </v-flex>
 
-    <v-flex class="ml-3 mt-2">
-      <slot name="action">
-      </slot>
-    </v-flex>
+        <v-flex xs1 class="ml-3 autoscaler">
+          <v-text-field
+            min="0"
+            color="cyan darken-2"
+            :error-messages="getErrorMessages('worker.autoScalerMin')"
+            @input="onInputAutoscalerMin"
+            @blur="$v.worker.autoScalerMin.$touch()"
+            type="number"
+            v-model="innerMin"
+            label="Autoscaler Min."></v-text-field>
+        </v-flex>
 
+        <v-flex xs1 class="ml-3 autoscaler">
+          <v-text-field
+            min="0"
+            color="cyan darken-2"
+            :error-messages="getErrorMessages('worker.autoScalerMax')"
+            @input="onInputAutoscalerMax"
+            @blur="$v.worker.autoScalerMax.$touch()"
+            type="number"
+            v-model="innerMax"
+            label="Autoscaler Max."
+          ></v-text-field>
+        </v-flex>
+
+        <v-flex xs1 class="ml-3 autoscaler">
+          <v-text-field
+            min="0"
+            color="cyan darken-2"
+            :error-messages="getErrorMessages('worker.maxSurge')"
+            @input="onInputMaxSurge"
+            @blur="$v.worker.maxSurge.$touch()"
+            v-model="maxSurge"
+            label="Max. Surge"></v-text-field>
+        </v-flex>
+
+      </v-layout>
+    </v-layout>
   </v-layout>
 </template>
 
@@ -98,9 +128,10 @@ import isEmpty from 'lodash/isEmpty'
 import SizeInput from '@/components/VolumeSizeInput'
 import MachineType from '@/components/MachineType'
 import VolumeType from '@/components/VolumeType'
+import MachineImage from '@/components/MachineImage'
 import { required, maxLength, minValue } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen } from '@/utils/validators'
+import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
   worker: {
@@ -119,6 +150,9 @@ const validationErrors = {
     },
     autoScalerMax: {
       minValue: 'Invalid value'
+    },
+    maxSurge: {
+      numberOrPercentage: 'Invalid value'
     }
   }
 }
@@ -140,6 +174,9 @@ const validations = {
     },
     autoScalerMax: {
       minValue: minValue(0)
+    },
+    maxSurge: {
+      numberOrPercentage
     }
   }
 }
@@ -148,7 +185,8 @@ export default {
   components: {
     SizeInput,
     MachineType,
-    VolumeType
+    VolumeType,
+    MachineImage
   },
   props: {
     worker: {
@@ -171,14 +209,16 @@ export default {
       validationErrors,
       valid: undefined,
       machineTypeValid: undefined,
-      volumeTypeValid: true // selection not shown in all cases, default to true
+      volumeTypeValid: true, // selection not shown in all cases, default to true
+      machineImageValid: undefined
     }
   },
   validations,
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones'
+      'volumeTypesByCloudProfileNameAndZones',
+      'machineImagesByCloudProfileName'
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
@@ -189,7 +229,9 @@ export default {
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
     },
-
+    machineImages () {
+      return this.machineImagesByCloudProfileName(this.cloudProfileName)
+    },
     innerMin: {
       get: function () {
         return Math.max(0, this.worker.autoScalerMin)
@@ -211,6 +253,18 @@ export default {
           this.worker.autoScalerMin = this.worker.autoScalerMax
         }
       }
+    },
+    maxSurge: {
+      get: function () {
+        return this.worker.maxSurge
+      },
+      set: function (maxSurge) {
+        if(/^[\d]+$/.test(maxSurge)) {
+          this.worker.maxSurge = parseInt(maxSurge)
+        } else {
+          this.worker.maxSurge = maxSurge
+        }
+      }
     }
   },
   methods: {
@@ -219,30 +273,32 @@ export default {
     },
     onInputName () {
       this.$v.worker.name.$touch()
-      this.$emit('updateName', { name: this.worker.name, id: this.worker.id })
       this.validateInput()
     },
     onUpdateMachineType () {
-      this.$emit('updateMachineType', { machineType: this.worker.machineType, id: this.worker.id })
       this.validateInput()
     },
     onUpdateVolumeType () {
-      this.$emit('updateVolumeType', { volumeType: this.worker.volumeType, id: this.worker.id })
       this.validateInput()
     },
     onInputVolumeSize () {
       this.$v.worker.volumeSize.$touch()
-      this.$emit('updateVolumeSize', { volumeSize: this.worker.volumeSize, id: this.worker.id })
       this.validateInput()
     },
     onInputAutoscalerMin () {
       this.$v.worker.autoScalerMin.$touch()
-      this.$emit('updateAutoscalerMin', { autoScalerMin: this.worker.autoScalerMin, id: this.worker.id })
       this.validateInput()
     },
     onInputAutoscalerMax () {
       this.$v.worker.autoScalerMax.$touch()
-      this.$emit('updateAutoscalerMax', { autoScalerMax: this.worker.autoScalerMax, id: this.worker.id })
+      this.validateInput()
+    },
+    onUpdateMachineImage () {
+      this.validateInput()
+    },
+    onInputMaxSurge () {
+      this.$v.worker.maxSurge.$touch()
+      this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {
@@ -257,8 +313,14 @@ export default {
         this.validateInput()
       }
     },
+    onMachineImageValid ({ valid }) {
+      if (this.machineImageValid !== valid) {
+        this.machineImageValid = valid
+        this.validateInput()
+      }
+    },
     validateInput () {
-      const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid
+      const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid && this.machineImageValid
       if (this.valid !== valid) {
         this.valid = valid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })

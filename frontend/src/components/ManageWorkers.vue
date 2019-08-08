@@ -23,12 +23,6 @@ limitations under the License.
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
         :zones="zones"
-        @updateName="onUpdateWorkerName"
-        @updateMachineType="onUpdateWorkerMachineType"
-        @updateVolumeType="onUpdateWorkerVolumeType"
-        @updateVolumeSize="onUpdateWorkerVolumeSize"
-        @updateAutoscalerMin="onUpdateWorkerAutoscalerMin"
-        @updateAutoscalerMax="onUpdateWorkerAutoscalerMax"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -75,6 +69,7 @@ import find from 'lodash/find'
 import head from 'lodash/head'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
+import lowerCase from 'lodash/lowerCase'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -100,13 +95,23 @@ export default {
     ...mapGetters([
       'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones'
+      'volumeTypesByCloudProfileNameAndZones',
+      'machineImagesByCloudProfileName'
+
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeTypes () {
       return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+    },
+    defaultMachineImage () {
+      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
+      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
+      if (!defaultMachineImage) {
+        defaultMachineImage = head(machineImages)
+      }
+      return defaultMachineImage
     }
   },
   methods: {
@@ -132,7 +137,9 @@ export default {
         volumeType,
         volumeSize,
         autoScalerMin: 1,
-        autoScalerMax: 2
+        autoScalerMax: 2,
+        maxSurge: 1,
+        machineImage: this.defaultMachineImage
       })
       this.validateInput()
     },
@@ -151,30 +158,6 @@ export default {
     setDefaultWorker () {
       this.internalWorkers = []
       this.addWorker()
-    },
-    onUpdateWorkerName ({ name, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.name = name
-    },
-    onUpdateWorkerMachineType ({ machineType, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.machineType = machineType
-    },
-    onUpdateWorkerVolumeType ({ volumeType, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.volumeType = volumeType
-    },
-    onUpdateWorkerVolumeSize ({ volumeSize, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.volumeSize = volumeSize
-    },
-    onUpdateWorkerAutoscalerMin ({ autoScalerMin, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.autoScalerMin = autoScalerMin
-    },
-    onUpdateWorkerAutoscalerMax ({ autoScalerMax, id }) {
-      const worker = find(this.internalWorkers, { id })
-      worker.autoScalerMax = autoScalerMax
     },
     onWorkerValid ({ valid, id }) {
       const worker = find(this.internalWorkers, { id })
