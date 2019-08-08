@@ -42,7 +42,8 @@ limitations under the License.
         ></maintenance-time>
         <maintenance-components
           ref="maintenanceComponents"
-          :update-kubernetes-version="data.updateKubernetesVersion"
+          :updateKubernetesVersion="data.updateKubernetesVersion"
+          :updateOSVersion="data.updateOSVersion"
         ></maintenance-components>
       </template>
     </confirm-dialog>
@@ -79,7 +80,8 @@ export default {
       data: {
         timeWindowBegin: undefined,
         timeWindowEnd: undefined,
-        updateKubernetesVersion: false
+        updateKubernetesVersion: false,
+        updateOSVersion: false
       },
       icon: 'mdi-settings-outline',
       caption: 'Configure Maintenance'
@@ -108,11 +110,12 @@ export default {
       })) {
         try {
           const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
-          const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+          const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
           assign(this.data, {
             timeWindowBegin: utcBegin,
             timeWindowEnd: utcEnd,
-            updateKubernetesVersion: k8sUpdates
+            updateKubernetesVersion: k8sUpdates,
+            updateOSVersion: osUpdates
           })
           await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
         } catch (err) {
@@ -132,6 +135,7 @@ export default {
       this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
       this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
       this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+      this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
 
       this.$nextTick(() => {
         this.$refs.maintenanceTime.reset()

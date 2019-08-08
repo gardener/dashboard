@@ -21,9 +21,9 @@ limitations under the License.
     </v-flex>
     <v-flex xs12>
       <v-list two-line>
-        <v-list-tile class="list-complete-item">
+        <v-list-tile class="list-complete-item" v-if="selectable || osUpdates">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates" disabled></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -47,6 +47,18 @@ limitations under the License.
             </v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
+        <v-list-tile class="list-complete-item" v-if="showNoUpdates">
+          <v-list-tile-action>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
+            <v-icon v-else>mdi-close-circle-outline</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title >Updates disabled</v-list-tile-title>
+            <v-list-tile-sub-title>
+              All automatic updates have been disabled for this cluster
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
       </v-list>
     </v-flex>
   </div>
@@ -61,6 +73,10 @@ export default {
       type: Boolean,
       default: true
     },
+    updateOSVersion: {
+      type: Boolean,
+      default: true
+    },
     title: {
       type: String,
       default: 'Auto Update'
@@ -72,19 +88,26 @@ export default {
   },
   data () {
     return {
-      osUpdates: true,
+      osUpdates: this.updateOSVersion,
       k8sUpdates: this.updateKubernetesVersion
+    }
+  },
+  computed: {
+    showNoUpdates () {
+      return !this.selectable && !this.updateKubernetesVersion && !this.updateOSVersion
     }
   },
   methods: {
     getComponentUpdates () {
-      return { k8sUpdates: this.k8sUpdates }
+      return { k8sUpdates: this.k8sUpdates, osUpdates: this.osUpdates }
     },
-    setComponentUpdates ({ k8sUpdates }) {
+    setComponentUpdates ({ k8sUpdates, osUpdates }) {
       this.k8sUpdates = k8sUpdates
+      this.osUpdates = osUpdates
     },
     reset () {
       this.k8sUpdates = this.updateKubernetesVersion
+      this.osUpdates = this.updateOSVersion
     }
   }
 }

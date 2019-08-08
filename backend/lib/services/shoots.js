@@ -165,7 +165,7 @@ exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, 
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
-  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
+  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
       maintenance: {
@@ -174,7 +174,8 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
           end: timeWindowEnd
         },
         autoUpdate: {
-          kubernetesVersion: updateKubernetesVersion
+          kubernetesVersion: updateKubernetesVersion,
+          machineImageVersion: updateOSVersion
         }
       }
     }

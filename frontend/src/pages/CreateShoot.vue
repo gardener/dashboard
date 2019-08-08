@@ -257,9 +257,10 @@ export default {
       set(shootResource, 'spec.addons', addons)
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
-      const { k8sUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+      const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
       const autoUpdate = get(shootResource, 'spec.maintenance.autoUpdate', {})
       autoUpdate.kubernetesVersion = k8sUpdates
+      autoUpdate.machineImageVersion = osUpdates
       const maintenance = {
         timeWindow: {
           begin: utcBegin,
@@ -314,8 +315,9 @@ export default {
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
+      const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
       this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
-      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates })
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)

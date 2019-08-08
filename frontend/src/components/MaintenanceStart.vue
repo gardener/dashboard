@@ -41,8 +41,10 @@ limitations under the License.
           </v-flex>
           <maintenance-components
             title="The following updates will be performed"
-            :update-kubernetes-version="updateKubernetesVersion"
+            :updateKubernetesVersion="updateKubernetesVersion"
+            :updateOSVersion="updateOSVersion"
             :selectable="false"
+            ref="maintenanceComponents"
           ></maintenance-components>
         </v-layout>
       </template>
@@ -94,6 +96,9 @@ export default {
     updateKubernetesVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
     },
+    updateOSVersion () {
+      return get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
+    },
     isShootMarkedForDeletion () {
       return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
@@ -123,6 +128,9 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
+      this.$nextTick(() => {
+        this.$refs.maintenanceComponents.reset()
+      })
     }
   },
   watch: {
