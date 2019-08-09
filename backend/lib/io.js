@@ -288,8 +288,8 @@ function setupJournalsNamespace (journalsNsp) {
           const numbers = cache.getIssueNumbersForNameAndNamespace({ name, namespace })
           for (const number of numbers) {
             try {
-              await getIssueComments({ number })
-                .reduce((accumulator, comments) => batchEmitter.batchEmitObjects(comments))
+              const comments = await getIssueComments({ number })
+              batchEmitter.batchEmitObjects(comments)
             } catch (err) {
               logger.error('Socket %s: failed to fetch comments for %s/%s issue %s: %s', socket.id, namespace, name, number, err)
               socket.emit('subscription_error', { kind, code: 500, message: `Failed to fetch comments for issue ${number}` })

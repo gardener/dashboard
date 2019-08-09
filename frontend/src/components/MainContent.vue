@@ -26,6 +26,7 @@ limitations under the License.
 <script>
 import set from 'lodash/set'
 import { mapGetters, mapActions } from 'vuex'
+import DOMPurify from 'dompurify'
 import marked from 'marked'
 
 function setElementStyle (element, key, value) {
@@ -63,10 +64,10 @@ export default {
       const options = {
         gfm: true,
         breaks: true,
-        tables: true,
-        sanitize: true
+        tables: true
       }
-      return marked(this.alertBannerMessage, options)
+      const dirty = marked(this.alertBannerMessage, options)
+      return DOMPurify.sanitize(dirty)
     }
   },
   methods: {
