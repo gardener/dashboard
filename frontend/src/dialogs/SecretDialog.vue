@@ -28,7 +28,7 @@ limitations under the License.
               <infra-icon v-model="infraIcon" :width="42"></infra-icon>
             </v-flex>
             <v-flex>
-              <div class="credential_title">{{title}}</div>
+              <div class="credential_title ml-3">{{title}}</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -69,9 +69,10 @@ limitations under the License.
 
           <slot name="data-slot"></slot>
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+          <p class="subheading mt-3">Do not use personalised login credentials as they should not be used as infrastructure secret.</p>
         </v-container>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 1" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>
