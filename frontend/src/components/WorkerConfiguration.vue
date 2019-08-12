@@ -17,10 +17,10 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || actionsDisabledForPurpose">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
-      {{caption}}
+      {{shootActionToolTip(caption)}}
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"
@@ -49,7 +49,6 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import ManageWorkers from '@/components/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { actionsDisabledForPurpose } from '@/utils'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
@@ -77,9 +76,6 @@ export default {
   computed: {
     valid () {
       return this.workersValid
-    },
-    actionsDisabledForPurpose () {
-      return actionsDisabledForPurpose(this.shootPurpose)
     }
   },
   methods: {

@@ -17,10 +17,10 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
-      {{caption}}
+      {{shootActionToolTip(caption)}}
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"

@@ -17,12 +17,12 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootReconciliationDeactivated">
+      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootReconciliationDeactivated || isShootActionsDisabledForPurpose">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isReconcileToBeScheduled">Requesting to schedule cluster reconcile</span>
       <span v-else-if="isShootReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
-      <span v-else>{{caption}}</span>
+      <span v-else>{{shootActionToolTip(caption)}}</span>
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Trigger Now"

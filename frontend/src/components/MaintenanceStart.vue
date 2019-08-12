@@ -17,11 +17,11 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
+      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
-      <span v-else>{{caption}}</span>
+      <span v-else>{{shootActionToolTip(caption)}}</span>
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Schedule Now"

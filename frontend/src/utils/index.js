@@ -384,13 +384,6 @@ export function isValidTerminationDate (expirationTimestamp) {
   return expirationTimestamp && new Date(expirationTimestamp) > new Date()
 }
 
-export function isShootMarkedForDeletion (metadata) {
-  const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'], false)
-  const deletionTimestamp = get(metadata, 'deletionTimestamp')
-
-  return !!deletionTimestamp && !!confirmation
-}
-
 export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
@@ -424,10 +417,6 @@ export function infrastructureColor (kind) {
     case 'aws':
       return '#ff9900'
   }
-}
-
-export function actionsDisabledForPurpose (purpose) {
-  return purpose === 'infrastructure'
 }
 
 export function purposeRequiresHibernationSchedule (purpose) {

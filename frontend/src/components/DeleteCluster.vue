@@ -21,13 +21,13 @@ limitations under the License.
         slot="activator"
         icon
         :small="small"
-        :disabled="isShootMarkedForDeletion"
+        :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose"
         :class="contentClass"
         @click="renderAndShowDialog"
       >
         <v-icon>delete</v-icon>
       </v-btn>
-      <span>{{caption}}</span>
+      <span>{{shootActionToolTip(caption)}}</span>
     </v-tooltip>
 
     <template v-if="renderDialog">

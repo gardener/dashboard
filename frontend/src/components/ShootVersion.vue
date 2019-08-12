@@ -39,7 +39,7 @@ limitations under the License.
         slot="activator"
         @click="showUpdateDialog"
         icon
-        :disabled="isShootMarkedForDeletion"
+        :disabled="!canUpdate"
       >
         <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
         <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
@@ -140,7 +140,7 @@ export default {
       return this.canUpdate ? '' : 'update_btn_inactive'
     },
     canUpdate () {
-      return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion
+      return !!this.availableK8sUpdates && !this.isShootMarkedForDeletion && !this.isShootActionsDisabledForPurpose
     },
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
@@ -150,9 +150,9 @@ export default {
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {
-        return 'Kubernetes patch available'
+        return this.shootActionToolTip('Kubernetes patch available')
       } else if (this.availableK8sUpdates) {
-        return 'Kubernetes upgrade available'
+        return this.shootActionToolTip('Kubernetes upgrade available')
       } else {
         return 'Kubernetes version up to date'
       }
