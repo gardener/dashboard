@@ -33,7 +33,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{dashboardUrlText}}</span>
             Dashboard is not running for hibernated clusters
           </v-tooltip>
@@ -75,7 +75,7 @@ limitations under the License.
             </v-list-tile-action>
           </v-list-tile>
           <v-card>
-            <code-block lang="yaml" :content="info.kubeconfig" :show-copy-button="false"></code-block>
+            <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
           </v-card>
         </v-expansion-panel-content>
       </v-expansion-panel>
@@ -88,8 +88,8 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
-import { isHibernated, getProjectName } from '@/utils'
 import download from 'downloadjs'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -98,7 +98,7 @@ export default {
     CopyBtn
   },
   props: {
-    item: {
+    shootItem: {
       type: Object
     }
   },
@@ -107,39 +107,29 @@ export default {
       expandKubeconfigIndex: null
     }
   },
+  mixins: [shootGetters],
   computed: {
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
       }
-      return this.info.dashboardUrl || ''
+      return this.shootInfo.dashboardUrl || ''
     },
     dashboardUrlText () {
-      return this.info.dashboardUrlText || ''
+      return this.shootInfo.dashboardUrlText || ''
     },
     username () {
-      return this.info.cluster_username || ''
+      return this.shootInfo.cluster_username || ''
     },
     password () {
-      return this.info.cluster_password || ''
-    },
-    name () {
-      return get(this.item, 'metadata.name')
-    },
-    metadata () {
-      return get(this.item, 'metadata')
-    },
-    info () {
-      return get(this.item, 'info', {})
+      return this.shootInfo.cluster_password || ''
     },
     hasDashboardEnabled () {
-      return get(this.item, 'spec.addons.kubernetes-dashboard.enabled', false) === true
+      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.enabled', false) === true
     },
-    isHibernated () {
-      return isHibernated(get(this.item, 'spec'))
-    },
+
     kubeconfig () {
-      return get(this, 'info.kubeconfig')
+      return get(this.shootInfo, 'kubeconfig')
     },
     visibilityIconKubeconfig () {
       if (this.isKubeconfigVisible) {
@@ -159,8 +149,7 @@ export default {
       return this.expandKubeconfigIndex === 0
     },
     getQualifiedName () {
-      const projectName = getProjectName(this.metadata)
-      return `kubeconfig--${projectName}--${this.name}.yaml`
+      return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
     hasVisibleProperties () {
       return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig

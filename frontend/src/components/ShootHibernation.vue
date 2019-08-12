@@ -34,7 +34,7 @@ limitations under the License.
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <template v-if="!isHibernated">
+        <template v-if="!isShootHibernated">
           This will scale the worker nodes of your cluster down to zero.<br /><br />
           Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
         </template>
@@ -48,10 +48,9 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { isHibernated, isShootMarkedForDeletion } from '@/utils'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -69,45 +68,34 @@ export default {
       enableHibernation: false
     }
   },
+  mixins: [shootGetters],
   computed: {
     confirmRequired () {
-      return !this.isHibernated
+      return !this.isShootHibernated
     },
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
     },
     confirmText () {
-      if (!this.isHibernated) {
+      if (!this.isShootHibernated) {
         return 'Hibernate'
       } else {
         return 'Wake-up'
       }
     },
     icon () {
-      if (!this.isHibernated) {
+      if (!this.isShootHibernated) {
         return 'mdi-pause-circle-outline'
       } else {
         return 'mdi-play-circle-outline'
       }
     },
     caption () {
-      if (!this.isHibernated) {
+      if (!this.isShootHibernated) {
         return 'Hibernate Cluster'
       } else {
         return 'Wake-up Cluster'
       }
-    },
-    isHibernated () {
-      return isHibernated(get(this.shootItem, 'spec'))
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -127,7 +115,7 @@ export default {
           })
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
-          if (!this.isHibernated) {
+          if (!this.isShootHibernated) {
             this.errorMessage = 'Could not hibernate cluster'
           } else {
             this.errorMessage = 'Could not wake up cluster from hibernation'
@@ -144,7 +132,7 @@ export default {
     }
   },
   watch: {
-    isHibernated (value) {
+    isShootHibernated (value) {
       // hide dialog if hibernation state changes
       this.$refs.confirmDialog.hideDialog()
     }

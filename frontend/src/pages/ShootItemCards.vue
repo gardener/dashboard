@@ -30,7 +30,7 @@ limitations under the License.
           <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
-          <cluster-access :item="item"></cluster-access>
+          <cluster-access :shootItem="item"></cluster-access>
         </v-card>
 
         <monitoring-card :shootItem="item" class="mt-3"></monitoring-card>
@@ -42,7 +42,7 @@ limitations under the License.
           <logging :shootItem="item"></logging>
         </v-card>
 
-        <journals v-if="isAdmin" :journals="journals" :shoot="item" class="mt-3"></journals>
+        <journals v-if="isAdmin" :journals="journals" :shootItem="item" class="mt-3"></journals>
 
       </v-flex>
 

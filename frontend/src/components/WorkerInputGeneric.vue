@@ -259,7 +259,7 @@ export default {
         return this.worker.maxSurge
       },
       set: function (maxSurge) {
-        if(/^[\d]+$/.test(maxSurge)) {
+        if (/^[\d]+$/.test(maxSurge)) {
           this.worker.maxSurge = parseInt(maxSurge)
         } else {
           this.worker.maxSurge = maxSurge

@@ -23,7 +23,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Kibana</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{kibanaUrl}}</span>
             Kibana is not running for hibernated clusters
           </v-tooltip>
@@ -39,7 +39,7 @@ limitations under the License.
 <script>
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import get from 'lodash/get'
-import { isHibernated } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -50,6 +50,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   computed: {
     kibanaUrl () {
       return get(this.shootItem, 'info.kibanaUrl', '')
@@ -59,9 +60,6 @@ export default {
     },
     password () {
       return get(this.shootItem, 'info.logging_password', '')
-    },
-    isHibernated () {
-      return isHibernated(get(this.shootItem, 'spec'))
     }
   }
 }

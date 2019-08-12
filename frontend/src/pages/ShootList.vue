@@ -139,7 +139,7 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <cluster-access ref="clusterAccess" :item="selectedItem"></cluster-access>
+          <cluster-access ref="clusterAccess" :shootItem="selectedItem"></cluster-access>
         </v-card>
       </v-dialog>
     </v-card>

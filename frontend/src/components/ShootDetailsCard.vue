@@ -24,7 +24,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">info_outline</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">Name</span><br>
-          <span class="subheading">{{metadata.name}}</span>
+          <span class="subheading">{{shootName}}</span>
         </v-flex>
       </v-card-title>
 
@@ -48,7 +48,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-cube-outline</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">Kubernetes Version</span><br>
-          <span class="subheading">{{k8sVersion}}</span>
+          <span class="subheading">{{shootK8sVersion}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -63,9 +63,9 @@ limitations under the License.
         <v-flex grow class="pa-0">
           <span class="grey--text">Worker Groups</span><br>
           <worker-group
-          v-for="workerGroup in workerGroups"
+          v-for="workerGroup in shootWorkerGroups"
           :workerGroup="workerGroup"
-          :cloudProfileName="cloudProfileName"
+          :cloudProfileName="shootCloudProfileName"
           :key="workerGroup.name"
           ></worker-group>
         </v-flex>
@@ -84,25 +84,25 @@ limitations under the License.
           </v-flex>
           <v-flex class="pa-0">
             <span class="grey--text">Created by</span><br>
-            <account-avatar :account-name="createdBy" :mail-to="true" class="pb-3"></account-avatar>
+            <account-avatar :account-name="shootCreatedBy" :mail-to="true" class="pb-3"></account-avatar>
             <v-tooltip top>
               <template slot="activator">
                 <span class="grey--text">Created at</span><br>
-                <span class="subheading">{{created}}</span>
+                <span class="subheading">{{shootCreatedAt}}</span>
               </template>
-              <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
+              <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
           </v-flex>
         </v-layout>
       </v-card-title>
 
-      <template v-if="!!purpose">
+      <template v-if="!!shootPurpose">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">label_outline</v-icon>
           <v-flex class="pa-0">
             <span class="grey--text">Purpose</span><br>
-            <span class="subheading">{{purpose}}</span>
+            <span class="subheading">{{shootPurpose}}</span>
           </v-flex>
           <v-flex shrink class="pa-0">
             <v-layout row>
@@ -117,7 +117,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">Addons</span><br>
-          <span class="subheading">{{shootAddons}}</span>
+          <span class="subheading">{{shootAddonsString}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -138,19 +138,16 @@ import WorkerConfiguration from '@/components/WorkerConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion'
 import AddonConfiguration from '@/components/AddonConfiguration'
-import get from 'lodash/get'
 import join from 'lodash/join'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import {
-  getDateFormatted,
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
-  getCloudProviderKind,
-  getCreatedBy,
   shootAddonList
 } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -167,27 +164,10 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   computed: {
-    metadata () {
-      return get(this.shootItem, 'metadata', {})
-    },
-    annotations () {
-      return this.metadata.annotations || {}
-    },
-    k8sVersion () {
-      return get(this.shootItem, 'spec.kubernetes.version')
-    },
-    purpose () {
-      return this.annotations['garden.sapcloud.io/purpose']
-    },
-    createdBy () {
-      return getCreatedBy(this.metadata)
-    },
-    created () {
-      return getDateFormatted(this.metadata.creationTimestamp)
-    },
     expirationTimestamp () {
-      return this.annotations['shoot.garden.sapcloud.io/expirationTimestamp']
+      return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
     selfTerminationMessage () {
       if (this.isValidTerminationDate) {
@@ -202,25 +182,12 @@ export default {
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
     },
-    getCloudProviderKind () {
-      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
-    },
-    workerGroups () {
-      const kind = this.getCloudProviderKind
-      return get(this.shootItem, `spec.cloud.${kind}.workers`, [])
-    },
-    cloudProfileName () {
-      return get(this.shootItem, 'spec.cloud.profile')
-    },
-    addons () {
-      return get(this.shootItem, 'spec.addons', {})
-    },
     addon () {
       return (name) => {
-        return this.addons[name] || {}
+        return this.shootAddons[name] || {}
       }
     },
-    shootAddons () {
+    shootAddonsString () {
       const addons = join(map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title'), ', ')
       if (addons.length > 0) {
         return addons

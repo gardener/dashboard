@@ -28,11 +28,11 @@ limitations under the License.
           </v-flex>
           <v-flex class="pa-0">
             <span class="grey--text">Provider / Credential</span><br>
-            <span class="subheading">{{getCloudProviderKind}} / {{secret}}</span>
+            <span class="subheading">{{shootCloudProviderKind}} / {{shootSecret}}</span>
             <v-layout row>
               <v-flex>
                 <span class="grey--text">Region / Zone</span><br>
-                <span class="subheading">{{region}} / {{zones}}</span>
+                <span class="subheading">{{shootRegion}} / {{shootZonesString}}</span>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -48,16 +48,16 @@ limitations under the License.
             </v-flex>
             <v-flex class="pa-0">
               <span class="grey--text">Seed</span><br>
-              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: seed, namespace:'garden' } }">
-                <span class="subheading">{{seed}}</span><br>
+              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeed, namespace:'garden' } }">
+                <span class="subheading">{{shootSeed}}</span><br>
               </router-link>
               <template v-else>
-                <span class="subheading">{{seed}}</span><br>
+                <span class="subheading">{{shootSeed}}</span><br>
               </template>
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Technical Id</span><br>
-                  <span class="subheading">{{technicalId}}</span>
+                  <span class="subheading">{{shootTechnicalId}}</span>
                 </v-flex>
                 <copy-btn :clipboard-text="technicalId"></copy-btn>
               </v-layout>
@@ -71,7 +71,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">settings_ethernet</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">CIDR</span><br>
-          <span class="subheading">{{cidr}}</span>
+          <span class="subheading">{{shootCidr}}</span>
         </v-flex>
       </v-card-title>
 
@@ -98,9 +98,9 @@ import join from 'lodash/join'
 import includes from 'lodash/includes'
 import CopyBtn from '@/components/CopyBtn'
 import {
-  getCloudProviderKind,
   canLinkToSeed
 } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -111,34 +111,11 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   computed: {
     ...mapGetters([
       'namespaces'
     ]),
-    getCloudProviderKind () {
-      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
-    },
-    region () {
-      return get(this.shootItem, 'spec.cloud.region')
-    },
-    zones () {
-      return join(get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'zones']), ', ')
-    },
-    infrastructureKind () {
-      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
-    },
-    secret () {
-      return get(this.shootItem, 'spec.cloud.secretBindingRef.name')
-    },
-    cidr () {
-      return get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'networks', 'nodes'])
-    },
-    technicalId () {
-      return get(this.shootItem, `status.technicalID`)
-    },
-    seed () {
-      return get(this.shootItem, 'spec.cloud.seed')
-    },
     showSeedInfo () {
       return !!this.seed && this.hasAccessToGardenNamespace
     },
@@ -150,16 +127,16 @@ export default {
     },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
-      if (!this.domain || !nginxIngressEnabled) {
+      if (!this.shootDomain || !nginxIngressEnabled) {
         return undefined
       }
-      return `*.ingress.${this.domain}`
+      return `*.ingress.${this.shootDomain}`
     },
     namespace () {
       return get(this.$route.params, 'namespace')
     },
-    domain () {
-      return get(this.shootItem, 'spec.dns.domain')
+    shootZonesString () {
+      return join(this.shootZones, ', ')
     }
   }
 }

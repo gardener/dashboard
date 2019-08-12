@@ -57,9 +57,9 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import MaintenanceComponents from '@/components/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -71,6 +71,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       errorMessage: null,
@@ -82,25 +83,16 @@ export default {
   computed: {
     isMaintenanceToBeScheduled () {
       // TODO we need a better way to track the maintenance status instead of checking the operation annotation
-      return get(this.shootItem, ['metadata', 'annotations', 'shoot.garden.sapcloud.io/operation']) === 'maintain'
+      return this.shootGardenOperation === 'maintain'
     },
     caption () {
       return 'Schedule Maintenance'
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
     },
     updateKubernetesVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
     },
     updateOSVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

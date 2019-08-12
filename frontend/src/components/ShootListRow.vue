@@ -17,24 +17,24 @@ limitations under the License.
 <template>
   <tr>
     <td class="nowrap" v-if="this.headerVisible['project']">
-      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace:row.namespace } }">
-        {{ row.projectName }}
+      <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootList', params: { namespace: shootNamespace } }">
+        {{ shootProjectName }}
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-layout align-center row fill-height class="pa-0 ma-0">
         <v-flex grow>
-          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-            {{ row.name }}
+          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+            {{ shootName }}
           </router-link>
         </v-flex>
         <v-flex shrink>
-          <self-termination-warning :expirationTimestamp="row.expirationTimestamp"></self-termination-warning>
+          <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
           <hibernation-schedule-warning
             v-if="isShootHasNoHibernationScheduleWarning"
-            :name="row.name"
-            :namespace="row.namespace"
-            :purpose="row.purpose">
+            :name="shootName"
+            :namespace="shootNamespace"
+            :purpose="shootPurpose">
           </hibernation-schedule-warning>
         </v-flex>
       </v-layout>
@@ -42,48 +42,48 @@ limitations under the License.
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
         <v-layout align-center justify-start row fill-height slot="activator">
-          <infra-icon v-model="row.kind" content-class="mr-2"></infra-icon>
-          <div>{{ row.region }}</div>
+          <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
+          <div>{{ shootRegion }}</div>
         </v-layout>
-        <span>{{ row.kind }} [{{ row.region }}]</span>
+        <span>{{ shootCloudProviderKind }} [{{ shootRegion }}]</span>
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
-      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.seed, namespace:'garden' } }">
-        <span>{{row.seed}}</span>
+      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeed, namespace:'garden' } }">
+        <span>{{shootSeed}}</span>
       </router-link>
       <template v-else>
-        <span>{{row.seed}}</span>
+        <span>{{shootSeed}}</span>
       </template>
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
       <v-layout align-center justify-start row fill-height slot="activator">
-        <span>{{row.technicalId}}</span>
-        <copy-btn :clipboard-text="row.technicalId"></copy-btn>
+        <span>{{shootTechnicalId}}</span>
+        <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
       </v-layout>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
-      <account-avatar :account-name="row.createdBy"></account-avatar>
+      <account-avatar :account-name="shootCreatedBy"></account-avatar>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
         <div slot="activator">
-          <time-string :date-time="row.creationTimestamp" :pointInTime="-1"></time-string>
+          <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
         </div>
-        {{ createdAt }}
+        {{ shootCreatedAt }}
       </v-tooltip>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
-      <purpose-tag :purpose="row.purpose"></purpose-tag>
+      <purpose-tag :purpose="shootPurpose"></purpose-tag>
     </td>
     <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
         <shoot-status
-         :operation="row.lastOperation"
-         :lastError="row.lastError"
-         :popperKey="`${row.namespace}/${row.name}`"
-         :isHibernated="row.isHibernated"
-         :reconciliationDeactivated="reconciliationDeactivated"
+         :operation="shootLastOperation"
+         :lastError="shootLastError"
+         :popperKey="`${shootNamespace}/${shootName}`"
+         :isHibernated="isShootHibernated"
+         :reconciliationDeactivated="isShootReconciliationDeactivated"
          :shootDeleted="isTypeDelete">
         </shoot-status>
         <retry-operation :shootItem="shootItem"></retry-operation>
@@ -93,24 +93,24 @@ limitations under the License.
       <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
-      <status-tags :conditions="row.conditions"></status-tags>
+      <status-tags :conditions="shootConditions"></status-tags>
     </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>
         <div slot="activator">
-          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: row.name, namespace:row.namespace } }">
-            <time-string :date-time="row.lastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
+          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+            <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
           </router-link>
         </div>
-        {{ lastUpdatedJournal }}
+        {{ shootLastUpdatedJournal }}
       </v-tooltip>
     </td>
     <td v-if="this.headerVisible['journalLabels']">
-      <template v-if="row.lastUpdatedJournalTimestamp && !row.journalsLabels.length">
+      <template v-if="shootLastUpdatedJournalTimestamp && !shootJournalsLabels.length">
         None
       </template>
       <template v-else>
-        <journal-labels :labels="row.journalsLabels"></journal-labels>
+        <journal-labels :labels="shootJournalsLabels"></journal-labels>
       </template>
     </td>
     <td class="action-button-group text-xs-right nowrap" v-if="this.headerVisible['actions']">
@@ -143,20 +143,13 @@ import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import forEach from 'lodash/forEach'
-import get from 'lodash/get'
 import includes from 'lodash/includes'
 import {
-  getTimestampFormatted,
-  getCloudProviderKind,
-  getCreatedBy,
-  isHibernated,
-  isReconciliationDeactivated,
-  isShootMarkedForDeletion,
   isTypeDelete,
-  getProjectName,
   isShootHasNoHibernationScheduleWarning,
   canLinkToSeed
 } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -184,42 +177,12 @@ export default {
       required: true
     }
   },
+  mixins: [shootGetters],
   computed: {
     ...mapGetters([
       'lastUpdatedJournalByNameAndNamespace',
       'journalsLabels'
     ]),
-    row () {
-      const spec = this.shootItem.spec
-      const metadata = this.shootItem.metadata
-      const status = this.shootItem.status
-      const info = this.shootItem.info
-      const kind = getCloudProviderKind(spec.cloud)
-      return {
-        name: metadata.name,
-        namespace: metadata.namespace,
-        projectName: getProjectName(metadata),
-        createdBy: getCreatedBy(metadata),
-        creationTimestamp: metadata.creationTimestamp,
-        expirationTimestamp: get(metadata, ['annotations', 'shoot.garden.sapcloud.io/expirationTimestamp']),
-        annotations: get(metadata, 'annotations', {}),
-        deletionTimestamp: metadata.deletionTimestamp,
-        lastOperation: get(status, 'lastOperation', {}),
-        lastError: get(status, 'lastError'),
-        conditions: get(status, 'conditions', []),
-        kind,
-        region: get(spec, 'cloud.region'),
-        isHibernated: isHibernated(spec),
-        info,
-        purpose: get(metadata, ['annotations', 'garden.sapcloud.io/purpose']),
-        lastUpdatedJournalTimestamp: this.lastUpdatedJournalByNameAndNamespace(this.shootItem.metadata),
-        journalsLabels: this.journalsLabels(this.shootItem.metadata),
-        // setting the retry annotation internally will increment "metadata.generation". If the values differ, a reconcile will be scheduled
-        reconcileScheduled: get(metadata, 'generation') !== get(status, 'observedGeneration'),
-        seed: get(spec, 'cloud.seed'),
-        technicalId: get(status, 'technicalID')
-      }
-    },
     headerVisible () {
       const headerVisible = {}
       forEach(this.visibleHeaders, (header) => {
@@ -227,44 +190,28 @@ export default {
       })
       return headerVisible
     },
-    createdAt () {
-      return getTimestampFormatted(this.row.creationTimestamp)
-    },
-    lastUpdatedJournal () {
-      return getTimestampFormatted(this.row.lastUpdatedJournalTimestamp)
-    },
     isInfoAvailable () {
       // operator not yet updated shoot resource
-      if (this.row.lastOperation.type === undefined || this.row.lastOperation.state === undefined) {
+      if (this.shootLastOperation.type === undefined || this.shootLastOperation.state === undefined) {
         return false
       }
       return !this.isCreateOrDeleteInProcess
     },
-    reconciliationDeactivated () {
-      const metadata = { annotations: this.row.annotations }
-      return isReconciliationDeactivated(metadata)
-    },
     isCreateOrDeleteInProcess () {
       // create or delete in process
-      if (includes(['Create', 'Delete'], this.row.lastOperation.type) && this.row.lastOperation.state === 'Processing') {
+      if (includes(['Create', 'Delete'], this.shootLastOperation.type) && this.shootLastOperation.state === 'Processing') {
         return true
       }
       return false
     },
-    isShootMarkedForDeletion () {
-      const metadata = { deletionTimestamp: this.row.deletionTimestamp, annotations: this.row.annotations }
-      return isShootMarkedForDeletion(metadata)
-    },
     isTypeDelete () {
-      return isTypeDelete(this.row.lastOperation)
+      return isTypeDelete(this.shootLastOperation)
     },
     isClusterAccessDialogDisabled () {
-      const itemInfo = this.row.info || {}
-
-      if (itemInfo.dashboardUrl) {
+      if (this.shootInfo.dashboardUrl) {
         return false
       }
-      if (itemInfo.kubeconfig) {
+      if (this.shootInfo.kubeconfig) {
         return false
       }
 
@@ -280,7 +227,13 @@ export default {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.row.namespace })
+      return canLinkToSeed({ shootNamespace: this.shootNamespace })
+    },
+    shootLastUpdatedJournalTimestamp () {
+      return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)
+    },
+    shootJournalsLabels () {
+      return this.journalsLabels(this.shootMetadata)
     }
   },
   methods: {

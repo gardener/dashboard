@@ -48,7 +48,7 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import ManageShootAddons from '@/components/ManageShootAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 import get from 'lodash/get'
 
 export default {
@@ -62,6 +62,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       dialog: false,
@@ -70,17 +71,6 @@ export default {
       addons: null,
       caption: 'Configure Add-ons',
       icon: 'mdi-settings-outline'
-    }
-  },
-  computed: {
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

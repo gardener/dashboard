@@ -53,8 +53,9 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion, purposesForSecret } from '@/utils'
+import { purposesForSecret } from '@/utils'
 import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   name: 'purpose-configuration',
@@ -66,6 +67,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       errorMessage: null,
@@ -76,23 +78,11 @@ export default {
     }
   },
   computed: {
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
     valid () {
       return !!this.purpose
     },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
-    },
     purposes () {
-      return purposesForSecret(this.secret)
-    },
-    secret () {
-      return get(this.shootItem, 'spec.cloud.secretBindingRef.name')
+      return purposesForSecret(this.shootSecret)
     }
   },
   methods: {

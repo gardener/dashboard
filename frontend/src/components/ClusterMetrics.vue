@@ -23,7 +23,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{grafanaUrlOperators}}</span>
             Grafana is not running for hibernated clusters
           </v-tooltip>
@@ -38,7 +38,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{grafanaUrlUsers}}</span>
             Grafana is not running for hibernated clusters
           </v-tooltip>
@@ -52,7 +52,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{prometheusUrl}}</span>
             Prometheus is not running for hibernated clusters
           </v-tooltip>
@@ -66,7 +66,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isHibernated" top>
+          <v-tooltip v-if="isShootHibernated" top>
             <span slot="activator">{{alertmanagerUrl}}</span>
             Alertmanager is not running for hibernated clusters
           </v-tooltip>
@@ -82,8 +82,8 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
-import { isHibernated } from '@/utils'
 import { mapGetters } from 'vuex'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -95,6 +95,7 @@ export default {
       required: true
     }
   },
+  mixins: [shootGetters],
   computed: {
     ...mapGetters([
       'isAdmin'
@@ -116,9 +117,6 @@ export default {
     },
     password () {
       return get(this.shootItem, 'info.monitoring_password', '')
-    },
-    isHibernated () {
-      return isHibernated(get(this.shootItem, 'spec'))
     }
   }
 }

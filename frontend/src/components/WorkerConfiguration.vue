@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion">
+      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || actionsDisabledForPurpose">
         <v-icon medium>{{icon}}</v-icon>
       </v-btn>
       {{caption}}
@@ -49,8 +49,8 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import ManageWorkers from '@/components/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion, getCloudProviderKind } from '@/utils'
-import get from 'lodash/get'
+import { actionsDisabledForPurpose } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   name: 'worker-configuration',
@@ -73,27 +73,13 @@ export default {
       caption: 'Configure Workers'
     }
   },
+  mixins: [shootGetters],
   computed: {
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
     valid () {
       return this.workersValid
     },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
-    },
-    infrastructureKind () {
-      return getCloudProviderKind(get(this.shootItem, 'spec.cloud'))
-    },
-    cloudProfileName () {
-      return get(this.shootItem, 'spec.cloud.profile')
-    },
-    zones () {
-      return get(this.shootItem, ['spec', 'cloud', this.infrastructureKind, 'zones'])
+    actionsDisabledForPurpose () {
+      return actionsDisabledForPurpose(this.shootPurpose)
     }
   },
   methods: {
@@ -105,7 +91,7 @@ export default {
       })) {
         try {
           this.workers = this.$refs.manageWorkers.getWorkers()
-          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.infrastructureKind, data: this.workers })
+          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: this.workers })
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
           this.errorMessage = 'Could not save worker configuration'
@@ -120,9 +106,9 @@ export default {
       this.detailedErrorMessage = null
       this.workersValid = false
 
-      const workers = get(this.shootItem, `spec.cloud.${this.infrastructureKind}.workers`)
+      const workers = this.shootWorkerGroups
       this.$nextTick(() => {
-        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.cloudProfileName, zones: this.zones })
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, zones: this.shootZones })
       })
     },
     onWorkersValid (value) {

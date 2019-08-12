@@ -51,8 +51,8 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import HibernationSchedule from '@/components/HibernationSchedule'
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   name: 'hibernation-configuration',
@@ -65,6 +65,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       errorMessage: null,
@@ -77,17 +78,8 @@ export default {
     }
   },
   computed: {
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
     valid () {
       return this.hibernationScheduleValid
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

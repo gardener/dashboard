@@ -32,7 +32,7 @@ limitations under the License.
         color="cyan darken-2"
       >
         <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
-        {{k8sVersion}}
+        {{shootK8sVersion}}
       </v-btn>
       <v-btn
         v-else-if="!!availableK8sUpdates"
@@ -61,7 +61,7 @@ limitations under the License.
       <template slot="message">
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
-          :currentk8sVersion="k8sVersion"
+          :currentk8sVersion="shootK8sVersion"
           @selectedVersion="onSelectedVersion"
           @selectedVersionType="onSelectedVersionType"
           @selectedVersionInvalid="onSelectedVersionInvalid"
@@ -100,11 +100,9 @@ limitations under the License.
 import ShootVersionUpdate from '@/components/ShootVersionUpdate'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { updateShootVersion } from '@/utils/api'
-import {
-  availableK8sUpdatesForShoot,
-  isShootMarkedForDeletion
-} from '@/utils'
+import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -130,6 +128,7 @@ export default {
       updateDetailedErrorMessage: null
     }
   },
+  mixins: [shootGetters],
   computed: {
     k8sPatchAvailable () {
       if (get(this.availableK8sUpdates, 'patch')) {
@@ -146,20 +145,8 @@ export default {
     confirm () {
       return this.confirmRequired ? this.shootName : undefined
     },
-    k8sVersion () {
-      return get(this.shootItem, 'spec.kubernetes.version')
-    },
     availableK8sUpdates () {
       return availableK8sUpdatesForShoot(get(this.shootItem, 'spec'))
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {

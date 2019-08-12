@@ -17,11 +17,11 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isReconciliationDeactivated">
+      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootReconciliationDeactivated">
         <v-icon medium>mdi-refresh</v-icon>
       </v-btn>
       <span v-if="isReconcileToBeScheduled">Requesting to schedule cluster reconcile</span>
-      <span v-else-if="isReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
+      <span v-else-if="isShootReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
       <span v-else>{{caption}}</span>
     </v-tooltip>
     <confirm-dialog
@@ -51,9 +51,9 @@ limitations under the License.
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion, isReconciliationDeactivated } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -72,24 +72,13 @@ export default {
       currentGeneration: null
     }
   },
+  mixins: [shootGetters],
   computed: {
     isReconcileToBeScheduled () {
-      return get(this.shootItem, 'metadata.generation') === this.currentGeneration
+      return this.shootGenerationValue === this.currentGeneration
     },
     caption () {
       return 'Trigger Reconcile'
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
-    },
-    isReconciliationDeactivated () {
-      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

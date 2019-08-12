@@ -88,13 +88,14 @@ limitations under the License.
 import { mapState } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
-import { isShootHasNoHibernationScheduleWarning, isReconciliationDeactivated } from '@/utils'
+import { isShootHasNoHibernationScheduleWarning } from '@/utils'
 import ShootHibernation from '@/components/ShootHibernation'
 import MaintenanceStart from '@/components/MaintenanceStart'
 import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
 import HibernationConfiguration from '@/components/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -110,16 +111,14 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   computed: {
     ...mapState([
       'localTimezone'
     ]),
-    purpose () {
-      return get(this.shootItem, 'metadata.annotations[garden.sapcloud.io/purpose]')
-    },
     hibernationDescription () {
-      const purpose = this.purpose || ''
-      if (get(this.shootItem, 'spec.hibernation.schedules', []).length > 0) {
+      const purpose = this.shootPurpose || ''
+      if (this.shootHibernationSchedules.length > 0) {
         return 'Hibernation schedule configured'
       } else if (this.isShootHasNoHibernationScheduleWarning) {
         return `Please configure a schedule for this ${purpose} cluster`
@@ -129,7 +128,7 @@ export default {
     },
     maintenanceDescription () {
       const timezone = this.localTimezone
-      const maintenanceStart = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
+      const maintenanceStart = get(this.shootMaintenance, 'timeWindow.begin')
       const momentObj = moment.tz(maintenanceStart, 'HHmmZ', timezone)
       if (momentObj.isValid()) {
         const maintenanceStr = momentObj.format('HH:mm')
@@ -141,14 +140,11 @@ export default {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     reconcileDescription () {
-      if (this.isReconciliationDeactivated) {
+      if (this.isShootReconciliationDeactivated) {
         return 'Reconciliation deactivated'
       } else {
         return 'Cluster reconciliation will be triggered regularly'
       }
-    },
-    isReconciliationDeactivated () {
-      return isReconciliationDeactivated(get(this.item, 'metadata'))
     }
   },
   methods: {

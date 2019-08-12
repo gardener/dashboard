@@ -79,7 +79,7 @@ export default {
   computed: {
     machineImageItems () {
       return map(this.machineImages, machineImage => {
-        machineImage.icon = this.iconForImageName (machineImage.name)
+        machineImage.icon = this.iconForImageName(machineImage.name)
         machineImage.expirationDateString = getTimestampFormatted(machineImage.expirationDate)
         return machineImage
       })
@@ -91,7 +91,7 @@ export default {
       set: function (machineImage) {
         this.worker.machineImage = pick(machineImage, ['name', 'version'])
       }
-    },
+    }
   },
   validations,
   methods: {

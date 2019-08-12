@@ -46,7 +46,7 @@ limitations under the License.
                 Created By
               </v-list-tile-sub-title>
               <v-list-tile-title>
-                <account-avatar :account-name="createdBy" :size="22"></account-avatar>
+                <account-avatar :account-name="shootCreatedBy" :size="22"></account-avatar>
               </v-list-tile-title>
             </v-list-tile-content>
           </v-list>
@@ -56,7 +56,7 @@ limitations under the License.
           <p>
             <i class="red--text text--darken-2">This action cannot be undone.</i>
           </p>
-          <p v-if="isReconciliationDeactivated()">
+          <p v-if="isShootReconciliationDeactivated">
             <v-layout row fill-height>
               <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
               <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
@@ -71,14 +71,9 @@ limitations under the License.
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import get from 'lodash/get'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
-import {
-  getCreatedBy,
-  isShootMarkedForDeletion,
-  isReconciliationDeactivated
-} from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -98,6 +93,7 @@ export default {
       default: undefined
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       renderDialog: false,
@@ -113,18 +109,6 @@ export default {
       return this.isShootMarkedForDeletion
         ? 'Cluster already marked for deletion'
         : 'Delete Cluster'
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    createdBy () {
-      return getCreatedBy(get(this.shootItem, 'metadata'))
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
@@ -156,9 +140,6 @@ export default {
     ...mapActions([
       'deleteShoot'
     ]),
-    isReconciliationDeactivated () {
-      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
-    },
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null

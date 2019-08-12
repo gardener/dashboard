@@ -26,12 +26,12 @@ limitations under the License.
           <span class="grey--text">Status</span><br>
           <shoot-status
             class="shootStatus"
-            :operation="lastOperation"
-            :lastError="lastError"
-            :popperKey="`${namespace}/${name}_lastOp`"
-            :isHibernated="isHibernated"
-            :reconciliationDeactivated="reconciliationDeactivated"
-            :shootDeleted="isTypeDelete"
+            :operation="shootLastOperation"
+            :lastError="shootLastError"
+            :popperKey="`${shootNamespace}/${shootName}_lastOp`"
+            :isHibernated="isShootHibernated"
+            :reconciliationDeactivated="isShootReconciliationDeactivated"
+            :shootDeleted="isLastOperationTypeDelete"
             popperPlacement="bottom"
             @titleChange="onShootStatusTitleChange">
           </shoot-status>
@@ -44,8 +44,8 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-speedometer</v-icon>
         <div>
           <span class="grey--text">Readiness</span><br>
-          <template v-if="conditions.length === 0">-</template>
-          <status-tags v-else :conditions="conditions" popperPlacement="bottom"></status-tags>
+          <template v-if="shootConditions.length === 0">-</template>
+          <status-tags v-else :conditions="shootConditions" popperPlacement="bottom"></status-tags>
         </div>
       </v-card-title>
       <template v-if="seedShootIngressDomain">
@@ -61,10 +61,8 @@ import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
 import RetryOperation from '@/components/RetryOperation'
 import ClusterMetrics from '@/components/ClusterMetrics'
-import get from 'lodash/get'
-import { isHibernated,
-  isReconciliationDeactivated,
-  isTypeDelete } from '@/utils'
+import { isTypeDelete } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -78,54 +76,15 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       shootStatusTitle: ''
     }
   },
   computed: {
-    lastOperation () {
-      return get(this.shootItem, 'status.lastOperation', {})
-    },
-    lastError () {
-      return get(this.shootItem, 'status.lastError', {})
-    },
-    name () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    namespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    metadata () {
-      return get(this.shootItem, 'metadata', {})
-    },
-    annotations () {
-      return get(this.shootItem, 'metadata.annotations', {})
-    },
-    spec () {
-      return get(this.shootItem, 'spec', {})
-    },
-    status () {
-      return get(this.shootItem, 'status', {})
-    },
-    conditions () {
-      return get(this.shootItem, 'status.conditions', [])
-    },
-    isHibernated () {
-      return isHibernated(this.spec)
-    },
-    reconciliationDeactivated () {
-      const metadata = { annotations: this.annotations }
-      return isReconciliationDeactivated(metadata)
-    },
-    isTypeDelete () {
-      return isTypeDelete(this.lastOperation)
-    },
-    info () {
-      return get(this.shootItem, 'info', {})
-    },
-    seedShootIngressDomain () {
-      return this.info.seedShootIngressDomain || ''
+    isLastOperationTypeDelete () {
+      return isTypeDelete(this.shootLastOperation)
     }
   },
   methods: {

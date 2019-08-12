@@ -56,9 +56,9 @@ import MaintenanceComponents from '@/components/MaintenanceComponents'
 import MaintenanceTime from '@/components/MaintenanceTime'
 import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion } from '@/utils'
 import get from 'lodash/get'
 import assign from 'lodash/assign'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   name: 'maintenance-configuration',
@@ -72,6 +72,7 @@ export default {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       errorMessage: null,
@@ -88,17 +89,8 @@ export default {
     }
   },
   computed: {
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
     valid () {
       return this.maintenanceTimeValid
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {

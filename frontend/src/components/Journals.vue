@@ -41,7 +41,8 @@ import get from 'lodash/get'
 import forEach from 'lodash/forEach'
 import { mapState } from 'vuex'
 import Journal from '@/components/Journal'
-import { getDateFormatted, getCloudProviderKind, canLinkToSeed } from '@/utils'
+import { canLinkToSeed } from '@/utils'
+import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
@@ -51,24 +52,19 @@ export default {
     journals: {
       type: Array
     },
-    shoot: {
+    shootItem: {
       type: Object,
       required: true
     }
   },
+  mixins: [shootGetters],
   computed: {
     ...mapState([
       'cfg'
     ]),
-    getCloudProviderKind () {
-      return getCloudProviderKind(get(this.shoot, 'spec.cloud'))
-    },
-    region () {
-      return get(this.shoot, 'spec.cloud.region')
-    },
     errorConditions () {
       let errorConditions = ''
-      forEach(get(this.shoot, 'status.conditions'), condition => {
+      forEach(this.shootConditions, condition => {
         errorConditions = `${errorConditions}\n**${condition.type}:** ${condition.message}`
       })
       return errorConditions
@@ -76,29 +72,23 @@ export default {
     gitHubRepoUrl () {
       return this.cfg.gitHubRepoUrl
     },
-    namespace () {
-      return get(this.shoot, 'metadata.namespace')
-    },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.namespace })
+      return canLinkToSeed({ shootNamespace: this.shootNamespace })
     },
     createJournalLink () {
-      const name = get(this.shoot, 'metadata.name')
+      const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
 
-      const url = `${window.location.origin}/namespace/${this.namespace}/shoots/${name}`
+      const dashboardShootLink = `**Shoot:** [${this.shootNamespace}/${this.shootName}](${url})`
+      const kind = `**Kind:** ${this.shootCloudProviderKind} / ${this.shootRegion}`
 
-      const dashboardShootLink = `**Shoot:** [${this.namespace}/${name}](${url})`
-      const kind = `**Kind:** ${this.getCloudProviderKind} / ${this.region}`
-
-      const seedName = get(this.shoot, 'spec.cloud.seed')
-      const seedLinkOrName = this.canLinkToSeed ? `[${seedName}](${window.location.origin}/namespace/garden/shoots/${seedName})` : seedName
+      const seedLinkOrName = this.canLinkToSeed ? `[${this.shootSeed}](${window.location.origin}/namespace/garden/shoots/${this.shootSeed})` : this.shootSeed
       const seed = `**Seed:** ${seedLinkOrName}`
 
-      const createdAt = `**Created At:** ${getDateFormatted(get(this.shoot, 'metadata.creationTimestamp', ''))}`
-      const lastOperation = `**Last Op:** ${get(this.shoot, 'status.lastOperation.description', '')}`
-      const lastError = `**Last Error:** ${get(this.shoot, 'status.lastError.description', '-')}`
+      const createdAt = `**Created At:** ${this.shootCreatedAt}`
+      const lastOperation = `**Last Op:** ${get(this.shootLastOperation, 'description', '')}`
+      const lastError = `**Last Error:** ${get(this.shootLastError, 'description', '-')}`
 
-      const journalTitle = encodeURIComponent(`[${this.namespace}/${name}]`)
+      const journalTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
       const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}

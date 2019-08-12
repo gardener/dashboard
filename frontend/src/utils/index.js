@@ -426,6 +426,10 @@ export function infrastructureColor (kind) {
   }
 }
 
+export function actionsDisabledForPurpose (purpose) {
+  return purpose === 'infrastructure'
+}
+
 export function purposeRequiresHibernationSchedule (purpose) {
   const defaultHibernationSchedules = get(store, 'state.cfg.defaultHibernationSchedule')
   if (defaultHibernationSchedules) {
