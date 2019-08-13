@@ -29,6 +29,7 @@ limitations under the License.
       ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
+      max-width=850
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>

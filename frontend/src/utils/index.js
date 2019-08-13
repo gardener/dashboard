@@ -475,9 +475,9 @@ export const shootAddonList = [
   {
     name: 'kubernetes-dashboard',
     title: 'Dashboard',
-    description: 'General-purpose web UI for Kubernetes clusters.',
+    description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
-    enabled: true
+    enabled: false
   },
   {
     name: 'monocular',
