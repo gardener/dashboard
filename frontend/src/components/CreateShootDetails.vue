@@ -15,43 +15,45 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row>
-    <v-flex xs3>
-      <v-text-field
-        ref="name"
-        color="cyan darken-2"
-        label="Cluster Name"
-        counter="10"
-        v-model="name"
-        :error-messages="getErrorMessages('name')"
-        @input="onInputName"
-        @blur="$v.name.$touch()"
-        ></v-text-field>
-    </v-flex>
-    <v-flex xs3 offset-xs1>
-      <v-select
-        color="cyan darken-2"
-        label="Kubernetes Version"
-        :items="sortedKubernetesVersions"
-        v-model="kubernetesVersion"
-        :error-messages="getErrorMessages('kubernetesVersion')"
-        @input="onInputKubernetesVersion"
-        @blur="$v.kubernetesVersion.$touch()"
-        ></v-select>
-    </v-flex>
-    <v-flex xs3 offset-xs1>
-      <v-select
-        color="cyan darken-2"
-        label="Purpose"
-        :items="purposes"
-        v-model="purpose"
-        hint="Indicate the importance of the cluster"
-        persistent-hint
-        @input="onInputPurpose"
-        @blur="$v.purpose.$touch()"
-        ></v-select>
-    </v-flex>
-  </v-layout>
+  <v-container grid-list-xl class="pa-0 ma-0">
+    <v-layout row wrap>
+      <v-flex>
+        <v-text-field
+          ref="name"
+          color="cyan darken-2"
+          label="Cluster Name"
+          counter="10"
+          v-model="name"
+          :error-messages="getErrorMessages('name')"
+          @input="onInputName"
+          @blur="$v.name.$touch()"
+          ></v-text-field>
+      </v-flex>
+      <v-flex>
+        <v-select
+          color="cyan darken-2"
+          label="Kubernetes Version"
+          :items="sortedKubernetesVersions"
+          v-model="kubernetesVersion"
+          :error-messages="getErrorMessages('kubernetesVersion')"
+          @input="onInputKubernetesVersion"
+          @blur="$v.kubernetesVersion.$touch()"
+          ></v-select>
+      </v-flex>
+      <v-flex>
+        <v-select
+          color="cyan darken-2"
+          label="Purpose"
+          :items="purposes"
+          v-model="purpose"
+          hint="Indicate the importance of the cluster"
+          persistent-hint
+          @input="onInputPurpose"
+          @blur="$v.purpose.$touch()"
+          ></v-select>
+      </v-flex>
+    </v-layout>
+</v-container>
 </template>
 
 <script>
@@ -204,3 +206,9 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  >>> .flex {
+    max-width: 300px;
+  }
+</style>

@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <transition-group name="list">
-      <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2">
+      <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  :class="scheduleRowClass(index)">
         <hibernation-schedule-event
           ref="scheduleEvents"
           :scheduleEvent="scheduleEvent"
@@ -244,6 +244,12 @@ export default {
       this.purpose = purpose
       this.parseSchedules(hibernationSchedule)
       this.setNoHibernationSchedule(noHibernationSchedule)
+    },
+    scheduleRowClass (index) {
+      if (index % 2 === 0) {
+        return 'list-item pt-2'
+      }
+      return 'list-item pt-2 rowBackground'
     }
   },
   mounted () {
@@ -256,3 +262,16 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+
+.add_worker {
+  margin-left: 30px;
+  border: 0;
+}
+
+.rowBackground {
+  background-color: #e0f7fa; // cyan lighten-5
+}
+
+</style>

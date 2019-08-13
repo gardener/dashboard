@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <div>
-    <v-layout align-center justify-center row fill-height wrap>
+    <v-layout align-center row fill-height wrap>
       <v-card
         v-for="infrastructureKind in sortedCloudProviderKindList"
         :class="select_infra_card_class(infrastructureKind)"
@@ -106,10 +106,11 @@ export default {
 
 <style lang="styl" scoped>
   .select_infra_card {
+    border: 1px solid transparent;
     padding: 10px;
     opacity: 0.8;
     cursor: pointer;
-    margin: 10px 20px 10px;
+    margin: 10px 20px 10px 0px;
     min-width: 120px;
   }
 
@@ -120,7 +121,6 @@ export default {
 
   .select_infra_card_active {
     border: 1px solid #0097A7; // cyan darken-2
-    opacity: 1
-    margin: 9px 19px 9px;
+    opacity: 1;
   }
 </style>

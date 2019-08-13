@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-layout row>
-      <v-flex xs3 v-show="cloudProfiles.length > 1">
+  <v-container grid-list-xl class="pa-0 ma-0">
+    <v-layout row wrap>
+      <v-flex v-show="cloudProfiles.length > 1">
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -28,7 +28,7 @@ limitations under the License.
           color="cyan darken-2">
         </cloud-profile>
       </v-flex>
-      <v-flex xs3 :offset-xs1="cloudProfiles.length > 1">
+      <v-flex>
         <v-select
           color="cyan darken-2"
           label="Secret"
@@ -58,9 +58,7 @@ limitations under the License.
           </template>
         </v-select>
       </v-flex>
-    </v-layout>
-    <v-layout row>
-      <v-flex xs3>
+      <v-flex>
         <v-select
           color="cyan darken-2"
           label="Region"
@@ -73,7 +71,7 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex xs3 offset-xs1 v-if="infrastructureKind !== 'azure'">
+      <v-flex v-if="infrastructureKind !== 'azure'">
         <v-select
           color="cyan darken-2"
           label="Zone"
@@ -85,10 +83,8 @@ limitations under the License.
           multiple
           ></v-select>
       </v-flex>
-    </v-layout>
-    <template v-if="infrastructureKind === 'openstack'">
-      <v-layout row>
-        <v-flex xs3>
+      <template v-if="infrastructureKind === 'openstack'">
+        <v-flex>
           <v-select
           color="cyan darken-2"
           label="Floating Pools"
@@ -99,7 +95,7 @@ limitations under the License.
           @blur="$v.floatingPoolName.$touch()"
           ></v-select>
         </v-flex>
-        <v-flex xs3 offset-xs1>
+        <v-flex>
           <v-select
           color="cyan darken-2"
           label="Load Balancer Providers"
@@ -111,10 +107,10 @@ limitations under the License.
           persistent-hint
           ></v-select>
         </v-flex>
-      </v-layout>
-    </template>
+      </template>
+    </v-layout>
     <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -431,3 +427,9 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  >>> .flex {
+    max-width: 300px;
+  }
+</style>

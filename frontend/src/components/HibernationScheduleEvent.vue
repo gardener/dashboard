@@ -15,69 +15,77 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout>
-    <v-flex xs6 class="mr-3">
-      <v-select
-      color="cyan darken-2"
-      v-model="selectedDays"
-      ref="selectedDays"
-      @blur="touchIfNothingFocused"
-      @input="onInputSelectedDays"
-      :items="weekdays"
-      return-object
-      :error-messages="getErrorMessages('selectedDays')"
-      chips
-      label="Weekdays on which this rule shall be active"
-      multiple
-      small-chips
-      deletable-chips
-    ></v-select>
-    </v-flex>
-    <v-flex xs2 class="mr-3">
-      <v-text-field
-        color="cyan darken-2"
-        label="Wake up at"
-        v-model="wakeUpTime"
-        ref="wakeUpTime"
-        @blur="touchIfNothingFocused"
-        @input="onInputWakeUpTime"
-        :error-messages="getErrorMessages('wakeUpTime')"
-        type="time"
-      ></v-text-field>
-    </v-flex>
-    <v-flex xs2 class="mr-3">
-      <v-text-field
-        color="cyan darken-2"
-        label="Hibernate at"
-        v-model="hibernateTime"
-        ref="hibernateTime"
-        @blur="touchIfNothingFocused"
-        @input="onInputHibernateTime"
-        :error-messages="getErrorMessages('hibernateTime')"
-        type="time"
-      ></v-text-field>
-    </v-flex>
-    <v-flex xs3 class="mr-3">
-      <v-autocomplete
-        color="cyan darken-2"
-        label="Timezone"
-        :items="timezones"
-        v-model="selectedTimezone"
-        @input="onInputSelectedTimezone"
-        >
-      </v-autocomplete>
-    </v-flex>
-    <v-flex xs1>
-      <v-btn
-        small
-        outline
-        icon
-        class="grey--text lighten-2"
-        @click.native.stop="removeScheduleEvent">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-flex>
-  </v-layout>
+  <v-container grid-list-xl class="py-0 ma-0">
+    <v-layout row>
+      <v-layout row wrap>
+        <v-flex>
+          <v-select
+          class="weekday-select"
+          color="cyan darken-2"
+          v-model="selectedDays"
+          ref="selectedDays"
+          @blur="touchIfNothingFocused"
+          @input="onInputSelectedDays"
+          :items="weekdays"
+          return-object
+          :error-messages="getErrorMessages('selectedDays')"
+          chips
+          label="Weekdays on which this rule shall be active"
+          multiple
+          small-chips
+          deletable-chips
+        ></v-select>
+        </v-flex>
+        <v-flex>
+          <v-text-field
+            class="time-select"
+            color="cyan darken-2"
+            label="Wake up at"
+            v-model="wakeUpTime"
+            ref="wakeUpTime"
+            @blur="touchIfNothingFocused"
+            @input="onInputWakeUpTime"
+            :error-messages="getErrorMessages('wakeUpTime')"
+            type="time"
+          ></v-text-field>
+        </v-flex>
+        <v-flex>
+          <v-text-field
+            class="time-select"
+            color="cyan darken-2"
+            label="Hibernate at"
+            v-model="hibernateTime"
+            ref="hibernateTime"
+            @blur="touchIfNothingFocused"
+            @input="onInputHibernateTime"
+            :error-messages="getErrorMessages('hibernateTime')"
+            type="time"
+          ></v-text-field>
+        </v-flex>
+        <v-flex>
+          <v-autocomplete
+            class="timezone-select"
+            color="cyan darken-2"
+            label="Timezone"
+            :items="timezones"
+            v-model="selectedTimezone"
+            @input="onInputSelectedTimezone"
+            >
+          </v-autocomplete>
+        </v-flex>
+      </v-layout>
+      <v-flex>
+        <v-btn
+          small
+          outline
+          icon
+          class="grey--text lighten-2"
+          @click.native.stop="removeScheduleEvent">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -285,3 +293,15 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  .weekday-select {
+    max-width: 530px;
+  }
+  .time-select {
+    max-width: 100px;
+  }
+  .timezone-select {
+    max-width: 300px;
+  }
+</style>

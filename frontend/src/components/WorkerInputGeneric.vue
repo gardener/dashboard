@@ -15,15 +15,10 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row class="mb-3">
-    <v-flex xs1 class="mt-1">
-      <v-avatar class="cyan darken-2">
-        <v-icon class="white--text">mdi-server</v-icon>
-      </v-avatar>
-    </v-flex>
-    <v-layout column>
-      <v-layout row>
-        <v-flex xs2>
+  <v-container grid-list-xl class="py-0 ma-0">
+    <v-layout row>
+      <v-layout row wrap>
+        <v-flex>
           <v-text-field
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.name')"
@@ -34,8 +29,7 @@ limitations under the License.
             label="Group Name">
           </v-text-field>
         </v-flex>
-
-        <v-flex xs2 class="ml-3">
+        <v-flex>
           <machine-type
           :machineTypes="machineTypes"
           :worker="worker"
@@ -43,8 +37,15 @@ limitations under the License.
           @valid="onMachineTypeValid">
           </machine-type>
         </v-flex>
-
-        <v-flex xs2 v-if="volumeInCloudProfile" class="ml-3">
+        <v-flex>
+          <machine-image
+          :machineImages="machineImages"
+          :worker="worker"
+          @updateMachineImage="onUpdateMachineImage"
+          @valid="onMachineImageValid">
+          </machine-image>
+        </v-flex>
+        <v-flex v-if="volumeInCloudProfile">
           <volume-type
           :volumeTypes="volumeTypes"
           :worker="worker"
@@ -52,9 +53,9 @@ limitations under the License.
           @valid="onVolumeTypeValid">
           </volume-type>
         </v-flex>
-
-        <v-flex v-if="volumeInCloudProfile" xs1  class="ml-3">
+        <v-flex v-if="volumeInCloudProfile">
           <size-input
+            class="smallInput"
             min="1"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.volumeSize')"
@@ -64,25 +65,9 @@ limitations under the License.
             v-model="worker.volumeSize"
           ></size-input>
         </v-flex>
-
-        <v-flex class="ml-3 mt-2">
-          <slot name="action">
-          </slot>
-        </v-flex>
-      </v-layout>
-
-      <v-layout row>
-        <v-flex xs3>
-          <machine-image
-          :machineImages="machineImages"
-          :worker="worker"
-          @updateMachineImage="onUpdateMachineImage"
-          @valid="onMachineImageValid">
-          </machine-image>
-        </v-flex>
-
-        <v-flex xs1 class="ml-3 autoscaler">
+        <v-flex>
           <v-text-field
+            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.autoScalerMin')"
@@ -92,9 +77,9 @@ limitations under the License.
             v-model="innerMin"
             label="Autoscaler Min."></v-text-field>
         </v-flex>
-
-        <v-flex xs1 class="ml-3 autoscaler">
+        <v-flex>
           <v-text-field
+            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.autoScalerMax')"
@@ -105,9 +90,9 @@ limitations under the License.
             label="Autoscaler Max."
           ></v-text-field>
         </v-flex>
-
-        <v-flex xs1 class="ml-3 autoscaler">
+        <v-flex class="smallInput">
           <v-text-field
+            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.maxSurge')"
@@ -116,10 +101,13 @@ limitations under the License.
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
         </v-flex>
-
       </v-layout>
+      <v-flex shrink>
+        <slot name="action">
+        </slot>
+      </v-flex>
     </v-layout>
-  </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -334,7 +322,10 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-  .autoscaler {
-    min-width: 90px;
+  >>> .flex {
+    max-width: 300px;
+  }
+  .smallInput {
+    width: 90px;
   }
 </style>
