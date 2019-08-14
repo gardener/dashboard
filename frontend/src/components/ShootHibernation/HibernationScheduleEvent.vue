@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-container grid-list-xl class="py-0 ma-0">
-    <v-layout row>
+    <v-layout row align-center>
       <v-layout row wrap>
         <v-flex class="weekday-select">
           <v-select
@@ -70,18 +70,16 @@ limitations under the License.
           </v-autocomplete>
         </v-flex>
       </v-layout>
-      <v-layout align-center>
-        <v-flex class="ml-3">
-          <v-btn
-            small
-            outline
-            icon
-            class="grey--text lighten-2"
-            @click.native.stop="removeScheduleEvent">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-flex>
-      </v-layout>
+      <v-flex class="ml-3">
+        <v-btn
+          small
+          outline
+          icon
+          class="grey--text lighten-2"
+          @click.native.stop="removeScheduleEvent">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-flex>
     </v-layout>
   </v-container>
 </template>

@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-container grid-list-xl class="py-0 ma-0">
-    <v-layout row>
+    <v-layout row align-center>
       <v-layout row wrap>
         <v-flex class="regularInput">
           <v-text-field
@@ -98,11 +98,9 @@ limitations under the License.
             label="Max. Surge"></v-text-field>
         </v-flex>
       </v-layout>
-      <v-layout align-center>
-        <v-flex class="ml-3">
-          <slot name="action"></slot>
-        </v-flex>
-      </v-layout>
+      <v-flex class="ml-3">
+        <slot name="action"></slot>
+      </v-flex>
     </v-layout>
   </v-container>
 </template>
