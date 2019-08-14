@@ -139,7 +139,7 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <cluster-access ref="clusterAccess" :shootItem="selectedItem"></cluster-access>
+          <shoot-access-card ref="clusterAccess" :shootItem="selectedItem"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>
@@ -160,13 +160,13 @@ import get from 'lodash/get'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
-import ClusterAccess from '@/components/ClusterAccess'
+import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 
 export default {
   name: 'shoot-list',
   components: {
     ShootListRow,
-    ClusterAccess
+    ShootAccessCard
   },
   data () {
     return {

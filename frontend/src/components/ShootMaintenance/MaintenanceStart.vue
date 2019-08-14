@@ -54,7 +54,7 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
+import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'

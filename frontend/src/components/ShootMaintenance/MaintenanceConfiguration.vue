@@ -27,18 +27,24 @@ limitations under the License.
       :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
-      max-width=1000
-      ref="confirmDialog"
+      max-width=850
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <manage-workers
-        ref="manageWorkers"
-        @valid="onWorkersValid"
-       ></manage-workers>
+        <maintenance-time
+          ref="maintenanceTime"
+          :time-window-begin="data.timeWindowBegin"
+          @valid="onMaintenanceTimeValid"
+        ></maintenance-time>
+        <maintenance-components
+          ref="maintenanceComponents"
+          :updateKubernetesVersion="data.updateKubernetesVersion"
+          :updateOSVersion="data.updateOSVersion"
+        ></maintenance-components>
       </template>
     </confirm-dialog>
   </div>
@@ -46,36 +52,45 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import ManageWorkers from '@/components/ManageWorkers'
-import { updateShootWorkers } from '@/utils/api'
+import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
+import get from 'lodash/get'
+import assign from 'lodash/assign'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
-  name: 'worker-configuration',
+  name: 'maintenance-configuration',
   components: {
     ConfirmDialog,
-    ManageWorkers
+    MaintenanceComponents,
+    MaintenanceTime
   },
   props: {
     shootItem: {
       type: Object
     }
   },
+  mixins: [shootGetters],
   data () {
     return {
       errorMessage: null,
       detailedErrorMessage: null,
-      workersValid: false,
-      workers: undefined,
+      maintenanceTimeValid: true,
+      data: {
+        timeWindowBegin: undefined,
+        timeWindowEnd: undefined,
+        updateKubernetesVersion: false,
+        updateOSVersion: false
+      },
       icon: 'mdi-settings-outline',
-      caption: 'Configure Workers'
+      caption: 'Configure Maintenance'
     }
   },
-  mixins: [shootGetters],
   computed: {
     valid () {
-      return this.workersValid
+      return this.maintenanceTimeValid
     }
   },
   methods: {
@@ -86,11 +101,18 @@ export default {
         }
       })) {
         try {
-          this.workers = this.$refs.manageWorkers.getWorkers()
-          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: this.workers })
+          const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+          const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+          assign(this.data, {
+            timeWindowBegin: utcBegin,
+            timeWindowEnd: utcEnd,
+            updateKubernetesVersion: k8sUpdates,
+            updateOSVersion: osUpdates
+          })
+          await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save worker configuration'
+          this.errorMessage = 'Could not save maintenance configuration'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.showDialog(false)
@@ -100,15 +122,20 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-      this.workersValid = false
+      this.maintenanceTimeValid = true
 
-      const workers = this.shootWorkerGroups
+      this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
+      this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
+      this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+      this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
+
       this.$nextTick(() => {
-        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, zones: this.shootZones })
+        this.$refs.maintenanceTime.reset()
+        this.$refs.maintenanceComponents.reset()
       })
     },
-    onWorkersValid (value) {
-      this.workersValid = value
+    onMaintenanceTimeValid (value) {
+      this.maintenanceTimeValid = value
     }
   }
 }

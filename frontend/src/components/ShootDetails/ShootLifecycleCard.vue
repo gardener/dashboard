@@ -32,7 +32,7 @@ limitations under the License.
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
-            <shoot-hibernation :shootItem="shootItem"></shoot-hibernation>
+            <change-hibernation :shootItem="shootItem"></change-hibernation>
             <hibernation-configuration ref="hibernationConfiguration" :shootItem="shootItem"></hibernation-configuration>
           </v-layout>
         </v-flex>
@@ -89,17 +89,17 @@ import { mapState } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
-import ShootHibernation from '@/components/ShootHibernation'
-import MaintenanceStart from '@/components/MaintenanceStart'
-import MaintenanceConfiguration from '@/components/MaintenanceConfiguration'
-import HibernationConfiguration from '@/components/HibernationConfiguration'
+import ChangeHibernation from '@/components/ShootHibernation/ChangeHibernation'
+import MaintenanceStart from '@/components/ShootMaintenance/MaintenanceStart'
+import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceConfiguration'
+import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    ShootHibernation,
+    ChangeHibernation,
     MaintenanceStart,
     MaintenanceConfiguration,
     HibernationConfiguration,

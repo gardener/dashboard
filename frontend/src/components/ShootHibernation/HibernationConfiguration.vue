@@ -36,10 +36,10 @@ limitations under the License.
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
         <v-layout row wrap>
-          <hibernation-schedule
+          <manage-hibernation-schedule
             ref="hibernationSchedule"
             @valid="onHibernationScheduleValid"
-          ></hibernation-schedule>
+          ></manage-hibernation-schedule>
         </v-layout>
       </template>
     </confirm-dialog>
@@ -48,7 +48,7 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import HibernationSchedule from '@/components/HibernationSchedule'
+import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
@@ -58,7 +58,7 @@ export default {
   name: 'hibernation-configuration',
   components: {
     ConfirmDialog,
-    HibernationSchedule
+    ManageHibernationSchedule
   },
   props: {
     shootItem: {

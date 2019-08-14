@@ -24,21 +24,21 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"
+      :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="confirmDialog"
       confirmColor="orange"
       defaultColor="orange"
-      max-width=850
+      max-width=1000
+      ref="confirmDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <v-layout row wrap>
-          <manage-shoot-addons
-            ref="addons"
-           ></manage-shoot-addons>
-        </v-layout>
+        <manage-workers
+        ref="manageWorkers"
+        @valid="onWorkersValid"
+       ></manage-workers>
       </template>
     </confirm-dialog>
   </div>
@@ -46,32 +46,36 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import ManageShootAddons from '@/components/ManageShootAddons'
-import { updateShootAddons } from '@/utils/api'
+import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
+import { updateShootWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootGetters } from '@/mixins/shootGetters'
-import get from 'lodash/get'
 
 export default {
-  name: 'addon-configuration',
+  name: 'worker-configuration',
   components: {
     ConfirmDialog,
-    ManageShootAddons
+    ManageWorkers
   },
   props: {
     shootItem: {
       type: Object
     }
   },
-  mixins: [shootGetters],
   data () {
     return {
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      addons: null,
-      caption: 'Configure Add-ons',
-      icon: 'mdi-settings-outline'
+      workersValid: false,
+      workers: undefined,
+      icon: 'mdi-settings-outline',
+      caption: 'Configure Workers'
+    }
+  },
+  mixins: [shootGetters],
+  computed: {
+    valid () {
+      return this.workersValid
     }
   },
   methods: {
@@ -82,11 +86,11 @@ export default {
         }
       })) {
         try {
-          this.addons = this.$refs.addons.getAddons()
-          await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
+          this.workers = this.$refs.manageWorkers.getWorkers()
+          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: this.workers })
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not update addons'
+          this.errorMessage = 'Could not save worker configuration'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.showDialog(false)
@@ -96,10 +100,15 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
+      this.workersValid = false
 
+      const workers = this.shootWorkerGroups
       this.$nextTick(() => {
-        this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, zones: this.shootZones })
       })
+    },
+    onWorkersValid (value) {
+      this.workersValid = value
     }
   }
 }

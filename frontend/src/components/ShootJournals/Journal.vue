@@ -45,8 +45,8 @@ limitations under the License.
 import get from 'lodash/get'
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
-import JournalLabels from '@/components/JournalLabels'
-import JournalComment from '@/components/JournalComment'
+import JournalLabels from '@/components/ShootJournals/JournalLabels'
+import JournalComment from '@/components/ShootJournals/JournalComment'
 
 export default {
   components: {

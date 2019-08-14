@@ -40,7 +40,7 @@ limitations under the License.
 import get from 'lodash/get'
 import forEach from 'lodash/forEach'
 import { mapState } from 'vuex'
-import Journal from '@/components/Journal'
+import Journal from '@/components/ShootJournals/Journal'
 import { canLinkToSeed } from '@/utils'
 import { shootGetters } from '@/mixins/shootGetters'
 

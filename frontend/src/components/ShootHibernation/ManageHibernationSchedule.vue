@@ -71,7 +71,7 @@ limitations under the License.
 </template>
 
 <script>
-import HibernationScheduleEvent from '@/components/HibernationScheduleEvent'
+import HibernationScheduleEvent from '@/components/ShootHibernation/HibernationScheduleEvent'
 import forEach from 'lodash/forEach'
 import flatMap from 'lodash/flatMap'
 import get from 'lodash/get'

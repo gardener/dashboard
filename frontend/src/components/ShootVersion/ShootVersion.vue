@@ -97,7 +97,7 @@ limitations under the License.
 </template>
 
 <script>
-import ShootVersionUpdate from '@/components/ShootVersionUpdate'
+import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'

@@ -24,7 +24,6 @@ limitations under the License.
     </v-tooltip>
     <confirm-dialog
       confirmButtonText="Save"
-      :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       ref="confirmDialog"
@@ -35,16 +34,11 @@ limitations under the License.
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
       <template slot="message">
-        <maintenance-time
-          ref="maintenanceTime"
-          :time-window-begin="data.timeWindowBegin"
-          @valid="onMaintenanceTimeValid"
-        ></maintenance-time>
-        <maintenance-components
-          ref="maintenanceComponents"
-          :updateKubernetesVersion="data.updateKubernetesVersion"
-          :updateOSVersion="data.updateOSVersion"
-        ></maintenance-components>
+        <v-layout row wrap>
+          <manage-shoot-addons
+            ref="addons"
+           ></manage-shoot-addons>
+        </v-layout>
       </template>
     </confirm-dialog>
   </div>
@@ -52,20 +46,17 @@ limitations under the License.
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
-import MaintenanceTime from '@/components/MaintenanceTime'
-import { updateShootMaintenance } from '@/utils/api'
+import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import get from 'lodash/get'
-import assign from 'lodash/assign'
 import { shootGetters } from '@/mixins/shootGetters'
+import get from 'lodash/get'
 
 export default {
-  name: 'maintenance-configuration',
+  name: 'addon-configuration',
   components: {
     ConfirmDialog,
-    MaintenanceComponents,
-    MaintenanceTime
+    ManageShootAddons
   },
   props: {
     shootItem: {
@@ -75,22 +66,12 @@ export default {
   mixins: [shootGetters],
   data () {
     return {
+      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null,
-      maintenanceTimeValid: true,
-      data: {
-        timeWindowBegin: undefined,
-        timeWindowEnd: undefined,
-        updateKubernetesVersion: false,
-        updateOSVersion: false
-      },
-      icon: 'mdi-settings-outline',
-      caption: 'Configure Maintenance'
-    }
-  },
-  computed: {
-    valid () {
-      return this.maintenanceTimeValid
+      addons: null,
+      caption: 'Configure Add-ons',
+      icon: 'mdi-settings-outline'
     }
   },
   methods: {
@@ -101,18 +82,11 @@ export default {
         }
       })) {
         try {
-          const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
-          const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
-          assign(this.data, {
-            timeWindowBegin: utcBegin,
-            timeWindowEnd: utcEnd,
-            updateKubernetesVersion: k8sUpdates,
-            updateOSVersion: osUpdates
-          })
-          await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+          this.addons = this.$refs.addons.getAddons()
+          await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save maintenance configuration'
+          this.errorMessage = 'Could not update addons'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
           this.showDialog(false)
@@ -122,20 +96,10 @@ export default {
     reset () {
       this.errorMessage = null
       this.detailedErrorMessage = null
-      this.maintenanceTimeValid = true
-
-      this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')
-      this.data.timeWindowEnd = get(this.shootItem, 'spec.maintenance.timeWindow.end')
-      this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-      this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
 
       this.$nextTick(() => {
-        this.$refs.maintenanceTime.reset()
-        this.$refs.maintenanceComponents.reset()
+        this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
       })
-    },
-    onMaintenanceTimeValid (value) {
-      this.maintenanceTimeValid = value
     }
   }
 }

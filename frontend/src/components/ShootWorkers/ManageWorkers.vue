@@ -60,7 +60,7 @@ limitations under the License.
 </template>
 
 <script>
-import WorkerInputGeneric from '@/components/WorkerInputGeneric'
+import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
 import { shortRandomString } from '@/utils'
 import forEach from 'lodash/forEach'

@@ -93,11 +93,11 @@ limitations under the License.
         Hibernation
       </v-card-title>
       <v-card-text>
-        <hibernation-schedule
+        <manage-hibernation-schedule
           ref="hibernationSchedule"
           :userInterActionBus="userInterActionBus"
           @valid="onHibernationScheduleValid"
-        ></hibernation-schedule>
+        ></manage-hibernation-schedule>
      </v-card-text>
     </v-card>
     <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
@@ -121,14 +121,14 @@ limitations under the License.
 
 <script>
 
-import CreateShootSelectInfrastructure from '@/components/CreateShootSelectInfrastructure'
-import CreateShootInfrastructureDetails from '@/components/CreateShootInfrastructureDetails'
-import CreateShootDetails from '@/components/CreateShootDetails'
-import ManageShootAddons from '@/components/ManageShootAddons'
-import MaintenanceComponents from '@/components/MaintenanceComponents'
-import MaintenanceTime from '@/components/MaintenanceTime'
-import HibernationSchedule from '@/components/HibernationSchedule'
-import ManageWorkers from '@/components/ManageWorkers'
+import CreateShootSelectInfrastructure from '@/components/CreateShoot/CreateShootSelectInfrastructure'
+import CreateShootInfrastructureDetails from '@/components/CreateShoot/CreateShootInfrastructureDetails'
+import CreateShootDetails from '@/components/CreateShoot/CreateShootDetails'
+import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
+import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
+import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
+import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
+import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import Alert from '@/components/Alert'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
@@ -152,7 +152,7 @@ export default {
     ManageShootAddons,
     MaintenanceComponents,
     MaintenanceTime,
-    HibernationSchedule,
+    ManageHibernationSchedule,
     ManageWorkers,
     Alert,
     ConfirmDialog
