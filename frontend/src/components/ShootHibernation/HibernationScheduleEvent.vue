@@ -18,9 +18,8 @@ limitations under the License.
   <v-container grid-list-xl class="py-0 ma-0">
     <v-layout row>
       <v-layout row wrap>
-        <v-flex>
+        <v-flex class="weekday-select">
           <v-select
-          class="weekday-select"
           color="cyan darken-2"
           v-model="selectedDays"
           ref="selectedDays"
@@ -36,9 +35,8 @@ limitations under the License.
           deletable-chips
         ></v-select>
         </v-flex>
-        <v-flex>
+        <v-flex class="time-select">
           <v-text-field
-            class="time-select"
             color="cyan darken-2"
             label="Wake up at"
             v-model="wakeUpTime"
@@ -49,9 +47,8 @@ limitations under the License.
             type="time"
           ></v-text-field>
         </v-flex>
-        <v-flex>
+        <v-flex class="time-select">
           <v-text-field
-            class="time-select"
             color="cyan darken-2"
             label="Hibernate at"
             v-model="hibernateTime"
@@ -62,9 +59,8 @@ limitations under the License.
             type="time"
           ></v-text-field>
         </v-flex>
-        <v-flex>
+        <v-flex class="timezone-select">
           <v-autocomplete
-            class="timezone-select"
             color="cyan darken-2"
             label="Timezone"
             :items="timezones"
@@ -74,16 +70,18 @@ limitations under the License.
           </v-autocomplete>
         </v-flex>
       </v-layout>
-      <v-flex>
-        <v-btn
-          small
-          outline
-          icon
-          class="grey--text lighten-2"
-          @click.native.stop="removeScheduleEvent">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-flex>
+      <v-layout align-center>
+        <v-flex class="ml-3">
+          <v-btn
+            small
+            outline
+            icon
+            class="grey--text lighten-2"
+            @click.native.stop="removeScheduleEvent">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-flex>
+      </v-layout>
     </v-layout>
   </v-container>
 </template>
@@ -296,7 +294,7 @@ export default {
 
 <style lang="styl" scoped>
   .weekday-select {
-    max-width: 530px;
+    max-width: 560px;
   }
   .time-select {
     max-width: 100px;

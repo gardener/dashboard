@@ -18,7 +18,7 @@ limitations under the License.
   <v-container grid-list-xl class="py-0 ma-0">
     <v-layout row>
       <v-layout row wrap>
-        <v-flex>
+        <v-flex class="regularInput">
           <v-text-field
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.name')"
@@ -37,7 +37,7 @@ limitations under the License.
           @valid="onMachineTypeValid">
           </machine-type>
         </v-flex>
-        <v-flex>
+        <v-flex class="regularInput">
           <machine-image
           :machineImages="machineImages"
           :worker="worker"
@@ -45,7 +45,7 @@ limitations under the License.
           @valid="onMachineImageValid">
           </machine-image>
         </v-flex>
-        <v-flex v-if="volumeInCloudProfile">
+        <v-flex v-if="volumeInCloudProfile" class="regularInput">
           <volume-type
           :volumeTypes="volumeTypes"
           :worker="worker"
@@ -53,9 +53,8 @@ limitations under the License.
           @valid="onVolumeTypeValid">
           </volume-type>
         </v-flex>
-        <v-flex v-if="volumeInCloudProfile">
+        <v-flex v-if="volumeInCloudProfile" class="smallInput">
           <size-input
-            class="smallInput"
             min="1"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.volumeSize')"
@@ -65,9 +64,8 @@ limitations under the License.
             v-model="worker.volumeSize"
           ></size-input>
         </v-flex>
-        <v-flex>
+        <v-flex class="smallInput">
           <v-text-field
-            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.autoScalerMin')"
@@ -77,9 +75,8 @@ limitations under the License.
             v-model="innerMin"
             label="Autoscaler Min."></v-text-field>
         </v-flex>
-        <v-flex>
+        <v-flex class="smallInput">
           <v-text-field
-            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.autoScalerMax')"
@@ -92,7 +89,6 @@ limitations under the License.
         </v-flex>
         <v-flex class="smallInput">
           <v-text-field
-            class="smallInput"
             min="0"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.maxSurge')"
@@ -102,10 +98,11 @@ limitations under the License.
             label="Max. Surge"></v-text-field>
         </v-flex>
       </v-layout>
-      <v-flex shrink>
-        <slot name="action">
-        </slot>
-      </v-flex>
+      <v-layout align-center>
+        <v-flex class="ml-3">
+          <slot name="action"></slot>
+        </v-flex>
+      </v-layout>
     </v-layout>
   </v-container>
 </template>
@@ -322,10 +319,10 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-  >>> .flex {
+  .regularInput {
     max-width: 300px;
   }
   .smallInput {
-    width: 90px;
+    max-width: 120px;
   }
 </style>

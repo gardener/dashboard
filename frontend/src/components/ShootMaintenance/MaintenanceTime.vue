@@ -15,30 +15,32 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout>
-    <v-flex xs3 class="mr-3">
-      <v-text-field
-        color="cyan darken-2"
-        label="Maintenance Start Time"
-        v-model="localizedMaintenanceBegin"
-        :error-messages="getErrorMessages('localizedMaintenanceBegin')"
-        @input="onInputLocalizedMaintenanceBegin"
-        @blur="$v.localizedMaintenanceBegin.$touch()"
-        type="time"
-        persistent-hint
-        hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
-      ></v-text-field>
-    </v-flex>
-    <v-flex xs2>
-      <v-autocomplete
-        color="cyan darken-2"
-        label="Timezone"
-        :items="timezones"
-        v-model="selectedTimezone"
-        >
-      </v-autocomplete>
-    </v-flex>
-  </v-layout>
+  <v-container grid-list-xl class="pa-0 ma-0">
+    <v-layout>
+      <v-flex class="regularInput">
+        <v-text-field
+          color="cyan darken-2"
+          label="Maintenance Start Time"
+          v-model="localizedMaintenanceBegin"
+          :error-messages="getErrorMessages('localizedMaintenanceBegin')"
+          @input="onInputLocalizedMaintenanceBegin"
+          @blur="$v.localizedMaintenanceBegin.$touch()"
+          type="time"
+          persistent-hint
+          hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
+        ></v-text-field>
+      </v-flex>
+      <v-flex class="regularInput">
+        <v-autocomplete
+          color="cyan darken-2"
+          label="Timezone"
+          :items="timezones"
+          v-model="selectedTimezone"
+          >
+        </v-autocomplete>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -150,3 +152,9 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  .regularInput {
+    max-width: 300px;
+  }
+</style>

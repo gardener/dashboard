@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-container grid-list-xl class="pa-0 ma-0">
     <v-layout row wrap>
-      <v-flex v-show="cloudProfiles.length > 1">
+      <v-flex v-show="cloudProfiles.length > 1" class="regularInput">
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -28,7 +28,7 @@ limitations under the License.
           color="cyan darken-2">
         </cloud-profile>
       </v-flex>
-      <v-flex>
+      <v-flex class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Secret"
@@ -58,7 +58,7 @@ limitations under the License.
           </template>
         </v-select>
       </v-flex>
-      <v-flex>
+      <v-flex class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Region"
@@ -71,7 +71,7 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex v-if="infrastructureKind !== 'azure'">
+      <v-flex v-if="infrastructureKind !== 'azure'" class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Zone"
@@ -84,7 +84,7 @@ limitations under the License.
           ></v-select>
       </v-flex>
       <template v-if="infrastructureKind === 'openstack'">
-        <v-flex>
+        <v-flex class="regularInput">
           <v-select
           color="cyan darken-2"
           label="Floating Pools"
@@ -95,7 +95,7 @@ limitations under the License.
           @blur="$v.floatingPoolName.$touch()"
           ></v-select>
         </v-flex>
-        <v-flex>
+        <v-flex class="regularInput">
           <v-select
           color="cyan darken-2"
           label="Load Balancer Providers"
@@ -429,7 +429,7 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-  >>> .flex {
+  .regularInput {
     max-width: 300px;
   }
 </style>

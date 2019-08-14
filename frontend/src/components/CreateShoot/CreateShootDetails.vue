@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-container grid-list-xl class="pa-0 ma-0">
     <v-layout row wrap>
-      <v-flex>
+      <v-flex class="regularInput">
         <v-text-field
           ref="name"
           color="cyan darken-2"
@@ -29,7 +29,7 @@ limitations under the License.
           @blur="$v.name.$touch()"
           ></v-text-field>
       </v-flex>
-      <v-flex>
+      <v-flex class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Kubernetes Version"
@@ -40,7 +40,7 @@ limitations under the License.
           @blur="$v.kubernetesVersion.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex>
+      <v-flex class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Purpose"
@@ -208,7 +208,7 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-  >>> .flex {
+  .regularInput {
     max-width: 300px;
   }
 </style>

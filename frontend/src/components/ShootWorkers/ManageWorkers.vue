@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <transition-group name="list">
-    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" :class="workerRowClass(index)">
+    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'cyan lighten-5': index % 2 }">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"
@@ -196,12 +196,6 @@ export default {
       this.cloudProfileName = cloudProfileName
       this.zones = zones
       this.setInternalWorkers(workers)
-    },
-    workerRowClass (index) {
-      if (index % 2 === 0) {
-        return 'list-item pt-2'
-      }
-      return 'list-item pt-2 rowBackground'
     }
   },
   mounted () {
@@ -220,11 +214,3 @@ export default {
   }
 }
 </script>
-
-<style lang="styl" scoped>
-
-.rowBackground {
-  background-color: #e0f7fa; // cyan lighten-5
-}
-
-</style>
