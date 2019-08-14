@@ -110,17 +110,7 @@ limitations under the License.
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-    <confirm-dialog
-      ref="confirmDialog"
-      :confirmButtonText="confirmYesButtonText"
-      max-width=400
-      defaultColor="orange"
-      >
-      <template slot="caption">{{confirmCaption}}</template>
-      <template slot="message">
-        <div v-html="confirmMessage"></div>
-      </template>
-    </confirm-dialog>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
@@ -170,9 +160,6 @@ export default {
       alertMessage: '',
       alertType: 'error',
       snackbar: false,
-      confirmCaption: undefined,
-      confirmMessage: undefined,
-      confirmYesButtonText: undefined,
       snackbarTimeout: 3000,
       snackbarColor: undefined,
       snackbarText: '',
@@ -411,22 +398,25 @@ export default {
       }
     },
     confirmEditorNavigation () {
-      this.confirmCaption = 'Leave Editor?'
-      this.confirmMessage = 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?'
-      this.confirmYesButtonText = 'Leave'
-      return this.$refs.confirmDialog.confirmWithDialog()
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Leave',
+        captionText: 'Leave Editor?',
+        messageHtml: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?'
+      })
     },
     confirmCreateNavigation () {
-      this.confirmCaption = 'Leave Create Cluster Page?'
-      this.confirmMessage = 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
-      this.confirmYesButtonText = 'Leave'
-      return this.$refs.confirmDialog.confirmWithDialog()
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Leave',
+        captionText: 'Leave Create Cluster Page?',
+        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
+      })
     },
     confirmOverwrite () {
-      this.confirmCaption = 'Confirm Overwrite'
-      this.confirmMessage = 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
-      this.confirmYesButtonText = 'Save'
-      return this.$refs.confirmDialog.confirmWithDialog()
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Save',
+        captionText: 'Confirm Overwrite',
+        messageHtml: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
+      })
     },
     onCopy () {
       this.snackbarColor = undefined

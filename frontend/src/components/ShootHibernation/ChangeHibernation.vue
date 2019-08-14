@@ -22,14 +22,14 @@ limitations under the License.
       </v-btn>
       {{shootActionToolTip(caption)}}
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       :confirmValue="confirm"
       :confirmButtonText="confirmText"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
-      ref="confirmDialog"
+      ref="gDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -42,19 +42,19 @@ limitations under the License.
           This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
         </template>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    ConfirmDialog
+    GDialog
   },
   props: {
     shootItem: {
@@ -100,7 +100,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }
@@ -134,7 +134,7 @@ export default {
   watch: {
     isShootHibernated (value) {
       // hide dialog if hibernation state changes
-      this.$refs.confirmDialog.hideDialog()
+      this.$refs.gDialog.hideDialog()
     }
   }
 }

@@ -105,17 +105,7 @@ limitations under the License.
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
       <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
     </v-layout>
-    <confirm-dialog
-      ref="confirmDialog"
-      :confirmButtonText="confirmYesButtonText"
-      max-width=400
-      defaultColor="orange"
-      >
-      <template slot="caption">{{confirmCaption}}</template>
-      <template slot="message">
-        <div v-html="confirmMessage"></div>
-      </template>
-    </confirm-dialog>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-container>
 </template>
 
@@ -168,9 +158,6 @@ export default {
       hibernationScheduleValid: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      confirmCaption: undefined,
-      confirmMessage: undefined,
-      confirmYesButtonText: undefined,
       isShootCreated: false,
       initialShootContent: undefined
     }
@@ -347,16 +334,18 @@ export default {
       }
     },
     confirmNavigation () {
-      this.confirmCaption = 'Leave Create Cluster Page?'
-      this.confirmMessage = 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
-      this.confirmYesButtonText = 'Leave'
-      return this.$refs.confirmDialog.confirmWithDialog()
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Leave',
+        captionText: 'Leave Create Cluster Page?',
+        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
+      })
     },
     confirmNavigateToYamlIfInvalid () {
-      this.confirmCaption = 'Validation Errors'
-      this.confirmMessage = 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
-      this.confirmYesButtonText = 'Continue'
-      return this.$refs.confirmDialog.confirmWithDialog()
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Continue',
+        captionText: 'Validation Errors',
+        messageHtml: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
+      })
     },
     cancelClicked () {
       this.$router.push({

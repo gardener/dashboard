@@ -74,11 +74,11 @@ limitations under the License.
       </v-btn>
     </v-fab-transition>
 
-    <confirm-dialog
+    <g-dialog
       defaultColor="red"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="confirmDialog">
+      ref="gDialog">
       <div slot="caption">
         Confirm Delete
       </div>
@@ -87,7 +87,7 @@ limitations under the License.
         <br />
         <i class="red--text text--darken-2">The operation can not be undone.</i>
       </div>
-    </confirm-dialog>
+    </g-dialog>
   </v-container>
 </template>
 
@@ -96,7 +96,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import find from 'lodash/find'
 import AccountAvatar from '@/components/AccountAvatar'
 import UpdateDialog from '@/dialogs/ProjectDialog'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { getDateFormatted } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
@@ -106,7 +106,7 @@ export default {
   components: {
     AccountAvatar,
     UpdateDialog,
-    ConfirmDialog,
+    GDialog,
     TimeString
   },
   data () {
@@ -159,7 +159,7 @@ export default {
       'deleteProject'
     ]),
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

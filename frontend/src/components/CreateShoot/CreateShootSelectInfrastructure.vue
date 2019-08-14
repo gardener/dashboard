@@ -15,26 +15,24 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-layout align-center row fill-height wrap>
-      <v-card
-        v-for="infrastructureKind in sortedCloudProviderKindList"
-        :class="select_infra_card_class(infrastructureKind)"
-        @click="selectInfrastructure(infrastructureKind)"
-        :key="infrastructureKind"
-        hover
-        >
-        <v-layout align-center justify-center fill-height column>
-          <v-flex grow>
-            <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
-          </v-flex>
-          <v-flex shrink mt-2>
-            <span class="subheading">{{infrastructureKind}}</span>
-          </v-flex>
-        </v-layout>
-      </v-card>
-    </v-layout>
-  </div>
+  <v-layout row wrap>
+    <v-card
+      v-for="infrastructureKind in sortedCloudProviderKindList"
+      :class="select_infra_card_class(infrastructureKind)"
+      @click="selectInfrastructure(infrastructureKind)"
+      :key="infrastructureKind"
+      hover
+      >
+      <v-layout align-center justify-center column>
+        <v-flex>
+          <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
+        </v-flex>
+        <v-flex mt-2>
+          <span class="subheading">{{infrastructureKind}}</span>
+        </v-flex>
+      </v-layout>
+    </v-card>
+  </v-layout>
 </template>
 
 <script>
@@ -83,9 +81,9 @@ export default {
     },
     select_infra_card_class (infrastructure) {
       if (infrastructure === this.selectedInfrastructure) {
-        return 'select_infra_card select_infra_card_active'
+        return 'select_infra_card select_infra_card_active elevation-4'
       }
-      return 'select_infra_card'
+      return 'select_infra_card elevation-1'
     },
     setSelectedInfrastructure (infrastructure) {
       this.selectedInfrastructure = infrastructure
@@ -105,22 +103,27 @@ export default {
 </script>
 
 <style lang="styl" scoped>
+  @import '~vuetify/src/stylus/settings/_colors.styl';
+
   .select_infra_card {
-    border: 1px solid transparent;
     padding: 10px;
     opacity: 0.8;
     cursor: pointer;
     margin: 10px 20px 10px 0px;
     min-width: 120px;
+    filter: grayscale(70%);
+    background-color: #f9f9f9;
   }
 
   .select_infra_card:hover {
     padding: 10px;
     opacity: 1;
+    filter: grayscale(50%);
   }
 
   .select_infra_card_active {
-    border: 1px solid #0097A7; // cyan darken-2
     opacity: 1;
+    filter: grayscale(0%);
+    background-color: transparent;
   }
 </style>

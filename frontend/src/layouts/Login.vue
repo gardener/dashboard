@@ -319,14 +319,15 @@ export default {
     }
   }
 
-  @import "~vue-snotify/styles/material.css"
+  @import "~vue-snotify/styles/material.css";
+  @import '~vuetify/src/stylus/settings/_colors.styl';
 
   .snotify-rightTop {
     top: 75px;
   }
 
   .snotify-info {
-    background-color: #0097A7; // cyan darken-2
+    background-color: $cyan.darken-2
   }
 
   .snotify {

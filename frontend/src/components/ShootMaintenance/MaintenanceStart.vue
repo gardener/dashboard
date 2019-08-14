@@ -23,9 +23,9 @@ limitations under the License.
       <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
       <span v-else>{{shootActionToolTip(caption)}}</span>
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Schedule Now"
-      ref="confirmDialog"
+      ref="gDialog"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
@@ -48,12 +48,12 @@ limitations under the License.
           ></maintenance-components>
         </v-layout>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -63,7 +63,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    ConfirmDialog,
+    GDialog,
     MaintenanceComponents
   },
   props: {
@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     async showDialog (reset) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

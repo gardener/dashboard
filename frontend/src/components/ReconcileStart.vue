@@ -24,14 +24,14 @@ limitations under the License.
       <span v-else-if="isShootReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
       <span v-else>{{shootActionToolTip(caption)}}</span>
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Trigger Now"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
       max-width="850"
-      ref="confirmDialog"
+      ref="gDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -43,12 +43,12 @@ limitations under the License.
           </v-flex>
         </v-layout>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
@@ -57,7 +57,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    ConfirmDialog
+    GDialog
   },
   props: {
     shootItem: {
@@ -83,7 +83,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

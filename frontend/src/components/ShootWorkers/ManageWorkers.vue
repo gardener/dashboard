@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <transition-group name="list">
-    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'cyan lighten-5': index % 2 }">
+    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"

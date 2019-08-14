@@ -22,12 +22,12 @@ limitations under the License.
       </v-btn>
       {{shootActionToolTip(caption)}}
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="confirmDialog"
+      ref="gDialog"
       confirmColor="orange"
       defaultColor="orange"
       max-width=850
@@ -46,12 +46,12 @@ limitations under the License.
           :updateOSVersion="data.updateOSVersion"
         ></maintenance-components>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import { updateShootMaintenance } from '@/utils/api'
@@ -63,7 +63,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 export default {
   name: 'maintenance-configuration',
   components: {
-    ConfirmDialog,
+    GDialog,
     MaintenanceComponents,
     MaintenanceTime
   },
@@ -95,7 +95,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

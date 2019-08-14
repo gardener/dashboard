@@ -22,7 +22,7 @@ limitations under the License.
       </v-btn>
       {{shootActionToolTip(caption)}}
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
@@ -30,7 +30,7 @@ limitations under the License.
       confirmColor="orange"
       defaultColor="orange"
       max-width=1000
-      ref="confirmDialog"
+      ref="gDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -40,12 +40,12 @@ limitations under the License.
         @valid="onWorkersValid"
        ></manage-workers>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -54,7 +54,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 export default {
   name: 'worker-configuration',
   components: {
-    ConfirmDialog,
+    GDialog,
     ManageWorkers
   },
   props: {
@@ -80,7 +80,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

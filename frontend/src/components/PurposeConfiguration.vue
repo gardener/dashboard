@@ -22,14 +22,14 @@ limitations under the License.
       </v-btn>
       {{shootActionToolTip(caption)}}
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Save"
       :confirm-disabled="!valid"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
-      ref="confirmDialog"
+      ref="gDialog"
       >
       <template slot="caption">{{caption}}</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -45,12 +45,12 @@ limitations under the License.
             ></v-select>
         </v-layout>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { purposesForSecret } from '@/utils'
@@ -60,7 +60,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 export default {
   name: 'purpose-configuration',
   components: {
-    ConfirmDialog
+    GDialog
   },
   props: {
     shootItem: {
@@ -87,7 +87,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

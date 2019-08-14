@@ -31,11 +31,11 @@ limitations under the License.
     </v-tooltip>
 
     <template v-if="renderDialog">
-      <confirm-dialog
+      <g-dialog
         :confirmValue="shootName"
         :errorMessage.sync="errorMessage"
         :detailedErrorMessage.sync="detailedErrorMessage"
-        ref="confirmDialog"
+        ref="gDialog"
       >
         <template slot="caption">Delete Cluster</template>
         <template slot="affectedObjectName">{{shootName}}</template>
@@ -63,21 +63,21 @@ limitations under the License.
             </v-layout>
           </p>
         </template>
-      </confirm-dialog>
+      </g-dialog>
     </template>
   </div>
 </template>
 
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    ConfirmDialog,
+    GDialog,
     AccountAvatar
   },
   props: {
@@ -121,7 +121,7 @@ export default {
       })
     },
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

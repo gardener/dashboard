@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <transition-group name="list">
-      <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'cyan lighten-5': index % 2 }">
+      <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
         <hibernation-schedule-event
           ref="scheduleEvents"
           :scheduleEvent="scheduleEvent"

@@ -46,7 +46,7 @@ limitations under the License.
       </v-btn>
       <span>{{tooltipText}}</span>
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       :confirmValue="confirm"
       confirmButtonText="Update"
       :confirmDisabled="selectedVersionInvalid"
@@ -54,7 +54,7 @@ limitations under the License.
       :detailedErrorMessage.sync="updateDetailedErrorMessage"
       confirmColor="orange"
       defaultColor="orange"
-      ref="confirmDialog"
+      ref="gDialog"
       >
       <template slot="caption">Update Cluster</template>
       <template slot="affectedObjectName">{{shootName}}</template>
@@ -92,13 +92,13 @@ limitations under the License.
           <i class="orange--text text--darken-2">This action cannot be undone.</i>
         </template>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
 import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
@@ -107,7 +107,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 export default {
   components: {
     ShootVersionUpdate,
-    ConfirmDialog
+    GDialog
   },
   props: {
     shootItem: {
@@ -173,7 +173,7 @@ export default {
     },
     async showUpdateDialog (reset = true) {
       if (this.canUpdate) {
-        if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+        if (await this.$refs.gDialog.confirmWithDialog(() => {
           if (reset) {
             this.reset()
           }

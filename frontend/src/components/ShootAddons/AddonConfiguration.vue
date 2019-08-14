@@ -22,11 +22,11 @@ limitations under the License.
       </v-btn>
       {{shootActionToolTip(caption)}}
     </v-tooltip>
-    <confirm-dialog
+    <g-dialog
       confirmButtonText="Save"
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="confirmDialog"
+      ref="gDialog"
       confirmColor="orange"
       defaultColor="orange"
       max-width=850
@@ -40,12 +40,12 @@ limitations under the License.
            ></manage-shoot-addons>
         </v-layout>
       </template>
-    </confirm-dialog>
+    </g-dialog>
   </div>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -55,7 +55,7 @@ import get from 'lodash/get'
 export default {
   name: 'addon-configuration',
   components: {
-    ConfirmDialog,
+    GDialog,
     ManageShootAddons
   },
   props: {
@@ -76,7 +76,7 @@ export default {
   },
   methods: {
     async showDialog (reset = true) {
-      if (await this.$refs.confirmDialog.confirmWithDialog(() => {
+      if (await this.$refs.gDialog.confirmWithDialog(() => {
         if (reset) {
           this.reset()
         }

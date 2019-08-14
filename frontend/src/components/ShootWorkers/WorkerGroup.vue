@@ -27,7 +27,6 @@ limitations under the License.
      :key="index"
      fill-height
      align-center>
-     <v-icon class="cyan--text text--darken-2 ma-1">{{line.icon}}</v-icon>
      <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
     </v-layout>
     <v-chip slot="popperRef" small class="cursor-pointer my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
@@ -74,14 +73,12 @@ export default {
       if (this.workerGroup.machineType) {
         const machineType = find(this.machineTypes, { name: this.workerGroup.machineType })
         description.push({
-          icon: 'mdi-speedometer',
           title: 'Machine Type',
           value: machineType.name,
           description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
         })
         if (machineType.volumeType && machineType.volumeSize) {
           description.push({
-            icon: 'mdi-harddisk',
             title: 'Volume Type',
             value: `${machineType.volumeType} / ${machineType.volumeSize}`
           })
@@ -90,7 +87,6 @@ export default {
       if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
         const volumeType = find(this.volumeTypes, { name: this.workerGroup.volumeType })
         description.push({
-          icon: 'mdi-harddisk',
           title: 'Volume Type',
           value: `${volumeType.name} / ${this.workerGroup.volumeSize}`,
           description: `(Class: ${volumeType.class})`
@@ -99,7 +95,6 @@ export default {
       if (this.workerGroup.machineImage) {
         const machineImage = find(this.machineImages, { name: this.workerGroup.machineImage.name })
         const machineImageDescription = {
-          icon: 'mdi-blur-radial',
           title: 'Machine Image',
           value: `${machineImage.name} | Version: ${machineImage.version}`
         }
@@ -110,14 +105,12 @@ export default {
       }
       if (this.workerGroup.autoScalerMin && this.workerGroup.autoScalerMax) {
         description.push({
-          icon: 'mdi-arrow-expand-all',
           title: 'Autoscaler',
           value: `Min. ${this.workerGroup.autoScalerMin} / Max. ${this.workerGroup.autoScalerMax}`
         })
       }
       if (this.workerGroup.maxSurge) {
         description.push({
-          icon: 'mdi-current-ac',
           title: 'Max. Surge',
           value: `${this.workerGroup.maxSurge}`
         })
