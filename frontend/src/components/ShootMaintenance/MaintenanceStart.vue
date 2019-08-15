@@ -85,6 +85,7 @@ export default {
   },
   methods: {
     async startDialogVisible () {
+      this.reset()
       const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
       if (confirmed) {
         this.startReconcile()
