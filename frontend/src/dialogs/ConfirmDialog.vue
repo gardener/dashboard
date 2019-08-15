@@ -17,9 +17,10 @@ limitations under the License.
 <template>
   <g-dialog
     ref="gDialog"
-    :confirmButtonText="confirmYesButtonText"
+    :confirmButtonText="confirmButtonText"
+    :cancelButtonText="cancelButtonText"
     :max-width="maxWidth"
-    :defaultColor="defaultColor"
+    :defaultColor="dialogColor"
     >
     <template slot="caption">{{captionText}}</template>
     <template slot="message">
@@ -42,17 +43,17 @@ export default {
       cancelButtonText: undefined,
       captionText: undefined,
       messageHtml: undefined,
-      defaultColor: undefined,
+      dialogColor: undefined,
       maxWidth: undefined
     }
   },
   methods: {
-    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, defaultColor, maxWidth } = {}) {
+    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth } = {}) {
       this.confirmButtonText = confirmButtonText || 'Confirm'
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
-      this.defaultColor = defaultColor || 'orange'
+      this.dialogColor = dialogColor || 'orange'
       this.maxWidth = maxWidth || '400'
 
       return this.$refs.gDialog.confirmWithDialog()

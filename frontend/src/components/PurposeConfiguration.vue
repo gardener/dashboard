@@ -15,52 +15,37 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>{{icon}}</v-icon>
-      </v-btn>
-      {{shootActionToolTip(caption)}}
-    </v-tooltip>
-    <g-dialog
-      confirmButtonText="Save"
-      :confirm-disabled="!valid"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
-      ref="gDialog"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <v-layout row wrap>
-          <v-select
-            color="cyan darken-2"
-            label="Purpose"
-            :items="purposes"
-            v-model="purpose"
-            hint="Indicate the importance of the cluster"
-            persistent-hint
-            ></v-select>
-        </v-layout>
-      </template>
-    </g-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    :valid="valid"
+    @onDialogVisible="configurationDialogVisible"
+    ref="actionDialog"
+    maxWidth="400"
+    caption="Configure Purpose">
+    <template slot="actionComponent">
+      <v-select
+        color="cyan darken-2"
+        label="Purpose"
+        :items="purposes"
+        v-model="purpose"
+        hint="Indicate the importance of the cluster"
+        persistent-hint
+        ></v-select>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
-import { errorDetailsFromError } from '@/utils/error'
 import { purposesForSecret } from '@/utils'
-import get from 'lodash/get'
 import { shootGetters } from '@/mixins/shootGetters'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'purpose-configuration',
   components: {
-    GDialog
+    ActionIconDialog
   },
   props: {
     shootItem: {
@@ -70,11 +55,7 @@ export default {
   mixins: [shootGetters],
   data () {
     return {
-      errorMessage: null,
-      detailedErrorMessage: null,
-      purpose: null,
-      caption: 'Configure Purpose',
-      icon: 'mdi-settings-outline'
+      purpose: null
     }
   },
   computed: {
@@ -86,35 +67,33 @@ export default {
     }
   },
   methods: {
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
+    async configurationDialogVisible () {
+      this.reset()
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.updateConfiguration()
+      }
+    },
+    async updateConfiguration () {
+      try {
+        const purposeAnnotation = {
+          'garden.sapcloud.io/purpose': this.purpose
         }
-      })) {
-        try {
-          const purposeAnnotation = {
-            'garden.sapcloud.io/purpose': this.purpose
-          }
-          await addShootAnnotation({
-            namespace: this.shootNamespace,
-            name: this.shootName,
-            data: purposeAnnotation
-          })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not update purpose'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
-        }
+        await addShootAnnotation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: purposeAnnotation
+        })
+      } catch (err) {
+        const errorMessage = 'Could not update purpose'
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
-
-      this.purpose = get(this.shootItem, 'metadata.annotations', {})['garden.sapcloud.io/purpose']
+      this.purpose = this.shootPurpose
     }
   }
 }

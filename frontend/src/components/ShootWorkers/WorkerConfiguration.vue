@@ -15,46 +15,32 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>{{icon}}</v-icon>
-      </v-btn>
-      {{shootActionToolTip(caption)}}
-    </v-tooltip>
-    <g-dialog
-      confirmButtonText="Save"
-      :confirm-disabled="!valid"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
-      max-width=1000
-      ref="gDialog"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <manage-workers
-        ref="manageWorkers"
-        @valid="onWorkersValid"
-       ></manage-workers>
-      </template>
-    </g-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    :valid="workersValid"
+    @onDialogVisible="configurationDialogVisible"
+    ref="actionDialog"
+    caption="Configure Workers">
+    <template slot="actionComponent">
+      <manage-workers
+      ref="manageWorkers"
+      @valid="onWorkersValid"
+     ></manage-workers>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
-import { errorDetailsFromError } from '@/utils/error'
 import { shootGetters } from '@/mixins/shootGetters'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'worker-configuration',
   components: {
-    GDialog,
+    ActionIconDialog,
     ManageWorkers
   },
   props: {
@@ -64,42 +50,32 @@ export default {
   },
   data () {
     return {
-      errorMessage: null,
-      detailedErrorMessage: null,
       workersValid: false,
-      workers: undefined,
-      icon: 'mdi-settings-outline',
-      caption: 'Configure Workers'
+      workers: undefined
     }
   },
   mixins: [shootGetters],
-  computed: {
-    valid () {
-      return this.workersValid
-    }
-  },
   methods: {
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
-        try {
-          this.workers = this.$refs.manageWorkers.getWorkers()
-          await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: this.workers })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save worker configuration'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
-        }
+    async configurationDialogVisible () {
+      this.reset()
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.updateConfiguration()
+      }
+    },
+    async updateConfiguration () {
+      try {
+        const workers = this.$refs.manageWorkers.getWorkers()
+        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: workers })
+      } catch (err) {
+        const errorMessage = 'Could not save worker configuration'
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
       this.workersValid = false
 
       const workers = this.shootWorkerGroups

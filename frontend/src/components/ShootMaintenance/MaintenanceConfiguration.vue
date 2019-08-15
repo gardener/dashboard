@@ -15,43 +15,29 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>{{icon}}</v-icon>
-      </v-btn>
-      {{shootActionToolTip(caption)}}
-    </v-tooltip>
-    <g-dialog
-      confirmButtonText="Save"
-      :confirm-disabled="!valid"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="gDialog"
-      confirmColor="orange"
-      defaultColor="orange"
-      max-width=850
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <maintenance-time
-          ref="maintenanceTime"
-          :time-window-begin="data.timeWindowBegin"
-          @valid="onMaintenanceTimeValid"
-        ></maintenance-time>
-        <maintenance-components
-          ref="maintenanceComponents"
-          :updateKubernetesVersion="data.updateKubernetesVersion"
-          :updateOSVersion="data.updateOSVersion"
-        ></maintenance-components>
-      </template>
-    </g-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    :valid="maintenanceTimeValid"
+    @onDialogVisible="configurationDialogVisible"
+    ref="actionDialog"
+    caption="Configure Maintenance">
+    <template slot="actionComponent">
+      <maintenance-time
+        ref="maintenanceTime"
+        :time-window-begin="data.timeWindowBegin"
+        @valid="onMaintenanceTimeValid"
+      ></maintenance-time>
+      <maintenance-components
+        ref="maintenanceComponents"
+        :updateKubernetesVersion="data.updateKubernetesVersion"
+        :updateOSVersion="data.updateOSVersion"
+      ></maintenance-components>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import { updateShootMaintenance } from '@/utils/api'
@@ -63,7 +49,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 export default {
   name: 'maintenance-configuration',
   components: {
-    GDialog,
+    ActionIconDialog,
     MaintenanceComponents,
     MaintenanceTime
   },
@@ -75,53 +61,43 @@ export default {
   mixins: [shootGetters],
   data () {
     return {
-      errorMessage: null,
-      detailedErrorMessage: null,
       maintenanceTimeValid: true,
       data: {
         timeWindowBegin: undefined,
         timeWindowEnd: undefined,
         updateKubernetesVersion: false,
         updateOSVersion: false
-      },
-      icon: 'mdi-settings-outline',
-      caption: 'Configure Maintenance'
-    }
-  },
-  computed: {
-    valid () {
-      return this.maintenanceTimeValid
+      }
     }
   },
   methods: {
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
-        try {
-          const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
-          const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
-          assign(this.data, {
-            timeWindowBegin: utcBegin,
-            timeWindowEnd: utcEnd,
-            updateKubernetesVersion: k8sUpdates,
-            updateOSVersion: osUpdates
-          })
-          await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not save maintenance configuration'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
-        }
+    async configurationDialogVisible () {
+      this.reset()
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.updateConfiguration()
+      }
+    },
+    async updateConfiguration () {
+      try {
+        const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
+        const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
+        assign(this.data, {
+          timeWindowBegin: utcBegin,
+          timeWindowEnd: utcEnd,
+          updateKubernetesVersion: k8sUpdates,
+          updateOSVersion: osUpdates
+        })
+        await updateShootMaintenance({ namespace: this.shootNamespace, name: this.shootName, data: this.data })
+      } catch (err) {
+        const errorMessage = 'Could not save maintenance configuration'
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
       this.maintenanceTimeValid = true
 
       this.data.timeWindowBegin = get(this.shootItem, 'spec.maintenance.timeWindow.begin')

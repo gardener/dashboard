@@ -32,7 +32,7 @@ limitations under the License.
 
 <script>
 export default {
-  name: 'alert',
+  name: 'galert',
   props: {
     message: {
       type: String

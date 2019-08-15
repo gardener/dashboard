@@ -15,66 +15,46 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>{{icon}}</v-icon>
-      </v-btn>
-      {{shootActionToolTip(caption)}}
-    </v-tooltip>
-    <g-dialog
-      :confirmValue="confirm"
-      :confirmButtonText="confirmText"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
-      ref="gDialog"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <template v-if="!isShootHibernated">
-          This will scale the worker nodes of your cluster down to zero.<br /><br />
-          Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
-        </template>
-        <template v-else>
-          This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
-        </template>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    @onDialogVisible="configurationDialogVisible"
+    ref="actionDialog"
+    :caption="caption"
+    :icon="icon"
+    :confirmButtonText="confirmText"
+    :confirmRequired="confirmRequired"
+    maxWidth="600">
+    <template slot="actionComponent">
+      <template v-if="!isShootHibernated">
+        This will scale the worker nodes of your cluster down to zero.<br /><br />
+        Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
       </template>
-    </g-dialog>
-  </div>
+      <template v-else>
+        This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
+      </template>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    GDialog
+    ActionIconDialog
   },
   props: {
     shootItem: {
       type: Object
     }
   },
-  data () {
-    return {
-      errorMessage: null,
-      detailedErrorMessage: null,
-      enableHibernation: false
-    }
-  },
   mixins: [shootGetters],
   computed: {
     confirmRequired () {
       return !this.isShootHibernated
-    },
-    confirm () {
-      return this.confirmRequired ? this.shootName : undefined
     },
     confirmText () {
       if (!this.isShootHibernated) {
@@ -99,42 +79,39 @@ export default {
     }
   },
   methods: {
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
-        try {
-          await updateShootHibernation({
-            namespace: this.shootNamespace,
-            name: this.shootName,
-            data: {
-              enabled: this.enableHibernation
-            }
-          })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          if (!this.isShootHibernated) {
-            this.errorMessage = 'Could not hibernate cluster'
-          } else {
-            this.errorMessage = 'Could not wake up cluster from hibernation'
-          }
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
-        }
+    async configurationDialogVisible () {
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.updateConfiguration()
       }
     },
-    reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
+    async updateConfiguration () {
+      try {
+        await updateShootHibernation({
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          data: {
+            enabled: !this.isShootHibernated
+          }
+        })
+      } catch (err) {
+        let errorMessage
+        if (!this.isShootHibernated) {
+          errorMessage = 'Could not hibernate cluster'
+        } else {
+          errorMessage = 'Could not wake up cluster from hibernation'
+        }
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+      }
     }
   },
   watch: {
     isShootHibernated (value) {
       // hide dialog if hibernation state changes
-      this.$refs.gDialog.hideDialog()
+      this.$refs.actionDialog.hideDialog()
     }
   }
 }

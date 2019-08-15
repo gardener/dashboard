@@ -103,6 +103,7 @@ import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
 import { shootGetters } from '@/mixins/shootGetters'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
@@ -173,17 +174,20 @@ export default {
     },
     async showUpdateDialog (reset = true) {
       if (this.canUpdate) {
-        if (await this.$refs.gDialog.confirmWithDialog(() => {
-          if (reset) {
-            this.reset()
-          }
-        })) {
+        this.$refs.gDialog.showDialog()
+        if (reset) {
+          this.reset()
+        }
+
+        const confirmed = await this.$refs.gDialog.confirmWithDialog()
+        if (confirmed) {
           try {
-            await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
+            await updateShootVersion({ namespace: this.shootnamespace, name: this.shootName, data: { version: this.selectedVersion } })
           } catch (err) {
+            const errorDetails = errorDetailsFromError(err)
             this.updateErrorMessage = 'Update Kubernetes version failed'
-            this.updateDetailedErrorMessage = err.message
-            console.error('Update shoot version failed with error:', err)
+            this.updateDetailedErrorMessage = errorDetails.detailedMessage
+            console.error(this.updateErrorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
             this.showUpdateDialog(false)
           }
         }
@@ -192,6 +196,9 @@ export default {
     reset () {
       const defaultData = this.$options.data.apply(this)
       Object.assign(this.$data, defaultData)
+
+      this.updateErrorMessage = undefined
+      this.updateDetailedErrorMessage = undefined
 
       this.$nextTick(() => {
         this.$refs.shootVersionUpdate.reset()

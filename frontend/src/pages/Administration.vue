@@ -79,14 +79,14 @@ limitations under the License.
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       ref="gDialog">
-      <div slot="caption">
+      <template slot="caption">
         Confirm Delete
-      </div>
-      <div slot="message">
+      </template>
+      <template slot="message">
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
         <i class="red--text text--darken-2">The operation can not be undone.</i>
-      </div>
+      </template>
     </g-dialog>
   </v-container>
 </template>
@@ -158,12 +158,11 @@ export default {
     ...mapActions([
       'deleteProject'
     ]),
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
+    async showDialog () {
+      this.$refs.gDialog.showDialog()
+
+      const confirmed = await this.$refs.gDialog.confirmWithDialog()
+      if (confirmed) {
         try {
           await this.deleteProject(this.project)
           if (this.projectList.length > 0) {
@@ -174,10 +173,10 @@ export default {
           }
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Failed to delete project.'
+          this.errorMessage = 'Failed to delete project'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
+          this.showDialog()
         }
       }
     },

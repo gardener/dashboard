@@ -41,6 +41,8 @@ export default {
           return 'PROD'
         case 'infrastructure':
           return 'INFRA'
+        case 'testing':
+          return 'TEST'
         default:
           return toUpper(this.purpose)
       }

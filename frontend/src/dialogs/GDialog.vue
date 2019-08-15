@@ -40,11 +40,9 @@ limitations under the License.
           type="text"
           color="cyan darken-2">
         </v-text-field>
+        <g-alert color="error" class="mt-3" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
       </v-card-text>
-
-      <alert color="error" :message.sync="message" :detailedMessage.sync="detailedMessage"></alert>
       <v-divider></v-divider>
-
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
@@ -56,14 +54,14 @@ limitations under the License.
 
 <script>
 import { setDelayedInputFocus } from '@/utils'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import noop from 'lodash/noop'
 import isFunction from 'lodash/isFunction'
 
 export default {
   name: 'gdialog',
   components: {
-    Alert
+    GAlert
   },
   props: {
     confirmValue: {
@@ -145,13 +143,8 @@ export default {
     }
   },
   methods: {
-    confirmWithDialog (resetFunction) {
+    confirmWithDialog () {
       this.visible = true
-
-      if (isFunction(resetFunction)) {
-        resetFunction()
-      }
-
       this.userInput = ''
 
       // we must delay the "focus" handling because the dialog.open is animated
@@ -164,6 +157,9 @@ export default {
     },
     hideDialog () {
       this.visible = false
+    },
+    showDialog () {
+      this.visible = true
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
@@ -186,12 +182,12 @@ export default {
       }
     },
     resolveAction (value) {
-      this.visible = false
       if (isFunction(this.resolve)) {
         const resolve = this.resolve
         this.resolve = undefined
         resolve(value)
       }
+      this.visible = false
     }
   }
 }

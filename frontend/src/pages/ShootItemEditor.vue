@@ -35,7 +35,7 @@ limitations under the License.
       </v-alert>
     </v-flex>
     <v-flex v-if="errorMessage" class="shrink">
-      <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+      <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
     </v-flex>
     <v-flex :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
@@ -116,7 +116,7 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { replaceShoot } from '@/utils/api'
@@ -147,7 +147,7 @@ function safeDump (value) {
 export default {
   components: {
     CopyBtn,
-    Alert,
+    GAlert,
     ConfirmDialog
   },
   name: 'shoot-item-editor',

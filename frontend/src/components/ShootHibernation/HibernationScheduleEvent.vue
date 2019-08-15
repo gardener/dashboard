@@ -157,37 +157,37 @@ export default {
       valid: undefined,
       weekdays: [
         {
-          text: 'Monday',
+          text: 'Mon',
           value: 1,
           sortValue: 1
         },
         {
-          text: 'Tuesday',
+          text: 'Tue',
           value: 2,
           sortValue: 2
         },
         {
-          text: 'Wednesday',
+          text: 'Wed',
           value: 3,
           sortValue: 3
         },
         {
-          text: 'Thursday',
+          text: 'Thu',
           value: 4,
           sortValue: 4
         },
         {
-          text: 'Friday',
+          text: 'Fri',
           value: 5,
           sortValue: 5
         },
         {
-          text: 'Saturday',
+          text: 'Sat',
           value: 6,
           sortValue: 6
         },
         {
-          text: 'Sunday',
+          text: 'Sun',
           value: 0,
           sortValue: 7
         }
@@ -292,7 +292,7 @@ export default {
 
 <style lang="styl" scoped>
   .weekday-select {
-    max-width: 560px;
+    width: 300px;
   }
   .time-select {
     max-width: 100px;

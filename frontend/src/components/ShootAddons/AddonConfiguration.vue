@@ -15,37 +15,22 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>{{icon}}</v-icon>
-      </v-btn>
-      {{shootActionToolTip(caption)}}
-    </v-tooltip>
-    <g-dialog
-      confirmButtonText="Save"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      ref="gDialog"
-      confirmColor="orange"
-      defaultColor="orange"
-      max-width=850
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <v-layout row wrap>
-          <manage-shoot-addons
-            ref="addons"
-           ></manage-shoot-addons>
-        </v-layout>
-      </template>
-    </g-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    @onDialogVisible="configurationDialogVisible"
+    ref="actionDialog"
+    caption="Configure Add-ons"
+    maxWidth="900">
+    <template slot="actionComponent">
+      <manage-shoot-addons
+        ref="addons"
+       ></manage-shoot-addons>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -55,7 +40,7 @@ import get from 'lodash/get'
 export default {
   name: 'addon-configuration',
   components: {
-    GDialog,
+    ActionIconDialog,
     ManageShootAddons
   },
   props: {
@@ -64,39 +49,27 @@ export default {
     }
   },
   mixins: [shootGetters],
-  data () {
-    return {
-      dialog: false,
-      errorMessage: null,
-      detailedErrorMessage: null,
-      addons: null,
-      caption: 'Configure Add-ons',
-      icon: 'mdi-settings-outline'
-    }
-  },
   methods: {
-    async showDialog (reset = true) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
-        try {
-          this.addons = this.$refs.addons.getAddons()
-          await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: this.addons })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not update addons'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.showDialog(false)
-        }
+    async configurationDialogVisible () {
+      this.reset()
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.updateConfiguration()
+      }
+    },
+    async updateConfiguration () {
+      try {
+        const addons = this.$refs.addons.getAddons()
+        await updateShootAddons({ namespace: this.shootNamespace, name: this.shootName, data: addons })
+      } catch (err) {
+        const errorMessage = 'Could not update addons'
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
     reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
-
       this.$nextTick(() => {
         this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
       })

@@ -15,45 +15,34 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" :loading="isMaintenanceToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
-        <v-icon medium>mdi-refresh</v-icon>
-      </v-btn>
-      <span v-if="isMaintenanceToBeScheduled">Requesting to schedule cluster maintenance</span>
-      <span v-else>{{shootActionToolTip(caption)}}</span>
-    </v-tooltip>
-    <g-dialog
-      confirmButtonText="Schedule Now"
-      ref="gDialog"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
-      max-width="850"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <v-layout row wrap>
-          <v-flex>
-            <div class="subheading pt-3">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-          </v-flex>
-          <maintenance-components
-            title="The following updates will be performed"
-            :updateKubernetesVersion="updateKubernetesVersion"
-            :updateOSVersion="updateOSVersion"
-            :selectable="false"
-            ref="maintenanceComponents"
-          ></maintenance-components>
-        </v-layout>
-      </template>
-    </g-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    :loading="isMaintenanceToBeScheduled"
+    @onDialogVisible="startDialogVisible"
+    ref="actionDialog"
+    :caption="caption"
+    icon="mdi-refresh"
+    maxWidth="850"
+    confirmButtonText="Trigger now">
+    <template slot="actionComponent">
+      <v-layout row wrap>
+        <v-flex>
+          <div class="subheading pt-3">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+        </v-flex>
+        <maintenance-components
+          title="The following updates will be performed"
+          :updateKubernetesVersion="updateKubernetesVersion"
+          :updateOSVersion="updateOSVersion"
+          :selectable="false"
+          ref="maintenanceComponents"
+        ></maintenance-components>
+      </v-layout>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import GDialog from '@/dialogs/GDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -63,7 +52,7 @@ import { shootGetters } from '@/mixins/shootGetters'
 
 export default {
   components: {
-    GDialog,
+    ActionIconDialog,
     MaintenanceComponents
   },
   props: {
@@ -74,18 +63,17 @@ export default {
   mixins: [shootGetters],
   data () {
     return {
-      errorMessage: null,
-      detailedErrorMessage: null,
-      osUpdates: true, // won't change
       maintenanceTriggered: false
     }
   },
   computed: {
     isMaintenanceToBeScheduled () {
-      // TODO we need a better way to track the maintenance status instead of checking the operation annotation
       return this.shootGardenOperation === 'maintain'
     },
     caption () {
+      if (this.isMaintenanceToBeScheduled) {
+        return 'Requesting to schedule cluster reconcile'
+      }
       return 'Schedule Maintenance'
     },
     updateKubernetesVersion () {
@@ -96,30 +84,30 @@ export default {
     }
   },
   methods: {
-    async showDialog (reset) {
-      if (await this.$refs.gDialog.confirmWithDialog(() => {
-        if (reset) {
-          this.reset()
-        }
-      })) {
-        this.maintenanceTriggered = true
+    async startDialogVisible () {
+      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      if (confirmed) {
+        this.startReconcile()
+      }
+    },
+    async startReconcile () {
+      this.maintenanceTriggered = true
 
-        const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
-        try {
-          await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
-        } catch (err) {
-          const errorDetails = errorDetailsFromError(err)
-          this.errorMessage = 'Could not start maintenance'
-          this.detailedErrorMessage = errorDetails.detailedMessage
-          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-          this.maintenanceTriggered = false
-          this.showDialog(false)
-        }
+      const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
+      try {
+        await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
+      } catch (err) {
+        const errorMessage = 'Could not start maintenance'
+        const errorDetails = errorDetailsFromError(err)
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
+        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+
+        this.reconcileTriggered = false
+        this.currentGeneration = null
       }
     },
     reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
       this.$nextTick(() => {
         this.$refs.maintenanceComponents.reset()
       })

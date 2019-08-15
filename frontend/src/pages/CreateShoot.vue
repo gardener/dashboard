@@ -100,7 +100,7 @@ limitations under the License.
         ></manage-hibernation-schedule>
      </v-card-text>
     </v-card>
-    <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+    <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
     <v-layout justify-end>
       <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
       <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
@@ -119,7 +119,7 @@ import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComp
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
@@ -144,7 +144,7 @@ export default {
     MaintenanceTime,
     ManageHibernationSchedule,
     ManageWorkers,
-    Alert,
+    GAlert,
     ConfirmDialog
   },
   data () {
