@@ -34,7 +34,7 @@ limitations under the License.
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -54,7 +54,7 @@ export default {
       workers: undefined
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   methods: {
     async configurationDialogVisible () {
       this.reset()

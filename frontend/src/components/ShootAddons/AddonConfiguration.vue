@@ -34,7 +34,7 @@ import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 
 export default {
@@ -48,7 +48,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   methods: {
     async configurationDialogVisible () {
       this.reset()

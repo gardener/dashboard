@@ -89,7 +89,7 @@ import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
 import download from 'downloadjs'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -107,7 +107,7 @@ export default {
       expandKubeconfigIndex: null
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {

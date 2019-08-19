@@ -48,7 +48,7 @@ import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -60,7 +60,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       maintenanceTriggered: false

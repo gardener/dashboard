@@ -60,7 +60,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -80,7 +80,7 @@ export default {
       default: undefined
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       renderDialog: false,

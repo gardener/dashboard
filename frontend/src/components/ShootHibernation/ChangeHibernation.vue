@@ -40,7 +40,7 @@ limitations under the License.
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -51,7 +51,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     confirmRequired () {
       return !this.isShootHibernated

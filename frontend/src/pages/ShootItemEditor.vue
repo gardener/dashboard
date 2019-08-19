@@ -183,7 +183,7 @@ export default {
     ]),
     ...mapGetters([
       'shootByNamespaceAndName',
-      'getCreateShootResource'
+      'newShootResource'
     ]),
     isCreateMode () {
       return (get(this.$route, 'name') === 'CreateShootEditor')
@@ -191,7 +191,7 @@ export default {
     value () {
       let data
       if (this.isCreateMode) {
-        data = this.getCreateShootResource
+        data = this.newShootResource
       } else {
         data = this.shootByNamespaceAndName(this.$route.params)
       }

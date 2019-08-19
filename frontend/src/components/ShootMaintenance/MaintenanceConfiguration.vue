@@ -44,7 +44,7 @@ import { updateShootMaintenance } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
 import assign from 'lodash/assign'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   name: 'maintenance-configuration',
@@ -58,7 +58,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       maintenanceTimeValid: true,

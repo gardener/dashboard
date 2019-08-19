@@ -62,7 +62,7 @@ import StatusTags from '@/components/StatusTags'
 import RetryOperation from '@/components/RetryOperation'
 import ClusterMetrics from '@/components/ClusterMetrics'
 import { isTypeDelete } from '@/utils'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -76,7 +76,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       shootStatusTitle: ''

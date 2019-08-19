@@ -86,7 +86,7 @@ const getters = {
   getShootListFilters () {
     return state.shootListFilters
   },
-  getCreateShootResource () {
+  newShootResource () {
     return state.createShootResource
   }
 }

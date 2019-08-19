@@ -28,7 +28,7 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import { addShootAnnotation } from '@/utils/api'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   props: {
@@ -41,7 +41,7 @@ export default {
       retryingOperation: false
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     canRetry () {
       const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration

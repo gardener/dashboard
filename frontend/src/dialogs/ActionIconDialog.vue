@@ -44,7 +44,7 @@ limitations under the License.
 
 <script>
 import GDialog from '@/dialogs/GDialog'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   name: 'action-icon-dialog',
@@ -100,7 +100,7 @@ export default {
       default: 'orange'
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     message: {
       get () {

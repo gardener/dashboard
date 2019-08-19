@@ -95,7 +95,7 @@ import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceC
 import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -111,7 +111,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     ...mapState([
       'localTimezone'

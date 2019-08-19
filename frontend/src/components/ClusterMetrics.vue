@@ -83,7 +83,7 @@ limitations under the License.
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import { mapGetters } from 'vuex'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -95,7 +95,7 @@ export default {
       required: true
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     ...mapGetters([
       'isAdmin'

@@ -128,6 +128,7 @@ import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
+import unset from 'lodash/unset'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 const { getCloudProviderKind } = require('../utils')
@@ -167,7 +168,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'getCreateShootResource',
+      'newShootResource',
       'infrastructureSecretsByCloudProfileName'
     ]),
     valid () {
@@ -179,7 +180,7 @@ export default {
         this.hibernationScheduleValid
     },
     isShootContentDirty () {
-      return !isEqual(this.initialShootContent, this.yamlFromUIComponents())
+      return !isEqual(this.initialShootContent, this.shootResourceFromUIComponents())
     }
   },
   methods: {
@@ -206,8 +207,8 @@ export default {
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
     },
-    yamlFromUIComponents () {
-      const shootResource = cloneDeep(this.getCreateShootResource)
+    shootResourceFromUIComponents () {
+      const shootResource = cloneDeep(this.newShootResource)
 
       const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
       const secretBindingRef = {
@@ -219,7 +220,7 @@ export default {
       const oldInfrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        delete shootResource.spec.cloud[oldInfrastructureKind]
+        unset(shootResource, ['spec', 'cloud', oldInfrastructureKind])
         set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
       }
       if (!isEmpty(floatingPoolName)) {
@@ -264,18 +265,18 @@ export default {
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
       } else {
-        delete shootResource.metadata.annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
+        unset(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]')
       }
 
       return shootResource
     },
     updateShootResourceWithUIComponents () {
-      const shootResource = this.yamlFromUIComponents()
+      const shootResource = this.shootResourceFromUIComponents()
       this.setCreateShootResource(shootResource)
       return shootResource
     },
     updateUIComponentsWithShootResource () {
-      const shootResource = this.getCreateShootResource
+      const shootResource = this.newShootResource
 
       const infrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
       this.$refs.infrastructure.setSelectedInfrastructure(infrastructureKind)
@@ -360,7 +361,7 @@ export default {
       return find(secrets, ['metadata.bindingName', secretBindingName])
     },
     setInitialShootContent () {
-      this.initialShootContent = this.yamlFromUIComponents()
+      this.initialShootContent = this.shootResourceFromUIComponents()
       const infrastructureKind = getCloudProviderKind(get(this.initialShootContent, 'spec.cloud'))
       if (isEmpty(get(this.initialShootContent, ['spec', 'cloud', infrastructureKind, 'workers']))) {
         // when workers are set, initialization is completed

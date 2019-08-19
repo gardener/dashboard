@@ -39,7 +39,7 @@ limitations under the License.
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { purposesForSecret } from '@/utils'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -52,7 +52,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       purpose: null

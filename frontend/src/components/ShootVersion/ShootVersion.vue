@@ -102,7 +102,7 @@ import GDialog from '@/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -129,7 +129,7 @@ export default {
       updateDetailedErrorMessage: null
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     k8sPatchAvailable () {
       if (get(this.availableK8sUpdates, 'patch')) {

@@ -40,7 +40,7 @@ import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
@@ -58,7 +58,7 @@ export default {
       currentGeneration: null
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     isReconcileToBeScheduled () {
       return this.shootGenerationValue === this.currentGeneration

@@ -116,8 +116,9 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
         <v-flex class="pa-0">
-          <span class="grey--text">Addons</span><br>
-          <span class="subheading">{{shootAddonsString}}</span>
+          <span class="grey--text">Add-ons</span><br>
+          <span class="subheading" v-if="!this.shootAddonNames">No addons configured</span>
+          <v-chip v-for="(index, name) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -138,7 +139,6 @@ import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
-import join from 'lodash/join'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import {
@@ -147,7 +147,7 @@ import {
   getTimeStringTo,
   shootAddonList
 } from '@/utils'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -164,7 +164,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     expirationTimestamp () {
       return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
@@ -187,12 +187,8 @@ export default {
         return this.shootAddons[name] || {}
       }
     },
-    shootAddonsString () {
-      const addons = join(map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title'), ', ')
-      if (addons.length > 0) {
-        return addons
-      }
-      return 'No addons configured'
+    shootAddonNames () {
+      return map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title')
     }
   }
 }

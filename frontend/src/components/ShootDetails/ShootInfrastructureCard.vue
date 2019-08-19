@@ -100,7 +100,7 @@ import CopyBtn from '@/components/CopyBtn'
 import {
   canLinkToSeed
 } from '@/utils'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
@@ -111,7 +111,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   computed: {
     ...mapGetters([
       'namespaces'

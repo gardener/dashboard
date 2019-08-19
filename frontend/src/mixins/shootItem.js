@@ -9,7 +9,7 @@ import {
   getProjectName
 } from '@/utils'
 
-export const shootGetters = {
+export const shootItem = {
   computed: {
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})

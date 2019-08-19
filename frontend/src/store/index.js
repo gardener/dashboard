@@ -300,8 +300,8 @@ const getters = {
   getShootListFilters (state, getters) {
     return getters['shoots/getShootListFilters']
   },
-  getCreateShootResource (state, getters) {
-    return getters['shoots/getCreateShootResource']
+  newShootResource (state, getters) {
+    return getters['shoots/newShootResource']
   }
 }
 

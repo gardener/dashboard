@@ -36,7 +36,7 @@ import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHiber
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
-import { shootGetters } from '@/mixins/shootGetters'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   name: 'hibernation-configuration',
@@ -49,7 +49,7 @@ export default {
       type: Object
     }
   },
-  mixins: [shootGetters],
+  mixins: [shootItem],
   data () {
     return {
       hibernationScheduleValid: false

@@ -29,7 +29,7 @@ limitations under the License.
      align-center>
      <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
     </v-layout>
-    <v-chip slot="popperRef" small class="cursor-pointer my-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
+    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
   </g-popper>
 </template>
 
