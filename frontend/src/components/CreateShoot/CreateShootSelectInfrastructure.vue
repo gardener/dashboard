@@ -18,7 +18,8 @@ limitations under the License.
   <v-layout row wrap>
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
-      :class="select_infra_card_class(infrastructureKind)"
+      class="select_infra_card"
+      :class="{ 'select_infra_card_active elevation-4' : infrastructureKind == selectedInfrastructure }"
       @click="selectInfrastructure(infrastructureKind)"
       :key="infrastructureKind"
       hover
@@ -74,12 +75,6 @@ export default {
         this.valid = valid
         this.$emit('valid', valid)
       }
-    },
-    select_infra_card_class (infrastructure) {
-      if (infrastructure === this.selectedInfrastructure) {
-        return 'select_infra_card select_infra_card_active elevation-4'
-      }
-      return 'select_infra_card elevation-1'
     },
     setSelectedInfrastructure (infrastructure) {
       this.selectedInfrastructure = infrastructure
