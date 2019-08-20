@@ -320,6 +320,11 @@ The Gardener Dashboard frontend depends on the following packages:
 Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>\
 [MIT License](https://github.com/babel/babel/blob/master/LICENSE)
 
+- [@mdi/font](https://github.com/Templarian/MaterialDesign-Webfont)\
+Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reserved Font Name Material Design Icons.\
+Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE\
+[SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
+
 - [axios](https://github.com/axios/axios)\
 Copyright (c) 2014-present Matt Zabriskie\
 [MIT License](https://github.com/axios/axios/blob/master/LICENSE)
@@ -335,6 +340,10 @@ Copyright (C) 2017 by Marijn Haverbeke <marijnh@gmail.com> and others\
 - [component-emitter](https://github.com/component/emitter)\
 Copyright (c) 2014 Component contributors <dev@component.io>\
 [MIT License](https://github.com/component/emitter/blob/master/LICENSE)
+
+- [DOMPurify](https://github.com/cure53/DOMPurify)\
+Copyright (c) 2015 Mario Heiderich\
+[Apache License 2.0](https://github.com/cure53/DOMPurify/blob/master/LICENSE)
 
 - [downloadjs](https://github.com/rndme/download)\
 Copyright (c) 2016 dandavis\
@@ -363,6 +372,10 @@ Copyright JS Foundation and other contributors <https://js.foundation/>\
 - [marked](https://github.com/markedjs/marked)\
 Copyright (c) 2011-2018, [Christopher Jeffrey](https://github.com/chjj/)\
 [MIT License](https://github.com/markedjs/marked/blob/master/LICENSE.md)
+
+- [material-design-icons-iconfont](https://github.com/jossef/material-design-icons-iconfont)\
+Copyright (c) 2004, Material Design Authors, Jossef Harush\
+[Apache License 2.0](https://github.com/jossef/material-design-icons-iconfont/blob/master/LICENSE)
 
 - [md5](https://github.com/pvorb/node-md5)\
 Copyright © 2011-2012, Paul Vorbach.\
@@ -420,11 +433,6 @@ Copyright (c) 2016 John Jeremy Leider\
 - [vuex](https://github.com/vuejs/vuex)\
 Copyright (c) 2013-present Evan You\
 [MIT License](https://github.com/vuejs/vuex/blob/dev/LICENSE)
-
-- [Webfont - Material Design Icons](https://github.com/Templarian/MaterialDesign-Webfont)\
-Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reserved Font Name Material Design Icons.\
-Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE\
-[SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
 
 - [The Roboto family of fonts](https://github.com/google/roboto)\
 [Apache License 2.0](https://github.com/google/roboto/blob/master/LICENSE)
