@@ -37,7 +37,6 @@ limitations under the License.
 
 <script>
 import InfraIcon from '@/components/VendorIcon'
-import intersection from 'lodash/intersection'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -60,12 +59,9 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'cloudProviderKindList',
+      'sortedCloudProviderKindList',
       'cloudProfilesByCloudProviderKind'
-    ]),
-    sortedCloudProviderKindList () {
-      return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], this.cloudProviderKindList)
-    }
+    ])
   },
   methods: {
     selectInfrastructure (infrastructure) {
@@ -90,14 +86,6 @@ export default {
       this.infrastructureValid = true
       this.validateInput()
     }
-  },
-  mounted () {
-    this.$nextTick(() => {
-      if (!this.selectedInfrastructure) {
-        // TODO: introduce default infrastructure / secret settings (as annotation on project resource)
-        this.selectInfrastructure('aws')
-      }
-    })
   }
 }
 </script>

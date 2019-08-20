@@ -69,7 +69,6 @@ import find from 'lodash/find'
 import head from 'lodash/head'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
-import lowerCase from 'lodash/lowerCase'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -96,8 +95,7 @@ export default {
       'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'machineImagesByCloudProfileName'
-
+      'defaultMachineImageForCloudProfileName'
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
@@ -106,12 +104,7 @@ export default {
       return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     defaultMachineImage () {
-      const machineImages = this.machineImagesByCloudProfileName(this.cloudProfileName)
-      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
-      if (!defaultMachineImage) {
-        defaultMachineImage = head(machineImages)
-      }
-      return defaultMachineImage
+      return this.defaultMachineImageForCloudProfileName(this.cloudProfileName)
     }
   },
   methods: {
@@ -128,18 +121,21 @@ export default {
     },
     addWorker () {
       const id = uuidv4()
+      const name = `worker-${shortRandomString(5)}`
       const volumeType = get(head(this.volumeTypes), 'name')
       const volumeSize = volumeType ? '50Gi' : undefined
+      const machineType = get(head(this.machineTypes), 'name')
+      const machineImage = this.defaultMachineImage
       this.internalWorkers.push({
         id,
-        name: `worker-${shortRandomString(5)}`,
-        machineType: get(head(this.machineTypes), 'name'),
+        name,
+        machineType,
         volumeType,
         volumeSize,
         autoScalerMin: 1,
         autoScalerMax: 2,
         maxSurge: 1,
-        machineImage: this.defaultMachineImage
+        machineImage
       })
       this.validateInput()
     },

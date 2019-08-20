@@ -124,7 +124,6 @@ import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import sample from 'lodash/sample'
 import concat from 'lodash/concat'
-import find from 'lodash/find'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import cloneDeep from 'lodash/cloneDeep'
@@ -233,7 +232,7 @@ export default {
       'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
-      'cloudProfileByName',
+      'zonesByCloudProfileNameAndRegion',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName'
     ]),
@@ -290,9 +289,7 @@ export default {
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
     allZones () {
-      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
-      const predicate = item => item.region === this.region
-      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
     isOwnSecretBinding () {
       return (secret) => {
@@ -330,7 +327,6 @@ export default {
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
-      this.setDefaultsDependingOnCloudProfile()
     },
     setDefaultZone () {
       this.zones = [sample(this.allZones)]

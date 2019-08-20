@@ -39,6 +39,7 @@ import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import last from 'lodash/last'
+import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
 
@@ -492,3 +493,30 @@ export const shootAddonList = [
     enabled: true
   }
 ]
+
+export function randomLocalMaintenanceBegin () {
+  // randomize maintenance time window
+  const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
+  const randomHour = sample(hours)
+  // use local timezone offset
+  const localBegin = `${randomHour}:00`
+
+  return localBegin
+}
+
+export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
+  timezone = timezone || store.state.localTimezone
+  if (localBegin) {
+    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
+
+    let utcBegin
+    let utcEnd
+    if (utcMoment && utcMoment.isValid()) {
+      utcBegin = utcMoment.format('HHmm00+0000')
+      utcMoment.add(1, 'h')
+      utcEnd = utcMoment.format('HHmm00+0000')
+    }
+    return { utcBegin, utcEnd }
+  }
+  return undefined
+}

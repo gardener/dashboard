@@ -32,6 +32,11 @@ import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
+import intersection from 'lodash/intersection'
+import find from 'lodash/find'
+import head from 'lodash/head'
+import lowerCase from 'lodash/lowerCase'
+import cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -41,6 +46,7 @@ import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
+const semSort = require('semver-sort')
 
 Vue.use(Vuex)
 
@@ -145,6 +151,23 @@ const getters = {
       return allMachineImages
     }
   },
+  zonesByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const predicate = item => item.region === region
+      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+    }
+  },
+  defaultMachineImageForCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
+      if (!defaultMachineImage) {
+        defaultMachineImage = head(machineImages)
+      }
+      return defaultMachineImage
+    }
+  },
   shootList (state, getters) {
     return getters['shoots/sortedItems']
   },
@@ -170,6 +193,9 @@ const getters = {
   },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
+  },
+  sortedCloudProviderKindList (state, getters) {
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -237,6 +263,11 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.kubernetes.versions', [])
+    }
+  },
+  sortedKubernetesVersions (state, getters) {
+    return (cloudProfileName) => {
+      return semSort.desc(cloneDeep(getters.kubernetesVersions(cloudProfileName)))
     }
   },
   isAdmin (state) {

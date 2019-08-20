@@ -46,9 +46,8 @@ limitations under the License.
 <script>
 import moment from 'moment-timezone'
 import { mapState } from 'vuex'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, randomLocalMaintenanceBegin, utcMaintenanceWindowFromLocalBegin } from '@/utils'
 import { required } from 'vuelidate/lib/validators'
-import sample from 'lodash/sample'
 
 const validationErrors = {
   localizedMaintenanceBegin: {
@@ -84,19 +83,7 @@ export default {
   },
   methods: {
     getUTCMaintenanceWindow () {
-      if (this.localizedMaintenanceBegin && this.selectedTimezone) {
-        const utcMoment = moment.tz(this.localizedMaintenanceBegin, 'HH:mm', this.selectedTimezone).utc()
-
-        let utcBegin
-        let utcEnd
-        if (utcMoment && utcMoment.isValid()) {
-          utcBegin = utcMoment.format('HHmm00+0000')
-          utcMoment.add(1, 'h')
-          utcEnd = utcMoment.format('HHmm00+0000')
-        }
-        return { utcBegin, utcEnd }
-      }
-      return undefined
+      return utcMaintenanceWindowFromLocalBegin({ localBegin: this.localizedMaintenanceBegin, timezone: this.selectedTimezone })
     },
     reset () {
       this.selectedTimezone = this.localTimezone
@@ -128,13 +115,7 @@ export default {
       }
     },
     setDefaultMaintenanceTimeWindow () {
-      // randomize maintenance time window
-      const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
-      const randomHour = sample(hours)
-      // use local timezone offset
-      const localBegin = `${randomHour}:00`
-
-      this.localizedMaintenanceBegin = localBegin
+      this.localizedMaintenanceBegin = randomLocalMaintenanceBegin()
     },
     onInputLocalizedMaintenanceBegin () {
       this.$v.localizedMaintenanceBegin.$touch()

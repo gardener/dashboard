@@ -186,8 +186,7 @@ export default {
   methods: {
     ...mapActions([
       'createShoot',
-      'setCreateShootResource',
-      'resetCreateShootResource'
+      'setCreateShootResource'
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
@@ -359,16 +358,6 @@ export default {
     infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
       return find(secrets, ['metadata.bindingName', secretBindingName])
-    },
-    setInitialShootContent () {
-      this.initialShootContent = this.shootResourceFromUIComponents()
-      const infrastructureKind = getCloudProviderKind(get(this.initialShootContent, 'spec.cloud'))
-      if (isEmpty(get(this.initialShootContent, ['spec', 'cloud', infrastructureKind, 'workers']))) {
-        // when workers are set, initialization is completed
-        setTimeout(() => {
-          this.setInitialShootContent()
-        }, 100)
-      }
     }
   },
   async beforeRouteLeave (to, from, next) {
@@ -386,13 +375,12 @@ export default {
           return next(false)
         }
       }
-      this.resetCreateShootResource()
       return next()
     }
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
-    this.setInitialShootContent()
+    this.initialShootContent = this.newShootResource
   }
 }
 </script>

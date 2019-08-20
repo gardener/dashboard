@@ -467,7 +467,19 @@ export default function createRouter ({ store, userManager }) {
                 store.dispatch('fetchInfrastructureSecrets'),
                 store.dispatch('subscribeShoots')
               ])
-              .then(() => undefined)
+              .then(() => {
+                if (from.name !== 'CreateShoot' && from.name !== 'CreateShootEditor') {
+                  return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
+                    .then(() => undefined)
+                }
+                return undefined
+              })
+          case 'CreateShootEditor':
+            if (from.name !== 'CreateShoot' && from.name !== 'CreateShootEditor') {
+              return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
+                .then(() => undefined)
+            }
+            return undefined
           case 'ShootList':
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)

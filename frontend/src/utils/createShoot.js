@@ -77,10 +77,3 @@ export function getCloudProviderTemplate (infrastructureKind) {
       }
   }
 }
-
-export function getShootResourceSkeleton () {
-  return {
-    apiVersion: 'garden.sapcloud.io/v1beta1',
-    kind: 'Shoot'
-  }
-}

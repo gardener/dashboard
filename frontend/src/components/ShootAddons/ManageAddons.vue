@@ -35,8 +35,6 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapState } from 'vuex'
-import reduce from 'lodash/reduce'
-import set from 'lodash/set'
 import filter from 'lodash/filter'
 import assign from 'lodash/assign'
 import cloneDeep from 'lodash/cloneDeep'
@@ -51,7 +49,7 @@ export default {
   },
   data () {
     return {
-      addons: undefined,
+      addons: {},
       addonDefinitionList: undefined
     }
   },
@@ -76,10 +74,6 @@ export default {
         return addon.visible === true || (addons && !!addons[addon.name])
       })
     }
-  },
-  mounted () {
-    this.resetAddonList()
-    this.addons = reduce(this.addonDefinitionList, (addons, { name, enabled }) => set(addons, name, { enabled }), {})
   }
 }
 </script>

@@ -70,12 +70,10 @@ export default {
   name: 'maintenance-components',
   props: {
     updateKubernetesVersion: {
-      type: Boolean,
-      default: true
+      type: Boolean
     },
     updateOSVersion: {
-      type: Boolean,
-      default: true
+      type: Boolean
     },
     title: {
       type: String,

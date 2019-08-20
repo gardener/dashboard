@@ -33,7 +33,7 @@ limitations under the License.
         <v-select
           color="cyan darken-2"
           label="Kubernetes Version"
-          :items="sortedKubernetesVersions"
+          :items="sortedKubernetesVersionsList"
           v-model="kubernetesVersion"
           :error-messages="getErrorMessages('kubernetesVersion')"
           @input="onInputKubernetesVersion"
@@ -59,14 +59,10 @@ limitations under the License.
 <script>
 
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, purposesForSecret, shortRandomString } from '@/utils'
+import { getValidationErrors, purposesForSecret } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import cloneDeep from 'lodash/cloneDeep'
 import head from 'lodash/head'
-import isEmpty from 'lodash/isEmpty'
-
-const semSort = require('semver-sort')
 
 const validationErrors = {
   name: {
@@ -131,14 +127,14 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'kubernetesVersions',
+      'sortedKubernetesVersions',
       'shootByNamespaceAndName'
     ]),
-    sortedKubernetesVersions () {
-      return semSort.desc(cloneDeep(this.kubernetesVersions(this.cloudProfileName)))
-    },
     purposes () {
       return purposesForSecret(this.secret)
+    },
+    sortedKubernetesVersionsList () {
+      return this.sortedKubernetesVersions(this.cloudProfileName)
     }
   },
   methods: {
@@ -170,7 +166,7 @@ export default {
       this.onInputPurpose()
     },
     setDefaultKubernetesVersion () {
-      this.kubernetesVersion = head(this.sortedKubernetesVersions)
+      this.kubernetesVersion = head(this.sortedKubernetesVersionsList)
       this.onInputKubernetesVersion()
     },
     getDetailsData () {
@@ -181,11 +177,7 @@ export default {
       }
     },
     setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret }) {
-      if (isEmpty(name)) {
-        this.name = shortRandomString(10)
-      } else {
-        this.name = name
-      }
+      this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
