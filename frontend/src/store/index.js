@@ -80,19 +80,14 @@ const getFilterValue = (state) => {
 }
 
 const machineAndVolumeTypePredicate = (item, zones) => {
-  let valid = true
-  const itemZones = get(item, 'zones')
-  if (!isEmpty(itemZones) && !isEmpty(zones)) {
-    forEach(zones, zone => {
-      if (includes(get(item, 'zones'), zone) !== true) {
-        valid = false
-      }
-    })
+  if (item.usable === false) {
+    return false
   }
-  if (get(item, 'usable', true) !== true) {
-    valid = false
+  const itemZones = item.zones
+  if (isEmpty(itemZones) || isEmpty(zones)) {
+    return true
   }
-  return valid
+  return difference(zones, itemZones).length === 0
 }
 
 // getters
