@@ -118,7 +118,7 @@ limitations under the License.
         <v-flex class="pa-0">
           <span class="grey--text">Add-ons</span><br>
           <span class="subheading" v-if="!this.shootAddonNames">No addons configured</span>
-          <v-chip v-for="(index, name) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
+          <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
