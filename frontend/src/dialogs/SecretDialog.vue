@@ -69,7 +69,7 @@ limitations under the License.
 
           <slot name="data-slot"></slot>
           <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
-          <p class="subheading mt-3">Do not use personalised login credentials as they should not be used as infrastructure secret.</p>
+          <p class="subheading mt-3">Do not use personalized login credentials as they should not be used as secret.</p>
         </v-container>
       </v-card-text>
       <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
