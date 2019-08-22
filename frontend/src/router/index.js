@@ -32,7 +32,8 @@ const Home = () => import('@/pages/Home')
 const CreateShoot = () => import('@/pages/CreateShoot')
 const ShootList = () => import('@/pages/ShootList')
 const ShootItemCards = () => import('@/pages/ShootItemCards')
-const ShootItemEditor = () => import('@/pages/ShootItemEditor')
+const ShootDetailsEditor = () => import('@/pages/ShootDetailsEditor')
+const ShootCreateEditor = () => import('@/pages/ShootCreateEditor')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
 const Account = () => import('@/pages/Account')
@@ -72,7 +73,7 @@ export default function createRouter ({ store, userManager }) {
       title: 'YAML',
       to: ({ params }) => {
         return {
-          name: 'ShootItemEditor',
+          name: 'ShootDetailsEditor',
           params
         }
       }
@@ -92,7 +93,7 @@ export default function createRouter ({ store, userManager }) {
       title: 'YAML',
       to: ({ params }) => {
         return {
-          name: 'CreateShootEditor',
+          name: 'ShootCreateEditor',
           params
         }
       }
@@ -198,7 +199,7 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'create/ui',
+              path: 'newshoot',
               name: 'CreateShoot',
               component: CreateShoot,
               meta: {
@@ -211,9 +212,9 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'create/yaml',
-              name: 'CreateShootEditor',
-              component: ShootItemEditor,
+              path: 'newshoot/yaml',
+              name: 'ShootCreateEditor',
+              component: ShootCreateEditor,
               meta: {
                 namespaced: true,
                 projectScope: false,
@@ -237,8 +238,8 @@ export default function createRouter ({ store, userManager }) {
             },
             {
               path: ':name/yaml',
-              name: 'ShootItemEditor',
-              component: ShootItemEditor,
+              name: 'ShootDetailsEditor',
+              component: ShootDetailsEditor,
               meta: {
                 namespaced: true,
                 projectScope: true,
@@ -468,14 +469,14 @@ export default function createRouter ({ store, userManager }) {
                 store.dispatch('subscribeShoots')
               ])
               .then(() => {
-                if (from.name !== 'CreateShoot' && from.name !== 'CreateShootEditor') {
+                if (from.name !== 'CreateShoot' && from.name !== 'ShootCreateEditor') {
                   return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
                     .then(() => undefined)
                 }
                 return undefined
               })
-          case 'CreateShootEditor':
-            if (from.name !== 'CreateShoot' && from.name !== 'CreateShootEditor') {
+          case 'ShootCreateEditor':
+            if (from.name !== 'CreateShoot' && from.name !== 'ShootCreateEditor') {
               return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
                 .then(() => undefined)
             }
@@ -491,7 +492,7 @@ export default function createRouter ({ store, userManager }) {
                 store.dispatch('subscribeComments', { name: params.name, namespace })
               ])
               .then(() => undefined)
-          case 'ShootItemEditor':
+          case 'ShootDetailsEditor':
             return store.dispatch('subscribeShoot', { name: params.name, namespace })
               .then(() => undefined)
           case 'Members':

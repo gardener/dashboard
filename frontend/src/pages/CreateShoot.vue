@@ -361,7 +361,7 @@ export default {
     }
   },
   async beforeRouteLeave (to, from, next) {
-    if (to.name === 'CreateShootEditor') {
+    if (to.name === 'ShootCreateEditor') {
       if (!this.valid) {
         if (!await this.confirmNavigateToYamlIfInvalid()) {
           return next(false)

@@ -109,4 +109,8 @@ export default {
     filter: grayscale(0%);
     background-color: transparent;
   }
+
+  .select_infra_card_active:hover {
+    filter: grayscale(0%);
+  }
 </style>

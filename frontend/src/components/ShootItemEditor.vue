@@ -16,37 +16,18 @@ limitations under the License.
 
 <template>
   <v-layout column fill-height class="position-relative">
-    <v-flex v-if="!clean && !isCreateMode && modificationWarning" class="shrink">
-      <v-alert :value="modificationWarning" @input="dismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
-        By modifying the resource directly you may cause serious problems in your cluster.
-        We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
-      </v-alert>
-    </v-flex>
-    <v-flex v-if="!clean && isCreateMode && createWarning" class="shrink">
-      <v-alert :value="createWarning" @input="dismissCreateWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
-        By modifying the resource directly you may create an invalid cluster resource.
-        If the resource is invalid, you may lose data when switching back to the overview page.
+    <v-flex v-if="!clean && !!modificationWarning" class="shrink">
+      <v-alert :value="modificationWarning" @input="onDismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
+        <slot name="modificationWarning"></slot>
       </v-alert>
     </v-flex>
     <v-flex ref="container" :style="containerStyles"></v-flex>
-    <v-flex v-if="alert" class="shrink">
-      <v-alert v-model="alert" :type="alertType" dismissible transition="reverse-slide-y-transition" class="ma-0">
-        {{alertMessage}}
-      </v-alert>
-    </v-flex>
-    <v-flex v-if="errorMessage" class="shrink">
-      <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+    <v-flex v-if="errorMessageInternal" class="shrink">
+      <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
     </v-flex>
     <v-flex :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
-        <v-flex v-if="!isCreateMode" d-flex class="divider-right">
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="clean" @click="save">
-              <v-icon small>mdi-content-save</v-icon>
-            </v-btn>
-            <span>Save</span>
-          </v-tooltip>
-        </v-flex>
+        <slot name="toolbarItemsLeft"></slot>
         <v-flex d-flex class="divider-right">
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="untouched" @click="reload">
@@ -88,40 +69,21 @@ limitations under the License.
           >
           </copy-btn>
         </v-flex>
-        <v-flex d-flex xs12>
-        </v-flex>
-        <v-flex v-if="!isCreateMode" d-flex fill-height align-center class="divider-left">
-          <v-tooltip top :color="hasConflict ? 'error' : ''">
-            <div slot="activator" class="px-3 py-2">
-            <v-icon :class="hasConflict ? 'error--text' : 'success--text'">
-              {{hasConflict ? 'mdi-alert-circle' : 'mdi-check-circle'}}
-            </v-icon>
-            </div>
-            <span v-if="hasConflict">Cluster resource has been modified<br>by another user or process</span>
-            <span v-else>Cluster resource can be saved<br>without any conflicts</span>
-          </v-tooltip>
-        </v-flex>
-        <v-flex v-if="isCreateMode" d-flex fill-height align-center class="divider-left">
-          <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
-        </v-flex>
+        <v-flex d-flex xs12></v-flex>
+        <slot name="toolbarItemsRight"></slot>
       </v-layout>
     </v-flex>
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import GAlert from '@/components/GAlert'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import { mapGetters, mapState, mapActions } from 'vuex'
-import { replaceShoot } from '@/utils/api'
+import { mapState } from 'vuex'
 import { getProjectName } from '@/utils'
-import { errorDetailsFromError } from '@/utils/error'
 import download from 'downloadjs'
 
 // codemirror
@@ -133,7 +95,7 @@ import 'codemirror/lib/codemirror.css'
 import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
-import pick from 'lodash/pick'
+import cloneDeep from 'lodash/cloneDeep'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -147,18 +109,26 @@ function safeDump (value) {
 export default {
   components: {
     CopyBtn,
-    GAlert,
-    ConfirmDialog
+    GAlert
   },
   name: 'shoot-item-editor',
+  props: {
+    shootContent: {
+      type: Object
+    },
+    modificationWarning: {
+      type: Boolean
+    },
+    errorMessage: {
+      type: String
+    },
+    detailedErrorMessage: {
+      type: String
+    }
+  },
   data () {
     return {
       conflictPath: null,
-      modificationWarning: true,
-      createWarning: true,
-      alert: false,
-      alertMessage: '',
-      alertType: 'error',
       snackbar: false,
       snackbarTimeout: 3000,
       snackbarColor: undefined,
@@ -171,30 +141,15 @@ export default {
       },
       generation: undefined,
       lineHeight: 21,
-      toolbarHeight: 48,
-      errorMessage: undefined,
-      detailedErrorMessage: undefined,
-      isShootCreated: false
+      toolbarHeight: 48
     }
   },
   computed: {
     ...mapState([
       'namespace'
     ]),
-    ...mapGetters([
-      'shootByNamespaceAndName',
-      'newShootResource'
-    ]),
-    isCreateMode () {
-      return (get(this.$route, 'name') === 'CreateShootEditor')
-    },
     value () {
-      let data
-      if (this.isCreateMode) {
-        data = this.newShootResource
-      } else {
-        data = this.shootByNamespaceAndName(this.$route.params)
-      }
+      const data = cloneDeep(this.shootContent)
       if (data) {
         return omit(data, ['info'])
       }
@@ -206,65 +161,39 @@ export default {
         minHeight: `${this.lineHeight * 3}px`
       }
     },
-    hasConflict () {
-      return !!this.conflictPath
-    },
     toolbarStyles () {
       return {
         flex: '0 0 auto',
         height: `${this.toolbarHeight}px`,
         minHeight: `${this.toolbarHeight}px`
       }
+    },
+    errorMessageInternal: {
+      get () {
+        return this.errorMessage
+      },
+      set (value) {
+        this.$emit('update:errorMessage', value)
+      }
+    },
+    detailedErrorMessageInternal: {
+      get () {
+        return this.detailedErrorMessage
+      },
+      set (value) {
+        this.$emit('update:detailedErrorMessage', value)
+      }
     }
   },
   methods: {
-    ...mapActions([
-      'setCreateShootResource',
-      'createShoot',
-      'resetCreateShootResource'
-    ]),
     getQualifiedName () {
-      const { name, namespace } = get(this, 'value.metadata')
+      const name = get(this, 'value.metadata.name', 'unnamed')
+      const namespace = this.namespace
       const projectName = getProjectName({ namespace })
       return `shoot--${projectName}--${name}.yaml`
     },
-    dismissModificationWarning () {
-      this.modificationWarning = false
-      this.$localStorage.setItem('showShootEditorWarning', 'false')
-    },
-    dismissCreateWarning () {
-      this.createWarning = false
-      this.$localStorage.setItem('showShootCreateEditorWarning', 'false')
-    },
-    async save () {
-      try {
-        if (this.untouched) {
-          return
-        }
-        if (this.clean) {
-          return this.clearHistory()
-        }
-        if (this.hasConflict && !(await this.confirmOverwrite())) {
-          return
-        }
-        if (this.isCreateMode) {
-          return
-        }
-
-        const paths = ['spec', 'metadata.labels', 'metadata.annotations']
-        const data = pick(jsyaml.safeLoad(this.getContent()), paths)
-        const { metadata: { namespace, name } } = this.value
-        const { data: value } = await replaceShoot({ namespace, name, data })
-        this.update(value)
-
-        this.snackbarColor = 'success'
-        this.snackbarText = `Cluster specification has been successfully updated`
-        this.snackbar = true
-      } catch (err) {
-        this.alert = true
-        this.alertType = 'error'
-        this.alertMessage = get(err, 'response.data.message', err.message)
-      }
+    onDismissModificationWarning () {
+      this.$emit('dismissModificationWarning')
     },
     undo () {
       if (this.$instance) {
@@ -282,6 +211,14 @@ export default {
       if (this.$instance) {
         this.$instance.focus()
       }
+    },
+    setClean (clean) {
+      this.clean = clean
+      this.$emit('clean', clean)
+    },
+    setConflictPath (conflictPath) {
+      this.conflictPath = conflictPath
+      this.$emit('conflictPath', conflictPath)
     },
     reload () {
       this.update(this.value)
@@ -344,10 +281,10 @@ export default {
       this.$instance.setSize('100%', '100%')
       const onChange = ({ doc }) => {
         this.untouched = false
-        this.clean = doc.isClean(this.generation)
+        this.setClean(doc.isClean(this.generation))
         this.historySize = doc.historySize()
-        this.alert = false
-        this.alertMessage = ''
+        this.errorMessage = undefined
+        this.detailedErrorMessage = undefined
       }
       this.$instance.on('change', onChange)
     },
@@ -364,9 +301,9 @@ export default {
       if (this.$instance) {
         this.$instance.doc.clearHistory()
         this.generation = this.$instance.doc.changeGeneration()
-        this.clean = true
+        this.setClean(true)
         this.untouched = true
-        this.conflictPath = null
+        this.setConflictPath(null)
         this.historySize.undo = 0
         this.historySize.redo = 0
       }
@@ -397,27 +334,6 @@ export default {
         this.setContent(safeDump(value))
       }
     },
-    confirmEditorNavigation () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
-        captionText: 'Leave Editor?',
-        messageHtml: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?'
-      })
-    },
-    confirmCreateNavigation () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
-        captionText: 'Leave Create Cluster Page?',
-        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
-      })
-    },
-    confirmOverwrite () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Save',
-        captionText: 'Confirm Overwrite',
-        messageHtml: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
-      })
-    },
     onCopy () {
       this.snackbarColor = undefined
       this.snackbarText = 'Copied content to clipboard'
@@ -427,41 +343,9 @@ export default {
       this.snackbarColor = 'error'
       this.snackbarText = 'Copy to clipboard failed'
       this.snackbar = true
-    },
-    async createClicked () {
-      const shootResource = jsyaml.safeLoad(this.getContent())
-
-      try {
-        await this.createShoot(shootResource)
-        this.isShootCreated = true
-        this.$router.push({
-          name: 'ShootItem',
-          params: {
-            namespace: this.namespace,
-            name: shootResource.metadata.name
-          }
-        })
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = `Failed to create cluster.`
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
-    },
-    cancelClicked () {
-      this.$router.push({
-        name: 'ShootList',
-        params: {
-          namespace: this.namespace
-        }
-      })
     }
   },
   mounted () {
-    const modificationWarning = this.$localStorage.getItem('showShootEditorWarning')
-    this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
-    const createWarning = this.$localStorage.getItem('showShootCreateEditorWarning')
-    this.createWarning = createWarning === null || createWarning === 'true'
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
@@ -477,51 +361,10 @@ export default {
           const newProp = get(newValue, path)
           const oldProp = get(oldValue, path)
           if (!isEqual(newProp, oldProp)) {
-            this.conflictPath = path
+            this.setConflictPath(path)
             break
           }
         }
-      }
-    }
-  },
-  async beforeRouteLeave (to, from, next) {
-    if (this.isCreateMode) {
-      if (to.name === 'CreateShoot') {
-        try {
-          const data = await jsyaml.safeLoad(this.getContent())
-          this.setCreateShootResource(data)
-          return next()
-        } catch (err) {
-          this.alert = true
-          this.alertType = 'error'
-          this.alertMessage = get(err, 'response.data.message', err.message)
-          return next(false)
-        }
-      } else {
-        if (this.isShootCreated) {
-          this.resetCreateShootResource()
-          return next()
-        }
-        if (!await this.confirmCreateNavigation()) {
-          return next(false)
-        } else {
-          this.resetCreateShootResource()
-          return next()
-        }
-      }
-    } else {
-      if (this.clean) {
-        return next()
-      }
-      try {
-        if (await this.confirmEditorNavigation()) {
-          next()
-        } else {
-          this.focus()
-          next(false)
-        }
-      } catch (err) {
-        next(err)
       }
     }
   },

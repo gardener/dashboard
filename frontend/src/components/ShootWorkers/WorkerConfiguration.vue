@@ -20,6 +20,7 @@ limitations under the License.
     :valid="workersValid"
     @onDialogVisible="configurationDialogVisible"
     ref="actionDialog"
+    maxWidth="760"
     caption="Configure Workers">
     <template slot="actionComponent">
       <manage-workers
