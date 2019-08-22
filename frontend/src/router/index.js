@@ -199,7 +199,7 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'newshoot',
+              path: 'new/shoot',
               name: 'CreateShoot',
               component: CreateShoot,
               meta: {
@@ -212,7 +212,7 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'newshoot/yaml',
+              path: 'new/shoot/yaml',
               name: 'ShootCreateEditor',
               component: ShootCreateEditor,
               meta: {
