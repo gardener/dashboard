@@ -27,12 +27,26 @@ limitations under the License.
             <v-icon class="cyan--text text--darken-2 avatar">cloud_queue</v-icon>
           </v-flex>
           <v-flex class="pa-0">
-            <span class="grey--text">Provider / Credential</span><br>
-            <span class="subheading">{{shootCloudProviderKind}} / {{shootSecret}}</span>
             <v-layout row>
-              <v-flex>
-                <span class="grey--text">Region / Zone</span><br>
-                <span class="subheading">{{shootRegion}} / {{shootZonesString}}</span>
+              <v-flex xs6>
+                <span class="grey--text">Provider</span><br>
+                <span class="subheading">{{shootCloudProviderKind}}</span>
+              </v-flex>
+              <v-flex xs6>
+                <span class="grey--text">Credential</span><br>
+                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecret, namespace: shootNamespace } }">
+                  <span class="subheading">{{shootSecret}}</span>
+                </router-link>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex xs6>
+                <span class="grey--text">Region</span><br>
+                <span class="subheading">{{shootRegion}}</span>
+              </v-flex>
+              <v-flex v-if="!!this.shootZones" xs6>
+                <span class="grey--text">{{zoneTitle}}</span><br>
+                <span class="subheading">{{shootZonesString}}</span>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -96,6 +110,7 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 import CopyBtn from '@/components/CopyBtn'
 import {
   canLinkToSeed
@@ -137,6 +152,12 @@ export default {
     },
     shootZonesString () {
       return join(this.shootZones, ', ')
+    },
+    zoneTitle () {
+      if (this.shootZones.length > 1) {
+        return 'Zones'
+      }
+      return 'Zone'
     }
   }
 }
