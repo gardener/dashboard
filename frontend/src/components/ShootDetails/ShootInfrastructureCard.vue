@@ -28,11 +28,13 @@ limitations under the License.
           </v-flex>
           <v-flex class="pa-0">
             <v-layout row>
-              <v-flex xs6>
+              <v-flex>
                 <span class="grey--text">Provider</span><br>
                 <span class="subheading">{{shootCloudProviderKind}}</span>
               </v-flex>
-              <v-flex xs6>
+            </v-layout>
+            <v-layout row>
+              <v-flex>
                 <span class="grey--text">Credential</span><br>
                 <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace } }">
                   <span class="subheading">{{shootSecretName}}</span>
@@ -40,13 +42,9 @@ limitations under the License.
               </v-flex>
             </v-layout>
             <v-layout row>
-              <v-flex xs6>
-                <span class="grey--text">Region</span><br>
-                <span class="subheading">{{shootRegion}}</span>
-              </v-flex>
-              <v-flex v-if="!!this.shootZones" xs6>
-                <span class="grey--text">{{zoneTitle}}</span><br>
-                <span class="subheading">{{shootZonesString}}</span>
+              <v-flex>
+                <span class="grey--text">{{regionZoneTitle}}</span><br>
+                <span class="subheading">{{regionZoneText}}</span>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -149,8 +147,20 @@ export default {
     namespace () {
       return get(this.$route.params, 'namespace')
     },
-    shootZonesString () {
+    shootZonesText () {
       return join(this.shootZones, ', ')
+    },
+    regionZoneText () {
+      if (this.shootZones.length > 0) {
+        return `${this.shootRegion} / ${this.shootZonesText}`
+      }
+      return this.shootRegion
+    },
+    regionZoneTitle () {
+      if (this.shootZones.length > 0) {
+        return `Region / ${this.zoneTitle}`
+      }
+      return 'Region'
     },
     zoneTitle () {
       if (this.shootZones.length > 1) {
