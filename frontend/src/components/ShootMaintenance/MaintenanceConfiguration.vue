@@ -18,7 +18,7 @@ limitations under the License.
   <action-icon-dialog
     :shootItem="shootItem"
     :valid="maintenanceTimeValid"
-    @onDialogVisible="configurationDialogVisible"
+    @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Maintenance">
     <template slot="actionComponent">
@@ -71,9 +71,9 @@ export default {
     }
   },
   methods: {
-    async configurationDialogVisible () {
+    async onConfigurationDialogOpened () {
       this.reset()
-      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
       }

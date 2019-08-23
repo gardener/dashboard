@@ -29,11 +29,11 @@ const Default = () => import('@/layouts/Default')
 
 /* Pages */
 const Home = () => import('@/pages/Home')
-const CreateShoot = () => import('@/pages/CreateShoot')
+const NewShoot = () => import('@/pages/NewShoot')
 const ShootList = () => import('@/pages/ShootList')
 const ShootItemCards = () => import('@/pages/ShootItemCards')
 const ShootDetailsEditor = () => import('@/pages/ShootDetailsEditor')
-const ShootCreateEditor = () => import('@/pages/ShootCreateEditor')
+const NewShootEditor = () => import('@/pages/NewShootEditor')
 const Secrets = () => import('@/pages/Secrets')
 const Members = () => import('@/pages/Members')
 const Account = () => import('@/pages/Account')
@@ -79,12 +79,12 @@ export default function createRouter ({ store, userManager }) {
       }
     }
   ]
-  const createShootTabs = [
+  const newShootTabs = [
     {
       title: 'Overview',
       to: ({ params }) => {
         return {
-          name: 'CreateShoot',
+          name: 'NewShoot',
           params
         }
       }
@@ -93,7 +93,7 @@ export default function createRouter ({ store, userManager }) {
       title: 'YAML',
       to: ({ params }) => {
         return {
-          name: 'ShootCreateEditor',
+          name: 'NewShootEditor',
           params
         }
       }
@@ -199,28 +199,28 @@ export default function createRouter ({ store, userManager }) {
               }
             },
             {
-              path: 'new/shoot',
-              name: 'CreateShoot',
-              component: CreateShoot,
+              path: '+',
+              name: 'NewShoot',
+              component: NewShoot,
               meta: {
                 namespaced: true,
                 projectScope: false,
                 title: 'Create Cluster',
-                toRouteName: 'CreateShoot',
+                toRouteName: 'NewShoot',
                 breadcrumbTextFn: routeTitle,
-                tabs: createShootTabs
+                tabs: newShootTabs
               }
             },
             {
-              path: 'new/shoot/yaml',
-              name: 'ShootCreateEditor',
-              component: ShootCreateEditor,
+              path: '+/yaml',
+              name: 'NewShootEditor',
+              component: NewShootEditor,
               meta: {
                 namespaced: true,
                 projectScope: false,
                 title: 'Create Cluster Editor',
                 breadcrumbTextFn: routeTitle,
-                tabs: createShootTabs
+                tabs: newShootTabs
               }
             },
             {
@@ -462,22 +462,22 @@ export default function createRouter ({ store, userManager }) {
             return undefined
           case 'Secrets':
           case 'Secret':
-          case 'CreateShoot':
+          case 'NewShoot':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets'),
                 store.dispatch('subscribeShoots')
               ])
               .then(() => {
-                if (from.name !== 'CreateShoot' && from.name !== 'ShootCreateEditor') {
-                  return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
+                if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
+                  return store.dispatch('resetNewShootResource', { name: params.name, namespace })
                     .then(() => undefined)
                 }
                 return undefined
               })
-          case 'ShootCreateEditor':
-            if (from.name !== 'CreateShoot' && from.name !== 'ShootCreateEditor') {
-              return store.dispatch('resetCreateShootResource', { name: params.name, namespace })
+          case 'NewShootEditor':
+            if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
+              return store.dispatch('resetNewShootResource', { name: params.name, namespace })
                 .then(() => undefined)
             }
             return undefined

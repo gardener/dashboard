@@ -73,7 +73,7 @@ const state = {
   searchValue: undefined,
   selection: undefined,
   shootListFilters: undefined,
-  createShootResource: undefined
+  newShootResource: undefined
 }
 
 // getters
@@ -95,7 +95,7 @@ const getters = {
     return state.shootListFilters
   },
   newShootResource () {
-    return state.createShootResource
+    return state.newShootResource
   }
 }
 
@@ -214,15 +214,15 @@ const actions = {
       return state.shootListFilters
     }
   },
-  setCreateShootResource ({ commit }, data) {
-    commit('SET_CREATE_SHOOT_RESOURCE', { data })
+  setNewShootResource ({ commit }, data) {
+    commit('SET_NEW_SHOOT_RESOURCE', { data })
 
-    return state.createShootResource
+    return state.newShootResource
   },
-  resetCreateShootResource ({ commit, rootState }) {
-    commit('RESET_CREATE_SHOOT_RESOURCE')
+  resetNewShootResource ({ commit, rootState }) {
+    commit('RESET_NEW_SHOOT_RESOURCE')
 
-    return state.createShootResource
+    return state.newShootResource
   }
 }
 
@@ -556,10 +556,10 @@ const mutations = {
     state.shootListFilters[filter] = value
     setFilteredAndSortedItems(state, rootState)
   },
-  SET_CREATE_SHOOT_RESOURCE (state, { data }) {
-    state.createShootResource = data
+  SET_NEW_SHOOT_RESOURCE (state, { data }) {
+    state.newShootResource = data
   },
-  RESET_CREATE_SHOOT_RESOURCE (state) {
+  RESET_NEW_SHOOT_RESOURCE (state) {
     const shootResource = {
       apiVersion: 'garden.sapcloud.io/v1beta1',
       kind: 'Shoot'
@@ -648,7 +648,7 @@ const mutations = {
     })
     set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
 
-    state.createShootResource = shootResource
+    state.newShootResource = shootResource
   }
 }
 

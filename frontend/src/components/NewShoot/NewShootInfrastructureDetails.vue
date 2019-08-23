@@ -174,7 +174,7 @@ const validations = {
 }
 
 export default {
-  name: 'create-shoot-infrastructure',
+  name: 'new-shoot-infrastructure',
   components: {
     CloudProfile,
     SecretDialogWrapper

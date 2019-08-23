@@ -21,11 +21,11 @@ limitations under the License.
         Infrastructure
       </v-card-title>
       <v-card-text>
-        <create-shoot-select-infrastructure
+        <new-shoot-select-infrastructure
           ref="infrastructure"
           :userInterActionBus="userInterActionBus"
           @valid="onInfrastructureValid"
-          ></create-shoot-select-infrastructure>
+          ></new-shoot-select-infrastructure>
       </v-card-text>
     </v-card>
     <v-card flat class="mt-3">
@@ -33,11 +33,11 @@ limitations under the License.
         Cluster Details
       </v-card-title>
       <v-card-text>
-        <create-shoot-details
+        <new-shoot-details
           ref="clusterDetails"
           :userInterActionBus="userInterActionBus"
           @valid="onDetailsValid"
-          ></create-shoot-details>
+          ></new-shoot-details>
       </v-card-text>
     </v-card>
     <v-card flat class="mt-3">
@@ -45,11 +45,11 @@ limitations under the License.
         Infrastructure Details
       </v-card-title>
       <v-card-text>
-        <create-shoot-infrastructure-details
+        <new-shoot-infrastructure-details
           ref="infrastructureDetails"
           :userInterActionBus="userInterActionBus"
           @valid="onInfrastructureDetailsValid"
-          ></create-shoot-infrastructure-details>
+          ></new-shoot-infrastructure-details>
       </v-card-text>
     </v-card>
     <v-card flat class="mt-3">
@@ -111,9 +111,9 @@ limitations under the License.
 
 <script>
 
-import CreateShootSelectInfrastructure from '@/components/CreateShoot/CreateShootSelectInfrastructure'
-import CreateShootInfrastructureDetails from '@/components/CreateShoot/CreateShootInfrastructureDetails'
-import CreateShootDetails from '@/components/CreateShoot/CreateShootDetails'
+import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
+import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
+import NewShootDetails from '@/components/NewShoot/NewShootDetails'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
@@ -137,9 +137,9 @@ const EventEmitter = require('events')
 export default {
   name: 'create-cluster',
   components: {
-    CreateShootSelectInfrastructure,
-    CreateShootInfrastructureDetails,
-    CreateShootDetails,
+    NewShootSelectInfrastructure,
+    NewShootInfrastructureDetails,
+    NewShootDetails,
     ManageShootAddons,
     MaintenanceComponents,
     MaintenanceTime,
@@ -159,8 +159,7 @@ export default {
       hibernationScheduleValid: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      isShootCreated: false,
-      initialShootContent: undefined
+      isShootCreated: false
     }
   },
   computed: {
@@ -180,13 +179,13 @@ export default {
         this.hibernationScheduleValid
     },
     isShootContentDirty () {
-      return !isEqual(this.initialShootContent, this.shootResourceFromUIComponents())
+      return !isEqual(this.newShootResource, this.shootResourceFromUIComponents())
     }
   },
   methods: {
     ...mapActions([
       'createShoot',
-      'setCreateShootResource'
+      'setNewShootResource'
     ]),
     onInfrastructureValid (value) {
       this.infrastructureValid = value
@@ -271,7 +270,7 @@ export default {
     },
     updateShootResourceWithUIComponents () {
       const shootResource = this.shootResourceFromUIComponents()
-      this.setCreateShootResource(shootResource)
+      this.setNewShootResource(shootResource)
       return shootResource
     },
     updateUIComponentsWithShootResource () {
@@ -361,7 +360,7 @@ export default {
     }
   },
   async beforeRouteLeave (to, from, next) {
-    if (to.name === 'ShootCreateEditor') {
+    if (to.name === 'NewShootEditor') {
       if (!this.valid) {
         if (!await this.confirmNavigateToYamlIfInvalid()) {
           return next(false)
@@ -380,7 +379,6 @@ export default {
   },
   mounted () {
     this.updateUIComponentsWithShootResource()
-    this.initialShootContent = this.newShootResource
   }
 }
 </script>

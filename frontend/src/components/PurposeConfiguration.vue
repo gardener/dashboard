@@ -18,7 +18,7 @@ limitations under the License.
   <action-icon-dialog
     :shootItem="shootItem"
     :valid="valid"
-    @onDialogVisible="configurationDialogVisible"
+    @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     maxWidth="400"
     caption="Configure Purpose">
@@ -67,9 +67,9 @@ export default {
     }
   },
   methods: {
-    async configurationDialogVisible () {
+    async onConfigurationDialogOpened () {
       this.reset()
-      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
       }

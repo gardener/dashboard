@@ -18,7 +18,7 @@ limitations under the License.
   <action-icon-dialog
     :shootItem="shootItem"
     :loading="isReconcileToBeScheduled"
-    @onDialogVisible="startDialogVisible"
+    @dialogOpened="startDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
@@ -73,8 +73,8 @@ export default {
     }
   },
   methods: {
-    async startDialogVisible () {
-      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+    async startDialogOpened () {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.startReconcile()
       }

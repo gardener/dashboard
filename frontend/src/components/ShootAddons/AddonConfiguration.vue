@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <action-icon-dialog
     :shootItem="shootItem"
-    @onDialogVisible="configurationDialogVisible"
+    @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Add-ons"
     maxWidth="900">
@@ -50,9 +50,9 @@ export default {
   },
   mixins: [shootItem],
   methods: {
-    async configurationDialogVisible () {
+    async onConfigurationDialogOpened () {
       this.reset()
-      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.updateConfiguration()
       }

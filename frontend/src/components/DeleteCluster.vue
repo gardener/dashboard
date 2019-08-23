@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <action-icon-dialog
     :shootItem="shootItem"
-    @onDialogVisible="deleteDialogVisible"
+    @dialogOpened="onDeleteDialogOpened"
     ref="actionDialog"
     :caption="caption"
     icon="delete"
@@ -99,8 +99,8 @@ export default {
     }
   },
   methods: {
-    async deleteDialogVisible () {
-      const confirmed = await this.$refs.actionDialog.waitForActionConfirmed()
+    async onDeleteDialogOpened () {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
         this.doDeleteCluster()
       }

@@ -41,7 +41,7 @@ import InfraIcon from '@/components/VendorIcon'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'create-shoot-select-infrastructure',
+  name: 'new-shoot-select-infrastructure',
   components: {
     InfraIcon
   },

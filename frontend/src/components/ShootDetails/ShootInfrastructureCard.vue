@@ -34,8 +34,8 @@ limitations under the License.
               </v-flex>
               <v-flex xs6>
                 <span class="grey--text">Credential</span><br>
-                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecret, namespace: shootNamespace } }">
-                  <span class="subheading">{{shootSecret}}</span>
+                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace } }">
+                  <span class="subheading">{{shootSecretName}}</span>
                 </router-link>
               </v-flex>
             </v-layout>
@@ -73,7 +73,7 @@ limitations under the License.
                   <span class="grey--text">Technical Id</span><br>
                   <span class="subheading">{{shootTechnicalId}}</span>
                 </v-flex>
-                <copy-btn :clipboard-text="technicalId"></copy-btn>
+                <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
               </v-layout>
             </v-flex>
           </v-layout>
@@ -110,7 +110,6 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
-import isEmpty from 'lodash/isEmpty'
 import CopyBtn from '@/components/CopyBtn'
 import {
   canLinkToSeed
@@ -132,7 +131,7 @@ export default {
       'namespaces'
     ]),
     showSeedInfo () {
-      return !!this.seed && this.hasAccessToGardenNamespace
+      return !!this.shootSeed && this.hasAccessToGardenNamespace
     },
     hasAccessToGardenNamespace () {
       return includes(this.namespaces, 'garden')
@@ -158,6 +157,9 @@ export default {
         return 'Zones'
       }
       return 'Zone'
+    },
+    shootSecretName () {
+      return this.shootSecret || 'default'
     }
   }
 }

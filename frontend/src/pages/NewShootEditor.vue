@@ -74,12 +74,12 @@ export default {
   },
   methods: {
     ...mapActions([
-      'setCreateShootResource',
+      'setNewShootResource',
       'createShoot'
     ]),
     onDismissModificationWarning () {
       this.modificationWarning = false
-      this.$localStorage.setItem('showShootCreateEditorWarning', 'false')
+      this.$localStorage.setItem('showNewShootEditorWarning', 'false')
     },
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -118,14 +118,14 @@ export default {
     }
   },
   mounted () {
-    const modificationWarning = this.$localStorage.getItem('showShootCreateEditorWarning')
+    const modificationWarning = this.$localStorage.getItem('showNewShootEditorWarning')
     this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
   },
   async beforeRouteLeave (to, from, next) {
-    if (to.name === 'CreateShoot') {
+    if (to.name === 'NewShoot') {
       try {
         const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-        this.setCreateShootResource(data)
+        this.setNewShootResource(data)
         return next()
       } catch (err) {
         this.errorMessage = get(err, 'response.data.message', err.message)

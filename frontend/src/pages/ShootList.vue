@@ -144,7 +144,7 @@ limitations under the License.
       </v-dialog>
     </v-card>
     <v-fab-transition>
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'CreateShoot', params: {  namespace: $route.params.namespace } }">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace: $route.params.namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>

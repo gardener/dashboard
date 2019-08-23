@@ -101,7 +101,7 @@ const validations = {
 }
 
 export default {
-  name: 'create-shoot-details',
+  name: 'new-shoot-details',
   components: {
   },
   props: {

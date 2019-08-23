@@ -447,11 +447,11 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setCreateShootResource ({ dispatch }, data) {
-    return dispatch('shoots/setCreateShootResource', data)
+  setNewShootResource ({ dispatch }, data) {
+    return dispatch('shoots/setNewShootResource', data)
   },
-  resetCreateShootResource ({ dispatch }) {
-    return dispatch('shoots/resetCreateShootResource')
+  resetNewShootResource ({ dispatch }) {
+    return dispatch('shoots/resetNewShootResource')
   },
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)

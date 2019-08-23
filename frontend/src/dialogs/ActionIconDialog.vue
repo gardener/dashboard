@@ -129,9 +129,9 @@ export default {
         this.detailedErrorMessage = undefined
       }
       this.$refs.gDialog.showDialog()
-      this.$emit('onDialogVisible')
+      this.$emit('dialogOpened')
     },
-    async waitForActionConfirmed () {
+    async waitForDialogClosed () {
       return this.$refs.gDialog.confirmWithDialog()
     },
     setError ({ errorMessage, detailedErrorMessage }) {

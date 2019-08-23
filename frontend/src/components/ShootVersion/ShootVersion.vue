@@ -182,7 +182,7 @@ export default {
         const confirmed = await this.$refs.gDialog.confirmWithDialog()
         if (confirmed) {
           try {
-            await updateShootVersion({ namespace: this.shootnamespace, name: this.shootName, data: { version: this.selectedVersion } })
+            await updateShootVersion({ namespace: this.shootNamespace, name: this.shootName, data: { version: this.selectedVersion } })
           } catch (err) {
             const errorDetails = errorDetailsFromError(err)
             this.updateErrorMessage = 'Update Kubernetes version failed'
