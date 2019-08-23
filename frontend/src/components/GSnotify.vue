@@ -105,6 +105,7 @@ export default {
 }
 </script>
 <style lang="styl">
+  @import '~vuetify/src/stylus/settings/_colors.styl';
   @import "~vue-snotify/styles/material.css";
 
   .snotify-rightTop {
@@ -112,7 +113,7 @@ export default {
   }
 
   .snotify-info {
-    background-color: #0097A7; // cyan darken-2
+    background-color: $cyan.darken-2
   }
 
   .snotify {

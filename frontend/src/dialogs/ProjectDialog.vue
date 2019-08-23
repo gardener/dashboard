@@ -86,7 +86,7 @@ limitations under the License.
                   ></v-text-field>
               </v-flex>
             </v-layout>
-            <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+            <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
           </v-container>
         </form>
         <v-snackbar :value="loading" bottom right absolute :timeout="0">
@@ -129,7 +129,7 @@ import get from 'lodash/get'
 import includes from 'lodash/includes'
 import concat from 'lodash/concat'
 import filter from 'lodash/filter'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
 const defaultProjectName = ''
@@ -151,7 +151,7 @@ const validationErrors = {
 export default {
   name: 'project-dialog',
   components: {
-    Alert
+    GAlert
   },
   props: {
     value: {

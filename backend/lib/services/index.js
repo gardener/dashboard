@@ -23,6 +23,5 @@ module.exports = {
   members: require('./members'),
   authorization: require('./authorization'),
   authentication: require('./authentication'),
-  journals: require('./journals'),
-  customAddonDefinitions: require('./customAddonDefinitions')
+  journals: require('./journals')
 }

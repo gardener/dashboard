@@ -22,7 +22,7 @@ limitations under the License.
 
         <shoot-infrastructure-card :shootItem="item" class="mt-3"></shoot-infrastructure-card>
 
-        <shoot-addons-card :shootItem="item" class="mt-3"></shoot-addons-card>
+        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
       </v-flex>
 
       <v-flex md6>
@@ -30,21 +30,19 @@ limitations under the License.
           <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
-          <cluster-access :item="item"></cluster-access>
+          <shoot-access-card :shootItem="item"></shoot-access-card>
         </v-card>
 
-        <monitoring-card :shootItem="item" class="mt-3"></monitoring-card>
+        <shoot-monitoring-card :shootItem="item" class="mt-3"></shoot-monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Logging
           </v-card-title>
-          <logging :shootItem="item"></logging>
+          <shoot-logging :shootItem="item"></shoot-logging>
         </v-card>
 
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
-
-        <journals v-if="isAdmin" :journals="journals" :shoot="item" class="mt-3"></journals>
+        <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="item" class="mt-3"></shoot-journals-card>
 
       </v-flex>
 
@@ -56,14 +54,13 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import ClusterAccess from '@/components/ClusterAccess'
-import Journals from '@/components/Journals'
-import MonitoringCard from '@/components/MonitoringCard'
-import Logging from '@/components/Logging'
-import ShootDetailsCard from '@/components/ShootDetailsCard'
-import ShootInfrastructureCard from '@/components/ShootInfrastructureCard'
-import ShootAddonsCard from '@/components/ShootAddonsCard'
-import ShootLifecycleCard from '@/components/ShootLifecycleCard'
+import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
+import ShootJournalsCard from '@/components/ShootDetails/ShootJournalsCard'
+import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
+import ShootLogging from '@/components/ShootDetails/ShootLogging'
+import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
+import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
+import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import get from 'lodash/get'
 
 import 'codemirror/mode/yaml/yaml.js'
@@ -73,12 +70,11 @@ export default {
   components: {
     ShootDetailsCard,
     ShootInfrastructureCard,
-    ShootAddonsCard,
     ShootLifecycleCard,
-    ClusterAccess,
-    Journals,
-    MonitoringCard,
-    Logging
+    ShootAccessCard,
+    ShootJournalsCard,
+    ShootMonitoringCard,
+    ShootLogging
   },
   computed: {
     ...mapGetters([

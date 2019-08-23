@@ -68,7 +68,7 @@ limitations under the License.
           </v-layout>
 
           <slot name="data-slot"></slot>
-          <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
       <v-alert :value="!isCreateMode && relatedShootCount > 1" type="warning">
@@ -94,8 +94,8 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
-import Alert from '@/components/Alert'
-import InfraIcon from '@/components/InfrastructureIcon'
+import GAlert from '@/components/GAlert'
+import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
@@ -111,7 +111,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    Alert,
+    GAlert,
     InfraIcon
   },
   props: {

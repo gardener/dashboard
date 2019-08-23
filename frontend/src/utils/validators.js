@@ -26,6 +26,7 @@ const alphaNumUnderscoreHyphenPattern = /^[a-zA-Z0-9-_]+$/
 const resourceNamePattern = /^[a-z0-9](?:[-a-z0-9]*[a-z0-9])?$/
 const consecutiveHyphenPattern = /.?-{2,}.?/
 const startEndHyphenPattern = /^-.*.|.*-$/
+const numberOrPercentagePattern = /^[\d]+[%]?$/
 
 const base64 = regex('base64', base64Pattern)
 const uppercaseAlphaNum = regex('uppercaseAlphaNum', uppercaseAlphaNumPattern)
@@ -37,6 +38,9 @@ const noConsecutiveHyphen = (value) => {
 }
 const noStartEndHyphen = (value) => {
   return !startEndHyphenPattern.test(value)
+}
+const numberOrPercentage = (value) => {
+  return numberOrPercentagePattern.test(value)
 }
 
 const unique = key => withParams({ type: 'unique', key },
@@ -86,5 +90,6 @@ export {
   noStartEndHyphen,
   serviceAccountKey,
   minVolumeSize,
-  uniqueWorkerName
+  uniqueWorkerName,
+  numberOrPercentage
 }

@@ -41,7 +41,7 @@ limitations under the License.
             can not be undone.</span>
           </div>
         </v-container>
-        <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+        <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -55,13 +55,13 @@ limitations under the License.
 <script>
 import { mapActions } from 'vuex'
 import get from 'lodash/get'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   name: 'secret-dialog-delete',
   components: {
-    Alert
+    GAlert
   },
   props: {
     value: {

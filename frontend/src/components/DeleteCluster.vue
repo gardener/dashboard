@@ -15,76 +15,56 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn
-        slot="activator"
-        icon
-        :small="small"
-        :disabled="isShootMarkedForDeletion"
-        :class="contentClass"
-        @click="renderAndShowDialog"
-      >
-        <v-icon>delete</v-icon>
-      </v-btn>
-      <span>{{caption}}</span>
-    </v-tooltip>
-
-    <template v-if="renderDialog">
-      <confirm-dialog
-        :confirm="shootName"
-        v-model="dialog"
-        :cancel="hideDialog"
-        :ok="deletionConfirmed"
-        :errorMessage.sync="errorMessage"
-        :detailedErrorMessage.sync="detailedErrorMessage"
-      >
-        <template slot="caption">Delete Cluster</template>
-        <template slot="affectedObjectName">{{shootName}}</template>
-        <template slot="message">
-          <v-list>
-            <v-list-tile-content>
-              <v-list-tile-sub-title>
-                Created By
-              </v-list-tile-sub-title>
-              <v-list-tile-title>
-                <account-avatar :account-name="createdBy" :size="22"></account-avatar>
-              </v-list-tile-title>
-            </v-list-tile-content>
-          </v-list>
-          <p>
-            Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
-          </p>
-          <p>
-            <i class="red--text text--darken-2">This action cannot be undone.</i>
-          </p>
-          <p v-if="isReconciliationDeactivated()">
-            <v-layout row fill-height>
-              <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
-              <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-            </v-layout>
-          </p>
-        </template>
-      </confirm-dialog>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    @dialogOpened="onDeleteDialogOpened"
+    ref="actionDialog"
+    :caption="caption"
+    icon="delete"
+    :iconClass="contentClass"
+    dialogColor="red"
+    confirmButtonText="Delete"
+    confirm-required
+    :smallIcon="small"
+    maxWidth="600"
+    >
+    <template slot="actionComponent">
+      <v-list>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>
+            Created By
+          </v-list-tile-sub-title>
+          <v-list-tile-title>
+            <account-avatar :account-name="shootCreatedBy" :size="22"></account-avatar>
+          </v-list-tile-title>
+        </v-list-tile-content>
+      </v-list>
+      <p>
+        Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
+      </p>
+      <p>
+        <i class="red--text text--darken-2">This action cannot be undone.</i>
+      </p>
+      <p v-if="isShootReconciliationDeactivated">
+        <v-layout row fill-height>
+          <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
+          <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
+        </v-layout>
+      </p>
     </template>
-  </div>
+  </action-icon-dialog>
 </template>
 
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import get from 'lodash/get'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
-import {
-  getCreatedBy,
-  isShootMarkedForDeletion,
-  isReconciliationDeactivated
-} from '@/utils'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    ConfirmDialog,
+    ActionIconDialog,
     AccountAvatar
   },
   props: {
@@ -100,10 +80,10 @@ export default {
       default: undefined
     }
   },
+  mixins: [shootItem],
   data () {
     return {
       renderDialog: false,
-      dialog: false,
       errorMessage: null,
       detailedErrorMessage: null
     }
@@ -116,57 +96,29 @@ export default {
       return this.isShootMarkedForDeletion
         ? 'Cluster already marked for deletion'
         : 'Delete Cluster'
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    createdBy () {
-      return getCreatedBy(get(this.shootItem, 'metadata'))
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
-    renderAndShowDialog () {
-      // as this component is potentially embedded in a list with many items we only want to render the dialog on demand
-      this.renderDialog = true
-
-      this.$nextTick(() => {
-        this.showDialog()
-      })
+    async onDeleteDialogOpened () {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
+        this.doDeleteCluster()
+      }
     },
-    showDialog () {
-      this.dialog = true
-      this.reset()
-    },
-    hideDialog () {
-      this.dialog = false
-    },
-    ...mapActions([
-      'deleteShoot'
-    ]),
-    async deletionConfirmed () {
+    async doDeleteCluster () {
       try {
         await this.deleteShoot({ name: this.shootName, namespace: this.shootNamespace })
-        this.hideDialog()
       } catch (err) {
+        const errorMessage = 'Cluster deletion failed'
         const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Cluster deletion failed'
-        this.detailedErrorMessage = errorDetails.detailedMessage
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
     },
-    isReconciliationDeactivated () {
-      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
-    },
-    reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
-    }
+    ...mapActions([
+      'deleteShoot'
+    ])
   }
 }
 </script>

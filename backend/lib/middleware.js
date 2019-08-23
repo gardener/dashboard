@@ -20,14 +20,9 @@ const _ = require('lodash')
 const config = require('./config')
 const logger = require('./logger')
 const { NotFound, InternalServerError } = require('./errors')
-const { customAddonDefinitions } = require('./services')
 
-async function frontendConfig (req, res, next) {
-  const user = req.user
+function frontendConfig (req, res, next) {
   const frontendConfig = {}
-  try {
-    frontendConfig.customAddonDefinitions = await customAddonDefinitions.list({ user, namespace: 'garden' })
-  } catch (err) { /* ignore error */ }
   res.json(Object.assign(frontendConfig, config.frontend))
 }
 
