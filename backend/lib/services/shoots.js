@@ -17,7 +17,7 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64, getProjectByNamespace } = require('../utils')
+const { decodeBase64, getSeedKubeconfig, getProjectByNamespace } = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
