@@ -130,21 +130,7 @@ limitations under the License.
 
     </template>
 
-    <aws-dialog v-model="dialogState.aws.visible" :secret="selectedSecret"></aws-dialog>
-    <aws-help-dialog v-model="dialogState.aws.help"></aws-help-dialog>
-
-    <azure-dialog v-model="dialogState.azure.visible" :secret="selectedSecret"></azure-dialog>
-    <azure-help-dialog v-model="dialogState.azure.help"></azure-help-dialog>
-
-    <gcp-dialog v-model="dialogState.gcp.visible" :secret="selectedSecret"></gcp-dialog>
-    <gcp-help-dialog v-model="dialogState.gcp.help"></gcp-help-dialog>
-
-    <openstack-dialog v-model="dialogState.openstack.visible" :secret="selectedSecret"></openstack-dialog>
-    <openstack-help-dialog v-model="dialogState.openstack.help"></openstack-help-dialog>
-
-    <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret"></alicloud-dialog>
-    <alicloud-help-dialog v-model="dialogState.alicloud.help"></alicloud-help-dialog>
-
+    <secret-dialog-wrapper :dialogState="dialogState" :selectedSecret="selectedSecret"></secret-dialog-wrapper>
     <delete-dialog v-if="selectedSecret" v-model="dialogState.deleteConfirm" :secret="selectedSecret" :backgroundSrc="backgroundForSelectedSecret"></delete-dialog>
 
     <v-fab-transition>
@@ -177,40 +163,22 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import { isOwnSecretBinding, infrastructureColor } from '@/utils'
-import GcpDialog from '@/dialogs/SecretDialogGcp'
-import GcpHelpDialog from '@/dialogs/SecretDialogGcpHelp'
-import AwsHelpDialog from '@/dialogs/SecretDialogAwsHelp'
-import AwsDialog from '@/dialogs/SecretDialogAws'
-import AzureDialog from '@/dialogs/SecretDialogAzure'
-import AzureHelpDialog from '@/dialogs/SecretDialogAzureHelp'
-import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
-import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
-import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
-import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
+import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
 import DisabledSecret from '@/components/DisabledSecret'
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 
 export default {
   name: 'secrets',
   components: {
-    GcpDialog,
-    GcpHelpDialog,
-    AzureHelpDialog,
-    AzureDialog,
-    AwsDialog,
-    AwsHelpDialog,
-    OpenstackDialog,
-    OpenstackHelpDialog,
-    AlicloudDialog,
-    AlicloudHelpDialog,
     DeleteDialog,
     Secret,
     DisabledSecret,
-    InfraIcon
+    InfraIcon,
+    SecretDialogWrapper
   },
   data () {
     return {

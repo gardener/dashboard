@@ -16,7 +16,7 @@ dashboard:
             registry: 'gcr-readwrite'
             image: 'eu.gcr.io/gardener-project/gardener/dashboard'
     steps: ~
-  variants:
+  jobs:
     head-update:
       traits:
         draft_release: ~

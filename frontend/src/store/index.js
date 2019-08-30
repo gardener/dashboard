@@ -30,6 +30,13 @@ import some from 'lodash/some'
 import concat from 'lodash/concat'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
+import forEach from 'lodash/forEach'
+import isEmpty from 'lodash/isEmpty'
+import intersection from 'lodash/intersection'
+import find from 'lodash/find'
+import head from 'lodash/head'
+import lowerCase from 'lodash/lowerCase'
+import cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -39,6 +46,7 @@ import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
+const semSort = require('semver-sort')
 
 Vue.use(Vuex)
 
@@ -71,11 +79,19 @@ const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
+const machineAndVolumeTypePredicate = (item, zones) => {
+  if (item.usable === false) {
+    return false
+  }
+  const itemZones = item.zones
+  if (isEmpty(itemZones) || isEmpty(zones)) {
+    return true
+  }
+  return difference(zones, itemZones).length === 0
+}
+
 // getters
 const getters = {
-  customAddonDefinitionList (state) {
-    return get(state, 'cfg.customAddonDefinitions', [])
-  },
   apiServerUrl (state) {
     return get(state.cfg, 'apiServerUrl', window.location.origin)
   },
@@ -96,18 +112,55 @@ const getters = {
       return filter(state.cloudProfiles.all, predicate)
     }
   },
-  machineTypesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
+  machineTypesByCloudProfileNameAndZones (state, getters) {
+    return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => get(machineType, 'usable', true) === true)
+      return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, zones))
     }
   },
-  volumeTypesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
+  volumeTypesByCloudProfileNameAndZones (state, getters) {
+    return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const volumeTypes = get(cloudProfile, 'data.volumeTypes')
-      return filter(volumeTypes, volumeType => get(volumeType, 'usable', true) === true)
+      return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, zones))
+    }
+  },
+  machineImagesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const machineImages = get(cloudProfile, 'data.machineImages')
+      const allMachineImages = []
+      forEach(machineImages, machineImage => {
+        forEach(machineImage.versions, version => {
+          if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
+            allMachineImages.push({
+              name: machineImage.name,
+              version: version.version,
+              expirationDate: version.expirationDate
+            })
+          }
+        })
+      })
+
+      return allMachineImages
+    }
+  },
+  zonesByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const predicate = item => item.region === region
+      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+    }
+  },
+  defaultMachineImageForCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
+      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
+      if (!defaultMachineImage) {
+        defaultMachineImage = head(machineImages)
+      }
+      return defaultMachineImage
     }
   },
   shootList (state, getters) {
@@ -135,6 +188,9 @@ const getters = {
   },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
+  },
+  sortedCloudProviderKindList (state, getters) {
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -204,6 +260,11 @@ const getters = {
       return get(cloudProfile, 'data.kubernetes.versions', [])
     }
   },
+  sortedKubernetesVersions (state, getters) {
+    return (cloudProfileName) => {
+      return semSort.desc(cloneDeep(getters.kubernetesVersions(cloudProfileName)))
+    }
+  },
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
   },
@@ -262,14 +323,11 @@ const getters = {
   websocketConnectAttempt (state) {
     return get(state, 'websocketConnectionError.reconnectAttempt')
   },
-  isHideUserIssues (state, getters) {
-    return getters['shoots/isHideUserIssues']
+  getShootListFilters (state, getters) {
+    return getters['shoots/getShootListFilters']
   },
-  isHideProgressingIssues (state, getters) {
-    return getters['shoots/isHideProgressingIssues']
-  },
-  isHideDeactivatedReconciliation (state, getters) {
-    return getters['shoots/isHideDeactivatedReconciliation']
+  newShootResource (state, getters) {
+    return getters['shoots/newShootResource']
   },
   hasTerminalAccess (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false) && getters.isAdmin
@@ -374,20 +432,14 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setHideUserIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideUserIssues', value)
+  setShootListFilters ({ dispatch, commit }, value) {
+    return dispatch('shoots/setShootListFilters', value)
       .catch(err => {
         dispatch('setError', err)
       })
   },
-  setHideProgressingIssues ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideProgressingIssues', value)
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  setHideDeactivatedReconciliation ({ dispatch, commit }, value) {
-    return dispatch('shoots/setHideDeactivatedReconciliation', value)
+  setShootListFilter ({ dispatch, commit }, { filter, value }) {
+    return dispatch('shoots/setShootListFilter', { filter, value })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -397,6 +449,12 @@ const actions = {
       .catch(err => {
         dispatch('setError', err)
       })
+  },
+  setNewShootResource ({ dispatch }, data) {
+    return dispatch('shoots/setNewShootResource', data)
+  },
+  resetNewShootResource ({ dispatch }) {
+    return dispatch('shoots/resetNewShootResource')
   },
   createProject ({ dispatch, commit }, data) {
     return dispatch('projects/create', data)

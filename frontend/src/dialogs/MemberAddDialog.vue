@@ -29,7 +29,7 @@ limitations under the License.
             color="green darken-2"
             ref="username"
             label="User"
-            v-model="username"
+            v-model.trim="username"
             :error-messages="usernameErrors"
             @input="$v.username.$touch()"
             @keyup.enter="submit()"
@@ -42,7 +42,7 @@ limitations under the License.
             color="blue-grey"
             ref="serviceAccountName"
             label="Service Account"
-            v-model="serviceAccountName"
+            v-model.trim="serviceAccountName"
             :error-messages="serviceAccountNameErrors"
             @input="$v.serviceAccountName.$touch()"
             @keyup.enter="submit()"
@@ -50,7 +50,7 @@ limitations under the License.
             persistent-hint
             tabindex="1"
           ></v-text-field>
-          <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
+          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -66,7 +66,7 @@ import toLower from 'lodash/toLower'
 import { mapActions, mapState, mapGetters } from 'vuex'
 import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
-import Alert from '@/components/Alert'
+import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { serviceAccountToDisplayName, isServiceAccount } from '@/utils'
 import filter from 'lodash/filter'
@@ -79,7 +79,7 @@ const defaultServiceName = 'robot'
 export default {
   name: 'add-member-dialog',
   components: {
-    Alert
+    GAlert
   },
   props: {
     value: {

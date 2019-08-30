@@ -17,7 +17,7 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64, getSeedKubeconfigForShoot, getProjectByNamespace } = require('../utils')
+const { decodeBase64, getProjectByNamespace } = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
@@ -29,6 +29,16 @@ function Garden ({ auth }) {
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
+}
+
+async function getSeedKubeconfigForShoot ({ user, shoot }) {
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  const seedShootNS = _.get(shoot, 'status.technicalID')
+
+  const coreClient = Core(user)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
+
+  return { seed, seedKubeconfig, seedShootNS }
 }
 
 function getSecret (core, namespace, name) {
@@ -145,6 +155,16 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   return patch({ user, namespace, name, body: payload })
 }
 
+exports.replaceAddons = async function ({ user, namespace, name, body }) {
+  const addons = body
+  const payload = {
+    spec: {
+      addons
+    }
+  }
+  return patch({ user, namespace, name, body: payload })
+}
+
 exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
   const workers = body
   const patchOperations = [
@@ -158,7 +178,7 @@ exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, 
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
-  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
+  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
       maintenance: {
@@ -167,7 +187,8 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
           end: timeWindowEnd
         },
         autoUpdate: {
-          kubernetesVersion: updateKubernetesVersion
+          kubernetesVersion: updateKubernetesVersion,
+          machineImageVersion: updateOSVersion
         }
       }
     }

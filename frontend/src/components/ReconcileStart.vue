@@ -15,51 +15,37 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-tooltip top>
-      <v-btn slot="activator" :loading="isReconcileToBeScheduled" icon @click="showDialog" :disabled="isShootMarkedForDeletion || isReconciliationDeactivated">
-        <v-icon medium>mdi-refresh</v-icon>
-      </v-btn>
-      <span v-if="isReconcileToBeScheduled">Requesting to schedule cluster reconcile</span>
-      <span v-else-if="isReconciliationDeactivated">Reconciliation deactivated for this cluster</span>
-      <span v-else>{{caption}}</span>
-    </v-tooltip>
-    <confirm-dialog
-      confirmButtonText="Trigger Now"
-      v-model="dialog"
-      :cancel="hideDialog"
-      :ok="triggerReconcile"
-      :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage"
-      confirmColor="orange"
-      defaultColor="orange"
-      max-width="850"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <v-layout row wrap>
-          <v-flex>
-            <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
-            </div>
-          </v-flex>
-        </v-layout>
-      </template>
-    </confirm-dialog>
-  </div>
+  <action-icon-dialog
+    :shootItem="shootItem"
+    :loading="isReconcileToBeScheduled"
+    @dialogOpened="startDialogOpened"
+    ref="actionDialog"
+    :caption="caption"
+    icon="mdi-refresh"
+    maxWidth="600"
+    confirmButtonText="Trigger now">
+    <template slot="actionComponent">
+      <v-layout row wrap>
+        <v-flex>
+          <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
+          </div>
+        </v-flex>
+      </v-layout>
+    </template>
+  </action-icon-dialog>
 </template>
 
 <script>
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
-import { errorDetailsFromError } from '@/utils/error'
-import { isShootMarkedForDeletion, isReconciliationDeactivated } from '@/utils'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
+import { shootItem } from '@/mixins/shootItem'
+import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
-    ConfirmDialog
+    ActionIconDialog
   },
   props: {
     shootItem: {
@@ -68,62 +54,48 @@ export default {
   },
   data () {
     return {
-      dialog: false,
-      errorMessage: null,
-      detailedErrorMessage: null,
       reconcileTriggered: false,
       currentGeneration: null
     }
   },
+  mixins: [shootItem],
   computed: {
     isReconcileToBeScheduled () {
-      return get(this.shootItem, 'metadata.generation') === this.currentGeneration
+      return this.shootGenerationValue === this.currentGeneration
     },
     caption () {
+      if (this.isReconcileToBeScheduled) {
+        return 'Requesting to schedule cluster reconcile'
+      } else if (this.isShootReconciliationDeactivated) {
+        return 'Reconciliation deactivated for this cluster'
+      }
       return 'Trigger Reconcile'
-    },
-    shootName () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    shootNamespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    isShootMarkedForDeletion () {
-      return isShootMarkedForDeletion(get(this.shootItem, 'metadata'))
-    },
-    isReconciliationDeactivated () {
-      return isReconciliationDeactivated(get(this.shootItem, 'metadata'))
     }
   },
   methods: {
-    showDialog () {
-      this.dialog = true
-      this.reset()
+    async startDialogOpened () {
+      const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
+      if (confirmed) {
+        this.startReconcile()
+      }
     },
-    hideDialog () {
-      this.dialog = false
-    },
-    async triggerReconcile () {
+    async startReconcile () {
       this.reconcileTriggered = true
       this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
       const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
-        this.hideDialog()
       } catch (err) {
+        const errorMessage = 'Could not trigger reconcile'
         const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Could not trigger reconcile'
-        this.detailedErrorMessage = errorDetails.detailedMessage
+        const detailedErrorMessage = errorDetails.detailedMessage
+        this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.reconcileTriggered = false
         this.currentGeneration = null
       }
-    },
-    reset () {
-      this.errorMessage = null
-      this.detailedErrorMessage = null
     }
   },
   watch: {

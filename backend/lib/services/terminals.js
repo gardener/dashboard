@@ -24,8 +24,8 @@ const {
   getKubeconfig,
   getShootIngressDomain,
   getConfigValue,
-  readServiceAccountToken,
-  getSoilIngressDomainForSeed
+  getSoilIngressDomainForSeed,
+  decodeBase64
 } = require('../utils')
 const {
   COMPONENT_TERMINAL,
@@ -57,6 +57,39 @@ function initializeTerminalObject ({ kubeApiServer }) {
     container: TERMINAL_CONTAINER_NAME,
     server: kubeApiServer
   }
+}
+
+async function readServiceAccountToken ({ coreClient, namespace, serviceAccountName, waitUntilReady = true }) {
+  let serviceAccount
+  if (waitUntilReady) {
+    const resourceName = serviceAccountName
+    const conditionFunction = isServiceAccountReady
+    const watch = coreClient.ns(namespace).serviceaccounts.watch({ name: serviceAccountName })
+    serviceAccount = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName, waitTimeout: 10 * 1000 })
+  } else {
+    try {
+      serviceAccount = await coreClient.ns(namespace).serviceaccounts.get({ name: serviceAccountName })
+    } catch (err) {
+      if (err.code !== 404) {
+        throw err
+      }
+    }
+  }
+  const secrets = _.get(serviceAccount, 'secrets')
+  const secretName = _.get(_.first(secrets), 'name')
+  if (_.isEmpty(secretName)) {
+    return
+  }
+
+  const secret = await coreClient.ns(namespace).secrets.get({ name: secretName })
+  const token = decodeBase64(secret.data.token)
+  const caData = secret.data['ca.crt']
+  return { token, caData }
+}
+
+function isServiceAccountReady ({ secrets } = {}) {
+  const secretName = _.get(_.first(secrets), 'name')
+  return !_.isEmpty(secretName)
 }
 
 async function existsShoot ({ gardenClient, seedName }) {

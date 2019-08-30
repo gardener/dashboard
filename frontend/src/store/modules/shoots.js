@@ -31,10 +31,14 @@ import filter from 'lodash/filter'
 import includes from 'lodash/includes'
 import split from 'lodash/split'
 import join from 'lodash/join'
+import set from 'lodash/set'
 import head from 'lodash/head'
+import sample from 'lodash/sample'
+import isEmpty from 'lodash/isEmpty'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import { getCloudProviderTemplate } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   getCloudProviderKind,
@@ -43,7 +47,12 @@ import { isHibernated,
   isStatusProgressing,
   getCreatedBy,
   getProjectName,
-  shootHasIssue } from '@/utils'
+  shootHasIssue,
+  purposesForSecret,
+  shortRandomString,
+  shootAddonList,
+  utcMaintenanceWindowFromLocalBegin,
+  randomLocalMaintenanceBegin } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -63,9 +72,8 @@ const state = {
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
-  hideUserIssues: undefined,
-  hideProgressingIssues: undefined,
-  hideDeactivatedReconciliation: undefined
+  shootListFilters: undefined,
+  newShootResource: undefined
 }
 
 // getters
@@ -83,14 +91,11 @@ const getters = {
       return findItem(state.selection)
     }
   },
-  isHideUserIssues () {
-    return state.hideUserIssues
+  getShootListFilters () {
+    return state.shootListFilters
   },
-  isHideProgressingIssues () {
-    return state.hideProgressingIssues
-  },
-  isHideDeactivatedReconciliation () {
-    return state.hideDeactivatedReconciliation
+  newShootResource () {
+    return state.newShootResource
   }
 }
 
@@ -199,17 +204,25 @@ const actions = {
       commit('SET_SEARCHVALUE', { rootState, searchValue })
     }
   },
-  setHideUserIssues ({ commit, rootState }, value) {
-    commit('SET_HIDE_USER_ISSUES', { rootState, value })
-    return state.hideUserIssues
+  setShootListFilters ({ commit, rootState }, value) {
+    commit('SET_SHOOT_LIST_FILTERS', { rootState, value })
+    return state.shootListFilters
   },
-  setHideProgressingIssues ({ commit, rootState }, value) {
-    commit('SET_HIDE_PROGRESSING_ISSUES', { rootState, value })
-    return state.hideProgressingIssues
+  setShootListFilter ({ commit, rootState }, filterValue) {
+    if (state.shootListFilters) {
+      commit('SET_SHOOT_LIST_FILTER', { rootState, filterValue })
+      return state.shootListFilters
+    }
   },
-  setHideDeactivatedReconciliation ({ commit, rootState }, value) {
-    commit('SET_HIDE_DEACTIVATED_RECONCILIATION', { rootState, value })
-    return state.hideDeactivatedReconciliation
+  setNewShootResource ({ commit }, data) {
+    commit('SET_NEW_SHOOT_RESOURCE', { data })
+
+    return state.newShootResource
+  },
+  resetNewShootResource ({ commit, rootState }) {
+    commit('RESET_NEW_SHOOT_RESOURCE')
+
+    return state.newShootResource
   }
 }
 
@@ -406,23 +419,31 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     items = filter(items, predicate)
   }
-  if (state.hideProgressingIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isStatusProgressing(get(item, 'metadata', {}))
+  if (rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
+    if (get(state, 'shootListFilters.progressing', false)) {
+      const predicate = item => {
+        return !isStatusProgressing(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
-  }
-  if (state.hideUserIssues && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isUserError(get(item, 'status.lastError.codes', []))
+    if (get(state, 'shootListFilters.userIssues', false)) {
+      const predicate = item => {
+        return !isUserError(get(item, 'status.lastError.codes', []))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
-  }
-  if (state.hideDeactivatedReconciliation && rootState.namespace === '_all' && rootState.onlyShootsWithIssues) {
-    const predicate = item => {
-      return !isReconciliationDeactivated(get(item, 'metadata', {}))
+    if (get(state, 'shootListFilters.deactivatedReconciliation', false)) {
+      const predicate = item => {
+        return !isReconciliationDeactivated(get(item, 'metadata', {}))
+      }
+      items = filter(items, predicate)
     }
-    items = filter(items, predicate)
+    if (get(state, 'shootListFilters.hasJournals', false)) {
+      const predicate = item => {
+        return !(store.getters['journals/lastUpdated'](get(item, 'metadata', {})) !== undefined)
+      }
+      items = filter(items, predicate)
+    }
   }
 
   state.filteredAndSortedShoots = items
@@ -526,17 +547,108 @@ const mutations = {
     state.sortedShoots = []
     state.filteredAndSortedShoots = []
   },
-  SET_HIDE_USER_ISSUES (state, { rootState, value }) {
-    state.hideUserIssues = value
+  SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
+    state.shootListFilters = value
     setFilteredAndSortedItems(state, rootState)
   },
-  SET_HIDE_PROGRESSING_ISSUES (state, { rootState, value }) {
-    state.hideProgressingIssues = value
+  SET_SHOOT_LIST_FILTER (state, { rootState, filterValue }) {
+    const { filter, value } = filterValue
+    state.shootListFilters[filter] = value
     setFilteredAndSortedItems(state, rootState)
   },
-  SET_HIDE_DEACTIVATED_RECONCILIATION (state, { rootState, value }) {
-    state.hideDeactivatedReconciliation = value
-    setFilteredAndSortedItems(state, rootState)
+  SET_NEW_SHOOT_RESOURCE (state, { data }) {
+    state.newShootResource = data
+  },
+  RESET_NEW_SHOOT_RESOURCE (state) {
+    const shootResource = {
+      apiVersion: 'garden.sapcloud.io/v1beta1',
+      kind: 'Shoot'
+    }
+
+    const infrastructureKind = head(store.getters.sortedCloudProviderKindList)
+    set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+
+    const cloudProfileName = get(head(store.getters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
+    set(shootResource, 'spec.cloud.profile', cloudProfileName)
+
+    const secret = head(store.getters.infrastructureSecretsByCloudProfileName(cloudProfileName))
+    const secretBindingRef = {
+      name: get(secret, 'metadata.bindingName')
+    }
+    set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
+
+    const region = head(store.getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+    set(shootResource, 'spec.cloud.region', region)
+
+    const zones = [sample(store.getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
+    if (!isEmpty(zones)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+    }
+
+    const loadBalancerProviderName = head(store.getters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
+    if (!isEmpty(loadBalancerProviderName)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
+    }
+    const floatingPoolName = head(store.getters.floatingPoolNamesByCloudProfileName(cloudProfileName))
+    if (!isEmpty(floatingPoolName)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
+    }
+
+    const name = shortRandomString(10)
+    set(shootResource, 'metadata.name', name)
+
+    const purpose = head(purposesForSecret(secret))
+    set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+
+    const kubernetesVersion = head(store.getters.sortedKubernetesVersions(cloudProfileName))
+    set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
+
+    const workerName = `worker-${shortRandomString(5)}`
+    const volumeType = get(head(store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
+    const volumeSize = volumeType ? '50Gi' : undefined
+    const machineType = get(head(store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
+    const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+    const workers = [
+      {
+        name: workerName,
+        machineType,
+        volumeType,
+        volumeSize,
+        autoScalerMin: 1,
+        autoScalerMax: 2,
+        maxSurge: 1,
+        machineImage
+      }
+    ]
+    set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
+
+    const addons = {}
+    forEach(filter(shootAddonList, addon => addon.visible), addon => {
+      set(addons, [addon.name, 'enabled'], addon.enabled)
+    })
+    set(shootResource, 'spec.addons', addons)
+
+    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: store.state.localTimezone })
+    const maintenance = {
+      timeWindow: {
+        begin: utcBegin,
+        end: utcEnd
+      },
+      autoUpdate: {
+        kubernetesVersion: true,
+        machineImageVersion: true
+      }
+    }
+    set(shootResource, 'spec.maintenance', maintenance)
+
+    let hibernationSchedule = get(store.state.cfg.defaultHibernationSchedule, purpose)
+    hibernationSchedule = map(hibernationSchedule, schedule => {
+      schedule.location = store.state.localTimezone
+      return schedule
+    })
+    set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
+
+    state.newShootResource = shootResource
   }
 }
 

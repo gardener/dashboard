@@ -18,6 +18,9 @@ const { assign, merge } = require('lodash')
 const { existsSync } = require('fs')
 const net = require('net')
 
+const { Request } = require('request')
+require('./debug')(Request)
+
 const BaseObject = require('kubernetes-client/lib/base')
 BaseObject.prototype.watch = require('./watch')
 BaseObject.prototype.mergePatch = mergePatch

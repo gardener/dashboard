@@ -41,6 +41,7 @@ import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import last from 'lodash/last'
+import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
 
@@ -421,13 +422,6 @@ export function isValidTerminationDate (expirationTimestamp) {
   return expirationTimestamp && new Date(expirationTimestamp) > new Date()
 }
 
-export function isShootMarkedForDeletion (metadata) {
-  const confirmation = get(metadata, ['annotations', 'confirmation.garden.sapcloud.io/deletion'], false)
-  const deletionTimestamp = get(metadata, 'deletionTimestamp')
-
-  return !!deletionTimestamp && !!confirmation
-}
-
 export function isTypeDelete (lastOperation) {
   return get(lastOperation, 'type') === 'Delete'
 }
@@ -498,4 +492,72 @@ export function shortRandomString (length) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
+}
+
+export function selfTerminationDaysForSecret (secret) {
+  const clusterLifetimeDays = function (quotas, scope) {
+    const predicate = item => get(item, 'spec.scope') === scope
+    return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+  }
+
+  const quotas = get(secret, 'quotas')
+  let terminationDays = clusterLifetimeDays(quotas, 'project')
+  if (!terminationDays) {
+    terminationDays = clusterLifetimeDays(quotas, 'secret')
+  }
+
+  return terminationDays
+}
+
+export function purposesForSecret (secret) {
+  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production']
+}
+
+export const shootAddonList = [
+  {
+    name: 'kubernetes-dashboard',
+    title: 'Dashboard',
+    description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
+    visible: true,
+    enabled: false
+  },
+  {
+    name: 'monocular',
+    title: 'Monocular',
+    description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
+  },
+  {
+    name: 'nginx-ingress',
+    title: 'Nginx Ingress',
+    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
+    visible: true,
+    enabled: true
+  }
+]
+
+export function randomLocalMaintenanceBegin () {
+  // randomize maintenance time window
+  const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
+  const randomHour = sample(hours)
+  // use local timezone offset
+  const localBegin = `${randomHour}:00`
+
+  return localBegin
+}
+
+export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
+  timezone = timezone || store.state.localTimezone
+  if (localBegin) {
+    const utcMoment = moment.tz(localBegin, 'HH:mm', timezone).utc()
+
+    let utcBegin
+    let utcEnd
+    if (utcMoment && utcMoment.isValid()) {
+      utcBegin = utcMoment.format('HHmm00+0000')
+      utcMoment.add(1, 'h')
+      utcEnd = utcMoment.format('HHmm00+0000')
+    }
+    return { utcBegin, utcEnd }
+  }
+  return undefined
 }
