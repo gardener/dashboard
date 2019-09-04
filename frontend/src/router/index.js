@@ -163,7 +163,7 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
-          path: 'namespace/create/ui',
+          path: 'namespace/+',
           name: 'CreateProject',
           component: Home,
           meta: {
