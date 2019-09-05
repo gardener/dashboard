@@ -141,7 +141,7 @@ async function readShoot ({ user, namespace, name }) {
 async function findExistingTerminalResource ({ gardendashboardClient, username, namespace, name, target }) {
   let selectors = [
     `component=${COMPONENT_TERMINAL}`,
-    `garden.sapcloud.io/targetType=${target}`,
+    `dashboard.gardener.cloud/targetType=${target}`,
     `garden.sapcloud.io/createdBy=${fnv.hash(username, 64).str()}`
   ]
   if (!_.isEmpty(name)) {
@@ -287,15 +287,15 @@ async function createTerminal ({ gardendashboardClient, user, namespace, name, t
   const terminalTarget = createTarget({ kubeconfigContextNamespace: kubecfgCtxNamespaceTargetCluster, credentials: targetCredentials, bindingKind, namespace: targetNamespace })
 
   const labels = {
-    'garden.sapcloud.io/targetType': target,
-    'garden.sapcloud.io/targetNamespace': fnv.hash(terminalTarget.kubeconfigContextNamespace, 64).str(),
+    'dashboard.gardener.cloud/targetType': target,
+    'dashboard.gardener.cloud/targetNamespace': fnv.hash(terminalTarget.kubeconfigContextNamespace, 64).str(),
     'garden.sapcloud.io/createdBy': fnv.hash(user.id, 64).str()
   }
   if (!_.isEmpty(name)) {
     labels['garden.sapcloud.io/name'] = name
   }
   const annotations = {
-    'garden.sapcloud.io/targetNamespace': terminalTarget.kubeconfigContextNamespace
+    'dashboard.gardener.cloud/targetNamespace': terminalTarget.kubeconfigContextNamespace
   }
   const prefix = `term-${target}-`
   const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
@@ -415,7 +415,7 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   }
 
   const annotations = {
-    'terminal.garden.sapcloud.io/operation': `keepalive`
+    'dashboard.gardener.cloud/operation': `keepalive`
   }
   try {
     const name = terminal.metadata.name

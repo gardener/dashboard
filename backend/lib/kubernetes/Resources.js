@@ -67,11 +67,6 @@ module.exports = {
     kind: 'ClusterRole',
     apiVersion: 'rbac.authorization.k8s.io/v1'
   },
-  Pod: {
-    name: 'pods',
-    kind: 'Pod',
-    apiVersion: 'v1'
-  },
   ServiceAccount: {
     name: 'serviceaccounts',
     kind: 'ServiceAccount',
@@ -81,11 +76,6 @@ module.exports = {
     name: 'ingresses',
     kind: 'Ingress',
     apiVersion: 'extensions/v1beta1'
-  },
-  CronJob: {
-    name: 'cronjobs',
-    kind: 'CronJob',
-    apiVersion: 'batch/v1beta1'
   },
   Shoot: {
     name: 'shoots',

@@ -260,7 +260,7 @@ function bootstrapSeed ({ seed }) {
   if (!requiredConfigExists) {
     return
   }
-  const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'dashboard.garden.sapcloud.io/terminal-bootstrap-resources-disabled'], false)
+  const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
   if (isBootstrapDisabledForSeed) {
     const name = _.get(seed, 'metadata.name')
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
