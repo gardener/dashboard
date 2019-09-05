@@ -17,8 +17,8 @@ limitations under the License.
 <template>
   <v-list v-if="hasTerminalAccess">
     <terminal-list-tile
-      :name=name
-      :namespace=namespace
+      :name=shootName
+      :namespace=shootNamespace
       target="cp"
       description="Open terminal into cluster's control plane running on it's seed">
     </terminal-list-tile>
@@ -29,26 +29,22 @@ limitations under the License.
 import TerminalListTile from '@/components/TerminalListTile'
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     TerminalListTile
   },
+  mixins: [shootItem],
   props: {
-    item: {
+    shootItem: {
       type: Object
     }
   },
   computed: {
     ...mapGetters([
       'hasTerminalAccess'
-    ]),
-    name () {
-      return get(this.item, 'metadata.name')
-    },
-    namespace () {
-      return get(this.item, 'metadata.namespace')
-    }
+    ])
   }
 }
 </script>

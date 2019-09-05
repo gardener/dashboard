@@ -28,7 +28,6 @@ const {
   decodeBase64
 } = require('../utils')
 const {
-  COMPONENT_TERMINAL,
   toTerminalResource
 } = require('../utils/terminals/terminalResources')
 const { getSeeds } = require('../cache')
@@ -50,13 +49,6 @@ function Gardendashboard ({ auth }) {
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
-}
-
-function initializeTerminalObject ({ kubeApiServer }) {
-  return {
-    container: TERMINAL_CONTAINER_NAME,
-    server: kubeApiServer
-  }
 }
 
 async function readServiceAccountToken ({ coreClient, namespace, serviceAccountName, waitUntilReady = true }) {
@@ -140,7 +132,6 @@ async function readShoot ({ user, namespace, name }) {
 
 async function findExistingTerminalResource ({ gardendashboardClient, username, namespace, name, target }) {
   let selectors = [
-    `component=${COMPONENT_TERMINAL}`,
     `dashboard.gardener.cloud/targetType=${target}`,
     `garden.sapcloud.io/createdBy=${fnv.hash(username, 64).str()}`
   ]
@@ -148,14 +139,11 @@ async function findExistingTerminalResource ({ gardendashboardClient, username, 
     selectors = _.concat(selectors, `garden.sapcloud.io/name=${name}`)
   }
   const qs = { labelSelector: selectors.join(',') }
-  try {
-    let { items: existingTerminals } = await gardendashboardClient.ns(namespace).terminals.get({ qs })
-    existingTerminals = _.filter(existingTerminals, terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
-    const existingTerminal = _.find(existingTerminals, item => item.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
-    return existingTerminal
-  } catch (e) {
-    throw e
-  }
+
+  let { items: existingTerminals } = await gardendashboardClient.ns(namespace).terminals.get({ qs })
+  existingTerminals = _.filter(existingTerminals, terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
+
+  return _.find(existingTerminals, item => item.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
 }
 
 async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, username, namespace, name, target }) {
@@ -165,7 +153,6 @@ async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, us
     return undefined
   }
   if (!isTerminalReady(existingTerminal)) {
-    // TODO handle timeout?
     existingTerminal = await readTerminalUntilReady({ gardendashboardClient, namespace, name })
   }
   const pod = existingTerminal.status.podName
@@ -188,12 +175,9 @@ exports.create = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  ensureTerminalAllowed({ isAdmin, target })
+  ensureTerminalAllowed({ isAdmin })
 
-  const context = await getContext({ user, namespace, name, target })
-
-  const terminalInfo = initializeTerminalObject(context)
-  return getOrCreateTerminalSession({ user, terminalInfo, username, namespace, name, target, context })
+  return getOrCreateTerminalSession({ user, username, namespace, name, target })
 }
 
 async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
@@ -361,7 +345,14 @@ async function readTerminalUntilReady ({ gardendashboardClient, namespace, name 
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
 
-async function getOrCreateTerminalSession ({ user, terminalInfo, username, namespace, name, target, context }) {
+async function getOrCreateTerminalSession ({ user, username, namespace, name, target }) {
+  const context = await getContext({ user, namespace, name, target })
+
+  const terminalInfo = {
+    container: TERMINAL_CONTAINER_NAME,
+    server: context.kubeApiServer
+  }
+
   const gardendashboardClient = Gardendashboard(user)
   const gardenCoreClient = Core(user)
 
@@ -379,10 +370,14 @@ async function getOrCreateTerminalSession ({ user, terminalInfo, username, names
 
   terminalResource = await readTerminalUntilReady({ gardendashboardClient, namespace, name: terminalResource.metadata.name })
 
-  const attachServiceAccountToken = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
+  const { token } = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
 
   const pod = terminalResource.status.podName
-  _.assign(terminalInfo, { pod, token: attachServiceAccountToken.token, namespace: terminalResource.spec.host.namespace })
+  _.assign(terminalInfo, {
+    pod,
+    token,
+    namespace: terminalResource.spec.host.namespace
+  })
   return terminalInfo
 }
 
@@ -397,7 +392,7 @@ function getSeedShootNamespace (shoot) {
 function ensureTerminalAllowed ({ isAdmin }) {
   const terminalAllowed = isAdmin
   if (!terminalAllowed) {
-    throw new Forbidden('Terminal usage is not allowed for this target')
+    throw new Forbidden('Terminal usage is not allowed')
   }
 }
 
@@ -405,7 +400,7 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  ensureTerminalAllowed({ isAdmin, target })
+  ensureTerminalAllowed({ isAdmin })
 
   const gardendashboardClient = Gardendashboard(user)
 

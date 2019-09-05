@@ -216,6 +216,9 @@ export function getInfo () {
 /* Terminals */
 
 export function createTerminal ({ namespace, name, target }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  target = encodeURIComponent(target)
   if (target === 'garden') {
     return createResource(`/api/namespaces/${namespace}/terminals/${target}`, undefined)
   } else {
@@ -224,6 +227,9 @@ export function createTerminal ({ namespace, name, target }) {
 }
 
 export function heartbeat ({ namespace, name, target }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  target = encodeURIComponent(target)
   if (target === 'garden') {
     return patchResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, undefined)
   } else {

@@ -26,10 +26,10 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="canRenderControlPlane">
+    <template v-if="canRenderTerminal">
       <terminal-list-tile
-        :name=name
-        :namespace=namespace
+        :name=shootName
+        :namespace=shootNamespace
         target="shoot"
         description="Open terminal into cluster">
       </terminal-list-tile>
@@ -168,10 +168,10 @@ export default {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
     hasVisibleProperties () {
-      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.canRenderControlPlane
+      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.canRenderTerminal
     },
-    canRenderControlPlane () {
-      return !isEmpty(this.item) && this.hasTerminalAccess
+    canRenderTerminal () {
+      return !isEmpty(this.shootInfo) && this.hasTerminalAccess
     }
   },
   methods: {

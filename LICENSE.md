@@ -434,9 +434,13 @@ Copyright (c) 2016 John Jeremy Leider\
 Copyright (c) 2013-present Evan You\
 [MIT License](https://github.com/vuejs/vuex/blob/dev/LICENSE)
 
-- [better-queue](https://github.com/diamondio/better-queue/)\
+- [better-queue](https://github.com/diamondio/better-queue)\
 Copyright (c) 2016 Leander\
 [MIT License](https://github.com/diamondio/better-queue/blob/master/LICENSE)
+
+- [fnv-plus](https://github.com/tjwebb/fnv-plus)\
+Copyright (c) Travis Webb\
+[MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
 
 - [The Roboto family of fonts](https://github.com/google/roboto)\
 [Apache License 2.0](https://github.com/google/roboto/blob/master/LICENSE)

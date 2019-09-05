@@ -132,20 +132,6 @@ async function getProjectByNamespace (projects, namespaces, namespace) {
   return projects.get({ name })
 }
 
-function createOwnerRefArrayForResource (resource) {
-  const name = _.get(resource, 'metadata.name')
-  const uid = _.get(resource, 'metadata.uid')
-  return [
-    {
-      apiVersion: resource.apiVersion,
-      controller: true,
-      kind: resource.kind,
-      name,
-      uid
-    }
-  ]
-}
-
 function getConfigValue ({ path, defaultValue = undefined, required = true }) {
   const value = _.get(config, path, defaultValue)
   if (required && !value) {
@@ -167,7 +153,6 @@ module.exports = {
   getSeedKubeconfig,
   getProjectNameFromNamespace,
   getProjectByNamespace,
-  createOwnerRefArrayForResource,
   getConfigValue,
   _cloudProvider: cloudProvider
 }

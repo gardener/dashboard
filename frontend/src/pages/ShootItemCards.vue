@@ -30,7 +30,7 @@ limitations under the License.
           <v-card-title class="subheading white--text cyan darken-2">
             Control Plane
           </v-card-title>
-          <control-plane :item="item"></control-plane>
+          <shoot-control-plane :shootItem="item"></shoot-control-plane>
         </v-card>
 
         <v-card>
@@ -61,8 +61,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-// TODO rename ControlPlane to ShootControlPlane
-import ControlPlane from '@/components/ControlPlane'
+import ShootControlPlane from '@/components/ShootDetails/ShootControlPlane'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 import ShootJournalsCard from '@/components/ShootDetails/ShootJournalsCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
@@ -78,7 +77,7 @@ import 'codemirror/mode/yaml/yaml.js'
 export default {
   name: 'shoot-item',
   components: {
-    ControlPlane,
+    ShootControlPlane,
     ShootDetailsCard,
     ShootInfrastructureCard,
     ShootLifecycleCard,

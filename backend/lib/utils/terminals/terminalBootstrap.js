@@ -34,11 +34,20 @@ const {
   toServiceResource
 } = require('./terminalResources')
 const shoots = require('../../services/shoots')
-const {
-  replaceResource
-} = require('../terminals')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
+
+async function replaceResource ({ client, name, body }) {
+  try {
+    await client.get({ name })
+    return client.mergePatch({ name, body })
+  } catch (err) {
+    if (err.code === 404) {
+      return client.post({ body })
+    }
+    throw err
+  }
+}
 
 async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences }) {
   const annotations = _.get(config, 'terminal.bootstrap.apiserverIngress.annotations')
