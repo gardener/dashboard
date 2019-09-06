@@ -86,7 +86,7 @@ export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, b
   term._core.register(addSocketListener(socket, 'message', term.__getMessage))
 
   if (bidirectional) {
-    term._core.register(term.addDisposableListener('data', term.__sendData))
+    term._core.register(term.onData(term.__sendData))
   }
 
   term._core.register(addSocketListener(socket, 'close', () => detach(term, socket)))
@@ -97,7 +97,7 @@ export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, b
   term.__sendResize({ cols: 1, rows: 1 })
   term.__sendResize({ cols: term.cols, rows: term.rows })
 
-  term.on('resize', term.__resizeHandler)
+  term.onResize(term.__resizeHandler)
 
   term.pingIntervalId = setInterval(function ping () {
     if (socket.readyState === ReadyStateEnum.CONNECTING || socket.readyState === ReadyStateEnum.CLOSED) {
@@ -123,8 +123,6 @@ function addSocketListener (socket, type, handler) {
 
 export function detach (term, socket) {
   clearTimeout(term.pingIntervalId)
-  term.off('data', term.__sendData)
-  term.off('resize', term.__resizeHandler)
   socket = typeof socket === 'undefined' ? term.__socket : socket
   delete term.__socket
 }

@@ -58,16 +58,14 @@ import { encodeURIComponents } from '@/utils'
 import get from 'lodash/get'
 import ora from 'ora'
 import * as attach from '@/lib/attach'
-import * as fit from 'xterm/dist/addons/fit/fit'
-import * as search from 'xterm/dist/addons/search/search'
-import * as webLinks from 'xterm/dist/addons/webLinks/webLinks'
-import * as winptyCompat from 'xterm/dist/addons/winptyCompat/winptyCompat'
+import * as fit from 'xterm/lib/addons/fit/fit'
+import * as search from 'xterm/lib/addons/search/search'
+import * as webLinks from 'xterm/lib/addons/webLinks/webLinks'
 
 Terminal.applyAddon(attach)
 Terminal.applyAddon(fit)
 Terminal.applyAddon(search)
 Terminal.applyAddon(webLinks)
-Terminal.applyAddon(winptyCompat)
 
 function encodeBase64 (input) {
   return Buffer.from(input, 'utf8').toString('base64')
@@ -322,7 +320,6 @@ export default {
   async mounted () {
     const term = this.term = new Terminal()
     term.open(this.$refs.container)
-    term.winptyCompatInit()
     term.webLinksInit()
     term.focus()
     this.$nextTick(() => {

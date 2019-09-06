@@ -50,7 +50,7 @@
     "vuelidate": "^0.7.4",
     "vuetify": "^1.4.2",
     "vuex": "^3.0.1",
-    "xterm": "3.10.1"
+    "xterm": "^3.14.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "^3.8.0",

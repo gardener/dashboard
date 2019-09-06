@@ -28,7 +28,6 @@ limitations under the License.
 <script>
 import TerminalListTile from '@/components/TerminalListTile'
 import { mapGetters } from 'vuex'
-import get from 'lodash/get'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
