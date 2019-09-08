@@ -283,7 +283,7 @@ const requiredConfigExists = verifyRequiredConfigExists()
 
 const options = {}
 _.assign(options, _.get(config, 'terminal.bootstrap.queueOptions'))
-var bootstrapQueue = new Queue(async (seed, cb) => {
+const bootstrapQueue = new Queue(async (seed, cb) => {
   try {
     await handleSeed(seed)
     cb(null, null)
