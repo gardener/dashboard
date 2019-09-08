@@ -132,7 +132,7 @@ async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, co
   return replaceResource({ client, name, body })
 }
 
-async function handleSeed (seed, cb) {
+async function handleSeed (seed) {
   const name = seed.metadata.name
   logger.debug(`replacing resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
