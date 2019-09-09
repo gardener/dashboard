@@ -144,7 +144,7 @@ async function handleSeed (seed) {
     const soilSeedResource = seed
     await bootstrapIngressAndHeadlessServiceForSoilOnSoil({ coreClient, soilSeedResource })
   } else {
-    await bootstrapIngressForSeedOnSoil({ gardenClient, coreClient, seedName: name })
+    await bootstrapShootIngress({ gardenClient, coreClient, namespace: 'garden', name })
   }
 }
 
@@ -160,33 +160,32 @@ async function existsShoot ({ gardenClient, seedName }) {
   }
 }
 
-async function bootstrapIngressForSeedOnSoil ({ gardenClient, coreClient, seedName }) {
-  const seedShootResource = await shoots.read({ gardenClient, namespace: 'garden', name: seedName })
+async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, name }) {
+  const shootResource = await shoots.read({ gardenClient, namespace, name })
 
-  // fetch soil's seed resource
-  const soilName = seedShootResource.spec.cloud.seed
-  const soilSeedResource = await gardenClient.seeds.get({ name: soilName })
+  // fetch seed resource
+  const seedName = shootResource.spec.cloud.seed
+  const seedResource = await gardenClient.seeds.get({ name: seedName })
 
-  // get soil client
-  const soilKubeconfig = await getSeedKubeconfig({ coreClient, seed: soilSeedResource })
-  const soilClientConfig = kubernetes.fromKubeconfig(soilKubeconfig)
-  const soilExtensionClient = kubernetes.extensions(soilClientConfig)
+  // get seed client
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed: seedResource })
+  const seedExtensionClient = kubernetes.extensions(kubernetes.fromKubeconfig(seedKubeconfig))
 
   // calculate ingress domain
   const projectsClient = kubernetes.garden().projects
   const namespacesClient = kubernetes.core().namespaces
-  const soilIngressDomain = await getShootIngressDomainForSeed(projectsClient, namespacesClient, seedShootResource, soilSeedResource)
-  const apiserverIngressHost = `api.${soilIngressDomain}`
+  const shootIngressDomain = await getShootIngressDomainForSeed(projectsClient, namespacesClient, shootResource, seedResource)
+  const apiserverIngressHost = `api.${shootIngressDomain}`
 
   // replace ingress apiserver resource
-  const seedShootNS = _.get(seedShootResource, 'status.technicalID')
+  const seedShootNS = _.get(shootResource, 'status.technicalID')
   if (!seedShootNS) {
-    throw new Error(`could not get namespace for seed ${seedName} on soil`)
+    throw new Error(`could not get namespace on seed for shoot ${namespace}/${name}`)
   }
 
   const serviceName = 'kube-apiserver'
   await replaceIngressApiServer({
-    extensionClient: soilExtensionClient,
+    extensionClient: seedExtensionClient,
     namespace: seedShootNS,
     serviceName,
     host: apiserverIngressHost
@@ -262,37 +261,41 @@ function verifyRequiredConfigExists () {
   return requiredConfigExists
 }
 
-function bootstrapSeed ({ seed }) {
+function bootstrapResource (resource) {
   if (isTerminalBootstrapDisabled()) {
     return
   }
   if (!requiredConfigExists) {
     return
   }
-  const isBootstrapDisabledForSeed = _.get(seed, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
-  if (isBootstrapDisabledForSeed) {
-    const name = _.get(seed, 'metadata.name')
+  const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
+  if (isBootstrapDisabledForResource) {
+    const name = resource.metadata.name
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
     return
   }
-
-  bootstrapQueue.push(seed)
+  const kind = resource.kind
+  bootstrapQueue.push({ resource, kind })
 }
 
 const requiredConfigExists = verifyRequiredConfigExists()
 
 const options = {}
 _.assign(options, _.get(config, 'terminal.bootstrap.queueOptions'))
-const bootstrapQueue = new Queue(async (seed, cb) => {
+const bootstrapQueue = new Queue(async ({ resource, kind }, cb) => {
   try {
-    await handleSeed(seed)
+    if (kind === 'Seed') {
+      await handleSeed(resource)
+    } else {
+      logger.error(`can't bootstrap unsupported kind ${kind}`)
+    }
     cb(null, null)
   } catch (err) {
-    logger.error(`failed to bootstrap terminal resources for seed ${seed.metadata.name}`, err)
+    logger.error(`failed to bootstrap terminal resources for ${kind} ${resource.metadata.name}`, err)
     cb(err, null)
   }
 }, options)
 
 module.exports = {
-  bootstrapSeed
+  bootstrapResource
 }

@@ -21,7 +21,7 @@ const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
 const logger = require('../logger')
 const { registerHandler } = require('./common')
-const { bootstrapSeed } = require('../utils/terminals/terminalBootstrap')
+const { bootstrapResource } = require('../utils/terminals/terminalBootstrap')
 
 module.exports = io => {
   const emitter = garden.seeds.watch()
@@ -31,7 +31,7 @@ module.exports = io => {
       logger.error('shoots event error', event.object)
     } else if (event.type === 'ADDED') {
       const seed = event.object
-      bootstrapSeed({ seed })
+      bootstrapResource(seed)
     }
   })
 }
