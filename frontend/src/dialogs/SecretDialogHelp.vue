@@ -26,7 +26,7 @@ limitations under the License.
         <v-container fill-height>
           <v-layout align-center justify-start row fill-height>
             <v-flex xs1>
-              <v-icon large class="white--text ml-3">mdi-help-circle-outline</v-icon>
+              <v-icon large class="white--text">mdi-help-circle-outline</v-icon>
             </v-flex>
             <v-flex>
               <div class="credential_title">{{title}}</div>
