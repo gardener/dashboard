@@ -91,7 +91,7 @@ export default {
       'shootByNamespaceAndName',
       'journalsByNamespaceAndName',
       'isAdmin',
-      'hasTerminalAccess'
+      'hasControlPlaneTerminalAccess'
     ]),
     value () {
       return this.shootByNamespaceAndName(this.$route.params)
@@ -110,7 +110,7 @@ export default {
       return this.journalsByNamespaceAndName(params)
     },
     canRenderControlPlane () {
-      return !isEmpty(this.item) && this.hasTerminalAccess
+      return !isEmpty(this.item) && this.hasControlPlaneTerminalAccess
     }
   },
   mounted () {

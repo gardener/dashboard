@@ -35,6 +35,17 @@ router.route('/:target/:name?/')
       next(err)
     }
   })
+  .delete(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const target = req.params.target
+      res.send(await terminals.remove({ user, namespace, name, target }))
+    } catch (err) {
+      next(err)
+    }
+  })
 
 router.route('/:target/heartbeat/:name?/')
   .patch(async (req, res, next) => {

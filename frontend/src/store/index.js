@@ -271,6 +271,9 @@ const getters = {
   canCreateProject (state) {
     return get(state.user, 'canCreateProject', false)
   },
+  canManageTerminal (state) {
+    return get(state.user, 'canManageTerminal', false)
+  },
   journalList (state) {
     return state.journals.all
   },
@@ -329,8 +332,17 @@ const getters = {
   newShootResource (state, getters) {
     return getters['shoots/newShootResource']
   },
+  hasGardenTerminalAccess (state, getters) {
+    return getters.hasTerminalAccess && getters.isAdmin
+  },
+  hasControlPlaneTerminalAccess (state, getters) {
+    return getters.hasTerminalAccess && getters.isAdmin
+  },
+  hasShootTerminalAccess (state, getters) {
+    return getters.hasTerminalAccess
+  },
   hasTerminalAccess (state, getters) {
-    return get(state, 'cfg.features.terminalEnabled', false) && getters.isAdmin
+    return get(state, 'cfg.features.terminalEnabled', false) && getters.canManageTerminal
   }
 }
 

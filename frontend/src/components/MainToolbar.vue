@@ -153,7 +153,11 @@ export default {
       return this.cfg.helpMenuItems || {}
     },
     tabs () {
-      return get(this.$route, 'meta.tabs', false)
+      const tabsFn = get(this.$route, 'meta.tabsFn', false)
+      if (!tabsFn) {
+        return get(this.$route, 'meta.tabs', false)
+      }
+      return tabsFn()
     },
     avatarTitle () {
       return `${this.displayName} (${this.username})`

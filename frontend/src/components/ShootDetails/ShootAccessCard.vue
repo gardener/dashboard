@@ -26,12 +26,14 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="canRenderTerminal">
+    <template v-if="canRenderTerminal && hasShootTerminalAccess">
       <terminal-list-tile
-        :name=shootName
-        :namespace=shootNamespace
+        :shoot-item=shootItem
         target="shoot"
-        description="Open terminal into cluster">
+        :description="shootTerminalDescription"
+        :buttonDescription="shootTerminalButtonDescription"
+        :disabled="isShootHibernated"
+        >
       </terminal-list-tile>
       <v-divider class="my-2" inset></v-divider>
     </template>
@@ -123,7 +125,7 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'hasTerminalAccess'
+      'hasShootTerminalAccess'
     ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
@@ -171,7 +173,16 @@ export default {
       return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.canRenderTerminal
     },
     canRenderTerminal () {
-      return !isEmpty(this.shootInfo) && this.hasTerminalAccess
+      return !isEmpty(this.shootInfo)
+    },
+    shootTerminalButtonDescription () {
+      if (this.isShootHibernated) {
+        return 'Cluster is hibernated. Wake-up cluster to open terminal.'
+      }
+      return this.shootTerminalDescription
+    },
+    shootTerminalDescription () {
+      return 'Open terminal into cluster'
     }
   },
   methods: {

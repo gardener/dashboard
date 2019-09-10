@@ -52,6 +52,18 @@ export default function createRouter ({ store, userManager }) {
     }
   }
 
+  function hasGardenTerminalAccess () {
+    return store.getters.hasGardenTerminalAccess
+  }
+
+  function hasControlPlaneTerminalAccess () {
+    return store.getters.hasControlPlaneTerminalAccess
+  }
+
+  function hasShootTerminalAccess () {
+    return store.getters.hasShootTerminalAccess
+  }
+
   function hasTerminalAccess () {
     return store.getters.hasTerminalAccess
   }
@@ -106,37 +118,45 @@ export default function createRouter ({ store, userManager }) {
     }
   ]
 
-  const shootItemTerminalTabs = [
-    {
-      title: 'Control Plane',
-      to: (route) => {
-        const params = cloneDeep(route.params)
-        params.target = 'cp'
-        return {
-          name: 'ShootItemTerminal',
-          params
-        }
-      }
-    },
-    {
-      title: 'Cluster',
-      to: (route) => {
-        const params = cloneDeep(route.params)
-        params.target = 'shoot'
-        return {
-          name: 'ShootItemTerminal',
-          params
-        }
-      }
-    }
-  ]
-
   const routeTitle = function () {
     return this.title
   }
 
   const routeParamName = function (route) {
     return get(route, 'params.name')
+  }
+
+  const shootItemTerminalTabs = function () {
+    const tabs = []
+
+    if (hasControlPlaneTerminalAccess()) {
+      tabs.push({
+        title: 'Control Plane',
+        to: (route) => {
+          const params = cloneDeep(route.params)
+          params.target = 'cp'
+          return {
+            name: 'ShootItemTerminal',
+            params
+          }
+        }
+      })
+    }
+
+    if (hasShootTerminalAccess()) {
+      tabs.push({
+        title: 'Cluster',
+        to: (route) => {
+          const params = cloneDeep(route.params)
+          params.target = 'shoot'
+          return {
+            name: 'ShootItemTerminal',
+            params
+          }
+        }
+      })
+    }
+    return tabs
   }
 
   const terminalBreadcrumbTitle = function (route) {
@@ -300,7 +320,7 @@ export default function createRouter ({ store, userManager }) {
                     namespaced: true,
                     projectScope: true,
                     breadcrumbTextFn: terminalBreadcrumbTitle,
-                    tabs: shootItemTerminalTabs
+                    tabsFn: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
                     if (hasTerminalAccess()) {
@@ -418,11 +438,11 @@ export default function createRouter ({ store, userManager }) {
             menu: {
               title: 'Garden Cluster',
               icon: 'mdi-console',
-              visible: () => hasTerminalAccess()
+              visible: () => hasGardenTerminalAccess()
             }
           },
           beforeEnter: (to, from, next) => {
-            if (hasTerminalAccess()) {
+            if (hasGardenTerminalAccess()) {
               next()
             } else {
               next('/')
@@ -476,9 +496,9 @@ export default function createRouter ({ store, userManager }) {
         const user = userManager.getUser()
         const storedUser = store.state.user
         if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin, canCreateProject } } = await getPrivileges()
+          const { data: { isAdmin, canCreateProject, canManageTerminal } } = await getPrivileges()
 
-          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject })
+          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject, canManageTerminal })
         }
         return next()
       }

@@ -33,14 +33,17 @@ router.route('/privileges')
       const user = req.user || {}
       const [
         isAdmin,
-        canCreateProject
+        canCreateProject,
+        canManageTerminal
       ] = await Promise.all([
         authorization.isAdmin(user),
-        authorization.canCreateProject(user)
+        authorization.canCreateProject(user),
+        authorization.canManageTerminal(user)
       ])
       res.send({
         isAdmin,
-        canCreateProject
+        canCreateProject,
+        canManageTerminal
       })
     } catch (err) {
       next(err)

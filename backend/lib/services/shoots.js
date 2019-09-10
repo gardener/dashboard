@@ -93,11 +93,24 @@ exports.create = async function ({ user, namespace, body }) {
   return Garden(user).namespaces(namespace).shoots.post({ body })
 }
 
-exports.read = async function ({ gardenClient, user, namespace, name }) {
+async function read ({ gardenClient, user, namespace, name }) {
   if (!gardenClient) {
     gardenClient = Garden(user)
   }
   return gardenClient.namespaces(namespace).shoots.get({ name })
+}
+exports.read = read
+
+exports.exists = async function ({ gardenClient, namespace, name }) {
+  try {
+    await read({ gardenClient, namespace, name })
+    return true
+  } catch (err) {
+    if (err.code !== 404) {
+      throw err
+    }
+    return false
+  }
 }
 
 const patch = exports.patch = async function ({ user, namespace, name, body }) {

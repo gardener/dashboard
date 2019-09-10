@@ -15,10 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-list v-if="hasTerminalAccess">
+  <v-list v-if="hasControlPlaneTerminalAccess">
     <terminal-list-tile
-      :name=shootName
-      :namespace=shootNamespace
+      :shoot-item="shootItem"
       target="cp"
       description="Open terminal into cluster's control plane running on it's seed">
     </terminal-list-tile>
@@ -42,7 +41,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'hasTerminalAccess'
+      'hasControlPlaneTerminalAccess'
     ])
   }
 }

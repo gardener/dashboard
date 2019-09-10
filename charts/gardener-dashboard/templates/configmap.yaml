@@ -57,7 +57,9 @@ data:
         image: {{ .Values.terminal.operator.image }}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
-        disabled: {{ .Values.terminal.bootstrap.disabled }}
+        disabled: {{ .Values.terminal.bootstrap.disabled | default false }}
+        seedDisabled: {{ .Values.terminal.bootstrap.seedDisabled | default false }}
+        shootDisabled: {{ .Values.terminal.bootstrap.shootDisabled | default false }}
         {{- if .Values.terminal.bootstrap.apiserverIngress }}
         apiserverIngress:
           {{- with .Values.terminal.bootstrap.apiserverIngress.annotations }}

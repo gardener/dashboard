@@ -15,52 +15,52 @@ limitations under the License.
 -->
 
 <template>
-  <div v-if="hasTerminalAccess">
-    <v-list-tile>
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">mdi-console</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>Terminal</v-list-tile-title>
-        <v-list-tile-sub-title>{{description}}</v-list-tile-sub-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
-        <v-tooltip top>
-          <v-btn slot="activator" icon :to=to>
-            <v-icon>mdi-console-line</v-icon>
-          </v-btn>
-          <span>{{description}}</span>
-        </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
-  </div>
+  <v-list-tile>
+    <v-list-tile-action>
+      <v-icon class="cyan--text text--darken-2">mdi-console</v-icon>
+    </v-list-tile-action>
+    <v-list-tile-content>
+      <v-list-tile-title>Terminal</v-list-tile-title>
+      <v-list-tile-sub-title>{{description}}</v-list-tile-sub-title>
+    </v-list-tile-content>
+    <v-list-tile-action>
+      <v-tooltip top>
+        <v-btn slot="activator" icon :to=to :disabled="disabled">
+          <v-icon>mdi-console-line</v-icon>
+        </v-btn>
+        <span>{{buttonDescription || description}}</span>
+      </v-tooltip>
+    </v-list-tile-action>
+  </v-list-tile>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { namespacedRouteWithName } from '@/utils'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
+  mixins: [shootItem],
   props: {
-    name: {
-      type: String
-    },
-    namespace: {
-      type: String
+    shootItem: {
+      type: Object
     },
     target: {
       type: String
     },
     description: {
       type: String
+    },
+    buttonDescription: {
+      type: String
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
-    ...mapGetters([
-      'hasTerminalAccess'
-    ]),
     to () {
-      const namespacedRoute = namespacedRouteWithName(this.$router.options.routes, 'ShootItemTerminal', this.namespace, this.name)
+      const namespacedRoute = namespacedRouteWithName(this.$router.options.routes, 'ShootItemTerminal', this.shootNamespace, this.shootName)
       namespacedRoute.params.target = this.target
       return namespacedRoute
     }

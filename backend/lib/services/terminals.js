@@ -17,6 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
+const assert = require('assert').strict
 
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
@@ -38,6 +39,12 @@ const logger = require('../logger')
 const fnv = require('fnv-plus')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
+
+const TARGET = {
+  garden: 'garden',
+  controlPlane: 'cp',
+  shoot: 'shoot'
+}
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -84,55 +91,38 @@ function isServiceAccountReady ({ secrets } = {}) {
   return !_.isEmpty(secretName)
 }
 
-async function existsShoot ({ gardenClient, seedName }) {
-  try {
-    await shoots.read({ gardenClient, namespace: 'garden', name: seedName })
-    return true
-  } catch (err) {
-    if (err.code === 404) {
-      return false
-    }
-    throw err
-  }
-}
+async function getKubeApiServerHostForSeed ({ user, seed }) {
+  const name = seed.metadata.name
+  const namespace = 'garden'
 
-async function getKubeApiServerHost ({ user, seed }) {
   const gardenClient = Garden(user)
-  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await existsShoot({ gardenClient, seedName: seed.metadata.name })
-  let soilIngressDomain
   const projectsClient = gardenClient.projects
   const namespacesClient = Core(user).namespaces
+
+  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await shoots.exists({ gardenClient, namespace, name })
+  let ingressDomain
   if (isSoil) {
-    const soilSeed = seed
-    soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeed)
+    ingressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, seed)
   } else {
-    const seedName = seed.metadata.name
-    const seedShootResource = await readShoot({ user, namespace: 'garden', name: seedName })
-    soilIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, seedShootResource)
-
-    const seedShootNS = _.get(seedShootResource, 'status.technicalID')
-    if (!seedShootNS) {
-      throw new Error(`could not get namespace for seed ${seedName} on soil`)
-    }
+    const shootResource = await shoots.read({ gardenClient, namespace, name })
+    ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
   }
 
-  return `api.${soilIngressDomain}`
+  return `api.${ingressDomain}`
 }
 
-async function readShoot ({ user, namespace, name }) {
-  try {
-    return await shoots.read({ user, namespace, name })
-  } catch (err) {
-    if (err.code !== 404) {
-      throw err
-    }
-    return undefined
-  }
+async function getKubeApiServerHostForShoot ({ user, shootResource }) {
+  const projectsClient = Garden(user).projects
+  const namespacesClient = Core(user).namespaces
+
+  const ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
+  return `api.${ingressDomain}`
 }
 
-async function findExistingTerminalResource ({ gardendashboardClient, username, namespace, name, target }) {
+async function findExistingTerminalResource ({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster }) {
   let selectors = [
-    `dashboard.gardener.cloud/targetType=${target}`,
+    `dashboard.gardener.cloud/hostCluster=${fnv.hash(JSON.stringify(hostCluster), 64).str()}`,
+    `dashboard.gardener.cloud/targetCluster=${fnv.hash(JSON.stringify(targetCluster), 64).str()}`,
     `garden.sapcloud.io/createdBy=${fnv.hash(username, 64).str()}`
   ]
   if (!_.isEmpty(name)) {
@@ -146,8 +136,8 @@ async function findExistingTerminalResource ({ gardendashboardClient, username, 
   return _.find(existingTerminals, item => item.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
 }
 
-async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, username, namespace, name, target }) {
-  let existingTerminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, target })
+async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
+  let existingTerminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
 
   if (!existingTerminal) {
     return undefined
@@ -173,11 +163,32 @@ async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, us
 
 exports.create = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
+  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+
+  return getOrCreateTerminalSession({ isAdmin, user, namespace, name, target })
+}
+
+exports.remove = async function ({ user, namespace, name, target }) {
+  const isAdmin = await authorization.isAdmin(user)
+  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+
+  return deleteTerminalSession({ isAdmin, user, namespace, name, target })
+}
+
+async function deleteTerminalSession ({ isAdmin, user, namespace, name, target }) {
   const username = user.id
 
-  ensureTerminalAllowed({ isAdmin })
+  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
 
-  return getOrCreateTerminalSession({ user, username, namespace, name, target })
+  const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
+  const targetCluster = await getTargetCluster({ user, namespace, name, target })
+
+  const gardendashboardClient = Gardendashboard(user)
+
+  const terminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
+  if (terminal) {
+    await gardendashboardClient.ns(namespace).terminals.delete({ name: terminal.metadata.name })
+  }
 }
 
 async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
@@ -198,81 +209,106 @@ async function getGardenRuntimeClusterSecretRef ({ gardenCoreClient }) {
   }
 }
 
-async function getContext ({ user, namespace, name, target }) {
-  let hostNamespace
-  let targetCredentials
-  let hostSecretRef
-  let kubecfgCtxNamespaceTargetCluster
-  let bindingKind
-  let targetNamespace
-  let kubeApiServer
+async function getTargetCluster ({ user, namespace, name, target }) {
+  const targetCluster = {
+    kubeconfigContextNamespace: undefined,
+    namespace: undefined, // this is the namespace where the "access" service account will be created
+    credentials: undefined,
+    bindingKind: undefined
+  }
 
-  const gardenCoreClient = Core(user)
-
-  if (target === 'garden') {
-    hostNamespace = undefined // this will create a temporary namespace
-    kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
-    kubecfgCtxNamespaceTargetCluster = namespace
-    targetNamespace = 'garden'
-
-    targetCredentials = {
+  if (target === TARGET.garden) {
+    targetCluster.kubeconfigContextNamespace = namespace
+    targetCluster.namespace = 'garden'
+    targetCluster.credentials = {
       serviceAccountRef: {
         name: getConfigValue({ path: 'terminal.gardenCluster.serviceAccountName', defaultValue: 'dashboard-terminal-admin' }),
         namespace: 'garden'
       }
     }
-    hostSecretRef = await getGardenRuntimeClusterSecretRef({ gardenCoreClient })
-
-    bindingKind = 'ClusterRoleBinding'
+    targetCluster.bindingKind = 'ClusterRoleBinding'
   } else {
-    const shootResource = await shoots.read({ user, namespace, name })
-    const seedShootNS = getSeedShootNamespace(shootResource)
-    hostNamespace = seedShootNS
-    const seedName = shootResource.spec.cloud.seed
-    const seed = _.find(getSeeds(), ['metadata.name', seedName])
-
-    kubeApiServer = await getKubeApiServerHost({ user, seed })
-
-    hostSecretRef = _.get(seed, 'spec.secretRef')
-
-    if (target === 'shoot') {
-      targetNamespace = undefined // this will create a temporary namespace
-      kubecfgCtxNamespaceTargetCluster = 'default'
-
-      targetCredentials = {
+    if (target === TARGET.shoot) {
+      targetCluster.kubeconfigContextNamespace = 'default'
+      targetCluster.namespace = undefined // this will create a temporary namespace
+      targetCluster.credentials = {
         secretRef: {
           name: `${name}.kubeconfig`,
           namespace
         }
       }
-      bindingKind = 'ClusterRoleBinding'
-    } else { // target cp
-      kubecfgCtxNamespaceTargetCluster = seedShootNS
-      targetNamespace = seedShootNS
+      targetCluster.bindingKind = 'ClusterRoleBinding'
+    } else if (target === TARGET.controlPlane) {
+      const shootResource = await shoots.read({ user, namespace, name })
+      const seedShootNS = getSeedShootNamespace(shootResource)
+      const seedName = shootResource.spec.cloud.seed
+      const seed = _.find(getSeeds(), ['metadata.name', seedName])
 
-      targetCredentials = {
+      targetCluster.kubeconfigContextNamespace = seedShootNS
+      targetCluster.namespace = seedShootNS
+      targetCluster.credentials = {
         secretRef: _.get(seed, 'spec.secretRef')
       }
-      bindingKind = 'RoleBinding'
+      targetCluster.bindingKind = 'RoleBinding'
+    } else {
+      throw new Error(`unknown target ${target}`)
     }
   }
-
-  return { kubeApiServer, hostNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, hostSecretRef, bindingKind, targetNamespace }
+  return targetCluster
 }
 
-async function createTerminal ({ gardendashboardClient, user, namespace, name, target, context }) {
-  const { hostNamespace, kubecfgCtxNamespaceTargetCluster, targetCredentials, bindingKind, targetNamespace, hostSecretRef } = context
+async function getHostCluster ({ isAdmin, user, namespace, name, target }) {
+  const hostCluster = {
+    namespace: undefined,
+    secretRef: undefined,
+    kubeApiServer: undefined,
+    isHibernated: false // only applicable for shoot clusters
+  }
 
+  if (target === TARGET.garden) {
+    const gardenCoreClient = Core(user)
+    hostCluster.namespace = undefined // this will create a temporary namespace
+    hostCluster.secretRef = await getGardenRuntimeClusterSecretRef({ gardenCoreClient })
+    hostCluster.kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
+  } else {
+    const shootResource = await shoots.read({ user, namespace, name })
+    if (target === TARGET.shoot) {
+      hostCluster.isHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
+    }
+
+    if (isAdmin) { // as admin - host cluser is the seed
+      const seedShootNS = getSeedShootNamespace(shootResource)
+      const seedName = shootResource.spec.cloud.seed
+      const seed = _.find(getSeeds(), ['metadata.name', seedName])
+
+      hostCluster.namespace = seedShootNS
+      hostCluster.secretRef = _.get(seed, 'spec.secretRef')
+      hostCluster.kubeApiServer = await getKubeApiServerHostForSeed({ user, seed })
+    } else { // as enduser - host cluster is the shoot
+      assert.strictEqual(target, TARGET.shoot, 'unexpected target')
+
+      hostCluster.namespace = undefined // this will create a temporary namespace
+      hostCluster.secretRef = {
+        namespace,
+        name: `${name}.kubeconfig`
+      }
+      hostCluster.kubeApiServer = await getKubeApiServerHostForShoot({ user, shootResource })
+    }
+  }
+  return hostCluster
+}
+
+async function createTerminal ({ gardendashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
   const containerImage = getConfigValue({ path: 'terminal.operator.image' })
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: hostNamespace, secretRef: hostSecretRef, containerImage, podLabels })
-  const terminalTarget = createTarget({ kubeconfigContextNamespace: kubecfgCtxNamespaceTargetCluster, credentials: targetCredentials, bindingKind, namespace: targetNamespace })
+  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels })
+  const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
-    'dashboard.gardener.cloud/targetType': target,
-    'dashboard.gardener.cloud/targetNamespace': fnv.hash(terminalTarget.kubeconfigContextNamespace, 64).str(),
+    'dashboard.gardener.cloud/hostCluster': fnv.hash(JSON.stringify(hostCluster), 64).str(),
+    'dashboard.gardener.cloud/targetCluster': fnv.hash(JSON.stringify(targetCluster), 64).str(),
     'garden.sapcloud.io/createdBy': fnv.hash(user.id, 64).str()
   }
   if (!_.isEmpty(name)) {
@@ -294,13 +330,13 @@ function getPodLabels (target) {
     'networking.gardener.cloud/to-private-networks': 'allowed'
   }
   switch (target) {
-    case 'garden':
+    case TARGET.garden:
       labels = {} // no network restrictions for now
       break
-    case 'cp':
+    case TARGET.controlPlane:
       labels['networking.gardener.cloud/to-seed-apiserver'] = 'allowed'
       break
-    case 'shoot':
+    case TARGET.shoot:
       labels['networking.gardener.cloud/to-shoot-apiserver'] = 'allowed'
       labels['networking.gardener.cloud/to-shoot-networks'] = 'allowed'
       break
@@ -345,28 +381,35 @@ async function readTerminalUntilReady ({ gardendashboardClient, namespace, name 
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
 
-async function getOrCreateTerminalSession ({ user, username, namespace, name, target }) {
-  const context = await getContext({ user, namespace, name, target })
+async function getOrCreateTerminalSession ({ isAdmin, user, namespace, name, target }) {
+  const username = user.id
+
+  const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
+  const targetCluster = await getTargetCluster({ user, namespace, name, target })
+
+  if (hostCluster.isHibernated) {
+    throw new Error('Hosting cluster is hibernated')
+  }
 
   const terminalInfo = {
     container: TERMINAL_CONTAINER_NAME,
-    server: context.kubeApiServer
+    server: hostCluster.kubeApiServer
   }
 
   const gardendashboardClient = Gardendashboard(user)
   const gardenCoreClient = Core(user)
 
-  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...context.hostSecretRef })
+  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...hostCluster.secretRef })
   const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
-  const existingTerminal = await findExistingTerminal({ gardendashboardClient, hostCoreClient, username, namespace, name, target })
+  const existingTerminal = await findExistingTerminal({ gardendashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
   }
 
   logger.debug(`No terminal found for user ${username}. Creating new..`)
-  let terminalResource = await createTerminal({ gardendashboardClient, user, namespace, name, target, context })
+  let terminalResource = await createTerminal({ gardendashboardClient, user, namespace, name, target, hostCluster, targetCluster })
 
   terminalResource = await readTerminalUntilReady({ gardendashboardClient, namespace, name: terminalResource.metadata.name })
 
@@ -389,9 +432,8 @@ function getSeedShootNamespace (shoot) {
   return seedShootNS
 }
 
-function ensureTerminalAllowed ({ isAdmin }) {
-  const terminalAllowed = isAdmin
-  if (!terminalAllowed) {
+async function ensureTerminalAllowed ({ isAdmin, user, namespace, name, target }) {
+  if ((target === TARGET.controlPlane || target === TARGET.garden) && !isAdmin) {
     throw new Forbidden('Terminal usage is not allowed')
   }
 }
@@ -400,11 +442,14 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  ensureTerminalAllowed({ isAdmin })
+  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+
+  const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
+  const targetCluster = await getTargetCluster({ user, namespace, name, target })
 
   const gardendashboardClient = Gardendashboard(user)
 
-  const terminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, target })
+  const terminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
   if (!terminal) {
     throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
   }

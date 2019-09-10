@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout ref="layout" v-resize="onResize" column fill-height class="position-relative">
+  <v-layout v-resize="onResize" column fill-height class="position-relative dark">
     <v-snackbar
       v-model="snackbarTop"
       :timeout="0"
@@ -44,23 +44,36 @@ limitations under the License.
         Close
       </v-btn>
     </v-snackbar>
+    <v-system-bar window dark class="systemBar">
+      {{toolbarTitle}}
+      <v-spacer></v-spacer>
+      <v-btn icon @click="deleteTerminal()">
+        <v-icon style="margin-right: 0">close</v-icon>
+      </v-btn>
+    </v-system-bar>
     <v-flex ref="container" class="terminal-container"></v-flex>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import 'xterm/dist/xterm.css'
-
-import { mapState } from 'vuex'
-import { Terminal } from 'xterm'
-import { createTerminal, heartbeat } from '@/utils/api'
-import { encodeURIComponents } from '@/utils'
-import get from 'lodash/get'
 import ora from 'ora'
+import get from 'lodash/get'
 import * as attach from '@/lib/attach'
 import * as fit from 'xterm/lib/addons/fit/fit'
 import * as search from 'xterm/lib/addons/search/search'
 import * as webLinks from 'xterm/lib/addons/webLinks/webLinks'
+
+import { mapState } from 'vuex'
+import { Terminal } from 'xterm'
+import { encodeURIComponents, getProjectName } from '@/utils'
+import {
+  createTerminal,
+  deleteTerminal,
+  heartbeat
+} from '@/utils/api'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 
 Terminal.applyAddon(attach)
 Terminal.applyAddon(fit)
@@ -116,6 +129,9 @@ function closeWsIfNotClosed (ws) {
 
 export default {
   name: 'shoot-item-terminal',
+  components: {
+    ConfirmDialog
+  },
   data () {
     return {
       close: () => { this.cancelConnect = true },
@@ -132,9 +148,57 @@ export default {
     ]),
     heartbeatIntervalSeconds () {
       return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
+    },
+    toolbarTitle () {
+      let title
+      if (this.name) {
+        title = this.name
+      } else {
+        title = getProjectName({ namespace: this.namespace}).toUpperCase()
+      }
+      title += ` - ${this.targetDescription} Terminal`
+      return title
+    },
+    name () {
+      const { name = undefined } = this.$route.params
+      return name
+    },
+    targetDescription () {
+      const { target } = this.$route.params
+      switch (target) {
+        case 'garden':
+          return 'Garden'
+        case 'cp':
+          return 'Control Plane'
+        case 'shoot':
+          return 'Cluster'
+      }
+      return 'UNKNOWN'
+    },
+    namespace () {
+      const { namespace } = this.$route.params
+      return namespace
     }
   },
   methods: {
+    async deleteTerminal () {
+      if (!await this.confirmDelete()) {
+        return
+      }
+      const { namespace = undefined, name = undefined, target } = this.$route.params
+      await deleteTerminal({ name, namespace, target })
+      if (this.name) {
+        return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
+      }
+      return this.$router.push({ name: 'ShootList', params: { namespace: this.namespace } })
+    },
+    confirmDelete () {
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Delete',
+        messageHtml: 'Do you want to delete this terminal session?<br/><br/><i>Information: Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
+      })
+    },
     onResize (size) {
       if (this.term) {
         this.term.fit()
@@ -345,17 +409,24 @@ export default {
 </script>
 
 <style lang="styl" scoped>
+  .dark {
+    background: black;
+  }
   .position-relative
     position: relative !important
   .terminal-container {
-      background: #212121;
       height: 100%;
       width: 100%;
       margin: 0;
+      padding-left: 4px;
+      padding-top: 4px;
   }
   .terminal {
     font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
     height: 100%;
     width: 100%;
+  }
+  .systemBar {
+    background-color: #212121;
   }
 </style>

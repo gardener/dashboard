@@ -139,7 +139,7 @@ async function handleSeed (seed) {
   const gardenClient = kubernetes.garden()
 
   // now make sure we expose the kube-apiserver with a browser-trusted certificate
-  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await existsShoot({ gardenClient, seedName: name })
+  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await shoots.exists({ gardenClient, namespace: 'garden', name })
   if (isSoil) {
     const soilSeedResource = seed
     await bootstrapIngressAndHeadlessServiceForSoilOnSoil({ coreClient, soilSeedResource })
@@ -148,16 +148,14 @@ async function handleSeed (seed) {
   }
 }
 
-async function existsShoot ({ gardenClient, seedName }) {
-  try {
-    await shoots.read({ gardenClient, namespace: 'garden', name: seedName })
-    return true
-  } catch (err) {
-    if (err.code === 404) {
-      return false
-    }
-    throw err
-  }
+async function handleShoot (shoot, cb) {
+  const name = shoot.metadata.name
+  const namespace = shoot.metadata.namespace
+  logger.debug(`replacing shoot's apiserver ingress ${name} for webterminals`)
+  const coreClient = kubernetes.core()
+  const gardenClient = kubernetes.garden()
+
+  await bootstrapShootIngress({ gardenClient, coreClient, namespace, name })
 }
 
 async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, name }) {
@@ -241,6 +239,11 @@ function isTerminalBootstrapDisabled () {
   return _.get(config, 'terminal.bootstrap.disabled', true)
 }
 
+function isTerminalBootstrapDisabledForKind (kind) {
+  kind = kind.toLowerCase()
+  return _.get(config, `terminal.bootstrap.${kind}Disabled`, false)
+}
+
 function verifyRequiredConfigExists () {
   if (isTerminalBootstrapDisabled()) {
     logger.debug('terminal bootstrap disabled by config')
@@ -265,6 +268,10 @@ function bootstrapResource (resource) {
   if (isTerminalBootstrapDisabled()) {
     return
   }
+  const kind = resource.kind
+  if (isTerminalBootstrapDisabledForKind(resource.kind)) {
+    return
+  }
   if (!requiredConfigExists) {
     return
   }
@@ -274,7 +281,6 @@ function bootstrapResource (resource) {
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
     return
   }
-  const kind = resource.kind
   bootstrapQueue.push({ resource, kind })
 }
 
@@ -286,6 +292,8 @@ const bootstrapQueue = new Queue(async ({ resource, kind }, cb) => {
   try {
     if (kind === 'Seed') {
       await handleSeed(resource)
+    } else if (kind === 'Shoot') {
+      await handleShoot(resource)
     } else {
       logger.error(`can't bootstrap unsupported kind ${kind}`)
     }

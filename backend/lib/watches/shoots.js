@@ -22,6 +22,7 @@ const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
 const _ = require('lodash')
+const { bootstrapResource } = require('../utils/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
 
@@ -30,42 +31,48 @@ module.exports = io => {
   registerHandler(emitter, async function (event) {
     if (event.type === 'ERROR') {
       logger.error('shoots event error', event.object)
-    } else {
-      event.objectKey = _.get(event.object, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+      return
+    }
+    event.objectKey = _.get(event.object, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
 
-      const name = event.object.metadata.name
-      const namespace = event.object.metadata.namespace
-      const namespacedEvents = { kind: 'shoots', namespaces: {} }
-      namespacedEvents.namespaces[namespace] = [event]
-      io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
-      io.of('/shoots').to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
+    const name = event.object.metadata.name
+    const namespace = event.object.metadata.namespace
+    const namespacedEvents = { kind: 'shoots', namespaces: {} }
+    namespacedEvents.namespaces[namespace] = [event]
+    io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
+    io.of('/shoots').to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
 
-      const shootIdentifier = `${namespace}_${name}`
-      const idx = _.indexOf(shootsWithIssues, shootIdentifier)
+    const shootIdentifier = `${namespace}_${name}`
+    const idx = _.indexOf(shootsWithIssues, shootIdentifier)
 
-      if (event.type === 'DELETED') {
+    switch (event.type) {
+      case 'ADDED':
+        const shoot = event.object
+        bootstrapResource(shoot)
+        break
+      case 'DELETED':
         try {
           await journals.deleteJournals({ namespace, name })
         } catch (error) {
           logger.error('failed to delete journals for %s/%s: %s', namespace, name, error)
         }
-      }
+        break
+    }
 
-      if (shootHasIssue(event.object)) {
-        io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
-        if (idx === -1) {
-          shootsWithIssues.push(shootIdentifier)
-        } else {
-          if (event.type === 'DELETED') {
-            _.pullAt(shootsWithIssues, idx)
-          }
-        }
+    if (shootHasIssue(event.object)) {
+      io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+      if (idx === -1) {
+        shootsWithIssues.push(shootIdentifier)
       } else {
-        if (idx !== -1) {
+        if (event.type === 'DELETED') {
           _.pullAt(shootsWithIssues, idx)
-          event.type = 'DELETED'
-          io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
         }
+      }
+    } else {
+      if (idx !== -1) {
+        _.pullAt(shootsWithIssues, idx)
+        event.type = 'DELETED'
+        io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
       }
     }
   })

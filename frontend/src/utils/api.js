@@ -226,6 +226,17 @@ export function createTerminal ({ namespace, name, target }) {
   }
 }
 
+export function deleteTerminal ({ namespace, name, target }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  target = encodeURIComponent(target)
+  if (target === 'garden') {
+    deleteResource(`/api/namespaces/${namespace}/terminals/${target}`)
+  } else {
+    deleteResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`)
+  }
+}
+
 export function heartbeat ({ namespace, name, target }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
