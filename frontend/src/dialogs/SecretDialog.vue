@@ -28,7 +28,7 @@ limitations under the License.
               <infra-icon v-model="infraIcon" :width="42"></infra-icon>
             </v-flex>
             <v-flex>
-              <div class="credential_title mr-3">{{title}}</div>
+              <div class="credential_title ml-3">{{title}}</div>
             </v-flex>
           </v-layout>
         </v-container>
