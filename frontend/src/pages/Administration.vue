@@ -23,7 +23,7 @@ limitations under the License.
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip top>
-          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="deleteConfirm=true" slot="activator">
+          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog" slot="activator">
             <v-icon>delete</v-icon>
           </v-btn>
           <span v-if="isDeleteButtonDisabled">You can only delete projects that do not contain clusters</span>
@@ -74,22 +74,20 @@ limitations under the License.
       </v-btn>
     </v-fab-transition>
 
-    <confirm-dialog
-      v-model="deleteConfirm"
+    <g-dialog
       defaultColor="red"
-      :cancel="hide"
-      :ok="onDeleteProject"
       :errorMessage.sync="errorMessage"
-      :detailedErrorMessage.sync="detailedErrorMessage">
-      <div slot="caption">
+      :detailedErrorMessage.sync="detailedErrorMessage"
+      ref="gDialog">
+      <template slot="caption">
         Confirm Delete
-      </div>
-      <div slot="message">
+      </template>
+      <template slot="message">
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
         <i class="red--text text--darken-2">The operation can not be undone.</i>
-      </div>
-    </confirm-dialog>
+      </template>
+    </g-dialog>
   </v-container>
 </template>
 
@@ -98,7 +96,7 @@ import { mapState, mapGetters, mapActions } from 'vuex'
 import find from 'lodash/find'
 import AccountAvatar from '@/components/AccountAvatar'
 import UpdateDialog from '@/dialogs/ProjectDialog'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { getDateFormatted } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
@@ -108,13 +106,12 @@ export default {
   components: {
     AccountAvatar,
     UpdateDialog,
-    ConfirmDialog,
+    GDialog,
     TimeString
   },
   data () {
     return {
       edit: false,
-      deleteConfirm: false,
       floatingButton: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -161,28 +158,32 @@ export default {
     ...mapActions([
       'deleteProject'
     ]),
-    hide () {
+    async showDialog () {
+      this.$refs.gDialog.showDialog()
+
+      const confirmed = await this.$refs.gDialog.confirmWithDialog()
+      if (confirmed) {
+        try {
+          await this.deleteProject(this.project)
+          if (this.projectList.length > 0) {
+            const p1 = this.projectList[0]
+            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+          } else {
+            this.$router.push({ name: 'Home', params: { } })
+          }
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Failed to delete project'
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+          this.showDialog()
+        }
+      }
+    },
+    reset () {
       this.errorMessage = undefined
       this.detailedMessage = undefined
-      this.deleteConfirm = false
       this.edit = false
-    },
-    async onDeleteProject () {
-      try {
-        await this.deleteProject(this.project)
-        this.hide()
-        if (this.projectList.length > 0) {
-          const p1 = this.projectList[0]
-          this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
-        } else {
-          this.$router.push({ name: 'Home', params: { } })
-        }
-      } catch (err) {
-        const errorDetails = errorDetailsFromError(err)
-        this.errorMessage = 'Failed to delete project.'
-        this.detailedErrorMessage = errorDetails.detailedMessage
-        console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
-      }
     }
   },
   mounted () {

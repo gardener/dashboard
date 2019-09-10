@@ -139,15 +139,12 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <cluster-access ref="clusterAccess" :item="selectedItem"></cluster-access>
+          <shoot-access-card ref="clusterAccess" :shootItem="selectedItem"></shoot-access-card>
         </v-card>
       </v-dialog>
-      <template v-if="renderCreateDialog">
-        <create-cluster-dialog v-if="projectScope" v-model="createDialog" @close="hideDialog"></create-cluster-dialog>
-      </template>
     </v-card>
     <v-fab-transition>
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" @click.native.stop="showDialog({action: 'create'})">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace: $route.params.namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -163,15 +160,13 @@ import get from 'lodash/get'
 import pick from 'lodash/pick'
 import join from 'lodash/join'
 import ShootListRow from '@/components/ShootListRow'
-import CreateClusterDialog from '@/dialogs/CreateClusterDialog'
-import ClusterAccess from '@/components/ClusterAccess'
+import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 
 export default {
   name: 'shoot-list',
   components: {
-    CreateClusterDialog,
     ShootListRow,
-    ClusterAccess
+    ShootAccessCard
   },
   data () {
     return {
@@ -197,8 +192,7 @@ export default {
       tableMenu: false,
       pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
       cachedItems: null,
-      clearSelectedShootTimerID: undefined,
-      renderCreateDialog: false
+      clearSelectedShootTimerID: undefined
     }
   },
   watch: {
@@ -230,12 +224,6 @@ export default {
           } catch (error) {
             // Currently not handled
           }
-          break
-        case 'create':
-          this.renderCreateDialog = true
-          this.$nextTick(() => {
-            this.dialog = args.action
-          })
       }
     },
     hideDialog () {
@@ -321,16 +309,6 @@ export default {
       'onlyShootsWithIssues',
       'cfg'
     ]),
-    createDialog: {
-      get () {
-        return this.dialog === 'create'
-      },
-      set (value) {
-        if (!value) {
-          this.hideDialog()
-        }
-      }
-    },
     clusterAccessDialog: {
       get () {
         return this.dialog === 'access'
@@ -428,11 +406,6 @@ export default {
     this.cachedItems = this.mappedItems.slice(0)
     this.search = null
     next()
-  },
-  created () {
-    this.$bus.$on('esc-pressed', () => {
-      this.hideDialog()
-    })
   }
 }
 </script>

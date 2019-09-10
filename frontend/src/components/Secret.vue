@@ -58,7 +58,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
-import InfraIcon from '@/components/InfrastructureIcon'
+import InfraIcon from '@/components/VendorIcon'
 
 export default {
   components: {

@@ -142,6 +142,16 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
   return patch({ user, namespace, name, body: payload })
 }
 
+exports.replaceAddons = async function ({ user, namespace, name, body }) {
+  const addons = body
+  const payload = {
+    spec: {
+      addons
+    }
+  }
+  return patch({ user, namespace, name, body: payload })
+}
+
 exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
   const workers = body
   const patchOperations = [
@@ -155,7 +165,7 @@ exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, 
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
-  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion } = body
+  const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
       maintenance: {
@@ -164,7 +174,8 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
           end: timeWindowEnd
         },
         autoUpdate: {
-          kubernetesVersion: updateKubernetesVersion
+          kubernetesVersion: updateKubernetesVersion,
+          machineImageVersion: updateOSVersion
         }
       }
     }

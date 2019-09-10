@@ -70,11 +70,11 @@ export default {
   },
   data () {
     return {
-      validationErrors
+      validationErrors,
+      valid: undefined
     }
   },
   validations () {
-    // had to move the code to a computed property so that the getValidationErrors method can access it
     return this.validators
   },
   computed: {
@@ -92,8 +92,15 @@ export default {
     },
     onInput (value) {
       this.$v.value.$touch()
-
       this.$emit('input', value)
+      this.validateInput()
+    },
+    validateInput () {
+      const valid = !this.$v.$invalid
+      if (this.valid !== valid) {
+        this.valid = valid
+        this.$emit('valid', valid)
+      }
     }
   }
 }

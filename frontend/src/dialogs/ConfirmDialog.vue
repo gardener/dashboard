@@ -15,181 +15,48 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="value" persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
-    <v-card>
-      <v-card-title :class="titleColorClass">
-        <div class="headline">
-          <slot name="caption">
-            Confirm Dialog
-          </slot>&nbsp;
-          <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
-        </div>
-      </v-card-title>
-      <v-card-text class="subheadingfont">
-        <slot name="message">
-          This is a generic dialog template.
-        </slot>
-        <v-text-field
-          @keyup.enter="okClicked()"
-          v-if="confirm && !confirmDisabled"
-          ref="deleteDialogInput"
-          :hint="hint"
-          persistent-hint
-          :error="hasError && userInput.length > 0"
-          v-model="userInput"
-          type="text"
-          color="cyan darken-2">
-        </v-text-field>
-      </v-card-text>
-
-      <alert color="error" :message.sync="message" :detailedMessage.sync="detailedMessage"></alert>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-        <v-btn @click.native.stop="okClicked()" :disabled="!valid" :class="textColorClass" flat>{{confirmButtonText}}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <g-dialog
+    ref="gDialog"
+    :confirmButtonText="confirmButtonText"
+    :cancelButtonText="cancelButtonText"
+    :max-width="maxWidth"
+    :defaultColor="dialogColor"
+    >
+    <template slot="caption">{{captionText}}</template>
+    <template slot="message">
+      <div v-html="messageHtml"></div>
+    </template>
+  </g-dialog>
 </template>
 
 <script>
-import { setDelayedInputFocus } from '@/utils'
-import Alert from '@/components/Alert'
+import GDialog from '@/dialogs/GDialog'
 
 export default {
   name: 'confirm-dialog',
   components: {
-    Alert
-  },
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    },
-    ok: {
-      type: Function,
-      required: true
-    },
-    cancel: {
-      type: Function,
-      required: true
-    },
-    confirm: {
-      type: String
-    },
-    confirmDisabled: {
-      type: Boolean,
-      default: false
-    },
-    errorMessage: {
-      type: String
-    },
-    detailedErrorMessage: {
-      type: String
-    },
-    confirmColor: {
-      type: String,
-      default: 'red'
-    },
-    defaultColor: {
-      type: String
-    },
-    confirmButtonText: {
-      type: String,
-      default: 'Confirm'
-    },
-    maxWidth: {
-      type: String,
-      default: '500'
-    }
+    GDialog
   },
   data () {
     return {
-      userInput: ''
-    }
-  },
-  watch: {
-    value (value) {
-      if (value) {
-        this.onShow()
-      }
-    }
-  },
-  computed: {
-    hasError () {
-      return this.confirm && this.confirm !== this.userInput
-    },
-    hint () {
-      if (this.userInput.length === 0) {
-        return `Type '${this.confirm}' to confirm`
-      } else if (this.userInput !== this.confirm) {
-        return `Your input did not match with required phrase '${this.confirm}'`
-      }
-      return ''
-    },
-    message: {
-      get () {
-        return this.errorMessage
-      },
-      set (value) {
-        this.$emit('update:errorMessage', value)
-      }
-    },
-    detailedMessage: {
-      get () {
-        return this.detailedErrorMessage
-      },
-      set (value) {
-        this.$emit('update:detailedErrorMessage', value)
-      }
-    },
-    titleColorClass () {
-      return this.confirm ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
-    },
-    textColorClass () {
-      return this.confirm ? this.textColorClassForString(this.confirmColor) : this.textColorClassForString(this.defaultColor)
-    },
-    valid () {
-      return !this.confirmDisabled && !this.hasError
+      confirmButtonText: undefined,
+      cancelButtonText: undefined,
+      captionText: undefined,
+      messageHtml: undefined,
+      dialogColor: undefined,
+      maxWidth: undefined
     }
   },
   methods: {
-    titleColorClassForString (titleColorClass) {
-      switch (titleColorClass) {
-        case 'red':
-          return 'red darken-2 grey--text text--lighten-4'
-        case 'orange':
-          return 'orange darken-2 grey--text text--lighten-4'
-        default:
-          return 'cyan darken-2 grey--text text--lighten-4'
-      }
-    },
-    textColorClassForString (textColorClass) {
-      switch (textColorClass) {
-        case 'red':
-          return 'red--text text--darken-2'
-        case 'orange':
-          return 'orange--text text--darken-2'
-        default:
-          return 'cyan--text text--darken-2'
-      }
-    },
-    cancelClicked () {
-      if (this.cancel) {
-        this.cancel()
-      }
-    },
-    okClicked () {
-      if (this.ok && this.valid) {
-        this.ok()
-      }
-    },
-    onShow () {
-      // we must delay the "focus" handling because the dialog.open is animated
-      // and the 'autofocus' property didn't work in this case.
-      this.userInput = ''
-      setDelayedInputFocus(this, 'deleteDialogInput')
+    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth } = {}) {
+      this.confirmButtonText = confirmButtonText || 'Confirm'
+      this.cancelButtonText = cancelButtonText || 'Cancel'
+      this.captionText = captionText || 'Confirm'
+      this.messageHtml = messageHtml
+      this.dialogColor = dialogColor || 'orange'
+      this.maxWidth = maxWidth || '400'
+
+      return this.$refs.gDialog.confirmWithDialog()
     }
   }
 }

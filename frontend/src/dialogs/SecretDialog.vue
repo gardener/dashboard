@@ -28,7 +28,7 @@ limitations under the License.
               <infra-icon v-model="infraIcon" :width="42"></infra-icon>
             </v-flex>
             <v-flex>
-              <div class="credential_title ml-3">{{title}}</div>
+              <div class="credential_title">{{title}}</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -68,11 +68,11 @@ limitations under the License.
           </v-layout>
 
           <slot name="data-slot"></slot>
-          <alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></alert>
           <p class="subheading mt-3">Do not use personalized login credentials. Instead, use credentials of a technical user.</p>
+          <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
-      <v-alert :value="!isCreateMode && relatedShootCount > 0" type="warning">
+      <v-alert :value="!isCreateMode && relatedShootCount > 1" type="warning">
         This secret is used by {{relatedShootCount}} clusters. The new secret should be part of the same account as the one that gets replaced.
       </v-alert>
       <v-card-actions>
@@ -95,8 +95,8 @@ import get from 'lodash/get'
 import head from 'lodash/head'
 import sortBy from 'lodash/sortBy'
 import filter from 'lodash/filter'
-import Alert from '@/components/Alert'
-import InfraIcon from '@/components/InfrastructureIcon'
+import GAlert from '@/components/GAlert'
+import InfraIcon from '@/components/VendorIcon'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
 
 const validationErrors = {
@@ -112,7 +112,7 @@ export default {
   name: 'secret-dialog',
   components: {
     CloudProfile,
-    Alert,
+    GAlert,
     InfraIcon
   },
   props: {

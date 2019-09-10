@@ -27,8 +27,8 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
-import { isReconciliationDeactivated } from '@/utils'
 import { addShootAnnotation } from '@/utils/api'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   props: {
@@ -41,38 +41,23 @@ export default {
       retryingOperation: false
     }
   },
+  mixins: [shootItem],
   computed: {
-    name () {
-      return get(this.shootItem, 'metadata.name')
-    },
-    namespace () {
-      return get(this.shootItem, 'metadata.namespace')
-    },
-    metadata () {
-      return get(this.shootItem, 'metadata', {})
-    },
-    status () {
-      return get(this.shootItem, 'status', {})
-    },
     canRetry () {
-      const reconcileScheduled = get(this.metadata, 'generation') !== get(this.status, 'observedGeneration')
+      const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration
 
-      return get(this.status, 'lastOperation.state') === 'Failed' &&
-          !this.reconciliationDeactivated &&
+      return get(this.shootLastOperation, 'state') === 'Failed' &&
+          !this.isShootReconciliationDeactivated &&
           !this.retryingOperation &&
           !reconcileScheduled
-    },
-    reconciliationDeactivated () {
-      const metadata = { annotations: this.metadata.annotations }
-      return isReconciliationDeactivated(metadata)
     }
   },
   methods: {
     async onRetryOperation () {
       this.retryingOperation = true
 
-      const namespace = this.namespace
-      const name = this.name
+      const namespace = this.shootNamespace
+      const name = this.shootName
 
       const retryAnnotation = { 'shoot.garden.sapcloud.io/operation': 'retry' }
       try {
