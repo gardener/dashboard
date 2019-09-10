@@ -68,7 +68,6 @@ limitations under the License.
           </v-layout>
 
           <slot name="data-slot"></slot>
-          <p class="subheading mt-3">Do not use personalized login credentials. Instead, use credentials of a technical user.</p>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
