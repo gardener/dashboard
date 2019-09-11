@@ -170,8 +170,12 @@ export default {
         this.token = undefined
         await this.$userManager.signinWithToken(token)
         this.dialog = false
-        this.$router.push(this.redirectPath)
+        await this.$router.push(this.redirectPath)
       } catch (err) {
+        if (err === undefined) {
+          // If router.push is done in any beforeEach navigation hook, the initial navigation is aborted with err = undefined. We do this in ensureDataLoaded to navigate to the ShootList as default. This should not result in an error.
+          return
+        }
         this.dialog = false
         this.showSnotifyLoginError(err.message)
       }
