@@ -44,14 +44,48 @@ limitations under the License.
         Close
       </v-btn>
     </v-snackbar>
-    <v-system-bar window dark class="systemBar">
-      {{toolbarTitle}}
+    <v-flex ref="container" class="terminal-container"></v-flex>
+    <v-system-bar dark class="systemBar">
+      <v-tooltip v-if="imageShortText" top>
+        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+          <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
+          <span>{{imageShortText}}</span>
+        </v-btn>
+        Image: {{image}}
+      </v-tooltip>
+
+      <v-tooltip v-if="isPrivileged !== undefined" top>
+        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+          <v-icon class="mr-2">mdi-shield-account</v-icon>
+          <span>{{privilegedText}}</span>
+        </v-btn>
+        Security Context: {{privilegedText}}
+      </v-tooltip>
+
+      <v-tooltip  v-if="node" top>
+        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+          <v-icon :size="14" class="mr-2">mdi-server</v-icon>
+          <span>{{node}}</span>
+        </v-btn>
+        Node: {{node}}
+      </v-tooltip>
+
       <v-spacer></v-spacer>
-      <v-btn icon @click="deleteTerminal()">
-        <v-icon style="margin-right: 0">close</v-icon>
+
+      <!-- <v-tooltip top>
+        <v-btn small flat slot="activator" class="text-none grey--text text--lighten-1 systemBarButton">
+          <v-icon>mdi-settings</v-icon>
+        </v-btn>
+        Settings
+      </v-tooltip>
+
+      <v-divider vertical></v-divider> -->
+
+      <v-btn small flat class="text-none grey--text text--lighten-1 systemBarButton" @click="deleteTerminal">
+        <v-icon class="mr-2">mdi-exit-to-app</v-icon>
+        Exit
       </v-btn>
     </v-system-bar>
-    <v-flex ref="container" class="terminal-container"></v-flex>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
@@ -60,6 +94,7 @@ limitations under the License.
 import 'xterm/dist/xterm.css'
 import ora from 'ora'
 import get from 'lodash/get'
+import find from 'lodash/find'
 import * as attach from '@/lib/attach'
 import * as fit from 'xterm/lib/addons/fit/fit'
 import * as search from 'xterm/lib/addons/search/search'
@@ -139,7 +174,10 @@ export default {
       errorSnackbarBottom: false,
       snackbarText: '',
       spinner: undefined,
-      cancelConnect: false
+      cancelConnect: false,
+      node: '',
+      isPrivileged: undefined,
+      image: ''
     }
   },
   computed: {
@@ -149,31 +187,15 @@ export default {
     heartbeatIntervalSeconds () {
       return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
     },
-    toolbarTitle () {
-      let title
-      if (this.name) {
-        title = this.name
-      } else {
-        title = getProjectName({ namespace: this.namespace}).toUpperCase()
-      }
-      title += ` - ${this.targetDescription} Terminal`
-      return title
-    },
     name () {
       const { name = undefined } = this.$route.params
       return name
     },
-    targetDescription () {
-      const { target } = this.$route.params
-      switch (target) {
-        case 'garden':
-          return 'Garden'
-        case 'cp':
-          return 'Control Plane'
-        case 'shoot':
-          return 'Cluster'
-      }
-      return 'UNKNOWN'
+    privilegedText () {
+      return this.isPrivileged ? 'Privileged' : 'Unprivileged'
+    },
+    imageShortText () {
+      return this.image.substring(this.image.lastIndexOf('/') + 1)
     },
     namespace () {
       const { namespace } = this.$route.params
@@ -194,9 +216,9 @@ export default {
     },
     confirmDelete () {
       return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Delete',
-        captionText: 'Confirm Delete',
-        messageHtml: 'Do you want to delete this terminal session?<br/><br/><i>Information: Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
+        confirmButtonText: 'Exit',
+        captionText: 'Confirm Exit',
+        messageHtml: 'Do you want to exit this terminal session? This will clean up all related resources.<br/><br/><i class="grey--text text--darken-2">Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
       })
     },
     onResize (size) {
@@ -344,7 +366,15 @@ export default {
             console.error('could not parse message')
             return
           }
-          const phase = get(event.object, 'status.phase')
+          const pod = event.object
+
+          const containers = get(pod, 'spec.containers')
+          const terminalContainer = find(containers, container => container.name === 'terminal')
+          this.image = get(terminalContainer, 'image')
+          this.isPrivileged = get(terminalContainer, 'securityContext.privileged')
+          this.node = get(pod, 'spec.nodeName')
+
+          const phase = get(pod, 'status.phase')
           switch (phase) {
             case 'Failed':
             case 'Terminating':
@@ -428,5 +458,8 @@ export default {
   }
   .systemBar {
     background-color: #212121;
+  }
+  .systemBarButton {
+    min-width: 20px;
   }
 </style>
