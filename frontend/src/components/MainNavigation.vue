@@ -412,7 +412,6 @@ export default {
 
     .v-footer{
       background-color: transparent
-      bottom: 10px
       padding-left: 10px;
       padding-right: 10px;
     }
