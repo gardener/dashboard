@@ -34,7 +34,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.be.json
     expect(res.body).to.eql({
       isAdmin: false,
-      canCreateProject: true
+      canCreateProject: true,
+      canManageTerminal: true
     })
   })
 

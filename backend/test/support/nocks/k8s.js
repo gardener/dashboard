@@ -232,6 +232,24 @@ function canCreateProjects (scope) {
     })
 }
 
+function canManageTerminals (scope) {
+  return scope
+    .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
+      const { namespace, verb, resource, group } = body.spec.resourceAttributes
+      return !namespace && group === 'dashboard.gardener.cloud' && resource === 'terminals' && verb === '*'
+    })
+    .reply(200, function (uri, body) {
+      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+      const payload = jwt.decode(token)
+      const allowed = _.endsWith(payload.id, 'example.org')
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
+}
+
 function reviewToken (scope) {
   return scope
     .post('/apis/authentication.k8s.io/v1/tokenreviews')
@@ -1008,6 +1026,7 @@ const stub = {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
     canCreateProjects(scope)
+    canManageTerminals(scope)
     return scope
   },
   authorizeToken () {
