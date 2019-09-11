@@ -56,13 +56,10 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
-async function getShootIngressDomain (projects, namespaces, shoot) {
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
-
-  return getShootIngressDomainForSeed(projects, namespaces, shoot, seed)
-}
-
-async function getShootIngressDomainForSeed (projects, namespaces, shoot, seed) {
+async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
+  if (!seed) {
+    seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  }
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
 
@@ -72,7 +69,7 @@ async function getShootIngressDomainForSeed (projects, namespaces, shoot, seed) 
   return `${name}.${projectName}.${ingressDomain}`
 }
 
-async function getSoilIngressDomainForSeed (projects, namespaces, seed) {
+async function getSeedIngressDomain (projects, namespaces, seed) {
   const namespace = 'garden'
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
@@ -147,8 +144,7 @@ module.exports = {
   getCloudProviderKind,
   shootHasIssue,
   getShootIngressDomain,
-  getShootIngressDomainForSeed,
-  getSoilIngressDomainForSeed,
+  getSeedIngressDomain,
   getKubeconfig,
   getSeedKubeconfig,
   getProjectNameFromNamespace,

@@ -24,8 +24,8 @@ const logger = require('../../logger')
 const config = require('../../config')
 const {
   getSeedKubeconfig,
-  getShootIngressDomainForSeed,
-  getSoilIngressDomainForSeed
+  getShootIngressDomain,
+  getSeedIngressDomain
 } = require('..')
 const kubernetes = require('../../kubernetes')
 const {
@@ -134,17 +134,18 @@ async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, co
 
 async function handleSeed (seed) {
   const name = seed.metadata.name
+  const namespace = 'garden'
+
   logger.debug(`replacing resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
 
   // now make sure we expose the kube-apiserver with a browser-trusted certificate
-  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await shoots.exists({ gardenClient, namespace: 'garden', name })
-  if (isSoil) {
-    const soilSeedResource = seed
-    await bootstrapIngressAndHeadlessServiceForSoilOnSoil({ coreClient, soilSeedResource })
+  const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
+  if (isShootedSeed) {
+    await bootstrapShootIngress({ gardenClient, coreClient, namespace, name })
   } else {
-    await bootstrapShootIngress({ gardenClient, coreClient, namespace: 'garden', name })
+    await bootstrapIngressAndHeadlessServiceForSeed({ coreClient, seed })
   }
 }
 
@@ -158,6 +159,12 @@ async function handleShoot (shoot, cb) {
   await bootstrapShootIngress({ gardenClient, coreClient, namespace, name })
 }
 
+/*
+  Currently the kube apiserver of a shoot presents a certificate signed by a custom CA root certificate which is usually not trusted by a browser.
+  As for the web terminals, the frontend client opens a websocket connection directly to the kube apiserver. This requires a browser trusted certificate.
+  Preferred, the gardener provides the kube apiserver a browser trusted certificate using the `--tls-sni-cert-key` argument.
+  Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube apiserver.
+*/
 async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, name }) {
   const shootResource = await shoots.read({ gardenClient, namespace, name })
 
@@ -172,7 +179,7 @@ async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, nam
   // calculate ingress domain
   const projectsClient = kubernetes.garden().projects
   const namespacesClient = kubernetes.core().namespaces
-  const shootIngressDomain = await getShootIngressDomainForSeed(projectsClient, namespacesClient, shootResource, seedResource)
+  const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
   const apiserverIngressHost = `api.${shootIngressDomain}`
 
   // replace ingress apiserver resource
@@ -190,24 +197,24 @@ async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, nam
   })
 }
 
-async function bootstrapIngressAndHeadlessServiceForSoilOnSoil ({ coreClient, soilSeedResource }) {
+async function bootstrapIngressAndHeadlessServiceForSeed ({ coreClient, seed }) {
   const projectsClient = kubernetes.garden().projects
   const namespacesClient = kubernetes.core().namespaces
 
-  const soilKubeconfig = await getSeedKubeconfig({ coreClient, seed: soilSeedResource })
-  const soilClientConfig = kubernetes.fromKubeconfig(soilKubeconfig)
-  const soilCoreClient = kubernetes.core(soilClientConfig)
-  const soilExtensionClient = kubernetes.extensions(soilClientConfig)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
+  const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
+  const seedCoreClient = kubernetes.core(seedClientConfig)
+  const seedExtensionClient = kubernetes.extensions(seedClientConfig)
 
   const namespace = 'garden'
-  const soilApiserverHostname = new URL(soilClientConfig.url).hostname
-  const soilIngressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, soilSeedResource)
+  const seedApiserverHostname = new URL(seedClientConfig.url).hostname
+  const seedIngressDomain = await getSeedIngressDomain(projectsClient, namespacesClient, seed)
   await bootstrapIngressAndHeadlessService({
-    coreClient: soilCoreClient,
-    extensionClient: soilExtensionClient,
+    coreClient: seedCoreClient,
+    extensionClient: seedExtensionClient,
     namespace,
-    apiserverHostname: soilApiserverHostname,
-    ingressDomain: soilIngressDomain
+    apiserverHostname: seedApiserverHostname,
+    ingressDomain: seedIngressDomain
   })
 }
 

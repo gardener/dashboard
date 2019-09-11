@@ -25,7 +25,7 @@ const {
   getKubeconfig,
   getShootIngressDomain,
   getConfigValue,
-  getSoilIngressDomainForSeed,
+  getSeedIngressDomain,
   decodeBase64
 } = require('../utils')
 const {
@@ -99,13 +99,13 @@ async function getKubeApiServerHostForSeed ({ user, seed }) {
   const projectsClient = gardenClient.projects
   const namespacesClient = Core(user).namespaces
 
-  const isSoil = _.get(seed, ['metadata', 'labels', 'garden.sapcloud.io/role']) === 'soil' || !await shoots.exists({ gardenClient, namespace, name })
   let ingressDomain
-  if (isSoil) {
-    ingressDomain = await getSoilIngressDomainForSeed(projectsClient, namespacesClient, seed)
-  } else {
+  const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
+  if (isShootedSeed) {
     const shootResource = await shoots.read({ gardenClient, namespace, name })
     ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
+  } else {
+    ingressDomain = await getSeedIngressDomain(projectsClient, namespacesClient, seed)
   }
 
   return `api.${ingressDomain}`
