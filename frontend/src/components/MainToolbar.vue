@@ -97,7 +97,7 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <v-tabs v-if="tabs" slot="extension" slider-color="grey darken-3">
+    <v-tabs v-if="tabs && tabs.length > 1" slot="extension" slider-color="grey darken-3">
       <template v-for="(tab, key) in tabs">
         <v-spacer v-if="tab.spacer" :key="key"></v-spacer>
         <v-tab :to="tab.to($route)" :key="key" ripple>
