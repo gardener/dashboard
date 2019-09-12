@@ -315,10 +315,6 @@ export default {
           }
           ws.onclose = error => {
             this.close()
-            if (this.cancelConnect) {
-              return
-            }
-
             const wasConnected = connected
             connected = false
 
@@ -328,6 +324,10 @@ export default {
             }
             if (tries >= MAX_TRIES) {
               this.showSnackbarTop('Could not connect to terminal')
+              return
+            }
+
+            if (this.cancelConnect) {
               return
             }
 
@@ -345,7 +345,6 @@ export default {
           }
 
           this.close = () => {
-            this.cancelConnect = true
             clearTimeout(reconnectTimeoutId)
             clearInterval(heartbeatIntervalId)
 
@@ -438,6 +437,7 @@ export default {
     this.connect()
   },
   beforeDestroy () {
+    this.cancelConnect = true
     this.close()
   }
 }
