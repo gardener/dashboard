@@ -315,6 +315,10 @@ export default {
           }
           ws.onclose = error => {
             this.close()
+            if (this.cancelConnect) {
+              return
+            }
+
             const wasConnected = connected
             connected = false
 
@@ -341,6 +345,7 @@ export default {
           }
 
           this.close = () => {
+            this.cancelConnect = true
             clearTimeout(reconnectTimeoutId)
             clearInterval(heartbeatIntervalId)
 
