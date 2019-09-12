@@ -23,13 +23,11 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
-router.route('/:target/:name?/')
+router.route('/:target/:name?')
   .post(async (req, res, next) => {
     try {
       const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const target = req.params.target
+      const { namespace, name, target } = req.params
       res.send(await terminals.create({ user, namespace, name, target }))
     } catch (err) {
       next(err)
@@ -38,22 +36,18 @@ router.route('/:target/:name?/')
   .delete(async (req, res, next) => {
     try {
       const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const target = req.params.target
+      const { namespace, name, target } = req.params
       res.send(await terminals.remove({ user, namespace, name, target }))
     } catch (err) {
       next(err)
     }
   })
 
-router.route('/:target/heartbeat/:name?/')
-  .patch(async (req, res, next) => {
+router.route('/:target/:name?/heartbeat')
+  .put(async (req, res, next) => {
     try {
       const user = req.user
-      const namespace = req.params.namespace
-      const name = req.params.name
-      const target = req.params.target
+      const { namespace, name, target } = req.params
       res.send(await terminals.heartbeat({ user, namespace, name, target }))
     } catch (err) {
       next(err)

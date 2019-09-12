@@ -242,8 +242,8 @@ export function heartbeat ({ namespace, name, target }) {
   name = encodeURIComponent(name)
   target = encodeURIComponent(target)
   if (target === 'garden') {
-    return patchResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, undefined)
+    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, undefined)
   } else {
-    return patchResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat/${name}`, undefined)
+    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/heartbeat`, undefined)
   }
 }
