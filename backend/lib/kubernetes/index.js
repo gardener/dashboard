@@ -205,7 +205,7 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
-  gardendashboard (options) {
+  gardenerDashboard (options) {
     const resources = [
       Resources.Terminal.name
     ]

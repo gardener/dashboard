@@ -50,8 +50,8 @@ function Garden ({ auth }) {
   return kubernetes.garden({ auth })
 }
 
-function Gardendashboard ({ auth }) {
-  return kubernetes.gardendashboard({ auth })
+function GardenerDashboard ({ auth }) {
+  return kubernetes.gardenerDashboard({ auth })
 }
 
 function Core ({ auth }) {
@@ -119,7 +119,7 @@ async function getKubeApiServerHostForShoot ({ user, shootResource }) {
   return `api.${ingressDomain}`
 }
 
-async function findExistingTerminalResource ({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster }) {
+async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster }) {
   let selectors = [
     `dashboard.gardener.cloud/hostCluster=${fnv.hash(JSON.stringify(hostCluster), 64).str()}`,
     `dashboard.gardener.cloud/targetCluster=${fnv.hash(JSON.stringify(targetCluster), 64).str()}`,
@@ -130,20 +130,20 @@ async function findExistingTerminalResource ({ gardendashboardClient, username, 
   }
   const qs = { labelSelector: selectors.join(',') }
 
-  let { items: existingTerminals } = await gardendashboardClient.ns(namespace).terminals.get({ qs })
+  let { items: existingTerminals } = await dashboardClient.ns(namespace).terminals.get({ qs })
   existingTerminals = _.filter(existingTerminals, terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
 
   return _.find(existingTerminals, item => item.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
 }
 
-async function findExistingTerminal ({ gardendashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
-  let existingTerminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
+async function findExistingTerminal ({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
+  let existingTerminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
 
   if (!existingTerminal) {
     return undefined
   }
   if (!isTerminalReady(existingTerminal)) {
-    existingTerminal = await readTerminalUntilReady({ gardendashboardClient, namespace, name })
+    existingTerminal = await readTerminalUntilReady({ dashboardClient, namespace, name })
   }
   const pod = existingTerminal.status.podName
   const attachServiceAccount = existingTerminal.status.attachServiceAccountName
@@ -183,11 +183,11 @@ async function deleteTerminalSession ({ isAdmin, user, namespace, name, target }
   const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
   const targetCluster = await getTargetCluster({ user, namespace, name, target })
 
-  const gardendashboardClient = Gardendashboard(user)
+  const dashboardClient = GardenerDashboard(user)
 
-  const terminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
+  const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
   if (terminal) {
-    await gardendashboardClient.ns(namespace).terminals.delete({ name: terminal.metadata.name })
+    await dashboardClient.ns(namespace).terminals.delete({ name: terminal.metadata.name })
   }
 }
 
@@ -298,7 +298,7 @@ async function getHostCluster ({ isAdmin, user, namespace, name, target }) {
   return hostCluster
 }
 
-async function createTerminal ({ gardendashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
+async function createTerminal ({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
   const containerImage = getConfigValue({ path: 'terminal.operator.image' })
 
   const podLabels = getPodLabels(target)
@@ -320,7 +320,7 @@ async function createTerminal ({ gardendashboardClient, user, namespace, name, t
   const prefix = `term-${target}-`
   const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
 
-  return gardendashboardClient.ns(namespace).terminals.post({ body: terminalResource })
+  return dashboardClient.ns(namespace).terminals.post({ body: terminalResource })
 }
 
 function getPodLabels (target) {
@@ -375,9 +375,9 @@ function isTerminalReady (terminal) {
   return !_.isEmpty(_.get(terminal, 'status.podName')) && !_.isEmpty(_.get(terminal, 'status.attachServiceAccountName'))
 }
 
-async function readTerminalUntilReady ({ gardendashboardClient, namespace, name }) {
+async function readTerminalUntilReady ({ dashboardClient, namespace, name }) {
   const conditionFunction = isTerminalReady
-  const watch = gardendashboardClient.ns(namespace).terminals.watch({ name })
+  const watch = dashboardClient.ns(namespace).terminals.watch({ name })
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
 
@@ -396,22 +396,22 @@ async function getOrCreateTerminalSession ({ isAdmin, user, namespace, name, tar
     server: hostCluster.kubeApiServer
   }
 
-  const gardendashboardClient = Gardendashboard(user)
+  const dashboardClient = GardenerDashboard(user)
   const gardenCoreClient = Core(user)
 
   const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...hostCluster.secretRef })
   const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
-  const existingTerminal = await findExistingTerminal({ gardendashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
+  const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
   }
 
   logger.debug(`No terminal found for user ${username}. Creating new..`)
-  let terminalResource = await createTerminal({ gardendashboardClient, user, namespace, name, target, hostCluster, targetCluster })
+  let terminalResource = await createTerminal({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster })
 
-  terminalResource = await readTerminalUntilReady({ gardendashboardClient, namespace, name: terminalResource.metadata.name })
+  terminalResource = await readTerminalUntilReady({ dashboardClient, namespace, name: terminalResource.metadata.name })
 
   const { token } = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
 
@@ -447,9 +447,9 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
   const targetCluster = await getTargetCluster({ user, namespace, name, target })
 
-  const gardendashboardClient = Gardendashboard(user)
+  const dashboardClient = GardenerDashboard(user)
 
-  const terminal = await findExistingTerminalResource({ gardendashboardClient, username, namespace, name, hostCluster, targetCluster })
+  const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
   if (!terminal) {
     throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
   }
@@ -459,7 +459,7 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   }
   try {
     const name = terminal.metadata.name
-    await gardendashboardClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
+    await dashboardClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
   } catch (e) {
     logger.error(`Could not update terminal on heartbeat. Error: ${e}`)
     throw new Error(`Could not update terminal on heartbeat`)
