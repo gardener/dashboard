@@ -222,7 +222,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     targetCluster.namespace = 'garden'
     targetCluster.credentials = {
       serviceAccountRef: {
-        name: getConfigValue({ path: 'terminal.gardenCluster.serviceAccountName', defaultValue: 'dashboard-terminal-admin' }),
+        name: getConfigValue('terminal.gardenCluster.serviceAccountName', 'dashboard-terminal-admin'),
         namespace: 'garden'
       }
     }
@@ -269,7 +269,7 @@ async function getHostCluster ({ isAdmin, user, namespace, name, target }) {
     const gardenCoreClient = Core(user)
     hostCluster.namespace = undefined // this will create a temporary namespace
     hostCluster.secretRef = await getGardenRuntimeClusterSecretRef({ gardenCoreClient })
-    hostCluster.kubeApiServer = _.head(getConfigValue({ path: 'terminal.gardenCluster.kubeApiServer.hosts' }))
+    hostCluster.kubeApiServer = _.head(getConfigValue('terminal.gardenCluster.kubeApiServer.hosts'))
   } else {
     const shootResource = await shoots.read({ user, namespace, name })
     if (target === TARGET.shoot) {
@@ -445,9 +445,9 @@ async function ensureTerminalAllowed ({ isAdmin, target }) {
 }
 
 function getContainerImage (isAdmin) {
-  const containerImage = getConfigValue({ path: 'terminal.containerImage' })
+  const containerImage = getConfigValue('terminal.containerImage')
   if (isAdmin) {
-    return getConfigValue({ path: 'terminal.containerImageOperator', defaultValue: containerImage })
+    return getConfigValue('terminal.containerImageOperator', containerImage)
   }
   return containerImage
 }
@@ -458,8 +458,13 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
 
   await ensureTerminalAllowed({ isAdmin, target })
 
-  const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
-  const targetCluster = await getTargetCluster({ user, namespace, name, target })
+  const [
+    hostCluster,
+    targetCluster
+  ] = await Promise.all([
+    getHostCluster({ isAdmin, user, namespace, name, target }),
+    getTargetCluster({ user, namespace, name, target })
+  ])
 
   const dashboardClient = GardenerDashboard(user)
 

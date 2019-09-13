@@ -22,6 +22,7 @@ const _ = require('lodash')
 const { getSeeds } = require('../cache')
 const { NotFound } = require('../errors')
 const config = require('../config')
+const assert = require('assert').strict
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -129,10 +130,10 @@ async function getProjectByNamespace (projects, namespaces, namespace) {
   return projects.get({ name })
 }
 
-function getConfigValue ({ path, defaultValue = undefined, required = true }) {
+function getConfigValue (path, defaultValue) {
   const value = _.get(config, path, defaultValue)
-  if (required && !value) {
-    throw new Error(`no config with ${path} found`)
+  if (arguments.length === 1 && typeof value === 'undefined') {
+    assert.fail(`no config with ${path} found`)
   }
   return value
 }
