@@ -298,8 +298,8 @@ async function getHostCluster ({ isAdmin, user, namespace, name, target }) {
   return hostCluster
 }
 
-async function createTerminal ({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
-  const containerImage = getConfigValue({ path: 'terminal.operator.image' })
+async function createTerminal ({ isAdmin, dashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
+  const containerImage = getContainerImage(isAdmin)
 
   const podLabels = getPodLabels(target)
 
@@ -409,7 +409,7 @@ async function getOrCreateTerminalSession ({ isAdmin, user, namespace, name, tar
   }
 
   logger.debug(`No terminal found for user ${username}. Creating new..`)
-  let terminalResource = await createTerminal({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster })
+  let terminalResource = await createTerminal({ isAdmin, dashboardClient, user, namespace, name, target, hostCluster, targetCluster })
 
   terminalResource = await readTerminalUntilReady({ dashboardClient, namespace, name: terminalResource.metadata.name })
 
@@ -436,6 +436,14 @@ async function ensureTerminalAllowed ({ isAdmin, user, namespace, name, target }
   if ((target === TARGET.controlPlane || target === TARGET.garden) && !isAdmin) {
     throw new Forbidden('Terminal usage is not allowed')
   }
+}
+
+function getContainerImage (isAdmin) {
+  const containerImage = getConfigValue({ path: 'terminal.containerImage' })
+  if (isAdmin) {
+    return getConfigValue({ path: 'terminal.containerImageOperator', defaultValue: containerImage })
+  }
+  return containerImage
 }
 
 exports.heartbeat = async function ({ user, namespace, name, target }) {

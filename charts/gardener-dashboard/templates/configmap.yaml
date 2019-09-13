@@ -53,8 +53,8 @@ data:
 {{- end }}
     {{- if .Values.terminal }}
     terminal:
-      operator:
-        image: {{ .Values.terminal.operator.image }}
+      containerImage: {{ .Values.terminal.containerImage }}
+      containerImageOperator: {{ .Values.terminal.containerImageOperator }}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
         disabled: {{ .Values.terminal.bootstrap.disabled | default false }}

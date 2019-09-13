@@ -27,7 +27,7 @@
       <span class="black--text ml-2">
        {{data.item.name}} [{{data.item.version}}]
       </span>
-  </template>
+    </template>
   </v-select>
 </template>
 

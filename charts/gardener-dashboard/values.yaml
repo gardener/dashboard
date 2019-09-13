@@ -100,8 +100,8 @@ readinessProbe:
   successThreshold: 1
 
 # terminal:
-#   operator:
-#     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+#   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+#   containerImageOperator: ~ # if not defined, value of containerImage will be used
 #   bootstrap:
 #     disabled: true # indicates if bootstrapping resources required for the terminal feature is generally disabled
 #     seedDisabled: false # indicates if bootstrapping resources for seeds is disabled, required for gardener operator terminals
