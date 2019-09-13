@@ -163,14 +163,14 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
 
 exports.create = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
-  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+  await ensureTerminalAllowed({ isAdmin, target })
 
   return getOrCreateTerminalSession({ isAdmin, user, namespace, name, target })
 }
 
 exports.remove = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
-  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+  await ensureTerminalAllowed({ isAdmin, target })
 
   return deleteTerminalSession({ isAdmin, user, namespace, name, target })
 }
@@ -178,7 +178,7 @@ exports.remove = async function ({ user, namespace, name, target }) {
 async function deleteTerminalSession ({ isAdmin, user, namespace, name, target }) {
   const username = user.id
 
-  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+  await ensureTerminalAllowed({ isAdmin, target })
 
   const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
   const targetCluster = await getTargetCluster({ user, namespace, name, target })
@@ -432,10 +432,16 @@ function getSeedShootNamespace (shoot) {
   return seedShootNS
 }
 
-async function ensureTerminalAllowed ({ isAdmin, user, namespace, name, target }) {
-  if ((target === TARGET.controlPlane || target === TARGET.garden) && !isAdmin) {
-    throw new Forbidden('Terminal usage is not allowed')
+async function ensureTerminalAllowed ({ isAdmin, target }) {
+  if (isAdmin) {
+    return
   }
+
+  // non-admin users are only allowed to open terminals for shoots
+  if (target === TARGET.shoot) {
+    return
+  }
+  throw new Forbidden('Terminal usage is not allowed')
 }
 
 function getContainerImage (isAdmin) {
@@ -450,7 +456,7 @@ exports.heartbeat = async function ({ user, namespace, name, target }) {
   const isAdmin = await authorization.isAdmin(user)
   const username = user.id
 
-  await ensureTerminalAllowed({ isAdmin, user, namespace, name, target })
+  await ensureTerminalAllowed({ isAdmin, target })
 
   const hostCluster = await getHostCluster({ isAdmin, user, namespace, name, target })
   const targetCluster = await getTargetCluster({ user, namespace, name, target })
