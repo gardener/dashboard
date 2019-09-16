@@ -102,7 +102,7 @@ import * as webLinks from 'xterm/lib/addons/webLinks/webLinks'
 
 import { mapState } from 'vuex'
 import { Terminal } from 'xterm'
-import { encodeURIComponents, getProjectName } from '@/utils'
+import { encodeURIComponents } from '@/utils'
 import {
   createTerminal,
   deleteTerminal,

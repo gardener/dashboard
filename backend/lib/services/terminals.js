@@ -31,6 +31,9 @@ const {
 const {
   toTerminalResource
 } = require('../utils/terminals/terminalResources')
+const {
+  getGardenTerminalHostClusterSecretRef
+} = require('../utils/terminals')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const shoots = require('./shoots')
@@ -191,24 +194,6 @@ async function deleteTerminalSession ({ isAdmin, user, namespace, name, target }
   }
 }
 
-async function getRuntimeClusterSecrets ({ gardenCoreClient }) {
-  const qs = { labelSelector: 'runtime=garden' }
-  return gardenCoreClient.ns('garden').secrets.get({ qs })
-}
-
-async function getGardenRuntimeClusterSecretRef ({ gardenCoreClient }) {
-  const { items: runtimeSecrets } = await getRuntimeClusterSecrets({ gardenCoreClient })
-  const secret = _.head(runtimeSecrets)
-  if (!secret) {
-    throw new Error('could not fetch garden runtime secret')
-  }
-  const { metadata: { name, namespace } } = secret
-  return {
-    name,
-    namespace
-  }
-}
-
 async function getTargetCluster ({ user, namespace, name, target }) {
   const targetCluster = {
     kubeconfigContextNamespace: undefined,
@@ -220,12 +205,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
   if (target === TARGET.garden) {
     targetCluster.kubeconfigContextNamespace = namespace
     targetCluster.namespace = 'garden'
-    targetCluster.credentials = {
-      serviceAccountRef: {
-        name: getConfigValue('terminal.gardenCluster.serviceAccountName', 'dashboard-terminal-admin'),
-        namespace: 'garden'
-      }
-    }
+    targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
     targetCluster.bindingKind = 'ClusterRoleBinding'
   } else {
     if (target === TARGET.shoot) {
@@ -268,8 +248,8 @@ async function getHostCluster ({ isAdmin, user, namespace, name, target }) {
   if (target === TARGET.garden) {
     const gardenCoreClient = Core(user)
     hostCluster.namespace = undefined // this will create a temporary namespace
-    hostCluster.secretRef = await getGardenRuntimeClusterSecretRef({ gardenCoreClient })
-    hostCluster.kubeApiServer = _.head(getConfigValue('terminal.gardenCluster.kubeApiServer.hosts'))
+    hostCluster.secretRef = await getGardenTerminalHostClusterSecretRef({ coreClient: gardenCoreClient })
+    hostCluster.kubeApiServer = getConfigValue('terminal.gardenHost.apiServerIngressHost')
   } else {
     const shootResource = await shoots.read({ user, namespace, name })
     if (target === TARGET.shoot) {

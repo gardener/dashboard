@@ -23,9 +23,11 @@ const net = require('net')
 const logger = require('../../logger')
 const config = require('../../config')
 const {
+  getKubeconfig,
   getSeedKubeconfig,
   getShootIngressDomain,
-  getSeedIngressDomain
+  getSeedIngressDomain,
+  getConfigValue
 } = require('..')
 const kubernetes = require('../../kubernetes')
 const {
@@ -33,9 +35,27 @@ const {
   toEndpointResource,
   toServiceResource
 } = require('./terminalResources')
+const {
+  getGardenTerminalHostClusterSecretRef
+} = require('./')
 const shoots = require('../../services/shoots')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
+
+class Handler {
+  constructor (fn, description) {
+    this.fn = fn
+    this.description = description
+  }
+
+  async run () {
+    return this.fn()
+  }
+
+  description () {
+    return this.description
+  }
+}
 
 async function replaceResource ({ client, name, body }) {
   try {
@@ -49,8 +69,10 @@ async function replaceResource ({ client, name, body }) {
   }
 }
 
-async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences }) {
-  const annotations = _.get(config, 'terminal.bootstrap.apiserverIngress.annotations')
+async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
+  if (!secretName) {
+    secretName = `${name}-tls`
+  }
 
   const spec = {
     rules: [
@@ -74,7 +96,7 @@ async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extens
         hosts: [
           host
         ],
-        secretName: `${name}-tls`
+        secretName
       }
     ]
   }
@@ -108,13 +130,14 @@ async function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, c
   return replaceResource({ client, name, body })
 }
 
-async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences }) {
+async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
   let type
   if (externalName) {
     type = 'ExternalName'
   }
 
   const spec = {
+    clusterIP,
     ports: [
       {
         port: 443,
@@ -140,12 +163,12 @@ async function handleSeed (seed) {
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
 
-  // now make sure we expose the kube-apiserver with a browser-trusted certificate
+  // now make sure a a browser-trusted certificate is presented for the kube-apiserver
   const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
   if (isShootedSeed) {
-    await bootstrapShootIngress({ gardenClient, coreClient, namespace, name })
+    await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
   } else {
-    await bootstrapIngressAndHeadlessServiceForSeed({ coreClient, seed })
+    await ensureTrustedCertForSeedApiServer({ coreClient, seed })
   }
 }
 
@@ -156,16 +179,17 @@ async function handleShoot (shoot, cb) {
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
 
-  await bootstrapShootIngress({ gardenClient, coreClient, namespace, name })
+  await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
 }
 
 /*
   Currently the kube apiserver of a shoot presents a certificate signed by a custom CA root certificate which is usually not trusted by a browser.
   As for the web terminals, the frontend client opens a websocket connection directly to the kube apiserver. This requires a browser trusted certificate.
-  Preferred, the gardener provides the kube apiserver a browser trusted certificate using the `--tls-sni-cert-key` argument.
-  Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube apiserver.
+  Preferred, the gardener provides the kube-apiserver a browser trusted certificate using the `--tls-sni-cert-key` argument.
+  Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube-apiserver.
+  https://github.com/gardener/gardener/issues/1413
 */
-async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, name }) {
+async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, namespace, name }) {
   const shootResource = await shoots.read({ gardenClient, namespace, name })
 
   // fetch seed resource
@@ -178,28 +202,60 @@ async function bootstrapShootIngress ({ gardenClient, coreClient, namespace, nam
 
   // calculate ingress domain
   const projectsClient = kubernetes.garden().projects
-  const namespacesClient = kubernetes.core().namespaces
+  const namespacesClient = coreClient.namespaces
   const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
-  const apiserverIngressHost = `api.${shootIngressDomain}`
+  const apiServerIngressHost = `api.${shootIngressDomain}`
 
-  // replace ingress apiserver resource
   const seedShootNS = _.get(shootResource, 'status.technicalID')
   if (!seedShootNS) {
     throw new Error(`could not get namespace on seed for shoot ${namespace}/${name}`)
   }
 
   const serviceName = 'kube-apiserver'
+  const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
   await replaceIngressApiServer({
     extensionClient: seedExtensionClient,
     namespace: seedShootNS,
     serviceName,
-    host: apiserverIngressHost
+    host: apiServerIngressHost,
+    annotations
   })
 }
 
-async function bootstrapIngressAndHeadlessServiceForSeed ({ coreClient, seed }) {
+/*
+ Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden host cluster (cluster that runs the (virtual)garden). The garden host cluster runs the terminal pods of garden operators for the virtual garden.
+*/
+async function ensureTrustedCertForGardenHostApiServer () {
+  logger.debug(`replacing resources on garden host cluster for webterminals`)
+
+  const coreClient = kubernetes.core()
+
+  const { name, namespace } = await getGardenTerminalHostClusterSecretRef({ coreClient })
+
+  const hostKubeconfig = await getKubeconfig({ coreClient, name, namespace })
+  const hostClientConfig = kubernetes.fromKubeconfig(hostKubeconfig)
+  const hostCoreClient = kubernetes.core(hostClientConfig)
+  const hostExtensionClient = kubernetes.extensions(hostClientConfig)
+
+  const hostNamespace = getConfigValue('terminal.bootstrap.gardenHost.namespace', 'garden')
+  const apiServerHostname = new URL(hostClientConfig.url).hostname
+  const apiServerIngressHost = getConfigValue('terminal.gardenHost.apiServerIngressHost')
+
+  const ingressAnnotations = getConfigValue('terminal.bootstrap.gardenHost.apiServerIngress.annotations')
+  await ensureTrustedCertForApiServer({
+    coreClient: hostCoreClient,
+    extensionClient: hostExtensionClient,
+    name: 'garden-host-cluster-apiserver',
+    namespace: hostNamespace,
+    apiServerHostname,
+    apiServerIngressHost,
+    ingressAnnotations
+  })
+}
+
+async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
   const projectsClient = kubernetes.garden().projects
-  const namespacesClient = kubernetes.core().namespaces
+  const namespacesClient = coreClient.namespaces
 
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
   const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
@@ -207,38 +263,43 @@ async function bootstrapIngressAndHeadlessServiceForSeed ({ coreClient, seed }) 
   const seedExtensionClient = kubernetes.extensions(seedClientConfig)
 
   const namespace = 'garden'
-  const seedApiserverHostname = new URL(seedClientConfig.url).hostname
+  const seedApiServerHostname = new URL(seedClientConfig.url).hostname
   const seedIngressDomain = await getSeedIngressDomain(projectsClient, namespacesClient, seed)
-  await bootstrapIngressAndHeadlessService({
+  const seedApiServerIngressHost = `api.${seedIngressDomain}`
+  const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
+
+  await ensureTrustedCertForApiServer({
     coreClient: seedCoreClient,
     extensionClient: seedExtensionClient,
     namespace,
-    apiserverHostname: seedApiserverHostname,
-    ingressDomain: seedIngressDomain
+    apiServerHostname: seedApiServerHostname,
+    apiServerIngressHost: seedApiServerIngressHost,
+    ingressAnnotations
   })
 }
 
-async function bootstrapIngressAndHeadlessService ({ coreClient, extensionClient, namespace, apiserverHostname, ingressDomain }) {
+async function ensureTrustedCertForApiServer ({ coreClient, extensionClient, namespace, apiServerHostname, apiServerIngressHost, ingressAnnotations, name }) {
   let service
   // replace headless service
-  if (net.isIP(apiserverHostname) !== 0) {
-    const ip = apiserverHostname
-    await replaceEndpointKubeApiServer({ coreClient, namespace, ip })
+  if (net.isIP(apiServerHostname) !== 0) {
+    const ip = apiServerHostname
+    await replaceEndpointKubeApiServer({ coreClient, namespace, ip, name })
 
-    service = await replaceServiceKubeApiServer({ coreClient, namespace })
+    service = await replaceServiceKubeApiServer({ coreClient, namespace, name })
   } else {
-    const externalName = apiserverHostname
-    service = await replaceServiceKubeApiServer({ coreClient, namespace, externalName })
+    const externalName = apiServerHostname
+    service = await replaceServiceKubeApiServer({ coreClient, namespace, externalName, name })
   }
   const serviceName = service.metadata.name
 
-  const apiserverIngressHost = `api.${ingressDomain}`
-
   await replaceIngressApiServer({
     extensionClient,
+    name,
     namespace,
     serviceName,
-    host: apiserverIngressHost
+    host: apiServerIngressHost,
+    annotations: ingressAnnotations,
+    secretName: `${name}-tls`
   })
 }
 
@@ -257,8 +318,12 @@ function verifyRequiredConfigExists () {
     return false // no further checks needed, bootstrapping is disabled
   }
   const requiredConfigs = [
-    'terminal.bootstrap.apiserverIngress.annotations'
+    'terminal.bootstrap.apiServerIngress.annotations'
   ]
+  if (!isTerminalBootstrapDisabledForKind('gardenHost')) {
+    requiredConfigs.push('terminal.gardenHost.apiServerIngressHost')
+    requiredConfigs.push('terminal.bootstrap.gardenHost.apiServerIngress.annotations')
+  }
 
   let requiredConfigExists = true
   _.forEach(requiredConfigs, requiredConfig => {
@@ -272,44 +337,68 @@ function verifyRequiredConfigExists () {
 }
 
 function bootstrapResource (resource) {
-  if (isTerminalBootstrapDisabled()) {
-    return
-  }
   const kind = resource.kind
-  if (isTerminalBootstrapDisabledForKind(resource.kind)) {
+  if (!bootstrapKindAllowed(kind)) {
     return
   }
-  if (!requiredConfigExists) {
-    return
-  }
+
   const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
   if (isBootstrapDisabledForResource) {
     const name = resource.metadata.name
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
     return
   }
-  bootstrapQueue.push({ resource, kind })
+
+  const description = `${kind} - ${resource.metadata.name}`
+  const handler = new Handler(() => {
+    switch (kind) {
+      case 'Seed':
+        return handleSeed(resource)
+      case 'Shoot':
+        return handleShoot(resource)
+      default:
+        logger.error(`can't bootstrap unsupported kind ${kind}`)
+    }
+  }, description)
+
+  bootstrapQueue.push(handler)
+}
+
+function bootstrapKindAllowed (kind) {
+  if (isTerminalBootstrapDisabled()) {
+    return false
+  }
+  if (isTerminalBootstrapDisabledForKind(kind)) {
+    return false
+  }
+  if (!requiredConfigExists) {
+    return false
+  }
+  return true
 }
 
 const requiredConfigExists = verifyRequiredConfigExists()
 
 const options = {}
 _.assign(options, _.get(config, 'terminal.bootstrap.queueOptions'))
-const bootstrapQueue = new Queue(async ({ resource, kind }, cb) => {
+const bootstrapQueue = new Queue(async (handler, cb) => {
   try {
-    if (kind === 'Seed') {
-      await handleSeed(resource)
-    } else if (kind === 'Shoot') {
-      await handleShoot(resource)
-    } else {
-      logger.error(`can't bootstrap unsupported kind ${kind}`)
-    }
+    await handler.run()
     cb(null, null)
   } catch (err) {
-    logger.error(`failed to bootstrap terminal resources for ${kind} ${resource.metadata.name}`, err)
+    logger.error(`failed to bootstrap ${handler.description}`, err)
     cb(err, null)
   }
 }, options)
+
+if (bootstrapKindAllowed('gardenHost')) {
+  const description = 'garden host cluster'
+  const handler = new Handler(() => {
+    ensureTrustedCertForGardenHostApiServer()
+  }, description)
+
+  bootstrapQueue.push(handler)
+}
 
 module.exports = {
   bootstrapResource

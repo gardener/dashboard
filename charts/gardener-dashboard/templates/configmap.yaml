@@ -55,14 +55,21 @@ data:
     terminal:
       containerImage: {{ .Values.terminal.containerImage }}
       containerImageOperator: {{ .Values.terminal.containerImageOperator }}
+      gardenHost:
+        apiServerIngressHost: {{ .Values.terminal.gardenHost.apiServerIngressHost }}
+      garden:
+        operatorCredentials:
+{{ toYaml .Values.terminal.garden.operatorCredentials | trim | indent 10 }}
       {{- if .Values.terminal.bootstrap }}
       bootstrap:
         disabled: {{ .Values.terminal.bootstrap.disabled | default false }}
+        {{- if ne .Values.terminal.bootstrap.disabled true }}
         seedDisabled: {{ .Values.terminal.bootstrap.seedDisabled | default false }}
         shootDisabled: {{ .Values.terminal.bootstrap.shootDisabled | default false }}
-        {{- if .Values.terminal.bootstrap.apiserverIngress }}
-        apiserverIngress:
-          {{- with .Values.terminal.bootstrap.apiserverIngress.annotations }}
+        gardenHostDisabled: {{ .Values.terminal.bootstrap.gardenHostDisabled | default false }}
+        {{- if .Values.terminal.bootstrap.apiServerIngress }}
+        apiServerIngress:
+          {{- with .Values.terminal.bootstrap.apiServerIngress.annotations }}
           annotations:
 {{ toYaml . | trim | indent 12 }}
           {{- end }}
@@ -71,14 +78,16 @@ data:
         queueOptions:
 {{ toYaml .Values.terminal.bootstrap.queueOptions | trim | indent 10 }}
         {{- end }}
+        {{- if ne .Values.terminal.bootstrap.gardenHostDisabled true }}
+        gardenHost:
+          apiServerIngress:
+            {{- with .Values.terminal.bootstrap.gardenHost.apiServerIngress.annotations }}
+            annotations:
+{{ toYaml . | trim | indent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
       {{- end }}
-      gardenCluster:
-        namespace: {{ .Values.terminal.gardenCluster.namespace }}
-        kubeApiServer:
-          {{- with .Values.terminal.gardenCluster.kubeApiServer.hosts }}
-          hosts:
-{{ toYaml . | trim | indent 10 }}
-          {{- end }}
     {{- end }}
     frontend:
 {{- if .Values.frontendConfig.landingPageUrl }}
