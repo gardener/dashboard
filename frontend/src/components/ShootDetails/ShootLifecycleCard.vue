@@ -69,19 +69,17 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
-          <div class="avatar">
-
-        <v-badge color="white cyan--text" overlap bottom>
-          <template v-slot:badge>
-            <v-icon color="cyan darken-2">mdi-sync</v-icon>
-          </template>
-          <v-icon class="cyan--text text--darken-2">mdi-shield-account</v-icon>
-        </v-badge>
+        <div class="avatar">
+          <v-badge color="white cyan--text" overlap bottom>
+            <template v-slot:badge>
+              <v-icon color="cyan darken-2">mdi-refresh</v-icon>
+            </template>
+            <v-icon class="cyan--text text--darken-2">mdi-file-account</v-icon>
+          </v-badge>
         </div>
 
         <v-flex grow class="pa-0">
-          <span class="subheading">Refresh Cluster Access</span><br>
-          <span class="grey--text">Trigger rotation of kubeconfig and user credentials</span>
+          <span class="subheading">Rotate Kubeconfig and Credentials</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>

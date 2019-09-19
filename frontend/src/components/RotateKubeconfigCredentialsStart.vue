@@ -21,14 +21,17 @@ limitations under the License.
     @dialogOpened="startDialogOpened"
     ref="actionDialog"
     :caption="caption"
-    icon="mdi-sync"
-    maxWidth="600"
+    icon="mdi-refresh"
+    maxWidth="700"
     confirmButtonText="Trigger now">
     <template slot="actionComponent">
       <v-layout row wrap>
         <v-flex>
-          <div class="subheading pt-3">Do you want to trigger rotation of kubeconfig and user credentials?<br />
+          <div class="subheading pt-3">Do you want to start rotation of kubeconfig and credentials?<br />
           </div>
+          <v-alert :value="true" dense color="warning" icon="priority_high" outline class="mt-2">
+            The previous kubeconfig and credentials will be invalidated.
+          </v-alert>
         </v-flex>
       </v-layout>
     </template>
@@ -61,13 +64,13 @@ export default {
   mixins: [shootItem],
   computed: {
     isActionToBeScheduled () {
-      return this.shootGenerationValue === this.currentGeneration
+      return this.shootGardenOperation === 'rotate-kubeconfig-credentials'
     },
     caption () {
       if (this.isActionToBeScheduled) {
-        return 'Requesting to schedule Kubeconfig Rotation'
+        return 'Requesting to schedule kubeconfig and credentials rotation'
       }
-      return 'Trigger Kubeconfig Rotation'
+      return 'Start Kubeconfig and Credentials Rotation'
     }
   },
   methods: {
@@ -85,7 +88,7 @@ export default {
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
-        const errorMessage = 'Could not trigger rotation of kubeconfig and user credentials'
+        const errorMessage = 'Could not start rotation of kubeconfig and credentials'
         const errorDetails = errorDetailsFromError(err)
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
@@ -109,7 +112,7 @@ export default {
             timeout: 5000,
             showProgressBar: false
           }
-          this.$snotify.success(`Rotation of kubeconfig and user credentials triggered for ${this.shootName}`, config)
+          this.$snotify.success(`Rotation of kubeconfig and credentials started for ${this.shootName}`, config)
         }
       }
     }
