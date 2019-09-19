@@ -73,7 +73,8 @@ const state = {
   searchValue: undefined,
   selection: undefined,
   shootListFilters: undefined,
-  newShootResource: undefined
+  newShootResource: undefined,
+  initialNewShootResource: undefined
 }
 
 // getters
@@ -96,6 +97,9 @@ const getters = {
   },
   newShootResource () {
     return state.newShootResource
+  },
+  initialNewShootResource () {
+    return state.initialNewShootResource
   }
 }
 
@@ -649,6 +653,7 @@ const mutations = {
     set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
 
     state.newShootResource = shootResource
+    state.initialNewShootResource = { ...shootResource }
   }
 }
 

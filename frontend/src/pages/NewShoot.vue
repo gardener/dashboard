@@ -168,6 +168,7 @@ export default {
     ]),
     ...mapGetters([
       'newShootResource',
+      'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName'
     ]),
     valid () {
@@ -179,7 +180,7 @@ export default {
         this.hibernationScheduleValid
     },
     isShootContentDirty () {
-      return !isEqual(this.newShootResource, this.shootResourceFromUIComponents())
+      return !isEqual(this.initialNewShootResource, this.shootResourceFromUIComponents())
     }
   },
   methods: {

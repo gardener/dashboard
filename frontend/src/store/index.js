@@ -328,6 +328,9 @@ const getters = {
   },
   newShootResource (state, getters) {
     return getters['shoots/newShootResource']
+  },
+  initialNewShootResource (state, getters) {
+    return getters['shoots/initialNewShootResource']
   }
 }
 
