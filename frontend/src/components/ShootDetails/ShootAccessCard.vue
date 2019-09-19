@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-show="!hasVisibleProperties">
+    <v-list-tile v-show="!isAnyTileVisible">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
       </v-list-tile-action>
@@ -26,7 +26,7 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="canRenderTerminal && hasShootTerminalAccess">
+    <template v-if="isTerminalTileVisible">
       <terminal-list-tile
         :shoot-item=shootItem
         target="shoot"
@@ -37,7 +37,7 @@ limitations under the License.
       </terminal-list-tile>
       <v-divider class="my-2" inset></v-divider>
     </template>
-    <v-list-tile v-show="!!dashboardUrl">
+    <v-list-tile v-if="isDashboardTileVisible">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
       </v-list-tile-action>
@@ -52,45 +52,43 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-divider v-show="!!dashboardUrl && !!username && !!password" class="my-2" inset></v-divider>
-    <username-password :username="username" :password="password"></username-password>
-    <template v-if="!!kubeconfig">
-      <v-divider class="my-2" inset></v-divider>
-      <v-expansion-panel :value="expandKubeconfigIndex" readonly>
-        <v-expansion-panel-content hide-actions>
-          <v-list-tile slot="header">
-            <v-list-tile-action>
-              <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>Kubeconfig</v-list-tile-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon @click.native.stop="onDownload">
-                  <v-icon>mdi-download</v-icon>
-                </v-btn>
-                <span>Download Kubeconfig</span>
-              </v-tooltip>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <copy-btn :clipboard-text="kubeconfig"></copy-btn>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
-                  <v-icon>{{visibilityIconKubeconfig}}</v-icon>
-                </v-btn>
-                <span>{{kubeconfigVisibilityTitle}}</span>
-              </v-tooltip>
-            </v-list-tile-action>
-          </v-list-tile>
-          <v-card>
-            <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
-          </v-card>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </template>
+    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+    <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
+    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" class="my-2" inset></v-divider>
+    <v-expansion-panel v-if="isKubeconfigTileVisible" :value="expandKubeconfigIndex" readonly>
+      <v-expansion-panel-content hide-actions>
+        <v-list-tile slot="header">
+          <v-list-tile-action>
+            <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Kubeconfig</v-list-tile-title>
+          </v-list-tile-content>
+          <v-list-tile-action>
+            <v-tooltip top>
+              <v-btn slot="activator" icon @click.native.stop="onDownload">
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
+              <span>Download Kubeconfig</span>
+            </v-tooltip>
+          </v-list-tile-action>
+          <v-list-tile-action>
+            <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+          </v-list-tile-action>
+          <v-list-tile-action>
+            <v-tooltip top>
+              <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
+                <v-icon>{{visibilityIconKubeconfig}}</v-icon>
+              </v-btn>
+              <span>{{kubeconfigVisibilityTitle}}</span>
+            </v-tooltip>
+          </v-list-tile-action>
+        </v-list-tile>
+        <v-card>
+          <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
+        </v-card>
+      </v-expansion-panel-content>
+    </v-expansion-panel>
   </v-list>
 </template>
 
@@ -169,12 +167,6 @@ export default {
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
-    hasVisibleProperties () {
-      return !!this.dashboardUrl || (!!this.username && !!this.password) || !!this.kubeconfig || this.canRenderTerminal
-    },
-    canRenderTerminal () {
-      return !isEmpty(this.shootInfo)
-    },
     shootTerminalButtonDescription () {
       if (this.isShootHibernated) {
         return 'Cluster is hibernated. Wake-up cluster to open terminal.'
@@ -183,6 +175,21 @@ export default {
     },
     shootTerminalDescription () {
       return 'Open terminal into cluster'
+    },
+    isAnyTileVisible () {
+      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
+    },
+    isDashboardTileVisible () {
+      return !!this.dashboardUrl
+    },
+    isCredentialsTileVisible () {
+      return !!this.username && !!this.password
+    },
+    isKubeconfigTileVisible () {
+      return !!this.kubeconfig
+    },
+    isTerminalTileVisible () {
+      return !isEmpty(this.shootInfo) && this.hasShootTerminalAccess
     }
   },
   methods: {
