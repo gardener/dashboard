@@ -151,7 +151,7 @@ export default {
   },
   methods: {
     confirmWithDialog () {
-      this.showDialog ()
+      this.showDialog()
       this.userInput = ''
 
       // we must delay the "focus" handling because the dialog.open is animated

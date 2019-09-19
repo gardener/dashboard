@@ -34,7 +34,7 @@ export default {
     },
     viewBox: {
       type: [Array, String],
-      default: [0, 0, 25, 25]
+      default: '0 0 25 25'
     },
     iconColor: {
       type: String,

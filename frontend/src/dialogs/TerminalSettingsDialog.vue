@@ -74,9 +74,7 @@ limitations under the License.
 
 <script>
 import GDialog from '@/dialogs/GDialog'
-import { getDateFormatted } from '@/utils'
 import TimeString from '@/components/TimeString'
-
 
 export default {
   components: {
@@ -109,8 +107,8 @@ export default {
   computed: {
     validSettings () {
       // invalid if not set or not changed
-      return !!this.selectedContainerImage, !!this.selectedNode, this.selectedPrivileged !== undefined
-    },
+      return !!this.selectedContainerImage && !!this.selectedNode && this.selectedPrivileged !== undefined
+    }
   },
   methods: {
     async confirmWithDialog () {

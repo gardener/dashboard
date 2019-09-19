@@ -197,7 +197,7 @@ function closeWsIfNotClosed (ws) {
   }
 }
 
-function getDetailedConnectionStateText(terminalContainerStatus) {
+function getDetailedConnectionStateText (terminalContainerStatus) {
   const stateType = head(intersection(keys(get(terminalContainerStatus, 'state'), ['waiting', 'running', 'terminated'])))
 
   let text = ''
@@ -262,13 +262,15 @@ export default {
     connectionText () {
       switch (this.terminalSession.connectionState) {
         case ConnectionState.DISCONNECTED:
-          return'Disconnected'
+          return 'Disconnected'
         case ConnectionState.PREPARING:
-          return'Preparing'
+          return 'Preparing'
         case ConnectionState.CONNECTING:
           return 'Connecting'
         case ConnectionState.CONNECTED:
           return 'Connected'
+        default:
+          return 'UNKNOWN'
       }
     },
     heartbeatIntervalSeconds () {
@@ -492,7 +494,6 @@ export default {
     },
     async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
       return new Promise((resolve, reject) => {
-
         const ws = new WebSocket(watchPodUri(terminalData), watchPodProtocols(terminalData))
         const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
 

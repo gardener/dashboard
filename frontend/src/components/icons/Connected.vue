@@ -24,4 +24,3 @@ limitations under the License.
     <polygon id="Rectangle" points="11.3481964 16.1147738 13.8218806 13.6410896 15.3481964 15.1674054 12.8745122 17.6410896"></polygon>
   </g>
 </template>
-
