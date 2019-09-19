@@ -23,15 +23,18 @@ limitations under the License.
     :caption="caption"
     icon="mdi-refresh"
     maxWidth="700"
+    :confirmRequired="true"
     confirmButtonText="Trigger now">
     <template slot="actionComponent">
       <v-layout row wrap>
         <v-flex>
-          <div class="subheading pt-3">Do you want to start rotation of kubeconfig and credentials?<br />
+          <div class="py-3">Do you want to start rotation of kubeconfig and credentials?
           </div>
-          <v-alert :value="true" dense color="warning" icon="priority_high" outline class="mt-2">
-            The previous kubeconfig and credentials will be invalidated.
+          <v-alert :value="true" dense color="warning" icon="priority_high" outline>
+            The previous kubeconfig and credentials will be revoked.
           </v-alert>
+          <div class="pt-3">Type <strong>{{shootName}}</strong> below and confirm revokation of previous kubeconfig and credentials.
+          </div>
         </v-flex>
       </v-layout>
     </template>
