@@ -38,7 +38,7 @@ limitations under the License.
           :error="hasError && userInput.length > 0"
           v-model="userInput"
           type="text"
-          color="cyan darken-2">
+          :color="textFieldColor">
         </v-text-field>
         <g-alert color="error" class="mt-3" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
       </v-card-text>
@@ -131,6 +131,10 @@ export default {
       set (value) {
         this.$emit('update:detailedErrorMessage', value)
       }
+    },
+    textFieldColor () {
+      const color = this.confirmValue ? this.confirmColor : this.defaultColor
+      return `${color || 'cyan'} darken-2`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
