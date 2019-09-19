@@ -96,6 +96,7 @@ data:
         {{- end }}
         {{- if ne .Values.terminal.bootstrap.gardenTerminalHostDisabled true }}
         gardenTerminalHost:
+          namespace: {{ .Values.terminal.bootstrap.gardenTerminalHost.namespace }}
           apiServerIngress:
             {{- with .Values.terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations }}
             annotations:
