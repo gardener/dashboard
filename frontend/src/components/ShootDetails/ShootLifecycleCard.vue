@@ -74,16 +74,15 @@ limitations under the License.
             <template v-slot:badge>
               <v-icon color="cyan darken-2">mdi-refresh</v-icon>
             </template>
-            <v-icon class="cyan--text text--darken-2">mdi-file-account</v-icon>
+            <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
           </v-badge>
         </div>
-
         <v-flex grow class="pa-0">
-          <span class="subheading">Rotate Kubeconfig and Credentials</span>
+          <span class="subheading">Rotate Kubeconfig</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
-            <rotate-kubeconfig-credentials-start :shootItem="shootItem"></rotate-kubeconfig-credentials-start>
+            <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
           </v-layout>
         </v-flex>
       </v-card-title>
@@ -116,7 +115,7 @@ import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceC
 import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
-import RotateKubeconfigCredentialsStart from '@/components/RotateKubeconfigCredentialsStart'
+import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -127,7 +126,7 @@ export default {
     HibernationConfiguration,
     DeleteCluster,
     ReconcileStart,
-    RotateKubeconfigCredentialsStart
+    RotateKubeconfigStart
   },
   props: {
     shootItem: {
