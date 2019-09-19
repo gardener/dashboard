@@ -133,7 +133,10 @@ export default {
       }
     },
     textFieldColor () {
-      const color = this.confirmValue ? this.confirmColor : this.defaultColor
+      let color = this.confirmValue ? this.confirmColor : this.defaultColor
+      if (color === 'red') {
+        color = 'black'
+      }
       return `${color || 'cyan'} darken-2`
     },
     titleColorClass () {
