@@ -45,7 +45,6 @@ limitations under the License.
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
-import get from 'lodash/get'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 
@@ -60,8 +59,7 @@ export default {
   },
   data () {
     return {
-      actionTriggered: false,
-      currentGeneration: null
+      actionTriggered: false
     }
   },
   mixins: [shootItem],
@@ -85,7 +83,6 @@ export default {
     },
     async start () {
       this.actionTriggered = true
-      this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
       const data = { 'shoot.garden.sapcloud.io/operation': 'rotate-kubeconfig-credentials' }
       try {
@@ -98,16 +95,14 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.actionTriggered = false
-        this.currentGeneration = null
       }
     }
   },
   watch: {
     isActionToBeScheduled (actionToBeScheduled) {
-      const isReconcileScheduled = !actionToBeScheduled && this.actionTriggered
-      if (isReconcileScheduled) {
+      const isActionScheduled = !actionToBeScheduled && this.actionTriggered
+      if (isActionScheduled) {
         this.actionTriggered = false
-        this.currentGeneration = null
 
         if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
           const config = {
