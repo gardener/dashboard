@@ -1,10 +1,10 @@
 {
   "all": true,
   "check-coverage": true,
-  "lines": 58,
-  "statements": 58,
-  "functions": 55,
-  "branches": 36,
+  "lines": 56,
+  "statements": 56,
+  "functions": 53,
+  "branches": 35,
   "include": [
     "server.js",
     "lib/**/*.js"
