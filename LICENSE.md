@@ -442,6 +442,10 @@ Copyright (c) 2016 Leander\
 Copyright (c) Travis Webb\
 [MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
 
+- [ora](https://github.com/sindresorhus/ora)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/ora/blob/master/license)
+
 - [The Roboto family of fonts](https://github.com/google/roboto)\
 [Apache License 2.0](https://github.com/google/roboto/blob/master/LICENSE)
 

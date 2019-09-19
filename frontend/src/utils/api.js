@@ -215,14 +215,14 @@ export function getInfo () {
 
 /* Terminals */
 
-export function createTerminal ({ namespace, name, target }) {
+export function createTerminal ({ namespace, name, target, body }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   target = encodeURIComponent(target)
   if (target === 'garden') {
-    return createResource(`/api/namespaces/${namespace}/terminals/${target}`, undefined)
+    return createResource(`/api/namespaces/${namespace}/terminals/${target}`, body)
   } else {
-    return createResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`, undefined)
+    return createResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`, body)
   }
 }
 
@@ -237,13 +237,24 @@ export function deleteTerminal ({ namespace, name, target }) {
   }
 }
 
-export function heartbeat ({ namespace, name, target }) {
+export function heartbeat ({ namespace, name, target, body }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   target = encodeURIComponent(target)
   if (target === 'garden') {
-    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, undefined)
+    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, body)
   } else {
-    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/heartbeat`, undefined)
+    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/heartbeat`, body)
+  }
+}
+
+export function terminalConfig ({ namespace, name, target }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  target = encodeURIComponent(target)
+  if (target === 'garden') {
+    return getResource(`/api/namespaces/${namespace}/terminals/${target}/config`)
+  } else {
+    return getResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/config`)
   }
 }

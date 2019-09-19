@@ -22,6 +22,7 @@ const net = require('net')
 
 const logger = require('../../logger')
 const config = require('../../config')
+const { NotImplemented } = require('../../errors')
 const {
   getKubeconfig,
   getSeedKubeconfig,
@@ -36,7 +37,9 @@ const {
   toServiceResource
 } = require('./terminalResources')
 const {
-  getGardenTerminalHostClusterSecretRef
+  getGardenTerminalHostClusterSecretRef,
+  getGardenTerminalHostClusterRefType,
+  GardenTerminalHostRefType
 } = require('./')
 const shoots = require('../../services/shoots')
 
@@ -45,15 +48,16 @@ const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 class Handler {
   constructor (fn, description) {
     this.fn = fn
-    this.description = description
+    this._run = () => fn()
+    this._description = description
   }
 
-  async run () {
-    return this.fn()
+  run () {
+    return this._run()
   }
 
-  description () {
-    return this.description
+  get description () {
+    return this._description
   }
 }
 
@@ -172,7 +176,7 @@ async function handleSeed (seed) {
   }
 }
 
-async function handleShoot (shoot, cb) {
+async function handleShoot (shoot) {
   const name = shoot.metadata.name
   const namespace = shoot.metadata.namespace
   logger.debug(`replacing shoot's apiserver ingress ${name} for webterminals`)
@@ -223,34 +227,42 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
 }
 
 /*
- Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden host cluster (cluster that runs the (virtual)garden). The garden host cluster runs the terminal pods of garden operators for the virtual garden.
+ Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden terminal host cluster. This cluster runs the terminal pods of garden operators for the virtual garden.
 */
-async function ensureTrustedCertForGardenHostApiServer () {
+async function ensureTrustedCertForGardenTerminalHostApiServer () {
   logger.debug(`replacing resources on garden host cluster for webterminals`)
 
-  const coreClient = kubernetes.core()
+  const refType = getGardenTerminalHostClusterRefType()
 
-  const { name, namespace } = await getGardenTerminalHostClusterSecretRef({ coreClient })
+  switch (refType) {
+    case GardenTerminalHostRefType.SECRET_REF: {
+      const coreClient = kubernetes.core()
 
-  const hostKubeconfig = await getKubeconfig({ coreClient, name, namespace })
-  const hostClientConfig = kubernetes.fromKubeconfig(hostKubeconfig)
-  const hostCoreClient = kubernetes.core(hostClientConfig)
-  const hostExtensionClient = kubernetes.extensions(hostClientConfig)
+      const { name, namespace } = await getGardenTerminalHostClusterSecretRef({ coreClient })
 
-  const hostNamespace = getConfigValue('terminal.bootstrap.gardenHost.namespace', 'garden')
-  const apiServerHostname = new URL(hostClientConfig.url).hostname
-  const apiServerIngressHost = getConfigValue('terminal.gardenHost.apiServerIngressHost')
+      const hostKubeconfig = await getKubeconfig({ coreClient, name, namespace })
+      const hostClientConfig = kubernetes.fromKubeconfig(hostKubeconfig)
+      const hostCoreClient = kubernetes.core(hostClientConfig)
+      const hostExtensionClient = kubernetes.extensions(hostClientConfig)
 
-  const ingressAnnotations = getConfigValue('terminal.bootstrap.gardenHost.apiServerIngress.annotations')
-  await ensureTrustedCertForApiServer({
-    coreClient: hostCoreClient,
-    extensionClient: hostExtensionClient,
-    name: 'garden-host-cluster-apiserver',
-    namespace: hostNamespace,
-    apiServerHostname,
-    apiServerIngressHost,
-    ingressAnnotations
-  })
+      const hostNamespace = getConfigValue('terminal.bootstrap.gardenTerminalHost.namespace', 'garden')
+      const apiServerHostname = new URL(hostClientConfig.url).hostname
+      const apiServerIngressHost = getConfigValue('terminal.gardenTerminalHost.apiServerIngressHost')
+
+      const ingressAnnotations = getConfigValue('terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations')
+      return ensureTrustedCertForApiServer({
+        coreClient: hostCoreClient,
+        extensionClient: hostExtensionClient,
+        name: 'garden-host-cluster-apiserver',
+        namespace: hostNamespace,
+        apiServerHostname,
+        apiServerIngressHost,
+        ingressAnnotations
+      })
+    }
+    default:
+      throw new NotImplemented(`bootstrapping garden terminal host cluster for refType ${refType} not yet implemented`)
+  }
 }
 
 async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
@@ -308,7 +320,7 @@ function isTerminalBootstrapDisabled () {
 }
 
 function isTerminalBootstrapDisabledForKind (kind) {
-  kind = kind.toLowerCase()
+  kind = kind.replace(/^\w/, c => c.toLowerCase()) // lower first character (Shoot -> shoot)
   return _.get(config, `terminal.bootstrap.${kind}Disabled`, false)
 }
 
@@ -320,9 +332,13 @@ function verifyRequiredConfigExists () {
   const requiredConfigs = [
     'terminal.bootstrap.apiServerIngress.annotations'
   ]
-  if (!isTerminalBootstrapDisabledForKind('gardenHost')) {
-    requiredConfigs.push('terminal.gardenHost.apiServerIngressHost')
-    requiredConfigs.push('terminal.bootstrap.gardenHost.apiServerIngress.annotations')
+  if (!isTerminalBootstrapDisabledForKind('gardenTerminalHost')) {
+    // bootstrapping of gardenTerminalHost only makes sense when using terminal.gardenTerminalHost.secretRef (for which default values exist)
+    // for refType "secretRef", the apiServerIngressHost config is required as it cannot be determined automatically
+    requiredConfigs.concat([
+      'terminal.gardenTerminalHost.apiServerIngressHost',
+      'terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations'
+    ])
   }
 
   let requiredConfigExists = true
@@ -391,11 +407,9 @@ const bootstrapQueue = new Queue(async (handler, cb) => {
   }
 }, options)
 
-if (bootstrapKindAllowed('gardenHost')) {
+if (bootstrapKindAllowed('gardenTerminalHost')) {
   const description = 'garden host cluster'
-  const handler = new Handler(() => {
-    ensureTrustedCertForGardenHostApiServer()
-  }, description)
+  const handler = new Handler(ensureTrustedCertForGardenTerminalHostApiServer, description)
 
   bootstrapQueue.push(handler)
 }

@@ -31,6 +31,6 @@ const moduleExports = {
   '/namespaces/:namespace/members': require('./members')
 }
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  moduleExports['/namespaces/:namespace/terminals'] = require('./terminals')
+  moduleExports['/namespaces/:namespace/terminals/:target'] = require('./terminals')
 }
 module.exports = moduleExports

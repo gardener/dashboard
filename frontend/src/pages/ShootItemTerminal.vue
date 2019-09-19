@@ -46,46 +46,64 @@ limitations under the License.
     </v-snackbar>
     <v-flex ref="container" class="terminal-container"></v-flex>
     <v-system-bar dark class="systemBar">
+      <v-tooltip :disabled="!detailedConnectionStateText" top class="ml-2" style="min-width: 110px">
+        <v-layout align-center justify-start row fill-height slot="activator">
+          <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+            <connected v-if="terminalSession.connectionState === ConnectionState.CONNECTED"></connected>
+            <disconnected v-else></disconnected>
+          </icon-base>
+          <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionText}}</span>
+        </v-layout>
+        {{detailedConnectionStateText}}
+      </v-tooltip>
+
       <v-tooltip v-if="imageShortText" top>
-        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+        <v-btn small flat slot="activator" @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
           <span>{{imageShortText}}</span>
         </v-btn>
-        Image: {{image}}
+        Image: {{terminalSession.image}}
       </v-tooltip>
 
-      <v-tooltip v-if="isPrivileged !== undefined" top>
-        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+      <v-tooltip v-if="terminalSession.privileged !== undefined" top>
+        <v-btn small flat slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon class="mr-2">mdi-shield-account</v-icon>
           <span>{{privilegedText}}</span>
         </v-btn>
         Security Context: {{privilegedText}}
       </v-tooltip>
 
-      <v-tooltip  v-if="node" top>
-        <v-btn small flat slot="activator" disabled class="text-none grey--text text--lighten-1 systemBarButton">
+      <v-tooltip v-if="terminalSession.node" top>
+        <v-btn small flat slot="activator" @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon :size="14" class="mr-2">mdi-server</v-icon>
-          <span>{{node}}</span>
+          <span>{{terminalSession.node}}</span>
         </v-btn>
-        Node: {{node}}
+        Node: {{terminalSession.node}}
       </v-tooltip>
 
       <v-spacer></v-spacer>
 
-      <!-- <v-tooltip top>
-        <v-btn small flat slot="activator" class="text-none grey--text text--lighten-1 systemBarButton">
+      <v-tooltip top>
+        <v-btn small flat slot="activator" @click="configure('settingsBtn')" :loading="loading.settingsBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon>mdi-settings</v-icon>
         </v-btn>
         Settings
       </v-tooltip>
 
-      <v-divider vertical></v-divider> -->
+      <v-divider vertical></v-divider>
 
       <v-btn small flat class="text-none grey--text text--lighten-1 systemBarButton" @click="deleteTerminal">
         <v-icon class="mr-2">mdi-exit-to-app</v-icon>
         Exit
       </v-btn>
     </v-system-bar>
+    <terminal-settings-dialog
+      ref="settings"
+      :image="defaultImage"
+      :node="defaultNode"
+      :privileged="defaultPrivileged"
+      :nodes="config.nodes"
+    ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
@@ -95,6 +113,11 @@ import 'xterm/dist/xterm.css'
 import ora from 'ora'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import assign from 'lodash/assign'
+import head from 'lodash/head'
+import intersection from 'lodash/intersection'
+import keys from 'lodash/keys'
+
 import * as attach from '@/lib/attach'
 import * as fit from 'xterm/lib/addons/fit/fit'
 import * as search from 'xterm/lib/addons/search/search'
@@ -106,14 +129,26 @@ import { encodeURIComponents } from '@/utils'
 import {
   createTerminal,
   deleteTerminal,
-  heartbeat
+  heartbeat,
+  terminalConfig
 } from '@/utils/api'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
+import TerminalSettingsDialog from '@/dialogs/TerminalSettingsDialog'
+import IconBase from '@/components/icons/IconBase'
+import Connected from '@/components/icons/Connected'
+import Disconnected from '@/components/icons/Disconnected'
 
 Terminal.applyAddon(attach)
 Terminal.applyAddon(fit)
 Terminal.applyAddon(search)
 Terminal.applyAddon(webLinks)
+
+const ConnectionState = {
+  DISCONNECTED: 0,
+  PREPARING: 1,
+  CONNECTING: 2,
+  CONNECTED: 3
+}
 
 function encodeBase64 (input) {
   return Buffer.from(input, 'utf8').toString('base64')
@@ -162,28 +197,80 @@ function closeWsIfNotClosed (ws) {
   }
 }
 
+function getDetailedConnectionStateText(terminalContainerStatus) {
+  const stateType = head(intersection(keys(get(terminalContainerStatus, 'state'), ['waiting', 'running', 'terminated'])))
+
+  let text = ''
+  if (!stateType) {
+    return text
+  }
+
+  text = `Container is ${stateType}`
+
+  const reason = get(terminalContainerStatus, ['state', stateType, 'reason'])
+  if (!reason) {
+    return text
+  }
+
+  return `${text}: ${reason}`
+}
+
 export default {
   name: 'shoot-item-terminal',
   components: {
-    ConfirmDialog
+    ConfirmDialog,
+    TerminalSettingsDialog,
+    IconBase,
+    Connected,
+    Disconnected
   },
   data () {
     return {
-      close: () => { this.cancelConnect = true },
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
       spinner: undefined,
-      cancelConnect: false,
-      node: '',
-      isPrivileged: undefined,
-      image: ''
+      loading: {
+        imageBtn: false,
+        secContextBtn: false,
+        nodeBtn: false,
+        settingsBtn: false
+      },
+      config: {
+        image: undefined,
+        nodes: []
+      },
+      selectedConfig: {},
+      terminalSession: {},
+      ConnectionState,
+      detailedConnectionStateText: undefined
     }
   },
   computed: {
     ...mapState([
       'cfg'
     ]),
+    defaultImage () {
+      return this.terminalSession.image || this.config.image
+    },
+    defaultNode () {
+      return this.terminalSession.node || get(head(this.config.nodes), 'data.kubernetesHostname')
+    },
+    defaultPrivileged () {
+      return this.terminalSession.privileged || false
+    },
+    connectionText () {
+      switch (this.terminalSession.connectionState) {
+        case ConnectionState.DISCONNECTED:
+          return'Disconnected'
+        case ConnectionState.PREPARING:
+          return'Preparing'
+        case ConnectionState.CONNECTING:
+          return 'Connecting'
+        case ConnectionState.CONNECTED:
+          return 'Connected'
+      }
+    },
     heartbeatIntervalSeconds () {
       return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
     },
@@ -192,10 +279,11 @@ export default {
       return name
     },
     privilegedText () {
-      return this.isPrivileged ? 'Privileged' : 'Unprivileged'
+      return this.terminalSession.privileged ? 'Privileged' : 'Unprivileged'
     },
     imageShortText () {
-      return this.image.substring(this.image.lastIndexOf('/') + 1)
+      const image = this.terminalSession.image || ''
+      return image.substring(image.lastIndexOf('/') + 1)
     },
     namespace () {
       const { namespace } = this.$route.params
@@ -221,7 +309,28 @@ export default {
         messageHtml: 'Do you want to exit this terminal session? This will clean up all related resources.<br/><br/><i class="grey--text text--darken-2">Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
       })
     },
-    onResize (size) {
+    async configure (refName) {
+      this.loading[refName] = true
+      const { namespace = undefined, name = undefined, target } = this.$route.params
+      try {
+        const { data: config } = await terminalConfig({ name, namespace, target })
+
+        assign(this.config, config)
+      } catch (error) {
+        this.errorMessage = error.message
+      } finally {
+        this.loading[refName] = false
+      }
+
+      const selectedConfig = await this.$refs.settings.confirmWithDialog()
+      if (selectedConfig) {
+        this.cancelConnectAndClose()
+
+        this.selectedConfig = selectedConfig
+        this.retry()
+      }
+    },
+    onResize () {
       if (this.term) {
         this.term.fit()
       }
@@ -246,7 +355,8 @@ export default {
     },
     async createTerminal () {
       const { namespace = undefined, name = undefined, target } = this.$route.params
-      const { data } = await createTerminal({ name, namespace, target })
+      const body = this.selectedConfig
+      const { data } = await createTerminal({ name, namespace, target, body })
 
       return data
     },
@@ -258,33 +368,48 @@ export default {
       this.snackbarTop = false
       return this.connect()
     },
+    cancelConnectAndClose () {
+      this.terminalSession.cancelConnect = true
+      this.terminalSession.close()
+    },
     async connect () {
+      const terminalSession = this.terminalSession = {
+        cancelConnect: false,
+        close: () => {},
+        connectionState: ConnectionState.DISCONNECTED,
+        tries: 0,
+        node: undefined,
+        privileged: undefined,
+        image: undefined
+      }
+
       this.spinner.start()
       this.spinner.text = 'Preparing terminal session'
+      terminalSession.connectionState = ConnectionState.PREPARING
 
       try {
         const terminalData = await this.createTerminal()
 
-        let connected = false
-        let tries = 0
         const RETRY_TIMEOUT_SECONDS = 3
         const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
 
         const attachTerminal = async () => {
-          if (this.cancelConnect) {
+          if (terminalSession.cancelConnect) {
             return
           }
 
-          tries++
+          terminalSession.tries++
 
           try {
+            terminalSession.connectionState = ConnectionState.CONNECTING
             await this.waitUntilPodIsRunning(terminalData, 60)
           } catch (err) {
             console.error('failed to wait until pod is running', err)
             this.showSnackbarTop('Could not connect to terminal')
+            terminalSession.connectionState = ConnectionState.DISCONNECTED
             return
           }
-          if (this.cancelConnect) {
+          if (terminalSession.cancelConnect) {
             return
           }
 
@@ -294,16 +419,16 @@ export default {
           let heartbeatIntervalId
 
           ws.onopen = async () => {
-            if (this.cancelConnect) {
-              this.close()
+            if (terminalSession.cancelConnect) {
+              terminalSession.close()
               return
             }
             this.term.attach(ws)
 
             this.spinner.stop()
             this.hideSnackbar()
-            connected = true
-            tries = 0
+            terminalSession.connectionState = ConnectionState.CONNECTED
+            terminalSession.tries = 0
 
             heartbeatIntervalId = setInterval(async () => {
               try {
@@ -314,22 +439,27 @@ export default {
             }, this.heartbeatIntervalSeconds * 1000)
           }
           ws.onclose = error => {
-            this.close()
-            const wasConnected = connected
-            connected = false
+            terminalSession.close()
+            const wasConnected = terminalSession.connectionState === ConnectionState.CONNECTED
+            terminalSession.connectionState = ConnectionState.DISCONNECTED
+
+            if (terminalSession.cancelConnect) {
+              return
+            }
 
             if (error.code === 1000) { // CLOSE_NORMAL
+              terminalSession.image = undefined
+              terminalSession.privileged = undefined
+              terminalSession.node = undefined
               this.showSnackbarTop('Terminal connection lost')
               return
             }
-            if (tries >= MAX_TRIES) {
+            if (terminalSession.tries >= MAX_TRIES) {
               this.showSnackbarTop('Could not connect to terminal')
               return
             }
 
-            if (this.cancelConnect) {
-              return
-            }
+            terminalSession.connectionState = ConnectionState.CONNECTING
 
             let timeoutSeconds
             if (wasConnected) {
@@ -344,21 +474,25 @@ export default {
             reconnectTimeoutId = setTimeout(async () => attachTerminal(), timeoutSeconds * 1000)
           }
 
-          this.close = () => {
+          terminalSession.close = () => {
             clearTimeout(reconnectTimeoutId)
             clearInterval(heartbeatIntervalId)
 
             closeWsIfNotClosed(ws)
             this.term.detach(ws)
+
+            terminalSession.close = () => {}
           }
         }
         return attachTerminal()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        terminalSession.connectionState = ConnectionState.DISCONNECTED
       }
     },
     async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
       return new Promise((resolve, reject) => {
+
         const ws = new WebSocket(watchPodUri(terminalData), watchPodProtocols(terminalData))
         const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
 
@@ -373,10 +507,10 @@ export default {
           const pod = event.object
 
           const containers = get(pod, 'spec.containers')
-          const terminalContainer = find(containers, container => container.name === 'terminal')
-          this.image = get(terminalContainer, 'image')
-          this.isPrivileged = get(terminalContainer, 'securityContext.privileged')
-          this.node = get(pod, 'spec.nodeName')
+          const terminalContainer = find(containers, container => container.name === terminalData.container)
+          this.terminalSession.image = get(terminalContainer, 'image')
+          this.terminalSession.privileged = get(terminalContainer, 'securityContext.privileged')
+          this.terminalSession.node = get(pod, 'spec.nodeName')
 
           const phase = get(pod, 'status.phase')
           switch (phase) {
@@ -391,8 +525,13 @@ export default {
             return
           }
 
+          const containerStatuses = get(pod, 'status.containerStatuses')
+          const terminalContainerStatus = find(containerStatuses, status => status.name === terminalData.container)
+          const isContainerReady = get(terminalContainerStatus, 'ready', false)
+
+          this.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
           this.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
-          if (phase === 'Running') {
+          if (phase === 'Running' && isContainerReady) {
             closeAndResolve(ws)
           }
         })
@@ -437,8 +576,7 @@ export default {
     this.connect()
   },
   beforeDestroy () {
-    this.cancelConnect = true
-    this.close()
+    this.cancelConnectAndClose()
   }
 }
 </script>
@@ -463,8 +601,10 @@ export default {
   }
   .systemBar {
     background-color: #212121;
+    min-height: 25px;
   }
   .systemBarButton {
     min-width: 20px;
+    max-height: 25px;
   }
 </style>

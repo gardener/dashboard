@@ -37,6 +37,7 @@
     "material-design-icons-iconfont": "^5.0.1",
     "md5": "^2.2.1",
     "moment-timezone": "^0.5.21",
+    "ora": "^3.4.0",
     "semver": "^5.5.1",
     "semver-sort": "0.0.4",
     "socket.io-client": "^2.2.0",

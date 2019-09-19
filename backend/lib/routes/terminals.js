@@ -17,18 +17,34 @@
 'use strict'
 
 const express = require('express')
-const { terminals } = require('../services')
+const { terminals, authorization } = require('../services')
 
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
-router.route('/:target/:name?')
+router.use(async (req, res, next) => {
+  try {
+    const user = req.user
+
+    const { target } = req.params
+
+    const isAdmin = req.user.isAdmin = await authorization.isAdmin(user)
+
+    await terminals.ensureTerminalAllowed({ isAdmin, target })
+    next()
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.route('/:name?')
   .post(async (req, res, next) => {
     try {
       const user = req.user
       const { namespace, name, target } = req.params
-      res.send(await terminals.create({ user, namespace, name, target }))
+      const body = req.body
+      res.send(await terminals.create({ user, namespace, name, target, body }))
     } catch (err) {
       next(err)
     }
@@ -37,18 +53,31 @@ router.route('/:target/:name?')
     try {
       const user = req.user
       const { namespace, name, target } = req.params
-      res.send(await terminals.remove({ user, namespace, name, target }))
+      const body = req.body
+      res.send(await terminals.remove({ user, namespace, name, target, body }))
     } catch (err) {
       next(err)
     }
   })
 
-router.route('/:target/:name?/heartbeat')
+router.route('/:name?/heartbeat')
   .put(async (req, res, next) => {
     try {
       const user = req.user
       const { namespace, name, target } = req.params
-      res.send(await terminals.heartbeat({ user, namespace, name, target }))
+      const body = req.body
+      res.send(await terminals.heartbeat({ user, namespace, name, target, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
+router.route('/:name?/config')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const { namespace, name, target } = req.params
+      res.send(await terminals.config({ user, namespace, name, target }))
     } catch (err) {
       next(err)
     }

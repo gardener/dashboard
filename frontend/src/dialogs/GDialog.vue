@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
+  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" lazy @keydown.esc="resolveAction(false)">
     <v-card>
       <v-card-title :class="titleColorClass">
         <div class="headline">
@@ -144,7 +144,7 @@ export default {
   },
   methods: {
     confirmWithDialog () {
-      this.visible = true
+      this.showDialog ()
       this.userInput = ''
 
       // we must delay the "focus" handling because the dialog.open is animated
@@ -160,6 +160,9 @@ export default {
     },
     showDialog () {
       this.visible = true
+      this.$nextTick(() => {
+        this.$emit('showDialog')
+      })
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {

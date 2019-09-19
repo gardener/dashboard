@@ -55,8 +55,24 @@ data:
     terminal:
       containerImage: {{ .Values.terminal.containerImage }}
       containerImageOperator: {{ .Values.terminal.containerImageOperator }}
-      gardenHost:
-        apiServerIngressHost: {{ .Values.terminal.gardenHost.apiServerIngressHost }}
+      gardenTerminalHost:
+{{- if .Values.terminal.gardenTerminalHost.secretRef }}
+        apiServerIngressHost: {{ .Values.terminal.gardenTerminalHost.apiServerIngressHost }}
+        secretRef:
+          namespace: {{ .Values.terminal.gardenTerminalHost.secretRef.namespace }}
+          {{- with .Values.terminal.gardenTerminalHost.secretRef.labelSelector }}
+          labelSelector:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+{{- end }}
+{{- if .Values.terminal.gardenTerminalHost.seedRef }}
+        seedRef: {{ .Values.terminal.gardenTerminalHost.seedRef }}
+{{- end }}
+{{- if .Values.terminal.gardenTerminalHost.shootRef }}
+        shootRef:
+          name: {{ .Values.terminal.gardenTerminalHost.shootRef.name }}
+          namespace: {{ .Values.terminal.gardenTerminalHost.shootRef.namespace }}
+{{- end }}
       garden:
         operatorCredentials:
 {{ toYaml .Values.terminal.garden.operatorCredentials | trim | indent 10 }}
@@ -66,7 +82,7 @@ data:
         {{- if ne .Values.terminal.bootstrap.disabled true }}
         seedDisabled: {{ .Values.terminal.bootstrap.seedDisabled | default false }}
         shootDisabled: {{ .Values.terminal.bootstrap.shootDisabled | default false }}
-        gardenHostDisabled: {{ .Values.terminal.bootstrap.gardenHostDisabled | default false }}
+        gardenTerminalHostDisabled: {{ .Values.terminal.bootstrap.gardenTerminalHostDisabled | default false }}
         {{- if .Values.terminal.bootstrap.apiServerIngress }}
         apiServerIngress:
           {{- with .Values.terminal.bootstrap.apiServerIngress.annotations }}
@@ -78,10 +94,10 @@ data:
         queueOptions:
 {{ toYaml .Values.terminal.bootstrap.queueOptions | trim | indent 10 }}
         {{- end }}
-        {{- if ne .Values.terminal.bootstrap.gardenHostDisabled true }}
-        gardenHost:
+        {{- if ne .Values.terminal.bootstrap.gardenTerminalHostDisabled true }}
+        gardenTerminalHost:
           apiServerIngress:
-            {{- with .Values.terminal.bootstrap.gardenHost.apiServerIngress.annotations }}
+            {{- with .Values.terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations }}
             annotations:
 {{ toYaml . | trim | indent 14 }}
             {{- end }}

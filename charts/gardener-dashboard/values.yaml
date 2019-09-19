@@ -102,8 +102,16 @@ readinessProbe:
 # terminal:
 #   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
 #   containerImageOperator: ~ # if not defined, value of containerImage will be used
-#   gardenHost: # cluster that hosts the gardener api server
-#     apiServerIngressHost: api.example.org # is host in browser-trusted certificate
+#   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
+#     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
+#     secretRef:
+#       namespace: garden # namespace, in which the secret for the gardenTerminalHost resides on the (virtual) garden cluster
+#       labelSelector:
+#       - runtime=gardenTerminalHost
+#       # seedRef: my-soil # if set, you most likely want to disable gardenTerminalHost bootstrapping
+#       # shootRef: # if set, you most likely want to disable gardenTerminalHost bootstrapping
+#       #   name: myshoot
+#       #   namespace: garden
 #   garden: # (virtual) garden
 #     operatorCredentials: # this is the credential used for operators for the (virtual) garden cluster, to create terminal session specific service accounts
 #       serviceAccountRef: # serviceAccountRef or secretRef
@@ -113,7 +121,7 @@ readinessProbe:
 #     disabled: true # indicates if bootstrapping resources required for the terminal feature is generally disabled
 #     seedDisabled: false # indicates if bootstrapping resources for seeds is disabled, required for gardener operator terminals
 #     shootDisabled: false # indicates if bootstrapping resources for shoots is disabled, required for enduser terminals
-#     gardenHostDisabled: true # indicates if bootstrapping resources for the virtual garden terminal host cluster is disabled
+#     gardenTerminalHostDisabled: false # indicates if bootstrapping resources for the virtual garden terminal host cluster is disabled
 #     apiServerIngress:
 #       annotations:
 #         kubernetes.io/ingress.class: nginx
@@ -122,7 +130,7 @@ readinessProbe:
 #         certmanager.k8s.io/acme-challenge-type: dns01
 #         certmanager.k8s.io/acme-dns01-provider: route53
 #     queueOptions: ~ # here you can specify options like maxRetries, retryDelay https://github.com/diamondio/better-queue#new-queueprocess-options
-#     gardenHost:
+#     gardenTerminalHost:
 #       namespace: garden # namespace, in which the tls-secret, ingress and headless service should be created in
 #       apiServerIngress:
 #         annotations:
