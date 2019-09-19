@@ -22,6 +22,7 @@ limitations under the License.
        :errorMessage.sync="errorMessage"
        :detailedErrorMessage.sync="detailedErrorMessage"
        :shootContent="shootContent"
+       :extraKeys="extraKeys"
        @clean="onClean"
        @conflictPath="onConflictPath"
        ref="shootEditor">
@@ -66,6 +67,8 @@ import pick from 'lodash/pick'
 // js-yaml
 import jsyaml from 'js-yaml'
 
+let vm
+
 export default {
   components: {
     ShootItemEditor,
@@ -79,7 +82,15 @@ export default {
       hasConflict: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      isShootCreated: false
+      isShootCreated: false,
+      extraKeys: {
+        'Ctrl-S' (instance) {
+          vm.save()
+        },
+        'Cmd-S' (instance) {
+          vm.save()
+        }
+      }
     }
   },
   computed: {
@@ -110,7 +121,7 @@ export default {
           return
         }
         if (this.clean) {
-          return this.clearHistory()
+          return this.$refs.shootEditor.clearHistory()
         }
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
@@ -147,6 +158,7 @@ export default {
   mounted () {
     const modificationWarning = this.$localStorage.getItem('showShootEditorWarning')
     this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
+    vm = this
   },
   async beforeRouteLeave (to, from, next) {
     if (this.clean) {

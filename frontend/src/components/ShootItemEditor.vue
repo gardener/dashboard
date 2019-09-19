@@ -96,6 +96,7 @@ import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
 import omit from 'lodash/omit'
 import cloneDeep from 'lodash/cloneDeep'
+import assign from 'lodash/assign'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -124,6 +125,9 @@ export default {
     },
     detailedErrorMessage: {
       type: String
+    },
+    extraKeys: {
+      type: Object
     }
   },
   data () {
@@ -246,13 +250,7 @@ export default {
     },
     createInstance (element) {
       const vm = this
-      const extraKeys = {
-        'Ctrl-S' (instance) {
-          vm.save()
-        },
-        'Cmd-S' (instance) {
-          vm.save()
-        },
+      const extraKeys = assign ({}, {
         'Tab': (instance) => {
           if (instance.somethingSelected()) {
             instance.indentSelection('add')
@@ -263,7 +261,7 @@ export default {
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
         }
-      }
+      }, this.extraKeys)
       const options = {
         mode: 'text/x-yaml',
         autofocus: true,
