@@ -204,7 +204,7 @@ export default function createRouter ({ store, userManager }) {
               component: NewShoot,
               meta: {
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Create Cluster',
                 toRouteName: 'NewShoot',
                 breadcrumbTextFn: routeTitle,
@@ -217,7 +217,7 @@ export default function createRouter ({ store, userManager }) {
               component: NewShootEditor,
               meta: {
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Create Cluster Editor',
                 breadcrumbTextFn: routeTitle,
                 tabs: newShootTabs
