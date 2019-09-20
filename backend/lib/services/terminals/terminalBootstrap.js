@@ -416,7 +416,7 @@ function bootstrapResource (resource) {
       return
     }
     const key = keyForResource(resource)
-    logger.info(`bootstrapping of ${key} postponed`)
+    logger.debug(`bootstrapping of ${key} postponed`)
     toBeBootstrapped.add(key)
     return
   }
