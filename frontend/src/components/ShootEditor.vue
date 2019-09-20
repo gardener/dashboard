@@ -324,6 +324,8 @@ export default {
           line--
         }
 
+        options.completeSingle = false
+
         return {
           list: getCompletions(token, context, options),
           from: CodeMirror.Pos(cur.line, token.start),
