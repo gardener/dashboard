@@ -22,7 +22,7 @@ const {
   getConfigValue,
   getSeedIngressDomain,
   getShootIngressDomain
-} = require('..')
+} = require('../../utils')
 const assert = require('assert').strict
 const { getSeeds } = require('../../cache')
 

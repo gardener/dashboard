@@ -22,21 +22,26 @@ const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
 const _ = require('lodash')
-const { bootstrapResource } = require('../utils/terminals/terminalBootstrap')
+const {
+  bootstrapResource,
+  isBootstrapPending,
+  removeFromToBeBoostrappedQueue
+} = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
 
 module.exports = io => {
   const emitter = garden.shoots.watch()
   registerHandler(emitter, async function (event) {
+    const shoot = event.object
     if (event.type === 'ERROR') {
-      logger.error('shoots event error', event.object)
+      logger.error('shoots event error', shoot)
       return
     }
-    event.objectKey = _.get(event.object, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+    event.objectKey = _.get(shoot, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
 
-    const name = event.object.metadata.name
-    const namespace = event.object.metadata.namespace
+    const name = shoot.metadata.name
+    const namespace = shoot.metadata.namespace
     const namespacedEvents = { kind: 'shoots', namespaces: {} }
     namespacedEvents.namespaces[namespace] = [event]
     io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
@@ -47,10 +52,18 @@ module.exports = io => {
 
     switch (event.type) {
       case 'ADDED':
-        const shoot = event.object
         bootstrapResource(shoot)
         break
+      case 'MODIFIED':
+        if (isBootstrapPending(shoot)) {
+          bootstrapResource(shoot)
+        }
+        break
       case 'DELETED':
+        if (isBootstrapPending(shoot)) {
+          removeFromToBeBoostrappedQueue(shoot)
+        }
+
         try {
           await journals.deleteJournals({ namespace, name })
         } catch (error) {
@@ -59,7 +72,7 @@ module.exports = io => {
         break
     }
 
-    if (shootHasIssue(event.object)) {
+    if (shootHasIssue(shoot)) {
       io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
       if (idx === -1) {
         shootsWithIssues.push(shootIdentifier)

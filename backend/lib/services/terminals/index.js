@@ -20,26 +20,26 @@ const _ = require('lodash')
 const assert = require('assert').strict
 const fnv = require('fnv-plus')
 
-const kubernetes = require('../kubernetes')
+const kubernetes = require('../../kubernetes')
 const Resources = kubernetes.Resources
 const {
   getKubeconfig,
   getConfigValue,
   decodeBase64
-} = require('../utils')
+} = require('../../utils')
 const {
   toTerminalResource
-} = require('../utils/terminals/terminalResources')
+} = require('./terminalResources')
 const {
   getKubeApiServerHostForSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer
-} = require('../utils/terminals')
-const { getSeeds } = require('../cache')
-const shoots = require('./shoots')
-const { Forbidden } = require('../errors')
-const logger = require('../logger')
+} = require('./utils')
+const { getSeeds } = require('../../cache')
+const shoots = require('../shoots')
+const { Forbidden } = require('../../errors')
+const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
@@ -398,6 +398,9 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   const gardenCoreClient = Core(user)
 
   const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...hostCluster.secretRef })
+  if (!hostKubeconfig) {
+    throw new Error('Host kubeconfig does not exist (yet)')
+  }
   const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
   const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster, body })

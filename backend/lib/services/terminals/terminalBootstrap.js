@@ -29,7 +29,7 @@ const {
   getShootIngressDomain,
   getSeedIngressDomain,
   getConfigValue
-} = require('..')
+} = require('../../utils')
 const kubernetes = require('../../kubernetes')
 const {
   toIngressResource,
@@ -40,10 +40,13 @@ const {
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   GardenTerminalHostRefType
-} = require('./')
-const shoots = require('../../services/shoots')
+} = require('./utils')
+const shoots = require('../shoots')
+const { getSeeds } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
+
+const toBeBootstrapped = new Set()
 
 class Handler {
   constructor (fn, description) {
@@ -59,6 +62,30 @@ class Handler {
   get description () {
     return this._description
   }
+}
+
+function seedShootNsExists (resource) {
+  /*
+    If the technicalID is set and the progress is over 10% (best guess), then we assume that the namespace on the seed exists for this shoot.
+    Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
+  */
+  return _.get(resource, 'status.technicalID') && _.get(resource, 'status.lastOperation.progress', 0) > 10
+}
+
+function keyForResource (resource) {
+  const kind = resource.kind
+  const { metadata: { name, namespace } } = resource
+  return `${kind}/${namespace}/${name}`
+}
+
+function isBootstrapPending (resource) {
+  const key = keyForResource(resource)
+  return toBeBootstrapped.has(key)
+}
+
+function removeFromToBeBoostrappedQueue (resource) {
+  const key = keyForResource(resource)
+  return toBeBootstrapped.delete(key)
 }
 
 async function replaceResource ({ client, name, body }) {
@@ -163,6 +190,14 @@ async function handleSeed (seed) {
   const name = seed.metadata.name
   const namespace = 'garden'
 
+  // get latest seed resource from cache
+  seed = _.find(getSeeds(), ['metadata.name', name])
+
+  if (!_.isEmpty(seed.metadata.deletionTimestamp)) {
+    logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
+    return
+  }
+
   logger.debug(`replacing resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
@@ -179,7 +214,7 @@ async function handleSeed (seed) {
 async function handleShoot (shoot) {
   const name = shoot.metadata.name
   const namespace = shoot.metadata.namespace
-  logger.debug(`replacing shoot's apiserver ingress ${name} for webterminals`)
+  logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
 
@@ -195,6 +230,11 @@ async function handleShoot (shoot) {
 */
 async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, namespace, name }) {
   const shootResource = await shoots.read({ gardenClient, namespace, name })
+
+  if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
+    logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
+    return
+  }
 
   // fetch seed resource
   const seedName = shootResource.spec.cloud.seed
@@ -358,11 +398,31 @@ function bootstrapResource (resource) {
     return
   }
 
+  // do not bootstrap if resource is beeing deleted
+  if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
+    return
+  }
+
   const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
   if (isBootstrapDisabledForResource) {
     const name = resource.metadata.name
     logger.debug(`terminal bootstrap disabled for seed ${name}`)
     return
+  }
+
+  // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
+  if (kind === 'Shoot' && !seedShootNsExists(resource)) {
+    if (isBootstrapPending(resource)) {
+      return
+    }
+    const key = keyForResource(resource)
+    logger.info(`bootstrapping of ${key} postponed`)
+    toBeBootstrapped.add(key)
+    return
+  }
+
+  if (isBootstrapPending(resource)) {
+    removeFromToBeBoostrappedQueue(resource)
   }
 
   const description = `${kind} - ${resource.metadata.name}`
@@ -415,5 +475,7 @@ if (bootstrapKindAllowed('gardenTerminalHost')) {
 }
 
 module.exports = {
-  bootstrapResource
+  bootstrapResource,
+  isBootstrapPending,
+  removeFromToBeBoostrappedQueue
 }

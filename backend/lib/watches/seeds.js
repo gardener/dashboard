@@ -21,7 +21,7 @@ const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
 const logger = require('../logger')
 const { registerHandler } = require('./common')
-const { bootstrapResource } = require('../utils/terminals/terminalBootstrap')
+const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
 
 module.exports = io => {
   const emitter = garden.seeds.watch()
