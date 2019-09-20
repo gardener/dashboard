@@ -30,7 +30,7 @@ limitations under the License.
       </p>
       <p>
         Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
-        (<a class="orange--text text--darken-2" href="https://help.aliyun.com/product/28625.html?spm=a2c8b.12215442.0.0.18fb3c2f2XqpeR" target="_blank">official
+        (<a class="orange--text text--darken-2" href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
         documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
       </p>
       <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
