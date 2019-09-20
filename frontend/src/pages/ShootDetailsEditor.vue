@@ -16,7 +16,7 @@ limitations under the License.
 
  <template>
    <v-layout fill-height>
-     <shoot-item-editor
+     <shoot-editor
        :modificationWarning="modificationWarning"
        @dismissModificationWarning="onDismissModificationWarning"
        :errorMessage.sync="errorMessage"
@@ -49,14 +49,14 @@ limitations under the License.
            <span v-else>Cluster resource can be saved<br>without any conflicts</span>
          </v-tooltip>
        </template>
-    </shoot-item-editor>
+    </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import ShootItemEditor from '@/components/ShootItemEditor'
+import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
@@ -71,7 +71,7 @@ let vm
 
 export default {
   components: {
-    ShootItemEditor,
+    ShootEditor,
     ConfirmDialog
   },
   name: 'shoot-details-editor',

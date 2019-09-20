@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-layout fill-height>
-    <shoot-item-editor
+    <shoot-editor
       :modificationWarning="modificationWarning"
       @dismissModificationWarning="onDismissModificationWarning"
       :errorMessage.sync="errorMessage"
@@ -33,26 +33,27 @@ limitations under the License.
           <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
         </v-flex>
       </template>
-    </shoot-item-editor>
+    </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import ShootItemEditor from '@/components/ShootItemEditor'
+import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState, mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 
 // lodash
 import get from 'lodash/get'
+import isEqual from 'lodash/isEqual'
 
 // js-yaml
 import jsyaml from 'js-yaml'
 
 export default {
   components: {
-    ShootItemEditor,
+    ShootEditor,
     ConfirmDialog
   },
   name: 'shoot-create-editor',
@@ -69,7 +70,8 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'newShootResource'
+      'newShootResource',
+      'initialNewShootResource'
     ])
   },
   methods: {
@@ -115,6 +117,10 @@ export default {
           namespace: this.namespace
         }
       })
+    },
+    async isShootContentDirty () {
+      const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
+      return !isEqual(JSON.stringify(this.initialNewShootResource), JSON.stringify(data))
     }
   },
   mounted () {
@@ -135,12 +141,13 @@ export default {
     if (this.isShootCreated) {
       return next()
     }
-    if (await this.confirmEditorNavigation()) {
-      next()
-    } else {
-      this.$refs.shootEditor.focus()
-      next(false)
+    if (!this.isShootCreated && await this.isShootContentDirty()) {
+      if (!await this.confirmEditorNavigation()) {
+        this.$refs.shootEditor.focus()
+        return next(false)
+      }
     }
+    return next()
   }
 }
 </script>

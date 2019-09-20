@@ -180,7 +180,7 @@ export default {
         this.hibernationScheduleValid
     },
     isShootContentDirty () {
-      return !isEqual(this.initialNewShootResource, this.shootResourceFromUIComponents())
+      return !isEqual(JSON.stringify(this.initialNewShootResource), JSON.stringify(this.shootResourceFromUIComponents()))
     }
   },
   methods: {

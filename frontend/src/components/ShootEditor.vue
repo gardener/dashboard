@@ -129,7 +129,7 @@ export default {
     CopyBtn,
     GAlert
   },
-  name: 'shoot-item-editor',
+  name: 'shoot-editor',
   props: {
     shootContent: {
       type: Object
