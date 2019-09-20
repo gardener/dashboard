@@ -139,6 +139,10 @@ export function updateShootAddons ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
 }
 
+export function getShootSpec () {
+  return getResource(`/api/info/shootspec`)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles () {

@@ -313,6 +313,10 @@ Copyright (c) 2011 Einar Otto Stangvik <einaros@gmail.com>\
 Copyright (c) 2014 Code Charm\
 [MIT License](https://github.com/encharm/x509.js/blob/master/LICENSE)
 
+- [swagger-parser](https://github.com/APIDevTools/swagger-parser)\
+Copyright (c) 2015 James Messinger\
+[MIT License](https://github.com/APIDevTools/swagger-parser/blob/master/LICENSE)
+
 ### Frontend
 The Gardener Dashboard frontend depends on the following packages:
 

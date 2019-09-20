@@ -84,10 +84,13 @@ import CopyBtn from '@/components/CopyBtn'
 import GAlert from '@/components/GAlert'
 import { mapState } from 'vuex'
 import { getProjectName } from '@/utils'
+import { getShootSpec } from '@/utils/api'
 import download from 'downloadjs'
 
 // codemirror
 import CodeMirror from 'codemirror'
+import 'codemirror/addon/hint/show-hint.js'
+import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 
@@ -97,6 +100,20 @@ import get from 'lodash/get'
 import omit from 'lodash/omit'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
+import forIn from 'lodash/forIn'
+import flatMap from 'lodash/flatMap'
+import map from 'lodash/map'
+import reverse from 'lodash/reverse'
+import trim from 'lodash/trim'
+import nth from 'lodash/nth'
+import forEach from 'lodash/forEach'
+import filter from 'lodash/filter'
+import includes from 'lodash/includes'
+import last from 'lodash/last'
+import words from 'lodash/words'
+import join from 'lodash/join'
+import repeat from 'lodash/repeat'
+import upperFirst from 'lodash/upperFirst'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -145,7 +162,8 @@ export default {
       },
       generation: undefined,
       lineHeight: 21,
-      toolbarHeight: 48
+      toolbarHeight: 48,
+      shootCompletions: {}
     }
   },
   computed: {
@@ -249,8 +267,7 @@ export default {
       }
     },
     createInstance (element) {
-      const vm = this
-      const extraKeys = assign ({}, {
+      const extraKeys = assign({}, {
         'Tab': (instance) => {
           if (instance.somethingSelected()) {
             instance.indentSelection('add')
@@ -260,7 +277,8 @@ export default {
         },
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
-        }
+        },
+        'Ctrl-Space': 'autocomplete'
       }, this.extraKeys)
       const options = {
         mode: 'text/x-yaml',
@@ -285,6 +303,140 @@ export default {
         this.detailedErrorMessage = undefined
       }
       this.$instance.on('change', onChange)
+
+      const yamlHint = (editor, options) => {
+        const cur = editor.getCursor()
+        const token = getYamlToken(editor, cur)
+
+        var tprop = token
+        var line = cur.line
+        var context = []
+        while (line > 0 && !(tprop.type === 'property' && tprop.indent === 0)) {
+          tprop = getYamlToken(editor, CodeMirror.Pos(line, 0))
+          if (tprop.indent < token.start &&
+              (context.length === 0 || context[context.length - 1].indent > tprop.indent)) {
+            if (tprop.type === 'property') {
+              context.push(tprop)
+            } else if (tprop.type === 'arrayStart') {
+              context.push(tprop)
+            }
+          }
+          line--
+        }
+
+        return {
+          list: getCompletions(token, context, options),
+          from: CodeMirror.Pos(cur.line, token.start),
+          to: CodeMirror.Pos(cur.line, token.end)
+        }
+      }
+
+      const getYamlToken = (editor, cur) => {
+        var token
+        var lineTokens = editor.getLineTokens(cur.line)
+        const lineString = join(map(lineTokens, 'string'), '')
+        forEach(lineTokens, lineToken => {
+          let result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
+          if (result) {
+            token = lineToken
+            token.type = 'arrayStart'
+            token.string = trim(last(words(lineString.substring(0, cur.ch).toLowerCase())))
+            token.indent = token.start = result[1].length
+            token.end = token.start + token.string.length + 2
+            if (lineTokens.length >= 2 && lineTokens[lineTokens.length - 1].string === ':') {
+              // arrayStart line can also start new object
+              let result = lineTokens[lineTokens.length - 2].string.match(/^(\s*)(.+?)$/)
+              token.propertyName = result[2]
+            }
+          }
+        })
+        if (!token) {
+          if (lineTokens.length >= 2 && lineTokens[lineTokens.length - 1].string === ':') {
+            token = lineTokens[lineTokens.length - 2]
+            let result = token.string.match(/^(\s*)(.+?)$/)
+            token.indent = token.start = result[1].length
+            token.propertyName = result[2]
+            token.type = 'property'
+          }
+        }
+        if (!token) {
+          token = editor.getTokenAt(cur, true)
+          token.string = trim(last(words(lineString.substring(0, cur.ch).toLowerCase())))
+          token.start = token.end - token.string.length
+        }
+        return token
+      }
+
+      const getCompletions = (token, context, options) => {
+        const completionPath = flatMap(reverse(context), (pathToken, index, revContext) => {
+          if (pathToken.type === 'property') {
+            if (get(nth(revContext, index + 1), 'type') === 'arrayStart') {
+              // next item is array, so don't append 'properties'
+              return pathToken.propertyName
+            }
+            if (index === revContext.length - 1 && token.type === 'arrayStart') {
+              // current token is array, so list properties of its items
+              return [pathToken.propertyName, 'items', 'properties']
+            }
+            // normal property token
+            return [pathToken.propertyName, 'properties']
+          } else if (pathToken.type === 'arrayStart') {
+            if (pathToken.propertyName !== undefined && token.start === pathToken.indent + (this.$instance.options.indentUnit * 2)) {
+              // arrayStart line can also start new object, so list properties of specific item
+              return ['items', 'properties', pathToken.propertyName, 'properties']
+            }
+            // path token is array, so list properties of its items
+            return ['items', 'properties']
+          } else {
+            return []
+          }
+        })
+
+        let completions
+        if (completionPath.length > 0) {
+          completions = get(this.shootCompletions, completionPath)
+        } else {
+          completions = this.shootCompletions
+        }
+
+        let completionArray = []
+        const generateCompletionText = (key, type) => {
+          const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.$instance.options.indentUnit)}`
+          if (type === 'array') {
+            return `${key}:\n${completionIndentStr}- `
+          } else if (type === 'object') {
+            return `${key}:\n${completionIndentStr}`
+          } else {
+            return `${key}: `
+          }
+        }
+        forIn(completions, (value, key) => {
+          const text = `${token.type === 'arrayStart' ? '- ' : ''}${generateCompletionText(key, value.type)}`
+          completionArray.push({
+            text,
+            displayText: `${key} [${value.type}] - ${value.description}`,
+            render: (el, self, data) => {
+              const propertyWrapper = document.createElement('div')
+              propertyWrapper.innerHTML = `<span class="property">${key}</span><span class="type">${upperFirst(value.type)}</span>`
+              propertyWrapper.className = 'ghint-type'
+              el.appendChild(propertyWrapper)
+
+              const descWrapper = document.createElement('div')
+              descWrapper.innerHTML = `<span class="description">${value.description}</span>`
+              descWrapper.className = 'ghint-desc'
+              el.appendChild(descWrapper)
+            }
+          })
+        })
+        if (trim(token.string).length > 0) {
+          completionArray = filter(completionArray, completion => {
+            return includes(completion.text.toLowerCase(), token.string)
+          })
+        }
+        return completionArray
+      }
+
+      CodeMirror.registerHelper('hint', 'yaml', yamlHint)
     },
     destroyInstance () {
       if (this.$instance) {
@@ -343,10 +495,12 @@ export default {
       this.snackbar = true
     }
   },
-  mounted () {
+  async mounted () {
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
+    const shootCompletions = await getShootSpec()
+    this.shootCompletions = get(shootCompletions, 'data.spec.properties', {})
   },
   watch: {
     value: {
@@ -373,6 +527,7 @@ export default {
 </script>
 
 <style lang="styl" scoped>
+
   .no-margin
     margin: 0 !important
   .position-relative
@@ -386,4 +541,42 @@ export default {
      background: embedurl('../assets/tab.png')
      background-position: right
      background-repeat: no-repeat
+
+</style>
+<style lang="styl">
+  @import '~vuetify/src/stylus/settings/_colors.styl';
+
+  .CodeMirror-hint {
+
+    .ghint-type  {
+      color: #000;
+
+      .property {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .type {
+        font-style: italic;
+        padding-left: 10px;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .CodeMirror-hint .ghint-desc  {
+    white-space: pre-wrap;
+    max-width: 800px;
+    padding: 10px;
+
+    .description {
+      font-family: Roboto, sans-serif;
+      font-size: 13px;
+      color: $grey.darken-3;
+    }
+  }
+
+  .CodeMirror-hint-active {
+    background-color: $grey.lighten-4 !important;
+  }
+
 </style>

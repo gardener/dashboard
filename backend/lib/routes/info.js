@@ -22,10 +22,10 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const { version } = require('../../package')
-
+const SwaggerParser = require('swagger-parser')
 const apiRegistration = kubernetes.apiRegistration()
-
 const router = module.exports = express.Router()
+const _ = require('lodash')
 
 router.route('/')
   .get(async (req, res, next) => {
@@ -51,6 +51,46 @@ async function fetchGardenerVersion () {
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
+    if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
+      return undefined
+    }
+    throw err
+  }
+}
+
+router.route('/shootspec')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const spec = await fetchShootSpec(user)
+      res.send({ spec })
+    } catch (err) {
+      next(err)
+    }
+  })
+
+let shootSpec // Cache, TODO: Need to update cache when apiserver gets updated
+
+async function fetchShootSpec (user) {
+  if (shootSpec) {
+    return shootSpec
+  }
+  try {
+    const { url, ca } = kubernetes.config()
+    console.log(user)
+
+    const { body } = await got(`${url}/openapi/v2`, {
+      ca,
+      headers: {
+        Authorization: `Bearer ${user.auth.bearer}`
+      },
+      json: true
+    })
+    const spec = await SwaggerParser.dereference(body)
+    shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.garden.v1beta1.Shoot'], {})
+    return shootSpec
+  } catch (err) {
+    logger.warn(`Could not fetch shoot spec. Error: ${err.message}`)
     if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
       return undefined
     }
