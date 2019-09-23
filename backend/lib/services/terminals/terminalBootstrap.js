@@ -165,6 +165,7 @@ async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, co
   let type
   if (externalName) {
     type = 'ExternalName'
+    clusterIP = undefined
   }
 
   const spec = {
