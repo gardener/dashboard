@@ -307,6 +307,7 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 }
 
 async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
+  const seedName = seed.metadata.name
   const projectsClient = kubernetes.garden().projects
   const namespacesClient = coreClient.namespaces
 
@@ -325,6 +326,7 @@ async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
     coreClient: seedCoreClient,
     extensionClient: seedExtensionClient,
     namespace,
+    name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
     apiServerHostname: seedApiServerHostname,
     apiServerIngressHost: seedApiServerIngressHost,
     ingressAnnotations
