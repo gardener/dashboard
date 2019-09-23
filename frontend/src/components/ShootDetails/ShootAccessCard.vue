@@ -26,17 +26,16 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <template v-if="isTerminalTileVisible">
-      <terminal-list-tile
-        :shoot-item=shootItem
-        target="shoot"
-        :description="shootTerminalDescription"
-        :buttonDescription="shootTerminalButtonDescription"
-        :disabled="isShootHibernated"
-        >
-      </terminal-list-tile>
-      <v-divider class="my-2" inset></v-divider>
-    </template>
+    <terminal-list-tile
+      v-if="isTerminalTileVisible"
+      :shoot-item=shootItem
+      target="shoot"
+      :description="shootTerminalDescription"
+      :buttonDescription="shootTerminalButtonDescription"
+      :disabled="isShootHibernated"
+      >
+    </terminal-list-tile>
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
     <v-list-tile v-if="isDashboardTileVisible">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>

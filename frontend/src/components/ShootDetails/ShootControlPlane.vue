@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-list v-if="hasControlPlaneTerminalAccess">
+  <v-list>
     <terminal-list-tile
       :shoot-item="shootItem"
       target="cp"
@@ -26,23 +26,15 @@ limitations under the License.
 
 <script>
 import TerminalListTile from '@/components/TerminalListTile'
-import { mapGetters } from 'vuex'
-import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     TerminalListTile
   },
-  mixins: [shootItem],
   props: {
     shootItem: {
       type: Object
     }
-  },
-  computed: {
-    ...mapGetters([
-      'hasControlPlaneTerminalAccess'
-    ])
   }
 }
 </script>

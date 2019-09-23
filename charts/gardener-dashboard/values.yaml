@@ -52,8 +52,6 @@ oidc:
   redirectUri: https://dashboard.ingress.example.org/auth/callback
 
 frontendConfig:
-  # features:
-  #   terminalEnabled: true
   landingPageUrl: https://github.com/gardener
   helpMenuItems:
   - title: Getting Started
@@ -63,8 +61,6 @@ frontendConfig:
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
-  terminal:
-    heartbeatIntervalSeconds: 60
   defaultHibernationSchedule:
     evaluation:
     - start: 00 17 * * 1,2,3,4,5
@@ -73,6 +69,10 @@ frontendConfig:
       end: 00 08 * * 1,2,3,4,5
     production: ~
   seedCandidateDeterminationStrategy: SameRegion
+  # features:
+  #   terminalEnabled: true
+  # terminal:
+  #   heartbeatIntervalSeconds: 60
 
 gitHub:
   apiUrl: https://api.foo-github.com
