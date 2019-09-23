@@ -100,7 +100,7 @@ async function replaceResource ({ client, name, body }) {
   }
 }
 
-async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
+function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
   if (!secretName) {
     secretName = `${name}-tls`
   }
@@ -138,7 +138,7 @@ async function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extens
   return replaceResource({ client, name, body })
 }
 
-async function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, ip, ownerReferences }) {
+function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, ip, ownerReferences }) {
   const subsets = [
     {
       addresses: [
@@ -161,7 +161,7 @@ async function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, c
   return replaceResource({ client, name, body })
 }
 
-async function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
+function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
   let type
   if (externalName) {
     type = 'ExternalName'
