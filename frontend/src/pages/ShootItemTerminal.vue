@@ -65,12 +65,14 @@ limitations under the License.
         Image: {{terminalSession.image}}
       </v-tooltip>
 
-      <v-tooltip v-if="terminalSession.privileged !== undefined" top>
+      <v-tooltip v-if="privilegedMode !== undefined" top>
         <v-btn small flat slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon class="mr-2">mdi-shield-account</v-icon>
-          <span>{{privilegedText}}</span>
+          <span>{{privilegedModeText}}</span>
         </v-btn>
-        Security Context: {{privilegedText}}
+        <strong>Privileged:</strong> {{terminalSession.privileged}}<br/>
+        <strong>Host PID:</strong> {{terminalSession.hostPID}}<br/>
+        <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
       </v-tooltip>
 
       <v-tooltip v-if="terminalSession.node" top>
@@ -101,7 +103,7 @@ limitations under the License.
       ref="settings"
       :image="defaultImage"
       :node="defaultNode"
-      :privileged="defaultPrivileged"
+      :privilegedMode="defaultPrivilegedMode"
       :nodes="config.nodes"
     ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
@@ -256,8 +258,11 @@ export default {
     defaultNode () {
       return this.terminalSession.node || get(head(this.config.nodes), 'data.kubernetesHostname')
     },
-    defaultPrivileged () {
-      return this.terminalSession.privileged || false
+    defaultPrivilegedMode () {
+      return this.privilegedMode || false
+    },
+    privilegedMode () {
+      return this.terminalSession.privileged || this.terminalSession.hostPID || this.terminalSession.hostNetwork
     },
     connectionText () {
       switch (this.terminalSession.connectionState) {
@@ -280,8 +285,8 @@ export default {
       const { name = undefined } = this.$route.params
       return name
     },
-    privilegedText () {
-      return this.terminalSession.privileged ? 'Privileged' : 'Unprivileged'
+    privilegedModeText () {
+      return this.privilegedMode ? 'Privileged' : 'Unprivileged'
     },
     imageShortText () {
       const image = this.terminalSession.image || ''
@@ -382,6 +387,8 @@ export default {
         tries: 0,
         node: undefined,
         privileged: undefined,
+        hostPID: undefined,
+        hostNetwork: undefined,
         image: undefined
       }
 
@@ -452,6 +459,8 @@ export default {
             if (error.code === 1000) { // CLOSE_NORMAL
               terminalSession.image = undefined
               terminalSession.privileged = undefined
+              terminalSession.hostPID = undefined
+              terminalSession.hostNetwork = undefined
               terminalSession.node = undefined
               this.showSnackbarTop('Terminal connection lost')
               return
@@ -510,7 +519,9 @@ export default {
           const containers = get(pod, 'spec.containers')
           const terminalContainer = find(containers, container => container.name === terminalData.container)
           this.terminalSession.image = get(terminalContainer, 'image')
-          this.terminalSession.privileged = get(terminalContainer, 'securityContext.privileged')
+          this.terminalSession.privileged = get(terminalContainer, 'securityContext.privileged', false)
+          this.terminalSession.hostPID = get(pod, 'spec.hostPID', false)
+          this.terminalSession.hostNetwork = get(pod, 'spec.hostNetwork', false)
           this.terminalSession.node = get(pod, 'spec.nodeName')
 
           const phase = get(pod, 'status.phase')

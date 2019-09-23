@@ -114,7 +114,7 @@ function isServiceAccountReady ({ secrets } = {}) {
 }
 
 function getConfigFromBody (body) {
-  return _.pick(body, ['node', 'containerImage', 'privileged'])
+  return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
 }
 
 async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster, body }) {
@@ -288,7 +288,7 @@ async function createTerminal ({ dashboardClient, user, namespace, name, target,
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, privileged: hostCluster.privileged, node: hostCluster.node })
+  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, node: hostCluster.node, privileged: hostCluster.privileged, hostPID: hostCluster.hostPID, hostNetwork: hostCluster.hostNetwork })
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
@@ -330,7 +330,7 @@ function getPodLabels (target) {
   return labels
 }
 
-function createHost ({ secretRef, namespace, containerImage, podLabels, privileged = false, node }) {
+function createHost ({ secretRef, namespace, containerImage, podLabels, node, privileged = false, hostPID = false, hostNetwork = false }) {
   const temporaryNamespace = _.isEmpty(namespace)
   const host = {
     credentials: {
@@ -341,7 +341,9 @@ function createHost ({ secretRef, namespace, containerImage, podLabels, privileg
     pod: {
       labels: podLabels,
       containerImage,
-      privileged
+      privileged,
+      hostPID,
+      hostNetwork
     }
   }
   if (node) {

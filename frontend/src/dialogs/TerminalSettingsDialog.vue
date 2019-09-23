@@ -33,16 +33,16 @@ limitations under the License.
         label="Image"
         hint="Image to be used for the Container"
         persistent-hint
-        class="mb-2"
+        class="mb-4"
       >
       </v-text-field>
       <v-switch
         color="cyan darken-2"
-        v-model="selectedPrivileged"
+        v-model="selectedPrivilegedMode"
         label="Privileged"
-        hint="Processes in privileged containers are essentially equivalent to root on the host. In addition, the host root filesystem will be mounted under the path /hostroot."
+        hint="When enabled this will schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. In addition, the host root filesystem will be mounted under the path /hostroot."
         persistent-hint
-        class="mb-3"
+        class="mt-2"
       ></v-switch>
       <v-select
         color="cyan darken-2"
@@ -52,21 +52,21 @@ limitations under the License.
         v-model="selectedNode"
         hint="Node on which the Pod should be scheduled"
         persistent-hint
-        class="mb-2"
-        >
-          <template slot="item" slot-scope="data">
-            <v-list-tile-content>
-              <v-list-tile-title>{{data.item.data.kubernetesHostname}}</v-list-tile-title>
-              <v-list-tile-sub-title>
-                <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-          </template>
-          <template slot="selection" slot-scope="data">
-            <span class="black--text ml-2">
-            {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
-            </span>
-          </template>
+        class="mt-4 mb-2"
+      >
+        <template slot="item" slot-scope="data">
+          <v-list-tile-content>
+            <v-list-tile-title>{{data.item.data.kubernetesHostname}}</v-list-tile-title>
+            <v-list-tile-sub-title>
+              <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
+            </v-list-tile-sub-title>
+          </v-list-tile-content>
+        </template>
+        <template slot="selection" slot-scope="data">
+          <span class="black--text ml-2">
+          {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
+          </span>
+        </template>
       </v-select>
     </template>
   </g-dialog>
@@ -75,6 +75,7 @@ limitations under the License.
 <script>
 import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
+import isEmpty from 'lodash/isEmpty'
 
 export default {
   components: {
@@ -91,7 +92,7 @@ export default {
     nodes: {
       type: Array
     },
-    privileged: {
+    privilegedMode: {
       type: Boolean
     }
   },
@@ -99,26 +100,31 @@ export default {
     return {
       selectedContainerImage: undefined,
       selectedNode: undefined,
-      selectedPrivileged: undefined,
+      selectedPrivilegedMode: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
   },
   computed: {
     validSettings () {
-      // invalid if not set or not changed
-      return !!this.selectedContainerImage && !!this.selectedNode && this.selectedPrivileged !== undefined
+      // invalid if not set
+      return !isEmpty(this.selectedContainerImage) && !isEmpty(this.selectedNode) && this.selectedPrivilegedMode !== undefined
     }
   },
   methods: {
     async confirmWithDialog () {
       const confirmed = await this.$refs.gDialog.confirmWithDialog()
       if (confirmed) {
-        return {
+        const selectedConfig = {
           containerImage: this.selectedContainerImage,
-          privileged: this.selectedPrivileged,
           node: this.selectedNode
         }
+        if (this.selectedPrivilegedMode) {
+          selectedConfig.privileged = true
+          selectedConfig.hostPID = true
+          selectedConfig.hostNetwork = true
+        }
+        return selectedConfig
       } else {
         return undefined
       }
@@ -135,7 +141,7 @@ export default {
     reset () {
       this.selectedContainerImage = this.image
       this.selectedNode = this.node
-      this.selectedPrivileged = this.privileged
+      this.selectedPrivilegedMode = this.privilegedMode
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
     }
