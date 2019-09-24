@@ -73,6 +73,17 @@ limitations under the License.
         <slot name="toolbarItemsRight"></slot>
       </v-layout>
     </v-flex>
+    <v-tooltip
+      right
+      absolute
+      :value="helpTooltip.visible"
+      :position-x="helpTooltip.posX"
+      :position-y="helpTooltip.posY"
+      max-width="800px"
+      >
+      <span class="font-weight-bold">{{helpTooltip.property}}</span><span class="font-style-italic ml-2">{{helpTooltip.type}}</span><br />
+      <span class="font-wrap">{{helpTooltip.description}}</span>
+    </v-tooltip>
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
@@ -163,7 +174,15 @@ export default {
       generation: undefined,
       lineHeight: 21,
       toolbarHeight: 48,
-      shootCompletions: {}
+      shootCompletions: {},
+      helpTooltip: {
+        visible: false,
+        posX: 0,
+        posY: 0,
+        property: undefined,
+        type: undefined,
+        description: undefined
+      }
     }
   },
   computed: {
@@ -307,10 +326,21 @@ export default {
       const yamlHint = (editor, options) => {
         const cur = editor.getCursor()
         const token = getYamlToken(editor, cur)
+        const list = getYamlCompletions(token, cur, editor)
 
-        var tprop = token
-        var line = cur.line
-        var context = []
+        options.completeSingle = false
+
+        return {
+          list,
+          from: CodeMirror.Pos(cur.line, token.start),
+          to: CodeMirror.Pos(cur.line, token.end)
+        }
+      }
+
+      const getYamlCompletions = (token, cur, editor, exactMatch = false) => {
+        let tprop = token
+        let line = cur.line
+        let context = []
         while (line > 0 && !(tprop.type === 'property' && tprop.indent === 0)) {
           tprop = getYamlToken(editor, CodeMirror.Pos(line, 0))
           if (tprop.indent < token.start &&
@@ -324,18 +354,12 @@ export default {
           line--
         }
 
-        options.completeSingle = false
-
-        return {
-          list: getCompletions(token, context, options),
-          from: CodeMirror.Pos(cur.line, token.start),
-          to: CodeMirror.Pos(cur.line, token.end)
-        }
+        return getCompletions(token, context, exactMatch)
       }
 
       const getYamlToken = (editor, cur) => {
-        var token
-        var lineTokens = editor.getLineTokens(cur.line)
+        let token
+        let lineTokens = editor.getLineTokens(cur.line)
         const lineString = join(map(lineTokens, 'string'), '')
         forEach(lineTokens, lineToken => {
           let result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
@@ -369,7 +393,7 @@ export default {
         return token
       }
 
-      const getCompletions = (token, context, options) => {
+      const getCompletions = (token, context, exactMatch) => {
         const completionPath = flatMap(reverse(context), (pathToken, index, revContext) => {
           if (pathToken.type === 'property') {
             if (get(nth(revContext, index + 1), 'type') === 'arrayStart') {
@@ -414,9 +438,13 @@ export default {
         }
         forIn(completions, (value, key) => {
           const text = `${token.type === 'arrayStart' ? '- ' : ''}${generateCompletionText(key, value.type)}`
+          const string = key.toLowerCase()
           completionArray.push({
             text,
-            displayText: `${key} [${value.type}] - ${value.description}`,
+            string,
+            property: key,
+            type: upperFirst(value.type),
+            description: value.description,
             render: (el, self, data) => {
               const propertyWrapper = document.createElement('div')
               propertyWrapper.innerHTML = `<span class="property">${key}</span><span class="type">${upperFirst(value.type)}</span>`
@@ -432,13 +460,55 @@ export default {
         })
         if (trim(token.string).length > 0) {
           completionArray = filter(completionArray, completion => {
-            return includes(completion.text.toLowerCase(), token.string)
+            if (exactMatch) {
+              return isEqual(completion.string, token.string)
+            }
+            return includes(completion.string, token.string)
           })
         }
         return completionArray
       }
 
       CodeMirror.registerHelper('hint', 'yaml', yamlHint)
+
+      const cm = this.$instance
+      let cmTooltipFnTimerID
+      const cmTooltipFn = (e) => {
+        let pos = cm.coordsChar({
+          left : e.clientX,
+          top : e.clientY
+        })
+        const lineTokens = cm.getLineTokens(pos.line)
+        const lineString = join(map(lineTokens, 'string'), '')
+        const result = lineString.match(/^(\s*)(.*?)([^\s]+):.*$/)
+        if (result) {
+          const start = result[1].length + result[2].length
+          const end = start + result[3].length
+          const string = result[3].toLowerCase()
+          const token = {
+            start,
+            end,
+            string
+          }
+          if (token.start <= pos.ch && pos.ch <= token.end) {
+            const completions = getYamlCompletions(token, pos, cm, true)
+            if (completions.length === 1) {
+              this.helpTooltip.visible = true
+              this.helpTooltip.posX = e.clientX
+              this.helpTooltip.posY = e.clientY
+              this.helpTooltip.property = completions[0].property
+              this.helpTooltip.type = completions[0].type
+              this.helpTooltip.description = completions[0].description
+              return
+            }
+          }
+        }
+      }
+      CodeMirror.on(element, 'mouseover', (e) => {
+        clearTimeout(cmTooltipFnTimerID)
+        this.helpTooltip.visible = false
+        cmTooltipFnTimerID = setTimeout(cmTooltipFn, 800, e)
+      })
     },
     destroyInstance () {
       if (this.$instance) {
@@ -543,6 +613,14 @@ export default {
      background: embedurl('../assets/tab.png')
      background-position: right
      background-repeat: no-repeat
+
+  .font-style-italic {
+    font-style: italic;
+  }
+
+  .font-wrap {
+    white-space: pre-wrap;
+  }
 
 </style>
 <style lang="styl">
