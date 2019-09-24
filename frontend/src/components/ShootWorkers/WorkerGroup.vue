@@ -38,7 +38,6 @@ limitations under the License.
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
 import { mapGetters } from 'vuex'
-import { getTimestampFormatted } from '@/utils'
 
 export default {
   name: 'worker-group',
@@ -99,7 +98,7 @@ export default {
           value: `${machineImage.name} | Version: ${machineImage.version}`
         }
         if (machineImage.expirationDate) {
-          machineImageDescription.description = `(Expiration Date: ${getTimestampFormatted(machineImage.expirationDate)})`
+          machineImageDescription.description = `(Expiration Date: ${machineImage.expirationDateString})`
         }
         description.push(machineImageDescription)
       }

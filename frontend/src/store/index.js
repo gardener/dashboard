@@ -19,9 +19,10 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getTimestampFormatted } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
@@ -46,6 +47,7 @@ import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
+import semver from 'semver'
 const semSort = require('semver-sort')
 
 Vue.use(Vuex)
@@ -90,6 +92,18 @@ const machineAndVolumeTypePredicate = (item, zones) => {
   return difference(zones, itemZones).length === 0
 }
 
+const iconForImageName = imageName => {
+  const lowerCaseName = lowerCase(imageName)
+  if (lowerCaseName.includes('coreos')) {
+    return 'coreos'
+  } else if (lowerCaseName.includes('ubuntu')) {
+    return 'ubuntu'
+  } else if (lowerCaseName.includes('suse')) {
+    return 'suse'
+  }
+  return 'mdi-blur-radial'
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -130,17 +144,23 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineImages = get(cloudProfile, 'data.machineImages')
-      const allMachineImages = []
-      forEach(machineImages, machineImage => {
+      const allMachineImages = flatMap(machineImages, machineImage => {
+        const machineImageVersions = []
         forEach(machineImage.versions, version => {
           if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
-            allMachineImages.push({
+            machineImageVersions.push({
               name: machineImage.name,
               version: version.version,
-              expirationDate: version.expirationDate
+              expirationDate: version.expirationDate,
+              expirationDateString: getTimestampFormatted(version.expirationDate),
+              icon: iconForImageName(machineImage.name)
             })
           }
         })
+        machineImageVersions.sort((a, b) => {
+          return semver.compare(a.version, b.version)
+        })
+        return machineImageVersions
       })
 
       return allMachineImages

@@ -1,10 +1,8 @@
 <template>
   <v-select
     color="cyan darken-2"
-    :items="machineImageItems"
+    :items="machineImages"
     return-object
-    item-text="name"
-    item-value="name"
     :error-messages="getErrorMessages('worker.machineImage')"
     @input="onInputMachineImage"
     @blur="$v.worker.machineImage.$touch()"
@@ -34,10 +32,9 @@
 <script>
 import VendorIcon from '@/components/VendorIcon'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors, getTimestampFormatted } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
-import lowerCase from 'lodash/lowerCase'
 import pick from 'lodash/pick'
 
 const validationErrors = {
@@ -77,13 +74,6 @@ export default {
     }
   },
   computed: {
-    machineImageItems () {
-      return map(this.machineImages, machineImage => {
-        machineImage.icon = this.iconForImageName(machineImage.name)
-        machineImage.expirationDateString = getTimestampFormatted(machineImage.expirationDate)
-        return machineImage
-      })
-    },
     machineImage: {
       get: function () {
         return this.worker.machineImage
@@ -108,17 +98,6 @@ export default {
         this.valid = !this.$v.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
-    },
-    iconForImageName (imageName) {
-      const lowerCaseName = lowerCase(imageName)
-      if (lowerCaseName.includes('coreos')) {
-        return 'coreos'
-      } else if (lowerCaseName.includes('ubuntu')) {
-        return 'ubuntu'
-      } else if (lowerCaseName.includes('suse')) {
-        return 'suse'
-      }
-      return 'mdi-blur-radial'
     }
   },
   mounted () {
