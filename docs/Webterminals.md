@@ -1,5 +1,8 @@
 # Webterminals
 
+<img width="477" alt="Screenshot 2019-09-25 at 13 52 15" src="https://user-images.githubusercontent.com/5526658/65598477-c7694280-df9b-11e9-83d9-32bbed7fd1bc.png">
+
+
 ## Motivation
 We want to give garden operators and "regular" users an easy way to have a preconfigured shell directly in the browser.
 
