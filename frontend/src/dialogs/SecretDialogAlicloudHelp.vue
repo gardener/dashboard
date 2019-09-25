@@ -23,22 +23,29 @@ limitations under the License.
     @input="onInput">
     <div slot="help-content" class="helpContent">
       <p>
-        Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials.
+        Before you can provision and access a Kubernetes cluster on Alibaba Cloud, you need to add account credentials. To manage
+        credentials for Alibaba Cloud Resource Access Management (RAM), use the
+        <a href="https://ram.console.aliyun.com/overview" target="_blank" class="orange--text  text--darken-2">RAM Console <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>.
         The Gardener needs the credentials to provision and operate the Alibaba Cloud infrastructure for your Kubernetes cluster.
       </p>
       <p>
-        Ensure that the user has privileges to <b>create, modify and delete VMs</b>.
+        Copy the Alibaba Cloud RAM policy document below and attach it to the RAM user
+        (<a class="orange--text text--darken-2" href="https://www.alibabacloud.com/help/product/28625.htm?spm=a3c0i.100866.1204872.1.79461e4eLtFABp" target="_blank">official
+        documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
       </p>
+      <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
     </div>
   </secret-dialog-help>
 </template>
 
 <script>
 import SecretDialogHelp from '@/dialogs/SecretDialogHelp'
+import CodeBlock from '@/components/CodeBlock'
 
 export default {
   components: {
-    SecretDialogHelp
+    SecretDialogHelp,
+    CodeBlock
   },
   props: {
     value: {
@@ -47,7 +54,33 @@ export default {
     }
   },
   data () {
-    return {}
+    return {
+      template: {
+        'Statement': [
+          {
+            'Action': 'vpc:*',
+            'Effect': 'Allow',
+            'Resource': '*'
+          },
+          {
+            'Action': 'oss:*',
+            'Effect': 'Allow',
+            'Resource': '*'
+          },
+          {
+            'Action': 'ecs:*',
+            'Effect': 'Allow',
+            'Resource': '*'
+          },
+          {
+            'Action': 'slb:*',
+            'Effect': 'Allow',
+            'Resource': '*'
+          }
+        ],
+        'Version': '1'
+      }
+    }
   },
   methods: {
     onInput (value) {

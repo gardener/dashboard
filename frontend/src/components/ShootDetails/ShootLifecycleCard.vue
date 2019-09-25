@@ -69,6 +69,26 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
+        <div class="avatar">
+          <v-badge color="white cyan--text" overlap bottom>
+            <template v-slot:badge>
+              <v-icon color="cyan darken-2">mdi-refresh</v-icon>
+            </template>
+            <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
+          </v-badge>
+        </div>
+        <v-flex grow class="pa-0">
+          <span class="subheading">Rotate Kubeconfig</span>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <v-layout row>
+            <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
+          </v-layout>
+        </v-flex>
+      </v-card-title>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
         <v-flex grow class="pa-0">
           <span class="subheading">Delete Cluster</span><br>
@@ -95,6 +115,7 @@ import MaintenanceConfiguration from '@/components/ShootMaintenance/MaintenanceC
 import HibernationConfiguration from '@/components/ShootHibernation/HibernationConfiguration'
 import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
+import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -104,7 +125,8 @@ export default {
     MaintenanceConfiguration,
     HibernationConfiguration,
     DeleteCluster,
-    ReconcileStart
+    ReconcileStart,
+    RotateKubeconfigStart
   },
   props: {
     shootItem: {

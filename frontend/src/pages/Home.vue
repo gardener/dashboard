@@ -73,7 +73,7 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.path === '/namespace/create/ui') {
+    if (this.$route.path === '/namespace/+') {
       this.projectDialog = true
     }
   },
