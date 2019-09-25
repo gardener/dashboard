@@ -605,6 +605,7 @@ export default {
       margin: 0;
       padding-left: 4px;
       padding-top: 4px;
+      max-height: calc(100% - 25px);
   }
   .terminal {
     font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
