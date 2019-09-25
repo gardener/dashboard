@@ -118,7 +118,6 @@ function getConfigFromBody (body) {
 }
 
 async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster, body }) {
-  const hashedConfig = fnv.hash(JSON.stringify(getConfigFromBody(body)), 64).str()
 
   let selectors = [
     `dashboard.gardener.cloud/hostCluster=${fnv.hash(JSON.stringify(hostCluster), 64).str()}`,
@@ -134,7 +133,6 @@ async function findExistingTerminalResource ({ dashboardClient, username, namesp
   existingTerminals = _.chain(existingTerminals)
     .filter(terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
     .filter(terminal => terminal.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
-    .sortBy(terminal => terminal.metadata.annotations['dashboard.gardener.cloud/config'] === hashedConfig)
     .value()
   return _.head(existingTerminals)
 }
@@ -161,7 +159,7 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
   }
 
   logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
-  return { pod, token, attachServiceAccount, namespace: hostNamespace }
+  return { pod, token, namespace: hostNamespace }
 }
 
 exports.create = async function ({ user, namespace, name, target, body = {} }) {
@@ -295,7 +293,6 @@ async function createTerminal ({ dashboardClient, user, namespace, name, target,
     'dashboard.gardener.cloud/hostCluster': fnv.hash(JSON.stringify(hostCluster), 64).str(),
     'dashboard.gardener.cloud/targetCluster': fnv.hash(JSON.stringify(targetCluster), 64).str(),
     'garden.sapcloud.io/createdBy': fnv.hash(user.id, 64).str()
-    // 'dashboard.gardener.cloud/config': fnv.hash(JSON.stringify(getConfigFromBody(body)), 64).str() // TODO
   }
   if (!_.isEmpty(name)) {
     labels['garden.sapcloud.io/name'] = name
