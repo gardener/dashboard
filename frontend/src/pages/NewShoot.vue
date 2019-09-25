@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-container fluid class="newshoot-container">
+  <v-flex fluid class="newshoot-container">
     <v-flex class="newshoot-cards">
       <v-card flat>
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
@@ -105,11 +105,11 @@ limitations under the License.
     <v-flex class="toolbar">
       <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       <v-layout align-center justify-end>
-        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create Cluster</v-btn>
+        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
       </v-layout>
     </v-flex>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-container>
+  </v-flex>
 </template>
 
 <script>
@@ -387,6 +387,7 @@ export default {
 
   .toolbar {
     height: 48px;
+    padding-right: 20px;
   }
 
   .newshoot-container {
@@ -396,6 +397,7 @@ export default {
   .newshoot-cards {
     max-height: calc(100% - 48px);
     overflow: scroll;
+    padding: 20px 20px 0px 20px;
   }
 
 </style>

@@ -29,7 +29,7 @@ limitations under the License.
       </template>
       <template slot="toolbarItemsRight">
         <v-flex d-flex fill-height align-center class="divider-left">
-          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create Cluster</v-btn>
+          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
         </v-flex>
       </template>
     </shoot-editor>

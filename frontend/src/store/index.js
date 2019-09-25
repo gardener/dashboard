@@ -153,7 +153,8 @@ const getters = {
               version: version.version,
               expirationDate: version.expirationDate,
               expirationDateString: getTimestampFormatted(version.expirationDate),
-              icon: iconForImageName(machineImage.name)
+              icon: iconForImageName(machineImage.name),
+              selectionId: `${machineImage.name}${version.version}`
             })
           }
         })

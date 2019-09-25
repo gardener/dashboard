@@ -32,17 +32,6 @@ limitations under the License.
        </template>
        <template slot="toolbarItemsRight">
         <v-btn flat @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
-         <!--
-         <v-tooltip top :color="hasConflict ? 'error' : ''">
-           <div slot="activator" class="px-3 py-2">
-           <v-icon :class="hasConflict ? 'error--text' : 'success--text'">
-             {{hasConflict ? 'mdi-alert-circle' : 'mdi-check-circle'}}
-           </v-icon>
-           </div>
-           <span v-if="hasConflict">Cluster resource has been modified<br>by another user or process</span>
-           <span v-else>Cluster resource can be saved<br>without any conflicts</span>
-         </v-tooltip>
-       -->
        </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
@@ -79,10 +68,10 @@ export default {
       detailedErrorMessage: undefined,
       isShootCreated: false,
       extraKeys: {
-        'Ctrl-S' (instance) {
+        'Ctrl-S': (instance) => {
           vm.save()
         },
-        'Cmd-S' (instance) {
+        'Cmd-S': (instance) => {
           vm.save()
         }
       }

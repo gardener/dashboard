@@ -2,6 +2,8 @@
   <v-select
     color="cyan darken-2"
     :items="machineImages"
+    item-text="selectionId"
+    item-value="selectionId"
     return-object
     :error-messages="getErrorMessages('worker.machineImage')"
     @input="onInputMachineImage"
@@ -36,6 +38,7 @@ import { getValidationErrors } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
+import find from 'lodash/find'
 
 const validationErrors = {
   worker: {
@@ -69,6 +72,7 @@ export default {
   },
   data () {
     return {
+      machineImageInternal: undefined,
       validationErrors,
       valid: undefined
     }
@@ -76,9 +80,10 @@ export default {
   computed: {
     machineImage: {
       get: function () {
-        return this.worker.machineImage
+        return this.machineImageInternal
       },
       set: function (machineImage) {
+        this.mmachineImageInternal = machineImage
         this.worker.machineImage = pick(machineImage, ['name', 'version'])
       }
     }
@@ -101,6 +106,7 @@ export default {
     }
   },
   mounted () {
+    this.machineImageInternal = find(this.machineImages, {name: this.worker.machineImage.name, version: this.worker.machineImage.version })
     this.$v.$touch()
     this.validateInput()
   },
