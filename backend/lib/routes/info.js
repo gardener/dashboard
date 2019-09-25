@@ -22,7 +22,9 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const kubernetes = require('../kubernetes')
 const { version } = require('../../package')
+
 const apiRegistration = kubernetes.apiRegistration()
+
 const router = module.exports = express.Router()
 
 router.route('/')

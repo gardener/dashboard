@@ -88,8 +88,6 @@ import download from 'downloadjs'
 
 // codemirror
 import CodeMirror from 'codemirror'
-import 'codemirror/addon/hint/show-hint.js'
-import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 
@@ -344,7 +342,7 @@ export default {
       this.snackbar = true
     }
   },
-  async mounted () {
+  mounted () {
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
@@ -374,7 +372,6 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-
   .no-margin
     margin: 0 !important
   .position-relative
@@ -388,50 +385,4 @@ export default {
      background: embedurl('../assets/tab.png')
      background-position: right
      background-repeat: no-repeat
-
-  .font-style-italic {
-    font-style: italic;
-  }
-
-  .font-wrap {
-    white-space: pre-wrap;
-  }
-
-</style>
-<style lang="styl">
-  @import '~vuetify/src/stylus/settings/_colors.styl';
-
-  .CodeMirror-hint {
-
-    .ghint-type  {
-      color: #000;
-
-      .property {
-        font-weight: bold;
-        font-size: 14px;
-      }
-      .type {
-        font-style: italic;
-        padding-left: 10px;
-        font-size: 13px;
-      }
-    }
-  }
-
-  .CodeMirror-hint .ghint-desc  {
-    white-space: pre-wrap;
-    max-width: 800px;
-    padding: 10px;
-
-    .description {
-      font-family: Roboto, sans-serif;
-      font-size: 13px;
-      color: $grey.darken-3;
-    }
-  }
-
-  .CodeMirror-hint-active {
-    background-color: $grey.lighten-4 !important;
-  }
-
 </style>
