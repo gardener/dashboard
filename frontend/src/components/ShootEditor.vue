@@ -475,8 +475,8 @@ export default {
       let cmTooltipFnTimerID
       const cmTooltipFn = (e) => {
         let pos = cm.coordsChar({
-          left : e.clientX,
-          top : e.clientY
+          left: e.clientX,
+          top: e.clientY
         })
         const lineTokens = cm.getLineTokens(pos.line)
         const lineString = join(map(lineTokens, 'string'), '')
@@ -499,7 +499,6 @@ export default {
               this.helpTooltip.property = completions[0].property
               this.helpTooltip.type = completions[0].type
               this.helpTooltip.description = completions[0].description
-              return
             }
           }
         }

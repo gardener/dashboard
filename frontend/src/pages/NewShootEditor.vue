@@ -29,8 +29,7 @@ limitations under the License.
       </template>
       <template slot="toolbarItemsRight">
         <v-flex d-flex fill-height align-center class="divider-left">
-          <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
+          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create Cluster</v-btn>
         </v-flex>
       </template>
     </shoot-editor>
@@ -109,14 +108,6 @@ export default {
         this.detailedErrorMessage = errorDetails.detailedMessage
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
       }
-    },
-    cancelClicked () {
-      this.$router.push({
-        name: 'ShootList',
-        params: {
-          namespace: this.namespace
-        }
-      })
     },
     async isShootContentDirty () {
       const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())

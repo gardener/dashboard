@@ -30,15 +30,9 @@ limitations under the License.
          By modifying the resource directly you may cause serious problems in your cluster.
          We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
        </template>
-       <template slot="toolbarItemsLeft">
-         <v-tooltip top>
-           <v-btn icon slot="activator" :disabled="clean" @click="save">
-             <v-icon small>mdi-content-save</v-icon>
-           </v-btn>
-           <span>Save</span>
-         </v-tooltip>
-       </template>
        <template slot="toolbarItemsRight">
+        <v-btn flat @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
+         <!--
          <v-tooltip top :color="hasConflict ? 'error' : ''">
            <div slot="activator" class="px-3 py-2">
            <v-icon :class="hasConflict ? 'error--text' : 'success--text'">
@@ -48,6 +42,7 @@ limitations under the License.
            <span v-if="hasConflict">Cluster resource has been modified<br>by another user or process</span>
            <span v-else>Cluster resource can be saved<br>without any conflicts</span>
          </v-tooltip>
+       -->
        </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
