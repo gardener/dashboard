@@ -204,7 +204,6 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     targetCluster.kubeconfigContextNamespace = namespace
     targetCluster.namespace = 'garden'
     targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-    targetCluster.roleName = 'garden.sapcloud.io:system:administrators'
     targetCluster.bindingKind = 'ClusterRoleBinding'
   } else {
     if (target === TARGET.shoot) {
