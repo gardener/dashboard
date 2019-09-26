@@ -293,7 +293,7 @@ const actions = {
     })
     set(shootResource, 'spec.addons', addons)
 
-    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: store.state.localTimezone })
+    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
     const maintenance = {
       timeWindow: {
         begin: utcBegin,
@@ -307,9 +307,11 @@ const actions = {
     set(shootResource, 'spec.maintenance', maintenance)
 
     let hibernationSchedule = get(rootState.cfg.defaultHibernationSchedule, purpose)
-    hibernationSchedule = map(hibernationSchedule, ({ ...schedule }) => {
-      schedule.location = rootState.localTimezone
-      return schedule
+    hibernationSchedule = map(hibernationSchedule, schedule => {
+      return {
+        ...schedule,
+        location: rootState.localTimezone
+      }
     })
     set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
 

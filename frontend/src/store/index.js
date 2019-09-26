@@ -177,10 +177,7 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
-      if (!defaultMachineImage) {
-        defaultMachineImage = head(machineImages)
-      }
+      const defaultMachineImage = head(machineImages)
       return pick(defaultMachineImage, 'name', 'version')
     }
   },

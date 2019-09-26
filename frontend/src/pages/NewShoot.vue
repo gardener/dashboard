@@ -15,8 +15,8 @@ limitations under the License.
  -->
 
 <template>
-  <v-flex fluid class="newshoot-container">
-    <v-flex class="newshoot-cards">
+  <div class="newshoot-container">
+    <v-container class="newshoot-cards">
       <v-card flat>
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Infrastructure
@@ -101,17 +101,17 @@ limitations under the License.
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
-    </v-flex>
+    </v-container>
     <v-divider></v-divider>
-    <v-flex class="toolbar">
+    <div class="toolbar">
       <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       <v-layout align-center justify-end>
         <v-divider vertical></v-divider>
         <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
       </v-layout>
-    </v-flex>
+    </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-flex>
+  </div>
 </template>
 
 <script>
@@ -400,7 +400,6 @@ export default {
   .newshoot-cards {
     max-height: calc(100% - 48px);
     overflow: scroll;
-    padding: 20px 20px 0px 20px;
   }
 
 </style>

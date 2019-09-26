@@ -10,7 +10,7 @@
     v-model="worker.machineType"
     label="Machine Type"
   >
-    <template v-slot:item="{item}">
+    <template v-slot:item="{ item }">
       <v-list-tile-content>
         <v-list-tile-title>{{item.name}}</v-list-tile-title>
         <v-list-tile-sub-title>

@@ -478,10 +478,9 @@ export default function createRouter ({ store, userManager }) {
               .then(() => {
                 if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
                   return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                    .then(() => undefined)
                 }
-                return undefined
               })
+              .then(() => undefined)
           case 'ShootList':
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)

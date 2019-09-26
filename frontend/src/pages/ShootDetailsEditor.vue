@@ -51,8 +51,6 @@ import pick from 'lodash/pick'
 // js-yaml
 import jsyaml from 'js-yaml'
 
-let vm
-
 export default {
   components: {
     ShootEditor,
@@ -60,6 +58,7 @@ export default {
   },
   name: 'shoot-details-editor',
   data () {
+    const vm = this
     return {
       modificationWarning: true,
       clean: true,
@@ -142,7 +141,6 @@ export default {
   mounted () {
     const modificationWarning = this.$localStorage.getItem('showShootEditorWarning')
     this.modificationWarning = modificationWarning === null || modificationWarning === 'true'
-    vm = this
   },
   async beforeRouteLeave (to, from, next) {
     if (this.clean) {

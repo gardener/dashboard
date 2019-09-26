@@ -9,7 +9,7 @@
     v-model="machineImage"
     label="Machine Image"
   >
-    <template v-slot:item="{item}">
+    <template v-slot:item="{ item }">
       <v-list-tile-action>
         <vendor-icon v-model="item.icon"></vendor-icon>
       </v-list-tile-action>
@@ -20,7 +20,7 @@
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
-    <template v-slot:selection="{item}">
+    <template v-slot:selection="{ item }">
       <vendor-icon v-model="item.icon"></vendor-icon>
       <span class="black--text ml-2">
        {{item.name}} [{{item.version}}]
@@ -70,18 +70,17 @@ export default {
   },
   data () {
     return {
-      machineImageInternal: undefined,
       validationErrors,
       valid: undefined
     }
   },
   computed: {
     machineImage: {
-      get: function () {
-        return this.machineImageInternal
+      get () {
+        const { name, version } = this.worker.machineImage
+        return find(this.machineImages, { name, version })
       },
-      set: function (machineImage) {
-        this.mmachineImageInternal = machineImage
+      set (machineImage) {
         this.worker.machineImage = pick(machineImage, ['name', 'version'])
       }
     }
@@ -104,7 +103,6 @@ export default {
     }
   },
   mounted () {
-    this.machineImageInternal = find(this.machineImages, { name: this.worker.machineImage.name, version: this.worker.machineImage.version })
     this.$v.$touch()
     this.validateInput()
   },
