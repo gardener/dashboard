@@ -60,7 +60,7 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-list-tile v-if="isAdmin">
+    <v-list-tile v-if="hasAlertmanager">
       <v-list-tile-action>
       </v-list-tile-action>
       <v-list-tile-content>
@@ -82,6 +82,7 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
+import { hasAlertmanager } from '@/utils'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -117,6 +118,9 @@ export default {
     },
     password () {
       return get(this.shootItem, 'info.monitoring_password', '')
+    },
+    hasAlertmanager () {
+      return hasAlertmanager(get(this.shootItem, 'metadata'))
     }
   }
 }
