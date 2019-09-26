@@ -102,9 +102,11 @@ limitations under the License.
        </v-card-text>
       </v-card>
     </v-flex>
+    <v-divider></v-divider>
     <v-flex class="toolbar">
       <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       <v-layout align-center justify-end>
+        <v-divider vertical></v-divider>
         <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
       </v-layout>
     </v-flex>
@@ -387,11 +389,12 @@ export default {
 
   .toolbar {
     height: 48px;
-    padding-right: 20px;
+    padding-right: 10px;
   }
 
   .newshoot-container {
     height: 100%;
+    overflow: hidden;
   }
 
   .newshoot-cards {

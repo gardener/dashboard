@@ -154,13 +154,12 @@ const getters = {
               version: version.version,
               expirationDate: version.expirationDate,
               expirationDateString: getTimestampFormatted(version.expirationDate),
-              icon: iconForImageName(machineImage.name),
-              selectionId: `${machineImage.name}${version.version}`
+              icon: iconForImageName(machineImage.name)
             })
           }
         })
         machineImageVersions.sort((a, b) => {
-          return semver.compare(a.version, b.version)
+          return semver.rcompare(a.version, b.version)
         })
         return machineImageVersions
       })

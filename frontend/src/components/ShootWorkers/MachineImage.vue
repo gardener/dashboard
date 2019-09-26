@@ -2,8 +2,6 @@
   <v-select
     color="cyan darken-2"
     :items="machineImages"
-    item-text="selectionId"
-    item-value="selectionId"
     return-object
     :error-messages="getErrorMessages('worker.machineImage')"
     @input="onInputMachineImage"
@@ -11,21 +9,21 @@
     v-model="machineImage"
     label="Machine Image"
   >
-    <template slot="item" slot-scope="data">
+    <template v-slot:item="{item}">
       <v-list-tile-action>
-        <vendor-icon v-model="data.item.icon"></vendor-icon>
+        <vendor-icon v-model="item.icon"></vendor-icon>
       </v-list-tile-action>
       <v-list-tile-content>
-        <v-list-tile-title>Name: {{data.item.name}} | Version: {{data.item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="data.item.expirationDate">
-          <span>Expiration Date: {{data.item.expirationDateString}}</span>
+        <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
+        <v-list-tile-sub-title v-if="item.expirationDate">
+          <span>Expiration Date: {{item.expirationDateString}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
-    <template slot="selection" slot-scope="data">
-      <vendor-icon v-model="data.item.icon"></vendor-icon>
+    <template v-slot:selection="{item}">
+      <vendor-icon v-model="item.icon"></vendor-icon>
       <span class="black--text ml-2">
-       {{data.item.name}} [{{data.item.version}}]
+       {{item.name}} [{{item.version}}]
       </span>
   </template>
   </v-select>

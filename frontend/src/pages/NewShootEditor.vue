@@ -28,7 +28,8 @@ limitations under the License.
         If the resource is invalid, you may lose data when switching back to the overview page.
       </template>
       <template slot="toolbarItemsRight">
-        <v-flex d-flex fill-height align-center class="divider-left">
+        <v-divider vertical></v-divider>
+        <v-flex d-flex fill-height align-center>
           <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
         </v-flex>
       </template>
