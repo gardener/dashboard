@@ -35,6 +35,7 @@ import set from 'lodash/set'
 import head from 'lodash/head'
 import sample from 'lodash/sample'
 import isEmpty from 'lodash/isEmpty'
+import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
@@ -73,7 +74,8 @@ const state = {
   searchValue: undefined,
   selection: undefined,
   shootListFilters: undefined,
-  newShootResource: undefined
+  newShootResource: undefined,
+  initialNewShootResource: undefined
 }
 
 // getters
@@ -96,6 +98,9 @@ const getters = {
   },
   newShootResource () {
     return state.newShootResource
+  },
+  initialNewShootResource () {
+    return state.initialNewShootResource
   }
 }
 
@@ -158,12 +163,12 @@ const actions = {
 
         if (info.seedShootIngressDomain) {
           const baseHost = info.seedShootIngressDomain
-          info.grafanaUrlUsers = `https://g-users.${baseHost}`
-          info.grafanaUrlOperators = `https://g-operators.${baseHost}`
+          info.grafanaUrlUsers = `https://gu.${baseHost}`
+          info.grafanaUrlOperators = `https://go.${baseHost}`
 
           info.prometheusUrl = `https://p.${baseHost}`
 
-          info.alertmanagerUrl = `https://a.${baseHost}`
+          info.alertmanagerUrl = `https://au.${baseHost}`
 
           info.kibanaUrl = `https://k.${baseHost}`
         }
@@ -219,8 +224,98 @@ const actions = {
 
     return state.newShootResource
   },
-  resetNewShootResource ({ commit, rootState }) {
-    commit('RESET_NEW_SHOOT_RESOURCE')
+  resetNewShootResource ({ commit, rootState, rootGetters }) {
+    const shootResource = {
+      apiVersion: 'garden.sapcloud.io/v1beta1',
+      kind: 'Shoot'
+    }
+
+    const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
+    set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+
+    const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
+    set(shootResource, 'spec.cloud.profile', cloudProfileName)
+
+    const secret = head(rootGetters.infrastructureSecretsByCloudProfileName(cloudProfileName))
+    const secretBindingRef = {
+      name: get(secret, 'metadata.bindingName')
+    }
+    set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
+
+    const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
+    set(shootResource, 'spec.cloud.region', region)
+
+    const zones = [sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
+    if (!isEmpty(zones)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+    }
+
+    const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
+    if (!isEmpty(loadBalancerProviderName)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
+    }
+    const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileName(cloudProfileName))
+    if (!isEmpty(floatingPoolName)) {
+      set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
+    }
+
+    const name = shortRandomString(10)
+    set(shootResource, 'metadata.name', name)
+
+    const purpose = head(purposesForSecret(secret))
+    set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+
+    const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
+    set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
+
+    const workerName = `worker-${shortRandomString(5)}`
+    const volumeType = get(head(rootGetters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
+    const volumeSize = volumeType ? '50Gi' : undefined
+    const machineType = get(head(rootGetters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
+    const machineImage = rootGetters.defaultMachineImageForCloudProfileName(cloudProfileName)
+    const workers = [
+      {
+        name: workerName,
+        machineType,
+        volumeType,
+        volumeSize,
+        autoScalerMin: 1,
+        autoScalerMax: 2,
+        maxSurge: 1,
+        machineImage
+      }
+    ]
+    set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
+
+    const addons = {}
+    forEach(filter(shootAddonList, addon => addon.visible), addon => {
+      set(addons, [addon.name, 'enabled'], addon.enabled)
+    })
+    set(shootResource, 'spec.addons', addons)
+
+    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
+    const maintenance = {
+      timeWindow: {
+        begin: utcBegin,
+        end: utcEnd
+      },
+      autoUpdate: {
+        kubernetesVersion: true,
+        machineImageVersion: true
+      }
+    }
+    set(shootResource, 'spec.maintenance', maintenance)
+
+    let hibernationSchedule = get(rootState.cfg.defaultHibernationSchedule, purpose)
+    hibernationSchedule = map(hibernationSchedule, schedule => {
+      return {
+        ...schedule,
+        location: rootState.localTimezone
+      }
+    })
+    set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
+
+    commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
 
     return state.newShootResource
   }
@@ -559,96 +654,9 @@ const mutations = {
   SET_NEW_SHOOT_RESOURCE (state, { data }) {
     state.newShootResource = data
   },
-  RESET_NEW_SHOOT_RESOURCE (state) {
-    const shootResource = {
-      apiVersion: 'garden.sapcloud.io/v1beta1',
-      kind: 'Shoot'
-    }
-
-    const infrastructureKind = head(store.getters.sortedCloudProviderKindList)
-    set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
-
-    const cloudProfileName = get(head(store.getters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
-    set(shootResource, 'spec.cloud.profile', cloudProfileName)
-
-    const secret = head(store.getters.infrastructureSecretsByCloudProfileName(cloudProfileName))
-    const secretBindingRef = {
-      name: get(secret, 'metadata.bindingName')
-    }
-    set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
-
-    const region = head(store.getters.regionsWithSeedByCloudProfileName(cloudProfileName))
-    set(shootResource, 'spec.cloud.region', region)
-
-    const zones = [sample(store.getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
-    if (!isEmpty(zones)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
-    }
-
-    const loadBalancerProviderName = head(store.getters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
-    if (!isEmpty(loadBalancerProviderName)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
-    }
-    const floatingPoolName = head(store.getters.floatingPoolNamesByCloudProfileName(cloudProfileName))
-    if (!isEmpty(floatingPoolName)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
-    }
-
-    const name = shortRandomString(10)
-    set(shootResource, 'metadata.name', name)
-
-    const purpose = head(purposesForSecret(secret))
-    set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
-
-    const kubernetesVersion = head(store.getters.sortedKubernetesVersions(cloudProfileName))
-    set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
-
-    const workerName = `worker-${shortRandomString(5)}`
-    const volumeType = get(head(store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
-    const volumeSize = volumeType ? '50Gi' : undefined
-    const machineType = get(head(store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
-    const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
-    const workers = [
-      {
-        name: workerName,
-        machineType,
-        volumeType,
-        volumeSize,
-        autoScalerMin: 1,
-        autoScalerMax: 2,
-        maxSurge: 1,
-        machineImage
-      }
-    ]
-    set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
-
-    const addons = {}
-    forEach(filter(shootAddonList, addon => addon.visible), addon => {
-      set(addons, [addon.name, 'enabled'], addon.enabled)
-    })
-    set(shootResource, 'spec.addons', addons)
-
-    const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: store.state.localTimezone })
-    const maintenance = {
-      timeWindow: {
-        begin: utcBegin,
-        end: utcEnd
-      },
-      autoUpdate: {
-        kubernetesVersion: true,
-        machineImageVersion: true
-      }
-    }
-    set(shootResource, 'spec.maintenance', maintenance)
-
-    let hibernationSchedule = get(store.state.cfg.defaultHibernationSchedule, purpose)
-    hibernationSchedule = map(hibernationSchedule, schedule => {
-      schedule.location = store.state.localTimezone
-      return schedule
-    })
-    set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
-
+  RESET_NEW_SHOOT_RESOURCE (state, shootResource) {
     state.newShootResource = shootResource
+    state.initialNewShootResource = cloneDeep(shootResource)
   }
 }
 

@@ -110,13 +110,14 @@ export default {
 </script>
 
 <style lang="styl" scoped>
+  @import '~vuetify/src/stylus/settings/_colors.styl';
 
   .code-block {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: #f5f5f5; /* grey--lighten--3 */
-    color: #f5f5f5; /* grey--lighten--3 */
+    background-color: $grey.lighten-3;
+    color: $grey.lighten-3;
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;
@@ -137,7 +138,7 @@ export default {
       right: 30px;
       transition: $swift-ease-out;
       color: rgba(#000, .26);
-      font-family: $font-roboto;
+      font-family: Roboto, sans-serif;
       font-size: 11px;
       line-height: 1em;
     }

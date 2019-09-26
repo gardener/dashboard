@@ -361,6 +361,13 @@ export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
+export function hasAlertmanager (metadata) {
+  if (get(metadata, ['annotations', 'garden.sapcloud.io/operatedBy'])) {
+    return true
+  }
+  return false
+}
+
 export function getProjectName (metadata) {
   const namespace = get(metadata, ['namespace'])
   const projectList = store.getters.projectList
