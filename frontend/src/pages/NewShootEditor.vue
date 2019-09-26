@@ -111,7 +111,7 @@ export default {
     },
     async isShootContentDirty () {
       const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-      return !isEqual(JSON.stringify(this.initialNewShootResource), JSON.stringify(data))
+      return !isEqual(this.initialNewShootResource, data)
     }
   },
   mounted () {

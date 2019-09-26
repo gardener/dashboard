@@ -462,7 +462,14 @@ export default function createRouter ({ store, userManager }) {
             return undefined
           case 'Secrets':
           case 'Secret':
+            return Promise
+              .all([
+                store.dispatch('fetchInfrastructureSecrets'),
+                store.dispatch('subscribeShoots')
+              ])
+              .then(() => undefined)
           case 'NewShoot':
+          case 'NewShootEditor':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets'),
@@ -475,12 +482,6 @@ export default function createRouter ({ store, userManager }) {
                 }
                 return undefined
               })
-          case 'NewShootEditor':
-            if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
-              return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                .then(() => undefined)
-            }
-            return undefined
           case 'ShootList':
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)

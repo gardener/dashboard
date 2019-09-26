@@ -36,6 +36,7 @@ import isEmpty from 'lodash/isEmpty'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
+import pick from 'lodash/pick'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment-timezone'
@@ -181,7 +182,7 @@ const getters = {
       if (!defaultMachineImage) {
         defaultMachineImage = head(machineImages)
       }
-      return defaultMachineImage
+      return pick(defaultMachineImage, 'name', 'version')
     }
   },
   shootList (state, getters) {
