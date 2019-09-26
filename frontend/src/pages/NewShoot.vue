@@ -15,98 +15,103 @@ limitations under the License.
  -->
 
 <template>
-  <v-container fluid>
-    <v-card flat>
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Infrastructure
-      </v-card-title>
-      <v-card-text>
-        <new-shoot-select-infrastructure
-          ref="infrastructure"
+  <div class="newshoot-container">
+    <v-container fluid class="newshoot-cards">
+      <v-card flat>
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Infrastructure
+        </v-card-title>
+        <v-card-text>
+          <new-shoot-select-infrastructure
+            ref="infrastructure"
+            :userInterActionBus="userInterActionBus"
+            @valid="onInfrastructureValid"
+            ></new-shoot-select-infrastructure>
+        </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Cluster Details
+        </v-card-title>
+        <v-card-text>
+          <new-shoot-details
+            ref="clusterDetails"
+            :userInterActionBus="userInterActionBus"
+            @valid="onDetailsValid"
+            ></new-shoot-details>
+        </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Infrastructure Details
+        </v-card-title>
+        <v-card-text>
+          <new-shoot-infrastructure-details
+            ref="infrastructureDetails"
+            :userInterActionBus="userInterActionBus"
+            @valid="onInfrastructureDetailsValid"
+            ></new-shoot-infrastructure-details>
+        </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Worker
+        </v-card-title>
+        <v-card-text>
+          <manage-workers
+          ref="manageWorkers"
           :userInterActionBus="userInterActionBus"
-          @valid="onInfrastructureValid"
-          ></new-shoot-select-infrastructure>
-      </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Cluster Details
-      </v-card-title>
-      <v-card-text>
-        <new-shoot-details
-          ref="clusterDetails"
-          :userInterActionBus="userInterActionBus"
-          @valid="onDetailsValid"
-          ></new-shoot-details>
-      </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Infrastructure Details
-      </v-card-title>
-      <v-card-text>
-        <new-shoot-infrastructure-details
-          ref="infrastructureDetails"
-          :userInterActionBus="userInterActionBus"
-          @valid="onInfrastructureDetailsValid"
-          ></new-shoot-infrastructure-details>
-      </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Worker
-      </v-card-title>
-      <v-card-text>
-        <manage-workers
-        ref="manageWorkers"
-        :userInterActionBus="userInterActionBus"
-        @valid="onWorkersValid"
-       ></manage-workers>
-     </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Add-Ons
-      </v-card-title>
-      <v-card-text>
-        <manage-shoot-addons
-          ref="addons"
-         ></manage-shoot-addons>
-     </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Maintenance
-      </v-card-title>
-      <v-card-text>
-        <maintenance-time
-          ref="maintenanceTime"
-          @valid="onMaintenanceTimeValid"
-        ></maintenance-time>
-        <maintenance-components
-          ref="maintenanceComponents"
-        ></maintenance-components>
-     </v-card-text>
-    </v-card>
-    <v-card flat class="mt-3">
-      <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-        Hibernation
-      </v-card-title>
-      <v-card-text>
-        <manage-hibernation-schedule
-          ref="hibernationSchedule"
-          :userInterActionBus="userInterActionBus"
-          @valid="onHibernationScheduleValid"
-        ></manage-hibernation-schedule>
-     </v-card-text>
-    </v-card>
-    <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
-    <v-layout justify-end>
-      <v-btn flat @click.native.stop="cancelClicked()">Cancel</v-btn>
-      <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
-    </v-layout>
+          @valid="onWorkersValid"
+         ></manage-workers>
+       </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Add-Ons
+        </v-card-title>
+        <v-card-text>
+          <manage-shoot-addons
+            ref="addons"
+           ></manage-shoot-addons>
+       </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Maintenance
+        </v-card-title>
+        <v-card-text>
+          <maintenance-time
+            ref="maintenanceTime"
+            @valid="onMaintenanceTimeValid"
+          ></maintenance-time>
+          <maintenance-components
+            ref="maintenanceComponents"
+          ></maintenance-components>
+       </v-card-text>
+      </v-card>
+      <v-card flat class="mt-3">
+        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+          Hibernation
+        </v-card-title>
+        <v-card-text>
+          <manage-hibernation-schedule
+            ref="hibernationSchedule"
+            :userInterActionBus="userInterActionBus"
+            @valid="onHibernationScheduleValid"
+          ></manage-hibernation-schedule>
+       </v-card-text>
+      </v-card>
+    </v-container>
+    <v-divider></v-divider>
+    <div class="toolbar">
+      <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+      <v-layout align-center justify-end>
+        <v-divider vertical></v-divider>
+        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
+      </v-layout>
+    </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -168,6 +173,7 @@ export default {
     ]),
     ...mapGetters([
       'newShootResource',
+      'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName'
     ]),
     valid () {
@@ -179,7 +185,7 @@ export default {
         this.hibernationScheduleValid
     },
     isShootContentDirty () {
-      return !isEqual(this.newShootResource, this.shootResourceFromUIComponents())
+      return !isEqual(this.initialNewShootResource, this.shootResourceFromUIComponents())
     }
   },
   methods: {
@@ -346,14 +352,6 @@ export default {
         messageHtml: 'Your cluster has validation errors.<br/>If you navigate to the yaml editor, you may lose data.'
       })
     },
-    cancelClicked () {
-      this.$router.push({
-        name: 'ShootList',
-        params: {
-          namespace: this.namespace
-        }
-      })
-    },
     infrastructureSecretsByBindingName ({ secretBindingName, cloudProfileName }) {
       const secrets = this.infrastructureSecretsByCloudProfileName(cloudProfileName)
       return find(secrets, ['metadata.bindingName', secretBindingName])
@@ -387,6 +385,21 @@ export default {
 
   .cardTitle {
     line-height: 10px;
+  }
+
+  .toolbar {
+    height: 48px;
+    padding-right: 10px;
+  }
+
+  .newshoot-container {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .newshoot-cards {
+    max-height: calc(100% - 48px);
+    overflow: scroll;
   }
 
 </style>

@@ -31,7 +31,7 @@ const Default = () => import('@/layouts/Default')
 const Home = () => import('@/pages/Home')
 const NewShoot = () => import('@/pages/NewShoot')
 const ShootList = () => import('@/pages/ShootList')
-const ShootItemCards = () => import('@/pages/ShootItemCards')
+const ShootDetails = () => import('@/pages/ShootDetails')
 const ShootDetailsEditor = () => import('@/pages/ShootDetailsEditor')
 const NewShootEditor = () => import('@/pages/NewShootEditor')
 const Secrets = () => import('@/pages/Secrets')
@@ -204,7 +204,7 @@ export default function createRouter ({ store, userManager }) {
               component: NewShoot,
               meta: {
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Create Cluster',
                 toRouteName: 'NewShoot',
                 breadcrumbTextFn: routeTitle,
@@ -217,7 +217,7 @@ export default function createRouter ({ store, userManager }) {
               component: NewShootEditor,
               meta: {
                 namespaced: true,
-                projectScope: false,
+                projectScope: true,
                 title: 'Create Cluster Editor',
                 breadcrumbTextFn: routeTitle,
                 tabs: newShootTabs
@@ -226,7 +226,7 @@ export default function createRouter ({ store, userManager }) {
             {
               path: ':name',
               name: 'ShootItem',
-              component: ShootItemCards,
+              component: ShootDetails,
               meta: {
                 namespaced: true,
                 projectScope: true,
@@ -250,7 +250,7 @@ export default function createRouter ({ store, userManager }) {
             {
               path: ':name/hibernation',
               name: 'ShootItemHibernationSettings',
-              component: ShootItemCards,
+              component: ShootDetails,
               meta: {
                 namespaced: true,
                 projectScope: true,
@@ -462,7 +462,14 @@ export default function createRouter ({ store, userManager }) {
             return undefined
           case 'Secrets':
           case 'Secret':
+            return Promise
+              .all([
+                store.dispatch('fetchInfrastructureSecrets'),
+                store.dispatch('subscribeShoots')
+              ])
+              .then(() => undefined)
           case 'NewShoot':
+          case 'NewShootEditor':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets'),
@@ -471,16 +478,9 @@ export default function createRouter ({ store, userManager }) {
               .then(() => {
                 if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
                   return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                    .then(() => undefined)
                 }
-                return undefined
               })
-          case 'NewShootEditor':
-            if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
-              return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                .then(() => undefined)
-            }
-            return undefined
+              .then(() => undefined)
           case 'ShootList':
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)

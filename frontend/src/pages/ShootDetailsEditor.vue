@@ -16,12 +16,13 @@ limitations under the License.
 
  <template>
    <v-layout fill-height>
-     <shoot-item-editor
+     <shoot-editor
        :modificationWarning="modificationWarning"
        @dismissModificationWarning="onDismissModificationWarning"
        :errorMessage.sync="errorMessage"
        :detailedErrorMessage.sync="detailedErrorMessage"
        :shootContent="shootContent"
+       :extraKeys="extraKeys"
        @clean="onClean"
        @conflictPath="onConflictPath"
        ref="shootEditor">
@@ -29,33 +30,17 @@ limitations under the License.
          By modifying the resource directly you may cause serious problems in your cluster.
          We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
        </template>
-       <template slot="toolbarItemsLeft">
-         <v-tooltip top>
-           <v-btn icon slot="activator" :disabled="clean" @click="save">
-             <v-icon small>mdi-content-save</v-icon>
-           </v-btn>
-           <span>Save</span>
-         </v-tooltip>
-       </template>
        <template slot="toolbarItemsRight">
-         <v-tooltip top :color="hasConflict ? 'error' : ''">
-           <div slot="activator" class="px-3 py-2">
-           <v-icon :class="hasConflict ? 'error--text' : 'success--text'">
-             {{hasConflict ? 'mdi-alert-circle' : 'mdi-check-circle'}}
-           </v-icon>
-           </div>
-           <span v-if="hasConflict">Cluster resource has been modified<br>by another user or process</span>
-           <span v-else>Cluster resource can be saved<br>without any conflicts</span>
-         </v-tooltip>
+        <v-btn flat @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
        </template>
-    </shoot-item-editor>
+    </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
 </template>
 
 <script>
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import ShootItemEditor from '@/components/ShootItemEditor'
+import ShootEditor from '@/components/ShootEditor'
 import { mapGetters, mapState } from 'vuex'
 import { replaceShoot } from '@/utils/api'
 
@@ -68,18 +53,27 @@ import jsyaml from 'js-yaml'
 
 export default {
   components: {
-    ShootItemEditor,
+    ShootEditor,
     ConfirmDialog
   },
   name: 'shoot-details-editor',
   data () {
+    const vm = this
     return {
       modificationWarning: true,
       clean: true,
       hasConflict: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      isShootCreated: false
+      isShootCreated: false,
+      extraKeys: {
+        'Ctrl-S': (instance) => {
+          vm.save()
+        },
+        'Cmd-S': (instance) => {
+          vm.save()
+        }
+      }
     }
   },
   computed: {
@@ -110,7 +104,7 @@ export default {
           return
         }
         if (this.clean) {
-          return this.clearHistory()
+          return this.$refs.shootEditor.clearHistory()
         }
         if (this.hasConflict && !(await this.confirmOverwrite())) {
           return
