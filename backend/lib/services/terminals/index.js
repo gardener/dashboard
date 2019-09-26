@@ -117,8 +117,7 @@ function getConfigFromBody (body) {
   return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
 }
 
-async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster, body }) {
-
+async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster }) {
   let selectors = [
     `dashboard.gardener.cloud/hostCluster=${fnv.hash(JSON.stringify(hostCluster), 64).str()}`,
     `dashboard.gardener.cloud/targetCluster=${fnv.hash(JSON.stringify(targetCluster), 64).str()}`,
@@ -137,8 +136,8 @@ async function findExistingTerminalResource ({ dashboardClient, username, namesp
   return _.head(existingTerminals)
 }
 
-async function findExistingTerminal ({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster, body }) {
-  let existingTerminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster, body })
+async function findExistingTerminal ({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
+  let existingTerminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
 
   if (!existingTerminal) {
     return undefined
@@ -401,7 +400,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   }
   const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
-  const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster, body })
+  const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
     _.assign(terminalInfo, existingTerminal)
     return terminalInfo
