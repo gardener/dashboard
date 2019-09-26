@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <div class="newshoot-container">
-    <v-container class="newshoot-cards">
+    <v-container fluid class="newshoot-cards">
       <v-card flat>
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Infrastructure
