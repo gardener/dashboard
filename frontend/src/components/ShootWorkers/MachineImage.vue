@@ -104,7 +104,7 @@ export default {
     }
   },
   mounted () {
-    this.machineImageInternal = find(this.machineImages, {name: this.worker.machineImage.name, version: this.worker.machineImage.version })
+    this.machineImageInternal = find(this.machineImages, { name: this.worker.machineImage.name, version: this.worker.machineImage.version })
     this.$v.$touch()
     this.validateInput()
   },
