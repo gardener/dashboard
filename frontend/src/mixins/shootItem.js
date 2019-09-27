@@ -22,10 +22,10 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
-      const confirmation = get(this.shootAnnotations['confirmation.garden.sapcloud.io/deletion'], false)
+      const confirmation = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
       const deletionTimestamp = this.shootDeletionTimestamp
 
-      return !!deletionTimestamp && !!confirmation
+      return !!deletionTimestamp && confirmation === 'true'
     },
     shootCreatedBy () {
       return getCreatedBy(this.shootMetadata)

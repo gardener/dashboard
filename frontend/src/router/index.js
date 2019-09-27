@@ -163,7 +163,7 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
-          path: 'namespace/create/ui',
+          path: 'namespace/+',
           name: 'CreateProject',
           component: Home,
           meta: {
@@ -462,7 +462,14 @@ export default function createRouter ({ store, userManager }) {
             return undefined
           case 'Secrets':
           case 'Secret':
+            return Promise
+              .all([
+                store.dispatch('fetchInfrastructureSecrets'),
+                store.dispatch('subscribeShoots')
+              ])
+              .then(() => undefined)
           case 'NewShoot':
+          case 'NewShootEditor':
             return Promise
               .all([
                 store.dispatch('fetchInfrastructureSecrets'),
@@ -471,16 +478,9 @@ export default function createRouter ({ store, userManager }) {
               .then(() => {
                 if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
                   return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                    .then(() => undefined)
                 }
-                return undefined
               })
-          case 'NewShootEditor':
-            if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
-              return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                .then(() => undefined)
-            }
-            return undefined
+              .then(() => undefined)
           case 'ShootList':
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)

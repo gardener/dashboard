@@ -28,8 +28,9 @@ limitations under the License.
         If the resource is invalid, you may lose data when switching back to the overview page.
       </template>
       <template slot="toolbarItemsRight">
-        <v-flex d-flex fill-height align-center class="divider-left">
-          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create Cluster</v-btn>
+        <v-divider vertical></v-divider>
+        <v-flex d-flex fill-height align-center>
+          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
         </v-flex>
       </template>
     </shoot-editor>
@@ -111,7 +112,7 @@ export default {
     },
     async isShootContentDirty () {
       const data = await jsyaml.safeLoad(this.$refs.shootEditor.getContent())
-      return !isEqual(JSON.stringify(this.initialNewShootResource), JSON.stringify(data))
+      return !isEqual(this.initialNewShootResource, data)
     }
   },
   mounted () {

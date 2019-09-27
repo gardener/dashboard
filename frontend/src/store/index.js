@@ -36,6 +36,7 @@ import isEmpty from 'lodash/isEmpty'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
+import pick from 'lodash/pick'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment-timezone'
@@ -158,7 +159,7 @@ const getters = {
           }
         })
         machineImageVersions.sort((a, b) => {
-          return semver.compare(a.version, b.version)
+          return semver.rcompare(a.version, b.version)
         })
         return machineImageVersions
       })
@@ -176,11 +177,8 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      let defaultMachineImage = find(machineImages, machineImage => lowerCase(machineImage.name).includes('coreos') === true)
-      if (!defaultMachineImage) {
-        defaultMachineImage = head(machineImages)
-      }
-      return defaultMachineImage
+      const defaultMachineImage = head(machineImages)
+      return pick(defaultMachineImage, 'name', 'version')
     }
   },
   shootList (state, getters) {

@@ -85,6 +85,7 @@ limitations under the License.
           ></v-text-field>
         </v-flex>
       </v-layout>
+      <p class="subheading mt-3">Do not use personalized login credentials. Instead, use credentials of a technical user.</p>
     </template>
 
   </secret-dialog>

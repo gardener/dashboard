@@ -25,10 +25,11 @@ limitations under the License.
     <v-flex v-if="errorMessageInternal" class="shrink">
       <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
     </v-flex>
+    <v-divider></v-divider>
     <v-flex :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
         <slot name="toolbarItemsLeft"></slot>
-        <v-flex d-flex class="divider-right">
+        <v-flex d-flex>
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="untouched" @click="reload">
               <v-icon small>mdi-reload</v-icon>
@@ -36,7 +37,8 @@ limitations under the License.
             <span>Discard and Reload</span>
           </v-tooltip>
         </v-flex>
-        <v-flex d-flex class="divider-right">
+        <v-divider vertical></v-divider>
+        <v-flex d-flex>
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="!historySize.undo" @click="undo">
               <v-icon small>mdi-undo</v-icon>
@@ -50,6 +52,7 @@ limitations under the License.
             <span>Redo</span>
           </v-tooltip>
         </v-flex>
+        <v-divider vertical></v-divider>
         <v-flex d-flex>
           <v-tooltip top>
             <v-btn icon slot="activator" @click="downloadContent">
@@ -58,7 +61,7 @@ limitations under the License.
             <span>Download</span>
           </v-tooltip>
         </v-flex >
-        <v-flex d-flex class="divider-right">
+        <v-flex d-flex>
           <copy-btn
             :clipboard-text="getContent()"
             @click.native.stop="focus"
@@ -69,6 +72,7 @@ limitations under the License.
           >
           </copy-btn>
         </v-flex>
+        <v-divider vertical></v-divider>
         <v-flex d-flex xs12></v-flex>
         <slot name="toolbarItemsRight"></slot>
       </v-layout>
@@ -598,21 +602,14 @@ export default {
 </script>
 
 <style lang="styl" scoped>
-
   .no-margin
     margin: 0 !important
   .position-relative
     position: relative !important
-  .divider-
-    &right
-      border-right: 1px solid #efefef
-    &left
-      border-left: 1px solid #efefef
   >>> .cm-tab
      background: embedurl('../assets/tab.png')
      background-position: right
      background-repeat: no-repeat
-
   .font-style-italic {
     font-style: italic;
   }
