@@ -57,11 +57,3 @@ exports.canCreateProject = function (user) {
     resource: 'projects'
   })
 }
-
-exports.canManageTerminal = function (user) {
-  return hasAuthorization(user, {
-    verb: '*',
-    group: 'dashboard.gardener.cloud',
-    resource: 'terminals'
-  })
-}

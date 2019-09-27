@@ -64,8 +64,8 @@ export default function createRouter ({ store, userManager }) {
     return store.getters.hasShootTerminalAccess
   }
 
-  function hasTerminalAccess () {
-    return store.getters.hasTerminalAccess
+  function isTerminalEnabled () {
+    return store.getters.isTerminalEnabled
   }
 
   const mode = 'history'
@@ -323,7 +323,7 @@ export default function createRouter ({ store, userManager }) {
                     tabsFn: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
-                    if (hasTerminalAccess()) {
+                    if (isTerminalEnabled()) {
                       next()
                     } else {
                       next('/')
@@ -496,9 +496,9 @@ export default function createRouter ({ store, userManager }) {
         const user = userManager.getUser()
         const storedUser = store.state.user
         if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin, canCreateProject, canManageTerminal } } = await getPrivileges()
+          const { data: { isAdmin, canCreateProject } } = await getPrivileges()
 
-          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject, canManageTerminal })
+          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject })
         }
         return next()
       }
