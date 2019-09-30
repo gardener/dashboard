@@ -77,7 +77,7 @@ export default {
   computed: {
     machineImage: {
       get () {
-        const { name, version } = this.worker.machineImage
+        const { name, version } = this.worker.machineImage || {}
         return find(this.machineImages, { name, version })
       },
       set (machineImage) {
