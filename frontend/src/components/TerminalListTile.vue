@@ -60,9 +60,14 @@ export default {
   },
   computed: {
     to () {
-      const route = namespacedRoute(this.$route, 'ShootItemTerminal', this.shootNamespace, this.shootName)
-      route.params.target = this.target
-      return route
+      return {
+        name: 'ShootItemTerminal',
+        params: {
+          namespace: this.shootNamespace,
+          name: this.shootName,
+          target: this.target
+        }
+      }
     }
   }
 }
