@@ -127,7 +127,10 @@ import * as webLinks from 'xterm/lib/addons/webLinks/webLinks'
 
 import { mapState } from 'vuex'
 import { Terminal } from 'xterm'
-import { encodeURIComponents } from '@/utils'
+import {
+  encodeURIComponents,
+  encodeBase64Url
+} from '@/utils'
 import {
   createTerminal,
   deleteTerminal,
@@ -150,18 +153,6 @@ const ConnectionState = {
   PREPARING: 1,
   CONNECTING: 2,
   CONNECTED: 3
-}
-
-function encodeBase64 (input) {
-  return Buffer.from(input, 'utf8').toString('base64')
-}
-
-function encodeBase64Url (input) {
-  let output = encodeBase64(input)
-  output = output.replace(/=/g, '')
-  output = output.replace(/\+/g, '-')
-  output = output.replace(/\//g, '_')
-  return output
 }
 
 function remoteCommandAttachOrExecuteProtocols ({ token }) {

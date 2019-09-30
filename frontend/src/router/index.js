@@ -188,8 +188,7 @@ export default function createRouter ({ store, userManager }) {
    * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
    * @prop {string}  [title]                    - Main menu title
    * @prop {string}  [icon]                     - Main menu icon
-   * @prop {RouteFn} [breadcrumbTextFn]         - Function that returns the breadcrumb title
-   * @prop {RouteFn} [additionalRouteParamsFn]  - Function that returns an object with additional route params that is used for the navigation
+   * @prop {RouteFn} [breadcrumbText]           - Property or function that returns the breadcrumb title
    * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
    */
 
@@ -214,7 +213,7 @@ export default function createRouter ({ store, userManager }) {
             title: 'Home',
             namespaced: false,
             projectScope: false,
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           }
         },
         {
@@ -223,7 +222,7 @@ export default function createRouter ({ store, userManager }) {
           component: Account,
           meta: {
             title: 'Account',
-            breadcrumbTextFn: routeTitle,
+            breadcrumbText: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -234,7 +233,7 @@ export default function createRouter ({ store, userManager }) {
           component: Home,
           meta: {
             title: 'Create Project',
-            breadcrumbTextFn: routeTitle,
+            breadcrumbText: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -252,7 +251,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           },
           children: [
             {
@@ -274,7 +273,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Create Cluster',
                 toRouteName: 'NewShoot',
-                breadcrumbTextFn: routeTitle,
+                breadcrumbText: routeTitle,
                 tabs: newShootTabs
               }
             },
@@ -286,7 +285,7 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Create Cluster Editor',
-                breadcrumbTextFn: routeTitle,
+                breadcrumbText: routeTitle,
                 tabs: newShootTabs
               }
             },
@@ -298,7 +297,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootItem',
-                breadcrumbTextFn: routeParamName
+                breadcrumbText: routeParamName
               },
               children: [
                 {
@@ -319,8 +318,8 @@ export default function createRouter ({ store, userManager }) {
                   meta: {
                     namespaced: true,
                     projectScope: true,
-                    breadcrumbTextFn: terminalBreadcrumbTitle,
-                    tabsFn: shootItemTerminalTabs
+                    breadcrumbText: terminalBreadcrumbTitle,
+                    tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
                     if (isTerminalEnabled()) {
@@ -339,7 +338,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                breadcrumbTextFn: routeParamName,
+                breadcrumbText: routeParamName,
                 tabs: shootItemTabs
               }
             },
@@ -350,7 +349,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                breadcrumbTextFn: routeParamName,
+                breadcrumbText: routeParamName,
                 tabs: shootItemTabs
               }
             }
@@ -369,7 +368,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: true,
             title: 'Secrets',
             toRouteName: 'Secrets',
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           },
           children: [
             {
@@ -407,7 +406,7 @@ export default function createRouter ({ store, userManager }) {
               icon: 'mdi-account-multiple-outline',
               visible: () => true
             },
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           }
         },
         {
@@ -423,18 +422,17 @@ export default function createRouter ({ store, userManager }) {
               icon: 'mdi-settings',
               visible: () => true
             },
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           }
         },
         {
-          path: 'namespace/:namespace/term/:target',
+          path: 'namespace/:namespace/term/garden',
           name: 'GardenTerminal',
           component: ShootItemTerminal,
           meta: {
             namespaced: true,
             projectScope: true,
-            breadcrumbTextFn: terminalBreadcrumbTitle,
-            additionalRouteParamsFn: () => { return { target: 'garden' } },
+            breadcrumbText: terminalBreadcrumbTitle,
             menu: {
               title: 'Garden Cluster',
               icon: 'mdi-console',
@@ -443,6 +441,7 @@ export default function createRouter ({ store, userManager }) {
           },
           beforeEnter: (to, from, next) => {
             if (hasGardenTerminalAccess()) {
+              to.params.target = 'garden'
               next()
             } else {
               next('/')

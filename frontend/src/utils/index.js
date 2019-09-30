@@ -22,7 +22,6 @@ import md5 from 'md5'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
-import assign from 'lodash/assign'
 import head from 'lodash/head'
 import keys from 'lodash/keys'
 import mapValues from 'lodash/mapValues'
@@ -223,46 +222,12 @@ export function routes (router, includeRoutesWithProjectScope) {
   return filter(defaultRoute.children, hasMenu)
 }
 
-function findRouteWithName (routes, routeName) {
-  if (!routes) {
-    return
-  }
-
-  let foundRoute
-  forEach(routes, route => {
-    if (route.name === routeName) {
-      foundRoute = route
-      return false // exit early
-    }
-    foundRoute = findRouteWithName(route.children, routeName)
-    if (foundRoute) {
-      return false // exit early
-    }
-  })
-
-  if (!foundRoute) {
-    console.error(`could not find route with name ${name}`)
-  }
-
-  return foundRoute
-}
-
-export function namespacedRouteWithName (routes, routeName, namespace, name) {
-  const route = findRouteWithName(routes, routeName)
-  return namespacedRoute(route, namespace, name)
-}
-
 export function namespacedRoute (route, namespace, name = undefined) {
   const params = {
     namespace: namespace
   }
   if (name) {
     params.name = name
-  }
-
-  const additionalRouteParamsFn = get(route, 'meta.additionalRouteParamsFn')
-  if (additionalRouteParamsFn) {
-    assign(params, additionalRouteParamsFn(route))
   }
 
   return { name: routeName(route), params }
@@ -462,6 +427,18 @@ export function infrastructureColor (kind) {
     case 'aws':
       return '#ff9900'
   }
+}
+
+export function encodeBase64 (input) {
+  return Buffer.from(input, 'utf8').toString('base64')
+}
+
+export function encodeBase64Url (input) {
+  let output = encodeBase64(input)
+  output = output.replace(/=/g, '')
+  output = output.replace(/\+/g, '-')
+  output = output.replace(/\//g, '_')
+  return output
 }
 
 export function encodeURIComponents (obj) {

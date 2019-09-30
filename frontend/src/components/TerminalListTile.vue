@@ -35,7 +35,7 @@ limitations under the License.
 </template>
 
 <script>
-import { namespacedRouteWithName } from '@/utils'
+import { namespacedRoute } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
@@ -60,9 +60,9 @@ export default {
   },
   computed: {
     to () {
-      const namespacedRoute = namespacedRouteWithName(this.$router.options.routes, 'ShootItemTerminal', this.shootNamespace, this.shootName)
-      namespacedRoute.params.target = this.target
-      return namespacedRoute
+      const route = namespacedRoute(this.$route, 'ShootItemTerminal', this.shootNamespace, this.shootName)
+      route.params.target = this.target
+      return route
     }
   }
 }

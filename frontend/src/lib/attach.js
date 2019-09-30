@@ -1,8 +1,39 @@
+//
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+import get from 'lodash/get'
+
 export const ReadyStateEnum = {
   CONNECTING: 0,
   OPEN: 1,
   CLOSING: 2,
   CLOSED: 3
+}
+
+const ChannelEnum = {
+  STD_IN: 0,
+  STD_OUT: 1,
+  STD_ERR: 2,
+  ERR: 3,
+  RESIZE: 4
+}
+
+const BufferEnum = {
+  CHANNEL_INDEX: 0,
+  DATA_INDEX: 1
 }
 
 export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, buffered) {
@@ -32,15 +63,23 @@ export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, b
     if (typeof ev.data === 'object' && ev.data instanceof ArrayBuffer) {
       const buffer = Buffer.from(ev.data)
       if (buffer.length > 1) {
-        const channel = buffer[0]
-        const data = decoder.decode(buffer.slice(1))
+        const channel = buffer[BufferEnum.CHANNEL_INDEX]
+        const data = decoder.decode(buffer.slice(BufferEnum.DATA_INDEX))
         switch (channel) {
-          case 1:
-          case 2:
+          case ChannelEnum.STD_OUT:
+          case ChannelEnum.STD_ERR:
             displayData(data)
             break
-          case 3:
-            window['console']['error'](JSON.parse(data))
+          case ChannelEnum.ERR:
+            try {
+              const errorData = JSON.parse(data)
+              if (get(errorData, 'status') === 'Success') {
+                return // just ignore success message
+              }
+              console.error('On error channel:', errorData)
+            } catch (err) {
+              console.error('On error channel:', data)
+            }
             break
           default:
             throw Error('Unsupported message!')
@@ -60,22 +99,22 @@ export function attach (term, socket, pingIntervalSeconds = 30, bidirectional, b
   }
 
   function sendData (channel, data) {
-    if (socket.readyState !== 1) {
+    if (socket.readyState !== ReadyStateEnum.OPEN) {
       return
     }
     const length = Buffer.byteLength(data)
     const buffer = Buffer.alloc(length + 1)
-    buffer.writeUInt8(channel, 0)
-    buffer.write(data, 1, 'binary')
+    buffer.writeUInt8(channel, BufferEnum.CHANNEL_INDEX)
+    buffer.write(data, BufferEnum.DATA_INDEX, 'binary')
     socket.send(buffer)
   }
 
   term.__sendResize = ({ cols: Width, rows: Height }) => {
-    sendData(4, JSON.stringify({ Width, Height }))
+    sendData(ChannelEnum.RESIZE, JSON.stringify({ Width, Height }))
   }
 
   term.__sendData = data => {
-    sendData(0, data)
+    sendData(ChannelEnum.STD_IN, data)
   }
 
   term.__resizeHandler = size => {
