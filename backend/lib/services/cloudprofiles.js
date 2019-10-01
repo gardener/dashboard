@@ -19,18 +19,14 @@
 const { NotFound } = require('../errors')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
-const { getCloudProviderKind } = require('../utils')
 
 function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
-  const cloudProviderKind = getCloudProviderKind(spec)
-  const keyStoneURL = _.get(spec, `${cloudProviderKind}.keystoneURL`)
+  const cloudProviderKind = spec.type
   const name = _.get(metadata, 'name')
   const displayName = _.get(metadata, ['annotations', 'garden.sapcloud.io/displayName'], name)
   const resourceVersion = _.get(metadata, 'resourceVersion')
   metadata = { name, cloudProviderKind, displayName, resourceVersion }
-  const constraints = _.get(spec, [cloudProviderKind, 'constraints'])
-  const countFaultDomains = _.get(spec, [cloudProviderKind, 'countFaultDomains'])
-  const data = { seeds, keyStoneURL, ...constraints, countFaultDomains }
+  const data = { seeds, ...spec }
   return { metadata, data }
 }
 

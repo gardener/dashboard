@@ -38,7 +38,6 @@
     "md5": "^2.2.1",
     "moment-timezone": "^0.5.21",
     "semver": "^5.5.1",
-    "semver-sort": "0.0.4",
     "socket.io-client": "^2.2.0",
     "typeface-roboto": "0.0.75",
     "vue": "^2.5.22",

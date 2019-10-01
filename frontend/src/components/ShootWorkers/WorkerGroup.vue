@@ -98,7 +98,7 @@ export default {
           value: `${machineImage.name} | Version: ${machineImage.version}`
         }
         if (machineImage.expirationDate) {
-          machineImageDescription.description = `(Expiration Date: ${machineImage.expirationDateString})`
+          machineImageDescription.description = `(Expires: ${machineImage.expirationDateString})`
         }
         description.push(machineImageDescription)
       }

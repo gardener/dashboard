@@ -70,7 +70,7 @@ module.exports = {
   CloudProfile: {
     name: 'cloudprofiles',
     kind: 'CloudProfile',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   SecretBinding: {
     name: 'secretbindings',

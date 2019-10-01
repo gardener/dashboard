@@ -33,12 +33,23 @@ limitations under the License.
         <v-select
           color="cyan darken-2"
           label="Kubernetes Version"
+          item-text="version"
+          item-value="version"
           :items="sortedKubernetesVersionsList"
           v-model="kubernetesVersion"
           :error-messages="getErrorMessages('kubernetesVersion')"
           @input="onInputKubernetesVersion"
           @blur="$v.kubernetesVersion.$touch()"
-          ></v-select>
+          >
+          <template v-slot:item="{ item }">
+            <v-list-tile-content>
+              <v-list-tile-title>{{item.version}}</v-list-tile-title>
+              <v-list-tile-sub-title v-if="item.expirationDateString">
+                <span>Expires: {{item.expirationDateString}}</span>
+              </v-list-tile-sub-title>
+            </v-list-tile-content>
+          </template>
+        </v-select>
       </v-flex>
       <v-flex class="regularInput">
         <v-select
@@ -166,7 +177,7 @@ export default {
       this.onInputPurpose()
     },
     setDefaultKubernetesVersion () {
-      this.kubernetesVersion = head(this.sortedKubernetesVersionsList)
+      this.kubernetesVersion = head(this.sortedKubernetesVersionsList).version
       this.onInputKubernetesVersion()
     },
     getDetailsData () {

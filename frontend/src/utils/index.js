@@ -303,14 +303,14 @@ export function availableK8sUpdatesForShoot (spec) {
     const allVersions = store.getters.kubernetesVersions(cloudProfileName)
 
     let newerVersion = false
-    forEach(allVersions, (version) => {
+    forEach(allVersions, ({ version, expirationDateString }) => {
       if (semver.gt(version, shootVersion)) {
         newerVersion = true
         const diff = semver.diff(version, shootVersion)
         if (!newerVersions[diff]) {
           newerVersions[diff] = []
         }
-        newerVersions[diff].push(version)
+        newerVersions[diff].push({ version, expirationDateString })
       }
     })
     newerVersions = newerVersion ? newerVersions : null

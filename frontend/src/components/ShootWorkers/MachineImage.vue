@@ -15,8 +15,8 @@
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="item.expirationDate">
-          <span>Expiration Date: {{item.expirationDateString}}</span>
+        <v-list-tile-sub-title v-if="item.expirationDateString">
+          <span>Expires: {{item.expirationDateString}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>

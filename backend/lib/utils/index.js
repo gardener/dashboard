@@ -39,17 +39,6 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-const config = {
-  getCloudProviderKindList () {
-    return ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
-  }
-}
-
-function getCloudProviderKind (object) {
-  const cloudProviderKinds = config.getCloudProviderKindList()
-  return _.head(_.intersection(_.keys(object), cloudProviderKinds))
-}
-
 function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
@@ -67,8 +56,6 @@ module.exports = {
   resolve,
   decodeBase64,
   encodeBase64,
-  getCloudProviderKind,
   shootHasIssue,
-  getProjectByNamespace,
-  _config: config
+  getProjectByNamespace
 }

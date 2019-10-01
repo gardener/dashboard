@@ -49,7 +49,6 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 import semver from 'semver'
-const semSort = require('semver-sort')
 
 Vue.use(Vuex)
 
@@ -275,12 +274,25 @@ const getters = {
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return get(cloudProfile, 'data.kubernetes.versions', [])
+      const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
+      const validVersions = filter(allVersions, ({ expirationDate }) => {
+        return !expirationDate || moment().isBefore(expirationDate)
+      })
+      return map(validVersions, version => {
+        return {
+          ...version,
+          expirationDateString: getTimestampFormatted(version.expirationDate)
+        }
+      })
     }
   },
   sortedKubernetesVersions (state, getters) {
     return (cloudProfileName) => {
-      return semSort.desc(cloneDeep(getters.kubernetesVersions(cloudProfileName)))
+      const kubernetsVersions = cloneDeep(getters.kubernetesVersions(cloudProfileName))
+      kubernetsVersions.sort((a, b) => {
+        return semver.rcompare(a.version, b.version)
+      })
+      return kubernetsVersions
     }
   },
   isAdmin (state) {
