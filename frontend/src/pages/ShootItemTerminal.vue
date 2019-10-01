@@ -46,7 +46,7 @@ limitations under the License.
     </v-snackbar>
     <v-flex ref="container" class="terminal-container"></v-flex>
     <v-system-bar dark class="systemBar">
-      <v-tooltip :disabled="!detailedConnectionStateText" top class="ml-2" style="min-width: 110px">
+      <v-tooltip top class="ml-2" style="min-width: 110px">
         <v-layout align-center justify-start row fill-height slot="activator">
           <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
             <connected v-if="terminalSession.connectionState === ConnectionState.CONNECTED"></connected>
@@ -54,7 +54,7 @@ limitations under the License.
           </icon-base>
           <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionText}}</span>
         </v-layout>
-        {{detailedConnectionStateText}}
+        {{terminalSession.detailedConnectionStateText || connectionText}}
       </v-tooltip>
 
       <v-tooltip v-if="imageShortText" top>
@@ -235,8 +235,7 @@ export default {
       },
       selectedConfig: {},
       terminalSession: {},
-      ConnectionState,
-      detailedConnectionStateText: undefined
+      ConnectionState
     }
   },
   computed: {
@@ -358,11 +357,11 @@ export default {
 
       return data
     },
-    async heartbeat () {
+    heartbeat () {
       const { namespace = undefined, name = undefined, target } = this.$route.params
       return heartbeat({ name, namespace, target })
     },
-    async retry () {
+    retry () {
       this.snackbarTop = false
       return this.connect()
     },
@@ -373,14 +372,24 @@ export default {
     async connect () {
       const terminalSession = this.terminalSession = {
         cancelConnect: false,
-        close: () => {},
-        connectionState: ConnectionState.DISCONNECTED,
         tries: 0,
+        connectionState: ConnectionState.DISCONNECTED,
         node: undefined,
         privileged: undefined,
         hostPID: undefined,
         hostNetwork: undefined,
-        image: undefined
+        image: undefined,
+        detailedConnectionStateText: undefined,
+        close: () => {},
+        setDisconnected: function () {
+          this.connectionState = ConnectionState.DISCONNECTED
+          this.node = undefined
+          this.privileged = undefined
+          this.hostPID = undefined
+          this.hostNetwork = undefined
+          this.image = undefined
+          this.detailedConnectionStateText = undefined
+        }
       }
 
       this.spinner.start()
@@ -406,7 +415,7 @@ export default {
           } catch (err) {
             console.error('failed to wait until pod is running', err)
             this.showSnackbarTop('Could not connect to terminal')
-            terminalSession.connectionState = ConnectionState.DISCONNECTED
+            terminalSession.setDisconnected()
             return
           }
           if (terminalSession.cancelConnect) {
@@ -441,22 +450,18 @@ export default {
           ws.onclose = error => {
             terminalSession.close()
             const wasConnected = terminalSession.connectionState === ConnectionState.CONNECTED
-            terminalSession.connectionState = ConnectionState.DISCONNECTED
 
             if (terminalSession.cancelConnect) {
+              terminalSession.setDisconnected()
               return
             }
-
             if (error.code === 1000) { // CLOSE_NORMAL
-              terminalSession.image = undefined
-              terminalSession.privileged = undefined
-              terminalSession.hostPID = undefined
-              terminalSession.hostNetwork = undefined
-              terminalSession.node = undefined
+              terminalSession.setDisconnected()
               this.showSnackbarTop('Terminal connection lost')
               return
             }
             if (terminalSession.tries >= MAX_TRIES) {
+              terminalSession.setDisconnected()
               this.showSnackbarTop('Could not connect to terminal')
               return
             }
@@ -473,9 +478,8 @@ export default {
               this.spinner.start()
               console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
             }
-            reconnectTimeoutId = setTimeout(async () => attachTerminal(), timeoutSeconds * 1000)
+            reconnectTimeoutId = setTimeout(attachTerminal, timeoutSeconds * 1000)
           }
-
           terminalSession.close = () => {
             clearTimeout(reconnectTimeoutId)
             clearInterval(heartbeatIntervalId)
@@ -489,10 +493,10 @@ export default {
         return attachTerminal()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
-        terminalSession.connectionState = ConnectionState.DISCONNECTED
+        terminalSession.setDisconnected()
       }
     },
-    async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
+    waitUntilPodIsRunning (terminalData, timeoutSeconds) {
       return new Promise((resolve, reject) => {
         const ws = new WebSocket(watchPodUri(terminalData), watchPodProtocols(terminalData))
         const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
@@ -532,7 +536,7 @@ export default {
           const terminalContainerStatus = find(containerStatuses, status => status.name === terminalData.container)
           const isContainerReady = get(terminalContainerStatus, 'ready', false)
 
-          this.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
+          this.terminalSession.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
           this.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
           if (phase === 'Running' && isContainerReady) {
             closeAndResolve(ws)
@@ -557,7 +561,7 @@ export default {
       })
     }
   },
-  async mounted () {
+  mounted () {
     const term = this.term = new Terminal()
     term.open(this.$refs.container)
     term.webLinksInit()

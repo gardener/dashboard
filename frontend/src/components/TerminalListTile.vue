@@ -35,7 +35,6 @@ limitations under the License.
 </template>
 
 <script>
-import { namespacedRoute } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
