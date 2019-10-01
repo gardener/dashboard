@@ -20,9 +20,7 @@ import CodeBlock from '@/components/CodeBlock.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 
-Vue.use(Vuetify, {
-  iconfont: 'md'
-})
+Vue.use(Vuetify)
 document.body.setAttribute('data-app', true)
 
 describe('CodeBlock.vue', function () {
