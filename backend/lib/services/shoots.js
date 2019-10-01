@@ -222,7 +222,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
 
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
   const projects = Garden(user).projects
   const namespaces = core.namespaces
   const project = await getProjectByNamespace(projects, namespaces, namespace)

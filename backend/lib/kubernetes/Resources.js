@@ -65,7 +65,7 @@ module.exports = {
   Seed: {
     name: 'seeds',
     kind: 'Seed',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1beta1'
   },
   CloudProfile: {
     name: 'cloudprofiles',
