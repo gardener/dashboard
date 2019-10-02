@@ -80,7 +80,7 @@ export default {
       const options = {
         text: () => this.clipboardText
       }
-      let vm = this
+      let vm = this.$parent
       while (vm && vm !== this.$root) {
         if (vm.$options.name === 'v-dialog') {
           options.container = vm.$refs.content
