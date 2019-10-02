@@ -75,6 +75,20 @@ export default {
     },
     snackbarColor () {
       return this.copyFailed ? 'error' : undefined
+    },
+    clipboardOptions () {
+      const options = {
+        text: () => this.clipboardText
+      }
+      let vm = this.$parent
+      while (vm && vm !== this.$root) {
+        if (vm.$options.name === 'v-dialog') {
+          options.container = vm.$refs.content
+          break
+        }
+        vm = vm.$parent
+      }
+      return options
     }
   },
   methods: {
@@ -82,10 +96,7 @@ export default {
       if (this.clipboard) {
         this.clipboard.destroy()
       }
-
-      this.clipboard = new Clipboard(this.$refs.copy.$el, {
-        text: () => this.clipboardText
-      })
+      this.clipboard = new Clipboard(this.$refs.copy.$el, this.clipboardOptions)
       this.clipboard.on('success', (event) => {
         this.snackbar = true
         this.copyFailed = false
