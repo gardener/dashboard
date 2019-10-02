@@ -91,4 +91,4 @@ There is an [issue](https://github.com/gardener/gardener/issues/1413) on the gar
 However, this would solve the issue for shoots and shooted-seeds, but not for soil and plant kube-apiservers and potentially others.
 
 #### Current Solution
-We had to "workaround" it by creating ingress resources for the kube-apiservers and letting the certmanager request browser trusted certificates.
+We had to "workaround" it by creating ingress resources for the kube-apiservers and letting the certmanager (or the new [shoot cert service](https://github.com/gardener/gardener-extensions/tree/master/controllers/extension-shoot-cert-service)) request browser trusted certificates.
