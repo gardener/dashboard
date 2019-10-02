@@ -29,8 +29,8 @@ There are different factors on where the host cluster (and namespace) is chosen 
 - For performance / low latency reasons, we want to place the "terminal" pods as near as possible to the target kube-apiserver.
 
 E.g. the user wants to have a terminal for a shoot cluster. The kube-apiserver of the shoot is running in the seed-shoot-ns on the seed.
-If the user is an operator, we place the "terminal" pod directly in the seed-shoot-ns on the seed.
-However, if the user is a "regular" user, we do not want to have "untrusted" workload scheduled on the seeds, that's why the "terminal" pod is scheduled on the shoot itself, in a temporary namespace that is deleted afterwards.
+- If the user is an operator, we place the "terminal" pod directly in the seed-shoot-ns on the seed.
+- However, if the user is a "regular" user, we do not want to have "untrusted" workload scheduled on the seeds, that's why the "terminal" pod is scheduled on the shoot itself, in a temporary namespace that is deleted afterwards.
 
 
 ## Lifecycle of a Web Terminal Session
