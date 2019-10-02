@@ -158,7 +158,7 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
   }
 
   logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
-  return { pod, token, namespace: hostNamespace }
+  return { pod, token, namespace: hostNamespace, terminal: existingTerminal }
 }
 
 exports.create = async function ({ user, namespace, name, target, body = {} }) {
@@ -402,7 +402,9 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
 
   const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
-    _.assign(terminalInfo, existingTerminal)
+    _.assign(terminalInfo, _.pick(existingTerminal, ['pod', 'token', 'namespace']))
+    keepaliveTerminal({ dashboardClient, terminal: existingTerminal.terminal, namespace })
+      .catch(err => logger.error('failed to keepalive terminal', err))
     return terminalInfo
   }
 
@@ -473,6 +475,10 @@ exports.heartbeat = async function ({ user, namespace, name, target, body = {} }
     throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
   }
 
+  return keepaliveTerminal({ dashboardClient, terminal, namespace })
+}
+
+async function keepaliveTerminal ({ dashboardClient, terminal, namespace }) {
   const annotations = {
     'dashboard.gardener.cloud/operation': `keepalive`
   }
@@ -480,8 +486,8 @@ exports.heartbeat = async function ({ user, namespace, name, target, body = {} }
     const name = terminal.metadata.name
     await dashboardClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
   } catch (e) {
-    logger.error(`Could not update terminal on heartbeat. Error: ${e}`)
-    throw new Error(`Could not update terminal on heartbeat`)
+    logger.error(`Could not keepalive terminal. Error: ${e}`)
+    throw new Error(`Could not keepalive terminal`)
   }
 }
 
