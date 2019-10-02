@@ -24,7 +24,7 @@ There are currently three targets, where a user can open a terminal session to
 - The control plane of the shoot cluster - operator only
 
 ## Hosts
-There are different factors on where the the host cluster (and namespace) is chosen by the dashboard
+There are different factors on where the host cluster (and namespace) is chosen by the dashboard
 - Depending on the selected target and the role of the user (operator or "regular" user) the host is chosen.
 - For performance / low latency reasons, we want to place the "terminal" pods as near as possible to the target kube-apiserver.
 
