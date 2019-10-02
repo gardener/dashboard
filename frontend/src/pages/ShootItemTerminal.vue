@@ -111,7 +111,7 @@ limitations under the License.
 </template>
 
 <script>
-import 'xterm/dist/xterm.css'
+import 'xterm/css/xterm.css'
 import ora from 'ora'
 import get from 'lodash/get'
 import find from 'lodash/find'
@@ -120,13 +120,12 @@ import head from 'lodash/head'
 import intersection from 'lodash/intersection'
 import keys from 'lodash/keys'
 
-import * as attach from '@/lib/attach'
-import * as fit from 'xterm/lib/addons/fit/fit'
-import * as search from 'xterm/lib/addons/search/search'
-import * as webLinks from 'xterm/lib/addons/webLinks/webLinks'
+import { Terminal } from 'xterm'
+import { FitAddon } from 'xterm-addon-fit'
+import { WebLinksAddon } from 'xterm-addon-web-links'
+import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
 
 import { mapState } from 'vuex'
-import { Terminal } from 'xterm'
 import {
   encodeURIComponents,
   encodeBase64Url
@@ -142,11 +141,6 @@ import TerminalSettingsDialog from '@/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
 import Disconnected from '@/components/icons/Disconnected'
-
-Terminal.applyAddon(attach)
-Terminal.applyAddon(fit)
-Terminal.applyAddon(search)
-Terminal.applyAddon(webLinks)
 
 const ConnectionState = {
   DISCONNECTED: 0,
@@ -185,7 +179,7 @@ function watchPodUri (terminalData) {
 }
 
 function closeWsIfNotClosed (ws) {
-  if (ws.readyState === attach.ReadyStateEnum.OPEN || ws.readyState === attach.ReadyStateEnum.CONNECTING) {
+  if (ws.readyState === WsReadyStateEnum.OPEN || ws.readyState === WsReadyStateEnum.CONNECTING) {
     ws.close()
   }
 }
@@ -328,8 +322,8 @@ export default {
       }
     },
     onResize () {
-      if (this.term) {
-        this.term.fit()
+      if (this.fitAddon) {
+        this.fitAddon.fit()
       }
     },
     hideSnackbar () {
@@ -423,7 +417,8 @@ export default {
           }
 
           const ws = new WebSocket(attachUri(terminalData), remoteCommandAttachOrExecuteProtocols(terminalData))
-          ws.binaryType = 'arraybuffer'
+          const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
+          this.term.loadAddon(attachAddon)
           let reconnectTimeoutId
           let heartbeatIntervalId
 
@@ -432,7 +427,6 @@ export default {
               terminalSession.close()
               return
             }
-            this.term.attach(ws)
 
             this.spinner.stop()
             this.hideSnackbar()
@@ -485,7 +479,7 @@ export default {
             clearInterval(heartbeatIntervalId)
 
             closeWsIfNotClosed(ws)
-            this.term.detach(ws)
+            attachAddon.dispose()
 
             terminalSession.close = () => {}
           }
@@ -563,11 +557,15 @@ export default {
   },
   mounted () {
     const term = this.term = new Terminal()
+    const fitAddon = this.fitAddon = new FitAddon()
+
+    term.loadAddon(fitAddon)
+    term.loadAddon(new WebLinksAddon())
+
     term.open(this.$refs.container)
-    term.webLinksInit()
     term.focus()
     this.$nextTick(() => {
-      term.fit()
+      fitAddon.fit()
     })
 
     this.spinner = ora({
@@ -584,6 +582,9 @@ export default {
   },
   beforeDestroy () {
     this.cancelConnectAndClose()
+    if (this.term) {
+      this.term.dispose()
+    }
   }
 }
 </script>

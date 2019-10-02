@@ -51,7 +51,9 @@
     "vuelidate": "^0.7.4",
     "vuetify": "^1.4.2",
     "vuex": "^3.0.1",
-    "xterm": "^3.14.5"
+    "xterm": "^4.0.2",
+    "xterm-addon-fit": "^0.2.1",
+    "xterm-addon-web-links": "^0.2.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "^3.8.0",
