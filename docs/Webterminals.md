@@ -17,13 +17,13 @@ This has several advantages:
 ## How it's done - TL;DR
 On the host cluster we schedule a pod to which the dashboard frontend client attaches to (similar to `kubectl attach`). Usually the [`ops-toolbelt`](https://github.com/gardener/ops-toolbelt/) image is used, containing all relevant tools like `kubectl`. The Pod has a kubeconfig secret (or service account) mounted with the necessary privileges for the target cluster - usually `cluster-admin`.
 
-## Targets
+## Target types
 There are currently three targets, where a user can open a terminal session to
 - The (virtual) garden - Currently operator only
 - The shoot cluster
 - The control plane of the shoot cluster - operator only
 
-## Hosts
+## Host
 There are different factors on where the host cluster (and namespace) is chosen by the dashboard
 - Depending on the selected target and the role of the user (operator or "regular" user) the host is chosen.
 - For performance / low latency reasons, we want to place the "terminal" pods as near as possible to the target kube-apiserver.
