@@ -1,6 +1,7 @@
 # Webterminals
 
-<img width="477" alt="Screenshot 2019-09-25 at 13 52 15" src="https://user-images.githubusercontent.com/5526658/65598477-c7694280-df9b-11e9-83d9-32bbed7fd1bc.png">
+<img width="180" alt="gardener-terminal-ascii" src="https://user-images.githubusercontent.com/5526658/66032047-ecfacc80-e504-11e9-9864-57d4f0bbaf5d.png">
+
 
 
 ## Motivation
