@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
-const garden = kubernetes.garden()
+const garden = kubernetes.gardener()
 const { PreconditionFailed, GatewayTimeout, InternalServerError } = require('../errors')
 const logger = require('../logger')
 const shoots = require('./shoots')

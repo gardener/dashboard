@@ -462,14 +462,13 @@ export function shortRandomString (length) {
 
 export function selfTerminationDaysForSecret (secret) {
   const clusterLifetimeDays = function (quotas, scope) {
-    const predicate = item => get(item, 'spec.scope') === scope
-    return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+    return get(find(quotas, scope), 'spec.clusterLifetimeDays')
   }
 
   const quotas = get(secret, 'quotas')
-  let terminationDays = clusterLifetimeDays(quotas, 'project')
+  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1alpha1', kind: 'Project' } } })
   if (!terminationDays) {
-    terminationDays = clusterLifetimeDays(quotas, 'secret')
+    terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
   }
 
   return terminationDays
