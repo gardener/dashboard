@@ -57,20 +57,20 @@ limitations under the License.
           <size-input
             min="1"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.volumeSize')"
+            :error-messages="getErrorMessages('worker.volume.size')"
             @input="onInputVolumeSize"
-            @blur="$v.worker.volumeSize.$touch()"
+            @blur="$v.worker.volume.size.$touch()"
             label="Volume Size"
-            v-model="worker.volumeSize"
+            v-model="worker.volume.size"
           ></size-input>
         </v-flex>
         <v-flex class="smallInput">
           <v-text-field
             min="0"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.autoScalerMin')"
-            @input="onInputAutoscalerMin"
-            @blur="$v.worker.autoScalerMin.$touch()"
+            :error-messages="getErrorMessages('worker.minimum')"
+            @input="onInputminimum"
+            @blur="$v.worker.minimum.$touch()"
             type="number"
             v-model="innerMin"
             label="Autoscaler Min."></v-text-field>
@@ -79,9 +79,9 @@ limitations under the License.
           <v-text-field
             min="0"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.autoScalerMax')"
-            @input="onInputAutoscalerMax"
-            @blur="$v.worker.autoScalerMax.$touch()"
+            :error-messages="getErrorMessages('worker.maximum')"
+            @input="onInputmaximum"
+            @blur="$v.worker.maximum.$touch()"
             type="number"
             v-model="innerMax"
             label="Autoscaler Max."
@@ -125,13 +125,15 @@ const validationErrors = {
       uniqueWorkerName: 'Name is taken. Try another.',
       noStartEndHyphen: 'Name must not start or end with a hyphen'
     },
-    volumeSize: {
-      minVolumeSize: 'Invalid volume size'
+    volume: {
+      size: {
+        minVolumeSize: 'Invalid volume size'
+      }
     },
-    autoScalerMin: {
+    minimum: {
       minValue: 'Invalid value'
     },
-    autoScalerMax: {
+    maximum: {
       minValue: 'Invalid value'
     },
     maxSurge: {
@@ -149,13 +151,15 @@ const validations = {
       resourceName,
       uniqueWorkerName
     },
-    volumeSize: {
-      minVolumeSize: minVolumeSize(1)
+    volume: {
+      size: {
+        minVolumeSize: minVolumeSize(1)
+      }
     },
-    autoScalerMin: {
+    minimum: {
       minValue: minValue(0)
     },
-    autoScalerMax: {
+    maximum: {
       minValue: minValue(0)
     },
     maxSurge: {
@@ -217,23 +221,23 @@ export default {
     },
     innerMin: {
       get: function () {
-        return Math.max(0, this.worker.autoScalerMin)
+        return Math.max(0, this.worker.minimum)
       },
       set: function (value) {
-        this.worker.autoScalerMin = Math.max(0, parseInt(value))
-        if (this.innerMax < this.worker.autoScalerMin) {
-          this.worker.autoScalerMax = this.worker.autoScalerMin
+        this.worker.minimum = Math.max(0, parseInt(value))
+        if (this.innerMax < this.worker.minimum) {
+          this.worker.maximum = this.worker.minimum
         }
       }
     },
     innerMax: {
       get: function () {
-        return Math.max(0, this.worker.autoScalerMax)
+        return Math.max(0, this.worker.maximum)
       },
       set: function (value) {
-        this.worker.autoScalerMax = Math.max(0, parseInt(value))
-        if (this.innerMin > this.worker.autoScalerMax) {
-          this.worker.autoScalerMin = this.worker.autoScalerMax
+        this.worker.maximum = Math.max(0, parseInt(value))
+        if (this.innerMin > this.worker.maximum) {
+          this.worker.minimum = this.worker.maximum
         }
       }
     },
@@ -265,15 +269,15 @@ export default {
       this.validateInput()
     },
     onInputVolumeSize () {
-      this.$v.worker.volumeSize.$touch()
+      this.$v.worker.volume.size.$touch()
       this.validateInput()
     },
-    onInputAutoscalerMin () {
-      this.$v.worker.autoScalerMin.$touch()
+    onInputminimum () {
+      this.$v.worker.minimum.$touch()
       this.validateInput()
     },
-    onInputAutoscalerMax () {
-      this.$v.worker.autoScalerMax.$touch()
+    onInputmaximum () {
+      this.$v.worker.maximum.$touch()
       this.validateInput()
     },
     onUpdateMachineImage () {

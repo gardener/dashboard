@@ -132,23 +132,6 @@ module.exports = {
   batch (options) {
     return new Batch(credentials(options))
   },
-  garden (options) {
-    const resources = [
-      Resources.Shoot.name,
-      Resources.Seed.name,
-      Resources.CloudProfile.name,
-      Resources.SecretBinding.name,
-      Resources.Quota.name,
-      Resources.Project.name
-    ]
-    options = assign(options, {
-      path: 'apis/garden.sapcloud.io',
-      version: 'v1beta1',
-      namespaceResources: resources,
-      groupResources: resources
-    })
-    return new ApiGroup(credentials(options))
-  },
   gardener (options) {
     const resources = [
       Resources.Shoot.name,

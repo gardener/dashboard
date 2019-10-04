@@ -42,7 +42,6 @@ import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
-  getCloudProviderKind,
   isUserError,
   isReconciliationDeactivated,
   isStatusProgressing,
@@ -226,37 +225,43 @@ const actions = {
   },
   resetNewShootResource ({ commit, rootState, rootGetters }) {
     const shootResource = {
-      apiVersion: 'garden.sapcloud.io/v1beta1',
-      kind: 'Shoot'
+      apiVersion: 'core.gardener.cloud/v1alpha1',
+      kind: 'Shoot',
+      spec: {
+        networking: {
+          type: 'calico',
+          pods: '100.96.0.0/11',
+          nodes: '10.250.0.0/16',
+          services: '100.64.0.0/13'
+        }
+      }
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+    set(shootResource, 'spec.provider.type', infrastructureKind)
+    // set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
-    set(shootResource, 'spec.cloud.profile', cloudProfileName)
+    set(shootResource, 'spec.cloudProfileName', cloudProfileName)
 
     const secret = head(rootGetters.infrastructureSecretsByCloudProfileName(cloudProfileName))
-    const secretBindingRef = {
-      name: get(secret, 'metadata.bindingName')
-    }
-    set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
+    set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
 
     const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
-    set(shootResource, 'spec.cloud.region', region)
+    set(shootResource, 'spec.region', region)
 
     const zones = [sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
     if (!isEmpty(zones)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+      set(shootResource, 'spec.provider.zones', zones)
     }
 
     const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
     if (!isEmpty(loadBalancerProviderName)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
+      set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
     }
     const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileName(cloudProfileName))
     if (!isEmpty(floatingPoolName)) {
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
+      set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
     }
 
     const name = shortRandomString(10)
@@ -266,26 +271,30 @@ const actions = {
     set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
 
     const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
-    set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
+    set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
 
     const workerName = `worker-${shortRandomString(5)}`
     const volumeType = get(head(rootGetters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
-    const volumeSize = volumeType ? '50Gi' : undefined
     const machineType = get(head(rootGetters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
     const machineImage = rootGetters.defaultMachineImageForCloudProfileName(cloudProfileName)
-    const workers = [
-      {
-        name: workerName,
-        machineType,
-        volumeType,
-        volumeSize,
-        autoScalerMin: 1,
-        autoScalerMax: 2,
-        maxSurge: 1,
-        machineImage
+    const worker = {
+      name: workerName,
+      minimum: 1,
+      maximum: 2,
+      maxSurge: 1,
+      machine: {
+        type: machineType,
+        image: machineImage
       }
-    ]
-    set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
+    }
+    if (volumeType) {
+      worker.volume = {
+        type: volumeType,
+        size: '50Gi'
+      }
+    }
+    const workers = [worker]
+    set(shootResource, 'spec.provider.workers', workers)
 
     const addons = {}
     forEach(filter(shootAddonList, addon => addon.visible), addon => {
@@ -350,9 +359,9 @@ const getRawVal = (item, column) => {
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
-      return `${getCloudProviderKind(spec.cloud)} ${get(spec, 'cloud.region')}`
+      return get(spec, 'provider.type')
     case 'seed':
-      return get(spec, 'cloud.seed')
+      return get(item, 'status.seed')
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')

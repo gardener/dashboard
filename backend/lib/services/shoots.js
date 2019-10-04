@@ -24,7 +24,7 @@ const logger = require('../logger')
 const _ = require('lodash')
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function Core ({ auth }) {
@@ -152,12 +152,12 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return patch({ user, namespace, name, body: payload })
 }
 
-exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
+exports.replaceWorkers = async function ({ user, namespace, name, body }) {
   const workers = body
   const patchOperations = [
     {
       op: 'replace',
-      path: `/spec/cloud/${infrastructureKind}/workers`,
+      path: `/spec/provider/workers`,
       value: workers
     }
   ]
@@ -220,7 +220,7 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  const seed = _.find(getSeeds(), ['metadata.name', shoot.status.seed])
 
   const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
   const projects = Garden(user).projects

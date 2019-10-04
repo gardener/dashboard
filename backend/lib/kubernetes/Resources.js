@@ -60,12 +60,12 @@ module.exports = {
   Shoot: {
     name: 'shoots',
     kind: 'Shoot',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   Seed: {
     name: 'seeds',
     kind: 'Seed',
-    apiVersion: 'core.gardener.cloud/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   CloudProfile: {
     name: 'cloudprofiles',
@@ -85,6 +85,6 @@ module.exports = {
   Project: {
     name: 'projects',
     kind: 'Project',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   }
 }

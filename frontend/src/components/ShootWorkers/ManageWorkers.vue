@@ -123,20 +123,26 @@ export default {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
       const volumeType = get(head(this.volumeTypes), 'name')
-      const volumeSize = volumeType ? '50Gi' : undefined
       const machineType = get(head(this.machineTypes), 'name')
       const machineImage = this.defaultMachineImage
-      this.internalWorkers.push({
+      const worker = {
         id,
         name,
-        machineType,
-        volumeType,
-        volumeSize,
-        autoScalerMin: 1,
-        autoScalerMax: 2,
+        minimum: 1,
+        maximum: 2,
         maxSurge: 1,
-        machineImage
-      })
+        machine: {
+          type: machineType,
+          image: machineImage
+        }
+      }
+      if (volumeType) {
+        worker.volume = {
+          type: volumeType,
+          size: '50Gi'
+        }
+      }
+      this.internalWorkers.push(worker)
       this.validateInput()
     },
     onRemoveWorker (index) {

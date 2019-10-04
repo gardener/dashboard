@@ -23,9 +23,7 @@ import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
-import keys from 'lodash/keys'
 import map from 'lodash/map'
-import intersection from 'lodash/intersection'
 import toLower from 'lodash/toLower'
 import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
@@ -281,11 +279,6 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   }
 }
 
-export function getCloudProviderKind (object) {
-  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
-  return head(intersection(keys(object), cloudProviderKinds))
-}
-
 export function isOwnSecretBinding (secret) {
   return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
 }
@@ -293,7 +286,7 @@ export function isOwnSecretBinding (secret) {
 const availableK8sUpdatesCache = {}
 export function availableK8sUpdatesForShoot (spec) {
   const shootVersion = get(spec, 'kubernetes.version')
-  const cloudProfileName = get(spec, 'cloud.profile')
+  const cloudProfileName = spec.cloudProfileName
 
   let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)
   if (newerVersions !== undefined) {

@@ -126,11 +126,10 @@ export function updateShootHibernation ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, data)
 }
 
-export function updateShootWorkers ({ namespace, name, infrastructureKind, data }) {
+export function updateShootWorkers ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  infrastructureKind = encodeURIComponent(infrastructureKind)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/${infrastructureKind}/workers`, data)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`, data)
 }
 
 export function updateShootAddons ({ namespace, name, data }) {

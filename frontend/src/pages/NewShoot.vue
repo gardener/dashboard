@@ -101,10 +101,10 @@ limitations under the License.
           ></manage-hibernation-schedule>
        </v-card-text>
       </v-card>
+      <g-alert ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-alert>
     </v-container>
     <v-divider></v-divider>
     <div class="toolbar">
-      <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       <v-layout align-center justify-end>
         <v-divider vertical></v-divider>
         <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
@@ -136,7 +136,6 @@ import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
 import { errorDetailsFromError } from '@/utils/error'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
-const { getCloudProviderKind } = require('../utils')
 const EventEmitter = require('events')
 
 export default {
@@ -215,26 +214,22 @@ export default {
       const shootResource = cloneDeep(this.newShootResource)
 
       const { infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
-      const secretBindingRef = {
-        name: get(secret, 'metadata.bindingName')
-      }
-      set(shootResource, 'spec.cloud.profile', cloudProfileName)
-      set(shootResource, 'spec.cloud.region', region)
-      set(shootResource, 'spec.cloud.secretBindingRef', secretBindingRef)
-      const oldInfrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
+      set(shootResource, 'spec.cloudProfileName', cloudProfileName)
+      set(shootResource, 'spec.region', region)
+      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
+      const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        unset(shootResource, ['spec', 'cloud', oldInfrastructureKind])
-        set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+        unset(shootResource, 'spec.provider')
       }
       if (!isEmpty(floatingPoolName)) {
-        set(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'], floatingPoolName)
+        set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
       if (!isEmpty(loadBalancerProviderName)) {
-        set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
+        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
       }
       if (!isEmpty(zones)) {
-        set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
+        set(shootResource, 'spec.provider.zones', zones)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -243,7 +238,7 @@ export default {
       set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
 
       const workers = this.$refs.manageWorkers.getWorkers()
-      set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
+      set(shootResource, 'spec.provider.workers', workers)
 
       const addons = this.$refs.addons.getAddons()
       set(shootResource, 'spec.addons', addons)
@@ -282,17 +277,17 @@ export default {
     updateUIComponentsWithShootResource () {
       const shootResource = this.newShootResource
 
-      const infrastructureKind = getCloudProviderKind(get(shootResource, 'spec.cloud'))
+      const infrastructureKind = get(shootResource, 'spec.provider.type')
       this.$refs.infrastructure.setSelectedInfrastructure(infrastructureKind)
 
-      const cloudProfileName = get(shootResource, 'spec.cloud.profile')
-      const region = get(shootResource, 'spec.cloud.region')
-      const secretBindingName = get(shootResource, 'spec.cloud.secretBindingRef.name')
+      const cloudProfileName = get(shootResource, 'spec.cloudProfileName')
+      const region = get(shootResource, 'spec.region')
+      const secretBindingName = get(shootResource, 'spec.secretBindingName')
       const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
 
-      const zones = get(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'])
-      const floatingPoolName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'floatingPoolName'])
-      const loadBalancerProviderName = get(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'])
+      const zones = get(shootResource, 'spec.provider.zones')
+      const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
+      const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
 
       this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zones, floatingPoolName, loadBalancerProviderName })
 
@@ -301,6 +296,9 @@ export default {
       const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
       this.purpose = purpose
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
+
+      const workers = get(shootResource, 'spec.provider.workers')
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)
@@ -314,9 +312,6 @@ export default {
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
       this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
-
-      const workers = get(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'])
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
     },
     async createClicked () {
       const shootResource = this.updateShootResourceWithUIComponents()
@@ -336,6 +331,10 @@ export default {
         this.errorMessage = `Failed to create cluster.`
         this.detailedErrorMessage = errorDetails.detailedMessage
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+
+        this.$nextTick(() => {
+          this.$refs.errorAlert.$el.scrollIntoView()
+        })
       }
     },
     confirmNavigation () {

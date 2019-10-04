@@ -17,7 +17,7 @@
 'use strict'
 
 const logger = require('../logger')
-const garden = require('../kubernetes').garden()
+const garden = require('../kubernetes').gardener()
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')

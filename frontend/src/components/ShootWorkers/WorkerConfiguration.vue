@@ -67,7 +67,7 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
-        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, infrastructureKind: this.shootCloudProviderKind, data: workers })
+        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, data: workers })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         const errorDetails = errorDetailsFromError(err)
