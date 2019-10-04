@@ -22,6 +22,7 @@ limitations under the License.
     :detailedErrorMessage.sync="detailedErrorMessage"
     @showDialog="onShowDialog"
     max-width="600"
+    max-height="100vh"
     defaultColor="cyan-darken-2"
     ref="gDialog"
     >
@@ -33,41 +34,76 @@ limitations under the License.
         label="Image"
         hint="Image to be used for the Container"
         persistent-hint
-        class="mb-4"
       >
       </v-text-field>
-      <v-switch
-        color="cyan darken-2"
-        v-model="selectedPrivilegedMode"
-        label="Privileged"
-        hint="When enabled this will schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. In addition, the host root filesystem will be mounted under the path /hostroot."
-        persistent-hint
-        class="mt-2"
-      ></v-switch>
-      <v-select
-        color="cyan darken-2"
-        label="Nodes"
-        :items="nodes"
-        item-value="data.kubernetesHostname"
-        v-model="selectedNode"
-        hint="Node on which the Pod should be scheduled"
-        persistent-hint
-        class="mt-4 mb-2"
-      >
-        <template slot="item" slot-scope="data">
-          <v-list-tile-content>
-            <v-list-tile-title>{{data.item.data.kubernetesHostname}}</v-list-tile-title>
-            <v-list-tile-sub-title>
-              <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </template>
-        <template slot="selection" slot-scope="data">
-          <span class="black--text ml-2">
-          {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
-          </span>
-        </template>
-      </v-select>
+      <template v-if="target === 'shoot'">
+        <v-radio-group
+          v-if="isAdmin"
+          v-model="selectedRunOnShootWorker"
+          label="Terminal Runtime"
+          class="mt-4"
+          hint='Choose "Cluster" if you want to troubleshoot a worker node of the cluster'
+          persistent-hint
+        >
+          <v-radio
+            label="Infrastructure (Seed)"
+            :value="false"
+            color="cyan darken-2"
+          ></v-radio>
+          <v-radio
+            label="Cluster"
+            :value="true"
+            color="cyan darken-2"
+          ></v-radio>
+        </v-radio-group>
+        <v-switch
+          :disabled="!selectedRunOnShootWorker"
+          color="cyan darken-2"
+          v-model="selectedPrivilegedMode"
+          label="Privileged"
+          hint="When enabled this will schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. In addition, the host root filesystem will be mounted under the path /hostroot."
+          persistent-hint
+          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
+        ></v-switch>
+        <v-select
+          :disabled="!selectedRunOnShootWorker"
+          no-data-text="No workers available"
+          color="cyan darken-2"
+          label="Node"
+          placeholder="Select worker node..."
+          :items="nodes"
+          item-value="data.kubernetesHostname"
+          v-model="selectedNode"
+          hint="Node on which the Pod should be scheduled"
+          persistent-hint
+          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"g
+        >
+          <template slot="item" slot-scope="data">
+            <v-list-tile-content>
+              <v-list-tile-title>{{data.item.data.kubernetesHostname}}</v-list-tile-title>
+              <v-list-tile-sub-title>
+                <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
+              </v-list-tile-sub-title>
+            </v-list-tile-content>
+          </template>
+          <template slot="selection" slot-scope="data">
+            <span :class="`${nodeTextColor}--text ml-2`">
+            {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
+            </span>
+          </template>
+        </v-select>
+        <v-alert
+          v-if="isAdmin && selectedRunOnShootWorker"
+          class="ml-4 mt-2 mb-2"
+          :value="true"
+          type="info"
+          color="cyan darken-2"
+          outline
+        >
+          <strong>Do not enter sensitive data within the terminal session.</strong><br/>
+          The pod will be running on one of the worker nodes where cluster owners have access to.
+        </v-alert>
+      </template>
     </template>
   </g-dialog>
 </template>
@@ -76,6 +112,8 @@ limitations under the License.
 import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import isEmpty from 'lodash/isEmpty'
+import { mapGetters } from 'vuex'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -94,10 +132,14 @@ export default {
     },
     privilegedMode: {
       type: Boolean
+    },
+    target: {
+      type: String
     }
   },
   data () {
     return {
+      selectedRunOnShootWorkerInternal: false,
       selectedContainerImage: undefined,
       selectedNode: undefined,
       selectedPrivilegedMode: undefined,
@@ -106,9 +148,27 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'isAdmin'
+    ]),
     validSettings () {
       // invalid if not set
       return !isEmpty(this.selectedContainerImage) && !isEmpty(this.selectedNode) && this.selectedPrivilegedMode !== undefined
+    },
+    selectedRunOnShootWorker: {
+      get () {
+        return this.selectedRunOnShootWorkerInternal
+      },
+      set (value) {
+        this.selectedRunOnShootWorkerInternal = value
+        this.selectedPrivilegedMode = value
+        if (!this.selectedRunOnShootWorkerInternal) {
+          this.selectedNode = undefined
+        }
+      }
+    },
+    nodeTextColor () {
+      return this.selectedRunOnShootWorker ? 'black' : 'grey'
     }
   },
   methods: {
@@ -123,6 +183,9 @@ export default {
           selectedConfig.privileged = true
           selectedConfig.hostPID = true
           selectedConfig.hostNetwork = true
+        }
+        if (this.selectedRunOnShootWorker) {
+          selectedConfig.preferredHost = 'shoot'
         }
         return selectedConfig
       } else {
@@ -144,6 +207,12 @@ export default {
       this.selectedPrivilegedMode = this.privilegedMode
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
+      const selectedNodeIsShootWorker = !!find(this.nodes, node => node.data.kubernetesHostname === this.selectedNode)
+      if (!this.isAdmin) {
+        this.selectedRunOnShootWorkerInternal = true
+      } else {
+        this.selectedRunOnShootWorkerInternal = selectedNodeIsShootWorker
+      }
     }
   }
 }

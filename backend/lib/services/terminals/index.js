@@ -43,10 +43,10 @@ const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
 
-const TARGET = {
-  garden: 'garden',
-  controlPlane: 'cp',
-  shoot: 'shoot'
+const TargetEnum = {
+  GARDEN: 'garden',
+  CONTROL_PLANE: 'cp',
+  SHOOT: 'shoot'
 }
 
 function Garden ({ auth }) {
@@ -111,10 +111,6 @@ async function readServiceAccountToken ({ coreClient, namespace, serviceAccountN
 function isServiceAccountReady ({ secrets } = {}) {
   const secretName = _.get(_.first(secrets), 'name')
   return !_.isEmpty(secretName)
-}
-
-function getConfigFromBody (body) {
-  return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
 }
 
 async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster }) {
@@ -197,7 +193,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     bindingKind: undefined
   }
 
-  if (target === TARGET.garden) {
+  if (target === TargetEnum.GARDEN) {
     assert.strictEqual(user.isAdmin, true, 'user is not admin')
 
     targetCluster.kubeconfigContextNamespace = namespace
@@ -205,7 +201,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
     targetCluster.bindingKind = 'ClusterRoleBinding'
   } else {
-    if (target === TARGET.shoot) {
+    if (target === TargetEnum.SHOOT) {
       targetCluster.kubeconfigContextNamespace = 'default'
       targetCluster.namespace = undefined // this will create a temporary namespace
       targetCluster.credentials = {
@@ -215,7 +211,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
         }
       }
       targetCluster.bindingKind = 'ClusterRoleBinding'
-    } else if (target === TARGET.controlPlane) {
+    } else if (target === TargetEnum.CONTROL_PLANE) {
       const shootResource = await shoots.read({ user, namespace, name })
       const seedShootNS = getSeedShootNamespace(shootResource)
       const seedName = shootResource.spec.cloud.seed
@@ -234,49 +230,85 @@ async function getTargetCluster ({ user, namespace, name, target }) {
   return targetCluster
 }
 
-async function getHostCluster ({ user, namespace, name, target, body }) {
-  const hostCluster = {
-    namespace: undefined,
-    secretRef: undefined,
-    kubeApiServer: undefined,
-    isHibernated: false // only applicable for shoot clusters
+async function getGardenTerminalHostCluster ({ gardenClient, gardenCoreClient, body }) {
+  const hostCluster = {}
+  hostCluster.config = getImageConfigFromBody(body)
+
+  const [
+    secretRef,
+    kubeApiServer
+  ] = await Promise.all([
+    await getGardenTerminalHostClusterSecretRef({ coreClient: gardenCoreClient }),
+    await getGardenHostClusterKubeApiServer({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots })
+  ])
+
+  hostCluster.namespace = undefined // this will create a temporary namespace
+  hostCluster.secretRef = secretRef
+  hostCluster.kubeApiServer = kubeApiServer
+  return hostCluster
+}
+
+async function getSeedHostCluster ({ gardenClient, gardenCoreClient, namespace, name, target, body }) {
+  const hostCluster = {}
+  hostCluster.config = getImageConfigFromBody(body)
+
+  const shootResource = await shoots.read({ gardenClient, namespace, name })
+  if (target === TargetEnum.SHOOT) {
+    hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
   }
 
-  _.assign(hostCluster, getConfigFromBody(body))
+  const seedShootNS = getSeedShootNamespace(shootResource)
+  const seedName = shootResource.spec.cloud.seed
+  const seed = _.find(getSeeds(), ['metadata.name', seedName])
 
+  hostCluster.namespace = seedShootNS
+  hostCluster.secretRef = _.get(seed, 'spec.secretRef')
+  hostCluster.kubeApiServer = await getKubeApiServerHostForSeed({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots, seed })
+  return hostCluster
+}
+
+async function getShootHostCluster ({ gardenClient, gardenCoreClient, namespace, name, target, body }) {
+  assert.strictEqual(target, TargetEnum.SHOOT, 'unexpected target')
+
+  const hostCluster = {}
+  hostCluster.config = getConfigFromBody(body)
+
+  const shootResource = await shoots.read({ gardenClient, namespace, name })
+  hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
+
+  hostCluster.namespace = undefined // this will create a temporary namespace
+  hostCluster.secretRef = {
+    namespace,
+    name: `${name}.kubeconfig`
+  }
+  hostCluster.kubeApiServer = await getKubeApiServerHostForShoot({ gardenClient, coreClient: gardenCoreClient, shootResource })
+  return hostCluster
+}
+
+function getImageConfigFromBody (body) {
+  return _.pick(body, ['containerImage'])
+}
+
+function getConfigFromBody (body) {
+  return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
+}
+
+function getHostCluster ({ user, namespace, name, target, body }) {
   const gardenClient = Garden(user)
   const gardenCoreClient = Core(user)
 
-  if (target === TARGET.garden) {
-    hostCluster.namespace = undefined // this will create a temporary namespace
-    hostCluster.secretRef = await getGardenTerminalHostClusterSecretRef({ coreClient: gardenCoreClient })
-    hostCluster.kubeApiServer = await getGardenHostClusterKubeApiServer({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots })
-  } else {
-    const shootResource = await shoots.read({ user, namespace, name })
-    if (target === TARGET.shoot) {
-      hostCluster.isHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
-    }
-
-    if (user.isAdmin) { // as admin - host cluser is the seed
-      const seedShootNS = getSeedShootNamespace(shootResource)
-      const seedName = shootResource.spec.cloud.seed
-      const seed = _.find(getSeeds(), ['metadata.name', seedName])
-
-      hostCluster.namespace = seedShootNS
-      hostCluster.secretRef = _.get(seed, 'spec.secretRef')
-      hostCluster.kubeApiServer = await getKubeApiServerHostForSeed({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots, seed })
-    } else { // as enduser - host cluster is the shoot
-      assert.strictEqual(target, TARGET.shoot, 'unexpected target')
-
-      hostCluster.namespace = undefined // this will create a temporary namespace
-      hostCluster.secretRef = {
-        namespace,
-        name: `${name}.kubeconfig`
-      }
-      hostCluster.kubeApiServer = await getKubeApiServerHostForShoot({ gardenClient, coreClient: gardenCoreClient, shootResource })
-    }
+  if (target === TargetEnum.GARDEN) {
+    return getGardenTerminalHostCluster({ gardenClient, gardenCoreClient, body })
   }
-  return hostCluster
+
+  const defaultHost = user.isAdmin ? 'seed' : 'shoot'
+  const preferredHost = _.get(body, 'preferredHost', defaultHost)
+  if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+    return getSeedHostCluster({ gardenClient, gardenCoreClient, namespace, name, target, body })
+  }
+
+  // host cluster is the shoot
+  return getShootHostCluster({ gardenClient, gardenCoreClient, namespace, name, target, body })
 }
 
 async function createTerminal ({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster }) {
@@ -284,7 +316,7 @@ async function createTerminal ({ dashboardClient, user, namespace, name, target,
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, node: hostCluster.node, privileged: hostCluster.privileged, hostPID: hostCluster.hostPID, hostNetwork: hostCluster.hostNetwork })
+  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, ...hostCluster.config })
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
@@ -311,13 +343,13 @@ function getPodLabels (target) {
     'networking.gardener.cloud/to-private-networks': 'allowed'
   }
   switch (target) {
-    case TARGET.garden:
+    case TargetEnum.GARDEN:
       labels = {} // no network restrictions for now
       break
-    case TARGET.controlPlane:
+    case TargetEnum.CONTROL_PLANE:
       labels['networking.gardener.cloud/to-seed-apiserver'] = 'allowed'
       break
-    case TARGET.shoot:
+    case TargetEnum.SHOOT:
       labels['networking.gardener.cloud/to-shoot-apiserver'] = 'allowed'
       labels['networking.gardener.cloud/to-shoot-networks'] = 'allowed'
       break
@@ -382,8 +414,8 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     getTargetCluster({ user, namespace, name, target })
   ])
 
-  if (hostCluster.isHibernated) {
-    throw new Error('Hosting cluster is hibernated')
+  if (hostCluster.isHostOrTargetHibernated) {
+    throw new Error('Hosting cluster or target cluster is hibernated')
   }
 
   const terminalInfo = {
@@ -438,7 +470,7 @@ async function ensureTerminalAllowed ({ isAdmin, target }) {
   }
 
   // non-admin users are only allowed to open terminals for shoots
-  if (target === TARGET.shoot) {
+  if (target === TargetEnum.SHOOT) {
     return
   }
   throw new Forbidden('Terminal usage is not allowed')
@@ -492,19 +524,23 @@ async function keepaliveTerminal ({ dashboardClient, terminal, namespace }) {
 }
 
 exports.config = async function ({ user, namespace, name, target }) {
-  const { secretRef: { namespace: secretNamespace, name: secretName } } = await getHostCluster({ user, namespace, name, target })
-
-  const secret = await Core(user).ns(secretNamespace).secrets.get({ name: secretName })
-  const kubeconfig = decodeBase64(secret.data.kubeconfig)
-  const clientConfig = kubernetes.fromKubeconfig(kubeconfig)
-  const shootCore = kubernetes.core(clientConfig)
-
-  const { items: nodes } = await shootCore.nodes.get({})
-
-  const image = getContainerImage({ isAdmin: user.isAdmin })
-
-  return {
-    nodes: _.map(nodes, node => fromResource(node)),
-    image
+  const config = {
+    image: getContainerImage({ isAdmin: user.isAdmin })
   }
+
+  if (target === TargetEnum.SHOOT) {
+    const gardenClient = Garden(user)
+    const gardenCoreClient = Core(user)
+
+    const { secretRef: { namespace: secretNamespace, name: secretName } } = await getShootHostCluster({ gardenClient, gardenCoreClient, namespace, name, target })
+
+    const secret = await Core(user).ns(secretNamespace).secrets.get({ name: secretName })
+    const kubeconfig = decodeBase64(secret.data.kubeconfig)
+    const clientConfig = kubernetes.fromKubeconfig(kubeconfig)
+    const coreClient = kubernetes.core(clientConfig)
+
+    const { items: nodes } = await coreClient.nodes.get({})
+    config.nodes = _.map(nodes, node => fromResource(node))
+  }
+  return config
 }

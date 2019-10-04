@@ -65,7 +65,7 @@ limitations under the License.
         Image: {{terminalSession.image}}
       </v-tooltip>
 
-      <v-tooltip v-if="privilegedMode !== undefined" top>
+      <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
         <v-btn small flat slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon class="mr-2">mdi-shield-account</v-icon>
           <span>{{privilegedModeText}}</span>
@@ -75,7 +75,7 @@ limitations under the License.
         <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
       </v-tooltip>
 
-      <v-tooltip v-if="terminalSession.node" top>
+      <v-tooltip v-if="terminalSession.node && target === 'shoot'" top>
         <v-btn small flat slot="activator" @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
           <v-icon :size="14" class="mr-2">mdi-server</v-icon>
           <span>{{terminalSession.node}}</span>
@@ -105,6 +105,7 @@ limitations under the License.
       :node="defaultNode"
       :privilegedMode="defaultPrivilegedMode"
       :nodes="config.nodes"
+      :target="target"
     ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </v-layout>
@@ -240,7 +241,8 @@ export default {
       return this.terminalSession.image || this.config.image
     },
     defaultNode () {
-      return this.terminalSession.node || get(head(this.config.nodes), 'data.kubernetesHostname')
+      const defaultNode = find(this.config.nodes, node => node.data.kubernetesHostname === this.terminalSession.node)
+      return get(defaultNode, 'data.kubernetesHostname') //|| get(head(this.config.nodes), 'data.kubernetesHostname')
     },
     defaultPrivilegedMode () {
       return this.privilegedMode || false
@@ -265,10 +267,6 @@ export default {
     heartbeatIntervalSeconds () {
       return get(this.cfg, 'terminal.heartbeatIntervalSeconds', 60)
     },
-    name () {
-      const { name = undefined } = this.$route.params
-      return name
-    },
     privilegedModeText () {
       return this.privilegedMode ? 'Privileged' : 'Unprivileged'
     },
@@ -276,9 +274,17 @@ export default {
       const image = this.terminalSession.image || ''
       return image.substring(image.lastIndexOf('/') + 1)
     },
+    name () {
+      const { name = undefined } = this.$route.params
+      return name
+    },
     namespace () {
       const { namespace } = this.$route.params
       return namespace
+    },
+    target () {
+      const { target } = this.$route.params
+      return target
     }
   },
   methods: {
