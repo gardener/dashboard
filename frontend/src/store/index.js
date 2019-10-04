@@ -81,15 +81,14 @@ const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
-const machineAndVolumeTypePredicate = (item, zones) => {
+const machineAndVolumeTypePredicate = (item, unavailableItems) => {
   if (item.usable === false) {
     return false
   }
-  const itemZones = item.zones
-  if (isEmpty(itemZones) || isEmpty(zones)) {
-    return true
+  if (includes(unavailableItems, item.name)) {
+    return false
   }
-  return difference(zones, itemZones).length === 0
+  return true
 }
 
 const iconForImageName = imageName => {
@@ -129,15 +128,27 @@ const getters = {
   machineTypesByCloudProfileNameAndZones (state, getters) {
     return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, zones))
+      if (cloudProfile) {
+        const machineTypes = cloudProfile.data.machineTypes
+        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
+          return map(zones, 'unavailableMachineTypes')
+        })
+        return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, unavailableItems))
+      }
+      return []
     }
   },
   volumeTypesByCloudProfileNameAndZones (state, getters) {
     return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const volumeTypes = get(cloudProfile, 'data.volumeTypes')
-      return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, zones))
+      if (cloudProfile) {
+        const volumeTypes = cloudProfile.data.volumeTypes
+        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
+          return map(zones, 'unavailableMachineTypes')
+        })
+        return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, unavailableItems))
+      }
+      return []
     }
   },
   machineImagesByCloudProfileName (state, getters) {
@@ -169,8 +180,10 @@ const getters = {
   zonesByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const predicate = item => item.region === region
-      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+      if (cloudProfile) {
+        return map(get(find(cloudProfile.data.regions, { 'name': region }), 'zones'), 'name')
+      }
+      return []
     }
   },
   defaultMachineImageForCloudProfileName (state, getters) {
@@ -218,22 +231,24 @@ const getters = {
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const regionsInCloudProfile = get(cloudProfile, 'data.zones', get(cloudProfile, 'data.countFaultDomains'))
-      const allRegions = uniq(map(regionsInCloudProfile, 'region'))
-      const regionsWithoutSeed = difference(allRegions, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
-      return regionsWithoutSeed
+      if (cloudProfile) {
+        const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
+        const regionsWithoutSeed = difference(regionsInCloudProfile, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+        return regionsWithoutSeed
+      }
+      return []
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), 'name'))
+      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.floatingPools'), 'name'))
+      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.floatingPools'), 'name'))
     }
   },
   infrastructureSecretsByInfrastructureKind (state) {

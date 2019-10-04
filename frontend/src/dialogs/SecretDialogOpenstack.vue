@@ -190,7 +190,8 @@ export default {
     },
     onCloudProfileNameUpdate (cloudProfileName) {
       const cloudProfile = this.cloudProfileByName(cloudProfileName)
-      this.keystoneUrl = get(cloudProfile, 'data.keyStoneURL')
+      console.log(cloudProfile);
+      this.keystoneUrl = get(cloudProfile, 'data.providerConfig.keystoneURL')
     },
     reset () {
       this.$v.$reset()

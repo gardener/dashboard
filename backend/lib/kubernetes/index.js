@@ -149,7 +149,7 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
-  garden2 (options) {
+  gardener (options) {
     const resources = [
       Resources.Shoot.name,
       Resources.Seed.name,
