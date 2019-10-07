@@ -46,16 +46,34 @@ limitations under the License.
     </v-snackbar>
     <v-flex ref="container" class="terminal-container"></v-flex>
     <v-system-bar dark class="systemBar">
-      <v-tooltip top class="ml-2" style="min-width: 110px">
-        <v-layout align-center justify-start row fill-height slot="activator">
-          <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
-            <connected v-if="terminalSession.connectionState === ConnectionState.CONNECTED"></connected>
-            <disconnected v-else></disconnected>
-          </icon-base>
-          <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionText}}</span>
-        </v-layout>
-        {{terminalSession.detailedConnectionStateText || connectionText}}
-      </v-tooltip>
+      <v-menu
+        v-model="connectionMenu"
+        top
+        offset-y
+        dark
+      >
+        <v-tooltip slot="activator" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
+          <v-btn small flat slot="activator" class="text-none grey--text text--lighten-1 systemBarButton">
+            <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+              <connected v-if="terminalSession.connectionState === ConnectionState.CONNECTED"></connected>
+              <disconnected v-else></disconnected>
+            </icon-base>
+            <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionStateText}}</span>
+          </v-btn>
+          {{terminalSession.detailedConnectionStateText || connectionStateText}}
+        </v-tooltip>
+        <v-list>
+          <v-list-tile-action v-if="terminalSession.connectionState === ConnectionState.DISCONNECTED" >
+            <v-btn small slot="activator" flat class="ml-2 mr-2 cyan--text text--darken-2" @click="retry()">
+              <v-icon left>mdi-reload</v-icon>
+              Reconnect
+            </v-btn>
+          </v-list-tile-action>
+          <v-list-tile-content v-else class="ml-2 mr-2">
+            {{terminalSession.detailedConnectionStateText || connectionStateText}}
+          </v-list-tile-content>
+        </v-list>
+      </v-menu>
 
       <v-tooltip v-if="imageShortText" top>
         <v-btn small flat slot="activator" @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
@@ -224,6 +242,7 @@ export default {
         nodeBtn: false,
         settingsBtn: false
       },
+      connectionMenu: false,
       config: {
         image: undefined,
         nodes: []
@@ -242,7 +261,7 @@ export default {
     },
     defaultNode () {
       const defaultNode = find(this.config.nodes, node => node.data.kubernetesHostname === this.terminalSession.node)
-      return get(defaultNode, 'data.kubernetesHostname') //|| get(head(this.config.nodes), 'data.kubernetesHostname')
+      return get(defaultNode, 'data.kubernetesHostname')
     },
     defaultPrivilegedMode () {
       return this.privilegedMode || false
@@ -250,7 +269,7 @@ export default {
     privilegedMode () {
       return this.terminalSession.privileged || this.terminalSession.hostPID || this.terminalSession.hostNetwork
     },
-    connectionText () {
+    connectionStateText () {
       switch (this.terminalSession.connectionState) {
         case ConnectionState.DISCONNECTED:
           return 'Disconnected'
@@ -363,6 +382,7 @@ export default {
     },
     retry () {
       this.snackbarTop = false
+      this.errorSnackbarBottom = false
       return this.connect()
     },
     cancelConnectAndClose () {
@@ -621,5 +641,7 @@ export default {
   .systemBarButton {
     min-width: 20px;
     max-height: 25px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
 </style>

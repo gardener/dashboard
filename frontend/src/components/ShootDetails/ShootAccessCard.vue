@@ -188,7 +188,7 @@ export default {
       return !!this.kubeconfig
     },
     isTerminalTileVisible () {
-      return !isEmpty(this.shootInfo) && this.hasShootTerminalAccess
+      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
     }
   },
   methods: {

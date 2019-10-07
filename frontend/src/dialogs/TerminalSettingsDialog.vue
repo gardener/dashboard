@@ -61,7 +61,7 @@ limitations under the License.
           color="cyan darken-2"
           v-model="selectedPrivilegedMode"
           label="Privileged"
-          hint="When enabled this will schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. In addition, the host root filesystem will be mounted under the path /hostroot."
+          hint="Enabled to schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. The host root filesystem will be mounted under the path <strong>/hostroot.</strong>"
           persistent-hint
           :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
         ></v-switch>
@@ -76,7 +76,7 @@ limitations under the License.
           v-model="selectedNode"
           hint="Node on which the Pod should be scheduled"
           persistent-hint
-          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"g
+          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
         >
           <template slot="item" slot-scope="data">
             <v-list-tile-content>
@@ -152,8 +152,7 @@ export default {
       'isAdmin'
     ]),
     validSettings () {
-      // invalid if not set
-      return !isEmpty(this.selectedContainerImage) && !isEmpty(this.selectedNode) && this.selectedPrivilegedMode !== undefined
+      return !isEmpty(this.selectedContainerImage)
     },
     selectedRunOnShootWorker: {
       get () {
