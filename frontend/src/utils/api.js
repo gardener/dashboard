@@ -29,7 +29,7 @@ function deleteResource (url) {
 }
 
 function createResource (url, data) {
-  return axios.post(url, data)
+  return callResourceMethod(url, data)
 }
 
 function updateResource (url, data) {
@@ -38,6 +38,10 @@ function updateResource (url, data) {
 
 function patchResource (url, data) {
   return axios.patch(url, data)
+}
+
+function callResourceMethod (url, data) {
+  return axios.post(url, data)
 }
 
 /* Infrastructures Secrets */
@@ -216,45 +220,41 @@ export function getInfo () {
 /* Terminals */
 
 export function createTerminal ({ namespace, name, target, body }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  target = encodeURIComponent(target)
-  if (target === 'garden') {
-    return createResource(`/api/namespaces/${namespace}/terminals/${target}`, body)
-  } else {
-    return createResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`, body)
-  }
+  return invokeTerminalMethod('create', { namespace, name, target, body })
 }
 
-export function deleteTerminal ({ namespace, name, target }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  target = encodeURIComponent(target)
-  if (target === 'garden') {
-    deleteResource(`/api/namespaces/${namespace}/terminals/${target}`)
-  } else {
-    deleteResource(`/api/namespaces/${namespace}/terminals/${target}/${name}`)
-  }
+export function deleteTerminal ({ namespace, name, target, body }) {
+  return invokeTerminalMethod('remove', { namespace, name, target, body })
 }
 
 export function heartbeat ({ namespace, name, target, body }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  target = encodeURIComponent(target)
-  if (target === 'garden') {
-    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/heartbeat`, body)
-  } else {
-    return updateResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/heartbeat`, body)
-  }
+  return invokeTerminalMethod('heartbeat', { namespace, name, target, body })
 }
 
 export function terminalConfig ({ namespace, name, target }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   target = encodeURIComponent(target)
-  if (target === 'garden') {
-    return getResource(`/api/namespaces/${namespace}/terminals/${target}/config`)
-  } else {
-    return getResource(`/api/namespaces/${namespace}/terminals/${target}/${name}/config`)
+
+  let pathname = `/api/namespaces/${namespace}/terminals/${target}`
+  if (target !== 'garden') {
+    pathname += `/${name}`
   }
+  pathname += '/config'
+  return getResource(pathname)
+}
+
+function invokeTerminalMethod (method, { namespace, name, target, body }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  target = encodeURIComponent(target)
+
+  let pathname = `/api/namespaces/${namespace}/terminals/${target}`
+  if (target !== 'garden') {
+    pathname += `/${name}`
+  }
+  return callResourceMethod(pathname, {
+    method,
+    params: body
+  })
 }

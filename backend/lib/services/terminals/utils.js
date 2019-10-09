@@ -40,26 +40,25 @@ async function getGardenTerminalHostClusterSecretRef ({ coreClient }) {
 
   switch (refType) {
     case GardenTerminalHostRefType.SECRET_REF: {
-      try {
-        const { items: runtimeSecrets } = await getGardenTerminalHostClusterSecrets({ coreClient })
-        const secret = _.head(runtimeSecrets)
-        return {
-          namespace: secret.metadata.namespace,
-          name: secret.metadata.name
-        }
-      } catch (err) {
-        throw new Error('could not fetch garden runtime secret', err)
+      const { items: runtimeSecrets } = await getGardenTerminalHostClusterSecrets({ coreClient })
+      const secret = _.head(runtimeSecrets)
+      return {
+        namespace: secret.metadata.namespace,
+        name: secret.metadata.name
       }
-    } case GardenTerminalHostRefType.SEED_REF: {
+    }
+    case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
       return _.get(seed, 'spec.secretRef')
-    } case GardenTerminalHostRefType.SHOOT_REF: {
+    }
+    case GardenTerminalHostRefType.SHOOT_REF: {
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
       return {
         namespace: getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden'),
         name: `${shootName}.kubeconfig`
       }
-    } default:
+    }
+    default:
       assert.fail(`unknown refType ${refType}`)
   }
 }
@@ -79,15 +78,18 @@ async function getGardenHostClusterKubeApiServer ({ gardenClient, coreClient, sh
   switch (refType) {
     case GardenTerminalHostRefType.SECRET_REF: {
       return getConfigValue('terminal.gardenTerminalHost.apiServerIngressHost')
-    } case GardenTerminalHostRefType.SEED_REF: {
+    }
+    case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
       return getKubeApiServerHostForSeed({ gardenClient, coreClient, shootsService, seed })
-    } case GardenTerminalHostRefType.SHOOT_REF: {
+    }
+    case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
       const shootResource = await shootsService.read({ gardenClient, namespace, name: shootName })
       return getKubeApiServerHostForShoot({ gardenClient, coreClient, shootResource })
-    } default:
+    }
+    default:
       assert.fail(`unknown refType ${refType}`)
   }
 }
@@ -120,12 +122,16 @@ async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootRe
 }
 
 function getGardenTerminalHostClusterRefType () {
-  const gardenTerminalHostConfig = getConfigValue('terminal.gardenTerminalHost')
-  return _.head(_.intersection(_.keys(gardenTerminalHostConfig), ['secretRef', 'seedRef', 'shootRef']))
+  return _.chain(getConfigValue('terminal.gardenTerminalHost'))
+    .keys()
+    .intersection(['secretRef', 'seedRef', 'shootRef'])
+    .head()
+    .value()
 }
 
 function getGardenTerminalHostClusterSecrets ({ coreClient }) {
   const namespace = getConfigValue('terminal.gardenTerminalHost.secretRef.namespace', 'garden')
+  assert.ok(namespace, 'namespace must be set')
   const labelSelector = getConfigValue('terminal.gardenTerminalHost.secretRef.labelSelector', ['runtime=gardenTerminalHost'])
   const qs = { labelSelector: labelSelector.join(',') }
   return coreClient.ns(namespace).secrets.get({ qs })

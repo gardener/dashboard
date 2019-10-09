@@ -24,8 +24,7 @@ const { journals } = require('../services')
 const _ = require('lodash')
 const {
   bootstrapResource,
-  isBootstrapPending,
-  removeFromToBeBoostrappedQueue
+  bootstrapPending
 } = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
@@ -55,13 +54,13 @@ module.exports = io => {
         bootstrapResource(shoot)
         break
       case 'MODIFIED':
-        if (isBootstrapPending(shoot)) {
+        if (bootstrapPending.containsResource(shoot)) {
           bootstrapResource(shoot)
         }
         break
       case 'DELETED':
-        if (isBootstrapPending(shoot)) {
-          removeFromToBeBoostrappedQueue(shoot)
+        if (bootstrapPending.containsResource(shoot)) {
+          bootstrapPending.removeResource(shoot)
         }
 
         try {

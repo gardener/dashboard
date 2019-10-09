@@ -46,7 +46,30 @@ const { getSeeds } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
-const toBeBootstrapped = new Set()
+class BootstrapPendingSet extends Set {
+  _keyForResource (resource) {
+    const kind = resource.kind
+    const { metadata: { name, namespace } } = resource
+    return `${kind}/${namespace}/${name}`
+  }
+
+  containsResource (resource) {
+    const key = this._keyForResource(resource)
+    return this.has(key)
+  }
+
+  removeResource (resource) {
+    const key = this._keyForResource(resource)
+    return this.delete(key)
+  }
+
+  addResource (resource) {
+    const key = this._keyForResource(resource)
+    this.add(key)
+    return key
+  }
+}
+const bootstrapPending = new BootstrapPendingSet()
 
 class Handler {
   constructor (fn, description) {
@@ -70,22 +93,6 @@ function seedShootNsExists (resource) {
     Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
   */
   return _.get(resource, 'status.technicalID') && _.get(resource, 'status.lastOperation.progress', 0) > 10
-}
-
-function keyForResource (resource) {
-  const kind = resource.kind
-  const { metadata: { name, namespace } } = resource
-  return `${kind}/${namespace}/${name}`
-}
-
-function isBootstrapPending (resource) {
-  const key = keyForResource(resource)
-  return toBeBootstrapped.has(key)
-}
-
-function removeFromToBeBoostrappedQueue (resource) {
-  const key = keyForResource(resource)
-  return toBeBootstrapped.delete(key)
 }
 
 async function replaceResource ({ client, name, body }) {
@@ -363,7 +370,7 @@ function isTerminalBootstrapDisabled () {
 }
 
 function isTerminalBootstrapDisabledForKind (kind) {
-  kind = kind.replace(/^\w/, c => c.toLowerCase()) // lower first character (Shoot -> shoot)
+  kind = _.lowerFirst(kind) // lower first character (Shoot -> shoot)
   return _.get(config, `terminal.bootstrap.${kind}Disabled`, false)
 }
 
@@ -372,13 +379,13 @@ function verifyRequiredConfigExists () {
     logger.debug('terminal bootstrap disabled by config')
     return false // no further checks needed, bootstrapping is disabled
   }
-  const requiredConfigs = [
+  let requiredConfigs = [
     'terminal.bootstrap.apiServerIngress.annotations'
   ]
   if (!isTerminalBootstrapDisabledForKind('gardenTerminalHost')) {
     // bootstrapping of gardenTerminalHost only makes sense when using terminal.gardenTerminalHost.secretRef (for which default values exist)
     // for refType "secretRef", the apiServerIngressHost config is required as it cannot be determined automatically
-    requiredConfigs.concat([
+    requiredConfigs = requiredConfigs.concat([
       'terminal.gardenTerminalHost.apiServerIngressHost',
       'terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations'
     ])
@@ -409,23 +416,23 @@ function bootstrapResource (resource) {
   const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
   if (isBootstrapDisabledForResource) {
     const name = resource.metadata.name
-    logger.debug(`terminal bootstrap disabled for seed ${name}`)
+    const namespace = _.get(resource, 'metadata.namespace', '')
+    logger.debug(`terminal bootstrap disabled for ${kind} ${namespace}/${name}`)
     return
   }
 
   // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
   if (kind === 'Shoot' && !seedShootNsExists(resource)) {
-    if (isBootstrapPending(resource)) {
+    if (bootstrapPending.containsResource(resource)) {
       return
     }
-    const key = keyForResource(resource)
+    const key = bootstrapPending.addResource(resource)
     logger.debug(`bootstrapping of ${key} postponed`)
-    toBeBootstrapped.add(key)
     return
   }
 
-  if (isBootstrapPending(resource)) {
-    removeFromToBeBoostrappedQueue(resource)
+  if (bootstrapPending.containsResource(resource)) {
+    bootstrapPending.removeResource(resource)
   }
 
   const description = `${kind} - ${resource.metadata.name}`
@@ -479,6 +486,5 @@ if (bootstrapKindAllowed('gardenTerminalHost')) {
 
 module.exports = {
   bootstrapResource,
-  isBootstrapPending,
-  removeFromToBeBoostrappedQueue
+  bootstrapPending
 }

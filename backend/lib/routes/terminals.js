@@ -18,6 +18,7 @@
 
 const express = require('express')
 const { terminals, authorization } = require('../services')
+const _ = require('lodash')
 
 const router = module.exports = express.Router({
   mergeParams: true
@@ -43,30 +44,12 @@ router.route('/:name?')
     try {
       const user = req.user
       const { namespace, name, target } = req.params
-      const body = req.body
-      res.send(await terminals.create({ user, namespace, name, target, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
-  .delete(async (req, res, next) => {
-    try {
-      const user = req.user
-      const { namespace, name, target } = req.params
-      const body = req.body
-      res.send(await terminals.remove({ user, namespace, name, target, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
+      const { method, params: body } = req.body
 
-router.route('/:name?/heartbeat')
-  .put(async (req, res, next) => {
-    try {
-      const user = req.user
-      const { namespace, name, target } = req.params
-      const body = req.body
-      res.send(await terminals.heartbeat({ user, namespace, name, target, body }))
+      if (!_.includes(['create', 'remove', 'heartbeat'], method)) {
+        throw new Error(`${method} not allowed for terminals`)
+      }
+      res.send(await terminals[method]({ user, namespace, name, target, body }))
     } catch (err) {
       next(err)
     }

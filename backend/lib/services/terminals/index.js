@@ -61,7 +61,7 @@ function Core ({ auth }) {
   return kubernetes.core({ auth })
 }
 
-function fromResource ({ metadata, status = {} }) {
+function fromNodeResource ({ metadata, status = {} }) {
   const { name, creationTimestamp, labels } = metadata
   const version = _.get(status, 'nodeInfo.kubeletVersion')
   const conditions = _.get(status, 'conditions')
@@ -125,11 +125,11 @@ async function findExistingTerminalResource ({ dashboardClient, username, namesp
   const qs = { labelSelector: selectors.join(',') }
 
   let { items: existingTerminals } = await dashboardClient.ns(namespace).terminals.get({ qs })
-  existingTerminals = _.chain(existingTerminals)
+  return _.chain(existingTerminals)
     .filter(terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
     .filter(terminal => terminal.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
+    .head(existingTerminals)
     .value()
-  return _.head(existingTerminals)
 }
 
 async function findExistingTerminal ({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
@@ -327,11 +327,8 @@ async function createTerminal ({ dashboardClient, user, namespace, name, target,
   if (!_.isEmpty(name)) {
     labels['garden.sapcloud.io/name'] = name
   }
-  const annotations = {
-    'dashboard.gardener.cloud/targetNamespace': terminalTarget.kubeconfigContextNamespace
-  }
   const prefix = `term-${target}-`
-  const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
+  const terminalResource = toTerminalResource({ prefix, namespace, labels, host: terminalHost, target: terminalTarget })
 
   return dashboardClient.ns(namespace).terminals.post({ body: terminalResource })
 }
@@ -435,8 +432,9 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
     _.assign(terminalInfo, _.pick(existingTerminal, ['pod', 'token', 'namespace']))
-    keepaliveTerminal({ dashboardClient, terminal: existingTerminal.terminal, namespace })
-      .catch(err => logger.error('failed to keepalive terminal', err))
+    // do not wait for keepalive to return - run in parallel
+    setKeepaliveAnnotation({ dashboardClient, terminal: existingTerminal.terminal, namespace })
+      .catch(_.noop) // ignore error
     return terminalInfo
   }
 
@@ -507,10 +505,11 @@ exports.heartbeat = async function ({ user, namespace, name, target, body = {} }
     throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
   }
 
-  return keepaliveTerminal({ dashboardClient, terminal, namespace })
+  await setKeepaliveAnnotation({ dashboardClient, terminal, namespace })
+  return { ok: true }
 }
 
-async function keepaliveTerminal ({ dashboardClient, terminal, namespace }) {
+async function setKeepaliveAnnotation ({ dashboardClient, terminal, namespace }) {
   const annotations = {
     'dashboard.gardener.cloud/operation': `keepalive`
   }
@@ -534,13 +533,13 @@ exports.config = async function ({ user, namespace, name, target }) {
 
     const { secretRef: { namespace: secretNamespace, name: secretName } } = await getShootHostCluster({ gardenClient, gardenCoreClient, namespace, name, target })
 
-    const secret = await Core(user).ns(secretNamespace).secrets.get({ name: secretName })
+    const secret = await gardenCoreClient.ns(secretNamespace).secrets.get({ name: secretName })
     const kubeconfig = decodeBase64(secret.data.kubeconfig)
     const clientConfig = kubernetes.fromKubeconfig(kubeconfig)
     const coreClient = kubernetes.core(clientConfig)
 
     const { items: nodes } = await coreClient.nodes.get({})
-    config.nodes = _.map(nodes, node => fromResource(node))
+    config.nodes = _.map(nodes, node => fromNodeResource(node))
   }
   return config
 }
