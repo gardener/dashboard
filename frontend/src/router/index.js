@@ -79,6 +79,7 @@ export default function createRouter ({ store, userManager }) {
    */
   const shootItemTabs = [
     {
+      key: 'shootOverview',
       title: 'Overview',
       to: ({ params }) => {
         return {
@@ -88,6 +89,7 @@ export default function createRouter ({ store, userManager }) {
       }
     },
     {
+      key: 'shootYaml',
       title: 'YAML',
       to: ({ params }) => {
         return {
@@ -99,6 +101,7 @@ export default function createRouter ({ store, userManager }) {
   ]
   const newShootTabs = [
     {
+      key: 'newShootOverview',
       title: 'Overview',
       to: ({ params }) => {
         return {
@@ -108,6 +111,7 @@ export default function createRouter ({ store, userManager }) {
       }
     },
     {
+      key: 'newShootYaml',
       title: 'YAML',
       to: ({ params }) => {
         return {
@@ -131,6 +135,7 @@ export default function createRouter ({ store, userManager }) {
 
     if (hasControlPlaneTerminalAccess()) {
       tabs.push({
+        key: 'terminalControlPlane',
         title: 'Control Plane',
         to: (route) => {
           const params = cloneDeep(route.params)
@@ -145,6 +150,7 @@ export default function createRouter ({ store, userManager }) {
 
     if (hasShootTerminalAccess()) {
       tabs.push({
+        key: 'terminalCluster',
         title: 'Cluster',
         to: (route) => {
           const params = cloneDeep(route.params)

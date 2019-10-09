@@ -19,7 +19,7 @@ limitations under the License.
     <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
       <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
     </v-alert>
-    <router-view></router-view>
+    <router-view :key="key"></router-view>
   </v-content>
 </template>
 
@@ -68,7 +68,14 @@ export default {
       }
       const dirty = marked(this.alertBannerMessage, options)
       return DOMPurify.sanitize(dirty)
+    },
+    key () {
+      if (this.$route.name !== 'ShootItemTerminal') {
+        return undefined
+      }
+      return this.$route.path
     }
+
   },
   methods: {
     ...mapActions([
