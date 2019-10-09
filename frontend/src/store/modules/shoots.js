@@ -34,12 +34,13 @@ import join from 'lodash/join'
 import set from 'lodash/set'
 import head from 'lodash/head'
 import sample from 'lodash/sample'
+import compact from 'lodash/compact'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
-import { getCloudProviderTemplate } from '@/utils/createShoot'
+import { getCloudProviderTemplate, getZonesObjectArray } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   isUserError,
@@ -227,6 +228,7 @@ const actions = {
     const shootResource = {
       apiVersion: 'core.gardener.cloud/v1alpha1',
       kind: 'Shoot',
+      metadata: {},
       spec: {
         networking: {
           type: 'calico',
@@ -238,8 +240,7 @@ const actions = {
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, 'spec.provider.type', infrastructureKind)
-    // set(shootResource, ['spec', 'cloud', infrastructureKind], getCloudProviderTemplate(infrastructureKind))
+    set(shootResource, ['spec', 'provider'], getCloudProviderTemplate(infrastructureKind))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
@@ -250,9 +251,9 @@ const actions = {
     const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.region', region)
 
-    const zones = [sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
+    const zones = compact([sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))])
     if (!isEmpty(zones)) {
-      set(shootResource, 'spec.provider.zones', zones)
+      set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', getZonesObjectArray(zones))
     }
 
     const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))

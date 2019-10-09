@@ -118,13 +118,17 @@ import CloudProfile from '@/components/CloudProfile'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
+import { getZonesObjectArray } from '@/utils/createShoot'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import map from 'lodash/map'
+import compact from 'lodash/compact'
 import isEmpty from 'lodash/isEmpty'
 import sample from 'lodash/sample'
 import concat from 'lodash/concat'
 import includes from 'lodash/includes'
+import find from 'lodash/find'
 import forEach from 'lodash/forEach'
 import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
@@ -158,7 +162,7 @@ const validations = {
   },
   zones: {
     required: requiredIf(function () {
-      return this.infrastructureKind === 'azure'
+      return this.infrastructureKind !== 'azure'
     })
   },
   floatingPoolName: {
@@ -192,6 +196,7 @@ export default {
       cloudProfileName: undefined,
       secret: undefined,
       zones: undefined,
+      zoneObjects: undefined,
       region: undefined,
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
@@ -329,7 +334,8 @@ export default {
       this.onUpdateCloudProfileName()
     },
     setDefaultZone () {
-      this.zones = [sample(this.allZones)]
+      this.zones = compact([sample(this.allZones)])
+      this.zoneObjects = undefined
     },
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
@@ -380,21 +386,33 @@ export default {
       }
     },
     getInfrastructureData () {
+      // keep CIDR settings if no new zone added...
+      let zoneObjects
+      if (this.zones) {
+        zoneObjects = compact(map(this.zones, zone => {
+          return find(this.zoneObjects, { name: zone })
+        }))
+        if (zoneObjects.length !== this.zones.length) {
+          // default CIDRs otherwise
+          zoneObjects = getZonesObjectArray(this.zones)
+        }
+      }
       return {
         infrastructureKind: this.infrastructureKind,
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
-        zones: this.zones,
         region: this.region,
+        zoneObjects,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, zones, region, floatingPoolName, loadBalancerProviderName }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, zoneObjects, region, floatingPoolName, loadBalancerProviderName }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
-      this.zones = zones
+      this.zoneObjects = zoneObjects
+      this.zones = map(zoneObjects, 'name')
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName

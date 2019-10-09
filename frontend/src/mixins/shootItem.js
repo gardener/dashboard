@@ -80,7 +80,7 @@ export const shootItem = {
       return this.shootSpec.cloudProfileName
     },
     shootCloudProviderKind () {
-      return this.shootSpec.provider.type
+      return get(this.shootSpec, 'provider.type')
     },
     shootWorkerGroups () {
       return get(this.shootSpec, 'provider.workers', [])

@@ -14,65 +14,121 @@
 // limitations under the License.
 //
 
+import map from 'lodash/map'
+
+export function getZonesObjectArray (zones) {
+  switch (zones.length) {
+    case 1:
+      return [{
+        name: zones[0],
+        internal: '10.250.112.0/22',
+        public: '10.250.96.0/22',
+        workers: '10.250.0.0/19'
+      }]
+    case 2:
+      return [{
+        name: zones[0],
+        internal: '10.250.112.0/23',
+        public: '10.250.96.0/23',
+        workers: '10.250.0.0/20'
+      },
+      {
+        name: zones[1],
+        internal: '10.250.114.0/23',
+        public: '10.250.98.0/23',
+        workers: '10.250.16.0/20'
+      }]
+    case 3:
+      return [{
+        name: zones[0],
+        internal: '10.250.112.0/24',
+        public: '10.250.96.0/24',
+        workers: '10.250.0.0/21'
+      },
+      {
+        name: zones[1],
+        internal: '10.250.113.0/24',
+        public: '10.250.97.0/24',
+        workers: '10.250.8.0/21'
+      },
+      {
+        name: zones[2],
+        internal: '10.250.114.0/24',
+        public: '10.250.98.0/24',
+        workers: '10.250.16.0/21'
+      }]
+    default:
+      return map(zones, zone => {
+        return {
+          name: zone
+        }
+      })
+  }
+}
+
 export function getCloudProviderTemplate (infrastructureKind) {
   switch (infrastructureKind) {
     case 'aws':
       return {
-        networks: {
-          vpc: {
-            cidr: '10.250.0.0/16'
-          },
-          internal: [
-            '10.250.112.0/22'
-          ],
-          nodes: '10.250.0.0/16',
-          public: [
-            '10.250.96.0/22'
-          ],
-          workers: [
-            '10.250.0.0/19'
-          ]
+        type: 'aws',
+        infrastructureConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: '10.250.0.0/16'
+            }
+          }
         }
       }
     case 'azure':
       return {
-        networks: {
-          vnet: {
-            cidr: '10.250.0.0/16'
-          },
-          nodes: '10.250.0.0/19',
-          public: '10.250.96.0/22',
-          workers: '10.250.0.0/19'
+        type: 'azure',
+        infrastructureConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vnet: {
+              name: 'my-vnet',
+              cidr: '10.250.0.0/16'
+            },
+            workers: '10.250.0.0/19'
+          }
         }
       }
     case 'gcp':
       return {
-        networks: {
-          nodes: '10.250.0.0/19',
-          workers: [
-            '10.250.0.0/19'
-          ]
+        type: 'gcp',
+        infrastructureConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            worker: '10.242.0.0/19'
+          }
         }
       }
     case 'openstack':
       return {
-        networks: {
-          nodes: '10.250.0.0/19',
-          workers: [
-            '10.250.0.0/19'
-          ]
+        type: 'openstack',
+        infrastructureConfig: {
+          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            worker: '10.250.0.0/19'
+          }
         }
       }
     case 'alicloud':
       return {
-        networks: {
-          vpc: {
-            cidr: '10.250.0.0/16'
-          },
-          nodes: '10.250.0.0/16',
-          workers: [
-            '10.250.0.0/19'
-          ]
+        type: 'aws',
+        infrastructureConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig',
+          networks: {
+            vpc: {
+              cidr: '10.250.0.0/16'
+            }
+          }
         }
       }
   }
