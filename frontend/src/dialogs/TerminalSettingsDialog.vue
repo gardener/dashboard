@@ -20,8 +20,7 @@ limitations under the License.
     :confirm-disabled="!validSettings"
     :errorMessage.sync="errorMessage"
     :detailedErrorMessage.sync="detailedErrorMessage"
-    @showDialog="onShowDialog"
-    max-width="750"
+    max-width="750px"
     max-height="100vh"
     defaultColor="cyan-darken-2"
     ref="gDialog"
@@ -63,20 +62,22 @@ limitations under the License.
           label="Privileged"
           hint="Enable to schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. The host root filesystem will be mounted under the path <strong>/hostroot.</strong>"
           persistent-hint
-          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
+          :class="{ 'ml-4': isAdmin }"
+          class="ml-2"
         ></v-switch>
         <v-select
           :disabled="!selectedRunOnShootWorker"
           no-data-text="No workers available"
           color="cyan darken-2"
           label="Node"
-          placeholder="Select worker node..."
+          placeholder="Change worker node..."
           :items="nodes"
           item-value="data.kubernetesHostname"
           v-model="selectedNode"
           hint="Node on which the Pod should be scheduled"
           persistent-hint
-          :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
+          :class="{ 'ml-4': isAdmin }"
+          class="ml-2"
         >
           <template slot="item" slot-scope="data">
             <v-list-tile-content>
@@ -87,7 +88,7 @@ limitations under the License.
             </v-list-tile-content>
           </template>
           <template slot="selection" slot-scope="data">
-            <span :class="`${nodeTextColor}--text ml-2`">
+            <span :class="nodeTextColor" class="ml-2">
             {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
             </span>
           </template>
@@ -121,18 +122,6 @@ export default {
     TimeString
   },
   props: {
-    image: {
-      type: String
-    },
-    node: {
-      type: String
-    },
-    nodes: {
-      type: Array
-    },
-    privilegedMode: {
-      type: Boolean
-    },
     target: {
       type: String
     }
@@ -144,7 +133,8 @@ export default {
       selectedNode: undefined,
       selectedPrivilegedMode: undefined,
       errorMessage: undefined,
-      detailedErrorMessage: undefined
+      detailedErrorMessage: undefined,
+      nodes: []
     }
   },
   computed: {
@@ -167,11 +157,13 @@ export default {
       }
     },
     nodeTextColor () {
-      return this.selectedRunOnShootWorker ? 'black' : 'grey'
+      return this.selectedRunOnShootWorker ? 'black--text' : 'grey--text'
     }
   },
   methods: {
-    async confirmWithDialog () {
+    async promptForConfigurationChange (initialState) {
+      this.initialize(initialState)
+
       const confirmed = await this.$refs.gDialog.confirmWithDialog()
       if (confirmed) {
         const selectedConfig = {
@@ -191,22 +183,14 @@ export default {
         return undefined
       }
     },
-    onShowDialog () {
-      this.reset()
-    },
-    hideDialog () {
-      this.$refs.gDialog.hideDialog()
-    },
-    showDialog () {
-      this.$refs.gDialog.showDialog()
-    },
-    reset () {
-      this.selectedContainerImage = this.image
-      this.selectedNode = this.node
-      this.selectedPrivilegedMode = this.privilegedMode
+    initialize ({ image, node, privilegedMode, nodes }) {
+      this.selectedContainerImage = image
+      this.selectedNode = node
+      this.selectedPrivilegedMode = privilegedMode
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
-      const selectedNodeIsShootWorker = !!find(this.nodes, node => node.data.kubernetesHostname === this.selectedNode)
+      this.nodes = nodes
+      const selectedNodeIsShootWorker = !!find(this.nodes, ['data.kubernetesHostname', this.selectedNode])
       if (!this.isAdmin) {
         this.selectedRunOnShootWorkerInternal = true
       } else {

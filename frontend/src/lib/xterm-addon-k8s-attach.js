@@ -53,9 +53,7 @@ class K8sAttachAddon {
     )
 
     if (this._bidirectional) {
-      this._disposables.push(terminal.onData(data => {
-        this._sendData(data)
-      }))
+      this._disposables.push(terminal.onData(data => this._sendData(data)))
     }
 
     this._disposables.push(addSocketListener(this._socket, 'close', () => this.dispose()))

@@ -119,10 +119,6 @@ limitations under the License.
     </v-system-bar>
     <terminal-settings-dialog
       ref="settings"
-      :image="defaultImage"
-      :node="defaultNode"
-      :privilegedMode="defaultPrivilegedMode"
-      :nodes="config.nodes"
       :target="target"
     ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
@@ -168,20 +164,6 @@ const ConnectionState = {
   CONNECTED: 3
 }
 
-function remoteCommandAttachOrExecuteProtocols ({ token }) {
-  const protocols = ['v4.channel.k8s.io']
-  addBearerToken(protocols, token)
-
-  return protocols
-}
-
-function watchPodProtocols ({ token }) {
-  const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-  addBearerToken(protocols, token)
-
-  return protocols
-}
-
 function addBearerToken (protocols, bearer) {
   protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
   return protocols
@@ -204,7 +186,9 @@ function closeWsIfNotClosed (ws) {
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {
-  const stateType = head(intersection(keys(get(terminalContainerStatus, 'state'), ['waiting', 'running', 'terminated'])))
+  const state = get(terminalContainerStatus, 'state')
+  const stateKeys = intersection(['waiting', 'running', 'terminated'], keys(state))
+  const stateType = head(stateKeys)
 
   let text = ''
   if (!stateType) {
@@ -260,7 +244,7 @@ export default {
       return this.terminalSession.image || this.config.image
     },
     defaultNode () {
-      const defaultNode = find(this.config.nodes, node => node.data.kubernetesHostname === this.terminalSession.node)
+      const defaultNode = find(this.config.nodes, ['data.kubernetesHostname', this.terminalSession.node])
       return get(defaultNode, 'data.kubernetesHostname')
     },
     defaultPrivilegedMode () {
@@ -338,7 +322,13 @@ export default {
         this.loading[refName] = false
       }
 
-      const selectedConfig = await this.$refs.settings.confirmWithDialog()
+      const initialState = {
+        image: this.defaultImage,
+        node: this.defaultNode,
+        privilegedMode: this.defaultPrivilegedMode,
+        nodes: this.config.nodes
+      }
+      const selectedConfig = await this.$refs.settings.promptForConfigurationChange(initialState)
       if (selectedConfig) {
         this.cancelConnectAndClose()
 
@@ -442,7 +432,8 @@ export default {
             return
           }
 
-          const ws = new WebSocket(attachUri(terminalData), remoteCommandAttachOrExecuteProtocols(terminalData))
+          const protocols = addBearerToken(['v4.channel.k8s.io'], terminalData.token)
+          const ws = new WebSocket(attachUri(terminalData), protocols)
           const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
           this.term.loadAddon(attachAddon)
           let reconnectTimeoutId
@@ -518,7 +509,9 @@ export default {
     },
     waitUntilPodIsRunning (terminalData, timeoutSeconds) {
       return new Promise((resolve, reject) => {
-        const ws = new WebSocket(watchPodUri(terminalData), watchPodProtocols(terminalData))
+        const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
+        addBearerToken(protocols, terminalData.token)
+        const ws = new WebSocket(watchPodUri(terminalData), protocols)
         const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
 
         ws.addEventListener('message', ({ data: message }) => {
