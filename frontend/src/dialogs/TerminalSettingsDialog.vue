@@ -21,7 +21,7 @@ limitations under the License.
     :errorMessage.sync="errorMessage"
     :detailedErrorMessage.sync="detailedErrorMessage"
     @showDialog="onShowDialog"
-    max-width="600"
+    max-width="750"
     max-height="100vh"
     defaultColor="cyan-darken-2"
     ref="gDialog"
@@ -61,7 +61,7 @@ limitations under the License.
           color="cyan darken-2"
           v-model="selectedPrivilegedMode"
           label="Privileged"
-          hint="Enabled to schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. The host root filesystem will be mounted under the path <strong>/hostroot.</strong>"
+          hint="Enable to schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. The host root filesystem will be mounted under the path <strong>/hostroot.</strong>"
           persistent-hint
           :class="`${isAdmin ? 'ml-4' : ''} mt-2`"
         ></v-switch>
@@ -94,14 +94,14 @@ limitations under the License.
         </v-select>
         <v-alert
           v-if="isAdmin && selectedRunOnShootWorker"
-          class="ml-4 mt-2 mb-2"
+          class="ml-4 mt-4 mb-2"
           :value="true"
           type="info"
           color="cyan darken-2"
           outline
         >
-          <strong>Do not enter sensitive data within the terminal session.</strong><br/>
-          The pod will be running on one of the worker nodes where cluster owners have access to.
+          <strong>Terminal will be running in an untrusted environment!</strong><br>
+          Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
         </v-alert>
       </template>
     </template>
