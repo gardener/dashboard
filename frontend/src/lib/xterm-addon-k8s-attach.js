@@ -96,7 +96,7 @@ class K8sAttachAddon {
         switch (channel) {
           case ChannelEnum.STD_OUT:
           case ChannelEnum.STD_ERR:
-            displayData(terminal, data)
+            terminal.write(data)
             break
           case ChannelEnum.ERR:
             try {
@@ -149,10 +149,6 @@ function addSocketListener (socket, type, handler) {
       socket.removeEventListener(type, handler)
     }
   }
-}
-
-function displayData (terminal, str, data) {
-  terminal.write(str || data)
 }
 
 module.exports = { K8sAttachAddon, WsReadyStateEnum }
