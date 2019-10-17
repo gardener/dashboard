@@ -52,7 +52,10 @@ function cleanKubeconfig (input) {
       users: _.map(users, cleanAuthInfo)
     }
   }
-  return yaml.safeDump(cleanConfig(yaml.safeLoad(input)))
+  if (_.isString(input)) {
+    input = yaml.safeLoad(input)
+  }
+  return cleanConfig(input)
 }
 
 function decodeBase64 (value) {

@@ -27,9 +27,10 @@ BaseObject.prototype.mergePatch = mergePatch
 BaseObject.prototype.jsonPatch = jsonPatch
 const ApiGroup = require('kubernetes-client/lib/api-group')
 const kubernetesClient = require('kubernetes-client')
-const yaml = require('js-yaml')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
+const { cleanKubeconfig } = require('../utils')
+
 const {
   Api,
   ApiExtensions,
@@ -103,7 +104,7 @@ module.exports = {
   kubernetesClient,
   Resources,
   fromKubeconfig (kubeconfig) {
-    return fromKubeconfig(yaml.safeLoad(kubeconfig))
+    return fromKubeconfig(cleanKubeconfig(kubeconfig))
   },
   core (options) {
     return new Core(credentials(options))

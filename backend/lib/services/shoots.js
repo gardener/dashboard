@@ -22,6 +22,7 @@ const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
+const yaml = require('js-yaml')
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -246,7 +247,11 @@ exports.info = async function ({ user, namespace, name }) {
       .forEach((value, key) => {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
-          data[key] = cleanKubeconfig(value)
+          try {
+            data[key] = yaml.safeDump(cleanKubeconfig(value))
+          } catch (err) {
+            logger.error('failed to clean kubeconfig', err)
+          }
         } else {
           data[`cluster_${key}`] = value
         }

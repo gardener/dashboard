@@ -17,7 +17,6 @@
 'use strict'
 
 const { cleanKubeconfig } = require('../lib/utils')
-const { safeDump, safeLoad } = require('js-yaml')
 const { merge } = require('lodash')
 
 describe('utils', function () {
@@ -75,8 +74,7 @@ describe('utils', function () {
         }]
       }
       const extendedKubeconfig = merge({}, kubeconfig, kubeconfigExtensions)
-      const cleanedKubeconfig = safeLoad(cleanKubeconfig(safeDump(extendedKubeconfig)))
-      expect(cleanedKubeconfig).to.eql(kubeconfig)
+      expect(cleanKubeconfig(extendedKubeconfig)).to.eql(kubeconfig)
     })
   })
 })
