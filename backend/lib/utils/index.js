@@ -19,10 +19,40 @@
 
 const path = require('path')
 const _ = require('lodash')
+const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
+}
+
+function cleanKubeconfig (input) {
+  const cleanCluster = ({ name, cluster }) => {
+    cluster = _.pick(cluster, ['server', 'insecure-skip-tls-verify', 'certificate-authority-data'])
+    return { name, cluster }
+  }
+  const cleanContext = ({ name, context }) => {
+    context = _.pick(context, ['cluster', 'user', 'namespace'])
+    return { name, context }
+  }
+  const cleanAuthInfo = ({ name, user }) => {
+    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password'])
+    return { name, user }
+  }
+  const cleanConfig = ({
+    clusters,
+    contexts,
+    'current-context': currentContext,
+    users
+  }) => {
+    return {
+      clusters: _.map(clusters, cleanCluster),
+      contexts: _.map(contexts, cleanContext),
+      'current-context': currentContext,
+      users: _.map(users, cleanAuthInfo)
+    }
+  }
+  return yaml.safeDump(cleanConfig(yaml.safeLoad(input)))
 }
 
 function decodeBase64 (value) {
@@ -64,6 +94,7 @@ async function getProjectByNamespace (projects, namespaces, namespace) {
 }
 
 module.exports = {
+  cleanKubeconfig,
   resolve,
   decodeBase64,
   encodeBase64,
