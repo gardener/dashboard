@@ -20,12 +20,45 @@
 const path = require('path')
 const _ = require('lodash')
 const { getSeeds } = require('../cache')
+const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
 const config = require('../config')
 const assert = require('assert').strict
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
+}
+
+function cleanKubeconfig (input) {
+  const cleanCluster = ({ name, cluster }) => {
+    cluster = _.pick(cluster, ['server', 'insecure-skip-tls-verify', 'certificate-authority-data'])
+    return { name, cluster }
+  }
+  const cleanContext = ({ name, context }) => {
+    context = _.pick(context, ['cluster', 'user', 'namespace'])
+    return { name, context }
+  }
+  const cleanAuthInfo = ({ name, user }) => {
+    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password'])
+    return { name, user }
+  }
+  const cleanConfig = ({
+    clusters,
+    contexts,
+    'current-context': currentContext,
+    users
+  }) => {
+    return {
+      clusters: _.map(clusters, cleanCluster),
+      contexts: _.map(contexts, cleanContext),
+      'current-context': currentContext,
+      users: _.map(users, cleanAuthInfo)
+    }
+  }
+  if (_.isString(input)) {
+    input = yaml.safeLoad(input)
+  }
+  return cleanConfig(input)
 }
 
 function decodeBase64 (value) {
@@ -139,6 +172,7 @@ function getConfigValue (path, defaultValue) {
 }
 
 module.exports = {
+  cleanKubeconfig,
   resolve,
   decodeBase64,
   encodeBase64,

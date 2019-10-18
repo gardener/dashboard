@@ -264,7 +264,7 @@ export default {
       set(shootResource, 'spec.maintenance', maintenance)
 
       const hibernationSchedule = this.$refs.hibernationSchedule.getScheduleCrontab()
-      set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
+      set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
       const noHibernationSchedule = this.$refs.hibernationSchedule.getNoHibernationSchedule()
       if (noHibernationSchedule) {
         set(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', 'true')
@@ -311,7 +311,7 @@ export default {
       this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
 
-      const hibernationSchedule = get(shootResource, 'spec.hibernation.schedule')
+      const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)
       this.$refs.hibernationSchedule.setScheduleData({ hibernationSchedule, noHibernationSchedule, purpose })
 
