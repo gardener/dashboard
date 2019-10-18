@@ -17,12 +17,14 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64, getProjectByNamespace, cleanKubeconfig } = require('../utils')
+const utils = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
+
+const { decodeBase64, getProjectByNamespace } = utils
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -248,7 +250,7 @@ exports.info = async function ({ user, namespace, name }) {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
-            data[key] = yaml.safeDump(cleanKubeconfig(value))
+            data[key] = yaml.safeDump(utils.cleanKubeconfig(value))
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }

@@ -17,6 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
+const utils = require('../../lib/utils')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -121,6 +122,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
     const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
+    const cleanKubeconfigSpy = sandbox.spy(utils, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
@@ -131,6 +133,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.have.own.property('kubeconfig')
+    expect(cleanKubeconfigSpy).to.have.callCount(3)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
     expect(res.body.monitoring_username).to.eql(monitoringUser)

@@ -29,7 +29,7 @@ const ApiGroup = require('kubernetes-client/lib/api-group')
 const kubernetesClient = require('kubernetes-client')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
-const { cleanKubeconfig } = require('../utils')
+const utils = require('../utils')
 
 const {
   Api,
@@ -104,7 +104,7 @@ module.exports = {
   kubernetesClient,
   Resources,
   fromKubeconfig (kubeconfig) {
-    return fromKubeconfig(cleanKubeconfig(kubeconfig))
+    return fromKubeconfig(utils.cleanKubeconfig(kubeconfig))
   },
   core (options) {
     return new Core(credentials(options))
