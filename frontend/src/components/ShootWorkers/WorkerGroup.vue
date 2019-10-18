@@ -37,6 +37,7 @@ limitations under the License.
 
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
+import join from 'lodash/join'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -112,6 +113,12 @@ export default {
         description.push({
           title: 'Max. Surge',
           value: `${this.workerGroup.maxSurge}`
+        })
+      }
+      if (this.workerGroup.zones) {
+        description.push({
+          title: this.workerGroup.zones.length > 1 ? 'Zones' : 'Zone',
+          value: join(this.workerGroup.zones, ', ')
         })
       }
       return description

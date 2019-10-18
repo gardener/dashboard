@@ -67,6 +67,9 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
+        // const oldZonesNetworkConfiguration = get(shootItem, 'spec.provider.infrastructureConfig.networks.zones', undefined)
+        // const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZonesNetworkConfiguration, workers, infrastructureKind)
+        // TODO: UPDATE ZONES
         await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, data: workers })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
@@ -81,7 +84,7 @@ export default {
 
       const workers = this.shootWorkerGroups
       this.$nextTick(() => {
-        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, zones: this.shootZones })
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
       })
     },
     onWorkersValid (value) {

@@ -257,8 +257,8 @@ exports.remove = async function ({ user, namespace, bindingName }) {
 
   const { items: shootList } = await shoots.list({ user, namespace })
   const predicate = (item) => {
-    const secretBindingRef = _.get(item, 'spec.cloud.secretBindingRef')
-    return secretBindingRef.name === bindingName
+    const secretBindingName = _.get(item, 'spec.secretBindingName')
+    return secretBindingName.name === bindingName
   }
   const secretReferencedByShoot = _.find(shootList, predicate)
   if (secretReferencedByShoot) {

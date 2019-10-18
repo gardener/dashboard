@@ -71,18 +71,6 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex v-if="infrastructureKind !== 'azure'" class="regularInput">
-        <v-select
-          color="cyan darken-2"
-          label="Zone"
-          :items="allZones"
-          :error-messages="getErrorMessages('zones')"
-          v-model="zones"
-          @input="onInputZones"
-          @blur="$v.zones.$touch()"
-          multiple
-          ></v-select>
-      </v-flex>
       <template v-if="infrastructureKind === 'openstack'">
         <v-flex class="regularInput">
           <v-select
@@ -118,17 +106,12 @@ import CloudProfile from '@/components/CloudProfile'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
-import { getZonesObjectArray } from '@/utils/createShoot'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
-import map from 'lodash/map'
-import compact from 'lodash/compact'
 import isEmpty from 'lodash/isEmpty'
-import sample from 'lodash/sample'
 import concat from 'lodash/concat'
 import includes from 'lodash/includes'
-import find from 'lodash/find'
 import forEach from 'lodash/forEach'
 import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
@@ -141,9 +124,6 @@ const validationErrors = {
   },
   region: {
     required: 'Region is required'
-  },
-  zones: {
-    required: 'Zone is required'
   },
   floatingPoolName: {
     required: 'Floating Pools required'
@@ -159,11 +139,6 @@ const validations = {
   },
   region: {
     required
-  },
-  zones: {
-    required: requiredIf(function () {
-      return this.infrastructureKind !== 'azure'
-    })
   },
   floatingPoolName: {
     required: requiredIf(function () {
@@ -195,8 +170,6 @@ export default {
       infrastructureKind: undefined,
       cloudProfileName: undefined,
       secret: undefined,
-      zones: undefined,
-      zoneObjects: undefined,
       region: undefined,
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
@@ -237,7 +210,6 @@ export default {
       'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName'
     ]),
@@ -293,9 +265,6 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    allZones () {
-      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
     isOwnSecretBinding () {
       return (secret) => {
         return isOwnSecretBinding(secret)
@@ -323,7 +292,6 @@ export default {
       this.onInputSecret()
       this.region = head(this.regionsWithSeed)
       this.onInputRegion()
-      this.onInputZones()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
       this.floatingPoolName = head(this.allFloatingPoolNames)
@@ -332,10 +300,6 @@ export default {
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
-    },
-    setDefaultZone () {
-      this.zones = compact([sample(this.allZones)])
-      this.zoneObjects = undefined
     },
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
@@ -351,12 +315,7 @@ export default {
     },
     onInputRegion () {
       this.$v.secret.$touch()
-      this.setDefaultZone()
-      this.validateInput()
-    },
-    onInputZones () {
-      this.$v.secret.$touch()
-      this.userInterActionBus.emit('updateZones', this.zones)
+      this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
     },
     onInputFloatingPoolName () {
@@ -386,33 +345,19 @@ export default {
       }
     },
     getInfrastructureData () {
-      // keep CIDR settings if no new zone added...
-      let zoneObjects
-      if (this.zones) {
-        zoneObjects = compact(map(this.zones, zone => {
-          return find(this.zoneObjects, { name: zone })
-        }))
-        if (zoneObjects.length !== this.zones.length) {
-          // default CIDRs otherwise
-          zoneObjects = getZonesObjectArray(this.zones)
-        }
-      }
       return {
         infrastructureKind: this.infrastructureKind,
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
         region: this.region,
-        zoneObjects,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, zoneObjects, region, floatingPoolName, loadBalancerProviderName }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
-      this.zoneObjects = zoneObjects
-      this.zones = map(zoneObjects, 'name')
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName

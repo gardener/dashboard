@@ -14,59 +14,17 @@
 // limitations under the License.
 //
 
+import { Netmask } from 'netmask'
 import map from 'lodash/map'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
+import find from 'lodash/find'
+import compact from 'lodash/compact'
 
-export function getZonesObjectArray (zones) {
-  switch (zones.length) {
-    case 1:
-      return [{
-        name: zones[0],
-        internal: '10.250.112.0/22',
-        public: '10.250.96.0/22',
-        workers: '10.250.0.0/19'
-      }]
-    case 2:
-      return [{
-        name: zones[0],
-        internal: '10.250.112.0/23',
-        public: '10.250.96.0/23',
-        workers: '10.250.0.0/20'
-      },
-      {
-        name: zones[1],
-        internal: '10.250.114.0/23',
-        public: '10.250.98.0/23',
-        workers: '10.250.16.0/20'
-      }]
-    case 3:
-      return [{
-        name: zones[0],
-        internal: '10.250.112.0/24',
-        public: '10.250.96.0/24',
-        workers: '10.250.0.0/21'
-      },
-      {
-        name: zones[1],
-        internal: '10.250.113.0/24',
-        public: '10.250.97.0/24',
-        workers: '10.250.8.0/21'
-      },
-      {
-        name: zones[2],
-        internal: '10.250.114.0/24',
-        public: '10.250.98.0/24',
-        workers: '10.250.16.0/21'
-      }]
-    default:
-      return map(zones, zone => {
-        return {
-          name: zone
-        }
-      })
-  }
-}
+export const workerCIDR = '10.250.0.0/16'
 
-export function getCloudProviderTemplate (infrastructureKind) {
+export function getProviderTemplate (infrastructureKind) {
+  // TODO: Remove network configuration as soon as gardener defaults it
   switch (infrastructureKind) {
     case 'aws':
       return {
@@ -76,7 +34,7 @@ export function getCloudProviderTemplate (infrastructureKind) {
           kind: 'InfrastructureConfig',
           networks: {
             vpc: {
-              cidr: '10.250.0.0/16'
+              cidr: workerCIDR
             }
           }
         }
@@ -89,10 +47,8 @@ export function getCloudProviderTemplate (infrastructureKind) {
           kind: 'InfrastructureConfig',
           networks: {
             vnet: {
-              name: 'my-vnet',
-              cidr: '10.250.0.0/16'
-            },
-            workers: '10.250.0.0/19'
+              cidr: workerCIDR
+            }
           }
         }
       }
@@ -103,7 +59,7 @@ export function getCloudProviderTemplate (infrastructureKind) {
           apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: '10.242.0.0/19'
+            worker: workerCIDR
           }
         }
       }
@@ -114,22 +70,85 @@ export function getCloudProviderTemplate (infrastructureKind) {
           apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: '10.250.0.0/19'
+            worker: workerCIDR
           }
         }
       }
     case 'alicloud':
       return {
-        type: 'aws',
+        type: 'alicloud',
         infrastructureConfig: {
-          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
             vpc: {
-              cidr: '10.250.0.0/16'
+              cidr: workerCIDR
             }
           }
         }
       }
   }
+}
+
+export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
+  if (numberOfNetworks === 1) {
+    return [cidrToSplitStr]
+  }
+  const cidrToSplit = new Netmask(cidrToSplitStr)
+  const numberOfSplits = Math.ceil(Math.log(numberOfNetworks) / Math.log(2))
+  const newBitmask = cidrToSplit.bitmask + numberOfSplits
+  if (newBitmask > 32) {
+    throw new Error(`Could not split CIDR into ${numberOfNetworks} networks: Not enough bits available`)
+  }
+  const newCidrBlock = new Netmask(`${cidrToSplit.base}/${newBitmask}`)
+  const cidrArray = []
+  for (var i = 0; i < numberOfNetworks; i++) {
+    cidrArray.push(newCidrBlock.next(i).toString())
+  }
+  return cidrArray
+}
+
+export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind) {
+  const zoneNetworks = splitCIDR(workerCIDR, zones.length)
+  switch (infrastructureKind) {
+    case 'aws':
+      return map(zones, (zone, index) => {
+        const bigNetWorks = splitCIDR(zoneNetworks[index], 2)
+        const workerNetwork = bigNetWorks[0]
+        const smallNetworks = splitCIDR(bigNetWorks[1], 2)
+        const publicNetwork = smallNetworks[0]
+        const internalNetwork = smallNetworks[1]
+        return {
+          name: zone,
+          workers: workerNetwork,
+          public: publicNetwork,
+          internal: internalNetwork
+        }
+      })
+    case 'alicloud':
+      return map(zones, (zone, index) => {
+        return {
+          name: zone,
+          worker: zoneNetworks[index]
+        }
+      })
+    default:
+      return undefined
+  }
+}
+
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind) {
+  const newZones = uniq(flatMap(newWorkers, 'zones'))
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind)
+
+  if (!defaultZonesNetworkConfiguration) {
+    return undefined
+  }
+  const newZonesNetworkConfiguration = compact(map(newZones, zone => {
+    return find(oldZonesNetworkConfiguration, { name: zone })
+  }))
+  if (newZonesNetworkConfiguration.length !== newZones.length) {
+    return defaultZonesNetworkConfiguration
+  }
+  return newZonesNetworkConfiguration
 }

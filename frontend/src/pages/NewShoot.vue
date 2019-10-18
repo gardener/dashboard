@@ -129,14 +129,13 @@ import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import set from 'lodash/set'
 import get from 'lodash/get'
-import map from 'lodash/map'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
 import { errorDetailsFromError } from '@/utils/error'
-import { getCloudProviderTemplate } from '@/utils/createShoot'
+import { getProviderTemplate, getZonesNetworkConfiguration } from '@/utils/createShoot'
 const EventEmitter = require('events')
 
 export default {
@@ -214,23 +213,20 @@ export default {
     shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
-      const { infrastructureKind, cloudProfileName, region, secret, zoneObjects, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
+      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
       set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, ['spec', 'provider'], getCloudProviderTemplate(infrastructureKind))
+        set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
       }
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
-      }
-      if (!isEmpty(zoneObjects)) {
-        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zoneObjects)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -240,6 +236,11 @@ export default {
 
       const workers = this.$refs.manageWorkers.getWorkers()
       set(shootResource, 'spec.provider.workers', workers)
+
+      const zonesNetworkConfiguration = getZonesNetworkConfiguration(get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', undefined), workers, infrastructureKind)
+      if (zonesNetworkConfiguration) {
+        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+      }
 
       const addons = this.$refs.addons.getAddons()
       set(shootResource, 'spec.addons', addons)
@@ -286,11 +287,10 @@ export default {
       const secretBindingName = get(shootResource, 'spec.secretBindingName')
       const secret = this.infrastructureSecretsByBindingName({ secretBindingName, cloudProfileName })
 
-      const zoneObjects = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones')
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
 
-      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, zoneObjects, floatingPoolName, loadBalancerProviderName })
+      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName })
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
@@ -299,8 +299,7 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      const zones = map(zoneObjects, 'name')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, zones })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region })
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)

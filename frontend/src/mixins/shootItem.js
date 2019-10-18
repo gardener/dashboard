@@ -1,4 +1,6 @@
 import get from 'lodash/get'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
 
 import {
   getDateFormatted,
@@ -92,7 +94,7 @@ export const shootItem = {
       return this.shootSpec.region
     },
     shootZones () {
-      return get(this.shootSpec, 'provider.zones', [])
+      return uniq(flatMap(get(this.shootSpec, 'provider.workers', []), 'zones'))
     },
     shootCidr () {
       return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')

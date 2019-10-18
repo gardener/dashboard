@@ -22,7 +22,7 @@ limitations under the License.
         :worker="worker"
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
-        :zones="zones"
+        :region="region"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -38,7 +38,7 @@ limitations under the License.
     <v-layout row key="addWorker" class="list-item pt-2">
       <v-flex>
         <v-btn
-          :disabled="!(machineTypes.length > 0)"
+          :disabled="!(allMachineTypes.length > 0)"
           small
           @click="addWorker"
           outline
@@ -48,7 +48,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn
-          :disabled="!(machineTypes.length > 0)"
+          :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           flat
           class="cyan--text text--darken-2">
@@ -66,6 +66,7 @@ import { shortRandomString } from '@/utils'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import sample from 'lodash/sample'
 import head from 'lodash/head'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
@@ -86,8 +87,8 @@ export default {
       internalWorkers: undefined,
       valid: false,
       cloudProfileName: undefined,
-      zones: undefined,
-      workers: undefined
+      workers: undefined,
+      region: undefined
     }
   },
   computed: {
@@ -95,16 +96,17 @@ export default {
       'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'defaultMachineImageForCloudProfileName'
+      'defaultMachineImageForCloudProfileName',
+      'zonesByCloudProfileNameAndRegion'
     ]),
-    machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
-    },
-    volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+    allMachineTypes () {
+      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
     },
     defaultMachineImage () {
       return this.defaultMachineImageForCloudProfileName(this.cloudProfileName)
+    },
+    allZones () {
+      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     }
   },
   methods: {
@@ -122,8 +124,11 @@ export default {
     addWorker () {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
-      const volumeType = get(head(this.volumeTypes), 'name')
-      const machineType = get(head(this.machineTypes), 'name')
+      const zones = [sample(this.allZones)]
+      const machineTypesForZone = this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })
+      const machineType = get(head(machineTypesForZone), 'name')
+      const volumeTypesForZone = this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })
+      const volumeType = get(head(volumeTypesForZone), 'name')
       const machineImage = this.defaultMachineImage
       const worker = {
         id,
@@ -134,7 +139,8 @@ export default {
         machine: {
           type: machineType,
           image: machineImage
-        }
+        },
+        zones
       }
       if (volumeType) {
         worker.volume = {
@@ -194,9 +200,9 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, zones }) {
+    setWorkersData ({ workers, cloudProfileName, region }) {
       this.cloudProfileName = cloudProfileName
-      this.zones = zones
+      this.region = region
       this.setInternalWorkers(workers)
     }
   },
@@ -205,12 +211,11 @@ export default {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.cloudProfileName = cloudProfileName
         this.$nextTick(() => {
-          // set worker when all props (including zone) have been updated
           this.setDefaultWorker()
         })
       })
-      this.userInterActionBus.on('updateZones', zones => {
-        this.zones = zones
+      this.userInterActionBus.on('updateRegion', region => {
+        this.region = region
       })
     }
   }

@@ -36,6 +36,7 @@ import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import moment from 'moment-timezone'
@@ -121,7 +122,8 @@ const getters = {
   cloudProfilesByCloudProviderKind (state) {
     return (cloudProviderKind) => {
       const predicate = item => item.metadata.cloudProviderKind === cloudProviderKind
-      return filter(state.cloudProfiles.all, predicate)
+      const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
+      return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
   machineTypesByCloudProfileNameAndZones (state, getters) {

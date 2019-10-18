@@ -97,6 +97,18 @@ limitations under the License.
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
         </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Zone"
+            :items="allZones"
+            :error-messages="getErrorMessages('worker.zones')"
+            v-model="worker.zones"
+            @input="onInputZones"
+            @blur="$v.worker.zones.$touch()"
+            multiple
+            ></v-select>
+        </v-flex>
       </v-layout>
       <v-flex class="ml-3">
         <slot name="action"></slot>
@@ -138,6 +150,9 @@ const validationErrors = {
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value'
+    },
+    zones: {
+      required: 'Zone is required'
     }
   }
 }
@@ -164,6 +179,9 @@ const validations = {
     },
     maxSurge: {
       numberOrPercentage
+    },
+    zones: {
+      required
     }
   }
 }
@@ -187,8 +205,8 @@ export default {
     cloudProfileName: {
       type: String
     },
-    zones: {
-      type: Array
+    region: {
+      type: String
     }
   },
   data () {
@@ -205,7 +223,8 @@ export default {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'machineImagesByCloudProfileName'
+      'machineImagesByCloudProfileName',
+      'zonesByCloudProfileNameAndRegion'
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
@@ -252,6 +271,9 @@ export default {
           this.worker.maxSurge = maxSurge
         }
       }
+    },
+    allZones () {
+      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     }
   },
   methods: {
@@ -286,6 +308,10 @@ export default {
     onInputMaxSurge () {
       this.$v.worker.maxSurge.$touch()
       this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
+      this.validateInput()
+    },
+    onInputZones () {
+      this.$v.worker.zones.$touch()
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {

@@ -34,13 +34,12 @@ import join from 'lodash/join'
 import set from 'lodash/set'
 import head from 'lodash/head'
 import sample from 'lodash/sample'
-import compact from 'lodash/compact'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
-import { getCloudProviderTemplate, getZonesObjectArray } from '@/utils/createShoot'
+import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   isUserError,
@@ -232,15 +231,13 @@ const actions = {
       spec: {
         networking: {
           type: 'calico',
-          pods: '100.96.0.0/11',
-          nodes: '10.250.0.0/16',
-          services: '100.64.0.0/13'
+          nodes: workerCIDR
         }
       }
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, ['spec', 'provider'], getCloudProviderTemplate(infrastructureKind))
+    set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
@@ -250,11 +247,6 @@ const actions = {
 
     const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.region', region)
-
-    const zones = compact([sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))])
-    if (!isEmpty(zones)) {
-      set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', getZonesObjectArray(zones))
-    }
 
     const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
     if (!isEmpty(loadBalancerProviderName)) {
@@ -273,6 +265,12 @@ const actions = {
 
     const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
+
+    const zones = [sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
+    const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind)
+    if (zonesNetworkConfiguration) {
+      set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+    }
 
     const workerName = `worker-${shortRandomString(5)}`
     const volumeType = get(head(rootGetters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
@@ -293,6 +291,9 @@ const actions = {
         type: volumeType,
         size: '50Gi'
       }
+    }
+    if (!isEmpty(zones)) {
+      worker.zones = zones
     }
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
