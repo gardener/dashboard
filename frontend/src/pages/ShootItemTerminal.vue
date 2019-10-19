@@ -313,6 +313,7 @@ class TerminalSession {
     addBearerToken(protocols, terminalData.token)
     const ws = new WebSocket(watchPodUri(terminalData), protocols)
 
+    this.vm.spinner.text = 'Connecting to Pod.'
     try {
       await pTimeout(waitForPodRunning(ws, containerName, onPodStateChange), timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
     } finally {
@@ -457,7 +458,7 @@ export default {
     },
     defaultNode () {
       const defaultNode = find(this.config.nodes, ['data.kubernetesHostname', this.terminalSession.node])
-      return get(defaultNode, 'data.kubernetesHostname')
+      return get(defaultNode, 'data.kubernetesHostname') || get(head(this.config.nodes), 'data.kubernetesHostname')
     },
     defaultPrivilegedMode () {
       return this.privilegedMode || false

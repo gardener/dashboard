@@ -71,7 +71,7 @@ limitations under the License.
           color="cyan darken-2"
           label="Node"
           placeholder="Change worker node..."
-          :items="nodes"
+          :items="shootNodes"
           item-value="data.kubernetesHostname"
           v-model="selectedNode"
           hint="Node on which the Pod should be scheduled"
@@ -134,7 +134,7 @@ export default {
       selectedPrivilegedMode: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      nodes: []
+      shootNodesInternal: []
     }
   },
   computed: {
@@ -151,9 +151,14 @@ export default {
       set (value) {
         this.selectedRunOnShootWorkerInternal = value
         this.selectedPrivilegedMode = value
-        if (!this.selectedRunOnShootWorkerInternal) {
-          this.selectedNode = undefined
-        }
+      }
+    },
+    shootNodes: {
+      get () {
+        return this.selectedRunOnShootWorker ? this.shootNodesInternal : []
+      },
+      set (value) {
+        this.shootNodesInternal = value
       }
     },
     nodeTextColor () {
@@ -189,12 +194,12 @@ export default {
       this.selectedPrivilegedMode = privilegedMode
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
-      this.nodes = nodes
-      const selectedNodeIsShootWorker = !!find(this.nodes, ['data.kubernetesHostname', this.selectedNode])
+      this.shootNodes = nodes
+      const selectedNodeIsShootWorker = !!find(nodes, ['data.kubernetesHostname', this.selectedNode])
       if (!this.isAdmin) {
-        this.selectedRunOnShootWorkerInternal = true
+        this.selectedRunOnShootWorker = true
       } else {
-        this.selectedRunOnShootWorkerInternal = selectedNodeIsShootWorker
+        this.selectedRunOnShootWorker = selectedNodeIsShootWorker
       }
     }
   }
