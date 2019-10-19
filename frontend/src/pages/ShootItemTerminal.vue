@@ -506,7 +506,8 @@ export default {
         return
       }
       const { namespace, name, target } = this.$route.params
-      await deleteTerminal({ name, namespace, target })
+      const body = this.selectedConfig
+      await deleteTerminal({ name, namespace, target, body })
       if (this.name) {
         return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
       }

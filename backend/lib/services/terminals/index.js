@@ -162,7 +162,7 @@ exports.create = async function ({ user, namespace, name, target, body = {} }) {
 }
 
 exports.remove = async function ({ user, namespace, name, target, body = {} }) {
-  return deleteTerminalSession({ user, namespace, name, target })
+  return deleteTerminalSession({ user, namespace, name, target, body })
 }
 
 async function deleteTerminalSession ({ user, namespace, name, target, body }) {
