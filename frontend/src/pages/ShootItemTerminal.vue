@@ -134,6 +134,8 @@ import assign from 'lodash/assign'
 import head from 'lodash/head'
 import intersection from 'lodash/intersection'
 import keys from 'lodash/keys'
+import includes from 'lodash/includes'
+import pTimeout from 'p-timeout'
 
 import { Terminal } from 'xterm'
 import { FitAddon } from 'xterm-addon-fit'
@@ -164,6 +166,161 @@ const ConnectionState = {
   CONNECTED: 3
 }
 
+const WsCloseEventEnum = {
+  NORMAL_CLOUSURE: 1000
+}
+
+const RETRY_TIMEOUT_SECONDS = 3
+const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
+
+class TerminalSession {
+  constructor (vm) {
+    this.vm = vm
+    this.cancelConnect = false
+    this.tries = 0
+
+    this.setInitialState()
+    this.close = () => {}
+  }
+
+  setInitialState () {
+    this.connectionState = ConnectionState.DISCONNECTED
+    this.node = undefined
+    this.privileged = undefined
+    this.hostPID = undefined
+    this.hostNetwork = undefined
+    this.image = undefined
+    this.detailedConnectionStateText = undefined
+  }
+
+  setDisconnectedState () {
+    this.setInitialState()
+  }
+
+  async attachTerminal (terminalData) {
+    if (this.cancelConnect) {
+      return
+    }
+
+    this.tries++
+
+    try {
+      this.connectionState = ConnectionState.CONNECTING
+      await this.waitUntilPodIsRunning(terminalData, 60)
+      if (this.cancelConnect) {
+        return
+      }
+    } catch (err) {
+      console.error('failed to wait until pod is running', err)
+      this.vm.showSnackbarTop('Could not connect to terminal')
+      this.setDisconnectedState()
+      return
+    }
+
+    const protocols = addBearerToken(['v4.channel.k8s.io'], terminalData.token)
+    const ws = new WebSocket(attachUri(terminalData), protocols)
+    const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
+    this.vm.term.loadAddon(attachAddon)
+    let reconnectTimeoutId
+    let heartbeatIntervalId
+
+    ws.onopen = () => {
+      if (this.cancelConnect) {
+        this.close()
+        return
+      }
+
+      this.vm.spinner.stop()
+      this.vm.hideSnackbar()
+      this.connectionState = ConnectionState.CONNECTED
+      this.tries = 0
+
+      heartbeatIntervalId = setInterval(async () => {
+        try {
+          await this.vm.heartbeat()
+        } catch (err) {
+          console.error('heartbeat failed:', err)
+        }
+      }, this.vm.heartbeatIntervalSeconds * 1000)
+    }
+    ws.onclose = error => {
+      this.close()
+      const wasConnected = this.connectionState === ConnectionState.CONNECTED
+
+      if (this.cancelConnect) {
+        this.setDisconnectedState()
+        return
+      }
+      if (error.code === WsCloseEventEnum.NORMAL_CLOUSURE) {
+        this.setDisconnectedState()
+        this.vm.showSnackbarTop('Terminal connection lost')
+        return
+      }
+      if (this.tries >= MAX_TRIES) {
+        this.setDisconnectedState()
+        this.vm.showSnackbarTop('Could not connect to terminal')
+        return
+      }
+
+      this.connectionState = ConnectionState.CONNECTING
+
+      let timeoutSeconds
+      if (wasConnected) {
+        timeoutSeconds = 0
+        // do not start spinner as this would clear the console
+        console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
+      } else { // Try again later
+        timeoutSeconds = RETRY_TIMEOUT_SECONDS
+        this.vm.spinner.start()
+        console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
+      }
+      reconnectTimeoutId = setTimeout(this.attachTerminal, timeoutSeconds * 1000)
+    }
+    this.close = () => {
+      clearTimeout(reconnectTimeoutId)
+      clearInterval(heartbeatIntervalId)
+
+      closeWsIfNotClosed(ws)
+      attachAddon.dispose()
+
+      this.close = () => {}
+    }
+  }
+
+  async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
+    const containerName = terminalData.container
+    const onPodStateChange = ({ type, object: pod }) => {
+      const containers = get(pod, 'spec.containers')
+      const terminalContainer = find(containers, ['name', containerName])
+      this.image = get(terminalContainer, 'image')
+      this.privileged = get(terminalContainer, 'securityContext.privileged', false)
+      this.hostPID = get(pod, 'spec.hostPID', false)
+      this.hostNetwork = get(pod, 'spec.hostNetwork', false)
+      this.node = get(pod, 'spec.nodeName')
+
+      const phase = get(pod, 'status.phase')
+      if (includes(['Failed', 'Succeeded'], phase) || type === 'DELETED') {
+        return
+      }
+
+      const containerStatuses = get(pod, 'status.containerStatuses')
+      const terminalContainerStatus = find(containerStatuses, ['name', containerName])
+      this.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
+      this.vm.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
+    }
+
+    const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
+    addBearerToken(protocols, terminalData.token)
+    const ws = new WebSocket(watchPodUri(terminalData), protocols)
+
+    try {
+      await pTimeout(waitForPodRunning(ws, containerName, onPodStateChange), timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
+    } finally {
+      closeWsIfNotClosed(ws)
+    }
+  }
+}
+
 function addBearerToken (protocols, bearer) {
   protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
   return protocols
@@ -183,6 +340,61 @@ function closeWsIfNotClosed (ws) {
   if (ws.readyState === WsReadyStateEnum.OPEN || ws.readyState === WsReadyStateEnum.CONNECTING) {
     ws.close()
   }
+}
+
+function waitForPodRunning (ws, containerName, handleEvent) {
+  return new Promise((resolve, reject) => {
+    const resolveOnce = value => {
+      ws.removeEventListener('message', messageHandler)
+      ws.removeEventListener('close', closeHandler)
+      resolve(value)
+    }
+    const rejectOnce = reason => {
+      ws.removeEventListener('message', messageHandler)
+      ws.removeEventListener('close', closeHandler)
+      reject(reason)
+    }
+
+    const closeHandler = error => {
+      rejectOnce(error)
+    }
+    const messageHandler = ({ data: message }) => {
+      let event
+      try {
+        event = JSON.parse(message)
+      } catch (error) {
+        console.error('could not parse message')
+        return
+      }
+      const pod = event.object
+      if (typeof handleEvent === 'function') {
+        try {
+          handleEvent(event)
+        } catch (error) {
+          console.error('error during handleEvent', error.message)
+        }
+      }
+
+      const phase = get(pod, 'status.phase')
+      if (includes(['Failed', 'Succeeded'], phase)) {
+        rejectOnce(new Error(`Pod is in phase ${phase}`))
+        return
+      } else if (event.type === 'DELETED') {
+        rejectOnce(new Error('Pod deleted'))
+        return
+      }
+
+      const containerStatuses = get(pod, 'status.containerStatuses')
+      const terminalContainerStatus = find(containerStatuses, ['name', containerName])
+      const isContainerReady = get(terminalContainerStatus, 'ready', false)
+
+      if (phase === 'Running' && isContainerReady) {
+        resolveOnce()
+      }
+    }
+    ws.addEventListener('message', messageHandler)
+    ws.addEventListener('close', closeHandler)
+  })
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {
@@ -278,16 +490,14 @@ export default {
       return image.substring(image.lastIndexOf('/') + 1)
     },
     name () {
-      const { name = undefined } = this.$route.params
-      return name
+      // name is undefined in case of garden terminal
+      return this.$route.params.name
     },
     namespace () {
-      const { namespace } = this.$route.params
-      return namespace
+      return this.$route.params.namespace
     },
     target () {
-      const { target } = this.$route.params
-      return target
+      return this.$route.params.target
     }
   },
   methods: {
@@ -295,7 +505,7 @@ export default {
       if (!await this.confirmDelete()) {
         return
       }
-      const { namespace = undefined, name = undefined, target } = this.$route.params
+      const { namespace, name, target } = this.$route.params
       await deleteTerminal({ name, namespace, target })
       if (this.name) {
         return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
@@ -311,7 +521,7 @@ export default {
     },
     async configure (refName) {
       this.loading[refName] = true
-      const { namespace = undefined, name = undefined, target } = this.$route.params
+      const { namespace, name, target } = this.$route.params
       try {
         const { data: config } = await terminalConfig({ name, namespace, target })
 
@@ -380,27 +590,7 @@ export default {
       this.terminalSession.close()
     },
     async connect () {
-      const terminalSession = this.terminalSession = {
-        cancelConnect: false,
-        tries: 0,
-        connectionState: ConnectionState.DISCONNECTED,
-        node: undefined,
-        privileged: undefined,
-        hostPID: undefined,
-        hostNetwork: undefined,
-        image: undefined,
-        detailedConnectionStateText: undefined,
-        close: () => {},
-        setDisconnected: function () {
-          this.connectionState = ConnectionState.DISCONNECTED
-          this.node = undefined
-          this.privileged = undefined
-          this.hostPID = undefined
-          this.hostNetwork = undefined
-          this.image = undefined
-          this.detailedConnectionStateText = undefined
-        }
-      }
+      const terminalSession = this.terminalSession = new TerminalSession(this)
 
       this.spinner.start()
       this.spinner.text = 'Preparing terminal session'
@@ -408,170 +598,11 @@ export default {
 
       try {
         const terminalData = await this.createTerminal()
-
-        const RETRY_TIMEOUT_SECONDS = 3
-        const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
-
-        const attachTerminal = async () => {
-          if (terminalSession.cancelConnect) {
-            return
-          }
-
-          terminalSession.tries++
-
-          try {
-            terminalSession.connectionState = ConnectionState.CONNECTING
-            await this.waitUntilPodIsRunning(terminalData, 60)
-          } catch (err) {
-            console.error('failed to wait until pod is running', err)
-            this.showSnackbarTop('Could not connect to terminal')
-            terminalSession.setDisconnected()
-            return
-          }
-          if (terminalSession.cancelConnect) {
-            return
-          }
-
-          const protocols = addBearerToken(['v4.channel.k8s.io'], terminalData.token)
-          const ws = new WebSocket(attachUri(terminalData), protocols)
-          const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
-          this.term.loadAddon(attachAddon)
-          let reconnectTimeoutId
-          let heartbeatIntervalId
-
-          ws.onopen = async () => {
-            if (terminalSession.cancelConnect) {
-              terminalSession.close()
-              return
-            }
-
-            this.spinner.stop()
-            this.hideSnackbar()
-            terminalSession.connectionState = ConnectionState.CONNECTED
-            terminalSession.tries = 0
-
-            heartbeatIntervalId = setInterval(async () => {
-              try {
-                await this.heartbeat()
-              } catch (err) {
-                console.error('heartbeat failed:', err)
-              }
-            }, this.heartbeatIntervalSeconds * 1000)
-          }
-          ws.onclose = error => {
-            terminalSession.close()
-            const wasConnected = terminalSession.connectionState === ConnectionState.CONNECTED
-
-            if (terminalSession.cancelConnect) {
-              terminalSession.setDisconnected()
-              return
-            }
-            if (error.code === 1000) { // CLOSE_NORMAL
-              terminalSession.setDisconnected()
-              this.showSnackbarTop('Terminal connection lost')
-              return
-            }
-            if (terminalSession.tries >= MAX_TRIES) {
-              terminalSession.setDisconnected()
-              this.showSnackbarTop('Could not connect to terminal')
-              return
-            }
-
-            terminalSession.connectionState = ConnectionState.CONNECTING
-
-            let timeoutSeconds
-            if (wasConnected) {
-              timeoutSeconds = 0
-              // do not start spinner as this would clear the console
-              console.log(`Websocket connection lost (code ${error.code}). Trying to reconnect..`)
-            } else { // Try again later
-              timeoutSeconds = RETRY_TIMEOUT_SECONDS
-              this.spinner.start()
-              console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
-            }
-            reconnectTimeoutId = setTimeout(attachTerminal, timeoutSeconds * 1000)
-          }
-          terminalSession.close = () => {
-            clearTimeout(reconnectTimeoutId)
-            clearInterval(heartbeatIntervalId)
-
-            closeWsIfNotClosed(ws)
-            attachAddon.dispose()
-
-            terminalSession.close = () => {}
-          }
-        }
-        return attachTerminal()
+        return terminalSession.attachTerminal(terminalData)
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
-        terminalSession.setDisconnected()
+        terminalSession.setDisconnectedState()
       }
-    },
-    waitUntilPodIsRunning (terminalData, timeoutSeconds) {
-      return new Promise((resolve, reject) => {
-        const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-        addBearerToken(protocols, terminalData.token)
-        const ws = new WebSocket(watchPodUri(terminalData), protocols)
-        const isRunningTimeoutId = setTimeout(() => closeAndReject(ws, new Error(`Timed out after ${timeoutSeconds}s`)), timeoutSeconds * 1000)
-
-        ws.addEventListener('message', ({ data: message }) => {
-          let event
-          try {
-            event = JSON.parse(message)
-          } catch (error) {
-            console.error('could not parse message')
-            return
-          }
-          const pod = event.object
-
-          const containers = get(pod, 'spec.containers')
-          const terminalContainer = find(containers, container => container.name === terminalData.container)
-          this.terminalSession.image = get(terminalContainer, 'image')
-          this.terminalSession.privileged = get(terminalContainer, 'securityContext.privileged', false)
-          this.terminalSession.hostPID = get(pod, 'spec.hostPID', false)
-          this.terminalSession.hostNetwork = get(pod, 'spec.hostNetwork', false)
-          this.terminalSession.node = get(pod, 'spec.nodeName')
-
-          const phase = get(pod, 'status.phase')
-          switch (phase) {
-            case 'Failed':
-            case 'Terminating':
-            case 'Completed':
-              closeWsIfNotClosed(ws, new Error(`Pod is in phase ${phase}`))
-              return
-          }
-          if (event.type === 'DELETED') {
-            closeWsIfNotClosed(ws, new Error('pod deleted'))
-            return
-          }
-
-          const containerStatuses = get(pod, 'status.containerStatuses')
-          const terminalContainerStatus = find(containerStatuses, status => status.name === terminalData.container)
-          const isContainerReady = get(terminalContainerStatus, 'ready', false)
-
-          this.terminalSession.detailedConnectionStateText = getDetailedConnectionStateText(terminalContainerStatus)
-          this.spinner.text = `Connecting to Pod. Current phase is "${phase}".`
-          if (phase === 'Running' && isContainerReady) {
-            closeAndResolve(ws)
-          }
-        })
-        ws.onclose = error => {
-          closeAndReject(ws, error)
-        }
-
-        const closeAndReject = (ws, error) => {
-          clearTimeout(isRunningTimeoutId)
-          closeWsIfNotClosed(ws)
-
-          reject(error)
-        }
-        const closeAndResolve = (ws) => {
-          clearTimeout(isRunningTimeoutId)
-          closeWsIfNotClosed(ws)
-
-          resolve()
-        }
-      })
     }
   },
   mounted () {
