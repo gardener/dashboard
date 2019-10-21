@@ -80,7 +80,7 @@ export default {
         if (machineType.storage) {
           description.push({
             title: 'Volume Size',
-            value: `${machineType.storage}`
+            value: `${machineType.storage.size}`
           })
         }
       }

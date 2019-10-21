@@ -386,13 +386,13 @@ Copyright © 2009, Jeff Mott.\
 Copyright (c) JS Foundation and other contributors\
 [MIT License](https://github.com/moment/moment-timezone/blob/develop/LICENSE)
 
+- [netmask](https://github.com/rs/node-netmas)\
+Copyright (c) 2011 Olivier Poitrey rs@dailymotion.com\
+[MIT License](https://github.com/rs/node-netmask/blob/master/README.md)
+
 - [semver](https://github.com/npm/node-semver)\
 Copyright (c) Isaac Z. Schlueter and Contributors\
 [ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)
-
-- [semver-sort](https://github.com/ragingwind/semver-sort)\
-Copyright (c) ragingwind <ragingwind@gmail.com> (ragingwind.me)\
-[MIT License](https://github.com/ragingwind/semver-sort/blob/master/license)
 
 - [socket.io-client](https://github.com/socketio/socket.io-client)\
 Copyright (c) 2014 Guillermo Rauch\

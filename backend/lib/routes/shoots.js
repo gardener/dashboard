@@ -142,7 +142,7 @@ router.route('/:name/spec/addons')
     }
   })
 
-router.route('/:name/spec/cloud/workers')
+router.route('/:name/spec/provider/workers')
   .put(async (req, res, next) => {
     try {
       const user = req.user

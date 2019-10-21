@@ -233,7 +233,8 @@ export default {
       return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeInCloudProfile () {
-      return !isEmpty(this.volumeTypes)
+      // TODO CHANGE AS SOON AS VOLUMETYPES NO LONGER IN OS CP
+      return this.cloudProfileName !== 'os-eu-de-200';//!isEmpty(this.volumeTypes)
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)
