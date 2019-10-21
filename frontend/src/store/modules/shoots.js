@@ -324,7 +324,7 @@ const actions = {
         location: rootState.localTimezone
       }
     })
-    set(shootResource, 'spec.hibernation.schedule', hibernationSchedule)
+    set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
 
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
 
