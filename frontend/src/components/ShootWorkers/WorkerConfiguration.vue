@@ -37,6 +37,7 @@ import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
+import get from 'lodash/get'
 
 export default {
   name: 'worker-configuration',
@@ -67,9 +68,6 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
-        // const oldZonesNetworkConfiguration = get(shootItem, 'spec.provider.infrastructureConfig.networks.zones', undefined)
-        // const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZonesNetworkConfiguration, workers, infrastructureKind)
-        // TODO: UPDATE ZONES
         await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, data: workers })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
@@ -83,8 +81,9 @@ export default {
       this.workersValid = false
 
       const workers = this.shootWorkerGroups
+      const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       this.$nextTick(() => {
-        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
+        this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion, zonesNetworkConfiguration })
       })
     },
     onWorkersValid (value) {

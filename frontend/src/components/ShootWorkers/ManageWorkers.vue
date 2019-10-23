@@ -22,7 +22,7 @@ limitations under the License.
         :worker="worker"
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
-        :region="region"
+        :availableZones="availableZones"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -66,6 +66,7 @@ import { shortRandomString } from '@/utils'
 import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import map from 'lodash/map'
 import sample from 'lodash/sample'
 import head from 'lodash/head'
 import omit from 'lodash/omit'
@@ -88,7 +89,8 @@ export default {
       valid: false,
       cloudProfileName: undefined,
       workers: undefined,
-      region: undefined
+      region: undefined,
+      zonesNetworkConfiguration: undefined
     }
   },
   computed: {
@@ -107,6 +109,15 @@ export default {
     },
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+    },
+    availableZones () {
+      // Ensure that only zones can bes elected, taht have a network config in providerConfig (if required)
+      // Could be removed if gardener would support to change network config afterwards
+      const zonesWithNetworkConfigInShoot = map(this.zonesNetworkConfiguration, 'name')
+      if (zonesWithNetworkConfigInShoot.length > 0) {
+        return zonesWithNetworkConfigInShoot
+      }
+      return this.allZones
     }
   },
   methods: {
@@ -140,7 +151,8 @@ export default {
           type: machineType,
           image: machineImage
         },
-        zones
+        zones,
+        isNewWorker: true // Could be removed if gardener would support to redistribute nodes when zone configuration changes
       }
       if (volumeType) {
         worker.volume = {
@@ -184,7 +196,7 @@ export default {
     getWorkers () {
       const workers = []
       forEach(this.internalWorkers, internalWorker => {
-        const worker = omit(internalWorker, ['id', 'valid'])
+        const worker = omit(internalWorker, ['id', 'valid', 'newWorker'])
         workers.push(worker)
       })
       return workers
@@ -200,9 +212,10 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
+      this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.setInternalWorkers(workers)
     }
   },

@@ -16,15 +16,10 @@
 
 import { Netmask } from 'netmask'
 import map from 'lodash/map'
-import uniq from 'lodash/uniq'
-import flatMap from 'lodash/flatMap'
-import find from 'lodash/find'
-import compact from 'lodash/compact'
 
 export const workerCIDR = '10.250.0.0/16'
 
 export function getProviderTemplate (infrastructureKind) {
-  // TODO: Remove network configuration as soon as gardener defaults it
   switch (infrastructureKind) {
     case 'aws':
       return {
@@ -108,7 +103,7 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   return cidrArray
 }
 
-export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind) {
+export function getZonesNetworkConfiguration (zones, infrastructureKind) {
   const zoneNetworks = splitCIDR(workerCIDR, zones.length)
   switch (infrastructureKind) {
     case 'aws':
@@ -135,20 +130,4 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind) 
     default:
       return undefined
   }
-}
-
-export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind) {
-  const newZones = uniq(flatMap(newWorkers, 'zones'))
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind)
-
-  if (!defaultZonesNetworkConfiguration) {
-    return undefined
-  }
-  const newZonesNetworkConfiguration = compact(map(newZones, zone => {
-    return find(oldZonesNetworkConfiguration, { name: zone })
-  }))
-  if (newZonesNetworkConfiguration.length !== newZones.length) {
-    return defaultZonesNetworkConfiguration
-  }
-  return newZonesNetworkConfiguration
 }

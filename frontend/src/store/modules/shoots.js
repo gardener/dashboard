@@ -39,7 +39,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
-import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration } from '@/utils/createShoot'
+import { getProviderTemplate, workerCIDR, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   isUserError,
@@ -266,12 +266,13 @@ const actions = {
     const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
 
-    const zones = [sample(rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }))]
-    const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind)
+    const allZones = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const zonesNetworkConfiguration = getZonesNetworkConfiguration(allZones, infrastructureKind)
     if (zonesNetworkConfiguration) {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
+    const zones = [sample(allZones)]
     const workerName = `worker-${shortRandomString(5)}`
     const volumeType = get(head(rootGetters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
     const machineType = get(head(rootGetters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')

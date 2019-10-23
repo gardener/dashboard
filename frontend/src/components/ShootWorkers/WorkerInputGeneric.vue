@@ -101,7 +101,8 @@ limitations under the License.
           <v-select
             color="cyan darken-2"
             label="Zone"
-            :items="allZones"
+            :disabled="!worker.isNewWorker"
+            :items="availableZones"
             :error-messages="getErrorMessages('worker.zones')"
             v-model="worker.zones"
             @input="onInputZones"
@@ -119,7 +120,6 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import isEmpty from 'lodash/isEmpty'
 import SizeInput from '@/components/ShootWorkers/VolumeSizeInput'
 import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
@@ -205,8 +205,8 @@ export default {
     cloudProfileName: {
       type: String
     },
-    region: {
-      type: String
+    availableZones: {
+      type: Array
     }
   },
   data () {
@@ -223,8 +223,7 @@ export default {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'machineImagesByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'machineImagesByCloudProfileName'
     ]),
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
@@ -234,7 +233,7 @@ export default {
     },
     volumeInCloudProfile () {
       // TODO CHANGE AS SOON AS VOLUMETYPES NO LONGER IN OS CP
-      return this.cloudProfileName !== 'os-eu-de-200';//!isEmpty(this.volumeTypes)
+      return this.cloudProfileName !== 'os-eu-de-200'; // !isEmpty(this.volumeTypes)
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)
@@ -272,9 +271,6 @@ export default {
           this.worker.maxSurge = maxSurge
         }
       }
-    },
-    allZones () {
-      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     }
   },
   methods: {

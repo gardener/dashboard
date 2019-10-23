@@ -132,8 +132,11 @@ import get from 'lodash/get'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
+import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+import map from 'lodash/map'
+import difference from 'lodash/difference'
 import { errorDetailsFromError } from '@/utils/error'
 import { getProviderTemplate, getZonesNetworkConfiguration } from '@/utils/createShoot'
 const EventEmitter = require('events')
@@ -173,7 +176,8 @@ export default {
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
-      'infrastructureSecretsByCloudProfileName'
+      'infrastructureSecretsByCloudProfileName',
+      'zonesByCloudProfileNameAndRegion'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -237,9 +241,11 @@ export default {
       const workers = this.$refs.manageWorkers.getWorkers()
       set(shootResource, 'spec.provider.workers', workers)
 
-      const zonesNetworkConfiguration = getZonesNetworkConfiguration(get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', undefined), workers, infrastructureKind)
-      if (zonesNetworkConfiguration) {
-        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+      const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const defaultZonesNetworkConfiguration = getZonesNetworkConfiguration(allZones, infrastructureKind)
+      const currentZonesNetworkConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones')
+      if (difference(map(defaultZonesNetworkConfiguration, 'name'), map(currentZonesNetworkConfiguration, 'name')).length > 0) {
+        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', defaultZonesNetworkConfiguration)
       }
 
       const addons = this.$refs.addons.getAddons()
@@ -299,6 +305,9 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
       const workers = get(shootResource, 'spec.provider.workers')
+      forEach(workers, worker => {
+        worker.isNewWorker = true
+      })
       this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region })
 
       const addons = get(shootResource, 'spec.addons')
