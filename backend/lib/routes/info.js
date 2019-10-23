@@ -41,7 +41,7 @@ router.route('/')
 async function fetchGardenerVersion () {
   try {
     const { spec: { service, caBundle } } = await apiRegistration.apiservices.get({
-      name: 'v1beta1.garden.sapcloud.io'
+      name: 'v1alpha1.core.gardener.cloud'
     })
     const uri = `https://${service.name}.${service.namespace}/version`
     const { body: version } = await got(uri, {

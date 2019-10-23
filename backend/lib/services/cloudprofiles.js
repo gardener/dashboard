@@ -36,17 +36,20 @@ function fromSeedResource ({ metadata, spec }) {
   return { metadata, data }
 }
 
-function getSeedsForCloudProfile ({ seeds, cloudProviderKind, matchlabels }) {
+function getSeedsForCloudProfile ({ seeds, cloudProviderKind, matchLabels }) {
   return _
     .chain(seeds)
     .filter(({ metadata, spec }) => {
       if (spec.provider.type !== cloudProviderKind) {
         return false
       }
-      if (_.difference(matchlabels, metadata.labels).length > 0) {
-        return false
-      }
-      return true
+      let seedMatchesLabelSelector = true
+      _.forEach(_.keys(matchLabels), key => {
+        if (!_.isEqual(matchLabels[key], _.get(metadata, ['labels', key]))) {
+          seedMatchesLabelSelector = false
+        }
+      })
+      return seedMatchesLabelSelector
     })
     .map(fromSeedResource)
     .value()
@@ -63,7 +66,7 @@ exports.list = function () {
       seeds: getSeedsForCloudProfile({
         seeds,
         cloudProviderKind: cloudProfile.spec.type,
-        matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', [])
+        matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels')
       })
     }))
     .filter((cloudProfile) => {

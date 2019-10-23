@@ -45,7 +45,7 @@ exports.isAdmin = function (user) {
   // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
     verb: 'delete',
-    group: 'garden.sapcloud.io',
+    group: 'core.gardener.cloud',
     resource: 'shoots'
   })
 }
@@ -53,7 +53,7 @@ exports.isAdmin = function (user) {
 exports.canCreateProject = function (user) {
   return hasAuthorization(user, {
     verb: 'create',
-    group: 'garden.sapcloud.io',
+    group: 'core.gardener.cloud',
     resource: 'projects'
   })
 }

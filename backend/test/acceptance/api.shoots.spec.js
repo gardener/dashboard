@@ -46,7 +46,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     bindingName: secret,
     seed: seedName
   })
-  spec.cloud[kind] = {}
   const resourceVersion = 42
 
   it('should return three shoots', async function () {
@@ -227,13 +226,13 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const workers = [ worker ]
     k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
     const res = await agent
-      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/fooInfra/workers`)
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`)
       .set('cookie', await user.cookie)
       .send(workers)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.cloud.fooInfra.workers).to.eql(workers)
+    expect(res.body.spec.provider.workers).to.eql(workers)
   })
 
   it('should replace hibernation enabled', async function () {
