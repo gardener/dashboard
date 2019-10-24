@@ -268,7 +268,7 @@ exports.info = async function ({ user, namespace, name }) {
     const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
     const seedSecret = await getSecret(core, seedSecretNamespace, seedSecretName)
 
-    if (seedSecret) {
+    if (seedSecret && seedSecret.data) {
       const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
 
       const seedShootNS = _.get(shoot, 'status.technicalID')
