@@ -49,7 +49,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
         </v-list-tile-action>
         <v-list-tile-content>
-          <v-list-tile-title>Dashboard</v-list-tile-title>
+          <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
         </v-list-tile-content>
       </v-list-tile>
       <v-list-tile>
@@ -292,7 +292,7 @@ export default {
   }
 
   .scroll {
-    overflow: scroll;
+    overflow-x: scroll;
   }
 
 </style>

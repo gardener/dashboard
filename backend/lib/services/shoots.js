@@ -268,17 +268,22 @@ exports.info = async function ({ user, namespace, name }) {
     const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
     const seedSecret = await getSecret(core, seedSecretNamespace, seedSecretName)
 
-    if (seedSecret && seedSecret.data) {
-      const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
+    if (seedSecret) {
+      try {
+        const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
 
-      const seedShootNS = _.get(shoot, 'status.technicalID')
-      if (!_.isEmpty(seedShootNS)) {
-        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
+        const seedShootNS = _.get(shoot, 'status.technicalID')
+        if (!_.isEmpty(seedShootNS)) {
+          const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
 
-        await Promise.all([
-          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
-        ])
+          await Promise.all([
+            assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
+            assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
+          ])
+        }
+      } catch (error) {
+        logger.error('Failed to access seed secret data', error)
+        logger.error('Seed Secret', seedSecret)
       }
     }
   } else {
