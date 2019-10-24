@@ -26,7 +26,8 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-list-tile v-if="isDashboardTileVisible">
+
+    <v-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
       </v-list-tile-action>
@@ -34,16 +35,70 @@ limitations under the License.
         <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
         <v-list-tile-title>
           <v-tooltip v-if="isShootHibernated" top>
-            <span slot="activator">{{dashboardUrlText}}</span>
+            <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
             Dashboard is not running for hibernated clusters
           </v-tooltip>
           <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
+
+    <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
+      <v-list-tile>
+        <v-list-tile-action>
+          <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Dashboard</v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-action-text>Access Dashboard using the kubectl command-line tool by running the following command: <code>kubectl proxy</code>. Kubectl will make Dashboard available at:</v-list-tile-action-text>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>
+            <v-tooltip v-if="isShootHibernated" top>
+              <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
+              Dashboard is not running for hibernated clusters
+            </v-tooltip>
+            <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
+          </v-list-tile-title>
+        </v-list-tile-content>
+      </v-list-tile>
+      <v-list-tile>
+        <v-list-tile-action>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-sub-title>Token</v-list-tile-sub-title>
+          <v-list-tile-title><pre class="scroll">{{tokenText}}</pre></v-list-tile-title>
+        </v-list-tile-content>
+        <v-list-tile-action>
+          <copy-btn :clipboard-text="token"></copy-btn>
+        </v-list-tile-action>
+        <v-list-tile-action>
+          <v-tooltip top>
+            <v-btn slot="activator" icon @click.native.stop="showToken = !showToken">
+              <v-icon>{{visibilityIcon}}</v-icon>
+            </v-btn>
+            <span>{{tokenVisibilityTitle}}</span>
+          </v-tooltip>
+        </v-list-tile-action>
+      </v-list-tile>
+    </template>
+
     <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
+
     <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" class="my-2" inset></v-divider>
+
     <v-expansion-panel v-if="isKubeconfigTileVisible" :value="expandKubeconfigIndex" readonly>
       <v-expansion-panel-content hide-actions>
         <v-list-tile slot="header">
@@ -88,6 +143,7 @@ import CodeBlock from '@/components/CodeBlock'
 import get from 'lodash/get'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -102,18 +158,29 @@ export default {
   },
   data () {
     return {
-      expandKubeconfigIndex: null
+      expandKubeconfigIndex: null,
+      showToken: false
     }
   },
   mixins: [shootItem],
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     dashboardUrl () {
       if (!this.hasDashboardEnabled) {
         return ''
       }
+      if (this.hasDashboardTokenAuth) {
+        const pathname = get(this.cfg, 'dashboardUrl.pathname', '')
+        return `http://localhost:8001${pathname}`
+      }
       return this.shootInfo.dashboardUrl || ''
     },
     dashboardUrlText () {
+      if (this.hasDashboardTokenAuth) {
+        return this.dashboardUrl
+      }
       return this.shootInfo.dashboardUrlText || ''
     },
     username () {
@@ -124,6 +191,9 @@ export default {
     },
     hasDashboardEnabled () {
       return get(this.shootItem, 'spec.addons.kubernetes-dashboard.enabled', false) === true
+    },
+    hasDashboardTokenAuth () {
+      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.authenticationMode', 'basic') === 'token'
     },
 
     kubeconfig () {
@@ -160,6 +230,30 @@ export default {
     },
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
+    },
+    token () {
+      return this.shootInfo.cluster_token || ''
+    },
+    tokenText () {
+      if (this.showToken) {
+        return this.token
+      } else {
+        return '****************'
+      }
+    },
+    tokenVisibilityTitle () {
+      if (this.showToken) {
+        return 'Hide token'
+      } else {
+        return 'Show token'
+      }
+    },
+    visibilityIcon () {
+      if (this.showToken) {
+        return 'visibility_off'
+      } else {
+        return 'visibility'
+      }
     }
   },
   methods: {
@@ -195,6 +289,10 @@ export default {
   >>> .v-expansion-panel__header {
     cursor: auto;
     padding: 0;
+  }
+
+  .scroll {
+    overflow: scroll;
   }
 
 </style>

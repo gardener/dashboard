@@ -245,7 +245,7 @@ exports.info = async function ({ user, namespace, name }) {
     _
       .chain(secret)
       .get('data')
-      .pick('kubeconfig', 'username', 'password')
+      .pick('kubeconfig', 'username', 'password', 'token')
       .forEach((value, key) => {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
