@@ -233,6 +233,7 @@ export default {
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, ['spec', 'cloud', infrastructureKind, 'loadBalancerProvider'], loadBalancerProviderName)
       }
+      console.log(zones);
       if (!isEmpty(zones)) {
         set(shootResource, ['spec', 'cloud', infrastructureKind, 'zones'], zones)
       }
