@@ -283,7 +283,6 @@ exports.info = async function ({ user, namespace, name }) {
         }
       } catch (error) {
         logger.error('Failed to access seed secret data', error)
-        logger.error('Seed Secret', seedSecret)
       }
     }
   } else {
