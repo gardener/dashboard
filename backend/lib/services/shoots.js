@@ -17,11 +17,14 @@
 'use strict'
 
 const kubernetes = require('../kubernetes')
-const { decodeBase64, getProjectByNamespace } = require('../utils')
+const utils = require('../utils')
 const { getSeeds } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
+const yaml = require('js-yaml')
+
+const { decodeBase64, getProjectByNamespace } = utils
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -242,14 +245,17 @@ exports.info = async function ({ user, namespace, name }) {
     _
       .chain(secret)
       .get('data')
-      .pick('kubeconfig', 'username', 'password')
+      .pick('kubeconfig', 'username', 'password', 'token')
       .forEach((value, key) => {
-        if (key === 'password') {
-          data['cluster_password'] = decodeBase64(value)
-        } else if (key === 'username') {
-          data['cluster_username'] = decodeBase64(value)
+        value = decodeBase64(value)
+        if (key === 'kubeconfig') {
+          try {
+            data[key] = yaml.safeDump(utils.cleanKubeconfig(value))
+          } catch (err) {
+            logger.error('failed to clean kubeconfig', err)
+          }
         } else {
-          data[key] = decodeBase64(value)
+          data[`cluster_${key}`] = value
         }
       })
       .commit()
@@ -263,16 +269,20 @@ exports.info = async function ({ user, namespace, name }) {
     const seedSecret = await getSecret(core, seedSecretNamespace, seedSecretName)
 
     if (seedSecret) {
-      const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
+      try {
+        const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
 
-      const seedShootNS = _.get(shoot, 'status.technicalID')
-      if (!_.isEmpty(seedShootNS)) {
-        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
+        const seedShootNS = _.get(shoot, 'status.technicalID')
+        if (!_.isEmpty(seedShootNS)) {
+          const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
 
-        await Promise.all([
-          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
-        ])
+          await Promise.all([
+            assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
+            assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
+          ])
+        }
+      } catch (error) {
+        logger.error('Failed to access seed secret data', error)
       }
     }
   } else {

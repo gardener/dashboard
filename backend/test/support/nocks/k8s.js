@@ -670,11 +670,13 @@ const stub = {
 
     return nockWithAuthorization(bearer)
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
+        expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecret.metadata, body.metadata)
         return true
       })
       .reply(200, () => resultSecret)
       .post(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`, body => {
+        expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecretBinding.metadata, body.metadata)
         _.assign(resultSecretBinding.secretRef, body.secretRef)
         return true
@@ -699,6 +701,7 @@ const stub = {
       .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
       .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`, body => {
+        expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecret.metadata, body.metadata)
         return true
       })
