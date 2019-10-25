@@ -27,7 +27,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const bindingName = `${name}-sb`
   const cloudProfileName = 'infra1-profileName'
   const cloudProviderKind = 'infra1'
-  const metadata = {name, bindingName, cloudProfileName}
+  const metadata = { namespace, name, bindingName, cloudProfileName, cloudProviderKind }
   const username = `${name}@example.org`
   const id = username
   const user = auth.createUser({ id })
@@ -79,7 +79,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind})
+    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind})
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
