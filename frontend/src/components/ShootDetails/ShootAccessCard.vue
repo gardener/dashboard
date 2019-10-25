@@ -72,7 +72,7 @@ limitations under the License.
           </v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile>
+      <v-list-tile v-if="token">
         <v-list-tile-action>
         </v-list-tile-action>
         <v-list-tile-content>
