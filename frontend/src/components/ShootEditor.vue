@@ -284,8 +284,8 @@ export default {
         this.untouched = false
         this.setClean(doc.isClean(this.generation))
         this.historySize = doc.historySize()
-        this.errorMessage = undefined
-        this.detailedErrorMessage = undefined
+        this.errorMessageInternal = undefined
+        this.detailedErrorMessageInternal = undefined
       }
       this.$instance.on('change', onChange)
     },
