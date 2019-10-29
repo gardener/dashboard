@@ -271,7 +271,7 @@ exports.info = async function ({ user, namespace, name }) {
     _
       .chain(secret)
       .get('data')
-      .pick('kubeconfig', 'username', 'password')
+      .pick('kubeconfig', 'username', 'password', 'token')
       .forEach((value, key) => {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
@@ -293,12 +293,16 @@ exports.info = async function ({ user, namespace, name }) {
     const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot })
 
     if (seedKubeconfig && !_.isEmpty(seedShootNS)) {
-      const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
+      try {
+        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
 
-      await Promise.all([
-        assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-        assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
-      ])
+        await Promise.all([
+          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
+          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
+        ])
+      } catch (error) {
+        logger.error('Failed to retrieve information using seed core client', error)
+      }
     }
   } else {
     await Promise.all([

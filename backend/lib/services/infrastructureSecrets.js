@@ -93,7 +93,7 @@ function toSecretResource ({ metadata, data }) {
   const type = 'Opaque'
   metadata = _
     .chain(metadata)
-    .pick(['namespace', 'name', 'resourceVersion'])
+    .pick(['namespace', 'name'])
     .value()
   try {
     data = _.mapValues(data, encodeBase64)
@@ -118,7 +118,7 @@ function toSecretBindingResource ({ metadata }) {
 
   metadata = _
     .chain(metadata)
-    .pick(['namespace', 'resourceVersion'])
+    .pick(['namespace'])
     .assign({ name, labels })
     .value()
   return { apiVersion, kind, metadata, secretRef }

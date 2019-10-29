@@ -158,7 +158,7 @@ const validations = {
   },
   zones: {
     required: requiredIf(function () {
-      return this.infrastructureKind === 'azure'
+      return this.infrastructureKind !== 'azure'
     })
   },
   floatingPoolName: {
@@ -329,7 +329,11 @@ export default {
       this.onUpdateCloudProfileName()
     },
     setDefaultZone () {
-      this.zones = [sample(this.allZones)]
+      if (!isEmpty(this.allZones) && this.infrastructureKind !== 'azure') {
+        this.zones = [sample(this.allZones)]
+      } else {
+        this.zones = undefined
+      }
     },
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
