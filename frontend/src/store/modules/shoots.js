@@ -52,7 +52,8 @@ import { isHibernated,
   shortRandomString,
   shootAddonList,
   utcMaintenanceWindowFromLocalBegin,
-  randomLocalMaintenanceBegin } from '@/utils'
+  randomLocalMaintenanceBegin,
+  generateWorker } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -273,29 +274,7 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
-    const workerName = `worker-${shortRandomString(5)}`
-    const volumeType = get(head(rootGetters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
-    const machineType = get(head(rootGetters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })), 'name')
-    const machineImage = rootGetters.defaultMachineImageForCloudProfileName(cloudProfileName)
-    const worker = {
-      name: workerName,
-      minimum: 1,
-      maximum: 2,
-      maxSurge: 1,
-      machine: {
-        type: machineType,
-        image: machineImage
-      }
-    }
-    if (volumeType) {
-      worker.volume = {
-        type: volumeType,
-        size: '50Gi'
-      }
-    }
-    if (!isEmpty(zones)) {
-      worker.zones = zones
-    }
+    const worker = generateWorker(zones, cloudProfileName, region)
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
 

@@ -55,7 +55,7 @@ limitations under the License.
         </v-flex>
         <v-flex v-if="volumeInCloudProfile" class="smallInput">
           <size-input
-            min="1"
+            :min="minimumVolumeSize"
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.volume.size')"
             @input="onInputVolumeSize"
@@ -126,7 +126,7 @@ import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import { required, maxLength, minValue } from 'vuelidate/lib/validators'
 import isEmpty from 'lodash/isEmpty'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -158,35 +158,6 @@ const validationErrors = {
   }
 }
 
-const validations = {
-  worker: {
-    name: {
-      required,
-      maxLength: maxLength(15),
-      noStartEndHyphen, // Order is important for UI hints
-      resourceName,
-      uniqueWorkerName
-    },
-    volume: {
-      size: {
-        minVolumeSize: minVolumeSize(1)
-      }
-    },
-    minimum: {
-      minValue: minValue(0)
-    },
-    maximum: {
-      minValue: minValue(0)
-    },
-    maxSurge: {
-      numberOrPercentage
-    },
-    zones: {
-      required
-    }
-  }
-}
-
 export default {
   components: {
     SizeInput,
@@ -206,6 +177,9 @@ export default {
     cloudProfileName: {
       type: String
     },
+    region: {
+      type: String
+    },
     availableZones: {
       type: Array
     }
@@ -219,13 +193,46 @@ export default {
       machineImageValid: undefined
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'machineImagesByCloudProfileName'
+      'machineImagesByCloudProfileName',
+      'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
+    validators () {
+      return {
+        worker: {
+          name: {
+            required,
+            maxLength: maxLength(15),
+            noStartEndHyphen, // Order is important for UI hints
+            resourceName,
+            uniqueWorkerName
+          },
+          volume: {
+            size: {
+              minVolumeSize: minVolumeSize(this.minimumVolumeSize)
+            }
+          },
+          minimum: {
+            minValue: minValue(0)
+          },
+          maximum: {
+            minValue: minValue(0)
+          },
+          maxSurge: {
+            numberOrPercentage
+          },
+          zones: {
+            required
+          }
+        }
+      }
+    },
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
@@ -237,6 +244,10 @@ export default {
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)
+    },
+    minimumVolumeSize () {
+      const minimumVolumeSize = this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+      return parseSize(minimumVolumeSize)
     },
     innerMin: {
       get: function () {

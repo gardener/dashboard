@@ -39,6 +39,7 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
+import min from 'lodash/min'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -227,6 +228,14 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+    }
+  },
+  minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const seedsForCloudProfile = cloudProfile.data.seeds
+      const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
+      return min(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || '20Gi'
     }
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {

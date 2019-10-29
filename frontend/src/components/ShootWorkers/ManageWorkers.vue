@@ -22,6 +22,7 @@ limitations under the License.
         :worker="worker"
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
+        :region="region"
         :availableZones="availableZones"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
@@ -62,13 +63,10 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { shortRandomString } from '@/utils'
+import { generateWorker } from '@/utils'
 import forEach from 'lodash/forEach'
-import get from 'lodash/get'
 import find from 'lodash/find'
 import map from 'lodash/map'
-import sample from 'lodash/sample'
-import head from 'lodash/head'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 const uuidv4 = require('uuid/v4')
@@ -97,15 +95,10 @@ export default {
     ...mapGetters([
       'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
-      'defaultMachineImageForCloudProfileName',
       'zonesByCloudProfileNameAndRegion'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
-    },
-    defaultMachineImage () {
-      return this.defaultMachineImageForCloudProfileName(this.cloudProfileName)
     },
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
@@ -133,33 +126,7 @@ export default {
       this.validateInput()
     },
     addWorker () {
-      const id = uuidv4()
-      const name = `worker-${shortRandomString(5)}`
-      const zones = [sample(this.availableZones)]
-      const machineTypesForZone = this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })
-      const machineType = get(head(machineTypesForZone), 'name')
-      const volumeTypesForZone = this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })
-      const volumeType = get(head(volumeTypesForZone), 'name')
-      const machineImage = this.defaultMachineImage
-      const worker = {
-        id,
-        name,
-        minimum: 1,
-        maximum: 2,
-        maxSurge: 1,
-        machine: {
-          type: machineType,
-          image: machineImage
-        },
-        zones,
-        isNewWorker: true // Could be removed if gardener would support to redistribute nodes when zone configuration changes
-      }
-      if (volumeType) {
-        worker.volume = {
-          type: volumeType,
-          size: '50Gi'
-        }
-      }
+      const worker = generateWorker(this.availableZones, this.cloudProfileName, this.region)
       this.internalWorkers.push(worker)
       this.validateInput()
     },

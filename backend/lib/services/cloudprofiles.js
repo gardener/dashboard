@@ -32,7 +32,9 @@ function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
 
 function fromSeedResource ({ metadata, spec }) {
   metadata = _.pick(metadata, ['name'])
-  const data = _.get(spec, 'provider')
+  const provider = _.get(spec, 'provider')
+  const volume = _.get(spec, 'volume')
+  const data = { volume, ...provider }
   return { metadata, data }
 }
 

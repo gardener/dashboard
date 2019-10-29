@@ -40,6 +40,7 @@ import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+const uuidv4 = require('uuid/v4')
 
 export function emailToDisplayName (value) {
   if (value) {
@@ -518,4 +519,38 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
     return { utcBegin, utcEnd }
   }
   return undefined
+}
+
+export function generateWorker (availableZones, cloudProfileName, region) {
+  const id = uuidv4()
+  const name = `worker-${shortRandomString(5)}`
+  const zones = [sample(availableZones)]
+  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const machineType = get(head(machineTypesForZone), 'name')
+  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const volumeType = get(head(volumeTypesForZone), 'name')
+  const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+  const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+  const worker = {
+    id,
+    name,
+    minimum: 1,
+    maximum: 2,
+    maxSurge: 1,
+    machine: {
+      type: machineType,
+      image: machineImage
+    },
+    zones,
+    isNewWorker: true // Could be removed if gardener would support to redistribute nodes when zone configuration changes
+  }
+  if (volumeType) {
+    worker.volume = {
+      type: volumeType,
+      size: defaultVolumeSize
+    }
+  }
+
+  return worker
 }
