@@ -24,7 +24,7 @@ const {
   getShootIngressDomain
 } = require('../../utils')
 const assert = require('assert').strict
-const { getSeeds } = require('../../cache')
+const { getSeed } = require('../../cache')
 
 const GardenTerminalHostRefType = {
   SECRET_REF: 'secretRef',
@@ -65,7 +65,7 @@ async function getGardenTerminalHostClusterSecretRef ({ coreClient }) {
 
 function getSeedForGardenTerminalHostCluster () {
   const seedName = getConfigValue('terminal.gardenTerminalHost.seedRef')
-  const seed = _.find(getSeeds(), ['metadata.name', seedName])
+  const seed = getSeed(seedName)
   if (!seed) {
     throw new Error(`There is no seed with name ${seedName}`)
   }

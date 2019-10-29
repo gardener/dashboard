@@ -51,6 +51,9 @@ module.exports = {
   getSeeds () {
     return cache.getSeeds()
   },
+  getSeed (name) {
+    return _.cloneDeep(_.find(cache.getSeeds(), ['metadata.name', name]))
+  },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
       const seedProtected = _.get(item, 'spec.protected', true)

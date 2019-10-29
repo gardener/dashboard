@@ -42,7 +42,7 @@ const {
   GardenTerminalHostRefType
 } = require('./utils')
 const shoots = require('../shoots')
-const { getSeeds } = require('../../cache')
+const { getSeed } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
@@ -199,7 +199,7 @@ async function handleSeed (seed) {
   const namespace = 'garden'
 
   // get latest seed resource from cache
-  seed = _.find(getSeeds(), ['metadata.name', name])
+  seed = getSeed(name)
 
   if (!_.isEmpty(seed.metadata.deletionTimestamp)) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
@@ -210,7 +210,7 @@ async function handleSeed (seed) {
   const coreClient = kubernetes.core()
   const gardenClient = kubernetes.garden()
 
-  // now make sure a a browser-trusted certificate is presented for the kube-apiserver
+  // now make sure a browser-trusted certificate is presented for the kube-apiserver
   const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
   if (isShootedSeed) {
     await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
@@ -275,7 +275,8 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
 }
 
 /*
- Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden terminal host cluster. This cluster runs the terminal pods of garden operators for the virtual garden.
+ Make sure a a browser-trusted certificate is presented for the kube-apiserver of the garden terminal host cluster.
+ This cluster runs the terminal pods of garden operators for the (virtual) garden.
 */
 async function ensureTrustedCertForGardenTerminalHostApiServer () {
   logger.debug(`replacing resources on garden host cluster for webterminals`)
@@ -413,7 +414,7 @@ function bootstrapResource (resource) {
     return
   }
 
-  const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-resources-disabled'], 'false') === 'true'
+  const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
   if (isBootstrapDisabledForResource) {
     const name = resource.metadata.name
     const namespace = _.get(resource, 'metadata.namespace', '')

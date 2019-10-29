@@ -19,7 +19,7 @@
 
 const path = require('path')
 const _ = require('lodash')
-const { getSeeds } = require('../cache')
+const { getSeed } = require('../cache')
 const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
 const config = require('../config')
@@ -92,7 +92,7 @@ function shootHasIssue (shoot) {
 
 async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
   if (!seed) {
-    seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+    seed = getSeed(shoot.spec.cloud.seed)
   }
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
@@ -142,10 +142,10 @@ async function getProjectNameFromNamespace (projects, namespaces, namespace) {
     const project = await getProjectByNamespace(projects, namespaces, namespace)
     return project.metadata.name
   } catch (e) {
-    if (e.code === 404) {
+    if (namespace === 'garden' && e.code === 404) {
       /*
-        fallback: there is no corresponding project, use namespace name
-        the community installer currently does not create a project resource for the garden namespace
+        fallback: if there is no corresponding garden project, use namespace name.
+        The community installer currently does not create a project resource for the garden namespace
         because of https://github.com/gardener/gardener/issues/879
       */
       return namespace

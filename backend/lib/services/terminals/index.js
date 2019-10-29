@@ -36,7 +36,7 @@ const {
   getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer
 } = require('./utils')
-const { getSeeds } = require('../../cache')
+const { getSeed } = require('../../cache')
 const shoots = require('../shoots')
 const { Forbidden } = require('../../errors')
 const logger = require('../../logger')
@@ -103,9 +103,7 @@ async function readServiceAccountToken ({ coreClient, namespace, serviceAccountN
   }
 
   const secret = await coreClient.ns(namespace).secrets.get({ name: secretName })
-  const token = decodeBase64(secret.data.token)
-  const caData = secret.data['ca.crt']
-  return { token, caData }
+  return decodeBase64(secret.data.token)
 }
 
 function isServiceAccountReady ({ secrets } = {}) {
@@ -146,8 +144,7 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
   const hostNamespace = existingTerminal.spec.host.namespace
 
   const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
-  const serviceAccountTokenObj = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: hostNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
-  const token = _.get(serviceAccountTokenObj, 'token')
+  const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: hostNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
   if (_.isEmpty(token)) {
     // TODO delete terminal resource?
     return undefined
@@ -193,15 +190,17 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     bindingKind: undefined
   }
 
-  if (target === TargetEnum.GARDEN) {
-    assert.strictEqual(user.isAdmin, true, 'user is not admin')
+  switch (target) {
+    case TargetEnum.GARDEN: {
+      assert.strictEqual(user.isAdmin, true, 'user is not admin')
 
-    targetCluster.kubeconfigContextNamespace = namespace
-    targetCluster.namespace = 'garden'
-    targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
-    targetCluster.bindingKind = 'ClusterRoleBinding'
-  } else {
-    if (target === TargetEnum.SHOOT) {
+      targetCluster.kubeconfigContextNamespace = namespace
+      targetCluster.namespace = 'garden'
+      targetCluster.credentials = getConfigValue('terminal.garden.operatorCredentials')
+      targetCluster.bindingKind = 'ClusterRoleBinding'
+      break
+    }
+    case TargetEnum.SHOOT: {
       targetCluster.kubeconfigContextNamespace = 'default'
       targetCluster.namespace = undefined // this will create a temporary namespace
       targetCluster.credentials = {
@@ -211,11 +210,13 @@ async function getTargetCluster ({ user, namespace, name, target }) {
         }
       }
       targetCluster.bindingKind = 'ClusterRoleBinding'
-    } else if (target === TargetEnum.CONTROL_PLANE) {
+      break
+    }
+    case TargetEnum.CONTROL_PLANE: {
       const shootResource = await shoots.read({ user, namespace, name })
       const seedShootNS = getSeedShootNamespace(shootResource)
       const seedName = shootResource.spec.cloud.seed
-      const seed = _.find(getSeeds(), ['metadata.name', seedName])
+      const seed = getSeed(seedName)
 
       targetCluster.kubeconfigContextNamespace = seedShootNS
       targetCluster.namespace = seedShootNS
@@ -223,7 +224,9 @@ async function getTargetCluster ({ user, namespace, name, target }) {
         secretRef: _.get(seed, 'spec.secretRef')
       }
       targetCluster.bindingKind = 'RoleBinding'
-    } else {
+      break
+    }
+    default: {
       throw new Error(`unknown target ${target}`)
     }
   }
@@ -259,7 +262,7 @@ async function getSeedHostCluster ({ gardenClient, gardenCoreClient, namespace, 
 
   const seedShootNS = getSeedShootNamespace(shootResource)
   const seedName = shootResource.spec.cloud.seed
-  const seed = _.find(getSeeds(), ['metadata.name', seedName])
+  const seed = getSeed(seedName)
 
   hostCluster.namespace = seedShootNS
   hostCluster.secretRef = _.get(seed, 'spec.secretRef')
@@ -443,7 +446,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
 
   terminalResource = await readTerminalUntilReady({ dashboardClient, namespace, name: terminalResource.metadata.name })
 
-  const { token } = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
+  const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
 
   const pod = terminalResource.status.podName
   _.assign(terminalInfo, {
@@ -517,8 +520,8 @@ async function setKeepaliveAnnotation ({ dashboardClient, terminal, namespace })
     const name = terminal.metadata.name
     await dashboardClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
   } catch (e) {
-    logger.error(`Could not keepalive terminal. Error: ${e}`)
-    throw new Error(`Could not keepalive terminal`)
+    logger.error('Could not keepalive terminal:', e)
+    throw new Error('Could not keepalive terminal')
   }
 }
 

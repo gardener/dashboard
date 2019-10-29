@@ -18,7 +18,7 @@
 
 const kubernetes = require('../kubernetes')
 const utils = require('../utils')
-const { getSeeds } = require('../cache')
+const { getSeed } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
@@ -35,7 +35,7 @@ function Core ({ auth }) {
 }
 
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  const seed = getSeed(shoot.spec.cloud.seed)
   const seedShootNS = _.get(shoot, 'status.technicalID')
 
   const coreClient = Core(user)
@@ -249,7 +249,7 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
+  const seed = getSeed(shoot.spec.cloud.seed)
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projects = Garden(user).projects
