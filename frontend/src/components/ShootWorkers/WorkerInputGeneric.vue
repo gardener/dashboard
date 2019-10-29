@@ -125,6 +125,7 @@ import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import { required, maxLength, minValue } from 'vuelidate/lib/validators'
+import isEmpty from 'lodash/isEmpty'
 import { getValidationErrors } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
@@ -232,8 +233,7 @@ export default {
       return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
     volumeInCloudProfile () {
-      // TODO CHANGE AS SOON AS VOLUMETYPES NO LONGER IN OS CP
-      return this.cloudProfileName !== 'os-eu-de-200'; // !isEmpty(this.volumeTypes)
+      return !isEmpty(this.volumeTypes)
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)

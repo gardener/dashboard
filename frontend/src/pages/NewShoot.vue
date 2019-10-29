@@ -135,8 +135,6 @@ import cloneDeep from 'lodash/cloneDeep'
 import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
-import map from 'lodash/map'
-import difference from 'lodash/difference'
 import { errorDetailsFromError } from '@/utils/error'
 import { getProviderTemplate, getZonesNetworkConfiguration } from '@/utils/createShoot'
 const EventEmitter = require('events')
