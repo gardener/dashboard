@@ -111,7 +111,7 @@ export default {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
     availableZones () {
-      // Ensure that only zones can bes elected, taht have a network config in providerConfig (if required)
+      // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
       // Could be removed if gardener would support to change network config afterwards
       const zonesWithNetworkConfigInShoot = map(this.zonesNetworkConfiguration, 'name')
       if (zonesWithNetworkConfigInShoot.length > 0) {
@@ -135,7 +135,7 @@ export default {
     addWorker () {
       const id = uuidv4()
       const name = `worker-${shortRandomString(5)}`
-      const zones = [sample(this.allZones)]
+      const zones = [sample(this.availableZones)]
       const machineTypesForZone = this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })
       const machineType = get(head(machineTypesForZone), 'name')
       const volumeTypesForZone = this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones })

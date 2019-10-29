@@ -16,6 +16,10 @@
 
 import { Netmask } from 'netmask'
 import map from 'lodash/map'
+import flatMap from 'lodash/flatMap'
+import uniq from 'lodash/uniq'
+import compact from 'lodash/compact'
+import find from 'lodash/find'
 
 export const workerCIDR = '10.250.0.0/16'
 
@@ -103,8 +107,8 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
   return cidrArray
 }
 
-export function getZonesNetworkConfiguration (zones, infrastructureKind) {
-  const zoneNetworks = splitCIDR(workerCIDR, zones.length)
+export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
+  const zoneNetworks = splitCIDR(workerCIDR, maxNumberOfZones)
   switch (infrastructureKind) {
     case 'aws':
       return map(zones, (zone, index) => {
@@ -130,4 +134,20 @@ export function getZonesNetworkConfiguration (zones, infrastructureKind) {
     default:
       return undefined
   }
+}
+
+export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones) {
+  const newZones = uniq(flatMap(newWorkers, 'zones'))
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind, maxNumberOfZones)
+
+  if (!defaultZonesNetworkConfiguration) {
+    return undefined
+  }
+  const newZonesNetworkConfiguration = compact(map(newZones, zone => {
+    return find(oldZonesNetworkConfiguration, { name: zone })
+  }))
+  if (newZonesNetworkConfiguration.length !== newZones.length) {
+    return defaultZonesNetworkConfiguration
+  }
+  return newZonesNetworkConfiguration
 }

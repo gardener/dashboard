@@ -242,10 +242,10 @@ export default {
       set(shootResource, 'spec.provider.workers', workers)
 
       const allZones = this.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-      const defaultZonesNetworkConfiguration = getZonesNetworkConfiguration(allZones, infrastructureKind)
-      const currentZonesNetworkConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones')
-      if (difference(map(defaultZonesNetworkConfiguration, 'name'), map(currentZonesNetworkConfiguration, 'name')).length > 0) {
-        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', defaultZonesNetworkConfiguration)
+      const oldZoneConfiguration = get(shootResource, 'spec.provider.infrastructureConfig.networks.zones', undefined)
+      const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length)
+      if (zonesNetworkConfiguration) {
+        set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
       }
 
       const addons = this.$refs.addons.getAddons()
