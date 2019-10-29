@@ -222,12 +222,9 @@ export function routes (router, includeRoutesWithProjectScope) {
   return filter(defaultRoute.children, hasMenu)
 }
 
-export function namespacedRoute (route, namespace, name = undefined) {
+export function namespacedRoute (route, namespace) {
   const params = {
     namespace: namespace
-  }
-  if (name) {
-    params.name = name
   }
 
   return { name: routeName(route), params }

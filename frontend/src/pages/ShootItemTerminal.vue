@@ -217,6 +217,7 @@ class TerminalSession {
       return
     }
 
+    // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
     const protocols = addBearerToken(['v4.channel.k8s.io'], terminalData.token)
     const ws = new WebSocket(attachUri(terminalData), protocols)
     const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
@@ -274,7 +275,7 @@ class TerminalSession {
         this.vm.spinner.start()
         console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
       }
-      reconnectTimeoutId = setTimeout(this.attachTerminal, timeoutSeconds * 1000)
+      reconnectTimeoutId = setTimeout(() => this.attachTerminal, timeoutSeconds * 1000)
     }
     this.close = () => {
       clearTimeout(reconnectTimeoutId)
@@ -315,7 +316,7 @@ class TerminalSession {
 
     this.vm.spinner.text = 'Connecting to Pod.'
     try {
-      await pTimeout(waitForPodRunning(ws, containerName, onPodStateChange), timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
+      await waitForPodRunning(ws, containerName, onPodStateChange, timeoutSeconds * 1000)
     } finally {
       closeWsIfNotClosed(ws)
     }
@@ -343,16 +344,39 @@ function closeWsIfNotClosed (ws) {
   }
 }
 
-function waitForPodRunning (ws, containerName, handleEvent) {
-  return new Promise((resolve, reject) => {
+async function waitForPodRunning (ws, containerName, handleEvent, timeoutSeconds) {
+  const connectPromise = new Promise((resolve, reject) => {
+    const openHandler = () => {
+      ws.removeEventListener('open', openHandler)
+      ws.removeEventListener('error', errorHandler)
+
+      resolve()
+    }
+    const errorHandler = error => {
+      ws.removeEventListener('open', openHandler)
+      ws.removeEventListener('error', errorHandler)
+
+      reject(error)
+    }
+
+    ws.addEventListener('open', openHandler)
+    ws.addEventListener('error', errorHandler)
+  })
+
+  const connectTimeoutSeconds = 5
+  await pTimeout(connectPromise, connectTimeoutSeconds * 1000, `Could not connect within ${connectTimeoutSeconds} seconds`)
+
+  const podRunningPromise = new Promise((resolve, reject) => {
     const resolveOnce = value => {
       ws.removeEventListener('message', messageHandler)
       ws.removeEventListener('close', closeHandler)
+
       resolve(value)
     }
     const rejectOnce = reason => {
       ws.removeEventListener('message', messageHandler)
       ws.removeEventListener('close', closeHandler)
+
       reject(reason)
     }
 
@@ -396,6 +420,7 @@ function waitForPodRunning (ws, containerName, handleEvent) {
     ws.addEventListener('message', messageHandler)
     ws.addEventListener('close', closeHandler)
   })
+  return pTimeout(podRunningPromise, timeoutSeconds * 1000, `Timed out after ${timeoutSeconds}s`)
 }
 
 function getDetailedConnectionStateText (terminalContainerStatus) {
@@ -600,7 +625,7 @@ export default {
 
       try {
         const terminalData = await this.createTerminal()
-        return terminalSession.attachTerminal(terminalData)
+        await terminalSession.attachTerminal(terminalData)
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
         terminalSession.setDisconnectedState()

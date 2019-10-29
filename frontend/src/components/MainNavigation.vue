@@ -124,7 +124,7 @@ limitations under the License.
         </v-list-tile>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-tile v-if="route.meta.menu.visible()" :to="namespacedRoute(route)" :key="index">
+            <v-list-tile v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
               <v-list-tile-action>
                 <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
               </v-list-tile-action>
