@@ -197,7 +197,15 @@ class TerminalSession {
     this.setInitialState()
   }
 
-  async attachTerminal (terminalData) {
+  setTerminalData (terminalData) {
+    this.terminalData = terminalData
+  }
+
+  getTerminalData () {
+    return this.terminalData
+  }
+
+  async attachTerminal () {
     if (this.cancelConnect) {
       return
     }
@@ -206,7 +214,7 @@ class TerminalSession {
 
     try {
       this.connectionState = ConnectionState.CONNECTING
-      await this.waitUntilPodIsRunning(terminalData, 60)
+      await this.waitUntilPodIsRunning(60)
       if (this.cancelConnect) {
         return
       }
@@ -218,8 +226,8 @@ class TerminalSession {
     }
 
     // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
-    const protocols = addBearerToken(['v4.channel.k8s.io'], terminalData.token)
-    const ws = new WebSocket(attachUri(terminalData), protocols)
+    const protocols = addBearerToken(['v4.channel.k8s.io'], this.terminalData.token)
+    const ws = new WebSocket(attachUri(this.terminalData), protocols)
     const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
     this.vm.term.loadAddon(attachAddon)
     let reconnectTimeoutId
@@ -288,8 +296,8 @@ class TerminalSession {
     }
   }
 
-  async waitUntilPodIsRunning (terminalData, timeoutSeconds) {
-    const containerName = terminalData.container
+  async waitUntilPodIsRunning (timeoutSeconds) {
+    const containerName = this.terminalData.container
     const onPodStateChange = ({ type, object: pod }) => {
       const containers = get(pod, 'spec.containers')
       const terminalContainer = find(containers, ['name', containerName])
@@ -311,10 +319,10 @@ class TerminalSession {
     }
 
     const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-    addBearerToken(protocols, terminalData.token)
-    const ws = new WebSocket(watchPodUri(terminalData), protocols)
+    addBearerToken(protocols, this.terminalData.token)
+    const ws = new WebSocket(watchPodUri(this.terminalData), protocols)
 
-    this.vm.spinner.text = 'Connecting to Pod.'
+    this.vm.spinner.text = 'Connecting to Pod'
     try {
       await waitForPodRunning(ws, containerName, onPodStateChange, timeoutSeconds * 1000)
     } finally {
@@ -329,13 +337,13 @@ function addBearerToken (protocols, bearer) {
 }
 
 function attachUri (terminalData) {
-  const { namespace, container, server, pod } = encodeURIComponents(terminalData)
-  return `wss://${server}/api/v1/namespaces/${namespace}/pods/${pod}/attach?container=${container}&stdin=true&stdout=true&tty=true`
+  const { hostNamespace, container, server, podName } = encodeURIComponents(terminalData)
+  return `wss://${server}/api/v1/namespaces/${hostNamespace}/pods/${podName}/attach?container=${container}&stdin=true&stdout=true&tty=true`
 }
 
 function watchPodUri (terminalData) {
-  const { namespace, server, pod } = encodeURIComponents(terminalData)
-  return `wss://${server}/api/v1/namespaces/${namespace}/pods?fieldSelector=metadata.name%3D${pod}&watch=true`
+  const { hostNamespace, server, podName } = encodeURIComponents(terminalData)
+  return `wss://${server}/api/v1/namespaces/${hostNamespace}/pods?fieldSelector=metadata.name%3D${podName}&watch=true`
 }
 
 function closeWsIfNotClosed (ws) {
@@ -532,12 +540,17 @@ export default {
         return
       }
       const { namespace, name, target } = this.$route.params
-      const body = this.selectedConfig
-      await deleteTerminal({ name, namespace, target, body })
-      if (this.name) {
-        return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
+      const terminalResourceName = get(this.terminalSession.getTerminalData(), 'name')
+      const body = { name: terminalResourceName }
+      try {
+        await deleteTerminal({ name, namespace, target, body })
+        if (this.name) {
+          return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
+        }
+        return this.$router.push({ name: 'ShootList', params: { namespace: this.namespace } })
+      } catch (err) {
+        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
       }
-      return this.$router.push({ name: 'ShootList', params: { namespace: this.namespace } })
     },
     confirmDelete () {
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -553,8 +566,8 @@ export default {
         const { data: config } = await terminalConfig({ name, namespace, target })
 
         assign(this.config, config)
-      } catch (error) {
-        this.errorMessage = error.message
+      } catch (err) {
+        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
       } finally {
         this.loading[refName] = false
       }
@@ -626,7 +639,8 @@ export default {
 
       try {
         const terminalData = await this.createTerminal()
-        await terminalSession.attachTerminal(terminalData)
+        terminalSession.setTerminalData(terminalData)
+        await terminalSession.attachTerminal()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
         terminalSession.setDisconnectedState()

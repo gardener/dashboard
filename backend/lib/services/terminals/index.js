@@ -139,7 +139,7 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
   if (!isTerminalReady(existingTerminal)) {
     existingTerminal = await readTerminalUntilReady({ dashboardClient, namespace, name })
   }
-  const pod = existingTerminal.status.podName
+  const podName = existingTerminal.status.podName
   const attachServiceAccount = existingTerminal.status.attachServiceAccountName
   const hostNamespace = existingTerminal.spec.host.namespace
 
@@ -151,34 +151,41 @@ async function findExistingTerminal ({ dashboardClient, hostCoreClient, username
   }
 
   logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
-  return { pod, token, namespace: hostNamespace, terminal: existingTerminal }
+  return { podName, token, hostNamespace, terminal: existingTerminal }
 }
 
-exports.create = async function ({ user, namespace, name, target, body = {} }) {
+exports.create = function ({ user, namespace, name, target, body = {} }) {
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-exports.remove = async function ({ user, namespace, name, target, body = {} }) {
+exports.remove = function ({ user, namespace, name, target, body = {} }) {
   return deleteTerminalSession({ user, namespace, name, target, body })
 }
 
 async function deleteTerminalSession ({ user, namespace, name, target, body }) {
   const username = user.id
 
-  const [
-    hostCluster,
-    targetCluster
-  ] = await Promise.all([
-    getHostCluster({ user, namespace, name, target, body }),
-    getTargetCluster({ user, namespace, name, target })
-  ])
-
   const dashboardClient = GardenerDashboard(user)
 
-  const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
-  if (terminal) {
-    await dashboardClient.ns(namespace).terminals.delete({ name: terminal.metadata.name })
+  let terminalResourceName = body.name
+  if (terminalResourceName) {
+    const terminal = await dashboardClient.ns(namespace).terminals.get({ name: terminalResourceName })
+    if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+      throw new Forbidden(`You are not allowed to delete terminal with name ${terminalResourceName}`)
+    }
+  } else { // fallback if no terminal resource name is given
+    const [
+      hostCluster,
+      targetCluster
+    ] = await Promise.all([
+      getHostCluster({ user, namespace, name, target, body }),
+      getTargetCluster({ user, namespace, name, target })
+    ])
+
+    const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
+    terminalResourceName = terminal.metadata.name
   }
+  return dashboardClient.ns(namespace).terminals.delete({ name: terminalResourceName })
 }
 
 async function getTargetCluster ({ user, namespace, name, target }) {
@@ -434,7 +441,12 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
 
   const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
   if (existingTerminal) {
-    _.assign(terminalInfo, _.pick(existingTerminal, ['pod', 'token', 'namespace']))
+    _.assign(terminalInfo, {
+      podName: existingTerminal.podName,
+      token: existingTerminal.token,
+      hostNamespace: existingTerminal.hostNamespace,
+      name: existingTerminal.terminal.metadata.name
+    })
     // do not wait for keepalive to return - run in parallel
     setKeepaliveAnnotation({ dashboardClient, terminal: existingTerminal.terminal, namespace })
       .catch(_.noop) // ignore error
@@ -448,11 +460,12 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
 
   const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
 
-  const pod = terminalResource.status.podName
+  const podName = terminalResource.status.podName
   _.assign(terminalInfo, {
-    pod,
+    podName,
     token,
-    namespace: terminalResource.spec.host.namespace
+    hostNamespace: terminalResource.spec.host.namespace,
+    name: terminalResource.metadata.name
   })
   return terminalInfo
 }
