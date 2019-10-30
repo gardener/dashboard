@@ -197,12 +197,12 @@ class TerminalSession {
     this.setInitialState()
   }
 
-  setTerminalData (terminalData) {
-    this.terminalData = terminalData
+  set terminalData (terminalData) {
+    this._terminalData = terminalData
   }
 
-  getTerminalData () {
-    return this.terminalData
+  get terminalData () {
+    return this._terminalData
   }
 
   async attachTerminal () {
@@ -540,7 +540,7 @@ export default {
         return
       }
       const { namespace, name, target } = this.$route.params
-      const terminalResourceName = get(this.terminalSession.getTerminalData(), 'name')
+      const terminalResourceName = get(this.terminalSession, 'terminalData.name')
       const body = { name: terminalResourceName }
       try {
         await deleteTerminal({ name, namespace, target, body })
@@ -619,7 +619,13 @@ export default {
     },
     heartbeat () {
       const { namespace = undefined, name = undefined, target } = this.$route.params
-      return heartbeat({ name, namespace, target })
+      const terminalResourceName = get(this.terminalSession, 'terminalData.name')
+      if (!terminalResourceName) {
+        console.log('could not evaluate terminal resource name')
+        return
+      }
+      const body = { name: terminalResourceName }
+      return heartbeat({ name, namespace, target, body })
     },
     retry () {
       this.snackbarTop = false
@@ -639,7 +645,7 @@ export default {
 
       try {
         const terminalData = await this.createTerminal()
-        terminalSession.setTerminalData(terminalData)
+        terminalSession.terminalData = terminalData
         await terminalSession.attachTerminal()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))

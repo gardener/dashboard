@@ -38,7 +38,7 @@ const {
 } = require('./utils')
 const { getSeed } = require('../../cache')
 const shoots = require('../shoots')
-const { Forbidden } = require('../../errors')
+const { Forbidden, BadRequest } = require('../../errors')
 const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
@@ -503,22 +503,19 @@ function getContainerImage ({ isAdmin, preferredContainerImage }) {
   return containerImage
 }
 
-exports.heartbeat = async function ({ user, namespace, name, target, body = {} }) {
+exports.heartbeat = async function ({ user, namespace, body = {} }) {
   const username = user.id
-
-  const [
-    hostCluster,
-    targetCluster
-  ] = await Promise.all([
-    getHostCluster({ user, namespace, name, target, body }),
-    getTargetCluster({ user, namespace, name, target })
-  ])
 
   const dashboardClient = GardenerDashboard(user)
 
-  const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
-  if (!terminal) {
-    throw new Error(`Can't process heartbeat, cannot find terminal resource for ${namespace}/${name} with target ${target}`)
+  let terminalResourceName = body.name
+  if (!terminalResourceName) {
+    throw new BadRequest('name is required')
+  }
+
+  const terminal = await dashboardClient.ns(namespace).terminals.get({ name: terminalResourceName })
+  if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+    throw new Forbidden(`You are not allowed to keep terminal session alive with name ${terminalResourceName}`)
   }
 
   await setKeepaliveAnnotation({ dashboardClient, terminal, namespace })
