@@ -163,7 +163,7 @@ export default {
     getWorkers () {
       const workers = []
       forEach(this.internalWorkers, internalWorker => {
-        const worker = omit(internalWorker, ['id', 'valid', 'newWorker'])
+        const worker = omit(internalWorker, ['id', 'valid', 'isNewWorker'])
         workers.push(worker)
       })
       return workers

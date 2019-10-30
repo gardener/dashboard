@@ -92,8 +92,9 @@ export default {
           description: `(Class: ${volumeType.class})`
         })
       }
-      if (this.workerGroup.image) {
-        const machineImage = find(this.machineImages, { name: this.workerGroup.image.name })
+      if (this.workerGroup.machine.image) {
+        const machineImage = find(this.machineImages, this.workerGroup.machine.image)
+
         const machineImageDescription = {
           title: 'Machine Image',
           value: `${machineImage.name} | Version: ${machineImage.version}`

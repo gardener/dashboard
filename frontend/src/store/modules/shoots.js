@@ -18,6 +18,7 @@ import Vue from 'vue'
 import assign from 'lodash/assign'
 import forEach from 'lodash/forEach'
 import pick from 'lodash/pick'
+import omit from 'lodash/omit'
 import map from 'lodash/map'
 import get from 'lodash/get'
 import replace from 'lodash/replace'
@@ -274,7 +275,7 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
-    const worker = generateWorker(zones, cloudProfileName, region)
+    const worker = omit(generateWorker(zones, cloudProfileName, region), ['id', 'isNewWorker'])
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
 
