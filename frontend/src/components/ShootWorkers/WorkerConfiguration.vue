@@ -38,6 +38,7 @@ import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   name: 'worker-configuration',
@@ -80,7 +81,7 @@ export default {
     reset () {
       this.workersValid = false
 
-      const workers = this.shootWorkerGroups
+      const workers = cloneDeep(this.shootWorkerGroups)
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
       this.$nextTick(() => {
         this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion, zonesNetworkConfiguration })

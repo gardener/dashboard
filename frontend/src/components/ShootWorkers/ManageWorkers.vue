@@ -86,7 +86,6 @@ export default {
       internalWorkers: undefined,
       valid: false,
       cloudProfileName: undefined,
-      workers: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined
     }
@@ -189,6 +188,7 @@ export default {
   mounted () {
     if (this.userInterActionBus) {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+        this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
         this.$nextTick(() => {
           this.setDefaultWorker()
