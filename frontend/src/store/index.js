@@ -93,16 +93,24 @@ const machineAndVolumeTypePredicate = (item, zones) => {
   return difference(zones, itemZones).length === 0
 }
 
-const iconForImageName = imageName => {
+const vendorNameFromImageName = imageName => {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
     return 'coreos'
   } else if (lowerCaseName.includes('ubuntu')) {
     return 'ubuntu'
-  } else if (lowerCaseName.includes('suse')) {
-    return 'suse'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
+    return 'suse-jeos'
   }
-  return 'mdi-blur-radial'
+  return undefined
+}
+
+const iconForImageName = imageName => {
+  const vendorName = vendorNameFromImageName(imageName)
+  if (!vendorName) {
+    return 'mdi-blur-radial'
+  }
+  return vendorName
 }
 
 // getters
@@ -154,7 +162,8 @@ const getters = {
               version: version.version,
               expirationDate: version.expirationDate,
               expirationDateString: getTimestampFormatted(version.expirationDate),
-              icon: iconForImageName(machineImage.name)
+              icon: iconForImageName(machineImage.name),
+              vendor: vendorNameFromImageName(machineImage.name)
             })
           }
         })

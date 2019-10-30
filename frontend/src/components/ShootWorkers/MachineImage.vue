@@ -8,6 +8,8 @@
     @blur="$v.worker.machineImage.$touch()"
     v-model="machineImage"
     label="Machine Image"
+    :hint="hint"
+    persistent-hint
   >
     <template v-slot:item="{ item }">
       <v-list-tile-action>
@@ -82,6 +84,11 @@ export default {
       },
       set (machineImage) {
         this.worker.machineImage = pick(machineImage, ['name', 'version'])
+      }
+    },
+    hint () {
+      if (this.machineImage.vendor === 'suse-jeos') {
+        return 'The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.'
       }
     }
   },
