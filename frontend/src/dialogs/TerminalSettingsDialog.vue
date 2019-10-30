@@ -149,8 +149,13 @@ export default {
         return this.selectedRunOnShootWorkerInternal
       },
       set (value) {
+        /* If user is admin, the default runtime is an infrastructure cluster.
+        An admin would usually only choose the cluster as terminal runtime when in need of troubleshooting the worker nodes. Hence, enable privileged mode automatically.
+        */
+        if (this.isAdmin) {
+          this.selectedPrivilegedMode = value
+        }
         this.selectedRunOnShootWorkerInternal = value
-        this.selectedPrivilegedMode = value
       }
     },
     shootNodes: {
@@ -188,19 +193,19 @@ export default {
         return undefined
       }
     },
-    initialize ({ image, node, privilegedMode, nodes }) {
+    initialize ({ image, defaultNode, currentNode, privilegedMode, nodes }) {
       this.selectedContainerImage = image
-      this.selectedNode = node
-      this.selectedPrivilegedMode = privilegedMode
+      this.selectedNode = defaultNode
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
       this.shootNodes = nodes
-      const selectedNodeIsShootWorker = !!find(nodes, ['data.kubernetesHostname', this.selectedNode])
+      const currentNodeIsShootWorker = !!find(nodes, ['data.kubernetesHostname', currentNode])
       if (!this.isAdmin) {
         this.selectedRunOnShootWorker = true
       } else {
-        this.selectedRunOnShootWorker = selectedNodeIsShootWorker
+        this.selectedRunOnShootWorker = currentNodeIsShootWorker
       }
+      this.selectedPrivilegedMode = privilegedMode
     }
   }
 }

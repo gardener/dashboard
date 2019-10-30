@@ -561,7 +561,8 @@ export default {
 
       const initialState = {
         image: this.defaultImage,
-        node: this.defaultNode,
+        defaultNode: this.defaultNode,
+        currentNode: this.terminalSession.node,
         privilegedMode: this.defaultPrivilegedMode,
         nodes: this.config.nodes
       }
