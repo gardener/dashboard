@@ -1,39 +1,41 @@
 <template>
-  <v-select
-    color="cyan darken-2"
-    :items="machineImages"
-    return-object
-    :error-messages="getErrorMessages('worker.machineImage')"
-    @input="onInputMachineImage"
-    @blur="$v.worker.machineImage.$touch()"
-    v-model="machineImage"
-    label="Machine Image"
-    :hint="hint"
-    persistent-hint
-    :class="{hintColor: machineImage.needsLicense}"
-  >
-    <template v-slot:item="{ item }">
-      <v-list-tile-action>
+  <select-hint-colorizer :hintColor="hintColor" class="testclass">
+    <v-select
+      color="cyan darken-2"
+      :items="machineImages"
+      return-object
+      :error-messages="getErrorMessages('worker.machineImage')"
+      @input="onInputMachineImage"
+      @blur="$v.worker.machineImage.$touch()"
+      v-model="machineImage"
+      label="Machine Image"
+      :hint="hint"
+      persistent-hint
+    >
+      <template v-slot:item="{ item }">
+        <v-list-tile-action>
+          <vendor-icon v-model="item.icon"></vendor-icon>
+        </v-list-tile-action>
+        <v-list-tile-content>
+          <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
+          <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
+            {{itemDescription(item)}}
+          </v-list-tile-sub-title>
+        </v-list-tile-content>
+      </template>
+      <template v-slot:selection="{ item }">
         <vendor-icon v-model="item.icon"></vendor-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
-          {{itemDescription(item)}}
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
+        <span class="black--text ml-2">
+         {{item.name}} [{{item.version}}]
+        </span>
     </template>
-    <template v-slot:selection="{ item }">
-      <vendor-icon v-model="item.icon"></vendor-icon>
-      <span class="black--text ml-2">
-       {{item.name}} [{{item.version}}]
-      </span>
-  </template>
-  </v-select>
+    </v-select>
+  </select-hint-colorizer>
 </template>
 
 <script>
 import VendorIcon from '@/components/VendorIcon'
+import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import includes from 'lodash/includes'
@@ -60,7 +62,8 @@ const validations = {
 
 export default {
   components: {
-    VendorIcon
+    VendorIcon,
+    SelectHintColorizer
   },
   props: {
     worker: {
@@ -97,6 +100,12 @@ export default {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
       return join(hintText, ' ')
+    },
+    hintColor () {
+      if (this.machineImage.needsLicense) {
+        return 'orange'
+      }
+      return ''
     }
   },
   validations,
@@ -115,7 +124,7 @@ export default {
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
     },
-    itemDescription(machineImage) {
+    itemDescription (machineImage) {
       const itemDescription = []
       if (machineImage.needsLicense) {
         itemDescription.push('Enterprise support license required')
@@ -140,15 +149,3 @@ export default {
   }
 }
 </script>
-
-<style lang="styl" scoped>
-  @import '~vuetify/src/stylus/settings/_colors.styl';
-
-  .hintColor {
-    >>>.v-messages__wrapper {
-      .v-messages__message {
-        color: $orange.darken-2 !important;
-      }
-    }
-  }
-</style>
