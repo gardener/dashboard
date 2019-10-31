@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const assert = require('assert').strict
-const fnv = require('fnv-plus')
+const hash = require('object-hash')
 
 const kubernetes = require('../../kubernetes')
 const Resources = kubernetes.Resources
@@ -38,7 +38,7 @@ const {
 } = require('./utils')
 const { getSeed } = require('../../cache')
 const shoots = require('../shoots')
-const { Forbidden, BadRequest } = require('../../errors')
+const { Forbidden, UnprocessableEntity } = require('../../errors')
 const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'
@@ -112,46 +112,22 @@ function isServiceAccountReady ({ secrets } = {}) {
 }
 
 async function findExistingTerminalResource ({ dashboardClient, username, namespace, name, hostCluster, targetCluster }) {
-  let selectors = [
-    `dashboard.gardener.cloud/hostCluster=${fnv.hash(JSON.stringify(hostCluster), 64).str()}`,
-    `dashboard.gardener.cloud/targetCluster=${fnv.hash(JSON.stringify(targetCluster), 64).str()}`,
-    `garden.sapcloud.io/createdBy=${fnv.hash(username, 64).str()}`
+  const selectors = [
+    `dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`,
+    `dashboard.gardener.cloud/targetCluster=${hash(targetCluster)}`,
+    `garden.sapcloud.io/createdBy=${hash(username)}`
   ]
   if (!_.isEmpty(name)) {
-    selectors = _.concat(selectors, `garden.sapcloud.io/name=${name}`)
+    selectors.push(`garden.sapcloud.io/name=${name}`)
   }
   const qs = { labelSelector: selectors.join(',') }
 
-  let { items: existingTerminals } = await dashboardClient.ns(namespace).terminals.get({ qs })
+  const { items: existingTerminals } = await dashboardClient.ns(namespace).terminals.get({ qs })
   return _.chain(existingTerminals)
     .filter(terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
-    .filter(terminal => terminal.metadata.annotations['garden.sapcloud.io/createdBy'] === username)
-    .head(existingTerminals)
+    .filter([['metadata', 'annotations', 'garden.sapcloud.io/createdBy'], username])
+    .head()
     .value()
-}
-
-async function findExistingTerminal ({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster }) {
-  let existingTerminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
-
-  if (!existingTerminal) {
-    return undefined
-  }
-  if (!isTerminalReady(existingTerminal)) {
-    existingTerminal = await readTerminalUntilReady({ dashboardClient, namespace, name })
-  }
-  const podName = existingTerminal.status.podName
-  const attachServiceAccount = existingTerminal.status.attachServiceAccountName
-  const hostNamespace = existingTerminal.spec.host.namespace
-
-  const waitUntilReady = false // if the service account token is not there it is maybe in the process of beeing deleted -> handle as create new terminal
-  const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: hostNamespace, serviceAccountName: attachServiceAccount, waitUntilReady })
-  if (_.isEmpty(token)) {
-    // TODO delete terminal resource?
-    return undefined
-  }
-
-  logger.debug(`Found terminal session for user ${username}: ${existingTerminal.metadata.name}`)
-  return { podName, token, hostNamespace, terminal: existingTerminal }
 }
 
 exports.create = function ({ user, namespace, name, target, body = {} }) {
@@ -162,30 +138,28 @@ exports.remove = function ({ user, namespace, name, target, body = {} }) {
   return deleteTerminalSession({ user, namespace, name, target, body })
 }
 
-async function deleteTerminalSession ({ user, namespace, name, target, body }) {
+exports.fetch = function ({ user, namespace, name, target, body = {} }) {
+  return fetchTerminalSession({ user, namespace, name, target, body })
+}
+
+async function deleteTerminalSession ({ user, namespace, body }) {
   const username = user.id
 
   const dashboardClient = GardenerDashboard(user)
 
-  let terminalResourceName = body.name
-  if (terminalResourceName) {
-    const terminal = await dashboardClient.ns(namespace).terminals.get({ name: terminalResourceName })
+  try {
+    const terminal = await getTerminalResource({ dashboardClient, ...body })
+    const terminalName = terminal.metadata.name
     if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
-      throw new Forbidden(`You are not allowed to delete terminal with name ${terminalResourceName}`)
+      throw new Forbidden(`You are not allowed to delete terminal with name ${terminalName}`)
     }
-  } else { // fallback if no terminal resource name is given
-    const [
-      hostCluster,
-      targetCluster
-    ] = await Promise.all([
-      getHostCluster({ user, namespace, name, target, body }),
-      getTargetCluster({ user, namespace, name, target })
-    ])
-
-    const terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
-    terminalResourceName = terminal.metadata.name
+    await dashboardClient.ns(namespace).terminals.delete({ name: terminalName })
+  } catch (err) {
+    if (err.code !== 404) {
+      throw err
+    }
   }
-  return dashboardClient.ns(namespace).terminals.delete({ name: terminalResourceName })
+  return body
 }
 
 async function getTargetCluster ({ user, namespace, name, target }) {
@@ -330,9 +304,9 @@ async function createTerminal ({ dashboardClient, user, namespace, name, target,
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
-    'dashboard.gardener.cloud/hostCluster': fnv.hash(JSON.stringify(hostCluster), 64).str(),
-    'dashboard.gardener.cloud/targetCluster': fnv.hash(JSON.stringify(targetCluster), 64).str(),
-    'garden.sapcloud.io/createdBy': fnv.hash(user.id, 64).str()
+    'dashboard.gardener.cloud/hostCluster': hash(hostCluster),
+    'dashboard.gardener.cloud/targetCluster': hash(targetCluster),
+    'garden.sapcloud.io/createdBy': hash(user.id)
   }
   if (!_.isEmpty(name)) {
     labels['garden.sapcloud.io/name'] = name
@@ -401,11 +375,19 @@ function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, r
 }
 
 function isTerminalReady (terminal) {
-  return !_.isEmpty(_.get(terminal, 'status.podName')) && !_.isEmpty(_.get(terminal, 'status.attachServiceAccountName'))
+  const podName = _.get(terminal, 'status.podName')
+  const attachServiceAccountName = _.get(terminal, 'status.attachServiceAccountName')
+  return !!podName && !!attachServiceAccountName
 }
 
-async function readTerminalUntilReady ({ dashboardClient, namespace, name }) {
-  const conditionFunction = isTerminalReady
+async function readTerminalUntilReady ({ dashboardClient, user, namespace, name }) {
+  const username = user.id
+  const conditionFunction = (terminal) => {
+    if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+      throw new Forbidden('You are not the user who created the terminal resource')
+    }
+    return isTerminalReady(terminal)
+  }
   const watch = dashboardClient.ns(namespace).terminals.watch({ name })
   return kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, resourceName: Resources.Terminal.name, waitTimeout: 10 * 1000 })
 }
@@ -425,11 +407,6 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Hosting cluster or target cluster is hibernated')
   }
 
-  const terminalInfo = {
-    container: TERMINAL_CONTAINER_NAME,
-    server: hostCluster.kubeApiServer
-  }
-
   const dashboardClient = GardenerDashboard(user)
   const gardenCoreClient = Core(user)
 
@@ -437,37 +414,51 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   if (!hostKubeconfig) {
     throw new Error('Host kubeconfig does not exist (yet)')
   }
-  const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
 
-  const existingTerminal = await findExistingTerminal({ dashboardClient, hostCoreClient, username, namespace, name, hostCluster, targetCluster })
-  if (existingTerminal) {
-    _.assign(terminalInfo, {
-      podName: existingTerminal.podName,
-      token: existingTerminal.token,
-      hostNamespace: existingTerminal.hostNamespace,
-      name: existingTerminal.terminal.metadata.name
-    })
+  let terminal = await findExistingTerminalResource({ dashboardClient, username, namespace, name, hostCluster, targetCluster })
+  if (!terminal) {
+    logger.debug(`No terminal found for user ${username}. Creating new..`)
+    terminal = await createTerminal({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster })
+  } else {
+    logger.debug(`Found terminal for user ${username}: ${terminal.metadata.name}`)
     // do not wait for keepalive to return - run in parallel
-    setKeepaliveAnnotation({ dashboardClient, terminal: existingTerminal.terminal, namespace })
+    setKeepaliveAnnotation({ dashboardClient, terminal })
       .catch(_.noop) // ignore error
-    return terminalInfo
   }
 
-  logger.debug(`No terminal found for user ${username}. Creating new..`)
-  let terminalResource = await createTerminal({ dashboardClient, user, namespace, name, target, hostCluster, targetCluster })
+  return {
+    metadata: _.pick(terminal.metadata, ['name', 'namespace']),
+    hostCluster: null
+  }
+}
 
-  terminalResource = await readTerminalUntilReady({ dashboardClient, namespace, name: terminalResource.metadata.name })
+async function fetchTerminalSession ({ user, namespace, name, target, body }) {
+  const dashboardClient = GardenerDashboard(user)
+  const gardenCoreClient = Core(user)
 
-  const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminalResource.spec.host.namespace, serviceAccountName: terminalResource.status.attachServiceAccountName })
+  const { name: terminalName, namespace: terminalNamespace } = body
+  const terminal = await readTerminalUntilReady({ dashboardClient, user, name: terminalName, namespace: terminalNamespace })
 
-  const podName = terminalResource.status.podName
-  _.assign(terminalInfo, {
-    podName,
-    token,
-    hostNamespace: terminalResource.spec.host.namespace,
-    name: terminalResource.metadata.name
-  })
-  return terminalInfo
+  const hostCluster = await getHostCluster({ user, namespace, name, target, body })
+  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...hostCluster.secretRef })
+  if (!hostKubeconfig) {
+    throw new Error('Host kubeconfig does not exist (yet)')
+  }
+  const hostCoreClient = kubernetes.core(kubernetes.fromKubeconfig(hostKubeconfig))
+  const token = await readServiceAccountToken({ coreClient: hostCoreClient, namespace: terminal.spec.host.namespace, serviceAccountName: terminal.status.attachServiceAccountName })
+
+  return {
+    metadata: _.pick(terminal.metadata, ['name', 'namespace']),
+    hostCluster: {
+      kubeApiServer: hostCluster.kubeApiServer,
+      token,
+      namespace: terminal.spec.host.namespace,
+      pod: {
+        name: terminal.status.podName,
+        container: TERMINAL_CONTAINER_NAME
+      }
+    }
+  }
 }
 
 function getSeedShootNamespace (shoot) {
@@ -503,31 +494,34 @@ function getContainerImage ({ isAdmin, preferredContainerImage }) {
   return containerImage
 }
 
-exports.heartbeat = async function ({ user, namespace, body = {} }) {
+exports.heartbeat = async function ({ user, body = {} }) {
   const username = user.id
 
   const dashboardClient = GardenerDashboard(user)
 
-  let terminalResourceName = body.name
-  if (!terminalResourceName) {
-    throw new BadRequest('name is required')
-  }
-
-  const terminal = await dashboardClient.ns(namespace).terminals.get({ name: terminalResourceName })
+  const terminal = await getTerminalResource({ dashboardClient, ...body })
   if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
-    throw new Forbidden(`You are not allowed to keep terminal session alive with name ${terminalResourceName}`)
+    throw new Forbidden(`You are not allowed to keep terminal session alive with name ${terminal.metadata.name}`)
   }
 
-  await setKeepaliveAnnotation({ dashboardClient, terminal, namespace })
+  await setKeepaliveAnnotation({ dashboardClient, terminal })
   return { ok: true }
 }
 
-async function setKeepaliveAnnotation ({ dashboardClient, terminal, namespace }) {
+function getTerminalResource ({ dashboardClient, name, namespace }) {
+  if (!name || !namespace) {
+    throw new UnprocessableEntity('name and namespace are required')
+  }
+
+  return dashboardClient.ns(namespace).terminals.get({ name: name })
+}
+
+async function setKeepaliveAnnotation ({ dashboardClient, terminal }) {
   const annotations = {
     'dashboard.gardener.cloud/operation': `keepalive`
   }
   try {
-    const name = terminal.metadata.name
+    const { name, namespace } = terminal.metadata
     await dashboardClient.ns(namespace).terminals.mergePatch({ name, body: { metadata: { annotations } } })
   } catch (e) {
     logger.error('Could not keepalive terminal:', e)

@@ -223,6 +223,10 @@ export function createTerminal ({ namespace, name, target, body }) {
   return invokeTerminalMethod('create', { namespace, name, target, body })
 }
 
+export function fetchTerminal ({ namespace, name, target, body }) {
+  return invokeTerminalMethod('fetch', { namespace, name, target, body })
+}
+
 export function deleteTerminal ({ namespace, name, target, body }) {
   return invokeTerminalMethod('remove', { namespace, name, target, body })
 }

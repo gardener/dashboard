@@ -266,16 +266,19 @@ module.exports = {
       }
 
       function onEvent (event) {
-        switch (event.type) {
-          case 'ADDED':
-          case 'MODIFIED':
-            if (conditionFunction(event.object)) {
-              done(null, event.object)
-            }
-            break
-          case 'DELETED':
-            done(new InternalServerError(`Resource "${resourceName}" has been deleted`))
-            break
+        try {
+          switch (event.type) {
+            case 'ADDED':
+            case 'MODIFIED':
+              if (conditionFunction(event.object)) {
+                done(null, event.object)
+              }
+              break
+            case 'DELETED':
+              throw new InternalServerError(`Resource "${resourceName}" has been deleted`)
+          }
+        } catch (err) {
+          done(err)
         }
       }
 

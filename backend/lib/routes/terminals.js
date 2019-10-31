@@ -46,7 +46,7 @@ router.route('/:name?')
       const { namespace, name, target } = req.params
       const { method, params: body } = req.body
 
-      if (!_.includes(['create', 'remove', 'heartbeat'], method)) {
+      if (!_.includes(['create', 'fetch', 'remove', 'heartbeat'], method)) {
         throw new Error(`${method} not allowed for terminals`)
       }
       res.send(await terminals[method]({ user, namespace, name, target, body }))

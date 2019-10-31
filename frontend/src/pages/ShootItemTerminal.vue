@@ -55,7 +55,7 @@ limitations under the License.
         <v-tooltip slot="activator" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
           <v-btn small flat slot="activator" class="text-none grey--text text--lighten-1 systemBarButton">
             <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
-              <connected v-if="terminalSession.connectionState === ConnectionState.CONNECTED"></connected>
+              <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
               <disconnected v-else></disconnected>
             </icon-base>
             <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionStateText}}</span>
@@ -63,7 +63,7 @@ limitations under the License.
           {{terminalSession.detailedConnectionStateText || connectionStateText}}
         </v-tooltip>
         <v-list>
-          <v-list-tile-action v-if="terminalSession.connectionState === ConnectionState.DISCONNECTED" >
+          <v-list-tile-action v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED" >
             <v-btn small slot="activator" flat class="ml-2 mr-2 cyan--text text--darken-2" @click="retry()">
               <v-icon left>mdi-reload</v-icon>
               Reconnect
@@ -112,7 +112,7 @@ limitations under the License.
 
       <v-divider vertical></v-divider>
 
-      <v-btn small flat class="text-none grey--text text--lighten-1 systemBarButton" @click="deleteTerminal">
+      <v-btn :disabled="!isTerminalSessionCreated" small flat class="text-none grey--text text--lighten-1 systemBarButton" @click="deleteTerminal">
         <v-icon class="mr-2">mdi-exit-to-app</v-icon>
         Exit
       </v-btn>
@@ -135,6 +135,7 @@ import head from 'lodash/head'
 import intersection from 'lodash/intersection'
 import keys from 'lodash/keys'
 import includes from 'lodash/includes'
+import pick from 'lodash/pick'
 import pTimeout from 'p-timeout'
 
 import { Terminal } from 'xterm'
@@ -143,12 +144,10 @@ import { WebLinksAddon } from 'xterm-addon-web-links'
 import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
 
 import { mapState } from 'vuex'
-import {
-  encodeURIComponents,
-  encodeBase64Url
-} from '@/utils'
+import { encodeBase64Url } from '@/utils'
 import {
   createTerminal,
+  fetchTerminal,
   deleteTerminal,
   heartbeat,
   terminalConfig
@@ -158,13 +157,6 @@ import TerminalSettingsDialog from '@/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
 import Disconnected from '@/components/icons/Disconnected'
-
-const ConnectionState = {
-  DISCONNECTED: 0,
-  PREPARING: 1,
-  CONNECTING: 2,
-  CONNECTED: 3
-}
 
 const WsCloseEventEnum = {
   NORMAL_CLOUSURE: 1000
@@ -178,13 +170,15 @@ class TerminalSession {
     this.vm = vm
     this.cancelConnect = false
     this.tries = 0
+    this.metadata = undefined
+    this.hostCluster = undefined
 
     this.setInitialState()
     this.close = () => {}
   }
 
   setInitialState () {
-    this.connectionState = ConnectionState.DISCONNECTED
+    this.connectionState = TerminalSession.DISCONNECTED
     this.node = undefined
     this.privileged = undefined
     this.hostPID = undefined
@@ -197,12 +191,52 @@ class TerminalSession {
     this.setInitialState()
   }
 
-  set terminalData (terminalData) {
-    this._terminalData = terminalData
+  async open () {
+    this.connectionState = TerminalSession.CREATING
+    const { metadata } = await this.createTerminal()
+    this.metadata = pick(metadata, ['name', 'namespace'])
+
+    this.connectionState = TerminalSession.FETCHING
+    const { hostCluster } = await this.fetchTerminal()
+    this.hostCluster = hostCluster
+
+    return this.attachTerminal()
   }
 
-  get terminalData () {
-    return this._terminalData
+  async createTerminal () {
+    const body = this.vm.selectedConfig
+
+    const { data } = await createTerminal({ ...this.terminalCoordinates, body })
+    return data
+  }
+
+  async fetchTerminal () {
+    const { data } = await fetchTerminal({ ...this.terminalCoordinates })
+    return data
+  }
+
+  async deleteTerminal () {
+    const { data } = await deleteTerminal({ ...this.terminalCoordinates })
+
+    this.metadata = undefined
+
+    return data
+  }
+
+  heartbeat () {
+    return heartbeat({ ...this.terminalCoordinates })
+  }
+
+  get isCreated () {
+    return !!this.metadata
+  }
+
+  get terminalCoordinates () {
+    const coordinates = pick(this.vm.$route.params, ['name', 'namespace', 'target'])
+    if (this.metadata) {
+      coordinates.body = { ...this.metadata }
+    }
+    return coordinates
   }
 
   async attachTerminal () {
@@ -213,7 +247,7 @@ class TerminalSession {
     this.tries++
 
     try {
-      this.connectionState = ConnectionState.CONNECTING
+      this.connectionState = TerminalSession.CONNECTING
       await this.waitUntilPodIsRunning(60)
       if (this.cancelConnect) {
         return
@@ -226,8 +260,8 @@ class TerminalSession {
     }
 
     // See https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apimachinery/pkg/util/remotecommand/constants.go
-    const protocols = addBearerToken(['v4.channel.k8s.io'], this.terminalData.token)
-    const ws = new WebSocket(attachUri(this.terminalData), protocols)
+    const protocols = addBearerToken(['v4.channel.k8s.io'], this.hostCluster.token)
+    const ws = new WebSocket(attachUri(this.hostCluster), protocols)
     const attachAddon = new K8sAttachAddon(ws, { bidirectional: true })
     this.vm.term.loadAddon(attachAddon)
     let reconnectTimeoutId
@@ -241,12 +275,12 @@ class TerminalSession {
 
       this.vm.spinner.stop()
       this.vm.hideSnackbar()
-      this.connectionState = ConnectionState.CONNECTED
+      this.connectionState = TerminalSession.CONNECTED
       this.tries = 0
 
       heartbeatIntervalId = setInterval(async () => {
         try {
-          await this.vm.heartbeat()
+          await this.heartbeat()
         } catch (err) {
           console.error('heartbeat failed:', err)
         }
@@ -254,7 +288,7 @@ class TerminalSession {
     }
     ws.onclose = error => {
       this.close()
-      const wasConnected = this.connectionState === ConnectionState.CONNECTED
+      const wasConnected = this.connectionState === TerminalSession.CONNECTED
 
       if (this.cancelConnect) {
         this.setDisconnectedState()
@@ -271,7 +305,7 @@ class TerminalSession {
         return
       }
 
-      this.connectionState = ConnectionState.CONNECTING
+      this.connectionState = TerminalSession.CONNECTING
 
       let timeoutSeconds
       if (wasConnected) {
@@ -297,7 +331,7 @@ class TerminalSession {
   }
 
   async waitUntilPodIsRunning (timeoutSeconds) {
-    const containerName = this.terminalData.container
+    const containerName = this.hostCluster.pod.container
     const onPodStateChange = ({ type, object: pod }) => {
       const containers = get(pod, 'spec.containers')
       const terminalContainer = find(containers, ['name', containerName])
@@ -319,8 +353,8 @@ class TerminalSession {
     }
 
     const protocols = ['garden'] // there must be at least one other subprotocol in addition to the bearer token
-    addBearerToken(protocols, this.terminalData.token)
-    const ws = new WebSocket(watchPodUri(this.terminalData), protocols)
+    addBearerToken(protocols, this.hostCluster.token)
+    const ws = new WebSocket(watchPodUri(this.hostCluster), protocols)
 
     this.vm.spinner.text = 'Connecting to Pod'
     try {
@@ -330,20 +364,33 @@ class TerminalSession {
     }
   }
 }
+Object.assign(TerminalSession, {
+  DISCONNECTED: 0,
+  CREATING: 1,
+  FETCHING: 2,
+  CONNECTING: 3,
+  CONNECTED: 4
+})
 
 function addBearerToken (protocols, bearer) {
   protocols.unshift(`base64url.bearer.authorization.k8s.io.${encodeBase64Url(bearer)}`)
   return protocols
 }
 
-function attachUri (terminalData) {
-  const { hostNamespace, container, server, podName } = encodeURIComponents(terminalData)
-  return `wss://${server}/api/v1/namespaces/${hostNamespace}/pods/${podName}/attach?container=${container}&stdin=true&stdout=true&tty=true`
+function attachUri ({ namespace, kubeApiServer, pod: { name, container } }) {
+  kubeApiServer = encodeURIComponent(kubeApiServer)
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  container = encodeURIComponent(container)
+
+  return `wss://${kubeApiServer}/api/v1/namespaces/${namespace}/pods/${name}/attach?container=${container}&stdin=true&stdout=true&tty=true`
 }
 
-function watchPodUri (terminalData) {
-  const { hostNamespace, server, podName } = encodeURIComponents(terminalData)
-  return `wss://${server}/api/v1/namespaces/${hostNamespace}/pods?fieldSelector=metadata.name%3D${podName}&watch=true`
+function watchPodUri ({ namespace, kubeApiServer, pod: { name } }) {
+  kubeApiServer = encodeURIComponent(kubeApiServer)
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return `wss://${kubeApiServer}/api/v1/namespaces/${namespace}/pods?fieldSelector=metadata.name%3D${name}&watch=true`
 }
 
 function closeWsIfNotClosed (ws) {
@@ -479,13 +526,16 @@ export default {
       },
       selectedConfig: {},
       terminalSession: {},
-      ConnectionState
+      TerminalSession
     }
   },
   computed: {
     ...mapState([
       'cfg'
     ]),
+    isTerminalSessionCreated () {
+      return this.terminalSession && this.terminalSession.isCreated
+    },
     defaultImage () {
       return this.terminalSession.image || this.config.image
     },
@@ -501,13 +551,14 @@ export default {
     },
     connectionStateText () {
       switch (this.terminalSession.connectionState) {
-        case ConnectionState.DISCONNECTED:
+        case TerminalSession.DISCONNECTED:
           return 'Disconnected'
-        case ConnectionState.PREPARING:
+        case TerminalSession.CREATING:
+        case TerminalSession.FETCHING:
           return 'Preparing'
-        case ConnectionState.CONNECTING:
+        case TerminalSession.CONNECTING:
           return 'Connecting'
-        case ConnectionState.CONNECTED:
+        case TerminalSession.CONNECTED:
           return 'Connected'
         default:
           return 'UNKNOWN'
@@ -539,11 +590,9 @@ export default {
       if (!await this.confirmDelete()) {
         return
       }
-      const { namespace, name, target } = this.$route.params
-      const terminalResourceName = get(this.terminalSession, 'terminalData.name')
-      const body = { name: terminalResourceName }
+
       try {
-        await deleteTerminal({ name, namespace, target, body })
+        await this.terminalSession.deleteTerminal()
         if (this.name) {
           return this.$router.push({ name: 'ShootItem', params: { namespace: this.namespace, name: this.name } })
         }
@@ -610,23 +659,6 @@ export default {
       }
       this.snackbarText = text
     },
-    async createTerminal () {
-      const { namespace = undefined, name = undefined, target } = this.$route.params
-      const body = this.selectedConfig
-      const { data } = await createTerminal({ name, namespace, target, body })
-
-      return data
-    },
-    heartbeat () {
-      const { namespace = undefined, name = undefined, target } = this.$route.params
-      const terminalResourceName = get(this.terminalSession, 'terminalData.name')
-      if (!terminalResourceName) {
-        console.log('could not evaluate terminal resource name')
-        return
-      }
-      const body = { name: terminalResourceName }
-      return heartbeat({ name, namespace, target, body })
-    },
     retry () {
       this.snackbarTop = false
       this.errorSnackbarBottom = false
@@ -641,12 +673,9 @@ export default {
 
       this.spinner.start()
       this.spinner.text = 'Preparing terminal session'
-      terminalSession.connectionState = ConnectionState.PREPARING
 
       try {
-        const terminalData = await this.createTerminal()
-        terminalSession.terminalData = terminalData
-        await terminalSession.attachTerminal()
+        await terminalSession.open()
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
         terminalSession.setDisconnectedState()

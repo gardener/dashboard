@@ -232,6 +232,10 @@ Copyright (c) 2018 Filip Skokan
 Copyright (c) 2013–2016 Brian J. Brennan\
 [MIT License](https://github.com/brianloveswords/base64url/blob/master/LICENSE)
 
+- [better-queue](https://github.com/diamondio/better-queue)\
+Copyright (c) 2016 Leander\
+[MIT License](https://github.com/diamondio/better-queue/blob/master/LICENSE)
+
 - [body-parser](https://github.com/expressjs/body-parser)\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
@@ -280,6 +284,10 @@ Copyright JS Foundation and other contributors <https://js.foundation/>\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/morgan/blob/master/LICENSE)
+
+- [object-hash](https://github.com/puleos/object-hash)\
+Copyright (c) 2014 object-hash contributors
+[MIT License](https://github.com/puleos/object-hash/blob/master/LICENSE)
 
 - [openid-client](https://github.com/panva/node-openid-client)\
 Copyright (c) 2016 Filip Skokan\
@@ -433,14 +441,6 @@ Copyright (c) 2016 John Jeremy Leider\
 - [vuex](https://github.com/vuejs/vuex)\
 Copyright (c) 2013-present Evan You\
 [MIT License](https://github.com/vuejs/vuex/blob/dev/LICENSE)
-
-- [better-queue](https://github.com/diamondio/better-queue)\
-Copyright (c) 2016 Leander\
-[MIT License](https://github.com/diamondio/better-queue/blob/master/LICENSE)
-
-- [fnv-plus](https://github.com/tjwebb/fnv-plus)\
-Copyright (c) Travis Webb\
-[MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
 
 - [ora](https://github.com/sindresorhus/ora)\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\

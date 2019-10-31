@@ -24,7 +24,6 @@ import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import keys from 'lodash/keys'
-import mapValues from 'lodash/mapValues'
 import map from 'lodash/map'
 import intersection from 'lodash/intersection'
 import toLower from 'lodash/toLower'
@@ -436,10 +435,6 @@ export function encodeBase64Url (input) {
   output = output.replace(/\+/g, '-')
   output = output.replace(/\//g, '_')
   return output
-}
-
-export function encodeURIComponents (obj) {
-  return mapValues(obj, value => encodeURIComponent(value))
 }
 
 export function purposeRequiresHibernationSchedule (purpose) {
