@@ -15,13 +15,12 @@
 //
 
 import { expect } from 'chai'
-import { mount } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { VSelect } from 'vuetify/lib'
 
 Vue.use(Vuetify)
-document.body.setAttribute('data-app', true)
 
 describe('VSelect', function () {
   it('should be able to overwrite hint color class', function () {
@@ -29,15 +28,14 @@ describe('VSelect', function () {
       hint: 'hint test',
       'persistent-hint': true
     }
-    const wrapper = mount(VSelect, {
+    const wrapper = shallowMount(VSelect, {
       propsData
     })
     const vm = wrapper.vm
     return new Promise(resolve => vm.$nextTick(resolve))
       .then(() => {
-        const hintElement = vm.$el.querySelector('.v-messages__wrapper')
-        expect(hintElement).to.be.an.instanceof(HTMLElement)
-        expect(hintElement.querySelector('.v-messages__message').textContent).to.equal('hint test')
+        const hintElement = vm.$el.querySelector('.v-messages__wrapper > .v-messages__message')
+        expect(hintElement.textContent).to.equal('hint test')
       })
   })
 })

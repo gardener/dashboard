@@ -10,7 +10,7 @@
     label="Machine Image"
     :hint="hint"
     persistent-hint
-    :class="{'hintColor': machineImage.needsLicense}"
+    :class="{hintColor: machineImage.needsLicense}"
   >
     <template v-slot:item="{ item }">
       <v-list-tile-action>
@@ -18,8 +18,8 @@
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title>
-          <span v-if="itemDescription(item).length > 0" class="mr-2">{{itemDescription(item)}}</span>
+        <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
+          {{itemDescription(item)}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
@@ -118,7 +118,7 @@ export default {
     itemDescription(machineImage) {
       const itemDescription = []
       if (machineImage.needsLicense) {
-        itemDescription.push('⚠ Enterprise support license required')
+        itemDescription.push('Enterprise support license required')
       }
       if (machineImage.expirationDate) {
         itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
