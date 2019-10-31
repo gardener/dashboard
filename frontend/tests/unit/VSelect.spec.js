@@ -24,18 +24,15 @@ Vue.use(Vuetify)
 
 describe('VSelect', function () {
   it('should be able to overwrite hint color class', function () {
+    const hint = 'hint test'
     const propsData = {
-      hint: 'hint test',
+      hint,
       'persistent-hint': true
     }
     const wrapper = shallowMount(VSelect, {
       propsData
     })
-    const vm = wrapper.vm
-    return new Promise(resolve => vm.$nextTick(resolve))
-      .then(() => {
-        const hintElement = vm.$el.querySelector('.v-messages__wrapper > .v-messages__message')
-        expect(hintElement.textContent).to.equal('hint test')
-      })
+    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
+    expect(hintElement.text()).to.equal(hint)
   })
 })
