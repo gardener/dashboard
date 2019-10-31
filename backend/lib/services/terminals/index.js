@@ -139,7 +139,7 @@ exports.remove = function ({ user, namespace, name, target, body = {} }) {
 }
 
 exports.fetch = function ({ user, namespace, name, target, body = {} }) {
-  return fetchTerminalSession({ user, namespace, name, target, body })
+  return fetchTerminalAccessInfo({ user, namespace, name, target, body })
 }
 
 async function deleteTerminalSession ({ user, namespace, body }) {
@@ -428,19 +428,21 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
 
   return {
     metadata: _.pick(terminal.metadata, ['name', 'namespace']),
-    hostCluster: null
+    hostCluster: {
+      kubeApiServer: hostCluster.kubeApiServer,
+      namespace: terminal.spec.host.namespace
+    }
   }
 }
 
-async function fetchTerminalSession ({ user, namespace, name, target, body }) {
+async function fetchTerminalAccessInfo ({ user, body }) {
   const dashboardClient = GardenerDashboard(user)
   const gardenCoreClient = Core(user)
 
   const { name: terminalName, namespace: terminalNamespace } = body
   const terminal = await readTerminalUntilReady({ dashboardClient, user, name: terminalName, namespace: terminalNamespace })
 
-  const hostCluster = await getHostCluster({ user, namespace, name, target, body })
-  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...hostCluster.secretRef })
+  const hostKubeconfig = await getKubeconfig({ coreClient: gardenCoreClient, ...terminal.spec.host.credentials.secretRef })
   if (!hostKubeconfig) {
     throw new Error('Host kubeconfig does not exist (yet)')
   }
@@ -450,9 +452,7 @@ async function fetchTerminalSession ({ user, namespace, name, target, body }) {
   return {
     metadata: _.pick(terminal.metadata, ['name', 'namespace']),
     hostCluster: {
-      kubeApiServer: hostCluster.kubeApiServer,
       token,
-      namespace: terminal.spec.host.namespace,
       pod: {
         name: terminal.status.podName,
         container: TERMINAL_CONTAINER_NAME

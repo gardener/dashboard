@@ -147,7 +147,7 @@ import { mapState } from 'vuex'
 import { encodeBase64Url } from '@/utils'
 import {
   createTerminal,
-  fetchTerminal,
+  fetchTerminalAccessInfo,
   deleteTerminal,
   heartbeat,
   terminalConfig
@@ -193,12 +193,13 @@ class TerminalSession {
 
   async open () {
     this.connectionState = TerminalSession.CREATING
-    const { metadata } = await this.createTerminal()
+    const { metadata, hostCluster } = await this.createTerminal()
     this.metadata = pick(metadata, ['name', 'namespace'])
+    this.hostCluster = pick(hostCluster, ['kubeApiServer', 'namespace', 'pod'])
 
     this.connectionState = TerminalSession.FETCHING
-    const { hostCluster } = await this.fetchTerminal()
-    this.hostCluster = hostCluster
+    const { hostCluster: { pod, token } } = await this.fetchTerminalAccessInfo()
+    assign(this.hostCluster, { pod, token })
 
     return this.attachTerminal()
   }
@@ -210,8 +211,8 @@ class TerminalSession {
     return data
   }
 
-  async fetchTerminal () {
-    const { data } = await fetchTerminal({ ...this.terminalCoordinates })
+  async fetchTerminalAccessInfo () {
+    const { data } = await fetchTerminalAccessInfo({ ...this.terminalCoordinates })
     return data
   }
 
