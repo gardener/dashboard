@@ -105,12 +105,15 @@ const vendorNameFromImageName = imageName => {
   return undefined
 }
 
-const iconForImageName = imageName => {
-  const vendorName = vendorNameFromImageName(imageName)
+const iconForVendor = vendorName => {
   if (!vendorName) {
     return 'mdi-blur-radial'
   }
   return vendorName
+}
+
+const vendorNeedsLicense = vendorName => {
+  return vendorName === 'suse-jeos'
 }
 
 // getters
@@ -157,13 +160,15 @@ const getters = {
         const machineImageVersions = []
         forEach(machineImage.versions, version => {
           if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
+            const vendorName = vendorNameFromImageName(machineImage.name)
             machineImageVersions.push({
               name: machineImage.name,
               version: version.version,
               expirationDate: version.expirationDate,
               expirationDateString: getTimestampFormatted(version.expirationDate),
-              icon: iconForImageName(machineImage.name),
-              vendor: vendorNameFromImageName(machineImage.name)
+              vendorName,
+              icon: iconForVendor(vendorName),
+              needsLicense: vendorNeedsLicense(vendorName)
             })
           }
         })

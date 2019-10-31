@@ -10,6 +10,7 @@
     label="Machine Image"
     :hint="hint"
     persistent-hint
+    :class="{'hintColor': machineImage.needsLicense}"
   >
     <template v-slot:item="{ item }">
       <v-list-tile-action>
@@ -17,8 +18,9 @@
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="item.expirationDate">
-          <span>Expiration Date: {{item.expirationDateString}}</span>
+        <v-list-tile-sub-title>
+          <span v-if="item.needsLicense" class="mr-2">⚠ Enterprise support license required</span>
+          <span v-if="item.expirationDate">Expiration Date: {{item.expirationDateString}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
@@ -39,6 +41,7 @@ import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
+import join from 'lodash/join'
 
 const validationErrors = {
   worker: {
@@ -87,9 +90,14 @@ export default {
       }
     },
     hint () {
-      if (this.machineImage.vendor === 'suse-jeos') {
-        return 'The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.'
+      const hintText = []
+      if (this.machineImage.needsLicense) {
+        hintText.push('The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.')
       }
+      if (this.machineImage.expirationDate) {
+        hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
+      }
+      return join(hintText, ' ')
     }
   },
   validations,
@@ -123,3 +131,15 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  @import '~vuetify/src/stylus/settings/_colors.styl';
+
+  .hintColor {
+    >>>.v-messages__wrapper {
+      .v-messages__message {
+        color: $orange.darken-2 !important;
+      }
+    }
+  }
+</style>
