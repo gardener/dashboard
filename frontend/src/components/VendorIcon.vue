@@ -71,7 +71,7 @@ export default {
           return require('@/assets/china-telecom.svg')
         case 'coreos':
           return require('@/assets/coreos.svg')
-        case 'suse':
+        case 'suse-jeos':
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')

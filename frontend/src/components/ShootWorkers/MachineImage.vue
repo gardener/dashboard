@@ -8,6 +8,9 @@
     @blur="$v.worker.machineImage.$touch()"
     v-model="machineImage"
     label="Machine Image"
+    :hint="hint"
+    persistent-hint
+    :class="{hintColor: machineImage.needsLicense}"
   >
     <template v-slot:item="{ item }">
       <v-list-tile-action>
@@ -15,8 +18,8 @@
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="item.expirationDate">
-          <span>Expiration Date: {{item.expirationDateString}}</span>
+        <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
+          {{itemDescription(item)}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
@@ -37,6 +40,7 @@ import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
+import join from 'lodash/join'
 
 const validationErrors = {
   worker: {
@@ -83,6 +87,16 @@ export default {
       set (machineImage) {
         this.worker.machineImage = pick(machineImage, ['name', 'version'])
       }
+    },
+    hint () {
+      const hintText = []
+      if (this.machineImage.needsLicense) {
+        hintText.push('The OS image selected requires a license and a contract for full enterprise support. By continuing you are confirming that you have a valid license and you have signed an enterprise support contract.')
+      }
+      if (this.machineImage.expirationDate) {
+        hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
+      }
+      return join(hintText, ' ')
     }
   },
   validations,
@@ -100,6 +114,16 @@ export default {
         this.valid = !this.$v.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
+    },
+    itemDescription(machineImage) {
+      const itemDescription = []
+      if (machineImage.needsLicense) {
+        itemDescription.push('Enterprise support license required')
+      }
+      if (machineImage.expirationDate) {
+        itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     }
   },
   mounted () {
@@ -116,3 +140,15 @@ export default {
   }
 }
 </script>
+
+<style lang="styl" scoped>
+  @import '~vuetify/src/stylus/settings/_colors.styl';
+
+  .hintColor {
+    >>>.v-messages__wrapper {
+      .v-messages__message {
+        color: $orange.darken-2 !important;
+      }
+    }
+  }
+</style>
