@@ -19,8 +19,7 @@
       <v-list-tile-content>
         <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
         <v-list-tile-sub-title>
-          <span v-if="item.needsLicense" class="mr-2">⚠ Enterprise support license required</span>
-          <span v-if="item.expirationDate">Expiration Date: {{item.expirationDateString}}</span>
+          <span v-if="itemDescription(item).length > 0" class="mr-2">{{itemDescription(item)}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
@@ -115,6 +114,16 @@ export default {
         this.valid = !this.$v.$invalid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
+    },
+    itemDescription(machineImage) {
+      const itemDescription = []
+      if (machineImage.needsLicense) {
+        itemDescription.push('⚠ Enterprise support license required')
+      }
+      if (machineImage.expirationDate) {
+        itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     }
   },
   mounted () {
