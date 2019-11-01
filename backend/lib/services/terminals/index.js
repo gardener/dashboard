@@ -139,7 +139,7 @@ exports.remove = function ({ user, namespace, name, target, body = {} }) {
 }
 
 exports.fetch = function ({ user, namespace, name, target, body = {} }) {
-  return fetchTerminalAccessInfo({ user, namespace, name, target, body })
+  return fetchTerminalSession({ user, namespace, name, target, body })
 }
 
 async function deleteTerminalSession ({ user, namespace, body }) {
@@ -435,7 +435,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   }
 }
 
-async function fetchTerminalAccessInfo ({ user, body }) {
+async function fetchTerminalSession ({ user, body }) {
   const dashboardClient = GardenerDashboard(user)
   const gardenCoreClient = Core(user)
 

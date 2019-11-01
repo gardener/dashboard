@@ -223,7 +223,7 @@ export function createTerminal ({ namespace, name, target, body }) {
   return invokeTerminalMethod('create', { namespace, name, target, body })
 }
 
-export function fetchTerminalAccessInfo ({ namespace, name, target, body }) {
+export function fetchTerminalSession ({ namespace, name, target, body }) {
   return invokeTerminalMethod('fetch', { namespace, name, target, body })
 }
 
