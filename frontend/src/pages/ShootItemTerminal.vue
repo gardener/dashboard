@@ -198,7 +198,7 @@ class TerminalSession {
     this.hostCluster = pick(hostCluster, ['kubeApiServer', 'namespace', 'pod'])
 
     this.connectionState = TerminalSession.FETCHING
-    const { hostCluster: { pod, token } } = await this.fetchTerminalSession()
+    const { hostCluster: { pod, token } } = await this.fetchTerminalSession()
     assign(this.hostCluster, { pod, token })
 
     return this.attachTerminal()
