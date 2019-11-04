@@ -17,7 +17,7 @@
 'use strict'
 const _ = require('lodash')
 const { EventEmitter } = require('events')
-const {_cache: cache} = require('../../lib/cache')
+const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
 
 function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
@@ -131,9 +131,9 @@ const domainList = [
 ]
 
 const quotaList = [
-  getQuota({name: 'trial-secret-quota', namespace: 'garden-trial'}),
-  getQuota({name: 'foo-quota1', namespace: 'garden-foo'}),
-  getQuota({name: 'foo-quota2', namespace: 'garden-foo'})
+  getQuota({ name: 'trial-secret-quota', namespace: 'garden-trial' }),
+  getQuota({ name: 'foo-quota1', namespace: 'garden-foo' }),
+  getQuota({ name: 'foo-quota2', namespace: 'garden-foo' })
 ]
 
 const stub = {
@@ -170,7 +170,7 @@ class Reconnector extends EventEmitter {
     this.disconnected = true
   }
   pushEvent (type, object, delay = 10) {
-    this.events.push({delay, event: {type, object}})
+    this.events.push({ delay, event: { type, object } })
   }
   start () {
     const emit = (event) => {

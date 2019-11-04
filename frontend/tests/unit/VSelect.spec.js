@@ -14,15 +14,25 @@
 // limitations under the License.
 //
 
-module.exports = {
-  cloudprofiles: require('./cloudprofiles'),
-  domains: require('./domains'),
-  projects: require('./projects'),
-  shoots: require('./shoots'),
-  infrastructureSecrets: require('./infrastructureSecrets'),
-  members: require('./members'),
-  authorization: require('./authorization'),
-  authentication: require('./authentication'),
-  journals: require('./journals'),
-  terminals: require('./terminals')
-}
+import { expect } from 'chai'
+import { shallowMount } from '@vue/test-utils'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import { VSelect } from 'vuetify/lib'
+
+Vue.use(Vuetify)
+
+describe('VSelect', function () {
+  it('should be able to overwrite hint color class', function () {
+    const hint = 'hint test'
+    const propsData = {
+      hint,
+      'persistent-hint': true
+    }
+    const wrapper = shallowMount(VSelect, {
+      propsData
+    })
+    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
+    expect(hintElement.text()).to.equal(hint)
+  })
+})

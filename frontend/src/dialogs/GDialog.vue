@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" lazy @keydown.esc="cancel">
+  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" lazy @keydown.esc="resolveAction(false)">
     <v-card>
       <v-card-title :class="titleColorClass">
         <div class="headline">
@@ -25,7 +25,7 @@ limitations under the License.
           <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
         </div>
       </v-card-title>
-      <v-card-text class="subheadingfont" style="max-height: 50vh">
+      <v-card-text class="subheadingfont" :style="{'max-height': maxHeight}">
         <slot name="message">
           This is a generic dialog template.
         </slot>
@@ -95,6 +95,10 @@ export default {
     maxWidth: {
       type: String,
       default: '500'
+    },
+    maxHeight: {
+      type: String,
+      default: '50vh'
     }
   },
   data () {
@@ -151,7 +155,7 @@ export default {
   },
   methods: {
     confirmWithDialog () {
-      this.visible = true
+      this.showDialog()
       this.userInput = ''
 
       // we must delay the "focus" handling because the dialog.open is animated

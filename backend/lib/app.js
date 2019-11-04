@@ -34,7 +34,7 @@ const periodSeconds = _.get(config, 'readinessProbe.periodSeconds', 10)
 const PUBLIC_DIRNAME = resolve(join(__dirname, '..', 'public'))
 const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 // csp sources
-const connectSrc = ['\'self\'', 'wss:', 'ws:'] // TODO allow ws connections only to backend
+const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {

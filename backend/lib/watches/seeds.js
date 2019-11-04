@@ -19,8 +19,19 @@
 const garden = require('../kubernetes').gardener()
 const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
+const logger = require('../logger')
+const { registerHandler } = require('./common')
+const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
 
 module.exports = io => {
   const emitter = garden.seeds.watch()
   cacheResource(emitter, getSeeds(), 'metadata.name')
+  registerHandler(emitter, async function (event) {
+    if (event.type === 'ERROR') {
+      logger.error('seed event error', event.object)
+    } else if (event.type === 'ADDED') {
+      const seed = event.object
+      bootstrapResource(seed)
+    }
+  })
 }

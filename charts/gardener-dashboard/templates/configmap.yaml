@@ -51,6 +51,61 @@ data:
       clockTolerance: {{ .Values.oidc.clockTolerance }}
 {{- end }}
 {{- end }}
+    {{- if .Values.terminal }}
+    terminal:
+      containerImage: {{ .Values.terminal.containerImage }}
+      containerImageOperator: {{ .Values.terminal.containerImageOperator }}
+      gardenTerminalHost:
+{{- if .Values.terminal.gardenTerminalHost.secretRef }}
+        apiServerIngressHost: {{ .Values.terminal.gardenTerminalHost.apiServerIngressHost }}
+        secretRef:
+          namespace: {{ .Values.terminal.gardenTerminalHost.secretRef.namespace }}
+          {{- with .Values.terminal.gardenTerminalHost.secretRef.labelSelector }}
+          labelSelector:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+{{- end }}
+{{- if .Values.terminal.gardenTerminalHost.seedRef }}
+        seedRef: {{ .Values.terminal.gardenTerminalHost.seedRef }}
+{{- end }}
+{{- if .Values.terminal.gardenTerminalHost.shootRef }}
+        shootRef:
+          name: {{ .Values.terminal.gardenTerminalHost.shootRef.name }}
+          namespace: {{ .Values.terminal.gardenTerminalHost.shootRef.namespace }}
+{{- end }}
+      garden:
+        operatorCredentials:
+{{ toYaml .Values.terminal.garden.operatorCredentials | trim | indent 10 }}
+      {{- if .Values.terminal.bootstrap }}
+      bootstrap:
+        disabled: {{ .Values.terminal.bootstrap.disabled | default false }}
+        {{- if ne .Values.terminal.bootstrap.disabled true }}
+        seedDisabled: {{ .Values.terminal.bootstrap.seedDisabled | default false }}
+        shootDisabled: {{ .Values.terminal.bootstrap.shootDisabled | default false }}
+        gardenTerminalHostDisabled: {{ .Values.terminal.bootstrap.gardenTerminalHostDisabled | default false }}
+        {{- if .Values.terminal.bootstrap.apiServerIngress }}
+        apiServerIngress:
+          {{- with .Values.terminal.bootstrap.apiServerIngress.annotations }}
+          annotations:
+{{ toYaml . | trim | indent 12 }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.terminal.bootstrap.queueOptions }}
+        queueOptions:
+{{ toYaml .Values.terminal.bootstrap.queueOptions | trim | indent 10 }}
+        {{- end }}
+        {{- if ne .Values.terminal.bootstrap.gardenTerminalHostDisabled true }}
+        gardenTerminalHost:
+          namespace: {{ .Values.terminal.bootstrap.gardenTerminalHost.namespace }}
+          apiServerIngress:
+            {{- with .Values.terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations }}
+            annotations:
+{{ toYaml . | trim | indent 14 }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
     frontend:
 {{- if .Values.frontendConfig.landingPageUrl }}
       landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
@@ -68,6 +123,16 @@ data:
         pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
+{{- end }}
+{{- if .Values.terminal }}
+      features:
+        terminalEnabled: true
+{{- end }}
+{{- if .Values.frontendConfig.terminal }}
+{{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
+      terminal:
+        heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
+{{- end }}
 {{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:

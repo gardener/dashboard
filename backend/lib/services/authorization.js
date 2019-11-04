@@ -42,11 +42,11 @@ async function hasAuthorization (user, resourceAttributes) {
 exports.hasAuthorization = hasAuthorization
 
 exports.isAdmin = function (user) {
-  // if someone is allowed to delete shoots in all namespaces he is considered to be an administrator
+  // if someone is allowed to get secrets in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
-    verb: 'delete',
-    group: 'core.gardener.cloud',
-    resource: 'shoots'
+    verb: 'get',
+    group: '',
+    resource: 'secrets'
   })
 }
 

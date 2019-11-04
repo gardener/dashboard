@@ -10,10 +10,10 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   ports:
-    - port: {{ .Values.servicePort }}
-      targetPort: {{ .Values.containerPort }}
-      protocol: TCP
-      name: http
+  - port: {{ .Values.servicePort }}
+    targetPort: {{ .Values.containerPort }}
+    protocol: TCP
+    name: http
   selector:
     app: gardener-dashboard
     release: {{ .Release.Name }}

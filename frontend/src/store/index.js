@@ -92,16 +92,27 @@ const machineAndVolumeTypePredicate = (item, unavailableItems) => {
   return true
 }
 
-const iconForImageName = imageName => {
+const vendorNameFromImageName = imageName => {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
     return 'coreos'
   } else if (lowerCaseName.includes('ubuntu')) {
     return 'ubuntu'
-  } else if (lowerCaseName.includes('suse')) {
-    return 'suse'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
+    return 'suse-jeos'
   }
-  return 'mdi-blur-radial'
+  return undefined
+}
+
+const iconForVendor = vendorName => {
+  if (!vendorName) {
+    return 'mdi-blur-radial'
+  }
+  return vendorName
+}
+
+const vendorNeedsLicense = vendorName => {
+  return vendorName === 'suse-jeos'
 }
 
 // getters
@@ -161,12 +172,15 @@ const getters = {
         const machineImageVersions = []
         forEach(machineImage.versions, version => {
           if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
+            const vendorName = vendorNameFromImageName(machineImage.name)
             machineImageVersions.push({
               name: machineImage.name,
               version: version.version,
               expirationDate: version.expirationDate,
               expirationDateString: getTimestampFormatted(version.expirationDate),
-              icon: iconForImageName(machineImage.name)
+              vendorName,
+              icon: iconForVendor(vendorName),
+              needsLicense: vendorNeedsLicense(vendorName)
             })
           }
         })
@@ -386,6 +400,18 @@ const getters = {
   },
   initialNewShootResource (state, getters) {
     return getters['shoots/initialNewShootResource']
+  },
+  hasGardenTerminalAccess (state, getters) {
+    return getters.isTerminalEnabled && getters.isAdmin
+  },
+  hasControlPlaneTerminalAccess (state, getters) {
+    return getters.isTerminalEnabled && getters.isAdmin
+  },
+  hasShootTerminalAccess (state, getters) {
+    return getters.isTerminalEnabled
+  },
+  isTerminalEnabled (state, getters) {
+    return get(state, 'cfg.features.terminalEnabled', false)
   }
 }
 

@@ -221,13 +221,11 @@ export function routes (router, includeRoutesWithProjectScope) {
 }
 
 export function namespacedRoute (route, namespace) {
-  const name = routeName(route)
-
   const params = {
     namespace: namespace
   }
 
-  return { name, params }
+  return { name: routeName(route), params }
 }
 
 export function routeName (route) {
@@ -419,6 +417,18 @@ export function infrastructureColor (kind) {
     case 'aws':
       return '#ff9900'
   }
+}
+
+export function encodeBase64 (input) {
+  return Buffer.from(input, 'utf8').toString('base64')
+}
+
+export function encodeBase64Url (input) {
+  let output = encodeBase64(input)
+  output = output.replace(/=/g, '')
+  output = output.replace(/\+/g, '-')
+  output = output.replace(/\//g, '_')
+  return output
 }
 
 export function purposeRequiresHibernationSchedule (purpose) {
