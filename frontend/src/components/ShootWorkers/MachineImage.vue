@@ -115,7 +115,7 @@ export default {
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
       }
     },
-    itemDescription(machineImage) {
+    itemDescription (machineImage) {
       const itemDescription = []
       if (machineImage.needsLicense) {
         itemDescription.push('Enterprise support license required')
