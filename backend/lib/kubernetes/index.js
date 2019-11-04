@@ -27,9 +27,16 @@ BaseObject.prototype.mergePatch = mergePatch
 BaseObject.prototype.jsonPatch = jsonPatch
 const ApiGroup = require('kubernetes-client/lib/api-group')
 const kubernetesClient = require('kubernetes-client')
+const yaml = require('js-yaml')
 const Resources = require('./Resources')
 const Specs = require('./Specs')
 const utils = require('../utils')
+
+const {
+  GatewayTimeout,
+  InternalServerError
+} = require('../errors')
+const logger = require('../logger')
 
 const {
   Api,
@@ -150,6 +157,18 @@ module.exports = {
     })
     return new ApiGroup(credentials(options))
   },
+  gardenerDashboard (options) {
+    const resources = [
+      Resources.Terminal.name
+    ]
+    options = assign(options, {
+      path: 'apis/dashboard.gardener.cloud',
+      version: 'v1alpha1',
+      namespaceResources: resources,
+      groupResources: resources
+    })
+    return new ApiGroup(credentials(options))
+  },
   apiRegistration (options) {
     options = assign(options, {
       path: 'apis/apiregistration.k8s.io',
@@ -191,6 +210,92 @@ module.exports = {
     return new kubernetesClient.Client({
       config: credentials(),
       spec: Specs.Healthz
+    })
+  },
+  getKubeconfigFromServiceAccount ({ serviceAccountName, contextName = 'default', contextNamespace, token, server, caData }) {
+    const clusterName = 'garden' // TODO as parameter
+    const cluster = {
+      'certificate-authority-data': caData,
+      server
+    }
+    const username = serviceAccountName
+    const user = {
+      token
+    }
+    const context = {
+      cluster: clusterName,
+      user: username,
+      namespace: contextNamespace
+    }
+    return yaml.safeDump({
+      kind: 'Config',
+      clusters: [{
+        cluster,
+        name: clusterName
+      }],
+      users: [{
+        user,
+        name: username
+      }],
+      contexts: [{
+        context,
+        name: contextName
+      }],
+      'current-context': contextName
+    })
+  },
+  async waitUntilResourceHasCondition ({ watch, conditionFunction, waitTimeout = 5000, resourceName }) {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        done(new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${waitTimeout} ms`))
+      }, waitTimeout)
+
+      function done (err, obj) {
+        clearTimeout(timeoutId)
+
+        watch.removeListener('event', onEvent)
+        watch.removeListener('disconnect', onDisconnect)
+        watch.removeListener('error', logError)
+        watch.once('error', ignoreError)
+
+        watch.disconnect()
+        if (err) {
+          return reject(err)
+        }
+        resolve(obj)
+      }
+
+      function onEvent (event) {
+        try {
+          switch (event.type) {
+            case 'ADDED':
+            case 'MODIFIED':
+              if (conditionFunction(event.object)) {
+                done(null, event.object)
+              }
+              break
+            case 'DELETED':
+              throw new InternalServerError(`Resource "${resourceName}" has been deleted`)
+          }
+        } catch (err) {
+          done(err)
+        }
+      }
+
+      function logError (err) {
+        logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
+      }
+
+      function ignoreError () {
+      }
+
+      function onDisconnect (err) {
+        done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
+      }
+
+      watch.on('event', onEvent)
+      watch.on('error', logError)
+      watch.on('disconnect', onDisconnect)
     })
   }
 }

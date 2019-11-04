@@ -251,11 +251,11 @@ function reviewToken (scope) {
     })
 }
 
-function canDeleteShootsInAllNamespaces (scope) {
+function canGetSecretsInAllNamespaces (scope) {
   return scope
     .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
       const { namespace, verb, resource, group } = body.spec.resourceAttributes
-      return !namespace && group === 'garden.sapcloud.io' && resource === 'shoots' && verb === 'delete'
+      return !namespace && group === '' && resource === 'secrets' && verb === 'get'
     })
     .reply(200, function (body) {
       const [, token] = _.split(this.req.headers.authorization, ' ', 2)
@@ -789,7 +789,7 @@ const stub = {
   },
   getProjects ({bearer}) {
     const scope = nockWithAuthorization(bearer)
-    canDeleteShootsInAllNamespaces(scope)
+    canGetSecretsInAllNamespaces(scope)
     return [
       scope,
       nockWithAuthorization(auth.bearer)
@@ -1009,7 +1009,7 @@ const stub = {
   },
   getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
-    canDeleteShootsInAllNamespaces(scope)
+    canGetSecretsInAllNamespaces(scope)
     canCreateProjects(scope)
     return scope
   },

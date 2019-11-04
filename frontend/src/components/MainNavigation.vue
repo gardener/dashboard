@@ -123,14 +123,16 @@ limitations under the License.
           </v-list-tile-content>
         </v-list-tile>
         <template v-if="namespace">
-          <v-list-tile v-for="(route, index) in routes" :to="namespacedRoute(route)" :key="index">
-            <v-list-tile-action>
-              <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+          <template v-for="(route, index) in routes">
+            <v-list-tile v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
+              <v-list-tile-action>
+                <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-content>
+                <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
+              </v-list-tile-content>
+            </v-list-tile>
+          </template>
         </template>
       </v-list>
 
@@ -288,6 +290,8 @@ export default {
         }
       } else if (!isEmpty(this.$route, 'params.name')) {
         name = fallback
+      } else if (get(this.$route, 'name') === 'GardenTerminal') {
+        name = fallback
       }
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
     }
@@ -408,7 +412,6 @@ export default {
 
     .v-footer{
       background-color: transparent
-      bottom: 10px
       padding-left: 10px;
       padding-right: 10px;
     }

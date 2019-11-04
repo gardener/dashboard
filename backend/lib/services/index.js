@@ -23,5 +23,6 @@ module.exports = {
   members: require('./members'),
   authorization: require('./authorization'),
   authentication: require('./authentication'),
-  journals: require('./journals')
+  journals: require('./journals'),
+  terminals: require('./terminals')
 }

@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/backend",
-  "version": "1.34.0",
+  "version": "1.34.3",
   "description": "Gardener Dashboard Server",
   "license": "Apache-2.0",
   "repository": {
@@ -28,6 +28,7 @@
     "@octokit/rest": "^16.28.1",
     "@panva/jose": "^1.3.0",
     "base64url": "^3.0.1",
+    "better-queue": "^3.8.10",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "es6-error": "^4.1.1",
@@ -39,6 +40,7 @@
     "kubernetes-client": "^5.4.0",
     "lodash": "^4.17.14",
     "morgan": "^1.9.1",
+    "object-hash": "^2.0.0",
     "openid-client": "^3.1.1",
     "p-retry": "^3.0.1",
     "p-timeout": "^2.0.1",
