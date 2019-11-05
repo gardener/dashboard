@@ -13,6 +13,7 @@
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
   "scripts": {
+    "postinstall": "yarn --cwd frontend install && yarn --cwd backend install",
     "start": "yarn --cwd frontend build && yarn --cwd backend start",
     "lint": "yarn --cwd backend lint && yarn --cwd frontend lint",
     "test": "yarn --cwd backend test:coverage && yarn --cwd frontend test:unit",
