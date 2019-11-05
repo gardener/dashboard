@@ -136,7 +136,7 @@ import forEach from 'lodash/forEach'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
 import { errorDetailsFromError } from '@/utils/error'
-import { getProviderTemplate, getZonesNetworkConfiguration } from '@/utils/createShoot'
+import { getProviderTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 const EventEmitter = require('events')
 
 export default {
@@ -244,6 +244,12 @@ export default {
       const zonesNetworkConfiguration = getZonesNetworkConfiguration(oldZoneConfiguration, workers, infrastructureKind, allZones.length)
       if (zonesNetworkConfiguration) {
         set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
+      }
+
+      const oldControlPlaneZone = get(shootResource, 'spec.provider.controlPlaneConfig.zone')
+      const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind, oldControlPlaneZone)
+      if (controlPlaneZone) {
+        set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
       }
 
       const addons = this.$refs.addons.getAddons()

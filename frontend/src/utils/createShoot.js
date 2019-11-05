@@ -20,6 +20,8 @@ import flatMap from 'lodash/flatMap'
 import uniq from 'lodash/uniq'
 import compact from 'lodash/compact'
 import find from 'lodash/find'
+import sample from 'lodash/sample'
+import includes from 'lodash/includes'
 
 export const workerCIDR = '10.250.0.0/16'
 
@@ -36,6 +38,10 @@ export function getProviderTemplate (infrastructureKind) {
               cidr: workerCIDR
             }
           }
+        },
+        controlPlaneConfig: {
+          apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
         }
       }
     case 'azure':
@@ -49,7 +55,12 @@ export function getProviderTemplate (infrastructureKind) {
               cidr: workerCIDR
             },
             workers: workerCIDR
-          }
+          },
+          zoned: true
+        },
+        controlPlaneConfig: {
+          apiVersion: 'azure.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
         }
       }
     case 'gcp':
@@ -61,6 +72,10 @@ export function getProviderTemplate (infrastructureKind) {
           networks: {
             worker: workerCIDR
           }
+        },
+        controlPlaneConfig: {
+          apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
         }
       }
     case 'openstack':
@@ -72,6 +87,10 @@ export function getProviderTemplate (infrastructureKind) {
           networks: {
             worker: workerCIDR
           }
+        },
+        controlPlaneConfig: {
+          apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
         }
       }
     case 'alicloud':
@@ -85,6 +104,10 @@ export function getProviderTemplate (infrastructureKind) {
               cidr: workerCIDR
             }
           }
+        },
+        controlPlaneConfig: {
+          apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
         }
       }
   }
@@ -152,4 +175,20 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     return defaultZonesNetworkConfiguration
   }
   return newZonesNetworkConfiguration
+}
+
+export function getControlPlaneZone (workers, infrastructureKind, oldControlPlaneZone) {
+  const workerZones = flatMap(workers, 'zones')
+  console.log(workerZones)
+  switch (infrastructureKind) {
+    case 'gcp':
+    case 'openstack':
+    case 'alicloud':
+      if (includes(workerZones, oldControlPlaneZone)) {
+        return oldControlPlaneZone
+      }
+      return sample(workerZones)
+    default:
+      return undefined
+  }
 }

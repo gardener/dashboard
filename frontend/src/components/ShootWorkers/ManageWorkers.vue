@@ -196,6 +196,9 @@ export default {
       })
       this.userInterActionBus.on('updateRegion', region => {
         this.region = region
+        this.$nextTick(() => {
+          this.setDefaultWorker()
+        })
       })
     }
   }

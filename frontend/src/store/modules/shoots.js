@@ -40,7 +40,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
-import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration } from '@/utils/createShoot'
+import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
   isUserError,
@@ -278,6 +278,11 @@ const actions = {
     const worker = omit(generateWorker(zones, cloudProfileName, region), ['id', 'isNewWorker'])
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
+
+    const controlPlaneZone = getControlPlaneZone(workers, infrastructureKind)
+    if (controlPlaneZone) {
+      set(shootResource, 'spec.provider.controlPlaneConfig.zone', controlPlaneZone)
+    }
 
     const addons = {}
     forEach(filter(shootAddonList, addon => addon.visible), addon => {
