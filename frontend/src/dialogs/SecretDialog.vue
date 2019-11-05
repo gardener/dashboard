@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="600">
+  <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-img
         class="white--text"
