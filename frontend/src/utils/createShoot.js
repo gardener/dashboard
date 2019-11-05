@@ -47,7 +47,8 @@ export function getProviderTemplate (infrastructureKind) {
           networks: {
             vnet: {
               cidr: workerCIDR
-            }
+            },
+            workers: workerCIDR
           }
         }
       }
@@ -108,11 +109,11 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 }
 
 export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
-  const zoneNetworks = splitCIDR(workerCIDR, maxNumberOfZones)
   switch (infrastructureKind) {
     case 'aws':
+      const zoneNetworksAws = splitCIDR(workerCIDR, maxNumberOfZones)
       return map(zones, (zone, index) => {
-        const bigNetWorks = splitCIDR(zoneNetworks[index], 2)
+        const bigNetWorks = splitCIDR(zoneNetworksAws[index], 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
         const publicNetwork = smallNetworks[0]
@@ -125,10 +126,11 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
         }
       })
     case 'alicloud':
+      const zoneNetworksAli = splitCIDR(workerCIDR, maxNumberOfZones)
       return map(zones, (zone, index) => {
         return {
           name: zone,
-          worker: zoneNetworks[index]
+          worker: zoneNetworksAli[index]
         }
       })
     default:
