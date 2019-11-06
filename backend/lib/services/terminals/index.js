@@ -243,6 +243,10 @@ async function getSeedHostCluster ({ gardenClient, gardenCoreClient, namespace, 
 
   const seedShootNS = getSeedShootNamespace(shootResource)
   const seedName = shootResource.status.seed
+
+  if (!seedName) {
+    throw new Error(`There is no seed assigned to this shoot (yet)`)
+  }
   const seed = getSeed(seedName)
 
   hostCluster.namespace = seedShootNS

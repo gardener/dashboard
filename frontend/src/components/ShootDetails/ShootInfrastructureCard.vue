@@ -135,7 +135,7 @@ export default {
       return includes(this.namespaces, 'garden')
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.namespace })
+      return canLinkToSeed({ shootNamespace: this.namespace, shootSeed: this.shootSeed })
     },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)

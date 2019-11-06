@@ -340,14 +340,14 @@ export function isHibernated (spec) {
   return hibernationEnabled
 }
 
-export function canLinkToSeed ({ shootNamespace }) {
+export function canLinkToSeed ({ shootNamespace, shootSeed }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".
   * Currently there is only the secret available.
   * If we are not in the garden namespace we expect a seed to be present
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return shootNamespace !== 'garden'
+  return shootSeed && shootNamespace !== 'garden'
 }
 
 export function isUserError (errorCodes) {

@@ -92,7 +92,7 @@ function seedShootNsExists (resource) {
     If the technicalID is set and the progress is over 10% (best guess), then we assume that the namespace on the seed exists for this shoot.
     Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
   */
-  return _.get(resource, 'status.technicalID') && _.get(resource, 'status.lastOperation.progress', 0) > 10
+  return _.get(resource, 'status.technicalID') && _.get(resource, 'status.seed') && _.get(resource, 'status.lastOperation.progress', 0) > 10
 }
 
 async function replaceResource ({ client, name, body }) {

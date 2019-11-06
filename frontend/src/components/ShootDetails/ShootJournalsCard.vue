@@ -73,7 +73,7 @@ export default {
       return this.cfg.gitHubRepoUrl
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.shootNamespace })
+      return canLinkToSeed({ shootNamespace: this.shootNamespace, shootSeed: this.shootSeed })
     },
     createJournalLink () {
       const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`

@@ -227,7 +227,7 @@ export default {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.shootNamespace })
+      return canLinkToSeed({ shootNamespace: this.shootNamespace, shootSeed: this.shootSeed })
     },
     shootLastUpdatedJournalTimestamp () {
       return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)
