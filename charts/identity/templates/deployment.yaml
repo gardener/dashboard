@@ -24,6 +24,7 @@ spec:
       labels:
         app: identity
         release: {{ .Release.Name }}
+{{- if .Values.podLabels }}{{ toYaml .Values.podLabels | trim | nindent 8 }}{{- end }}
     spec:
       volumes:
         - name: config
