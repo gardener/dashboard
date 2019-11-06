@@ -6,22 +6,22 @@ Setup
 
 ``` bash
 # install dependencies
-npm install
+yarn
 
 # run server at localhost:3030
-npm run start
+yarn start
 
 # run server with hot reload at localhost:3030
-npm run dev
+yarn serve
 
 # run static code checks
-npm run lint
+yarn lint
 
 # run tests without coverage
-npm run test
+yarn test
 
 # run tests with coverage
-npm run test-cov
+yarn test:coverage
 
 ```
 

@@ -63,13 +63,13 @@ describe('dockerfile', function () {
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
-    expect(dashboardDockerfile.getFROMs()).to.have.length(4)
+    expect(dashboardDockerfile.getFROMs()).to.have.length(2)
     const buildStages = _
       .chain(dashboardDockerfile.getFROMs())
       .map(from => [from.getBuildStage(), from])
       .fromPairs()
       .value()
-    const imageTag = buildStages.base.getImageTag()
+    const imageTag = buildStages.builder.getImageTag()
     const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine$/.exec(imageTag) || []
     expect(_.keys(activeNodeReleases), `Node release ${nodeRelease} is not in the range of active LTS releases`).to.include(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife

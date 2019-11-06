@@ -14,44 +14,23 @@
 # limitations under the License.
 #
 
-#### Base ####
-FROM node:12-alpine as base
+#### Builder ####
+FROM node:12-alpine as builder
 
 WORKDIR /usr/src/app
 
-RUN npm set progress=false \
-    && npm config set depth 0
+COPY . .
 
-#### Backend base ####
-FROM base as backend
-
-COPY backend/package*.json ./
-
-RUN npm install --only=production \
-    && cp -R node_modules dist \
-    && npm install
-
-COPY backend ./
-COPY VERSION ../
-COPY Dockerfile ../
-
-RUN npm run lint \
-    && npm run test-cov \
-    && npm run sync-version
-
-#### Frontend  base ####
-FROM base as frontend
-
-COPY frontend/package*.json ./
-
-RUN npm install
-
-COPY frontend ./
-COPY VERSION ../
-
-RUN npm run lint \
-    && npm run test:unit \
-    && npm run build
+RUN yarn --cwd=backend install --no-progress --production \
+    && cp -R backend/node_modules backend/production_node_modules \
+    && yarn --cwd=backend install --no-progress \
+    && yarn --cwd=backend lint \
+    && yarn --cwd=backend test:coverage \
+    && yarn --cwd=backend sync-version \
+    && yarn --cwd=frontend install --no-progress \
+    && yarn --cwd=frontend lint \
+    && yarn --cwd=frontend test:unit \
+    && yarn --cwd=frontend build
 
 # Release
 FROM alpine:3.9 as release
@@ -67,14 +46,13 @@ ENV NODE_ENV production
 ARG PORT=8080
 ENV PORT $PORT
 
-COPY --from=backend /usr/local/bin/node /usr/local/bin/
+COPY --from=builder /usr/local/bin/node /usr/local/bin/
 
-COPY --from=backend /usr/src/app/package.json ./
-COPY --from=backend /usr/src/app/dist  ./node_modules/
-COPY --from=backend /usr/src/app/lib ./lib/
-COPY --from=backend /usr/src/app/server.js ./
+COPY --from=builder /usr/src/app/backend/package.json /usr/src/app/backend/server.js ./
+COPY --from=builder /usr/src/app/backend/lib ./lib/
+COPY --from=builder /usr/src/app/backend/production_node_modules ./node_modules/
 
-COPY --from=frontend /usr/src/app/dist ./public/
+COPY --from=builder /usr/src/app/frontend/dist ./public/
 
 USER node
 

@@ -2,17 +2,20 @@
 **
 
 # include backend files and folders
-!backend/package*.json
+!backend/package.json
+!backend/yarn.lock
 !backend/.babelrc
 !backend/.eslintrc.js
 !backend/.nycrc
+!backend/*.config.js
 !backend/server.js
 !backend/lib
 !backend/bin
 !backend/test
 
 # include frontend folder
-!frontend/package*.json
+!frontend/package.json
+!frontend/yarn.lock
 !frontend/.browserslistrc
 !frontend/.editorconfig
 !frontend/.env
@@ -24,6 +27,8 @@
 !frontend/tests
 
 # include metadata files
+!package.json
+!yarn.lock
 !LICENSE.md
 !NOTICE.md
 !VERSION

@@ -16,12 +16,12 @@
   "private": true,
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon --ext js --watch lib server.js",
+    "serve": "nodemon --ext js --watch lib server.js",
     "start": "cross-env NODE_ENV=prod node server.js",
     "lint": "eslint --ext .js server.js lib",
     "sync-version": "bin/sync-version",
     "test": "cross-env NODE_ENV=test _mocha",
-    "test-cov": "cross-env NODE_ENV=test nyc _mocha"
+    "test:coverage": "cross-env NODE_ENV=test nyc _mocha"
   },
   "dependencies": {
     "@godaddy/terminus": "^4.1.2",
@@ -77,6 +77,6 @@
   },
   "engines": {
     "node": ">= 12.3.1",
-    "npm": ">= 6.9.0"
+    "yarn": ">= 1.16.0"
   }
 }
