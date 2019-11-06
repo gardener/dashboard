@@ -1,0 +1,25 @@
+{
+  "name": "gardener-dashboard",
+  "description": "Gardener Dashboard",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gardener/dashboard"
+  },
+  "contributors": [
+    "Gross, Lukas <lukas.gross@sap.com>",
+    "Koser, Holger <holger.koser@sap.com>",
+    "Sutter, Peter <peter.sutter@sap.com>"
+  ],
+  "scripts": {
+    "postinstall": "yarn --cwd frontend install && yarn --cwd backend install",
+    "start": "yarn --cwd frontend build && yarn --cwd backend start",
+    "lint": "yarn --cwd backend lint && yarn --cwd frontend lint",
+    "test": "yarn --cwd backend test:coverage && yarn --cwd frontend test:unit",
+    "serve": "concurrently --raw --kill-others  --handle-input \"yarn --cwd backend serve\" \"yarn --cwd frontend serve\""
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.0"
+  }
+}

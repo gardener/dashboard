@@ -318,7 +318,7 @@ class TerminalSession {
         this.vm.spinner.start()
         console.log(`Pod not yet ready. Reconnecting in ${timeoutSeconds} seconds..`)
       }
-      reconnectTimeoutId = setTimeout(() => this.attachTerminal, timeoutSeconds * 1000)
+      reconnectTimeoutId = setTimeout(() => this.attachTerminal(), timeoutSeconds * 1000)
     }
     this.close = () => {
       clearTimeout(reconnectTimeoutId)

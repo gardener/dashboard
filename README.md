@@ -10,20 +10,10 @@
 
 ### Install
 
-Install client dependencies
+Install all dependencies
 
 ```sh
-pushd frontend
-npm install
-popd
-```
-
-Install server dependencies
-
-```sh
-pushd backend
-npm install
-popd
+yarn
 ```
 
 ### Configuration
@@ -63,18 +53,10 @@ frontend:
 
 ## Run locally <small style="color: grey; font-size: 0.7em">(during development)</small>
 
-Run local backend server with hot reload listening on port `3030`.
+Concurrently run the backend server (port `3030`) and the frontend server (port `8080`) both with hot reload enabled.
 
 ```sh
-cd backend
-npm run dev
-```
-
-Run local frontend server with hot reload istening on port `8080`.
-
-```sh
-cd frontend
-npm run serve
+yarn serve
 ```
 
 All request to `/api`, `/auth` and `/config.json` will be proxied by default to the backend server.
