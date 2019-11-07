@@ -19,7 +19,7 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getTimestampFormatted } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -177,7 +177,7 @@ const getters = {
               name: machineImage.name,
               version: version.version,
               expirationDate: version.expirationDate,
-              expirationDateString: getTimestampFormatted(version.expirationDate),
+              expirationDateString: getDateFormatted(version.expirationDate),
               vendorName,
               icon: iconForVendor(vendorName),
               needsLicense: vendorNeedsLicense(vendorName)
@@ -320,7 +320,7 @@ const getters = {
       return map(validVersions, version => {
         return {
           ...version,
-          expirationDateString: getTimestampFormatted(version.expirationDate)
+          expirationDateString: getDateFormatted(version.expirationDate)
         }
       })
     }

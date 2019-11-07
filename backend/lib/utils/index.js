@@ -81,7 +81,7 @@ function shootHasIssue (shoot) {
 
 async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
   if (!seed) {
-    seed = getSeed(shoot.status.seed)
+    seed = getSeed(getSeedNameFromShoot(shoot))
   }
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
@@ -160,6 +160,13 @@ function getConfigValue (path, defaultValue) {
   return value
 }
 
+function getSeedNameFromShoot (shootResource) {
+  if (shootResource.status && shootResource.status.seed) {
+    return shootResource.status.seed
+  }
+  throw new Error(`There is no seed assigned to this shoot (yet)`)
+}
+
 module.exports = {
   cleanKubeconfig,
   resolve,
@@ -172,5 +179,6 @@ module.exports = {
   getSeedKubeconfig,
   getProjectNameFromNamespace,
   getProjectByNamespace,
-  getConfigValue
+  getConfigValue,
+  getSeedNameFromShoot
 }

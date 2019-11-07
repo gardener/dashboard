@@ -35,12 +35,14 @@ function Core ({ auth }) {
 }
 
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
-  const seed = getSeed(shoot.status.seed)
-  const seedShootNS = _.get(shoot, 'status.technicalID')
+  if (!shoot.status || !shoot.status.seed) {
+    return {}
+  }
+  const seed = getSeed(utils.getSeedNameFromShoot(shoot))
+  const seedShootNS = shoot.status.technicalID
 
   const coreClient = Core(user)
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
-
   return { seed, seedKubeconfig, seedShootNS }
 }
 
@@ -249,9 +251,6 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
-  const seed = getSeed(shoot.status.seed)
-
-  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
   const projects = Garden(user).projects
   const namespaces = core.namespaces
   const project = await getProjectByNamespace(projects, namespaces, namespace)
@@ -264,9 +263,15 @@ exports.info = async function ({ user, namespace, name }) {
   const monitoringIngressUserSecretName = name + '.monitoring'
   const loggingIngressAdminSecretName = 'logging-ingress-credentials'
 
-  const data = {
-    seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
+  const data = {}
+  if (shoot.status && shoot.status.seed) {
+    const seed = getSeed(utils.getSeedNameFromShoot(shoot))
+    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+    if (ingressDomain) {
+      data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+    }
   }
+
   if (secret) {
     _
       .chain(secret)

@@ -25,7 +25,8 @@ const Resources = kubernetes.Resources
 const {
   getKubeconfig,
   getConfigValue,
-  decodeBase64
+  decodeBase64,
+  getSeedNameFromShoot
 } = require('../../utils')
 const {
   toTerminalResource
@@ -196,7 +197,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
     case TargetEnum.CONTROL_PLANE: {
       const shootResource = await shoots.read({ user, namespace, name })
       const seedShootNS = getSeedShootNamespace(shootResource)
-      const seedName = shootResource.status.seed
+      const seedName = getSeedNameFromShoot(shootResource)
       const seed = getSeed(seedName)
 
       targetCluster.kubeconfigContextNamespace = seedShootNS
@@ -242,11 +243,8 @@ async function getSeedHostCluster ({ gardenClient, gardenCoreClient, namespace, 
   }
 
   const seedShootNS = getSeedShootNamespace(shootResource)
-  const seedName = shootResource.status.seed
+  const seedName = getSeedNameFromShoot(shootResource)
 
-  if (!seedName) {
-    throw new Error(`There is no seed assigned to this shoot (yet)`)
-  }
   const seed = getSeed(seedName)
 
   hostCluster.namespace = seedShootNS

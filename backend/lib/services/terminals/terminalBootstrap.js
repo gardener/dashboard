@@ -28,7 +28,8 @@ const {
   getSeedKubeconfig,
   getShootIngressDomain,
   getSeedIngressDomain,
-  getConfigValue
+  getConfigValue,
+  getSeedNameFromShoot
 } = require('../../utils')
 const kubernetes = require('../../kubernetes')
 const {
@@ -92,7 +93,11 @@ function seedShootNsExists (resource) {
     If the technicalID is set and the progress is over 10% (best guess), then we assume that the namespace on the seed exists for this shoot.
     Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
   */
-  return _.get(resource, 'status.technicalID') && _.get(resource, 'status.seed') && _.get(resource, 'status.lastOperation.progress', 0) > 10
+  const status = resource.status
+  if (!status) {
+    return false
+  }
+  return status.technicalID && status.seed && _.get(status, 'lastOperation.progress', 0) > 10
 }
 
 async function replaceResource ({ client, name, body }) {
@@ -245,7 +250,7 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
   }
 
   // fetch seed resource
-  const seedName = shootResource.status.seed
+  const seedName = getSeedNameFromShoot(shootResource)
   const seedResource = await gardenClient.seeds.get({ name: seedName })
 
   // get seed client

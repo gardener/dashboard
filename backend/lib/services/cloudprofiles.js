@@ -46,11 +46,12 @@ function getSeedsForCloudProfile ({ seeds, cloudProviderKind, matchLabels }) {
         return false
       }
       let seedMatchesLabelSelector = true
-      _.forEach(_.keys(matchLabels), key => {
-        if (!_.isEqual(matchLabels[key], _.get(metadata, ['labels', key]))) {
+      for (let [key, value] of Object.entries(matchLabels)) {
+        if (!_.isEqual(value, _.get(metadata, ['labels', key]))) {
           seedMatchesLabelSelector = false
+          break
         }
-      })
+      }
       return seedMatchesLabelSelector
     })
     .map(fromSeedResource)
@@ -68,12 +69,10 @@ exports.list = function () {
       seeds: getSeedsForCloudProfile({
         seeds,
         cloudProviderKind: cloudProfile.spec.type,
-        matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels')
+        matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', {})
       })
     }))
-    .filter((cloudProfile) => {
-      return cloudProfile.data.seeds.length > 0
-    })
+    .filter(cloudProfile => !_.isEmpty(cloudProfile.data.seeds))
     .value()
 }
 
@@ -87,10 +86,10 @@ exports.read = function ({ name }) {
   const seedsForCloudProfile = getSeedsForCloudProfile({
     seeds,
     cloudProviderKind: cloudProfile.spec.type,
-    matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', [])
+    matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', {})
   })
 
-  if (seedsForCloudProfile.length < 1) {
+  if (_.isEmpty(seedsForCloudProfile)) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }
 

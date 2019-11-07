@@ -74,6 +74,7 @@ import { getValidationErrors, purposesForSecret } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
+import get from 'lodash/get'
 
 const validationErrors = {
   name: {
@@ -177,7 +178,7 @@ export default {
       this.onInputPurpose()
     },
     setDefaultKubernetesVersion () {
-      this.kubernetesVersion = head(this.sortedKubernetesVersionsList).version
+      this.kubernetesVersion = head(get(this, 'sortedKubernetesVersionsList.version'))
       this.onInputKubernetesVersion()
     },
     getDetailsData () {
