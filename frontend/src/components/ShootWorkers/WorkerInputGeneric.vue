@@ -101,7 +101,6 @@ limitations under the License.
           <v-select
             color="cyan darken-2"
             label="Zone"
-            :disabled="!worker.isNewWorker"
             :items="availableZones"
             :error-messages="getErrorMessages('worker.zones')"
             v-model="worker.zones"

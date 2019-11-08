@@ -73,7 +73,7 @@ export default {
       return this.cfg.gitHubRepoUrl
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.shootNamespace, shootSeed: this.shootSeed })
+      return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
     createJournalLink () {
       const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
@@ -81,7 +81,7 @@ export default {
       const dashboardShootLink = `**Shoot:** [${this.shootNamespace}/${this.shootName}](${url})`
       const kind = `**Kind:** ${this.shootCloudProviderKind} / ${this.shootRegion}`
 
-      const seedLinkOrName = this.canLinkToSeed ? `[${this.shootSeed}](${window.location.origin}/namespace/garden/shoots/${this.shootSeed})` : this.shootSeed
+      const seedLinkOrName = this.canLinkToSeed ? `[${this.shootSeedName}](${window.location.origin}/namespace/garden/shoots/${this.shootSeedName})` : this.shootSeedName
       const seed = `**Seed:** ${seedLinkOrName}`
 
       const createdAt = `**Created At:** ${this.shootCreatedAt}`

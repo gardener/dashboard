@@ -163,6 +163,9 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
 
 export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones) {
   const newZones = uniq(flatMap(newWorkers, 'zones'))
+  if (!newZones || !infrastructureKind || !maxNumberOfZones) {
+    return undefined
+  }
   const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind, maxNumberOfZones)
 
   if (!defaultZonesNetworkConfiguration) {
@@ -179,7 +182,6 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
 
 export function getControlPlaneZone (workers, infrastructureKind, oldControlPlaneZone) {
   const workerZones = flatMap(workers, 'zones')
-  console.log(workerZones)
   switch (infrastructureKind) {
     case 'gcp':
     case 'openstack':

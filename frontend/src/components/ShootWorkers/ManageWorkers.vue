@@ -69,6 +69,7 @@ import find from 'lodash/find'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
+import isEmpty from 'lodash/isEmpty'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -104,9 +105,10 @@ export default {
     },
     availableZones () {
       // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
-      // Could be removed if gardener would support to change network config afterwards
+      // Can be removed when gardener supports to change network config afterwards
+      // --> Allow adding zones post-shoot creation PR: https://github.com/gardener/gardener/pull/1587
       const zonesWithNetworkConfigInShoot = map(this.zonesNetworkConfiguration, 'name')
-      if (zonesWithNetworkConfigInShoot.length > 0) {
+      if (!isEmpty(zonesWithNetworkConfigInShoot)) {
         return zonesWithNetworkConfigInShoot
       }
       return this.allZones
@@ -160,10 +162,8 @@ export default {
       this.validateInput()
     },
     getWorkers () {
-      const workers = []
-      forEach(this.internalWorkers, internalWorker => {
-        const worker = omit(internalWorker, ['id', 'valid', 'isNewWorker'])
-        workers.push(worker)
+      const workers = map(this.internalWorkers, internalWorker => {
+        return omit(internalWorker, ['id', 'valid'])
       })
       return workers
     },
@@ -190,15 +190,11 @@ export default {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
-        this.$nextTick(() => {
-          this.setDefaultWorker()
-        })
+        this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {
         this.region = region
-        this.$nextTick(() => {
-          this.setDefaultWorker()
-        })
+        this.setDefaultWorker()
       })
     }
   }

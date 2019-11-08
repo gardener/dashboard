@@ -45,14 +45,12 @@ function getSeedsForCloudProfile ({ seeds, cloudProviderKind, matchLabels }) {
       if (spec.provider.type !== cloudProviderKind) {
         return false
       }
-      let seedMatchesLabelSelector = true
       for (let [key, value] of Object.entries(matchLabels)) {
-        if (!_.isEqual(value, _.get(metadata, ['labels', key]))) {
-          seedMatchesLabelSelector = false
-          break
+        if (value !== _.get(metadata, ['labels', key])) {
+          return false
         }
       }
-      return seedMatchesLabelSelector
+      return true
     })
     .map(fromSeedResource)
     .value()

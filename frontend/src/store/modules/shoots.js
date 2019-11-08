@@ -275,7 +275,7 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)
     }
 
-    const worker = omit(generateWorker(zones, cloudProfileName, region), ['id', 'isNewWorker'])
+    const worker = omit(generateWorker(zones, cloudProfileName, region), ['id'])
     const workers = [worker]
     set(shootResource, 'spec.provider.workers', workers)
 

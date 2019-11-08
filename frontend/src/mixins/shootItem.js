@@ -131,7 +131,7 @@ export const shootItem = {
     shootTechnicalId () {
       return get(this.shootItem, `status.technicalID`)
     },
-    shootSeed () {
+    shootSeedName () {
       return get(this.shootItem, 'status.seed')
     }
   },

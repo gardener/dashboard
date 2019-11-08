@@ -340,14 +340,14 @@ export function isHibernated (spec) {
   return hibernationEnabled
 }
 
-export function canLinkToSeed ({ shootNamespace, shootSeed }) {
+export function canLinkToSeed ({ namespace, seedName }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".
   * Currently there is only the secret available.
   * If we are not in the garden namespace we expect a seed to be present
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return shootSeed && shootNamespace !== 'garden'
+  return namespace && seedName !== 'garden'
 }
 
 export function isUserError (errorCodes) {
@@ -552,8 +552,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
       type: machineType,
       image: machineImage
     },
-    zones,
-    isNewWorker: true // Could be removed if gardener would support to redistribute nodes when zone configuration changes
+    zones
   }
   if (volumeType) {
     worker.volume = {
