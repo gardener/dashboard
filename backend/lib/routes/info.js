@@ -77,8 +77,6 @@ async function fetchShootSpec (user) {
   }
   try {
     const { url, ca } = kubernetes.config()
-    console.log(user)
-
     const { body } = await got(`${url}/openapi/v2`, {
       ca,
       headers: {
@@ -87,7 +85,8 @@ async function fetchShootSpec (user) {
       json: true
     })
     const spec = await SwaggerParser.dereference(body)
-    shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.garden.v1beta1.Shoot'], {})
+
+    shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
     return shootSpec
   } catch (err) {
     logger.warn(`Could not fetch shoot spec. Error: ${err.message}`)
