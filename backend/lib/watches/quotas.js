@@ -16,7 +16,7 @@
 
 'use strict'
 
-const garden = require('../kubernetes').garden()
+const garden = require('../kubernetes').gardener()
 const { cacheResource } = require('./common')
 const { getQuotas } = require('../cache')
 

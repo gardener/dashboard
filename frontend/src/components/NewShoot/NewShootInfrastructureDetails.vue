@@ -71,18 +71,6 @@ limitations under the License.
           @blur="$v.region.$touch()"
           ></v-select>
       </v-flex>
-      <v-flex v-if="infrastructureKind !== 'azure'" class="regularInput">
-        <v-select
-          color="cyan darken-2"
-          label="Zone"
-          :items="allZones"
-          :error-messages="getErrorMessages('zones')"
-          v-model="zones"
-          @input="onInputZones"
-          @blur="$v.zones.$touch()"
-          multiple
-          ></v-select>
-      </v-flex>
       <template v-if="infrastructureKind === 'openstack'">
         <v-flex class="regularInput">
           <v-select
@@ -122,7 +110,6 @@ import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
-import sample from 'lodash/sample'
 import concat from 'lodash/concat'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
@@ -138,9 +125,6 @@ const validationErrors = {
   region: {
     required: 'Region is required'
   },
-  zones: {
-    required: 'Zone is required'
-  },
   floatingPoolName: {
     required: 'Floating Pools required'
   },
@@ -155,11 +139,6 @@ const validations = {
   },
   region: {
     required
-  },
-  zones: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'azure'
-    })
   },
   floatingPoolName: {
     required: requiredIf(function () {
@@ -191,7 +170,6 @@ export default {
       infrastructureKind: undefined,
       cloudProfileName: undefined,
       secret: undefined,
-      zones: undefined,
       region: undefined,
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
@@ -232,7 +210,6 @@ export default {
       'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion',
       'loadBalancerProviderNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName'
     ]),
@@ -288,9 +265,6 @@ export default {
       }
       return 'API servers in another region than your workers (expect a somewhat higher latency; picked by Gardener based on internal considerations such as geographic proximity)'
     },
-    allZones () {
-      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
-    },
     isOwnSecretBinding () {
       return (secret) => {
         return isOwnSecretBinding(secret)
@@ -318,7 +292,6 @@ export default {
       this.onInputSecret()
       this.region = head(this.regionsWithSeed)
       this.onInputRegion()
-      this.onInputZones()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
       this.floatingPoolName = head(this.allFloatingPoolNames)
@@ -327,9 +300,6 @@ export default {
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
-    },
-    setDefaultZone () {
-      this.zones = [sample(this.allZones)]
     },
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
@@ -345,12 +315,7 @@ export default {
     },
     onInputRegion () {
       this.$v.secret.$touch()
-      this.setDefaultZone()
-      this.validateInput()
-    },
-    onInputZones () {
-      this.$v.secret.$touch()
-      this.userInterActionBus.emit('updateZones', this.zones)
+      this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
     },
     onInputFloatingPoolName () {
@@ -384,17 +349,15 @@ export default {
         infrastructureKind: this.infrastructureKind,
         cloudProfileName: this.cloudProfileName,
         secret: this.secret,
-        zones: this.zones,
         region: this.region,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, zones, region, floatingPoolName, loadBalancerProviderName }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
-      this.zones = zones
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName

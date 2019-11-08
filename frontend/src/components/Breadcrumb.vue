@@ -47,8 +47,13 @@ export default {
       const namespace = this.namespace
       const matched = this.$route.matched
       matched.forEach((matchedRoute) => {
-        if (get(matchedRoute, 'meta.breadcrumbTextFn')) {
-          const text = matchedRoute.meta.breadcrumbTextFn(this.$route)
+        if (get(matchedRoute, 'meta.breadcrumbText')) {
+          let text
+          if (typeof matchedRoute.meta.breadcrumbText === 'function') {
+            text = matchedRoute.meta.breadcrumbText(this.$route)
+          } else {
+            text = matchedRoute.meta.breadcrumbText
+          }
           const to = namespacedRoute(matchedRoute, namespace)
           crumbs.push({ text, to })
         }

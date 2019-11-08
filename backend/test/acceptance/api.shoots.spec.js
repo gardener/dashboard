@@ -17,6 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
+const utils = require('../../lib/utils')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -45,7 +46,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     bindingName: secret,
     seed: seedName
   })
-  spec.cloud[kind] = {}
   const resourceVersion = 42
 
   it('should return three shoots', async function () {
@@ -121,6 +121,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
     const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
+    const cleanKubeconfigSpy = sandbox.spy(utils, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
@@ -131,6 +132,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.have.own.property('kubeconfig')
+    expect(cleanKubeconfigSpy).to.have.callCount(3)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
     expect(res.body.monitoring_username).to.eql(monitoringUser)
@@ -224,13 +226,13 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const workers = [ worker ]
     k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
     const res = await agent
-      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/cloud/fooInfra/workers`)
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`)
       .set('cookie', await user.cookie)
       .send(workers)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.cloud.fooInfra.workers).to.eql(workers)
+    expect(res.body.spec.provider.workers).to.eql(workers)
   })
 
   it('should replace hibernation enabled', async function () {

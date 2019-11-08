@@ -39,6 +39,6 @@ module.exports = function ({ agent, sandbox, auth }) {
     predicate = item => item.metadata.name === 'infra3-profileName'
     expect(_.find(res.body, predicate).data.seeds).to.have.length(1)
     predicate = item => item.metadata.name === 'infra3-profileName2'
-    expect(_.find(res.body, predicate).data.seeds).to.have.length(1)
+    expect(_.find(res.body, predicate).data.seeds).to.have.length(2)
   })
 }

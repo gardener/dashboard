@@ -17,43 +17,63 @@
 'use strict'
 const _ = require('lodash')
 const { EventEmitter } = require('events')
-const {_cache: cache} = require('../../lib/cache')
+const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
-const { _config: config } = require('../../lib/utils')
 
-function getSeed (name, profileName, region, kind, seedProtected = false, seedVisible = true) {
-  return {
+function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
+  const seed = {
     metadata: {
-      name
+      name,
+      labels
     },
     spec: {
-      cloud: {
-        profile: profileName,
+      provider: {
+        type: kind,
         region
       },
       secretRef: {
         name: `seedsecret-${name}`,
         namespace: 'garden'
       },
-      ingressDomain: `ingress.${region}.${kind}.example.org`,
-      protected: seedProtected,
-      visible: seedVisible
+      dns: {
+        ingressDomain: `ingress.${region}.${kind}.example.org`
+      },
+      taints: []
     }
   }
+  if (seedProtected) {
+    seed.spec.taints.push({
+      key: 'seed.gardener.cloud/protected'
+    })
+  }
+  if (!seedVisible) {
+    seed.spec.taints.push({
+      key: 'seed.gardener.cloud/invisible'
+    })
+  }
+
+  return seed
 }
 
-function getCloudProfile (cloudProfileName, kind) {
-  const spec = _.set({}, kind, {
-    constraints: {
-      kubernetes: {
-        versions: ['1.9.0', '1.8.5']
-      }
+function getCloudProfile (cloudProfileName, kind, seedSelector = {}) {
+  const spec = {
+    type: kind,
+    seedSelector,
+    kubernetes: {
+      versions: [
+        {
+          version: '1.9.0'
+        },
+        {
+          version: '1.8.5'
+        }
+      ]
     }
-  })
+  }
 
   return {
     metadata: {
-      name: `${cloudProfileName}`
+      name: cloudProfileName
     },
     spec
   }
@@ -72,7 +92,7 @@ function getDomain (name, provider, domain) {
   }
 }
 
-function getQuota ({name, namespace = 'garden-trial', scope = 'secret', clusterLifetimeDays = 14, cpu = '200'}) {
+function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1.Secret', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
   return {
     metadata: {
       name,
@@ -91,15 +111,18 @@ function getQuota ({name, namespace = 'garden-trial', scope = 'secret', clusterL
 const cloudProfileList = [
   getCloudProfile('infra1-profileName', 'infra1'),
   getCloudProfile('infra2-profileName', 'infra2'),
-  getCloudProfile('infra3-profileName', 'infra3'),
+  getCloudProfile('infra3-profileName', 'infra3', { matchLabels: { foo: 'bar' } }),
   getCloudProfile('infra3-profileName2', 'infra3')
 ]
 
 const seedList = [
-  getSeed('infra1-seed', 'infra1-profileName', 'foo-east', 'infra1'),
-  getSeed('infra1-seed2', 'infra1-profileName', 'foo-west', 'infra1'),
-  getSeed('infra3-seed', 'infra3-profileName', 'foo-europe', 'infra3'),
-  getSeed('infra3-seed2', 'infra3-profileName2', 'foo-europe', 'infra3')
+  getSeed('infra1-seed', 'foo-east', 'infra1'),
+  getSeed('infra1-seed2', 'foo-west', 'infra1'),
+  getSeed('infra3-seed', 'foo-europe', 'infra3'),
+  getSeed('infra3-seed-with-selector', 'foo-europe', 'infra3', false, true, { foo: 'bar' }),
+  getSeed('infra3-seed-protected', 'foo-europe', 'infra3', true),
+  getSeed('infra3-seed-invisible', 'foo-europe', 'infra3', false, false)
+
 ]
 
 const domainList = [
@@ -108,16 +131,13 @@ const domainList = [
 ]
 
 const quotaList = [
-  getQuota({name: 'trial-secret-quota', namespace: 'garden-trial'}),
-  getQuota({name: 'foo-quota1', namespace: 'garden-foo'}),
-  getQuota({name: 'foo-quota2', namespace: 'garden-foo'})
+  getQuota({ name: 'trial-secret-quota', namespace: 'garden-trial' }),
+  getQuota({ name: 'foo-quota1', namespace: 'garden-foo' }),
+  getQuota({ name: 'foo-quota2', namespace: 'garden-foo' })
 ]
 
 const stub = {
   getCloudProfiles (sandbox) {
-    const getcloudProviderKindListStub = sandbox.stub(config, 'getCloudProviderKindList')
-    getcloudProviderKindListStub.returns(['infra1', 'infra2', 'infra3'])
-
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
     getCloudProfilesStub.returns(cloudProfileList)
 
@@ -150,7 +170,7 @@ class Reconnector extends EventEmitter {
     this.disconnected = true
   }
   pushEvent (type, object, delay = 10) {
-    this.events.push({delay, event: {type, object}})
+    this.events.push({ delay, event: { type, object } })
   }
   start () {
     const emit = (event) => {

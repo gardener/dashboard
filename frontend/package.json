@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.33.0",
+  "version": "1.35.0",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "repository": {
@@ -26,7 +26,7 @@
     "clipboard": "^2.0.1",
     "codemirror": "^5.40.2",
     "component-emitter": "^1.2.1",
-    "dompurify": "^1.0.11",
+    "dompurify": "^2.0.7",
     "downloadjs": "^1.4.7",
     "get-contrast": "^2.0.0",
     "highlight.js": "^9.12.0",
@@ -37,9 +37,11 @@
     "material-design-icons-iconfont": "^5.0.1",
     "md5": "^2.2.1",
     "moment-timezone": "^0.5.21",
+    "netmask": "^1.0.6",
+    "ora": "^3.4.0",
+    "p-timeout": "^3.2.0",
     "semver": "^5.5.1",
-    "semver-sort": "0.0.4",
-    "socket.io-client": "^2.2.0",
+    "socket.io-client": "^2.3.0",
     "typeface-roboto": "0.0.75",
     "vue": "^2.5.22",
     "vue-cookie": "^1.1.4",
@@ -49,7 +51,10 @@
     "vue-snotify": "^3.2.1",
     "vuelidate": "^0.7.4",
     "vuetify": "^1.4.2",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "xterm": "^4.2.0",
+    "xterm-addon-fit": "^0.2.1",
+    "xterm-addon-web-links": "^0.2.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-eslint": "^3.8.0",
@@ -71,6 +76,6 @@
   },
   "engines": {
     "node": ">= 12.3.1",
-    "npm": ">= 6.9.0"
+    "yarn": ">= 1.16.0"
   }
 }

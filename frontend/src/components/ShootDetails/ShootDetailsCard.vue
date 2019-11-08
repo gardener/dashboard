@@ -117,7 +117,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">Add-ons</span><br>
-          <span class="subheading" v-if="!this.shootAddonNames.length > 0">No addons configured</span>
+          <span class="subheading" v-if="!this.shootAddonNames.length">No addons configured</span>
           <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
         </v-flex>
         <v-flex shrink class="pa-0">

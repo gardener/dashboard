@@ -51,11 +51,23 @@ module.exports = {
   getSeeds () {
     return cache.getSeeds()
   },
+  getSeed (name) {
+    return _.cloneDeep(_.find(cache.getSeeds(), ['metadata.name', name]))
+  },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
-      const seedProtected = _.get(item, 'spec.protected', true)
-      const seedVisible = _.get(item, 'spec.visible', false)
-      return !seedProtected && seedVisible
+      const taints = _.get(item, 'spec.taints', [])
+      let seedProtected = false
+      let seedInVisible = false
+      _.forEach(taints, taint => {
+        if (taint.key === 'seed.gardener.cloud/protected') {
+          seedProtected = true
+        }
+        if (taint.key === 'seed.gardener.cloud/invisible') {
+          seedInVisible = true
+        }
+      })
+      return !seedProtected && !seedInVisible
     }
     return _.filter(cache.getSeeds(), predicate)
   },

@@ -4,10 +4,10 @@
     :items="machineTypes"
     item-text="name"
     item-value="name"
-    :error-messages="getErrorMessages('worker.machineType')"
+    :error-messages="getErrorMessages('worker.machine.type')"
     @input="onInputMachineType"
-    @blur="$v.worker.machineType.$touch()"
-    v-model="worker.machineType"
+    @blur="$v.worker.machine.type.$touch()"
+    v-model="worker.machine.type"
     label="Machine Type"
   >
     <template v-slot:item="{ item }">
@@ -30,16 +30,20 @@ import map from 'lodash/map'
 
 const validationErrors = {
   worker: {
-    machineType: {
-      required: 'Machine Type is required'
+    machine: {
+      type: {
+        required: 'Machine Type is required'
+      }
     }
   }
 }
 
 const validations = {
   worker: {
-    machineType: {
-      required
+    machine: {
+      type: {
+        required
+      }
     }
   }
 }
@@ -67,8 +71,8 @@ export default {
       return getValidationErrors(this, field)
     },
     onInputMachineType () {
-      this.$v.worker.machineType.$touch()
-      this.$emit('updateMachineType', this.worker.machineType)
+      this.$v.worker.machine.type.$touch()
+      this.$emit('updateMachineType', this.worker.machine.type)
       this.validateInput()
     },
     validateInput () {
@@ -84,8 +88,8 @@ export default {
   },
   watch: {
     machineTypes (updatedMachineTypes) {
-      if (!includes(map(updatedMachineTypes, 'name'), this.worker.machineType)) {
-        this.worker.machineType = undefined
+      if (!includes(map(updatedMachineTypes, 'name'), this.worker.machine.type)) {
+        this.worker.machine.type = undefined
         this.onInputMachineType()
       }
     }
