@@ -75,29 +75,18 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-const cloudProvider = {
-  getKindList () {
-    return ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
-  }
-}
-
-function getCloudProviderKind (object) {
-  const cloudProviderKinds = cloudProvider.getKindList()
-  return _.head(_.intersection(_.keys(object), cloudProviderKinds))
-}
-
 function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
 async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
   if (!seed) {
-    seed = getSeed(shoot.spec.cloud.seed)
+    seed = getSeed(getSeedNameFromShoot(shoot))
   }
   const name = _.get(shoot, 'metadata.name')
   const namespace = _.get(shoot, 'metadata.namespace')
 
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
   const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
 
   return `${name}.${projectName}.${ingressDomain}`
@@ -106,7 +95,7 @@ async function getShootIngressDomain (projects, namespaces, shoot, seed = undefi
 async function getSeedIngressDomain (projects, namespaces, seed) {
   const namespace = 'garden'
 
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
+  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
   const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
 
   return `${projectName}.${ingressDomain}`
@@ -171,12 +160,18 @@ function getConfigValue (path, defaultValue) {
   return value
 }
 
+function getSeedNameFromShoot (shootResource) {
+  if (shootResource.status && shootResource.status.seed) {
+    return shootResource.status.seed
+  }
+  throw new Error(`There is no seed assigned to this shoot (yet)`)
+}
+
 module.exports = {
   cleanKubeconfig,
   resolve,
   decodeBase64,
   encodeBase64,
-  getCloudProviderKind,
   shootHasIssue,
   getShootIngressDomain,
   getSeedIngressDomain,
@@ -185,5 +180,5 @@ module.exports = {
   getProjectNameFromNamespace,
   getProjectByNamespace,
   getConfigValue,
-  _cloudProvider: cloudProvider
+  getSeedNameFromShoot
 }

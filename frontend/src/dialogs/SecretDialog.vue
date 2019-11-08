@@ -245,7 +245,7 @@ export default {
       const secretName = get(this.secret, 'metadata.name')
       if (secretName) {
         const predicate = item => {
-          return get(item, 'spec.cloud.secretBindingRef.name') === secretName
+          return get(item, 'spec.secretBindingName') === secretName
         }
         return filter(this.shootList, predicate)
       }

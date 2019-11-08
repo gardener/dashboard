@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const kubernetes = require('../kubernetes')
 const Resources = kubernetes.Resources
-const garden = kubernetes.garden()
+const garden = kubernetes.gardener()
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const { getProjectByNamespace } = require('../utils')
@@ -32,7 +32,7 @@ function Core ({ auth }) {
 }
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function fromResource ({ metadata, spec = {} }) {

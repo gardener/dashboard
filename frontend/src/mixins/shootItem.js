@@ -1,11 +1,12 @@
 import get from 'lodash/get'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
 
 import {
   getDateFormatted,
   getCreatedBy,
   isHibernated,
   isReconciliationDeactivated,
-  getCloudProviderKind,
   getProjectName
 } from '@/utils'
 
@@ -71,35 +72,32 @@ export const shootItem = {
     isShootHibernated () {
       return isHibernated(this.shootSpec)
     },
-    shootSecret () {
-      return get(this.shootSpec, 'cloud.secretBindingRef.name')
+    shootSecretBindingName () {
+      return this.shootSpec.secretBindingName
     },
     shootK8sVersion () {
       return get(this.shootSpec, 'kubernetes.version')
     },
     shootCloudProfileName () {
-      return get(this.shootSpec, 'cloud.profile')
+      return this.shootSpec.cloudProfileName
     },
     shootCloudProviderKind () {
-      return getCloudProviderKind(this.shootSpec.cloud)
+      return get(this.shootSpec, 'provider.type')
     },
     shootWorkerGroups () {
-      return get(this.shootSpec, `cloud.${this.shootCloudProviderKind}.workers`, [])
+      return get(this.shootSpec, 'provider.workers', [])
     },
     shootAddons () {
       return get(this.shootSpec, 'addons', {})
     },
     shootRegion () {
-      return get(this.shootSpec, 'cloud.region')
+      return this.shootSpec.region
     },
     shootZones () {
-      return get(this.shootSpec, ['cloud', this.shootCloudProviderKind, 'zones'], [])
+      return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
     },
     shootCidr () {
-      return get(this.shootSpec, ['cloud', this.shootCloudProviderKind, 'networks', 'nodes'])
-    },
-    shootSeed () {
-      return get(this.shootSpec, 'cloud.seed')
+      return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')
     },
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')
@@ -132,6 +130,9 @@ export const shootItem = {
     },
     shootTechnicalId () {
       return get(this.shootItem, `status.technicalID`)
+    },
+    shootSeedName () {
+      return get(this.shootItem, 'status.seed')
     }
   },
   methods: {

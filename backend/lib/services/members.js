@@ -27,7 +27,7 @@ function Core ({ auth }) {
 }
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function toServiceAccountName ({ metadata: { name, namespace } }) {

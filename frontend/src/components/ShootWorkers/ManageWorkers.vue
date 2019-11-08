@@ -22,7 +22,8 @@ limitations under the License.
         :worker="worker"
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
-        :zones="zones"
+        :region="region"
+        :availableZones="availableZones"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -38,7 +39,7 @@ limitations under the License.
     <v-layout row key="addWorker" class="list-item pt-2">
       <v-flex>
         <v-btn
-          :disabled="!(machineTypes.length > 0)"
+          :disabled="!(allMachineTypes.length > 0)"
           small
           @click="addWorker"
           outline
@@ -48,7 +49,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn
-          :disabled="!(machineTypes.length > 0)"
+          :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
           flat
           class="cyan--text text--darken-2">
@@ -62,13 +63,13 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { shortRandomString } from '@/utils'
+import { generateWorker } from '@/utils'
 import forEach from 'lodash/forEach'
-import get from 'lodash/get'
 import find from 'lodash/find'
-import head from 'lodash/head'
+import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
+import isEmpty from 'lodash/isEmpty'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -86,25 +87,31 @@ export default {
       internalWorkers: undefined,
       valid: false,
       cloudProfileName: undefined,
-      zones: undefined,
-      workers: undefined
+      region: undefined,
+      zonesNetworkConfiguration: undefined
     }
   },
   computed: {
     ...mapGetters([
       'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
-      'defaultMachineImageForCloudProfileName'
+      'zonesByCloudProfileNameAndRegion'
     ]),
-    machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+    allMachineTypes () {
+      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
     },
-    volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+    allZones () {
+      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
-    defaultMachineImage () {
-      return this.defaultMachineImageForCloudProfileName(this.cloudProfileName)
+    availableZones () {
+      // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
+      // Can be removed when gardener supports to change network config afterwards
+      // --> Allow adding zones post-shoot creation PR: https://github.com/gardener/gardener/pull/1587
+      const zonesWithNetworkConfigInShoot = map(this.zonesNetworkConfiguration, 'name')
+      if (!isEmpty(zonesWithNetworkConfigInShoot)) {
+        return zonesWithNetworkConfigInShoot
+      }
+      return this.allZones
     }
   },
   methods: {
@@ -120,23 +127,8 @@ export default {
       this.validateInput()
     },
     addWorker () {
-      const id = uuidv4()
-      const name = `worker-${shortRandomString(5)}`
-      const volumeType = get(head(this.volumeTypes), 'name')
-      const volumeSize = volumeType ? '50Gi' : undefined
-      const machineType = get(head(this.machineTypes), 'name')
-      const machineImage = this.defaultMachineImage
-      this.internalWorkers.push({
-        id,
-        name,
-        machineType,
-        volumeType,
-        volumeSize,
-        autoScalerMin: 1,
-        autoScalerMax: 2,
-        maxSurge: 1,
-        machineImage
-      })
+      const worker = generateWorker(this.availableZones, this.cloudProfileName, this.region)
+      this.internalWorkers.push(worker)
       this.validateInput()
     },
     onRemoveWorker (index) {
@@ -170,10 +162,8 @@ export default {
       this.validateInput()
     },
     getWorkers () {
-      const workers = []
-      forEach(this.internalWorkers, internalWorker => {
-        const worker = omit(internalWorker, ['id', 'valid'])
-        workers.push(worker)
+      const workers = map(this.internalWorkers, internalWorker => {
+        return omit(internalWorker, ['id', 'valid'])
       })
       return workers
     },
@@ -188,23 +178,23 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, zones }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration }) {
       this.cloudProfileName = cloudProfileName
-      this.zones = zones
+      this.region = region
+      this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.setInternalWorkers(workers)
     }
   },
   mounted () {
     if (this.userInterActionBus) {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
+        this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
-        this.$nextTick(() => {
-          // set worker when all props (including zone) have been updated
-          this.setDefaultWorker()
-        })
+        this.setDefaultWorker()
       })
-      this.userInterActionBus.on('updateZones', zones => {
-        this.zones = zones
+      this.userInterActionBus.on('updateRegion', region => {
+        this.region = region
+        this.setDefaultWorker()
       })
     }
   }

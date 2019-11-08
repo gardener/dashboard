@@ -140,7 +140,7 @@ module.exports = {
   batch (options) {
     return new Batch(credentials(options))
   },
-  garden (options) {
+  gardener (options) {
     const resources = [
       Resources.Shoot.name,
       Resources.Seed.name,
@@ -150,8 +150,8 @@ module.exports = {
       Resources.Project.name
     ]
     options = assign(options, {
-      path: 'apis/garden.sapcloud.io',
-      version: 'v1beta1',
+      path: 'apis/core.gardener.cloud',
+      version: 'v1alpha1',
       namespaceResources: resources,
       groupResources: resources
     })

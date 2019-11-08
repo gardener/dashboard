@@ -80,32 +80,32 @@ module.exports = {
   Shoot: {
     name: 'shoots',
     kind: 'Shoot',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   Seed: {
     name: 'seeds',
     kind: 'Seed',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   CloudProfile: {
     name: 'cloudprofiles',
     kind: 'CloudProfile',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   SecretBinding: {
     name: 'secretbindings',
     kind: 'SecretBinding',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   Quota: {
     name: 'quotas',
     kind: 'Quota',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   Project: {
     name: 'projects',
     kind: 'Project',
-    apiVersion: 'garden.sapcloud.io/v1beta1'
+    apiVersion: 'core.gardener.cloud/v1alpha1'
   },
   Terminal: {
     name: 'terminals',

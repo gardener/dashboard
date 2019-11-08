@@ -184,7 +184,7 @@ function getServiceAccountSecret (namespace, serviceAccountName) {
   }
 }
 
-function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, bindingName, bindingNamespace, cloudProfileName}) {
+function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, bindingName, bindingNamespace, cloudProfileName }) {
   const metadataSecretBinding = {
     resourceVersion,
     name: bindingName,
@@ -211,14 +211,14 @@ function prepareSecretAndBindingMeta ({name, namespace, data, resourceVersion, b
     data
   }
 
-  return {metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret}
+  return { metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret }
 }
 
 function canCreateProjects (scope) {
   return scope
     .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
       const { namespace, verb, resource, group } = body.spec.resourceAttributes
-      return !namespace && group === 'garden.sapcloud.io' && resource === 'projects' && verb === 'create'
+      return !namespace && group === 'core.gardener.cloud' && resource === 'projects' && verb === 'create'
     })
     .reply(200, function (uri, body) {
       const [, token] = _.split(this.req.headers.authorization, ' ', 2)
@@ -309,7 +309,7 @@ function getUser (name) {
   }
 }
 
-function getProject ({name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready'}) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready' }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -374,19 +374,18 @@ function getShoot ({
       }
     },
     spec: {
+      secretBindingName: bindingName,
+      cloudProfileName: profile,
+      region,
       hibernation,
-      cloud: {
-        profile,
-        region,
-        seed,
-        secretBindingRef: {
-          name: bindingName,
-          namespace
-        }
+      provider: {
+        type: kind
       }
+    },
+    status: {
+      seed
     }
   }
-  shoot.spec.cloud[kind] = {}
 
   if (createdBy) {
     shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
@@ -394,7 +393,7 @@ function getShoot ({
   return shoot
 }
 
-function getKubeconfig ({server, name}) {
+function getKubeconfig ({ server, name }) {
   const cluster = {
     'certificate-authority-data': certificateAuthorityData,
     server
@@ -409,9 +408,9 @@ function getKubeconfig ({server, name}) {
   }
   return yaml.safeDump({
     kind: 'Config',
-    clusters: [{cluster, name}],
-    contexts: [{context, name}],
-    users: [{user, name}],
+    clusters: [{ cluster, name }],
+    contexts: [{ context, name }],
+    users: [{ user, name }],
     'current-context': name
   })
 }
@@ -429,59 +428,59 @@ function getServiceAccountsForNamespace (scope, namespace, additionalServiceAcco
 
 function authorizationHeader (bearer) {
   const authorization = `Bearer ${bearer}`
-  return {authorization}
+  return { authorization }
 }
 
 function nockWithAuthorization (bearer) {
   const reqheaders = authorizationHeader(bearer || auth.bearer)
-  return nock(url, {reqheaders})
+  return nock(url, { reqheaders })
 }
 
 const stub = {
-  getShoots ({bearer, namespace}) {
+  getShoots ({ bearer, namespace }) {
     const shoots = {
       items: shootList
     }
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`)
       .reply(200, shoots)
   },
   getShoot ({ bearer, namespace, name, ...rest }) {
     const shoot = getShoot({ namespace, name, ...rest })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, shoot)
   },
-  createShoot ({bearer, namespace, spec, resourceVersion = 42}) {
+  createShoot ({ bearer, namespace, spec, resourceVersion = 42 }) {
     const metadata = {
       resourceVersion,
       namespace
     }
-    const result = {metadata, spec}
+    const result = { metadata, spec }
 
     return nockWithAuthorization(bearer)
-      .post(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`, body => {
+      .post(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
       .reply(200, () => result)
   },
-  deleteShoot ({bearer, namespace, name, resourceVersion = 42}) {
+  deleteShoot ({ bearer, namespace, name, resourceVersion = 42 }) {
     const metadata = {
       resourceVersion,
       namespace
     }
-    const result = {metadata}
+    const result = { metadata }
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
       .reply(200)
-      .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .delete(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => result)
   },
   getShootInfo ({
@@ -505,10 +504,9 @@ const stub = {
     const technicalID = `shoot--${project}--${name}`
     const projectResource = readProject(namespace)
 
-    const shootResult = getShoot({name, project, kind, region, seed: seedName})
-    shootResult.status = {
-      technicalID: `shoot--${project}--${name}`
-    }
+    const shootResult = getShoot({ name, project, kind, region, seed: seedName })
+    shootResult.status.technicalID = `shoot--${project}--${name}`
+
     const kubecfgResult = {
       data: {
         kubeconfig: encodeBase64(getKubeconfig({
@@ -548,9 +546,9 @@ const stub = {
     return [nockWithAuthorization(bearer)
       .get(`/api/v1/namespaces/${namespace}`)
       .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${project}`)
       .reply(200, () => projectResource)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shootResult)
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, () => kubecfgResult)
@@ -564,22 +562,22 @@ const stub = {
       .get(`/api/v1/namespaces/${technicalID}/secrets/logging-ingress-credentials`)
       .reply(200, loggingSecretResult)]
   },
-  replaceShoot ({bearer, namespace, name, project, createdBy}) {
-    const shoot = getShoot({name, project, createdBy})
+  replaceShoot ({ bearer, namespace, name, project, createdBy }) {
+    const shoot = getShoot({ name, project, createdBy })
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shoot)
-      .put(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .put(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         _.assign(shoot, body)
         return true
       })
       .reply(200, () => shoot)
   },
-  replaceShootK8sVersion ({bearer, namespace, name, project, createdBy}) {
-    const shoot = getShoot({name, project, createdBy})
+  replaceShootK8sVersion ({ bearer, namespace, name, project, createdBy }) {
+    const shoot = getShoot({ name, project, createdBy })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         const payload = _.head(body)
         if (payload.op === 'replace' && payload.path === '/spec/kubernetes/version') {
           shoot.spec.kubernetes = _.assign({}, shoot.spec.kubernetes, payload.value)
@@ -588,13 +586,13 @@ const stub = {
       })
       .reply(200, () => shoot)
   },
-  replaceWorkers ({bearer, namespace, name, project, workers}) {
-    const shoot = getShoot({name, project})
+  replaceWorkers ({ bearer, namespace, name, project, workers }) {
+    const shoot = getShoot({ name, project })
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         const payload = _.head(body)
-        if (payload.op === 'replace' && payload.path === '/spec/cloud/fooInfra/workers') {
-          shoot.spec.cloud.fooInfra.workers = workers
+        if (payload.op === 'replace' && payload.path === '/spec/provider/workers') {
+          shoot.spec.provider.workers = workers
         }
         return true
       })
@@ -604,43 +602,43 @@ const stub = {
     const shoot = getShoot({ name, project, createdBy })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.metadata.annotations = Object.assign({}, shoot.metadata.annotations, body.metadata.annotations)
         return true
       })
       .reply(200, () => shoot)
   },
-  replaceMaintenance ({bearer, namespace, name, project}) {
-    const shoot = getShoot({name, project})
+  replaceMaintenance ({ bearer, namespace, name, project }) {
+    const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.maintenance = body.spec.maintenance
         return true
       })
       .reply(200, () => shoot)
   },
   replaceHibernationSchedules ({ bearer, namespace, name, project }) {
-    const shoot = getShoot({name, project})
+    const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.hibernation.schedules = body.spec.hibernation.schedules
         return true
       })
       .reply(200, () => shoot)
   },
   replaceHibernationEnabled ({ bearer, namespace, name, project }) {
-    const shoot = getShoot({name, project})
+    const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.hibernation.enabled = body.spec.hibernation.enabled
         return true
       })
       .reply(200, () => shoot)
   },
-  getInfrastructureSecrets ({bearer, namespace, empty = false}) {
+  getInfrastructureSecrets ({ bearer, namespace, empty = false }) {
     const secretBindings = !empty
       ? _.filter(secretBindingList, ['metadata.namespace', namespace])
       : []
@@ -648,7 +646,7 @@ const stub = {
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
       })
@@ -657,7 +655,7 @@ const stub = {
         items: infrastructureSecrets
       })
   },
-  createInfrastructureSecret ({bearer, namespace, data, cloudProfileName, resourceVersion = 42}) {
+  createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding,
       resultSecret
@@ -675,7 +673,7 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
-      .post(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/secretbindings`, body => {
+      .post(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/secretbindings`, body => {
         expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecretBinding.metadata, body.metadata)
         _.assign(resultSecretBinding.secretRef, body.secretRef)
@@ -683,7 +681,7 @@ const stub = {
       })
       .reply(200, () => resultSecretBinding)
   },
-  patchInfrastructureSecret ({bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42}) {
+  patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding,
       resultSecret
@@ -698,7 +696,7 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
       .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`, body => {
         expect(body).to.not.have.nested.property('metadata.resourceVersion')
@@ -707,7 +705,7 @@ const stub = {
       })
       .reply(200, () => resultSecret)
   },
-  patchSharedInfrastructureSecret ({bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42}) {
+  patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
@@ -721,11 +719,11 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
   },
-  deleteInfrastructureSecret ({bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42}) {
-    const shoot = getShoot({name: 'fooShoot', project, bindingName: 'someOtherSecretName'})
+  deleteInfrastructureSecret ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
+    const shoot = getShoot({ name: 'fooShoot', project, bindingName: 'someOtherSecretName' })
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
@@ -738,18 +736,18 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/shoots`)
       .reply(200, {
         items: [shoot]
       })
-      .delete(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .delete(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200)
       .delete(`/api/v1/namespaces/${bindingNamespace}/secrets/${name}`)
       .reply(200)
   },
-  deleteSharedInfrastructureSecret ({bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42}) {
+  deleteSharedInfrastructureSecret ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
@@ -762,12 +760,12 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
   },
-  deleteInfrastructureSecretReferencedByShoot ({bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42}) {
-    const referencingShoot = getShoot({name: 'referencingShoot', project, bindingName})
-    const shoot = getShoot({name: 'fooShoot', project, bindingName: 'someOtherSecretName'})
+  deleteInfrastructureSecretReferencedByShoot ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
+    const referencingShoot = getShoot({ name: 'referencingShoot', project, bindingName })
+    const shoot = getShoot({ name: 'fooShoot', project, bindingName: 'someOtherSecretName' })
     const {
       resultSecretBinding
     } = prepareSecretAndBindingMeta({
@@ -780,26 +778,26 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/shoots`)
       .reply(200, {
         items: [shoot, referencingShoot]
       })
   },
-  getProjects ({bearer}) {
+  getProjects ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
     return [
       scope,
       nockWithAuthorization(auth.bearer)
-        .get('/apis/garden.sapcloud.io/v1beta1/projects')
+        .get('/apis/core.gardener.cloud/v1alpha1/projects')
         .reply(200, {
           items: projectList
         })
     ]
   },
-  getProject ({bearer, name, namespace, resourceVersion = 42, unauthorized = false}) {
+  getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
     let statusCode = 200
     let result = _
       .chain(projectList)
@@ -816,11 +814,11 @@ const stub = {
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
         .reply(statusCode, () => result)
     ]
   },
-  createProject ({bearer, resourceVersion = 42}) {
+  createProject ({ bearer, resourceVersion = 42 }) {
     const result = {
       metadata: {
         resourceVersion
@@ -832,17 +830,17 @@ const stub = {
     }
 
     return nockWithAuthorization(bearer)
-      .post('/apis/garden.sapcloud.io/v1beta1/projects', body => {
+      .post('/apis/core.gardener.cloud/v1alpha1/projects', body => {
         const namespace = `garden-${body.metadata.name}`
         _
           .chain(result)
-          .merge({spec: {namespace}}, body)
+          .merge({ spec: { namespace } }, body)
           .commit()
         return true
       })
       .reply(200, () => result)
   },
-  patchProject ({bearer, namespace, resourceVersion = 43}) {
+  patchProject ({ bearer, namespace, resourceVersion = 43 }) {
     const project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
     const newProject = _.cloneDeep(project)
@@ -851,16 +849,16 @@ const stub = {
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
         .reply(200, () => project)
-        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
           _.merge(newProject, body)
           return true
         })
         .reply(200, () => _.set(newProject, 'metadata.resourceVersion', resourceVersion))
     ]
   },
-  deleteProject ({bearer, namespace}) {
+  deleteProject ({ bearer, namespace }) {
     let project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
     const confirmationPath = ['metadata', 'annotations', 'confirmation.garden.sapcloud.io/deletion']
@@ -868,25 +866,25 @@ const stub = {
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/garden.sapcloud.io/v1beta1/namespaces/${namespace}/shoots`)
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`)
         .reply(200, {
           items: []
         })
-        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
         .reply(200, () => project)
-        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
           return _.get(body, confirmationPath) === 'true'
         })
         .reply(200, () => _.set(project, confirmationPath, 'true'))
-        .delete(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+        .delete(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
         .reply(200, () => project)
     ]
   },
-  getMembers ({bearer, namespace}) {
+  getMembers ({ bearer, namespace }) {
     const project = readProject(namespace)
     if (project) {
       const scope = nockWithAuthorization(bearer)
-        .get(`/apis/garden.sapcloud.io/v1beta1/projects/${project.metadata.name}`)
+        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${project.metadata.name}`)
         .reply(200, () => project)
       getServiceAccountsForNamespace(scope, namespace)
 
@@ -904,17 +902,17 @@ const stub = {
         }
       })
   },
-  addMember ({bearer, namespace, name: username}) {
+  addMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
       .reply(200, () => project)
     if (!_.find(project.spec.members, ['name', username])) {
       scope
-        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
           if (!_.find(body.spec.members, ['name', username])) {
             return false
           }
@@ -931,17 +929,17 @@ const stub = {
       scope
     ]
   },
-  removeMember ({bearer, namespace, name: username}) {
+  removeMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
       .reply(200, () => project)
     if (_.find(project.spec.members, ['name', username])) {
       scope
-        .patch(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
           if (_.find(body.spec.members, ['name', username])) {
             return false
           }
@@ -958,12 +956,12 @@ const stub = {
       scope
     ]
   },
-  getMember ({bearer, namespace, name: username}) {
+  getMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
     const name = project.metadata.name
     const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/garden.sapcloud.io/v1beta1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
       .reply(200, () => project)
     const scopes = [
       nockWithAuthorization(bearer)
@@ -973,9 +971,9 @@ const stub = {
     ]
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace && isMember) {
-      const serviceAccount = _.find(serviceAccountList, ({metadata}) => metadata.name === serviceAccountName && metadata.namespace === namespace)
+      const serviceAccount = _.find(serviceAccountList, ({ metadata }) => metadata.name === serviceAccountName && metadata.namespace === namespace)
       const serviceAccountSecretName = _.first(serviceAccount.secrets).name
-      const serviceAccountSecret = _.find(serviceAccountSecretList, ({metadata}) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
+      const serviceAccountSecret = _.find(serviceAccountSecretList, ({ metadata }) => metadata.name === serviceAccountSecretName && metadata.namespace === namespace)
       scope
         .get(`/api/v1/namespaces/${namespace}/serviceaccounts/${serviceAccountName}`)
         .reply(200, serviceAccount)
@@ -1000,7 +998,7 @@ const stub = {
     const statusCode = !version ? 404 : 200
     return [
       nockWithAuthorization(auth.bearer)
-        .get('/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.garden.sapcloud.io')
+        .get('/apis/apiregistration.k8s.io/v1/apiservices/v1alpha1.core.gardener.cloud')
         .reply(200, body),
       nock(serviceUrl)
         .get(`/version`)

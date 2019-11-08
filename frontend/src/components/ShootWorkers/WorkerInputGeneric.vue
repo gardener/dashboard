@@ -55,22 +55,22 @@ limitations under the License.
         </v-flex>
         <v-flex v-if="volumeInCloudProfile" class="smallInput">
           <size-input
-            min="1"
+            :min="minimumVolumeSize"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.volumeSize')"
+            :error-messages="getErrorMessages('worker.volume.size')"
             @input="onInputVolumeSize"
-            @blur="$v.worker.volumeSize.$touch()"
+            @blur="$v.worker.volume.size.$touch()"
             label="Volume Size"
-            v-model="worker.volumeSize"
+            v-model="worker.volume.size"
           ></size-input>
         </v-flex>
         <v-flex class="smallInput">
           <v-text-field
             min="0"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.autoScalerMin')"
-            @input="onInputAutoscalerMin"
-            @blur="$v.worker.autoScalerMin.$touch()"
+            :error-messages="getErrorMessages('worker.minimum')"
+            @input="onInputminimum"
+            @blur="$v.worker.minimum.$touch()"
             type="number"
             v-model="innerMin"
             label="Autoscaler Min."></v-text-field>
@@ -79,9 +79,9 @@ limitations under the License.
           <v-text-field
             min="0"
             color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.autoScalerMax')"
-            @input="onInputAutoscalerMax"
-            @blur="$v.worker.autoScalerMax.$touch()"
+            :error-messages="getErrorMessages('worker.maximum')"
+            @input="onInputmaximum"
+            @blur="$v.worker.maximum.$touch()"
             type="number"
             v-model="innerMax"
             label="Autoscaler Max."
@@ -97,6 +97,18 @@ limitations under the License.
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
         </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Zone"
+            :items="availableZones"
+            :error-messages="getErrorMessages('worker.zones')"
+            v-model="worker.zones"
+            @input="onInputZones"
+            @blur="$v.worker.zones.$touch()"
+            multiple
+            ></v-select>
+        </v-flex>
       </v-layout>
       <v-flex class="ml-3">
         <slot name="action"></slot>
@@ -107,13 +119,13 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import isEmpty from 'lodash/isEmpty'
 import SizeInput from '@/components/ShootWorkers/VolumeSizeInput'
 import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import { required, maxLength, minValue } from 'vuelidate/lib/validators'
-import { getValidationErrors } from '@/utils'
+import isEmpty from 'lodash/isEmpty'
+import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
 
 const validationErrors = {
@@ -125,41 +137,22 @@ const validationErrors = {
       uniqueWorkerName: 'Name is taken. Try another.',
       noStartEndHyphen: 'Name must not start or end with a hyphen'
     },
-    volumeSize: {
-      minVolumeSize: 'Invalid volume size'
+    volume: {
+      size: {
+        minVolumeSize: 'Invalid volume size'
+      }
     },
-    autoScalerMin: {
+    minimum: {
       minValue: 'Invalid value'
     },
-    autoScalerMax: {
+    maximum: {
       minValue: 'Invalid value'
     },
     maxSurge: {
       numberOrPercentage: 'Invalid value'
-    }
-  }
-}
-
-const validations = {
-  worker: {
-    name: {
-      required,
-      maxLength: maxLength(15),
-      noStartEndHyphen, // Order is important for UI hints
-      resourceName,
-      uniqueWorkerName
     },
-    volumeSize: {
-      minVolumeSize: minVolumeSize(1)
-    },
-    autoScalerMin: {
-      minValue: minValue(0)
-    },
-    autoScalerMax: {
-      minValue: minValue(0)
-    },
-    maxSurge: {
-      numberOrPercentage
+    zones: {
+      required: 'Zone is required'
     }
   }
 }
@@ -183,7 +176,10 @@ export default {
     cloudProfileName: {
       type: String
     },
-    zones: {
+    region: {
+      type: String
+    },
+    availableZones: {
       type: Array
     }
   },
@@ -196,13 +192,46 @@ export default {
       machineImageValid: undefined
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileNameAndZones',
       'volumeTypesByCloudProfileNameAndZones',
-      'machineImagesByCloudProfileName'
+      'machineImagesByCloudProfileName',
+      'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
+    validators () {
+      return {
+        worker: {
+          name: {
+            required,
+            maxLength: maxLength(15),
+            noStartEndHyphen, // Order is important for UI hints
+            resourceName,
+            uniqueWorkerName
+          },
+          volume: {
+            size: {
+              minVolumeSize: minVolumeSize(this.minimumVolumeSize)
+            }
+          },
+          minimum: {
+            minValue: minValue(0)
+          },
+          maximum: {
+            minValue: minValue(0)
+          },
+          maxSurge: {
+            numberOrPercentage
+          },
+          zones: {
+            required
+          }
+        }
+      }
+    },
     machineTypes () {
       return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
     },
@@ -215,25 +244,29 @@ export default {
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)
     },
+    minimumVolumeSize () {
+      const minimumVolumeSize = this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+      return parseSize(minimumVolumeSize)
+    },
     innerMin: {
       get: function () {
-        return Math.max(0, this.worker.autoScalerMin)
+        return Math.max(0, this.worker.minimum)
       },
       set: function (value) {
-        this.worker.autoScalerMin = Math.max(0, parseInt(value))
-        if (this.innerMax < this.worker.autoScalerMin) {
-          this.worker.autoScalerMax = this.worker.autoScalerMin
+        this.worker.minimum = Math.max(0, parseInt(value))
+        if (this.innerMax < this.worker.minimum) {
+          this.worker.maximum = this.worker.minimum
         }
       }
     },
     innerMax: {
       get: function () {
-        return Math.max(0, this.worker.autoScalerMax)
+        return Math.max(0, this.worker.maximum)
       },
       set: function (value) {
-        this.worker.autoScalerMax = Math.max(0, parseInt(value))
-        if (this.innerMin > this.worker.autoScalerMax) {
-          this.worker.autoScalerMin = this.worker.autoScalerMax
+        this.worker.maximum = Math.max(0, parseInt(value))
+        if (this.innerMin > this.worker.maximum) {
+          this.worker.minimum = this.worker.maximum
         }
       }
     },
@@ -265,15 +298,15 @@ export default {
       this.validateInput()
     },
     onInputVolumeSize () {
-      this.$v.worker.volumeSize.$touch()
+      this.$v.worker.volume.size.$touch()
       this.validateInput()
     },
-    onInputAutoscalerMin () {
-      this.$v.worker.autoScalerMin.$touch()
+    onInputminimum () {
+      this.$v.worker.minimum.$touch()
       this.validateInput()
     },
-    onInputAutoscalerMax () {
-      this.$v.worker.autoScalerMax.$touch()
+    onInputmaximum () {
+      this.$v.worker.maximum.$touch()
       this.validateInput()
     },
     onUpdateMachineImage () {
@@ -282,6 +315,10 @@ export default {
     onInputMaxSurge () {
       this.$v.worker.maxSurge.$touch()
       this.$emit('updateMaxSurge', { maxSurge: this.worker.maxSurge, id: this.worker.id })
+      this.validateInput()
+    },
+    onInputZones () {
+      this.$v.worker.zones.$touch()
       this.validateInput()
     },
     onMachineTypeValid ({ valid }) {

@@ -37,6 +37,7 @@ limitations under the License.
 
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
+import join from 'lodash/join'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -69,49 +70,56 @@ export default {
     },
     description () {
       const description = []
-      if (this.workerGroup.machineType) {
-        const machineType = find(this.machineTypes, { name: this.workerGroup.machineType })
+      if (this.workerGroup.machine.type) {
+        const machineType = find(this.machineTypes, { name: this.workerGroup.machine.type })
         description.push({
           title: 'Machine Type',
           value: machineType.name,
           description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
         })
-        if (machineType.volumeType && machineType.volumeSize) {
+        if (machineType.storage) {
           description.push({
-            title: 'Volume Type',
-            value: `${machineType.volumeType} / ${machineType.volumeSize}`
+            title: 'Volume Size',
+            value: `${machineType.storage.size}`
           })
         }
       }
-      if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
-        const volumeType = find(this.volumeTypes, { name: this.workerGroup.volumeType })
+      if (this.workerGroup.volume) {
+        const volumeType = find(this.volumeTypes, { name: this.workerGroup.volume.type })
         description.push({
           title: 'Volume Type',
-          value: `${volumeType.name} / ${this.workerGroup.volumeSize}`,
+          value: `${volumeType.name} / ${this.workerGroup.volume.size}`,
           description: `(Class: ${volumeType.class})`
         })
       }
-      if (this.workerGroup.machineImage) {
-        const machineImage = find(this.machineImages, { name: this.workerGroup.machineImage.name })
+      if (this.workerGroup.machine.image) {
+        const machineImage = find(this.machineImages, this.workerGroup.machine.image)
+
         const machineImageDescription = {
           title: 'Machine Image',
           value: `${machineImage.name} | Version: ${machineImage.version}`
         }
         if (machineImage.expirationDate) {
-          machineImageDescription.description = `(Expiration Date: ${machineImage.expirationDateString})`
+          machineImageDescription.description = `(Expires: ${machineImage.expirationDateString})`
         }
         description.push(machineImageDescription)
       }
-      if (this.workerGroup.autoScalerMin && this.workerGroup.autoScalerMax) {
+      if (this.workerGroup.minimum && this.workerGroup.maximum) {
         description.push({
           title: 'Autoscaler',
-          value: `Min. ${this.workerGroup.autoScalerMin} / Max. ${this.workerGroup.autoScalerMax}`
+          value: `Min. ${this.workerGroup.minimum} / Max. ${this.workerGroup.maximum}`
         })
       }
       if (this.workerGroup.maxSurge) {
         description.push({
           title: 'Max. Surge',
           value: `${this.workerGroup.maxSurge}`
+        })
+      }
+      if (this.workerGroup.zones) {
+        description.push({
+          title: this.workerGroup.zones.length > 1 ? 'Zones' : 'Zone',
+          value: join(this.workerGroup.zones, ', ')
         })
       }
       return description

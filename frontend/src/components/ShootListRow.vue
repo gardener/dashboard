@@ -49,11 +49,11 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
-      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeed, namespace:'garden' } }">
-        <span>{{shootSeed}}</span>
+      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
+        <span>{{shootSeedName}}</span>
       </router-link>
       <template v-else>
-        <span>{{shootSeed}}</span>
+        <span>{{shootSeedName}}</span>
       </template>
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
@@ -227,7 +227,7 @@ export default {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.shootNamespace })
+      return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
     shootLastUpdatedJournalTimestamp () {
       return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)

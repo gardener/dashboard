@@ -19,7 +19,7 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getTimestampFormatted } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -32,13 +32,14 @@ import concat from 'lodash/concat'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
-import isEmpty from 'lodash/isEmpty'
 import intersection from 'lodash/intersection'
 import find from 'lodash/find'
 import head from 'lodash/head'
 import pick from 'lodash/pick'
+import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
+import max from 'lodash/max'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -49,7 +50,6 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 import semver from 'semver'
-const semSort = require('semver-sort')
 
 Vue.use(Vuex)
 
@@ -82,15 +82,14 @@ const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
-const machineAndVolumeTypePredicate = (item, zones) => {
+const machineAndVolumeTypePredicate = (item, unavailableItems) => {
   if (item.usable === false) {
     return false
   }
-  const itemZones = item.zones
-  if (isEmpty(itemZones) || isEmpty(zones)) {
-    return true
+  if (includes(unavailableItems, item.name)) {
+    return false
   }
-  return difference(zones, itemZones).length === 0
+  return true
 }
 
 const vendorNameFromImageName = imageName => {
@@ -135,21 +134,34 @@ const getters = {
   cloudProfilesByCloudProviderKind (state) {
     return (cloudProviderKind) => {
       const predicate = item => item.metadata.cloudProviderKind === cloudProviderKind
-      return filter(state.cloudProfiles.all, predicate)
+      const filteredCloudProfiles = filter(state.cloudProfiles.all, predicate)
+      return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
   machineTypesByCloudProfileNameAndZones (state, getters) {
     return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const machineTypes = get(cloudProfile, 'data.machineTypes')
-      return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, zones))
+      if (cloudProfile) {
+        const machineTypes = cloudProfile.data.machineTypes
+        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
+          return map(zones, 'unavailableMachineTypes')
+        })
+        return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, unavailableItems))
+      }
+      return []
     }
   },
   volumeTypesByCloudProfileNameAndZones (state, getters) {
     return ({ cloudProfileName, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const volumeTypes = get(cloudProfile, 'data.volumeTypes')
-      return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, zones))
+      if (cloudProfile) {
+        const volumeTypes = cloudProfile.data.volumeTypes
+        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
+          return map(zones, 'unavailableMachineTypes')
+        })
+        return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, unavailableItems))
+      }
+      return []
     }
   },
   machineImagesByCloudProfileName (state, getters) {
@@ -165,7 +177,7 @@ const getters = {
               name: machineImage.name,
               version: version.version,
               expirationDate: version.expirationDate,
-              expirationDateString: getTimestampFormatted(version.expirationDate),
+              expirationDateString: getDateFormatted(version.expirationDate),
               vendorName,
               icon: iconForVendor(vendorName),
               needsLicense: vendorNeedsLicense(vendorName)
@@ -184,8 +196,10 @@ const getters = {
   zonesByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const predicate = item => item.region === region
-      return get(find(get(cloudProfile, 'data.zones'), predicate), 'names')
+      if (cloudProfile) {
+        return map(get(find(cloudProfile.data.regions, { 'name': region }), 'zones'), 'name')
+      }
+      return []
     }
   },
   defaultMachineImageForCloudProfileName (state, getters) {
@@ -230,25 +244,35 @@ const getters = {
       return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
     }
   },
+  minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const seedsForCloudProfile = cloudProfile.data.seeds
+      const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
+      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || '20Gi'
+    }
+  },
   regionsWithoutSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const regionsInCloudProfile = get(cloudProfile, 'data.zones', get(cloudProfile, 'data.countFaultDomains'))
-      const allRegions = uniq(map(regionsInCloudProfile, 'region'))
-      const regionsWithoutSeed = difference(allRegions, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
-      return regionsWithoutSeed
+      if (cloudProfile) {
+        const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
+        const regionsWithoutSeed = difference(regionsInCloudProfile, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+        return regionsWithoutSeed
+      }
+      return []
     }
   },
   loadBalancerProviderNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.loadBalancerProviders'), 'name'))
+      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.floatingPools'), 'name'))
+      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.floatingPools'), 'name'))
     }
   },
   infrastructureSecretsByInfrastructureKind (state) {
@@ -289,12 +313,25 @@ const getters = {
   kubernetesVersions (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return get(cloudProfile, 'data.kubernetes.versions', [])
+      const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
+      const validVersions = filter(allVersions, ({ expirationDate }) => {
+        return !expirationDate || moment().isBefore(expirationDate)
+      })
+      return map(validVersions, version => {
+        return {
+          ...version,
+          expirationDateString: getDateFormatted(version.expirationDate)
+        }
+      })
     }
   },
   sortedKubernetesVersions (state, getters) {
     return (cloudProfileName) => {
-      return semSort.desc(cloneDeep(getters.kubernetesVersions(cloudProfileName)))
+      const kubernetsVersions = cloneDeep(getters.kubernetesVersions(cloudProfileName))
+      kubernetsVersions.sort((a, b) => {
+        return semver.rcompare(a.version, b.version)
+      })
+      return kubernetsVersions
     }
   },
   isAdmin (state) {

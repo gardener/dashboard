@@ -53,7 +53,7 @@ exports.isAdmin = function (user) {
 exports.canCreateProject = function (user) {
   return hasAuthorization(user, {
     verb: 'create',
-    group: 'garden.sapcloud.io',
+    group: 'core.gardener.cloud',
     resource: 'projects'
   })
 }

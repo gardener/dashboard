@@ -28,7 +28,8 @@ const {
   getSeedKubeconfig,
   getShootIngressDomain,
   getSeedIngressDomain,
-  getConfigValue
+  getConfigValue,
+  getSeedNameFromShoot
 } = require('../../utils')
 const kubernetes = require('../../kubernetes')
 const {
@@ -92,7 +93,11 @@ function seedShootNsExists (resource) {
     If the technicalID is set and the progress is over 10% (best guess), then we assume that the namespace on the seed exists for this shoot.
     Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
   */
-  return _.get(resource, 'status.technicalID') && _.get(resource, 'status.lastOperation.progress', 0) > 10
+  const status = resource.status
+  if (!status) {
+    return false
+  }
+  return status.technicalID && status.seed && _.get(status, 'lastOperation.progress', 0) > 10
 }
 
 async function replaceResource ({ client, name, body }) {
@@ -208,7 +213,7 @@ async function handleSeed (seed) {
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
   const coreClient = kubernetes.core()
-  const gardenClient = kubernetes.garden()
+  const gardenClient = kubernetes.gardener()
 
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
   const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
@@ -224,7 +229,7 @@ async function handleShoot (shoot) {
   const namespace = shoot.metadata.namespace
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
   const coreClient = kubernetes.core()
-  const gardenClient = kubernetes.garden()
+  const gardenClient = kubernetes.gardener()
 
   await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
 }
@@ -245,7 +250,7 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
   }
 
   // fetch seed resource
-  const seedName = shootResource.spec.cloud.seed
+  const seedName = getSeedNameFromShoot(shootResource)
   const seedResource = await gardenClient.seeds.get({ name: seedName })
 
   // get seed client
@@ -253,7 +258,7 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
   const seedExtensionClient = kubernetes.extensions(kubernetes.fromKubeconfig(seedKubeconfig))
 
   // calculate ingress domain
-  const projectsClient = kubernetes.garden().projects
+  const projectsClient = kubernetes.gardener().projects
   const namespacesClient = coreClient.namespaces
   const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
   const apiServerIngressHost = `k8.${shootIngressDomain}`
@@ -316,7 +321,7 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 
 async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
   const seedName = seed.metadata.name
-  const projectsClient = kubernetes.garden().projects
+  const projectsClient = kubernetes.gardener().projects
   const namespacesClient = coreClient.namespaces
 
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
