@@ -169,7 +169,7 @@ export default {
       return 'Zone'
     },
     shootSecretName () {
-      return this.shootSecret || 'default'
+      return this.shootSecretBindingName || 'default'
     }
   }
 }

@@ -114,9 +114,6 @@ export function getProviderTemplate (infrastructureKind) {
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
-  if (numberOfNetworks === 1) {
-    return [cidrToSplitStr]
-  }
   const cidrToSplit = new Netmask(cidrToSplitStr)
   const numberOfSplits = Math.ceil(Math.log(numberOfNetworks) / Math.log(2))
   const newBitmask = cidrToSplit.bitmask + numberOfSplits
@@ -166,8 +163,8 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
   if (!newZones || !infrastructureKind || !maxNumberOfZones) {
     return undefined
   }
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind, maxNumberOfZones)
 
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind, maxNumberOfZones)
   if (!defaultZonesNetworkConfiguration) {
     return undefined
   }

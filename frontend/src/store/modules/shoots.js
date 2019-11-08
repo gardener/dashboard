@@ -232,7 +232,7 @@ const actions = {
       metadata: {},
       spec: {
         networking: {
-          type: 'calico',
+          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
           nodes: workerCIDR
         }
       }
@@ -347,7 +347,7 @@ const getRawVal = (item, column) => {
     case 'k8sVersion':
       return get(spec, 'kubernetes.version')
     case 'infrastructure':
-      return get(spec, 'provider.type')
+      return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
     case 'seed':
       return get(item, 'status.seed')
     case 'journalLabels':

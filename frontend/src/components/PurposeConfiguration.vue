@@ -63,7 +63,7 @@ export default {
       return !!this.purpose
     },
     purposes () {
-      return purposesForSecret(this.shootSecret)
+      return purposesForSecret(this.shootSecretBindingName)
     }
   },
   methods: {

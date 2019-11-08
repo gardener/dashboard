@@ -178,10 +178,8 @@ export default {
       this.onInputPurpose()
     },
     setDefaultKubernetesVersion () {
-      this.$nextTick(() => {
-        this.kubernetesVersion = get(head(this.sortedKubernetesVersionsList), 'version')
-        this.onInputKubernetesVersion()
-      })
+      this.kubernetesVersion = get(head(this.sortedKubernetesVersionsList), 'version')
+      this.onInputKubernetesVersion()
     },
     getDetailsData () {
       return {

@@ -72,7 +72,7 @@ export const shootItem = {
     isShootHibernated () {
       return isHibernated(this.shootSpec)
     },
-    shootSecret () {
+    shootSecretBindingName () {
       return this.shootSpec.secretBindingName
     },
     shootK8sVersion () {
@@ -94,7 +94,7 @@ export const shootItem = {
       return this.shootSpec.region
     },
     shootZones () {
-      return uniq(flatMap(get(this.shootSpec, 'provider.workers', []), 'zones'))
+      return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
     },
     shootCidr () {
       return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')
