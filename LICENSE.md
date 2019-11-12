@@ -297,6 +297,10 @@ Copyright (c) 2014 object-hash contributors
 Copyright (c) 2016 Filip Skokan\
 [MIT License](https://github.com/panva/node-openid-client/blob/master/LICENSE.md)
 
+- [p-event](https://github.com/sindresorhus/p-event)<>
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-event/blob/master/license)
+
 - [p-retry](https://github.com/sindresorhus/p-retry)<>
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/p-retry/blob/master/license)

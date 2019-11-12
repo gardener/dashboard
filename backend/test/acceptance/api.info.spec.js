@@ -18,7 +18,7 @@
 
 const { version } = require('../../package')
 
-module.exports = function info({ agent, k8s, auth }) {
+module.exports = function info ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const username = 'john.doe@example.org'
   const id = username

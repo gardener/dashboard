@@ -92,7 +92,7 @@ function getDomain (name, provider, domain) {
   }
 }
 
-function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1.Secret', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
+function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
   return {
     metadata: {
       name,
