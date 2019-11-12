@@ -1,25 +1,35 @@
 <template>
   <select-hint-colorizer :hintColor="hintColor" class="testclass">
     <v-select
-      color="cyan darken-2"
-      :items="machineImages"
-      return-object
-      :error-messages="getErrorMessages('worker.machine.image')"
-      @input="onInputMachineImage"
-      @blur="$v.worker.machine.image.$touch()"
-      v-model="machineImage"
-      label="Machine Image"
-      :hint="hint"
-      persistent-hint
-    >
+    color="cyan darken-2"
+    :items="machineImages"
+    return-object
+    :error-messages="getErrorMessages('worker.machine.image')"
+    @input="onInputMachineImage"
+    @blur="$v.worker.machine.image.$touch()"
+    v-model="machineImage"
+    label="Machine Image"
+    :hint="hint"
+    persistent-hint
+  >
     <template v-slot:item="{ item }">
       <v-list-tile-action>
         <vendor-icon v-model="item.icon"></vendor-icon>
-        <span class="black--text ml-2">
-         {{item.name}} [{{item.version}}]
-        </span>
       </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
+        <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
+          {{itemDescription(item)}}
+        </v-list-tile-sub-title>
+      </v-list-tile-content>
     </template>
+    <template v-slot:selection="{ item }">
+      <vendor-icon v-model="item.icon"></vendor-icon>
+      <span class="black--text ml-2">
+       {{item.name}} [{{item.version}}]
+      </span>
+    </template>
+  </v-select>
   </select-hint-colorizer>
 </template>
 

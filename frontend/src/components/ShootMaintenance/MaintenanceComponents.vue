@@ -21,9 +21,9 @@ limitations under the License.
     </v-flex>
     <v-flex xs12>
       <v-list two-line>
-        <v-list-tile class="list-complete-item" v-if="selectable || osUpdates">
+        <v-list-tile class="list-complete-item" v-if="selectable || osVersion">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osVersion"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -34,9 +34,9 @@ limitations under the License.
             </v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile class="list-complete-item" v-if="selectable || k8sUpdates">
+        <v-list-tile class="list-complete-item" v-if="selectable || kubernetesVersion">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="kubernetesVersion"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -49,7 +49,7 @@ limitations under the License.
         </v-list-tile>
         <v-list-tile class="list-complete-item" v-if="showNoUpdates">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="kubernetesVersion"></v-checkbox>
             <v-icon v-else>mdi-close-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -69,6 +69,10 @@ limitations under the License.
 export default {
   name: 'maintenance-components',
   props: {
+    userInterActionBus: {
+      type: Object,
+      required: true
+    },
     updateKubernetesVersion: {
       type: Boolean
     },
@@ -93,6 +97,28 @@ export default {
   computed: {
     showNoUpdates () {
       return !this.selectable && !this.updateKubernetesVersion && !this.updateOSVersion
+    },
+    kubernetesVersion: {
+      get () {
+        return this.k8sUpdates
+      },
+      set (value) {
+        this.k8sUpdates = value
+        if (this.userInterActionBus) {
+          this.userInterActionBus.emit('updateK8sMaintenance', value)
+        }
+      }
+    },
+    osVersion: {
+      get () {
+        return this.osUpdates
+      },
+      set (value) {
+        this.osUpdates = value
+        if (this.userInterActionBus) {
+          this.userInterActionBus.emit('updateOSMaintenance', value)
+        }
+      }
     }
   },
   methods: {
