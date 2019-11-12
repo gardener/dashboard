@@ -19,8 +19,11 @@
 
 const path = require('path')
 const _ = require('lodash')
+const { getSeed } = require('../cache')
 const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
+const config = require('../config')
+const assert = require('assert').strict
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -72,19 +75,72 @@ function encodeBase64 (value) {
   return Buffer.from(value, 'utf8').toString('base64')
 }
 
-const config = {
-  getCloudProviderKindList () {
-    return ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
+function shootHasIssue (shoot) {
+  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
+}
+
+async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
+  if (!seed) {
+    seed = getSeed(getSeedNameFromShoot(shoot))
+  }
+  const name = _.get(shoot, 'metadata.name')
+  const namespace = _.get(shoot, 'metadata.namespace')
+
+  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
+
+  return `${name}.${projectName}.${ingressDomain}`
+}
+
+async function getSeedIngressDomain (projects, namespaces, seed) {
+  const namespace = 'garden'
+
+  const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
+
+  return `${projectName}.${ingressDomain}`
+}
+
+async function getSeedKubeconfig ({ coreClient, seed }) {
+  const seedSecretName = _.get(seed, 'spec.secretRef.name')
+  const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
+  return getKubeconfig({ coreClient, name: seedSecretName, namespace: seedSecretNamespace })
+}
+
+async function getKubeconfig ({ coreClient, name, namespace }) {
+  try {
+    const secret = await coreClient.ns(namespace).secrets.get({ name })
+
+    const kubeConfigBase64 = _.get(secret, 'data.kubeconfig')
+    if (!kubeConfigBase64) {
+      return
+    }
+
+    const kubeconfig = decodeBase64(secret.data.kubeconfig)
+    return kubeconfig
+  } catch (err) {
+    if (err.code === 404) {
+      return
+    }
+    throw err
   }
 }
 
-function getCloudProviderKind (object) {
-  const cloudProviderKinds = config.getCloudProviderKindList()
-  return _.head(_.intersection(_.keys(object), cloudProviderKinds))
-}
-
-function shootHasIssue (shoot) {
-  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
+async function getProjectNameFromNamespace (projects, namespaces, namespace) {
+  try {
+    const project = await getProjectByNamespace(projects, namespaces, namespace)
+    return project.metadata.name
+  } catch (e) {
+    if (namespace === 'garden' && e.code === 404) {
+      /*
+        fallback: if there is no corresponding garden project, use namespace name.
+        The community installer currently does not create a project resource for the garden namespace
+        because of https://github.com/gardener/gardener/issues/879
+      */
+      return namespace
+    }
+    throw e
+  }
 }
 
 async function getProjectByNamespace (projects, namespaces, namespace) {
@@ -96,13 +152,33 @@ async function getProjectByNamespace (projects, namespaces, namespace) {
   return projects.get({ name })
 }
 
+function getConfigValue (path, defaultValue) {
+  const value = _.get(config, path, defaultValue)
+  if (arguments.length === 1 && typeof value === 'undefined') {
+    assert.fail(`no config with ${path} found`)
+  }
+  return value
+}
+
+function getSeedNameFromShoot (shootResource) {
+  if (shootResource.status && shootResource.status.seed) {
+    return shootResource.status.seed
+  }
+  throw new Error(`There is no seed assigned to this shoot (yet)`)
+}
+
 module.exports = {
   cleanKubeconfig,
   resolve,
   decodeBase64,
   encodeBase64,
-  getCloudProviderKind,
   shootHasIssue,
+  getShootIngressDomain,
+  getSeedIngressDomain,
+  getKubeconfig,
+  getSeedKubeconfig,
+  getProjectNameFromNamespace,
   getProjectByNamespace,
-  _config: config
+  getConfigValue,
+  getSeedNameFromShoot
 }

@@ -26,6 +26,17 @@ limitations under the License.
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
+    <terminal-list-tile
+      v-if="isTerminalTileVisible"
+      :shoot-item=shootItem
+      target="shoot"
+      :description="shootTerminalDescription"
+      :buttonDescription="shootTerminalButtonDescription"
+      :disabled="isShootHibernated"
+      >
+    </terminal-list-tile>
+
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
 
     <v-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth">
       <v-list-tile-action>
@@ -140,16 +151,19 @@ limitations under the License.
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
+import TerminalListTile from '@/components/TerminalListTile'
 import get from 'lodash/get'
+import isEmpty from 'lodash/isEmpty'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
     UsernamePassword,
     CodeBlock,
-    CopyBtn
+    CopyBtn,
+    TerminalListTile
   },
   props: {
     shootItem: {
@@ -164,6 +178,9 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    ...mapGetters([
+      'hasShootTerminalAccess'
+    ]),
     ...mapState([
       'cfg'
     ]),
@@ -219,8 +236,17 @@ export default {
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
+    shootTerminalButtonDescription () {
+      if (this.isShootHibernated) {
+        return 'Cluster is hibernated. Wake-up cluster to open terminal.'
+      }
+      return this.shootTerminalDescription
+    },
+    shootTerminalDescription () {
+      return 'Open terminal into cluster'
+    },
     isAnyTileVisible () {
-      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible
+      return this.isDashboardTileVisible || this.isCredentialsTileVisible || this.isKubeconfigTileVisible || this.isTerminalTileVisible
     },
     isDashboardTileVisible () {
       return !!this.dashboardUrl
@@ -230,6 +256,9 @@ export default {
     },
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
+    },
+    isTerminalTileVisible () {
+      return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
     },
     token () {
       return this.shootInfo.cluster_token || ''

@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" max-width="600">
+  <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-img
         class="white--text"
@@ -245,7 +245,7 @@ export default {
       const secretName = get(this.secret, 'metadata.name')
       if (secretName) {
         const predicate = item => {
-          return get(item, 'spec.cloud.secretBindingRef.name') === secretName
+          return get(item, 'spec.secretBindingName') === secretName
         }
         return filter(this.shootList, predicate)
       }

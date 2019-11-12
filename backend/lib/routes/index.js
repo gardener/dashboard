@@ -16,7 +16,10 @@
 
 'use strict'
 
-module.exports = {
+const _ = require('lodash')
+const config = require('../config')
+
+const moduleExports = {
   '/info': require('./info'),
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
@@ -27,3 +30,7 @@ module.exports = {
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
   '/namespaces/:namespace/members': require('./members')
 }
+if (_.get(config, 'frontend.features.terminalEnabled', false)) {
+  moduleExports['/namespaces/:namespace/terminals/:target'] = require('./terminals')
+}
+module.exports = moduleExports

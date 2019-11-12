@@ -4,32 +4,22 @@
       color="cyan darken-2"
       :items="machineImages"
       return-object
-      :error-messages="getErrorMessages('worker.machineImage')"
+      :error-messages="getErrorMessages('worker.machine.image')"
       @input="onInputMachineImage"
-      @blur="$v.worker.machineImage.$touch()"
+      @blur="$v.worker.machine.image.$touch()"
       v-model="machineImage"
       label="Machine Image"
       :hint="hint"
       persistent-hint
     >
-      <template v-slot:item="{ item }">
-        <v-list-tile-action>
-          <vendor-icon v-model="item.icon"></vendor-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-          <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
-            {{itemDescription(item)}}
-          </v-list-tile-sub-title>
-        </v-list-tile-content>
-      </template>
-      <template v-slot:selection="{ item }">
+    <template v-slot:item="{ item }">
+      <v-list-tile-action>
         <vendor-icon v-model="item.icon"></vendor-icon>
         <span class="black--text ml-2">
          {{item.name}} [{{item.version}}]
         </span>
+      </v-list-tile-action>
     </template>
-    </v-select>
   </select-hint-colorizer>
 </template>
 
@@ -46,16 +36,20 @@ import join from 'lodash/join'
 
 const validationErrors = {
   worker: {
-    machineImage: {
-      required: 'Machine Image is required'
+    machine: {
+      image: {
+        required: 'Machine Image is required'
+      }
     }
   }
 }
 
 const validations = {
   worker: {
-    machineImage: {
-      required
+    machine: {
+      image: {
+        required
+      }
     }
   }
 }
@@ -84,11 +78,11 @@ export default {
   computed: {
     machineImage: {
       get () {
-        const { name, version } = this.worker.machineImage || {}
+        const { name, version } = this.worker.machine.image || {}
         return find(this.machineImages, { name, version })
       },
       set (machineImage) {
-        this.worker.machineImage = pick(machineImage, ['name', 'version'])
+        this.worker.machine.image = pick(machineImage, ['name', 'version'])
       }
     },
     hint () {
@@ -114,8 +108,8 @@ export default {
       return getValidationErrors(this, field)
     },
     onInputMachineImage () {
-      this.$v.worker.machineImage.$touch()
-      this.$emit('updateMachineImage', this.worker.machineImage)
+      this.$v.worker.machine.image.$touch()
+      this.$emit('updateMachineImage', this.worker.machine.image)
       this.validateInput()
     },
     validateInput () {
@@ -141,8 +135,8 @@ export default {
   },
   watch: {
     machineImages (updatedMachineImages) {
-      if (!includes(map(updatedMachineImages, 'name'), this.worker.machineImages)) {
-        this.worker.machineImage = undefined
+      if (!includes(map(updatedMachineImages, 'name'), this.worker.machine.image)) {
+        this.worker.machine.image = undefined
         this.onInputMachineImage()
       }
     }

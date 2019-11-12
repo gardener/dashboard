@@ -14,18 +14,18 @@ metadata:
   {{- end }}
 spec:
   tls:
-    - secretName: {{ .Values.tlsSecretName | default "gardener-dashboard-tls" }}
-      hosts:
-      {{- range .Values.hosts }}
-        - {{ . }}
-      {{- end }}
+  - secretName: {{ .Values.tlsSecretName | default "gardener-dashboard-tls" }}
+    hosts:
+    {{- range .Values.hosts }}
+    - {{ . }}
+    {{- end }}
   rules:
   {{- range .Values.hosts }}
-    - host: {{ . }}
-      http:
-        paths:
-          - backend:
-              serviceName: gardener-dashboard-service
-              servicePort: {{ $.Values.servicePort }}
-            path: /
+  - host: {{ . }}
+    http:
+      paths:
+      - backend:
+          serviceName: gardener-dashboard-service
+          servicePort: {{ $.Values.servicePort }}
+        path: /
   {{- end }}

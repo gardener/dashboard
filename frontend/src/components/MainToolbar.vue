@@ -19,11 +19,14 @@ limitations under the License.
     <v-toolbar-side-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-toolbar-side-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
-    <div class="text-xs-center" v-if="helpMenuItems.length">
+    <div class="text-xs-center mr-4" v-if="helpMenuItems.length">
       <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
-        <v-btn slot="activator" icon class="cyan--text text--darken-2 mr-4" title="Gardener Landing Page">
-          <v-icon medium>help_outline</v-icon>
-        </v-btn>
+        <v-tooltip left slot="activator" open-delay="500">
+          <v-btn slot="activator" icon class="cyan--text text--darken-2">
+            <v-icon medium>help_outline</v-icon>
+          </v-btn>
+          Info
+        </v-tooltip>
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -94,8 +97,8 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <v-tabs v-if="tabs" slot="extension" slider-color="grey darken-3">
-      <v-tab v-for="(tab, key) in tabs" :to="tab.to($route)" :key="key" ripple>
+    <v-tabs v-if="tabs && tabs.length > 1" slot="extension" slider-color="grey darken-3">
+      <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
         {{tab.title}}
       </v-tab>
     </v-tabs>
@@ -147,7 +150,11 @@ export default {
       return this.cfg.helpMenuItems || {}
     },
     tabs () {
-      return get(this.$route, 'meta.tabs', false)
+      const tabs = get(this.$route, 'meta.tabs', false)
+      if (typeof tabs === 'function') {
+        return tabs()
+      }
+      return tabs
     },
     avatarTitle () {
       return `${this.displayName} (${this.username})`

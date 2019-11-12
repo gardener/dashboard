@@ -23,9 +23,7 @@ import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
-import keys from 'lodash/keys'
 import map from 'lodash/map'
-import intersection from 'lodash/intersection'
 import toLower from 'lodash/toLower'
 import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
@@ -42,6 +40,7 @@ import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
 import store from '../store'
+const uuidv4 = require('uuid/v4')
 
 export function emailToDisplayName (value) {
   if (value) {
@@ -222,13 +221,11 @@ export function routes (router, includeRoutesWithProjectScope) {
 }
 
 export function namespacedRoute (route, namespace) {
-  const name = routeName(route)
-
   const params = {
     namespace: namespace
   }
 
-  return { name, params }
+  return { name: routeName(route), params }
 }
 
 export function routeName (route) {
@@ -281,11 +278,6 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
   }
 }
 
-export function getCloudProviderKind (object) {
-  const cloudProviderKinds = ['aws', 'azure', 'gcp', 'openstack', 'alicloud']
-  return head(intersection(keys(object), cloudProviderKinds))
-}
-
 export function isOwnSecretBinding (secret) {
   return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
 }
@@ -293,7 +285,7 @@ export function isOwnSecretBinding (secret) {
 const availableK8sUpdatesCache = {}
 export function availableK8sUpdatesForShoot (spec) {
   const shootVersion = get(spec, 'kubernetes.version')
-  const cloudProfileName = get(spec, 'cloud.profile')
+  const cloudProfileName = spec.cloudProfileName
 
   let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)
   if (newerVersions !== undefined) {
@@ -303,14 +295,14 @@ export function availableK8sUpdatesForShoot (spec) {
     const allVersions = store.getters.kubernetesVersions(cloudProfileName)
 
     let newerVersion = false
-    forEach(allVersions, (version) => {
+    forEach(allVersions, ({ version, expirationDateString }) => {
       if (semver.gt(version, shootVersion)) {
         newerVersion = true
         const diff = semver.diff(version, shootVersion)
         if (!newerVersions[diff]) {
           newerVersions[diff] = []
         }
-        newerVersions[diff].push(version)
+        newerVersions[diff].push({ version, expirationDateString })
       }
     })
     newerVersions = newerVersion ? newerVersions : null
@@ -348,14 +340,14 @@ export function isHibernated (spec) {
   return hibernationEnabled
 }
 
-export function canLinkToSeed ({ shootNamespace }) {
+export function canLinkToSeed ({ namespace, seedName }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".
   * Currently there is only the secret available.
   * If we are not in the garden namespace we expect a seed to be present
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return shootNamespace !== 'garden'
+  return namespace && seedName !== 'garden'
 }
 
 export function isUserError (errorCodes) {
@@ -427,6 +419,18 @@ export function infrastructureColor (kind) {
   }
 }
 
+export function encodeBase64 (input) {
+  return Buffer.from(input, 'utf8').toString('base64')
+}
+
+export function encodeBase64Url (input) {
+  let output = encodeBase64(input)
+  output = output.replace(/=/g, '')
+  output = output.replace(/\+/g, '-')
+  output = output.replace(/\//g, '_')
+  return output
+}
+
 export function purposeRequiresHibernationSchedule (purpose) {
   const defaultHibernationSchedules = get(store, 'state.cfg.defaultHibernationSchedule')
   if (defaultHibernationSchedules) {
@@ -462,14 +466,13 @@ export function shortRandomString (length) {
 
 export function selfTerminationDaysForSecret (secret) {
   const clusterLifetimeDays = function (quotas, scope) {
-    const predicate = item => get(item, 'spec.scope') === scope
-    return get(find(quotas, predicate), 'spec.clusterLifetimeDays')
+    return get(find(quotas, scope), 'spec.clusterLifetimeDays')
   }
 
   const quotas = get(secret, 'quotas')
-  let terminationDays = clusterLifetimeDays(quotas, 'project')
+  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1alpha1', kind: 'Project' } } })
   if (!terminationDays) {
-    terminationDays = clusterLifetimeDays(quotas, 'secret')
+    terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
   }
 
   return terminationDays
@@ -526,4 +529,37 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
     return { utcBegin, utcEnd }
   }
   return undefined
+}
+
+export function generateWorker (availableZones, cloudProfileName, region) {
+  const id = uuidv4()
+  const name = `worker-${shortRandomString(5)}`
+  const zones = [sample(availableZones)]
+  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const machineType = get(head(machineTypesForZone), 'name')
+  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const volumeType = get(head(volumeTypesForZone), 'name')
+  const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
+  const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
+  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+  const worker = {
+    id,
+    name,
+    minimum: 1,
+    maximum: 2,
+    maxSurge: 1,
+    machine: {
+      type: machineType,
+      image: machineImage
+    },
+    zones
+  }
+  if (volumeType) {
+    worker.volume = {
+      type: volumeType,
+      size: defaultVolumeSize
+    }
+  }
+
+  return worker
 }

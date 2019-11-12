@@ -147,7 +147,7 @@ export default {
       return this.confirmRequired ? this.shootName : undefined
     },
     availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(get(this.shootItem, 'spec'))
+      return availableK8sUpdatesForShoot(this.shootSpec)
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {

@@ -31,7 +31,7 @@ function Core ({ auth }) {
 }
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [] }) {
@@ -257,8 +257,8 @@ exports.remove = async function ({ user, namespace, bindingName }) {
 
   const { items: shootList } = await shoots.list({ user, namespace })
   const predicate = (item) => {
-    const secretBindingRef = _.get(item, 'spec.cloud.secretBindingRef')
-    return secretBindingRef.name === bindingName
+    const itemSecretBindingName = _.get(item, 'spec.secretBindingName')
+    return itemSecretBindingName === bindingName
   }
   const secretReferencedByShoot = _.find(shootList, predicate)
   if (secretReferencedByShoot) {

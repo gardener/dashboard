@@ -60,11 +60,11 @@ limitations under the License.
             </v-flex>
             <v-flex class="pa-0">
               <span class="grey--text">Seed</span><br>
-              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeed, namespace:'garden' } }">
-                <span class="subheading">{{shootSeed}}</span><br>
+              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
+                <span class="subheading">{{shootSeedName}}</span><br>
               </router-link>
               <template v-else>
-                <span class="subheading">{{shootSeed}}</span><br>
+                <span class="subheading">{{shootSeedName}}</span><br>
               </template>
               <v-layout row>
                 <v-flex>
@@ -129,13 +129,13 @@ export default {
       'namespaces'
     ]),
     showSeedInfo () {
-      return !!this.shootSeed && this.hasAccessToGardenNamespace
+      return !!this.shootSeedName && this.hasAccessToGardenNamespace
     },
     hasAccessToGardenNamespace () {
       return includes(this.namespaces, 'garden')
     },
     canLinkToSeed () {
-      return canLinkToSeed({ shootNamespace: this.namespace })
+      return canLinkToSeed({ namespace: this.namespace, seedName: this.shootSeedName })
     },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
@@ -169,7 +169,7 @@ export default {
       return 'Zone'
     },
     shootSecretName () {
-      return this.shootSecret || 'default'
+      return this.shootSecretBindingName || 'default'
     }
   }
 }

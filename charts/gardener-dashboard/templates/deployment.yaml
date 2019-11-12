@@ -31,6 +31,9 @@ spec:
       labels:
         app: gardener-dashboard
         release: {{ .Release.Name }}
+        {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
     spec:
       volumes:
       - name: gardener-dashboard-config
@@ -121,7 +124,7 @@ spec:
             value: /etc/gardener-dashboard/secrets/kubeconfig/kubeconfig
           {{- end }}
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.resources | trim | indent 12 }}
           volumeMounts:
           - name: gardener-dashboard-config
             mountPath: /etc/gardener-dashboard

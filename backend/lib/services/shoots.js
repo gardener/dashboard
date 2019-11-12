@@ -18,20 +18,32 @@
 
 const kubernetes = require('../kubernetes')
 const utils = require('../utils')
-const { getSeeds } = require('../cache')
+const { getSeed } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { decodeBase64, getProjectByNamespace } = utils
+const { decodeBase64, getProjectByNamespace, getSeedKubeconfig } = utils
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function Core ({ auth }) {
   return kubernetes.core({ auth })
+}
+
+async function getSeedKubeconfigForShoot ({ user, shoot }) {
+  if (!shoot.status || !shoot.status.seed) {
+    return {}
+  }
+  const seed = getSeed(utils.getSeedNameFromShoot(shoot))
+  const seedShootNS = shoot.status.technicalID
+
+  const coreClient = Core(user)
+  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
+  return { seed, seedKubeconfig, seedShootNS }
 }
 
 function getSecret (core, namespace, name) {
@@ -86,8 +98,24 @@ exports.create = async function ({ user, namespace, body }) {
   return Garden(user).namespaces(namespace).shoots.post({ body })
 }
 
-exports.read = async function ({ user, namespace, name }) {
-  return Garden(user).namespaces(namespace).shoots.get({ name })
+async function read ({ gardenClient, user, namespace, name }) {
+  if (!gardenClient) {
+    gardenClient = Garden(user)
+  }
+  return gardenClient.namespaces(namespace).shoots.get({ name })
+}
+exports.read = read
+
+exports.exists = async function ({ gardenClient, namespace, name }) {
+  try {
+    await read({ gardenClient, namespace, name })
+    return true
+  } catch (err) {
+    if (err.code !== 404) {
+      throw err
+    }
+    return false
+  }
 }
 
 const patch = exports.patch = async function ({ user, namespace, name, body }) {
@@ -155,12 +183,12 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return patch({ user, namespace, name, body: payload })
 }
 
-exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {
+exports.replaceWorkers = async function ({ user, namespace, name, body }) {
   const workers = body
   const patchOperations = [
     {
       op: 'replace',
-      path: `/spec/cloud/${infrastructureKind}/workers`,
+      path: `/spec/provider/workers`,
       value: workers
     }
   ]
@@ -223,9 +251,6 @@ exports.info = async function ({ user, namespace, name }) {
     readKubeconfigPromise
   ])
 
-  const seed = _.find(getSeeds(), ['metadata.name', shoot.spec.cloud.seed])
-
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projects = Garden(user).projects
   const namespaces = core.namespaces
   const project = await getProjectByNamespace(projects, namespaces, namespace)
@@ -238,9 +263,15 @@ exports.info = async function ({ user, namespace, name }) {
   const monitoringIngressUserSecretName = name + '.monitoring'
   const loggingIngressAdminSecretName = 'logging-ingress-credentials'
 
-  const data = {
-    seedShootIngressDomain: `${name}.${projectName}.${ingressDomain}`
+  const data = {}
+  if (shoot.status && shoot.status.seed) {
+    const seed = getSeed(utils.getSeedNameFromShoot(shoot))
+    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+    if (ingressDomain) {
+      data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+    }
   }
+
   if (secret) {
     _
       .chain(secret)
@@ -264,25 +295,18 @@ exports.info = async function ({ user, namespace, name }) {
 
   const isAdmin = await authorization.isAdmin(user)
   if (isAdmin) {
-    const seedSecretName = _.get(seed, 'spec.secretRef.name')
-    const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
-    const seedSecret = await getSecret(core, seedSecretNamespace, seedSecretName)
+    const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot })
 
-    if (seedSecret) {
+    if (seedKubeconfig && !_.isEmpty(seedShootNS)) {
       try {
-        const seedKubeconfig = decodeBase64(seedSecret.data.kubeconfig)
+        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
 
-        const seedShootNS = _.get(shoot, 'status.technicalID')
-        if (!_.isEmpty(seedShootNS)) {
-          const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
-
-          await Promise.all([
-            assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-            assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
-          ])
-        }
+        await Promise.all([
+          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
+          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
+        ])
       } catch (error) {
-        logger.error('Failed to access seed secret data', error)
+        logger.error('Failed to retrieve information using seed core client', error)
       }
     }
   } else {

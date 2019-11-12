@@ -21,6 +21,7 @@ import moment from 'moment-timezone'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 import { getPrivileges } from '@/utils/api'
 
 /* Layouts */
@@ -31,6 +32,7 @@ const Default = () => import('@/layouts/Default')
 const Home = () => import('@/pages/Home')
 const NewShoot = () => import('@/pages/NewShoot')
 const ShootList = () => import('@/pages/ShootList')
+const ShootItemTerminal = () => import('@/pages/ShootItemTerminal')
 const ShootDetails = () => import('@/pages/ShootDetails')
 const ShootDetailsEditor = () => import('@/pages/ShootDetailsEditor')
 const NewShootEditor = () => import('@/pages/NewShootEditor')
@@ -50,6 +52,22 @@ export default function createRouter ({ store, userManager }) {
     }
   }
 
+  function hasGardenTerminalAccess () {
+    return store.getters.hasGardenTerminalAccess
+  }
+
+  function hasControlPlaneTerminalAccess () {
+    return store.getters.hasControlPlaneTerminalAccess
+  }
+
+  function hasShootTerminalAccess () {
+    return store.getters.hasShootTerminalAccess
+  }
+
+  function isTerminalEnabled () {
+    return store.getters.isTerminalEnabled
+  }
+
   const mode = 'history'
 
   /**
@@ -61,6 +79,7 @@ export default function createRouter ({ store, userManager }) {
    */
   const shootItemTabs = [
     {
+      key: 'shootOverview',
       title: 'Overview',
       to: ({ params }) => {
         return {
@@ -70,6 +89,7 @@ export default function createRouter ({ store, userManager }) {
       }
     },
     {
+      key: 'shootYaml',
       title: 'YAML',
       to: ({ params }) => {
         return {
@@ -81,6 +101,7 @@ export default function createRouter ({ store, userManager }) {
   ]
   const newShootTabs = [
     {
+      key: 'newShootOverview',
       title: 'Overview',
       to: ({ params }) => {
         return {
@@ -90,6 +111,7 @@ export default function createRouter ({ store, userManager }) {
       }
     },
     {
+      key: 'newShootYaml',
       title: 'YAML',
       to: ({ params }) => {
         return {
@@ -108,6 +130,55 @@ export default function createRouter ({ store, userManager }) {
     return get(route, 'params.name')
   }
 
+  const shootItemTerminalTabs = function () {
+    const tabs = []
+
+    if (hasControlPlaneTerminalAccess()) {
+      tabs.push({
+        key: 'terminalControlPlane',
+        title: 'Control Plane',
+        to: (route) => {
+          const params = cloneDeep(route.params)
+          params.target = 'cp'
+          return {
+            name: 'ShootItemTerminal',
+            params
+          }
+        }
+      })
+    }
+
+    if (hasShootTerminalAccess()) {
+      tabs.push({
+        key: 'terminalCluster',
+        title: 'Cluster',
+        to: (route) => {
+          const params = cloneDeep(route.params)
+          params.target = 'shoot'
+          return {
+            name: 'ShootItemTerminal',
+            params
+          }
+        }
+      })
+    }
+    return tabs
+  }
+
+  const terminalBreadcrumbTitle = function (route) {
+    const target = get(route, 'params.target')
+    switch (target) {
+      case 'cp':
+        return 'Control Plane Terminal'
+      case 'shoot':
+        return 'Cluster Terminal'
+      case 'garden':
+        return 'Garden Cluster Terminal'
+      default:
+        return undefined
+    }
+  }
+
   /** Route function
       @name RouteFn
       @function
@@ -123,7 +194,7 @@ export default function createRouter ({ store, userManager }) {
    * @prop {string}  [toRouteName]              - It is possible to set a default child route for a top level item (like the PlaceholderComponent)
    * @prop {string}  [title]                    - Main menu title
    * @prop {string}  [icon]                     - Main menu icon
-   * @prop {RouteFn} [breadcrumbTextFn]         - Function that returns the breadcrumb title
+   * @prop {RouteFn} [breadcrumbText]           - Property or function that returns the breadcrumb title
    * @prop {Tab[]}   [tabs]                     - Determines the tabs to displayed in the main toolbar extenstion slot
    */
 
@@ -148,7 +219,7 @@ export default function createRouter ({ store, userManager }) {
             title: 'Home',
             namespaced: false,
             projectScope: false,
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           }
         },
         {
@@ -157,7 +228,7 @@ export default function createRouter ({ store, userManager }) {
           component: Account,
           meta: {
             title: 'Account',
-            breadcrumbTextFn: routeTitle,
+            breadcrumbText: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -168,7 +239,7 @@ export default function createRouter ({ store, userManager }) {
           component: Home,
           meta: {
             title: 'Create Project',
-            breadcrumbTextFn: routeTitle,
+            breadcrumbText: routeTitle,
             namespaced: false,
             projectScope: false
           }
@@ -185,7 +256,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: false,
             title: 'Project Clusters',
             toRouteName: 'ShootList',
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           },
           children: [
             {
@@ -207,7 +278,7 @@ export default function createRouter ({ store, userManager }) {
                 projectScope: true,
                 title: 'Create Cluster',
                 toRouteName: 'NewShoot',
-                breadcrumbTextFn: routeTitle,
+                breadcrumbText: routeTitle,
                 tabs: newShootTabs
               }
             },
@@ -219,22 +290,51 @@ export default function createRouter ({ store, userManager }) {
                 namespaced: true,
                 projectScope: true,
                 title: 'Create Cluster Editor',
-                breadcrumbTextFn: routeTitle,
+                breadcrumbText: routeTitle,
                 tabs: newShootTabs
               }
             },
             {
               path: ':name',
-              name: 'ShootItem',
-              component: ShootDetails,
+              component: PlaceholderComponent,
               meta: {
                 namespaced: true,
                 projectScope: true,
                 title: 'Cluster Details',
                 toRouteName: 'ShootItem',
-                breadcrumbTextFn: routeParamName,
-                tabs: shootItemTabs
-              }
+                breadcrumbText: routeParamName
+              },
+              children: [
+                {
+                  path: '',
+                  name: 'ShootItem',
+                  component: ShootDetails,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    title: 'Cluster Details',
+                    tabs: shootItemTabs
+                  }
+                },
+                {
+                  path: 'term/:target',
+                  name: 'ShootItemTerminal',
+                  component: ShootItemTerminal,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    breadcrumbText: terminalBreadcrumbTitle,
+                    tabs: shootItemTerminalTabs
+                  },
+                  beforeEnter: (to, from, next) => {
+                    if (isTerminalEnabled()) {
+                      next()
+                    } else {
+                      next('/')
+                    }
+                  }
+                }
+              ]
             },
             {
               path: ':name/yaml',
@@ -243,7 +343,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                breadcrumbTextFn: routeParamName,
+                breadcrumbText: routeParamName,
                 tabs: shootItemTabs
               }
             },
@@ -254,7 +354,7 @@ export default function createRouter ({ store, userManager }) {
               meta: {
                 namespaced: true,
                 projectScope: true,
-                breadcrumbTextFn: routeParamName,
+                breadcrumbText: routeParamName,
                 tabs: shootItemTabs
               }
             }
@@ -272,7 +372,7 @@ export default function createRouter ({ store, userManager }) {
             projectScope: true,
             title: 'Secrets',
             toRouteName: 'Secrets',
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           },
           children: [
             {
@@ -309,7 +409,7 @@ export default function createRouter ({ store, userManager }) {
               title: 'Members',
               icon: 'mdi-account-multiple-outline'
             },
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
           }
         },
         {
@@ -324,7 +424,32 @@ export default function createRouter ({ store, userManager }) {
               title: 'Administration',
               icon: 'mdi-settings'
             },
-            breadcrumbTextFn: routeTitle
+            breadcrumbText: routeTitle
+          }
+        },
+        {
+          path: 'namespace/:namespace/term/garden',
+          name: 'GardenTerminal',
+          component: ShootItemTerminal,
+          meta: {
+            namespaced: true,
+            projectScope: true,
+            breadcrumbText: terminalBreadcrumbTitle,
+            menu: {
+              title: 'Garden Cluster',
+              icon: 'mdi-console',
+              get hidden () {
+                return !hasGardenTerminalAccess()
+              }
+            }
+          },
+          beforeEnter: (to, from, next) => {
+            if (hasGardenTerminalAccess()) {
+              to.params.target = 'garden'
+              next()
+            } else {
+              next('/')
+            }
           }
         }
       ]

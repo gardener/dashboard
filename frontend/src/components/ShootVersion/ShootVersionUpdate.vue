@@ -17,6 +17,7 @@ limitations under the License.
 <template>
   <v-select
     :items="items"
+    item-value="version"
     v-model="selectedItem"
     :label="label"
     :hint="hint"
@@ -24,11 +25,14 @@ limitations under the License.
     return-object
     placeholder="Please select version..."
   >
-  <template slot="item" slot-scope="data">
-    <v-tooltip top :disabled="!data.item.notNextMinor">
+  <template v-slot:item="{ item }">
+    <v-tooltip top :disabled="!item.notNextMinor">
       <v-list-tile-content slot="activator">
-        <v-list-tile-title v-if="!data.item.notNextMinor">{{data.item.text}}</v-list-tile-title>
-        <v-list-tile-title v-else class="text--disabled">{{data.item.text}}</v-list-tile-title>
+        <v-list-tile-title v-if="!item.notNextMinor">{{item.text}}</v-list-tile-title>
+        <v-list-tile-title v-else class="text--disabled">{{item.text}}</v-list-tile-title>
+        <v-list-tile-sub-title v-if="item.expirationDateString">
+          <span>Expires: {{item.expirationDateString}}</span>
+        </v-list-tile-sub-title>
       </v-list-tile-content>
       <span>You cannot upgrade your cluster more than one minor version at a time</span>
     </v-tooltip>
@@ -62,9 +66,10 @@ export default {
   computed: {
     items () {
       const selectionItemsForType = (versions, type) => {
-        return map(versions, version => {
+        return map(versions, ({ version, expirationDateString }) => {
           return { type,
             version,
+            expirationDateString,
             text: `${this.currentk8sVersion} → ${version}`,
             notNextMinor: this.itemIsNotNextMinor(version, type)
           }

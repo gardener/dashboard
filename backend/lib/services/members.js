@@ -17,7 +17,6 @@
 'use strict'
 
 const _ = require('lodash')
-const yaml = require('js-yaml')
 const config = require('../config')
 const { decodeBase64, getProjectByNamespace } = require('../utils')
 const kubernetes = require('../kubernetes')
@@ -28,7 +27,7 @@ function Core ({ auth }) {
 }
 
 function Garden ({ auth }) {
-  return kubernetes.garden({ auth })
+  return kubernetes.gardener({ auth })
 }
 
 function toServiceAccountName ({ metadata: { name, namespace } }) {
@@ -58,40 +57,6 @@ function fromResource (project = {}, serviceAccounts = []) {
       ...serviceAccountsMetadata[username]
     }))
     .value()
-}
-
-function getKubeconfig ({ serviceaccountName, serviceaccountNamespace, projectName = 'default', token, server, caData }) {
-  const clusterName = 'garden'
-  const cluster = {
-    'certificate-authority-data': caData,
-    server
-  }
-  const userName = serviceaccountName
-  const user = {
-    token
-  }
-  const contextName = `${clusterName}-${projectName}-${userName}`
-  const context = {
-    cluster: clusterName,
-    user: userName,
-    namespace: serviceaccountNamespace
-  }
-  return yaml.safeDump({
-    kind: 'Config',
-    clusters: [{
-      cluster,
-      name: clusterName
-    }],
-    users: [{
-      user,
-      name: userName
-    }],
-    contexts: [{
-      context,
-      name: contextName
-    }],
-    'current-context': contextName
-  })
 }
 
 function createServiceaccount (core, namespace, name, user) {
@@ -179,6 +144,7 @@ exports.get = async function ({ user, namespace, name: username }) {
   const project = await getProjectByNamespace(projects, namespaces, namespace)
 
   const projectName = project.metadata.name
+
   // find member of project
   const member = _.find(project.spec.members, {
     name: username,
@@ -187,12 +153,12 @@ exports.get = async function ({ user, namespace, name: username }) {
   if (!member) {
     throw new NotFound(`User ${username} is not a member of project ${projectName}`)
   }
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
-  if (serviceaccountNamespace === namespace) {
+  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
+  if (serviceAccountNamespace === namespace) {
     const core = Core(user)
     const ns = core.namespaces(namespace)
     const serviceaccount = await ns.serviceaccounts.get({
-      name: serviceaccountName
+      name: serviceAccountName
     })
     const api = ns.serviceaccounts.api
     const server = _.get(config, 'apiServerUrl', api.url)
@@ -201,8 +167,10 @@ exports.get = async function ({ user, namespace, name: username }) {
     })
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
+    const clusterName = 'garden'
+    const contextName = `${clusterName}-${projectName}-${username}`
     member.kind = 'ServiceAccount'
-    member.kubeconfig = getKubeconfig({ serviceaccountName, serviceaccountNamespace, projectName, token, caData, server })
+    member.kubeconfig = kubernetes.getKubeconfigFromServiceAccount({ serviceAccountName, contextName, contextNamespace: serviceAccountNamespace, token, caData, server })
   }
   return member
 }

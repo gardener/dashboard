@@ -4,10 +4,10 @@
     :items="volumeTypes"
     item-text="name"
     item-value="name"
-    v-model="worker.volumeType"
-    :error-messages="getErrorMessages('worker.volumeType')"
+    v-model="worker.volume.type"
+    :error-messages="getErrorMessages('worker.volume.type')"
     @input="onInputVolumeType"
-    @blur="$v.worker.volumeType.$touch()"
+    @blur="$v.worker.volume.type.$touch()"
     label="Volume Type">
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
@@ -26,15 +26,19 @@ import map from 'lodash/map'
 
 const validationErrors = {
   worker: {
-    volumeType: {
-      required: 'Volume Type is required'
+    volume: {
+      type: {
+        required: 'Volume Type is required'
+      }
     }
   }
 }
 const validations = {
   worker: {
-    volumeType: {
-      required
+    volume: {
+      type: {
+        required
+      }
     }
   }
 }
@@ -62,8 +66,8 @@ export default {
       return getValidationErrors(this, field)
     },
     onInputVolumeType () {
-      this.$v.worker.volumeType.$touch()
-      this.$emit('updateVolumeType', this.worker.volumeType)
+      this.$v.worker.volume.type.$touch()
+      this.$emit('updateVolumeType', this.worker.volume.type)
       this.validateInput()
     },
     validateInput () {
@@ -79,8 +83,8 @@ export default {
   },
   watch: {
     volumeTypes (updatedVolumeTypes) {
-      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volumeType)) {
-        this.worker.volumeType = undefined
+      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volume.type)) {
+        this.worker.volume.type = undefined
         this.onInputVolumeType()
       }
     }
