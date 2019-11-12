@@ -118,7 +118,7 @@ function fromKubeconfig (filename = process.env.KUBECONFIG) {
     if (ca) {
       config.ca = ca
     }
-    if (Object.prototype.hasOwnProperty.call(cluster, 'insecure-skip-tls-verify')) {
+    if ('insecure-skip-tls-verify' in cluster) {
       config.rejectUnauthorized = !cluster['insecure-skip-tls-verify']
     }
   }
@@ -145,30 +145,23 @@ function fromKubeconfig (filename = process.env.KUBECONFIG) {
   return config
 }
 
-function mergeConfig ({ auth, key, cert, ...options } = {}, config) {
-  options.url = config.url
-  options.ca = config.ca
-  options.rejectUnauthorized = config.rejectUnauthorized
+function mergeConfig ({ auth, key, cert, privileged, ...options } = {}, config) {
+  if (!options.url) {
+    options.url = config.url
+    options.ca = config.ca
+    options.rejectUnauthorized = config.rejectUnauthorized
+  }
   if (key && cert) {
     options.key = key
     options.cert = cert
   } else if (auth) {
     options.auth = auth
-  } else if (config.key && config.cert) {
-    options.key = config.key
-    options.cert = config.cert
-  } else if (config.auth) {
-    options.auth = config.auth
-  }
-  if (options.auth) {
-    const auth = options.auth
-    delete options.auth
-    if (auth.bearer) {
-      setAuthorization(options, 'bearer', auth.bearer)
-    } else if (auth.user && auth.pass) {
-      setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
-    } else if (typeof auth === 'string') {
-      setAuthorization(options, 'basic', auth)
+  } else if (privileged === true) {
+    if (config.key && config.cert) {
+      options.key = config.key
+      options.cert = config.cert
+    } else if (config.auth) {
+      options.auth = config.auth
     }
   }
   return options

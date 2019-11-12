@@ -20,18 +20,33 @@ const resources = require('./resources')
 
 const config = require('./config')(process.env)
 const debug = require('./debug')
-const { mergeConfig } = require('./util')
+const { mergeConfig, setAuthorization } = require('./util')
 
 function createClient (options) {
+  options = mergeConfig(options, config)
+  if (options.auth) {
+    const auth = options.auth
+    delete options.auth
+    if (auth.bearer) {
+      setAuthorization(options, 'bearer', auth.bearer)
+    } else if (auth.user && auth.pass) {
+      setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
+    } else if (typeof auth === 'string') {
+      setAuthorization(options, 'basic', auth)
+    }
+  }
   options = debug.attach(options)
-  return resources(mergeConfig(options, config))
+  return resources(options)
 }
 
 exports = module.exports = createClient
+
 exports.api = () => {
   return (req, res, next) => {
     const { auth } = req.user
-    req.user.api = createClient({ auth })
+    Object.defineProperty(req.user, 'api', {
+      value: createClient({ auth })
+    })
     next()
   }
 }

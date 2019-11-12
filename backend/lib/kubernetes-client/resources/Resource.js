@@ -53,13 +53,13 @@ class Resource extends BaseResource {
       } else if (!namespace) {
         throw new TypeError('Either \'namespace\' or \'allNamespaces\' must be specified for a namespaced resource')
       } else {
-        pathname += 'namespaces/' + namespace + '/'
+        pathname += 'namespaces/' + encodeURIComponent(namespace) + '/'
       }
     }
     pathname += this.constructor.names.plural
     if (name) {
       pathname += '/'
-      pathname += Array.isArray(name) ? name.join('/') : name
+      pathname += Array.isArray(name) ? name.map(encodeURIComponent).join('/') : encodeURIComponent(name)
     }
     return pathname
   }

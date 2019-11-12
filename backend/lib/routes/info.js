@@ -20,10 +20,9 @@ const express = require('express')
 const got = require('got')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const kubernetes = require('../kubernetes')
+const kubernetesClient = require('../kubernetes-client')
 const { version } = require('../../package')
-
-const apiRegistration = kubernetes.apiRegistration()
+const { 'apiregistration.k8s.io': apiRegistration } = kubernetesClient({ privileged: true })
 
 const router = module.exports = express.Router()
 
@@ -44,14 +43,15 @@ async function fetchGardenerVersion () {
       name: 'v1alpha1.core.gardener.cloud'
     })
     const uri = `https://${service.name}.${service.namespace}/version`
-    const { body: version } = await got(uri, {
+    const version = await got(uri, {
       ca: decodeBase64(caBundle),
-      json: true
+      resolveBodyOnly: true,
+      responseType: 'json'
     })
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
+    if (err instanceof got.HTTPError && err.response.statusCode === 404) {
       return undefined
     }
     throw err

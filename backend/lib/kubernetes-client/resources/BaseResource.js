@@ -54,7 +54,7 @@ class BaseResource {
   }
 
   [http.delete] (options = {}) {
-    return this[http.request](this[http.pathname](options), { method: 'delete', ...options })
+    return this[http.request]({ method: 'delete', ...options })
   }
 }
 

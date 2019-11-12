@@ -19,6 +19,14 @@
 const { getInCluster, fromKubeconfig } = require('./util')
 
 function load (env = process.env) {
+  if (/^test/.test(env.NODE_ENV)) {
+    return {
+      url: 'https://kubernetes:6443',
+      auth: {
+        bearer: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
+      }
+    }
+  }
   if (env.KUBECONFIG) {
     return fromKubeconfig(env.KUBECONFIG)
   }

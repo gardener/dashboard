@@ -16,17 +16,4 @@
 
 'use strict'
 
-exports = module.exports = {}
-
-const apiGroups = [
-  'apiregistration.k8s.io',
-  'authentication.k8s.io',
-  'authorization.k8s.io',
-  'core',
-  'core.gardener.cloud',
-  'dashboard.gardener.cloud',
-  'extensions'
-]
-for (const key of apiGroups) {
-  exports[key] = require(`./${key}`)
-}
+module.exports = require('../../../util').ctors(__filename)

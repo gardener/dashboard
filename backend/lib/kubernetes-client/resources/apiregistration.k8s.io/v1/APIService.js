@@ -16,17 +16,24 @@
 
 'use strict'
 
-exports = module.exports = {}
+const Resource = require('../../Resource')
+const { http } = require('../../symbols')
 
-const apiGroups = [
-  'apiregistration.k8s.io',
-  'authentication.k8s.io',
-  'authorization.k8s.io',
-  'core',
-  'core.gardener.cloud',
-  'dashboard.gardener.cloud',
-  'extensions'
-]
-for (const key of apiGroups) {
-  exports[key] = require(`./${key}`)
+class APIService extends Resource {
+  get (options = {}) {
+    return this[http.get](options)
+  }
 }
+
+Object.assign(APIService, {
+  group: 'apiregistration.k8s.io',
+  version: 'v1',
+  scope: 'Cluster',
+  names: {
+    plural: 'apiservices',
+    singular: 'apiservice',
+    kind: 'APIService'
+  }
+})
+
+module.exports = APIService

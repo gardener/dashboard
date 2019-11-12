@@ -24,7 +24,8 @@ const readFile = promisify(fs.readFile)
 const got = require('got')
 const { DockerfileParser } = require('dockerfile-ast')
 const httpClient = got.extend({
-  baseUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master',
+  prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
+  resolveBodyOnly: true,
   timeout: 3000
 })
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
@@ -58,7 +59,8 @@ async function getDashboardDockerfile () {
 }
 
 describe('dockerfile', function () {
-  this.timeout(5000)
+  this.timeout(15000)
+  this.slow(5000)
 
   it('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
