@@ -34,7 +34,8 @@ class BaseResource {
   }
 
   [http.request] (options = {}) {
-    return this[http.client](this[http.pathname](options), options)
+    const pathname = this[http.pathname](options).replace(/^\//, '')
+    return this[http.client](pathname, options)
   }
 
   [http.get] (options = {}) {

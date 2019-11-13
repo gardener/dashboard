@@ -48,7 +48,7 @@ const activeNodeReleases = {
 }
 
 async function getNodeDockerfile (nodeVersion, alpineVersion) {
-  const { body } = await httpClient.get(`/${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
+  const body = await httpClient.get(`${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
   return DockerfileParser.parse(body)
 }
 

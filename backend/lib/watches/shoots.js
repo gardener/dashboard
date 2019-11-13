@@ -17,7 +17,7 @@
 'use strict'
 
 const logger = require('../logger')
-const garden = require('../kubernetes').gardener()
+const kubernetesClient = require('../kubernetes-client')
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
@@ -28,9 +28,10 @@ const {
 } = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
+const { 'core.gardener.cloud': gardener } = kubernetesClient({ privileged: true })
 
 module.exports = io => {
-  const emitter = garden.shoots.watch()
+  const emitter = gardener.shoots.watch({ allNamespaces: true })
   registerHandler(emitter, async function (event) {
     const shoot = event.object
     if (event.type === 'ERROR') {

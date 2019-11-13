@@ -68,7 +68,7 @@ class Resource extends BaseResource {
     return super[http.patch](setPatchType(options, type))
   }
 
-  [ws.connect] ({ namespace, name, query, headers, origin, ...options } = {}) {
+  [ws.connect] ({ allNamespaces, namespace, name, query, headers, origin, ...options } = {}) {
     const {
       prefixUrl,
       ca,
@@ -77,11 +77,11 @@ class Resource extends BaseResource {
       servername,
       rejectUnauthorized,
       headers: defaultHeaders
-    } = this[http.request].defaults.options
+    } = this[http.client].defaults.options
     const url = new URL(prefixUrl)
     origin = origin || url.origin
     url.protocol = url.protocol.replace(/^http/, 'ws')
-    url.pathname = join(url.pathname, this[http.pathname]({ namespace }))
+    url.pathname = join(url.pathname, this[http.pathname]({ allNamespaces, namespace }))
     const searchParams = new URLSearchParams(query)
     searchParams.set('watch', true)
     if (name) {
@@ -106,7 +106,7 @@ class Resource extends BaseResource {
     return new WebSocket(url, websocketOptions)
   }
 
-  watch (options = {}) {
+  [ws.watch] (options = {}) {
     const {
       initialDelay,
       maxDelay,
@@ -136,14 +136,12 @@ class Resource extends BaseResource {
       immediate
     }
 
+    const resourceName = this.constructor.names.plural
+
     const createConnection = options => {
       const connection = new EventEmitter()
-      connection.resourceName = this.type
-      try {
-        wrapWebSocket(connection, this[ws.connect](options))
-      } catch (err) {
-        return null
-      }
+      connection.resourceName = resourceName
+      wrapWebSocket(connection, this[ws.connect](options))
       return connection
     }
 
@@ -152,7 +150,7 @@ class Resource extends BaseResource {
     }
 
     const reconnector = inject(createConnection)(reconnectOptions, onConnect)
-    reconnector.resourceName = this.type
+    reconnector.resourceName = resourceName
     reconnector.connect(connectOptions)
     return reconnector
   }

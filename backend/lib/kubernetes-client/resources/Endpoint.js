@@ -16,21 +16,14 @@
 
 'use strict'
 
-const kubernetesClient = require('../kubernetes-client')
-const { format: fmt } = require('util')
-const { healthz } = kubernetesClient({ privileged: true })
+const endpoints = require('./endpoints')
 
-async function healthCheck () {
-  try {
-    await healthz.get()
-  } catch (err) {
-    if (err.name === 'HTTPError') {
-      throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', err.response.body, err.response.statusCode))
+class Endpoint {
+  static create (key, options) {
+    if (key in endpoints) {
+      return new endpoints[key](options)
     }
-    throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', err))
   }
 }
 
-module.exports = {
-  healthCheck
-}
+module.exports = Endpoint

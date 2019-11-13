@@ -16,8 +16,6 @@
 
 'use strict'
 
-exports = module.exports = {}
-
 const apiGroups = [
   'apiregistration.k8s.io',
   'authentication.k8s.io',
@@ -26,7 +24,39 @@ const apiGroups = [
   'core.gardener.cloud',
   'dashboard.gardener.cloud',
   'extensions'
-]
-for (const key of apiGroups) {
-  exports[key] = require(`./${key}`)
+].reduce((apiGroups, key) => {
+  apiGroups[key] = require(`./${key}`)
+  return apiGroups
+}, {})
+
+class ApiGroup extends Map {
+  constructor (apiGroup, options = {}) {
+    super()
+    this.create = key => {
+      if (key in apiGroup) {
+        return new apiGroup[key](options)
+      } else {
+        throw new TypeError(`Resource ${key} not supported`)
+      }
+    }
+  }
+
+  get (key) {
+    if (!this.has(key)) {
+      this.set(key, this.create(key))
+    }
+    return super.get(key)
+  }
+
+  static create (key, options) {
+    if (key in apiGroups) {
+      return new Proxy(new ApiGroup(apiGroups[key], options), {
+        get (apiGroup, key) {
+          return apiGroup.get(key)
+        }
+      })
+    }
+  }
 }
+
+module.exports = ApiGroup

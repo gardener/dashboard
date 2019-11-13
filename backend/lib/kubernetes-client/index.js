@@ -16,8 +16,8 @@
 
 'use strict'
 
-const resources = require('./resources')
-
+const createApi = require('./resources')
+const Helper = require('./Helper')
 const config = require('./config')(process.env)
 const debug = require('./debug')
 const { mergeConfig, setAuthorization } = require('./util')
@@ -36,7 +36,9 @@ function createClient (options) {
     }
   }
   options = debug.attach(options)
-  return resources(options)
+  const api = createApi(options)
+  api.extend(Helper)
+  return api
 }
 
 exports = module.exports = createClient
@@ -50,3 +52,5 @@ exports.api = () => {
     next()
   }
 }
+
+exports.privilegedClient = createClient({ privileged: true })
