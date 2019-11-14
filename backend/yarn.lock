@@ -2455,6 +2455,13 @@ flatted@^2.0.0:
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.1.tgz#69e57caa8f0eacbc281d2e2cb458d46fdb449e08"
   integrity sha512-a1hQMktqW9Nmqr5aktAux3JMNqaucxGcjtjWnZLHX7yyPCmlSV3M54nGYbqT8K+0GhF3NBgmJCc3ma+WOgX8Jg==
 
+fnv-plus@^1.2.12:
+  version "1.2.12"
+  resolved "https://registry.yarnpkg.com/fnv-plus/-/fnv-plus-1.2.12.tgz#00752fc2d80761bacda9bfb9ea098f44cb3746be"
+  integrity sha1-AHUvwtgHYbrNqb+56gmPRMs3Rr4=
+  dependencies:
+    jsbn "~0.0.0"
+
 for-in@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
@@ -3392,6 +3399,11 @@ js-yaml@^3.10.0, js-yaml@^3.13.0, js-yaml@^3.13.1:
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+jsbn@~0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.0.0.tgz#c52701bdcedbdf7084e1cfc701a7f86464ad7828"
+  integrity sha1-xScBvc7b33CE4c/HAaf4ZGSteCg=
 
 jsbn@~0.1.0:
   version "0.1.1"
