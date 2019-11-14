@@ -69,12 +69,6 @@ limitations under the License.
 export default {
   name: 'maintenance-components',
   props: {
-    updateKubernetesVersion: {
-      type: Boolean
-    },
-    updateOSVersion: {
-      type: Boolean
-    },
     title: {
       type: String,
       default: 'Auto Update'
@@ -86,13 +80,13 @@ export default {
   },
   data () {
     return {
-      osUpdates: this.updateOSVersion,
-      k8sUpdates: this.updateKubernetesVersion
+      osUpdates: false,
+      k8sUpdates: false
     }
   },
   computed: {
     showNoUpdates () {
-      return !this.selectable && !this.updateKubernetesVersion && !this.updateOSVersion
+      return !this.selectable && !this.osUpdates && !this.k8sUpdates
     }
   },
   methods: {
@@ -102,10 +96,6 @@ export default {
     setComponentUpdates ({ k8sUpdates, osUpdates }) {
       this.k8sUpdates = k8sUpdates
       this.osUpdates = osUpdates
-    },
-    reset () {
-      this.k8sUpdates = this.updateKubernetesVersion
-      this.osUpdates = this.updateOSVersion
     }
   }
 }
