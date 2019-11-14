@@ -137,6 +137,7 @@ export function setInputFocus (vm, fieldName) {
   if (fieldRef) {
     const inputRef = fieldRef.$refs.input
     vm.$nextTick(() => {
+      // Ensure that the input field has been rendered
       inputRef.focus()
       inputRef.select()
     })
@@ -489,11 +490,6 @@ export const shootAddonList = [
     description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
     enabled: false
-  },
-  {
-    name: 'monocular',
-    title: 'Monocular',
-    description: 'Monocular is a web-based UI for managing Kubernetes applications and services packaged as Helm Charts. It allows you to search and discover available charts from multiple repositories, and install them in your cluster with one click.'
   },
   {
     name: 'nginx-ingress',

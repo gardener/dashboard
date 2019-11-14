@@ -90,12 +90,10 @@ export default {
       this.hibernationScheduleValid = false
 
       const noScheduleAnnotation = !!get(this.shootItem, 'metadata.annotations', {})['dashboard.garden.sapcloud.io/no-hibernation-schedule']
-      this.$nextTick(() => {
-        this.$refs.hibernationSchedule.setScheduleData({
-          hibernationSchedule: this.shootHibernationSchedules,
-          noHibernationSchedule: noScheduleAnnotation,
-          purpose: this.shootPurpose
-        })
+      this.$refs.hibernationSchedule.setScheduleData({
+        hibernationSchedule: this.shootHibernationSchedules,
+        noHibernationSchedule: noScheduleAnnotation,
+        purpose: this.shootPurpose
       })
     },
     onHibernationScheduleValid (value) {

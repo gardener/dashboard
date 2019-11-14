@@ -176,7 +176,10 @@ export default {
       if (this.canUpdate) {
         this.$refs.gDialog.showDialog()
         if (reset) {
-          this.reset()
+          this.$nextTick(() => {
+            // need to defer event until dialog has been rendered
+            this.reset()
+          })
         }
 
         const confirmed = await this.$refs.gDialog.confirmWithDialog()
@@ -200,9 +203,7 @@ export default {
       this.updateErrorMessage = undefined
       this.updateDetailedErrorMessage = undefined
 
-      this.$nextTick(() => {
-        this.$refs.shootVersionUpdate.reset()
-      })
+      this.$refs.shootVersionUpdate.reset()
     }
   }
 }

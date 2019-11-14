@@ -21,9 +21,9 @@ limitations under the License.
     </v-flex>
     <v-flex xs12>
       <v-list two-line>
-        <v-list-tile class="list-complete-item" v-if="selectable || osVersion">
+        <v-list-tile class="list-complete-item" v-if="selectable || osUpdates">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osVersion"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -34,9 +34,9 @@ limitations under the License.
             </v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-list-tile class="list-complete-item" v-if="selectable || kubernetesVersion">
+        <v-list-tile class="list-complete-item" v-if="selectable || k8sUpdates">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="kubernetesVersion"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -49,7 +49,7 @@ limitations under the License.
         </v-list-tile>
         <v-list-tile class="list-complete-item" v-if="showNoUpdates">
           <v-list-tile-action>
-            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="kubernetesVersion"></v-checkbox>
+            <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-close-circle-outline</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
@@ -73,12 +73,6 @@ export default {
       type: Object,
       required: true
     },
-    updateKubernetesVersion: {
-      type: Boolean
-    },
-    updateOSVersion: {
-      type: Boolean
-    },
     title: {
       type: String,
       default: 'Auto Update'
@@ -90,35 +84,35 @@ export default {
   },
   data () {
     return {
-      osUpdates: this.updateOSVersion,
-      k8sUpdates: this.updateKubernetesVersion
+      k8sUpdatesInternal: false,
+      osUpdatesInternal: false
     }
   },
   computed: {
-    showNoUpdates () {
-      return !this.selectable && !this.updateKubernetesVersion && !this.updateOSVersion
-    },
-    kubernetesVersion: {
+    k8sUpdates: {
       get () {
-        return this.k8sUpdates
+        return this.k8sUpdatesInternal
       },
       set (value) {
-        this.k8sUpdates = value
+        this.k8sUpdatesInternal = value
         if (this.userInterActionBus) {
           this.userInterActionBus.emit('updateK8sMaintenance', value)
         }
       }
     },
-    osVersion: {
+    osUpdates: {
       get () {
-        return this.osUpdates
+        return this.osUpdatesInternal
       },
       set (value) {
-        this.osUpdates = value
+        this.osUpdatesInternal = value
         if (this.userInterActionBus) {
           this.userInterActionBus.emit('updateOSMaintenance', value)
         }
       }
+    },
+    showNoUpdates () {
+      return !this.selectable && !this.osUpdates && !this.k8sUpdates
     }
   },
   methods: {
@@ -128,10 +122,6 @@ export default {
     setComponentUpdates ({ k8sUpdates, osUpdates }) {
       this.k8sUpdates = k8sUpdates
       this.osUpdates = osUpdates
-    },
-    reset () {
-      this.k8sUpdates = this.updateKubernetesVersion
-      this.osUpdates = this.updateOSVersion
     }
   }
 }

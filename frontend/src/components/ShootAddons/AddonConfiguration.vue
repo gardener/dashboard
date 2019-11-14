@@ -70,9 +70,7 @@ export default {
       }
     },
     reset () {
-      this.$nextTick(() => {
-        this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
-      })
+      this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
     }
   }
 }
