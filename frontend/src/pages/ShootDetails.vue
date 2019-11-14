@@ -22,9 +22,9 @@ limitations under the License.
 
         <shoot-infrastructure-card :shootItem="item" class="mt-3"></shoot-infrastructure-card>
 
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
-
         <shoot-external-tools-card :shootItem="item" class="mt-3"></shoot-external-tools-card>
+
+        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
       </v-flex>
 
       <v-flex md6>
