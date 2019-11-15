@@ -24,6 +24,7 @@ const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
 const config = require('../config')
 const assert = require('assert').strict
+const fnv = require('fnv-plus')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -99,17 +100,15 @@ async function getShootIngressDomain (projects, namespaces, shoot, seed = undefi
 
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
   const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
+  const hash = fnv.hash(`${name}.${projectName}`, 32).str()
 
-  return `${name}.${projectName}.${ingressDomain}`
+  return `${hash}.${ingressDomain}`
 }
 
-async function getSeedIngressDomain (projects, namespaces, seed) {
-  const namespace = 'garden'
-
+async function getSeedIngressDomain (seed) {
   const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
 
-  return `${projectName}.${ingressDomain}`
+  return `g.${ingressDomain}`
 }
 
 async function getSeedKubeconfig ({ coreClient, seed }) {

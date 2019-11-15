@@ -256,7 +256,7 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
   const projectsClient = kubernetes.garden().projects
   const namespacesClient = coreClient.namespaces
   const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
-  const apiServerIngressHost = `k8.${shootIngressDomain}`
+  const apiServerIngressHost = `k-${shootIngressDomain}`
 
   const seedShootNS = _.get(shootResource, 'status.technicalID')
   if (!seedShootNS) {
@@ -316,8 +316,6 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 
 async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
   const seedName = seed.metadata.name
-  const projectsClient = kubernetes.garden().projects
-  const namespacesClient = coreClient.namespaces
 
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
   const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
@@ -326,8 +324,8 @@ async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
 
   const namespace = 'garden'
   const seedApiServerHostname = new URL(seedClientConfig.url).hostname
-  const seedIngressDomain = await getSeedIngressDomain(projectsClient, namespacesClient, seed)
-  const seedApiServerIngressHost = `k8.${seedIngressDomain}`
+  const seedIngressDomain = await getSeedIngressDomain(seed)
+  const seedApiServerIngressHost = `k-${seedIngressDomain}`
   const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
   await ensureTrustedCertForApiServer({

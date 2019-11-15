@@ -256,6 +256,10 @@ Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/express/blob/master/LICENSE)
 
+- [fnv-plus](https://github.com/tjwebb/fnv-plus)\
+Copyright (c) Travis Webb\
+[MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
+
 - [got](https://github.com/sindresorhus/got)\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/got/blob/master/license)
