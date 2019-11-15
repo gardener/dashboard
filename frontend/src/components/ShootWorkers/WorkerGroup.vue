@@ -29,7 +29,6 @@ limitations under the License.
      align-center>
      <span class="ma-1">
        <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-       <span v-if="line.unsupported">| <span class="orange--text text--darken-2">{{line.unsupported}}</span></span>
      </span>
     </v-layout>
     <v-chip
@@ -37,7 +36,7 @@ limitations under the License.
       small
       class="cursor-pointer my-0 ml-0"
       outline
-      :color="chipColor">
+      color="cyan darken-2">
       {{workerGroup.name}}
     </v-chip>
   </g-popper>
@@ -97,8 +96,7 @@ export default {
         } else {
           description.push({
             title: 'Machine Type',
-            value: this.workerGroup.machine.type,
-            unsupported: 'This machine type is no longer supported'
+            value: this.workerGroup.machine.type
           })
         }
       }
@@ -113,8 +111,7 @@ export default {
         } else {
           description.push({
             title: 'Volume Type',
-            value: this.workerGroup.volume.type,
-            unsupported: 'This volume type is no longer supported'
+            value: this.workerGroup.volume.type
           })
         }
       }
@@ -133,8 +130,7 @@ export default {
         } else {
           description.push({
             title: 'Machine Image',
-            value: this.workerGroup.machine.image,
-            unsupported: 'This machine image is no longer supported'
+            value: this.workerGroup.machine.image
           })
         }
       }
@@ -157,15 +153,6 @@ export default {
         })
       }
       return description
-    },
-    unsupported () {
-      return find(this.description, line => { return line.unsupported !== undefined })
-    },
-    chipColor () {
-      if (this.unsupported) {
-        return 'orange darken-2'
-      }
-      return 'cyan darken-2'
     }
   }
 }

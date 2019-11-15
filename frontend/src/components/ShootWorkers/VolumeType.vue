@@ -2,7 +2,7 @@
   <v-select
     color="cyan darken-2"
     :items="volumeTypeItems"
-    item-text="displayName"
+    item-text="name"
     item-value="name"
     v-model="worker.volume.type"
     :error-messages="getErrorMessages('worker.volume.type')"
@@ -12,7 +12,7 @@
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
         <v-list-tile-title>{{data.item.name}}</v-list-tile-title>
-        <v-list-tile-sub-title>Class: {{data.item.class}}</v-list-tile-sub-title>
+        <v-list-tile-sub-title v-if="data.item.class">Class: {{data.item.class}}</v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
   </v-select>
@@ -21,15 +21,13 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
+import find from 'lodash/find'
 
 const validationErrors = {
   worker: {
     volume: {
       type: {
-        required: 'Volume Type is required',
-        notUnsupported: 'This volume type is not supported, please choose a different one'
+        required: 'Volume Type is required'
       }
     }
   }
@@ -38,10 +36,7 @@ const validations = {
   worker: {
     volume: {
       type: {
-        required,
-        notUnsupported () {
-          return !this.unsupported
-        }
+        required
       }
     }
   }
@@ -66,22 +61,17 @@ export default {
   },
   computed: {
     volumeTypeItems () {
-      const volumeTypes = map(this.volumeTypes, volumeType => {
-        volumeType.displayName = volumeType.name
-        return volumeType
-      })
+      const volumeTypes = this.volumeTypes.slice()
       if (this.unsupported) {
         volumeTypes.push({
-          name: this.worker.volume.type,
-          displayName: `${this.worker.volume.type} [unsupported]`,
-          class: 'Not supported'
+          name: this.worker.volume.type
         })
       }
       this.onInputVolumeType()
       return volumeTypes
     },
     unsupported () {
-      return !includes(map(this.volumeTypes, 'name'), this.worker.volume.type)
+      return !find(this.volumeTypes, ['name', this.worker.volume.type])
     }
   },
   validations,
