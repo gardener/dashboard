@@ -1,18 +1,21 @@
 <template>
   <v-select
     color="cyan darken-2"
-    :items="volumeTypes"
+    :items="volumeTypeItems"
     item-text="name"
     item-value="name"
     v-model="worker.volumeType"
     :error-messages="getErrorMessages('worker.volumeType')"
     @input="onInputVolumeType"
     @blur="$v.worker.volumeType.$touch()"
-    label="Volume Type">
+    label="Volume Type"
+    :hint="hint"
+    persistent-hint
+    >
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
         <v-list-tile-title>{{data.item.name}}</v-list-tile-title>
-        <v-list-tile-sub-title>Class: {{data.item.class}}</v-list-tile-sub-title>
+        <v-list-tile-sub-title v-if="data.item.class">Class: {{data.item.class}}</v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
   </v-select>
@@ -21,8 +24,7 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
+import find from 'lodash/find'
 
 const validationErrors = {
   worker: {
@@ -56,6 +58,27 @@ export default {
       valid: undefined
     }
   },
+  computed: {
+    volumeTypeItems () {
+      const volumeTypes = this.volumeTypes.slice()
+      if (this.notInCloudProfile) {
+        volumeTypes.push({
+          name: this.worker.volumeType
+        })
+      }
+      this.onInputVolumeType()
+      return volumeTypes
+    },
+    notInCloudProfile () {
+      return !find(this.volumeTypes, ['name', this.worker.volumeType])
+    },
+    hint () {
+      if (this.notInCloudProfile) {
+        return 'This volume type may not be supported by your worker'
+      }
+      return undefined
+    }
+  },
   validations,
   methods: {
     getErrorMessages (field) {
@@ -76,14 +99,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    volumeTypes (updatedVolumeTypes) {
-      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volumeType)) {
-        this.worker.volumeType = undefined
-        this.onInputVolumeType()
-      }
-    }
   }
 }
 </script>
