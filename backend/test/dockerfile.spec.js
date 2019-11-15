@@ -60,7 +60,7 @@ async function getDashboardDockerfile () {
 describe('dockerfile', function () {
   this.timeout(5000)
 
-  it('should have the same alpine base image as the corresponding node image', async function () {
+  it.skip('should have the same alpine base image as the corresponding node image', async function () {
     const dashboardDockerfile = await getDashboardDockerfile()
 
     expect(dashboardDockerfile.getFROMs()).to.have.length(4)
