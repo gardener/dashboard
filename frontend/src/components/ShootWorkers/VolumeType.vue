@@ -24,8 +24,7 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
+import find from 'lodash/find'
 
 const validationErrors = {
   worker: {
@@ -71,7 +70,7 @@ export default {
       return volumeTypes
     },
     notInCloudProfile () {
-      return !includes(map(this.volumeTypes, 'name'), this.worker.volumeType)
+      return !find(this.volumeTypes, ['name', this.worker.volumeType])
     },
     hint () {
       if (this.notInCloudProfile) {
