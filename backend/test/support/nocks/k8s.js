@@ -987,7 +987,7 @@ const stub = {
       .get(`/healthz`)
       .reply(200, 'ok')
   },
-  fetchGardenerVersion ({ version }) {
+  fetchGardenerVersion ({ bearer, version }) {
     const service = {
       name: 'gardener-apiserver',
       namespace: 'gardener'
@@ -997,7 +997,7 @@ const stub = {
     const serviceUrl = `https://${service.name}.${service.namespace}`
     const statusCode = !version ? 404 : 200
     return [
-      nockWithAuthorization(auth.bearer)
+      nockWithAuthorization(bearer)
         .get('/apis/apiregistration.k8s.io/v1/apiservices/v1alpha1.core.gardener.cloud')
         .reply(200, body),
       nock(serviceUrl)

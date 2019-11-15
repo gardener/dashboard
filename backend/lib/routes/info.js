@@ -20,24 +20,24 @@ const express = require('express')
 const got = require('got')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const kubernetesClient = require('../kubernetes-client')
 const { version } = require('../../package')
-const { 'apiregistration.k8s.io': apiRegistration } = kubernetesClient({ privileged: true })
 
 const router = module.exports = express.Router()
 
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const user = req.user
-      const gardenerVersion = await fetchGardenerVersion()
+      const { api, auth, ...profile } = req.user || {}
+      const gardenerVersion = await fetchGardenerVersion(api)
+      const user = { auth, ...profile }
       res.send({ version, gardenerVersion, user })
     } catch (err) {
       next(err)
     }
   })
 
-async function fetchGardenerVersion () {
+async function fetchGardenerVersion (client) {
+  const { 'apiregistration.k8s.io': apiRegistration } = client
   try {
     const { spec: { service, caBundle } } = await apiRegistration.apiservices.get({
       name: 'v1alpha1.core.gardener.cloud'
