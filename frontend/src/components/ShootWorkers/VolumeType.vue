@@ -1,8 +1,8 @@
 <template>
   <v-select
     color="cyan darken-2"
-    :items="volumeTypes"
-    item-text="name"
+    :items="volumeTypeItems"
+    item-text="displayName"
     item-value="name"
     v-model="worker.volumeType"
     :error-messages="getErrorMessages('worker.volumeType')"
@@ -27,14 +27,18 @@ import map from 'lodash/map'
 const validationErrors = {
   worker: {
     volumeType: {
-      required: 'Volume Type is required'
+      required: 'Volume Type is required',
+      notUnsupported: 'This volume type is not supported, please choose a different one'
     }
   }
 }
 const validations = {
   worker: {
     volumeType: {
-      required
+      required,
+      notUnsupported () {
+        return !this.unsupported
+      }
     }
   }
 }
@@ -54,6 +58,26 @@ export default {
     return {
       validationErrors,
       valid: undefined
+    }
+  },
+  computed: {
+    volumeTypeItems () {
+      const volumeTypes = map(this.volumeTypes, volumeType => {
+        volumeType.displayName = volumeType.name
+        return volumeType
+      })
+      if (this.unsupported) {
+        volumeTypes.push({
+          name: this.worker.volumeType,
+          displayName: `${this.worker.volumeType} [unsupported]`,
+          class: 'Not supported'
+        })
+      }
+      this.onInputVolumeType()
+      return volumeTypes
+    },
+    unsupported () {
+      return !includes(map(this.volumeTypes, 'name'), this.worker.volumeType)
     }
   },
   validations,
@@ -76,14 +100,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    volumeTypes (updatedVolumeTypes) {
-      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volumeType)) {
-        this.worker.volumeType = undefined
-        this.onInputVolumeType()
-      }
-    }
   }
 }
 </script>

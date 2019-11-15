@@ -27,9 +27,19 @@ limitations under the License.
      :key="index"
      fill-height
      align-center>
-     <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
+     <span class="ma-1">
+       <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
+       <span v-if="line.unsupported">| <span class="orange--text text--darken-2">{{line.unsupported}}</span></span>
+     </span>
     </v-layout>
-    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
+    <v-chip
+      slot="popperRef"
+      small
+      class="cursor-pointer my-0 ml-0"
+      outline
+      :color="chipColor">
+      {{workerGroup.name}}
+    </v-chip>
   </g-popper>
 </template>
 
@@ -85,11 +95,19 @@ export default {
       }
       if (this.workerGroup.volumeType && this.workerGroup.volumeSize) {
         const volumeType = find(this.volumeTypes, { name: this.workerGroup.volumeType })
-        description.push({
-          title: 'Volume Type',
-          value: `${volumeType.name} / ${this.workerGroup.volumeSize}`,
-          description: `(Class: ${volumeType.class})`
-        })
+        if (volumeType) {
+          description.push({
+            title: 'Volume Type',
+            value: `${volumeType.name} / ${this.workerGroup.volumeSize}`,
+            description: `(Class: ${volumeType.class})`
+          })
+        } else {
+          description.push({
+            title: 'Volume Type',
+            value: this.workerGroup.volumeType,
+            unsupported: 'This volume type is no longer supported'
+          })
+        }
       }
       if (this.workerGroup.machineImage) {
         const machineImage = find(this.machineImages, { name: this.workerGroup.machineImage.name })
@@ -115,6 +133,15 @@ export default {
         })
       }
       return description
+    },
+    unsupported () {
+      return find(this.description, line => { return line.unsupported !== undefined })
+    },
+    chipColor () {
+      if (this.unsupported) {
+        return 'orange darken-2'
+      }
+      return 'cyan darken-2'
     }
   }
 }
