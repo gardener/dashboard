@@ -68,7 +68,7 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
@@ -172,10 +172,16 @@ export default {
       return this.type === 'service'
     },
     textField () {
+      if (this.textFieldName) {
+        return this.$refs[this.textFieldName]
+      }
+      return undefined
+    },
+    textFieldName () {
       if (this.isUserDialog) {
-        return this.$refs.username
+        return 'username'
       } else if (this.isServiceDialog) {
-        return this.$refs.serviceAccountName
+        return 'serviceAccountName'
       }
       return undefined
     },
@@ -233,7 +239,7 @@ export default {
     },
     cancel () {
       this.$v.$reset()
-      this.$nextTick(() => this.hide())
+      this.hide()
     },
     reset () {
       this.$v.$reset()
@@ -247,10 +253,7 @@ export default {
     },
     setFocusAndSelection () {
       if (this.textField) {
-        const input = this.textField.$refs.input
-        this.$nextTick(() => {
-          input.focus()
-        })
+        setInputFocus(this, this.textFieldName)
       }
     },
     save () {

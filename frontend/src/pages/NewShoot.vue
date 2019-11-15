@@ -343,6 +343,7 @@ export default {
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
         this.$nextTick(() => {
+          // Need to wait for the new element to be rendered, before we can scroll it into view
           this.$refs.errorAlert.$el.scrollIntoView()
         })
       }

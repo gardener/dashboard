@@ -266,14 +266,12 @@ export default {
       this.project = project
     },
     onProjectFilterSubmit () {
-      this.$nextTick(() => { // give events time to react (if v-list tile is active)
-        if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
-          const project = head(this.sortedAndFilteredProjectList)
-          if (project) {
-            this.onProjectSelect(project)
-          }
+      if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
+        const project = head(this.sortedAndFilteredProjectList)
+        if (project) {
+          this.onProjectSelect(project)
         }
-      })
+      }
     },
     openProjectDialog () {
       this.projectMenu = false

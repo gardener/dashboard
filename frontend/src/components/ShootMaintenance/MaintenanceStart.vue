@@ -31,8 +31,6 @@ limitations under the License.
         </v-flex>
         <maintenance-components
           title="The following updates will be performed"
-          :updateKubernetesVersion="updateKubernetesVersion"
-          :updateOSVersion="updateOSVersion"
           :selectable="false"
           ref="maintenanceComponents"
         ></maintenance-components>
@@ -109,9 +107,7 @@ export default {
       }
     },
     reset () {
-      this.$nextTick(() => {
-        this.$refs.maintenanceComponents.reset()
-      })
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateOSVersion, osUpdates: this.updateKubernetesVersion })
     }
   },
   watch: {

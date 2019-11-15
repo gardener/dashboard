@@ -693,6 +693,8 @@ export default {
     term.open(this.$refs.container)
     term.focus()
     this.$nextTick(() => {
+      // use $nextTick as xterm needs to be finished with rendering because fitAddon relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
       fitAddon.fit()
     })
 
