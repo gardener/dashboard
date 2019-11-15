@@ -2,17 +2,20 @@
   <v-select
     color="cyan darken-2"
     :items="volumeTypeItems"
-    item-text="displayName"
+    item-text="name"
     item-value="name"
     v-model="worker.volumeType"
     :error-messages="getErrorMessages('worker.volumeType')"
     @input="onInputVolumeType"
     @blur="$v.worker.volumeType.$touch()"
-    label="Volume Type">
+    label="Volume Type"
+    :hint="hint"
+    persistent-hint
+    >
     <template slot="item" slot-scope="data">
       <v-list-tile-content>
         <v-list-tile-title>{{data.item.name}}</v-list-tile-title>
-        <v-list-tile-sub-title>Class: {{data.item.class}}</v-list-tile-sub-title>
+        <v-list-tile-sub-title v-if="data.item.class">Class: {{data.item.class}}</v-list-tile-sub-title>
       </v-list-tile-content>
     </template>
   </v-select>
@@ -27,18 +30,14 @@ import map from 'lodash/map'
 const validationErrors = {
   worker: {
     volumeType: {
-      required: 'Volume Type is required',
-      notUnsupported: 'This volume type is not supported, please choose a different one'
+      required: 'Volume Type is required'
     }
   }
 }
 const validations = {
   worker: {
     volumeType: {
-      required,
-      notUnsupported () {
-        return !this.unsupported
-      }
+      required
     }
   }
 }
@@ -62,22 +61,23 @@ export default {
   },
   computed: {
     volumeTypeItems () {
-      const volumeTypes = map(this.volumeTypes, volumeType => {
-        volumeType.displayName = volumeType.name
-        return volumeType
-      })
-      if (this.unsupported) {
+      const volumeTypes = this.volumeTypes.slice()
+      if (this.notInCloudProfile) {
         volumeTypes.push({
-          name: this.worker.volumeType,
-          displayName: `${this.worker.volumeType} [unsupported]`,
-          class: 'Not supported'
+          name: this.worker.volumeType
         })
       }
       this.onInputVolumeType()
       return volumeTypes
     },
-    unsupported () {
+    notInCloudProfile () {
       return !includes(map(this.volumeTypes, 'name'), this.worker.volumeType)
+    },
+    hint () {
+      if (this.notInCloudProfile) {
+        return 'This volume type may not be supported by your worker'
+      }
+      return undefined
     }
   },
   validations,
