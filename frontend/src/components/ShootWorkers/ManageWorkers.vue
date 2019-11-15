@@ -24,6 +24,7 @@ limitations under the License.
         :cloudProfileName="cloudProfileName"
         :region="region"
         :availableZones="availableZones"
+        :zonedCluster="zonedCluster"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -88,7 +89,8 @@ export default {
       valid: false,
       cloudProfileName: undefined,
       region: undefined,
-      zonesNetworkConfiguration: undefined
+      zonesNetworkConfiguration: undefined,
+      zonedCluster: undefined
     }
   },
   computed: {
@@ -178,11 +180,12 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.setInternalWorkers(workers)
+      this.zonedCluster = zonedCluster !== false
     }
   },
   mounted () {

@@ -1,8 +1,8 @@
 <template>
   <v-select
     color="cyan darken-2"
-    :items="volumeTypes"
-    item-text="name"
+    :items="volumeTypeItems"
+    item-text="displayName"
     item-value="name"
     v-model="worker.volume.type"
     :error-messages="getErrorMessages('worker.volume.type')"
@@ -28,7 +28,8 @@ const validationErrors = {
   worker: {
     volume: {
       type: {
-        required: 'Volume Type is required'
+        required: 'Volume Type is required',
+        notUnsupported: 'This volume type is not supported, please choose a different one'
       }
     }
   }
@@ -37,7 +38,10 @@ const validations = {
   worker: {
     volume: {
       type: {
-        required
+        required,
+        notUnsupported () {
+          return !this.unsupported
+        }
       }
     }
   }
@@ -60,6 +64,26 @@ export default {
       valid: undefined
     }
   },
+  computed: {
+    volumeTypeItems () {
+      const volumeTypes = map(this.volumeTypes, volumeType => {
+        volumeType.displayName = volumeType.name
+        return volumeType
+      })
+      if (this.unsupported) {
+        volumeTypes.push({
+          name: this.worker.volume.type,
+          displayName: `${this.worker.volume.type} [unsupported]`,
+          class: 'Not supported'
+        })
+      }
+      this.onInputVolumeType()
+      return volumeTypes
+    },
+    unsupported () {
+      return !includes(map(this.volumeTypes, 'name'), this.worker.volume.type)
+    }
+  },
   validations,
   methods: {
     getErrorMessages (field) {
@@ -80,14 +104,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    volumeTypes (updatedVolumeTypes) {
-      if (!includes(map(updatedVolumeTypes, 'name'), this.worker.volume.type)) {
-        this.worker.volume.type = undefined
-        this.onInputVolumeType()
-      }
-    }
   }
 }
 </script>
