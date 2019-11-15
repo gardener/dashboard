@@ -34,6 +34,14 @@ dashboardOrigins:
 dashboardClientSecret: sHq4vLoiQcIWbO3h
 kubectlClientSecret: if6ji0dTFE4rQfj8
 
+additionalStaticClients: ~
+# - name: additional identity example client
+#   id: exampleClient
+#   secret: changeme
+#   redirectURIs:
+#     - "https://additional.ingress.example.org"
+#     - "https://additional.example.org"
+
 connectors:
 - type: saml
   id: saml
