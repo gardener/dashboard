@@ -41,6 +41,7 @@ limitations under the License.
           <machine-image
           :machineImages="machineImages"
           :worker="worker"
+          :updateOSMaintenance="updateOSMaintenance"
           @updateMachineImage="onUpdateMachineImage"
           @valid="onMachineImageValid">
           </machine-image>
@@ -181,6 +182,9 @@ export default {
     },
     availableZones: {
       type: Array
+    },
+    updateOSMaintenance: {
+      type: Boolean
     }
   },
   data () {

@@ -35,7 +35,11 @@ export default {
   },
   methods: {
     applyHintColor (hintColor) {
-      this.$el.className = `hintColor-${hintColor}`
+      if (hintColor === 'default') {
+        this.$el.className = undefined
+      } else {
+        this.$el.className = `hintColor-${hintColor}`
+      }
     }
   },
   mounted () {
