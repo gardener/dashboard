@@ -46,8 +46,8 @@ const activeNodeReleases = {
   }
 }
 
-async function getNodeDockerfile (nodeVersion) {
-  const { body } = await httpClient.get(`/${nodeVersion}/alpine/Dockerfile`)
+async function getNodeDockerfile (nodeVersion, alpineVersion) {
+  const { body } = await httpClient.get(`/${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
   return DockerfileParser.parse(body)
 }
 
@@ -74,10 +74,11 @@ describe('dockerfile', function () {
     expect(_.keys(activeNodeReleases), `Node release ${nodeRelease} is not in the range of active LTS releases`).to.include(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     expect(endOfLife, `Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.`).to.be.above(new Date())
-    const nodeDockerfile = await getNodeDockerfile(nodeRelease)
+    const dashboardReleaseBaseImage = buildStages.release.getImage()
+    const [, alpineVersion] = /^alpine:(\d+\.\d+)/.exec(dashboardReleaseBaseImage)
+    const nodeDockerfile = await getNodeDockerfile(nodeRelease, alpineVersion)
     expect(nodeDockerfile.getFROMs()).to.have.length(1)
     const nodeBaseImage = _.first(nodeDockerfile.getFROMs()).getImage()
-    const dashboardReleaseBaseImage = buildStages.release.getImage()
     expect(nodeBaseImage, 'Alpine base images of "dashboard-release" image and "node" image do not match!').to.be.equal(dashboardReleaseBaseImage)
   })
 })

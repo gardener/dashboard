@@ -41,6 +41,9 @@ data:
       - dashboard
       name: Kubectl
       secret: {{ .Values.kubectlClientSecret }}
+{{- if .Values.additionalStaticClients }}
+{{ toYaml .Values.additionalStaticClients | indent 4 }}
+{{- end -}}
 {{- if .Values.staticPasswords }}
     enablePasswordDB: true
     staticPasswords:

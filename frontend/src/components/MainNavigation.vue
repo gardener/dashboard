@@ -325,6 +325,7 @@ export default {
         height: auto;
         max-height: (4 * 54px) + (2 * 8px);
         overflow-y: auto;
+        max-width: 300px;
 
         div > a {
           height: 54px;

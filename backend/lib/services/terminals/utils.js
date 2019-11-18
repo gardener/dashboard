@@ -107,10 +107,10 @@ async function getKubeApiServerHostForSeed ({ gardenClient, coreClient, shootsSe
     const shootResource = await shootsService.read({ gardenClient, namespace, name })
     ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
   } else {
-    ingressDomain = await getSeedIngressDomain(projectsClient, namespacesClient, seed)
+    ingressDomain = await getSeedIngressDomain(seed)
   }
 
-  return `k8.${ingressDomain}`
+  return `k-${ingressDomain}`
 }
 
 async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootResource }) {
@@ -118,7 +118,7 @@ async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootRe
   const namespacesClient = coreClient.namespaces
 
   const ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
-  return `k8.${ingressDomain}`
+  return `k-${ingressDomain}`
 }
 
 function getGardenTerminalHostClusterRefType () {

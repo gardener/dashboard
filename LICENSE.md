@@ -256,6 +256,10 @@ Copyright (c) 2013-2014 Roman Shtylman <shtylman+expressjs@gmail.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/express/blob/master/LICENSE)
 
+- [fnv-plus](https://github.com/tjwebb/fnv-plus)\
+Copyright (c) Travis Webb\
+[MIT License](https://github.com/tjwebb/fnv-plus/blob/master/README.md)
+
 - [got](https://github.com/sindresorhus/got)\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/got/blob/master/license)
@@ -308,6 +312,10 @@ Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
 - [socket.io](https://github.com/socketio/socket.io)\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
+
+- [url-template](https://github.com/bramstein/url-template)\
+Copyright (c) 2012-2014, Bram Stein\
+[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
 
 - [uuid](https://github.com/kelektiv/node-uuid)\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
