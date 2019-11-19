@@ -17,7 +17,7 @@
 'use strict'
 
 const Resource = require('../../Resource')
-const { http } = require('../../symbols')
+const { http, ws } = require('../../symbols')
 
 class Terminal extends Resource {
   get (options = {}) {
@@ -38,6 +38,10 @@ class Terminal extends Resource {
 
   delete (options = {}) {
     return this[http.delete](options)
+  }
+
+  waitFor (options = {}) {
+    return this[ws.waitFor](options)
   }
 }
 

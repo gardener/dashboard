@@ -24,38 +24,37 @@ const apiGroups = [
   'core.gardener.cloud',
   'dashboard.gardener.cloud',
   'extensions'
-].reduce((apiGroups, key) => {
-  apiGroups[key] = require(`./${key}`)
-  return apiGroups
+].reduce((accumulator, key) => {
+  accumulator[key] = require(`./${key}`)
+  return accumulator
 }, {})
 
-class ApiGroup extends Map {
-  constructor (apiGroup, options = {}) {
-    super()
-    this.create = key => {
-      if (key in apiGroup) {
-        return new apiGroup[key](options)
-      } else {
-        throw new TypeError(`Resource ${key} not supported`)
+class ApiGroup {
+  constructor (key, options = {}) {
+    for (const [name, Ctor] of Object.entries(apiGroups[key])) {
+      this[name] = new Ctor(options)
+    }
+  }
+
+  static assignAll (client, options) {
+    for (const key of Object.keys(apiGroups)) {
+      client[key] = new ApiGroup(key, options)
+    }
+    return client
+  }
+
+  static getResources () {
+    const resources = {}
+    for (const apiGroup of Object.values(apiGroups)) {
+      for (const { group, version, names: { plural, kind } = {} } of Object.values(apiGroup)) {
+        if (group && version && kind && plural) {
+          const name = plural
+          const apiVersion = group === 'core' ? version : `${group}/${version}`
+          resources[kind] = { name, kind, apiVersion }
+        }
       }
     }
-  }
-
-  get (key) {
-    if (!this.has(key)) {
-      this.set(key, this.create(key))
-    }
-    return super.get(key)
-  }
-
-  static create (key, options) {
-    if (key in apiGroups) {
-      return new Proxy(new ApiGroup(apiGroups[key], options), {
-        get (apiGroup, key) {
-          return apiGroup.get(key)
-        }
-      })
-    }
+    return resources
   }
 }
 

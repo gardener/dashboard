@@ -33,7 +33,10 @@ class BaseResource {
     return this.constructor.name.toLocaleLowerCase()
   }
 
-  [http.request] (options = {}) {
+  [http.request] ({ body, ...options } = {}) {
+    if (body && typeof body === 'object') {
+      options.json = body
+    }
     const pathname = this[http.pathname](options).replace(/^\//, '')
     return this[http.client](pathname, options)
   }

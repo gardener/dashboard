@@ -47,9 +47,13 @@ function errorToLocals (err, req) {
   const message = err.message
   let reason = err.reason || 'Internal Error'
   const name = err.name
+
   const error = req.app.get('env') === 'development' ? err : { name }
   let status = 500
-  if (_.isInteger(err.code)) {
+  if (name === 'HTTPError' && err.response) {
+    status = err.response.statusCode
+    reason = err.response.statusMessage
+  } else if (_.isInteger(err.code)) {
     status = err.code
   } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
     status = parseInt(err.code)

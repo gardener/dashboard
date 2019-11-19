@@ -25,7 +25,8 @@ const httpSymbols = [
   'post',
   'put',
   'patch',
-  'delete'
+  'delete',
+  'waitFor'
 ]
 const http = {}
 for (const key of httpSymbols) {
@@ -33,6 +34,7 @@ for (const key of httpSymbols) {
 }
 
 const wsSymbols = [
+  'create',
   'connect',
   'watch'
 ]

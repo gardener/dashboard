@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { getInCluster, fromKubeconfig } = require('./util')
+const { getInCluster, fromKubeconfig, readKubeconfig } = require('./util')
 
 function load (env = process.env) {
   if (/^test/.test(env.NODE_ENV)) {
@@ -28,12 +28,12 @@ function load (env = process.env) {
     }
   }
   if (env.KUBECONFIG) {
-    return fromKubeconfig(env.KUBECONFIG)
+    return fromKubeconfig(readKubeconfig(env.KUBECONFIG))
   }
   try {
     return getInCluster(env)
   } catch (err) {
-    return fromKubeconfig()
+    return fromKubeconfig(readKubeconfig())
   }
 }
 

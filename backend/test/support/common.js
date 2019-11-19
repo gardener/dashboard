@@ -190,9 +190,10 @@ class Reconnector extends EventEmitter {
   }
 }
 
-function createReconnectorStub (events = []) {
+function createReconnectorStub (events = [], name) {
   const reconnector = new Reconnector()
   _.forEach(events, args => reconnector.pushEvent(...args))
+  reconnector.resourceName = name
   return reconnector
 }
 

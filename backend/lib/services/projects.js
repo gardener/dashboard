@@ -17,23 +17,12 @@
 'use strict'
 
 const _ = require('lodash')
-const kubernetes = require('../kubernetes')
-const Resources = kubernetes.Resources
-const garden = kubernetes.gardener()
+const { privilegedClient, Resources, waitFor } = require('../kubernetes-client')
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
-const { getProjectByNamespace } = require('../utils')
 const authorization = require('./authorization')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
-
-function Core ({ auth }) {
-  return kubernetes.core({ auth })
-}
-
-function Garden ({ auth }) {
-  return kubernetes.gardener({ auth })
-}
 
 function fromResource ({ metadata, spec = {} }) {
   const role = 'project'
@@ -103,11 +92,12 @@ async function validateDeletePreconditions ({ user, namespace }) {
 }
 
 exports.list = async function ({ user, qs = {} }) {
+  const { 'core.gardener.cloud': gardener } = privilegedClient
   const [
     projects,
     isAdmin
   ] = await Promise.all([
-    garden.projects.get(),
+    gardener.projects.get(),
     authorization.isAdmin(user)
   ])
 
@@ -149,65 +139,70 @@ function isProjectReady ({ status: { phase } = {} } = {}) {
 }
 
 exports.create = async function ({ user, body }) {
+  const client = user.api
+  const { 'core.gardener.cloud': gardener } = client
+
   const name = _.get(body, 'metadata.name')
   _.set(body, 'metadata.namespace', `garden-${name}`)
   _.set(body, 'data.createdBy', user.id)
-  const projects = Garden(user).projects
-  let project = await projects.post({ body: toResource(body) })
+  let project = await gardener.projects.create({ json: toResource(body) })
 
   const watch = exports.watchProject(name)
-  const conditionFunction = isProjectReady
-  const resourceName = name
-  const waitTimeout = exports.projectInitializationTimeout
-  project = await kubernetes.waitUntilResourceHasCondition({ watch, conditionFunction, waitTimeout, resourceName })
+  const timeout = exports.projectInitializationTimeout
+  project = await waitFor.call(watch, isProjectReady, { timeout })
 
   return fromResource(project)
 }
 // needs to be exported for testing
-exports.watchProject = name => garden.projects.watch({ name })
+exports.watchProject = name => {
+  // must be the privilegedClient because rbac rolebinding does not exist yet
+  const { 'core.gardener.cloud': gardener } = privilegedClient
+  return gardener.projects.watch({ name })
+}
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
-  const projects = Garden(user).projects
-  const namespaces = Core(user).namespaces
-
-  const project = await getProjectByNamespace(projects, namespaces, namespace)
+  const client = user.api
+  const project = await client.getProjectByNamespace(namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
-  const projects = Garden(user).projects
-  const namespaces = Core(user).namespaces
+  const client = user.api
+  const { 'core.gardener.cloud': gardener } = client
 
-  const project = await getProjectByNamespace(projects, namespaces, namespace)
+  const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
   // do not update createdBy
   const { metadata, data } = fromResource(project)
   _.assign(data, _.omit(body.data, 'createdBy'))
-  return fromResource(await projects.mergePatch({
+  return fromResource(await gardener.projects.patch({
+    type: 'merge',
     name,
-    body: toResource({ metadata, data })
+    json: toResource({ metadata, data })
   }))
 }
 
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
-  const projects = Garden(user).projects
-  const namespaces = Core(user).namespaces
 
-  const project = await getProjectByNamespace(projects, namespaces, namespace)
+  const client = user.api
+  const { 'core.gardener.cloud': gardener } = client
+
+  const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
   const annotations = _.assign({
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }, project.metadata.annotations)
-  await projects.mergePatch({
+  await gardener.projects.patch({
+    type: 'merge',
     name,
-    body: {
+    json: {
       metadata: {
         annotations
       }
     }
   })
-  await projects.delete({ name })
+  await gardener.projects.delete({ name })
   return fromResource(project)
 }

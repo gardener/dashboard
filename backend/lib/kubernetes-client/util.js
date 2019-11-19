@@ -16,11 +16,13 @@
 
 'use strict'
 
+const _ = require('lodash')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const yaml = require('js-yaml')
 const logger = require('../logger')
+const { GatewayTimeout, InternalServerError } = require('../errors')
 
 function ctors (filename) {
   const basename = path.basename(filename)
@@ -77,26 +79,91 @@ function getInCluster ({
   return config
 }
 
-function fromKubeconfig (filename = process.env.KUBECONFIG) {
+function readKubeconfig (filename) {
+  if (!filename) {
+    filename = path.join(os.homedir(), '.kube', 'config')
+  }
+  if (filename.indexOf(':') !== -1) {
+    filename = filename.split(':')
+  }
   // use the first kubeconfig file
-  filename = filename
-    ? filename.split(':')
-    : path.join(os.homedir(), '.kube', 'config')
   if (Array.isArray(filename)) {
     filename = filename.shift()
   }
-  const {
-    contexts,
+  const dirname = path.dirname(filename)
+  const config = yaml.safeLoad(fs.readFileSync(filename))
+  const resolvePath = (object, key) => {
+    if (object[key]) {
+      object[key] = path.resolve(dirname, object[key])
+    }
+  }
+  for (const { cluster } of Object.values(config.cluster)) {
+    resolvePath(cluster, 'certificate-authority')
+  }
+  for (const { user } of Object.values(config.users)) {
+    resolvePath(user, 'client-key')
+    resolvePath(user, 'client-certificate')
+  }
+  return config
+}
+
+function parseKubeconfig (input) {
+  if (input) {
+    switch (typeof input) {
+      case 'string':
+        return yaml.safeLoad(input)
+      default:
+        return input
+    }
+  }
+  throw new TypeError('Kubeconfig must not be empty')
+}
+
+function cleanKubeconfig (input) {
+  const cleanCluster = ({ name, cluster }) => {
+    cluster = _.pick(cluster, ['server', 'insecure-skip-tls-verify', 'certificate-authority-data'])
+    return { name, cluster }
+  }
+  const cleanContext = ({ name, context }) => {
+    context = _.pick(context, ['cluster', 'user', 'namespace'])
+    return { name, context }
+  }
+  const cleanAuthInfo = ({ name, user }) => {
+    user = _.pick(user, ['client-certificate-data', 'client-key-data', 'token', 'username', 'password'])
+    return { name, user }
+  }
+  const cleanConfig = ({
+    apiVersion = 'v1',
+    kind = 'Config',
     clusters,
-    users,
-    'current-context': currentContext
-  } = yaml.safeLoad(fs.readFileSync(filename))
+    contexts,
+    'current-context': currentContext,
+    users
+  }) => {
+    return {
+      apiVersion,
+      kind,
+      clusters: _.map(clusters, cleanCluster),
+      contexts: _.map(contexts, cleanContext),
+      'current-context': currentContext,
+      users: _.map(users, cleanAuthInfo)
+    }
+  }
+  return cleanConfig(parseKubeconfig(input))
+}
+
+function fromKubeconfig (input) {
+  const {
+    clusters,
+    contexts,
+    'current-context': currentContext,
+    users
+  } = parseKubeconfig(input)
 
   // inline certificates and keys
-  const dirname = path.dirname(filename)
-  const readFile = (obj, name) => {
+  const readCertificate = (obj, name) => {
     if (obj[name]) {
-      return fs.readFileSync(path.resolve(dirname, obj[name]))
+      return fs.readFileSync(obj[name])
     }
     if (obj[`${name}-data`]) {
       return Buffer.from(obj[`${name}-data`], 'base64').toString('utf8')
@@ -114,7 +181,7 @@ function fromKubeconfig (filename = process.env.KUBECONFIG) {
 
   if (cluster) {
     config.url = cluster.server
-    const ca = readFile(cluster, 'certificate-authority')
+    const ca = readCertificate(cluster, 'certificate-authority')
     if (ca) {
       config.ca = ca
     }
@@ -124,8 +191,8 @@ function fromKubeconfig (filename = process.env.KUBECONFIG) {
   }
 
   if (user) {
-    const cert = readFile(user, 'client-certificate')
-    const key = readFile(user, 'client-key')
+    const cert = readCertificate(user, 'client-certificate')
+    const key = readCertificate(user, 'client-key')
     if (cert && key) {
       config.cert = cert
       config.key = key
@@ -143,6 +210,35 @@ function fromKubeconfig (filename = process.env.KUBECONFIG) {
   }
 
   return config
+}
+
+function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namespace, token, server, caData }) {
+  return yaml.safeDump({
+    apiVersion: 'v1',
+    kind: 'Config',
+    clusters: [{
+      name: cluster,
+      cluster: {
+        'certificate-authority-data': caData,
+        server
+      }
+    }],
+    users: [{
+      name: user,
+      user: {
+        token
+      }
+    }],
+    contexts: [{
+      name: context,
+      context: {
+        cluster,
+        user,
+        namespace
+      }
+    }],
+    'current-context': context
+  })
 }
 
 function mergeConfig ({ auth, key, cert, privileged, ...options } = {}, config) {
@@ -233,7 +329,7 @@ function createError (code, reason) {
 function createErrorEvent ({ message, error }) {
   const type = 'ERROR'
   const annotations = {
-    'websocket.sapcloud.io/message': message
+    'websocket.gardener.cloud/message': message
   }
   const object = {
     kind: 'Status',
@@ -329,11 +425,84 @@ function wrapWebSocket (emitter, ws) {
   return emitter
 }
 
-module.exports = {
+function waitFor (condition, { timeout = 5000 }) {
+  const watch = this
+  const resourceName = this.resourceName
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      done(new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${timeout} ms`))
+    }, timeout)
+
+    function done (err, obj) {
+      clearTimeout(timeoutId)
+
+      watch.removeListener('event', onEvent)
+      watch.removeListener('disconnect', onDisconnect)
+      watch.removeListener('error', logError)
+      watch.once('error', ignoreError)
+
+      watch.disconnect()
+      if (err) {
+        return reject(err)
+      }
+      resolve(obj)
+    }
+
+    function onEvent (event) {
+      try {
+        switch (event.type) {
+          case 'ADDED':
+          case 'MODIFIED':
+            if (condition(event.object)) {
+              done(null, event.object)
+            }
+            break
+          case 'DELETED':
+            throw new InternalServerError(`Resource "${resourceName}" has been deleted`)
+        }
+      } catch (err) {
+        done(err)
+      }
+    }
+
+    function logError (err) {
+      logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
+    }
+
+    function ignoreError () {
+    }
+
+    function onDisconnect (err) {
+      done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
+    }
+
+    watch.on('event', onEvent)
+    watch.on('error', logError)
+    watch.on('disconnect', onDisconnect)
+  })
+}
+
+function isHttpError ({ name, response: { statusCode } = {} }, expectedStatusCode) {
+  if (name !== 'HTTPError') {
+    return false
+  }
+  if (expectedStatusCode) {
+    if (Array.isArray(expectedStatusCode)) {
+      return expectedStatusCode.indexOf(statusCode) !== -1
+    }
+    return expectedStatusCode === statusCode
+  }
+  return true
+}
+
+exports = module.exports = {
   ctors,
   findByName,
   getInCluster,
+  readKubeconfig,
   fromKubeconfig,
+  cleanKubeconfig,
+  dumpKubeconfig,
   mergeConfig,
   base64Encode,
   base64UrlEncode,
@@ -342,5 +511,7 @@ module.exports = {
   setAuthorization,
   setContentType,
   setPatchType,
-  wrapWebSocket
+  wrapWebSocket,
+  waitFor,
+  isHttpError
 }

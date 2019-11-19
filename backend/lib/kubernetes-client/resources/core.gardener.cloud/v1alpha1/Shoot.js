@@ -28,10 +28,6 @@ class Shoot extends Resource {
     return this[ws.watch](options)
   }
 
-  connect (options = {}) {
-    return this[ws.connect](options)
-  }
-
   create (options = {}) {
     return this[http.post](options)
   }

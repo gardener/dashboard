@@ -18,11 +18,19 @@
 'use strict'
 
 const _ = require('lodash')
+const { HTTPError } = require('got')
 const { getSeed } = require('../cache')
+const { isHttpError } = require('./util')
 const { decodeBase64 } = require('../utils')
-const { NotFound } = require('../errors')
 
-class Helper {
+module.exports = {
+  getSeedNameFromShoot ({ status: { seed } = {} }) {
+    if (!seed) {
+      throw new Error(`There is no seed assigned to this shoot (yet)`)
+    }
+    return seed
+  },
+
   async getShootIngressDomain (shoot, seed = undefined) {
     if (!seed) {
       seed = getSeed(this.getSeedNameFromShoot(shoot))
@@ -34,7 +42,7 @@ class Helper {
     const projectName = await this.getProjectNameFromNamespace(namespace)
 
     return `${name}.${projectName}.${ingressDomain}`
-  }
+  },
 
   async getSeedIngressDomain (seed) {
     const namespace = 'garden'
@@ -43,16 +51,16 @@ class Helper {
     const projectName = await this.getProjectNameFromNamespace(namespace)
 
     return `${projectName}.${ingressDomain}`
-  }
+  },
 
-  async getSeedKubeconfig (seed) {
+  getSeedKubeconfig (seed) {
     const secretRef = _.get(seed, 'spec.secretRef')
     return this.getKubeconfig(secretRef)
-  }
+  },
 
   async getKubeconfig ({ name, namespace }) {
     try {
-      const secret = await this.get('core').secrets.get({ namespace, name })
+      const secret = await this.core.secrets.get({ namespace, name })
 
       const kubeConfigBase64 = _.get(secret, 'data.kubeconfig')
       if (!kubeConfigBase64) {
@@ -61,40 +69,40 @@ class Helper {
 
       return decodeBase64(secret.data.kubeconfig)
     } catch (err) {
-      if (err.name === 'HTTPError' && err.response.statusCode === 404) {
+      if (isHttpError(err, 404)) {
         return
       }
       throw err
     }
-  }
+  },
 
   async getProjectNameFromNamespace (namespace) {
     try {
       const project = await this.getProjectByNamespace(namespace)
       return project.metadata.name
     } catch (err) {
-      if (err.name === 'HTTPError' && err.response.statusCode === 404) {
-        if (namespace === 'garden') {
+      if (isHttpError(err, 404) && namespace === 'garden') {
         /*
           fallback: if there is no corresponding garden project, use namespace name.
           The community installer currently does not create a project resource for the garden namespace
           because of https://github.com/gardener/gardener/issues/879
         */
-          return namespace
-        }
+        return namespace
       }
       throw err
     }
-  }
+  },
 
   async getProjectByNamespace (namespace) {
-    const ns = await this.get('core').namespaces.get({ name: namespace })
+    const ns = await this.core.namespaces.get({ name: namespace })
     const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
     if (!name) {
-      throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
+      const response = {
+        statusCode: 404,
+        statusMessage: `Namespace '${namespace}' is not related to a gardener project`
+      }
+      throw new HTTPError(response)
     }
-    return this.get('core.gardener.cloud').projects.get({ name })
+    return this['core.gardener.cloud'].projects.get({ name })
   }
 }
-
-module.exports = Helper

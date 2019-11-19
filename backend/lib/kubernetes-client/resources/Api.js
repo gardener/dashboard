@@ -20,31 +20,18 @@ const { isIP } = require('net')
 const ApiGroup = require('./ApiGroup')
 const Endpoint = require('./Endpoint')
 
-class Api extends Map {
+class Api {
   constructor (options = {}) {
-    super()
-    this.create = key => {
-      const apiGroup = ApiGroup.create(key, options)
-      if (apiGroup) {
-        return apiGroup
-      }
-      const endpoint = Endpoint.create(key, options)
-      if (endpoint) {
-        return endpoint
-      }
-      throw new TypeError(`Api ${key} not supported`)
-    }
+    ApiGroup.assignAll(this, options)
+    Endpoint.assignAll(this, options)
   }
 
-  extend (Ctor) {
-    Object.assign(this, Ctor.prototype)
+  getResources () {
+    return this.constructor.getResources()
   }
 
-  get (key) {
-    if (!this.has(key)) {
-      this.set(key, this.create(key))
-    }
-    return super.get(key)
+  static getResources () {
+    return ApiGroup.getResources()
   }
 
   static create (options = {}) {
@@ -55,14 +42,7 @@ class Api extends Map {
       resolveBodyOnly: true,
       timeout: 30 * 1000
     }
-    return new Proxy(new Api({ ...defaultOptions, ...options }), {
-      get (api, key) {
-        if (typeof api[key] === 'function') {
-          return api[key]
-        }
-        return api.get(key)
-      }
-    })
+    return new Api({ ...defaultOptions, ...options })
   }
 }
 

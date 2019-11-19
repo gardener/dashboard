@@ -69,7 +69,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
   })
 
   it('should reject request with authorization error', async function () {
@@ -125,8 +125,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(watchStub).to.have.callCount(1)
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-    expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 
   it('should timeout when creating a project', async function () {
@@ -156,7 +156,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const reconnectorStub = createReconnectorStub([
       ['ADDED', newProject],
       ['MODIFIED', modifiedProject]
-    ])
+    ], name)
     sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
     const watchStub = sandbox.stub(services.projects, 'watchProject')
       .callsFake(() => reconnectorStub.start())
@@ -185,8 +185,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-    expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 
   it('should delete a project', async function () {

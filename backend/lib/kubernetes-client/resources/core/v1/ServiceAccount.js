@@ -24,6 +24,10 @@ class ServiceAccount extends Resource {
     return this[http.get](options)
   }
 
+  waitFor (options = {}) {
+    return this[ws.waitFor](options)
+  }
+
   watch (options = {}) {
     return this[ws.watch](options)
   }

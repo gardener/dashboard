@@ -16,6 +16,4 @@
 
 'use strict'
 
-const v1beta1 = require('./v1beta1')
-
-module.exports = { v1beta1, ...v1beta1 }
+module.exports = require('./v1beta1')

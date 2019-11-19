@@ -19,6 +19,8 @@
 const { URLSearchParams } = require('url')
 const { join } = require('path')
 const { EventEmitter } = require('events')
+const pRetry = require('p-retry')
+const pEvent = require('p-event')
 const WebSocket = require('ws')
 const inject = require('reconnect-core')
 
@@ -68,7 +70,7 @@ class Resource extends BaseResource {
     return super[http.patch](setPatchType(options, type))
   }
 
-  [ws.connect] ({ allNamespaces, namespace, name, query, headers, origin, ...options } = {}) {
+  [ws.create] ({ allNamespaces, namespace, name, query, headers, origin, ...options } = {}) {
     const {
       prefixUrl,
       ca,
@@ -106,6 +108,11 @@ class Resource extends BaseResource {
     return new WebSocket(url, websocketOptions)
   }
 
+  [ws.connect] ({ timeout = 5000, retries = 2, ...options } = {}) {
+    const connect = () => pEvent(this[ws.create](options), 'open', { timeout })
+    return pRetry(connect, { retries })
+  }
+
   [ws.watch] (options = {}) {
     const {
       initialDelay,
@@ -141,7 +148,7 @@ class Resource extends BaseResource {
     const createConnection = options => {
       const connection = new EventEmitter()
       connection.resourceName = resourceName
-      wrapWebSocket(connection, this[ws.connect](options))
+      wrapWebSocket(connection, this[ws.create](options))
       return connection
     }
 

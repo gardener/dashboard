@@ -20,7 +20,13 @@ const createApi = require('./resources')
 const Helper = require('./Helper')
 const config = require('./config')(process.env)
 const debug = require('./debug')
-const { mergeConfig, setAuthorization } = require('./util')
+const util = require('./util')
+const {
+  mergeConfig,
+  setAuthorization,
+  waitFor,
+  isHttpError
+} = util
 
 function createClient (options) {
   options = mergeConfig(options, config)
@@ -37,20 +43,35 @@ function createClient (options) {
   }
   options = debug.attach(options)
   const api = createApi(options)
-  api.extend(Helper)
+  Object.assign(api, Helper)
   return api
 }
 
 exports = module.exports = createClient
 
-exports.api = () => {
-  return (req, res, next) => {
-    const { auth } = req.user
-    Object.defineProperty(req.user, 'api', {
-      value: createClient({ auth })
-    })
-    next()
-  }
-}
+const privilegedClient = createClient({ privileged: true })
 
-exports.privilegedClient = createClient({ privileged: true })
+Object.assign(exports, {
+  privilegedClient,
+  Resources: privilegedClient.getResources(),
+  waitFor,
+  isHttpError,
+  dumpKubeconfig (options) {
+    return util.dumpKubeconfig(options)
+  },
+  fromKubeconfig (input) {
+    return util.fromKubeconfig(util.cleanKubeconfig(input))
+  },
+  cleanKubeconfig (input) {
+    return util.cleanKubeconfig(input)
+  },
+  api () {
+    return (req, res, next) => {
+      const { auth } = req.user
+      Object.defineProperty(req.user, 'api', {
+        value: createClient({ auth })
+      })
+      next()
+    }
+  }
+})

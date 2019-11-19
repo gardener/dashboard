@@ -19,10 +19,11 @@
 const endpoints = require('./endpoints')
 
 class Endpoint {
-  static create (key, options) {
-    if (key in endpoints) {
-      return new endpoints[key](options)
+  static assignAll (client, options) {
+    for (const [key, Ctor] of Object.entries(endpoints)) {
+      client[key] = new Ctor(options)
     }
+    return client
   }
 }
 
