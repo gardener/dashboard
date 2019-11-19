@@ -1,4 +1,3 @@
-
 //
 // Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
@@ -18,23 +17,31 @@
 'use strict'
 
 const _ = require('lodash')
+const { isIP } = require('net')
 const { HTTPError } = require('got')
-const { getSeed } = require('../cache')
 const { isHttpError } = require('./util')
+const { ApiGroup, Endpoint } = require('./resources')
+
 const { decodeBase64 } = require('../utils')
 
-module.exports = {
+class Client {
+  constructor (options = {}) {
+    ApiGroup.assignAll(this, options)
+    Endpoint.assignAll(this, options)
+  }
+
+  getResources () {
+    return this.constructor.getResources()
+  }
+
   getSeedNameFromShoot ({ status: { seed } = {} }) {
     if (!seed) {
       throw new Error(`There is no seed assigned to this shoot (yet)`)
     }
     return seed
-  },
+  }
 
-  async getShootIngressDomain (shoot, seed = undefined) {
-    if (!seed) {
-      seed = getSeed(this.getSeedNameFromShoot(shoot))
-    }
+  async getShootIngressDomain (shoot, seed) {
     const name = _.get(shoot, 'metadata.name')
     const namespace = _.get(shoot, 'metadata.namespace')
 
@@ -42,7 +49,7 @@ module.exports = {
     const projectName = await this.getProjectNameFromNamespace(namespace)
 
     return `${name}.${projectName}.${ingressDomain}`
-  },
+  }
 
   async getSeedIngressDomain (seed) {
     const namespace = 'garden'
@@ -51,12 +58,12 @@ module.exports = {
     const projectName = await this.getProjectNameFromNamespace(namespace)
 
     return `${projectName}.${ingressDomain}`
-  },
+  }
 
   getSeedKubeconfig (seed) {
     const secretRef = _.get(seed, 'spec.secretRef')
     return this.getKubeconfig(secretRef)
-  },
+  }
 
   async getKubeconfig ({ name, namespace }) {
     try {
@@ -74,7 +81,7 @@ module.exports = {
       }
       throw err
     }
-  },
+  }
 
   async getProjectNameFromNamespace (namespace) {
     try {
@@ -91,7 +98,7 @@ module.exports = {
       }
       throw err
     }
-  },
+  }
 
   async getProjectByNamespace (namespace) {
     const ns = await this.core.namespaces.get({ name: namespace })
@@ -105,4 +112,21 @@ module.exports = {
     }
     return this['core.gardener.cloud'].projects.get({ name })
   }
+
+  static getResources () {
+    return ApiGroup.getResources()
+  }
+
+  static create (options = {}) {
+    const { hostname } = new URL(options.url)
+    const defaultOptions = {
+      servername: isIP(hostname) !== 0 ? '' : hostname,
+      throwHttpErrors: true,
+      resolveBodyOnly: true,
+      timeout: 30 * 1000
+    }
+    return new Client({ ...defaultOptions, ...options })
+  }
 }
+
+module.exports = Client

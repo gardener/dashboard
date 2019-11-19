@@ -17,7 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
-const util = require('../../lib/kubernetes-client/util')
+const kubeconfig = require('../../lib/kubeconfig')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -121,7 +121,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
     const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
-    const cleanKubeconfigSpy = sandbox.spy(util, 'cleanKubeconfig')
+    const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })

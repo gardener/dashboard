@@ -16,20 +16,19 @@
 
 'use strict'
 
-const createApi = require('./resources')
-const Helper = require('./Helper')
-const config = require('./config')(process.env)
 const debug = require('./debug')
 const util = require('./util')
+const Client = require('./Client')
+const kubeconfig = require('../kubeconfig')
 const {
-  mergeConfig,
   setAuthorization,
   waitFor,
   isHttpError
 } = util
+const config = kubeconfig.load(process.env)
 
 function createClient (options) {
-  options = mergeConfig(options, config)
+  options = kubeconfig.mergeOptions(config, options)
   if (options.auth) {
     const auth = options.auth
     delete options.auth
@@ -42,9 +41,7 @@ function createClient (options) {
     }
   }
   options = debug.attach(options)
-  const api = createApi(options)
-  Object.assign(api, Helper)
-  return api
+  return Client.create(options)
 }
 
 exports = module.exports = createClient
@@ -52,19 +49,11 @@ exports = module.exports = createClient
 const privilegedClient = createClient({ privileged: true })
 
 Object.assign(exports, {
+  createClient,
   privilegedClient,
   Resources: privilegedClient.getResources(),
   waitFor,
   isHttpError,
-  dumpKubeconfig (options) {
-    return util.dumpKubeconfig(options)
-  },
-  fromKubeconfig (input) {
-    return util.fromKubeconfig(util.cleanKubeconfig(input))
-  },
-  cleanKubeconfig (input) {
-    return util.cleanKubeconfig(input)
-  },
   api () {
     return (req, res, next) => {
       const { auth } = req.user

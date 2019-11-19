@@ -16,6 +16,7 @@
 
 'use strict'
 
-const Api = require('./Api')
-
-module.exports = options => Api.create(options)
+module.exports = {
+  ApiGroup: require('./ApiGroup'),
+  Endpoint: require('./Endpoint')
+}

@@ -16,7 +16,8 @@
 
 'use strict'
 
-const kubernetes = require('../kubernetes-client')
+const kubernetesClient = require('../kubernetes-client')
+const kubeconfig = require('../kubeconfig')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')
@@ -24,7 +25,7 @@ const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { isHttpError } = kubernetes
+const { isHttpError, createClient } = kubernetesClient
 const { decodeBase64 } = utils
 
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
@@ -285,7 +286,7 @@ exports.info = async function ({ user, namespace, name }) {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
-            data[key] = yaml.safeDump(kubernetes.cleanKubeconfig(value))
+            data[key] = yaml.safeDump(kubeconfig.cleanKubeconfig(value))
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }
@@ -295,7 +296,7 @@ exports.info = async function ({ user, namespace, name }) {
       })
       .commit()
 
-    data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
+    data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
   }
 
   const isAdmin = await authorization.isAdmin(user)
@@ -304,8 +305,8 @@ exports.info = async function ({ user, namespace, name }) {
 
     if (seedKubeconfig && seedShootNamespace) {
       try {
-        const options = kubernetes.fromKubeconfig(seedKubeconfig)
-        const seedClient = kubernetes(options)
+        const options = kubeconfig.fromKubeconfig(seedKubeconfig)
+        const seedClient = createClient(options)
 
         await assignComponentSecrets(seedClient, data, seedShootNamespace)
       } catch (error) {
