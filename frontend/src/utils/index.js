@@ -137,6 +137,7 @@ export function setInputFocus (vm, fieldName) {
   if (fieldRef) {
     const inputRef = fieldRef.$refs.input
     vm.$nextTick(() => {
+      // Ensure that the input field has been rendered
       inputRef.focus()
       inputRef.select()
     })

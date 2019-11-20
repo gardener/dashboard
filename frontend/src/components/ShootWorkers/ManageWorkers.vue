@@ -25,6 +25,7 @@ limitations under the License.
         :region="region"
         :availableZones="availableZones"
         :zonedCluster="zonedCluster"
+        :updateOSMaintenance="updateOSMaintenance"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -90,7 +91,8 @@ export default {
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
-      zonedCluster: undefined
+      zonedCluster: undefined,
+      updateOSMaintenance: undefined
     }
   },
   computed: {
@@ -135,15 +137,13 @@ export default {
     },
     onRemoveWorker (index) {
       this.internalWorkers.splice(index, 1)
-      this.$nextTick(() => {
-        // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
-        // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
-        // on component which did not report valid = false in the first place
-        forEach(this.$refs.workerInput, workerInput => {
-          workerInput.validateInput()
-        })
-        this.validateInput()
+      // Need to evaluate the other components as well, as valid state may depend on each other (e.g. duplicate name)
+      // Lack of doing so can lead to worker valid state != true even if conflict has been resolved, if input happens
+      // on component which did not report valid = false in the first place
+      forEach(this.$refs.workerInput, workerInput => {
+        workerInput.validateInput()
       })
+      this.validateInput()
     },
     setDefaultWorker () {
       this.internalWorkers = []
@@ -151,6 +151,10 @@ export default {
     },
     onWorkerValid ({ valid, id }) {
       const worker = find(this.internalWorkers, { id })
+      if (!worker) {
+        // if worker has been removed and we receive an onWorkerValid event for this worker ->ignore
+        return
+      }
       const wasValid = worker.valid
       worker.valid = valid
       if (valid !== wasValid) {
@@ -180,10 +184,11 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, updateOSMaintenance }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
+      this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
       this.zonedCluster = zonedCluster !== false
     }
@@ -198,6 +203,9 @@ export default {
       this.userInterActionBus.on('updateRegion', region => {
         this.region = region
         this.setDefaultWorker()
+      })
+      this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
+        this.updateOSMaintenance = updateOSMaintenance
       })
     }
   }
