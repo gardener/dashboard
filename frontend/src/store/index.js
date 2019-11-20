@@ -171,18 +171,23 @@ const getters = {
       const allMachineImages = flatMap(machineImages, machineImage => {
         const machineImageVersions = []
         forEach(machineImage.versions, version => {
-          if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
-            const vendorName = vendorNameFromImageName(machineImage.name)
-            machineImageVersions.push({
-              name: machineImage.name,
-              version: version.version,
-              expirationDate: version.expirationDate,
-              expirationDateString: getDateFormatted(version.expirationDate),
-              vendorName,
-              icon: iconForVendor(vendorName),
-              needsLicense: vendorNeedsLicense(vendorName)
-            })
+          if (version.expirationDate && moment().isBefore(version.expirationDate)) {
+            return true // continue
           }
+          if (!semver.valid(version.version)) {
+            console.error(`Skipped machine image ${machineImage.name} as version ${version.version} is not a valid semver version`)
+            return true // continue
+          }
+          const vendorName = vendorNameFromImageName(machineImage.name)
+          machineImageVersions.push({
+            name: machineImage.name,
+            version: version.version,
+            expirationDate: version.expirationDate,
+            expirationDateString: getDateFormatted(version.expirationDate),
+            vendorName,
+            icon: iconForVendor(vendorName),
+            needsLicense: vendorNeedsLicense(vendorName)
+          })
         })
         machineImageVersions.sort((a, b) => {
           return semver.rcompare(a.version, b.version)
@@ -314,7 +319,11 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
-      const validVersions = filter(allVersions, ({ expirationDate }) => {
+      const validVersions = filter(allVersions, ({ expirationDate, version }) => {
+        if (!semver.valid(version)) {
+          console.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
+          return true // continue
+        }
         return !expirationDate || moment().isBefore(expirationDate)
       })
       return map(validVersions, version => {
