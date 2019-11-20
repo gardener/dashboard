@@ -26,17 +26,17 @@ const _ = require('lodash')
 const yaml = require('js-yaml')
 
 const { isHttpError, createClient } = kubernetesClient
-const { decodeBase64 } = utils
+const { decodeBase64, getSeedNameFromShoot } = utils
 
 async function getSeedKubeconfigForShoot ({ user, shoot }) {
   const client = user.api
   if (!shoot.status || !shoot.status.seed) {
     return {}
   }
-  const seed = getSeed(client.getSeedNameFromShoot(shoot))
+  const seed = getSeed(getSeedNameFromShoot(shoot))
   const seedShootNamespace = shoot.status.technicalID
 
-  const seedKubeconfig = await client.getSeedKubeconfig(seed)
+  const seedKubeconfig = await client.getKubeconfig(seed.spec.secretRef)
   return { seed, seedKubeconfig, seedShootNamespace }
 }
 
@@ -270,7 +270,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   const data = {}
   if (shoot.status && shoot.status.seed) {
-    const seed = getSeed(client.getSeedNameFromShoot(shoot))
+    const seed = getSeed(getSeedNameFromShoot(shoot))
     const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
     if (ingressDomain) {
       data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`

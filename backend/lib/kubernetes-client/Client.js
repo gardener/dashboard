@@ -17,28 +17,34 @@
 'use strict'
 
 const _ = require('lodash')
+const assert = require('assert').strict
 const { isIP } = require('net')
 const { HTTPError } = require('got')
 const { isHttpError } = require('./util')
 const { ApiGroup, Endpoint } = require('./resources')
 
+const { fromKubeconfig } = require('../kubeconfig')
 const { decodeBase64 } = require('../utils')
 
+const cluster = Symbol('cluster')
 class Client {
   constructor (options = {}) {
+    const { url, ca, rejectUnauthorized = true } = options
+    this[cluster] = {
+      server: new URL(url),
+      'certificate-authority-data': ca,
+      'insecure-skip-tls-verify': !rejectUnauthorized
+    }
     ApiGroup.assignAll(this, options)
     Endpoint.assignAll(this, options)
   }
 
-  getResources () {
-    return this.constructor.getResources()
+  get cluster () {
+    return this[cluster]
   }
 
-  getSeedNameFromShoot ({ status: { seed } = {} }) {
-    if (!seed) {
-      throw new Error(`There is no seed assigned to this shoot (yet)`)
-    }
-    return seed
+  getResources () {
+    return this.constructor.getResources()
   }
 
   async getShootIngressDomain (shoot, seed) {
@@ -60,27 +66,25 @@ class Client {
     return `${projectName}.${ingressDomain}`
   }
 
-  getSeedKubeconfig (seed) {
-    const secretRef = _.get(seed, 'spec.secretRef')
-    return this.getKubeconfig(secretRef)
-  }
-
   async getKubeconfig ({ name, namespace }) {
     try {
       const secret = await this.core.secrets.get({ namespace, name })
 
-      const kubeConfigBase64 = _.get(secret, 'data.kubeconfig')
-      if (!kubeConfigBase64) {
-        return
+      const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
+      if (kubeconfigBase64) {
+        return decodeBase64(kubeconfigBase64)
       }
-
-      return decodeBase64(secret.data.kubeconfig)
     } catch (err) {
-      if (isHttpError(err, 404)) {
-        return
+      if (!isHttpError(err, 404)) {
+        throw err
       }
-      throw err
     }
+  }
+
+  async createKubeconfigClient (secretRef) {
+    const kubeconfig = await this.getKubeconfig(secretRef)
+    assert.ok(kubeconfig, 'kubeconfig does not exist (yet)')
+    return this.constructor.create(fromKubeconfig(kubeconfig))
   }
 
   async getProjectNameFromNamespace (namespace) {

@@ -16,22 +16,28 @@
 
 'use strict'
 
-module.exports = {
-  Healthz: {
-    swagger: '2.0',
-    paths: {
-      '/healthz': {
-        get: {
-          description: 'healthz check',
-          schemes: ['https'],
-          operationId: 'healthzCheck',
-          responses: {
-            '200': { description: 'OK' },
-            '401': { description: 'Unauthorized' },
-            '503': { description: 'Unhealthy' }
-          }
-        }
-      }
-    }
+const Resource = require('../../Resource')
+const { http, ws } = require('../../symbols')
+
+class Node extends Resource {
+  get (options = {}) {
+    return this[http.get](options)
+  }
+
+  watch (options = {}) {
+    return this[ws.watch](options)
   }
 }
+
+Object.assign(Node, {
+  group: 'core',
+  version: 'v1',
+  scope: 'Cluster',
+  names: {
+    plural: 'nodes',
+    singular: 'node',
+    kind: 'Node'
+  }
+})
+
+module.exports = Node

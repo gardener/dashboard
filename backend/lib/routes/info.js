@@ -20,6 +20,7 @@ const express = require('express')
 const got = require('got')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
+const { isHttpError } = require('../kubernetes-client')
 const { version } = require('../../package')
 
 const router = module.exports = express.Router()
@@ -51,7 +52,7 @@ async function fetchGardenerVersion (client) {
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    if (err instanceof got.HTTPError && err.response.statusCode === 404) {
+    if (isHttpError(err, 404)) {
       return undefined
     }
     throw err

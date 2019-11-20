@@ -41,7 +41,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body).to.eql(members)
   })
 
-  it('should not return members but respond "Namespace not found"', async function () {
+  it('should not return members but respond "not found"', async function () {
     const bearer = await user.bearer
     const namespace = 'garden-baz'
     k8s.stub.getMembers({ bearer, namespace })
@@ -51,7 +51,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(404)
     expect(res).to.be.json
-    expect(res.body.message).to.equal('Namespace not found')
+    expect(res.body.message).to.match(/not found/i)
   })
 
   it('should return a service account', async function () {

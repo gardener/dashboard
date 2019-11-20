@@ -19,12 +19,9 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { credentials } = require('../../../lib/kubernetes')
 const { encodeBase64 } = require('../../../lib/utils')
 const jwt = require('jsonwebtoken')
-const clientConfig = credentials()
-const url = clientConfig.url
-const auth = clientConfig.auth
+const { url, auth } = require('../../../lib/kubeconfig').load()
 
 const quotas = [
   {

@@ -18,11 +18,13 @@
 'use strict'
 
 const _ = require('lodash')
+
 const {
   getConfigValue,
-  getSeedIngressDomain,
-  getShootIngressDomain
+  getSeedNameFromShoot
 } = require('../../utils')
+
+const { isHttpError } = require('../../kubernetes-client')
 const assert = require('assert').strict
 const { getSeed } = require('../../cache')
 
@@ -32,15 +34,40 @@ const GardenTerminalHostRefType = {
   SHOOT_REF: 'shootRef'
 }
 
+function getShoot (client, { namespace, name }) {
+  return client['core.gardener.cloud'].shoots.get({ namespace, name })
+}
+
+async function shootExists (client, { namespace, name }) {
+  try {
+    await getShoot(client, { namespace, name })
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return false
+    }
+    throw err
+  }
+  return true
+}
+
+function getShootIngressDomain (client, shoot) {
+  const seed = getSeed(getSeedNameFromShoot(shoot))
+  return client.getShootIngressDomain(shoot, seed)
+}
+
+function getSeedIngressDomain (client, seed) {
+  return client.getSeedIngressDomain(seed)
+}
+
 /*
   Returns the secretRef for the cluster, that hosts the terminal pods for the (virtual)garden
 */
-async function getGardenTerminalHostClusterSecretRef ({ coreClient }) {
+async function getGardenTerminalHostClusterSecretRef (client) {
   const refType = getGardenTerminalHostClusterRefType()
 
   switch (refType) {
     case GardenTerminalHostRefType.SECRET_REF: {
-      const { items: runtimeSecrets } = await getGardenTerminalHostClusterSecrets({ coreClient })
+      const { items: runtimeSecrets } = await getGardenTerminalHostClusterSecrets(client)
       const secret = _.head(runtimeSecrets)
       return {
         namespace: secret.metadata.namespace,
@@ -72,7 +99,7 @@ function getSeedForGardenTerminalHostCluster () {
   return seed
 }
 
-async function getGardenHostClusterKubeApiServer ({ gardenClient, coreClient, shootsService }) {
+async function getGardenHostClusterKubeApiServer (client) {
   const refType = getGardenTerminalHostClusterRefType()
 
   switch (refType) {
@@ -81,63 +108,62 @@ async function getGardenHostClusterKubeApiServer ({ gardenClient, coreClient, sh
     }
     case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
-      return getKubeApiServerHostForSeed({ gardenClient, coreClient, shootsService, seed })
+      return getKubeApiServerHostForSeed(client, seed)
     }
     case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
-      const shootResource = await shootsService.read({ gardenClient, namespace, name: shootName })
-      return getKubeApiServerHostForShoot({ gardenClient, coreClient, shootResource })
+      const shootResource = await getShoot(client, { namespace, name: shootName })
+      return getKubeApiServerHostForShoot(client, shootResource)
     }
     default:
       assert.fail(`unknown refType ${refType}`)
   }
 }
 
-async function getKubeApiServerHostForSeed ({ gardenClient, coreClient, shootsService, seed }) {
+async function getKubeApiServerHostForSeed (client, seed) {
   const name = seed.metadata.name
   const namespace = 'garden'
 
-  const projectsClient = gardenClient.projects
-  const namespacesClient = coreClient.namespaces
-
   let ingressDomain
-  const isShootedSeed = await shootsService.exists({ gardenClient, namespace, name })
+  const isShootedSeed = await shootExists(client, { namespace, name })
   if (isShootedSeed) {
-    const shootResource = await shootsService.read({ gardenClient, namespace, name })
-    ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
+    const shootResource = await getShoot(client, { namespace, name })
+    ingressDomain = await getShootIngressDomain(client, shootResource)
   } else {
-    ingressDomain = await getSeedIngressDomain(seed)
+    ingressDomain = await getSeedIngressDomain(client, seed)
   }
 
   return `k-${ingressDomain}`
 }
 
-async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootResource }) {
-  const projectsClient = gardenClient.projects
-  const namespacesClient = coreClient.namespaces
-
-  const ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
+async function getKubeApiServerHostForShoot (client, shootResource) {
+  const ingressDomain = await getShootIngressDomain(client, shootResource)
   return `k-${ingressDomain}`
 }
 
 function getGardenTerminalHostClusterRefType () {
-  return _.chain(getConfigValue('terminal.gardenTerminalHost'))
+  return _
+    .chain(getConfigValue('terminal.gardenTerminalHost'))
     .keys()
     .intersection(['secretRef', 'seedRef', 'shootRef'])
     .head()
     .value()
 }
 
-function getGardenTerminalHostClusterSecrets ({ coreClient }) {
+function getGardenTerminalHostClusterSecrets (client) {
   const namespace = getConfigValue('terminal.gardenTerminalHost.secretRef.namespace', 'garden')
   assert.ok(namespace, 'namespace must be set')
   const labelSelector = getConfigValue('terminal.gardenTerminalHost.secretRef.labelSelector', ['runtime=gardenTerminalHost'])
-  const qs = { labelSelector: labelSelector.join(',') }
-  return coreClient.ns(namespace).secrets.get({ qs })
+  const query = {
+    labelSelector: labelSelector.join(',')
+  }
+  return client.core.secrets.get({ namespace, query })
 }
 
 module.exports = {
+  getShoot,
+  shootExists,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   getGardenHostClusterKubeApiServer,

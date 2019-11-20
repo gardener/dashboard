@@ -19,9 +19,7 @@
 const assert = require('assert').strict
 const { Unauthorized } = require('../errors')
 const logger = require('../logger')
-const kubernetes = require('../kubernetes')
-const Resources = kubernetes.Resources
-const authentication = kubernetes.authentication()
+const { privilegedClient, Resources } = require('../kubernetes-client')
 
 exports.isAuthenticated = async function ({ token } = {}) {
   const { apiVersion, kind } = Resources.TokenReview
@@ -36,7 +34,7 @@ exports.isAuthenticated = async function ({ token } = {}) {
     }
   }
   try {
-    const { status } = await authentication.tokenreviews.post({ body })
+    const { status } = await privilegedClient['authentication.k8s.io'].tokenreviews.create({ json: body })
     const { user = {}, authenticated = false, error = 'User not authenticated' } = status || {}
     assert.strictEqual(authenticated, true, error)
     assert.ok(user.username, `User authenticated but username is empty`)
