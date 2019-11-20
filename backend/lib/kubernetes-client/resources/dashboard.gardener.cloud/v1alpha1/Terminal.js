@@ -24,6 +24,10 @@ class Terminal extends Resource {
     return this[http.get](options)
   }
 
+  watch (options = {}) {
+    return this[ws.watch](options)
+  }
+
   create (options = {}) {
     return this[http.post](options)
   }
@@ -38,10 +42,6 @@ class Terminal extends Resource {
 
   delete (options = {}) {
     return this[http.delete](options)
-  }
-
-  waitFor (options = {}) {
-    return this[ws.waitFor](options)
   }
 }
 

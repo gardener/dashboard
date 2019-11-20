@@ -43,10 +43,6 @@ class Project extends Resource {
   delete (options = {}) {
     return this[http.delete](options)
   }
-
-  waitFor (options = {}) {
-    return this[ws.waitFor](options)
-  }
 }
 
 Object.assign(Project, {

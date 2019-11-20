@@ -61,7 +61,7 @@ function createServiceaccount (client, { namespace, name, createdBy }) {
       }
     }
   }
-  return client.core.serviceaccounts.create({ namespace, name, json: body })
+  return client.core.serviceaccounts.create({ namespace, json: body })
 }
 
 async function deleteServiceaccount (client, { namespace, name }) {

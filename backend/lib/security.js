@@ -217,7 +217,7 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
-function authenticate () {
+function authenticate ({ createClient } = {}) {
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
@@ -249,6 +249,11 @@ function authenticate () {
     const bearer = decrypt(encryptedBearer)
     assert.ok(bearer, 'The decrypted bearer token must not be empty')
     user.auth = { bearer }
+    if (typeof createClient === 'function') {
+      Object.defineProperty(user, 'api', {
+        value: createClient(user)
+      })
+    }
   }
   return async (req, res, next) => {
     try {

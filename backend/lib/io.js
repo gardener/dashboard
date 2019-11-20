@@ -22,6 +22,7 @@ const logger = require('./logger')
 const { authenticateSocket } = require('./security')
 const { Forbidden } = require('./errors')
 
+const kubernetesClient = require('./kubernetes-client')
 const { projects, shoots, journals, authorization } = require('./services')
 const { getIssueComments } = journals
 const { isAdmin } = authorization
@@ -30,7 +31,7 @@ const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter'
 const { getJournalCache } = require('./cache')
 
 function socketAuthentication (nsp) {
-  const authenticate = authenticateSocket()
+  const authenticate = authenticateSocket(kubernetesClient)
   nsp.use(async (socket, next) => {
     logger.debug('Socket %s authenticating', socket.id)
     try {
