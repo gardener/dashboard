@@ -31,7 +31,7 @@ const {
   toTerminalResource
 } = require('./terminalResources')
 const {
-  getKubeApiServerHostForSeed,
+  getKubeApiServerHostForSeedOrShootedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer
@@ -247,7 +247,7 @@ async function getSeedHostCluster ({ gardenClient, gardenCoreClient, namespace, 
 
   hostCluster.namespace = seedShootNS
   hostCluster.secretRef = _.get(seed, 'spec.secretRef')
-  hostCluster.kubeApiServer = await getKubeApiServerHostForSeed({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots, seed })
+  hostCluster.kubeApiServer = await getKubeApiServerHostForSeedOrShootedSeed({ gardenClient, coreClient: gardenCoreClient, shootsService: shoots, seed })
   return hostCluster
 }
 

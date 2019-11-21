@@ -18,10 +18,9 @@
 'use strict'
 
 const _ = require('lodash')
+const fnv = require('fnv-plus')
 const {
-  getConfigValue,
-  getSeedIngressDomain,
-  getShootIngressDomain
+  getConfigValue
 } = require('../../utils')
 const assert = require('assert').strict
 const { getSeed } = require('../../cache')
@@ -81,7 +80,7 @@ async function getGardenHostClusterKubeApiServer ({ gardenClient, coreClient, sh
     }
     case GardenTerminalHostRefType.SEED_REF: {
       const seed = getSeedForGardenTerminalHostCluster()
-      return getKubeApiServerHostForSeed({ gardenClient, coreClient, shootsService, seed })
+      return getKubeApiServerHostForSeedOrShootedSeed({ gardenClient, coreClient, shootsService, seed })
     }
     case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
@@ -94,31 +93,43 @@ async function getGardenHostClusterKubeApiServer ({ gardenClient, coreClient, sh
   }
 }
 
-async function getKubeApiServerHostForSeed ({ gardenClient, coreClient, shootsService, seed }) {
+// TODO remove coreClient param.
+async function getKubeApiServerHostForSeedOrShootedSeed ({ gardenClient, coreClient, shootsService, seed }) {
   const name = seed.metadata.name
   const namespace = 'garden'
 
-  const projectsClient = gardenClient.projects
-  const namespacesClient = coreClient.namespaces
-
-  let ingressDomain
   const isShootedSeed = await shootsService.exists({ gardenClient, namespace, name })
   if (isShootedSeed) {
     const shootResource = await shootsService.read({ gardenClient, namespace, name })
-    ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
+    return getKubeApiServerHostForShoot({ shootResource })
   } else {
-    ingressDomain = await getSeedIngressDomain(seed)
+    return getKubeApiServerHostForSeed(seed)
   }
-
-  return `k-${ingressDomain}`
 }
 
-async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootResource }) {
-  const projectsClient = gardenClient.projects
-  const namespacesClient = coreClient.namespaces
+// TODO remove gardenClient, coreClient param. Remove async
+async function getKubeApiServerHostForShoot ({ gardenClient, coreClient, shootResource, seedResource }) {
+  if (!seedResource) {
+    seedResource = getSeed(shootResource.spec.cloud.seed)
+  }
+  const name = _.get(shootResource, 'metadata.name')
+  const namespace = _.get(shootResource, 'metadata.namespace')
 
-  const ingressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource)
-  return `k-${ingressDomain}`
+  const ingressDomain = seedResource.spec.ingressDomain
+  const hash = fnv.hash(`${name}.${namespace}`, 32).str()
+
+  return `k-${hash}.${ingressDomain}`
+}
+
+function getKubeApiServerHostForSeed (seed) {
+  const ingressDomain = seed.spec.ingressDomain
+
+  return `k-g.${ingressDomain}`
+}
+
+function getWildcardIngressDomainForSeed (seed) {
+  const ingressDomain = seed.spec.ingressDomain
+  return `*.${ingressDomain}`
 }
 
 function getGardenTerminalHostClusterRefType () {
@@ -143,5 +154,7 @@ module.exports = {
   getGardenHostClusterKubeApiServer,
   getKubeApiServerHostForSeed,
   getKubeApiServerHostForShoot,
+  getWildcardIngressDomainForSeed,
+  getKubeApiServerHostForSeedOrShootedSeed,
   GardenTerminalHostRefType
 }

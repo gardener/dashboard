@@ -19,12 +19,10 @@
 
 const path = require('path')
 const _ = require('lodash')
-const { getSeed } = require('../cache')
 const yaml = require('js-yaml')
 const { NotFound } = require('../errors')
 const config = require('../config')
 const assert = require('assert').strict
-const fnv = require('fnv-plus')
 
 function resolve (pathname) {
   return path.resolve(__dirname, '../..', pathname)
@@ -91,26 +89,6 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
-async function getShootIngressDomain (projects, namespaces, shoot, seed = undefined) {
-  if (!seed) {
-    seed = getSeed(shoot.spec.cloud.seed)
-  }
-  const name = _.get(shoot, 'metadata.name')
-  const namespace = _.get(shoot, 'metadata.namespace')
-
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
-  const projectName = await getProjectNameFromNamespace(projects, namespaces, namespace)
-  const hash = fnv.hash(`${name}.${projectName}`, 32).str()
-
-  return `${hash}.${ingressDomain}`
-}
-
-async function getSeedIngressDomain (seed) {
-  const ingressDomain = _.get(seed, 'spec.ingressDomain')
-
-  return `g.${ingressDomain}`
-}
-
 async function getSeedKubeconfig ({ coreClient, seed }) {
   const seedSecretName = _.get(seed, 'spec.secretRef.name')
   const seedSecretNamespace = _.get(seed, 'spec.secretRef.namespace')
@@ -133,23 +111,6 @@ async function getKubeconfig ({ coreClient, name, namespace }) {
       return
     }
     throw err
-  }
-}
-
-async function getProjectNameFromNamespace (projects, namespaces, namespace) {
-  try {
-    const project = await getProjectByNamespace(projects, namespaces, namespace)
-    return project.metadata.name
-  } catch (e) {
-    if (namespace === 'garden' && e.code === 404) {
-      /*
-        fallback: if there is no corresponding garden project, use namespace name.
-        The community installer currently does not create a project resource for the garden namespace
-        because of https://github.com/gardener/gardener/issues/879
-      */
-      return namespace
-    }
-    throw e
   }
 }
 
@@ -177,11 +138,8 @@ module.exports = {
   encodeBase64,
   getCloudProviderKind,
   shootHasIssue,
-  getShootIngressDomain,
-  getSeedIngressDomain,
   getKubeconfig,
   getSeedKubeconfig,
-  getProjectNameFromNamespace,
   getProjectByNamespace,
   getConfigValue,
   _cloudProvider: cloudProvider

@@ -26,8 +26,6 @@ const { NotImplemented } = require('../../errors')
 const {
   getKubeconfig,
   getSeedKubeconfig,
-  getShootIngressDomain,
-  getSeedIngressDomain,
   getConfigValue
 } = require('../../utils')
 const kubernetes = require('../../kubernetes')
@@ -39,6 +37,9 @@ const {
 const {
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
+  getKubeApiServerHostForShoot,
+  getKubeApiServerHostForSeed,
+  getWildcardIngressDomainForSeed,
   GardenTerminalHostRefType
 } = require('./utils')
 const shoots = require('../shoots')
@@ -107,7 +108,7 @@ async function replaceResource ({ client, name, body }) {
   }
 }
 
-function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
+function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
   if (!secretName) {
     secretName = `${name}-tls`
   }
@@ -132,7 +133,7 @@ function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionCli
     tls: [
       {
         hosts: [
-          host
+          tlsHost
         ],
         secretName
       }
@@ -246,17 +247,15 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
 
   // fetch seed resource
   const seedName = shootResource.spec.cloud.seed
-  const seedResource = await gardenClient.seeds.get({ name: seedName })
+  const seedResource = await gardenClient.seeds.get({ name: seedName }) // TODO fetch from cache
 
   // get seed client
   const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed: seedResource })
   const seedExtensionClient = kubernetes.extensions(kubernetes.fromKubeconfig(seedKubeconfig))
 
   // calculate ingress domain
-  const projectsClient = kubernetes.garden().projects
-  const namespacesClient = coreClient.namespaces
-  const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
-  const apiServerIngressHost = `k-${shootIngressDomain}`
+  const apiServerIngressHost = await getKubeApiServerHostForShoot({ gardenClient, coreClient, shootResource, seedResource })
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seedResource)
 
   const seedShootNS = _.get(shootResource, 'status.technicalID')
   if (!seedShootNS) {
@@ -270,6 +269,7 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
     namespace: seedShootNS,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     annotations
   })
 }
@@ -306,6 +306,7 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
         namespace: hostNamespace,
         apiServerHostname,
         apiServerIngressHost,
+        tlsHost: apiServerIngressHost,
         ingressAnnotations
       })
     }
@@ -324,8 +325,8 @@ async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
 
   const namespace = 'garden'
   const seedApiServerHostname = new URL(seedClientConfig.url).hostname
-  const seedIngressDomain = await getSeedIngressDomain(seed)
-  const seedApiServerIngressHost = `k-${seedIngressDomain}`
+  const seedApiServerIngressHost = getKubeApiServerHostForSeed(seed)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
   const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
   await ensureTrustedCertForApiServer({
@@ -335,11 +336,12 @@ async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
     apiServerHostname: seedApiServerHostname,
     apiServerIngressHost: seedApiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     ingressAnnotations
   })
 }
 
-async function ensureTrustedCertForApiServer ({ coreClient, extensionClient, namespace, apiServerHostname, apiServerIngressHost, ingressAnnotations, name }) {
+async function ensureTrustedCertForApiServer ({ coreClient, extensionClient, namespace, apiServerHostname, apiServerIngressHost, tlsHost, ingressAnnotations, name }) {
   let service
   // replace headless service
   if (net.isIP(apiServerHostname) !== 0) {
@@ -359,6 +361,7 @@ async function ensureTrustedCertForApiServer ({ coreClient, extensionClient, nam
     namespace,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost,
     annotations: ingressAnnotations,
     secretName: `${name}-tls`
   })
