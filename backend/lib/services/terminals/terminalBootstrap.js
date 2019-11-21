@@ -44,6 +44,9 @@ const {
   getShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
+  getKubeApiServerHostForShoot,
+  getKubeApiServerHostForSeed,
+  getWildcardIngressDomainForSeed,
   GardenTerminalHostRefType
 } = require('./utils')
 
@@ -115,7 +118,7 @@ async function replaceResource (resource, { namespace, name, body }) {
   return resource.patch({ type: 'merge', namespace, name, json: body })
 }
 
-function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
+function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
   if (!secretName) {
     secretName = `${name}-tls`
   }
@@ -140,7 +143,7 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
     tls: [
       {
         hosts: [
-          host
+          tlsHost
         ],
         secretName
       }
@@ -247,8 +250,8 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
   const seedResource = await client['core.gardener.cloud'].seeds.get({ name: seedName })
 
   // calculate ingress domain
-  const shootIngressDomain = await client.getShootIngressDomain(shootResource, seedResource)
-  const apiServerIngressHost = `k-${shootIngressDomain}`
+  const apiServerIngressHost = getKubeApiServerHostForShoot(shootResource, seedResource)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seedResource)
 
   const seedShootNamespace = _.get(shootResource, 'status.technicalID')
   if (!seedShootNamespace) {
@@ -264,6 +267,7 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
     namespace: seedShootNamespace,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     annotations
   })
 }
@@ -290,6 +294,7 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
         namespace: hostNamespace,
         name: 'garden-host-cluster-apiserver',
         apiServerIngressHost,
+        tlsHost: apiServerIngressHost,
         ingressAnnotations
       })
     }
@@ -304,18 +309,19 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
 
   const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
 
-  const seedIngressDomain = await client.getSeedIngressDomain(seed)
-  const apiServerIngressHost = `k-${seedIngressDomain}`
+  const apiServerIngressHost = getKubeApiServerHostForSeed(seed)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
   const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
   await ensureTrustedCertForApiServer(seedClient, {
     namespace,
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
     apiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     ingressAnnotations
   })
 }
 
-async function ensureTrustedCertForApiServer (client, { namespace, name, apiServerIngressHost, ingressAnnotations }) {
+async function ensureTrustedCertForApiServer (client, { namespace, name, apiServerIngressHost, tlsHost, ingressAnnotations }) {
   const apiServerHostname = client.cluster.server.hostname
   let service
   // replace headless service
@@ -335,6 +341,7 @@ async function ensureTrustedCertForApiServer (client, { namespace, name, apiServ
     namespace,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost,
     annotations: ingressAnnotations,
     secretName: `${name}-tls`
   })

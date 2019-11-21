@@ -35,7 +35,7 @@ const {
 
 const {
   getShoot,
-  getKubeApiServerHostForSeed,
+  getKubeApiServerHostForSeedOrShootedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenHostClusterKubeApiServer
@@ -236,7 +236,7 @@ async function getSeedHostCluster (client, { namespace, name, target, body }) {
 
   hostCluster.namespace = seedShootNamespace
   hostCluster.secretRef = _.get(seed, 'spec.secretRef')
-  hostCluster.kubeApiServer = await getKubeApiServerHostForSeed(client, seed)
+  hostCluster.kubeApiServer = await getKubeApiServerHostForSeedOrShootedSeed(client, seed)
   return hostCluster
 }
 
