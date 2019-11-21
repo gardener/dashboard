@@ -1,8 +1,8 @@
 <template>
-  <select-hint-colorizer :hintColor="hintColor" class="testclass">
+  <select-hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
-      :items="machineImages"
+      :items="machineImageItems"
       return-object
       :error-messages="getErrorMessages('worker.machine.image')"
       @input="onInputMachineImage"
@@ -38,8 +38,6 @@ import VendorIcon from '@/components/VendorIcon'
 import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
@@ -94,11 +92,26 @@ export default {
     machineImage: {
       get () {
         const { name, version } = this.worker.machine.image || {}
-        return find(this.machineImages, { name, version })
+        return find(this.machineImageItems, { name, version })
       },
       set (machineImage) {
         this.worker.machine.image = pick(machineImage, ['name', 'version'])
       }
+    },
+    machineImageItems () {
+      const machineImages = this.machineImages.slice()
+      if (this.notInCloudProfile) {
+        machineImages.push({
+          name: this.worker.machine.image.name,
+          version: this.worker.machine.image.version,
+          icon: 'mdi-blur-radial'
+        })
+      }
+      this.onInputMachineImage()
+      return machineImages
+    },
+    notInCloudProfile () {
+      return !find(this.machineImages, { name: this.worker.machine.image.name, version: this.worker.machine.image.version })
     },
     hint () {
       const hintText = []
@@ -111,10 +124,13 @@ export default {
       if (this.updateOSMaintenance && this.imageIsNotLatest(this.machineImage)) {
         hintText.push('If you select a version which is not the latest, you should disable automatic operating system updates')
       }
+      if (this.notInCloudProfile) {
+        return 'This machine image may not be supported by your worker'
+      }
       return join(hintText, ' / ')
     },
     hintColor () {
-      if (this.machineImage.needsLicense || this.updateOSMaintenance) {
+      if (this.machineImage.needsLicense || this.updateOSMaintenance || this.notInCloudProfile) {
         return 'orange'
       }
       return 'default'
@@ -163,14 +179,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    machineImages (updatedMachineImages) {
-      if (!includes(map(updatedMachineImages, 'name'), this.worker.machine.image)) {
-        this.worker.machine.image = undefined
-        this.onInputMachineImage()
-      }
-    }
   }
 }
 </script>

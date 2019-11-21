@@ -30,7 +30,7 @@ limitations under the License.
           ></v-text-field>
       </v-flex>
       <v-flex class="regularInput">
-        <select-hint-colorizer hintColor="orange" class="testclass">
+        <select-hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
             label="Kubernetes Version"

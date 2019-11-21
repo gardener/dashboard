@@ -1,32 +1,38 @@
 <template>
-  <v-select
-    color="cyan darken-2"
-    :items="machineTypes"
-    item-text="name"
-    item-value="name"
-    :error-messages="getErrorMessages('worker.machine.type')"
-    @input="onInputMachineType"
-    @blur="$v.worker.machine.type.$touch()"
-    v-model="worker.machine.type"
-    label="Machine Type"
-  >
-    <template v-slot:item="{ item }">
-      <v-list-tile-content>
-        <v-list-tile-title>{{item.name}}</v-list-tile-title>
-        <v-list-tile-sub-title>
-          <span>CPU: {{item.cpu}} | GPU: {{item.gpu}} | Memory: {{item.memory}}</span>
-          <span v-if="item.volumeType && item.volumeSize"> | Volume Type: {{item.volumeType}} | Volume Size: {{item.volumeSize}}</span>
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
-    </template>
-  </v-select>
+  <select-hint-colorizer hintColor="orange">
+    <v-select
+      color="cyan darken-2"
+      :items="machineTypeItems"
+      item-text="name"
+      item-value="name"
+      :error-messages="getErrorMessages('worker.machine.type')"
+      @input="onInputMachineType"
+      @blur="$v.worker.machine.type.$touch()"
+      v-model="worker.machine.type"
+      label="Machine Type"
+      :hint="hint"
+      persistent-hint
+    >
+      <template v-slot:item="{ item }">
+        <v-list-tile-content>
+          <v-list-tile-title>{{item.name}}</v-list-tile-title>
+          <v-list-tile-sub-title>
+            <span v-if="item.cpu">CPU: {{item.cpu}} | </span>
+            <span v-if="item.gpu">GPU: {{item.gpu}} | </span>
+            <span v-if="item.memory">Memory: {{item.memory}}</span>
+            <span v-if="item.volumeType && item.volumeSize"> | Volume Type: {{item.volumeType}} | Volume Size: {{item.volumeSize}}</span>
+          </v-list-tile-sub-title>
+        </v-list-tile-content>
+      </template>
+    </v-select>
+  </select-hint-colorizer>
 </template>
 
 <script>
+import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
-import includes from 'lodash/includes'
-import map from 'lodash/map'
+import find from 'lodash/find'
 
 const validationErrors = {
   worker: {
@@ -49,6 +55,9 @@ const validations = {
 }
 
 export default {
+  components: {
+    SelectHintColorizer
+  },
   props: {
     worker: {
       type: Object,
@@ -63,6 +72,27 @@ export default {
     return {
       validationErrors,
       valid: undefined
+    }
+  },
+  computed: {
+    machineTypeItems () {
+      const machineTypes = this.machineTypes.slice()
+      if (this.notInCloudProfile) {
+        machineTypes.push({
+          name: this.worker.machine.type
+        })
+      }
+      this.onInputMachineType()
+      return machineTypes
+    },
+    notInCloudProfile () {
+      return !find(this.machineTypes, ['name', this.worker.machine.type])
+    },
+    hint () {
+      if (this.notInCloudProfile) {
+        return 'This machine type may not be supported by your worker'
+      }
+      return undefined
     }
   },
   validations,
@@ -85,14 +115,6 @@ export default {
   mounted () {
     this.$v.$touch()
     this.validateInput()
-  },
-  watch: {
-    machineTypes (updatedMachineTypes) {
-      if (!includes(map(updatedMachineTypes, 'name'), this.worker.machine.type)) {
-        this.worker.machine.type = undefined
-        this.onInputMachineType()
-      }
-    }
   }
 }
 </script>
