@@ -22,7 +22,6 @@ const Client = require('./Client')
 const kubeconfig = require('../kubeconfig')
 const {
   setAuthorization,
-  waitFor,
   isHttpError
 } = util
 const config = kubeconfig.load(process.env)
@@ -47,20 +46,11 @@ function createClient (options) {
 exports = module.exports = createClient
 
 const privilegedClient = createClient({ privileged: true })
+const Resources = privilegedClient.getResources()
 
 Object.assign(exports, {
   createClient,
   privilegedClient,
-  Resources: privilegedClient.getResources(),
-  waitFor,
-  isHttpError,
-  api () {
-    return (req, res, next) => {
-      const { auth } = req.user
-      Object.defineProperty(req.user, 'api', {
-        value: createClient({ auth })
-      })
-      next()
-    }
-  }
+  Resources,
+  isHttpError
 })

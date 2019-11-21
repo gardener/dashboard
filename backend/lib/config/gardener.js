@@ -98,7 +98,9 @@ module.exports = {
           _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
         }
         _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
-      } catch (err) { /* ignore */ }
+      } catch (err) { /* ignore */
+        console.error(err)
+      }
     }
     this.assignEnvironmentVariables(config, env)
     if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {

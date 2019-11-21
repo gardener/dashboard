@@ -71,8 +71,9 @@ exports.fetch = function ({ user, namespace, name, target, body = {} }) {
 async function readServiceAccountToken (client, { namespace, serviceAccountName, waitUntilReady = true }) {
   let serviceAccount
   if (waitUntilReady) {
-    const watch = client.core.serviceaccounts.watch({ namespace, name: serviceAccountName })
-    serviceAccount = await waitFor.call(watch, isServiceAccountReady, { timeout: 10 * 1000 })
+    serviceAccount = await client.core.serviceaccounts
+      .watch({ namespace, name: serviceAccountName })
+      .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
   } else {
     try {
       serviceAccount = await client.core.serviceaccounts.get({ namespace, name: serviceAccountName })
@@ -366,7 +367,7 @@ function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, r
   }
 }
 
-async function readTerminalUntilReady ({ user, namespace, name }) {
+function readTerminalUntilReady ({ user, namespace, name }) {
   const username = user.id
   const client = user.api
 
@@ -378,8 +379,9 @@ async function readTerminalUntilReady ({ user, namespace, name }) {
     const attachServiceAccountName = _.get(terminal, 'status.attachServiceAccountName')
     return podName && attachServiceAccountName
   }
-  const watch = client['dashboard.gardener.cloud'].terminals.watch({ namespace, name })
-  return waitFor.call(watch, isTerminalReady, { timeout: 10 * 1000 })
+  return client['dashboard.gardener.cloud'].terminals
+    .watch({ namespace, name })
+    .waitFor(isTerminalReady, { timeout: 10 * 1000 })
 }
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body }) {

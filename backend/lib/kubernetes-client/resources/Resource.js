@@ -27,7 +27,7 @@ const inject = require('reconnect-core')
 const BaseResource = require('./BaseResource')
 const { http, ws } = require('./symbols')
 
-const { setPatchType, wrapWebSocket } = require('../util')
+const { setPatchType, wrapWebSocket, waitFor } = require('../util')
 
 class Resource extends BaseResource {
   constructor (options = {}) {
@@ -158,6 +158,7 @@ class Resource extends BaseResource {
 
     const reconnector = inject(createConnection)(reconnectOptions, onConnect)
     reconnector.resourceName = resourceName
+    reconnector.waitFor = waitFor
     reconnector.connect(connectOptions)
     return reconnector
   }

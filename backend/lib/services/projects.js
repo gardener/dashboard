@@ -17,7 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
-const { privilegedClient, Resources, waitFor } = require('../kubernetes-client')
+const { privilegedClient, Resources } = require('../kubernetes-client')
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
@@ -134,10 +134,6 @@ exports.list = async function ({ user, qs = {} }) {
     .value()
 }
 
-function isProjectReady ({ status: { phase } = {} } = {}) {
-  return phase === 'Ready'
-}
-
 exports.create = async function ({ user, body }) {
   const client = user.api
   const { 'core.gardener.cloud': gardener } = client
@@ -147,17 +143,20 @@ exports.create = async function ({ user, body }) {
   _.set(body, 'data.createdBy', user.id)
   let project = await gardener.projects.create({ json: toResource(body) })
 
-  const watch = exports.watchProject(name)
+  const isProjectReady = project => {
+    return _.get(project, 'status.phase') === 'Ready'
+  }
   const timeout = exports.projectInitializationTimeout
-  project = await waitFor.call(watch, isProjectReady, { timeout })
+  project = await exports
+    .watchProject(name)
+    .waitFor(isProjectReady, { timeout })
 
   return fromResource(project)
 }
 // needs to be exported for testing
 exports.watchProject = name => {
   // must be the privilegedClient because rbac rolebinding does not exist yet
-  const { 'core.gardener.cloud': gardener } = privilegedClient
-  return gardener.projects.watch({ name })
+  return privilegedClient['core.gardener.cloud'].projects.watch({ name })
 }
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
