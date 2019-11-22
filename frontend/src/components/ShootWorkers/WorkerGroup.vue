@@ -64,15 +64,15 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName'
     ]),
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)

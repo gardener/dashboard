@@ -162,11 +162,11 @@ export default {
       }
       return join(itemDescription, ' | ')
     },
-    imageIsNotLatest ({ version: currentImageVersion, vendorName: currentVendor }) {
+    imageIsNotLatest ({ version: currentImageVersion, name: currentImageName }) {
       if (currentImageVersion) {
         let notLatesVersion = false
-        forEach(this.machineImages, ({ version, vendorName }) => {
-          if (currentVendor === vendorName && semver.gt(version, currentImageVersion)) {
+        forEach(this.machineImages, ({ version, name }) => {
+          if (currentImageName === name && semver.gt(version, currentImageVersion)) {
             notLatesVersion = true
             return false // break
           }

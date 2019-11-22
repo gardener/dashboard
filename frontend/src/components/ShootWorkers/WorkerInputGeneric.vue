@@ -204,8 +204,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndZones',
+      'volumeTypesByCloudProfileNameAndRegionAndZones',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
@@ -242,10 +242,10 @@ export default {
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+      return this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+      return this.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)

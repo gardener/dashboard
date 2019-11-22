@@ -138,26 +138,42 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  machineTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
+  machineTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  machineTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
         const machineTypes = cloudProfile.data.machineTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
+        const regionObject = find(cloudProfile.data.regions, { name: region })
+        const unavailableItems = flatMap(get(regionObject, 'zones', []), zone => {
+          if (includes(zones, zone.name)) {
+            return zone.unavailableMachineTypes
+          }
         })
         return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, unavailableItems))
       }
       return []
     }
   },
-  volumeTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
+  volumeTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  volumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
         const volumeTypes = cloudProfile.data.volumeTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
+        const regionObject = find(cloudProfile.data.regions, { name: region })
+        const unavailableItems = flatMap(get(regionObject, 'zones', []), zone => {
+          if (includes(zones, zone.name)) {
+            return zone.unavailableVolumeTypes
+          }
         })
         return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, unavailableItems))
       }

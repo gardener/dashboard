@@ -531,9 +531,9 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
   const zones = [sample(availableZones)]
-  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
-  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const volumeType = get(head(volumeTypesForZone), 'name')
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })

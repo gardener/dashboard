@@ -98,11 +98,11 @@ export default {
   computed: {
     ...mapGetters([
       'cloudProfileByName',
-      'machineTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion'
     ]),
     allMachineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
