@@ -57,11 +57,7 @@ function setAuthorization (options, type, credentials) {
   type = type.toLowerCase()
   switch (type) {
     case 'basic':
-      return setHeader(
-        options,
-        'authorization',
-        `Basic ${base64Encode(credentials)}`
-      )
+      return setHeader(options, 'authorization', `Basic ${base64Encode(credentials)}`)
     case 'bearer':
       return setHeader(options, 'authorization', `Bearer ${credentials}`)
     default:

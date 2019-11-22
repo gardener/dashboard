@@ -33,9 +33,12 @@ class BaseResource {
     return this.constructor.name.toLocaleLowerCase()
   }
 
-  [http.request] ({ body, ...options } = {}) {
+  [http.request] ({ query, body, ...options } = {}) {
     if (body && typeof body === 'object') {
       options.json = body
+    }
+    if (query && typeof query === 'object') {
+      options.searchParams = new URLSearchParams(query)
     }
     const pathname = this[http.pathname](options).replace(/^\//, '')
     return this[http.client](pathname, options)

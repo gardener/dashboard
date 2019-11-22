@@ -16,31 +16,14 @@
 
 'use strict'
 
-const debug = require('./debug')
 const util = require('./util')
 const Client = require('./Client')
 const kubeconfig = require('../kubeconfig')
-const {
-  setAuthorization,
-  isHttpError
-} = util
+const { isHttpError } = util
 const config = kubeconfig.load(process.env)
 
 function createClient (options) {
-  options = kubeconfig.mergeOptions(config, options)
-  if (options.auth) {
-    const auth = options.auth
-    delete options.auth
-    if (auth.bearer) {
-      setAuthorization(options, 'bearer', auth.bearer)
-    } else if (auth.user && auth.pass) {
-      setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
-    } else if (typeof auth === 'string') {
-      setAuthorization(options, 'basic', auth)
-    }
-  }
-  options = debug.attach(options)
-  return Client.create(options)
+  return Client.create(kubeconfig.mergeOptions(config, options))
 }
 
 exports = module.exports = createClient

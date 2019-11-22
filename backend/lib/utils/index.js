@@ -49,10 +49,8 @@ function getConfigValue (path, defaultValue) {
 }
 
 function getSeedNameFromShoot ({ status: { seed } = {} }) {
-  if (seed) {
-    return seed
-  }
-  throw new Error(`There is no seed assigned to this shoot (yet)`)
+  assert.ok(seed, `There is no seed assigned to this shoot (yet)`)
+  return seed
 }
 
 function shootHasIssue (shoot) {

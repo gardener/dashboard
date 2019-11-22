@@ -18,6 +18,9 @@
 
 const Resource = require('../../Resource')
 const { http, ws } = require('../../symbols')
+const { createErrorEvent } = require('../../../util')
+
+const pEvent = require('p-event')
 
 class Shoot extends Resource {
   get (options = {}) {
@@ -26,6 +29,23 @@ class Shoot extends Resource {
 
   watch (options = {}) {
     return this[ws.watch](options)
+  }
+
+  async * eventIterator (options = {}) {
+    const socket = this[ws.create](options)
+    try {
+      await pEvent(socket, 'open', { timeout: 3000 })
+      const asyncIterator = pEvent.iterator(socket, 'message', { resolutionEvents: ['close'] })
+      for await (let message of asyncIterator) {
+        try {
+          yield JSON.parse(message)
+        } catch (error) {
+          yield createErrorEvent({ error, message })
+        }
+      }
+    } finally {
+      socket.terminate()
+    }
   }
 
   create (options = {}) {

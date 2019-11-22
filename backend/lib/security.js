@@ -248,10 +248,10 @@ function authenticate ({ createClient } = {}) {
     }
     const bearer = decrypt(encryptedBearer)
     assert.ok(bearer, 'The decrypted bearer token must not be empty')
-    user.auth = { bearer }
+    const auth = user.auth = { bearer }
     if (typeof createClient === 'function') {
       Object.defineProperty(user, 'api', {
-        value: createClient(user)
+        value: createClient({ auth })
       })
     }
   }

@@ -42,7 +42,6 @@ const {
 
 const {
   getShoot,
-  shootExists,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   GardenTerminalHostRefType
@@ -215,9 +214,9 @@ async function handleSeed (seed) {
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
-  const isShootedSeed = await shootExists(privilegedClient, { namespace, name })
-  if (isShootedSeed) {
-    await ensureTrustedCertForShootApiServer(privilegedClient, { namespace, name })
+  const shoot = await getShoot(privilegedClient, { namespace, name, throwNotFound: false })
+  if (shoot) {
+    await ensureTrustedCertForShootApiServer(privilegedClient, shoot)
   } else {
     await ensureTrustedCertForSeedApiServer(privilegedClient, seed)
   }
@@ -226,8 +225,7 @@ async function handleSeed (seed) {
 async function handleShoot (shoot) {
   const { metadata: { namespace, name } } = shoot
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
-
-  await ensureTrustedCertForShootApiServer(privilegedClient, { namespace, name })
+  await ensureTrustedCertForShootApiServer(privilegedClient, shoot)
 }
 
 /*
@@ -237,9 +235,8 @@ async function handleShoot (shoot) {
   Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube-apiserver.
   https://github.com/gardener/gardener/issues/1413
 */
-async function ensureTrustedCertForShootApiServer (client, { namespace, name }) {
-  const shootResource = await getShoot(client, { namespace, name })
-
+async function ensureTrustedCertForShootApiServer (client, shootResource) {
+  const { metadata: { namespace, name } } = shootResource
   if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return

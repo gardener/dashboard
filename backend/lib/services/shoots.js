@@ -25,20 +25,8 @@ const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { isHttpError, createClient } = kubernetesClient
+const { isHttpError } = kubernetesClient
 const { decodeBase64, getSeedNameFromShoot } = utils
-
-async function getSeedKubeconfigForShoot ({ user, shoot }) {
-  const client = user.api
-  if (!shoot.status || !shoot.status.seed) {
-    return {}
-  }
-  const seed = getSeed(getSeedNameFromShoot(shoot))
-  const seedShootNamespace = shoot.status.technicalID
-
-  const seedKubeconfig = await client.getKubeconfig(seed.spec.secretRef)
-  return { seed, seedKubeconfig, seedShootNamespace }
-}
 
 function getSecret (client, { namespace, name }) {
   try {
@@ -269,8 +257,9 @@ exports.info = async function ({ user, namespace, name }) {
   const projectName = project.metadata.name
 
   const data = {}
+  let seed
   if (shoot.status && shoot.status.seed) {
-    const seed = getSeed(getSeedNameFromShoot(shoot))
+    seed = getSeed(getSeedNameFromShoot(shoot))
     const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
     if (ingressDomain) {
       data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
@@ -301,16 +290,13 @@ exports.info = async function ({ user, namespace, name }) {
 
   const isAdmin = await authorization.isAdmin(user)
   if (isAdmin) {
-    const { seedKubeconfig, seedShootNamespace } = await getSeedKubeconfigForShoot({ user, shoot })
-
-    if (seedKubeconfig && seedShootNamespace) {
+    if (seed) {
       try {
-        const options = kubeconfig.fromKubeconfig(seedKubeconfig)
-        const seedClient = createClient(options)
-
+        const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+        const seedShootNamespace = shoot.status.technicalID
         await assignComponentSecrets(seedClient, data, seedShootNamespace)
-      } catch (error) {
-        logger.error('Failed to retrieve information using seed core client', error)
+      } catch (err) {
+        logger.error('Failed to retrieve information using seed core client', err)
       }
     }
   } else {

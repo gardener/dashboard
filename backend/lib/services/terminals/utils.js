@@ -34,20 +34,16 @@ const GardenTerminalHostRefType = {
   SHOOT_REF: 'shootRef'
 }
 
-function getShoot (client, { namespace, name }) {
-  return client['core.gardener.cloud'].shoots.get({ namespace, name })
-}
-
-async function shootExists (client, { namespace, name }) {
+async function getShoot (client, { namespace, name, throwNotFound = true }) {
+  let shoot
   try {
-    await getShoot(client, { namespace, name })
+    shoot = await client['core.gardener.cloud'].shoots.get({ namespace, name })
   } catch (err) {
-    if (isHttpError(err, 404)) {
-      return false
+    if (throwNotFound || !isHttpError(err, 404)) {
+      throw err
     }
-    throw err
   }
-  return true
+  return shoot
 }
 
 function getShootIngressDomain (client, shoot) {
@@ -126,10 +122,9 @@ async function getKubeApiServerHostForSeed (client, seed) {
   const namespace = 'garden'
 
   let ingressDomain
-  const isShootedSeed = await shootExists(client, { namespace, name })
-  if (isShootedSeed) {
-    const shootResource = await getShoot(client, { namespace, name })
-    ingressDomain = await getShootIngressDomain(client, shootResource)
+  const shoot = await getShoot(client, { namespace, name, throwNotFound: false })
+  if (shoot) {
+    ingressDomain = await getShootIngressDomain(client, shoot)
   } else {
     ingressDomain = await getSeedIngressDomain(client, seed)
   }
@@ -163,7 +158,6 @@ function getGardenTerminalHostClusterSecrets (client) {
 
 module.exports = {
   getShoot,
-  shootExists,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   getGardenHostClusterKubeApiServer,

@@ -44,12 +44,6 @@ class Pod extends Resource {
     return this[http.delete](options)
   }
 
-  log ({ name, query, ...options } = {}) {
-    name = [name, 'log']
-    const stream = query && query.follow
-    return this[http.get]({ name, query, ...options, json: false, stream })
-  }
-
   status ({ name, ...options } = {}) {
     name = [name, 'status']
     return this[http.get]({ name, ...options })

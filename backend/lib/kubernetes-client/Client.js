@@ -20,8 +20,9 @@ const _ = require('lodash')
 const assert = require('assert').strict
 const { isIP } = require('net')
 const { HTTPError } = require('got')
-const { isHttpError } = require('./util')
+const { isHttpError, setAuthorization } = require('./util')
 const { ApiGroup, Endpoint } = require('./resources')
+const debug = require('./debug')
 
 const { fromKubeconfig } = require('../kubeconfig')
 const { decodeBase64 } = require('../utils')
@@ -123,13 +124,26 @@ class Client {
 
   static create (options = {}) {
     const { hostname } = new URL(options.url)
-    const defaultOptions = {
+    options = {
       servername: isIP(hostname) !== 0 ? '' : hostname,
       throwHttpErrors: true,
       resolveBodyOnly: true,
-      timeout: 30 * 1000
+      timeout: 30 * 1000,
+      ...options
     }
-    return new Client({ ...defaultOptions, ...options })
+    if (options.auth) {
+      const auth = options.auth
+      delete options.auth
+      if (auth.bearer) {
+        setAuthorization(options, 'bearer', auth.bearer)
+      } else if (auth.user && auth.pass) {
+        setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
+      } else if (typeof auth === 'string') {
+        setAuthorization(options, 'basic', auth)
+      }
+    }
+    options = debug.attach(options)
+    return new Client(options)
   }
 }
 

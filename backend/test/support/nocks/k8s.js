@@ -794,6 +794,14 @@ const stub = {
         })
     ]
   },
+  createTerminal ({ bearer, namespace, target }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    scope
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/infra1-seed`)
+      .reply(404)
+    return scope
+  },
   getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
     let statusCode = 200
     let result = _

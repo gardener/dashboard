@@ -20,10 +20,7 @@ const _ = require('lodash')
 const assert = require('assert').strict
 const hash = require('object-hash')
 
-const {
-  waitFor,
-  isHttpError
-} = require('../../kubernetes-client')
+const { isHttpError } = require('../../kubernetes-client')
 
 const {
   decodeBase64,
@@ -185,7 +182,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
       break
     }
     case TargetEnum.CONTROL_PLANE: {
-      const shootResource = await client['core.gardener.cloud'].shoots.get({ namespace, name })
+      const shootResource = await getShoot(client, { namespace, name })
       const seedShootNamespace = getSeedShootNamespace(shootResource)
       const seedName = getSeedNameFromShoot(shootResource)
       const seed = getSeed(seedName)
