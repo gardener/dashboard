@@ -254,7 +254,7 @@ async function getShootHostCluster (client, { namespace, name, target, body }) {
     namespace,
     name: `${name}.kubeconfig`
   }
-  hostCluster.kubeApiServer = await getKubeApiServerHostForShoot(client, shootResource)
+  hostCluster.kubeApiServer = await getKubeApiServerHostForShoot(shootResource)
   return hostCluster
 }
 
