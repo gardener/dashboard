@@ -282,6 +282,8 @@ export default {
       this.focus()
     },
     refresh () {
+      // use $nextTick as CodeMirror needs to be finished with rendering because refresh method relies on
+      // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
       this.$nextTick(() => this.refreshInstance())
     },
     refreshInstance () {

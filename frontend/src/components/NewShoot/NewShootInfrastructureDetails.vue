@@ -304,9 +304,7 @@ export default {
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
         this.onAddSecret()
-        this.$nextTick(() => {
-          this.secret = head(this.infrastructureSecretsByProfileName)
-        })
+        this.secret = head(this.infrastructureSecretsByProfileName)
       } else {
         this.$v.secret.$touch()
         this.userInterActionBus.emit('updateSecret', this.secret)

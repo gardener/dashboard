@@ -266,14 +266,12 @@ export default {
       this.project = project
     },
     onProjectFilterSubmit () {
-      this.$nextTick(() => { // give events time to react (if v-list tile is active)
-        if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
-          const project = head(this.sortedAndFilteredProjectList)
-          if (project) {
-            this.onProjectSelect(project)
-          }
+      if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
+        const project = head(this.sortedAndFilteredProjectList)
+        if (project) {
+          this.onProjectSelect(project)
         }
-      })
+      }
     },
     openProjectDialog () {
       this.projectMenu = false
@@ -327,6 +325,7 @@ export default {
         height: auto;
         max-height: (4 * 54px) + (2 * 8px);
         overflow-y: auto;
+        max-width: 300px;
 
         div > a {
           height: 54px;

@@ -129,7 +129,10 @@ export default {
         this.detailedErrorMessage = undefined
       }
       this.$refs.gDialog.showDialog()
-      this.$emit('dialogOpened')
+      this.$nextTick(() => {
+        // need to defer event until dialog has been rendered
+        this.$emit('dialogOpened')
+      })
     },
     async waitForDialogClosed () {
       return this.$refs.gDialog.confirmWithDialog()

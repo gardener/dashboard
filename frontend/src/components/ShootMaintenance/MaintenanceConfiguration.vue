@@ -29,8 +29,6 @@ limitations under the License.
       ></maintenance-time>
       <maintenance-components
         ref="maintenanceComponents"
-        :updateKubernetesVersion="data.updateKubernetesVersion"
-        :updateOSVersion="data.updateOSVersion"
       ></maintenance-components>
     </template>
   </action-icon-dialog>
@@ -105,10 +103,9 @@ export default {
       this.data.updateKubernetesVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
       this.data.updateOSVersion = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
 
-      this.$nextTick(() => {
-        this.$refs.maintenanceTime.reset()
-        this.$refs.maintenanceComponents.reset()
-      })
+      this.$refs.maintenanceTime.reset()
+
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.data.updateOSVersion, osUpdates: this.data.updateKubernetesVersion })
     },
     onMaintenanceTimeValid (value) {
       this.maintenanceTimeValid = value

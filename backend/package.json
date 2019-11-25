@@ -33,6 +33,7 @@
     "cookie-parser": "^1.4.4",
     "es6-error": "^4.1.1",
     "express": "^4.17.1",
+    "fnv-plus": "^1.2.12",
     "got": "^9.6.0",
     "helmet": "^3.21.2",
     "js-yaml": "^3.13.1",
