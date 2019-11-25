@@ -18,7 +18,7 @@
 
 const util = require('./util')
 const Client = require('./Client')
-const kubeconfig = require('../kubeconfig')
+const kubeconfig = require('../kubernetes-config')
 const { isHttpError } = util
 const config = kubeconfig.load(process.env)
 

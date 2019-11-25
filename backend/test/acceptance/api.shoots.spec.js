@@ -17,7 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
-const kubeconfig = require('../../lib/kubeconfig')
+const kubeconfig = require('../../lib/kubernetes-config')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */

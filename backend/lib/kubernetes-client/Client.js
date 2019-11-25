@@ -24,7 +24,7 @@ const { isHttpError, setAuthorization } = require('./util')
 const { ApiGroup, Endpoint } = require('./resources')
 const debug = require('./debug')
 
-const { fromKubeconfig } = require('../kubeconfig')
+const { fromKubeconfig } = require('../kubernetes-config')
 const { decodeBase64 } = require('../utils')
 
 const cluster = Symbol('cluster')

@@ -21,7 +21,7 @@ const nock = require('nock')
 const yaml = require('js-yaml')
 const { encodeBase64 } = require('../../../lib/utils')
 const jwt = require('jsonwebtoken')
-const { url, auth } = require('../../../lib/kubeconfig').load()
+const { url, auth } = require('../../../lib/kubernetes-config').load()
 
 const quotas = [
   {

@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const { decodeBase64 } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
-const { dumpKubeconfig } = require('../kubeconfig')
+const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
 
 function toServiceAccountName ({ metadata: { name, namespace } }) {

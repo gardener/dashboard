@@ -17,7 +17,7 @@
 'use strict'
 
 const kubernetesClient = require('../kubernetes-client')
-const kubeconfig = require('../kubeconfig')
+const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')
