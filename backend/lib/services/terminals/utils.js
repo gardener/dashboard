@@ -116,7 +116,7 @@ async function getKubeApiServerHostForSeedOrShootedSeed (client, seed) {
 
   const shoot = await getShoot(client, { namespace, name, throwNotFound: false })
   if (shoot) {
-    return getKubeApiServerHostForShoot(shoot, seed)
+    return getKubeApiServerHostForShoot(shoot)
   } else {
     return getKubeApiServerHostForSeed(seed)
   }
