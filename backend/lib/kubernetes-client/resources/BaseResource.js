@@ -18,6 +18,7 @@
 
 const got = require('got')
 const { http } = require('./symbols')
+const { patchHttpErrorMessage } = require('../util')
 
 class BaseResource {
   constructor ({ url, ...options } = {}) {
@@ -33,7 +34,7 @@ class BaseResource {
     return this.constructor.name.toLocaleLowerCase()
   }
 
-  [http.request] ({ query, body, ...options } = {}) {
+  async [http.request] ({ query, body, ...options } = {}) {
     if (body && typeof body === 'object') {
       options.json = body
     }
@@ -41,7 +42,11 @@ class BaseResource {
       options.searchParams = new URLSearchParams(query)
     }
     const pathname = this[http.pathname](options).replace(/^\//, '')
-    return this[http.client](pathname, options)
+    try {
+      return await this[http.client](pathname, options)
+    } catch (err) {
+      throw patchHttpErrorMessage(err)
+    }
   }
 
   [http.get] (options = {}) {

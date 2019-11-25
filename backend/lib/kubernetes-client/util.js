@@ -18,6 +18,7 @@
 
 const fs = require('fs')
 const path = require('path')
+const { HTTPError } = require('got')
 const logger = require('../logger')
 const { GatewayTimeout, InternalServerError } = require('../errors')
 
@@ -252,17 +253,28 @@ function waitFor (condition, { timeout = 5000 }) {
   })
 }
 
-function isHttpError ({ name, response: { statusCode } = {} }, expectedStatusCode) {
-  if (name !== 'HTTPError') {
+function isHttpError (err, expectedStatusCode) {
+  if (!(err instanceof HTTPError) && err.name !== 'HTTPError') {
     return false
   }
   if (expectedStatusCode) {
+    const { statusCode } = err.response || {}
     if (Array.isArray(expectedStatusCode)) {
       return expectedStatusCode.indexOf(statusCode) !== -1
     }
     return expectedStatusCode === statusCode
   }
   return true
+}
+
+function patchHttpErrorMessage (err) {
+  if (err instanceof HTTPError) {
+    const { response = {} } = err
+    if (response.body) {
+      err.message = response.body.message || response.body
+    }
+  }
+  return err
 }
 
 exports = module.exports = {
@@ -276,5 +288,6 @@ exports = module.exports = {
   setPatchType,
   wrapWebSocket,
   waitFor,
-  isHttpError
+  isHttpError,
+  patchHttpErrorMessage
 }
