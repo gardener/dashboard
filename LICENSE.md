@@ -276,10 +276,6 @@ Copyright (C) 2011-2015 by Vitaly Puzrin\
 Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
 [MIT License](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)
 
-- [kubernetes-client](https://github.com/godaddy/kubernetes-client)\
-Copyright (c) 2016 GoDaddy Operating Company, LLC.\
-[MIT License](https://github.com/godaddy/kubernetes-client/blob/master/LICENSE)
-
 - [lodash](https://github.com/lodash/lodash)\
 Copyright JS Foundation and other contributors <https://js.foundation/>\
 [MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
@@ -316,10 +312,6 @@ Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
 - [socket.io](https://github.com/socketio/socket.io)\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
-
-- [url-template](https://github.com/bramstein/url-template)\
-Copyright (c) 2012-2014, Bram Stein\
-[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
 
 - [uuid](https://github.com/kelektiv/node-uuid)\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
@@ -417,6 +409,10 @@ Copyright (c) Isaac Z. Schlueter and Contributors\
 - [socket.io-client](https://github.com/socketio/socket.io-client)\
 Copyright (c) 2014 Guillermo Rauch\
 [MIT License](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
+
+- [url-template](https://github.com/bramstein/url-template)\
+Copyright (c) 2012-2014, Bram Stein\
+[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
 
 - [vue](https://github.com/vuejs/vue)\
 Copyright (c) 2013-present, Yuxi (Evan) You\
