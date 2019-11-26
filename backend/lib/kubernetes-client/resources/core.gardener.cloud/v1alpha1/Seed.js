@@ -32,7 +32,7 @@ class Seed extends Resource {
 Object.assign(Seed, {
   group: 'core.gardener.cloud',
   version: 'v1alpha1',
-  scope: 'Namespaced',
+  scope: 'Cluster',
   names: {
     plural: 'seeds',
     singular: 'seed',

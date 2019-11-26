@@ -19,7 +19,7 @@
 const Resource = require('../../Resource')
 const { http, ws } = require('../../symbols')
 
-class CloudProfile extends Resource {
+class Service extends Resource {
   get (options = {}) {
     return this[http.get](options)
   }
@@ -27,17 +27,33 @@ class CloudProfile extends Resource {
   watch (options = {}) {
     return this[ws.watch](options)
   }
+
+  create (options = {}) {
+    return this[http.post](options)
+  }
+
+  update (options = {}) {
+    return this[http.put](options)
+  }
+
+  patch (options = {}) {
+    return this[http.patch](options)
+  }
+
+  delete (options = {}) {
+    return this[http.delete](options)
+  }
 }
 
-Object.assign(CloudProfile, {
-  group: 'core.gardener.cloud',
-  version: 'v1alpha1',
-  scope: 'Cluster',
+Object.assign(Service, {
+  group: 'core',
+  version: 'v1',
+  scope: 'Namespaced',
   names: {
-    plural: 'cloudprofiles',
-    singular: 'cloudprofile',
-    kind: 'CloudProfile'
+    plural: 'services',
+    singular: 'service',
+    kind: 'Service'
   }
 })
 
-module.exports = CloudProfile
+module.exports = Service

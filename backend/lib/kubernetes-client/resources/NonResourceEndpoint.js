@@ -16,44 +16,15 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http, ws } = require('../../symbols')
+const nonResourceEndpoints = require('./nonResourceEndpoints')
 
-class Endpoint extends Resource {
-  get (options = {}) {
-    return this[http.get](options)
-  }
-
-  watch (options = {}) {
-    return this[ws.watch](options)
-  }
-
-  create (options = {}) {
-    return this[http.post](options)
-  }
-
-  update (options = {}) {
-    return this[http.put](options)
-  }
-
-  patch (options = {}) {
-    return this[http.patch](options)
-  }
-
-  delete (options = {}) {
-    return this[http.delete](options)
+class NonResourceEndpoint {
+  static assignAll (client, options) {
+    for (const [key, Ctor] of Object.entries(nonResourceEndpoints)) {
+      client[key] = new Ctor(options)
+    }
+    return client
   }
 }
 
-Object.assign(Endpoint, {
-  group: 'core',
-  version: 'v1',
-  scope: 'Namespaced',
-  names: {
-    plural: 'endpoints',
-    singular: 'endpoint',
-    kind: 'Endpoint'
-  }
-})
-
-module.exports = Endpoint
+module.exports = NonResourceEndpoint

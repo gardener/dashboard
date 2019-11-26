@@ -152,7 +152,7 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
 
   const body = toIngressResource({ name, annotations, spec, ownerReferences })
 
-  return replaceResource(client.extensions.ingress, { namespace, name, body })
+  return replaceResource(client.extensions.ingresses, { namespace, name, body })
 }
 
 function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, ip, ownerReferences }) {

@@ -21,7 +21,7 @@ const assert = require('assert').strict
 const { isIP } = require('net')
 const { HTTPError } = require('got')
 const { isHttpError, setAuthorization } = require('./util')
-const { ApiGroup, Endpoint } = require('./resources')
+const { ApiGroup, NonResourceEndpoint } = require('./resources')
 const debug = require('./debug')
 
 const { fromKubeconfig } = require('../kubernetes-config')
@@ -37,7 +37,7 @@ class Client {
       'insecure-skip-tls-verify': !rejectUnauthorized
     }
     ApiGroup.assignAll(this, options)
-    Endpoint.assignAll(this, options)
+    NonResourceEndpoint.assignAll(this, options)
   }
 
   get cluster () {

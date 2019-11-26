@@ -58,7 +58,7 @@ function toEndpointResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const resource = Resources.Endpoint
+  const resource = Resources.Endpoints
   const data = { subsets }
 
   return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })

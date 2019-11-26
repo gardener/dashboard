@@ -18,5 +18,5 @@
 
 module.exports = {
   ApiGroup: require('./ApiGroup'),
-  Endpoint: require('./Endpoint')
+  NonResourceEndpoint: require('./NonResourceEndpoint')
 }

@@ -37,7 +37,7 @@ class Resource extends BaseResource {
   [http.prefixUrl] (url) {
     let prefixUrl = super[http.prefixUrl](url)
     const { group, version } = this.constructor
-    if (group === 'core') {
+    if (group === 'core' || group === '') {
       prefixUrl += '/api/' + version
     } else {
       prefixUrl += '/apis/' + group + '/' + version
