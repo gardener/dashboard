@@ -16,17 +16,15 @@
 
 'use strict'
 
-const kubernetesClient = require('../kubernetes-client')
 const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
 const logger = require('../logger')
 const { registerHandler } = require('./common')
 const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
-
-const { 'core.gardener.cloud': gardener } = kubernetesClient({ privileged: true })
+const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = gardener.seeds.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].seeds.watch()
   cacheResource(emitter, getSeeds(), 'metadata.name')
   registerHandler(emitter, async function (event) {
     if (event.type === 'ERROR') {

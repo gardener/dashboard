@@ -25,7 +25,6 @@ const {
   getSeedNameFromShoot
 } = require('../../utils')
 
-const { isHttpError } = require('../../kubernetes-client')
 const assert = require('assert').strict
 const { getSeed } = require('../../cache')
 
@@ -33,18 +32,6 @@ const GardenTerminalHostRefType = {
   SECRET_REF: 'secretRef',
   SEED_REF: 'seedRef',
   SHOOT_REF: 'shootRef'
-}
-
-async function getShoot (client, { namespace, name, throwNotFound = true }) {
-  let shoot
-  try {
-    shoot = await client['core.gardener.cloud'].shoots.get({ namespace, name })
-  } catch (err) {
-    if (throwNotFound || !isHttpError(err, 404)) {
-      throw err
-    }
-  }
-  return shoot
 }
 
 /*
@@ -101,7 +88,7 @@ async function getGardenHostClusterKubeApiServer (client) {
     case GardenTerminalHostRefType.SHOOT_REF: {
       const namespace = getConfigValue('terminal.gardenTerminalHost.shootRef.namespace', 'garden')
       const shootName = getConfigValue('terminal.gardenTerminalHost.shootRef.name')
-      const shootResource = await getShoot(client, { namespace, name: shootName })
+      const shootResource = await client.getShoot({ namespace, name: shootName })
       return getKubeApiServerHostForShoot(shootResource)
     }
     default:
@@ -109,12 +96,11 @@ async function getGardenHostClusterKubeApiServer (client) {
   }
 }
 
-// TODO remove coreClient param.
 async function getKubeApiServerHostForSeedOrShootedSeed (client, seed) {
   const name = seed.metadata.name
   const namespace = 'garden'
 
-  const shoot = await getShoot(client, { namespace, name, throwNotFound: false })
+  const shoot = await client.getShoot({ namespace, name, throwNotFound: false })
   if (shoot) {
     return getKubeApiServerHostForShoot(shoot)
   } else {
@@ -162,7 +148,6 @@ function getGardenTerminalHostClusterSecrets (client) {
 }
 
 module.exports = {
-  getShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   getGardenHostClusterKubeApiServer,

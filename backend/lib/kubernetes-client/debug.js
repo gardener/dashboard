@@ -62,7 +62,7 @@ function beforeRequest (options) {
         }
       } else {
         user.type = 'bearer'
-        user.id = value
+        user.id = '"redacted"'
       }
       break
     case 'Basic':

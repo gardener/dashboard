@@ -16,19 +16,33 @@
 
 'use strict'
 
+const assert = require('assert').strict
 const util = require('./util')
 const Client = require('./Client')
 const kubeconfig = require('../kubernetes-config')
 const { isHttpError } = util
 const config = kubeconfig.load(process.env)
 
-function createClient (options) {
-  return Client.create(kubeconfig.mergeOptions(config, options))
+function createClient ({ auth, key, cert, ...options } = {}) {
+  assert.ok(auth || (key && cert), 'Client credentials are required')
+  if (key && cert) {
+    options.key = key
+    options.cert = cert
+  } else if (auth) {
+    options.auth = auth
+  }
+  // if no url is given use server from kubeconfig
+  if (!options.url) {
+    options.url = config.url
+    options.ca = config.ca
+    options.rejectUnauthorized = config.rejectUnauthorized
+  }
+  return Client.create(options)
 }
 
 exports = module.exports = createClient
 
-const privilegedClient = createClient({ privileged: true })
+const privilegedClient = Client.create(config)
 const Resources = privilegedClient.getResources()
 
 Object.assign(exports, {

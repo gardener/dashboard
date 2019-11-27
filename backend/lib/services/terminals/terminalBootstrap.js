@@ -41,7 +41,6 @@ const {
 } = require('./terminalResources')
 
 const {
-  getShoot,
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
   getKubeApiServerHostForShoot,
@@ -217,7 +216,7 @@ async function handleSeed (seed) {
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
-  const shoot = await getShoot(privilegedClient, { namespace, name, throwNotFound: false })
+  const shoot = await privilegedClient.getShoot({ namespace, name, throwNotFound: false })
   if (shoot) {
     await ensureTrustedCertForShootApiServer(privilegedClient, shoot)
   } else {

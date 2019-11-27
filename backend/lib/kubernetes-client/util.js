@@ -20,6 +20,7 @@ const fs = require('fs')
 const path = require('path')
 const { HTTPError } = require('got')
 const logger = require('../logger')
+const { encodeBase64 } = require('../utils')
 const { GatewayTimeout, InternalServerError } = require('../errors')
 
 function ctors (filename) {
@@ -32,18 +33,16 @@ function ctors (filename) {
     if (file !== basename) {
       const Ctor = require(`./${baseDir}/${file}`)
       const { name, names: { plural } = {} } = Ctor
-      data[plural || name.toLowerCase()] = Ctor
+      if (plural) {
+        // use resource plural name as key (e.g shoots)
+        data[plural] = Ctor
+      } else {
+        // use constructor name in lowercase as key (e.g healthz)
+        data[name.toLowerCase()] = Ctor
+      }
     }
   }
   return data
-}
-
-function base64Encode (value) {
-  return Buffer.from(value, 'utf8').toString('base64')
-}
-
-function base64Decode (value) {
-  return Buffer.from(value, 'base64').toString('utf8')
 }
 
 function setHeader (options, key, value) {
@@ -58,7 +57,7 @@ function setAuthorization (options, type, credentials) {
   type = type.toLowerCase()
   switch (type) {
     case 'basic':
-      return setHeader(options, 'authorization', `Basic ${base64Encode(credentials)}`)
+      return setHeader(options, 'authorization', `Basic ${encodeBase64(credentials)}`)
     case 'bearer':
       return setHeader(options, 'authorization', `Bearer ${credentials}`)
     default:
@@ -81,14 +80,6 @@ function setPatchType (options, type = 'merge') {
     default:
       throw new TypeError('The patch type must be one of [json merge strategic]')
   }
-}
-
-function base64UrlEncode (input) {
-  let output = base64Encode(input)
-  output = output.replace(/=/g, '')
-  output = output.replace(/\+/g, '-')
-  output = output.replace(/\//g, '_')
-  return output
 }
 
 function createError (code, reason) {
@@ -254,7 +245,7 @@ function waitFor (condition, { timeout = 5000 }) {
 }
 
 function isHttpError (err, expectedStatusCode) {
-  if (!(err instanceof HTTPError) && err.name !== 'HTTPError') {
+  if (!(err instanceof HTTPError || err.name === 'HTTPError')) {
     return false
   }
   if (expectedStatusCode) {
@@ -279,9 +270,6 @@ function patchHttpErrorMessage (err) {
 
 exports = module.exports = {
   ctors,
-  base64Encode,
-  base64UrlEncode,
-  base64Decode,
   setHeader,
   setAuthorization,
   setContentType,

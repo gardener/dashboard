@@ -34,7 +34,6 @@ const {
 } = require('./terminalResources')
 
 const {
-  getShoot,
   getKubeApiServerHostForSeedOrShootedSeed,
   getKubeApiServerHostForShoot,
   getGardenTerminalHostClusterSecretRef,
@@ -182,7 +181,7 @@ async function getTargetCluster ({ user, namespace, name, target }) {
       break
     }
     case TargetEnum.CONTROL_PLANE: {
-      const shootResource = await getShoot(client, { namespace, name })
+      const shootResource = await client.getShoot({ namespace, name })
       const seedShootNamespace = getSeedShootNamespace(shootResource)
       const seedName = getSeedNameFromShoot(shootResource)
       const seed = getSeed(seedName)
@@ -224,7 +223,7 @@ async function getSeedHostCluster (client, { namespace, name, target, body }) {
   const hostCluster = {}
   hostCluster.config = getImageConfigFromBody(body)
 
-  const shootResource = await getShoot(client, { namespace, name })
+  const shootResource = await client.getShoot({ namespace, name })
   if (target === TargetEnum.SHOOT) {
     hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
   }
@@ -246,7 +245,7 @@ async function getShootHostCluster (client, { namespace, name, target, body }) {
   const hostCluster = {}
   hostCluster.config = getConfigFromBody(body)
 
-  const shootResource = await getShoot(client, { namespace, name })
+  const shootResource = await client.getShoot({ namespace, name })
   hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
 
   hostCluster.namespace = undefined // this will create a temporary namespace

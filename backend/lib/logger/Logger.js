@@ -49,7 +49,7 @@ class Logger {
     if (!this.isDisabled(LEVELS.trace + 1)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
       const host = headers.host || uri.host || '-'
-      let path = uri.path || (uri.pathname + uri.search)
+      const path = uri.path || (uri.pathname + uri.search)
       id = id || headers['x-request-id']
       let msg = `${method} ${path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
       if (this.logHttpRequestBody && body) {

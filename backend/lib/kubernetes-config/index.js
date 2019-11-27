@@ -22,14 +22,6 @@ const os = require('os')
 const path = require('path')
 const yaml = require('js-yaml')
 
-function findByName (items, name) {
-  for (const item of items) {
-    if (item.name === name) {
-      return item
-    }
-  }
-}
-
 function getInCluster ({
   KUBERNETES_SERVICE_HOST: host,
   KUBERNETES_SERVICE_PORT: port
@@ -153,9 +145,9 @@ function fromKubeconfig (input) {
   }
 
   // get current user and cluster
-  const { context } = findByName(contexts, currentContext) || {}
-  const { cluster } = findByName(clusters, context.cluster) || {}
-  const { user } = findByName(users, context.user) || {}
+  const { context } = _.find(contexts, ['name', currentContext]) || {}
+  const { cluster } = _.find(clusters, ['name', context.cluster]) || {}
+  const { user } = _.find(users, ['name', context.user]) || {}
 
   const config = {
     rejectUnauthorized: true
@@ -178,8 +170,7 @@ function fromKubeconfig (input) {
     if (cert && key) {
       config.cert = cert
       config.key = key
-    }
-    if (user.token) {
+    } else if (user.token) {
       config.auth = {
         bearer: user.token
       }
@@ -223,28 +214,6 @@ function dumpKubeconfig ({ user, context = 'default', cluster = 'garden', namesp
   })
 }
 
-function mergeOptions (config, { auth, key, cert, privileged, ...options } = {}) {
-  if (!options.url) {
-    options.url = config.url
-    options.ca = config.ca
-    options.rejectUnauthorized = config.rejectUnauthorized
-  }
-  if (key && cert) {
-    options.key = key
-    options.cert = cert
-  } else if (auth) {
-    options.auth = auth
-  } else if (privileged === true) {
-    if (config.key && config.cert) {
-      options.key = config.key
-      options.cert = config.cert
-    } else if (config.auth) {
-      options.auth = config.auth
-    }
-  }
-  return options
-}
-
 function load (env = process.env) {
   if (/^test/.test(env.NODE_ENV)) {
     return {
@@ -272,6 +241,5 @@ exports = module.exports = {
     return fromKubeconfig(input)
   },
   dumpKubeconfig,
-  mergeOptions,
   load
 }

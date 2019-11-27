@@ -32,39 +32,21 @@ class Client {
   constructor (options = {}) {
     const { url, ca, rejectUnauthorized = true } = options
     this[cluster] = {
-      server: new URL(url),
-      'certificate-authority-data': ca,
-      'insecure-skip-tls-verify': !rejectUnauthorized
+      server: url,
+      certificateAuthority: ca,
+      insecureSkipTlsVerify: !rejectUnauthorized
     }
     ApiGroup.assignAll(this, options)
     NonResourceEndpoint.assignAll(this, options)
   }
 
   get cluster () {
-    return this[cluster]
-  }
-
-  getResources () {
-    return this.constructor.getResources()
-  }
-
-  async getShootIngressDomain (shoot, seed) {
-    const name = _.get(shoot, 'metadata.name')
-    const namespace = _.get(shoot, 'metadata.namespace')
-
-    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
-    const projectName = await this.getProjectNameFromNamespace(namespace)
-
-    return `${name}.${projectName}.${ingressDomain}`
-  }
-
-  async getSeedIngressDomain (seed) {
-    const namespace = 'garden'
-
-    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
-    const projectName = await this.getProjectNameFromNamespace(namespace)
-
-    return `${projectName}.${ingressDomain}`
+    const { server, certificateAuthority, insecureSkipTlsVerify } = this[cluster]
+    return {
+      server: new URL(server),
+      certificateAuthority,
+      insecureSkipTlsVerify
+    }
   }
 
   async getKubeconfig ({ name, namespace }) {
@@ -88,23 +70,6 @@ class Client {
     return this.constructor.create(fromKubeconfig(kubeconfig))
   }
 
-  async getProjectNameFromNamespace (namespace) {
-    try {
-      const project = await this.getProjectByNamespace(namespace)
-      return project.metadata.name
-    } catch (err) {
-      if (isHttpError(err, 404) && namespace === 'garden') {
-        /*
-          fallback: if there is no corresponding garden project, use namespace name.
-          The community installer currently does not create a project resource for the garden namespace
-          because of https://github.com/gardener/gardener/issues/879
-        */
-        return namespace
-      }
-      throw err
-    }
-  }
-
   async getProjectByNamespace (namespace) {
     const ns = await this.core.namespaces.get({ name: namespace })
     const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
@@ -116,6 +81,22 @@ class Client {
       throw new HTTPError(response)
     }
     return this['core.gardener.cloud'].projects.get({ name })
+  }
+
+  async getShoot ({ namespace, name, throwNotFound = true }) {
+    let shoot
+    try {
+      shoot = await this['core.gardener.cloud'].shoots.get({ namespace, name })
+    } catch (err) {
+      if (throwNotFound || !isHttpError(err, 404)) {
+        throw err
+      }
+    }
+    return shoot
+  }
+
+  getResources () {
+    return this.constructor.getResources()
   }
 
   static getResources () {

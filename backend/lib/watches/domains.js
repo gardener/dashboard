@@ -16,14 +16,12 @@
 
 'use strict'
 
-const kubernetesClient = require('../kubernetes-client')
 const { cacheResource } = require('./common')
 const { getDomains } = require('../cache')
-
-const { core } = kubernetesClient({ privileged: true })
+const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = core.secrets.watch({
+  const emitter = privilegedClient.core.secrets.watch({
     namespace: 'garden',
     query: { labelSelector: 'garden.sapcloud.io/role=default-domain' }
   })

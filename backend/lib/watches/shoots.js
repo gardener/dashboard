@@ -17,21 +17,17 @@
 'use strict'
 
 const logger = require('../logger')
-const kubernetesClient = require('../kubernetes-client')
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
 const _ = require('lodash')
-const {
-  bootstrapResource,
-  bootstrapPending
-} = require('../services/terminals/terminalBootstrap')
+const { privilegedClient } = require('../kubernetes-client')
+const { bootstrapResource, bootstrapPending } = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
-const { 'core.gardener.cloud': gardener } = kubernetesClient({ privileged: true })
 
 module.exports = io => {
-  const emitter = gardener.shoots.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].shoots.watch({ allNamespaces: true })
   registerHandler(emitter, async function (event) {
     const shoot = event.object
     if (event.type === 'ERROR') {
