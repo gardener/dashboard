@@ -42,6 +42,10 @@ additionalStaticClients: ~
 #     - "https://additional.ingress.example.org"
 #     - "https://additional.example.org"
 
+additionalTrustedPeers: ~
+# - exampleClient
+# - anotherClient
+
 connectors:
 - type: saml
   id: saml
