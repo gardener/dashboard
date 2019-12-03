@@ -534,7 +534,10 @@ exports.config = async function ({ user, namespace, name, target }) {
   }
 
   if (target === TargetEnum.SHOOT) {
-    const { secretRef } = await getShootHostCluster(client, { namespace, name, target })
+    const secretRef = {
+      namespace,
+      name: `${name}.kubeconfig`
+    }
     const hostClient = await client.createKubeconfigClient(secretRef)
 
     const nodeList = await hostClient.core.nodes.list()

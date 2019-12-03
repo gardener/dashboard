@@ -107,14 +107,13 @@ function seedShootNamespaceExists ({ status }) {
 
 async function replaceResource (resource, { namespace, name, body }) {
   try {
-    await resource.get(namespace, name)
+    return resource.update(namespace, name, body)
   } catch (err) {
     if (isHttpError(err, 404)) {
       return resource.create(namespace, body)
     }
     throw err
   }
-  return resource.mergePatch(namespace, name, body)
 }
 
 function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
