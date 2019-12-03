@@ -211,27 +211,24 @@ ClusterScoped.Writable = superclass => class Writable extends ClusterScoped.Crea
     assertBodyObject(body)
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names, name)
-    const headers = setPatchType({}, PatchType.MERGE)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
   }
   jsonPatch (name, body, options) {
     assertName(name)
     assertBodyArray(body)
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names, name)
-    const headers = setPatchType({}, PatchType.JSON)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
   }
   strategicMergePatch (name, body, options) {
     assertName(name)
     assertBodyObject(body)
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names, name)
-    const headers = setPatchType({}, PatchType.STRATEGIC_MERGE)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
   }
   delete (name, options) {
     assertName(name)
@@ -264,9 +261,8 @@ NamespaceScoped.Writable = superclass => class Writable extends NamespaceScoped.
     assertBodyObject(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const headers = setPatchType({}, PatchType.MERGE)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
   }
   jsonPatch (namespace, name, body, options) {
     assertNamespace(namespace)
@@ -274,9 +270,8 @@ NamespaceScoped.Writable = superclass => class Writable extends NamespaceScoped.
     assertBodyArray(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const headers = setPatchType({}, PatchType.JSON)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
   }
   strategicMergePatch (namespace, name, body, options) {
     assertNamespace(namespace)
@@ -284,9 +279,8 @@ NamespaceScoped.Writable = superclass => class Writable extends NamespaceScoped.
     assertBodyObject(body)
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names, namespace, name)
-    const headers = setPatchType({}, PatchType.STRATEGIC_MERGE)
     const searchParams = new URLSearchParams(options)
-    return this[http.request](url, { method: 'patch', headers, searchParams, json: body })
+    return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
   }
   delete (namespace, name, options) {
     assertNamespace(namespace)
