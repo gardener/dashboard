@@ -103,7 +103,7 @@ limitations under the License.
         <v-card-title class="listItem">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
           <v-flex class="pa-0">
-            <span class="grey--text">Available Loadbalancer Classes</span><br>
+            <span class="grey--text">Available Load Balancer Classes</span><br>
             <lb-class
             v-for="lbClass in shootLoadbalancerClasses"
             :lbClass="lbClass"
