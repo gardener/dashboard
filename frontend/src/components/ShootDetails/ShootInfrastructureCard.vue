@@ -98,6 +98,21 @@ limitations under the License.
         </v-card-title>
       </template>
 
+      <template v-if="!!shootLoadbalancerClasses">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">Available Loadbalancer Classes</span><br>
+            <lb-class
+            v-for="lbClass in shootLoadbalancerClasses"
+            :lbClass="lbClass"
+            :key="lbClass.name"
+            ></lb-class>
+          </v-flex>
+        </v-card-title>
+      </template>
+
     </div>
   </v-card>
 </template>
@@ -108,7 +123,9 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
+import find from 'lodash/find'
 import CopyBtn from '@/components/CopyBtn'
+import LbClass from '@/components/ShootDetails/LbClass'
 import {
   canLinkToSeed
 } from '@/utils'
@@ -116,7 +133,8 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    LbClass
   },
   props: {
     shootItem: {
@@ -126,7 +144,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'namespaces'
+      'namespaces',
+      'cloudProfileByName'
     ]),
     showSeedInfo () {
       return !!this.shootSeedName && this.hasAccessToGardenNamespace
@@ -143,6 +162,16 @@ export default {
         return undefined
       }
       return `*.ingress.${this.shootDomain}`
+    },
+    shootLoadbalancerClasses () {
+      const cloudProfile = this.cloudProfileByName('this.shootCloudProfileName')
+      const profileFloatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+      const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
+      const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
+      if (shootFloatingPool) {
+        return shootFloatingPool.loadBalancerClasses
+      }
+      return undefined
     },
     namespace () {
       return get(this.$route.params, 'namespace')

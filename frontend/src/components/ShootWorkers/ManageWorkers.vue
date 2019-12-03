@@ -93,7 +93,6 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
       'zonesByCloudProfileNameAndRegion'
     ]),

@@ -60,7 +60,7 @@ exports.list = function () {
   const seeds = getVisibleAndNotProtectedSeeds()
   const cloudProfiles = getCloudProfiles()
 
-  return _
+  const profiles = _
     .chain(cloudProfiles)
     .map(cloudProfile => fromResource({
       cloudProfile,
@@ -72,6 +72,41 @@ exports.list = function () {
     }))
     .filter(cloudProfile => !_.isEmpty(cloudProfile.data.seeds))
     .value()
+
+  const fakeCP = _.cloneDeep(_.find(profiles, { data: { type: 'openstack' } }))
+  fakeCP.metadata.name = 'FAKEPROFILE'
+  fakeCP.metadata.displayName = 'FAKEPROFILE'
+  fakeCP.data.providerConfig.constraints = {
+    'floatingPools': [
+      {
+        'loadBalancerClasses': [
+          {
+            'floatingSubnetID': 'cc4cf15d-dcd3-43bb-bc31-bfd4b9d6996d',
+            'name': 'internal'
+          },
+          {
+            'floatingSubnetID': '1bef59b2-74a5-4f94-aad6-83a59abe2aa0',
+            'name': 'internet'
+          }
+        ],
+        'name': 'FloatingIP-external-cp'
+      },
+      {
+        'loadBalancerClasses': [
+          {
+            'floatingSubnetID': '42f12acd-244d-486e-8bbf-c58b0cb44619',
+            'name': 'default'
+          }
+        ],
+        'name': 'FloatingIP-external-cp-gardener'
+      }
+    ]
+  }
+
+  profiles.push(fakeCP)
+  console.log(JSON.stringify(fakeCP))
+
+  return profiles
 }
 
 exports.read = function ({ name }) {
