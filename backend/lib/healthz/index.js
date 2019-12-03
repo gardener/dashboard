@@ -17,7 +17,10 @@
 'use strict'
 
 const { format: fmt } = require('util')
-const { privilegedClient, isHttpError } = require('../kubernetes-client')
+const {
+  privilegedClient, // privileged client for the garden cluster
+  isHttpError
+} = require('../kubernetes-client')
 
 async function healthCheck () {
   try {

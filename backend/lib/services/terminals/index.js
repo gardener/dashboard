@@ -101,7 +101,7 @@ function isServiceAccountReady (serviceAccount) {
 
 async function findExistingTerminalResource ({ user, namespace, name, hostCluster, targetCluster }) {
   const username = user.id
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const selectors = [
     `dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`,
@@ -127,7 +127,7 @@ async function findExistingTerminalResource ({ user, namespace, name, hostCluste
 
 async function deleteTerminalSession ({ user, namespace: shootNamespace, body }) {
   const username = user.id
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const { namespace, name } = body
   assert.strictEqual(namespace, shootNamespace, 'Namespaces of "terminal" and "shoot" do not match')
@@ -147,7 +147,7 @@ async function deleteTerminalSession ({ user, namespace: shootNamespace, body })
 }
 
 async function getTargetCluster ({ user, namespace, name, target }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const isAdmin = user.isAdmin
 
   const targetCluster = {
@@ -266,7 +266,7 @@ function getConfigFromBody (body) {
 }
 
 function getHostCluster ({ user, namespace, name, target, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   if (target === TargetEnum.GARDEN) {
     return getGardenTerminalHostCluster(client, { body })
@@ -283,7 +283,7 @@ function getHostCluster ({ user, namespace, name, target, body }) {
 }
 
 async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const isAdmin = user.isAdmin
   const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
 
@@ -365,7 +365,7 @@ function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, r
 
 function readTerminalUntilReady ({ user, namespace, name }) {
   const username = user.id
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const isTerminalReady = terminal => {
     if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
@@ -382,7 +382,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body }) {
   const username = user.id
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const [
     hostCluster,
@@ -432,7 +432,7 @@ async function createHostClient (client, secretRef) {
 }
 
 async function fetchTerminalSession ({ user, body: { name, namespace } }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const terminal = await readTerminalUntilReady({ user, name, namespace })
   const host = terminal.spec.host
@@ -489,7 +489,7 @@ function getContainerImage ({ isAdmin, preferredContainerImage }) {
 
 exports.heartbeat = async function ({ user, body = {} }) {
   const username = user.id
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const { name, namespace } = body
   const terminal = await getTerminalResource(client, { name, namespace })
@@ -526,7 +526,7 @@ async function setKeepaliveAnnotation (client, terminal, throwErrors = true) {
 }
 
 exports.config = async function ({ user, namespace, name, target }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const isAdmin = user.isAdmin
 
   const config = {

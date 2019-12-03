@@ -18,7 +18,9 @@
 
 const { cacheResource } = require('./common')
 const { getQuotas } = require('../cache')
-const { privilegedClient } = require('../kubernetes-client')
+const {
+  privilegedClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
   const emitter = privilegedClient['core.gardener.cloud'].quotas.watchListAllNamespaces()

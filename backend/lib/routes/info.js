@@ -28,16 +28,15 @@ const router = module.exports = express.Router()
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const { api, auth, ...profile } = req.user || {}
-      const gardenerVersion = await fetchGardenerVersion(api)
-      const user = { auth, ...profile }
-      res.send({ version, gardenerVersion, user })
+      const gardenerVersion = await fetchGardenerVersion(req.user)
+      res.send({ version, gardenerVersion })
     } catch (err) {
       next(err)
     }
   })
 
-async function fetchGardenerVersion (client) {
+async function fetchGardenerVersion (user) {
+  const client = user.client // user specific client for the garden cluster
   try {
     const {
       spec: {

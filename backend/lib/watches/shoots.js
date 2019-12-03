@@ -21,7 +21,9 @@ const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
 const _ = require('lodash')
-const { privilegedClient } = require('../kubernetes-client')
+const {
+  privilegedClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 const { bootstrapResource, bootstrapPending } = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []

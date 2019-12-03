@@ -23,7 +23,7 @@ oidc:
   scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
   clockTolerance: 42
 terminal:
-  containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:0.6.0
+  containerImage: dummyImage:1.0.0
   gardenTerminalHost:
     seedRef: infra1-seed
   garden:

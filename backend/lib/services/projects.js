@@ -17,7 +17,10 @@
 'use strict'
 
 const _ = require('lodash')
-const { privilegedClient, Resources } = require('../kubernetes-client')
+const {
+  privilegedClient, // privileged client for the garden cluster
+  Resources
+} = require('../kubernetes-client')
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
@@ -92,12 +95,11 @@ async function validateDeletePreconditions ({ user, namespace }) {
 }
 
 exports.list = async function ({ user, qs = {} }) {
-  const { 'core.gardener.cloud': gardener } = privilegedClient
   const [
     projects,
     isAdmin
   ] = await Promise.all([
-    gardener.projects.list(),
+    privilegedClient['core.gardener.cloud'].projects.list(),
     authorization.isAdmin(user)
   ])
 
@@ -135,7 +137,7 @@ exports.list = async function ({ user, qs = {} }) {
 }
 
 exports.create = async function ({ user, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const { 'core.gardener.cloud': gardener } = client
 
   const name = _.get(body, 'metadata.name')
@@ -161,13 +163,13 @@ exports.watchProject = name => {
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const project = await client.getProjectByNamespace(namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
@@ -182,7 +184,7 @@ exports.patch = async function ({ user, name: namespace, body }) {
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
 
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name

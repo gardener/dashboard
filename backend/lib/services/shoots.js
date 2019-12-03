@@ -16,7 +16,7 @@
 
 'use strict'
 
-const kubernetesClient = require('../kubernetes-client')
+const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
@@ -25,11 +25,10 @@ const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { isHttpError } = kubernetesClient
 const { decodeBase64, getSeedNameFromShoot } = utils
 
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const query = {}
   if (shootsWithIssuesOnly) {
     query.labelSelector = 'shoot.garden.sapcloud.io/status!=healthy'
@@ -41,7 +40,7 @@ exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }
 }
 
 exports.create = async function ({ user, namespace, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const username = user.id
   const finalizers = ['gardener']
@@ -53,20 +52,20 @@ exports.create = async function ({ user, namespace, body }) {
 }
 
 async function read ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   return client['core.gardener.cloud'].shoots.get(namespace, name)
 }
 exports.read = read
 
 async function patch ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
 exports.patch = patch
 
 exports.replace = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
   const {
@@ -82,7 +81,7 @@ exports.replace = async function ({ user, namespace, name, body }) {
 }
 
 exports.replaceVersion = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const version = body.version
   const patchOperations = [{
     op: 'replace',
@@ -93,7 +92,7 @@ exports.replaceVersion = async function ({ user, namespace, name, body }) {
 }
 
 exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const enabled = !!body.enabled
   const payload = {
     spec: {
@@ -106,7 +105,7 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
 }
 
 exports.replaceHibernationSchedules = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const schedules = body
   const payload = {
     spec: {
@@ -119,7 +118,7 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const addons = body
   const payload = {
     spec: {
@@ -130,7 +129,7 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
 }
 
 exports.replaceWorkers = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const workers = body
   const patchOperations = [{
     op: 'replace',
@@ -141,7 +140,7 @@ exports.replaceWorkers = async function ({ user, namespace, name, body }) {
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
@@ -161,7 +160,7 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
 }
 
 const patchAnnotations = async function ({ user, namespace, name, annotations }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const body = {
     metadata: {
       annotations: annotations
@@ -172,7 +171,7 @@ const patchAnnotations = async function ({ user, namespace, name, annotations })
 exports.patchAnnotations = patchAnnotations
 
 exports.remove = async function ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   const annotations = {
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }
@@ -182,7 +181,7 @@ exports.remove = async function ({ user, namespace, name }) {
 }
 
 async function readSecret ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
   try {
     return await client.core.secrets.get(namespace, name)
   } catch (err) {
@@ -194,7 +193,7 @@ async function readSecret ({ user, namespace, name }) {
 }
 
 exports.info = async function ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const [
     shoot,

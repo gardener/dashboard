@@ -19,7 +19,10 @@
 const assert = require('assert').strict
 const { Unauthorized } = require('../errors')
 const logger = require('../logger')
-const { privilegedClient, Resources } = require('../kubernetes-client')
+const {
+  privilegedClient, // privileged client for the garden cluster
+  Resources
+} = require('../kubernetes-client')
 
 exports.isAuthenticated = async function ({ token } = {}) {
   const { apiVersion, kind } = Resources.TokenReview

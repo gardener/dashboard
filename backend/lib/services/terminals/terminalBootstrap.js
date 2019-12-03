@@ -25,7 +25,7 @@ const config = require('../../config')
 const { NotImplemented } = require('../../errors')
 
 const {
-  privilegedClient,
+  privilegedClient, // privileged client for the garden cluster
   isHttpError
 } = require('../../kubernetes-client')
 

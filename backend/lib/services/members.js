@@ -115,7 +115,7 @@ async function unsetProjectMember (client, { namespace, name }) {
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const project = await client.getProjectByNamespace(namespace)
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
@@ -125,7 +125,7 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.get = async function ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const project = await client.getProjectByNamespace(namespace)
 
@@ -164,7 +164,7 @@ exports.get = async function ({ user, namespace, name }) {
 }
 
 exports.create = async function ({ user, namespace, body: { name } }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
   if (serviceaccountNamespace === namespace) {
@@ -182,7 +182,7 @@ exports.create = async function ({ user, namespace, body: { name } }) {
 }
 
 exports.remove = async function ({ user, namespace, name }) {
-  const client = user.api
+  const client = user.client // user specific client for the garden cluster
 
   // unassign user from project
   const project = await unsetProjectMember(client, { namespace, name })

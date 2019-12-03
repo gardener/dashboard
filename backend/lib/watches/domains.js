@@ -18,7 +18,9 @@
 
 const { cacheResource } = require('./common')
 const { getDomains } = require('../cache')
-const { privilegedClient } = require('../kubernetes-client')
+const {
+  privilegedClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
   const query = { labelSelector: 'garden.sapcloud.io/role=default-domain' }

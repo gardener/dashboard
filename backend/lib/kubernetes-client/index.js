@@ -43,6 +43,7 @@ function createClient ({ auth, key, cert, ...options } = {}) {
 
 exports = module.exports = createClient
 
+// create a privileged client for the garden cluster
 const privilegedClient = Client.create(config)
 
 Object.assign(exports, {

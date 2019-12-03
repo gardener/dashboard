@@ -21,7 +21,9 @@ const { getSeeds } = require('../cache')
 const logger = require('../logger')
 const { registerHandler } = require('./common')
 const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
-const { privilegedClient } = require('../kubernetes-client')
+const {
+  privilegedClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
   const emitter = privilegedClient['core.gardener.cloud'].seeds.watchList()
