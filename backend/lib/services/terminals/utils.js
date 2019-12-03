@@ -144,7 +144,7 @@ function getGardenTerminalHostClusterSecrets (client) {
   const query = {
     labelSelector: labelSelector.join(',')
   }
-  return client.core.secrets.get({ namespace, query })
+  return client.core.secrets.list(namespace, query)
 }
 
 module.exports = {

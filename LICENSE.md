@@ -280,6 +280,10 @@ Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
 Copyright JS Foundation and other contributors <https://js.foundation/>\
 [MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
 
+- [mixwith](https://github.com/justinfagnani/mixwith.js)\
+Copyright (c) 2014 Justin Fagnani\
+[Apache License 2.0](https://github.com/justinfagnani/mixwith.js/blob/master/LICENSE)
+
 - [morgan](https://github.com/expressjs/morgan)\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>\

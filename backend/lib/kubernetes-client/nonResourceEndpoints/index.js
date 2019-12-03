@@ -16,36 +16,16 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http, ws } = require('../../symbols')
+const Healthz = require('./Healthz')
 
-class Ingress extends Resource {
-  get (options = {}) {
-    return this[http.get](options)
-  }
-
-  watch (options = {}) {
-    return this[ws.watch](options)
-  }
-
-  patch (options = {}) {
-    return this[http.patch](options)
-  }
-
-  delete (options = {}) {
-    return this[http.delete](options)
+function load (options) {
+  return {
+    healthz: new Healthz(options)
   }
 }
 
-Object.assign(Ingress, {
-  group: 'extensions',
-  version: 'v1beta1',
-  scope: 'Namespaced',
-  names: {
-    plural: 'ingresses',
-    singular: 'ingress',
-    kind: 'Ingress'
-  }
-})
+exports = module.exports = load
 
-module.exports = Ingress
+exports.assign = (object, options = {}) => {
+  return Object.assign(object, load(options))
+}

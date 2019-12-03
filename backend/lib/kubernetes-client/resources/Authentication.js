@@ -16,4 +16,21 @@
 
 'use strict'
 
-module.exports = require('./v1beta1')
+const { mix } = require('mixwith')
+
+const { Authentication } = require('../groups')
+const { ClusterScoped, Creatable } = require('../mixins')
+
+class TokenReview extends mix(Authentication).with(ClusterScoped, Creatable) {
+  static get names () {
+    return {
+      plural: 'tokenreviews',
+      singular: 'tokenreview',
+      kind: 'TokenReview'
+    }
+  }
+}
+
+module.exports = {
+  TokenReview
+}

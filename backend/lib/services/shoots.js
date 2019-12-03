@@ -28,54 +28,20 @@ const yaml = require('js-yaml')
 const { isHttpError } = kubernetesClient
 const { decodeBase64, getSeedNameFromShoot } = utils
 
-function getSecret (client, { namespace, name }) {
-  try {
-    return client.core.secrets.get({ namespace, name })
-  } catch (err) {
-    if (isHttpError(err, 404)) {
-      return
-    }
-    logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
-    throw err
-  }
-}
-
-async function assignComponentSecret (client, data, component, namespace, name) {
-  const secret = await getSecret(client, { namespace, name })
-  if (secret) {
-    _
-      .chain(secret)
-      .get('data')
-      .pick('username', 'password')
-      .forEach((value, key) => {
-        if (key === 'password') {
-          data[`${component}_password`] = decodeBase64(value)
-        } else if (key === 'username') {
-          data[`${component}_username`] = decodeBase64(value)
-        }
-      })
-      .commit()
-  }
-}
-
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
-  const options = {}
+  const query = {}
   if (shootsWithIssuesOnly) {
-    options.query = { labelSelector: 'shoot.garden.sapcloud.io/status!=healthy' }
+    query.labelSelector = 'shoot.garden.sapcloud.io/status!=healthy'
   }
-  if (namespace) {
-    options.namespace = namespace
-  } else {
-    options.allNamespaces = true
+  if (!namespace) {
+    return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
   }
-  return gardener.shoots.get(options)
+  return client['core.gardener.cloud'].shoots.list(namespace, query)
 }
 
 exports.create = async function ({ user, namespace, body }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
 
   const username = user.id
   const finalizers = ['gardener']
@@ -83,42 +49,26 @@ exports.create = async function ({ user, namespace, body }) {
     'garden.sapcloud.io/createdBy': username
   }
   body = _.merge({}, body, { metadata: { namespace, finalizers, annotations } })
-  return gardener.shoots.create({ namespace, json: body })
+  return client['core.gardener.cloud'].shoots.create(namespace, body)
 }
 
 async function read ({ user, namespace, name }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
 
-  return gardener.shoots.get({ namespace, name })
+  return client['core.gardener.cloud'].shoots.get(namespace, name)
 }
 exports.read = read
 
-exports.exists = async function ({ user, namespace, name }) {
-  try {
-    await read({ user, namespace, name })
-    return true
-  } catch (err) {
-    if (isHttpError(404)) {
-      return false
-    }
-    throw err
-  }
-}
-
-async function patch ({ user, type = 'merge', namespace, name, body }) {
+async function patch ({ user, namespace, name, body }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
-
-  return gardener.shoots.patch({ type, namespace, name, json: body })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
 exports.patch = patch
 
 exports.replace = async function ({ user, namespace, name, body }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
 
-  const { metadata, kind, apiVersion, status } = await gardener.shoots.get({ namespace, name })
+  const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
   const {
     metadata: { labels, annotations },
     spec
@@ -128,22 +78,22 @@ exports.replace = async function ({ user, namespace, name, body }) {
   // compose new body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return gardener.shoots.update({ namespace, name, json: body })
+  return client['core.gardener.cloud'].shoots.update(namespace, name, body)
 }
 
 exports.replaceVersion = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const version = body.version
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: '/spec/kubernetes/version',
-      value: version
-    }
-  ]
-  return patch({ user, type: 'json', namespace, name, body: patchOperations })
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/kubernetes/version',
+    value: version
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
 exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const enabled = !!body.enabled
   const payload = {
     spec: {
@@ -152,10 +102,11 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceHibernationSchedules = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const schedules = body
   const payload = {
     spec: {
@@ -164,32 +115,33 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const addons = body
   const payload = {
     spec: {
       addons
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceWorkers = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const workers = body
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: `/spec/provider/workers`,
-      value: workers
-    }
-  ]
-  return patch({ user, type: 'json', namespace, name, body: patchOperations })
+  const patchOperations = [{
+    op: 'replace',
+    path: `/spec/provider/workers`,
+    value: workers
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
+  const client = user.api
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
@@ -205,35 +157,34 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 const patchAnnotations = async function ({ user, namespace, name, annotations }) {
+  const client = user.api
   const body = {
     metadata: {
       annotations: annotations
     }
   }
-  return patch({ user, namespace, name, body })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
 exports.patchAnnotations = patchAnnotations
 
 exports.remove = async function ({ user, namespace, name }) {
   const client = user.api
-  const { 'core.gardener.cloud': gardener } = client
-
   const annotations = {
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }
   await patchAnnotations({ user, namespace, name, annotations })
 
-  return gardener.shoots.delete({ namespace, name })
+  return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
 
 async function readSecret ({ user, namespace, name }) {
   const client = user.api
   try {
-    return await client.core.secrets.get({ namespace, name })
+    return await client.core.secrets.get(namespace, name)
   } catch (err) {
     if (isHttpError(err, 404)) {
       return
@@ -312,4 +263,34 @@ function assignComponentSecrets (client, data, namespace, name) {
     const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
     return assignComponentSecret(client, data, component, namespace, ingressSecretName)
   }))
+}
+
+function getSecret (client, { namespace, name }) {
+  try {
+    return client.core.secrets.get(namespace, name)
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return
+    }
+    logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
+    throw err
+  }
+}
+
+async function assignComponentSecret (client, data, component, namespace, name) {
+  const secret = await getSecret(client, { namespace, name })
+  if (secret) {
+    _
+      .chain(secret)
+      .get('data')
+      .pick('username', 'password')
+      .forEach((value, key) => {
+        if (key === 'password') {
+          data[`${component}_password`] = decodeBase64(value)
+        } else if (key === 'username') {
+          data[`${component}_username`] = decodeBase64(value)
+        }
+      })
+      .commit()
+  }
 }

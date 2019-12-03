@@ -61,12 +61,12 @@ function createServiceaccount (client, { namespace, name, createdBy }) {
       }
     }
   }
-  return client.core.serviceaccounts.create({ namespace, json: body })
+  return client.core.serviceaccounts.create(namespace, body)
 }
 
 async function deleteServiceaccount (client, { namespace, name }) {
   try {
-    return client.core.serviceaccounts.delete({ namespace, name })
+    return client.core.serviceaccounts.delete(namespace, name)
   } catch (err) {
     if (isHttpError(err, [404, 410])) {
       return { metadata: { name, namespace } }
@@ -93,12 +93,7 @@ async function setProjectMember (client, { namespace, name }) {
       members
     }
   }
-  return client['core.gardener.cloud'].projects.patch({
-    type: 'merge',
-    namespace,
-    name: project.metadata.name,
-    json: body
-  })
+  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
 async function unsetProjectMember (client, { namespace, name }) {
@@ -115,12 +110,7 @@ async function unsetProjectMember (client, { namespace, name }) {
       members
     }
   }
-  return client['core.gardener.cloud'].projects.patch({
-    type: 'merge',
-    namespace,
-    name: project.metadata.name,
-    json: body
-  })
+  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
 // list, create and remove is done with the user
@@ -128,7 +118,7 @@ exports.list = async function ({ user, namespace }) {
   const client = user.api
 
   const project = await client.getProjectByNamespace(namespace)
-  const { items: serviceAccounts } = await client.core.serviceaccounts.get({ namespace })
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
 
   // get project members from project
   return fromResource(project, serviceAccounts)
@@ -151,16 +141,10 @@ exports.get = async function ({ user, namespace, name }) {
   }
   const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
   if (serviceAccountNamespace === namespace) {
-    const serviceaccount = await client.core.serviceaccounts.get({
-      namespace,
-      name: serviceAccountName
-    })
+    const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
     const server = client.cluster.server.toString()
     const secretName = _.first(serviceaccount.secrets).name
-    const secret = await client.core.secrets.get({
-      namespace,
-      name: secretName
-    })
+    const secret = await client.core.secrets.get(namespace, secretName)
     const token = decodeBase64(secret.data.token)
     const caData = secret.data['ca.crt']
     const clusterName = 'garden'
@@ -193,7 +177,7 @@ exports.create = async function ({ user, namespace, body: { name } }) {
 
   // assign user to project
   const project = await setProjectMember(client, { namespace, name })
-  const { items: serviceAccounts } = await client.core.serviceaccounts.get({ namespace })
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
   return fromResource(project, serviceAccounts)
 }
 
@@ -210,6 +194,6 @@ exports.remove = async function ({ user, namespace, name }) {
     })
   }
 
-  const { items: serviceAccounts } = await client.core.serviceaccounts.get({ namespace })
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
   return fromResource(project, serviceAccounts)
 }

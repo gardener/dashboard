@@ -16,28 +16,21 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http, ws } = require('../../symbols')
+const { mix } = require('mixwith')
 
-class Quota extends Resource {
-  get (options = {}) {
-    return this[http.get](options)
-  }
+const { APIRegistration } = require('../groups')
+const { ClusterScoped, Readable } = require('../mixins')
 
-  watch (options = {}) {
-    return this[ws.watch](options)
+class APIService extends mix(APIRegistration).with(ClusterScoped, Readable) {
+  static get names () {
+    return {
+      plural: 'apiservices',
+      singular: 'apiservice',
+      kind: 'APIService'
+    }
   }
 }
 
-Object.assign(Quota, {
-  group: 'core.gardener.cloud',
-  version: 'v1alpha1',
-  scope: 'Namespaced',
-  names: {
-    plural: 'quotas',
-    singular: 'quota',
-    kind: 'Quota'
-  }
-})
-
-module.exports = Quota
+module.exports = {
+  APIService
+}

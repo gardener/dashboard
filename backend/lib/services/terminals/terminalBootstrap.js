@@ -107,14 +107,14 @@ function seedShootNamespaceExists ({ status }) {
 
 async function replaceResource (resource, { namespace, name, body }) {
   try {
-    await resource.get({ namespace, name })
+    await resource.get(namespace, name)
   } catch (err) {
     if (isHttpError(err, 404)) {
-      return resource.create({ namespace, json: body })
+      return resource.create(namespace, body)
     }
     throw err
   }
-  return resource.patch({ type: 'merge', namespace, name, json: body })
+  return resource.mergePatch(namespace, name, body)
 }
 
 function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
@@ -246,7 +246,7 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
 
   // fetch seed resource
   const seedName = getSeedNameFromShoot(shootResource)
-  const seedResource = await client['core.gardener.cloud'].seeds.get({ name: seedName })
+  const seedResource = await client['core.gardener.cloud'].seeds.get(seedName)
 
   // calculate ingress domain
   const apiServerIngressHost = getKubeApiServerHostForShoot(shootResource, seedResource)

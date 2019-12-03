@@ -27,7 +27,7 @@ const { bootstrapResource, bootstrapPending } = require('../services/terminals/t
 const shootsWithIssues = []
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].shoots.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
   registerHandler(emitter, async function (event) {
     const shoot = event.object
     if (event.type === 'ERROR') {

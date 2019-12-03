@@ -32,8 +32,12 @@ async function hasAuthorization (user, resourceAttributes) {
       resourceAttributes
     }
   }
-  const response = await client['authorization.k8s.io'].selfsubjectaccessreviews.create({ json: body })
-  return _.get(response, 'status.allowed', false)
+  const {
+    status: {
+      allowed = false
+    } = {}
+  } = await client['authorization.k8s.io'].selfsubjectaccessreviews.create(body)
+  return allowed
 }
 exports.hasAuthorization = hasAuthorization
 

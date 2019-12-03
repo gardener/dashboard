@@ -38,11 +38,13 @@ router.route('/')
   })
 
 async function fetchGardenerVersion (client) {
-  const { 'apiregistration.k8s.io': apiRegistration } = client
   try {
-    const { spec: { service, caBundle } } = await apiRegistration.apiservices.get({
-      name: 'v1alpha1.core.gardener.cloud'
-    })
+    const {
+      spec: {
+        service,
+        caBundle
+      }
+    } = await client['apiregistration.k8s.io'].apiservices.get('v1alpha1.core.gardener.cloud')
     const uri = `https://${service.name}.${service.namespace}/version`
     const version = await got(uri, {
       ca: decodeBase64(caBundle),

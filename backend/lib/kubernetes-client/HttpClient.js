@@ -18,56 +18,33 @@
 
 const got = require('got')
 const { http } = require('./symbols')
-const { patchHttpErrorMessage } = require('../util')
+const { patchHttpErrorMessage } = require('./util')
 
-class BaseResource {
+class HttpClient {
   constructor ({ url, ...options } = {}) {
     const prefixUrl = this[http.prefixUrl](url)
     this[http.client] = got.extend({ prefixUrl, ...options })
   }
 
   [http.prefixUrl] (url) {
-    return url.replace(/\/$/, '')
+    return url
   }
 
-  [http.pathname] () {
-    return this.constructor.name.toLocaleLowerCase()
-  }
-
-  async [http.request] ({ query, body, ...options } = {}) {
+  async [http.request] (url, { body, searchParams, query, ...options } = {}) {
     if (body && typeof body === 'object') {
       options.json = body
     }
-    if (query && typeof query === 'object') {
+    if (searchParams && searchParams.toString()) {
+      options.searchParams = searchParams
+    } else if (query && typeof query === 'object' && Object.keys(query).length) {
       options.searchParams = new URLSearchParams(query)
     }
-    const pathname = this[http.pathname](options).replace(/^\//, '')
     try {
-      return await this[http.client](pathname, options)
+      return await this[http.client](url, options)
     } catch (err) {
       throw patchHttpErrorMessage(err)
     }
   }
-
-  [http.get] (options = {}) {
-    return this[http.request]({ method: 'get', ...options })
-  }
-
-  [http.post] (options = {}) {
-    return this[http.request]({ method: 'post', ...options })
-  }
-
-  [http.put] (options = {}) {
-    return this[http.request]({ method: 'put', ...options })
-  }
-
-  [http.patch] (options = {}) {
-    return this[http.request]({ method: 'patch', ...options })
-  }
-
-  [http.delete] (options = {}) {
-    return this[http.request]({ method: 'delete', ...options })
-  }
 }
 
-module.exports = BaseResource
+module.exports = HttpClient

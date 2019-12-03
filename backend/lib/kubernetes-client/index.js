@@ -19,6 +19,7 @@
 const assert = require('assert').strict
 const util = require('./util')
 const Client = require('./Client')
+const { Resources } = require('./resources')
 const kubeconfig = require('../kubernetes-config')
 const { isHttpError } = util
 const config = kubeconfig.load(process.env)
@@ -43,7 +44,6 @@ function createClient ({ auth, key, cert, ...options } = {}) {
 exports = module.exports = createClient
 
 const privilegedClient = Client.create(config)
-const Resources = privilegedClient.getResources()
 
 Object.assign(exports, {
   createClient,

@@ -16,15 +16,13 @@
 
 'use strict'
 
-const nonResourceEndpoints = require('./nonResourceEndpoints')
+const HttpClient = require('../HttpClient')
+const { http } = require('../symbols')
 
-class NonResourceEndpoint {
-  static assignAll (client, options) {
-    for (const [key, Ctor] of Object.entries(nonResourceEndpoints)) {
-      client[key] = new Ctor(options)
-    }
-    return client
+class Healthz extends HttpClient {
+  get () {
+    return this[http.request]('healthz', { method: 'get' })
   }
 }
 
-module.exports = NonResourceEndpoint
+module.exports = Healthz

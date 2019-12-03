@@ -19,7 +19,7 @@ const _ = require('lodash')
 const { EventEmitter } = require('events')
 const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
-const { waitFor } = require('../../lib/kubernetes-client/util')
+const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
   const seed = {
@@ -195,7 +195,7 @@ function createReconnectorStub (events = [], name) {
   const reconnector = new Reconnector()
   _.forEach(events, args => reconnector.pushEvent(...args))
   reconnector.resourceName = name
-  reconnector.waitFor = waitFor
+  WatchBuilder.setWaitFor(reconnector)
   return reconnector
 }
 

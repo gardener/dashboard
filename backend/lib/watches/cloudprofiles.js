@@ -21,6 +21,6 @@ const { getCloudProfiles } = require('../cache')
 const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].cloudprofiles.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].cloudprofiles.watchList()
   cacheResource(emitter, getCloudProfiles(), 'metadata.name')
 }

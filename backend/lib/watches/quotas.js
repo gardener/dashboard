@@ -21,6 +21,6 @@ const { getQuotas } = require('../cache')
 const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].quotas.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].quotas.watchListAllNamespaces()
   cacheResource(emitter, getQuotas(), 'metadata.name')
 }

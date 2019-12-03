@@ -68,11 +68,11 @@ async function readServiceAccountToken (client, { namespace, serviceAccountName,
   let serviceAccount
   if (waitUntilReady) {
     serviceAccount = await client.core.serviceaccounts
-      .watch({ namespace, name: serviceAccountName })
+      .watch(namespace, serviceAccountName)
       .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
   } else {
     try {
-      serviceAccount = await client.core.serviceaccounts.get({ namespace, name: serviceAccountName })
+      serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
     } catch (err) {
       if (!isHttpError(err, 404)) {
         throw err
@@ -81,7 +81,7 @@ async function readServiceAccountToken (client, { namespace, serviceAccountName,
   }
   const secretName = getFirstServiceAccountSecret(serviceAccount)
   if (secretName) {
-    const secret = await client.core.secrets.get({ namespace, name: secretName })
+    const secret = await client.core.secrets.get(namespace, secretName)
     return decodeBase64(secret.data.token)
   }
 }
@@ -115,7 +115,7 @@ async function findExistingTerminalResource ({ user, namespace, name, hostCluste
     labelSelector: selectors.join(',')
   }
 
-  const existingTerminalList = await client['dashboard.gardener.cloud'].terminals.get({ namespace, query })
+  const existingTerminalList = await client['dashboard.gardener.cloud'].terminals.list(namespace, query)
   return _
     .chain(existingTerminalList)
     .get('items')
@@ -137,7 +137,7 @@ async function deleteTerminalSession ({ user, namespace: shootNamespace, body })
     if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
       throw new Forbidden(`You are not allowed to delete terminal with name ${name}`)
     }
-    await client['dashboard.gardener.cloud'].terminals.delete({ namespace, name })
+    await client['dashboard.gardener.cloud'].terminals.delete(namespace, name)
   } catch (err) {
     if (!isHttpError(err, 404)) {
       throw err
@@ -303,7 +303,7 @@ async function createTerminal ({ user, namespace, name, target, hostCluster, tar
   const prefix = `term-${target}-`
   const terminalResource = toTerminalResource({ prefix, namespace, labels, host: terminalHost, target: terminalTarget })
 
-  return client['dashboard.gardener.cloud'].terminals.create({ namespace, json: terminalResource })
+  return client['dashboard.gardener.cloud'].terminals.create(namespace, terminalResource)
 }
 
 function getPodLabels (target) {
@@ -376,7 +376,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
     return podName && attachServiceAccountName
   }
   return client['dashboard.gardener.cloud'].terminals
-    .watch({ namespace, name })
+    .watch(namespace, name)
     .waitFor(isTerminalReady, { timeout: 10 * 1000 })
 }
 
@@ -506,7 +506,7 @@ function getTerminalResource (client, { name, namespace }) {
     throw new UnprocessableEntity('name and namespace are required')
   }
 
-  return client['dashboard.gardener.cloud'].terminals.get({ namespace, name })
+  return client['dashboard.gardener.cloud'].terminals.get(namespace, name)
 }
 
 async function setKeepaliveAnnotation (client, terminal, throwErrors = true) {
@@ -515,7 +515,8 @@ async function setKeepaliveAnnotation (client, terminal, throwErrors = true) {
   }
   try {
     const { name, namespace } = terminal.metadata
-    await client['dashboard.gardener.cloud'].terminals.patch({ type: 'merge', namespace, name, json: { metadata: { annotations } } })
+    const body = { metadata: { annotations } }
+    await client['dashboard.gardener.cloud'].terminals.mergePatch(namespace, name, body)
   } catch (err) {
     logger.error('Could not keepalive terminal:', err)
     if (throwErrors !== false) {
@@ -536,7 +537,7 @@ exports.config = async function ({ user, namespace, name, target }) {
     const { secretRef } = await getShootHostCluster(client, { namespace, name, target })
     const hostClient = await client.createKubeconfigClient(secretRef)
 
-    const nodeList = await hostClient.core.nodes.get({})
+    const nodeList = await hostClient.core.nodes.list()
     config.nodes = _
       .chain(nodeList)
       .get('items')

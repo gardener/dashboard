@@ -16,24 +16,32 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http } = require('../../symbols')
+const { mix } = require('mixwith')
 
-class TokenReview extends Resource {
-  create (options = {}) {
-    return this[http.post](options)
+const { Authorization } = require('../groups')
+const { ClusterScoped, Creatable } = require('../mixins')
+
+class SelfSubjectAccessReview extends mix(Authorization).with(ClusterScoped, Creatable) {
+  static get names () {
+    return {
+      plural: 'selfsubjectaccessreviews',
+      singular: 'selfsubjectaccessreview',
+      kind: 'SelfSubjectAccessReview'
+    }
   }
 }
 
-Object.assign(TokenReview, {
-  group: 'authentication.k8s.io',
-  version: 'v1',
-  scope: 'Cluster',
-  names: {
-    plural: 'tokenreviews',
-    singular: 'tokenreview',
-    kind: 'TokenReview'
+class SelfSubjectRulesReview extends mix(Authorization).with(ClusterScoped, Creatable) {
+  static get names () {
+    return {
+      plural: 'selfsubjectrulesreviews',
+      singular: 'selfsubjectrulesreview',
+      kind: 'SelfSubjectRulesReview'
+    }
   }
-})
+}
 
-module.exports = TokenReview
+module.exports = {
+  SelfSubjectAccessReview,
+  SelfSubjectRulesReview
+}

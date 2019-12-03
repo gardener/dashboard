@@ -34,8 +34,13 @@ exports.isAuthenticated = async function ({ token } = {}) {
     }
   }
   try {
-    const { status } = await privilegedClient['authentication.k8s.io'].tokenreviews.create({ json: body })
-    const { user = {}, authenticated = false, error = 'User not authenticated' } = status || {}
+    const {
+      status: {
+        user = {},
+        authenticated = false,
+        error = 'User not authenticated'
+      } = {}
+    } = await privilegedClient['authentication.k8s.io'].tokenreviews.create(body)
     assert.strictEqual(authenticated, true, error)
     assert.ok(user.username, `User authenticated but username is empty`)
     return user

@@ -16,24 +16,21 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http } = require('../../symbols')
+const { mix } = require('mixwith')
 
-class SelfSubjectAccessReview extends Resource {
-  create (options = {}) {
-    return this[http.post](options)
+const { Extensions } = require('../groups')
+const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
+
+class Ingress extends mix(Extensions).with(NamespaceScoped, Readable, Observable, Writable) {
+  static get names () {
+    return {
+      plural: 'ingresses',
+      singular: 'ingress',
+      kind: 'Ingress'
+    }
   }
 }
 
-Object.assign(SelfSubjectAccessReview, {
-  group: 'authorization.k8s.io',
-  version: 'v1',
-  scope: 'Cluster',
-  names: {
-    plural: 'selfsubjectaccessreviews',
-    singular: 'selfsubjectaccessreview',
-    kind: 'SelfSubjectAccessReview'
-  }
-})
-
-module.exports = SelfSubjectAccessReview
+module.exports = {
+  Ingress
+}

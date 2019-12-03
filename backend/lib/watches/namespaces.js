@@ -20,7 +20,7 @@ const { registerHandler } = require('./common')
 const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].projects.watch({ allNamespaces: true })
+  const emitter = privilegedClient['core.gardener.cloud'].projects.watchList()
   registerHandler(emitter, event => {
     if (event.type === 'ADDED') {
       const namespace = event.object.spec.namespace

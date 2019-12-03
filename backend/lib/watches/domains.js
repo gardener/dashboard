@@ -21,9 +21,7 @@ const { getDomains } = require('../cache')
 const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = privilegedClient.core.secrets.watch({
-    namespace: 'garden',
-    query: { labelSelector: 'garden.sapcloud.io/role=default-domain' }
-  })
+  const query = { labelSelector: 'garden.sapcloud.io/role=default-domain' }
+  const emitter = privilegedClient.core.secrets.watchList('garden', query)
   cacheResource(emitter, getDomains(), 'metadata.name')
 }

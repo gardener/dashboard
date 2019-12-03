@@ -24,7 +24,7 @@ const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
 const { privilegedClient } = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].seeds.watch()
+  const emitter = privilegedClient['core.gardener.cloud'].seeds.watchList()
   cacheResource(emitter, getSeeds(), 'metadata.name')
   registerHandler(emitter, async function (event) {
     if (event.type === 'ERROR') {

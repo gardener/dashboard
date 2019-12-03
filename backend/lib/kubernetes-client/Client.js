@@ -21,23 +21,52 @@ const assert = require('assert').strict
 const { isIP } = require('net')
 const { HTTPError } = require('got')
 const { isHttpError, setAuthorization } = require('./util')
-const { ApiGroup, NonResourceEndpoint } = require('./resources')
 const debug = require('./debug')
+const resources = require('./resources')
+const nonResourceEndpoints = require('./nonResourceEndpoints')
 
 const { fromKubeconfig } = require('../kubernetes-config')
 const { decodeBase64 } = require('../utils')
 
 const cluster = Symbol('cluster')
+
 class Client {
-  constructor (options = {}) {
+  // the options are use to create a got instance (see https://github.com/sindresorhus/got#api)
+  constructor ({ auth, ...options } = {}) {
+    const { hostname } = new URL(options.url)
+    // use empty string '' to disable sending the SNI extension
+    const servername = isIP(hostname) !== 0 ? '' : hostname
+    // merge with default options
+    options = {
+      servername,
+      throwHttpErrors: true,
+      resolveBodyOnly: true,
+      timeout: 30 * 1000,
+      ...options
+    }
+    // set authorization header for basic and bearer authentication scheme
+    if (auth) {
+      if (auth.bearer) {
+        setAuthorization(options, 'bearer', auth.bearer)
+      } else if (auth.user && auth.pass) {
+        setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
+      } else if (typeof auth === 'string') {
+        setAuthorization(options, 'basic', auth)
+      }
+    }
+    // add hooks for logging (see https://github.com/sindresorhus/got#hooks)
+    options = debug.attach(options)
+    // kubernetes cluster endpoint info
     const { url, ca, rejectUnauthorized = true } = options
     this[cluster] = {
       server: url,
       certificateAuthority: ca,
       insecureSkipTlsVerify: !rejectUnauthorized
     }
-    ApiGroup.assignAll(this, options)
-    NonResourceEndpoint.assignAll(this, options)
+    // assign grouped resources (e.g. core.)
+    resources.assign(this, options)
+    // assign non-resource endpoints (e.g healthz)
+    nonResourceEndpoints.assign(this, options)
   }
 
   get cluster () {
@@ -51,7 +80,7 @@ class Client {
 
   async getKubeconfig ({ name, namespace }) {
     try {
-      const secret = await this.core.secrets.get({ namespace, name })
+      const secret = await this.core.secrets.get(namespace, name)
 
       const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
       if (kubeconfigBase64) {
@@ -71,7 +100,7 @@ class Client {
   }
 
   async getProjectByNamespace (namespace) {
-    const ns = await this.core.namespaces.get({ name: namespace })
+    const ns = await this.core.namespaces.get(namespace)
     const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
     if (!name) {
       const response = {
@@ -80,13 +109,13 @@ class Client {
       }
       throw new HTTPError(response)
     }
-    return this['core.gardener.cloud'].projects.get({ name })
+    return this['core.gardener.cloud'].projects.get(name)
   }
 
   async getShoot ({ namespace, name, throwNotFound = true }) {
     let shoot
     try {
-      shoot = await this['core.gardener.cloud'].shoots.get({ namespace, name })
+      shoot = await this['core.gardener.cloud'].shoots.get(namespace, name)
     } catch (err) {
       if (throwNotFound || !isHttpError(err, 404)) {
         throw err
@@ -95,35 +124,7 @@ class Client {
     return shoot
   }
 
-  getResources () {
-    return this.constructor.getResources()
-  }
-
-  static getResources () {
-    return ApiGroup.getResources()
-  }
-
-  static create (options = {}) {
-    const { hostname } = new URL(options.url)
-    options = {
-      servername: isIP(hostname) !== 0 ? '' : hostname,
-      throwHttpErrors: true,
-      resolveBodyOnly: true,
-      timeout: 30 * 1000,
-      ...options
-    }
-    if (options.auth) {
-      const auth = options.auth
-      delete options.auth
-      if (auth.bearer) {
-        setAuthorization(options, 'bearer', auth.bearer)
-      } else if (auth.user && auth.pass) {
-        setAuthorization(options, 'basic', `${auth.user}:${auth.pass}`)
-      } else if (typeof auth === 'string') {
-        setAuthorization(options, 'basic', auth)
-      }
-    }
-    options = debug.attach(options)
+  static create (options) {
     return new Client(options)
   }
 }

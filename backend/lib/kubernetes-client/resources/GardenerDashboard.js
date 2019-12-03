@@ -16,44 +16,21 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http, ws } = require('../../symbols')
+const { mix } = require('mixwith')
 
-class Endpoints extends Resource {
-  get (options = {}) {
-    return this[http.get](options)
-  }
+const { GardenerDashboard } = require('../groups')
+const { NamespaceScoped, Readable, Writable, Observable } = require('../mixins')
 
-  watch (options = {}) {
-    return this[ws.watch](options)
-  }
-
-  create (options = {}) {
-    return this[http.post](options)
-  }
-
-  update (options = {}) {
-    return this[http.put](options)
-  }
-
-  patch (options = {}) {
-    return this[http.patch](options)
-  }
-
-  delete (options = {}) {
-    return this[http.delete](options)
+class Terminal extends mix(GardenerDashboard).with(NamespaceScoped, Readable, Observable, Writable) {
+  static get names () {
+    return {
+      plural: 'terminals',
+      singular: 'terminal',
+      kind: 'Terminal'
+    }
   }
 }
 
-Object.assign(Endpoints, {
-  group: 'core',
-  version: 'v1',
-  scope: 'Namespaced',
-  names: {
-    plural: 'endpoints',
-    singular: '',
-    kind: 'Endpoints'
-  }
-})
-
-module.exports = Endpoints
+module.exports = {
+  Terminal
+}

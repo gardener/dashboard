@@ -19,30 +19,13 @@
 const fs = require('fs')
 const path = require('path')
 const { HTTPError } = require('got')
-const logger = require('../logger')
-const { encodeBase64 } = require('../utils')
-const { GatewayTimeout, InternalServerError } = require('../errors')
 
-function ctors (filename) {
-  const basename = path.basename(filename)
-  const dirname = path.dirname(filename)
-  const baseDir = path.relative(__dirname, dirname)
-  const files = fs.readdirSync(dirname)
-  const data = {}
-  for (const file of files) {
-    if (file !== basename) {
-      const Ctor = require(`./${baseDir}/${file}`)
-      const { name, names: { plural } = {} } = Ctor
-      if (plural) {
-        // use resource plural name as key (e.g shoots)
-        data[plural] = Ctor
-      } else {
-        // use constructor name in lowercase as key (e.g healthz)
-        data[name.toLowerCase()] = Ctor
-      }
-    }
-  }
-  return data
+const { encodeBase64 } = require('../utils')
+
+const PatchType = {
+  MERGE: 'merge',
+  STRATEGIC_MERGE: 'strategic-merge',
+  JSON: 'json'
 }
 
 function setHeader (options, key, value) {
@@ -61,7 +44,7 @@ function setAuthorization (options, type, credentials) {
     case 'bearer':
       return setHeader(options, 'authorization', `Bearer ${credentials}`)
     default:
-      throw new TypeError('The authentication type must be one of [basic bearer]')
+      throw new TypeError('The authentication type must be one of ["basic", "bearer"]')
   }
 }
 
@@ -69,179 +52,17 @@ function setContentType (options, value) {
   return setHeader(options, 'Content-Type', value)
 }
 
-function setPatchType (options, type = 'merge') {
+function setPatchType (options, type = PatchType.MERGE) {
   switch (type) {
-    case 'json':
-      return setContentType(options, 'application/json-patch+json')
-    case 'merge':
+    case PatchType.MERGE:
       return setContentType(options, 'application/merge-patch+json')
-    case 'strategic':
+    case PatchType.STRATEGIC_MERGE:
       return setContentType(options, 'application/strategic-merge-patch+json')
+    case PatchType.JSON:
+      return setContentType(options, 'application/json-patch+json')
     default:
-      throw new TypeError('The patch type must be one of [json merge strategic]')
+      throw new TypeError('The patch type must be one of ["merge", "strategic-merge", "json"]')
   }
-}
-
-function createError (code, reason) {
-  const err = new Error(reason)
-  err.code = code
-  return err
-}
-
-function createErrorEvent ({ message, error }) {
-  const type = 'ERROR'
-  const annotations = {
-    'websocket.gardener.cloud/message': message
-  }
-  const object = {
-    kind: 'Status',
-    apiVersion: 'v1',
-    metadata: { annotations },
-    status: 'Failure',
-    message: error.message,
-    reason: error.constructor.name,
-    code: 500
-  }
-  return { type, object }
-}
-
-function wrapWebSocket (emitter, ws) {
-  const state = {
-    name: emitter.resourceName,
-    isAlive: false
-  }
-
-  function startPingPong () {
-    ws.on('pong', onPong)
-    state.isAlive = true
-    state.timestamp = Date.now()
-    state.intervalId = setInterval(ping, 15000)
-    logger.debug(`ping-${state.timestamp} started for watch ${state.name}`)
-  }
-
-  function stopPingPong () {
-    if (state.intervalId) {
-      clearInterval(state.intervalId)
-      state.intervalId = undefined
-      logger.debug(`ping-${state.timestamp} stopped for watch ${state.name}`)
-    }
-    ws.removeListener('pong', onPong)
-  }
-
-  function ping () {
-    if (state.isAlive === true) {
-      state.isAlive = false
-      try {
-        ws.ping()
-      } catch (err) {
-        logger.error(`ping-${state.timestamp} ping error for watch ${state.name}`, err.message)
-      }
-    } else {
-      stopPingPong()
-      ws.terminate()
-    }
-  }
-
-  function onOpen () {
-    emitter.emit('connect')
-    startPingPong()
-  }
-
-  function onPong () {
-    state.isAlive = true
-  }
-
-  function onError (error) {
-    ws.removeListener('error', onError)
-    logger.error('websocket error', error)
-    onClose(4000, error.message)
-  }
-
-  function onMessage (message) {
-    let event
-    try {
-      event = JSON.parse(message)
-    } catch (error) {
-      event = createErrorEvent({ message, error })
-    }
-    emitter.emit('event', event)
-  }
-
-  function onClose (code, reason) {
-    logger.debug('watch closed', code, reason)
-    ws.removeAllListeners()
-    ws.removeListener('close', onClose)
-    ws.removeListener('message', onMessage)
-    stopPingPong()
-    emitter.emit('close', createError(code, reason))
-  }
-
-  ws.once('open', onOpen)
-    .on('message', onMessage)
-    .on('error', onError)
-    .on('close', onClose)
-
-  emitter.websocket = ws
-  emitter.end = () => ws.terminate()
-
-  return emitter
-}
-
-function waitFor (condition, { timeout = 5000 }) {
-  const watch = this
-  const resourceName = this.resourceName
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      done(new GatewayTimeout(`Resource "${resourceName}" could not be initialized within ${timeout} ms`))
-    }, timeout)
-
-    function done (err, obj) {
-      clearTimeout(timeoutId)
-
-      watch.removeListener('event', onEvent)
-      watch.removeListener('disconnect', onDisconnect)
-      watch.removeListener('error', logError)
-      watch.once('error', ignoreError)
-
-      watch.disconnect()
-      if (err) {
-        return reject(err)
-      }
-      resolve(obj)
-    }
-
-    function onEvent (event) {
-      try {
-        switch (event.type) {
-          case 'ADDED':
-          case 'MODIFIED':
-            if (condition(event.object)) {
-              done(null, event.object)
-            }
-            break
-          case 'DELETED':
-            throw new InternalServerError(`Resource "${resourceName}" has been deleted`)
-        }
-      } catch (err) {
-        done(err)
-      }
-    }
-
-    function logError (err) {
-      logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
-    }
-
-    function ignoreError () {
-    }
-
-    function onDisconnect (err) {
-      done(err || new InternalServerError(`Watch for Resource "${resourceName}" has been disconnected`))
-    }
-
-    watch.on('event', onEvent)
-    watch.on('error', logError)
-    watch.on('disconnect', onDisconnect)
-  })
 }
 
 function isHttpError (err, expectedStatusCode) {
@@ -268,14 +89,45 @@ function patchHttpErrorMessage (err) {
   return err
 }
 
+function encodeName (name) {
+  return Array.isArray(name) ? path.join(name.map(encodeURIComponent)) : encodeURIComponent(name)
+}
+
+function encodeNamespace (namespace) {
+  return encodeURIComponent(namespace)
+}
+
+function namespaceScopedUrl ({ plural }, namespace, name) {
+  if (name) {
+    return path.join('namespaces', encodeNamespace(namespace), plural, encodeName(name))
+  } else if (namespace) {
+    return path.join('namespaces', encodeNamespace(namespace), plural)
+  }
+  return plural
+}
+
+function clusterScopedUrl ({ plural }, name) {
+  if (name) {
+    return path.join(plural, encodeName(name))
+  }
+  return plural
+}
+
+function validateLabelValue (name) {
+  if (name && !/^[a-z0-9A-Z][a-z0-9A-Z_.-]*[a-z0-9A-Z]$/.test(name)) {
+    throw new TypeError('Label values must be empty or begin and end with an alphanumeric character with dashes, underscores, dots and alphanumerics between')
+  }
+}
+
 exports = module.exports = {
-  ctors,
   setHeader,
   setAuthorization,
   setContentType,
+  PatchType,
   setPatchType,
-  wrapWebSocket,
-  waitFor,
+  namespaceScopedUrl,
+  clusterScopedUrl,
+  validateLabelValue,
   isHttpError,
   patchHttpErrorMessage
 }

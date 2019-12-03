@@ -16,28 +16,22 @@
 
 'use strict'
 
-const Resource = require('../../Resource')
-const { http, ws } = require('../../symbols')
-
-class CloudProfile extends Resource {
-  get (options = {}) {
-    return this[http.get](options)
-  }
-
-  watch (options = {}) {
-    return this[ws.watch](options)
-  }
+const httpSymbols = [
+  'prefixUrl',
+  'url',
+  'client',
+  'request',
+  'post',
+  'get',
+  'put',
+  'patch',
+  'delete'
+]
+const http = {}
+for (const key of httpSymbols) {
+  http[key] = Symbol(`http.${key}`)
 }
 
-Object.assign(CloudProfile, {
-  group: 'core.gardener.cloud',
-  version: 'v1alpha1',
-  scope: 'Cluster',
-  names: {
-    plural: 'cloudprofiles',
-    singular: 'cloudprofile',
-    kind: 'CloudProfile'
-  }
-})
-
-module.exports = CloudProfile
+module.exports = {
+  http
+}
