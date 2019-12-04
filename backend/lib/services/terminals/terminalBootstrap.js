@@ -107,7 +107,7 @@ function seedShootNamespaceExists ({ status }) {
 
 async function replaceResource (resource, { namespace, name, body }) {
   try {
-    return resource.update(namespace, name, body)
+    return await resource.mergePatch(namespace, name, body)
   } catch (err) {
     if (isHttpError(err, 404)) {
       return resource.create(namespace, body)
