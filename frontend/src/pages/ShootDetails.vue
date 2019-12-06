@@ -23,6 +23,8 @@ limitations under the License.
         <shoot-infrastructure-card :shootItem="item" class="mt-3"></shoot-infrastructure-card>
 
         <shoot-lifecycle-card ref="shootLifecycle" :shootItem="item" class="mt-3"></shoot-lifecycle-card>
+
+        <shoot-external-tools-card :shootItem="item" class="mt-3"></shoot-external-tools-card>
       </v-flex>
 
       <v-flex md6>
@@ -69,6 +71,7 @@ import ShootLogging from '@/components/ShootDetails/ShootLogging'
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
+import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 
@@ -84,7 +87,8 @@ export default {
     ShootAccessCard,
     ShootJournalsCard,
     ShootMonitoringCard,
-    ShootLogging
+    ShootLogging,
+    ShootExternalToolsCard
   },
   computed: {
     ...mapGetters([
