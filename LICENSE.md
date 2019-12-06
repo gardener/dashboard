@@ -313,6 +313,10 @@ Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
 
+- [url-template](https://github.com/bramstein/url-template)\
+Copyright (c) 2012-2014, Bram Stein\
+[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
+
 - [uuid](https://github.com/kelektiv/node-uuid)\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
 [MIT License](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)

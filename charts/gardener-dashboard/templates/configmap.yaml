@@ -119,6 +119,14 @@ data:
         target: {{ .target }}{{- end }}
       {{- end }}
 {{- end }}
+{{- if .Values.frontendConfig.externalTools }}
+      externalTools:
+      {{- range .Values.frontendConfig.externalTools }}
+      - title: {{ .title }}{{- if .icon }}
+        icon: {{ .icon }}{{- end }}
+        url: {{ .url }}
+      {{- end }}
+{{- end }}
       dashboardUrl:
         pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
