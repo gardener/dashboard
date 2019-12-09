@@ -63,15 +63,13 @@ class WatchBuilder {
     }
   }
 
-  createWebSocket () {
-    return new WebSocket(this.url, this.options)
-  }
-
   createWatch () {
+    const createWebSocket = this.constructor.createWebSocket
+
     const createConnection = () => {
       const connection = new EventEmitter()
       connection.resourceName = this.resourceName
-      wrapWebSocket(connection, this.createWebSocket())
+      wrapWebSocket(connection, createWebSocket(this.url, this.options))
       return connection
     }
 
@@ -95,6 +93,10 @@ class WatchBuilder {
 
   static create (...args) {
     return new WatchBuilder(...args).createWatch()
+  }
+
+  static createWebSocket (...args) {
+    return new WebSocket(...args)
   }
 
   static setWaitFor (object) {

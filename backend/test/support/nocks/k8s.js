@@ -20,6 +20,7 @@ const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
 const { encodeBase64 } = require('../../../lib/utils')
+const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('../../../lib/kubernetes-config').load()
 
@@ -264,6 +265,22 @@ function canGetSecretsInAllNamespaces (scope) {
         }
       }, body)
     })
+}
+
+function getKubeconfigSecret (scope, { namespace, name, server }) {
+  const url = new URL(server)
+  const secret = {
+    data: {
+      kubeconfig: encodeBase64(getKubeconfig({
+        server,
+        name: url.hostname
+      }))
+    }
+  }
+  scope
+    .get(`/api/v1/namespaces/${namespace}/secrets/${name}`)
+    .reply(200, secret)
+  return scope
 }
 
 function readProject (namespace) {
@@ -794,12 +811,69 @@ const stub = {
         })
     ]
   },
-  createTerminal ({ bearer, namespace, target }) {
+  getTerminalConfig ({ bearer }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    return scope
+  },
+  createTerminal ({ bearer, username, namespace, target, seedName = 'infra1-seed' }) {
+    const terminal = {
+      metadata: {},
+      spec: {},
+      status: {}
+    }
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
     scope
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/infra1-seed`)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
       .reply(404)
+    getKubeconfigSecret(scope, {
+      namespace: 'garden',
+      name: `seedsecret-${seedName}`,
+      server: `https://${seedName}:8443`
+    })
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
+      .query(({ labelSelector }) => {
+        const labels = _
+          .chain(labelSelector)
+          .split(',')
+          .map(value => value.split('='))
+          .fromPairs()
+          .value()
+        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+      })
+      .reply(200, { items: [] })
+      .post(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`, body => {
+        const { metadata, spec: { host } } = body
+        const suffix = '0815'
+        _.merge(terminal, body)
+        if (metadata.generateName) {
+          terminal.metadata.name = `${metadata.generateName}${suffix}`
+        }
+        if (host.temporaryNamespace) {
+          terminal.spec.host.namespace = `term-host-${suffix}`
+        }
+        return true
+      })
+      .reply(200, () => terminal)
+    return scope
+  },
+  fetchTerminal ({ bearer, hostUrl, host, serviceAccountSecretName, token }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    getKubeconfigSecret(scope, {
+      ...host.credentials.secretRef,
+      server: hostUrl
+    })
+    const serviceAccountSecret = {
+      data: {
+        token: encodeBase64(token)
+      }
+    }
+    nock(hostUrl)
+      .get(`/api/v1/namespaces/${host.namespace}/secrets/${serviceAccountSecretName}`)
+      .reply(200, serviceAccountSecret)
     return scope
   },
   getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {

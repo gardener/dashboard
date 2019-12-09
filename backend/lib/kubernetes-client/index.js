@@ -19,6 +19,7 @@
 const assert = require('assert').strict
 const util = require('./util')
 const Client = require('./Client')
+const WatchBuilder = require('./WatchBuilder')
 const { Resources } = require('./resources')
 const kubeconfig = require('../kubernetes-config')
 const { isHttpError } = util
@@ -50,5 +51,6 @@ Object.assign(exports, {
   createClient,
   privilegedClient,
   Resources,
+  WatchBuilder,
   isHttpError
 })

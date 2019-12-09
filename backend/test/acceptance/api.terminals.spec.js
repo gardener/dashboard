@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { WatchBuilder } = require('../../lib/kubernetes-client')
 const common = require('../support/common')
 
 module.exports = function info ({ agent, sandbox, k8s, auth }) {
@@ -25,20 +26,146 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
   const aud = [ 'gardener' ]
   const project = 'foo'
   const namespace = `garden-${project}`
+  const kind = 'infra1'
+  const region = 'foo-east'
+  const ingressDomain = `ingress.${region}.${kind}.example.org`
 
-  it.skip('should create a terminal resource', async function () {
-    const user = auth.createUser({ id, aud })
-    const bearer = await user.bearer
+  describe('garden', function () {
     const target = 'garden'
+    const name = 'term-garden-0815'
 
-    common.stub.getCloudProfiles(sandbox)
-    k8s.stub.createTerminal({ bearer, namespace, target })
-    const res = await agent
-      .post(`/api/namespaces/${namespace}/terminals/${target}`)
-      .set('cookie', await user.cookie)
-      .send({ method: 'create', params: {} })
+    it('should create a terminal resource', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+      common.stub.getCloudProfiles(sandbox)
+      k8s.stub.createTerminal({ bearer, username, namespace, target })
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/terminals/${target}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'create',
+          params: {}
+        })
 
-    expect(res).to.have.status(200)
-    expect(res).to.be.json
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({
+        metadata: {
+          namespace,
+          name
+        },
+        hostCluster: {
+          kubeApiServer: `k-g.${ingressDomain}`,
+          namespace: 'term-host-0815'
+        }
+      })
+    })
+
+    it('should fetch a terminal resource', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+      const host = {
+        namespace: 'term-host-0815',
+        credentials: {
+          secretRef: {
+            name: 'host.kubeconfig',
+            namespace: 'garden'
+          }
+        }
+      }
+      const serviceAccountName = 'term-access-0815'
+      const serviceAccountSecretName = 'term-access-secret-0815'
+      const token = 'dG9rZW4K'
+      const podName = 'term-0815'
+      const hostUrl = 'https://garden.host.cluster.org'
+
+      common.stub.getCloudProfiles(sandbox)
+      k8s.stub.fetchTerminal({ bearer, target, hostUrl, host, serviceAccountSecretName, token })
+
+      // watch
+      const watchStub = sandbox.stub(WatchBuilder, 'create')
+
+      // terminal
+      const terminal = {
+        metadata: {
+          namespace,
+          name,
+          annotations: {
+            'garden.sapcloud.io/createdBy': username
+          }
+        },
+        spec: {
+          host
+        },
+        status: {}
+      }
+      const status = {
+        attachServiceAccountName: serviceAccountName,
+        podName
+      }
+      const terminalReconnector = common.createReconnectorStub([
+        ['ADDED', { ...terminal }],
+        ['MODIFIED', { ...terminal, status }]
+      ])
+
+      // serviceaccount
+      watchStub.onFirstCall().callsFake(() => terminalReconnector.start())
+      const serviceAccount = {
+        metadata: {
+          name: serviceAccountName,
+          namespace: host.namespace
+        },
+        secrets: []
+      }
+      const secrets = [{
+        name: serviceAccountSecretName
+      }]
+      const serviceAccountReconnector = common.createReconnectorStub([
+        ['ADDED', { ...serviceAccount }],
+        ['MODIFIED', { ...serviceAccount, secrets }]
+      ])
+      watchStub.onSecondCall().callsFake(() => serviceAccountReconnector.start())
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/terminals/${target}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'fetch',
+          params: {
+            namespace,
+            name
+          }
+        })
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(watchStub).to.have.been.calledTwice
+      expect(res.body).to.eql({
+        metadata: {
+          namespace,
+          name
+        },
+        hostCluster: {
+          token,
+          pod: {
+            container: 'terminal',
+            name: podName
+          }
+        }
+      })
+    })
+
+    it('should read the terminal config', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+      k8s.stub.getTerminalConfig({ bearer, namespace, target })
+      const res = await agent
+        .get(`/api/namespaces/${namespace}/terminals/${target}/config`)
+        .set('cookie', await user.cookie)
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
+    })
   })
 }
