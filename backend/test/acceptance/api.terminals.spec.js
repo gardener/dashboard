@@ -33,6 +33,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
   describe('garden', function () {
     const target = 'garden'
     const name = 'term-garden-0815'
+    const hostNamespace = 'term-host-0815'
 
     it('should create a terminal resource', async function () {
       const user = auth.createUser({ id, aud })
@@ -56,7 +57,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         },
         hostCluster: {
           kubeApiServer: `k-g.${ingressDomain}`,
-          namespace: 'term-host-0815'
+          namespace: hostNamespace
         }
       })
     })
@@ -65,7 +66,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
       const host = {
-        namespace: 'term-host-0815',
+        namespace: hostNamespace,
         credentials: {
           secretRef: {
             name: 'host.kubeconfig',
