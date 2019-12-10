@@ -78,7 +78,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const serviceAccountSecretName = 'term-access-secret-0815'
       const token = 'dG9rZW4K'
       const podName = 'term-0815'
-      const hostUrl = 'https://garden.host.cluster.org'
+      const hostUrl = 'https://garden.host.cluster.foo.bar'
 
       common.stub.getCloudProfiles(sandbox)
       k8s.stub.fetchTerminal({ bearer, target, hostUrl, host, serviceAccountSecretName, token })
@@ -167,6 +167,52 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
+    })
+
+    it('should keep a terminal resource alive', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+
+      k8s.stub.keepAliveTerminal({ bearer, username, namespace, name, target })
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/terminals/${target}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'heartbeat',
+          params: {
+            name,
+            namespace
+          }
+        })
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({ ok: true })
+    })
+
+    it('should delete a terminal resource', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+
+      k8s.stub.deleteTerminal({ bearer, username, namespace, name, target })
+
+      const res = await agent
+        .post(`/api/namespaces/${namespace}/terminals/${target}`)
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'remove',
+          params: {
+            name,
+            namespace
+          }
+        })
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({
+        name,
+        namespace })
     })
   })
 }

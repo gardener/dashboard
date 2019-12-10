@@ -876,6 +876,51 @@ const stub = {
       .reply(200, serviceAccountSecret)
     return scope
   },
+  keepAliveTerminal ({ bearer, username, namespace, name }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    let terminal = {
+      metadata: {
+        namespace,
+        name,
+        annotations: {
+          'garden.sapcloud.io/createdBy': username
+        }
+      }
+    }
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`)
+      .reply(200, () => terminal)
+      .patch(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`, body => {
+        terminal = _
+          .chain(terminal)
+          .cloneDeep()
+          .merge(body)
+          .value()
+        return true
+      })
+      .reply(200, () => terminal)
+    return scope
+  },
+  deleteTerminal ({ bearer, username, namespace, name }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    let terminal = {
+      metadata: {
+        namespace,
+        name,
+        annotations: {
+          'garden.sapcloud.io/createdBy': username
+        }
+      }
+    }
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`)
+      .reply(200, () => terminal)
+      .delete(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`)
+      .reply(200, () => terminal)
+    return scope
+  },
   getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
     let statusCode = 200
     let result = _
