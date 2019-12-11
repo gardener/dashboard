@@ -240,7 +240,6 @@ async function handleShoot (shoot) {
 */
 async function ensureTrustedCertForShootApiServer (client, shootResource) {
   const { metadata: { namespace, name } } = shootResource
-  // read the latest resource version
   if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return
