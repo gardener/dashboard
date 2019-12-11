@@ -252,7 +252,8 @@ function authenticate ({ createClient } = {}) {
     const auth = user.auth = { bearer }
 
     Object.defineProperty(user, 'client', {
-      value: createClient({ auth })
+      value: createClient({ auth }),
+      enumerable: false
     })
   }
   return async (req, res, next) => {

@@ -18,13 +18,13 @@
 
 const { format: fmt } = require('util')
 const {
-  privilegedClient, // privileged client for the garden cluster
+  dashboardClient,
   isHttpError
 } = require('../kubernetes-client')
 
 async function healthCheck () {
   try {
-    await privilegedClient.healthz.get()
+    await dashboardClient.healthz.get()
   } catch (err) {
     if (isHttpError(err)) {
       const response = err.response

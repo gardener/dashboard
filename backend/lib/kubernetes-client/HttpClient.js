@@ -30,14 +30,9 @@ class HttpClient {
     return url
   }
 
-  async [http.request] (url, { body, searchParams, query, ...options } = {}) {
-    if (body && typeof body === 'object') {
-      options.json = body
-    }
+  async [http.request] (url, { searchParams, ...options } = {}) {
     if (searchParams && searchParams.toString()) {
       options.searchParams = searchParams
-    } else if (query && typeof query === 'object' && Object.keys(query).length) {
-      options.searchParams = new URLSearchParams(query)
     }
     try {
       return await this[http.client](url, options)

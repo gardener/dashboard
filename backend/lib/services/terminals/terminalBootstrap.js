@@ -25,7 +25,7 @@ const config = require('../../config')
 const { NotImplemented } = require('../../errors')
 
 const {
-  privilegedClient, // privileged client for the garden cluster
+  dashboardClient,
   isHttpError
 } = require('../../kubernetes-client')
 
@@ -215,18 +215,20 @@ async function handleSeed (seed) {
   logger.debug(`replacing resources on seed ${name} for webterminals`)
 
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
-  const shoot = await privilegedClient.getShoot({ namespace, name, throwNotFound: false })
+  const shoot = await dashboardClient.getShoot({ namespace, name, throwNotFound: false })
   if (shoot) {
-    await ensureTrustedCertForShootApiServer(privilegedClient, shoot)
+    await ensureTrustedCertForShootApiServer(dashboardClient, shoot)
   } else {
-    await ensureTrustedCertForSeedApiServer(privilegedClient, seed)
+    await ensureTrustedCertForSeedApiServer(dashboardClient, seed)
   }
 }
 
 async function handleShoot (shoot) {
   const { metadata: { namespace, name } } = shoot
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
-  await ensureTrustedCertForShootApiServer(privilegedClient, shoot)
+  // read the latest shoot resource version
+  const latestShootResource = await dashboardClient['core.gardener.cloud'].shoots.get(namespace, name)
+  await ensureTrustedCertForShootApiServer(dashboardClient, latestShootResource)
 }
 
 /*
@@ -238,6 +240,7 @@ async function handleShoot (shoot) {
 */
 async function ensureTrustedCertForShootApiServer (client, shootResource) {
   const { metadata: { namespace, name } } = shootResource
+  // read the latest resource version
   if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return
@@ -281,9 +284,9 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 
   switch (refType) {
     case GardenTerminalHostRefType.SECRET_REF: {
-      const { name, namespace } = await getGardenTerminalHostClusterSecretRef(privilegedClient)
+      const { name, namespace } = await getGardenTerminalHostClusterSecretRef(dashboardClient)
 
-      const hostClient = await privilegedClient.createKubeconfigClient({ name, namespace })
+      const hostClient = await dashboardClient.createKubeconfigClient({ name, namespace })
 
       const hostNamespace = getConfigValue('terminal.bootstrap.gardenTerminalHost.namespace', 'garden')
       const apiServerIngressHost = getConfigValue('terminal.gardenTerminalHost.apiServerIngressHost')

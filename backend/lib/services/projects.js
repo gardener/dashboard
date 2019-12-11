@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const {
-  privilegedClient, // privileged client for the garden cluster
+  dashboardClient,
   Resources
 } = require('../kubernetes-client')
 const { PreconditionFailed } = require('../errors')
@@ -99,7 +99,7 @@ exports.list = async function ({ user, qs = {} }) {
     projects,
     isAdmin
   ] = await Promise.all([
-    privilegedClient['core.gardener.cloud'].projects.list(),
+    dashboardClient['core.gardener.cloud'].projects.list(),
     authorization.isAdmin(user)
   ])
 
@@ -137,39 +137,35 @@ exports.list = async function ({ user, qs = {} }) {
 }
 
 exports.create = async function ({ user, body }) {
-  const client = user.client // user specific client for the garden cluster
-  const { 'core.gardener.cloud': gardener } = client
+  const client = user.client
 
   const name = _.get(body, 'metadata.name')
   _.set(body, 'metadata.namespace', `garden-${name}`)
   _.set(body, 'data.createdBy', user.id)
-  let project = await gardener.projects.create(toResource(body))
+  let project = await client['core.gardener.cloud'].projects.create(toResource(body))
 
   const isProjectReady = project => {
     return _.get(project, 'status.phase') === 'Ready'
   }
   const timeout = exports.projectInitializationTimeout
-  project = await exports
-    .watchProject(name)
+  // must be the dashboardClient because rbac rolebinding does not exist yet
+  project = await dashboardClient['core.gardener.cloud'].projects
+    .watch(name)
     .waitFor(isProjectReady, { timeout })
 
   return fromResource(project)
 }
 // needs to be exported for testing
-exports.watchProject = name => {
-  // must be the privilegedClient because rbac rolebinding does not exist yet
-  return privilegedClient['core.gardener.cloud'].projects.watch(name)
-}
 exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
   const project = await client.getProjectByNamespace(namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
@@ -184,7 +180,7 @@ exports.patch = async function ({ user, name: namespace, body }) {
 exports.remove = async function ({ user, name: namespace }) {
   await validateDeletePreconditions({ user, namespace })
 
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name

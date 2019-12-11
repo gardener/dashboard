@@ -816,7 +816,7 @@ const stub = {
     canGetSecretsInAllNamespaces(scope)
     return scope
   },
-  createTerminal ({ bearer, username, namespace, target, seedName = 'infra1-seed' }) {
+  createTerminal ({ bearer, username, namespace, target, seedName }) {
     const terminal = {
       metadata: {},
       spec: {},
@@ -1111,7 +1111,7 @@ const stub = {
       .get(`/healthz`)
       .reply(200, 'ok')
   },
-  fetchGardenerVersion ({ bearer, version }) {
+  fetchGardenerVersion ({ version }) {
     const service = {
       name: 'gardener-apiserver',
       namespace: 'gardener'
@@ -1121,7 +1121,7 @@ const stub = {
     const serviceUrl = `https://${service.name}.${service.namespace}`
     const statusCode = !version ? 404 : 200
     return [
-      nockWithAuthorization(bearer)
+      nockWithAuthorization(auth.bearer)
         .get('/apis/apiregistration.k8s.io/v1/apiservices/v1alpha1.core.gardener.cloud')
         .reply(200, body),
       nock(serviceUrl)

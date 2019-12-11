@@ -24,8 +24,6 @@ function load (options) {
   }
 }
 
-exports = module.exports = load
-
 exports.assign = (object, options = {}) => {
   return Object.assign(object, load(options))
 }

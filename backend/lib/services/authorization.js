@@ -22,7 +22,7 @@ async function hasAuthorization (user, resourceAttributes) {
   if (!user) {
     return false
   }
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
   const body = {
     kind,

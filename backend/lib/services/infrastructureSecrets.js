@@ -166,7 +166,7 @@ async function getCloudProviderKind (cloudProfileName) {
 }
 
 exports.list = async function ({ user, namespace }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   try {
     const cloudProfileList = cloudprofiles.list()
@@ -189,7 +189,7 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.create = async function ({ user, namespace, body }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const secret = await client.core.secrets.create(namespace, toSecretResource(body))
 
@@ -215,7 +215,7 @@ function checkIfOwnSecret (bodySecretBinding) {
 }
 
 exports.patch = async function ({ user, namespace, bindingName, body }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
   const secretName = _.get(secretBinding, 'secretRef.name')
@@ -236,7 +236,7 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
 }
 
 exports.remove = async function ({ user, namespace, bindingName }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
   const secretName = _.get(secretBinding, 'secretRef.name')

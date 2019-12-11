@@ -21,6 +21,7 @@ const assert = require('assert').strict
 const hash = require('object-hash')
 
 const { isHttpError } = require('../../kubernetes-client')
+const { AssertionError } = assert
 
 const {
   decodeBase64,
@@ -101,7 +102,7 @@ function isServiceAccountReady (serviceAccount) {
 
 async function findExistingTerminalResource ({ user, namespace, name, hostCluster, targetCluster }) {
   const username = user.id
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const selectors = [
     `dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`,
@@ -127,7 +128,7 @@ async function findExistingTerminalResource ({ user, namespace, name, hostCluste
 
 async function deleteTerminalSession ({ user, namespace: shootNamespace, body }) {
   const username = user.id
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const { namespace, name } = body
   assert.strictEqual(namespace, shootNamespace, 'Namespaces of "terminal" and "shoot" do not match')
@@ -147,7 +148,7 @@ async function deleteTerminalSession ({ user, namespace: shootNamespace, body })
 }
 
 async function getTargetCluster ({ user, namespace, name, target }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
   const isAdmin = user.isAdmin
 
   const targetCluster = {
@@ -266,7 +267,7 @@ function getConfigFromBody (body) {
 }
 
 function getHostCluster ({ user, namespace, name, target, body }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   if (target === TargetEnum.GARDEN) {
     return getGardenTerminalHostCluster(client, { body })
@@ -283,7 +284,7 @@ function getHostCluster ({ user, namespace, name, target, body }) {
 }
 
 async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
   const isAdmin = user.isAdmin
   const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
 
@@ -365,7 +366,7 @@ function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, r
 
 function readTerminalUntilReady ({ user, namespace, name }) {
   const username = user.id
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const isTerminalReady = terminal => {
     if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
@@ -382,7 +383,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
 
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body }) {
   const username = user.id
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const [
     hostCluster,
@@ -408,7 +409,8 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   } else {
     logger.debug(`Found terminal for user ${username}: ${terminal.metadata.name}`)
     // do not wait for keepalive to return - run in parallel
-    setKeepaliveAnnotation(client, terminal, /* do NOT throw errors */ false)
+    setKeepaliveAnnotation(client, terminal)
+      .catch(_.noop) // ignore error
   }
 
   return {
@@ -424,7 +426,7 @@ async function createHostClient (client, secretRef) {
   try {
     return await client.createKubeconfigClient(secretRef)
   } catch (err) {
-    if (err.name === 'AssertionError') {
+    if (err instanceof AssertionError) {
       throw new Error('Host kubeconfig does not exist (yet)')
     }
     throw err
@@ -432,7 +434,7 @@ async function createHostClient (client, secretRef) {
 }
 
 async function fetchTerminalSession ({ user, body: { name, namespace } }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const terminal = await readTerminalUntilReady({ user, name, namespace })
   const host = terminal.spec.host
@@ -489,7 +491,7 @@ function getContainerImage ({ isAdmin, preferredContainerImage }) {
 
 exports.heartbeat = async function ({ user, body = {} }) {
   const username = user.id
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const { name, namespace } = body
   const terminal = await getTerminalResource(client, { name, namespace })
@@ -497,7 +499,7 @@ exports.heartbeat = async function ({ user, body = {} }) {
     throw new Forbidden(`You are not allowed to keep terminal session alive with name ${terminal.metadata.name}`)
   }
 
-  await setKeepaliveAnnotation(client, terminal, /* throw errors */ true)
+  await setKeepaliveAnnotation(client, terminal)
   return { ok: true }
 }
 
@@ -509,7 +511,7 @@ function getTerminalResource (client, { name, namespace }) {
   return client['dashboard.gardener.cloud'].terminals.get(namespace, name)
 }
 
-async function setKeepaliveAnnotation (client, terminal, throwErrors = true) {
+async function setKeepaliveAnnotation (client, terminal) {
   const annotations = {
     'dashboard.gardener.cloud/operation': `keepalive`
   }
@@ -519,14 +521,12 @@ async function setKeepaliveAnnotation (client, terminal, throwErrors = true) {
     await client['dashboard.gardener.cloud'].terminals.mergePatch(namespace, name, body)
   } catch (err) {
     logger.error('Could not keepalive terminal:', err)
-    if (throwErrors !== false) {
-      throw new Error('Could not keepalive terminal')
-    }
+    throw new Error('Could not keepalive terminal')
   }
 }
 
 exports.config = async function ({ user, namespace, name, target }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
   const isAdmin = user.isAdmin
 
   const config = {

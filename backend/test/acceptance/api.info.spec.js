@@ -71,9 +71,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
   it('should return information with version', async function () {
     const user = auth.createUser({ id, aud })
-    const bearer = await user.bearer
     const gardenerVersion = { major: '1', minor: '0' }
-    k8s.stub.fetchGardenerVersion({ bearer, version: gardenerVersion })
+    k8s.stub.fetchGardenerVersion({ version: gardenerVersion })
     const res = await agent
       .get('/api/info')
       .set('cookie', await user.cookie)
@@ -88,8 +87,7 @@ module.exports = function info ({ agent, k8s, auth }) {
 
   it('should return information without version', async function () {
     const user = auth.createUser({ id, aud })
-    const bearer = await user.bearer
-    k8s.stub.fetchGardenerVersion({ bearer, version: undefined })
+    k8s.stub.fetchGardenerVersion({ version: undefined })
     const res = await agent
       .get('/api/info')
       .set('cookie', await user.cookie)

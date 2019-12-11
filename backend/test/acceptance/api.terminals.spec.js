@@ -26,6 +26,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
   const aud = [ 'gardener' ]
   const project = 'foo'
   const namespace = `garden-${project}`
+  const seedName = 'infra1-seed'
   const kind = 'infra1'
   const region = 'foo-east'
   const ingressDomain = `ingress.${region}.${kind}.example.org`
@@ -38,8 +39,10 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     it('should create a terminal resource', async function () {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
+
       common.stub.getCloudProfiles(sandbox)
-      k8s.stub.createTerminal({ bearer, username, namespace, target })
+      k8s.stub.createTerminal({ bearer, username, namespace, target, seedName })
+
       const res = await agent
         .post(`/api/namespaces/${namespace}/terminals/${target}`)
         .set('cookie', await user.cookie)
@@ -83,10 +86,9 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       common.stub.getCloudProfiles(sandbox)
       k8s.stub.fetchTerminal({ bearer, target, hostUrl, host, serviceAccountSecretName, token })
 
-      // watch
+      // create watch stub
       const watchStub = sandbox.stub(WatchBuilder, 'create')
 
-      // terminal
       const terminal = {
         metadata: {
           namespace,
@@ -108,9 +110,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         ['ADDED', { ...terminal }],
         ['MODIFIED', { ...terminal, status }]
       ])
-
-      // serviceaccount
       watchStub.onFirstCall().callsFake(() => terminalReconnector.start())
+
       const serviceAccount = {
         metadata: {
           name: serviceAccountName,
@@ -159,7 +160,9 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     it('should read the terminal config', async function () {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
+
       k8s.stub.getTerminalConfig({ bearer, namespace, target })
+
       const res = await agent
         .get(`/api/namespaces/${namespace}/terminals/${target}/config`)
         .set('cookie', await user.cookie)

@@ -53,7 +53,6 @@ function getResourceGroupMetadata (resources, resourceGroup) {
     .value()
 }
 
-exports = module.exports = load
 exports.Resources = _.reduce(resourceGroups, getResourceGroupMetadata, {})
 
 exports.assign = (object, options = {}) => {

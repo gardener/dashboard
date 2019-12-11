@@ -20,7 +20,7 @@ const assert = require('assert').strict
 const { Unauthorized } = require('../errors')
 const logger = require('../logger')
 const {
-  privilegedClient, // privileged client for the garden cluster
+  dashboardClient,
   Resources
 } = require('../kubernetes-client')
 
@@ -43,7 +43,7 @@ exports.isAuthenticated = async function ({ token } = {}) {
         authenticated = false,
         error = 'User not authenticated'
       } = {}
-    } = await privilegedClient['authentication.k8s.io'].tokenreviews.create(body)
+    } = await dashboardClient['authentication.k8s.io'].tokenreviews.create(body)
     assert.strictEqual(authenticated, true, error)
     assert.ok(user.username, `User authenticated but username is empty`)
     return user

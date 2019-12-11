@@ -18,14 +18,8 @@
 
 const httpSymbols = [
   'prefixUrl',
-  'url',
   'client',
-  'request',
-  'post',
-  'get',
-  'put',
-  'patch',
-  'delete'
+  'request'
 ]
 const http = {}
 for (const key of httpSymbols) {

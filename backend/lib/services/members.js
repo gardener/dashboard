@@ -17,6 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
+const config = require('../config')
 const { decodeBase64 } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
@@ -115,7 +116,7 @@ async function unsetProjectMember (client, { namespace, name }) {
 
 // list, create and remove is done with the user
 exports.list = async function ({ user, namespace }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const project = await client.getProjectByNamespace(namespace)
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
@@ -125,7 +126,7 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.get = async function ({ user, namespace, name }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const project = await client.getProjectByNamespace(namespace)
 
@@ -142,7 +143,7 @@ exports.get = async function ({ user, namespace, name }) {
   const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
   if (serviceAccountNamespace === namespace) {
     const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
-    const server = client.cluster.server.toString()
+    const server = _.get(config, 'apiServerUrl', client.cluster.server.toString())
     const secretName = _.first(serviceaccount.secrets).name
     const secret = await client.core.secrets.get(namespace, secretName)
     const token = decodeBase64(secret.data.token)
@@ -164,7 +165,7 @@ exports.get = async function ({ user, namespace, name }) {
 }
 
 exports.create = async function ({ user, namespace, body: { name } }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
   if (serviceaccountNamespace === namespace) {
@@ -182,7 +183,7 @@ exports.create = async function ({ user, namespace, body: { name } }) {
 }
 
 exports.remove = async function ({ user, namespace, name }) {
-  const client = user.client // user specific client for the garden cluster
+  const client = user.client
 
   // unassign user from project
   const project = await unsetProjectMember(client, { namespace, name })

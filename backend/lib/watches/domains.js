@@ -19,11 +19,11 @@
 const { cacheResource } = require('./common')
 const { getDomains } = require('../cache')
 const {
-  privilegedClient // privileged client for the garden cluster
+  dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
 
 module.exports = io => {
   const query = { labelSelector: 'garden.sapcloud.io/role=default-domain' }
-  const emitter = privilegedClient.core.secrets.watchList('garden', query)
+  const emitter = dashboardClient.core.secrets.watchList('garden', query)
   cacheResource(emitter, getDomains(), 'metadata.name')
 }

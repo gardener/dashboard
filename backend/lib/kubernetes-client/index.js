@@ -39,17 +39,17 @@ function createClient ({ auth, key, cert, ...options } = {}) {
     options.ca = config.ca
     options.rejectUnauthorized = config.rejectUnauthorized
   }
-  return Client.create(options)
+  return new Client(options)
 }
 
 exports = module.exports = createClient
 
-// create a privileged client for the garden cluster
-const privilegedClient = Client.create(config)
+// create a client instance for the gardener cluster with dashboard privileges
+const dashboardClient = new Client(config)
 
 Object.assign(exports, {
   createClient,
-  privilegedClient,
+  dashboardClient,
   Resources,
   WatchBuilder,
   isHttpError

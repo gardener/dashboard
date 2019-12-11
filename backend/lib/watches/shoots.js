@@ -22,14 +22,14 @@ const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
 const _ = require('lodash')
 const {
-  privilegedClient // privileged client for the garden cluster
+  dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
 const { bootstrapResource, bootstrapPending } = require('../services/terminals/terminalBootstrap')
 
 const shootsWithIssues = []
 
 module.exports = io => {
-  const emitter = privilegedClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
+  const emitter = dashboardClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
   registerHandler(emitter, async function (event) {
     const shoot = event.object
     if (event.type === 'ERROR') {

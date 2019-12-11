@@ -24,6 +24,7 @@ const WatchBuilder = require('./WatchBuilder')
 const { http } = require('./symbols')
 const { clusterScopedUrl, namespaceScopedUrl, setPatchType, PatchType } = require('./util')
 
+// Plain subclass factories without deduplication, caching and instanceof support
 const V1Alpha1 = superclass => class extends superclass {
   static get version () {
     return 'v1alpha1'
@@ -54,6 +55,7 @@ const NamedGroup = superclass => class extends superclass {
   }
 }
 
+// Wrapped subclass factories with deduplication, caching and instanceof support  (https://github.com/justinfagnani/mixwith.js#defining-mixins)
 const NamespaceScoped = Mixin(superclass => class extends superclass {
   static get scope () {
     return 'Namespaced'
@@ -65,36 +67,6 @@ const ClusterScoped = Mixin(superclass => class extends superclass {
     return 'Cluster'
   }
 })
-
-function assertOptions (options) {
-  if (options && !isPlainObject(options)) {
-    throw new TypeError('The parameter "options" must be empty or a plain object')
-  }
-}
-
-function assertNamespace (namespace) {
-  if (typeof namespace !== 'string' || !namespace) {
-    throw new TypeError('The parameter "namespace" must be a string')
-  }
-}
-
-function assertName (name) {
-  if (typeof name !== 'string' || !name) {
-    throw new TypeError('The parameter "name" must be a string')
-  }
-}
-
-function assertBodyObject (body) {
-  if (!isPlainObject(body) || isEmpty(body)) {
-    throw new TypeError('The parameter "body" must be a non empty plain object')
-  }
-}
-
-function assertBodyArray (body) {
-  if (!Array.isArray(body) || isEmpty(body)) {
-    throw new TypeError('The parameter "body" must be a non empty array')
-  }
-}
 
 ClusterScoped.Readable = superclass => class extends superclass {
   get (name, options) {
@@ -112,7 +84,7 @@ ClusterScoped.Readable = superclass => class extends superclass {
   }
 }
 
-NamespaceScoped.Readable = superclass => class Readable extends superclass {
+NamespaceScoped.Readable = superclass => class extends superclass {
   get (namespace, name, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -136,7 +108,7 @@ NamespaceScoped.Readable = superclass => class Readable extends superclass {
   }
 }
 
-ClusterScoped.Observable = superclass => class Observable extends superclass {
+ClusterScoped.Observable = superclass => class extends superclass {
   watch (name, options) {
     assertName(name)
     assertOptions(options)
@@ -152,7 +124,7 @@ ClusterScoped.Observable = superclass => class Observable extends superclass {
   }
 }
 
-NamespaceScoped.Observable = superclass => class Observable extends superclass {
+NamespaceScoped.Observable = superclass => class extends superclass {
   watch (namespace, name, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -176,7 +148,7 @@ NamespaceScoped.Observable = superclass => class Observable extends superclass {
   }
 }
 
-ClusterScoped.Creatable = superclass => class Creatable extends superclass {
+ClusterScoped.Creatable = superclass => class extends superclass {
   create (body, options) {
     assertBodyObject(body)
     assertOptions(options)
@@ -186,7 +158,7 @@ ClusterScoped.Creatable = superclass => class Creatable extends superclass {
   }
 }
 
-NamespaceScoped.Creatable = superclass => class Creatable extends superclass {
+NamespaceScoped.Creatable = superclass => class extends superclass {
   create (namespace, body, options) {
     assertNamespace(namespace)
     assertBodyObject(body)
@@ -197,7 +169,7 @@ NamespaceScoped.Creatable = superclass => class Creatable extends superclass {
   }
 }
 
-ClusterScoped.Writable = superclass => class Writable extends ClusterScoped.Creatable(superclass) {
+ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(superclass) {
   update (name, body, options) {
     assertName(name)
     assertBodyObject(body)
@@ -245,7 +217,7 @@ ClusterScoped.Writable = superclass => class Writable extends ClusterScoped.Crea
   }
 }
 
-NamespaceScoped.Writable = superclass => class Writable extends NamespaceScoped.Creatable(superclass) {
+NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable(superclass) {
   update (namespace, name, body, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -342,6 +314,36 @@ const Writable = Mixin(superclass => {
       throw new TypeError('The resource scope must be one of ["Namespaced", "Cluster"]')
   }
 })
+
+function assertOptions (options) {
+  if (options && !isPlainObject(options)) {
+    throw new TypeError('The parameter "options" must be empty or a plain object')
+  }
+}
+
+function assertNamespace (namespace) {
+  if (typeof namespace !== 'string' || !namespace) {
+    throw new TypeError('The parameter "namespace" must be a string')
+  }
+}
+
+function assertName (name) {
+  if (typeof name !== 'string' || !name) {
+    throw new TypeError('The parameter "name" must be a string')
+  }
+}
+
+function assertBodyObject (body) {
+  if (!isPlainObject(body) || isEmpty(body)) {
+    throw new TypeError('The parameter "body" must be a non empty plain object')
+  }
+}
+
+function assertBodyArray (body) {
+  if (!Array.isArray(body) || isEmpty(body)) {
+    throw new TypeError('The parameter "body" must be a non empty array')
+  }
+}
 
 module.exports = {
   V1,
