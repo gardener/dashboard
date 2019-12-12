@@ -19,6 +19,7 @@ const _ = require('lodash')
 const { EventEmitter } = require('events')
 const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
+const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
   const seed = {
@@ -92,7 +93,7 @@ function getDomain (name, provider, domain) {
   }
 }
 
-function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1.Secret', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
+function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
   return {
     metadata: {
       name,
@@ -190,9 +191,11 @@ class Reconnector extends EventEmitter {
   }
 }
 
-function createReconnectorStub (events = []) {
+function createReconnectorStub (events = [], name) {
   const reconnector = new Reconnector()
   _.forEach(events, args => reconnector.pushEvent(...args))
+  reconnector.resourceName = name
+  WatchBuilder.setWaitFor(reconnector)
   return reconnector
 }
 

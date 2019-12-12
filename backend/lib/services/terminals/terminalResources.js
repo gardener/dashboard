@@ -19,8 +19,7 @@
 
 const _ = require('lodash')
 
-const kubernetes = require('../../kubernetes')
-const Resources = kubernetes.Resources
+const { Resources } = require('../../kubernetes-client')
 
 const COMPONENT_TERMINAL = 'dashboard-terminal'
 
@@ -59,7 +58,7 @@ function toEndpointResource ({
   ownerReferences = [],
   labels = {}
 }) {
-  const resource = Resources.Endpoint
+  const resource = Resources.Endpoints
   const data = { subsets }
 
   return toResource({ resource, name, namespace, annotations, labels, ownerReferences, data })
@@ -112,9 +111,29 @@ function toResource ({
   return resourceBody
 }
 
+function fromNodeResource ({ metadata, status = {} }) {
+  const { name, creationTimestamp, labels } = metadata
+  const version = _.get(status, 'nodeInfo.kubeletVersion')
+  const conditions = _.get(status, 'conditions')
+  const readyCondition = _.find(conditions, condition => condition.type === 'Ready')
+  const readyStatus = _.get(readyCondition, 'status', 'UNKNOWN')
+  return {
+    metadata: {
+      name,
+      creationTimestamp
+    },
+    data: {
+      kubernetesHostname: labels['kubernetes.io/hostname'],
+      version,
+      readyStatus
+    }
+  }
+}
+
 module.exports = {
   toIngressResource,
   toEndpointResource,
   toServiceResource,
-  toTerminalResource
+  toTerminalResource,
+  fromNodeResource
 }

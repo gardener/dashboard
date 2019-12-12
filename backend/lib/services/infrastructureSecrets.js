@@ -16,8 +16,7 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const Resources = require('../kubernetes/Resources')
-const kubernetes = require('../kubernetes')
+const { Resources } = require('../kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
@@ -25,14 +24,6 @@ const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'do
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas } = require('../cache')
-
-function Core ({ auth }) {
-  return kubernetes.core({ auth })
-}
-
-function Garden ({ auth }) {
-  return kubernetes.gardener({ auth })
-}
 
 function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [] }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
@@ -175,14 +166,16 @@ async function getCloudProviderKind (cloudProfileName) {
 }
 
 exports.list = async function ({ user, namespace }) {
+  const client = user.client
+
   try {
     const cloudProfileList = cloudprofiles.list()
     const [
       { items: secretList },
       { items: secretBindings }
     ] = await Promise.all([
-      Core(user).namespaces(namespace).secrets.get({}),
-      Garden(user).namespaces(namespace).secretbindings.get({})
+      client.core.secrets.list(namespace),
+      client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
     return getInfrastructureSecrets({
       secretBindings,
@@ -196,13 +189,11 @@ exports.list = async function ({ user, namespace }) {
 }
 
 exports.create = async function ({ user, namespace, body }) {
-  const secret = await Core(user).namespaces(namespace).secrets.post({
-    body: toSecretResource(body)
-  })
+  const client = user.client
 
-  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.post({
-    body: toSecretBindingResource(body)
-  })
+  const secret = await client.core.secrets.create(namespace, toSecretResource(body))
+
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
@@ -224,17 +215,14 @@ function checkIfOwnSecret (bodySecretBinding) {
 }
 
 exports.patch = async function ({ user, namespace, bindingName, body }) {
-  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
-    name: bindingName
-  })
+  const client = user.client
+
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
   const secretName = _.get(secretBinding, 'secretRef.name')
 
   checkIfOwnSecret(secretBinding)
 
-  const secret = await Core(user).namespaces(namespace).secrets.mergePatch({
-    name: secretName,
-    body: toSecretResource(body)
-  })
+  const secret = await client.core.secrets.mergePatch(namespace, secretName, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
   const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
@@ -248,9 +236,9 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
 }
 
 exports.remove = async function ({ user, namespace, bindingName }) {
-  const secretBinding = await Garden(user).namespaces(namespace).secretbindings.get({
-    name: bindingName
-  })
+  const client = user.client
+
+  const secretBinding = await client['core.gardener.cloud'].secretbindings.get(namespace, bindingName)
   const secretName = _.get(secretBinding, 'secretRef.name')
 
   checkIfOwnSecret(secretBinding)
@@ -266,8 +254,8 @@ exports.remove = async function ({ user, namespace, bindingName }) {
   }
 
   await Promise.all([
-    await Garden(user).namespaces(namespace).secretbindings.delete({ name: bindingName }),
-    await Core(user).namespaces(namespace).secrets.delete({ name: secretName })
+    await client['core.gardener.cloud'].secretbindings.delete(namespace, bindingName),
+    await client.core.secrets.delete(namespace, secretName)
   ])
   return { metadata: { name: secretName, bindingName, namespace } }
 }

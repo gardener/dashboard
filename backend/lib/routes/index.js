@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const config = require('../config')
 
-const moduleExports = {
+module.exports = {
   '/info': require('./info'),
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
@@ -30,7 +30,7 @@ const moduleExports = {
   '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
   '/namespaces/:namespace/members': require('./members')
 }
+
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  moduleExports['/namespaces/:namespace/terminals/:target'] = require('./terminals')
+  module.exports['/namespaces/:namespace/terminals/:target'] = require('./terminals')
 }
-module.exports = moduleExports

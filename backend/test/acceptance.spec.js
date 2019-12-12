@@ -72,6 +72,10 @@ describe('acceptance', function () {
       require('./acceptance/api.shoots.spec.js')(context)
     })
 
+    describe('terminals', function () {
+      require('./acceptance/api.terminals.spec.js')(context)
+    })
+
     describe('user', function () {
       require('./acceptance/api.user.spec.js')(context)
     })
