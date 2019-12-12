@@ -41,31 +41,32 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import join from 'lodash/join'
+import merge from 'lodash/merge'
 import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 
 const knownConditions = {
   APIServerAvailable: {
     displayName: 'API Server',
     shortName: 'API',
-    description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this in error state then there is no interaction with the cluster possible. The workload running on the cluster is most likely not affected.'
+    description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.'
   },
   ControlPlaneHealthy: {
     displayName: 'Control Plane',
     shortName: 'CP',
-    description: 'Indicates whether all control plane components are up and running',
+    description: 'Indicates whether all control plane components are up and running.',
     showAdminOnly: true
   },
   EveryNodeReady: {
     displayName: 'Nodes',
     shortName: 'N',
-    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then is probably an issue with the cluster nodes and they are not ready for some reason. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a disruption on workload side.'
+    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.'
   },
   SystemComponentsHealthy: {
     displayName: 'System Components',
     shortName: 'SC',
-    description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again. The impact of these health checks is in the most cases very limited.'
+    description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
   }
 }
 
@@ -94,6 +95,12 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
+    ...mapGetters([
+      'isAdmin'
+    ]),
     chipText () {
       return this.tag.shortName || ''
     },
@@ -165,10 +172,7 @@ export default {
         return !get(knownConditions, [type, 'showAdminOnly'], false)
       }
       return true
-    },
-    ...mapGetters([
-      'isAdmin'
-    ])
+    }
   },
   methods: {
     generateChipTitle ({ name, timeString }) {
@@ -209,15 +213,19 @@ export default {
         shortNameComponents.push(conditionComponent[1])
       }
       if (shortNameComponents.length > 1) {
-        // Remove last character as it is usually not part of the condition name (e.g. availability)
+        // Remove last component as it is usually not part of the condition name (e.g. availability)
         shortNameComponents = shortNameComponents.slice(0, shortNameComponents.length - 1)
+        displayNameComponents = displayNameComponents.slice(0, displayNameComponents.length - 1)
       }
 
       const displayName = join(displayNameComponents, ' ')
       const shortName = join(shortNameComponents, '')
-      knownConditions[type] = { displayName, shortName }
+      knownConditions[type] = { displayName, shortName } // cache
       return knownConditions[type]
     }
+  },
+  beforeMount () {
+    merge(knownConditions, this.cfg.knownConditions)
   }
 }
 </script>
