@@ -1,7 +1,7 @@
 port: 3030
 logLevel: info
 logFormat: text
-apiServerUrl: https://kubernetes:6443
+apiServerUrl: https://kubernetes.external.foo.bar
 gitHub:
   apiUrl: https://api.github.com
   org: gardener

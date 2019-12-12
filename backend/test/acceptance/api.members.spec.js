@@ -69,7 +69,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body.name).to.equal(name)
     expect(res.body.kind).to.equal('ServiceAccount')
     expect(res.body).to.have.property('kubeconfig')
-    expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes:6443')
+    expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes.external.foo.bar')
   })
 
   it('should add a project member', async function () {
