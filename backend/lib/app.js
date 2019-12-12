@@ -38,8 +38,10 @@ const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
 const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
 if (gitHubRepoUrl) {
-  const gitHubOrigin = new URL(gitHubRepoUrl).origin
-  imgSrc.push(gitHubOrigin)
+  const url = new URL(gitHubRepoUrl)
+  imgSrc.push(url.origin)
+  url.hostname = 'avatars.' + url.hostname
+  imgSrc.push(url.origin)
 }
 
 // configure app
