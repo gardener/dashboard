@@ -148,14 +148,14 @@ export default {
     },
     imageIsNotLatest ({ version: currentImageVersion, vendorName: currentVendor }) {
       if (currentImageVersion) {
-        let notLatesVersion = false
+        let notLatestVersion = false
         forEach(this.machineImages, ({ version, vendorName }) => {
           if (currentVendor === vendorName && semver.gt(version, currentImageVersion)) {
-            notLatesVersion = true
+            notLatestVersion = true
             return false // break
           }
         })
-        return notLatesVersion
+        return notLatestVersion
       }
       return false
     }
