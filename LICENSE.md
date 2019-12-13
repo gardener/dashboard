@@ -341,6 +341,10 @@ Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reser
 Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE\
 [SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
 
+- [ansi-html](https://github.com/Tjatse/ansi-html)\
+Copyright 2017 Tjatse\
+[Apache License 2.0](https://github.com/Tjatse/ansi-html/blob/master/LICENSE)
+
 - [axios](https://github.com/axios/axios)\
 Copyright (c) 2014-present Matt Zabriskie\
 [MIT License](https://github.com/axios/axios/blob/master/LICENSE)
@@ -364,6 +368,12 @@ Copyright (c) 2015 Mario Heiderich\
 - [downloadjs](https://github.com/rndme/download)\
 Copyright (c) 2016 dandavis\
 [MIT License](https://github.com/rndme/download/blob/master/LICENSE.md)
+
+- [escape-html](https://github.com/component/escape-html)\
+Copyright (c) 2012-2013 TJ Holowaychuk\
+Copyright (c) 2015 Andreas Lubbe\
+Copyright (c) 2015 Tiancheng "Timothy" Gu\
+[MIT License](https://github.com/component/escape-html/blob/master/LICENSE)
 
 - [get-contrast](https://github.com/johno/get-contrast)\
 Copyright (c) 2014-2016 John Otander\
