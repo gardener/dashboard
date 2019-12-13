@@ -21,6 +21,8 @@ limitations under the License.
     trigger="click"
     :options="popperOptions"
     boundaries-selector=".v-content__wrap"
+    @show="onPopperShow"
+    @hide="onPopperHide"
     >
     <div class="popper">
       <v-card>
@@ -139,6 +141,12 @@ export default {
     },
     emitRendered () {
       this.$emit('rendered')
+    },
+    onPopperShow () {
+      this.$emit('input', true)
+    },
+    onPopperHide () {
+      this.$emit('input', false)
     }
   },
   created () {
