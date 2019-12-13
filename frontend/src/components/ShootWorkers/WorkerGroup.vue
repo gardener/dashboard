@@ -22,7 +22,7 @@ limitations under the License.
 
   >
     <v-layout row
-     slot="content-before"
+     slot="content"
      v-for="(line,index) in description"
      :key="index"
      fill-height

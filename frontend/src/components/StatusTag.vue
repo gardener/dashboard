@@ -17,13 +17,14 @@ limitations under the License.
 <template>
   <span v-if="visible">
     <template v-if="tag.message">
-      <g-popper v-model="popperVisible" @rendered="popperRendered=true" :title="chipTitle" :message="tag.message" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
+      <g-popper v-model="popperVisible" @rendered="popperRendered=true" :title="chipTitle" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
         <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
           <v-chip class="cursor-pointer status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
             {{chipText}}
           </v-chip>
           <span v-html="chipTooltip"></span>
         </v-tooltip>
+        <pre class="message" slot="content">{{tag.message}}</pre>
       </g-popper>
     </template>
     <template v-else max-width="400px">
@@ -248,4 +249,12 @@ export default {
     margin: -4px;
   }
 
+  .message {
+    text-align: left;
+    min-width: 250px;
+    max-width: 800px;
+    max-height: 150px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+  }
 </style>

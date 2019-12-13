@@ -40,7 +40,7 @@ limitations under the License.
         <div>{{ tooltipText }}</div>
       </v-tooltip>
     </div>
-    <template slot="content-after">
+    <template slot="content">
       <pre v-if="!!popperMessage" class="alert-message">{{ popperMessage }}</pre>
       <template v-if="isError">
         <v-divider class="my-2"></v-divider>

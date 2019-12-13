@@ -20,7 +20,7 @@ limitations under the License.
     toolbarColor="cyan darken-2"
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
-  <div slot="content-before" class="message">
+  <div slot="content" class="message">
     To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
     Please navigate to the cluster details page to
     <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>

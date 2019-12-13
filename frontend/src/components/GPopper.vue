@@ -34,9 +34,7 @@ limitations under the License.
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <slot name="content-before"></slot>
-          <pre class="message" v-if="!!message">{{message}}</pre>
-          <slot name="content-after"></slot>
+          <slot name="content"></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
               <template v-if="showPlaceholder">
@@ -90,10 +88,6 @@ export default {
     title: {
       type: String,
       required: true
-    },
-    message: {
-      type: String,
-      required: false
     },
     time: {
       type: Object
@@ -171,15 +165,6 @@ export default {
     background-color: transparent !important;
     -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
     box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
-  }
-
-  .message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    max-height: 150px;
-    white-space: pre-wrap;
-    overflow-y: auto;
   }
 
   .timestamp {
