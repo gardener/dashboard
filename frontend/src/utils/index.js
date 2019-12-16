@@ -348,7 +348,7 @@ export function canLinkToSeed ({ namespace, seedName }) {
   * If we are not in the garden namespace we expect a seed to be present
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return namespace && seedName !== 'garden'
+  return namespace && seedName && seedName !== 'garden'
 }
 
 export function isUserError (errorCodes) {
