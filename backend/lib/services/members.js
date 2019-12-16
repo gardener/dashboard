@@ -87,7 +87,8 @@ async function setProjectMember (client, { namespace, name }) {
   members.push({
     kind: 'User',
     name,
-    apiGroup: 'rbac.authorization.k8s.io'
+    apiGroup: 'rbac.authorization.k8s.io',
+    role: 'admin'
   })
   const body = {
     spec: {
