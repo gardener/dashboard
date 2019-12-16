@@ -61,8 +61,8 @@ import map from 'lodash/map'
 import join from 'lodash/join'
 import { isUserError } from '@/utils'
 
-const ansiHTML = require('ansi-html')
-const escape = require('escape-html');
+import ansiHTML from 'ansi-html'
+import escape from 'lodash/escape'
 
 const errorCodes = {
   'ERR_INFRA_UNAUTHORIZED': {
