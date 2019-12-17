@@ -20,6 +20,7 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import StatusTag from '@/components/StatusTag.vue'
+import store from '@/store'
 
 Vue.use(Vuetify)
 const localVue = createLocalVue()
@@ -30,157 +31,95 @@ Object.defineProperties(localVue.prototype, {
   $bus: { value: bus }
 })
 
-describe('StatusTag.vue', function () {
-  let store
+function createStatusTagComponent (conditionType) {
+  const propsData = {
+    condition: {
+      type: conditionType
+    },
+    popperKey: 'foo'
+  }
+  const wrapper = mount(StatusTag, {
+    localVue,
+    store,
+    propsData
+  })
+  const statustagComponent = wrapper.find(StatusTag)
+  return statustagComponent.vm.tag
+}
 
-  beforeEach(() => {
-    store = new Vuex.Store({
-      state: {
-        cfg: {
-          knownConditions: {
-            ControlPlaneHealthy: {
-              displayName: 'Control Plane Overwritten',
-              shortName: 'CPO',
-              description: 'Overwritten Description'
-            },
-            ConditionFromConfigAvailability: {
-              displayName: 'Config Condition',
-              shortName: 'CC',
-              description: 'Config Condition Description'
-            }
-          }
-        }
-      },
-      modules: {},
-      getters: {
-        isAdmin: () => {
-          return false
+describe('StatusTag.vue', function () {
+  beforeEach(async () => {
+    const cfg = {
+      knownConditions: {
+        ControlPlaneHealthy: {
+          displayName: 'Control Plane Overwritten',
+          shortName: 'CPO',
+          description: 'Overwritten Description'
+        },
+        ConditionFromConfigAvailability: {
+          displayName: 'Config Condition',
+          shortName: 'CC',
+          description: 'Config Condition Description'
         }
       }
-    })
+    }
+    await store.dispatch('setConfiguration', cfg)
   })
-  it('should generate condition object for unknown condition types', function () {
-    let conditionType = 'SampleConditionAvailability'
-    let propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
-    let wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    let statustagComponent = wrapper.find(StatusTag)
-    let conditionTag = statustagComponent.vm.tag
 
-    expect(conditionTag.shortName).to.equal('SC')
-    expect(conditionTag.name).to.equal('Sample Condition')
-    expect(conditionTag.description).to.equal(undefined)
+  it('should generate condition object for simple condition type', function () {
+    const statusTag = createStatusTagComponent('SampleConditionAvailability')
 
-    conditionType = 'ExtraLongSampleTESTConditionAvailable'
-    propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
-    wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    statustagComponent = wrapper.find(StatusTag)
-    conditionTag = statustagComponent.vm.tag
+    expect(statusTag.shortName).to.equal('SC')
+    expect(statusTag.name).to.equal('Sample Condition')
+    expect(statusTag.description).to.equal(undefined)
+  })
 
-    expect(conditionTag.shortName).to.equal('ELSC')
-    expect(conditionTag.name).to.equal('Extra Long Sample TESTCondition')
-    expect(conditionTag.description).to.equal(undefined)
+  it('should generate condition object for long condition type', function () {
+    const statusTag = createStatusTagComponent('ExtraLongSampleTESTConditionAvailable')
 
-    conditionType = 'Singlecondition'
-    propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
-    wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    statustagComponent = wrapper.find(StatusTag)
-    conditionTag = statustagComponent.vm.tag
+    expect(statusTag.shortName).to.equal('ELSTC')
+    expect(statusTag.name).to.equal('Extra Long Sample Test Condition')
+    expect(statusTag.description).to.equal(undefined)
+  })
 
-    expect(conditionTag.shortName).to.equal('S')
-    expect(conditionTag.name).to.equal('Singlecondition')
-    expect(conditionTag.description).to.equal(undefined)
+  it('should generate condition object for single condition type', function () {
+    const statusTag = createStatusTagComponent('Singlecondition')
+
+    expect(statusTag.shortName).to.equal('S')
+    expect(statusTag.name).to.equal('Singlecondition')
+    expect(statusTag.description).to.equal(undefined)
+  })
+
+  it('should cache generated condition object for unknown condition type', function () {
+    expect(store.state.conditionCache.UnknownCondition).to.equal(undefined)
+
+    const statusTag = createStatusTagComponent('UnknownCondition')
+    expect(statusTag.shortName).to.equal('UC')
+
+    expect(store.state.conditionCache.UnknownCondition).to.not.equal(undefined)
   })
 
   it('should return condition object for known condition types', function () {
-    const conditionType = 'APIServerAvailable'
-    const propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
+    const statusTag = createStatusTagComponent('APIServerAvailable')
 
-    const wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    const statustagComponent = wrapper.find(StatusTag)
-    const conditionTag = statustagComponent.vm.tag
-
-    expect(conditionTag.shortName).to.equal('API')
-    expect(conditionTag.name).to.equal('API Server')
-    expect(conditionTag.description).to.not.be.empty
+    expect(statusTag.shortName).to.equal('API')
+    expect(statusTag.name).to.equal('API Server')
+    expect(statusTag.description).to.not.be.empty
   })
 
   it('should return condition object for condition types loaded from config', function () {
-    const conditionType = 'ConditionFromConfigAvailability'
-    const propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
+    const statusTag = createStatusTagComponent('ConditionFromConfigAvailability')
 
-    const wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    const statustagComponent = wrapper.find(StatusTag)
-    const conditionTag = statustagComponent.vm.tag
-
-    expect(conditionTag.shortName).to.equal('CC')
-    expect(conditionTag.name).to.equal('Config Condition')
-    expect(conditionTag.description).to.equal('Config Condition Description')
+    expect(statusTag.shortName).to.equal('CC')
+    expect(statusTag.name).to.equal('Config Condition')
+    expect(statusTag.description).to.equal('Config Condition Description')
   })
 
   it('should return overwritten known condition with values from config', function () {
-    const conditionType = 'ControlPlaneHealthy'
-    const propsData = {
-      condition: {
-        type: conditionType
-      },
-      popperKey: 'foo'
-    }
+    const statusTag = createStatusTagComponent('ControlPlaneHealthy')
 
-    const wrapper = mount(StatusTag, {
-      localVue,
-      store,
-      propsData
-    })
-    const statustagComponent = wrapper.find(StatusTag)
-    const conditionTag = statustagComponent.vm.tag
-
-    expect(conditionTag.shortName).to.equal('CPO')
-    expect(conditionTag.name).to.equal('Control Plane Overwritten')
-    expect(conditionTag.description).to.equal('Overwritten Description')
+    expect(statusTag.shortName).to.equal('CPO')
+    expect(statusTag.name).to.equal('Control Plane Overwritten')
+    expect(statusTag.description).to.equal('Overwritten Description')
   })
 })

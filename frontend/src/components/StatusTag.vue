@@ -57,35 +57,18 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import join from 'lodash/join'
-import merge from 'lodash/merge'
+import map from 'lodash/map'
+import split from 'lodash/split'
+import dropRight from 'lodash/dropRight'
+import last from 'lodash/last'
+import snakeCase from 'lodash/snakeCase'
+import includes from 'lodash/includes'
+import upperFirst from 'lodash/upperFirst'
+
 import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
 import AnsiText from '@/components/AnsiText'
-import { mapGetters, mapState } from 'vuex'
-
-const knownConditions = {
-  APIServerAvailable: {
-    displayName: 'API Server',
-    shortName: 'API',
-    description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.'
-  },
-  ControlPlaneHealthy: {
-    displayName: 'Control Plane',
-    shortName: 'CP',
-    description: 'Indicates whether all control plane components are up and running.',
-    showAdminOnly: true
-  },
-  EveryNodeReady: {
-    displayName: 'Nodes',
-    shortName: 'N',
-    description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.'
-  },
-  SystemComponentsHealthy: {
-    displayName: 'System Components',
-    shortName: 'SC',
-    description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
-  }
-}
+import { mapGetters, mapState, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -115,7 +98,8 @@ export default {
   },
   computed: {
     ...mapState([
-      'cfg'
+      'cfg',
+      'conditionCache'
     ]),
     ...mapGetters([
       'isAdmin'
@@ -156,7 +140,7 @@ export default {
     tag () {
       const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
-      const { displayName: name, shortName, description } = this.conditionFromType(type)
+      const { displayName: name, shortName, description } = this.conditionMetaDataFromType(type)
 
       return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status }
     },
@@ -175,7 +159,8 @@ export default {
     visible () {
       if (!this.isAdmin) {
         const { type } = this.condition
-        return !get(knownConditions, [type, 'showAdminOnly'], false)
+
+        return !get(this.conditionMetaDataFromType(type), 'showAdminOnly', false)
       }
       return true
     },
@@ -184,6 +169,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'setCondition'
+    ]),
     generateChipTitle ({ name, timeString }) {
       let since = ''
       let errorState
@@ -208,36 +196,35 @@ export default {
 
       return `${name} [${errorState}${since}]`
     },
-    conditionFromType (type) {
-      let condition = knownConditions[type]
+    conditionMetaDataFromType (type) {
+      let condition = this.conditionCache[type]
       if (condition) {
         return condition
       }
-      let displayNameComponents = []
-      let shortNameComponents = []
-      const conditionPattern = /[A-Z]*([A-Z])[a-z]*/g
-      let conditionComponent
-      while ((conditionComponent = conditionPattern.exec(type)) !== null) {
-        displayNameComponents.push(conditionComponent[0])
-        shortNameComponents.push(conditionComponent[1])
-      }
-      if (shortNameComponents.length > 1) {
-        // Remove last component as it is usually not part of the condition name (e.g. availability)
-        shortNameComponents = shortNameComponents.slice(0, shortNameComponents.length - 1)
-        displayNameComponents = displayNameComponents.slice(0, displayNameComponents.length - 1)
+
+      const dropSuffixes = [
+        'Available',
+        'Healthy',
+        'Ready',
+        'Availability'
+      ]
+      let conditionComponents = snakeCase(type)
+      conditionComponents = split(conditionComponents, '_')
+      conditionComponents = map(conditionComponents, upperFirst)
+      if (includes(dropSuffixes, last(conditionComponents))) {
+        conditionComponents = dropRight(conditionComponents)
       }
 
-      const displayName = join(displayNameComponents, ' ')
-      const shortName = join(shortNameComponents, '')
-      knownConditions[type] = { displayName, shortName } // cache
-      return knownConditions[type]
+      const displayName = join(conditionComponents, ' ')
+      const shortName = join(map(conditionComponents, conditionComponent => conditionComponent.charAt(0)), '')
+      const conditionMetaData = { displayName, shortName }
+      this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
+
+      return conditionMetaData
     },
     onPopperInput (value) {
       this.popperVisible = value
     }
-  },
-  beforeMount () {
-    merge(knownConditions, this.cfg.knownConditions)
   }
 }
 </script>
