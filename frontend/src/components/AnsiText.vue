@@ -25,7 +25,8 @@ import escape from 'lodash/escape'
 export default {
   props: {
     text: {
-      type: String
+      type: String,
+      default: ''
     }
   },
   computed: {

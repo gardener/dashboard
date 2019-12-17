@@ -41,7 +41,7 @@ limitations under the License.
           {{chipTooltip.description}}
         </div>
       </v-tooltip>
-      <ansi-text :text="tag.message" :class="{ 'error--text': isError }"></ansi-text>
+      <ansi-text :text="tag.message"></ansi-text>
     </g-popper>
     <time-string
       v-if="popperRendered"
@@ -61,6 +61,7 @@ import map from 'lodash/map'
 import split from 'lodash/split'
 import dropRight from 'lodash/dropRight'
 import last from 'lodash/last'
+import first from 'lodash/first'
 import snakeCase from 'lodash/snakeCase'
 import includes from 'lodash/includes'
 import upperFirst from 'lodash/upperFirst'
@@ -68,7 +69,7 @@ import upperFirst from 'lodash/upperFirst'
 import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
 import AnsiText from '@/components/AnsiText'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { mapGetters, mapState, mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -140,7 +141,7 @@ export default {
     tag () {
       const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
-      const { displayName: name, shortName, description } = this.conditionMetaDataFromType(type)
+      const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
 
       return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status }
     },
@@ -160,7 +161,8 @@ export default {
       if (!this.isAdmin) {
         const { type } = this.condition
 
-        return !get(this.conditionMetaDataFromType(type), 'showAdminOnly', false)
+        const conditionMetadata = this.conditionMetadataFromType(type)
+        return !get(conditionMetadata, 'showAdminOnly', false)
       }
       return true
     },
@@ -169,7 +171,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
+    ...mapMutations([
       'setCondition'
     ]),
     generateChipTitle ({ name, timeString }) {
@@ -196,7 +198,7 @@ export default {
 
       return `${name} [${errorState}${since}]`
     },
-    conditionMetaDataFromType (type) {
+    conditionMetadataFromType (type) {
       let condition = this.conditionCache[type]
       if (condition) {
         return condition
@@ -216,7 +218,7 @@ export default {
       }
 
       const displayName = join(conditionComponents, ' ')
-      const shortName = join(map(conditionComponents, conditionComponent => conditionComponent.charAt(0)), '')
+      const shortName = join(map(conditionComponents, first), '')
       const conditionMetaData = { displayName, shortName }
       this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
 

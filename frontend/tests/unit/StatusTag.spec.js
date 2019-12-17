@@ -96,7 +96,7 @@ describe('StatusTag.vue', function () {
     const statusTag = createStatusTagComponent('UnknownCondition')
     expect(statusTag.shortName).to.equal('UC')
 
-    expect(store.state.conditionCache.UnknownCondition).to.not.equal(undefined)
+    expect(store.state.conditionCache.UnknownCondition.shortName).to.equal('UC')
   })
 
   it('should return condition object for known condition types', function () {

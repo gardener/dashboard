@@ -641,7 +641,7 @@ const actions = {
     }
 
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
-      commit('SET_CONDITION', { conditionKey, conditionValue })
+      commit('setCondition', { conditionKey, conditionValue })
     })
 
     return state.cfg
@@ -703,10 +703,6 @@ const actions = {
   setAlertBanner ({ commit }, value) {
     commit('SET_ALERT_BANNER', value)
     return state.alertBanner
-  },
-  setCondition ({ commit }, value) {
-    commit('SET_CONDITION', value)
-    return state.conditionCache
   }
 }
 
@@ -759,7 +755,7 @@ const mutations = {
   SET_ALERT_BANNER (state, value) {
     state.alertBanner = value
   },
-  SET_CONDITION (state, { conditionKey, conditionValue }) {
+  setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)
   }
 }
