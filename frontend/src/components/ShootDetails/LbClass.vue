@@ -16,14 +16,12 @@ limitations under the License.
 
 <template>
   <g-popper
-    :title="lbClass.name"
+    :title="name"
     toolbarColor="cyan darken-2"
-    :popperKey="`lbclass_${lbClass.name}`"
+    :popperKey="`lbclass_${name}`"
   >
-    <span slot="content-before">
-      <span class="font-weight-bold">Floating Subnet ID:</span> {{lbClass.floatingSubnetID}}
-    </span>
-    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{lbClass.name}}</v-chip>
+    <span class="font-weight-bold">Floating Subnet ID:</span> {{floatingSubnetID}}
+    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
   </g-popper>
 </template>
 
@@ -37,8 +35,11 @@ export default {
     GPopper
   },
   props: {
-    lbClass: {
-      type: Object
+    name: {
+      type: String
+    },
+    floatingSubnetID: {
+      type: String
     }
   }
 }

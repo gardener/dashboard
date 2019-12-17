@@ -106,7 +106,8 @@ limitations under the License.
             <span class="grey--text">Available Load Balancer Classes</span><br>
             <lb-class
             v-for="lbClass in shootLoadbalancerClasses"
-            :lbClass="lbClass"
+            :name="lbClass.name"
+            :floatingSubnetID="lbClass.floatingSubnetID"
             :key="lbClass.name"
             ></lb-class>
           </v-flex>
@@ -164,14 +165,11 @@ export default {
       return `*.ingress.${this.shootDomain}`
     },
     shootLoadbalancerClasses () {
-      const cloudProfile = this.cloudProfileByName('this.shootCloudProfileName')
+      const cloudProfile = this.cloudProfileByName(this.shootCloudProfileName)
       const profileFloatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
       const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
       const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
-      if (shootFloatingPool) {
-        return shootFloatingPool.loadBalancerClasses
-      }
-      return undefined
+      return get(shootFloatingPool, 'loadBalancerClasses')
     },
     namespace () {
       return get(this.$route.params, 'namespace')
