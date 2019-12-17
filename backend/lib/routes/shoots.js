@@ -180,3 +180,15 @@ router.route('/:name/info')
       next(err)
     }
   })
+
+router.route('/:name/kyma')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.kyma({ user, namespace, name }))
+    } catch (err) {
+      next(err)
+    }
+  })
