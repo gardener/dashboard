@@ -32,14 +32,12 @@ limitations under the License.
             {{displayName}}
           </v-list-tile-title>
           <v-layout row
-            slot="content"
             fill-height
             align-center
           >
             <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
           </v-layout>
           <v-layout row
-            slot="content"
             fill-height
             align-center
           >

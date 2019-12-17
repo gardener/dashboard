@@ -21,6 +21,7 @@ limitations under the License.
     trigger="click"
     :options="popperOptions"
     boundaries-selector=".v-content__wrap"
+    :disabled="disabled"
     @show="onPopperShow"
     @hide="onPopperHide"
     >
@@ -34,7 +35,7 @@ limitations under the License.
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <slot name="content"></slot>
+          <slot></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
               <template v-if="showPlaceholder">
@@ -74,9 +75,6 @@ export default {
     TimeString
   },
   props: {
-    value: {
-      type: Boolean
-    },
     popperKey: {
       type: String,
       required: true
@@ -95,6 +93,9 @@ export default {
     placement: {
       type: String,
       default: 'top'
+    },
+    disabled: {
+      type: Boolean
     }
   },
   data () {
@@ -160,7 +161,7 @@ export default {
   .popper {
     padding: 0px;
     border-radius: 0px;
-    z-index: 42;
+    z-index: 7;
     border: 0px !important;
     background-color: transparent !important;
     -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);

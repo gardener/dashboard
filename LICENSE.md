@@ -369,12 +369,6 @@ Copyright (c) 2015 Mario Heiderich\
 Copyright (c) 2016 dandavis\
 [MIT License](https://github.com/rndme/download/blob/master/LICENSE.md)
 
-- [escape-html](https://github.com/component/escape-html)\
-Copyright (c) 2012-2013 TJ Holowaychuk\
-Copyright (c) 2015 Andreas Lubbe\
-Copyright (c) 2015 Tiancheng "Timothy" Gu\
-[MIT License](https://github.com/component/escape-html/blob/master/LICENSE)
-
 - [get-contrast](https://github.com/johno/get-contrast)\
 Copyright (c) 2014-2016 John Otander\
 [MIT License](https://github.com/johno/get-contrast/blob/master/license)

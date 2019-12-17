@@ -16,26 +16,41 @@ limitations under the License.
 
 <template>
   <span v-if="visible">
-    <template v-if="tag.message">
-      <g-popper v-model="popperVisible" @rendered="popperRendered=true" :title="chipTitle" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
-        <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
-          <v-chip class="cursor-pointer status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
-            {{chipText}}
-          </v-chip>
-          <span v-html="chipTooltip"></span>
-        </v-tooltip>
-        <pre class="message" slot="content">{{tag.message}}</pre>
-      </g-popper>
-    </template>
-    <template v-else max-width="400px">
-      <v-tooltip top>
-        <v-chip class="status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
+    <g-popper
+      @input="onPopperInput"
+      @rendered="popperRendered=true"
+      :title="chipTitle"
+      :toolbarColor="color"
+      :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }"
+      :popperKey="popperKeyWithType"
+      :placement="popperPlacement"
+      :disabled="!tag.message">
+      <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
+        <v-chip
+          class="status-tag"
+          :class="{ 'cursor-pointer': tag.message }"
+          slot="activator"
+          outline
+          :text-color="color"
+          small
+          :color="color">
           {{chipText}}
         </v-chip>
-        <span v-html="chipTooltip"></span>
+        <span class="font-weight-bold">{{chipTooltip.title}}</span>
+        <div v-if="chipTooltip.description">
+          {{chipTooltip.description}}
+        </div>
       </v-tooltip>
-    </template>
-    <time-string v-if="popperRendered" v-show="false" :dateTime="tag.lastTransitionTime" :currentString.sync="lastTransitionString" :pointInTime="-1" :withoutPrefixOrSuffix="true"></time-string>
+      <ansi-text :text="tag.message" :class="{ 'error--text': isError }"></ansi-text>
+    </g-popper>
+    <time-string
+      v-if="popperRendered"
+      v-show="false"
+      :dateTime="tag.lastTransitionTime"
+      :currentString.sync="lastTransitionString"
+      :pointInTime="-1"
+      :withoutPrefixOrSuffix="true">
+    </time-string>
   </span>
 </template>
 
@@ -45,6 +60,7 @@ import join from 'lodash/join'
 import merge from 'lodash/merge'
 import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
+import AnsiText from '@/components/AnsiText'
 import { mapGetters, mapState } from 'vuex'
 
 const knownConditions = {
@@ -74,7 +90,8 @@ const knownConditions = {
 export default {
   components: {
     GPopper,
-    TimeString
+    TimeString,
+    AnsiText
   },
   props: {
     condition: {
@@ -110,11 +127,10 @@ export default {
       return this.generateChipTitle({ name: this.tag.name, timeString: this.lastTransitionString })
     },
     chipTooltip () {
-      const title = `<span class="font-weight-bold">${this.generateChipTitle({ name: this.tag.name })}</span>`
-      if (this.tag.description) {
-        return `${title}<br />${this.tag.description}`
+      return {
+        title: this.generateChipTitle({ name: this.tag.name }),
+        description: this.tag.description
       }
-      return title
     },
     isError () {
       if (this.tag.status === 'False') {
@@ -146,19 +162,7 @@ export default {
     },
     color () {
       if (this.isError) {
-        return 'red'
-      }
-      if (this.isUnknown) {
-        return 'grey lighten-1'
-      }
-      if (this.isProgressing && this.isAdmin) {
-        return 'blue darken-2'
-      }
-      return 'cyan darken-2'
-    },
-    chipTextColor () {
-      if (this.isError) {
-        return 'red'
+        return 'error'
       }
       if (this.isUnknown) {
         return 'grey lighten-1'
@@ -227,6 +231,9 @@ export default {
       const shortName = join(shortNameComponents, '')
       knownConditions[type] = { displayName, shortName } // cache
       return knownConditions[type]
+    },
+    onPopperInput (value) {
+      this.popperVisible = value
     }
   },
   beforeMount () {
@@ -247,14 +254,5 @@ export default {
 
   .status-tag >>> .v-chip__content {
     margin: -4px;
-  }
-
-  .message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    max-height: 150px;
-    white-space: pre-wrap;
-    overflow-y: auto;
   }
 </style>
