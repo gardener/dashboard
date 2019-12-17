@@ -202,6 +202,7 @@ class ShootSubscription extends AbstractSubscription {
       const { name, namespace } = target
       throttledNsEventEmitter.flush()
       store.dispatch('getShootInfo', { name, namespace })
+      store.dispatch('getShootAddonKyma', { name, namespace })
     })
   }
 

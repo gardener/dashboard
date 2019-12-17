@@ -38,7 +38,13 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
-import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import {
+  getShoot,
+  getShootInfo,
+  getShootAddonKyma,
+  createShoot,
+  deleteShoot
+} from '@/utils/api'
 import { getCloudProviderTemplate } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isHibernated,
@@ -185,6 +191,19 @@ const actions = {
         }
         throw error
       })
+  },
+  async getAddonKyma ({ commit, rootState }, { name, namespace }) {
+    try {
+      const { data: addonKyma } = await getShootAddonKyma({ namespace, name })
+      commit('RECEIVE_ADDON_KYMA', { name, namespace, addonKyma })
+      return addonKyma
+    } catch (error) {
+      // shoot addon kyma not found -> ignore if KubernetesError
+      if (isNotFound(error)) {
+        return
+      }
+      throw error
+    }
   },
   setSelection ({ commit, dispatch }, metadata) {
     if (!metadata) {
@@ -585,6 +604,12 @@ const mutations = {
     const item = findItem({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
+    }
+  },
+  RECEIVE_ADDON_KYMA (state, { namespace, name, addonKyma }) {
+    const item = findItem({ namespace, name })
+    if (item !== undefined) {
+      Vue.set(item, 'addonKyma', addonKyma)
     }
   },
   SET_SELECTION (state, metadata) {
