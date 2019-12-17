@@ -2,6 +2,9 @@
 
 ![](https://github.com/gardener/dashboard/blob/master/logo/logo_gardener_dashboard.png)
 
+[![CI Build status](https://concourse.ci.infra.gardener.cloud/api/v1/teams/gardener/pipelines/dashboard-master/jobs/master-head-update-job/badge)](https://concourse.ci.infra.gardener.cloud/teams/gardener/pipelines/dashboard-master/jobs/master-head-update-job)
+[![Slack channel #gardener](https://img.shields.io/badge/slack-gardener-brightgreen.svg?logo=slack)](https://kubernetes.slack.com/messages/gardener)
+
 ## Demo
 
 <img src="https://user-images.githubusercontent.com/5526658/35324536-4447618c-00f1-11e8-8cb7-70b0ad193593.gif" alt="Gardener Demo" width="600"/>

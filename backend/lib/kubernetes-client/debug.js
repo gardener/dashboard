@@ -14,25 +14,41 @@
 // limitations under the License.
 //
 
-const { clone, split, first } = require('lodash')
+'use strict'
+
+const { clone, split, first, get, set } = require('lodash')
 const uuidv1 = require('uuid/v1')
 const x509 = require('x509.js')
 const jwt = require('jsonwebtoken')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 
-const originalInit = Symbol('Request.prototype.init')
-const requestId = Symbol('Request.id')
+function afterResponse (response) {
+  const { headers, httpVersion, statusCode, statusMessage, body, request } = response
+  const id = get(request, 'options.headers["x-request-id"]')
+  logger.response({
+    id,
+    statusCode,
+    statusMessage,
+    httpVersion,
+    headers: clone(headers),
+    body
+  })
+  return response
+}
 
-function onRequest (req) {
-  this[requestId] = uuidv1()
+function beforeRequest (options) {
+  const { href, method, headers, body, key, cert } = options
+  const uri = new URL(href)
+  if (!('x-request-id' in headers)) {
+    headers['x-request-id'] = uuidv1()
+  }
   const user = {
     id: undefined,
     type: undefined
   }
-  const headers = clone(this.headers)
+
   const [schema, value] = split(headers.authorization, ' ') || []
-  delete headers.authorization
   switch (schema) {
     case 'Bearer':
       const payload = jwt.decode(value)
@@ -46,7 +62,7 @@ function onRequest (req) {
         }
       } else {
         user.type = 'bearer'
-        user.id = value
+        user.id = '"redacted"'
       }
       break
     case 'Basic':
@@ -54,57 +70,63 @@ function onRequest (req) {
       user.id = first(split(decodeBase64(value), ':'))
       break
   }
-  if (this.key && this.cert) {
+
+  if (key && cert) {
     try {
-      const { subject } = x509.parseCert(this.cert)
+      const { subject } = x509.parseCert(cert)
       user.type = 'cn'
       user.id = subject.commonName
     } catch (err) { /* ignore error */ }
   }
-  logger.request({
-    id: this[requestId],
-    uri: this.uri,
-    method: this.method,
-    httpVersion: '1.1',
-    user: user.id ? user : undefined,
-    headers,
-    body: this.body
-  })
-}
 
-function onComplete (res, body) {
-  logger.response({
-    id: this[requestId],
-    statusCode: res.statusCode,
-    reasonPhrase: res.statusMessage,
-    httpVersion: res.httpVersion,
-    headers: clone(res.headers),
+  logger.request({
+    uri,
+    method,
+    user: user.id ? user : undefined,
+    headers: clone(headers),
     body
   })
 }
 
-function onRedirect () {
+function beforeRedirect (options, response) {
+  const { headers, httpVersion, statusCode, statusMessage, redirectUrls, request } = response
+  const id = get(request, 'options.headers["x-request-id"]')
   logger.response({
-    id: this[requestId],
-    statusCode: this.response.statusCode,
-    reasonPhrase: this.response.statusMessage,
-    httpVersion: this.response.httpVersion,
-    headers: clone(this.response.headers),
+    id,
+    statusCode,
+    statusMessage,
+    httpVersion,
+    headers: clone(headers),
     body: JSON.stringify({
-      uri: this.uri.href
+      redirectUrls
     })
   })
+  beforeRequest(options)
 }
 
-module.exports = Request => {
-  if (Request.prototype && !Request.prototype[originalInit]) {
-    Request.prototype[originalInit] = Request.prototype.init
-
-    Request.prototype.init = function init () {
-      this.on('request', onRequest)
-      this.on('complete', onComplete)
-      this.on('redirect', onRedirect)
-      return Request.prototype[originalInit].apply(this, arguments)
-    }
+function addHook (options, hook) {
+  const name = hook.name
+  let hooks = get(options, ['hooks', name])
+  if (!Array.isArray(hooks)) {
+    set(options, ['hooks', name], (hooks = []))
   }
+  hooks.push(hook)
+  return options
+}
+
+function attach (options = {}) {
+  const LEVELS = logger.LEVELS
+  if (!logger.isDisabled(LEVELS.debug)) {
+    addHook(options, beforeRequest)
+    addHook(options, afterResponse)
+    addHook(options, beforeRedirect)
+  }
+  return options
+}
+
+module.exports = {
+  attach,
+  beforeRequest,
+  beforeRedirect,
+  afterResponse
 }

@@ -40,22 +40,21 @@ limitations under the License.
         <div>{{ tooltipText }}</div>
       </v-tooltip>
     </div>
-    <template slot="content-after">
-      <pre v-if="!!popperMessage" class="alert-message">{{ popperMessage }}</pre>
-      <template v-if="isError">
-        <v-divider class="my-2"></v-divider>
-        <h4 class="error--text text-xs-left">Last Error</h4>
-        <template v-for="errorCodeDescription in errorCodeDescriptions">
-          <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-        </template>
-        <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
+    <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
+    <template v-if="isError">
+      <v-divider class="my-2"></v-divider>
+      <h4 class="error--text text-xs-left">Last Error</h4>
+      <template v-for="errorCodeDescription in errorCodeDescriptions">
+        <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
       </template>
+      <ansi-text class="error--text" :text="lastErrorDescription"></ansi-text>
     </template>
   </g-popper>
 </template>
 
 <script>
 import GPopper from '@/components/GPopper'
+import AnsiText from '@/components/AnsiText'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
@@ -82,7 +81,8 @@ const errorCodes = {
 
 export default {
   components: {
-    GPopper
+    GPopper,
+    AnsiText
   },
   props: {
     operation: {
@@ -270,15 +270,6 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
-  }
-
-  .alert-message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    max-height: 300px;
-    white-space: pre-wrap;
-    overflow-y: auto;
   }
 
 </style>

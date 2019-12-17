@@ -18,7 +18,7 @@
 
 const { version } = require('../../package')
 
-module.exports = function info({ agent, k8s, auth }) {
+module.exports = function info ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const username = 'john.doe@example.org'
   const id = username
@@ -82,8 +82,7 @@ module.exports = function info({ agent, k8s, auth }) {
     expect(res.body).to.have.property('version').that.is.equal(version)
     expect(res.body.gardenerVersion).to.have.property('major').that.is.equal(gardenerVersion.major)
     expect(res.body.gardenerVersion).to.have.property('minor').that.is.equal(gardenerVersion.minor)
-    expect(res.body).to.have.property('user').that.is.an('object')
-    expect(res.body.user).to.have.property('id').that.is.equal(id)
+    expect(res.body).not.to.have.property('user')
   })
 
   it('should return information without version', async function () {
@@ -97,7 +96,6 @@ module.exports = function info({ agent, k8s, auth }) {
     expect(res).to.be.json
     expect(res.body).to.have.property('version').that.is.equal(version)
     expect(res.body).not.to.have.property('gardenerVersion')
-    expect(res.body).to.have.property('user').that.is.an('object')
-    expect(res.body.user).to.have.property('id').that.is.equal(id)
+    expect(res.body).not.to.have.property('user')
   })
 }
