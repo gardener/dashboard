@@ -132,15 +132,24 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
-{{- if .Values.terminal }}
+{{- if .Values.terminal or .Values.frontendConfig.kyma }}
       features:
+{{- if .Values.terminal }}
         terminalEnabled: true
+{{- end }}
+{{- if .Values.frontendConfig.kyma }}
+        kymaEnabled: true
+{{- end }}
 {{- end }}
 {{- if .Values.frontendConfig.terminal }}
 {{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
       terminal:
         heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
 {{- end }}
+{{- end }}
+{{- if .Values.frontendConfig.kyma }}
+      kyma:
+{{ toYaml .Values.frontendConfig.kyma | trim | indent 8 }}
 {{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
