@@ -51,6 +51,13 @@ limitations under the License.
           <shoot-logging :shootItem="item"></shoot-logging>
         </v-card>
 
+        <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
+          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+            Kyma
+          </v-card-title>
+          <shoot-addon-kyma-card :shootItem="item"></shoot-addon-kyma-card>
+        </v-card>
+
         <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="item" class="mt-3"></shoot-journals-card>
 
       </v-flex>
@@ -65,6 +72,7 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import ShootControlPlane from '@/components/ShootDetails/ShootControlPlane'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
+import ShootAddonKymaCard from '@/components/ShootDetails/ShootAddonKymaCard'
 import ShootJournalsCard from '@/components/ShootDetails/ShootJournalsCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
 import ShootLogging from '@/components/ShootDetails/ShootLogging'
@@ -85,6 +93,7 @@ export default {
     ShootInfrastructureCard,
     ShootLifecycleCard,
     ShootAccessCard,
+    ShootAddonKymaCard,
     ShootJournalsCard,
     ShootMonitoringCard,
     ShootLogging,
@@ -95,7 +104,8 @@ export default {
       'shootByNamespaceAndName',
       'journalsByNamespaceAndName',
       'isAdmin',
-      'hasControlPlaneTerminalAccess'
+      'hasControlPlaneTerminalAccess',
+      'isKymaFeatureEnabled'
     ]),
     value () {
       return this.shootByNamespaceAndName(this.$route.params)
@@ -115,6 +125,9 @@ export default {
     },
     canRenderControlPlane () {
       return !isEmpty(this.item) && this.hasControlPlaneTerminalAccess
+    },
+    isKymaAddonEnabled () {
+      return !!get(this.item, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
     }
   },
   mounted () {

@@ -30,12 +30,14 @@ limitations under the License.
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
+import cloneDeep from 'lodash/cloneDeep'
 
 export default {
   name: 'addon-configuration',
@@ -49,6 +51,11 @@ export default {
     }
   },
   mixins: [shootItem],
+  computed: {
+    ...mapGetters([
+      'isKymaFeatureEnabled'
+    ])
+  },
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
@@ -70,7 +77,14 @@ export default {
       }
     },
     reset () {
-      this.$refs.addons.updateAddons(get(this.shootItem, 'spec.addons', {}))
+      this.$nextTick(() => {
+        const addons = cloneDeep(get(this.shootItem, 'spec.addons', {}))
+        if (this.isKymaFeatureEnabled) {
+          const kymaEnabled = !!get(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+          addons['kyma'] = { enabled: kymaEnabled }
+        }
+        this.$refs.addons.updateAddons(addons)
+      })
     }
   }
 }

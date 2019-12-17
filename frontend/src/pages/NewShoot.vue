@@ -175,7 +175,8 @@ export default {
       'newShootResource',
       'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'zonesByCloudProfileNameAndRegion',
+      'isKymaFeatureEnabled'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -253,7 +254,16 @@ export default {
       }
 
       const addons = this.$refs.addons.getAddons()
+      const kymaEnabled = get(addons, 'kyma.enabled', false)
+      delete addons.kyma
       set(shootResource, 'spec.addons', addons)
+      if (this.isKymaFeatureEnabled) {
+        if (kymaEnabled) {
+          set(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]', 'enabled')
+        } else {
+          unset(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        }
+      }
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
@@ -316,7 +326,11 @@ export default {
       const workers = get(shootResource, 'spec.provider.workers')
       this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates })
 
-      const addons = get(shootResource, 'spec.addons')
+      const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
+      if (this.isKymaFeatureEnabled) {
+        const kymaEnabled = !!get(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        addons['kyma'] = { enabled: kymaEnabled }
+      }
       this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')

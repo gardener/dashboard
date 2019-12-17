@@ -19,7 +19,7 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, shootAddonList } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -450,6 +450,9 @@ const getters = {
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
+  },
+  isKymaFeatureEnabled (state, getters) {
+    return get(state, 'cfg.features.kymaEnabled', false)
   }
 }
 
@@ -520,6 +523,12 @@ const actions = {
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -648,11 +657,26 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
-  setConfiguration ({ commit }, value) {
-    commit('SET_CONFIGURATION', value)
+  setConfiguration ({ commit, getters }, cfg) {
+    commit('SET_CONFIGURATION', cfg)
+    if (getters.isKymaFeatureEnabled) {
+      let kymaAddon = {
+        name: 'kyma',
+        title: 'Kyma',
+        description: 'Kyma is a platform for extending applications with serverless functions and microservices. It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.',
+        visible: true,
+        enabled: false,
+        forbidDisable: true
+      }
+      if (cfg.kyma) {
+        const overwrite = pick(cfg.kyma, ['title', 'description', 'visible', 'enabled', 'forbidDisable'])
+        kymaAddon = merge(kymaAddon, overwrite)
+      }
+      shootAddonList.push(kymaAddon)
+    }
 
-    if (get(value, 'alert')) {
-      commit('SET_ALERT_BANNER', get(value, 'alert'))
+    if (get(cfg, 'alert')) {
+      commit('SET_ALERT_BANNER', get(cfg, 'alert'))
     }
 
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
