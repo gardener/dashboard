@@ -16,59 +16,66 @@ limitations under the License.
 
 <template>
   <span v-if="visible">
-    <template v-if="tag.message">
-      <g-popper @rendered="popperRendered=true" :title="chipTitle" :message="tag.message" :toolbarColor="color" :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }" :popperKey="popperKeyWithType" :placement="popperPlacement">
-        <v-tooltip slot="popperRef" top>
-          <v-chip class="cursor-pointer status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
-            {{chipText}}
-          </v-chip>
-          <span>{{chipTooltip}}</span>
-        </v-tooltip>
-      </g-popper>
-    </template>
-    <template v-else>
-      <v-tooltip top>
-        <v-chip class="status-tag" slot="activator" outline :text-color="chipTextColor" small :color="color">
+    <g-popper
+      @input="onPopperInput"
+      @rendered="popperRendered=true"
+      :title="chipTitle"
+      :toolbarColor="color"
+      :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }"
+      :popperKey="popperKeyWithType"
+      :placement="popperPlacement"
+      :disabled="!tag.message">
+      <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
+        <v-chip
+          class="status-tag"
+          :class="{ 'cursor-pointer': tag.message }"
+          slot="activator"
+          outline
+          :text-color="color"
+          small
+          :color="color">
           {{chipText}}
         </v-chip>
-        <span>{{chipTooltip}}</span>
+        <span class="font-weight-bold">{{chipTooltip.title}}</span>
+        <div v-if="chipTooltip.description">
+          {{chipTooltip.description}}
+        </div>
       </v-tooltip>
-    </template>
-    <time-string v-if="popperRendered" v-show="false" :dateTime="tag.lastTransitionTime" :currentString.sync="lastTransitionString" :pointInTime="-1" :withoutPrefixOrSuffix="true"></time-string>
+      <ansi-text :text="tag.message"></ansi-text>
+    </g-popper>
+    <time-string
+      v-if="popperRendered"
+      v-show="false"
+      :dateTime="tag.lastTransitionTime"
+      :currentString.sync="lastTransitionString"
+      :pointInTime="-1"
+      :withoutPrefixOrSuffix="true">
+    </time-string>
   </span>
 </template>
 
 <script>
-import replace from 'lodash/replace'
 import get from 'lodash/get'
+import join from 'lodash/join'
+import map from 'lodash/map'
+import split from 'lodash/split'
+import dropRight from 'lodash/dropRight'
+import last from 'lodash/last'
+import first from 'lodash/first'
+import snakeCase from 'lodash/snakeCase'
+import includes from 'lodash/includes'
+import upperFirst from 'lodash/upperFirst'
+
 import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
-import { mapGetters } from 'vuex'
-
-const knownConditions = {
-  APIServerAvailable: {
-    displayName: 'API Server',
-    shortName: 'API'
-  },
-  ControlPlaneHealthy: {
-    displayName: 'Control Plane',
-    shortName: 'CP',
-    showAdminOnly: true
-  },
-  EveryNodeReady: {
-    displayName: 'Nodes',
-    shortName: 'N'
-  },
-  SystemComponentsHealthy: {
-    displayName: 'System Components',
-    shortName: 'SC'
-  }
-}
+import AnsiText from '@/components/AnsiText'
+import { mapGetters, mapState, mapMutations } from 'vuex'
 
 export default {
   components: {
     GPopper,
-    TimeString
+    TimeString,
+    AnsiText
   },
   props: {
     condition: {
@@ -86,10 +93,18 @@ export default {
   data () {
     return {
       popperRendered: false,
-      lastTransitionString: undefined
+      lastTransitionString: undefined,
+      popperVisible: false
     }
   },
   computed: {
+    ...mapState([
+      'cfg',
+      'conditionCache'
+    ]),
+    ...mapGetters([
+      'isAdmin'
+    ]),
     chipText () {
       return this.tag.shortName || ''
     },
@@ -97,7 +112,10 @@ export default {
       return this.generateChipTitle({ name: this.tag.name, timeString: this.lastTransitionString })
     },
     chipTooltip () {
-      return this.generateChipTitle({ name: this.tag.name })
+      return {
+        title: this.generateChipTitle({ name: this.tag.name }),
+        description: this.tag.description
+      }
     },
     isError () {
       if (this.tag.status === 'False') {
@@ -123,26 +141,13 @@ export default {
     tag () {
       const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
       const id = type
-      const name = get(knownConditions, [type, 'displayName'], replace(type, /([a-z])([A-Z])/g, '$1 $2'))
-      const shortName = get(knownConditions, [type, 'shortName'], replace(name, /^([A-Z])[\w]*(\s(([A-Z])\w*))?/, '$1$4'))
+      const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
 
-      return { id, name, shortName, message, lastTransitionTime, lastUpdateTime, status }
+      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status }
     },
     color () {
       if (this.isError) {
-        return 'red'
-      }
-      if (this.isUnknown) {
-        return 'grey lighten-1'
-      }
-      if (this.isProgressing && this.isAdmin) {
-        return 'blue darken-2'
-      }
-      return 'cyan darken-2'
-    },
-    chipTextColor () {
-      if (this.isError) {
-        return 'red'
+        return 'error'
       }
       if (this.isUnknown) {
         return 'grey lighten-1'
@@ -155,15 +160,20 @@ export default {
     visible () {
       if (!this.isAdmin) {
         const { type } = this.condition
-        return !get(knownConditions, [type, 'showAdminOnly'], false)
+
+        const conditionMetadata = this.conditionMetadataFromType(type)
+        return !get(conditionMetadata, 'showAdminOnly', false)
       }
       return true
     },
-    ...mapGetters([
-      'isAdmin'
-    ])
+    tooltipDisabled () {
+      return this.popperVisible
+    }
   },
   methods: {
+    ...mapMutations([
+      'setCondition'
+    ]),
     generateChipTitle ({ name, timeString }) {
       let since = ''
       let errorState
@@ -187,6 +197,35 @@ export default {
       }
 
       return `${name} [${errorState}${since}]`
+    },
+    conditionMetadataFromType (type) {
+      let condition = this.conditionCache[type]
+      if (condition) {
+        return condition
+      }
+
+      const dropSuffixes = [
+        'Available',
+        'Healthy',
+        'Ready',
+        'Availability'
+      ]
+      let conditionComponents = snakeCase(type)
+      conditionComponents = split(conditionComponents, '_')
+      conditionComponents = map(conditionComponents, upperFirst)
+      if (includes(dropSuffixes, last(conditionComponents))) {
+        conditionComponents = dropRight(conditionComponents)
+      }
+
+      const displayName = join(conditionComponents, ' ')
+      const shortName = join(map(conditionComponents, first), '')
+      const conditionMetaData = { displayName, shortName }
+      this.setCondition({ conditionKey: type, conditionValue: conditionMetaData })
+
+      return conditionMetaData
+    },
+    onPopperInput (value) {
+      this.popperVisible = value
     }
   }
 }
@@ -205,5 +244,4 @@ export default {
   .status-tag >>> .v-chip__content {
     margin: -4px;
   }
-
 </style>

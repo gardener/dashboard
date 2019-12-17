@@ -1,7 +1,7 @@
 port: 3030
 logLevel: info
 logFormat: text
-apiServerUrl: https://kubernetes:6443
+apiServerUrl: https://kubernetes.external.foo.bar
 gitHub:
   apiUrl: https://api.github.com
   org: gardener
@@ -22,7 +22,20 @@ oidc:
   redirect_uri: http://localhost:8080/auth/callback
   scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
   clockTolerance: 42
+terminal:
+  containerImage: dummyImage:1.0.0
+  gardenTerminalHost:
+    seedRef: infra1-seed
+  garden:
+    operatorCredentials:
+      serviceAccountRef:
+        name: dashboard-terminal-admin
+        namespace: garden
+  bootstrap:
+    disabled: true
 frontend:
+  features:
+    terminalEnabled: true
   dashboardUrl:
     pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
   landingPageUrl: https://gardener.cloud/

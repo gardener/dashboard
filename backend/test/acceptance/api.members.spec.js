@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { fromKubeconfig } = require('../../lib/kubernetes-config')
 const _ = require('lodash')
 
 module.exports = function ({ agent, k8s, auth }) {
@@ -41,7 +42,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body).to.eql(members)
   })
 
-  it('should not return members but respond "Namespace not found"', async function () {
+  it('should not return members but respond "not found"', async function () {
     const bearer = await user.bearer
     const namespace = 'garden-baz'
     k8s.stub.getMembers({ bearer, namespace })
@@ -51,7 +52,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(404)
     expect(res).to.be.json
-    expect(res.body.message).to.equal('Namespace not found')
+    expect(res.body.message).to.match(/not found/i)
   })
 
   it('should return a service account', async function () {
@@ -68,6 +69,7 @@ module.exports = function ({ agent, k8s, auth }) {
     expect(res.body.name).to.equal(name)
     expect(res.body.kind).to.equal('ServiceAccount')
     expect(res.body).to.have.property('kubeconfig')
+    expect(fromKubeconfig(res.body.kubeconfig)).to.have.property('url', 'https://kubernetes.external.foo.bar')
   })
 
   it('should add a project member', async function () {

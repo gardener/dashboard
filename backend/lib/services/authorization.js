@@ -16,18 +16,13 @@
 
 'use strict'
 
-const _ = require('lodash')
-const kubernetes = require('../kubernetes')
-const Resources = kubernetes.Resources
-
-function Authorization ({ auth }) {
-  return kubernetes.authorization({ auth })
-}
+const { Resources } = require('../kubernetes-client')
 
 async function hasAuthorization (user, resourceAttributes) {
   if (!user) {
     return false
   }
+  const client = user.client
   const { apiVersion, kind } = Resources.SelfSubjectAccessReview
   const body = {
     kind,
@@ -36,8 +31,12 @@ async function hasAuthorization (user, resourceAttributes) {
       resourceAttributes
     }
   }
-  const response = await Authorization(user).selfsubjectaccessreviews.post({ body })
-  return _.get(response, 'status.allowed', false)
+  const {
+    status: {
+      allowed = false
+    } = {}
+  } = await client['authorization.k8s.io'].selfsubjectaccessreviews.create(body)
+  return allowed
 }
 exports.hasAuthorization = hasAuthorization
 
