@@ -53,7 +53,7 @@ limitations under the License.
 
         <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
-            Kyma
+            {{kymaTitle}}
           </v-card-title>
           <shoot-addon-kyma-card :shootItem="item"></shoot-addon-kyma-card>
         </v-card>
@@ -82,6 +82,7 @@ import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
+import { shootAddonByName } from '@/utils'
 
 import 'codemirror/mode/yaml/yaml.js'
 
@@ -128,6 +129,10 @@ export default {
     },
     isKymaAddonEnabled () {
       return !!get(this.item, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+    },
+    kymaTitle () {
+      const kymaAddon = shootAddonByName('kyma')
+      return get(kymaAddon, 'title')
     }
   },
   mounted () {

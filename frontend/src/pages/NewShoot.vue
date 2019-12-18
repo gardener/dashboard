@@ -72,6 +72,7 @@ limitations under the License.
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
+            :isCreateMode="true"
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>

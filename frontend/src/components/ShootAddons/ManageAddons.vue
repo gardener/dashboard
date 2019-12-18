@@ -23,7 +23,7 @@ limitations under the License.
         <v-checkbox
           color="cyan darken-2"
           v-model="addons[addonDefinition.name].enabled"
-          :disabled="addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+          :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>
       </v-list-tile-action>
       <v-list-tile-content>
@@ -43,6 +43,12 @@ import { shootAddonList } from '@/utils'
 
 export default {
   name: 'manage-shoot-addons',
+  props: {
+    isCreateMode: {
+      type: Boolean,
+      required: true
+    }
+  },
   data () {
     return {
       addons: {},

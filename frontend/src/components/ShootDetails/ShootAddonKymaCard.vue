@@ -22,7 +22,7 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-content>
         <v-list-tile-title>
-          Kyma information currently not available
+          {{kymaTitle}} information currently not available
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
@@ -45,7 +45,7 @@ limitations under the License.
 
     <v-divider v-if="isConsoleTileVisible && isCredentialsTileVisible" class="my-2" inset></v-divider>
 
-    <username-password v-if="isCredentialsTileVisible" :username="email" :password="password"></username-password>
+    <username-password v-if="isCredentialsTileVisible" :email="email" :password="password"></username-password>
   </v-list>
 </template>
 
@@ -53,6 +53,7 @@ limitations under the License.
 import UsernamePassword from '@/components/UsernamePasswordListTile'
 import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
+import { shootAddonByName } from '@/utils'
 
 export default {
   components: {
@@ -65,6 +66,10 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    kymaTitle () {
+      const kymaAddon = shootAddonByName('kyma')
+      return get(kymaAddon, 'title')
+    },
     shootAddonKyma () {
       return get(this.shootItem, 'addonKyma', {})
     },

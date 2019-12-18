@@ -310,7 +310,12 @@ const actions = {
     forEach(filter(shootAddonList, addon => addon.visible), addon => {
       set(addons, [addon.name, 'enabled'], addon.enabled)
     })
+    const kymaEnabled = get(addons, 'kyma.enabled', false)
+    delete addons.kyma
     set(shootResource, 'spec.addons', addons)
+    if (rootGetters.isKymaFeatureEnabled && kymaEnabled) {
+      set(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]', 'enabled')
+    }
 
     const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
     const maintenance = {
