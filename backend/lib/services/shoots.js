@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { AssertionError } = require('assert').strict
 const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
@@ -125,7 +126,53 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
       addons
     }
   }
+  if (kyma.enabled) {
+    payload.metadata = {
+      annotations: {
+        'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
+      }
+    }
+  }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
+exports.kyma = async function ({ user, namespace, name }) {
+  const client = user.client
+  try {
+    const shootClient = client.createKubeconfigClient({ namespace, name: `${name}.kubeconfig` })
+    const [{
+      data: {
+        'global.ingress.domainName': domain
+      }
+    }, {
+      data: {
+        email, password, username
+      }
+    }] = await Promise.all([
+      shootClient.core.configmaps.get({
+        namespace: 'kyma-installer',
+        name: 'net-global-overrides'
+      }),
+      shootClient.core.secrets.get({
+        namespace: 'kyma-system',
+        name: 'admin-user'
+      })
+    ])
+    return {
+      url: `https://console.${domain}`,
+      email: decodeBase64(email),
+      username: decodeBase64(username),
+      password: decodeBase64(password)
+    }
+  } catch (err) {
+    if (err instanceof AssertionError) {
+      throw new NotFound('Kubeconfig for cluster does not exist')
+    }
+    if (/^ECONNRE/.test(err.code)) {
+      throw new NotFound('Connection to cluster could not be estalished')
+    }
+    throw new NotFound('Kyma not correctly installed in cluster')
+  }
 }
 
 exports.replaceWorkers = async function ({ user, namespace, name, body }) {
