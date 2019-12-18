@@ -132,7 +132,7 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
-{{- if .Values.terminal or .Values.frontendConfig.kyma }}
+{{- if or .Values.terminal .Values.frontendConfig.kyma }}
       features:
 {{- if .Values.terminal }}
         terminalEnabled: true
