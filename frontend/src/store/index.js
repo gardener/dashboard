@@ -659,6 +659,7 @@ const actions = {
   },
   setConfiguration ({ commit, getters }, cfg) {
     commit('SET_CONFIGURATION', cfg)
+
     if (getters.isKymaFeatureEnabled) {
       let kymaAddon = {
         name: 'kyma',

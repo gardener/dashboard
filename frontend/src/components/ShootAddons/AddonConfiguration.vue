@@ -24,6 +24,7 @@ limitations under the License.
     <template slot="actionComponent">
       <manage-shoot-addons
         ref="addons"
+        :isCreateMode="false"
        ></manage-shoot-addons>
     </template>
   </action-icon-dialog>

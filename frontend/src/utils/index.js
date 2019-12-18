@@ -500,6 +500,10 @@ export const shootAddonList = [
   }
 ]
 
+export function shootAddonByName (name) {
+  return find(shootAddonList, ['name', name])
+}
+
 export function randomLocalMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
