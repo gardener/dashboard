@@ -69,6 +69,10 @@ frontendConfig:
       end: 00 08 * * 1,2,3,4,5
     production: ~
   seedCandidateDeterminationStrategy: SameRegion
+  features:
+    terminalEnabled: false
+    kymaEnabled: false
+
   # terminal:
   #   heartbeatIntervalSeconds: 60
   

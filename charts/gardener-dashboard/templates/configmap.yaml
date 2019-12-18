@@ -132,15 +132,9 @@ data:
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
-{{- if or .Values.terminal .Values.frontendConfig.kyma }}
       features:
-{{- if .Values.terminal }}
-        terminalEnabled: true
-{{- end }}
-{{- if .Values.frontendConfig.kyma }}
-        kymaEnabled: true
-{{- end }}
-{{- end }}
+        terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
+        kymaEnabled: {{ .Values.frontendConfig.features.kymaEnabled | default false }}
 {{- if .Values.frontendConfig.terminal }}
 {{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
       terminal:
