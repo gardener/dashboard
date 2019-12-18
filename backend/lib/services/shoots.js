@@ -183,8 +183,10 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
     }
   }
   if (kyma.enabled) {
-    payload.annotations = {
-      'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
+    payload.metadata = {
+      annotations: {
+        'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
+      }
     }
   }
   return patch({ user, namespace, name, body: payload })
@@ -194,26 +196,33 @@ exports.kyma = async function ({ user, namespace, name }) {
   const coreClient = Core(user)
   const kubeconfig = await getKubeconfig({ coreClient, namespace, name: `${name}.kubeconfig` })
   if (!kubeconfig) {
-    throw new NotFound('Kubeconfig for shoot does not exist')
+    throw new NotFound('Kubeconfig for cluster does not exist')
   }
-  const shootCoreClient = kubernetes.core(kubernetes.fromKubeconfig(utils.cleanKubeconfig(kubeconfig)))
-  const [{
-    data: {
-      'global.ingress.domainName': domain
+  try {
+    const shootCoreClient = kubernetes.core(kubernetes.fromKubeconfig(utils.cleanKubeconfig(kubeconfig)))
+    const [{
+      data: {
+        'global.ingress.domainName': domain
+      }
+    }, {
+      data: {
+        email, password, username
+      }
+    }] = await Promise.all([
+      shootCoreClient.namespaces('kyma-installer').configmaps.get({ name: 'net-global-overrides' }),
+      shootCoreClient.namespaces('kyma-system').secrets.get({ name: 'admin-user' })
+    ])
+    return {
+      url: `https://console.${domain}`,
+      email: decodeBase64(email),
+      username: decodeBase64(username),
+      password: decodeBase64(password)
     }
-  }, {
-    data: {
-      email, password, username
+  } catch (err) {
+    if (/^ECONNRE/.test(err.code)) {
+      throw new NotFound('Connection to cluster could not be estalished')
     }
-  }] = await Promise.all([
-    shootCoreClient.namespaces('kyma-installer').configmaps.get({ name: 'net-global-overrides' }),
-    shootCoreClient.namespaces('kyma-system').secrets.get({ name: 'admin-user' })
-  ])
-  return {
-    url: `https://console.${domain}`,
-    email: decodeBase64(email),
-    username: decodeBase64(username),
-    password: decodeBase64(password)
+    throw new NotFound('Kyma not correctly installed in cluster')
   }
 }
 
