@@ -31,6 +31,7 @@ class Logger {
     this.logLevel = LEVELS[logLevel] || 3
     this.logHttpRequestBody = logHttpRequestBody === true
     this.silent = /^test/.test(process.env.NODE_ENV)
+    this.console = console
   }
   isDisabled (level) {
     return this.silent || level < this.logLevel
@@ -55,7 +56,7 @@ class Logger {
       if (this.logHttpRequestBody && body) {
         msg += ' ' + body.toString('utf8')
       }
-      console.log(chalk.black.bgGreen('req ') + ': ' + msg)
+      this.console.log(chalk.black.bgGreen('req ') + ': ' + msg)
     }
   }
   response ({ id, statusCode, statusMessage = '', httpVersion = '1.1', headers, body }) {
@@ -64,42 +65,42 @@ class Logger {
       if (body && statusCode >= 300) {
         msg += ' ' + body.toString('utf8')
       }
-      console.log(chalk.black.bgBlue('res ') + ': ' + msg)
+      this.console.log(chalk.black.bgBlue('res ') + ': ' + msg)
     }
   }
   http (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      console.log(chalk.magenta('http') + ': ' + msg, ...args)
+      this.console.log(chalk.magenta('http') + ': ' + msg, ...args)
     }
   }
   log (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      console.log(chalk.whiteBright('log') + ': ' + msg, ...args)
+      this.console.log(chalk.whiteBright('log') + ': ' + msg, ...args)
     }
   }
   trace (msg, ...args) {
     if (!this.isDisabled(LEVELS.trace)) {
-      console.log(chalk.cyan('trace') + ': ' + msg, ...args)
+      this.console.log(chalk.cyan('trace') + ': ' + msg, ...args)
     }
   }
   debug (msg, ...args) {
     if (!this.isDisabled(LEVELS.debug)) {
-      console.debug(chalk.blue('debug') + ': ' + msg, ...args)
+      this.console.debug(chalk.blue('debug') + ': ' + msg, ...args)
     }
   }
   info (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      console.info(chalk.green('info') + ': ' + msg, ...args)
+      this.console.info(chalk.green('info') + ': ' + msg, ...args)
     }
   }
   warn (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      console.warn(chalk.yellow('warn') + ': ' + msg, ...args)
+      this.console.warn(chalk.yellow('warn') + ': ' + msg, ...args)
     }
   }
   error (msg, ...args) {
     if (!this.isDisabled(LEVELS.error)) {
-      console.error(chalk.red('error') + ': ' + msg, ...args)
+      this.console.error(chalk.red('error') + ': ' + msg, ...args)
     }
   }
 }
