@@ -120,12 +120,12 @@ export function getProviderTemplate (infrastructureKind) {
           'firewall': {
             'image': 'firewall-1',
             'networks': [
-              'internet-'
+              'internet-' // TODO
             ],
             'size': 'c1-xlarge-x86'
           },
-          'partitionID': '',
-          'projectID': ''
+          'partitionID': '', // TODO
+          'projectID': '' // TODO
         },
         'controlPlaneConfig': {
           'apiVersion': 'metal.provider.extensions.gardener.cloud/v1alpha1',
@@ -139,7 +139,7 @@ export function getProviderTemplate (infrastructureKind) {
             },
             'issuerConfig': {
               'clientId': 'auth-go-cli',
-              'url': 'https://'
+              'url': 'https://' // TODO
             }
           }
         }
