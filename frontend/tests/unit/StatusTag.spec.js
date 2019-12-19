@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { mount, createLocalVue } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -38,7 +38,7 @@ function createStatusTagComponent (conditionType) {
     },
     popperKey: 'foo'
   }
-  const wrapper = mount(StatusTag, {
+  const wrapper = shallowMount(StatusTag, {
     localVue,
     store,
     propsData

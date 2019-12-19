@@ -1,5 +1,5 @@
 <template>
-  <select-hint-colorizer :hintColor="hintColor" class="testclass">
+  <select-hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
       :items="machineImages"
@@ -43,7 +43,6 @@ import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
-import forEach from 'lodash/forEach'
 import semver from 'semver'
 
 const validationErrors = {
@@ -108,7 +107,7 @@ export default {
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
-      if (this.updateOSMaintenance && this.imageIsNotLatest(this.machineImage)) {
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
         hintText.push('If you select a version which is not the latest, you should disable automatic operating system updates')
       }
       return join(hintText, ' / ')
@@ -118,6 +117,13 @@ export default {
         return 'orange'
       }
       return 'default'
+    },
+    selectedImageIsNotLatest () {
+      const { version: currentImageVersion, vendorName: currentVendor } = this.machineImage
+
+      return !!find(this.machineImages, ({ version, vendorName }) => {
+        return currentVendor === vendorName && semver.gt(version, currentImageVersion)
+      })
     }
   },
   validations,
@@ -145,19 +151,6 @@ export default {
         itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
       }
       return join(itemDescription, ' | ')
-    },
-    imageIsNotLatest ({ version: currentImageVersion, vendorName: currentVendor }) {
-      if (currentImageVersion) {
-        let notLatestVersion = false
-        forEach(this.machineImages, ({ version, vendorName }) => {
-          if (currentVendor === vendorName && semver.gt(version, currentImageVersion)) {
-            notLatestVersion = true
-            return false // break
-          }
-        })
-        return notLatestVersion
-      }
-      return false
     }
   },
   mounted () {

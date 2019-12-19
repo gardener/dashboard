@@ -30,7 +30,9 @@ export default {
   },
   watch: {
     hintColor (hintColor) {
-      this.applyHintColor(hintColor)
+      if (this && this.$el) {
+        this.applyHintColor(hintColor)
+      }
     }
   },
   methods: {

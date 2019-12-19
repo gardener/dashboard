@@ -30,7 +30,7 @@ limitations under the License.
           ></v-text-field>
       </v-flex>
       <v-flex class="regularInput">
-        <select-hint-colorizer hintColor="orange" class="testclass">
+        <select-hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
             label="Kubernetes Version"
@@ -80,7 +80,7 @@ import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
 import get from 'lodash/get'
-import forEach from 'lodash/forEach'
+import find from 'lodash/find'
 import semver from 'semver'
 
 const validationErrors = {
@@ -158,10 +158,15 @@ export default {
       return this.sortedKubernetesVersions(this.cloudProfileName)
     },
     versionHint () {
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch(this.kubernetesVersion)) {
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
         return 'If you select a version which is not the latest patch version, you should disable automatic Kubernetes updates'
       }
       return undefined
+    },
+    versionIsNotLatestPatch () {
+      return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
+        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
+      })
     }
   },
   methods: {
@@ -212,19 +217,6 @@ export default {
       this.updateK8sMaintenance = updateK8sMaintenance
 
       this.validateInput()
-    },
-    versionIsNotLatestPatch (currentVersion) {
-      if (currentVersion) {
-        let notLatestPatch = false
-        forEach(this.sortedKubernetesVersionsList, ({ version }) => {
-          if (semver.diff(version, currentVersion) === 'patch' && semver.gt(version, currentVersion)) {
-            notLatestPatch = true
-            return false // break
-          }
-        })
-        return notLatestPatch
-      }
-      return false
     }
   },
   mounted () {
