@@ -231,7 +231,7 @@ export default {
           },
           zones: {
             required: requiredIf(function () {
-              return this.infrastructureKind === 'metal'
+              return this.infrastructureKind !== 'metal'
             })
           }
         }
