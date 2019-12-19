@@ -100,9 +100,9 @@ limitations under the License.
     infrastructureKey="metal"
     infrastructureName="Metal Cloud"
     secretDescriptorKey="metalHMAC"
-    icon="alicloud-white"
+    icon="metal-white"
     description="Make sure that the new credentials have the correct Metal Cloud permissions"
-    color="grey darken-4"
+    color="metal-bgcolor"
     @add="onAdd"
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
@@ -219,6 +219,10 @@ export default {
           help: false
         },
         alicloud: {
+          visible: false,
+          help: false
+        },
+        metal: {
           visible: false,
           help: false
         },

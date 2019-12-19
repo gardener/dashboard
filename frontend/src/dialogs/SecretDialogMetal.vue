@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="metal"
-    color="orange darken-2"
+    color="blue"
     infraIcon="metal-white"
     backgroundSrc="/static/background_metal.svg"
     createTitle="Add new Metal Secret"
@@ -32,11 +32,11 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="orange darken-2"
+            color="blue"
             ref="accessKeyId"
             v-model="accessKeyId"
             :label="accessKeyIdLabel"
-            :error-messages="getErrorMessages('metalHMAC')"
+            :error-messages="getErrorMessages('accessKeyId')"
             @input="$v.accessKeyId.$touch()"
             @blur="$v.accessKeyId.$touch()"
             counter="128"
@@ -48,7 +48,7 @@ limitations under the License.
       <v-layout row>
         <v-flex xs8>
           <v-text-field
-            color="orange darken-2"
+            color="blue"
             v-model="secretAccessKey"
             :label="secretAccessKeyLabel"
             :error-messages="getErrorMessages('secretAccessKey')"

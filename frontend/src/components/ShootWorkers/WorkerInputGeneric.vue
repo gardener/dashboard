@@ -123,7 +123,7 @@ import SizeInput from '@/components/ShootWorkers/VolumeSizeInput'
 import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
-import { required, maxLength, minValue } from 'vuelidate/lib/validators'
+import { required, requiredIf, maxLength, minValue } from 'vuelidate/lib/validators'
 import isEmpty from 'lodash/isEmpty'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -228,13 +228,12 @@ export default {
           },
           maxSurge: {
             numberOrPercentage
+          },
+          zones: {
+            required: requiredIf(function () {
+              return this.infrastructureKind === 'metal'
+            })
           }
-          // FIXME temporarily disabled
-          // zones: {
-          //   required: requiredIf(function () {
-          //     return this.infrastructureKind === 'metal'
-          //   })
-          // }
         }
       }
     },
