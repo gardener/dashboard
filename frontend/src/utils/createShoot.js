@@ -110,6 +110,40 @@ export function getProviderTemplate (infrastructureKind) {
           kind: 'ControlPlaneConfig'
         }
       }
+    // FIXME adopt to our spec
+    case 'metal':
+      return {
+        type: 'metal',
+        'infrastructureConfig': {
+          'apiVersion': 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          'kind': 'InfrastructureConfig',
+          'firewall': {
+            'image': 'firewall-1',
+            'networks': [
+              'internet-'
+            ],
+            'size': 'c1-xlarge-x86'
+          },
+          'partitionID': '',
+          'projectID': ''
+        },
+        'controlPlaneConfig': {
+          'apiVersion': 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          'kind': 'ControlPlaneConfig',
+          'iamconfig': {
+            'groupConfig': {
+              'namespaceMaxLength': 20
+            },
+            'idmConfig': {
+              'idmtype': 'UX'
+            },
+            'issuerConfig': {
+              'clientId': 'auth-go-cli',
+              'url': 'https://'
+            }
+          }
+        }
+      }
   }
 }
 

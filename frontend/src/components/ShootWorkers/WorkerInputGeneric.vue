@@ -97,7 +97,7 @@ limitations under the License.
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
         </v-flex>
-        <v-flex class="regularInput">
+        <v-flex class="regularInput" v-if="infrastructureKind !== 'metal'">
           <v-select
             color="cyan darken-2"
             label="Zone"
@@ -181,6 +181,9 @@ export default {
     },
     availableZones: {
       type: Array
+    },
+    infrastructureKind: {
+      type: String
     }
   },
   data () {
@@ -225,10 +228,13 @@ export default {
           },
           maxSurge: {
             numberOrPercentage
-          },
-          zones: {
-            required
           }
+          // FIXME temporarily disabled
+          // zones: {
+          //   required: requiredIf(function () {
+          //     return this.infrastructureKind === 'metal'
+          //   })
+          // }
         }
       }
     },

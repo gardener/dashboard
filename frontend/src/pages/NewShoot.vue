@@ -214,7 +214,7 @@ export default {
     shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
-      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
+      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName, nodesCidr } = this.$refs.infrastructureDetails.getInfrastructureData()
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
       set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
@@ -278,6 +278,26 @@ export default {
         unset(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]')
       }
 
+      if (infrastructureKind === 'metal') {
+        set(shootResource, 'spec.networking', {
+          'type': 'calico',
+          'nodes': nodesCidr,
+          'pods': '10.244.128.0/18',
+          'services': '10.244.192.0/18',
+          'providerConfig': {
+            'apiVersion': 'calico.networking.extensions.gardener.cloud/v1alpha1',
+            'kind': 'NetworkConfig',
+            'backend': 'vxlan',
+            'ipv4': {
+              'autoDetectionMethod': 'interface=lo',
+              'mode': 'Always',
+              'pool': 'vxlan'
+            }
+          }
+        })
+        unset(shootResource, 'spec.provider.workers[0].zones')
+      }
+
       return shootResource
     },
     updateShootResourceWithUIComponents () {
@@ -298,8 +318,9 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
+      const nodesCidr = get(shootResource, 'spec.networking.nodes')
 
-      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName })
+      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName, nodesCidr })
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
@@ -308,7 +329,7 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, infrastructureKind })
 
       const addons = get(shootResource, 'spec.addons')
       this.$refs.addons.updateAddons(addons)

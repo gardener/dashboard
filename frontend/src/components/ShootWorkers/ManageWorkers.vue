@@ -24,6 +24,7 @@ limitations under the License.
         :cloudProfileName="cloudProfileName"
         :region="region"
         :availableZones="availableZones"
+        :infrastructureKind="infrastructureKind"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -88,7 +89,8 @@ export default {
       valid: false,
       cloudProfileName: undefined,
       region: undefined,
-      zonesNetworkConfiguration: undefined
+      zonesNetworkConfiguration: undefined,
+      infrastructureKind: undefined
     }
   },
   computed: {
@@ -180,15 +182,19 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, infrastructureKind }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
+      this.infrastructureKind = infrastructureKind
       this.setInternalWorkers(workers)
     }
   },
   mounted () {
     if (this.userInterActionBus) {
+      this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
+        this.infrastructureKind = infrastructureKind
+      })
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName

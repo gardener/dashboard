@@ -417,6 +417,8 @@ export function infrastructureColor (kind) {
       return '#2075b8'
     case 'aws':
       return '#ff9900'
+    case 'metal':
+      return '#ff9900'
   }
 }
 

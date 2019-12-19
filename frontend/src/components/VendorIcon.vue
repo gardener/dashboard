@@ -75,6 +75,8 @@ export default {
           return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
+        case 'metal':
+          return require('@/assets/metal.svg')
       }
       return undefined
     },

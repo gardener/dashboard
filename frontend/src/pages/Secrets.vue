@@ -94,6 +94,21 @@ limitations under the License.
     @delete="onDelete"
     ></secret>
 
+    <secret
+    v-if="hasCloudProfileForCloudProviderKind('metal')"
+    class="mt-3"
+    infrastructureKey="metal"
+    infrastructureName="Metal Cloud"
+    secretDescriptorKey="metalHMAC"
+    icon="alicloud-white"
+    description="Make sure that the new credentials have the correct Metal Cloud permissions"
+    color="grey darken-4"
+    @add="onAdd"
+    @toogleHelp="onToogleHelp"
+    @update="onUpdate"
+    @delete="onDelete"
+    ></secret>
+
     <template v-if="showDisabledCloudProviders">
 
       <disabled-secret
@@ -153,6 +168,9 @@ limitations under the License.
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small :color="infrastructureColor('aws')" @click="onAdd('aws')">
           <infra-icon value="aws-white" :width="20"></infra-icon>
+        </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small :color="infrastructureColor('metal')" @click="onAdd('metal')">
+          <infra-icon value="metal-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>
@@ -262,6 +280,8 @@ export default {
           return '/static/background_openstack.svg'
         case 'alicloud':
           return '/static/background_alicloud.svg'
+        case 'metal':
+          return '/static/background_metal.svg'
       }
       return '/static/background_aws.svg'
     },
