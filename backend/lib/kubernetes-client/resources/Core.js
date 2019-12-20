@@ -61,6 +61,16 @@ class Pod extends mix(Core).with(NamespaceScoped, Readable, Observable, Writable
   }
 }
 
+class ConfigMap extends mix(Core).with(NamespaceScoped, Readable) {
+  static get names () {
+    return {
+      plural: 'configmaps',
+      singular: 'configmap',
+      kind: 'ConfigMap'
+    }
+  }
+}
+
 class Secret extends mix(Core).with(NamespaceScoped, Readable, Observable, Writable) {
   static get names () {
     return {
@@ -96,6 +106,7 @@ module.exports = {
   Namespace,
   Node,
   Pod,
+  ConfigMap,
   Secret,
   Service,
   ServiceAccount

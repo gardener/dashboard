@@ -17,6 +17,7 @@
 'use strict'
 
 const { AssertionError } = require('assert').strict
+const { HTTPError } = require('got')
 const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
@@ -139,7 +140,7 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
 exports.kyma = async function ({ user, namespace, name }) {
   const client = user.client
   try {
-    const shootClient = client.createKubeconfigClient({ namespace, name: `${name}.kubeconfig` })
+    const shootClient = await client.createKubeconfigClient({ namespace, name: `${name}.kubeconfig` })
     const [{
       data: {
         'global.ingress.domainName': domain
@@ -149,14 +150,8 @@ exports.kyma = async function ({ user, namespace, name }) {
         email, password, username
       }
     }] = await Promise.all([
-      shootClient.core.configmaps.get({
-        namespace: 'kyma-installer',
-        name: 'net-global-overrides'
-      }),
-      shootClient.core.secrets.get({
-        namespace: 'kyma-system',
-        name: 'admin-user'
-      })
+      shootClient.core.configmaps.get('kyma-installer', 'net-global-overrides'),
+      shootClient.core.secrets.get('kyma-system', 'admin-user' )
     ])
     return {
       url: `https://console.${domain}`,
@@ -165,13 +160,17 @@ exports.kyma = async function ({ user, namespace, name }) {
       password: decodeBase64(password)
     }
   } catch (err) {
+    const statusCode = 404
+    let statusMessage
     if (err instanceof AssertionError) {
-      throw new NotFound('Kubeconfig for cluster does not exist')
+      statusMessage = 'Kubeconfig for cluster does not exist'
+    } else if (/^ECONNRE/.test(err.code)) {
+      statusMessage = 'Connection to cluster could not be estalished'
+    } else {
+      statusMessage = 'Kyma not correctly installed in cluster'
     }
-    if (/^ECONNRE/.test(err.code)) {
-      throw new NotFound('Connection to cluster could not be estalished')
-    }
-    throw new NotFound('Kyma not correctly installed in cluster')
+    const response = { statusCode, statusMessage }
+    throw new HTTPError(response)
   }
 }
 

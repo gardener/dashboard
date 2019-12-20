@@ -657,15 +657,15 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
-  setConfiguration ({ commit, getters }, cfg) {
-    commit('SET_CONFIGURATION', cfg)
+  setConfiguration ({ commit, getters }, value) {
+    commit('SET_CONFIGURATION', value)
 
     if (getters.isKymaFeatureEnabled) {
-      addKymaAddon(cfg.kyma)
+      addKymaAddon(value.kyma)
     }
 
-    if (get(cfg, 'alert')) {
-      commit('SET_ALERT_BANNER', get(cfg, 'alert'))
+    if (get(value, 'alert')) {
+      commit('SET_ALERT_BANNER', get(value, 'alert'))
     }
 
     forEach(value.knownConditions, (conditionValue, conditionKey) => {
