@@ -69,10 +69,19 @@ frontendConfig:
       end: 00 08 * * 1,2,3,4,5
     production: ~
   seedCandidateDeterminationStrategy: SameRegion
-  # features:
-  #   terminalEnabled: true
+  features:
+    terminalEnabled: false
+    kymaEnabled: false
+
   # terminal:
   #   heartbeatIntervalSeconds: 60
+  
+  # kyma:
+  #   title: Kyma
+  #   description: | 
+  #     Kyma is a platform for extending applications with serverless functions and microservices. 
+  #     It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.
+  #   enabled: false
 
 gitHub:
   apiUrl: https://api.foo-github.com

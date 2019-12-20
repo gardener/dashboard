@@ -51,7 +51,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return three shoots', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoots({bearer, namespace})
+    k8s.stub.getShoots({ bearer, namespace })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
@@ -63,22 +63,21 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should create a shoot', async function () {
     const bearer = await user.bearer
-    const finalizers = ['gardener']
-    k8s.stub.createShoot({bearer, namespace, name, spec, resourceVersion})
+    k8s.stub.createShoot({ bearer, namespace, name, spec, resourceVersion })
     const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
-      .send({metadata: {
+      .send({ metadata: {
         name,
         annotations: {
           'garden.sapcloud.io/purpose': purpose
         }
       },
-      spec})
+      spec })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, annotations, finalizers})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -91,7 +90,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, annotations})
+    expect(res.body.metadata).to.eql({ name, namespace, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -108,7 +107,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({namespace, annotations: deleteAnnotations, resourceVersion})
+    expect(res.body.metadata).to.eql({ namespace, annotations: deleteAnnotations, resourceVersion })
   })
 
   it('should return shoot info', async function () {

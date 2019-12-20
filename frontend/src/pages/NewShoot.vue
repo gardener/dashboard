@@ -72,6 +72,7 @@ limitations under the License.
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
+            :isCreateMode="true"
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
@@ -174,7 +175,8 @@ export default {
     ...mapGetters([
       'newShootResource',
       'initialNewShootResource',
-      'infrastructureSecretsByCloudProfileName'
+      'infrastructureSecretsByCloudProfileName',
+      'isKymaFeatureEnabled'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -246,7 +248,16 @@ export default {
       set(shootResource, ['spec', 'cloud', infrastructureKind, 'workers'], workers)
 
       const addons = this.$refs.addons.getAddons()
+      const kymaEnabled = get(addons, 'kyma.enabled', false)
+      delete addons.kyma
       set(shootResource, 'spec.addons', addons)
+      if (this.isKymaFeatureEnabled) {
+        if (kymaEnabled) {
+          set(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]', 'enabled')
+        } else {
+          unset(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        }
+      }
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
@@ -302,7 +313,11 @@ export default {
       this.purpose = purpose
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
 
-      const addons = get(shootResource, 'spec.addons')
+      const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
+      if (this.isKymaFeatureEnabled) {
+        const kymaEnabled = !!get(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        addons['kyma'] = { enabled: kymaEnabled }
+      }
       this.$refs.addons.updateAddons(addons)
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')

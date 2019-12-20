@@ -21,10 +21,11 @@ const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')
 const logger = require('../logger')
+const { NotFound } = require('../errors')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { decodeBase64, getProjectByNamespace, getSeedKubeconfig } = utils
+const { decodeBase64, getProjectByNamespace, getSeedKubeconfig, getKubeconfig } = utils
 
 function Garden ({ auth }) {
   return kubernetes.garden({ auth })
@@ -88,11 +89,14 @@ exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }
 
 exports.create = async function ({ user, namespace, body }) {
   const username = user.id
-  const finalizers = ['gardener']
   const annotations = {
     'garden.sapcloud.io/createdBy': username
   }
-  body = _.merge({}, body, { metadata: { namespace, finalizers, annotations } })
+  if (_.get(body, 'spec.addons.kyma.enabled', false)) {
+    annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
+  }
+  body = _.merge({}, body, { metadata: { namespace, annotations } })
+  _.unset(body, 'spec.addons.kyma')
   return Garden(user).namespaces(namespace).shoots.post({ body })
 }
 
@@ -172,13 +176,54 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
-  const addons = body
+  const { kyma = {}, ...addons } = body
   const payload = {
     spec: {
       addons
     }
   }
+  if (kyma.enabled) {
+    payload.metadata = {
+      annotations: {
+        'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
+      }
+    }
+  }
   return patch({ user, namespace, name, body: payload })
+}
+
+exports.kyma = async function ({ user, namespace, name }) {
+  const coreClient = Core(user)
+  const kubeconfig = await getKubeconfig({ coreClient, namespace, name: `${name}.kubeconfig` })
+  if (!kubeconfig) {
+    throw new NotFound('Kubeconfig for cluster does not exist')
+  }
+  try {
+    const shootCoreClient = kubernetes.core(kubernetes.fromKubeconfig(utils.cleanKubeconfig(kubeconfig)))
+    const [{
+      data: {
+        'global.ingress.domainName': domain
+      }
+    }, {
+      data: {
+        email, password, username
+      }
+    }] = await Promise.all([
+      shootCoreClient.namespaces('kyma-installer').configmaps.get({ name: 'net-global-overrides' }),
+      shootCoreClient.namespaces('kyma-system').secrets.get({ name: 'admin-user' })
+    ])
+    return {
+      url: `https://console.${domain}`,
+      email: decodeBase64(email),
+      username: decodeBase64(username),
+      password: decodeBase64(password)
+    }
+  } catch (err) {
+    if (/^ECONNRE/.test(err.code)) {
+      throw new NotFound('Connection to cluster could not be estalished')
+    }
+    throw new NotFound('Kyma not correctly installed in cluster')
+  }
 }
 
 exports.replaceWorkers = async function ({ user, namespace, infrastructureKind, name, body }) {

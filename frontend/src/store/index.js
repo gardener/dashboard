@@ -19,7 +19,13 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getTimestampFormatted } from '@/utils'
+import {
+  gravatarUrlGeneric,
+  displayName,
+  fullDisplayName,
+  getTimestampFormatted,
+  addKymaAddon
+} from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -375,6 +381,9 @@ const getters = {
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
+  },
+  isKymaFeatureEnabled (state, getters) {
+    return get(state, 'cfg.features.kymaEnabled', false)
   }
 }
 
@@ -445,6 +454,12 @@ const actions = {
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -573,11 +588,15 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
-  setConfiguration ({ commit }, value) {
-    commit('SET_CONFIGURATION', value)
+  setConfiguration ({ commit, getters }, cfg) {
+    commit('SET_CONFIGURATION', cfg)
 
-    if (get(value, 'alert')) {
-      commit('SET_ALERT_BANNER', get(value, 'alert'))
+    if (getters.isKymaFeatureEnabled) {
+      addKymaAddon(cfg.kyma)
+    }
+
+    if (get(cfg, 'alert')) {
+      commit('SET_ALERT_BANNER', get(cfg, 'alert'))
     }
 
     return state.cfg
