@@ -67,7 +67,7 @@ export default {
     },
     updateAddons (addons) {
       this.resetAddonList(addons)
-      assign(this.addons, cloneDeep(addons))
+      this.addons =  cloneDeep(addons)
     },
     resetAddonList (addons) {
       this.addonDefinitionList = filter(shootAddonList, addon => {
