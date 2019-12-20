@@ -19,11 +19,15 @@
 import moment from 'moment-timezone'
 import semver from 'semver'
 import md5 from 'md5'
+import DOMPurify from 'dompurify'
+import marked from 'marked'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
+import merge from 'lodash/merge'
+import pick from 'lodash/pick'
 import toLower from 'lodash/toLower'
 import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
@@ -499,6 +503,39 @@ export const shootAddonList = [
     enabled: true
   }
 ]
+
+const kymaAddonDescription = `Kyma is a platform for extending applications with serverless functions and microservices. As an integrated stack of the best cloud-native projects, including Istio, Kiali, Prometheus, Grafana, Jaeger, Knative, Ory Hydra, and Loki it allows running modern microservice or serverless applications on top of Kubernetes.
+Kyma comes with a new, lightweight Service Catalog you can use to easily connect services provided by hyperscalers such as Azure, GCP, or AWS, as well as SAP applications.
+
+To successfully run Kyma, the minimal cluster size should be **2 nodes (4 CPU and 16GB each)**, but it is recommended to have 3-5 nodes. Additionally, make sure your Kubernetes version is **1.15.x or lower**.
+
+You can find a link to Kyma management Console UI and credentials in the shoot cluster dashboard.
+To learn more, visit the [Kyma website](https://kyma-project.io). If you want to discuss Kyma, ask questions, and contribute, join the Kyma community in the [Slack channel](http://slack.kyma-project.io).`
+
+export function addKymaAddon (options) {
+  const kymaAddon = {
+    name: 'kyma',
+    title: 'Kyma',
+    description: kymaAddonDescription,
+    visible: true,
+    enabled: false,
+    forbidDisable: true
+  }
+  if (options) {
+    const overwrite = pick(options, ['title', 'description', 'visible', 'enabled', 'forbidDisable'])
+    merge(kymaAddon, overwrite)
+  }
+  kymaAddon.description = compileMarkdown(kymaAddon.description)
+  shootAddonList.push(kymaAddon)
+}
+
+export function compileMarkdown (text) {
+  return DOMPurify.sanitize(marked(text, {
+    gfm: true,
+    breaks: true,
+    tables: true
+  }))
+}
 
 export function shootAddonByName (name) {
   return find(shootAddonList, ['name', name])
