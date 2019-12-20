@@ -24,7 +24,7 @@ import {
   displayName,
   fullDisplayName,
   getTimestampFormatted,
-  shootAddonList
+  addKymaAddon
 } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
@@ -592,19 +592,7 @@ const actions = {
     commit('SET_CONFIGURATION', cfg)
 
     if (getters.isKymaFeatureEnabled) {
-      let kymaAddon = {
-        name: 'kyma',
-        title: 'Kyma',
-        description: 'Kyma is a platform for extending applications with serverless functions and microservices. It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.',
-        visible: true,
-        enabled: false,
-        forbidDisable: true
-      }
-      if (cfg.kyma) {
-        const overwrite = pick(cfg.kyma, ['title', 'description', 'visible', 'enabled', 'forbidDisable'])
-        kymaAddon = merge(kymaAddon, overwrite)
-      }
-      shootAddonList.push(kymaAddon)
+      addKymaAddon(cfg.kyma)
     }
 
     if (get(cfg, 'alert')) {

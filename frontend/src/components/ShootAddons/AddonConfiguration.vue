@@ -20,7 +20,9 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Add-ons"
-    maxWidth="900">
+    maxWidth="900"
+    max-height="60vh"
+    >
     <template slot="actionComponent">
       <manage-shoot-addons
         ref="addons"
