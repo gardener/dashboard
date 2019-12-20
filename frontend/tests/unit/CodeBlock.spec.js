@@ -15,13 +15,12 @@
 //
 
 import { expect } from 'chai'
-import { mount } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import CodeBlock from '@/components/CodeBlock.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 
 Vue.use(Vuetify)
-document.body.setAttribute('data-app', true)
 
 describe('CodeBlock.vue', function () {
   it('should render correct contents', function () {
@@ -32,7 +31,7 @@ describe('CodeBlock.vue', function () {
         foo: true
         bar: 42`
     }
-    const wrapper = mount(CodeBlock, {
+    const wrapper = shallowMount(CodeBlock, {
       propsData
     })
     const vm = wrapper.vm

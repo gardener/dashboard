@@ -36,7 +36,6 @@ limitations under the License.
 <script>
 import { mapGetters, mapState } from 'vuex'
 import filter from 'lodash/filter'
-import assign from 'lodash/assign'
 import cloneDeep from 'lodash/cloneDeep'
 import { shootAddonList } from '@/utils'
 
@@ -67,7 +66,7 @@ export default {
     },
     updateAddons (addons) {
       this.resetAddonList(addons)
-      this.addons =  cloneDeep(addons)
+      this.addons = cloneDeep(addons)
     },
     resetAddonList (addons) {
       this.addonDefinitionList = filter(shootAddonList, addon => {

@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount, createLocalVue } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -23,11 +23,10 @@ import StatusTag from '@/components/StatusTag.vue'
 import store from '@/store'
 
 Vue.use(Vuetify)
-const localVue = createLocalVue()
-localVue.use(Vuex)
+Vue.use(Vuex)
 
 const bus = new Vue({})
-Object.defineProperties(localVue.prototype, {
+Object.defineProperties(Vue.prototype, {
   $bus: { value: bus }
 })
 
@@ -39,7 +38,6 @@ function createStatusTagComponent (conditionType) {
     popperKey: 'foo'
   }
   const wrapper = shallowMount(StatusTag, {
-    localVue,
     store,
     propsData
   })

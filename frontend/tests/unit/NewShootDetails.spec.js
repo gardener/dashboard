@@ -46,7 +46,6 @@ function createNewShootDetailsComponent (kubernetesVersion) {
   }
   const wrapper = shallowMount(NewShootDetails, {
     propsData,
-    Vuelidate,
     computed: {
       sortedKubernetesVersionsList: () => sampleVersions
     }

@@ -61,8 +61,7 @@ function createMachineImageComponent (selectedMachineImage) {
     }
   }
   const wrapper = shallowMount(MachineImage, {
-    propsData,
-    Vuelidate
+    propsData
   })
   const machineImageComponent = wrapper.find(MachineImage)
 
