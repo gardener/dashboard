@@ -20,7 +20,7 @@ const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
 const logger = require('../logger')
 const { registerHandler } = require('./common')
-const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
+const { bootstrapper } = require('../services/terminals')
 const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
@@ -33,7 +33,7 @@ module.exports = io => {
       logger.error('seed event error', event.object)
     } else if (event.type === 'ADDED') {
       const seed = event.object
-      bootstrapResource(seed)
+      bootstrapper.bootstrapResource(seed)
     }
   })
 }

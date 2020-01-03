@@ -76,7 +76,6 @@ class BootstrapPendingSet extends Set {
     return key
   }
 }
-const bootstrapPending = new BootstrapPendingSet()
 
 class Handler {
   constructor (fn, description) {
@@ -384,89 +383,107 @@ function verifyRequiredConfigExists () {
   return requiredConfigExists
 }
 
-function bootstrapResource (resource) {
-  const kind = resource.kind
-  if (!bootstrapKindAllowed(kind)) {
-    return
+class Bootstrapper extends Queue {
+  constructor () {
+    super(Bootstrapper.process, Bootstrapper.options)
+    this.bootstrapPending = new BootstrapPendingSet()
+    this.requiredConfigExists = verifyRequiredConfigExists()
+    if (this.isBootstrapKindAllowed('gardenTerminalHost')) {
+      const description = 'garden host cluster'
+      const handler = new Handler(ensureTrustedCertForGardenTerminalHostApiServer, description)
+      this.push(handler)
+    }
   }
 
-  // do not bootstrap if resource is beeing deleted
-  if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
-    return
+  isBootstrapKindAllowed (kind) {
+    if (isTerminalBootstrapDisabled()) {
+      return false
+    }
+    if (isTerminalBootstrapDisabledForKind(kind)) {
+      return false
+    }
+    if (!this.requiredConfigExists) {
+      return false
+    }
+    return true
   }
 
-  const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
-  if (isBootstrapDisabledForResource) {
-    const name = resource.metadata.name
-    const namespace = _.get(resource, 'metadata.namespace', '')
-    logger.debug(`terminal bootstrap disabled for ${kind} ${namespace}/${name}`)
-    return
+  isResourcePending (resource) {
+    return this.bootstrapPending.containsResource(resource)
   }
 
-  // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
-  if (kind === 'Shoot' && !seedShootNamespaceExists(resource)) {
-    if (bootstrapPending.containsResource(resource)) {
+  removePendingResource (resource) {
+    return this.bootstrapPending.removeResource(resource)
+  }
+
+  bootstrapResource (resource) {
+    const kind = resource.kind
+    if (!this.isBootstrapKindAllowed(kind)) {
       return
     }
-    const key = bootstrapPending.addResource(resource)
-    logger.debug(`bootstrapping of ${key} postponed`)
-    return
-  }
 
-  if (bootstrapPending.containsResource(resource)) {
-    bootstrapPending.removeResource(resource)
-  }
-
-  const description = `${kind} - ${resource.metadata.name}`
-  const handler = new Handler(() => {
-    switch (kind) {
-      case 'Seed':
-        return handleSeed(resource)
-      case 'Shoot':
-        return handleShoot(resource)
-      default:
-        logger.error(`can't bootstrap unsupported kind ${kind}`)
+    // do not bootstrap if resource is beeing deleted
+    if (!_.isEmpty(resource.metadata.deletionTimestamp)) {
+      return
     }
-  }, description)
 
-  bootstrapQueue.push(handler)
-}
+    const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
+    if (isBootstrapDisabledForResource) {
+      const name = resource.metadata.name
+      const namespace = _.get(resource, 'metadata.namespace', '')
+      logger.debug(`terminal bootstrap disabled for ${kind} ${namespace}/${name}`)
+      return
+    }
 
-function bootstrapKindAllowed (kind) {
-  if (isTerminalBootstrapDisabled()) {
-    return false
+    // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
+    if (kind === 'Shoot' && !seedShootNamespaceExists(resource)) {
+      if (this.bootstrapPending.containsResource(resource)) {
+        return
+      }
+      const key = this.bootstrapPending.addResource(resource)
+      logger.debug(`bootstrapping of ${key} postponed`)
+      return
+    }
+
+    if (this.bootstrapPending.containsResource(resource)) {
+      this.bootstrapPending.removeResource(resource)
+    }
+
+    const description = `${kind} - ${resource.metadata.name}`
+    const handler = new Handler(() => {
+      switch (kind) {
+        case 'Seed':
+          return handleSeed(resource)
+        case 'Shoot':
+          return handleShoot(resource)
+        default:
+          logger.error(`can't bootstrap unsupported kind ${kind}`)
+      }
+    }, description)
+    this.push(handler)
   }
-  if (isTerminalBootstrapDisabledForKind(kind)) {
-    return false
+
+  static get options () {
+    return _
+      .chain(config)
+      .get('terminal.bootstrap.queueOptions', {})
+      .cloneDeep()
+      .value()
   }
-  if (!requiredConfigExists) {
-    return false
+
+  static async process (handler, cb) {
+    try {
+      await handler.run()
+      cb(null, null)
+    } catch (err) {
+      console.log(err)
+      logger.error(`failed to bootstrap ${handler.description}`, err)
+      cb(err, null)
+    }
   }
-  return true
-}
-
-const requiredConfigExists = verifyRequiredConfigExists()
-
-const options = {}
-_.assign(options, _.get(config, 'terminal.bootstrap.queueOptions'))
-const bootstrapQueue = new Queue(async (handler, cb) => {
-  try {
-    await handler.run()
-    cb(null, null)
-  } catch (err) {
-    logger.error(`failed to bootstrap ${handler.description}`, err)
-    cb(err, null)
-  }
-}, options)
-
-if (bootstrapKindAllowed('gardenTerminalHost')) {
-  const description = 'garden host cluster'
-  const handler = new Handler(ensureTrustedCertForGardenTerminalHostApiServer, description)
-
-  bootstrapQueue.push(handler)
 }
 
 module.exports = {
-  bootstrapResource,
-  bootstrapPending
+  Handler,
+  Bootstrapper
 }

@@ -40,6 +40,10 @@ const {
   getGardenHostClusterKubeApiServer
 } = require('./utils')
 
+const {
+  Bootstrapper
+} = require('./terminalBootstrap')
+
 const { getSeed } = require('../../cache')
 const { Forbidden, UnprocessableEntity } = require('../../errors')
 const logger = require('../../logger')
@@ -64,21 +68,10 @@ exports.fetch = function ({ user, namespace, name, target, body = {} }) {
   return fetchTerminalSession({ user, namespace, name, target, body })
 }
 
-async function readServiceAccountToken (client, { namespace, serviceAccountName, waitUntilReady = true }) {
-  let serviceAccount
-  if (waitUntilReady) {
-    serviceAccount = await client.core.serviceaccounts
-      .watch(namespace, serviceAccountName)
-      .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
-  } else {
-    try {
-      serviceAccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
-    } catch (err) {
-      if (!isHttpError(err, 404)) {
-        throw err
-      }
-    }
-  }
+async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
+  const serviceAccount = await client.core.serviceaccounts
+    .watch(namespace, serviceAccountName)
+    .waitFor(isServiceAccountReady, { timeout: 10 * 1000 })
   const secretName = getFirstServiceAccountSecret(serviceAccount)
   if (secretName) {
     const secret = await client.core.secrets.get(namespace, secretName)
@@ -146,7 +139,15 @@ async function deleteTerminalSession ({ user, namespace: shootNamespace, body })
   return body
 }
 
-async function getTargetCluster ({ user, namespace, name, target }) {
+function getShootResource ({ user, namespace, name, target }) {
+  const client = user.client
+  if (target === TargetEnum.GARDEN) {
+    return
+  }
+  return client.getShoot({ namespace, name })
+}
+
+async function getTargetCluster ({ user, namespace, name, target, shootResource }) {
   const client = user.client
   const isAdmin = user.isAdmin
 
@@ -181,7 +182,9 @@ async function getTargetCluster ({ user, namespace, name, target }) {
       break
     }
     case TargetEnum.CONTROL_PLANE: {
-      const shootResource = await client.getShoot({ namespace, name })
+      if (!shootResource) {
+        shootResource = await client.getShoot({ namespace, name })
+      }
       const seedShootNamespace = getSeedShootNamespace(shootResource)
       const seedName = getSeedNameFromShoot(shootResource)
       const seed = getSeed(seedName)
@@ -219,11 +222,12 @@ async function getGardenTerminalHostCluster (client, { body }) {
   return hostCluster
 }
 
-async function getSeedHostCluster (client, { namespace, name, target, body }) {
+async function getSeedHostCluster (client, { namespace, name, target, body, shootResource }) {
   const hostCluster = {}
   hostCluster.config = getImageConfigFromBody(body)
-
-  const shootResource = await client.getShoot({ namespace, name })
+  if (!shootResource) {
+    shootResource = await client.getShoot({ namespace, name })
+  }
   if (target === TargetEnum.SHOOT) {
     hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
   }
@@ -239,13 +243,15 @@ async function getSeedHostCluster (client, { namespace, name, target, body }) {
   return hostCluster
 }
 
-async function getShootHostCluster (client, { namespace, name, target, body }) {
+async function getShootHostCluster (client, { namespace, name, target, body, shootResource }) {
   assert.strictEqual(target, TargetEnum.SHOOT, 'unexpected target')
 
   const hostCluster = {}
   hostCluster.config = getConfigFromBody(body)
 
-  const shootResource = await client.getShoot({ namespace, name })
+  if (!shootResource) {
+    shootResource = await client.getShoot({ namespace, name })
+  }
   hostCluster.isHostOrTargetHibernated = _.get(shootResource, 'spec.hibernation.enabled', false)
 
   hostCluster.namespace = undefined // this will create a temporary namespace
@@ -265,7 +271,7 @@ function getConfigFromBody (body) {
   return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
 }
 
-function getHostCluster ({ user, namespace, name, target, body }) {
+function getHostCluster ({ user, namespace, name, target, body, shootResource }) {
   const client = user.client
 
   if (target === TargetEnum.GARDEN) {
@@ -275,11 +281,11 @@ function getHostCluster ({ user, namespace, name, target, body }) {
   const defaultHost = user.isAdmin ? 'seed' : 'shoot'
   const preferredHost = _.get(body, 'preferredHost', defaultHost)
   if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
-    return getSeedHostCluster(client, { namespace, name, target, body })
+    return getSeedHostCluster(client, { namespace, name, target, body, shootResource })
   }
 
   // host cluster is the shoot
-  return getShootHostCluster(client, { namespace, name, target, body })
+  return getShootHostCluster(client, { namespace, name, target, body, shootResource })
 }
 
 async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster }) {
@@ -383,13 +389,14 @@ function readTerminalUntilReady ({ user, namespace, name }) {
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body }) {
   const username = user.id
   const client = user.client
+  const shootResource = await getShootResource({ user, namespace, name, target })
 
   const [
     hostCluster,
     targetCluster
   ] = await Promise.all([
-    getHostCluster({ user, namespace, name, target, body }),
-    getTargetCluster({ user, namespace, name, target })
+    getHostCluster({ user, namespace, name, target, body, shootResource }),
+    getTargetCluster({ user, namespace, name, target, shootResource })
   ])
 
   if (hostCluster.isHostOrTargetHibernated) {
@@ -551,3 +558,5 @@ exports.config = async function ({ user, namespace, name, target }) {
   }
   return config
 }
+
+exports.bootstrapper = new Bootstrapper()

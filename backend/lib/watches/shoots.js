@@ -24,7 +24,7 @@ const _ = require('lodash')
 const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
-const { bootstrapResource, bootstrapPending } = require('../services/terminals/terminalBootstrap')
+const { bootstrapper } = require('../services/terminals')
 
 const shootsWithIssues = []
 
@@ -50,18 +50,17 @@ module.exports = io => {
 
     switch (event.type) {
       case 'ADDED':
-        bootstrapResource(shoot)
+        bootstrapper.bootstrapResource(shoot)
         break
       case 'MODIFIED':
-        if (bootstrapPending.containsResource(shoot)) {
-          bootstrapResource(shoot)
+        if (bootstrapper.isResourcePending(shoot)) {
+          bootstrapper.bootstrapResource(shoot)
         }
         break
       case 'DELETED':
-        if (bootstrapPending.containsResource(shoot)) {
-          bootstrapPending.removeResource(shoot)
+        if (bootstrapper.isResourcePending(shoot)) {
+          bootstrapper.removePendingResource(shoot)
         }
-
         try {
           await journals.deleteJournals({ namespace, name })
         } catch (error) {
