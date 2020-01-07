@@ -29,7 +29,7 @@ limitations under the License.
             :operation="shootLastOperation"
             :lastError="shootLastError"
             :popperKey="`${shootNamespace}/${shootName}_lastOp`"
-            :isHibernated="isShootHibernated"
+            :isHibernated="isShootStatusHibernated"
             :reconciliationDeactivated="isShootReconciliationDeactivated"
             :shootDeleted="isLastOperationTypeDelete"
             popperPlacement="bottom"

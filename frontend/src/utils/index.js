@@ -332,15 +332,6 @@ export function getProjectName (metadata) {
   return projectName
 }
 
-export function isHibernated (spec) {
-  if (!spec) {
-    return false
-  }
-
-  const hibernationEnabled = get(spec, 'hibernation.enabled', false)
-  return hibernationEnabled
-}
-
 export function canLinkToSeed ({ namespace, seedName }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".

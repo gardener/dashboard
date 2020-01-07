@@ -25,7 +25,7 @@ limitations under the License.
     :confirmRequired="confirmRequired"
     maxWidth="600">
     <template slot="actionComponent">
-      <template v-if="!isShootHibernated">
+      <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
         Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
       </template>
@@ -54,24 +54,24 @@ export default {
   mixins: [shootItem],
   computed: {
     confirmRequired () {
-      return !this.isShootHibernated
+      return !this.isShootSettingHibernated
     },
     confirmText () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'Hibernate'
       } else {
         return 'Wake-up'
       }
     },
     icon () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'mdi-pause-circle-outline'
       } else {
         return 'mdi-play-circle-outline'
       }
     },
     caption () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'Hibernate Cluster'
       } else {
         return 'Wake-up Cluster'
@@ -91,12 +91,12 @@ export default {
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            enabled: !this.isShootHibernated
+            enabled: !this.isShootSettingHibernated
           }
         })
       } catch (err) {
         let errorMessage
-        if (!this.isShootHibernated) {
+        if (!this.isShootSettingHibernated) {
           errorMessage = 'Could not hibernate cluster'
         } else {
           errorMessage = 'Could not wake up cluster from hibernation'
@@ -109,7 +109,7 @@ export default {
     }
   },
   watch: {
-    isShootHibernated (value) {
+    isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
       this.$refs.actionDialog.hideDialog()
     }

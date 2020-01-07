@@ -65,12 +65,14 @@ export const shootItem = {
     isShootActionsDisabledForPurpose () {
       return this.shootPurpose === 'infrastructure'
     },
-
     shootSpec () {
       return get(this.shootItem, 'spec', {})
     },
-    isShootHibernated () {
-      return isHibernated(this.shootSpec)
+    isShootSettingHibernated () {
+      return get(this.shootSpec, 'hibernation.enabled', false)
+    },
+    isShootStatusHibernated () {
+      return get(this.shootItem, 'status.hibernated', false)
     },
     shootSecretBindingName () {
       return this.shootSpec.secretBindingName
