@@ -43,13 +43,16 @@ exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }
 
 exports.create = async function ({ user, namespace, body }) {
   const client = user.client
-
   const username = user.id
-  const finalizers = ['gardener']
+
   const annotations = {
     'garden.sapcloud.io/createdBy': username
   }
-  body = _.merge({}, body, { metadata: { namespace, finalizers, annotations } })
+  if (_.get(body, 'spec.addons.kyma.enabled', false)) {
+    annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
+  }
+  body = _.merge({}, body, { metadata: { namespace, annotations } })
+  _.unset(body, 'spec.addons.kyma')
   return client['core.gardener.cloud'].shoots.create(namespace, body)
 }
 
@@ -121,7 +124,7 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const addons = body
+  const { kyma = {}, ...addons } = body
   const payload = {
     spec: {
       addons
@@ -151,7 +154,7 @@ exports.kyma = async function ({ user, namespace, name }) {
       }
     }] = await Promise.all([
       shootClient.core.configmaps.get('kyma-installer', 'net-global-overrides'),
-      shootClient.core.secrets.get('kyma-system', 'admin-user' )
+      shootClient.core.secrets.get('kyma-system', 'admin-user')
     ])
     return {
       url: `https://console.${domain}`,
