@@ -250,7 +250,7 @@ function waitFor (condition, { timeout = 5000 }) {
     }
 
     function logError (err) {
-      logger.error(`Error watching Resource "%s": %s`, resourceName, err.message)
+      logger.error('Error watching Resource "%s": %s', resourceName, err.message)
     }
 
     function ignoreError () {

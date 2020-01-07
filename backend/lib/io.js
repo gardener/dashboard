@@ -164,7 +164,7 @@ function setupShootsNamespace (shootsNsp) {
       socket.emit('subscription_error', {
         kind,
         code: 500,
-        message: `Failed to fetch clusters`
+        message: 'Failed to fetch clusters'
       })
     }
     batchEmitter.flush()
@@ -196,7 +196,7 @@ function setupShootsNamespace (shootsNsp) {
         socket.emit('subscription_error', {
           kind: 'shoots',
           code: 500,
-          message: `Failed to fetch clusters`
+          message: 'Failed to fetch clusters'
         })
       }
     })
@@ -210,7 +210,7 @@ function setupShootsNamespace (shootsNsp) {
         socket.emit('subscription_error', {
           kind: 'shoots',
           code: 500,
-          message: `Failed to fetch clusters`
+          message: 'Failed to fetch clusters'
         })
       }
     })

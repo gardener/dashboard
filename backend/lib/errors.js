@@ -51,9 +51,11 @@ class Timeout extends BaseError {
       this.error = new Error(error)
     }
   }
+
   static timedOut (time, err) {
     return new Timeout(`Operation timed out after ${time} ms`, err)
   }
+
   static toManyAttempts (attempts, err) {
     return new Timeout(`Operation failed after ${attempts} attempts`, err)
   }
@@ -119,7 +121,7 @@ exports.NotFound = NotFound
 
 class MethodNotAllowed extends HttpClientError {
   constructor (method, allow) {
-    let message = `The method ${method} is not allowed for the resource identified by the URI`
+    const message = `The method ${method} is not allowed for the resource identified by the URI`
     super(405, 'Method Not Allowed', message)
     this.allow = allow
   }

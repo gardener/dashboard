@@ -157,8 +157,8 @@ async function authorizeToken (req, res) {
     name,
     email
   }
-  const audience = [ GARDENER_AUDIENCE ]
-  const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
+  const audience = [GARDENER_AUDIENCE]
+  const [header, payload, signature] = split(await sign(user, { expiresIn, audience }), '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
@@ -209,10 +209,10 @@ function getToken ({ cookies = {}, headers = {} }) {
   if (authorization.startsWith('Bearer ')) {
     return authorization.substring(7)
   }
-  const [ header, payload ] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
+  const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
   const signature = cookies[COOKIE_SIGNATURE]
   if (header && payload && signature) {
-    return join([ header, payload, signature ], '.')
+    return join([header, payload, signature], '.')
   }
   return null
 }
@@ -225,7 +225,7 @@ function authenticate ({ createClient } = {}) {
       throw new Unauthorized('No authorization token was found')
     }
     try {
-      const audience = [ GARDENER_AUDIENCE ]
+      const audience = [GARDENER_AUDIENCE]
       req.user = await verify(token, { audience })
     } catch (err) {
       throw new Unauthorized(err.message)

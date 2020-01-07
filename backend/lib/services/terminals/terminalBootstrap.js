@@ -276,7 +276,7 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
  This cluster runs the terminal pods of garden operators for the (virtual) garden.
 */
 async function ensureTrustedCertForGardenTerminalHostApiServer () {
-  logger.debug(`replacing resources on garden host cluster for webterminals`)
+  logger.debug('replacing resources on garden host cluster for webterminals')
 
   const refType = getGardenTerminalHostClusterRefType()
 

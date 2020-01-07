@@ -522,7 +522,7 @@ function getTerminalResource (client, { name, namespace }) {
 
 async function setKeepaliveAnnotation (client, terminal) {
   const annotations = {
-    'dashboard.gardener.cloud/operation': `keepalive`
+    'dashboard.gardener.cloud/operation': 'keepalive'
   }
   try {
     const { name, namespace } = terminal.metadata

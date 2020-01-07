@@ -50,7 +50,7 @@ function beforeRequest (options) {
 
   const [schema, value] = split(headers.authorization, ' ') || []
   switch (schema) {
-    case 'Bearer':
+    case 'Bearer': {
       const payload = jwt.decode(value)
       if (payload) {
         if (payload.email) {
@@ -65,10 +65,12 @@ function beforeRequest (options) {
         user.id = '"redacted"'
       }
       break
-    case 'Basic':
+    }
+    case 'Basic': {
       user.type = 'user'
       user.id = first(split(decodeBase64(value), ':'))
       break
+    }
   }
 
   if (key && cert) {
