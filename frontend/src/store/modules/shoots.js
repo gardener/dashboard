@@ -410,6 +410,8 @@ const getSortVal = (item, sortBy) => {
       const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
       const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
       return lastErrorTransitionTime
+    case 'infrastructure':
+      return [get(spec, 'provider.type'), get(spec, 'region')]
     default:
       return toLower(value)
   }
