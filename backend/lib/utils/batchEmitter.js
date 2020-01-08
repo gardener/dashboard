@@ -31,8 +31,8 @@ class AbstractBatchEmitter {
     this.MIN_CHUNK_SIZE = 10
   }
 
-  batchEmitObjectsAndFlush (objects) {
-    this.batchEmitObjects(objects)
+  batchEmitObjectsAndFlush (...args) {
+    this.batchEmitObjects(...args)
     this.flush()
   }
 
@@ -53,7 +53,8 @@ class AbstractBatchEmitter {
           this.emit()
           this.clearData()
         }
-      }).value()
+      })
+      .value()
   }
 
   flush () {
@@ -120,11 +121,19 @@ class NamespacedBatchEmitter extends AbstractBatchEmitter {
   }
 
   count () {
-    return _.chain(this.namespaces).map(events => events.length).sum().value()
+    return _
+      .chain(this.namespaces)
+      .map(events => events.length)
+      .sum()
+      .value()
   }
 
   appendChunkedEvents (chunkedEvents) {
-    this.namespaces[this.currentBatchNamespace] = _.concat(_.get(this.namespaces, this.currentBatchNamespace, []), chunkedEvents)
+    this.namespaces[this.currentBatchNamespace] = _
+      .chain(this.namespaces)
+      .get(this.currentBatchNamespace, [])
+      .concat(chunkedEvents)
+      .value()
   }
 
   clearData () {
@@ -133,6 +142,7 @@ class NamespacedBatchEmitter extends AbstractBatchEmitter {
 }
 
 module.exports = {
+  AbstractBatchEmitter,
   EventsEmitter,
   NamespacedBatchEmitter
 }
