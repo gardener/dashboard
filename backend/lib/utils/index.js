@@ -17,14 +17,9 @@
 
 'use strict'
 
-const path = require('path')
 const _ = require('lodash')
 const config = require('../config')
 const assert = require('assert').strict
-
-function resolve (pathname) {
-  return path.resolve(__dirname, '../..', pathname)
-}
 
 function decodeBase64 (value) {
   if (!value) {
@@ -59,7 +54,6 @@ function shootHasIssue (shoot) {
 }
 
 module.exports = {
-  resolve,
   decodeBase64,
   encodeBase64,
   getConfigValue,
