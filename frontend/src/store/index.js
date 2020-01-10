@@ -760,20 +760,22 @@ const mutations = {
   }
 }
 
+const modules = {
+  projects,
+  members,
+  cloudProfiles,
+  domains,
+  shoots,
+  infrastructureSecrets,
+  journals
+}
+
 const store = new Vuex.Store({
   state,
   actions,
   getters,
   mutations,
-  modules: {
-    projects,
-    members,
-    cloudProfiles,
-    domains,
-    shoots,
-    infrastructureSecrets,
-    journals
-  },
+  modules,
   strict: debug,
   plugins
 })
@@ -809,3 +811,12 @@ journalCommentsEmitter.on('comments', events => {
 })
 
 export default store
+
+export {
+  state,
+  actions,
+  getters,
+  mutations,
+  modules,
+  plugins
+}
