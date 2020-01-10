@@ -191,7 +191,8 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineImages = get(cloudProfile, 'data.machineImages')
-      return flatMap(machineImages, machineImage => {
+
+      const mapMachineImages = (machineImage) => {
         const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
           if (expirationDate && moment().isAfter(expirationDate)) {
             return false
@@ -218,7 +219,9 @@ const getters = {
             needsLicense: vendorNeedsLicense(vendorName)
           }
         })
-      })
+      }
+
+      return flatMap(machineImages, mapMachineImages)
     }
   },
   zonesByCloudProfileNameAndRegion (state, getters) {

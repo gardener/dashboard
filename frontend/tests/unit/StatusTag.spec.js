@@ -53,7 +53,7 @@ function createStatusTagComponent (conditionType) {
 }
 
 describe('StatusTag.vue', function () {
-  beforeEach(async () => {
+  beforeEach(function () {
     const cfg = {
       knownConditions: {
         ControlPlaneHealthy: {
@@ -68,7 +68,7 @@ describe('StatusTag.vue', function () {
         }
       }
     }
-    await store.dispatch('setConfiguration', cfg)
+    return store.dispatch('setConfiguration', cfg)
   })
 
   it('should generate condition object for simple condition type', function () {

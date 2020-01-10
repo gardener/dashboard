@@ -30,17 +30,22 @@ export default {
   },
   watch: {
     hintColor (hintColor) {
-      if (this && this.$el) {
-        this.applyHintColor(hintColor)
-      }
+      this.applyHintColor(hintColor)
     }
   },
   methods: {
     applyHintColor (hintColor) {
-      if (hintColor === 'default') {
-        this.$el.className = undefined
-      } else {
-        this.$el.className = `hintColor-${hintColor}`
+      if (!this.$el) {
+        return
+      }
+      const elementClasses = this.$el.classList
+      elementClasses.forEach((className) => {
+        if (/hintColor-.+/.test(className)) {
+          elementClasses.remove(className)
+        }
+      })
+      if (hintColor !== 'default') {
+        elementClasses.add(`hintColor-${hintColor}`)
       }
     }
   },
