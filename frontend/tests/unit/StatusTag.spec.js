@@ -20,10 +20,17 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import StatusTag from '@/components/StatusTag.vue'
-import store from '@/store'
+import { state, actions, getters, mutations } from '@/store'
 
 Vue.use(Vuetify)
 Vue.use(Vuex)
+
+const store = new Vuex.Store({
+  state,
+  actions,
+  getters,
+  mutations
+})
 
 const bus = new Vue({})
 Object.defineProperties(Vue.prototype, {

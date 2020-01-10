@@ -14,8 +14,9 @@
 // limitations under the License.
 //
 
+import Vuex from 'vuex'
 import { expect } from 'chai'
-import store from '@/store'
+import { state, actions, getters, mutations, modules } from '@/store'
 import find from 'lodash/find'
 
 describe('Store', function () {
@@ -58,7 +59,7 @@ describe('Store', function () {
       }
     ]
 
-    store.state.cloudProfiles.all = [
+    state.cloudProfiles.all = [
       {
         data: {
           machineImages: cpMachineImages
@@ -68,6 +69,14 @@ describe('Store', function () {
         }
       }
     ]
+
+    const store = new Vuex.Store({
+      state,
+      actions,
+      getters,
+      mutations,
+      modules
+    })
 
     const dashboardMachineImages = store.getters.machineImagesByCloudProfileName('foo')
     expect(dashboardMachineImages).to.have.length(4)
@@ -109,7 +118,7 @@ describe('Store', function () {
       }
     ]
 
-    store.state.cloudProfiles.all = [
+    state.cloudProfiles.all = [
       {
         data: {
           kubernetes: {
@@ -121,6 +130,14 @@ describe('Store', function () {
         }
       }
     ]
+
+    const store = new Vuex.Store({
+      state,
+      actions,
+      getters,
+      mutations,
+      modules
+    })
 
     const dashboardVersions = store.getters.sortedKubernetesVersions('foo')
     expect(dashboardVersions).to.have.length(2)
