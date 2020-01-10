@@ -48,6 +48,7 @@ import moment from 'moment-timezone'
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import projects from './modules/projects'
+import draggable from './modules/draggable'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
@@ -84,6 +85,9 @@ const state = {
   shootsLoading: false,
   websocketConnectionError: null,
   localTimezone: moment.tz.guess(),
+  focusedElementId: null,
+  splitpaneResize: null,
+  splitpaneLayouts: {},
   conditionCache: {
     APIServerAvailable: {
       displayName: 'API Server',
@@ -597,6 +601,15 @@ const getters = {
   canDeleteProject (state, getters) {
     const name = getters.projectName
     return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'projects', name)
+  },
+  draggingDragAndDropId (state, getters) {
+    return getters['draggable/draggingDragAndDropId']
+  },
+  focusedElementId (state) {
+    return state.focusedElementId
+  },
+  splitpaneResize (state) {
+    return state.splitpaneResize
   }
 }
 
@@ -883,6 +896,21 @@ const actions = {
   setAlertBanner ({ commit }, value) {
     commit('SET_ALERT_BANNER', value)
     return state.alertBanner
+  },
+  setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
+    return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
+  },
+  setFocusedElementId ({ commit }, id) {
+    commit('SET_FOCUSED_ELEMENT_ID', id)
+    return state.focusedElementId
+  },
+  unsetFocusedElementId ({ commit }, id) {
+    commit('UNSET_FOCUSED_ELEMENT_ID', id)
+    return state.focusedElementId
+  },
+  setSplitpaneResize ({ commit }, value) {
+    commit('SPLITPANE_RESIZE', value)
+    return state.splizpaneResize
   }
 }
 
@@ -940,12 +968,24 @@ const mutations = {
   },
   setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)
+  },
+  SET_FOCUSED_ELEMENT_ID (state, value) {
+    state.focusedElementId = value
+  },
+  UNSET_FOCUSED_ELEMENT_ID (state, value) {
+    if (state.focusedElementId === value) {
+      state.focusedElementId = null
+    }
+  },
+  SPLITPANE_RESIZE (state, value) {
+    state.splitpaneResize = value
   }
 }
 
 const modules = {
   projects,
   members,
+  draggable,
   cloudProfiles,
   shoots,
   infrastructureSecrets,

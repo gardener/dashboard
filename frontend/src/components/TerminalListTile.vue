@@ -63,8 +63,7 @@ export default {
         name: 'ShootItemTerminal',
         params: {
           namespace: this.shootNamespace,
-          name: this.shootName,
-          target: this.target
+          name: this.shootName
         }
       }
     }

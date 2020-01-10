@@ -1,7 +1,7 @@
 //
 // Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -14,22 +14,28 @@
 // limitations under the License.
 //
 
-'use strict'
+const { default: store } = require('../store')
 
-const _ = require('lodash')
-const config = require('../config')
+class FocusAddon {
+  constructor (uuid) {
+    this.uuid = uuid
+  }
+  activate (terminal) {
+    terminal.textarea.onfocus = () => {
+      store.dispatch('setFocusedElementId', this.uuid)
+      if (typeof this.onFocus === 'function') {
+        this.onFocus()
+      }
+    }
+    terminal.textarea.onblur = () => {
+      store.dispatch('unsetFocusedElementId', this.uuid)
+      if (typeof this.onBlur === 'function') {
+        this.onBlur()
+      }
+    }
+  }
 
-module.exports = {
-  '/info': require('./info'),
-  '/user': require('./user'),
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/shoots': require('./shoots'),
-  '/namespaces': require('./namespaces'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
+  dispose () {}
 }
 
-if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  module.exports['/terminals'] = require('./terminals')
-}
+module.exports = { FocusAddon }

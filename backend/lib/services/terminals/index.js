@@ -56,16 +56,34 @@ const TargetEnum = {
   SHOOT: 'shoot'
 }
 
-exports.create = function ({ user, namespace, name, target, body = {} }) {
+exports.create = function ({ user, coordinate: { namespace, name, target }, body = {} }) {
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-exports.remove = function ({ user, namespace, name, target, body = {} }) {
-  return deleteTerminalSession({ user, namespace, name, target, body })
+exports.config = async function ({ user, coordinate: { namespace, name, target } }) {
+  return getTerminalConfig({ user, namespace, name, target })
 }
 
-exports.fetch = function ({ user, namespace, name, target, body = {} }) {
-  return fetchTerminalSession({ user, namespace, name, target, body })
+exports.list = function ({ user, coordinate: { namespace } }) {
+  return listTerminalSessions({ user, namespace })
+}
+
+exports.remove = function ({ user, body = {} }) {
+  return deleteTerminalSession({ user, body })
+}
+
+exports.fetch = function ({ user, body = {} }) {
+  return fetchTerminalSession({ user, body })
+}
+
+exports.heartbeat = async function ({ user, body = {} }) {
+  return heartbeatTerminalSession({ user, body })
+}
+
+function toTerminalMetadata (terminal) {
+  const metadata = _.pick(terminal.metadata, ['name', 'namespace'])
+  metadata.identifier = _.get(terminal, 'metadata.annotations["dashboard.gardener.cloud/identifier"]')
+  return metadata
 }
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
@@ -92,38 +110,50 @@ function isServiceAccountReady (serviceAccount) {
   return !_.isEmpty(getFirstServiceAccountSecret(serviceAccount))
 }
 
-async function findExistingTerminalResource ({ user, namespace, name, hostCluster, targetCluster }) {
+async function listTerminals ({ user, namespace, name, hostCluster, targetCluster, identifier }) {
   const username = user.id
   const client = user.client
 
   const selectors = [
-    `dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`,
-    `dashboard.gardener.cloud/targetCluster=${hash(targetCluster)}`,
     `garden.sapcloud.io/createdBy=${hash(username)}`
   ]
+  if (hostCluster) {
+    selectors.push(`dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`)
+  }
+  if (targetCluster) {
+    selectors.push(`dashboard.gardener.cloud/targetCluster=${hash(targetCluster)}`)
+  }
   if (name) {
     selectors.push(`garden.sapcloud.io/name=${name}`)
+  }
+  if (identifier) {
+    selectors.push(`dashboard.gardener.cloud/identifier=${hash(identifier)}`)
   }
   const query = {
     labelSelector: selectors.join(',')
   }
 
-  const existingTerminalList = await client['dashboard.gardener.cloud'].terminals.list(namespace, query)
+  const terminals = await client['dashboard.gardener.cloud'].terminals.list(namespace, query)
   return _
-    .chain(existingTerminalList)
+    .chain(terminals)
     .get('items')
     .filter(terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
     .filter(['metadata.annotations["garden.sapcloud.io/createdBy"]', username])
-    .first()
     .value()
 }
 
-async function deleteTerminalSession ({ user, namespace: shootNamespace, body }) {
+async function findExistingTerminalResource ({ user, namespace, name, hostCluster, targetCluster, body }) {
+  const { identifier } = body
+
+  const existingTerminalList = await listTerminals({ user, namespace, name, hostCluster, targetCluster, identifier })
+  return _.first(existingTerminalList)
+}
+
+async function deleteTerminalSession ({ user, body }) {
   const username = user.id
   const client = user.client
 
   const { namespace, name } = body
-  assert.strictEqual(namespace, shootNamespace, 'Namespaces of "terminal" and "shoot" do not match')
 
   try {
     const terminal = await getTerminalResource(client, { namespace, name })
@@ -136,7 +166,7 @@ async function deleteTerminalSession ({ user, namespace: shootNamespace, body })
       throw err
     }
   }
-  return body
+  return { namespace, name }
 }
 
 function getShootResource ({ user, namespace, name, target }) {
@@ -288,9 +318,10 @@ function getHostCluster ({ user, namespace, name, target, body, shootResource })
   return getShootHostCluster(client, { namespace, name, target, body, shootResource })
 }
 
-async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster }) {
+async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster, body }) {
   const client = user.client
   const isAdmin = user.isAdmin
+  const { identifier } = body
   const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
 
   const podLabels = getPodLabels(target)
@@ -306,8 +337,15 @@ async function createTerminal ({ user, namespace, name, target, hostCluster, tar
   if (name) {
     labels['garden.sapcloud.io/name'] = name
   }
+  if (identifier) {
+    labels['dashboard.gardener.cloud/identifier'] = hash(identifier)
+  }
+
+  const annotations = {
+    'dashboard.gardener.cloud/identifier': identifier
+  }
   const prefix = `term-${target}-`
-  const terminalResource = toTerminalResource({ prefix, namespace, labels, host: terminalHost, target: terminalTarget })
+  const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
 
   return client['dashboard.gardener.cloud'].terminals.create(namespace, terminalResource)
 }
@@ -386,7 +424,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
     .waitFor(isTerminalReady, { timeout: 10 * 1000 })
 }
 
-async function getOrCreateTerminalSession ({ user, namespace, name, target, body }) {
+async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {
   const username = user.id
   const client = user.client
   const shootResource = await getShootResource({ user, namespace, name, target })
@@ -409,10 +447,10 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Host kubeconfig does not exist (yet)')
   }
 
-  let terminal = await findExistingTerminalResource({ user, namespace, name, hostCluster, targetCluster })
+  let terminal = await findExistingTerminalResource({ user, namespace, name, hostCluster, targetCluster, body })
   if (!terminal) {
     logger.debug(`No terminal found for user ${username}. Creating new..`)
-    terminal = await createTerminal({ user, namespace, name, target, hostCluster, targetCluster })
+    terminal = await createTerminal({ user, namespace, name, target, hostCluster, targetCluster, body })
   } else {
     logger.debug(`Found terminal for user ${username}: ${terminal.metadata.name}`)
     // do not wait for keepalive to return - run in parallel
@@ -421,7 +459,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   }
 
   return {
-    metadata: _.pick(terminal.metadata, ['name', 'namespace']),
+    metadata: toTerminalMetadata(terminal),
     hostCluster: {
       kubeApiServer: hostCluster.kubeApiServer,
       namespace: terminal.spec.host.namespace
@@ -454,7 +492,7 @@ async function fetchTerminalSession ({ user, body: { name, namespace } }) {
   })
 
   return {
-    metadata: _.pick(terminal.metadata, ['name', 'namespace']),
+    metadata: toTerminalMetadata(terminal),
     hostCluster: {
       token,
       pod: {
@@ -465,6 +503,16 @@ async function fetchTerminalSession ({ user, body: { name, namespace } }) {
   }
 }
 
+async function listTerminalSessions ({ user, namespace }) {
+  const terminals = await listTerminals({ user, namespace })
+
+  return _.map(terminals, terminal => {
+    return {
+      metadata: toTerminalMetadata(terminal)
+    }
+  })
+}
+
 function getSeedShootNamespace (shoot) {
   const seedShootNamespace = _.get(shoot, 'status.technicalID')
   if (_.isEmpty(seedShootNamespace)) {
@@ -473,8 +521,13 @@ function getSeedShootNamespace (shoot) {
   return seedShootNamespace
 }
 
-async function ensureTerminalAllowed ({ isAdmin, target }) {
+async function ensureTerminalAllowed ({ method, isAdmin, target }) {
   if (isAdmin) {
+    return
+  }
+
+  // list your terminal sessions is allowed for everybody
+  if (method === 'list') {
     return
   }
 
@@ -498,7 +551,7 @@ function getContainerImage ({ isAdmin, preferredContainerImage }) {
   return containerImage
 }
 
-exports.heartbeat = async function ({ user, body = {} }) {
+async function heartbeatTerminalSession ({ user, body }) {
   const username = user.id
   const client = user.client
 
@@ -534,7 +587,7 @@ async function setKeepaliveAnnotation (client, terminal) {
   }
 }
 
-exports.config = async function ({ user, namespace, name, target }) {
+async function getTerminalConfig ({ user, namespace, name, target }) {
   const client = user.client
   const isAdmin = user.isAdmin
 

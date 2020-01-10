@@ -28,39 +28,30 @@ router.use(async (req, res, next) => {
   try {
     const user = req.user
 
-    const { target } = req.params
+    const { method, params: body } = req.body
+    const { coordinate: { target } } = body
 
     const isAdmin = req.user.isAdmin = await authorization.isAdmin(user)
 
-    await terminals.ensureTerminalAllowed({ isAdmin, target })
+    await terminals.ensureTerminalAllowed({ method, isAdmin, target })
     next()
   } catch (err) {
     next(err)
   }
 })
 
-router.route('/:name?')
+router.route('/')
   .post(async (req, res, next) => {
     try {
       const user = req.user
-      const { namespace, name, target } = req.params
-      const { method, params: body } = req.body
 
-      if (!_.includes(['create', 'fetch', 'remove', 'heartbeat'], method)) {
+      const { method, params: body } = req.body
+      const { coordinate } = body
+
+      if (!_.includes(['create', 'fetch', 'list', 'config', 'remove', 'heartbeat'], method)) {
         throw new Error(`${method} not allowed for terminals`)
       }
-      res.send(await terminals[method]({ user, namespace, name, target, body }))
-    } catch (err) {
-      next(err)
-    }
-  })
-
-router.route('/:name?/config')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const { namespace, name, target } = req.params
-      res.send(await terminals.config({ user, namespace, name, target }))
+      res.send(await terminals[method]({ user, coordinate, body }))
     } catch (err) {
       next(err)
     }

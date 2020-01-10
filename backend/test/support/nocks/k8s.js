@@ -1037,6 +1037,47 @@ const stub = {
       .reply(200, () => terminal)
     return scope
   },
+  listTerminalResources ({ bearer, username, namespace }) {
+    const terminal1 = {
+      metadata: {
+        name: 'foo1',
+        namespace: 'foo',
+        annotations: {
+          'dashboard.gardener.cloud/identifier': '1',
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {},
+      status: {}
+    }
+    const terminal2 = {
+      metadata: {
+        name: 'foo2',
+        namespace: 'foo',
+        annotations: {
+          'dashboard.gardener.cloud/identifier': '2',
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {},
+      status: {}
+    }
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
+      .query(({ labelSelector }) => {
+        const labels = _
+          .chain(labelSelector)
+          .split(',')
+          .map(value => value.split('='))
+          .fromPairs()
+          .value()
+        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+      })
+      .reply(200, { items: [terminal1, terminal2] })
+    return scope
+  },
   getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
     let statusCode = 200
     let result = _
