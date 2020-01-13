@@ -58,8 +58,9 @@ describe('Store', function () {
       }
     ]
 
-    const _getters = {
-      cloudProfileByName: () => {
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
         return {
           data: {
             machineImages: cpMachineImages
@@ -68,7 +69,7 @@ describe('Store', function () {
       }
     }
 
-    const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, _getters)()
+    const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
     expect(dashboardMachineImages).to.have.length(4)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-jeos', version: '15.1.20191127' })
@@ -108,24 +109,24 @@ describe('Store', function () {
       }
     ]
 
-    const _getters = {
-      kubernetesVersions: () => {
-        const _getters = {
-          cloudProfileByName: () => {
-            return {
-              data: {
-                kubernetes: {
-                  versions: kubernetesVersions
-                }
-              }
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return {
+          data: {
+            kubernetes: {
+              versions: kubernetesVersions
             }
           }
         }
-        return getters.kubernetesVersions({}, _getters)()
+      },
+      kubernetesVersions (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return getters.kubernetesVersions({}, this)(cloudProfileName)
       }
     }
 
-    const dashboardVersions = getters.sortedKubernetesVersions({}, _getters)()
+    const dashboardVersions = getters.sortedKubernetesVersions({}, storeGetters)('foo')
     expect(dashboardVersions).to.have.length(2)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
