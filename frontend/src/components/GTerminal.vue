@@ -677,13 +677,12 @@ export default {
 
       try {
         await this.terminalSession.deleteTerminal()
-        // TODO instead: emit event. let outer component decide to move away. Maybe also the deletion of the terminal should be done in the outer component, e.g. if terminal session is reused by another terminal (exec)
-        this.cancelConnectAndClose()
-
-        this.$emit('terminated')
       } catch (err) {
         this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
       }
+      this.cancelConnectAndClose()
+
+      this.$emit('terminated')
     },
     confirmDelete () {
       return this.$refs.confirmDialog.waitForConfirmation({
@@ -714,6 +713,11 @@ export default {
       }
       const selectedConfig = await this.$refs.settings.promptForConfigurationChange(initialState)
       if (selectedConfig) {
+        try {
+          await this.terminalSession.deleteTerminal()
+        } catch (err) {
+          console.log('failed to cleanup terminal session on configuration change')
+        }
         this.cancelConnectAndClose()
 
         this.selectedConfig = selectedConfig
