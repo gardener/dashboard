@@ -63,8 +63,8 @@ function mousedown (event, el, binding) {
   clone.style.top = rect.top + 'px'
   clone.style.opacity = '0.5'
 
-  dragState.offsetX = event.offsetX
-  dragState.offsetY = event.offsetY
+  dragState.offsetX = event.clientX - rect.left
+  dragState.offsetY = event.clientY - rect.top
   dragState.baseLeft = rect.left
   dragState.baseTop = rect.top
   dragState.startX = event.clientX
@@ -110,8 +110,8 @@ function mousemove (event, binding) {
     dragState.appendClone = false
   }
 
-  dragState.clone.style.left = dragState.baseLeft + (event.clientX - dragState.startX) + 'px'
-  dragState.clone.style.top = dragState.baseTop + (event.clientY - dragState.startY) + 'px'
+  dragState.clone.style.left = `${dragState.baseLeft + event.clientX - dragState.startX}px`
+  dragState.clone.style.top = `${dragState.baseTop + event.clientY - dragState.startY}px`
 
   dragState.clone.hidden = true
   dispatchEvent(binding, dragState, event, DragAndDropEventsEnum.DRAG_OVER)
@@ -140,12 +140,12 @@ function createMouseEvent (type, clientX, clientY) {
   return event
 }
 
-function dispatchDragLeaveEventToListeners (dragState, binding) {
-  const customEventInit = getCustomEventInit({ mouseOverId: dragState.mouseOverId, mouseOverDropzoneId: dragState.mouseOverDropzoneId, source: dragState.source, binding })
-  dispatchEventToListeners(dragState.listeners, new CustomEvent(DragAndDropEventsEnum.DRAG_LEAVE, customEventInit))
+function dispatchDragLeaveEventToListeners ({ mouseOverId, mouseOverDropzoneId, listeners, source, animation }, binding) {
+  const customEventInit = getCustomEventInit({ mouseOverId, mouseOverDropzoneId, source, binding })
+  dispatchEventToListeners(listeners, new CustomEvent(DragAndDropEventsEnum.DRAG_LEAVE, customEventInit))
 
-  if (dragState.animation) {
-    dragState.animation.reverse()
+  if (animation) {
+    animation.reverse()
   }
 }
 
