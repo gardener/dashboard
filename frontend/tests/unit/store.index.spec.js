@@ -14,9 +14,8 @@
 // limitations under the License.
 //
 
-import Vuex from 'vuex'
 import { expect } from 'chai'
-import { state, actions, getters, mutations, modules } from '@/store'
+import { getters } from '@/store'
 import find from 'lodash/find'
 
 describe('Store', function () {
@@ -59,26 +58,17 @@ describe('Store', function () {
       }
     ]
 
-    state.cloudProfiles.all = [
-      {
-        data: {
-          machineImages: cpMachineImages
-        },
-        metadata: {
-          name: 'foo'
+    const _getters = {
+      cloudProfileByName: () => {
+        return {
+          data: {
+            machineImages: cpMachineImages
+          }
         }
       }
-    ]
+    }
 
-    const store = new Vuex.Store({
-      state,
-      actions,
-      getters,
-      mutations,
-      modules
-    })
-
-    const dashboardMachineImages = store.getters.machineImagesByCloudProfileName('foo')
+    const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, _getters)()
     expect(dashboardMachineImages).to.have.length(4)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-jeos', version: '15.1.20191127' })
@@ -118,28 +108,24 @@ describe('Store', function () {
       }
     ]
 
-    state.cloudProfiles.all = [
-      {
-        data: {
-          kubernetes: {
-            versions: kubernetesVersions
+    const _getters = {
+      kubernetesVersions: () => {
+        const _getters = {
+          cloudProfileByName: () => {
+            return {
+              data: {
+                kubernetes: {
+                  versions: kubernetesVersions
+                }
+              }
+            }
           }
-        },
-        metadata: {
-          name: 'foo'
         }
+        return getters.kubernetesVersions({}, _getters)()
       }
-    ]
+    }
 
-    const store = new Vuex.Store({
-      state,
-      actions,
-      getters,
-      mutations,
-      modules
-    })
-
-    const dashboardVersions = store.getters.sortedKubernetesVersions('foo')
+    const dashboardVersions = getters.sortedKubernetesVersions({}, _getters)()
     expect(dashboardVersions).to.have.length(2)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
