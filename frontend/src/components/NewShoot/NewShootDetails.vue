@@ -167,6 +167,7 @@ export default {
       return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
         return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
       })
+    }
   },
   methods: {
     getErrorMessages (field) {
