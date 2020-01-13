@@ -86,6 +86,7 @@ limitations under the License.
           ></maintenance-time>
           <maintenance-components
             ref="maintenanceComponents"
+            :userInterActionBus="userInterActionBus"
           ></maintenance-components>
        </v-card-text>
       </v-card>
@@ -298,26 +299,25 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
-
       this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName })
-
-      const name = get(shootResource, 'metadata.name')
-      const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
-      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
-      this.purpose = purpose
-      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
-
-      const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region })
-
-      const addons = get(shootResource, 'spec.addons')
-      this.$refs.addons.updateAddons(addons)
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
       this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
+
+      const name = get(shootResource, 'metadata.name')
+      const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
+      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
+      this.purpose = purpose
+      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
+
+      const workers = get(shootResource, 'spec.provider.workers')
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates })
+
+      const addons = get(shootResource, 'spec.addons')
+      this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)

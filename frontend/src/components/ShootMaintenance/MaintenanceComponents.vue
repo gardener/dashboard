@@ -69,6 +69,10 @@ limitations under the License.
 export default {
   name: 'maintenance-components',
   props: {
+    userInterActionBus: {
+      type: Object,
+      required: true
+    },
     title: {
       type: String,
       default: 'Auto Update'
@@ -80,11 +84,33 @@ export default {
   },
   data () {
     return {
-      osUpdates: false,
-      k8sUpdates: false
+      k8sUpdatesInternal: false,
+      osUpdatesInternal: false
     }
   },
   computed: {
+    k8sUpdates: {
+      get () {
+        return this.k8sUpdatesInternal
+      },
+      set (value) {
+        this.k8sUpdatesInternal = value
+        if (this.userInterActionBus) {
+          this.userInterActionBus.emit('updateK8sMaintenance', value)
+        }
+      }
+    },
+    osUpdates: {
+      get () {
+        return this.osUpdatesInternal
+      },
+      set (value) {
+        this.osUpdatesInternal = value
+        if (this.userInterActionBus) {
+          this.userInterActionBus.emit('updateOSMaintenance', value)
+        }
+      }
+    },
     showNoUpdates () {
       return !this.selectable && !this.osUpdates && !this.k8sUpdates
     }
