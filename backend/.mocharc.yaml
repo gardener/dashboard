@@ -1,0 +1,10 @@
+require: test/support
+check-leaks: true
+ui: bdd
+slow: 100
+timeout: 2000
+reporter: spec
+spec: test/**/*.spec.js
+package: ./package.json
+extension: [ js ]
+opts: false
