@@ -19,6 +19,7 @@
 const _ = require('lodash')
 const config = require('./config')
 const logger = require('./logger')
+const { isHttpError } = require('./kubernetes-client')
 const { NotFound, InternalServerError } = require('./errors')
 
 function frontendConfig (req, res, next) {
@@ -47,9 +48,13 @@ function errorToLocals (err, req) {
   const message = err.message
   let reason = err.reason || 'Internal Error'
   const name = err.name
+
   const error = req.app.get('env') === 'development' ? err : { name }
   let status = 500
-  if (_.isInteger(err.code)) {
+  if (isHttpError(err) && err.response) {
+    status = err.response.statusCode
+    reason = err.response.statusMessage
+  } else if (_.isInteger(err.code)) {
     status = err.code
   } else if (_.isString(err.code) && /[0-9]+/.test(err.code)) {
     status = parseInt(err.code)

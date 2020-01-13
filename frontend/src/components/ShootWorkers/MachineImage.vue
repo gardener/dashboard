@@ -2,7 +2,7 @@
   <select-hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
-      :items="machineImageItems"
+      :items="machineImages"
       return-object
       :error-messages="getErrorMessages('worker.machine.image')"
       @input="onInputMachineImage"
@@ -38,10 +38,11 @@ import VendorIcon from '@/components/VendorIcon'
 import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
+import includes from 'lodash/includes'
+import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
-import forEach from 'lodash/forEach'
 import semver from 'semver'
 
 const validationErrors = {
@@ -92,26 +93,11 @@ export default {
     machineImage: {
       get () {
         const { name, version } = this.worker.machine.image || {}
-        return find(this.machineImageItems, { name, version })
+        return find(this.machineImages, { name, version })
       },
       set (machineImage) {
         this.worker.machine.image = pick(machineImage, ['name', 'version'])
       }
-    },
-    machineImageItems () {
-      const machineImages = this.machineImages.slice()
-      if (this.notInCloudProfile) {
-        machineImages.push({
-          name: this.worker.machine.image.name,
-          version: this.worker.machine.image.version,
-          icon: 'mdi-blur-radial'
-        })
-      }
-      this.onInputMachineImage()
-      return machineImages
-    },
-    notInCloudProfile () {
-      return !find(this.machineImages, { name: this.worker.machine.image.name, version: this.worker.machine.image.version })
     },
     hint () {
       const hintText = []
@@ -121,19 +107,23 @@ export default {
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
-      if (this.updateOSMaintenance && this.imageIsNotLatest(this.machineImage)) {
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
         hintText.push('If you select a version which is not the latest, you should disable automatic operating system updates')
-      }
-      if (this.notInCloudProfile) {
-        return 'This machine image may not be supported by your worker'
       }
       return join(hintText, ' / ')
     },
     hintColor () {
-      if (this.machineImage.needsLicense || this.updateOSMaintenance || this.notInCloudProfile) {
+      if (this.machineImage.needsLicense || this.updateOSMaintenance) {
         return 'orange'
       }
       return 'default'
+    },
+    selectedImageIsNotLatest () {
+      const { version: currentImageVersion, vendorName: currentVendor } = this.machineImage
+
+      return !!find(this.machineImages, ({ version, vendorName }) => {
+        return currentVendor === vendorName && semver.gt(version, currentImageVersion)
+      })
     }
   },
   validations,
@@ -161,24 +151,19 @@ export default {
         itemDescription.push(`Expiration Date: ${machineImage.expirationDateString}`)
       }
       return join(itemDescription, ' | ')
-    },
-    imageIsNotLatest ({ version: currentImageVersion, name: currentImageName }) {
-      if (currentImageVersion) {
-        let notLatesVersion = false
-        forEach(this.machineImages, ({ version, name }) => {
-          if (currentImageName === name && semver.gt(version, currentImageVersion)) {
-            notLatesVersion = true
-            return false // break
-          }
-        })
-        return notLatesVersion
-      }
-      return false
     }
   },
   mounted () {
     this.$v.$touch()
     this.validateInput()
+  },
+  watch: {
+    machineImages (updatedMachineImages) {
+      if (!includes(map(updatedMachineImages, 'name'), this.worker.machine.image)) {
+        this.worker.machine.image = undefined
+        this.onInputMachineImage()
+      }
+    }
   }
 }
 </script>

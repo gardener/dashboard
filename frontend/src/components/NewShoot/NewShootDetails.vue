@@ -158,8 +158,8 @@ export default {
       return this.sortedKubernetesVersions(this.cloudProfileName)
     },
     versionHint () {
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch(this.kubernetesVersion)) {
-        return 'If you select a version which is not the latest patch version, you should disable automatic Kubernetes updates'
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+        return 'If you select a version which is not the latest patch version, you may want to disable automatic Kubernetes updates'
       }
       return undefined
     }

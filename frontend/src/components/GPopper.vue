@@ -21,6 +21,9 @@ limitations under the License.
     trigger="click"
     :options="popperOptions"
     boundaries-selector=".v-content__wrap"
+    :disabled="disabled"
+    @show="onPopperShow"
+    @hide="onPopperHide"
     >
     <div class="popper">
       <v-card>
@@ -32,9 +35,7 @@ limitations under the License.
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <slot name="content-before"></slot>
-          <pre class="message" v-if="!!message">{{message}}</pre>
-          <slot name="content-after"></slot>
+          <slot></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
               <template v-if="showPlaceholder">
@@ -74,9 +75,6 @@ export default {
     TimeString
   },
   props: {
-    value: {
-      type: Boolean
-    },
     popperKey: {
       type: String,
       required: true
@@ -89,16 +87,15 @@ export default {
       type: String,
       required: true
     },
-    message: {
-      type: String,
-      required: false
-    },
     time: {
       type: Object
     },
     placement: {
       type: String,
       default: 'top'
+    },
+    disabled: {
+      type: Boolean
     }
   },
   data () {
@@ -139,6 +136,12 @@ export default {
     },
     emitRendered () {
       this.$emit('rendered')
+    },
+    onPopperShow () {
+      this.$emit('input', true)
+    },
+    onPopperHide () {
+      this.$emit('input', false)
     }
   },
   created () {
@@ -158,20 +161,11 @@ export default {
   .popper {
     padding: 0px;
     border-radius: 0px;
-    z-index: 42;
+    z-index: 7;
     border: 0px !important;
     background-color: transparent !important;
     -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
     box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
-  }
-
-  .message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    max-height: 150px;
-    white-space: pre-wrap;
-    overflow-y: auto;
   }
 
   .timestamp {

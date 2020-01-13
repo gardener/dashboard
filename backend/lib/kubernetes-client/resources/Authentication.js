@@ -16,22 +16,21 @@
 
 'use strict'
 
-module.exports = {
-  Healthz: {
-    swagger: '2.0',
-    paths: {
-      '/healthz': {
-        get: {
-          description: 'healthz check',
-          schemes: ['https'],
-          operationId: 'healthzCheck',
-          responses: {
-            '200': { description: 'OK' },
-            '401': { description: 'Unauthorized' },
-            '503': { description: 'Unhealthy' }
-          }
-        }
-      }
+const { mix } = require('mixwith')
+
+const { Authentication } = require('../groups')
+const { ClusterScoped, Creatable } = require('../mixins')
+
+class TokenReview extends mix(Authentication).with(ClusterScoped, Creatable) {
+  static get names () {
+    return {
+      plural: 'tokenreviews',
+      singular: 'tokenreview',
+      kind: 'TokenReview'
     }
   }
+}
+
+module.exports = {
+  TokenReview
 }
