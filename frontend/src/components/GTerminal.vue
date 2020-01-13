@@ -46,10 +46,12 @@ limitations under the License.
     </v-snackbar>
     <draggable-component :uuid="uuid">
       <template v-slot:handle>
-        <v-system-bar dark class="systemBarTop" :class="backgroundClass">
+        <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
           <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton" @click="deleteTerminal">
             <v-icon>mdi-close</v-icon>
           </v-btn>
+          <v-spacer></v-spacer>
+          <v-icon class="pr-2">mdi-console</v-icon>
           <span>{{terminalTitle}}</span>
           <v-spacer></v-spacer>
           <v-menu
@@ -670,6 +672,9 @@ export default {
     ...mapActions([
       'setFocusedElementId'
     ]),
+    focus () {
+      this.term.focus()
+    },
     async deleteTerminal () {
       if (!await this.confirmDelete()) {
         return

@@ -132,7 +132,11 @@ export default function createRouter ({ store, userManager }) {
 
   const terminalBreadcrumbTitle = function (route) {
     const target = get(route, 'params.target')
-    return targetText(target)
+    if (targetText(target)) {
+      return `${targetText(target)} Terminal`
+    } else {
+      return 'Terminal'
+    }
   }
 
   /** Route function

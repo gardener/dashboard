@@ -658,11 +658,11 @@ export const TargetEnum = {
 export function targetText (target) {
   switch (target) {
     case TargetEnum.CONTROL_PLANE:
-      return 'Control Plane Terminal'
+      return 'Control Plane'
     case TargetEnum.SHOOT:
-      return 'Cluster Terminal'
+      return 'Cluster'
     case TargetEnum.GARDEN:
-      return 'Garden Cluster Terminal'
+      return 'Garden Cluster'
     default:
       return undefined
   }
