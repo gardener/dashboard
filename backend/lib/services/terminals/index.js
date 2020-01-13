@@ -110,22 +110,13 @@ function isServiceAccountReady (serviceAccount) {
   return !_.isEmpty(getFirstServiceAccountSecret(serviceAccount))
 }
 
-async function listTerminals ({ user, namespace, name, hostCluster, targetCluster, identifier }) {
+async function listTerminals ({ user, namespace, identifier }) {
   const username = user.id
   const client = user.client
 
   const selectors = [
     `garden.sapcloud.io/createdBy=${hash(username)}`
   ]
-  if (hostCluster) {
-    selectors.push(`dashboard.gardener.cloud/hostCluster=${hash(hostCluster)}`)
-  }
-  if (targetCluster) {
-    selectors.push(`dashboard.gardener.cloud/targetCluster=${hash(targetCluster)}`)
-  }
-  if (name) {
-    selectors.push(`garden.sapcloud.io/name=${name}`)
-  }
   if (identifier) {
     selectors.push(`dashboard.gardener.cloud/identifier=${hash(identifier)}`)
   }
@@ -142,10 +133,10 @@ async function listTerminals ({ user, namespace, name, hostCluster, targetCluste
     .value()
 }
 
-async function findExistingTerminalResource ({ user, namespace, name, hostCluster, targetCluster, body }) {
+async function findExistingTerminalResource ({ user, namespace, body }) {
   const { identifier } = body
 
-  const existingTerminalList = await listTerminals({ user, namespace, name, hostCluster, targetCluster, identifier })
+  const existingTerminalList = await listTerminals({ user, namespace, identifier })
   return _.first(existingTerminalList)
 }
 
