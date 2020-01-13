@@ -476,7 +476,6 @@ class Bootstrapper extends Queue {
       await handler.run()
       cb(null, null)
     } catch (err) {
-      console.log(err)
       logger.error(`failed to bootstrap ${handler.description}`, err)
       cb(err, null)
     }

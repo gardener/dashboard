@@ -16,27 +16,27 @@
 
 'use strict'
 
+const pRetry = require('p-retry')
 const logger = require('../logger')
-const backoff = require('backoff')
-const { loadOpenIssues } = require('../services/journals')
-const { getJournalCache } = require('../cache')
+const journals = require('../services/journals')
+const cache = require('../cache')
 const config = require('../config')
 
-module.exports = io => {
+module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for journals feature')
     return
   }
 
-  const cache = getJournalCache()
-  cache.onIssue(event => {
+  const journalCache = cache.getJournalCache()
+  journalCache.onIssue(event => {
     const room = 'issues'
     io.of('/journals').to(room).emit('events', {
       kind: 'issues',
       events: [event]
     })
   })
-  cache.onComment(event => {
+  journalCache.onComment(event => {
     const { namespace, name } = event.object.metadata
     const room = `comments_${namespace}/${name}`
     io.of('/journals').to(room).emit('events', {
@@ -45,26 +45,26 @@ module.exports = io => {
     })
   })
 
-  function loadAllOpenIssues (cb) {
-    loadOpenIssues().then(() => cb(), err => cb(err))
+  async function loadAllOpenIssues () {
+    const options = {
+      retries: 0,
+      forever: true,
+      maxTimeout: 60e3,
+      ...retryOptions,
+      onFailedAttempt (err) {
+        if ([500, 502, 503, 504, 521, 522, 524].indexOf(err.status) === -1) {
+          throw err
+        }
+        logger.info(`Attempt ${err.attemptNumber} failed. Will retry to fetch journals`)
+      }
+    }
+    try {
+      await pRetry(() => journals.loadOpenIssues(), options)
+      logger.info('successfully fetched journals')
+    } catch (err) {
+      logger.error('failed to fetch journals', err)
+    }
   }
 
-  const call = backoff.call(loadAllOpenIssues, err => {
-    if (err) {
-      logger.error('failed to fetch journals', err)
-    } else {
-      logger.info('successfully fetched journals')
-    }
-  })
-  call.retryIf(err => {
-    const willRetry = err.status === 503
-    logger.info('will retry to fetch journals', willRetry)
-    return willRetry
-  })
-  call.setStrategy(new backoff.FibonacciStrategy({
-    initialDelay: 1e3,
-    maxDelay: 60e3,
-    randomisationFactor: 0
-  }))
-  call.start()
+  loadAllOpenIssues()
 }

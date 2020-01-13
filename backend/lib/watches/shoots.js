@@ -20,70 +20,71 @@ const logger = require('../logger')
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
 const { journals } = require('../services')
-const _ = require('lodash')
 const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
 const { bootstrapper } = require('../services/terminals')
 
-const shootsWithIssues = []
+async function deleteJournals ({ namespace, name }) {
+  try {
+    await journals.deleteJournals({ namespace, name })
+  } catch (error) {
+    logger.error('failed to delete journals for %s/%s: %s', namespace, name, error)
+  }
+}
 
-module.exports = io => {
-  const emitter = dashboardClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
-  registerHandler(emitter, async function (event) {
-    const shoot = event.object
-    if (event.type === 'ERROR') {
-      logger.error('shoots event error', shoot)
-      return
+function toNamespacedEvents ({ type, object }) {
+  const { namespace, uid } = object.metadata
+  return {
+    kind: 'shoots',
+    namespaces: {
+      [namespace]: [{
+        type,
+        object,
+        objectKey: uid // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+      }]
     }
-    event.objectKey = _.get(shoot, 'metadata.uid') // objectKey used for throttling events on frontend (discard previous events for one batch for same objectKey)
+  }
+}
 
-    const name = shoot.metadata.name
-    const namespace = shoot.metadata.namespace
-    const namespacedEvents = { kind: 'shoots', namespaces: {} }
-    namespacedEvents.namespaces[namespace] = [event]
-    io.of('/shoots').to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
-    io.of('/shoots').to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
+module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
+  const emitter = dashboardClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
+  registerHandler(emitter, async event => {
+    const { type, object } = event
+    const { namespace, name, uid } = object.metadata
 
-    const shootIdentifier = `${namespace}_${name}`
-    const idx = _.indexOf(shootsWithIssues, shootIdentifier)
+    const nsp = io.of('/shoots')
+    const namespacedEvents = toNamespacedEvents(event)
+    nsp.to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
+    nsp.to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
 
-    switch (event.type) {
+    if (shootHasIssue(object)) {
+      nsp.to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
+      if (!shootsWithIssues.has(uid)) {
+        shootsWithIssues.add(uid)
+      } else if (type === 'DELETED') {
+        shootsWithIssues.delete(uid)
+      }
+    } else if (shootsWithIssues.has(uid)) {
+      nsp.to(`shoots_${namespace}_issues`).emit('namespacedEvents', toNamespacedEvents({ type: 'DELETED', object }))
+      shootsWithIssues.delete(uid)
+    }
+
+    switch (type) {
       case 'ADDED':
-        bootstrapper.bootstrapResource(shoot)
+        bootstrapper.bootstrapResource(object)
         break
       case 'MODIFIED':
-        if (bootstrapper.isResourcePending(shoot)) {
-          bootstrapper.bootstrapResource(shoot)
+        if (bootstrapper.isResourcePending(object)) {
+          bootstrapper.bootstrapResource(object)
         }
         break
       case 'DELETED':
-        if (bootstrapper.isResourcePending(shoot)) {
-          bootstrapper.removePendingResource(shoot)
+        if (bootstrapper.isResourcePending(object)) {
+          bootstrapper.removePendingResource(object)
         }
-        try {
-          await journals.deleteJournals({ namespace, name })
-        } catch (error) {
-          logger.error('failed to delete journals for %s/%s: %s', namespace, name, error)
-        }
+        deleteJournals(object.metadata)
         break
-    }
-
-    if (shootHasIssue(shoot)) {
-      io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
-      if (idx === -1) {
-        shootsWithIssues.push(shootIdentifier)
-      } else {
-        if (event.type === 'DELETED') {
-          _.pullAt(shootsWithIssues, idx)
-        }
-      }
-    } else {
-      if (idx !== -1) {
-        _.pullAt(shootsWithIssues, idx)
-        event.type = 'DELETED'
-        io.of('/shoots').to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)
-      }
     }
   })
 }
