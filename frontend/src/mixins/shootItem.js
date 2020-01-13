@@ -5,7 +5,7 @@ import flatMap from 'lodash/flatMap'
 import {
   getDateFormatted,
   getCreatedBy,
-  isHibernated,
+  isShootStatusHibernated,
   isReconciliationDeactivated,
   getProjectName
 } from '@/utils'
@@ -72,7 +72,10 @@ export const shootItem = {
       return get(this.shootSpec, 'hibernation.enabled', false)
     },
     isShootStatusHibernated () {
-      return get(this.shootItem, 'status.hibernated', false)
+      return isShootStatusHibernated(this.shootItem.status)
+    },
+    isShootStatusHibernationProgressing () {
+      return this.isShootSettingHibernated !== this.isShootStatusHibernated
     },
     shootSecretBindingName () {
       return this.shootSpec.secretBindingName

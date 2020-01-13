@@ -70,7 +70,7 @@ export default {
     },
     caption () {
       if (this.isMaintenanceToBeScheduled) {
-        return 'Requesting to schedule cluster reconcile'
+        return 'Requesting to schedule cluster maintenance'
       }
       return 'Schedule Maintenance'
     },
@@ -86,10 +86,10 @@ export default {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.startReconcile()
+        this.startMaintenance()
       }
     },
-    async startReconcile () {
+    async startMaintenance () {
       this.maintenanceTriggered = true
 
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
@@ -102,7 +102,7 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.reconcileTriggered = false
+        this.maintenanceTriggered = false
         this.currentGeneration = null
       }
     },

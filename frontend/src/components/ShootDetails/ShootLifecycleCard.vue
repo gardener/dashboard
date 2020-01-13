@@ -24,11 +24,11 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-sleep</v-icon>
         <v-flex grow class="pa-0">
           <span class="subheading">Hibernation</span><br>
-          <v-layout v-if="isShootHasNoHibernationScheduleWarning" align-center row fill-height class="ma-0">
-            <v-icon small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
+          <v-layout align-center row fill-height class="ma-0">
+            <v-icon v-if="isShootHasNoHibernationScheduleWarning" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
+            <v-progress-circular v-if="isShootStatusHibernationProgressing" indeterminate size=12 width=2 color="grey" class="mr-1"></v-progress-circular>
             <span class="grey--text">{{hibernationDescription}}</span>
           </v-layout>
-          <span v-else class="grey--text">{{hibernationDescription}}</span>
         </v-flex>
         <v-flex shrink class="pa-0">
           <v-layout row>
@@ -139,6 +139,14 @@ export default {
       'localTimezone'
     ]),
     hibernationDescription () {
+      if (this.isShootStatusHibernationProgressing) {
+        if (this.isShootSettingHibernated) {
+          return 'Hibernating Cluster...'
+        } else {
+          return 'Waking-up Cluster...'
+        }
+      }
+
       const purpose = this.shootPurpose || ''
       if (this.shootHibernationSchedules.length > 0) {
         return 'Hibernation schedule configured'

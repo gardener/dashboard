@@ -332,6 +332,10 @@ export function getProjectName (metadata) {
   return projectName
 }
 
+export function isShootStatusHibernated (status) {
+  return get(status, 'hibernated', false)
+}
+
 export function canLinkToSeed ({ namespace, seedName }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".

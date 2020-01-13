@@ -42,7 +42,7 @@ import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
 import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
-import { isHibernated,
+import { isShootStatusHibernated,
   isUserError,
   isReconciliationDeactivated,
   isStatusProgressing,
@@ -360,7 +360,6 @@ const getRawVal = (item, column) => {
 
 const getSortVal = (item, sortBy) => {
   const value = getRawVal(item, sortBy)
-  const spec = item.spec
   const status = item.status
   switch (sortBy) {
     case 'purpose':
@@ -402,7 +401,7 @@ const getSortVal = (item, sortBy) => {
       } else if (inProgress) {
         const progress = padStart(operation.progress, 2, '0')
         return `6${progress}`
-      } else if (isHibernated(spec)) {
+      } else if (isShootStatusHibernated(status)) {
         return 500
       }
       return 700

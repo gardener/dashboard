@@ -41,6 +41,7 @@ import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+import { SnotifyPosition } from 'vue-snotify'
 
 export default {
   components: {
@@ -52,6 +53,11 @@ export default {
     }
   },
   mixins: [shootItem],
+  data () {
+    return {
+      hibernationChanged: false
+    }
+  },
   computed: {
     confirmRequired () {
       return !this.isShootSettingHibernated
@@ -86,6 +92,7 @@ export default {
       }
     },
     async updateConfiguration () {
+      this.hibernationChanged = true
       try {
         await updateShootHibernation({
           namespace: this.shootNamespace,
@@ -105,6 +112,7 @@ export default {
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.hibernationChanged = false
       }
     }
   },
@@ -112,6 +120,24 @@ export default {
     isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
       this.$refs.actionDialog.hideDialog()
+    },
+    isShootStatusHibernationProgressing (hibernationProgressing) {
+      if (!hibernationProgressing) {
+        this.hibernationChanged = false
+
+        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+          const config = {
+            position: SnotifyPosition.rightBottom,
+            timeout: 5000,
+            showProgressBar: false
+          }
+          if (this.isShootStatusHibernated) {
+            this.$snotify.success(`Cluster ${this.shootName} sucessfully hibernated`, config)
+          } else {
+            this.$snotify.success(`Cluster ${this.shootName} sucessfully started`, config)
+          }
+        }
+      }
     }
   }
 }
