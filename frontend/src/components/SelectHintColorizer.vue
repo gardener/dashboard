@@ -40,7 +40,7 @@ export default {
       }
       const elementClasses = this.$el.classList
       elementClasses.forEach((className) => {
-        if (/hintColor-.+/.test(className)) {
+        if (className.startsWith('hintColor-')) {
           elementClasses.remove(className)
         }
       })
