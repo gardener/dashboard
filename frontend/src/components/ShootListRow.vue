@@ -49,12 +49,7 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
-      <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
-        <span>{{shootSeedName}}</span>
-      </router-link>
-      <template v-else>
-        <span>{{shootSeedName}}</span>
-      </template>
+      <shoot-seed-name :shootItem="shootItem" short />
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
       <v-layout align-center justify-start row fill-height slot="activator">
@@ -142,12 +137,12 @@ import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
+import ShootSeedName from '@/components/ShootSeedName'
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import {
   isTypeDelete,
-  isShootHasNoHibernationScheduleWarning,
-  canLinkToSeed
+  isShootHasNoHibernationScheduleWarning
 } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -165,7 +160,8 @@ export default {
     HibernationScheduleWarning,
     AccountAvatar,
     DeleteCluster,
-    CopyBtn
+    CopyBtn,
+    ShootSeedName
   },
   props: {
     shootItem: {
@@ -225,9 +221,6 @@ export default {
     },
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
-    },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
     shootLastUpdatedJournalTimestamp () {
       return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)

@@ -204,7 +204,7 @@ exports.info = async function ({ user, namespace, name }) {
 
   const data = {}
   let seed
-  if (shoot.status && shoot.status.seed) {
+  if (shoot.spec.seedName) {
     seed = getSeed(getSeedNameFromShoot(shoot))
     const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
     if (ingressDomain) {

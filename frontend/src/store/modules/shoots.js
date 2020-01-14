@@ -349,7 +349,7 @@ const getRawVal = (item, column) => {
     case 'infrastructure':
       return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
     case 'seed':
-      return get(item, 'status.seed')
+      return get(item, 'spec.seedName')
     case 'journalLabels':
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')

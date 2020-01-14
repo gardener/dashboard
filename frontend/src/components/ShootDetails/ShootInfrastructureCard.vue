@@ -36,9 +36,10 @@ limitations under the License.
             <v-layout row>
               <v-flex>
                 <span class="grey--text">Credential</span><br>
-                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace } }">
+                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace: shootNamespace } }">
                   <span class="subheading">{{shootSecretName}}</span>
                 </router-link>
+                <span v-else>{{shootSecretName}}</span>
               </v-flex>
             </v-layout>
             <v-layout row>
@@ -60,12 +61,7 @@ limitations under the License.
             </v-flex>
             <v-flex class="pa-0">
               <span class="grey--text">Seed</span><br>
-              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </router-link>
-              <template v-else>
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </template>
+              <shoot-seed-name :shootItem="shootItem" />
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Technical Id</span><br>
@@ -109,14 +105,13 @@ import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
 import CopyBtn from '@/components/CopyBtn'
-import {
-  canLinkToSeed
-} from '@/utils'
+import ShootSeedName from '@/components/ShootSeedName'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    ShootSeedName
   },
   props: {
     shootItem: {
@@ -134,18 +129,12 @@ export default {
     hasAccessToGardenNamespace () {
       return includes(this.namespaces, 'garden')
     },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.namespace, seedName: this.shootSeedName })
-    },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
       if (!this.shootDomain || !nginxIngressEnabled) {
         return undefined
       }
       return `*.ingress.${this.shootDomain}`
-    },
-    namespace () {
-      return get(this.$route.params, 'namespace')
     },
     shootZonesText () {
       return join(this.shootZones, ', ')
@@ -170,6 +159,9 @@ export default {
     },
     shootSecretName () {
       return this.shootSecretBindingName || 'default'
+    },
+    canLinkToSecret () {
+      return this.shootName && this.shootNamespace
     }
   }
 }

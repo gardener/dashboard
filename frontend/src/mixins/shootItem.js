@@ -15,7 +15,6 @@ export const shootItem = {
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
-
     shootName () {
       return this.shootMetadata.name
     },
@@ -137,7 +136,13 @@ export const shootItem = {
       return get(this.shootItem, `status.technicalID`)
     },
     shootSeedName () {
+      return get(this.shootSpec, 'seedName')
+    },
+    shootStatusSeedName () {
       return get(this.shootItem, 'status.seed')
+    },
+    isControlPlaneMigrating () {
+      return !!this.shootStatusSeedName && this.shootStatusSeedName !== this.shootSeedName
     }
   },
   methods: {
