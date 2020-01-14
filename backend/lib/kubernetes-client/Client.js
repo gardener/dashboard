@@ -17,7 +17,6 @@
 'use strict'
 
 const _ = require('lodash')
-const assert = require('assert').strict
 const { isIP } = require('net')
 const { HTTPError } = require('got')
 const { isHttpError, setAuthorization } = require('./util')
@@ -79,16 +78,16 @@ class Client {
   }
 
   async getKubeconfig ({ name, namespace }) {
-    const secret = await this.getSecret({ name, namespace, throwNotFound: false })
+    const secret = await this.getSecret({ name, namespace })
     const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
-    if (kubeconfigBase64) {
-      return decodeBase64(kubeconfigBase64)
+    if (!kubeconfigBase64) {
+      throw createHttpError(404, 'No kubeconfig found in secret')
     }
+    return decodeBase64(kubeconfigBase64)
   }
 
   async createKubeconfigClient (secretRef) {
     const kubeconfig = await this.getKubeconfig(secretRef)
-    assert.ok(kubeconfig, 'kubeconfig does not exist (yet)')
     return new this.constructor(fromKubeconfig(kubeconfig))
   }
 
@@ -96,11 +95,7 @@ class Client {
     const ns = await this.core.namespaces.get(namespace)
     const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
     if (!name) {
-      const response = {
-        statusCode: 404,
-        statusMessage: `Namespace '${namespace}' is not related to a gardener project`
-      }
-      throw new HTTPError(response)
+      throw createHttpError(404, `Namespace '${namespace}' is not related to a gardener project`)
     }
     return this['core.gardener.cloud'].projects.get(name)
   }
@@ -112,6 +107,10 @@ class Client {
   getSecret (...args) {
     return getResource(this.core.secrets, ...args)
   }
+}
+
+function createHttpError (statusCode, statusMessage) {
+  return new HTTPError({ statusCode, statusMessage })
 }
 
 async function getResource (resource, { namespace, name, throwNotFound = true }) {

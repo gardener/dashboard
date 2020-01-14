@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 <template>
-  <div v-show="!!username && !!password">
-    <v-list-tile>
+  <div v-show="(!!username || !!email) && !!password">
+    <v-list-tile v-if="username">
       <v-list-tile-action>
         <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
       </v-list-tile-action>
@@ -24,6 +24,21 @@ limitations under the License.
         <v-list-tile-sub-title>User</v-list-tile-sub-title>
         <v-list-tile-title>{{username}}</v-list-tile-title>
       </v-list-tile-content>
+      <v-list-tile-action>
+        <copy-btn :clipboard-text="username"></copy-btn>
+      </v-list-tile-action>
+    </v-list-tile>
+    <v-list-tile v-if="email">
+      <v-list-tile-action>
+        <v-icon v-if="!username" class="cyan--text text--darken-2">perm_identity</v-icon>
+      </v-list-tile-action>
+      <v-list-tile-content>
+        <v-list-tile-sub-title>Email</v-list-tile-sub-title>
+        <v-list-tile-title>{{email}}</v-list-tile-title>
+      </v-list-tile-content>
+      <v-list-tile-action>
+        <copy-btn :clipboard-text="email"></copy-btn>
+      </v-list-tile-action>
     </v-list-tile>
     <v-list-tile>
       <v-list-tile-action>
@@ -56,6 +71,9 @@ export default {
   },
   props: {
     username: {
+      type: String
+    },
+    email: {
       type: String
     },
     password: {

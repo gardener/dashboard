@@ -62,7 +62,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should create a shoot', async function () {
     const bearer = await user.bearer
-    const finalizers = ['gardener']
     k8s.stub.createShoot({ bearer, namespace, name, spec, resourceVersion })
     const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
@@ -77,7 +76,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations, finalizers })
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
