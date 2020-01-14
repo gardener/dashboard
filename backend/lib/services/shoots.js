@@ -16,7 +16,6 @@
 
 'use strict'
 
-const { AssertionError } = require('assert').strict
 const { HTTPError } = require('got')
 const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
@@ -163,9 +162,10 @@ exports.kyma = async function ({ user, namespace, name }) {
       password: decodeBase64(password)
     }
   } catch (err) {
+    logger.error('Failed to fetch kyma addon info', err)
     const statusCode = 404
     let statusMessage
-    if (err instanceof AssertionError) {
+    if (isHttpError(err, 404)) {
       statusMessage = 'Kubeconfig for cluster does not exist'
     } else if (/^ECONNRE/.test(err.code)) {
       statusMessage = 'Connection to cluster could not be estalished'

@@ -80,14 +80,12 @@ export default {
       }
     },
     reset () {
-      this.$nextTick(() => {
-        const addons = cloneDeep(get(this.shootItem, 'spec.addons', {}))
-        if (this.isKymaFeatureEnabled) {
-          const kymaEnabled = !!get(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
-          addons['kyma'] = { enabled: kymaEnabled }
-        }
-        this.$refs.addons.updateAddons(addons)
-      })
+      const addons = cloneDeep(get(this.shootItem, 'spec.addons', {}))
+      if (this.isKymaFeatureEnabled) {
+        const kymaEnabled = !!get(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        addons['kyma'] = { enabled: kymaEnabled }
+      }
+      this.$refs.addons.updateAddons(addons)
     }
   }
 }
