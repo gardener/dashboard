@@ -78,7 +78,7 @@ class Client {
   }
 
   async getKubeconfig ({ name, namespace }) {
-    const secret = await this.getSecret({ name, namespace, throwNotFound: false })
+    const secret = await this.getSecret({ name, namespace })
     const kubeconfigBase64 = _.get(secret, 'data.kubeconfig')
     if (!kubeconfigBase64) {
       throw createHttpError(404, 'No kubeconfig found in secret')
