@@ -59,13 +59,18 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
             </v-flex>
             <v-flex class="pa-0">
-              <span class="grey--text">Seed</span><br>
-              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </router-link>
-              <template v-else>
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </template>
+              <v-layout row>
+                <v-flex>
+                  <span class="grey--text">Seed</span><br>
+                  <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
+                    <span class="subheading">{{shootSeedName}}</span><br>
+                  </router-link>
+                  <template v-else>
+                    <span class="subheading">{{shootSeedName}}</span><br>
+                  </template>
+                </v-flex>
+                <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+              </v-layout>
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Technical Id</span><br>
