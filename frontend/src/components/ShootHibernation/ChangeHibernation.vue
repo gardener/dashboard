@@ -132,7 +132,7 @@ export default {
             showProgressBar: false
           }
           if (this.isShootStatusHibernated) {
-            this.$snotify.success(`Cluster ${this.shootName} sucessfully hibernated`, config)
+            this.$snotify.success(`Cluster ${this.shootName} successfully hibernated`, config)
           } else {
             this.$snotify.success(`Cluster ${this.shootName} sucessfully started`, config)
           }
