@@ -98,7 +98,7 @@ limitations under the License.
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
         </v-flex>
-        <v-flex class="regularInput">
+        <v-flex class="regularInput" v-if="zonedCluster">
           <v-select
             color="cyan darken-2"
             label="Zone"
@@ -124,7 +124,7 @@ import SizeInput from '@/components/ShootWorkers/VolumeSizeInput'
 import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
-import { required, maxLength, minValue } from 'vuelidate/lib/validators'
+import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import isEmpty from 'lodash/isEmpty'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -183,6 +183,9 @@ export default {
     availableZones: {
       type: Array
     },
+    zonedCluster: {
+      type: Boolean
+    },
     updateOSMaintenance: {
       type: Boolean
     }
@@ -201,8 +204,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileNameAndRegionAndZones',
+      'volumeTypesByCloudProfileNameAndRegionAndZones',
       'machineImagesByCloudProfileName',
       'minimumVolumeSizeByCloudProfileNameAndRegion'
     ]),
@@ -231,16 +234,18 @@ export default {
             numberOrPercentage
           },
           zones: {
-            required
+            required: requiredIf(function () {
+              return this.zonedCluster
+            })
           }
         }
       }
     },
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+      return this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName, zones: this.zones })
+      return this.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: this.worker.zones })
     },
     volumeInCloudProfile () {
       return !isEmpty(this.volumeTypes)
