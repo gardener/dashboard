@@ -142,7 +142,7 @@ export const shootItem = {
       return get(this.shootItem, 'status.seed')
     },
     isControlPlaneMigrating () {
-      return !!this.shootStatusSeedName && this.shootStatusSeedName !== this.shootSeedName
+      return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName
     }
   },
   methods: {
