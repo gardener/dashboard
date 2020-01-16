@@ -30,26 +30,30 @@ limitations under the License.
           ></v-text-field>
       </v-flex>
       <v-flex class="regularInput">
-        <v-select
-          color="cyan darken-2"
-          label="Kubernetes Version"
-          item-text="version"
-          item-value="version"
-          :items="sortedKubernetesVersionsList"
-          v-model="kubernetesVersion"
-          :error-messages="getErrorMessages('kubernetesVersion')"
-          @input="onInputKubernetesVersion"
-          @blur="$v.kubernetesVersion.$touch()"
-          >
-          <template v-slot:item="{ item }">
-            <v-list-tile-content>
-              <v-list-tile-title>{{item.version}}</v-list-tile-title>
-              <v-list-tile-sub-title v-if="item.expirationDateString">
-                <span>Expires: {{item.expirationDateString}}</span>
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-          </template>
-        </v-select>
+        <select-hint-colorizer hintColor="orange">
+          <v-select
+            color="cyan darken-2"
+            label="Kubernetes Version"
+            item-text="version"
+            item-value="version"
+            :items="sortedKubernetesVersionsList"
+            v-model="kubernetesVersion"
+            :error-messages="getErrorMessages('kubernetesVersion')"
+            @input="onInputKubernetesVersion"
+            @blur="$v.kubernetesVersion.$touch()"
+            :hint="versionHint"
+            persistent-hint
+            >
+            <template v-slot:item="{ item }">
+              <v-list-tile-content>
+                <v-list-tile-title>{{item.version}}</v-list-tile-title>
+                <v-list-tile-sub-title v-if="item.expirationDateString">
+                  <span>Expires: {{item.expirationDateString}}</span>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            </template>
+          </v-select>
+        </select-hint-colorizer>
       </v-flex>
       <v-flex class="regularInput">
         <v-select
@@ -69,12 +73,15 @@ limitations under the License.
 
 <script>
 
+import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { mapGetters, mapState } from 'vuex'
 import { getValidationErrors, purposesForSecret } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import find from 'lodash/find'
+import semver from 'semver'
 
 const validationErrors = {
   name: {
@@ -115,6 +122,7 @@ const validations = {
 export default {
   name: 'new-shoot-details',
   components: {
+    SelectHintColorizer
   },
   props: {
     userInterActionBus: {
@@ -130,7 +138,8 @@ export default {
       purpose: undefined,
       valid: false,
       cloudProfileName: undefined,
-      secret: undefined
+      secret: undefined,
+      updateK8sMaintenance: undefined
     }
   },
   validations,
@@ -147,6 +156,17 @@ export default {
     },
     sortedKubernetesVersionsList () {
       return this.sortedKubernetesVersions(this.cloudProfileName)
+    },
+    versionHint () {
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+        return 'If you select a version which is not the latest patch version, you may want to disable automatic Kubernetes updates'
+      }
+      return undefined
+    },
+    versionIsNotLatestPatch () {
+      return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
+        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
+      })
     }
   },
   methods: {
@@ -188,12 +208,13 @@ export default {
         purpose: this.purpose
       }
     },
-    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret }) {
+    setDetailsData ({ name, kubernetesVersion, purpose, cloudProfileName, secret, updateK8sMaintenance }) {
       this.name = name
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
       this.purpose = purpose
+      this.updateK8sMaintenance = updateK8sMaintenance
 
       this.validateInput()
     }
@@ -206,6 +227,9 @@ export default {
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName
       this.setDefaultKubernetesVersion()
+    })
+    this.userInterActionBus.on('updateK8sMaintenance', updateK8sMaintenance => {
+      this.updateK8sMaintenance = updateK8sMaintenance
     })
   }
 }

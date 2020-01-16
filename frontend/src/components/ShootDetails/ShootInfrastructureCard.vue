@@ -60,8 +60,13 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
             </v-flex>
             <v-flex class="pa-0">
-              <span class="grey--text">Seed</span><br>
-              <shoot-seed-name :shootItem="shootItem" />
+              <v-layout row>
+                <v-flex>
+                  <span class="grey--text">Seed</span><br>
+                  <shoot-seed-name :shootItem="shootItem" />
+                </v-flex>
+                <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+              </v-layout>
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Technical Id</span><br>
@@ -94,6 +99,22 @@ limitations under the License.
         </v-card-title>
       </template>
 
+      <template v-if="!!shootLoadbalancerClasses">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">Available Load Balancer Classes</span><br>
+            <lb-class
+            v-for="lbClass in shootLoadbalancerClasses"
+            :name="lbClass.name"
+            :floatingSubnetID="lbClass.floatingSubnetID"
+            :key="lbClass.name"
+            ></lb-class>
+          </v-flex>
+        </v-card-title>
+      </template>
+
     </div>
   </v-card>
 </template>
@@ -104,14 +125,17 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
+import find from 'lodash/find'
 import CopyBtn from '@/components/CopyBtn'
 import ShootSeedName from '@/components/ShootSeedName'
+import LbClass from '@/components/ShootDetails/LbClass'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     CopyBtn,
-    ShootSeedName
+    ShootSeedName,
+    LbClass
   },
   props: {
     shootItem: {
@@ -121,7 +145,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'namespaces'
+      'namespaces',
+      'cloudProfileByName'
     ]),
     showSeedInfo () {
       return !!this.shootSeedName && this.hasAccessToGardenNamespace
@@ -135,6 +160,13 @@ export default {
         return undefined
       }
       return `*.ingress.${this.shootDomain}`
+    },
+    shootLoadbalancerClasses () {
+      const cloudProfile = this.cloudProfileByName(this.shootCloudProfileName)
+      const profileFloatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+      const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
+      const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
+      return get(shootFloatingPool, 'loadBalancerClasses')
     },
     shootZonesText () {
       return join(this.shootZones, ', ')
@@ -158,7 +190,7 @@ export default {
       return 'Zone'
     },
     canLinkToSecret () {
-      return this. shootSecretBindingName && this.shootNamespace
+      return this.shootSecretBindingName && this.shootNamespace
     }
   }
 }

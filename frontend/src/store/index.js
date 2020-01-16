@@ -19,7 +19,7 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -191,29 +191,37 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineImages = get(cloudProfile, 'data.machineImages')
-      const allMachineImages = flatMap(machineImages, machineImage => {
-        const machineImageVersions = []
-        forEach(machineImage.versions, version => {
-          if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
-            const vendorName = vendorNameFromImageName(machineImage.name)
-            machineImageVersions.push({
-              name: machineImage.name,
-              version: version.version,
-              expirationDate: version.expirationDate,
-              expirationDateString: getDateFormatted(version.expirationDate),
-              vendorName,
-              icon: iconForVendor(vendorName),
-              needsLicense: vendorNeedsLicense(vendorName)
-            })
+
+      const mapMachineImages = (machineImage) => {
+        const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
+          if (expirationDate && moment().isAfter(expirationDate)) {
+            return false
           }
+          if (!semver.valid(version)) {
+            console.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
+            return false
+          }
+          return true
         })
-        machineImageVersions.sort((a, b) => {
+        versions.sort((a, b) => {
           return semver.rcompare(a.version, b.version)
         })
-        return machineImageVersions
-      })
 
-      return allMachineImages
+        return map(versions, ({ version, expirationDate }) => {
+          const vendorName = vendorNameFromImageName(machineImage.name)
+          return {
+            name: machineImage.name,
+            version,
+            expirationDate,
+            expirationDateString: getDateFormatted(expirationDate),
+            vendorName,
+            icon: iconForVendor(vendorName),
+            needsLicense: vendorNeedsLicense(vendorName)
+          }
+        })
+      }
+
+      return flatMap(machineImages, mapMachineImages)
     }
   },
   zonesByCloudProfileNameAndRegion (state, getters) {
@@ -337,8 +345,15 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
-      const validVersions = filter(allVersions, ({ expirationDate }) => {
-        return !expirationDate || moment().isBefore(expirationDate)
+      const validVersions = filter(allVersions, ({ expirationDate, version }) => {
+        if (!semver.valid(version)) {
+          console.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
+          return false
+        }
+        if (expirationDate && moment().isAfter(expirationDate)) {
+          return false
+        }
+        return true
       })
       return map(validVersions, version => {
         return {
@@ -435,6 +450,9 @@ const getters = {
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
+  },
+  isKymaFeatureEnabled (state, getters) {
+    return get(state, 'cfg.features.kymaEnabled', false)
   }
 }
 
@@ -505,6 +523,12 @@ const actions = {
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -633,8 +657,12 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
-  setConfiguration ({ commit }, value) {
+  setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
+
+    if (getters.isKymaFeatureEnabled) {
+      addKymaAddon(value.kyma)
+    }
 
     if (get(value, 'alert')) {
       commit('SET_ALERT_BANNER', get(value, 'alert'))
@@ -760,20 +788,22 @@ const mutations = {
   }
 }
 
+const modules = {
+  projects,
+  members,
+  cloudProfiles,
+  domains,
+  shoots,
+  infrastructureSecrets,
+  journals
+}
+
 const store = new Vuex.Store({
   state,
   actions,
   getters,
   mutations,
-  modules: {
-    projects,
-    members,
-    cloudProfiles,
-    domains,
-    shoots,
-    infrastructureSecrets,
-    journals
-  },
+  modules,
   strict: debug,
   plugins
 })
@@ -809,3 +839,12 @@ journalCommentsEmitter.on('comments', events => {
 })
 
 export default store
+
+export {
+  state,
+  actions,
+  getters,
+  mutations,
+  modules,
+  plugins
+}

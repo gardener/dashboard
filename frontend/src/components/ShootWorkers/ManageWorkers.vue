@@ -24,6 +24,7 @@ limitations under the License.
         :cloudProfileName="cloudProfileName"
         :region="region"
         :availableZones="availableZones"
+        :updateOSMaintenance="updateOSMaintenance"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -88,12 +89,12 @@ export default {
       valid: false,
       cloudProfileName: undefined,
       region: undefined,
-      zonesNetworkConfiguration: undefined
+      zonesNetworkConfiguration: undefined,
+      updateOSMaintenance: undefined
     }
   },
   computed: {
     ...mapGetters([
-      'cloudProfileByName',
       'machineTypesByCloudProfileNameAndZones',
       'zonesByCloudProfileNameAndRegion'
     ]),
@@ -148,7 +149,7 @@ export default {
     onWorkerValid ({ valid, id }) {
       const worker = find(this.internalWorkers, { id })
       if (!worker) {
-        // if worker has been removed and we receive a onWorkerValid event for this worker ->ignore
+        // if worker has been removed and we receive an onWorkerValid event for this worker ->ignore
         return
       }
       const wasValid = worker.valid
@@ -180,10 +181,11 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
+      this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
     }
   },
@@ -197,6 +199,9 @@ export default {
       this.userInterActionBus.on('updateRegion', region => {
         this.region = region
         this.setDefaultWorker()
+      })
+      this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
+        this.updateOSMaintenance = updateOSMaintenance
       })
     }
   }

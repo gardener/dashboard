@@ -1,6 +1,7 @@
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
+import cloneDeep from 'lodash/cloneDeep'
 
 import {
   getDateFormatted,
@@ -92,7 +93,12 @@ export const shootItem = {
       return get(this.shootSpec, 'provider.workers', [])
     },
     shootAddons () {
-      return get(this.shootSpec, 'addons', {})
+      const addons = cloneDeep(get(this.shootSpec, 'addons', {}))
+      const kymaAddonEnabled = !!get(this.shootAnnotations, '["experimental.addons.shoot.gardener.cloud/kyma"]')
+      if (kymaAddonEnabled) {
+        addons['kyma'] = { enabled: true }
+      }
+      return addons
     },
     shootRegion () {
       return this.shootSpec.region

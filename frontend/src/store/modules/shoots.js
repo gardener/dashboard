@@ -39,7 +39,7 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
-import { getShoot, getShootInfo, createShoot, deleteShoot } from '@/utils/api'
+import { getShoot, getShootInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
 import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isShootStatusHibernated,
@@ -187,6 +187,19 @@ const actions = {
         throw error
       })
   },
+  async getAddonKyma ({ commit, rootState }, { name, namespace }) {
+    try {
+      const { data: addonKyma } = await getShootAddonKyma({ namespace, name })
+      commit('RECEIVE_ADDON_KYMA', { name, namespace, addonKyma })
+      return addonKyma
+    } catch (error) {
+      // shoot addon kyma not found -> ignore if KubernetesError
+      if (isNotFound(error)) {
+        return
+      }
+      throw error
+    }
+  },
   setSelection ({ commit, dispatch }, metadata) {
     if (!metadata) {
       return commit('SET_SELECTION', null)
@@ -288,7 +301,12 @@ const actions = {
     forEach(filter(shootAddonList, addon => addon.visible), addon => {
       set(addons, [addon.name, 'enabled'], addon.enabled)
     })
+    const kymaEnabled = get(addons, 'kyma.enabled', false)
+    delete addons.kyma
     set(shootResource, 'spec.addons', addons)
+    if (rootGetters.isKymaFeatureEnabled && kymaEnabled) {
+      set(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]', 'enabled')
+    }
 
     const { utcBegin, utcEnd } = utcMaintenanceWindowFromLocalBegin({ localBegin: randomLocalMaintenanceBegin(), timezone: rootState.localTimezone })
     const maintenance = {
@@ -581,6 +599,12 @@ const mutations = {
     const item = findItem({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
+    }
+  },
+  RECEIVE_ADDON_KYMA (state, { namespace, name, addonKyma }) {
+    const item = findItem({ namespace, name })
+    if (item !== undefined) {
+      Vue.set(item, 'addonKyma', addonKyma)
     }
   },
   SET_SELECTION (state, metadata) {

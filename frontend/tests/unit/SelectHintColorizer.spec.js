@@ -16,34 +16,27 @@
 
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import CodeBlock from '@/components/CodeBlock.vue'
+import SelectHintColorizer from '@/components/SelectHintColorizer.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-
 Vue.use(Vuetify)
 
-describe('CodeBlock.vue', function () {
-  it('should render correct contents', function () {
+describe('SelectHintColorizer.vue', function () {
+  it('should be able to apply classname', function () {
     const propsData = {
-      lang: 'yaml',
-      content: `
-        ---
-        foo: true
-        bar: 42`
+      hintColor: 'orange'
     }
-    const wrapper = shallowMount(CodeBlock, {
+    const wrapper = shallowMount(SelectHintColorizer, {
       propsData
     })
-    const vm = wrapper.vm
-    return new Promise(resolve => vm.$nextTick(resolve))
-      .then(() => {
-        const codeElement = vm.$el.querySelector('code.yaml')
-        expect(codeElement).to.be.an.instanceof(HTMLElement)
-        expect(codeElement.querySelector('.hljs-meta').textContent).to.equal('---')
-        expect(codeElement.querySelector('.hljs-literal').textContent).to.equal('true')
-        expect(codeElement.querySelector('.hljs-number').textContent).to.equal('42')
-        const attrs = Array.prototype.map.call(codeElement.querySelectorAll('.hljs-attr'), el => el.textContent)
-        expect(attrs).to.eql(['foo:', 'bar:'])
-      })
+    const colorizerComponent = wrapper.find(SelectHintColorizer).vm
+    expect(colorizerComponent.$el.className).to.contain('hintColor-orange')
+
+    wrapper.setProps({ hintColor: 'cyan' })
+    expect(colorizerComponent.$el.className).to.contain('hintColor-cyan')
+    expect(colorizerComponent.$el.className).to.not.contain('hintColor-orange')
+
+    wrapper.setProps({ hintColor: 'default' })
+    expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
   })
 })

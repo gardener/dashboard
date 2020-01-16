@@ -124,7 +124,7 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :hide-actions="hideActions" :total-items="totalItems" :rows-per-page-items="[5,10,20]">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :rows-per-page-items="[5,10,20]">
         <template slot="items" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
@@ -366,12 +366,6 @@ export default {
         }
       }
       return join(subtitle, ', ')
-    },
-    hideActions () {
-      return this.projectScope
-    },
-    totalItems () {
-      return this.hideActions ? -1 : undefined
     },
     gitHubRepoUrl () {
       return this.cfg.gitHubRepoUrl
