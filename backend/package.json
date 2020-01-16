@@ -30,6 +30,7 @@
     "base64url": "^3.0.1",
     "better-queue": "^3.8.10",
     "body-parser": "^1.19.0",
+    "chalk": "^3.0.0",
     "cookie-parser": "^1.4.4",
     "es6-error": "^4.1.1",
     "express": "^4.17.1",

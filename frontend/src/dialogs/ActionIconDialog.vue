@@ -28,6 +28,7 @@ limitations under the License.
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       :max-width="maxWidth"
+      :maxHeight="maxHeight"
       :confirmValue="confirmValue"
       :confirmColor="dialogColor"
       :defaultColor="dialogColor"
@@ -83,6 +84,10 @@ export default {
     maxWidth: {
       type: String,
       default: '1000'
+    },
+    maxHeight: {
+      type: String,
+      default: '50vh'
     },
     loading: {
       type: Boolean,

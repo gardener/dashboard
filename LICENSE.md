@@ -241,6 +241,10 @@ Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/body-parser/blob/master/LICENSE)
 
+- [chalk](https://github.com/chalk/chalk)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/chalk/chalk/blob/master/license)
+
 - [cookie-parser](https://github.com/expressjs/cookie-parser)\
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>\
 Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>\

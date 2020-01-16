@@ -15,22 +15,23 @@ limitations under the License.
 -->
 
 <template>
-  <v-list three-line class="pa-0 ma-0">
-    <v-list-tile class="list-complete-item ma-0"
-      v-for="addonDefinition in addonDefinitionList"
-      :key="addonDefinition.name">
-      <v-list-tile-action>
-        <v-checkbox
-          color="cyan darken-2"
-          v-model="addons[addonDefinition.name].enabled"
-        ></v-checkbox>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title >{{addonDefinition.title}}</v-list-tile-title>
-        <v-list-tile-sub-title>{{addonDefinition.description}}</v-list-tile-sub-title>
-      </v-list-tile-content>
-    </v-list-tile>
-  </v-list>
+  <v-layout column>
+    <v-flex xs12>
+      <v-layout row v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+        <v-flex class="addon-action">
+          <v-checkbox
+            color="cyan darken-2"
+            v-model="addons[addonDefinition.name].enabled"
+            :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+          ></v-checkbox>
+        </v-flex>
+        <v-flex>
+          <div class="subheading font-weight-medium my-1" v-text="addonDefinition.title"/>
+          <div class="addon-content mb-4" v-html="addonDefinition.description"/>
+        </v-flex>
+      </v-layout>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -41,10 +42,11 @@ import { shootAddonList } from '@/utils'
 
 export default {
   name: 'manage-shoot-addons',
-  components: {
-  },
   props: {
-
+    isCreateMode: {
+      type: Boolean,
+      required: true
+    }
   },
   data () {
     return {
@@ -76,3 +78,18 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+.addon-content >>>  p {
+  margin-bottom: 4px;
+}
+
+.addon-action {
+  min-height: 50px;
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  margin: 0;
+}
+</style>
