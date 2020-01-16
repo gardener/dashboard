@@ -35,7 +35,7 @@ limitations under the License.
       </template>
       <span>Control Plane is migrating </span>
       <span class="font-weight-bold">{{shootStatusSeedName}}</span>
-      <v-icon size=14 color="white">mdi-arrow-right-bold</v-icon>
+      <v-icon size=14 color="white">mdi-arrow-right</v-icon>
       <span class="font-weight-bold">{{shootSeedName}}</span>
     </v-tooltip>
   </v-layout>
