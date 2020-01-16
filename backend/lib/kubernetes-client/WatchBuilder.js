@@ -21,6 +21,7 @@ const EventEmitter = require('events')
 const WebSocket = require('ws')
 const inject = require('reconnect-core')
 
+const HttpClient = require('./HttpClient')
 const { http } = require('./symbols')
 const { validateLabelValue } = require('./util')
 
@@ -29,6 +30,10 @@ const { GatewayTimeout, InternalServerError } = require('../errors')
 
 class WatchBuilder {
   constructor (resource, url, searchParams, name) {
+    assertResource(resource)
+    assertUrl(url)
+    assertSearchParams(searchParams)
+    assertName(name)
     const {
       prefixUrl,
       ca,
@@ -63,7 +68,7 @@ class WatchBuilder {
     }
   }
 
-  createWatch () {
+  createWatch (options = {}) {
     const createWebSocket = this.constructor.createWebSocket
 
     const createConnection = () => {
@@ -83,7 +88,8 @@ class WatchBuilder {
       strategy: 'fibonacci',
       failAfter: Infinity,
       randomisationFactor: 0,
-      immediate: false
+      immediate: false,
+      ...options
     }, onConnect)
     reconnector.resourceName = this.resourceName
     reconnector.waitFor = waitFor
@@ -91,12 +97,13 @@ class WatchBuilder {
     return reconnector
   }
 
-  static create (...args) {
-    return new WatchBuilder(...args).createWatch()
+  static create (resource, url, searchParams, name, options) {
+    const watchBuilder = new WatchBuilder(resource, url, searchParams, name)
+    return watchBuilder.createWatch(options)
   }
 
-  static createWebSocket (...args) {
-    return new WebSocket(...args)
+  static createWebSocket (url, options) {
+    return new WebSocket(url, options)
   }
 
   static setWaitFor (object) {
@@ -137,7 +144,8 @@ function wrapWebSocket (emitter, ws) {
     ws.on('pong', onPong)
     state.isAlive = true
     state.timestamp = Date.now()
-    state.intervalId = setInterval(ping, 15000)
+    const pingInterval = ws._pingInterval || 15000
+    state.intervalId = setInterval(ping, pingInterval)
     logger.debug(`ping-${state.timestamp} started for watch ${state.name}`)
   }
 
@@ -192,9 +200,8 @@ function wrapWebSocket (emitter, ws) {
   function onClose (code, reason) {
     logger.debug('watch closed', code, reason)
     ws.removeAllListeners()
-    ws.removeListener('close', onClose)
-    ws.removeListener('message', onMessage)
     stopPingPong()
+    ws.terminate()
     emitter.emit('close', createError(code, reason))
   }
 
@@ -209,7 +216,7 @@ function wrapWebSocket (emitter, ws) {
   return emitter
 }
 
-function waitFor (condition, { timeout = 5000 }) {
+function waitFor (condition, { timeout = 5000 } = {}) {
   const watch = this
   const resourceName = this.resourceName
   return new Promise((resolve, reject) => {
@@ -264,6 +271,30 @@ function waitFor (condition, { timeout = 5000 }) {
     watch.on('error', logError)
     watch.on('disconnect', onDisconnect)
   })
+}
+
+function assertResource (resource) {
+  if (!(resource instanceof HttpClient)) {
+    throw new TypeError('The parameter "resource" must an instance of HttpClient')
+  }
+}
+
+function assertUrl (url) {
+  if (typeof url !== 'string') {
+    throw new TypeError('The parameter "url" must be a string')
+  }
+}
+
+function assertSearchParams (searchParams) {
+  if (!(searchParams instanceof URLSearchParams)) {
+    throw new TypeError('The parameter "searchParams" must an instance of URLSearchParams')
+  }
+}
+
+function assertName (name) {
+  if (typeof name !== 'string' && typeof name !== 'undefined') {
+    throw new TypeError('The parameter "name" must be a string or undefined')
+  }
 }
 
 module.exports = WatchBuilder
