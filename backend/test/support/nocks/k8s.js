@@ -394,11 +394,10 @@ function getShoot ({
       hibernation,
       provider: {
         type: kind
-      }
+      },
+      seedName: seed
     },
-    status: {
-      seed
-    }
+    status: {}
   }
 
   if (createdBy) {

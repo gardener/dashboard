@@ -36,10 +36,10 @@ limitations under the License.
             <v-layout row>
               <v-flex>
                 <span class="grey--text">Credential</span><br>
-                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace: shootNamespace } }">
-                  <span class="subheading">{{shootSecretName}}</span>
+                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
+                  <span class="subheading">{{shootSecretBindingName}}</span>
                 </router-link>
-                <span v-else>{{shootSecretName}}</span>
+                <span v-else>{{shootSecretBindingName}}</span>
               </v-flex>
             </v-layout>
             <v-layout row>
@@ -157,11 +157,8 @@ export default {
       }
       return 'Zone'
     },
-    shootSecretName () {
-      return this.shootSecretBindingName || 'default'
-    },
     canLinkToSecret () {
-      return this. shootSecretName && this.shootNamespace
+      return this. shootSecretBindingName && this.shootNamespace
     }
   }
 }

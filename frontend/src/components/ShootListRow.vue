@@ -49,7 +49,7 @@ limitations under the License.
       </v-tooltip>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
-      <shoot-seed-name :shootItem="shootItem" short />
+      <shoot-seed-name :shootItem="shootItem" />
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
       <v-layout align-center justify-start row fill-height slot="activator">

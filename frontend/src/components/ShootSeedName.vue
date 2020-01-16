@@ -20,13 +20,11 @@ limitations under the License.
       <template slot="activator">
         <template v-if="isControlPlaneMigrating">
           <v-progress-circular indeterminate size=12 width=2 color="cyan darken-2" class="mr-1"></v-progress-circular>
-          <template v-if="!short">
-            <router-link v-if="canLinkToSeed(shootStatusSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootStatusSeedName, namespace:'garden' } }">
-              <span>{{shootStatusSeedName}}</span>
-            </router-link>
-            <span v-else>{{shootSeedName}}</span>
-            <v-icon small class="mx-1">mdi-arrow-right</v-icon>
-          </template>
+          <router-link v-if="canLinkToSeed(shootStatusSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootStatusSeedName, namespace:'garden' } }">
+            <span>{{shootStatusSeedName}}</span>
+          </router-link>
+          <span v-else>{{shootSeedName}}</span>
+          <v-icon small class="mx-1">mdi-arrow-right</v-icon>
         </template>
         <router-link v-if="canLinkToSeed(shootSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
           <span>{{shootSeedName}}</span>
@@ -50,10 +48,6 @@ export default {
   props: {
     shootItem: {
       type: Object
-    },
-    short: {
-      type: Boolean,
-      default: false
     }
   },
   mixins: [shootItem],

@@ -25,7 +25,7 @@ limitations under the License.
         <v-flex grow class="pa-0">
           <span class="subheading">Hibernation</span><br>
           <v-layout align-center row fill-height class="ma-0">
-            <v-icon v-if="isShootHasNoHibernationScheduleWarning" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
+            <v-icon v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
             <v-progress-circular v-if="isShootStatusHibernationProgressing" indeterminate size=12 width=2 color="grey" class="mr-1"></v-progress-circular>
             <span class="grey--text">{{hibernationDescription}}</span>
           </v-layout>
