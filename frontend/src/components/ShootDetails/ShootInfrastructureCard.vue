@@ -161,7 +161,7 @@ export default {
       return this.shootSecretBindingName || 'default'
     },
     canLinkToSecret () {
-      return this.shootName && this.shootNamespace
+      return this. shootSecretName && this.shootNamespace
     }
   }
 }
