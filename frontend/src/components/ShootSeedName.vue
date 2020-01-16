@@ -25,7 +25,7 @@ limitations under the License.
               <span>{{shootStatusSeedName}}</span>
             </router-link>
             <span v-else>{{shootSeedName}}</span>
-            <v-icon small class="mx-1">mdi-arrow-right-bold</v-icon>
+            <v-icon small class="mx-1">mdi-arrow-right</v-icon>
           </template>
         </template>
         <router-link v-if="canLinkToSeed(shootSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
