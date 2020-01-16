@@ -248,16 +248,16 @@ exports.info = async function ({ user, namespace, name }) {
     })
   ])
 
-  const project = await client.getProjectByNamespace(namespace)
-  const projectName = project.metadata.name
-
   const data = {}
   let seed
   if (shoot.status && shoot.status.seed) {
     seed = getSeed(getSeedNameFromShoot(shoot))
-    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
-    if (ingressDomain) {
-      data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+    const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
+    if (prefix) {
+      const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+      if (ingressDomain) {
+        data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
+      }
     }
   }
 

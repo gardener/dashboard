@@ -164,14 +164,14 @@ const actions = {
 
         if (info.seedShootIngressDomain) {
           const baseHost = info.seedShootIngressDomain
-          info.grafanaUrlUsers = `https://gu.${baseHost}`
-          info.grafanaUrlOperators = `https://go.${baseHost}`
+          info.grafanaUrlUsers = `https://gu-${baseHost}`
+          info.grafanaUrlOperators = `https://go-${baseHost}`
 
-          info.prometheusUrl = `https://p.${baseHost}`
+          info.prometheusUrl = `https://p-${baseHost}`
 
-          info.alertmanagerUrl = `https://au.${baseHost}`
+          info.alertmanagerUrl = `https://au-${baseHost}`
 
-          info.kibanaUrl = `https://k.${baseHost}`
+          info.kibanaUrl = `https://k-${baseHost}`
         }
         return info
       })

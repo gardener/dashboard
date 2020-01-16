@@ -119,7 +119,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
-    const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
+    const seedShootIngressDomain = `${project}--${name}.ingress.${seedClusterName}`
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
