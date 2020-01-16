@@ -7,4 +7,3 @@ reporter: spec
 spec: test/**/*.spec.js
 package: ./package.json
 extension: [ js ]
-opts: false

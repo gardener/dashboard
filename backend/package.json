@@ -20,8 +20,8 @@
     "start": "cross-env NODE_ENV=prod node server.js",
     "lint": "eslint --ext .js server.js lib",
     "sync-version": "bin/sync-version",
-    "test": "cross-env NODE_ENV=test _mocha",
-    "test:coverage": "cross-env NODE_ENV=test nyc _mocha"
+    "test": "cross-env NODE_ENV=test mocha",
+    "test:coverage": "cross-env NODE_ENV=test nyc mocha"
   },
   "dependencies": {
     "@godaddy/terminus": "^4.1.2",
