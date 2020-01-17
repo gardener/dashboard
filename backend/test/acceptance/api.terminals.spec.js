@@ -25,7 +25,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const username = 'admin@example.org'
   const id = username
-  const aud = [ 'gardener' ]
+  const aud = ['gardener']
   const project = 'foo'
   const namespace = `garden-${project}`
 

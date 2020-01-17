@@ -33,6 +33,7 @@ class Client {
     this.clientId = clientId
     this.clientSecret = clientSecret
   }
+
   authorizationUrl ({
     redirect_uri: redirectUri,
     scope
@@ -46,6 +47,7 @@ class Client {
     params.append('response_type', 'code')
     return url.toString()
   }
+
   async callback (redirectUri, { code }, { response_type: responseType }) {
     expect(code).to.equal(OTAC)
     expect(responseType).to.equal('code')
@@ -140,7 +142,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     k8s.stub.authorizeToken()
 
     const res = await agent
-      .post(`/auth`)
+      .post('/auth')
       .send({ token: bearer })
 
     expect(res).to.have.status(200)
@@ -152,10 +154,10 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       decodeValues: true,
       map: true
     })
-    const [ header, payload ] = cookieHeaderPayload.value.split('.')
+    const [header, payload] = cookieHeaderPayload.value.split('.')
     const signature = cookieSignature.value
     const encryptedBearer = cookieToken.value
-    const token = [ header, payload, signature ].join('.')
+    const token = [header, payload, signature].join('.')
     const tokenPayload = security.decode(token)
     expect(tokenPayload.jti).to.match(/[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}/i)
     expect(cookieHeaderPayload.sameSite).to.equal('Lax')
