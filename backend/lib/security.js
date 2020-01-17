@@ -217,8 +217,8 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
-function authenticate ({ createClient } = {}) {
-  assert.ok(typeof createClient === 'function', 'No "createClient" function passed to authenticate middleware')
+function authenticate (options = {}) {
+  assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
@@ -252,7 +252,7 @@ function authenticate ({ createClient } = {}) {
     const auth = user.auth = { bearer }
 
     Object.defineProperty(user, 'client', {
-      value: createClient({ auth }),
+      value: options.createClient({ auth }),
       enumerable: false
     })
   }
@@ -319,7 +319,7 @@ function decode (token) {
   return jwt.decode(token) || {}
 }
 
-module.exports = exports = {
+exports = module.exports = {
   discoverIssuer,
   getIssuerClient,
   COOKIE_HEADER_PAYLOAD,
