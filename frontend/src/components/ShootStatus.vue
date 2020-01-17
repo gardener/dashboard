@@ -20,7 +20,7 @@ limitations under the License.
       <v-tooltip top>
         <template slot="activator">
           <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-            <v-icon v-if="isHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
+            <v-icon v-if="isStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
             <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" color="error">mdi-account-alert</v-icon>
             <v-icon v-else-if="shootDeleted" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
             <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
@@ -28,7 +28,7 @@ limitations under the License.
             <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
             <template v-else>{{operation.progress}}</template>
           </v-progress-circular>
-          <v-icon v-else-if="isHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
+          <v-icon v-else-if="isStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
           <v-icon v-else-if="reconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
           <v-icon v-else-if="isAborted && shootDeleted" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
           <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
@@ -101,7 +101,11 @@ export default {
       type: String,
       required: true
     },
-    isHibernated: {
+    isStatusHibernated: {
+      type: Boolean,
+      default: false
+    },
+    isHibernationProgressing: {
       type: Boolean,
       default: false
     },
@@ -155,8 +159,16 @@ export default {
     },
     popperTitle () {
       let popperTitle = ''
-      if (this.isHibernated) {
-        popperTitle = popperTitle.concat('Hibernated; ')
+      if (this.isHibernationProgressing) {
+        if (this.isStatusHibernated) {
+          popperTitle = popperTitle.concat('Waking up; ')
+        } else {
+          popperTitle = popperTitle.concat('Hibernating; ')
+        }
+      } else {
+        if (this.isStatusHibernated) {
+          popperTitle = popperTitle.concat('Hibernated; ')
+        }
       }
       if (this.reconciliationDeactivated) {
         popperTitle = popperTitle.concat('Reconciliation Deactivated')

@@ -30,7 +30,7 @@ limitations under the License.
         Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
       </template>
       <template v-else>
-        This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
+        This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
       </template>
     </template>
   </action-icon-dialog>
@@ -66,7 +66,7 @@ export default {
       if (!this.isShootSettingHibernated) {
         return 'Hibernate'
       } else {
-        return 'Wake-up'
+        return 'Wake up'
       }
     },
     icon () {
@@ -80,7 +80,7 @@ export default {
       if (!this.isShootSettingHibernated) {
         return 'Hibernate Cluster'
       } else {
-        return 'Wake-up Cluster'
+        return 'Wake up Cluster'
       }
     }
   },

@@ -238,7 +238,7 @@ export default {
     },
     shootTerminalButtonDescription () {
       if (this.isShootStatusHibernated) {
-        return 'Cluster is hibernated. Wake-up cluster to open terminal.'
+        return 'Cluster is hibernated. Wake up cluster to open terminal.'
       }
       return this.shootTerminalDescription
     },

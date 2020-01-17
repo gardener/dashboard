@@ -77,7 +77,8 @@ limitations under the License.
          :operation="shootLastOperation"
          :lastError="shootLastError"
          :popperKey="`${shootNamespace}/${shootName}`"
-         :isHibernated="isShootStatusHibernated"
+         :isStatusHibernated="isShootStatusHibernated"
+         :isHibernationProgressing="isShootStatusHibernationProgressing"
          :reconciliationDeactivated="isShootReconciliationDeactivated"
          :shootDeleted="isTypeDelete">
         </shoot-status>

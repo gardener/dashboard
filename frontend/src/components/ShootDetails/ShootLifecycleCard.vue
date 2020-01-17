@@ -143,7 +143,7 @@ export default {
         if (this.isShootSettingHibernated) {
           return 'Hibernating Cluster...'
         } else {
-          return 'Waking-up Cluster...'
+          return 'Waking up Cluster...'
         }
       }
 
