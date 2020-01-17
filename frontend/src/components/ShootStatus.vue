@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <div slot="popperRef" class="shoot-status-div">
       <v-tooltip top>
         <template slot="activator">
@@ -157,30 +157,27 @@ export default {
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
     },
-    popperTitle () {
-      let popperTitle = ''
+    statusTitle () {
+      const statusTitle = []
       if (this.isHibernationProgressing) {
         if (this.isStatusHibernated) {
-          popperTitle = popperTitle.concat('Waking up; ')
+          statusTitle.push('Waking up')
         } else {
-          popperTitle = popperTitle.concat('Hibernating; ')
+          statusTitle.push('Hibernating')
         }
       } else if (this.isStatusHibernated) {
-        popperTitle = popperTitle.concat('Hibernated; ')
+        statusTitle.push('Hibernated')
       }
       if (this.reconciliationDeactivated) {
-        popperTitle = popperTitle.concat('Reconciliation Deactivated')
-
-        this.emitExtendedTitle(popperTitle)
-        return popperTitle
+        statusTitle.push('Hibernated')
+      } else {
+        statusTitle.push(`${this.operationType} ${this.operationState}`)
       }
-      popperTitle = popperTitle.concat(`${this.operationType} ${this.operationState}`)
 
-      this.emitExtendedTitle(popperTitle)
-      return popperTitle
+      return join(statusTitle, ', ')
     },
     tooltipText () {
-      let tooltipText = this.popperTitle
+      let tooltipText = this.statusTitle
       if (this.showProgress) {
         tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
       }
@@ -214,13 +211,15 @@ export default {
       }
     }
   },
-  methods: {
-    emitExtendedTitle (title) {
+  watch: {
+    statusTitle (statusTitle) {
       // similar to tooltipText, except the progress is missing
-      let extendedTitle = title
+      let extendedTitle = statusTitle
       if (this.isUserError) {
-        extendedTitle = extendedTitle.concat(`; ${this.errorCodeShortDescriptionsText}`)
+        extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
       }
+
+      console.log('extendedTitle', extendedTitle);
 
       this.$emit('titleChange', extendedTitle)
     }
