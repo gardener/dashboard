@@ -165,10 +165,8 @@ export default {
         } else {
           popperTitle = popperTitle.concat('Hibernating; ')
         }
-      } else {
-        if (this.isStatusHibernated) {
-          popperTitle = popperTitle.concat('Hibernated; ')
-        }
+      } else if (this.isStatusHibernated) {
+        popperTitle = popperTitle.concat('Hibernated; ')
       }
       if (this.reconciliationDeactivated) {
         popperTitle = popperTitle.concat('Reconciliation Deactivated')
