@@ -127,17 +127,18 @@ export default {
       }
       this.hibernationChanged = false
 
-      if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
-        const config = {
-          position: SnotifyPosition.rightBottom,
-          timeout: 5000,
-          showProgressBar: false
-        }
-        if (this.isShootStatusHibernated) {
-          this.$snotify.success(`Cluster ${this.shootName} successfully hibernated`, config)
-        } else {
-          this.$snotify.success(`Cluster ${this.shootName} successfully started`, config)
-        }
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      if (this.isShootStatusHibernated) {
+        this.$snotify.success(`Cluster ${this.shootName} successfully hibernated`, config)
+      } else {
+        this.$snotify.success(`Cluster ${this.shootName} successfully started`, config)
       }
     }
   }

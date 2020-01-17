@@ -113,18 +113,20 @@ export default {
   watch: {
     isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
       const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
-      if (isMaintenanceScheduled) {
-        this.maintenanceTriggered = false
-
-        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
-          const config = {
-            position: SnotifyPosition.rightBottom,
-            timeout: 5000,
-            showProgressBar: false
-          }
-          this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
-        }
+      if (!isMaintenanceScheduled) {
+        return
       }
+      this.maintenanceTriggered = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
     }
   }
 }
