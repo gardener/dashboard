@@ -19,12 +19,13 @@
 const ioClient = require('socket.io-client')
 const http = require('http')
 const pEvent = require('p-event')
-const { filter, map, keys } = require('lodash')
+const { filter, map, pick, groupBy, find, includes } = require('lodash')
 
 const kubernetesClient = require('../../lib/kubernetes-client')
 const io = require('../../lib/io')
 const watches = require('../../lib/watches')
-const { projects, shoots, authorization } = require('../../lib/services')
+const cache = require('../../lib/cache')
+const { projects, shoots, authorization, journals } = require('../../lib/services')
 
 module.exports = function ({ sandbox, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -33,30 +34,27 @@ module.exports = function ({ sandbox, auth }) {
   const id = username
   const user = auth.createUser({ id })
 
-  let bearer
-  let client = {}
-  let createClientStub
-  let isAdminStub
-  let listProjectsStub
-  let listShootsStub
-  let sockets = {}
+  let socket
   let server
   let ioServer
 
-  const projectList = [
-    { metadata: { namespace: 'foo' } },
-    { metadata: { namespace: 'bar' } }
-  ]
-
-  const shootList = [
-    { metadata: { namespace: 'foo', name: 'foo' } },
-    { metadata: { namespace: 'foo', name: 'bar' } },
-    { metadata: { namespace: 'foo', name: 'baz' } },
-    { metadata: { namespace: 'bar', name: 'foo' } }
-  ]
+  const client = {}
+  const journalCache = {
+    issues: [],
+    getIssues () {
+      return this.issues
+    },
+    getIssueNumbersForNameAndNamespace ({ namespace, name }) {
+      const issues = filter(this.issues, { namespace, name })
+      return map(issues, 'id')
+    }
+  }
+  let createClientStub
+  let isAdminStub
 
   function setupIoServer (server) {
     try {
+      const getJournalCacheStub = sandbox.stub(cache, 'getJournalCache').returns(journalCache)
       const stubs = {}
       for (const key of Object.keys(watches)) {
         stubs[key] = sandbox.stub(watches, key)
@@ -67,6 +65,7 @@ module.exports = function ({ sandbox, auth }) {
         expect(stub.firstCall.args).to.have.length(1)
         expect(stub.firstCall.args[0]).to.be.equal(ioServer)
       }
+      expect(getJournalCacheStub).to.be.calledOnce
       ioServer.attach(server)
     } finally {
       sandbox.restore()
@@ -77,7 +76,6 @@ module.exports = function ({ sandbox, auth }) {
     const { address: hostname, port } = server.address()
     const origin = `http://[${hostname}]:${port}`
     const cookie = await user.cookie
-    bearer = await user.bearer
     const socket = ioClient(origin + '/' + key, {
       path: '/api/events',
       extraHeaders: { cookie },
@@ -111,69 +109,174 @@ module.exports = function ({ sandbox, auth }) {
   })
 
   beforeEach(async function () {
-    client = {}
-    createClientStub = sandbox.stub(kubernetesClient, 'createClient')
-      .callsFake(() => client)
+    createClientStub = sandbox.stub(kubernetesClient, 'createClient').returns(client)
     isAdminStub = sandbox.stub(authorization, 'isAdmin')
-    listProjectsStub = sandbox.stub(projects, 'list')
-    listShootsStub = sandbox.stub(shoots, 'list')
-    sockets = await Promise.all(['shoots', 'journals'].map(connect))
-    expect(sockets).to.have.length(2)
-    for (const socket of sockets) {
-      expect(socket.connected).to.be.true
-    }
-    expect(createClientStub).to.be.calledTwice
-    expect(createClientStub).to.be.calledWith({ auth: { bearer } })
   })
 
   afterEach(function () {
-    for (const socket of sockets) {
-      if (socket.connected) {
-        socket.disconnect()
+    if (socket.connected) {
+      socket.disconnect()
+    }
+  })
+
+  describe('shoots', function () {
+    const projectList = [
+      { metadata: { namespace: 'foo' } },
+      { metadata: { namespace: 'bar' } }
+    ]
+
+    const shootList = [
+      { metadata: { namespace: 'foo', name: 'foo' } },
+      { metadata: { namespace: 'foo', name: 'bar' } },
+      { metadata: { namespace: 'foo', name: 'baz' } },
+      { metadata: { namespace: 'bar', name: 'foo' } }
+    ]
+
+    async function emitSubscribe (...args) {
+      const asyncIterator = pEvent.iterator(socket, 'namespacedEvents', {
+        timeout: 1000,
+        resolutionEvents: ['shootSubscriptionDone', 'batchNamespacedEventsDone'],
+        rejectionEvents: ['error', 'subscription_error']
+      })
+      socket.emit(...args)
+      const shootsByNamespace = {}
+      for await (const namespacedEvent of asyncIterator) {
+        for (const [key, items] of Object.entries(namespacedEvent.namespaces)) {
+          shootsByNamespace[key] = (shootsByNamespace[key] || []).concat(map(items, 'object'))
+        }
       }
+      return shootsByNamespace
     }
+
+    let listProjectsStub
+    let listShootsStub
+    let readShootStub
+
+    beforeEach(async function () {
+      listProjectsStub = sandbox.stub(projects, 'list')
+      listShootsStub = sandbox.stub(shoots, 'list')
+      readShootStub = sandbox.stub(shoots, 'read')
+      socket = await connect('shoots')
+      expect(socket.connected).to.be.true
+      expect(createClientStub).to.be.calledOnce
+      const bearer = await user.bearer
+      expect(createClientStub).to.be.calledWith({ auth: { bearer } })
+    })
+
+    it('should subscribe shoots for a namespace', async function () {
+      listProjectsStub.callsFake(() => projectList)
+      listShootsStub.callsFake(({ namespace }) => {
+        const items = filter(shootList, ['metadata.namespace', namespace])
+        return { items }
+      })
+      const shootsByNamespace = await emitSubscribe('subscribeShoots', {
+        namespaces: [{ namespace: 'foo' }]
+      })
+      expect(isAdminStub).to.not.be.called
+      expect(listProjectsStub).to.be.calledOnce
+      expect(listShootsStub).to.be.calledOnce
+      expect(shootsByNamespace).to.eql(pick(groupBy(shootList, 'metadata.namespace'), 'foo'))
+    })
+
+    it('should subscribe shoots for all namespaces', async function () {
+      isAdminStub.callsFake(() => false)
+      listProjectsStub.callsFake(() => projectList)
+      listShootsStub.callsFake(({ namespace }) => {
+        const items = filter(shootList, ['metadata.namespace', namespace])
+        return { items }
+      })
+      const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
+      expect(isAdminStub).to.be.calledOnce
+      expect(listProjectsStub).to.be.calledOnce
+      expect(listShootsStub).to.be.calledTwice
+      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+    })
+
+    it('should subscribe shoots for all namespaces as admin', async function () {
+      isAdminStub.callsFake(() => true)
+      listProjectsStub.callsFake(() => projectList)
+      listShootsStub.callsFake(() => {
+        const items = shootList
+        return { items }
+      })
+      const shootsByNamespace = await emitSubscribe('subscribeAllShoots', {})
+      expect(isAdminStub).to.be.calledOnce
+      expect(listProjectsStub).to.be.calledOnce
+      expect(listShootsStub).to.be.calledOnce
+      expect(shootsByNamespace).to.eql(groupBy(shootList, 'metadata.namespace'))
+    })
+
+    it('should subscribe single shoot', async function () {
+      listProjectsStub.callsFake(() => projectList)
+      readShootStub.callsFake(({ namespace, name }) => {
+        return find(shootList, { metadata: { namespace, name } })
+      })
+      const metadata = {
+        namespace: 'foo',
+        name: 'bar'
+      }
+      const shootsByNamespace = await emitSubscribe('subscribeShoot', metadata)
+      expect(isAdminStub).to.not.be.called
+      expect(listProjectsStub).to.be.calledOnce
+      expect(listShootsStub).to.not.be.called
+      expect(shootsByNamespace).to.eql({ [metadata.namespace]: [find(shootList, { metadata })] })
+    })
   })
 
-  it('should subscribe shoots', async function () {
-    listProjectsStub.callsFake(() => projectList)
-    listShootsStub.callsFake(({ namespace }) => {
-      const items = filter(shootList, ['metadata.namespace', namespace])
-      return { items }
-    })
-    const socket = sockets[0]
-    const namespaces = [{ namespace: 'foo' }]
-    socket.emit('subscribeShoots', { namespaces })
-    const namespacedEvent = await pEvent(socket, 'namespacedEvents', {
-      timeout: 1000,
-      rejectionEvents: ['error', 'subscription_error']
-    })
-    expect(isAdminStub).to.not.be.called
-    expect(listProjectsStub).to.be.calledOnce
-    expect(listShootsStub).to.be.calledOnce
-    expect(keys(namespacedEvent.namespaces)).to.eql(['foo'])
-    expect(map(namespacedEvent.namespaces.foo, 'object')).to.eql(filter(shootList, ['metadata.namespace', 'foo']))
-  })
+  describe('journals', function () {
+    const issues = [
+      { id: 1, namespace: 'foo', name: 'bar' },
+      { id: 2, namespace: 'foo', name: 'baz' },
+      { id: 3, namespace: 'foo', name: 'bar' }
+    ]
 
-  it('should subscribe all shoots', async function () {
-    isAdminStub.callsFake(() => true)
-    listProjectsStub.callsFake(() => projectList)
-    listShootsStub.callsFake(({ namespace }) => {
-      const items = shootList
-      return { items }
-    })
-    const socket = sockets[0]
-    socket.emit('subscribeAllShoots', { })
-    const namespacedEvent = await pEvent(socket, 'namespacedEvents', {
-      timeout: 1000,
-      rejectionEvents: ['error', 'subscription_error']
-    })
-    expect(isAdminStub).to.be.calledOnce
-    expect(listProjectsStub).to.be.calledOnce
-    expect(listShootsStub).to.be.calledOnce
-    const namespaces = ['foo', 'bar']
-    expect(keys(namespacedEvent.namespaces)).to.eql(namespaces)
-    for (const key of namespaces) {
-      expect(map(namespacedEvent.namespaces[key], 'object')).to.eql(filter(shootList, ['metadata.namespace', key]))
+    const comments = [
+      { id: 1, issue: 1 },
+      { id: 2, issue: 2 },
+      { id: 3, issue: 1 },
+      { id: 4, issue: 2 },
+      { id: 5, issue: 3 },
+      { id: 6, issue: 3 }
+    ]
+
+    async function emitSubscribe (...args) {
+      socket.emit(...args)
+      const { events } = await pEvent(socket, 'events', {
+        timeout: 1000,
+        rejectionEvents: ['error', 'subscription_error']
+      })
+      return map(events, 'object')
     }
+
+    let getIssueCommentsStub
+
+    beforeEach(async function () {
+      journalCache.issues = issues
+      getIssueCommentsStub = sandbox.stub(journals, 'getIssueComments')
+        .callsFake(({ number }) => filter(comments, ['issue', number]))
+      socket = await connect('journals')
+      expect(socket.connected).to.be.true
+      expect(createClientStub).to.be.calledOnce
+      const bearer = await user.bearer
+      expect(createClientStub).to.be.calledWith({ auth: { bearer } })
+    })
+
+    it('should subscribe issues', async function () {
+      isAdminStub.callsFake(() => true)
+      const actualIssues = await emitSubscribe('subscribeIssues')
+      expect(isAdminStub).to.be.calledOnce
+      expect(actualIssues).to.eql(issues)
+    })
+
+    it('should subscribe issues comments', async function () {
+      isAdminStub.callsFake(() => true)
+      const metadata = { namespace: 'foo', name: 'bar' }
+      const issueComments = await emitSubscribe('subscribeComments', metadata)
+      expect(isAdminStub).to.be.calledOnce
+      const numbers = map(filter(issues, metadata), 'id')
+      expect(getIssueCommentsStub).to.have.callCount(numbers.length)
+      const predicate = ({ issue: id }) => includes(numbers, id)
+      expect(issueComments).to.eql(filter(comments, predicate))
+    })
   })
 }
