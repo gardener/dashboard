@@ -21,7 +21,7 @@ import { state, actions, getters, mutations, modules } from '@/store'
 let store
 
 describe('Store.Shoots', function () {
-  beforeEach(function (done) {
+  beforeEach(function () {
     const shootItems = {
       shoot2_foo: {
         metadata: {
@@ -130,8 +130,6 @@ describe('Store.Shoots', function () {
       mutations,
       modules
     })
-
-    done()
   })
 
   it('should sort shoots by name', function () {
