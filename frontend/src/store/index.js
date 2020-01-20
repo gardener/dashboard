@@ -105,16 +105,6 @@ const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
 
-const machineAndVolumeTypePredicate = (item, unavailableItems) => {
-  if (item.usable === false) {
-    return false
-  }
-  if (includes(unavailableItems, item.name)) {
-    return false
-  }
-  return true
-}
-
 const vendorNameFromImageName = imageName => {
   const lowerCaseName = lowerCase(imageName)
   if (lowerCaseName.includes('coreos')) {
@@ -161,30 +151,56 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  machineTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        const machineTypes = cloudProfile.data.machineTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
-        })
-        return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, unavailableItems))
+  machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    const machineAndVolumeTypePredicate = unavailableItems => {
+      return item => {
+        if (item.usable === false) {
+          return false
+        }
+        if (includes(unavailableItems, item.name)) {
+          return false
+        }
+        return true
       }
-      return []
+    }
+
+    return ({ type, cloudProfileName, region, zones }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const items = cloudProfile.data[type]
+      if (!region || !zones) {
+        return items
+      }
+      const regionObject = find(cloudProfile.data.regions, { name: region })
+      let regionZones = get(regionObject, 'zones', [])
+      regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
+      const unavailableItems = flatMap(regionZones, zone => {
+        if (type === 'machineTypes') {
+          return zone.unavailableMachineTypes
+        } else if (type === 'volumeTypes') {
+          return zone.unavailableVolumeTypes
+        }
+      })
+      return filter(items, machineAndVolumeTypePredicate(unavailableItems))
     }
   },
-  volumeTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        const volumeTypes = cloudProfile.data.volumeTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
-        })
-        return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, unavailableItems))
-      }
-      return []
+  machineTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  machineTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
+    }
+  },
+  volumeTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  volumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'volumeTypes', cloudProfileName, region, zones })
     }
   },
   machineImagesByCloudProfileName (state, getters) {

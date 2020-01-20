@@ -91,7 +91,7 @@ describe('Store', function () {
     expect(fooImage.needsLicense).to.equal(false)
   })
 
-  it('should should filter kubernetes versions from cloud profile', function () {
+  it('should filter kubernetes versions from cloud profile', function () {
     const kubernetesVersions = [
       {
         'version': '1.13.4'
@@ -139,5 +139,152 @@ describe('Store', function () {
     expect(kubernetesVersion.expirationDate).to.equal('2120-04-12T23:59:59Z')
     expect(kubernetesVersion.expirationDateString).to.not.equal(undefined)
     expect(kubernetesVersion).to.equal(dashboardVersions[0]) // check sorting
+  })
+
+  it('should return machineTypes by region and zones from cloud profile', function () {
+    const cpMachineTypes = [
+      {
+        'name': 'machineType1'
+      },
+      {
+        'name': 'machineType2'
+      },
+      {
+        'name': 'machineType3'
+      }
+    ]
+
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return {
+          data: {
+            machineTypes: cpMachineTypes,
+            regions: [
+              {
+                name: 'region1',
+                zones: [
+                  {
+                    name: 'zone1'
+                  },
+                  {
+                    name: 'zone2',
+                    unavailableMachineTypes: [
+                      'machineType2'
+                    ]
+                  }
+                ]
+              },
+              {
+                name: 'region2',
+                zones: [
+                  {
+                    name: 'zone1'
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      machineTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      },
+      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      }
+    }
+
+    let dashboardMachineTypes = getters.machineTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
+    expect(dashboardMachineTypes).to.have.length(3)
+
+    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2'] })
+    expect(dashboardMachineTypes).to.have.length(2)
+    expect(dashboardMachineTypes[0].name).to.equal('machineType1')
+    expect(dashboardMachineTypes[1].name).to.equal('machineType3')
+
+    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1', 'zone3'] })
+    expect(dashboardMachineTypes).to.have.length(3)
+
+    dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
+    expect(dashboardMachineTypes).to.have.length(3)
+  })
+
+  it('should return volumeTypes by region and zones from cloud profile', function () {
+    const cpVolumeTypes = [
+      {
+        'name': 'volumeType1'
+      },
+      {
+        'name': 'volumeType2'
+      },
+      {
+        'name': 'volumeType3'
+      }
+    ]
+
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return {
+          data: {
+            volumeTypes: cpVolumeTypes,
+            regions: [
+              {
+                name: 'region1',
+                zones: [
+                  {
+                    name: 'zone1'
+                  },
+                  {
+                    name: 'zone2',
+                    unavailableVolumeTypes: [
+                      'volumeType2'
+                    ]
+                  },
+                  {
+                    name: 'zone3',
+                    unavailableVolumeTypes: [
+                      'volumeType1',
+                      'volumeType3'
+                    ]
+                  }
+                ]
+              },
+              {
+                name: 'region2',
+                zones: [
+                  {
+                    name: 'zone1'
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      volumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      },
+      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      }
+    }
+
+    let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
+    expect(dashboardVolumeTypes).to.have.length(3)
+
+    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1'] })
+    expect(dashboardVolumeTypes).to.have.length(3)
+
+    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2', 'zone3'] })
+    expect(dashboardVolumeTypes).to.have.length(0)
+
+    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone3'] })
+    expect(dashboardVolumeTypes).to.have.length(1)
+    expect(dashboardVolumeTypes[0].name).to.equal('volumeType2')
+
+    dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
+    expect(dashboardVolumeTypes).to.have.length(3)
   })
 })

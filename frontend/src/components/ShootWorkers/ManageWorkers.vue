@@ -24,6 +24,7 @@ limitations under the License.
         :cloudProfileName="cloudProfileName"
         :region="region"
         :availableZones="availableZones"
+        :zonedCluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
@@ -90,16 +91,18 @@ export default {
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
+      zonedCluster: undefined,
       updateOSMaintenance: undefined
     }
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndZones',
+      'cloudProfileByName',
+      'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion'
     ]),
     allMachineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
@@ -181,12 +184,13 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster = true, updateOSMaintenance }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
+      this.zonedCluster = zonedCluster
     }
   },
   mounted () {
