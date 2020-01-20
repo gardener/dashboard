@@ -219,8 +219,6 @@ export default {
         extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
       }
 
-      console.log('extendedTitle', extendedTitle);
-
       this.$emit('titleChange', extendedTitle)
     }
   }
