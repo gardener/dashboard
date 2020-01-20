@@ -186,10 +186,16 @@ describe('Store', function () {
             ]
           }
         }
+      },
+      machineTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      },
+      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
       }
     }
 
-    let dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo' })
+    let dashboardMachineTypes = getters.machineTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
     expect(dashboardMachineTypes).to.have.length(3)
 
     dashboardMachineTypes = getters.machineTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone2'] })
@@ -256,10 +262,16 @@ describe('Store', function () {
             ]
           }
         }
+      },
+      volumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
+      },
+      machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (...args) {
+        return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, this)(...args)
       }
     }
 
-    let dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo' })
+    let dashboardVolumeTypes = getters.volumeTypesByCloudProfileName({}, storeGetters)({ cloudProfileName: 'foo' })
     expect(dashboardVolumeTypes).to.have.length(3)
 
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region1', zones: ['zone1'] })

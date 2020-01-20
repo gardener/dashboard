@@ -184,13 +184,13 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, updateOSMaintenance }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster = true, updateOSMaintenance }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
-      this.zonedCluster = zonedCluster !== false
+      this.zonedCluster = zonedCluster
     }
   },
   mounted () {
