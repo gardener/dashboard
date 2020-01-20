@@ -101,18 +101,20 @@ export default {
   watch: {
     isActionToBeScheduled (actionToBeScheduled) {
       const isActionScheduled = !actionToBeScheduled && this.actionTriggered
-      if (isActionScheduled) {
-        this.actionTriggered = false
-
-        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
-          const config = {
-            position: SnotifyPosition.rightBottom,
-            timeout: 5000,
-            showProgressBar: false
-          }
-          this.$snotify.success(`Rotation of kubeconfig credentials started for ${this.shootName}`, config)
-        }
+      if (!isActionScheduled) {
+        return
       }
+      this.actionTriggered = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      this.$snotify.success(`Rotation of kubeconfig credentials started for ${this.shootName}`, config)
     }
   }
 }

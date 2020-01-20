@@ -6,7 +6,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import {
   getDateFormatted,
   getCreatedBy,
-  isHibernated,
+  isShootStatusHibernated,
   isReconciliationDeactivated,
   getProjectName
 } from '@/utils'
@@ -16,7 +16,6 @@ export const shootItem = {
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
-
     shootName () {
       return this.shootMetadata.name
     },
@@ -66,12 +65,17 @@ export const shootItem = {
     isShootActionsDisabledForPurpose () {
       return this.shootPurpose === 'infrastructure'
     },
-
     shootSpec () {
       return get(this.shootItem, 'spec', {})
     },
-    isShootHibernated () {
-      return isHibernated(this.shootSpec)
+    isShootSettingHibernated () {
+      return get(this.shootSpec, 'hibernation.enabled', false)
+    },
+    isShootStatusHibernated () {
+      return isShootStatusHibernated(this.shootItem.status)
+    },
+    isShootStatusHibernationProgressing () {
+      return this.isShootSettingHibernated !== this.isShootStatusHibernated
     },
     shootSecretBindingName () {
       return this.shootSpec.secretBindingName
@@ -138,7 +142,13 @@ export const shootItem = {
       return get(this.shootItem, `status.technicalID`)
     },
     shootSeedName () {
+      return get(this.shootSpec, 'seedName')
+    },
+    shootStatusSeedName () {
       return get(this.shootItem, 'status.seed')
+    },
+    isControlPlaneMigrating () {
+      return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName
     }
   },
   methods: {

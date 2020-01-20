@@ -336,13 +336,8 @@ export function getProjectName (metadata) {
   return projectName
 }
 
-export function isHibernated (spec) {
-  if (!spec) {
-    return false
-  }
-
-  const hibernationEnabled = get(spec, 'hibernation.enabled', false)
-  return hibernationEnabled
+export function isShootStatusHibernated (status) {
+  return get(status, 'hibernated', false)
 }
 
 export function canLinkToSeed ({ namespace, seedName }) {

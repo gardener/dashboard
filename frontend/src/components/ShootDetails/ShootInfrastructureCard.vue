@@ -36,9 +36,10 @@ limitations under the License.
             <v-layout row>
               <v-flex>
                 <span class="grey--text">Credential</span><br>
-                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace } }">
-                  <span class="subheading">{{shootSecretName}}</span>
+                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
+                  <span class="subheading">{{shootSecretBindingName}}</span>
                 </router-link>
+                <span v-else>{{shootSecretBindingName}}</span>
               </v-flex>
             </v-layout>
             <v-layout row>
@@ -62,12 +63,7 @@ limitations under the License.
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Seed</span><br>
-                  <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
-                    <span class="subheading">{{shootSeedName}}</span><br>
-                  </router-link>
-                  <template v-else>
-                    <span class="subheading">{{shootSeedName}}</span><br>
-                  </template>
+                  <shoot-seed-name :shootItem="shootItem" />
                 </v-flex>
                 <copy-btn :clipboard-text="shootSeedName"></copy-btn>
               </v-layout>
@@ -131,15 +127,14 @@ import join from 'lodash/join'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import CopyBtn from '@/components/CopyBtn'
+import ShootSeedName from '@/components/ShootSeedName'
 import LbClass from '@/components/ShootDetails/LbClass'
-import {
-  canLinkToSeed
-} from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     CopyBtn,
+    ShootSeedName,
     LbClass
   },
   props: {
@@ -159,9 +154,6 @@ export default {
     hasAccessToGardenNamespace () {
       return includes(this.namespaces, 'garden')
     },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.namespace, seedName: this.shootSeedName })
-    },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
       if (!this.shootDomain || !nginxIngressEnabled) {
@@ -175,9 +167,6 @@ export default {
       const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
       const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
       return get(shootFloatingPool, 'loadBalancerClasses')
-    },
-    namespace () {
-      return get(this.$route.params, 'namespace')
     },
     shootZonesText () {
       return join(this.shootZones, ', ')
@@ -200,8 +189,8 @@ export default {
       }
       return 'Zone'
     },
-    shootSecretName () {
-      return this.shootSecretBindingName || 'default'
+    canLinkToSecret () {
+      return this.shootSecretBindingName && this.shootNamespace
     }
   }
 }
