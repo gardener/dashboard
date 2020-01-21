@@ -30,6 +30,9 @@ limitations under the License.
 
     <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret" @input="onInput('alicloud')"></alicloud-dialog>
     <alicloud-help-dialog v-model="dialogState.alicloud.help" @input="onInput('alicloud')"></alicloud-help-dialog>
+
+    <vsphere-dialog v-model="dialogState.vsphere.visible" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
+    <vsphere-help-dialog v-model="dialogState.vsphere.help" @input="onInput('vsphere')"></vsphere-help-dialog>
   </div>
 </template>
 
@@ -44,6 +47,8 @@ import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
 import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
+import VsphereDialog from '@/dialogs/SecretDialogVSphere'
+import VsphereHelpDialog from '@/dialogs/SecretDialogVSphereHelp'
 
 export default {
   name: 'secret-dialog-wrapper',
@@ -57,7 +62,9 @@ export default {
     OpenstackDialog,
     OpenstackHelpDialog,
     AlicloudDialog,
-    AlicloudHelpDialog
+    AlicloudHelpDialog,
+    VsphereDialog,
+    VsphereHelpDialog
   },
   props: {
     dialogState: {

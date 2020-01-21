@@ -94,6 +94,21 @@ limitations under the License.
     @delete="onDelete"
     ></secret>
 
+    <secret
+    v-if="hasCloudProfileForCloudProviderKind('vsphere')"
+    class="mt-3"
+    infrastructureKey="vsphere"
+    infrastructureName="VMware vSphere"
+    secretDescriptorKey="accessKeyID"
+    icon="vsphere-white"
+    description="Make sure that the new credentials have the correct VMware vSphere permissions"
+    color="vsphere-bgcolor"
+    @add="onAdd"
+    @toogleHelp="onToogleHelp"
+    @update="onUpdate"
+    @delete="onDelete"
+    ></secret>
+
     <template v-if="showDisabledCloudProviders">
 
       <disabled-secret
@@ -102,14 +117,6 @@ limitations under the License.
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
       color="blue"
-      ></disabled-secret>
-
-      <disabled-secret
-      class="mt-3"
-      infrastructureName="VMware"
-      icon="vmware"
-      description="Before you can provision and access a Kubernetes cluster on VMware, you need to add account credentials."
-      color="green darken-4"
       ></disabled-secret>
 
       <disabled-secret
@@ -138,6 +145,9 @@ limitations under the License.
         <v-btn slot="activator" class="cyan darken-2" dark fab v-model="dialogState.speedDial">
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
+        </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="light-green darken-3" @click="onAdd('vsphere')">
+          <infra-icon value="vsphere-white" :width="20"></infra-icon>
         </v-btn>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
           <infra-icon value="alicloud-white" :width="20"></infra-icon>
@@ -204,6 +214,10 @@ export default {
           visible: false,
           help: false
         },
+        vsphere: {
+          visible: false,
+          help: false
+        },
         deleteConfirm: false,
         speedDial: false
       },
@@ -262,6 +276,8 @@ export default {
           return '/static/background_openstack.svg'
         case 'alicloud':
           return '/static/background_alicloud.svg'
+        case 'vsphere':
+          return '/static/background_vsphere.svg'
       }
       return '/static/background_aws.svg'
     },

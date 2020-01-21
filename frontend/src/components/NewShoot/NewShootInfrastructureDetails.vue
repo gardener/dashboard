@@ -195,6 +195,10 @@ export default {
         alicloud: {
           visible: false,
           help: false
+        },
+        vsphere: {
+          visible: false,
+          help: false
         }
       },
       secretItemsBeforeAdd: undefined
