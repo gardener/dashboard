@@ -17,6 +17,7 @@
 'use strict'
 
 const { Server } = require('http')
+const pEvent = require('p-event')
 const createServer = require('../lib/server')
 
 function createApplication (port) {
@@ -63,15 +64,17 @@ function createApplication (port) {
 }
 
 describe('server', function () {
-  const port = 1234
   /* eslint no-unused-expressions: 0 */
+  const port = 1234
+
   it('should create a server', async function () {
     const app = createApplication(port)
     const server = createServer(app)
     expect(server).to.be.instanceof(Server)
     expect(server).to.equal(app.io.server)
     try {
-      await server.startListeningForConnections()
+      server.startListening()
+      await pEvent(server, 'listening', { timeout: 1000 })
       expect(app.log[0]).to.eql(['info', `Server listening on port ${port}`])
     } finally {
       server.close()

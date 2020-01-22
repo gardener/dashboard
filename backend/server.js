@@ -18,7 +18,4 @@
 
 const app = require('./lib/app')
 const server = require('./lib/server')(app)
-
-if (require.main === module) {
-  server.startListeningForConnections()
-}
+server.startListening()

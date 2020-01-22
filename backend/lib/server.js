@@ -18,7 +18,6 @@
 
 const http = require('http')
 const delay = require('delay')
-const pTimeout = require('p-timeout')
 const terminus = require('@godaddy/terminus')
 
 function toMilliseconds (seconds) {
@@ -65,13 +64,10 @@ module.exports = function createServer (app) {
     }
   })
 
-  server.startListeningForConnections = function startListeningForConnections () {
-    const startServer = async () => {
-      await new Promise(resolve => server.listen(port, resolve))
-      logger.info(`Server listening on port ${port}`)
-    }
-    const seconds = 30
-    return pTimeout(startServer(), seconds * 1000, `Starting server timed out after ${seconds} seconds`)
+  function onListening () {
+    logger.info(`Server listening on port ${port}`)
   }
+
+  server.startListening = () => server.listen(port, onListening)
   return server
 }

@@ -47,8 +47,8 @@ module.exports = (io, retryOptions = {}) => {
 
   async function loadAllOpenIssues () {
     const options = {
-      retries: 0,
       forever: true,
+      retries: undefined, // because of retriesLeft calculation in onFailedAttempt
       maxTimeout: 60e3,
       ...retryOptions,
       onFailedAttempt (err) {
