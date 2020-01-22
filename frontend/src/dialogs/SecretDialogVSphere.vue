@@ -26,8 +26,7 @@ limitations under the License.
     backgroundSrc="/static/background_vsphere.svg"
     createTitle="Add new VMware vShpere Secret"
     replaceTitle="Replace VMware vShpere Secret"
-    @input="onInput"
-    @cloudProfileName="onCloudProfileNameUpdate">
+    @input="onInput">
 
     <template slot="data-slot">
       <v-layout column>
@@ -37,8 +36,8 @@ limitations under the License.
           v-model="vsphereUsername"
           label="vSphere Username"
           :error-messages="getErrorMessages('vsphereUsername')"
-          @input="$v.username.$touch()"
-          @blur="$v.username.$touch()"
+          @input="$v.vsphereUsername.$touch()"
+          @blur="$v.vsphereUsername.$touch()"
           ></v-text-field>
         </v-flex>
         <v-flex>
@@ -51,8 +50,8 @@ limitations under the License.
             :append-icon="hideVspherePassword ? 'visibility' : 'visibility_off'"
             :type="hideVspherePassword ? 'password' : 'text'"
             @click:append="() => (hideVspherePassword = !hideVspherePassword)"
-            @input="$v.password.$touch()"
-            @blur="$v.password.$touch()"
+            @input="$v.vspherePassword.$touch()"
+            @blur="$v.vspherePassword.$touch()"
           ></v-text-field>
         </v-flex>
         <v-flex class="mt-3">
@@ -61,8 +60,8 @@ limitations under the License.
           v-model="nsxtUsername"
           label="NSX-T Username"
           :error-messages="getErrorMessages('nsxtUsername')"
-          @input="$v.username.$touch()"
-          @blur="$v.username.$touch()"
+          @input="$v.nsxtUsername.$touch()"
+          @blur="$v.nsxtUsername.$touch()"
           ></v-text-field>
         </v-flex>
         <v-flex>
@@ -75,8 +74,8 @@ limitations under the License.
             :append-icon="hideNsxtPassword ? 'visibility' : 'visibility_off'"
             :type="hideNsxtPassword ? 'password' : 'text'"
             @click:append="() => (hideNsxtPassword = !hideNsxtPassword)"
-            @input="$v.password.$touch()"
-            @blur="$v.password.$touch()"
+            @input="$v.nsxtPassword.$touch()"
+            @blur="$v.nsxtPassword.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>

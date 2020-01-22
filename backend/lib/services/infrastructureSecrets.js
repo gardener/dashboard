@@ -152,7 +152,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
           quotas: resolveQuotas(secretBinding)
         })
       } catch (err) {
-        logger.error(err.message)
+        logger.warn(err.message)
       }
     })
     .compact()

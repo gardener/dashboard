@@ -116,7 +116,10 @@ export function getValidationErrors (vm, field) {
     .keys(get(validators, field))
     .forEach(key => {
       if (!validationForField[key]) {
-        const validationErrorMessage = get(vm.validationErrors, field)[key]
+        let validationErrorMessage = get(vm.validationErrors, field)[key]
+        if (typeof validationErrorMessage === 'function') {
+          validationErrorMessage = validationErrorMessage(get(validationForField.$params, key))
+        }
         if (validationErrorMessage) {
           errors.push(validationErrorMessage)
         } else {

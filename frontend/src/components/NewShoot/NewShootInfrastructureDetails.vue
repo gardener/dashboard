@@ -96,6 +96,24 @@ limitations under the License.
           ></v-select>
         </v-flex>
       </template>
+      <template v-else-if="infrastructureKind === 'vsphere'">
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Load Balancer Classes"
+            :items="allLoadBalancerClasses"
+            v-model="loadBalancerClassNames"
+            :error-messages="getErrorMessages('loadBalancerClassNames')"
+            @input="onInputLoadBalancerClassNames"
+            @blur="$v.loadBalancerClassNames.$touch()"
+            attach
+            chips
+            small-chips
+            deletable-chips
+            multiple
+          ></v-select>
+        </v-flex>
+      </template>
     </v-layout>
     <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
@@ -106,15 +124,18 @@ import CloudProfile from '@/components/CloudProfile'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
+import { includesIfAvailable } from '@/utils/validators'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import map from 'lodash/map'
 import isEmpty from 'lodash/isEmpty'
 import concat from 'lodash/concat'
 import includes from 'lodash/includes'
 import forEach from 'lodash/forEach'
 import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
+import intersection from 'lodash/intersection'
 import isEqual from 'lodash/isEqual'
 import { mapGetters, mapState } from 'vuex'
 
@@ -130,6 +151,10 @@ const validationErrors = {
   },
   loadBalancerProviderName: {
     required: 'Load Balancer Providers required'
+  },
+  loadBalancerClassNames: {
+    required: 'Load Balancer Classes required',
+    includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`
   }
 }
 
@@ -149,6 +174,12 @@ const validations = {
     required: requiredIf(function () {
       return this.infrastructureKind === 'openstack'
     })
+  },
+  loadBalancerClassNames: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'vsphere'
+    }),
+    includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames')
   }
 }
 
@@ -173,6 +204,7 @@ export default {
       region: undefined,
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
+      loadBalancerClassNames: [],
       valid: false,
       cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
@@ -215,6 +247,8 @@ export default {
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
       'loadBalancerProviderNamesByCloudProfileName',
+      'loadBalancerClassesByCloudProfileName',
+      'loadBalancerClassNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName'
     ]),
     cloudProfiles () {
@@ -277,6 +311,18 @@ export default {
     allLoadBalancerProviderNames () {
       return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
     },
+    allLoadBalancerClassNames () {
+      return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
+    },
+    allLoadBalancerClasses () {
+      return map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
+        return {
+          text: name,
+          value: name,
+          disabled: name === 'default'
+        }
+      })
+    },
     allFloatingPoolNames () {
       return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
     },
@@ -300,6 +346,16 @@ export default {
       this.onInputLoadBalancerProviderName()
       this.floatingPoolName = head(this.allFloatingPoolNames)
       this.onInputFloatingPoolName()
+      if (!isEmpty(this.allLoadBalancerClassNames)) {
+        this.loadBalancerClassNames = [
+          includes(this.allLoadBalancerClassNames, 'default')
+            ? 'default'
+            : head(this.allLoadBalancerClassNames)
+        ]
+      } else {
+        this.loadBalancerClassNames = []
+      }
+      this.onInputLoadBalancerClassNames()
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -328,6 +384,11 @@ export default {
       this.$v.loadBalancerProviderName.$touch()
       this.validateInput()
     },
+    onInputLoadBalancerClassNames () {
+      this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
+      this.$v.loadBalancerClassNames.$touch()
+      this.validateInput()
+    },
     onUpdateCloudProfileName () {
       this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
@@ -353,16 +414,18 @@ export default {
         secret: this.secret,
         region: this.region,
         floatingPoolName: this.floatingPoolName,
-        loadBalancerProviderName: this.loadBalancerProviderName
+        loadBalancerProviderName: this.loadBalancerProviderName,
+        loadBalancerClassNames: this.loadBalancerClassNames
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, loadBalancerClassNames }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
+      this.loadBalancerClassNames = loadBalancerClassNames
 
       this.validateInput()
     },

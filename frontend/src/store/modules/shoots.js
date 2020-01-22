@@ -272,6 +272,16 @@ const actions = {
       set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
     }
 
+    const allLoadBalancerClassNames = rootGetters.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
+    if (!isEmpty(allLoadBalancerClassNames)) {
+      const loadBalancerClassNames = [
+        includes(allLoadBalancerClassNames, 'default')
+          ? 'default'
+          : head(allLoadBalancerClassNames)
+      ]
+      set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+    }
+
     const name = shortRandomString(10)
     set(shootResource, 'metadata.name', name)
 
@@ -331,7 +341,6 @@ const actions = {
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
 
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
-
     return state.newShootResource
   }
 }

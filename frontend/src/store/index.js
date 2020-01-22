@@ -300,6 +300,18 @@ const getters = {
       return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
     }
   },
+  loadBalancerClassNamesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const loadBalancerClasses = getters.loadBalancerClassesByCloudProfileName(cloudProfileName)
+      return uniq(map(loadBalancerClasses, 'name'))
+    }
+  },
+  loadBalancerClassesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
+    }
+  },
   floatingPoolNamesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
