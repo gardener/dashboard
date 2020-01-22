@@ -35,7 +35,7 @@ limitations under the License.
           <v-text-field
           color="black"
           v-model="vsphereUsername"
-          :label="vsphereUsernameLabel"
+          label="vSphere Username"
           :error-messages="getErrorMessages('vsphereUsername')"
           @input="$v.username.$touch()"
           @blur="$v.username.$touch()"
@@ -45,6 +45,7 @@ limitations under the License.
           <v-text-field
             color="black"
             v-model="vspherePassword"
+            ref="vspherePassword"
             :label="vspherePasswordLabel"
             :error-messages="getErrorMessages('vspherePassword')"
             :append-icon="hideVspherePassword ? 'visibility' : 'visibility_off'"
@@ -58,7 +59,7 @@ limitations under the License.
           <v-text-field
           color="black"
           v-model="nsxtUsername"
-          :label="nsxtUsernameLabel"
+          label="NSX-T Username"
           :error-messages="getErrorMessages('nsxtUsername')"
           @input="$v.username.$touch()"
           @blur="$v.username.$touch()"
@@ -68,6 +69,7 @@ limitations under the License.
           <v-text-field
             color="black"
             v-model="nsxtPassword"
+            ref="nsxtPassword"
             :label="nsxtPasswordLabel"
             :error-messages="getErrorMessages('nsxtPassword')"
             :append-icon="hideNsxtPassword ? 'visibility' : 'visibility_off'"
@@ -85,11 +87,9 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import SecretDialog from '@/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import get from 'lodash/get'
 
 const validationErrors = {
   vsphereUsername: {
@@ -135,18 +135,15 @@ export default {
     return this.validators
   },
   computed: {
-    ...mapGetters([
-      'cloudProfileByName'
-    ]),
     valid () {
       return !this.$v.$invalid
     },
     secretData () {
       return {
-        vsphereUsername: undefined,
-        vspherePassword: undefined,
-        nsxtUsername: undefined,
-        nsxtPassword: undefined
+        vsphereUsername: this.vsphereUsername,
+        vspherePassword: this.vspherePassword,
+        nsxtUsername: this.nsxtUsername,
+        nsxtPassword: this.nsxtPassword
       }
     },
     validators () {
@@ -169,14 +166,8 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    vsphereUsernameLabel () {
-      return this.isCreateMode ? 'vSphere Username' : 'New vSphere Username'
-    },
     vspherePasswordLabel () {
       return this.isCreateMode ? 'vSphere Password' : 'New vSphere Password'
-    },
-    nsxtUsernameLabel () {
-      return this.isCreateMode ? 'NSX-T Username' : 'New NSX-T Username'
     },
     nsxtPasswordLabel () {
       return this.isCreateMode ? 'NSX-T Password' : 'New NSX-T Password'
@@ -195,7 +186,11 @@ export default {
       this.nsxtPassword = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'vsphereUsername')
+        if (this.secret.data) {
+          this.vsphereUsername = this.secret.data.vsphereUsername
+          this.nsxtUsername = this.secret.data.nsxtUsername
+        }
+        setDelayedInputFocus(this, 'vspherePassword')
       }
     },
     getErrorMessages (field) {

@@ -99,7 +99,7 @@ limitations under the License.
     class="mt-3"
     infrastructureKey="vsphere"
     infrastructureName="VMware vSphere"
-    secretDescriptorKey="accessKeyID"
+    secretDescriptorKey="vsphereUsername"
     icon="vsphere-white"
     description="Make sure that the new credentials have the correct VMware vSphere permissions"
     color="vsphere-bgcolor"
@@ -107,7 +107,21 @@ limitations under the License.
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
-    ></secret>
+    >
+      <template v-if="isOwnSecretBinding(secret)" slot="rowSubTitle" slot-scope="{ secret }">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{secret.data.vsphereUsername}}</span>
+          </template>
+          <span>vSphere Username</span>
+        </v-tooltip> / <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{secret.data.nsxtUsername}}</span>
+          </template>
+          <span>NSX-T Username</span>
+        </v-tooltip>
+      </template>
+    </secret>
 
     <template v-if="showDisabledCloudProviders">
 
