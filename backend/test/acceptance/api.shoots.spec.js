@@ -17,7 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
-const utils = require('../../lib/utils')
+const kubeconfig = require('../../lib/kubernetes-config')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -50,7 +50,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return three shoots', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoots({bearer, namespace})
+    k8s.stub.getShoots({ bearer, namespace })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
@@ -62,22 +62,21 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should create a shoot', async function () {
     const bearer = await user.bearer
-    const finalizers = ['gardener']
-    k8s.stub.createShoot({bearer, namespace, name, spec, resourceVersion})
+    k8s.stub.createShoot({ bearer, namespace, name, spec, resourceVersion })
     const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
-      .send({metadata: {
+      .send({ metadata: {
         name,
         annotations: {
           'garden.sapcloud.io/purpose': purpose
         }
       },
-      spec})
+      spec })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, annotations, finalizers})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -90,7 +89,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, annotations})
+    expect(res.body.metadata).to.eql({ name, namespace, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -107,7 +106,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({namespace, annotations: deleteAnnotations, resourceVersion})
+    expect(res.body.metadata).to.eql({ namespace, annotations: deleteAnnotations, resourceVersion })
   })
 
   it('should return shoot info', async function () {
@@ -120,8 +119,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
-    const seedShootIngressDomain = `${name}.${project}.ingress.${seedClusterName}`
-    const cleanKubeconfigSpy = sandbox.spy(utils, 'cleanKubeconfig')
+    const seedShootIngressDomain = `${project}--${name}.ingress.${seedClusterName}`
+    const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
     k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })

@@ -20,11 +20,16 @@ limitations under the License.
       Details
     </v-card-title>
     <div class="list">
-      <v-card-title class="listItem">
+      <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">info_outline</v-icon>
         <v-flex class="pa-0">
           <span class="grey--text">Name</span><br>
           <span class="subheading">{{shootName}}</span>
+        </v-flex>
+        <v-flex shrink class="pa-0">
+          <v-layout row>
+            <copy-btn :clipboard-text="shootName"></copy-btn>
+          </v-layout>
         </v-flex>
       </v-card-title>
 
@@ -139,6 +144,7 @@ import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
+import CopyBtn from '@/components/CopyBtn'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import {
@@ -157,7 +163,8 @@ export default {
     WorkerConfiguration,
     PurposeConfiguration,
     AddonConfiguration,
-    ShootVersion
+    ShootVersion,
+    CopyBtn
   },
   props: {
     shootItem: {

@@ -25,12 +25,12 @@ limitations under the License.
     :confirmRequired="confirmRequired"
     maxWidth="600">
     <template slot="actionComponent">
-      <template v-if="!isShootHibernated">
+      <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
         Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />
       </template>
       <template v-else>
-        This will wake-up your cluster and scale the worker nodes up to their previous count.<br /><br />
+        This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
       </template>
     </template>
   </action-icon-dialog>
@@ -41,6 +41,7 @@ import ActionIconDialog from '@/dialogs/ActionIconDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
+import { SnotifyPosition } from 'vue-snotify'
 
 export default {
   components: {
@@ -52,29 +53,34 @@ export default {
     }
   },
   mixins: [shootItem],
+  data () {
+    return {
+      hibernationChanged: false
+    }
+  },
   computed: {
     confirmRequired () {
-      return !this.isShootHibernated
+      return !this.isShootSettingHibernated
     },
     confirmText () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'Hibernate'
       } else {
-        return 'Wake-up'
+        return 'Wake up'
       }
     },
     icon () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'mdi-pause-circle-outline'
       } else {
         return 'mdi-play-circle-outline'
       }
     },
     caption () {
-      if (!this.isShootHibernated) {
+      if (!this.isShootSettingHibernated) {
         return 'Hibernate Cluster'
       } else {
-        return 'Wake-up Cluster'
+        return 'Wake up Cluster'
       }
     }
   },
@@ -86,17 +92,18 @@ export default {
       }
     },
     async updateConfiguration () {
+      this.hibernationChanged = true
       try {
         await updateShootHibernation({
           namespace: this.shootNamespace,
           name: this.shootName,
           data: {
-            enabled: !this.isShootHibernated
+            enabled: !this.isShootSettingHibernated
           }
         })
       } catch (err) {
         let errorMessage
-        if (!this.isShootHibernated) {
+        if (!this.isShootSettingHibernated) {
           errorMessage = 'Could not hibernate cluster'
         } else {
           errorMessage = 'Could not wake up cluster from hibernation'
@@ -105,13 +112,34 @@ export default {
         const detailedErrorMessage = errorDetails.detailedMessage
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        this.hibernationChanged = false
       }
     }
   },
   watch: {
-    isShootHibernated (value) {
+    isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
       this.$refs.actionDialog.hideDialog()
+    },
+    isShootStatusHibernationProgressing (hibernationProgressing) {
+      if (hibernationProgressing || !this.hibernationChanged) {
+        return
+      }
+      this.hibernationChanged = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      if (this.isShootStatusHibernated) {
+        this.$snotify.success(`Cluster ${this.shootName} successfully hibernated`, config)
+      } else {
+        this.$snotify.success(`Cluster ${this.shootName} successfully started`, config)
+      }
     }
   }
 }

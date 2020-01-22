@@ -16,11 +16,13 @@
 
 'use strict'
 
-const garden = require('../kubernetes').gardener()
 const { cacheResource } = require('./common')
 const { getCloudProfiles } = require('../cache')
+const {
+  dashboardClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = garden.cloudprofiles.watch()
+  const emitter = dashboardClient['core.gardener.cloud'].cloudprofiles.watchList()
   cacheResource(emitter, getCloudProfiles(), 'metadata.name')
 }

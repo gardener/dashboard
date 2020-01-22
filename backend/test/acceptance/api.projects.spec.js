@@ -19,6 +19,7 @@
 const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
+const { WatchBuilder } = require('../../lib/kubernetes-client')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -69,7 +70,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
   })
 
   it('should reject request with authorization error', async function () {
@@ -108,25 +109,28 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const modifiedProject = _.cloneDeep(project)
     modifiedProject.metadata.resourceVersion = resourceVersion
     modifiedProject.status.phase = 'Ready'
+
+    // create watch stub
+    const watchStub = sandbox.stub(WatchBuilder, 'create')
+
     // reconnector
     const reconnectorStub = createReconnectorStub([
       ['ADDED', newProject],
       ['MODIFIED', modifiedProject]
     ])
     sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
-    const watchStub = sandbox.stub(services.projects, 'watchProject')
-      .callsFake(() => reconnectorStub.start())
+    watchStub.callsFake(() => reconnectorStub.start())
 
     const res = await agent
       .post('/api/namespaces')
       .set('cookie', await user.cookie)
       .send({ metadata, data })
 
-    expect(watchStub).to.have.callCount(1)
+    expect(watchStub).to.have.been.calledOnce
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-    expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 
   it('should timeout when creating a project', async function () {
@@ -152,21 +156,24 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const modifiedProject = _.cloneDeep(project)
     modifiedProject.metadata.resourceVersion = resourceVersion
     modifiedProject.status.phase = 'Pending'
+
+    // create watch stub
+    const watchStub = sandbox.stub(WatchBuilder, 'create')
+
     // reconnector
     const reconnectorStub = createReconnectorStub([
       ['ADDED', newProject],
       ['MODIFIED', modifiedProject]
-    ])
+    ], name)
     sandbox.stub(services.projects, 'projectInitializationTimeout').value(timeout)
-    const watchStub = sandbox.stub(services.projects, 'watchProject')
-      .callsFake(() => reconnectorStub.start())
+    watchStub.callsFake(() => reconnectorStub.start())
 
     const res = await agent
       .post('/api/namespaces')
       .set('cookie', await user.cookie)
       .send({ metadata, data })
 
-    expect(watchStub).to.have.callCount(1)
+    expect(watchStub).to.have.been.calledOnce
     expect(res).to.have.status(504)
     expect(res).to.be.json
     expect(res.body.message).to.equal(`Resource "${name}" could not be initialized within ${timeout} ms`)
@@ -185,8 +192,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, role})
-    expect(res.body.data).to.eql({createdBy, owner, description, purpose})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 
   it('should delete a project', async function () {

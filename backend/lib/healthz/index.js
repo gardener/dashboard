@@ -16,19 +16,21 @@
 
 'use strict'
 
-const kubernetes = require('../kubernetes')
 const { format: fmt } = require('util')
+const {
+  dashboardClient,
+  isHttpError
+} = require('../kubernetes-client')
 
 async function healthCheck () {
-  let response
   try {
-    response = await kubernetes.healthz().healthz.get()
-  } catch (error) {
-    throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', error))
-  }
-
-  if (response.statusCode !== 200) {
-    throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.body, response.statusCode))
+    await dashboardClient.healthz.get()
+  } catch (err) {
+    if (isHttpError(err)) {
+      const response = err.response
+      throw new Error(fmt('Kubernetes apiserver is not healthy. Healthz endpoint returned: %s (Status code: %s)', response.body, response.statusCode))
+    }
+    throw new Error(fmt('Could not reach Kubernetes apiserver healthz endpoint. Request failed with error: %s', err))
   }
 }
 

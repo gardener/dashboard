@@ -16,7 +16,9 @@
 
 'use strict'
 
-const kubernetes = require('../kubernetes')
+const { HTTPError } = require('got')
+const { isHttpError } = require('../kubernetes-client')
+const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')
@@ -24,107 +26,52 @@ const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
 
-const { decodeBase64, getProjectByNamespace, getSeedKubeconfig } = utils
-
-function Garden ({ auth }) {
-  return kubernetes.gardener({ auth })
-}
-
-function Core ({ auth }) {
-  return kubernetes.core({ auth })
-}
-
-async function getSeedKubeconfigForShoot ({ user, shoot }) {
-  if (!shoot.status || !shoot.status.seed) {
-    return {}
-  }
-  const seed = getSeed(utils.getSeedNameFromShoot(shoot))
-  const seedShootNS = shoot.status.technicalID
-
-  const coreClient = Core(user)
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
-  return { seed, seedKubeconfig, seedShootNS }
-}
-
-function getSecret (core, namespace, name) {
-  return core.ns(namespace).secrets.get({ name: name })
-    .catch(err => {
-      if (err.code === 404) {
-        return
-      }
-      logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
-      throw err
-    })
-}
-
-async function assignComponentSecret (core, namespace, component, secretName, data) {
-  const secret = await getSecret(core, namespace, secretName)
-  if (secret) {
-    _
-      .chain(secret)
-      .get('data')
-      .pick('username', 'password')
-      .forEach((value, key) => {
-        if (key === 'password') {
-          data[`${component}_password`] = decodeBase64(value)
-        } else if (key === 'username') {
-          data[`${component}_username`] = decodeBase64(value)
-        }
-      })
-      .commit()
-  }
-}
+const { decodeBase64, getSeedNameFromShoot } = utils
 
 exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }) {
-  let qs
+  const client = user.client
+  const query = {}
   if (shootsWithIssuesOnly) {
-    qs = { labelSelector: 'shoot.garden.sapcloud.io/status!=healthy' }
+    query.labelSelector = 'shoot.garden.sapcloud.io/status!=healthy'
   }
-  if (namespace) {
-    return Garden(user).namespaces(namespace).shoots.get({ qs })
-  } else {
-    // only works if user is member of garden-administrators (admin)
-    return Garden(user).shoots.get({ qs })
+  if (!namespace) {
+    return client['core.gardener.cloud'].shoots.listAllNamespaces(query)
   }
+  return client['core.gardener.cloud'].shoots.list(namespace, query)
 }
 
 exports.create = async function ({ user, namespace, body }) {
+  const client = user.client
   const username = user.id
-  const finalizers = ['gardener']
+
   const annotations = {
     'garden.sapcloud.io/createdBy': username
   }
-  body = _.merge({}, body, { metadata: { namespace, finalizers, annotations } })
-  return Garden(user).namespaces(namespace).shoots.post({ body })
+  if (_.get(body, 'spec.addons.kyma.enabled', false)) {
+    annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
+  }
+  body = _.merge({}, body, { metadata: { namespace, annotations } })
+  _.unset(body, 'spec.addons.kyma')
+  return client['core.gardener.cloud'].shoots.create(namespace, body)
 }
 
-async function read ({ gardenClient, user, namespace, name }) {
-  if (!gardenClient) {
-    gardenClient = Garden(user)
-  }
-  return gardenClient.namespaces(namespace).shoots.get({ name })
+async function read ({ user, namespace, name }) {
+  const client = user.client
+
+  return client['core.gardener.cloud'].shoots.get(namespace, name)
 }
 exports.read = read
 
-exports.exists = async function ({ gardenClient, namespace, name }) {
-  try {
-    await read({ gardenClient, namespace, name })
-    return true
-  } catch (err) {
-    if (err.code !== 404) {
-      throw err
-    }
-    return false
-  }
+async function patch ({ user, namespace, name, body }) {
+  const client = user.client
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
-
-const patch = exports.patch = async function ({ user, namespace, name, body }) {
-  return Garden(user).namespaces(namespace).shoots.mergePatch({ name, body })
-}
+exports.patch = patch
 
 exports.replace = async function ({ user, namespace, name, body }) {
-  const shoots = Garden(user).namespaces(namespace).shoots
-  const { metadata, kind, apiVersion, status } = await shoots.get({ name })
+  const client = user.client
+
+  const { metadata, kind, apiVersion, status } = await client['core.gardener.cloud'].shoots.get(namespace, name)
   const {
     metadata: { labels, annotations },
     spec
@@ -134,22 +81,22 @@ exports.replace = async function ({ user, namespace, name, body }) {
   // compose new body
   body = { kind, apiVersion, metadata, spec, status }
   // replace
-  return shoots.put({ name, body })
+  return client['core.gardener.cloud'].shoots.update(namespace, name, body)
 }
 
 exports.replaceVersion = async function ({ user, namespace, name, body }) {
+  const client = user.client
   const version = body.version
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: '/spec/kubernetes/version',
-      value: version
-    }
-  ]
-  return Garden(user).namespaces(namespace).shoots.jsonPatch({ name, body: patchOperations })
+  const patchOperations = [{
+    op: 'replace',
+    path: '/spec/kubernetes/version',
+    value: version
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
 exports.replaceHibernationEnabled = async function ({ user, namespace, name, body }) {
+  const client = user.client
   const enabled = !!body.enabled
   const payload = {
     spec: {
@@ -158,10 +105,11 @@ exports.replaceHibernationEnabled = async function ({ user, namespace, name, bod
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceHibernationSchedules = async function ({ user, namespace, name, body }) {
+  const client = user.client
   const schedules = body
   const payload = {
     spec: {
@@ -170,32 +118,78 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
-  const addons = body
+  const client = user.client
+  const { kyma = {}, ...addons } = body
   const payload = {
     spec: {
       addons
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  if (kyma.enabled) {
+    payload.metadata = {
+      annotations: {
+        'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
+      }
+    }
+  }
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
+exports.kyma = async function ({ user, namespace, name }) {
+  const client = user.client
+  try {
+    const shootClient = await client.createKubeconfigClient({ namespace, name: `${name}.kubeconfig` })
+    const [{
+      data: {
+        'global.ingress.domainName': domain
+      }
+    }, {
+      data: {
+        email, password, username
+      }
+    }] = await Promise.all([
+      shootClient.core.configmaps.get('kyma-installer', 'net-global-overrides'),
+      shootClient.core.secrets.get('kyma-system', 'admin-user')
+    ])
+    return {
+      url: `https://console.${domain}`,
+      email: decodeBase64(email),
+      username: decodeBase64(username),
+      password: decodeBase64(password)
+    }
+  } catch (err) {
+    logger.error('Failed to fetch kyma addon info', err)
+    const statusCode = 404
+    let statusMessage
+    if (isHttpError(err, 404)) {
+      statusMessage = 'Kubeconfig for cluster does not exist'
+    } else if (/^ECONNRE/.test(err.code)) {
+      statusMessage = 'Connection to cluster could not be estalished'
+    } else {
+      statusMessage = 'Kyma not correctly installed in cluster'
+    }
+    const response = { statusCode, statusMessage }
+    throw new HTTPError(response)
+  }
 }
 
 exports.replaceWorkers = async function ({ user, namespace, name, body }) {
+  const client = user.client
   const workers = body
-  const patchOperations = [
-    {
-      op: 'replace',
-      path: `/spec/provider/workers`,
-      value: workers
-    }
-  ]
-  return Garden(user).namespaces(namespace).shoots.jsonPatch({ name, body: patchOperations })
+  const patchOperations = [{
+    op: 'replace',
+    path: `/spec/provider/workers`,
+    value: workers
+  }]
+  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
+  const client = user.client
   const { timeWindowBegin, timeWindowEnd, updateKubernetesVersion, updateOSVersion } = body
   const payload = {
     spec: {
@@ -211,64 +205,59 @@ exports.replaceMaintenance = async function ({ user, namespace, name, body }) {
       }
     }
   }
-  return patch({ user, namespace, name, body: payload })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 const patchAnnotations = async function ({ user, namespace, name, annotations }) {
+  const client = user.client
   const body = {
     metadata: {
       annotations: annotations
     }
   }
-  return patch({ user, namespace, name, body })
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, body)
 }
 exports.patchAnnotations = patchAnnotations
 
 exports.remove = async function ({ user, namespace, name }) {
+  const client = user.client
   const annotations = {
     'confirmation.garden.sapcloud.io/deletion': 'true'
   }
   await patchAnnotations({ user, namespace, name, annotations })
 
-  return Garden(user).namespaces(namespace).shoots.delete({ name })
+  return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
 
 exports.info = async function ({ user, namespace, name }) {
-  const core = Core(user)
-  const readKubeconfigPromise = core.ns(namespace).secrets.get({ name: `${name}.kubeconfig` })
-    .catch(err => {
-      if (err.code === 404) {
-        return
-      }
-      throw err
-    })
+  const client = user.client
 
   const [
     shoot,
     secret
   ] = await Promise.all([
-    this.read({ user, namespace, name }),
-    readKubeconfigPromise
+    read({
+      user,
+      namespace,
+      name
+    }),
+    client.getSecret({
+      namespace,
+      name: `${name}.kubeconfig`,
+      throwNotFound: false
+    })
   ])
 
-  const projects = Garden(user).projects
-  const namespaces = core.namespaces
-  const project = await getProjectByNamespace(projects, namespaces, namespace)
-  const projectName = project.metadata.name
-
-  const monitoringComponent = 'monitoring'
-  const loggingComponent = 'logging'
-  const monitoringIngressSecretName = 'monitoring-ingress-credentials'
-  const loggingIngressUserSecretName = name + '.logging'
-  const monitoringIngressUserSecretName = name + '.monitoring'
-  const loggingIngressAdminSecretName = 'logging-ingress-credentials'
-
   const data = {}
-  if (shoot.status && shoot.status.seed) {
-    const seed = getSeed(utils.getSeedNameFromShoot(shoot))
-    const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
-    if (ingressDomain) {
-      data.seedShootIngressDomain = `${name}.${projectName}.${ingressDomain}`
+  let seed
+  if (shoot.spec.seedName) {
+    seed = getSeed(getSeedNameFromShoot(shoot))
+    const prefix = _.replace(shoot.status.technicalID, /^shoot--/, '')
+    if (prefix) {
+      const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
+      if (ingressDomain) {
+        data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
+      }
     }
   }
 
@@ -281,7 +270,7 @@ exports.info = async function ({ user, namespace, name }) {
         value = decodeBase64(value)
         if (key === 'kubeconfig') {
           try {
-            data[key] = yaml.safeDump(utils.cleanKubeconfig(value))
+            data[key] = yaml.safeDump(kubeconfig.cleanKubeconfig(value))
           } catch (err) {
             logger.error('failed to clean kubeconfig', err)
           }
@@ -290,31 +279,62 @@ exports.info = async function ({ user, namespace, name }) {
         }
       })
       .commit()
-    data.serverUrl = kubernetes.fromKubeconfig(data.kubeconfig).url
+
+    data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
   }
 
   const isAdmin = await authorization.isAdmin(user)
   if (isAdmin) {
-    const { seedKubeconfig, seedShootNS } = await getSeedKubeconfigForShoot({ user, shoot })
-
-    if (seedKubeconfig && !_.isEmpty(seedShootNS)) {
+    if (seed) {
       try {
-        const core = kubernetes.core(kubernetes.fromKubeconfig(seedKubeconfig))
-
-        await Promise.all([
-          assignComponentSecret(core, seedShootNS, monitoringComponent, monitoringIngressSecretName, data),
-          assignComponentSecret(core, seedShootNS, loggingComponent, loggingIngressAdminSecretName, data)
-        ])
-      } catch (error) {
-        logger.error('Failed to retrieve information using seed core client', error)
+        const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+        const seedShootNamespace = shoot.status.technicalID
+        await assignComponentSecrets(seedClient, data, seedShootNamespace)
+      } catch (err) {
+        logger.error('Failed to retrieve information using seed core client', err)
       }
     }
   } else {
-    await Promise.all([
-      assignComponentSecret(core, namespace, monitoringComponent, monitoringIngressUserSecretName, data),
-      assignComponentSecret(core, namespace, loggingComponent, loggingIngressUserSecretName, data)
-    ])
+    await assignComponentSecrets(client, data, namespace, name)
   }
 
   return data
+}
+
+function assignComponentSecrets (client, data, namespace, name) {
+  const components = ['monitoring', 'logging']
+  return Promise.all(components.map(component => {
+    const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
+    return assignComponentSecret(client, data, component, namespace, ingressSecretName)
+  }))
+}
+
+function getSecret (client, { namespace, name }) {
+  try {
+    return client.core.secrets.get(namespace, name)
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return
+    }
+    logger.error('failed to fetch %s secret: %s', name, err) // pragma: whitelist secret
+    throw err
+  }
+}
+
+async function assignComponentSecret (client, data, component, namespace, name) {
+  const secret = await getSecret(client, { namespace, name })
+  if (secret) {
+    _
+      .chain(secret)
+      .get('data')
+      .pick('username', 'password')
+      .forEach((value, key) => {
+        if (key === 'password') {
+          data[`${component}_password`] = decodeBase64(value)
+        } else if (key === 'username') {
+          data[`${component}_username`] = decodeBase64(value)
+        }
+      })
+      .commit()
+  }
 }

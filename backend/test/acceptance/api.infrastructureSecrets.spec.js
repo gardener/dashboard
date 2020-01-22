@@ -33,7 +33,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const user = auth.createUser({ id })
   const key = 'myKey'
   const secret = 'mySecret'
-  const data = {key, secret}
+  const data = { key, secret }
   const resourceVersion = 42
 
   it('should return three infrastructure secrets', async function () {
@@ -79,7 +79,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind})
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, bindingName, bindingNamespace: namespace, cloudProfileName, cloudProviderKind })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
@@ -96,7 +96,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, namespace, bindingName, cloudProfileName, bindingNamespace: namespace, cloudProviderKind, resourceVersion})
+    expect(res.body.metadata).to.eql({ name, namespace, bindingName, cloudProfileName, bindingNamespace: namespace, cloudProviderKind, resourceVersion })
     expect(res.body.data).to.have.own.property('key')
     expect(res.body.data).to.have.own.property('secret')
   })
@@ -110,7 +110,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const res = await agent
       .put(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)
       .set('cookie', await user.cookie)
-      .send({metadata, data})
+      .send({ metadata, data })
 
     expect(res).to.have.status(405)
   })
@@ -126,7 +126,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({name, bindingName, namespace})
+    expect(res.body.metadata).to.eql({ name, bindingName, namespace })
   })
 
   it('should not delete a shared infrastructure secret', async function () {

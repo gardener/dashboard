@@ -16,11 +16,13 @@
 
 'use strict'
 
-const garden = require('../kubernetes').gardener()
 const { registerHandler } = require('./common')
+const {
+  dashboardClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = garden.projects.watch()
+  const emitter = dashboardClient['core.gardener.cloud'].projects.watchList()
   registerHandler(emitter, event => {
     if (event.type === 'ADDED') {
       const namespace = event.object.spec.namespace

@@ -22,14 +22,22 @@ limitations under the License.
 
   >
     <v-layout row
-     slot="content-before"
      v-for="(line,index) in description"
      :key="index"
      fill-height
      align-center>
-     <span class="ma-1"><span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}</span>
+     <span class="ma-1">
+       <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
+     </span>
     </v-layout>
-    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{workerGroup.name}}</v-chip>
+    <v-chip
+      slot="popperRef"
+      small
+      class="cursor-pointer my-0 ml-0"
+      outline
+      color="cyan darken-2">
+      {{workerGroup.name}}
+    </v-chip>
   </g-popper>
 </template>
 
@@ -55,15 +63,15 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'machineTypesByCloudProfileNameAndZones',
-      'volumeTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileName',
+      'volumeTypesByCloudProfileName',
       'machineImagesByCloudProfileName'
     ]),
     machineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     volumeTypes () {
-      return this.volumeTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.volumeTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     machineImages () {
       return this.machineImagesByCloudProfileName(this.cloudProfileName)
@@ -72,37 +80,58 @@ export default {
       const description = []
       if (this.workerGroup.machine.type) {
         const machineType = find(this.machineTypes, { name: this.workerGroup.machine.type })
-        description.push({
-          title: 'Machine Type',
-          value: machineType.name,
-          description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
-        })
-        if (machineType.storage) {
+        if (machineType) {
           description.push({
-            title: 'Volume Size',
-            value: `${machineType.storage.size}`
+            title: 'Machine Type',
+            value: machineType.name,
+            description: `(CPU: ${machineType.cpu} | GPU: ${machineType.gpu} | Memory: ${machineType.memory})`
+          })
+          if (machineType.storage) {
+            description.push({
+              title: 'Volume Size',
+              value: `${machineType.storage.size}`
+            })
+          }
+        } else {
+          description.push({
+            title: 'Machine Type',
+            value: this.workerGroup.machine.type
           })
         }
       }
       if (this.workerGroup.volume) {
         const volumeType = find(this.volumeTypes, { name: this.workerGroup.volume.type })
-        description.push({
-          title: 'Volume Type',
-          value: `${volumeType.name} / ${this.workerGroup.volume.size}`,
-          description: `(Class: ${volumeType.class})`
-        })
+        if (volumeType) {
+          description.push({
+            title: 'Volume Type',
+            value: `${volumeType.name} / ${this.workerGroup.volume.size}`,
+            description: `(Class: ${volumeType.class})`
+          })
+        } else {
+          description.push({
+            title: 'Volume Type',
+            value: this.workerGroup.volume.type
+          })
+        }
       }
       if (this.workerGroup.machine.image) {
         const machineImage = find(this.machineImages, this.workerGroup.machine.image)
 
-        const machineImageDescription = {
-          title: 'Machine Image',
-          value: `${machineImage.name} | Version: ${machineImage.version}`
+        if (machineImage) {
+          const machineImageDescription = {
+            title: 'Machine Image',
+            value: `${machineImage.name} | Version: ${machineImage.version}`
+          }
+          if (machineImage.expirationDate) {
+            machineImageDescription.description = `(Expires: ${machineImage.expirationDateString})`
+          }
+          description.push(machineImageDescription)
+        } else {
+          description.push({
+            title: 'Machine Image',
+            value: this.workerGroup.machine.image
+          })
         }
-        if (machineImage.expirationDate) {
-          machineImageDescription.description = `(Expires: ${machineImage.expirationDateString})`
-        }
-        description.push(machineImageDescription)
       }
       if (this.workerGroup.minimum && this.workerGroup.maximum) {
         description.push({

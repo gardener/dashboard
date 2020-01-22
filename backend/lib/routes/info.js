@@ -20,19 +20,17 @@ const express = require('express')
 const got = require('got')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const kubernetes = require('../kubernetes')
+const { dashboardClient, isHttpError } = require('../kubernetes-client')
 const { version } = require('../../package')
 const SwaggerParser = require('swagger-parser')
-const apiRegistration = kubernetes.apiRegistration()
 const router = module.exports = express.Router()
 const _ = require('lodash')
 
 router.route('/')
   .get(async (req, res, next) => {
     try {
-      const user = req.user
       const gardenerVersion = await fetchGardenerVersion()
-      res.send({ version, gardenerVersion, user })
+      res.send({ version, gardenerVersion })
     } catch (err) {
       next(err)
     }
@@ -40,18 +38,22 @@ router.route('/')
 
 async function fetchGardenerVersion () {
   try {
-    const { spec: { service, caBundle } } = await apiRegistration.apiservices.get({
-      name: 'v1alpha1.core.gardener.cloud'
-    })
+    const {
+      spec: {
+        service,
+        caBundle
+      }
+    } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1alpha1.core.gardener.cloud')
     const uri = `https://${service.name}.${service.namespace}/version`
-    const { body: version } = await got(uri, {
+    const version = await got(uri, {
       ca: decodeBase64(caBundle),
-      json: true
+      resolveBodyOnly: true,
+      responseType: 'json'
     })
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
-    if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
+    if (isHttpError(err, 404)) {
       return undefined
     }
     throw err
@@ -76,13 +78,21 @@ async function fetchShootSpec (user) {
     return shootSpec
   }
   try {
-    const { url, ca } = kubernetes.config()
-    const { body } = await got(`${url}/openapi/v2`, {
-      ca,
+    const {
+      cluster: {
+        server: {
+          origin
+        },
+        certificateAuthority
+      }
+    } = dashboardClient
+    const uri = `${origin}/openapi/v2`
+    const { body } = await got(uri, {
+      ca: certificateAuthority,
       headers: {
         Authorization: `Bearer ${user.auth.bearer}`
       },
-      json: true
+      responseType: 'json'
     })
     const spec = await SwaggerParser.dereference(body)
 

@@ -1,28 +1,3 @@
-apiVersion: {{ include "rbacversion" . }}
-kind: ClusterRole
-metadata:
-  name: dashboard.gardener.cloud:system:project-member
-  labels:
-    rbac.gardener.cloud/aggregate-to-project-member: "true"
-    app: gardener-dashboard
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-rules:
-- apiGroups:
-  - dashboard.gardener.cloud
-  resources:
-  - terminals
-  verbs:
-  - create
-  - delete
-  - deletecollection
-  - get
-  - list
-  - patch
-  - update
-  - watch
----
 {{- if not .Values.kubeconfig }}
 apiVersion: {{ include "rbacversion" . }}
 kind: ClusterRoleBinding

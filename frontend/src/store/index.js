@@ -19,7 +19,7 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon } from '@/utils'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -53,7 +53,7 @@ import semver from 'semver'
 
 Vue.use(Vuex)
 
-const debug = process.env.NODE_ENV !== 'production'
+const debug = process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test'
 
 // plugins
 const plugins = []
@@ -75,21 +75,34 @@ const state = {
   alertBanner: null,
   shootsLoading: false,
   websocketConnectionError: null,
-  localTimezone: moment.tz.guess()
+  localTimezone: moment.tz.guess(),
+  conditionCache: {
+    APIServerAvailable: {
+      displayName: 'API Server',
+      shortName: 'API',
+      description: 'Indicates whether the shoot\'s kube-apiserver is healthy and available. If this is in error state then no interaction with the cluster is possible. The workload running on the cluster is most likely not affected.'
+    },
+    ControlPlaneHealthy: {
+      displayName: 'Control Plane',
+      shortName: 'CP',
+      description: 'Indicates whether all control plane components are up and running.',
+      showAdminOnly: true
+    },
+    EveryNodeReady: {
+      displayName: 'Nodes',
+      shortName: 'N',
+      description: 'Indicates whether all nodes registered to the cluster are healthy and up-to-date. If this is in error state there then there is probably an issue with the cluster nodes. In worst case there is currently not enough capacity to schedule all the workloads/pods running in the cluster and that might cause a service disruption of your applications.'
+    },
+    SystemComponentsHealthy: {
+      displayName: 'System Components',
+      shortName: 'SC',
+      description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
+    }
+  }
 }
 
 const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
-}
-
-const machineAndVolumeTypePredicate = (item, unavailableItems) => {
-  if (item.usable === false) {
-    return false
-  }
-  if (includes(unavailableItems, item.name)) {
-    return false
-  }
-  return true
 }
 
 const vendorNameFromImageName = imageName => {
@@ -138,59 +151,93 @@ const getters = {
       return sortBy(filteredCloudProfiles, 'metadata.name')
     }
   },
-  machineTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        const machineTypes = cloudProfile.data.machineTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
-        })
-        return filter(machineTypes, machineType => machineAndVolumeTypePredicate(machineType, unavailableItems))
+  machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    const machineAndVolumeTypePredicate = unavailableItems => {
+      return item => {
+        if (item.usable === false) {
+          return false
+        }
+        if (includes(unavailableItems, item.name)) {
+          return false
+        }
+        return true
       }
-      return []
+    }
+
+    return ({ type, cloudProfileName, region, zones }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const items = cloudProfile.data[type]
+      if (!region || !zones) {
+        return items
+      }
+      const regionObject = find(cloudProfile.data.regions, { name: region })
+      let regionZones = get(regionObject, 'zones', [])
+      regionZones = filter(regionZones, regionZone => includes(zones, regionZone.name))
+      const unavailableItems = flatMap(regionZones, zone => {
+        if (type === 'machineTypes') {
+          return zone.unavailableMachineTypes
+        } else if (type === 'volumeTypes') {
+          return zone.unavailableVolumeTypes
+        }
+      })
+      return filter(items, machineAndVolumeTypePredicate(unavailableItems))
     }
   },
-  volumeTypesByCloudProfileNameAndZones (state, getters) {
-    return ({ cloudProfileName, zones }) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        const volumeTypes = cloudProfile.data.volumeTypes
-        const unavailableItems = flatMap(cloudProfile.data.regions, ({ zones }) => {
-          return map(zones, 'unavailableMachineTypes')
-        })
-        return filter(volumeTypes, volumeType => machineAndVolumeTypePredicate(volumeType, unavailableItems))
-      }
-      return []
+  machineTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  machineTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'machineTypes', cloudProfileName, region, zones })
+    }
+  },
+  volumeTypesByCloudProfileName (state, getters) {
+    return ({ cloudProfileName }) => {
+      return getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName })
+    }
+  },
+  volumeTypesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region, zones }) => {
+      return getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({ type: 'volumeTypes', cloudProfileName, region, zones })
     }
   },
   machineImagesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const machineImages = get(cloudProfile, 'data.machineImages')
-      const allMachineImages = flatMap(machineImages, machineImage => {
-        const machineImageVersions = []
-        forEach(machineImage.versions, version => {
-          if (!version.expirationDate || moment().isBefore(version.expirationDate)) {
-            const vendorName = vendorNameFromImageName(machineImage.name)
-            machineImageVersions.push({
-              name: machineImage.name,
-              version: version.version,
-              expirationDate: version.expirationDate,
-              expirationDateString: getDateFormatted(version.expirationDate),
-              vendorName,
-              icon: iconForVendor(vendorName),
-              needsLicense: vendorNeedsLicense(vendorName)
-            })
+
+      const mapMachineImages = (machineImage) => {
+        const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
+          if (expirationDate && moment().isAfter(expirationDate)) {
+            return false
           }
+          if (!semver.valid(version)) {
+            console.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
+            return false
+          }
+          return true
         })
-        machineImageVersions.sort((a, b) => {
+        versions.sort((a, b) => {
           return semver.rcompare(a.version, b.version)
         })
-        return machineImageVersions
-      })
 
-      return allMachineImages
+        return map(versions, ({ version, expirationDate }) => {
+          const vendorName = vendorNameFromImageName(machineImage.name)
+          return {
+            name: machineImage.name,
+            version,
+            expirationDate,
+            expirationDateString: getDateFormatted(expirationDate),
+            vendorName,
+            icon: iconForVendor(vendorName),
+            needsLicense: vendorNeedsLicense(vendorName)
+          }
+        })
+      }
+
+      return flatMap(machineImages, mapMachineImages)
     }
   },
   zonesByCloudProfileNameAndRegion (state, getters) {
@@ -314,8 +361,15 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const allVersions = get(cloudProfile, 'data.kubernetes.versions', [])
-      const validVersions = filter(allVersions, ({ expirationDate }) => {
-        return !expirationDate || moment().isBefore(expirationDate)
+      const validVersions = filter(allVersions, ({ expirationDate, version }) => {
+        if (!semver.valid(version)) {
+          console.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
+          return false
+        }
+        if (expirationDate && moment().isAfter(expirationDate)) {
+          return false
+        }
+        return true
       })
       return map(validVersions, version => {
         return {
@@ -412,6 +466,9 @@ const getters = {
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
+  },
+  isKymaFeatureEnabled (state, getters) {
+    return get(state, 'cfg.features.kymaEnabled', false)
   }
 }
 
@@ -482,6 +539,12 @@ const actions = {
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
+  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -610,12 +673,20 @@ const actions = {
         dispatch('setError', { message: `Delete member failed. ${err.message}` })
       })
   },
-  setConfiguration ({ commit }, value) {
+  setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
+
+    if (getters.isKymaFeatureEnabled) {
+      addKymaAddon(value.kyma)
+    }
 
     if (get(value, 'alert')) {
       commit('SET_ALERT_BANNER', get(value, 'alert'))
     }
+
+    forEach(value.knownConditions, (conditionValue, conditionKey) => {
+      commit('setCondition', { conditionKey, conditionValue })
+    })
 
     return state.cfg
   },
@@ -727,7 +798,20 @@ const mutations = {
   },
   SET_ALERT_BANNER (state, value) {
     state.alertBanner = value
+  },
+  setCondition (state, { conditionKey, conditionValue }) {
+    Vue.set(state.conditionCache, conditionKey, conditionValue)
   }
+}
+
+const modules = {
+  projects,
+  members,
+  cloudProfiles,
+  domains,
+  shoots,
+  infrastructureSecrets,
+  journals
 }
 
 const store = new Vuex.Store({
@@ -735,15 +819,7 @@ const store = new Vuex.Store({
   actions,
   getters,
   mutations,
-  modules: {
-    projects,
-    members,
-    cloudProfiles,
-    domains,
-    shoots,
-    infrastructureSecrets,
-    journals
-  },
+  modules,
   strict: debug,
   plugins
 })
@@ -779,3 +855,12 @@ journalCommentsEmitter.on('comments', events => {
 })
 
 export default store
+
+export {
+  state,
+  actions,
+  getters,
+  mutations,
+  modules,
+  plugins
+}

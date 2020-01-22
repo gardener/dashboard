@@ -217,7 +217,8 @@ function getToken ({ cookies = {}, headers = {} }) {
   return null
 }
 
-function authenticate () {
+function authenticate ({ createClient } = {}) {
+  assert.ok(typeof createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
@@ -248,7 +249,12 @@ function authenticate () {
     }
     const bearer = decrypt(encryptedBearer)
     assert.ok(bearer, 'The decrypted bearer token must not be empty')
-    user.auth = { bearer }
+    const auth = user.auth = { bearer }
+
+    Object.defineProperty(user, 'client', {
+      value: createClient({ auth }),
+      enumerable: false
+    })
   }
   return async (req, res, next) => {
     try {

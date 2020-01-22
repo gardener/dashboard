@@ -241,6 +241,10 @@ Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/body-parser/blob/master/LICENSE)
 
+- [chalk](https://github.com/chalk/chalk)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/chalk/chalk/blob/master/license)
+
 - [cookie-parser](https://github.com/expressjs/cookie-parser)\
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>\
 Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
@@ -276,13 +280,13 @@ Copyright (C) 2011-2015 by Vitaly Puzrin\
 Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
 [MIT License](https://github.com/auth0/node-jsonwebtoken/blob/master/LICENSE)
 
-- [kubernetes-client](https://github.com/godaddy/kubernetes-client)\
-Copyright (c) 2016 GoDaddy Operating Company, LLC.\
-[MIT License](https://github.com/godaddy/kubernetes-client/blob/master/LICENSE)
-
 - [lodash](https://github.com/lodash/lodash)\
 Copyright JS Foundation and other contributors <https://js.foundation/>\
 [MIT License](https://github.com/lodash/lodash/blob/master/LICENSE)
+
+- [mixwith](https://github.com/justinfagnani/mixwith.js)\
+Copyright (c) 2014 Justin Fagnani\
+[Apache License 2.0](https://github.com/justinfagnani/mixwith.js/blob/master/LICENSE)
 
 - [morgan](https://github.com/expressjs/morgan)\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
@@ -296,6 +300,10 @@ Copyright (c) 2014 object-hash contributors
 - [openid-client](https://github.com/panva/node-openid-client)\
 Copyright (c) 2016 Filip Skokan\
 [MIT License](https://github.com/panva/node-openid-client/blob/master/LICENSE.md)
+
+- [p-event](https://github.com/sindresorhus/p-event)<>
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/p-event/blob/master/license)
 
 - [p-retry](https://github.com/sindresorhus/p-retry)<>
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
@@ -312,10 +320,6 @@ Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
 - [socket.io](https://github.com/socketio/socket.io)\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
-
-- [url-template](https://github.com/bramstein/url-template)\
-Copyright (c) 2012-2014, Bram Stein\
-[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
 
 - [uuid](https://github.com/kelektiv/node-uuid)\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
@@ -344,6 +348,10 @@ Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>\
 Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reserved Font Name Material Design Icons.\
 Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE\
 [SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
+
+- [ansi-html](https://github.com/Tjatse/ansi-html)\
+Copyright 2017 Tjatse\
+[Apache License 2.0](https://github.com/Tjatse/ansi-html/blob/master/LICENSE)
 
 - [axios](https://github.com/axios/axios)\
 Copyright (c) 2014-present Matt Zabriskie\
@@ -417,6 +425,10 @@ Copyright (c) Isaac Z. Schlueter and Contributors\
 - [socket.io-client](https://github.com/socketio/socket.io-client)\
 Copyright (c) 2014 Guillermo Rauch\
 [MIT License](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
+
+- [url-template](https://github.com/bramstein/url-template)\
+Copyright (c) 2012-2014, Bram Stein\
+[BSD License](https://github.com/bramstein/url-template/blob/master/LICENSE)
 
 - [vue](https://github.com/vuejs/vue)\
 Copyright (c) 2013-present, Yuxi (Evan) You\

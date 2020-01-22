@@ -16,11 +16,13 @@
 
 'use strict'
 
-const garden = require('../kubernetes').gardener()
 const { cacheResource } = require('./common')
 const { getQuotas } = require('../cache')
+const {
+  dashboardClient // privileged client for the garden cluster
+} = require('../kubernetes-client')
 
 module.exports = io => {
-  const emitter = garden.quotas.watch()
+  const emitter = dashboardClient['core.gardener.cloud'].quotas.watchListAllNamespaces()
   cacheResource(emitter, getQuotas(), 'metadata.name')
 }

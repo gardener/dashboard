@@ -23,26 +23,32 @@ const net = require('net')
 const logger = require('../../logger')
 const config = require('../../config')
 const { NotImplemented } = require('../../errors')
+
 const {
-  getKubeconfig,
-  getSeedKubeconfig,
-  getShootIngressDomain,
-  getSeedIngressDomain,
+  dashboardClient,
+  isHttpError
+} = require('../../kubernetes-client')
+
+const {
   getConfigValue,
   getSeedNameFromShoot
 } = require('../../utils')
-const kubernetes = require('../../kubernetes')
+
 const {
   toIngressResource,
   toEndpointResource,
   toServiceResource
 } = require('./terminalResources')
+
 const {
   getGardenTerminalHostClusterSecretRef,
   getGardenTerminalHostClusterRefType,
+  getKubeApiServerHostForShoot,
+  getKubeApiServerHostForSeed,
+  getWildcardIngressDomainForSeed,
   GardenTerminalHostRefType
 } = require('./utils')
-const shoots = require('../shoots')
+
 const { getSeed } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
@@ -88,31 +94,29 @@ class Handler {
   }
 }
 
-function seedShootNsExists (resource) {
+function seedShootNamespaceExists ({ status, spec }) {
   /*
     If the technicalID is set and the progress is over 10% (best guess), then we assume that the namespace on the seed exists for this shoot.
     Currently there is no better indicator, except trying to get the namespace on the seed - which we want to avoid for performance reasons.
   */
-  const status = resource.status
   if (!status) {
     return false
   }
-  return status.technicalID && status.seed && _.get(status, 'lastOperation.progress', 0) > 10
+  return status.technicalID && spec.seedName && _.get(status, 'lastOperation.progress', 0) > 10
 }
 
-async function replaceResource ({ client, name, body }) {
+async function replaceResource (resource, { namespace, name, body }) {
   try {
-    await client.get({ name })
-    return client.mergePatch({ name, body })
+    return await resource.mergePatch(namespace, name, body)
   } catch (err) {
-    if (err.code === 404) {
-      return client.post({ body })
+    if (isHttpError(err, 404)) {
+      return resource.create(namespace, body)
     }
     throw err
   }
 }
 
-function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionClient, namespace, host, serviceName, ownerReferences, annotations, secretName }) {
+function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, host, tlsHost, serviceName, ownerReferences, annotations, secretName }) {
   if (!secretName) {
     secretName = `${name}-tls`
   }
@@ -137,7 +141,7 @@ function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionCli
     tls: [
       {
         hosts: [
-          host
+          tlsHost
         ],
         secretName
       }
@@ -145,12 +149,11 @@ function replaceIngressApiServer ({ name = TERMINAL_KUBE_APISERVER, extensionCli
   }
 
   const body = toIngressResource({ name, annotations, spec, ownerReferences })
-  const client = extensionClient.ns(namespace).ingress
 
-  return replaceResource({ client, name, body })
+  return replaceResource(client.extensions.ingresses, { namespace, name, body })
 }
 
-function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, ip, ownerReferences }) {
+function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, ip, ownerReferences }) {
   const subsets = [
     {
       addresses: [
@@ -168,12 +171,11 @@ function replaceEndpointKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreCli
   ]
 
   const body = toEndpointResource({ name, namespace, subsets, ownerReferences })
-  const client = coreClient.ns(namespace).endpoints
 
-  return replaceResource({ client, name, body })
+  return replaceResource(client.core.endpoints, { namespace, name, body })
 }
 
-function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClient, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
+function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
   let type
   if (externalName) {
     type = 'ExternalName'
@@ -194,9 +196,8 @@ function replaceServiceKubeApiServer ({ name = TERMINAL_KUBE_APISERVER, coreClie
   }
 
   const body = toServiceResource({ name, namespace, spec, ownerReferences })
-  const client = coreClient.ns(namespace).services
 
-  return replaceResource({ client, name, body })
+  return replaceResource(client.core.services, { namespace, name, body })
 }
 
 async function handleSeed (seed) {
@@ -212,26 +213,22 @@ async function handleSeed (seed) {
   }
 
   logger.debug(`replacing resources on seed ${name} for webterminals`)
-  const coreClient = kubernetes.core()
-  const gardenClient = kubernetes.gardener()
 
   // now make sure a browser-trusted certificate is presented for the kube-apiserver
-  const isShootedSeed = await shoots.exists({ gardenClient, namespace, name })
-  if (isShootedSeed) {
-    await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
+  const shoot = await dashboardClient.getShoot({ namespace, name, throwNotFound: false })
+  if (shoot) {
+    await ensureTrustedCertForShootApiServer(dashboardClient, shoot)
   } else {
-    await ensureTrustedCertForSeedApiServer({ coreClient, seed })
+    await ensureTrustedCertForSeedApiServer(dashboardClient, seed)
   }
 }
 
 async function handleShoot (shoot) {
-  const name = shoot.metadata.name
-  const namespace = shoot.metadata.namespace
+  const { metadata: { namespace, name } } = shoot
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
-  const coreClient = kubernetes.core()
-  const gardenClient = kubernetes.gardener()
-
-  await ensureTrustedCertForShootApiServer({ gardenClient, coreClient, namespace, name })
+  // read the latest shoot resource version
+  const latestShootResource = await dashboardClient['core.gardener.cloud'].shoots.get(namespace, name)
+  await ensureTrustedCertForShootApiServer(dashboardClient, latestShootResource)
 }
 
 /*
@@ -241,9 +238,8 @@ async function handleShoot (shoot) {
   Until this is the case we need to workaround this by creating an ingress (e.g. with the respective certmanager annotations) so that a proper certificate is presented for the kube-apiserver.
   https://github.com/gardener/gardener/issues/1413
 */
-async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, namespace, name }) {
-  const shootResource = await shoots.read({ gardenClient, namespace, name })
-
+async function ensureTrustedCertForShootApiServer (client, shootResource) {
+  const { metadata: { namespace, name } } = shootResource
   if (!_.isEmpty(shootResource.metadata.deletionTimestamp)) {
     logger.debug(`Shoot ${namespace}/${name} is marked for deletion, bootstrapping aborted`)
     return
@@ -251,30 +247,27 @@ async function ensureTrustedCertForShootApiServer ({ gardenClient, coreClient, n
 
   // fetch seed resource
   const seedName = getSeedNameFromShoot(shootResource)
-  const seedResource = await gardenClient.seeds.get({ name: seedName })
-
-  // get seed client
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed: seedResource })
-  const seedExtensionClient = kubernetes.extensions(kubernetes.fromKubeconfig(seedKubeconfig))
+  const seedResource = await client['core.gardener.cloud'].seeds.get(seedName)
 
   // calculate ingress domain
-  const projectsClient = kubernetes.gardener().projects
-  const namespacesClient = coreClient.namespaces
-  const shootIngressDomain = await getShootIngressDomain(projectsClient, namespacesClient, shootResource, seedResource)
-  const apiServerIngressHost = `k-${shootIngressDomain}`
+  const apiServerIngressHost = getKubeApiServerHostForShoot(shootResource, seedResource)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seedResource)
 
-  const seedShootNS = _.get(shootResource, 'status.technicalID')
-  if (!seedShootNS) {
+  const seedShootNamespace = _.get(shootResource, 'status.technicalID')
+  if (!seedShootNamespace) {
     throw new Error(`could not get namespace on seed for shoot ${namespace}/${name}`)
   }
 
+  // get seed client
+  const seedClient = await client.createKubeconfigClient(seedResource.spec.secretRef)
+
   const serviceName = 'kube-apiserver'
   const annotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
-  await replaceIngressApiServer({
-    extensionClient: seedExtensionClient,
-    namespace: seedShootNS,
+  await replaceIngressApiServer(seedClient, {
+    namespace: seedShootNamespace,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     annotations
   })
 }
@@ -290,27 +283,18 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 
   switch (refType) {
     case GardenTerminalHostRefType.SECRET_REF: {
-      const coreClient = kubernetes.core()
+      const { name, namespace } = await getGardenTerminalHostClusterSecretRef(dashboardClient)
 
-      const { name, namespace } = await getGardenTerminalHostClusterSecretRef({ coreClient })
-
-      const hostKubeconfig = await getKubeconfig({ coreClient, name, namespace })
-      const hostClientConfig = kubernetes.fromKubeconfig(hostKubeconfig)
-      const hostCoreClient = kubernetes.core(hostClientConfig)
-      const hostExtensionClient = kubernetes.extensions(hostClientConfig)
+      const hostClient = await dashboardClient.createKubeconfigClient({ name, namespace })
 
       const hostNamespace = getConfigValue('terminal.bootstrap.gardenTerminalHost.namespace', 'garden')
-      const apiServerHostname = new URL(hostClientConfig.url).hostname
       const apiServerIngressHost = getConfigValue('terminal.gardenTerminalHost.apiServerIngressHost')
-
       const ingressAnnotations = getConfigValue('terminal.bootstrap.gardenTerminalHost.apiServerIngress.annotations')
-      return ensureTrustedCertForApiServer({
-        coreClient: hostCoreClient,
-        extensionClient: hostExtensionClient,
-        name: 'garden-host-cluster-apiserver',
+      return ensureTrustedCertForApiServer(hostClient, {
         namespace: hostNamespace,
-        apiServerHostname,
+        name: 'garden-host-cluster-apiserver',
         apiServerIngressHost,
+        tlsHost: apiServerIngressHost,
         ingressAnnotations
       })
     }
@@ -319,51 +303,45 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
   }
 }
 
-async function ensureTrustedCertForSeedApiServer ({ coreClient, seed }) {
+async function ensureTrustedCertForSeedApiServer (client, seed) {
   const seedName = seed.metadata.name
-
-  const seedKubeconfig = await getSeedKubeconfig({ coreClient, seed })
-  const seedClientConfig = kubernetes.fromKubeconfig(seedKubeconfig)
-  const seedCoreClient = kubernetes.core(seedClientConfig)
-  const seedExtensionClient = kubernetes.extensions(seedClientConfig)
-
   const namespace = 'garden'
-  const seedApiServerHostname = new URL(seedClientConfig.url).hostname
-  const seedIngressDomain = await getSeedIngressDomain(seed)
-  const seedApiServerIngressHost = `k-${seedIngressDomain}`
-  const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
 
-  await ensureTrustedCertForApiServer({
-    coreClient: seedCoreClient,
-    extensionClient: seedExtensionClient,
+  const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+
+  const apiServerIngressHost = getKubeApiServerHostForSeed(seed)
+  const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
+  const ingressAnnotations = _.get(config, 'terminal.bootstrap.apiServerIngress.annotations')
+  await ensureTrustedCertForApiServer(seedClient, {
     namespace,
     name: `${TERMINAL_KUBE_APISERVER}-${seedName}`,
-    apiServerHostname: seedApiServerHostname,
-    apiServerIngressHost: seedApiServerIngressHost,
+    apiServerIngressHost,
+    tlsHost: seedWildcardIngressDomain,
     ingressAnnotations
   })
 }
 
-async function ensureTrustedCertForApiServer ({ coreClient, extensionClient, namespace, apiServerHostname, apiServerIngressHost, ingressAnnotations, name }) {
+async function ensureTrustedCertForApiServer (client, { namespace, name, apiServerIngressHost, tlsHost, ingressAnnotations }) {
+  const apiServerHostname = client.cluster.server.hostname
   let service
   // replace headless service
   if (net.isIP(apiServerHostname) !== 0) {
     const ip = apiServerHostname
-    await replaceEndpointKubeApiServer({ coreClient, namespace, ip, name })
+    await replaceEndpointKubeApiServer(client, { namespace, name, ip })
 
-    service = await replaceServiceKubeApiServer({ coreClient, namespace, name })
+    service = await replaceServiceKubeApiServer(client, { namespace, name })
   } else {
     const externalName = apiServerHostname
-    service = await replaceServiceKubeApiServer({ coreClient, namespace, externalName, name })
+    service = await replaceServiceKubeApiServer(client, { namespace, name, externalName })
   }
   const serviceName = service.metadata.name
 
-  await replaceIngressApiServer({
-    extensionClient,
+  await replaceIngressApiServer(client, {
     name,
     namespace,
     serviceName,
     host: apiServerIngressHost,
+    tlsHost,
     annotations: ingressAnnotations,
     secretName: `${name}-tls`
   })
@@ -426,7 +404,7 @@ function bootstrapResource (resource) {
   }
 
   // for shoots, if the seed-shoot-ns does not exist, postpone bootstrapping
-  if (kind === 'Shoot' && !seedShootNsExists(resource)) {
+  if (kind === 'Shoot' && !seedShootNamespaceExists(resource)) {
     if (bootstrapPending.containsResource(resource)) {
       return
     }

@@ -15,12 +15,12 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="popperTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <div slot="popperRef" class="shoot-status-div">
       <v-tooltip top>
         <template slot="activator">
           <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-            <v-icon v-if="isHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
+            <v-icon v-if="isStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
             <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" color="error">mdi-account-alert</v-icon>
             <v-icon v-else-if="shootDeleted" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
             <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
@@ -28,7 +28,7 @@ limitations under the License.
             <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
             <template v-else>{{operation.progress}}</template>
           </v-progress-circular>
-          <v-icon v-else-if="isHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
+          <v-icon v-else-if="isStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
           <v-icon v-else-if="reconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
           <v-icon v-else-if="isAborted && shootDeleted" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
           <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
@@ -40,22 +40,21 @@ limitations under the License.
         <div>{{ tooltipText }}</div>
       </v-tooltip>
     </div>
-    <template slot="content-after">
-      <pre v-if="!!popperMessage" class="alert-message">{{ popperMessage }}</pre>
-      <template v-if="isError">
-        <v-divider class="my-2"></v-divider>
-        <h4 class="error--text text-xs-left">Last Error</h4>
-        <template v-for="errorCodeDescription in errorCodeDescriptions">
-          <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-        </template>
-        <pre class="alert-message error--text" color="error">{{ lastErrorDescription }}</pre>
+    <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
+    <template v-if="isError">
+      <v-divider class="my-2"></v-divider>
+      <h4 class="error--text text-xs-left">Last Error</h4>
+      <template v-for="errorCodeDescription in errorCodeDescriptions">
+        <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
       </template>
+      <ansi-text class="error--text" :text="lastErrorDescription"></ansi-text>
     </template>
   </g-popper>
 </template>
 
 <script>
 import GPopper from '@/components/GPopper'
+import AnsiText from '@/components/AnsiText'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
@@ -82,7 +81,8 @@ const errorCodes = {
 
 export default {
   components: {
-    GPopper
+    GPopper,
+    AnsiText
   },
   props: {
     operation: {
@@ -101,7 +101,11 @@ export default {
       type: String,
       required: true
     },
-    isHibernated: {
+    isStatusHibernated: {
+      type: Boolean,
+      default: false
+    },
+    isHibernationProgressing: {
       type: Boolean,
       default: false
     },
@@ -153,24 +157,27 @@ export default {
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
     },
-    popperTitle () {
-      let popperTitle = ''
-      if (this.isHibernated) {
-        popperTitle = popperTitle.concat('Hibernated; ')
+    statusTitle () {
+      const statusTitle = []
+      if (this.isHibernationProgressing) {
+        if (this.isStatusHibernated) {
+          statusTitle.push('Waking up')
+        } else {
+          statusTitle.push('Hibernating')
+        }
+      } else if (this.isStatusHibernated) {
+        statusTitle.push('Hibernated')
       }
       if (this.reconciliationDeactivated) {
-        popperTitle = popperTitle.concat('Reconciliation Deactivated')
-
-        this.emitExtendedTitle(popperTitle)
-        return popperTitle
+        statusTitle.push('Hibernated')
+      } else {
+        statusTitle.push(`${this.operationType} ${this.operationState}`)
       }
-      popperTitle = popperTitle.concat(`${this.operationType} ${this.operationState}`)
 
-      this.emitExtendedTitle(popperTitle)
-      return popperTitle
+      return join(statusTitle, ', ')
     },
     tooltipText () {
-      let tooltipText = this.popperTitle
+      let tooltipText = this.statusTitle
       if (this.showProgress) {
         tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
       }
@@ -204,12 +211,12 @@ export default {
       }
     }
   },
-  methods: {
-    emitExtendedTitle (title) {
+  watch: {
+    statusTitle (statusTitle) {
       // similar to tooltipText, except the progress is missing
-      let extendedTitle = title
+      let extendedTitle = statusTitle
       if (this.isUserError) {
-        extendedTitle = extendedTitle.concat(`; ${this.errorCodeShortDescriptionsText}`)
+        extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
       }
 
       this.$emit('titleChange', extendedTitle)
@@ -270,15 +277,6 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
-  }
-
-  .alert-message {
-    text-align: left;
-    min-width: 250px;
-    max-width: 800px;
-    max-height: 300px;
-    white-space: pre-wrap;
-    overflow-y: auto;
   }
 
 </style>
