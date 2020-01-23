@@ -316,8 +316,9 @@ export default {
       }
       this.$instance.on('change', onChange)
 
-      CodeMirror.registerHelper('hint', 'yaml', (...args) => {
-        return this.shootEditorCompletions.yamlHint(...args)
+      CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
+        options.completeSingle = false
+        return this.shootEditorCompletions.yamlHint(editor)
       })
 
       let cmTooltipFnTimerID

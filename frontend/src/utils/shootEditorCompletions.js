@@ -41,12 +41,10 @@ export class ShootEditorCompletions {
     this.indentUnit = editorIndent
   }
 
-  yamlHint (editor, options) {
+  yamlHint (editor) {
     const cur = editor.getCursor()
     const token = this.getYamlToken(editor, cur)
     const list = this.getYamlCompletions(token, cur, editor)
-
-    options.completeSingle = false
 
     return {
       list,
@@ -63,6 +61,7 @@ export class ShootEditorCompletions {
     const lineTokens = cm.getLineTokens(pos.line)
     const lineString = join(map(lineTokens, 'string'), '')
     const result = lineString.match(/^(\s*)(.*?)([^\s]+):.*$/)
+
     if (result) {
       const start = result[1].length + result[2].length
       const end = start + result[3].length
@@ -85,7 +84,7 @@ export class ShootEditorCompletions {
     let tprop = token
     let line = cur.line
     let context = []
-    while (line > 0 && !(tprop.type === 'property' && tprop.indent === 0)) {
+    while (line >= 0 && !(tprop.type === 'property' && tprop.indent === 0)) {
       tprop = this.getYamlToken(editor, CodeMirror.Pos(line, 0))
       if (tprop.indent < token.start &&
           (context.length === 0 || context[context.length - 1].indent > tprop.indent)) {
