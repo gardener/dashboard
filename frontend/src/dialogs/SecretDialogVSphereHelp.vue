@@ -27,14 +27,19 @@ limitations under the License.
         The Gardener needs these credentials to provision and operate the VMware vSphere infrastructure for your Kubernetes cluster.
       </p>
       <p>
-        Ensure that these account has privileges to <b>create, modify and delete VMs</b>.
+        Ensure that these accounts have privileges to <b>create, modify and delete VMs and Networking resources</b>.
       </p>
       <p>
-        Read the
+        Please read the
         <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
            target="_blank"
-           class="indigo--text text--darken-3">
-          VMware vSphere help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
+           class="indigo--text text--darken-4">
+          VMware vSphere Documentation</a>
+          and the
+        <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
+          target="_blank"
+          class="indigo--text text--darken-4">
+         VMware NSX-T Data Center Documentation</a>.
       </p>
     </div>
   </secret-dialog-help>
