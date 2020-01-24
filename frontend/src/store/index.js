@@ -165,6 +165,9 @@ const getters = {
     }
 
     return ({ type, cloudProfileName, region, zones }) => {
+      if (!cloudProfileName) {
+        return []
+      }
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const items = cloudProfile.data[type]
       if (!region || !zones) {
