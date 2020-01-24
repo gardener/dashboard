@@ -23,7 +23,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Kibana</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isShootHibernated" top>
+          <v-tooltip v-if="isShootStatusHibernated" top>
             <span slot="activator">{{kibanaUrl}}</span>
             Kibana is not running for hibernated clusters
           </v-tooltip>

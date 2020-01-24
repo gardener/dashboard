@@ -32,7 +32,7 @@ limitations under the License.
       target="shoot"
       :description="shootTerminalDescription"
       :buttonDescription="shootTerminalButtonDescription"
-      :disabled="isShootHibernated"
+      :disabled="isShootStatusHibernated"
       >
     </terminal-list-tile>
 
@@ -45,7 +45,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isShootHibernated" top>
+          <v-tooltip v-if="isShootStatusHibernated" top>
             <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
             Dashboard is not running for hibernated clusters
           </v-tooltip>
@@ -75,7 +75,7 @@ limitations under the License.
         </v-list-tile-action>
         <v-list-tile-content>
           <v-list-tile-title>
-            <v-tooltip v-if="isShootHibernated" top>
+            <v-tooltip v-if="isShootStatusHibernated" top>
               <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
               Dashboard is not running for hibernated clusters
             </v-tooltip>
@@ -237,8 +237,8 @@ export default {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
     shootTerminalButtonDescription () {
-      if (this.isShootHibernated) {
-        return 'Cluster is hibernated. Wake-up cluster to open terminal.'
+      if (this.isShootStatusHibernated) {
+        return 'Cluster is hibernated. Wake up cluster to open terminal.'
       }
       return this.shootTerminalDescription
     },

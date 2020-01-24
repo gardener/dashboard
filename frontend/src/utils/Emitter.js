@@ -201,7 +201,12 @@ class ShootSubscription extends AbstractSubscription {
     this.socket.on('shootSubscriptionDone', ({ kind, target }) => {
       const { name, namespace } = target
       throttledNsEventEmitter.flush()
-      store.dispatch('getShootInfo', { name, namespace })
+      Promise.all([
+        store.dispatch('getShootInfo', { name, namespace }),
+        store.dispatch('getShootAddonKyma', { name, namespace })
+      ]).catch(err => {
+        console.error('SubscribeShootDone Error:', err.message)
+      })
     })
   }
 

@@ -15,19 +15,25 @@
 //
 
 import { expect } from 'chai'
-import { mount, createLocalVue } from '@vue/test-utils'
+import { shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import StatusTag from '@/components/StatusTag.vue'
-import store from '@/store'
+import { state, actions, getters, mutations } from '@/store'
 
 Vue.use(Vuetify)
-const localVue = createLocalVue()
-localVue.use(Vuex)
+Vue.use(Vuex)
+
+const store = new Vuex.Store({
+  state,
+  actions,
+  getters,
+  mutations
+})
 
 const bus = new Vue({})
-Object.defineProperties(localVue.prototype, {
+Object.defineProperties(Vue.prototype, {
   $bus: { value: bus }
 })
 
@@ -38,8 +44,7 @@ function createStatusTagComponent (conditionType) {
     },
     popperKey: 'foo'
   }
-  const wrapper = mount(StatusTag, {
-    localVue,
+  const wrapper = shallowMount(StatusTag, {
     store,
     propsData
   })
@@ -48,7 +53,7 @@ function createStatusTagComponent (conditionType) {
 }
 
 describe('StatusTag.vue', function () {
-  beforeEach(async () => {
+  beforeEach(function () {
     const cfg = {
       knownConditions: {
         ControlPlaneHealthy: {
@@ -63,7 +68,7 @@ describe('StatusTag.vue', function () {
         }
       }
     }
-    await store.dispatch('setConfiguration', cfg)
+    return store.dispatch('setConfiguration', cfg)
   })
 
   it('should generate condition object for simple condition type', function () {

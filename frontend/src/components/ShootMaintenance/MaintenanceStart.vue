@@ -70,7 +70,7 @@ export default {
     },
     caption () {
       if (this.isMaintenanceToBeScheduled) {
-        return 'Requesting to schedule cluster reconcile'
+        return 'Requesting to schedule cluster maintenance'
       }
       return 'Schedule Maintenance'
     },
@@ -86,10 +86,10 @@ export default {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
       if (confirmed) {
-        this.startReconcile()
+        this.startMaintenance()
       }
     },
-    async startReconcile () {
+    async startMaintenance () {
       this.maintenanceTriggered = true
 
       const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
@@ -102,7 +102,7 @@ export default {
         this.$refs.actionDialog.setError({ errorMessage, detailedErrorMessage })
         console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
 
-        this.reconcileTriggered = false
+        this.maintenanceTriggered = false
         this.currentGeneration = null
       }
     },
@@ -113,18 +113,20 @@ export default {
   watch: {
     isMaintenanceToBeScheduled (maintenanceToBeScheduled) {
       const isMaintenanceScheduled = !maintenanceToBeScheduled && this.maintenanceTriggered
-      if (isMaintenanceScheduled) {
-        this.maintenanceTriggered = false
-
-        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
-          const config = {
-            position: SnotifyPosition.rightBottom,
-            timeout: 5000,
-            showProgressBar: false
-          }
-          this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
-        }
+      if (!isMaintenanceScheduled) {
+        return
       }
+      this.maintenanceTriggered = false
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      this.$snotify.success(`Maintenance scheduled for ${this.shootName}`, config)
     }
   }
 }

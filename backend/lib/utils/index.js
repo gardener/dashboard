@@ -49,7 +49,7 @@ function getConfigValue (path, defaultValue) {
 }
 
 function getSeedNameFromShoot ({ spec = {}, status = {} }) {
-  const seed = status.seed || spec.seedName
+  const seed = spec.seedName
   assert.ok(seed, `There is no seed assigned to this shoot (yet)`)
   return seed
 }

@@ -72,6 +72,7 @@ limitations under the License.
         <v-card-text>
           <manage-shoot-addons
             ref="addons"
+            :isCreateMode="true"
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
@@ -86,6 +87,7 @@ limitations under the License.
           ></maintenance-time>
           <maintenance-components
             ref="maintenanceComponents"
+            :userInterActionBus="userInterActionBus"
           ></maintenance-components>
        </v-card-text>
       </v-card>
@@ -174,7 +176,8 @@ export default {
       'newShootResource',
       'initialNewShootResource',
       'infrastructureSecretsByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'zonesByCloudProfileNameAndRegion',
+      'isKymaFeatureEnabled'
     ]),
     valid () {
       return this.infrastructureValid &&
@@ -252,7 +255,16 @@ export default {
       }
 
       const addons = this.$refs.addons.getAddons()
+      const kymaEnabled = get(addons, 'kyma.enabled', false)
+      delete addons.kyma
       set(shootResource, 'spec.addons', addons)
+      if (this.isKymaFeatureEnabled) {
+        if (kymaEnabled) {
+          set(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]', 'enabled')
+        } else {
+          unset(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        }
+      }
 
       const { utcBegin, utcEnd } = this.$refs.maintenanceTime.getUTCMaintenanceWindow()
       const { k8sUpdates, osUpdates } = this.$refs.maintenanceComponents.getComponentUpdates()
@@ -318,27 +330,29 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
-      const nodesCidr = get(shootResource, 'spec.networking.nodes')
-
-      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName, nodesCidr })
-
-      const name = get(shootResource, 'metadata.name')
-      const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
-      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
-      this.purpose = purpose
-      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName })
-
-      const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, infrastructureKind })
-
-      const addons = get(shootResource, 'spec.addons')
-      this.$refs.addons.updateAddons(addons)
+      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName })
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)
       const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', true)
       this.$refs.maintenanceTime.setLocalizedTime(utcBegin)
       this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates, osUpdates })
+
+      const name = get(shootResource, 'metadata.name')
+      const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
+      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
+      this.purpose = purpose
+      this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
+
+      const workers = get(shootResource, 'spec.provider.workers')
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates })
+
+      const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
+      if (this.isKymaFeatureEnabled) {
+        const kymaEnabled = !!get(shootResource, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
+        addons['kyma'] = { enabled: kymaEnabled }
+      }
+      this.$refs.addons.updateAddons(addons)
 
       const hibernationSchedule = get(shootResource, 'spec.hibernation.schedules')
       const noHibernationSchedule = get(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]', false)

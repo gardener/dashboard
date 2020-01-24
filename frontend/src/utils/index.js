@@ -19,11 +19,15 @@
 import moment from 'moment-timezone'
 import semver from 'semver'
 import md5 from 'md5'
+import DOMPurify from 'dompurify'
+import marked from 'marked'
 import capitalize from 'lodash/capitalize'
 import replace from 'lodash/replace'
 import get from 'lodash/get'
 import head from 'lodash/head'
 import map from 'lodash/map'
+import merge from 'lodash/merge'
+import pick from 'lodash/pick'
 import toLower from 'lodash/toLower'
 import toUpper from 'lodash/toUpper'
 import filter from 'lodash/filter'
@@ -332,13 +336,8 @@ export function getProjectName (metadata) {
   return projectName
 }
 
-export function isHibernated (spec) {
-  if (!spec) {
-    return false
-  }
-
-  const hibernationEnabled = get(spec, 'hibernation.enabled', false)
-  return hibernationEnabled
+export function isShootStatusHibernated (status) {
+  return get(status, 'hibernated', false)
 }
 
 export function canLinkToSeed ({ namespace, seedName }) {
@@ -348,7 +347,7 @@ export function canLinkToSeed ({ namespace, seedName }) {
   * If we are not in the garden namespace we expect a seed to be present
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return namespace && seedName !== 'garden'
+  return seedName && namespace !== 'garden'
 }
 
 export function isUserError (errorCodes) {
@@ -502,6 +501,43 @@ export const shootAddonList = [
   }
 ]
 
+const kymaAddonDescription = `Kyma is a platform for extending applications with serverless functions and microservices. As an integrated stack of the best cloud-native projects, including Istio, Kiali, Prometheus, Grafana, Jaeger, Knative, Ory Hydra, and Loki it allows running modern microservice or serverless applications on top of Kubernetes.
+Kyma comes with a new, lightweight Service Catalog you can use to easily connect services provided by hyperscalers such as Azure, GCP, or AWS, as well as SAP applications.
+
+To successfully run Kyma, the minimal cluster size should be **2 nodes (4 CPU and 16GB each)**, but it is recommended to have 3-5 nodes. Additionally, make sure your Kubernetes version is **1.15.x or lower**.
+
+You can find a link to Kyma management Console UI and credentials in the shoot cluster dashboard.
+To learn more, visit the [Kyma website](https://kyma-project.io). If you want to discuss Kyma, ask questions, and contribute, join the Kyma community in the [Slack channel](http://slack.kyma-project.io).`
+
+export function addKymaAddon (options) {
+  const kymaAddon = {
+    name: 'kyma',
+    title: 'Kyma',
+    description: kymaAddonDescription,
+    visible: true,
+    enabled: false,
+    forbidDisable: true
+  }
+  if (options) {
+    const overwrite = pick(options, ['title', 'description', 'visible', 'enabled', 'forbidDisable'])
+    merge(kymaAddon, overwrite)
+  }
+  kymaAddon.description = compileMarkdown(kymaAddon.description)
+  shootAddonList.push(kymaAddon)
+}
+
+export function compileMarkdown (text) {
+  return DOMPurify.sanitize(marked(text, {
+    gfm: true,
+    breaks: true,
+    tables: true
+  }))
+}
+
+export function shootAddonByName (name) {
+  return find(shootAddonList, ['name', name])
+}
+
 export function randomLocalMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']
@@ -533,9 +569,9 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
   const zones = [sample(availableZones)]
-  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
-  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndZones({ cloudProfileName, zones })
+  const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const volumeType = get(head(volumeTypesForZone), 'name')
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })

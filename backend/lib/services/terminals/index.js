@@ -21,7 +21,6 @@ const assert = require('assert').strict
 const hash = require('object-hash')
 
 const { isHttpError } = require('../../kubernetes-client')
-const { AssertionError } = assert
 
 const {
   decodeBase64,
@@ -397,8 +396,9 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Hosting cluster or target cluster is hibernated')
   }
 
-  const hostKubeconfig = await client.getKubeconfig(hostCluster.secretRef)
-  if (!hostKubeconfig) {
+  try {
+    await client.getKubeconfig(hostCluster.secretRef)
+  } catch (err) {
     throw new Error('Host kubeconfig does not exist (yet)')
   }
 
@@ -426,9 +426,11 @@ async function createHostClient (client, secretRef) {
   try {
     return await client.createKubeconfigClient(secretRef)
   } catch (err) {
-    if (err instanceof AssertionError) {
+    if (isHttpError(err, 404)) {
       throw new Error('Host kubeconfig does not exist (yet)')
     }
+    const { namespace, name } = secretRef
+    logger.error(`Failed to create client from kubeconfig secret ${namespace}/${name}`, err)
     throw err
   }
 }

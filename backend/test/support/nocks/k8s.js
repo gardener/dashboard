@@ -394,11 +394,10 @@ function getShoot ({
       hibernation,
       provider: {
         type: kind
-      }
+      },
+      seedName: seed
     },
-    status: {
-      seed
-    }
+    status: {}
   }
 
   if (createdBy) {
@@ -558,10 +557,6 @@ const stub = {
     }
 
     return [nockWithAuthorization(bearer)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${project}`)
-      .reply(200, () => projectResource)
       .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shootResult)
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)

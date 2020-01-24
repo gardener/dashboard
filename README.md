@@ -111,6 +111,6 @@ at commit eeb623d60c86e6037c0e1dc2bdd9e54663bf41a8.
 ## License
 [Apache License 2.0](LICENSE.md)
 
-Copyright 2019 The Gardener Authors
+Copyright 2020 The Gardener Authors
 
 

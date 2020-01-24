@@ -24,7 +24,8 @@ limitations under the License.
         :cloudProfileName="cloudProfileName"
         :region="region"
         :availableZones="availableZones"
-        :infrastructureKind="infrastructureKind"
+        :zonedCluster="zonedCluster"
+        :updateOSMaintenance="updateOSMaintenance"
         @valid="onWorkerValid">
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
@@ -90,17 +91,18 @@ export default {
       cloudProfileName: undefined,
       region: undefined,
       zonesNetworkConfiguration: undefined,
-      infrastructureKind: undefined
+      zonedCluster: undefined,
+      updateOSMaintenance: undefined
     }
   },
   computed: {
     ...mapGetters([
       'cloudProfileByName',
-      'machineTypesByCloudProfileNameAndZones',
+      'machineTypesByCloudProfileName',
       'zonesByCloudProfileNameAndRegion'
     ]),
     allMachineTypes () {
-      return this.machineTypesByCloudProfileNameAndZones({ cloudProfileName: this.cloudProfileName })
+      return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
     },
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
@@ -150,7 +152,7 @@ export default {
     onWorkerValid ({ valid, id }) {
       const worker = find(this.internalWorkers, { id })
       if (!worker) {
-        // if worker has been removed and we receive a onWorkerValid event for this worker ->ignore
+        // if worker has been removed and we receive an onWorkerValid event for this worker ->ignore
         return
       }
       const wasValid = worker.valid
@@ -182,19 +184,17 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, infrastructureKind }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster = true, updateOSMaintenance }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
-      this.infrastructureKind = infrastructureKind
+      this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
+      this.zonedCluster = zonedCluster
     }
   },
   mounted () {
     if (this.userInterActionBus) {
-      this.userInterActionBus.on('updateInfrastructure', infrastructureKind => {
-        this.infrastructureKind = infrastructureKind
-      })
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
@@ -203,6 +203,9 @@ export default {
       this.userInterActionBus.on('updateRegion', region => {
         this.region = region
         this.setDefaultWorker()
+      })
+      this.userInterActionBus.on('updateOSMaintenance', updateOSMaintenance => {
+        this.updateOSMaintenance = updateOSMaintenance
       })
     }
   }

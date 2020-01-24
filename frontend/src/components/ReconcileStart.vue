@@ -101,19 +101,22 @@ export default {
   watch: {
     isReconcileToBeScheduled (reconcileToBeScheduled) {
       const isReconcileScheduled = !reconcileToBeScheduled && this.reconcileTriggered
-      if (isReconcileScheduled) {
-        this.reconcileTriggered = false
-        this.currentGeneration = null
-
-        if (this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
-          const config = {
-            position: SnotifyPosition.rightBottom,
-            timeout: 5000,
-            showProgressBar: false
-          }
-          this.$snotify.success(`Reconcile triggered for ${this.shootName}`, config)
-        }
+      if (!isReconcileScheduled) {
+        return
       }
+      this.reconcileTriggered = false
+      this.currentGeneration = null
+
+      if (!this.shootName) { // ensure that notification is not triggered by shoot resource beeing cleared (e.g. during navigation)
+        return
+      }
+
+      const config = {
+        position: SnotifyPosition.rightBottom,
+        timeout: 5000,
+        showProgressBar: false
+      }
+      this.$snotify.success(`Reconcile triggered for ${this.shootName}`, config)
     }
   }
 }

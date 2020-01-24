@@ -26,8 +26,7 @@ limitations under the License.
 export default {
   props: {
     value: {
-      type: String,
-      required: true
+      type: String
     },
     width: {
       type: Number

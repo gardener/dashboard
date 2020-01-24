@@ -36,9 +36,10 @@ limitations under the License.
             <v-layout row>
               <v-flex>
                 <span class="grey--text">Credential</span><br>
-                <router-link slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretName, namespace } }">
-                  <span class="subheading">{{shootSecretName}}</span>
+                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
+                  <span class="subheading">{{shootSecretBindingName}}</span>
                 </router-link>
+                <span v-else>{{shootSecretBindingName}}</span>
               </v-flex>
             </v-layout>
             <v-layout row>
@@ -59,13 +60,13 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
             </v-flex>
             <v-flex class="pa-0">
-              <span class="grey--text">Seed</span><br>
-              <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2 subheading" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </router-link>
-              <template v-else>
-                <span class="subheading">{{shootSeedName}}</span><br>
-              </template>
+              <v-layout row>
+                <v-flex>
+                  <span class="grey--text">Seed</span><br>
+                  <shoot-seed-name :shootItem="shootItem" />
+                </v-flex>
+                <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+              </v-layout>
               <v-layout row>
                 <v-flex>
                   <span class="grey--text">Technical Id</span><br>
@@ -98,6 +99,22 @@ limitations under the License.
         </v-card-title>
       </template>
 
+      <template v-if="!!shootLoadbalancerClasses">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">Available Load Balancer Classes</span><br>
+            <lb-class
+            v-for="lbClass in shootLoadbalancerClasses"
+            :name="lbClass.name"
+            :floatingSubnetID="lbClass.floatingSubnetID"
+            :key="lbClass.name"
+            ></lb-class>
+          </v-flex>
+        </v-card-title>
+      </template>
+
     </div>
   </v-card>
 </template>
@@ -108,15 +125,17 @@ import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import join from 'lodash/join'
 import includes from 'lodash/includes'
+import find from 'lodash/find'
 import CopyBtn from '@/components/CopyBtn'
-import {
-  canLinkToSeed
-} from '@/utils'
+import ShootSeedName from '@/components/ShootSeedName'
+import LbClass from '@/components/ShootDetails/LbClass'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    ShootSeedName,
+    LbClass
   },
   props: {
     shootItem: {
@@ -126,16 +145,14 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'namespaces'
+      'namespaces',
+      'cloudProfileByName'
     ]),
     showSeedInfo () {
       return !!this.shootSeedName && this.hasAccessToGardenNamespace
     },
     hasAccessToGardenNamespace () {
       return includes(this.namespaces, 'garden')
-    },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.namespace, seedName: this.shootSeedName })
     },
     shootIngressDomainText () {
       const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
@@ -144,8 +161,12 @@ export default {
       }
       return `*.ingress.${this.shootDomain}`
     },
-    namespace () {
-      return get(this.$route.params, 'namespace')
+    shootLoadbalancerClasses () {
+      const cloudProfile = this.cloudProfileByName(this.shootCloudProfileName)
+      const profileFloatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+      const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
+      const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
+      return get(shootFloatingPool, 'loadBalancerClasses')
     },
     shootZonesText () {
       return join(this.shootZones, ', ')
@@ -168,8 +189,8 @@ export default {
       }
       return 'Zone'
     },
-    shootSecretName () {
-      return this.shootSecretBindingName || 'default'
+    canLinkToSecret () {
+      return this.shootSecretBindingName && this.shootNamespace
     }
   }
 }
