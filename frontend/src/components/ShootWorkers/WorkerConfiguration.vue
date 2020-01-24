@@ -63,8 +63,6 @@ export default {
       switch (this.shootCloudProviderKind) {
         case 'azure':
           return get(this.shootItem, 'spec.provider.infrastructureConfig.zoned', false)
-        case 'metal':
-          return false
         default:
           return true
       }
