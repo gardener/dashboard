@@ -24,8 +24,8 @@ limitations under the License.
     color="vsphere-bgcolor"
     infraIcon="vsphere-white"
     backgroundSrc="/static/background_vsphere.svg"
-    createTitle="Add new VMware vShpere Secret"
-    replaceTitle="Replace VMware vShpere Secret"
+    createTitle="Add new VMware vSphere Secret"
+    replaceTitle="Replace VMware vSphere Secret"
     @input="onInput">
 
     <template slot="data-slot">

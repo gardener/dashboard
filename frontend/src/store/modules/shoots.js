@@ -245,7 +245,7 @@ const actions = {
       metadata: {},
       spec: {
         networking: {
-          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
+          type: 'calico', // TODO: read network extension list, see https://github.com/gardener/dashboard/issues/452
           nodes: workerCIDR
         }
       }
