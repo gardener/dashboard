@@ -287,4 +287,10 @@ describe('Store', function () {
     dashboardVolumeTypes = getters.volumeTypesByCloudProfileNameAndRegionAndZones({}, storeGetters)({ cloudProfileName: 'foo', region: 'region2', zones: ['zone1'] })
     expect(dashboardVolumeTypes).to.have.length(3)
   })
+
+  it('should return an empty machineType / volumeType array if no cloud profile is provided', function () {
+    const items = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, getters)({ })
+    expect(items).to.be.an.instanceof(Array)
+    expect(items).to.have.length(0)
+  })
 })
