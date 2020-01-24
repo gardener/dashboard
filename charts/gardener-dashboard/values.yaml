@@ -72,6 +72,9 @@ frontendConfig:
   features:
     terminalEnabled: false
     kymaEnabled: false
+  # alert:
+  #   type: error
+  #   message: This is an **alert** banner
 
   # terminal:
   #   heartbeatIntervalSeconds: 60
