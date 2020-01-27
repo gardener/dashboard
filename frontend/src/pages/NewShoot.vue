@@ -217,7 +217,7 @@ export default {
     shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
-      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName, nodesCidr } = this.$refs.infrastructureDetails.getInfrastructureData()
+      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
       set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
@@ -293,7 +293,6 @@ export default {
       if (infrastructureKind === 'metal') {
         set(shootResource, 'spec.networking', {
           'type': 'calico',
-          'nodes': nodesCidr,
           'pods': '10.244.128.0/18',
           'services': '10.244.192.0/18',
           'providerConfig': {

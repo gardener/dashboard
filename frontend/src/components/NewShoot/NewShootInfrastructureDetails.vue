@@ -96,19 +96,6 @@ limitations under the License.
           ></v-select>
         </v-flex>
       </template>
-      <template v-if="infrastructureKind === 'metal'">
-        <v-flex class="regularInput">
-        <v-text-field
-          ref="name"
-          color="cyan darken-2"
-          label="Nodes CIDR"
-          v-model="nodesCidr"
-          :error-messages="getErrorMessages('nodesCidr')"
-          @input="onInputNodesCidr"
-          @blur="$v.nodesCidr.$touch()"
-          ></v-text-field>
-        </v-flex>
-      </template>
     </v-layout>
     <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
@@ -143,9 +130,6 @@ const validationErrors = {
   },
   loadBalancerProviderName: {
     required: 'Load Balancer Providers required'
-  },
-  nodesCidr: {
-    required: 'Nodes CIDR is required'
   }
 }
 
@@ -164,11 +148,6 @@ const validations = {
   loadBalancerProviderName: {
     required: requiredIf(function () {
       return this.infrastructureKind === 'openstack'
-    })
-  },
-  nodesCidr: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'metal'
     })
   }
 }
@@ -194,7 +173,6 @@ export default {
       region: undefined,
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
-      nodesCidr: undefined,
       valid: false,
       cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
@@ -350,10 +328,6 @@ export default {
       this.$v.loadBalancerProviderName.$touch()
       this.validateInput()
     },
-    onInputNodesCidr () {
-      this.$v.nodesCidr.$touch()
-      this.validateInput()
-    },
     onUpdateCloudProfileName () {
       this.userInterActionBus.emit('updateCloudProfileName', this.cloudProfileName)
       this.setDefaultsDependingOnCloudProfile()
@@ -379,18 +353,16 @@ export default {
         secret: this.secret,
         region: this.region,
         floatingPoolName: this.floatingPoolName,
-        loadBalancerProviderName: this.loadBalancerProviderName,
-        nodesCidr: this.nodesCidr
+        loadBalancerProviderName: this.loadBalancerProviderName
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, nodesCidr }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
-      this.nodesCidr = nodesCidr
 
       this.validateInput()
     },
