@@ -333,7 +333,6 @@ export default {
       })
       return loadBalancerClasses
     },
-
     allFloatingPoolNames () {
       return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
     },
