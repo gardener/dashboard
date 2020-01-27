@@ -42,11 +42,11 @@ limitations under the License.
           v-if="hasShootTerminalAccess"
           value="shoot"
           color="cyan darken-2"
-          :disabled="isShootHibernated"
+          :disabled="isShootStatusHibernated"
         >
           <template v-slot:label>
             <div>Cluster</div>
-            <v-icon v-if="isShootHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
+            <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle ml-2">mdi-sleep</v-icon>
           </template>
         </v-radio>
         <v-radio
@@ -92,14 +92,14 @@ export default {
         return false
       }
 
-      if (!this.isAdmin && this.isShootHibernated) {
+      if (!this.isAdmin && this.isShootStatusHibernated) {
         return false
       }
 
       return true
     },
     hint () {
-      if (!this.isAdmin && this.isShootHibernated) {
+      if (!this.isAdmin && this.isShootStatusHibernated) {
         return 'Terminal not available for hibernated clusters'
       }
       return 'Choose for which target you want to have a terminal session'

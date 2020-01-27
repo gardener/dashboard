@@ -23,6 +23,11 @@ const common = require('./support/common')
 const config = require('../lib/config')
 const { getSeed } = require('../lib/cache')
 const { Resources } = require('../lib/kubernetes-client')
+const { Forbidden } = require('../lib/errors')
+
+const {
+  ensureTerminalAllowed
+} = require('../lib/services/terminals')
 
 const {
   getGardenTerminalHostClusterSecretRef,
@@ -291,6 +296,65 @@ describe('services', function () {
         const seed = { spec: { dns: { ingressDomain } } }
         const wildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
         expect(wildcardIngressDomain).to.equal(`*.${ingressDomain}`)
+      })
+    })
+
+    describe('#ensureTerminalAllowed', function () {
+      it('should allow terminals for admins', function () {
+        const isAdmin = true
+        const method = 'foo'
+        const target = 'foo'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, target})
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should allow terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'shoot'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, target})
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should allow to list terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'list'
+        const target = 'foo'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, target})
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should disallow cp terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'cp'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, target})
+          expect.fail('Forbidden error expected')
+        } catch (err) {
+          expect(err).to.be.instanceof(Forbidden)
+        }
+      })
+
+      it('should disallow garden terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'garden'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, target})
+          expect.fail('Forbidden error expected')
+        } catch (err) {
+          expect(err).to.be.instanceof(Forbidden)
+        }
       })
     })
 

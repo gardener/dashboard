@@ -24,6 +24,11 @@ oidc:
   clockTolerance: 42
 terminal:
   containerImage: dummyImage:1.0.0
+  containerImageDescriptions:
+  - image: dummyImage:.*
+    description: Dummy Image Description
+  - image: fooImage:0.1.2
+    description: Foo Image Description
   gardenTerminalHost:
     seedRef: infra1-seed
   garden:

@@ -975,6 +975,88 @@ const stub = {
       .reply(200, () => terminal)
     return scope
   },
+  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, containerImage }) {
+    let terminal = {
+      metadata: {
+        namespace,
+        name,
+        annotations: {
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {
+        host: {
+          namespace: hostNamespace,
+          pod: {
+            containerImage
+          }
+        }
+      },
+      status: {}
+    }
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    if (target === 'garden') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .reply(404)
+    } else {
+      const shootResource = _.find(shootList, ['metadata.name', shootName])
+      seedName = getSeedNameFromShoot(shootResource)
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${shootName}`)
+        .reply(200, shootResource)
+    }
+    if (target === 'cp') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .reply(200, {
+          metadata: {
+            name: seedName,
+            namespace: 'garden'
+          },
+          spec: {
+            seedName: 'soil-infra1'
+          }
+        })
+    }
+    if (target === 'shoot') {
+      const server = `https://${shootName}.cluster.foo.bar`
+      getKubeconfigSecret(scope, {
+        namespace,
+        name: `${shootName}.kubeconfig`,
+        server
+      })
+    } else {
+      getKubeconfigSecret(scope, {
+        namespace: 'garden',
+        name: `seedsecret-${seedName}`,
+        server: `https://${seedName}:8443`
+      })
+    }
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
+      .query(({ labelSelector }) => {
+        const labels = _
+          .chain(labelSelector)
+          .split(',')
+          .map(value => value.split('='))
+          .fromPairs()
+          .value()
+        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+      })
+      .reply(200, { items: [terminal] })
+      .patch(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`, body => {
+        terminal = _
+          .chain(terminal)
+          .cloneDeep()
+          .merge(body)
+          .value()
+        return true
+      })
+      .reply(200, () => terminal)
+    return scope
+  },
   fetchTerminal ({ bearer, hostUrl, host, serviceAccountSecretName, token }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)

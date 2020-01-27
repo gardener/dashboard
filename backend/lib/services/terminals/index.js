@@ -86,6 +86,19 @@ function toTerminalMetadata (terminal) {
   return metadata
 }
 
+function imageHelpText (terminal) {
+  const containerImage = terminal.spec.host.pod.containerImage
+  const imageDescriptions = getConfigValue('terminal.containerImageDescriptions')
+
+  const imageDescription = _
+    .chain(imageDescriptions)
+    .map(({ image, description }) => ({ image: new RegExp(image), description }))
+    .find(({ image }) => image.exec(containerImage))
+    .value()
+
+  return _.get(imageDescription, 'description')
+}
+
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
   const serviceAccount = await client.core.serviceaccounts
     .watch(namespace, serviceAccountName)
@@ -454,7 +467,8 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     hostCluster: {
       kubeApiServer: hostCluster.kubeApiServer,
       namespace: terminal.spec.host.namespace
-    }
+    },
+    imageHelpText: imageHelpText(terminal)
   }
 }
 
@@ -512,7 +526,7 @@ function getSeedShootNamespace (shoot) {
   return seedShootNamespace
 }
 
-async function ensureTerminalAllowed ({ method, isAdmin, target }) {
+function ensureTerminalAllowed ({ method, isAdmin, target }) {
   if (isAdmin) {
     return
   }

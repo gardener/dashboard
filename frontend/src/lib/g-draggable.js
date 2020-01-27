@@ -54,6 +54,11 @@ Object.assign(dragState, initialDragState)
 function mousedown (event, el, binding) {
   stopInputEvents(event)
 
+  const ignore = event.srcElement.closest('.g-ignore-drag')
+  if (ignore) {
+    return
+  }
+
   const rect = el.getBoundingClientRect()
   const clone = dragState.clone = el.cloneNode(true)
   clone.style.position = 'absolute'

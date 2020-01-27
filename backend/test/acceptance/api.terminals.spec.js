@@ -20,6 +20,7 @@ const { WatchBuilder } = require('../../lib/kubernetes-client')
 const { Terminal } = require('../../lib/kubernetes-client/resources/GardenerDashboard')
 const { ServiceAccount } = require('../../lib/kubernetes-client/resources/Core')
 const common = require('../support/common')
+const delay = require('delay')
 
 module.exports = function info ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -29,8 +30,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
   const project = 'foo'
   const namespace = `garden-${project}`
 
-  const name = 'shoot1'
-  const terminalName = 'term-0815'
   const seedName = 'infra1-seed'
   const kind = 'infra1'
   const region = 'foo-east'
@@ -105,6 +104,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
   describe('garden', function () {
     const target = 'garden'
+    const name = 'term-garden-0815'
     const hostNamespace = 'term-host-0815'
 
     it('should create a terminal resource', async function () {
@@ -121,7 +121,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           method: 'create',
           params: {
             coordinate: {
-              name,
               namespace,
               target
             }
@@ -133,12 +132,53 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res.body).to.eql({
         metadata: {
           namespace,
-          name: terminalName
+          name
         },
         hostCluster: {
           kubeApiServer: `k-g.${ingressDomain}`,
           namespace: hostNamespace
-        }
+        },
+        imageHelpText: 'Dummy Image Description'
+      })
+    })
+
+    it('should reuse a terminal session', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+
+      const containerImage = 'fooImage:0.1.2'
+
+
+      common.stub.getCloudProfiles(sandbox)
+      k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
+
+      const res = await agent
+        .post('/api/terminals')
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'create',
+          params: {
+            coordinate: {
+              namespace,
+              target
+            },
+            namespace
+          }
+        })
+
+      delay(5)
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({
+        metadata: {
+          namespace,
+          name
+        },
+        hostCluster: {
+          kubeApiServer: `k-g.${ingressDomain}`,
+          namespace: hostNamespace
+        },
+        imageHelpText: 'Foo Image Description'
       })
     })
 
@@ -166,7 +206,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       // stub WatchBuilder
       const watchBuilderStub = createWatchBuilderStub({
         namespace,
-        name: terminalName,
+        name,
         username,
         host,
         serviceAccountName,
@@ -183,7 +223,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
             coordinate: {
               target
             },
-            name: terminalName,
+            name,
             namespace
           }
         })
@@ -193,7 +233,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res.body).to.eql({
         metadata: {
           namespace,
-          name: terminalName
+          name
         },
         hostCluster: {
           token,
@@ -218,7 +258,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           method: 'config',
           params: {
             coordinate: {
-              name,
               namespace,
               target
             }
@@ -234,7 +273,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
 
-      k8s.stub.keepAliveTerminal({ bearer, username, namespace, name: terminalName, target })
+      k8s.stub.keepAliveTerminal({ bearer, username, namespace, name, target })
 
       const res = await agent
         .post('/api/terminals')
@@ -245,7 +284,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
             coordinate: {
               target
             },
-            name: terminalName,
+            name,
             namespace
           }
         })
@@ -259,7 +298,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
 
-      k8s.stub.deleteTerminal({ bearer, username, namespace, name: terminalName, target })
+      k8s.stub.deleteTerminal({ bearer, username, namespace, name, target })
 
       const res = await agent
         .post('/api/terminals')
@@ -270,7 +309,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
             coordinate: {
               target
             },
-            name: terminalName,
+            name,
             namespace
           }
         })
@@ -300,11 +339,17 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       k8s.stub.createTerminal({ bearer, username, namespace, target, shootName, seedName })
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/terminals/${target}/${shootName}`)
+        .post('/api/terminals')
         .set('cookie', await user.cookie)
         .send({
           method: 'create',
-          params: {}
+          params: {
+            coordinate: {
+              name: shootName,
+              namespace,
+              target
+            }
+          }
         })
 
       expect(res).to.have.status(200)
@@ -317,7 +362,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         hostCluster: {
           kubeApiServer,
           namespace: seedShootNamespace
-        }
+        },
+        imageHelpText: 'Dummy Image Description'
       })
     })
 
@@ -328,8 +374,18 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       k8s.stub.getTerminalConfig({ bearer, namespace, target })
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/terminals/${target}/${shootName}/config`)
+        .post('/api/terminals')
         .set('cookie', await user.cookie)
+        .send({
+          method: 'config',
+          params: {
+            coordinate: {
+              name: shootName,
+              namespace,
+              target
+            }
+          }
+        })
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
@@ -343,11 +399,14 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       k8s.stub.keepAliveTerminal({ bearer, username, namespace, name, target })
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/terminals/${target}/${shootName}`)
+        .post('/api/terminals')
         .set('cookie', await user.cookie)
         .send({
           method: 'heartbeat',
           params: {
+            coordinate: {
+              target
+            },
             name,
             namespace
           }
@@ -375,11 +434,16 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       k8s.stub.createTerminal({ bearer, username, namespace, target, shootName, seedName })
 
       const res = await agent
-        .post(`/api/namespaces/${namespace}/terminals/${target}/${shootName}`)
+        .post('/api/terminals')
         .set('cookie', await user.cookie)
         .send({
           method: 'create',
           params: {
+            coordinate: {
+              name: shootName,
+              namespace,
+              target
+            },
             preferredHost: 'shoot'
           }
         })
@@ -394,7 +458,8 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         hostCluster: {
           kubeApiServer,
           namespace: hostNamespace
-        }
+        },
+        imageHelpText: 'Dummy Image Description'
       })
     })
 
@@ -405,8 +470,18 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       k8s.stub.getTerminalConfig({ bearer, namespace, shootName, target })
 
       const res = await agent
-        .get(`/api/namespaces/${namespace}/terminals/${target}/${shootName}/config`)
+        .post('/api/terminals')
         .set('cookie', await user.cookie)
+        .send({
+          method: 'config',
+          params: {
+            coordinate: {
+              name: shootName,
+              namespace,
+              target
+            }
+          }
+        })
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
@@ -429,7 +504,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
 
-      k8s.stub.listTerminalResources({ bearer, username, namespace, name })
+      k8s.stub.listTerminalResources({ bearer, username, namespace, shootName })
 
       const res = await agent
         .post('/api/terminals')
@@ -440,9 +515,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
             coordinate: {
               target,
               namespace
-            },
-            name: terminalName,
-            namespace
+            }
           }
         })
 

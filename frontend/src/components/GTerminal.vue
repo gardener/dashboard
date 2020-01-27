@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout v-resize="onResize" column fill-height :class="backgroundClass" class="position-relative">
+  <v-layout v-resize="onResize" column fill-height :class="backgroundClass" class="position-relative" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
       :timeout="0"
@@ -47,13 +47,30 @@ limitations under the License.
     <draggable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton" @click="deleteTerminal">
+          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag" @click="deleteTerminal">
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
           <v-icon class="pr-2">mdi-console</v-icon>
           <span>{{terminalTitle}}</span>
           <v-spacer></v-spacer>
+          <v-tooltip v-if="terminalSession.imageHelpText" top class="g-ignore-drag">
+            <!-- g-popper boundariesSelector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
+            <g-popper
+              slot="activator"
+              :title="`${imageShortText} Help`"
+              toolbarColor="cyan darken-2"
+              :popperKey="`popper_${uuid}`"
+              placement="bottom"
+              :boundariesSelector="`#boundary_${uuid}`"
+            >
+              <span v-html="compiledImageHelpText"></span>
+              <v-btn slot="popperRef" v-if="terminalSession.imageHelpText" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag">
+                <v-icon>mdi-help-circle-outline</v-icon>
+              </v-btn>
+            </g-popper>
+            Help
+          </v-tooltip>
           <v-menu
             bottom
             offset-y
@@ -61,7 +78,7 @@ limitations under the License.
             min-width="400px"
           >
             <template v-slot:activator="{ on }">
-              <v-btn slot="activator" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton" v-on="on">
+              <v-btn slot="activator" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag" v-on="on">
                 <v-icon>mdi-menu</v-icon>
               </v-btn>
             </template>
@@ -73,7 +90,7 @@ limitations under the License.
                   </icon-base>
                   <span>Split Pane Vertically</span>
                   <v-spacer></v-spacer>
-                  <span>(ctrl + y)</span>
+                  <span>(ctrl + shift + v)</span>
                 </v-btn>
               </v-card-actions>
               <v-card-actions>
@@ -83,7 +100,7 @@ limitations under the License.
                   </icon-base>
                   <span>Split Pane Horizontally</span>
                   <v-spacer></v-spacer>
-                  <span>(ctrl + shift + y)</span>
+                  <span>(ctrl + shift + h)</span>
                 </v-btn>
               </v-card-actions>
               <v-divider class="mt-1 mb-1"></v-divider>
@@ -177,6 +194,8 @@ import keys from 'lodash/keys'
 import includes from 'lodash/includes'
 import pick from 'lodash/pick'
 import pTimeout from 'p-timeout'
+import DOMPurify from 'dompurify'
+import marked from 'marked'
 
 import 'xterm/css/xterm.css'
 import { Terminal } from 'xterm'
@@ -184,6 +203,7 @@ import { FitAddon } from 'xterm-addon-fit'
 import { WebLinksAddon } from 'xterm-addon-web-links'
 import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
 import { FocusAddon } from '@/lib/xterm-addon-focus'
+import GPopper from '@/components/GPopper'
 
 import DraggableComponent from '@/components/DraggableComponent'
 import { encodeBase64Url, targetText } from '@/utils'
@@ -216,6 +236,7 @@ class TerminalSession {
     this.tries = 0
     this.metadata = undefined
     this.hostCluster = undefined
+    this.imageHelpText = undefined
 
     this.setInitialState()
     this.close = () => {}
@@ -237,9 +258,10 @@ class TerminalSession {
 
   async open () {
     this.connectionState = TerminalSession.CREATING
-    const { metadata, hostCluster } = await this.createTerminal()
+    const { metadata, hostCluster, imageHelpText } = await this.createTerminal()
     this.metadata = pick(metadata, ['name', 'namespace'])
     this.hostCluster = pick(hostCluster, ['kubeApiServer', 'namespace', 'pod'])
+    this.imageHelpText = imageHelpText
 
     this.connectionState = TerminalSession.FETCHING
     const { hostCluster: { pod, token } } = await this.fetchTerminalSession()
@@ -553,6 +575,7 @@ export default {
     IconBase,
     Connected,
     Disconnected,
+    GPopper,
     SplitVertically,
     SplitHorizontally,
     DraggableComponent
@@ -656,6 +679,15 @@ export default {
     imageShortText () {
       const image = this.terminalSession.image || ''
       return image.substring(image.lastIndexOf('/') + 1)
+    },
+    compiledImageHelpText () {
+      const options = {
+        gfm: true,
+        breaks: true,
+        tables: true
+      }
+      const dirty = marked(get(this.terminalSession, 'imageHelpText', ''), options)
+      return DOMPurify.sanitize(dirty)
     },
     name () {
       // name is undefined in case of garden terminal

@@ -19,7 +19,7 @@ limitations under the License.
     class="g-droppable-listener"
     @dropped="droppedAt"
     style="height:100%; width:100%; background-color: #333"
-    v-shortkey.once="{bottom: ['ctrl', 'shift', 'y'], right: ['ctrl', 'y']}"
+    v-shortkey.once="{bottom: ['ctrl', 'shift', 'h'], right: ['ctrl', 'shift', 'v']}"
     @shortkey="addFromShortkey"
   >
     <g-splitpane v-if="treeItem" :splitpaneTreeItem="treeItem">

@@ -33,7 +33,7 @@ router.use(async (req, res, next) => {
 
     const isAdmin = req.user.isAdmin = await authorization.isAdmin(user)
 
-    await terminals.ensureTerminalAllowed({ method, isAdmin, target })
+    terminals.ensureTerminalAllowed({ method, isAdmin, target })
     next()
   } catch (err) {
     next(err)
