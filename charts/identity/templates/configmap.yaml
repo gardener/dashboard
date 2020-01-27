@@ -40,12 +40,12 @@ data:
       trustedPeers:
       - dashboard
 {{- if .Values.additionalTrustedPeers }}
-{{ toYaml .Values.additionalTrustedPeers | indent 6 }}
+{{ toYaml .Values.additionalTrustedPeers | trim | indent 6 }}
 {{- end }}
       name: Kubectl
       secret: {{ .Values.kubectlClientSecret }}
 {{- if .Values.additionalStaticClients }}
-{{ toYaml .Values.additionalStaticClients | indent 4 }}
+{{ toYaml .Values.additionalStaticClients | trim | indent 4 }}
 {{- end }}
 {{- if .Values.staticPasswords }}
     enablePasswordDB: true
