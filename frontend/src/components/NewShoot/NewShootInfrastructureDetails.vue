@@ -111,7 +111,16 @@ limitations under the License.
             small-chips
             deletable-chips
             multiple
-          ></v-select>
+          >
+            <template v-slot:item="{ item, tile }">
+                <v-list-tile-action >
+                  <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
+                </v-list-tile-action>
+                <v-list-tile-content :class="{ 'grey--text': item.disabled }">
+                  <v-list-tile-title>{{ item.text }}</v-list-tile-title>
+                </v-list-tile-content>
+            </template>
+          </v-select>
         </v-flex>
       </template>
     </v-layout>
@@ -315,14 +324,16 @@ export default {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
     },
     allLoadBalancerClasses () {
-      return map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
+      const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
         return {
           text: name,
           value: name,
           disabled: name === 'default'
         }
       })
+      return loadBalancerClasses
     },
+
     allFloatingPoolNames () {
       return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
     },
@@ -361,6 +372,9 @@ export default {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
       this.onUpdateCloudProfileName()
     },
+    isLoadBalancerClassSelected ({ value }) {
+      return includes(this.loadBalancerClassNames, value)
+    },
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
         this.onAddSecret()
@@ -385,6 +399,7 @@ export default {
       this.validateInput()
     },
     onInputLoadBalancerClassNames () {
+      // sort loadBalancerClassNames in the same order as they are listed in the cloudProfile
       this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
       this.$v.loadBalancerClassNames.$touch()
       this.validateInput()
