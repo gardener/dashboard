@@ -152,3 +152,8 @@ data:
 {{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
       seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}
 {{- end }}
+{{- if .Values.frontendConfig.alert }}
+      alert:
+        type: {{ .Values.frontendConfig.alert.type }}
+        message: {{ .Values.frontendConfig.alert.message }}
+{{- end }}

@@ -34,7 +34,7 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-sub-title>Console</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isShootHibernated" top>
+          <v-tooltip v-if="isShootStatusHibernated" top>
             <span class="grey--text" slot="activator">{{consoleUrl}}</span>
             Console is not running for hibernated clusters
           </v-tooltip>

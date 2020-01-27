@@ -33,6 +33,9 @@ limitations under the License.
 
     <metal-dialog v-model="dialogState.metal.visible" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
     <metal-help-dialog v-model="dialogState.metal.help" @input="onInput('metal')"></metal-help-dialog>
+
+    <vsphere-dialog v-model="dialogState.vsphere.visible" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
+    <vsphere-help-dialog v-model="dialogState.vsphere.help" @input="onInput('vsphere')"></vsphere-help-dialog>
   </div>
 </template>
 
@@ -49,6 +52,8 @@ import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
 import MetalDialog from '@/dialogs/SecretDialogMetal'
 import MetalHelpDialog from '@/dialogs/SecretDialogMetalHelp'
+import VsphereDialog from '@/dialogs/SecretDialogVSphere'
+import VsphereHelpDialog from '@/dialogs/SecretDialogVSphereHelp'
 
 export default {
   name: 'secret-dialog-wrapper',
@@ -64,7 +69,9 @@ export default {
     AlicloudDialog,
     AlicloudHelpDialog,
     MetalDialog,
-    MetalHelpDialog
+    MetalHelpDialog,
+    VsphereDialog,
+    VsphereHelpDialog
   },
   props: {
     dialogState: {

@@ -286,7 +286,7 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal'], getters.cloudProviderKindList)
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -317,6 +317,18 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
+    }
+  },
+  loadBalancerClassNamesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const loadBalancerClasses = getters.loadBalancerClassesByCloudProfileName(cloudProfileName)
+      return uniq(map(loadBalancerClasses, 'name'))
+    }
+  },
+  loadBalancerClassesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {

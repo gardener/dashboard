@@ -20,7 +20,7 @@ const { Resources } = require('../kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
-const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl']
+const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas } = require('../cache')
@@ -152,7 +152,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
           quotas: resolveQuotas(secretBinding)
         })
       } catch (err) {
-        logger.error(err.message)
+        logger.warn(err.message)
       }
     })
     .compact()

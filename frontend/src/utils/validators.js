@@ -68,6 +68,13 @@ const serviceAccountKey = withParams({ type: 'serviceAccountKey' },
   }
 )
 
+const includesIfAvailable = (key, reference) => withParams({ type: 'includesIfAvailable', key },
+  function (selectedKeys, parentVm) {
+    const availableKeys = ref(reference, this, parentVm)
+    return includes(availableKeys, key) ? includes(selectedKeys, key) : true
+  }
+)
+
 const minVolumeSize = key => withParams({ type: 'minVolumeSize', key },
   function (value) {
     if (this.volumeInCloudProfile) {
@@ -89,6 +96,7 @@ export {
   noConsecutiveHyphen,
   noStartEndHyphen,
   serviceAccountKey,
+  includesIfAvailable,
   minVolumeSize,
   uniqueWorkerName,
   numberOrPercentage
