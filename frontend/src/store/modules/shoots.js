@@ -245,7 +245,7 @@ const actions = {
       metadata: {},
       spec: {
         networking: {
-          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
+          type: 'calico', // TODO: read network extension list, see https://github.com/gardener/dashboard/issues/452
           nodes: workerCIDR
         }
       }
@@ -270,6 +270,16 @@ const actions = {
     const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileName(cloudProfileName))
     if (!isEmpty(floatingPoolName)) {
       set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
+    }
+
+    const allLoadBalancerClassNames = rootGetters.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
+    if (!isEmpty(allLoadBalancerClassNames)) {
+      const loadBalancerClassNames = [
+        includes(allLoadBalancerClassNames, 'default')
+          ? 'default'
+          : head(allLoadBalancerClassNames)
+      ]
+      set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
     }
 
     const name = shortRandomString(10)
@@ -331,7 +341,6 @@ const actions = {
     set(shootResource, 'spec.hibernation.schedules', hibernationSchedule)
 
     commit('RESET_NEW_SHOOT_RESOURCE', shootResource)
-
     return state.newShootResource
   }
 }

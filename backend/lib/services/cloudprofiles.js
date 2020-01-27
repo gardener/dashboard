@@ -38,61 +38,52 @@ function fromSeedResource ({ metadata, spec }) {
   return { metadata, data }
 }
 
-function getSeedsForCloudProfile ({ seeds, cloudProviderKind, matchLabels }) {
-  return _
-    .chain(seeds)
-    .filter(({ metadata, spec }) => {
-      if (spec.provider.type !== cloudProviderKind) {
-        return false
-      }
-      for (let [key, value] of Object.entries(matchLabels)) {
-        if (value !== _.get(metadata, ['labels', key])) {
-          return false
-        }
-      }
-      return true
+function emptyToUndefined (value) {
+  return _.isEmpty(value) ? undefined : value
+}
+
+function assignSeedsToCloudProfileIteratee (seeds) {
+  return cloudProfileResource => {
+    const providerType = cloudProfileResource.spec.type
+    const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
+
+    const seedsForCloudProfile = _
+      .chain(seeds)
+      .filter(['spec.provider.type', providerType])
+      .filter({ metadata: { labels: matchLabels } })
+      .map(fromSeedResource)
+      .thru(emptyToUndefined)
+      .value()
+
+    return fromResource({
+      cloudProfile: cloudProfileResource,
+      seeds: seedsForCloudProfile
     })
-    .map(fromSeedResource)
-    .value()
+  }
 }
 
 exports.list = function () {
-  const seeds = getVisibleAndNotProtectedSeeds()
   const cloudProfiles = getCloudProfiles()
-
+  const seeds = getVisibleAndNotProtectedSeeds()
   return _
     .chain(cloudProfiles)
-    .map(cloudProfile => fromResource({
-      cloudProfile,
-      seeds: getSeedsForCloudProfile({
-        seeds,
-        cloudProviderKind: cloudProfile.spec.type,
-        matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', {})
-      })
-    }))
-    .filter(cloudProfile => !_.isEmpty(cloudProfile.data.seeds))
+    .map(assignSeedsToCloudProfileIteratee(seeds))
+    .filter('data.seeds')
     .value()
 }
 
 exports.read = function ({ name }) {
-  const cloudProfile = _.find(getCloudProfiles(), ['metadata.name', name])
-  if (!cloudProfile) {
+  const cloudProfiles = getCloudProfiles()
+  const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
+  if (!cloudProfileResource) {
     throw new NotFound(`Cloud profile with name ${name} not found`)
   }
 
   const seeds = getVisibleAndNotProtectedSeeds()
-  const seedsForCloudProfile = getSeedsForCloudProfile({
-    seeds,
-    cloudProviderKind: cloudProfile.spec.type,
-    matchLabels: _.get(cloudProfile, 'spec.seedSelector.matchLabels', {})
-  })
-
-  if (_.isEmpty(seedsForCloudProfile)) {
+  const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
+  if (!cloudProfile.data.seeds) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }
 
-  return fromResource({
-    cloudProfile,
-    seeds: seedsForCloudProfile
-  })
+  return cloudProfile
 }
