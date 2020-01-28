@@ -35,14 +35,14 @@ describe('healthz', function () {
   })
 
   it('should successfully check health', async function () {
-    await healthCheck()
+    await healthCheck(true)
     expect(getHealthzStub).to.be.calledOnce
   })
 
   it('should throw a HTTP Error', async function () {
     getHealthzStub.throws(new HTTPError({ body: 'body', statusCode: 500 }))
     try {
-      await healthCheck()
+      await healthCheck(true)
     } catch (err) {
       expect(err.message).to.match(/^Kubernetes apiserver is not healthy/)
       expect(err.message).to.match(/(Status code: 500)/)
@@ -53,7 +53,7 @@ describe('healthz', function () {
   it('should throw an Error', async function () {
     getHealthzStub.throws(new Error('Failed'))
     try {
-      await healthCheck()
+      await healthCheck(true)
     } catch (err) {
       expect(err.message).to.match(/^Could not reach Kubernetes apiserver/)
     }

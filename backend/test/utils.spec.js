@@ -68,11 +68,11 @@ describe('utils', function () {
         spec: {
           seedName: 'foo'
         },
-        status: {}
+        status: {
+          seed: 'bar'
+        }
       }
       expect(getSeedNameFromShoot(shoot)).to.equal('foo')
-      shoot.status.seed = 'bar'
-      expect(getSeedNameFromShoot(shoot)).to.equal('bar')
     })
   })
 
@@ -130,9 +130,9 @@ describe('utils', function () {
         { id: 8 }
       ])
       expect(chunks).to.eql([
-        [ 1, 2, 3 ],
-        [ 4, 5, 6, 7 ],
-        [ 8 ]
+        [1, 2, 3],
+        [4, 5, 6, 7],
+        [8]
       ])
     })
 
@@ -167,10 +167,10 @@ describe('utils', function () {
         { id: 2 }
       ], 'foo')
       expect(chunks).to.eql([
-        { bar: [ 1, 2, 3 ] },
-        { bar: [ 4 ], foo: [ 1 ] },
-        { bar: [ 5, 6, 7 ] },
-        { bar: [ 8 ], foo: [ 2 ] }
+        { bar: [1, 2, 3] },
+        { bar: [4], foo: [1] },
+        { bar: [5, 6, 7] },
+        { bar: [8], foo: [2] }
       ])
     })
   })

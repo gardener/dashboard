@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { encodeBase64 } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('../../../lib/kubernetes-config').load()
@@ -521,7 +521,6 @@ const stub = {
   }) {
     const seedServerURL = 'https://seed.foo.bar:8443'
     const technicalID = `shoot--${project}--${name}`
-    const projectResource = readProject(namespace)
 
     const shootResult = getShoot({ name, project, kind, region, seed: seedName })
     shootResult.status.technicalID = `shoot--${project}--${name}`
@@ -858,7 +857,7 @@ const stub = {
         .reply(404)
     } else {
       const shootResource = _.find(shootList, ['metadata.name', shootName])
-      seedName = shootResource.status.seed
+      seedName = getSeedNameFromShoot(shootResource)
       scope
         .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${shootName}`)
         .reply(200, shootResource)
@@ -871,8 +870,8 @@ const stub = {
             name: seedName,
             namespace: 'garden'
           },
-          status: {
-            seed: 'soil-infra1'
+          spec: {
+            seedName: 'soil-infra1'
           }
         })
     }

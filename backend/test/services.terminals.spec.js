@@ -77,8 +77,10 @@ describe('services', function () {
           return {
             kind: 'Shoot',
             metadata: { namespace, name },
+            spec: {
+              seedName: soilName
+            },
             status: {
-              seed: soilName,
               technicalID: `shoot--garden--${name}`
             }
           }
@@ -87,8 +89,10 @@ describe('services', function () {
         return {
           kind: 'Shoot',
           metadata: { namespace, name },
+          spec: {
+            seedName: seedName
+          },
           status: {
-            seed: seedName,
             technicalID: `shoot--${project}--${name}`
           }
         }
@@ -448,9 +452,11 @@ describe('services', function () {
           namespace: 'garden-foo',
           name: 'bar'
         },
+        spec: {
+          seedName
+        },
         status: {
-          seed: seedName,
-          technicalID: `shoot--foo--bar`,
+          technicalID: 'shoot--foo--bar',
           lastOperation: {
             progress: 5
           }
@@ -461,9 +467,11 @@ describe('services', function () {
           namespace: 'garden-foo',
           name: 'baz'
         },
+        spec: {
+          seedName
+        },
         status: {
-          seed: seedName,
-          technicalID: `shoot--foo--baz`,
+          technicalID: 'shoot--foo--baz',
           lastOperation: {
             progress: 50
           }
@@ -472,7 +480,7 @@ describe('services', function () {
 
       beforeEach(function () {
         sandbox.stub(dashboardClient, 'core').get(() => {
-          return client['core']
+          return client.core
         })
         sandbox.stub(dashboardClient, 'core.gardener.cloud').get(() => {
           return {
