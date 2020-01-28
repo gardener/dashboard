@@ -136,8 +136,9 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import { getProviderTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 const EventEmitter = require('events')
 
 export default {
@@ -226,14 +227,14 @@ export default {
         loadBalancerProviderName,
         loadBalancerClassNames
       } = this.$refs.infrastructureDetails.getInfrastructureData()
-      set(shootResource, 'spec.cloudProfileName', cloudProfileName)
-      set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
       }
+      set(shootResource, 'spec.cloudProfileName', cloudProfileName)
+      set(shootResource, 'spec.region', region)
+      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
@@ -301,25 +302,6 @@ export default {
         unset(shootResource, 'metadata.annotations["dashboard.garden.sapcloud.io/no-hibernation-schedule"]')
       }
 
-      if (infrastructureKind === 'metal') {
-        set(shootResource, 'spec.networking', {
-          'type': 'calico',
-          'pods': '10.244.128.0/18',
-          'services': '10.244.192.0/18',
-          'providerConfig': {
-            'apiVersion': 'calico.networking.extensions.gardener.cloud/v1alpha1',
-            'kind': 'NetworkConfig',
-            'backend': 'vxlan',
-            'ipv4': {
-              'autoDetectionMethod': 'interface=lo',
-              'mode': 'Always',
-              'pool': 'vxlan'
-            }
-          }
-        })
-        unset(shootResource, 'spec.provider.workers[0].zones')
-      }
-
       return shootResource
     },
     updateShootResourceWithUIComponents () {
@@ -364,7 +346,7 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster: isZonedCluster({ cloudProviderKind: infrastructureKind }) })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       if (this.isKymaFeatureEnabled) {

@@ -93,7 +93,7 @@ export default {
     machineImage: {
       get () {
         const { name, version } = this.worker.machine.image || {}
-        return find(this.machineImages, { name, version })
+        return find(this.machineImages, { name, version }) || {}
       },
       set (machineImage) {
         this.worker.machine.image = pick(machineImage, ['name', 'version'])
@@ -113,7 +113,8 @@ export default {
       return join(hintText, ' / ')
     },
     hintColor () {
-      if (this.machineImage.needsLicense || this.updateOSMaintenance) {
+      if (this.machineImage.needsLicense || (this.updateOSMaintenance && this.selectedImageIsNotLatest)) {
+        console.log('orange');
         return 'orange'
       }
       return 'default'

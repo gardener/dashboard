@@ -40,7 +40,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShoot, getShootInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
-import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isShootStatusHibernated,
   isUserError,
@@ -242,17 +242,11 @@ const actions = {
     const shootResource = {
       apiVersion: 'core.gardener.cloud/v1alpha1',
       kind: 'Shoot',
-      metadata: {},
-      spec: {
-        networking: {
-          type: 'calico', // TODO: read network extension list, see https://github.com/gardener/dashboard/issues/452
-          nodes: workerCIDR
-        }
-      }
+      metadata: {}
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
+    set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
