@@ -30,7 +30,8 @@ const server = http.createServer(app)
 io.attach(server)
 createTerminus(server, {
   healthChecks: {
-    '/healthz': healthCheck
+    '/healthz': () => healthCheck(false),
+    '/healthz-transitive': () => healthCheck(true)
   },
   beforeShutdown,
   onSignal,
