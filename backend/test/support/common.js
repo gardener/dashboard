@@ -167,12 +167,15 @@ class Reconnector extends EventEmitter {
     this.disconnected = false
     this.events = []
   }
+
   disconnect () {
     this.disconnected = true
   }
+
   pushEvent (type, object, delay = 10) {
     this.events.push({ delay, event: { type, object } })
   }
+
   start () {
     const emit = (event) => {
       return () => {

@@ -174,8 +174,8 @@ function getServiceAccountSecret (namespace, serviceAccountName) {
   }
   const data = {}
   data['ca.crt'] = encodeBase64('ca.crt')
-  data['namespace'] = encodeBase64(namespace)
-  data['token'] = encodeBase64(name)
+  data.namespace = encodeBase64(namespace)
+  data.token = encodeBase64(name)
   return {
     metadata,
     data
@@ -214,7 +214,7 @@ function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, 
 
 function canCreateProjects (scope) {
   return scope
-    .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
       const { namespace, verb, resource, group } = body.spec.resourceAttributes
       return !namespace && group === 'core.gardener.cloud' && resource === 'projects' && verb === 'create'
     })
@@ -251,7 +251,7 @@ function reviewToken (scope) {
 
 function canGetSecretsInAllNamespaces (scope) {
   return scope
-    .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`, body => {
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
       const { namespace, verb, resource, group } = body.spec.resourceAttributes
       return !namespace && group === '' && resource === 'secrets' && verb === 'get'
     })
@@ -561,7 +561,7 @@ const stub = {
       .reply(200, () => shootResult)
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, () => kubecfgResult)
-      .post(`/apis/authorization.k8s.io/v1/selfsubjectaccessreviews`)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
       .reply(200, () => isAdminResult)
       .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)
       .reply(200, () => seedSecretResult),
@@ -900,7 +900,7 @@ const stub = {
   deleteTerminal ({ bearer, username, namespace, name }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    let terminal = {
+    const terminal = {
       metadata: {
         namespace,
         name,
@@ -978,7 +978,7 @@ const stub = {
     ]
   },
   deleteProject ({ bearer, namespace }) {
-    let project = readProject(namespace)
+    const project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
     const confirmationPath = ['metadata', 'annotations', 'confirmation.garden.sapcloud.io/deletion']
     return [
@@ -1103,7 +1103,7 @@ const stub = {
   },
   healthz () {
     return nockWithAuthorization(auth.bearer)
-      .get(`/healthz`)
+      .get('/healthz')
       .reply(200, 'ok')
   },
   fetchGardenerVersion ({ version }) {
@@ -1120,7 +1120,7 @@ const stub = {
         .get('/apis/apiregistration.k8s.io/v1/apiservices/v1alpha1.core.gardener.cloud')
         .reply(200, body),
       nock(serviceUrl)
-        .get(`/version`)
+        .get('/version')
         .reply(statusCode, version)
     ]
   },
