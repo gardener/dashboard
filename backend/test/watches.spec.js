@@ -17,7 +17,6 @@
 'use strict'
 
 const EventEmitter = require('events')
-const delay = require('delay')
 const _ = require('lodash')
 const { dashboardClient } = require('../lib/kubernetes-client')
 const logger = require('../lib/logger')
@@ -27,7 +26,6 @@ const watches = require('../lib/watches')
 const { _cache: cache } = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const journals = require('../lib/services/journals')
-const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
 describe('watches', function () {
   /* eslint no-unused-expressions: 0 */
@@ -111,8 +109,10 @@ describe('watches', function () {
       emitter.emit('connect')
       expect(items).to.be.empty
       emitter.emit('event', { type: 'DELETED', object: foo })
+      expect(items).to.be.empty
       emitter.emit('event', { type: 'ADDED', object: foo })
       emitter.emit('event', { type: 'ADDED', object: bar })
+      expect(items).to.have.length(2)
       emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
       emitter.emit('event', { type: 'DELETED', object: foo })
       expect(items).to.have.length(1)
@@ -166,36 +166,6 @@ describe('watches', function () {
       expect(bootstrapStub).to.be.calledOnceWith(foo)
       expect(items).to.have.length(2)
       expect(items).to.eql([foo, bar])
-    })
-  })
-
-  describe('projects', function () {
-    const fooRoom = {
-      emit (event) {
-        expect(event).to.equal('ping')
-      }
-    }
-
-    const nsp = {
-      to (room) {
-        expect(room).to.equal('foo')
-        return fooRoom
-      }
-    }
-
-    const io = {
-      of (namespace) {
-        expect(namespace).to.equal('/shoots')
-        return nsp
-      }
-    }
-    const { projects } = dashboardClient['core.gardener.cloud']
-
-    it('should watch projects', async function () {
-      const watchStub = sandbox.stub(projects, 'watchList').returns(emitter)
-      watches.namespaces(io)
-      expect(watchStub).to.be.calledOnce
-      emitter.emit('event', { type: 'ADDED', object: foo })
     })
   })
 
@@ -505,22 +475,22 @@ describe('watches', function () {
       gitHubConfigStub.get(() => true)
       cacheStub.returns(journalCache)
       loadOpenIssuesStub.onCall(0).throws(serviceUnavailable)
-      watches.journals(io, { minTimeout: 1 })
+      const promise = watches.journals(io, { minTimeout: 1 })
       expect(cacheStub).to.be.calledOnce
-      await delay(5)
+      await promise
       expect(loadOpenIssuesStub).to.be.calledTwice
       expect(infoSpy).to.be.calledTwice
     })
 
-    it('should failed to fetch journals', async function () {
+    it('should fail to fetch journals', async function () {
       gitHubConfigStub.get(() => true)
       cacheStub.returns(journalCache)
       loadOpenIssuesStub.throws(new Error('Unexpected'))
 
-      watches.journals(io)
+      const promise = watches.journals(io)
       expect(cacheStub).to.be.calledOnce
       expect(loadOpenIssuesStub).to.be.calledOnce
-      await nextTick()
+      await promise
       expect(errorSpy).to.be.calledOnce
     })
   })

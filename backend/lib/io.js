@@ -272,6 +272,7 @@ function setupJournalsNamespace (journalsNsp) {
         logger.error('Socket %s: failed to fetch issues: %s', socket.id, error)
         socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch issues' })
       }
+      socket.emit('batchEventsDone', { kind })
     })
     socket.on('subscribeComments', async ({ name, namespace }) => {
       leaveCommentsRooms(socket)
@@ -304,6 +305,7 @@ function setupJournalsNamespace (journalsNsp) {
         logger.error('Socket %s: failed to fetch comments for %s/%s: %s', socket.id, namespace, name, error)
         socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch comments' })
       }
+      socket.emit('batchEventsDone', { kind, namespace, name })
     })
     socket.on('unsubscribeComments', () => {
       leaveCommentsRooms(socket)

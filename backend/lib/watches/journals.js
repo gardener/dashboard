@@ -66,5 +66,5 @@ module.exports = (io, retryOptions = {}) => {
     }
   }
 
-  loadAllOpenIssues()
+  return loadAllOpenIssues()
 }

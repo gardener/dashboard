@@ -60,6 +60,9 @@ describe('services', function () {
       core: {
         secrets: {
           list (namespace, query) {
+            expect(query).to.eql({
+              labelSelector: 'runtime=gardenTerminalHost'
+            })
             return {
               items: [
                 { metadata: { namespace, name: firstSecretName } },
@@ -376,7 +379,7 @@ describe('services', function () {
     describe('bootstrap', function () {
       const hostClient = {
         cluster: {
-          server: new URL('https://apiServerHostname:6443')
+          server: new URL('https://gardenApiServerHostname:6443')
         },
         core: {
           services: {
@@ -400,7 +403,7 @@ describe('services', function () {
 
       const soilClient = {
         cluster: {
-          server: new URL('https://apiServerHostname:6443')
+          server: new URL('https://soilApiServerHostname:6443')
         },
         core: {
           services: {
@@ -424,7 +427,7 @@ describe('services', function () {
 
       const seedClient = {
         cluster: {
-          server: new URL('https://apiServerHostname:6443')
+          server: new URL('https://seedApiServerHostname:6443')
         },
         core: {
           services: {
@@ -516,9 +519,12 @@ describe('services', function () {
         const bootstrap = {
           disabled: true
         }
+        const seed = getSeed(seedName)
         createConfigStub({ bootstrap })
         const bootstrapper = new Bootstrapper()
         bootstrapper.push(new Handler(() => {}, 'test'))
+        bootstrapper.bootstrapResource(seed)
+        bootstrapper.bootstrapResource(shootList[0])
         await pEvent(bootstrapper, 'empty')
         const stats = bootstrapper.getStats()
         expect(stats.total).to.equal(1)

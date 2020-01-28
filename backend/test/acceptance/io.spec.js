@@ -240,12 +240,17 @@ module.exports = function ({ sandbox, auth }) {
     ]
 
     async function emitSubscribe (...args) {
-      socket.emit(...args)
-      const { events } = await pEvent(socket, 'events', {
+      const asyncIterator = pEvent.iterator(socket, 'events', {
         timeout: 1000,
+        resolutionEvents: ['batchEventsDone'],
         rejectionEvents: ['error', 'subscription_error']
       })
-      return map(events, 'object')
+      socket.emit(...args)
+      let items = []
+      for await (const { events } of asyncIterator) {
+        items = items.concat(map(events, 'object'))
+      }
+      return items
     }
 
     let getIssueCommentsStub
