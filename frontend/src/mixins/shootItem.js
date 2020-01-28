@@ -72,7 +72,7 @@ export const shootItem = {
       return get(this.shootSpec, 'hibernation.enabled', false)
     },
     isShootStatusHibernated () {
-      return isShootStatusHibernated(get(this.shootItem), 'status')
+      return isShootStatusHibernated(get(this.shootItem, 'status'))
     },
     isShootStatusHibernationProgressing () {
       return this.isShootSettingHibernated !== this.isShootStatusHibernated
