@@ -224,7 +224,7 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames
+        loadBalancerClasses
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
@@ -240,8 +240,8 @@ export default {
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
       }
-      if (!isEmpty(loadBalancerClassNames)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+      if (!isEmpty(loadBalancerClasses)) {
+        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -321,7 +321,7 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
-      const loadBalancerClassNames = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      const loadBalancerClasses = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
       this.$refs.infrastructureDetails.setInfrastructureData({
         infrastructureKind,
         cloudProfileName,
@@ -329,7 +329,7 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames
+        loadBalancerClasses
       })
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')

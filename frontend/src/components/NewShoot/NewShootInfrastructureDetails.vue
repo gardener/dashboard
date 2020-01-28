@@ -429,17 +429,17 @@ export default {
         region: this.region,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
-        loadBalancerClassNames: this.loadBalancerClassNames
+        loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name }))
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, loadBalancerClassNames }) {
+    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, loadBalancerClasses }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
-      this.loadBalancerClassNames = loadBalancerClassNames
+      this.loadBalancerClassNames = map(loadBalancerClasses, 'name')
 
       this.validateInput()
     },
