@@ -49,11 +49,11 @@ class Logger {
     }
   }
 
-  request ({ id, uri, method, httpVersion = '1.1', user, headers, body }) {
+  request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
     if (!this.isDisabled(LEVELS.trace + 1)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
-      const host = headers.host || uri.host || '-'
-      const path = uri.path || (uri.pathname + uri.search)
+      const host = headers.host || url.host || '-'
+      const path = url.path || (url.pathname + url.search)
       id = id || headers['x-request-id']
       let msg = `${method} ${path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
       if (this.logHttpRequestBody && body) {

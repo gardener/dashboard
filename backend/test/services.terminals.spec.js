@@ -59,10 +59,7 @@ describe('services', function () {
       cluster: dashboardClient.cluster,
       core: {
         secrets: {
-          list (namespace, query) {
-            expect(query).to.eql({
-              labelSelector: 'runtime=gardenTerminalHost'
-            })
+          list (namespace) {
             return {
               items: [
                 { metadata: { namespace, name: firstSecretName } },
@@ -158,7 +155,15 @@ describe('services', function () {
             }
           }
           createConfigStub({ gardenTerminalHost })
+          const listSecretsSpy = sandbox.spy(client.core.secrets, 'list')
           const secretRef = await getGardenTerminalHostClusterSecretRef(client)
+          expect(listSecretsSpy).to.be.calledOnce
+          expect(listSecretsSpy.firstCall.args).to.eql([
+            gardenTerminalHost.secretRef.namespace,
+            {
+              labelSelector: 'runtime=gardenTerminalHost'
+            }
+          ])
           expect(secretRef).to.eql({
             namespace: gardenTerminalHost.secretRef.namespace,
             name: firstSecretName
@@ -541,9 +546,17 @@ describe('services', function () {
           disabled: false,
           gardenTerminalHostDisabled: false
         }
+        const listSecretsSpy = sandbox.spy(client.core.secrets, 'list')
         createConfigStub({ gardenTerminalHost, bootstrap })
         const bootstrapper = new Bootstrapper()
         await pEvent(bootstrapper, 'empty')
+        expect(listSecretsSpy).to.be.calledOnce
+        expect(listSecretsSpy.firstCall.args).to.eql([
+          gardenTerminalHost.secretRef.namespace,
+          {
+            labelSelector: 'runtime=gardenTerminalHost'
+          }
+        ])
         const stats = bootstrapper.getStats()
         expect(stats.total).to.equal(1)
         expect(stats.successRate).to.equal(1)

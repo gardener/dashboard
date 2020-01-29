@@ -21,12 +21,14 @@ const EventEmitter = require('events')
 const { mix } = require('mixwith')
 const pEvent = require('p-event')
 const http = require('http')
+const express = require('express')
 const jwt = require('jsonwebtoken')
 
 const logger = require('../lib/logger')
 const mixins = require('../lib/kubernetes-client/mixins')
 const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
 const HttpClient = require('../lib/kubernetes-client/HttpClient')
+const { http: httpSymbols } = require('../lib/kubernetes-client/symbols')
 const { attach, beforeRequest, beforeRedirect, afterResponse } = require('../lib/kubernetes-client/debug')
 const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable } = mixins
 
@@ -101,9 +103,11 @@ describe('kubernetes-client', function () {
           this.pongTimeoutId = undefined
           this.open()
         }
+
         send (type, object) {
           process.nextTick(() => this.emit('message', JSON.stringify({ type, object })))
         }
+
         ping (data) {
           if (this._pongDelay === -1) {
             process.nextTick(() => this.emit('pong', data))
@@ -111,13 +115,16 @@ describe('kubernetes-client', function () {
             this.pongTimeoutId = setTimeout(() => this.emit('pong', data), this._pongDelay)
           }
         }
+
         throw (message) {
           process.nextTick(() => this.emit('error', new Error(message)))
         }
+
         open () {
           this.timeoutId = setTimeout(() => this.terminate(), 5000)
           process.nextTick(() => this.emit('open'))
         }
+
         terminate () {
           clearTimeout(this.timeoutId)
           clearTimeout(this.pongTimeoutId)
@@ -251,9 +258,11 @@ describe('kubernetes-client', function () {
           super()
           this.resourceName = 'bars'
         }
+
         send (type, object) {
           process.nextTick(() => this.emit('event', { type, object }))
         }
+
         disconnect () {}
       }
 
@@ -272,9 +281,68 @@ describe('kubernetes-client', function () {
     })
   })
 
+  describe('HttpClient', function () {
+    let server
+
+    const app = express()
+    app.get('/foo', (req, res) => {
+      res.send('bar')
+    })
+
+    async function serve () {
+      server = http.createServer(app).listen(0, 'localhost')
+      await pEvent(server, 'listening', {
+        timeout: 100
+      })
+      const { address, port } = server.address()
+      return `http://${address}:${port}`
+    }
+
+    class TestClient extends HttpClient {
+      constructor (url, options) {
+        super({
+          url,
+          throwHttpErrors: true,
+          resolveBodyOnly: true,
+          ...options
+        })
+      }
+
+      get () {
+        return this[httpSymbols.request]('foo', { method: 'get' })
+      }
+    }
+
+    after(function () {
+      server.close()
+    })
+
+    it('should assert "beforeRequest" hook parameters', async function () {
+      const origin = await serve()
+      const client = new TestClient(origin, {
+        headers: {
+          foo: 'bar'
+        },
+        hooks: {
+          beforeRequest: [
+            options => {
+              const { url, method, headers } = options
+              expect(url).to.be.instanceof(URL)
+              expect(url.origin).to.equal(origin)
+              expect(method).to.equal('GET')
+              expect(headers.foo).to.equal('bar')
+            }
+          ]
+        }
+      })
+      const body = await client.get()
+      expect(body).to.equal('bar')
+    })
+  })
+
   describe('debug', function () {
     const uuidRegEx = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
-    const href = 'https://kubernetes/foo/bar'
+    const url = new URL('https://kubernetes/foo/bar')
     const method = 'GET'
     const body = { ok: true }
     const statusCode = 200
@@ -304,7 +372,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
           return undefined
         }
         if (key === 'user') {
-          return 'Basic ' + Buffer.from([ this.user, this.password ].join(':')).toString('base64')
+          return 'Basic ' + Buffer.from([this.user, this.password].join(':')).toString('base64')
         }
         if (key === 'bearer') {
           return 'Bearer <token>'
@@ -332,12 +400,12 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
     })
 
     it('should log a http request', function () {
-      const options = { href, method, headers: { foo: 'bar' }, body }
+      const options = { url, method, headers: { foo: 'bar' }, body }
 
       beforeRequest(options)
       expect(requestStub).to.be.calledOnce
       const args = requestStub.firstCall.args[0]
-      expect(args.uri.href).to.equal(href)
+      expect(args.url).to.equal(url)
       expect(args.method).to.equal(method)
       expect(args.body).to.equal(body)
       expect(args.user).to.be.undefined
@@ -349,7 +417,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       for (const key of ['user', 'email', 'sub', 'bearer', 'cn']) {
         requestStub.resetHistory()
         const authorization = user.authorization(key)
-        const options = { href, method, headers: { authorization }, body }
+        const options = { url, method, headers: { authorization }, body }
         if (key === 'cn') {
           Object.assign(options, { key: 'key', cert: user.cert })
         }
@@ -382,8 +450,8 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       const xRequestId = '42'
       const request = { options: { headers: { 'x-request-id': xRequestId } } }
       const headers = { foo: 'bar' }
-      const options = { href, method, headers, body }
-      const redirectUrls = [ 'http://foo.org/bar' ]
+      const options = { url, method, headers, body }
+      const redirectUrls = ['http://foo.org/bar']
       const response = { headers, httpVersion, statusCode, statusMessage, redirectUrls, request }
 
       beforeRedirect(options, response)

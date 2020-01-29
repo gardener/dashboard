@@ -37,24 +37,8 @@ function afterResponse (response) {
   return response
 }
 
-function parseUrl (url) {
-  try {
-    return new URL(url)
-  } catch (err) {
-    logger.error('URI parse error:', err)
-  }
-}
-
 function beforeRequest (options) {
-  const { url, href, method, headers, body, key, cert } = options
-  let uri
-  if (url instanceof URL) {
-    uri = url
-  } else if (url && typeof url === 'string') {
-    uri = parseUrl(url)
-  } else if (href && typeof href === 'string') {
-    uri = parseUrl(href)
-  }
+  const { url, method, headers, body, key, cert } = options
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = uuidv1()
   }
@@ -97,7 +81,7 @@ function beforeRequest (options) {
   }
 
   logger.request({
-    uri,
+    url,
     method,
     user: user.id ? user : undefined,
     headers: clone(headers),

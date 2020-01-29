@@ -34,9 +34,14 @@ describe('healthz', function () {
     sandbox.restore()
   })
 
-  it('should successfully check health', async function () {
+  it('should successfully check transitive healthz', async function () {
     await healthCheck(true)
     expect(getHealthzStub).to.be.calledOnce
+  })
+
+  it('should successfully check non-transitive healthz', async function () {
+    await healthCheck(false)
+    expect(getHealthzStub).not.to.be.called
   })
 
   it('should throw a HTTP Error', async function () {

@@ -24,21 +24,27 @@ class ConsoleStub {
   constructor () {
     this.args = []
   }
+
   debug (...args) {
     this.args.push(...args)
   }
+
   log (...args) {
     this.args.push(...args)
   }
+
   info (...args) {
     this.args.push(...args)
   }
+
   warn (...args) {
     this.args.push(...args)
   }
+
   error (...args) {
     this.args.push(...args)
   }
+
   static create () {
     return new ConsoleStub()
   }
@@ -59,9 +65,9 @@ describe('logger', function () {
   const user = { type: 'email', id: 'bar@foo.org' }
   const id = 1
   const headers = { 'x-request-id': id }
-  const uri = new URL('https://foo.org/bar')
+  const url = new URL('https://foo.org/bar')
   const body = 'body'
-  const requestArgs = { uri, method, user, headers, body }
+  const requestArgs = { url, method, user, headers, body }
   const statusCode = 404
   const statusMessage = 'Not found'
   const responseArgs = { id, statusCode, statusMessage, body }
@@ -130,7 +136,7 @@ describe('logger', function () {
   it('should log a request message', function () {
     const logger = createNoisyLogger()
     logger.request(requestArgs)
-    const msg = `${method} ${uri.pathname} HTTP/1.1 [${id}] ${user.type}=${user.id} ${uri.host} ${body}`
+    const msg = `${method} ${url.pathname} HTTP/1.1 [${id}] ${user.type}=${user.id} ${url.host} ${body}`
     expect(logger.console.args).to.eql([chalk.black.bgGreen('req ') + ': ' + msg])
   })
 
