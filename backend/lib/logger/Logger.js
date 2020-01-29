@@ -38,6 +38,11 @@ class Logger {
     return this.silent || level < this.logLevel
   }
 
+  get ts () {
+    const ts = new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
+    return chalk.whiteBright(ts)
+  }
+
   get stream () {
     const logger = this
     return {
@@ -59,7 +64,7 @@ class Logger {
       if (this.logHttpRequestBody && body) {
         msg += ' ' + body.toString('utf8')
       }
-      this.console.log(chalk.black.bgGreen('req ') + ': ' + msg)
+      this.console.log(this.ts + ' ' + chalk.black.bgGreen('req') + '  : ' + msg)
     }
   }
 
@@ -69,49 +74,49 @@ class Logger {
       if (body && statusCode >= 300) {
         msg += ' ' + body.toString('utf8')
       }
-      this.console.log(chalk.black.bgBlue('res ') + ': ' + msg)
+      this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)
     }
   }
 
   http (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      this.console.log(chalk.magenta('http') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.magenta('http') + ' : ' + msg, ...args)
     }
   }
 
   log (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      this.console.log(chalk.whiteBright('log') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.whiteBright('log') + '  : ' + msg, ...args)
     }
   }
 
   trace (msg, ...args) {
     if (!this.isDisabled(LEVELS.trace)) {
-      this.console.log(chalk.cyan('trace') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.cyan('trace') + ': ' + msg, ...args)
     }
   }
 
   debug (msg, ...args) {
     if (!this.isDisabled(LEVELS.debug)) {
-      this.console.debug(chalk.blue('debug') + ': ' + msg, ...args)
+      this.console.debug(this.ts + ' ' + chalk.blue('debug') + ': ' + msg, ...args)
     }
   }
 
   info (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      this.console.info(chalk.green('info') + ': ' + msg, ...args)
+      this.console.info(this.ts + ' ' + chalk.green('info') + ' : ' + msg, ...args)
     }
   }
 
   warn (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      this.console.warn(chalk.yellow('warn') + ': ' + msg, ...args)
+      this.console.warn(this.ts + ' ' + chalk.yellow('warn') + ' : ' + msg, ...args)
     }
   }
 
   error (msg, ...args) {
     if (!this.isDisabled(LEVELS.error)) {
-      this.console.error(chalk.red('error') + ': ' + msg, ...args)
+      this.console.error(this.ts + ' ' + chalk.red('error') + ': ' + msg, ...args)
     }
   }
 }

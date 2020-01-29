@@ -50,11 +50,20 @@ class ConsoleStub {
   }
 }
 
+class TestLogger extends Logger {
+  constructor (options) {
+    super(options)
+    this.silent = false
+    this.console = ConsoleStub.create()
+  }
+
+  get ts () {
+    return 'D T'
+  }
+}
+
 function createNoisyLogger (logLevel = 'trace', logHttpRequestBody = true) {
-  const logger = new Logger({ logLevel, logHttpRequestBody })
-  logger.silent = false
-  logger.console = ConsoleStub.create()
-  return logger
+  return new TestLogger({ logLevel, logHttpRequestBody })
 }
 
 describe('logger', function () {
@@ -94,56 +103,56 @@ describe('logger', function () {
   it('should log a trace message', function () {
     const logger = createNoisyLogger()
     logger.trace(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.cyan('trace') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.cyan('trace') + ': ' + msg, ...args])
   })
 
   it('should log a debug message', function () {
     const logger = createNoisyLogger()
     logger.debug(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.blue('debug') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.blue('debug') + ': ' + msg, ...args])
   })
 
   it('should log a log message', function () {
     const logger = createNoisyLogger()
     logger.log(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.whiteBright('log') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.whiteBright('log') + '  : ' + msg, ...args])
   })
 
   it('should log an info message', function () {
     const logger = createNoisyLogger()
     logger.info(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.green('info') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.green('info') + ' : ' + msg, ...args])
   })
 
   it('should log a warn message', function () {
     const logger = createNoisyLogger()
     logger.warn(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.yellow('warn') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.yellow('warn') + ' : ' + msg, ...args])
   })
 
   it('should log an error message', function () {
     const logger = createNoisyLogger()
     logger.error(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.red('error') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.red('error') + ': ' + msg, ...args])
   })
 
   it('should log a http message', function () {
     const logger = createNoisyLogger()
     logger.http(msg, ...args)
-    expect(logger.console.args).to.eql([chalk.magenta('http') + ': ' + msg, ...args])
+    expect(logger.console.args).to.eql(['D T ' + chalk.magenta('http') + ' : ' + msg, ...args])
   })
 
   it('should log a request message', function () {
     const logger = createNoisyLogger()
     logger.request(requestArgs)
     const msg = `${method} ${url.pathname} HTTP/1.1 [${id}] ${user.type}=${user.id} ${url.host} ${body}`
-    expect(logger.console.args).to.eql([chalk.black.bgGreen('req ') + ': ' + msg])
+    expect(logger.console.args).to.eql(['D T ' + chalk.black.bgGreen('req') + '  : ' + msg])
   })
 
   it('should log a response message', function () {
     const logger = createNoisyLogger()
     logger.response(responseArgs)
     const msg = `HTTP/1.1 ${statusCode} ${statusMessage} [${id}] ${body}`
-    expect(logger.console.args).to.eql([chalk.black.bgBlue('res ') + ': ' + msg])
+    expect(logger.console.args).to.eql(['D T ' + chalk.black.bgBlue('res') + '  : ' + msg])
   })
 })
