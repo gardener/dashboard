@@ -48,10 +48,6 @@ describe('acceptance', function () {
       require('./acceptance/api.cloudprofiles.spec.js')(context)
     })
 
-    describe('domains', function () {
-      require('./acceptance/api.domains.spec.js')(context)
-    })
-
     describe('info', function () {
       require('./acceptance/api.info.spec.js')(context)
     })

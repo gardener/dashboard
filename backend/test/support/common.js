@@ -87,19 +87,6 @@ function getKubeApiServer (namespace, name, ingressDomain) {
   return `k-${hash}.${ingressDomain}`
 }
 
-function getDomain (name, provider, domain) {
-  return {
-    metadata: {
-      name,
-      annotations: {
-        'dns.garden.sapcloud.io/domain': domain,
-        'dns.garden.sapcloud.io/provider': provider
-      }
-    },
-    data: {}
-  }
-}
-
 function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
   return {
     metadata: {
@@ -133,11 +120,6 @@ const seedList = [
   getSeed('infra3-seed-invisible', 'foo-europe', 'infra3', false, false)
 ]
 
-const domainList = [
-  getDomain('provider1-default-domain', 'provider1', 'domain1'),
-  getDomain('provider2-default-domain', 'provider2', 'domain2')
-]
-
 const quotaList = [
   getQuota({ name: 'trial-secret-quota', namespace: 'garden-trial' }),
   getQuota({ name: 'foo-quota1', namespace: 'garden-foo' }),
@@ -155,10 +137,6 @@ const stub = {
   getQuotas (sandbox) {
     const getQuotasStub = sandbox.stub(cache, 'getQuotas')
     getQuotasStub.returns(quotaList)
-  },
-  getDomains (sandbox) {
-    const getDomainsStub = sandbox.stub(cache, 'getDomains')
-    getDomainsStub.returns(domainList)
   },
   getJournalCache (sandbox) {
     const getJournalCacheStub = sandbox.stub(cache, 'getJournalCache')

@@ -16,7 +16,6 @@
 
 module.exports = {
   cloudprofiles: require('./cloudprofiles'),
-  domains: require('./domains'),
   projects: require('./projects'),
   shoots: require('./shoots'),
   infrastructureSecrets: require('./infrastructureSecrets'),

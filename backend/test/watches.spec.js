@@ -120,19 +120,6 @@ describe('watches', function () {
     })
   })
 
-  describe('domains', function () {
-    const { secrets } = dashboardClient.core
-
-    it('should watch domains', async function () {
-      const matchQuery = sinon.match.has('labelSelector', 'garden.sapcloud.io/role=default-domain')
-      const watchStub = sandbox.stub(secrets, 'watchList').withArgs('garden', matchQuery).returns(emitter)
-      const cacheStub = sandbox.stub(cache, 'getDomains').returns(items)
-      watches.domains(io)
-      expect(watchStub).to.be.calledOnce
-      expect(cacheStub).to.be.calledOnce
-    })
-  })
-
   describe('quotas', function () {
     const { quotas } = dashboardClient['core.gardener.cloud']
 
