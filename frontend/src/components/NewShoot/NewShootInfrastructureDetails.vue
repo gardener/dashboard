@@ -373,10 +373,10 @@ export default {
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
       'floatingPoolNamesByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion',
+      'partitionIDsByCloudProfileNameAndRegion',
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
-      'machineTypesByCloudProfileNameAndRegionAndZones'
+      'firewallSizesByCloudProfileNameAndRegionAndZones'
     ]),
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
@@ -442,15 +442,13 @@ export default {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
     },
     partitionIDs () {
-      // Partion IDs equal zones for metal infrastructure
-      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+      return this.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
     firewallImages () {
       return this.firewallImagesByCloudProfileName(this.cloudProfileName)
     },
     firewallSizes () {
-      // Firewall Sizes equals to list of image types for this zone
-      return map(this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: [ this.partitionID ] }), 'name')
+      return map(this.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: [ this.partitionID ] }), 'name')
     },
     allFirewallNetworks () {
       return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
@@ -500,6 +498,7 @@ export default {
       this.onInputLoadBalancerClassNames()
       this.firewallImage = head(this.firewallImages)
       this.onInputFirewallImage()
+      this.projectID = undefined
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -544,7 +543,9 @@ export default {
       this.firewallSize = head(this.firewallSizes)
       const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
       if (firewallNetwork) {
-        this.firewallNetworks = [firewallNetwork.value]
+        this.firewallNetworks =  [firewallNetwork.value]
+      } else {
+        this.firewallNetworks = undefined
       }
       this.validateInput()
     },

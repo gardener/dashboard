@@ -334,6 +334,28 @@ const getters = {
       return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.floatingPools'), 'name'))
     }
   },
+  partitionIDsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Partion IDs equal zones for metal infrastructure
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile.metadata.cloudProviderKind !== 'metal') {
+        return
+      }
+      const partitionIDs = getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+      return partitionIDs
+    }
+  },
+  firewallSizesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Firewall Sizes equals to list of image types for this zone
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile.metadata.cloudProviderKind !== 'metal') {
+        return
+      }
+      const firewallSizes = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region })
+      return firewallSizes
+    }
+  },
   firewallImagesByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)

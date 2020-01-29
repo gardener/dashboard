@@ -276,8 +276,7 @@ const actions = {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
     }
 
-    // Partion IDs equal zones for metal infrastructure
-    const partitionIDs = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const partitionIDs = rootGetters.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
     const partitionID = head(partitionIDs)
     if (!isEmpty(partitionID)) {
       set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
@@ -287,8 +286,7 @@ const actions = {
     if (!isEmpty(firewallImage)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
     }
-    // Firewall Sizes equals to list of image types for this zone
-    const firewallSizes = map(rootGetters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [ partitionID ] }), 'name')
+    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [ partitionID ] }), 'name')
     const firewallSize = head(firewallSizes)
     if (!isEmpty(firewallSize)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
