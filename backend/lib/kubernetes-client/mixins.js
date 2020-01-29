@@ -76,6 +76,7 @@ ClusterScoped.Readable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'get', searchParams })
   }
+
   list (options) {
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names)
@@ -93,6 +94,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'get', searchParams })
   }
+
   list (namespace, options) {
     assertNamespace(namespace)
     assertOptions(options)
@@ -100,6 +102,7 @@ NamespaceScoped.Readable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'get', searchParams })
   }
+
   listAllNamespaces (options) {
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names)
@@ -116,6 +119,7 @@ ClusterScoped.Observable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return WatchBuilder.create(this, url, searchParams, name)
   }
+
   watchList (options) {
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names)
@@ -133,6 +137,7 @@ NamespaceScoped.Observable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return WatchBuilder.create(this, url, searchParams, name)
   }
+
   watchList (namespace, options) {
     assertNamespace(namespace)
     assertOptions(options)
@@ -140,6 +145,7 @@ NamespaceScoped.Observable = superclass => class extends superclass {
     const searchParams = new URLSearchParams(options)
     return WatchBuilder.create(this, url, searchParams)
   }
+
   watchListAllNamespaces (options) {
     assertOptions(options)
     const url = namespaceScopedUrl(this.constructor.names)
@@ -178,6 +184,7 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'put', searchParams, json: body })
   }
+
   mergePatch (name, body, options) {
     assertName(name)
     assertBodyObject(body)
@@ -186,6 +193,7 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
   }
+
   jsonPatch (name, body, options) {
     assertName(name)
     assertBodyArray(body)
@@ -194,6 +202,7 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
   }
+
   strategicMergePatch (name, body, options) {
     assertName(name)
     assertBodyObject(body)
@@ -202,6 +211,7 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
   }
+
   delete (name, options) {
     assertName(name)
     assertOptions(options)
@@ -209,6 +219,7 @@ ClusterScoped.Writable = superclass => class extends ClusterScoped.Creatable(sup
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'delete', searchParams })
   }
+
   deleteCollection (options) {
     assertOptions(options)
     const url = clusterScopedUrl(this.constructor.names)
@@ -227,6 +238,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'put', searchParams, json: body })
   }
+
   mergePatch (namespace, name, body, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -236,6 +248,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.MERGE))
   }
+
   jsonPatch (namespace, name, body, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -245,6 +258,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.JSON))
   }
+
   strategicMergePatch (namespace, name, body, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -254,6 +268,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, setPatchType({ method: 'patch', searchParams, json: body }, PatchType.STRATEGIC_MERGE))
   }
+
   delete (namespace, name, options) {
     assertNamespace(namespace)
     assertName(name)
@@ -262,6 +277,7 @@ NamespaceScoped.Writable = superclass => class extends NamespaceScoped.Creatable
     const searchParams = new URLSearchParams(options)
     return this[http.request](url, { method: 'delete', searchParams })
   }
+
   deleteCollection (namespace, options) {
     assertNamespace(namespace)
     assertOptions(options)

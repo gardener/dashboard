@@ -24,5 +24,5 @@ const {
 
 module.exports = io => {
   const emitter = dashboardClient['core.gardener.cloud'].quotas.watchListAllNamespaces()
-  cacheResource(emitter, getQuotas(), 'metadata.name')
+  cacheResource(emitter, getQuotas(), ['metadata.namespace', 'metadata.name'])
 }

@@ -225,7 +225,7 @@ Copyright (c) 2017-2018 Octokit contributors\
 [MIT License](https://github.com/octokit/rest.js/blob/master/LICENSE)
 
 - [@panva/jose](https://github.com/panva/jose)\
-Copyright (c) 2018 Filip Skokan
+Copyright (c) 2018 Filip Skokan\
 [MIT License](https://github.com/panva/jose/blob/master/LICENSE.md)
 
 - [base64url](https://github.com/brianloveswords/base64url)\
@@ -249,6 +249,10 @@ Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 Copyright (c) 2014 TJ Holowaychuk <tj@vision-media.ca>\
 Copyright (c) 2015 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/cookie-parser/blob/master/LICENSE)
+
+- [delay](https://github.com/sindresorhus/delay)\
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
+[MIT License](https://github.com/sindresorhus/delay/blob/master/license)
 
 - [es6-error](https://github.com/bjyoungblood/es6-error)\
 Copyright (c) 2015 Ben Youngblood\
@@ -294,7 +298,7 @@ Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>\
 [MIT License](https://github.com/expressjs/morgan/blob/master/LICENSE)
 
 - [object-hash](https://github.com/puleos/object-hash)\
-Copyright (c) 2014 object-hash contributors
+Copyright (c) 2014 object-hash contributors\
 [MIT License](https://github.com/puleos/object-hash/blob/master/LICENSE)
 
 - [openid-client](https://github.com/panva/node-openid-client)\
@@ -342,7 +346,7 @@ Copyright (c) 2014-2018 Sebastian McKenzie <sebmck@gmail.com>\
 
 - [@mdi/font](https://github.com/Templarian/MaterialDesign-Webfont)\
 Copyright (c) 2014, Austin Andrews (http://materialdesignicons.com/), with Reserved Font Name Material Design Icons.\
-Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE\
+Copyright (c) 2014, Google (http://www.google.com/design/) uses the license at https://github.com/google/material-design-icons/blob/master/LICENSE \
 [SIL Open Font License 1.1](https://github.com/Templarian/MaterialDesign-Webfont/blob/master/license.md)
 
 - [ansi-html](https://github.com/Tjatse/ansi-html)\
@@ -386,7 +390,7 @@ Copyright (C) 2011-2015 by Vitaly Puzrin\
 [MIT License](https://github.com/nodeca/js-yaml/blob/master/LICENSE)
 
 - [jwt-decode](https://github.com/auth0/jwt-decode)\
-Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com)\
+Copyright (c) 2015 Auth0, Inc. <support@auth0.com> (http://auth0.com) \
 [MIT License](https://github.com/auth0/jwt-decode/blob/master/LICENSE)
 
 - [lodash](https://github.com/lodash/lodash)\

@@ -45,7 +45,7 @@ exports.isAuthenticated = async function ({ token } = {}) {
       } = {}
     } = await dashboardClient['authentication.k8s.io'].tokenreviews.create(body)
     assert.strictEqual(authenticated, true, error)
-    assert.ok(user.username, `User authenticated but username is empty`)
+    assert.ok(user.username, 'User authenticated but username is empty')
     return user
   } catch (err) {
     logger.error('Authentication Error:', err.message)

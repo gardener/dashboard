@@ -250,7 +250,7 @@ exports.remove = async function ({ user, namespace, bindingName }) {
   }
   const secretReferencedByShoot = _.find(shootList, predicate)
   if (secretReferencedByShoot) {
-    throw new PreconditionFailed(`Only secrets not referened by any shoot can be deleted`)
+    throw new PreconditionFailed('Only secrets not referened by any shoot can be deleted')
   }
 
   await Promise.all([

@@ -4,6 +4,7 @@
 # include backend files and folders
 !backend/package.json
 !backend/yarn.lock
+!backend/.mocharc.yaml
 !backend/.babelrc
 !backend/.eslintrc.js
 !backend/.nycrc

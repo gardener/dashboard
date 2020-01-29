@@ -30,10 +30,12 @@ class AbstractBatchEmitter {
     this.MAX_CHUNK_SIZE = 50
     this.MIN_CHUNK_SIZE = 10
   }
-  batchEmitObjectsAndFlush (objects) {
-    this.batchEmitObjects(objects)
+
+  batchEmitObjectsAndFlush (...args) {
+    this.batchEmitObjects(...args)
     this.flush()
   }
+
   batchEmitObjects (objects) {
     _
       .chain(objects)
@@ -51,8 +53,10 @@ class AbstractBatchEmitter {
           this.emit()
           this.clearData()
         }
-      }).value()
+      })
+      .value()
   }
+
   flush () {
     if (this.count() !== 0) {
       this.emit()
@@ -66,12 +70,15 @@ class AbstractBatchEmitter {
   emit () {
     throw new Error('You have to implement the method!')
   }
+
   count () {
     throw new Error('You have to implement the method!')
   }
+
   appendChunkedEvents (chunkedEvents) {
     throw new Error('You have to implement the method!')
   }
+
   clearData () {
     throw new Error('You have to implement the method!')
   }
@@ -85,12 +92,15 @@ class EventsEmitter extends AbstractBatchEmitter {
   emit () {
     this.socket.emit(this.eventsKind, { kind: this.kind, events: this.events })
   }
+
   count () {
     return _.size(this.events)
   }
+
   appendChunkedEvents (chunkedEvents) {
     this.events = _.concat(this.events, chunkedEvents)
   }
+
   clearData () {
     this.events = []
   }
@@ -109,18 +119,30 @@ class NamespacedBatchEmitter extends AbstractBatchEmitter {
   emit () {
     this.socket.emit(this.eventsKind, { kind: this.kind, namespaces: this.namespaces })
   }
+
   count () {
-    return _.chain(this.namespaces).map(events => events.length).sum().value()
+    return _
+      .chain(this.namespaces)
+      .map(events => events.length)
+      .sum()
+      .value()
   }
+
   appendChunkedEvents (chunkedEvents) {
-    this.namespaces[this.currentBatchNamespace] = _.concat(_.get(this.namespaces, this.currentBatchNamespace, []), chunkedEvents)
+    this.namespaces[this.currentBatchNamespace] = _
+      .chain(this.namespaces)
+      .get(this.currentBatchNamespace, [])
+      .concat(chunkedEvents)
+      .value()
   }
+
   clearData () {
     this.namespaces = {}
   }
 }
 
 module.exports = {
+  AbstractBatchEmitter,
   EventsEmitter,
   NamespacedBatchEmitter
 }

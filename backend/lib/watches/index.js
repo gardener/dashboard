@@ -16,7 +16,6 @@
 
 'use strict'
 
-exports.namespaces = require('./namespaces')
 exports.shoots = require('./shoots')
 exports.seeds = require('./seeds')
 exports.cloudprofiles = require('./cloudprofiles')

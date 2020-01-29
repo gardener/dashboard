@@ -100,4 +100,8 @@ describe('acceptance', function () {
   describe('webhook', function () {
     require('./acceptance/webhook.spec.js')(context)
   })
+
+  describe('io', function () {
+    require('./acceptance/io.spec.js')(context)
+  })
 })

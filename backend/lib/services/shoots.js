@@ -182,7 +182,7 @@ exports.replaceWorkers = async function ({ user, namespace, name, body }) {
   const workers = body
   const patchOperations = [{
     op: 'replace',
-    path: `/spec/provider/workers`,
+    path: '/spec/provider/workers',
     value: workers
   }]
   return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)

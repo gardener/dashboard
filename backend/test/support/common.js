@@ -17,12 +17,14 @@
 'use strict'
 const _ = require('lodash')
 const { EventEmitter } = require('events')
+const fnv = require('fnv-plus')
 const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
   const seed = {
+    kind: 'Seed',
     metadata: {
       name,
       labels
@@ -80,6 +82,11 @@ function getCloudProfile (cloudProfileName, kind, seedSelector = {}) {
   }
 }
 
+function getKubeApiServer (namespace, name, ingressDomain) {
+  const hash = fnv.hash(`${name}.${namespace}`, 32).str()
+  return `k-${hash}.${ingressDomain}`
+}
+
 function getDomain (name, provider, domain) {
   return {
     metadata: {
@@ -117,13 +124,13 @@ const cloudProfileList = [
 ]
 
 const seedList = [
+  getSeed('soil-infra1', 'foo-east', 'infra1', true, false),
   getSeed('infra1-seed', 'foo-east', 'infra1'),
   getSeed('infra1-seed2', 'foo-west', 'infra1'),
   getSeed('infra3-seed', 'foo-europe', 'infra3'),
   getSeed('infra3-seed-with-selector', 'foo-europe', 'infra3', false, true, { foo: 'bar' }),
   getSeed('infra3-seed-protected', 'foo-europe', 'infra3', true),
   getSeed('infra3-seed-invisible', 'foo-europe', 'infra3', false, false)
-
 ]
 
 const domainList = [
@@ -206,5 +213,6 @@ module.exports = {
   stub,
   createJournalCache,
   createReconnectorStub,
+  getKubeApiServer,
   getSeed
 }

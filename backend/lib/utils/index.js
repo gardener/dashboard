@@ -17,14 +17,9 @@
 
 'use strict'
 
-const path = require('path')
 const _ = require('lodash')
 const config = require('../config')
 const assert = require('assert').strict
-
-function resolve (pathname) {
-  return path.resolve(__dirname, '../..', pathname)
-}
 
 function decodeBase64 (value) {
   if (!value) {
@@ -48,9 +43,9 @@ function getConfigValue (path, defaultValue) {
   return value
 }
 
-function getSeedNameFromShoot ({ spec = {}, status = {} }) {
+function getSeedNameFromShoot ({ spec = {} }) {
   const seed = spec.seedName
-  assert.ok(seed, `There is no seed assigned to this shoot (yet)`)
+  assert.ok(seed, 'There is no seed assigned to this shoot (yet)')
   return seed
 }
 
@@ -59,7 +54,6 @@ function shootHasIssue (shoot) {
 }
 
 module.exports = {
-  resolve,
   decodeBase64,
   encodeBase64,
   getConfigValue,

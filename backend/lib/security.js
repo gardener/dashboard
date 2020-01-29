@@ -157,8 +157,8 @@ async function authorizeToken (req, res) {
     name,
     email
   }
-  const audience = [ GARDENER_AUDIENCE ]
-  const [ header, payload, signature ] = split(await sign(user, { expiresIn, audience }), '.')
+  const audience = [GARDENER_AUDIENCE]
+  const [header, payload, signature] = split(await sign(user, { expiresIn, audience }), '.')
   res.cookie(COOKIE_HEADER_PAYLOAD, join([header, payload], '.'), {
     secure,
     expires: undefined,
@@ -209,23 +209,23 @@ function getToken ({ cookies = {}, headers = {} }) {
   if (authorization.startsWith('Bearer ')) {
     return authorization.substring(7)
   }
-  const [ header, payload ] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
+  const [header, payload] = split(cookies[COOKIE_HEADER_PAYLOAD], '.')
   const signature = cookies[COOKIE_SIGNATURE]
   if (header && payload && signature) {
-    return join([ header, payload, signature ], '.')
+    return join([header, payload, signature], '.')
   }
   return null
 }
 
-function authenticate ({ createClient } = {}) {
-  assert.ok(typeof createClient === 'function', 'No "createClient" function passed to authenticate middleware')
+function authenticate (options = {}) {
+  assert.ok(typeof options.createClient === 'function', 'No "createClient" function passed to authenticate middleware')
   const verifyToken = async (req, res) => {
     const token = getToken(req)
     if (!token) {
       throw new Unauthorized('No authorization token was found')
     }
     try {
-      const audience = [ GARDENER_AUDIENCE ]
+      const audience = [GARDENER_AUDIENCE]
       req.user = await verify(token, { audience })
     } catch (err) {
       throw new Unauthorized(err.message)
@@ -252,7 +252,7 @@ function authenticate ({ createClient } = {}) {
     const auth = user.auth = { bearer }
 
     Object.defineProperty(user, 'client', {
-      value: createClient({ auth }),
+      value: options.createClient({ auth }),
       enumerable: false
     })
   }
@@ -319,7 +319,7 @@ function decode (token) {
   return jwt.decode(token) || {}
 }
 
-module.exports = exports = {
+exports = module.exports = {
   discoverIssuer,
   getIssuerClient,
   COOKIE_HEADER_PAYLOAD,
