@@ -44,7 +44,6 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
-import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
@@ -132,9 +131,6 @@ const vendorNeedsLicense = vendorName => {
 const getters = {
   apiServerUrl (state) {
     return get(state.cfg, 'apiServerUrl', window.location.origin)
-  },
-  domainList (state) {
-    return state.domains.all
   },
   cloudProfileList (state) {
     return state.cloudProfiles.all
@@ -503,12 +499,6 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  fetchDomains ({ dispatch }) {
-    return dispatch('domains/getAll')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
   fetchProjects ({ dispatch }) {
     return dispatch('projects/getAll')
       .catch(err => {
@@ -823,7 +813,6 @@ const modules = {
   projects,
   members,
   cloudProfiles,
-  domains,
   shoots,
   infrastructureSecrets,
   journals
