@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { encodeBase64 } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('../../../lib/kubernetes-config').load()
@@ -83,6 +83,7 @@ const shootList = [
   getShoot({
     name: 'fooShoot',
     namespace: 'garden-foo',
+    project: 'foo',
     createdBy: 'fooCreator',
     purpose: 'fooPurpose',
     bindingName: 'fooSecretName'
@@ -90,6 +91,7 @@ const shootList = [
   getShoot({
     name: 'barShoot',
     namespace: 'garden-foo',
+    project: 'foo',
     createdBy: 'barCreator',
     purpose: 'barPurpose',
     bindingName: 'barSecretName'
@@ -97,6 +99,7 @@ const shootList = [
   getShoot({
     name: 'dummyShoot',
     namespace: 'garden-foo',
+    project: 'foo',
     createdBy: 'fooCreator',
     purpose: 'fooPurpose',
     bindingName: 'barSecretName'
@@ -370,6 +373,7 @@ function getProjectNamespace (namespace) {
 function getShoot ({
   namespace,
   name,
+  project,
   createdBy,
   purpose = 'foo-purpose',
   kind = 'fooInfra',
@@ -399,9 +403,11 @@ function getShoot ({
     },
     status: {}
   }
-
   if (createdBy) {
     shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
+  }
+  if (project) {
+    shoot.status.technicalID = `shoot--${project}--${name}`
   }
   return shoot
 }
@@ -515,7 +521,6 @@ const stub = {
   }) {
     const seedServerURL = 'https://seed.foo.bar:8443'
     const technicalID = `shoot--${project}--${name}`
-    const projectResource = readProject(namespace)
 
     const shootResult = getShoot({ name, project, kind, region, seed: seedName })
     shootResult.status.technicalID = `shoot--${project}--${name}`
@@ -806,12 +811,39 @@ const stub = {
         })
     ]
   },
-  getTerminalConfig ({ bearer }) {
+  getTerminalConfig ({ bearer, namespace, shootName, target }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
+    if (target === 'shoot') {
+      const server = `https://${shootName}.cluster.foo.bar`
+      getKubeconfigSecret(scope, {
+        namespace,
+        name: `${shootName}.kubeconfig`,
+        server
+      })
+      nock(server)
+        .get('/api/v1/nodes')
+        .reply(200, {
+          items: [{
+            metadata: {
+              name: 'nodename',
+              creationTimestamp: '2020-01-01T20:01:01Z',
+              labels: {
+                'kubernetes.io/hostname': 'hostname'
+              }
+            },
+            status: {
+              conditions: [{
+                type: 'Ready',
+                status: 'True'
+              }]
+            }
+          }]
+        })
+    }
     return scope
   },
-  createTerminal ({ bearer, username, namespace, target, seedName }) {
+  createTerminal ({ bearer, username, namespace, target, shootName, seedName }) {
     const terminal = {
       metadata: {},
       spec: {},
@@ -819,14 +851,44 @@ const stub = {
     }
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    scope
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
-      .reply(404)
-    getKubeconfigSecret(scope, {
-      namespace: 'garden',
-      name: `seedsecret-${seedName}`,
-      server: `https://${seedName}:8443`
-    })
+    if (target === 'garden') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .reply(404)
+    } else {
+      const shootResource = _.find(shootList, ['metadata.name', shootName])
+      seedName = getSeedNameFromShoot(shootResource)
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${shootName}`)
+        .reply(200, shootResource)
+    }
+    if (target === 'cp') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .reply(200, {
+          metadata: {
+            name: seedName,
+            namespace: 'garden'
+          },
+          spec: {
+            seedName: 'soil-infra1'
+          }
+        })
+    }
+    if (target === 'shoot') {
+      const server = `https://${shootName}.cluster.foo.bar`
+      getKubeconfigSecret(scope, {
+        namespace,
+        name: `${shootName}.kubeconfig`,
+        server
+      })
+    } else {
+      getKubeconfigSecret(scope, {
+        namespace: 'garden',
+        name: `seedsecret-${seedName}`,
+        server: `https://${seedName}:8443`
+      })
+    }
     scope
       .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
       .query(({ labelSelector }) => {

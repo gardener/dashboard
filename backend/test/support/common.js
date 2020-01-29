@@ -17,12 +17,14 @@
 'use strict'
 const _ = require('lodash')
 const { EventEmitter } = require('events')
+const fnv = require('fnv-plus')
 const { _cache: cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
   const seed = {
+    kind: 'Seed',
     metadata: {
       name,
       labels
@@ -80,17 +82,9 @@ function getCloudProfile (cloudProfileName, kind, seedSelector = {}) {
   }
 }
 
-function getDomain (name, provider, domain) {
-  return {
-    metadata: {
-      name,
-      annotations: {
-        'dns.garden.sapcloud.io/domain': domain,
-        'dns.garden.sapcloud.io/provider': provider
-      }
-    },
-    data: {}
-  }
+function getKubeApiServer (namespace, name, ingressDomain) {
+  const hash = fnv.hash(`${name}.${namespace}`, 32).str()
+  return `k-${hash}.${ingressDomain}`
 }
 
 function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1', kind: 'Secret' }, clusterLifetimeDays = 14, cpu = '200' }) {
@@ -117,18 +111,13 @@ const cloudProfileList = [
 ]
 
 const seedList = [
+  getSeed('soil-infra1', 'foo-east', 'infra1', true, false),
   getSeed('infra1-seed', 'foo-east', 'infra1'),
   getSeed('infra1-seed2', 'foo-west', 'infra1'),
   getSeed('infra3-seed', 'foo-europe', 'infra3'),
   getSeed('infra3-seed-with-selector', 'foo-europe', 'infra3', false, true, { foo: 'bar' }),
   getSeed('infra3-seed-protected', 'foo-europe', 'infra3', true),
   getSeed('infra3-seed-invisible', 'foo-europe', 'infra3', false, false)
-
-]
-
-const domainList = [
-  getDomain('provider1-default-domain', 'provider1', 'domain1'),
-  getDomain('provider2-default-domain', 'provider2', 'domain2')
 ]
 
 const quotaList = [
@@ -148,10 +137,6 @@ const stub = {
   getQuotas (sandbox) {
     const getQuotasStub = sandbox.stub(cache, 'getQuotas')
     getQuotasStub.returns(quotaList)
-  },
-  getDomains (sandbox) {
-    const getDomainsStub = sandbox.stub(cache, 'getDomains')
-    getDomainsStub.returns(domainList)
   },
   getJournalCache (sandbox) {
     const getJournalCacheStub = sandbox.stub(cache, 'getJournalCache')
@@ -206,5 +191,6 @@ module.exports = {
   stub,
   createJournalCache,
   createReconnectorStub,
+  getKubeApiServer,
   getSeed
 }

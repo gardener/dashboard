@@ -153,12 +153,6 @@ export function getCloudprofiles () {
   return getResource(`/api/cloudprofiles`)
 }
 
-/* Domains */
-
-export function getDomains () {
-  return getResource(`/api/domains`)
-}
-
 /* Projects */
 
 export function getProjects () {

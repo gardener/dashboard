@@ -590,7 +590,7 @@ export default {
         region: this.region,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
-        loadBalancerClassNames: this.loadBalancerClassNames,
+        loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),
         partitionID: this.partitionID,
         projectID: this.projectID,
         firewallImage: this.firewallImage,
@@ -605,7 +605,7 @@ export default {
       region,
       floatingPoolName,
       loadBalancerProviderName,
-      loadBalancerClassNames,
+      loadBalancerClasses,
       partitionID,
       projectID,
       firewallImage,
@@ -617,7 +617,7 @@ export default {
       this.region = region
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
-      this.loadBalancerClassNames = loadBalancerClassNames
+      this.loadBalancerClassNames = map(loadBalancerClasses, 'name')
       this.partitionID = partitionID
       this.projectID = projectID
       this.firewallImage = firewallImage

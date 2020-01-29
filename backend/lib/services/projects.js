@@ -90,7 +90,7 @@ function toSubject (username) {
 async function validateDeletePreconditions ({ user, namespace }) {
   const shootList = await shoots.list({ user, namespace })
   if (!_.isEmpty(shootList.items)) {
-    throw new PreconditionFailed(`Only empty projects can be deleted`)
+    throw new PreconditionFailed('Only empty projects can be deleted')
   }
 }
 

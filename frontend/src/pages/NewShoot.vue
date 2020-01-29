@@ -225,7 +225,7 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames,
+        loadBalancerClasses,
         partitionID,
         projectID,
         firewallImage,
@@ -246,8 +246,8 @@ export default {
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
       }
-      if (!isEmpty(loadBalancerClassNames)) {
-        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+      if (!isEmpty(loadBalancerClasses)) {
+        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
       }
       if (!isEmpty(partitionID)) {
         set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
@@ -342,7 +342,7 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
-      const loadBalancerClassNames = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      const loadBalancerClasses = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
 
       const partitionID = get(shootResource, 'spec.provider.infrastructureConfig.partitionID')
       const projectID = get(shootResource, 'spec.provider.infrastructureConfig.projectID')
@@ -357,7 +357,7 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames,
+        loadBalancerClasses,
         partitionID,
         projectID,
         firewallImage,

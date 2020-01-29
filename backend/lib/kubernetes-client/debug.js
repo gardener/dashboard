@@ -38,8 +38,7 @@ function afterResponse (response) {
 }
 
 function beforeRequest (options) {
-  const { href, method, headers, body, key, cert } = options
-  const uri = new URL(href)
+  const { url, method, headers, body, key, cert } = options
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = uuidv1()
   }
@@ -50,7 +49,7 @@ function beforeRequest (options) {
 
   const [schema, value] = split(headers.authorization, ' ') || []
   switch (schema) {
-    case 'Bearer':
+    case 'Bearer': {
       const payload = jwt.decode(value)
       if (payload) {
         if (payload.email) {
@@ -65,10 +64,12 @@ function beforeRequest (options) {
         user.id = '"redacted"'
       }
       break
-    case 'Basic':
+    }
+    case 'Basic': {
       user.type = 'user'
       user.id = first(split(decodeBase64(value), ':'))
       break
+    }
   }
 
   if (key && cert) {
@@ -80,7 +81,7 @@ function beforeRequest (options) {
   }
 
   logger.request({
-    uri,
+    url,
     method,
     user: user.id ? user : undefined,
     headers: clone(headers),

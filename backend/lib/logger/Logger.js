@@ -31,10 +31,18 @@ class Logger {
     this.logLevel = LEVELS[logLevel] || 3
     this.logHttpRequestBody = logHttpRequestBody === true
     this.silent = /^test/.test(process.env.NODE_ENV)
+    this.console = console
   }
+
   isDisabled (level) {
     return this.silent || level < this.logLevel
   }
+
+  get ts () {
+    const ts = new Date().toISOString().replace(/T/, ' ').replace(/Z/, '')
+    return chalk.whiteBright(ts)
+  }
+
   get stream () {
     const logger = this
     return {
@@ -45,61 +53,70 @@ class Logger {
       }
     }
   }
-  request ({ id, uri, method, httpVersion = '1.1', user, headers, body }) {
+
+  request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
     if (!this.isDisabled(LEVELS.trace + 1)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
-      const host = headers.host || uri.host || '-'
-      const path = uri.path || (uri.pathname + uri.search)
+      const host = headers.host || url.host || '-'
+      const path = url.path || (url.pathname + url.search)
       id = id || headers['x-request-id']
       let msg = `${method} ${path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
       if (this.logHttpRequestBody && body) {
         msg += ' ' + body.toString('utf8')
       }
-      console.log(chalk.black.bgGreen('req ') + ': ' + msg)
+      this.console.log(this.ts + ' ' + chalk.black.bgGreen('req') + '  : ' + msg)
     }
   }
+
   response ({ id, statusCode, statusMessage = '', httpVersion = '1.1', headers, body }) {
     if (!this.isDisabled(LEVELS.trace)) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (body && statusCode >= 300) {
         msg += ' ' + body.toString('utf8')
       }
-      console.log(chalk.black.bgBlue('res ') + ': ' + msg)
+      this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)
     }
   }
+
   http (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      console.log(chalk.magenta('http') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.magenta('http') + ' : ' + msg, ...args)
     }
   }
+
   log (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      console.log(chalk.whiteBright('log') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.whiteBright('log') + '  : ' + msg, ...args)
     }
   }
+
   trace (msg, ...args) {
     if (!this.isDisabled(LEVELS.trace)) {
-      console.log(chalk.cyan('trace') + ': ' + msg, ...args)
+      this.console.log(this.ts + ' ' + chalk.cyan('trace') + ': ' + msg, ...args)
     }
   }
+
   debug (msg, ...args) {
     if (!this.isDisabled(LEVELS.debug)) {
-      console.debug(chalk.blue('debug') + ': ' + msg, ...args)
+      this.console.debug(this.ts + ' ' + chalk.blue('debug') + ': ' + msg, ...args)
     }
   }
+
   info (msg, ...args) {
     if (!this.isDisabled(LEVELS.info)) {
-      console.info(chalk.green('info') + ': ' + msg, ...args)
+      this.console.info(this.ts + ' ' + chalk.green('info') + ' : ' + msg, ...args)
     }
   }
+
   warn (msg, ...args) {
     if (!this.isDisabled(LEVELS.warn)) {
-      console.warn(chalk.yellow('warn') + ': ' + msg, ...args)
+      this.console.warn(this.ts + ' ' + chalk.yellow('warn') + ' : ' + msg, ...args)
     }
   }
+
   error (msg, ...args) {
     if (!this.isDisabled(LEVELS.error)) {
-      console.error(chalk.red('error') + ': ' + msg, ...args)
+      this.console.error(this.ts + ' ' + chalk.red('error') + ': ' + msg, ...args)
     }
   }
 }

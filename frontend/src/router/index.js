@@ -535,14 +535,6 @@ export default function createRouter ({ store, userManager }) {
     return store.dispatch('fetchCloudProfiles')
   }
 
-  function ensureDomainsLoaded () {
-    const domainList = store.getters.domainList
-    if (domainList && domainList.length) {
-      return Promise.resolve()
-    }
-    return store.dispatch('fetchDomains')
-  }
-
   function ensureDataLoaded (to, from, next) {
     const meta = to.meta || {}
     if (meta.public) {
@@ -555,7 +547,6 @@ export default function createRouter ({ store, userManager }) {
       .all([
         ensureCloudProfilesLoaded(),
         ensureProjectsLoaded(),
-        ensureDomainsLoaded(),
         store.dispatch('unsubscribeComments')
       ])
       .then(() => {
