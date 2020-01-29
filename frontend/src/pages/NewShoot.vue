@@ -225,7 +225,12 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames
+        loadBalancerClassNames,
+        partitionID,
+        projectID,
+        firewallImage,
+        firewallSize,
+        firewallNetworks
       } = this.$refs.infrastructureDetails.getInfrastructureData()
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
@@ -243,6 +248,21 @@ export default {
       }
       if (!isEmpty(loadBalancerClassNames)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+      }
+      if (!isEmpty(partitionID)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+      }
+      if (!isEmpty(projectID)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
+      }
+      if (!isEmpty(firewallImage)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+      }
+      if (!isEmpty(firewallSize)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
+      }
+      if (!isEmpty(firewallNetworks)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -323,6 +343,13 @@ export default {
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
       const loadBalancerClassNames = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+
+      const partitionID = get(shootResource, 'spec.provider.infrastructureConfig.partitionID')
+      const projectID = get(shootResource, 'spec.provider.infrastructureConfig.projectID')
+      const firewallImage = get(shootResource, 'spec.provider.infrastructureConfig.firewall.image')
+      const firewallSize = get(shootResource, 'spec.provider.infrastructureConfig.firewall.size')
+      const firewallNetworks = get(shootResource, 'spec.provider.infrastructureConfig.firewall.networks')
+
       this.$refs.infrastructureDetails.setInfrastructureData({
         infrastructureKind,
         cloudProfileName,
@@ -330,7 +357,12 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClassNames
+        loadBalancerClassNames,
+        partitionID,
+        projectID,
+        firewallImage,
+        firewallSize,
+        firewallNetworks
       })
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')

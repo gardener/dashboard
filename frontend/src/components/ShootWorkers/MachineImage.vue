@@ -114,7 +114,6 @@ export default {
     },
     hintColor () {
       if (this.machineImage.needsLicense || (this.updateOSMaintenance && this.selectedImageIsNotLatest)) {
-        console.log('orange');
         return 'orange'
       }
       return 'default'

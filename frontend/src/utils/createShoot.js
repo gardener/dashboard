@@ -22,13 +22,14 @@ import compact from 'lodash/compact'
 import find from 'lodash/find'
 import sample from 'lodash/sample'
 import includes from 'lodash/includes'
+import store from '../store'
 
 const workerCIDR = '10.250.0.0/16'
 
 export function getSpecTemplate (infrastructureKind) {
   switch (infrastructureKind) {
     case 'metal':
-      return { // TODO: nodes CIDR?
+      return { // TODO: Remove when metal extension sets this config via mutating webhook
         provider: getProviderTemplate(infrastructureKind),
         networking: {
           type: 'calico',
@@ -42,7 +43,18 @@ export function getSpecTemplate (infrastructureKind) {
               autoDetectionMethod: 'interface=lo',
               mode: 'Always',
               pool: 'vxlan'
+            },
+            typha: {
+              enabled: true
             }
+          }
+        },
+        kubernetes: {
+          kubeControllerManager: {
+            nodeCIDRMaskSize: 23
+          },
+          kubelet: {
+            maxPods: 510
           }
         }
       }
@@ -142,38 +154,17 @@ function getProviderTemplate (infrastructureKind) {
           kind: 'ControlPlaneConfig'
         }
       }
-    // FIXME adopt to our spec
     case 'metal':
       return {
         type: 'metal',
         infrastructureConfig: {
           apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'InfrastructureConfig',
-          firewall: {
-            image: 'firewall-1',
-            networks: [
-              'internet-' // TODO
-            ],
-            size: 'c1-xlarge-x86'
-          },
-          partitionID: '', // TODO
-          projectID: '' // TODO
+          kind: 'InfrastructureConfig'
         },
-        'controlPlaneConfig': {
+        controlPlaneConfig: {
           apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'ControlPlaneConfig',
-          iamconfig: {
-            groupConfig: {
-              namespaceMaxLength: 20
-            },
-            idmConfig: {
-              idmtype: 'UX'
-            },
-            issuerConfig: {
-              clientId: 'auth-go-cli',
-              url: 'https://' // TODO
-            }
-          }
+          iamconfig: store.getters.iamconfigByCloudProfileName('metal')
         }
       }
     case 'vsphere':

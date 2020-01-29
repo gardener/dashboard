@@ -276,6 +276,29 @@ const actions = {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
     }
 
+    // Partion IDs equal zones for metal infrastructure
+    const partitionIDs = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const partitionID = head(partitionIDs)
+    if (!isEmpty(partitionID)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+    }
+    const firewallImages = rootGetters.firewallImagesByCloudProfileName(cloudProfileName)
+    const firewallImage = head(firewallImages)
+    if (!isEmpty(firewallImage)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+    }
+    // Firewall Sizes equals to list of image types for this zone
+    const firewallSizes = map(rootGetters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [ partitionID ] }), 'name')
+    const firewallSize = head(firewallSizes)
+    if (!isEmpty(firewallSize)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
+    }
+    const allFirewallNetworks = rootGetters.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
+    const firewallNetworks = find(allFirewallNetworks, { key: 'internet' })
+    if (!isEmpty(firewallNetworks)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+    }
+
     const name = shortRandomString(10)
     set(shootResource, 'metadata.name', name)
 

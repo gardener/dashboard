@@ -96,6 +96,70 @@ limitations under the License.
           ></v-select>
         </v-flex>
       </template>
+      <template v-else-if="infrastructureKind === 'metal'">
+        <v-flex class="regularInput">
+          <v-text-field
+            color="cyan darken-2"
+            label="Project ID"
+            v-model="projectID"
+            :error-messages="getErrorMessages('projectID')"
+            @input="onInputProjectID"
+            @blur="$v.projectID.$touch()"
+            hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
+            persistent-hint
+            ></v-text-field>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Partition ID"
+            :items="partitionIDs"
+            v-model="partitionID"
+            :error-messages="getErrorMessages('partitionID')"
+            @input="onInputPartitionID"
+            @blur="$v.partitionID.$touch()"
+            hint="Partion ID equals zone on other infrastructures"
+            persistent-hint
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Image"
+            :items="firewallImages"
+            v-model="firewallImage"
+            :error-messages="getErrorMessages('firewallImage')"
+            @input="onInputFirewallImage"
+            @blur="$v.firewallImage.$touch()"
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Size"
+            :items="firewallSizes"
+            v-model="firewallSize"
+            :error-messages="getErrorMessages('firewallSize')"
+            @input="onInputFirewallSize"
+            @blur="$v.firewallImage.$touch()"
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Networks"
+            :items="allFirewallNetworks"
+            v-model="firewallNetworks"
+            :error-messages="getErrorMessages('firewallNetworks')"
+            @input="onInputFirewallNetworks"
+            @blur="$v.firewallNetworks.$touch()"
+            chips
+            small-chips
+            deletable-chips
+            multiple
+          ></v-select>
+        </v-flex>
+      </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
         <v-flex class="regularInput">
           <v-select
@@ -146,6 +210,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
 import intersection from 'lodash/intersection'
 import isEqual from 'lodash/isEqual'
+import find from 'lodash/find'
 import { mapGetters, mapState } from 'vuex'
 
 const validationErrors = {
@@ -164,6 +229,21 @@ const validationErrors = {
   loadBalancerClassNames: {
     required: 'Load Balancer Classes required',
     includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`
+  },
+  partitionID: {
+    required: 'Partition ID is required'
+  },
+  projectID: {
+    required: 'Project ID is required'
+  },
+  firewallImage: {
+    required: 'Firewall Image is required'
+  },
+  firewallSize: {
+    required: 'Firewall Size is required'
+  },
+  firewallNetworks: {
+    required: 'Firewall Networks required'
   }
 }
 
@@ -189,6 +269,31 @@ const validations = {
       return this.infrastructureKind === 'vsphere'
     }),
     includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames')
+  },
+  partitionID: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallImage: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallSize: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallNetworks: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  projectID: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
   }
 }
 
@@ -214,6 +319,11 @@ export default {
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
+      partitionID: undefined,
+      firewallImage: undefined,
+      firewallSize: undefined,
+      firewallNetworks: undefined,
+      projectID: undefined,
       valid: false,
       cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
@@ -262,7 +372,11 @@ export default {
       'loadBalancerProviderNamesByCloudProfileName',
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileName'
+      'floatingPoolNamesByCloudProfileName',
+      'zonesByCloudProfileNameAndRegion',
+      'firewallImagesByCloudProfileName',
+      'firewallNetworksByCloudProfileNameAndPartitionId',
+      'machineTypesByCloudProfileNameAndRegionAndZones'
     ]),
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
@@ -327,6 +441,20 @@ export default {
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
     },
+    partitionIDs () {
+      // Partion IDs equal zones for metal infrastructure
+      return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+    },
+    firewallImages () {
+      return this.firewallImagesByCloudProfileName(this.cloudProfileName)
+    },
+    firewallSizes () {
+      // Firewall Sizes equals to list of image types for this zone
+      return map(this.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: [ this.partitionID ] }), 'name')
+    },
+    allFirewallNetworks () {
+      return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
+    },
     allLoadBalancerClasses () {
       const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
         return {
@@ -370,6 +498,8 @@ export default {
         this.loadBalancerClassNames = []
       }
       this.onInputLoadBalancerClassNames()
+      this.firewallImage = head(this.firewallImages)
+      this.onInputFirewallImage()
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -390,6 +520,8 @@ export default {
     },
     onInputRegion () {
       this.$v.secret.$touch()
+      this.partitionID = head(this.partitionIDs)
+      this.onInputPartitionID()
       this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
     },
@@ -405,6 +537,31 @@ export default {
       // sort loadBalancerClassNames in the same order as they are listed in the cloudProfile
       this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
       this.$v.loadBalancerClassNames.$touch()
+      this.validateInput()
+    },
+    onInputPartitionID () {
+      this.$v.partitionID.$touch()
+      this.firewallSize = head(this.firewallSizes)
+      const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
+      if (firewallNetwork) {
+        this.firewallNetworks = [firewallNetwork.value]
+      }
+      this.validateInput()
+    },
+    onInputProjectID () {
+      this.$v.projectID.$touch()
+      this.validateInput()
+    },
+    onInputFirewallImage () {
+      this.$v.firewallImage.$touch()
+      this.validateInput()
+    },
+    onInputFirewallSize () {
+      this.$v.firewallSize.$touch()
+      this.validateInput()
+    },
+    onInputFirewallNetworks () {
+      this.$v.firewallNetworks.$touch()
       this.validateInput()
     },
     onUpdateCloudProfileName () {
@@ -433,10 +590,27 @@ export default {
         region: this.region,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
-        loadBalancerClassNames: this.loadBalancerClassNames
+        loadBalancerClassNames: this.loadBalancerClassNames,
+        partitionID: this.partitionID,
+        projectID: this.projectID,
+        firewallImage: this.firewallImage,
+        firewallSize: this.firewallSize,
+        firewallNetworks: this.firewallNetworks
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, loadBalancerClassNames }) {
+    setInfrastructureData ({
+      infrastructureKind,
+      cloudProfileName,
+      secret,
+      region,
+      floatingPoolName,
+      loadBalancerProviderName,
+      loadBalancerClassNames,
+      partitionID,
+      projectID,
+      firewallImage,
+      firewallSize,
+      firewallNetworks }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
@@ -444,7 +618,11 @@ export default {
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
       this.loadBalancerClassNames = loadBalancerClassNames
-
+      this.partitionID = partitionID
+      this.projectID = projectID
+      this.firewallImage = firewallImage
+      this.firewallSize = firewallSize
+      this.firewallNetworks = firewallNetworks
       this.validateInput()
     },
     isAddNewSecret (item) {

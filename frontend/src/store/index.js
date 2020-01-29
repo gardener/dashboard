@@ -40,6 +40,7 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import toPairs from 'lodash/toPairs'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -337,6 +338,32 @@ const getters = {
       return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.floatingPools'), 'name'))
     }
   },
+  firewallImagesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.firewallImages')
+    }
+  },
+  firewallNetworksByCloudProfileNameAndPartitionId (state, getters) {
+    return ({ cloudProfileName, partitionID }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const networks = get(cloudProfile, ['data', 'providerConfig', 'firewallNetworks', partitionID])
+      return map(toPairs(networks), network => {
+        return {
+          key: network[0],
+          value: network[1],
+          text: `${network[0]} [${network[1]}]`
+        }
+      })
+    }
+  },
+  iamconfigByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.iamconfig')
+    }
+  },
+
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])

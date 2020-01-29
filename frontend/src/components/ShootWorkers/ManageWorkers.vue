@@ -65,7 +65,7 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { generateWorker } from '@/utils'
+import { generateWorker, isZonedCluster } from '@/utils'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import map from 'lodash/map'
@@ -98,7 +98,8 @@ export default {
   computed: {
     ...mapGetters([
       'machineTypesByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'zonesByCloudProfileNameAndRegion',
+      'cloudProfileByName'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -197,6 +198,8 @@ export default {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
+        const cloudProfile = this.cloudProfileByName(cloudProfileName)
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {
