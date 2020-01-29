@@ -546,17 +546,9 @@ describe('services', function () {
           disabled: false,
           gardenTerminalHostDisabled: false
         }
-        const listSecretsSpy = sandbox.spy(client.core.secrets, 'list')
         createConfigStub({ gardenTerminalHost, bootstrap })
         const bootstrapper = new Bootstrapper()
         await pEvent(bootstrapper, 'empty')
-        expect(listSecretsSpy).to.be.calledOnce
-        expect(listSecretsSpy.firstCall.args).to.eql([
-          gardenTerminalHost.secretRef.namespace,
-          {
-            labelSelector: 'runtime=gardenTerminalHost'
-          }
-        ])
         const stats = bootstrapper.getStats()
         expect(stats.total).to.equal(1)
         expect(stats.successRate).to.equal(1)
