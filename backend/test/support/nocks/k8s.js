@@ -899,14 +899,7 @@ const stub = {
   getProjects ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    return [
-      scope,
-      nockWithAuthorization(auth.bearer)
-        .get('/apis/core.gardener.cloud/v1beta1/projects')
-        .reply(200, {
-          items: projectList
-        })
-    ]
+    return scope
   },
   getTerminalConfig ({ bearer, namespace, shootName, target }) {
     const scope = nockWithAuthorization(bearer)
