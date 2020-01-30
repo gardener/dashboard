@@ -24,6 +24,7 @@ const {
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
+const { getProjectsList } = require('../cache')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
@@ -95,13 +96,8 @@ async function validateDeletePreconditions ({ user, namespace }) {
 }
 
 exports.list = async function ({ user, qs = {} }) {
-  const [
-    projects,
-    isAdmin
-  ] = await Promise.all([
-    dashboardClient['core.gardener.cloud'].projects.list(),
-    authorization.isAdmin(user)
-  ])
+  const projects = getProjectsList()
+  const isAdmin = await authorization.isAdmin(user)
 
   const isMemberOf = project => _
     .chain(project)
@@ -121,7 +117,6 @@ exports.list = async function ({ user, qs = {} }) {
     .value()
   return _
     .chain(projects)
-    .get('items')
     .filter(project => {
       if (!isAdmin && !isMemberOf(project)) {
         return false

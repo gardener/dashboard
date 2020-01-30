@@ -20,6 +20,7 @@ const cloudProfiles = []
 const seeds = []
 const quotas = []
 const journals = require('./journals')()
+const projects = {}
 
 const cache = {
   getCloudProfiles () {
@@ -33,6 +34,9 @@ const cache = {
   },
   getJournalCache () {
     return journals
+  },
+  getProjectsCache () {
+    return projects
   }
 }
 
@@ -69,5 +73,12 @@ module.exports = {
   },
   getJournalCache () {
     return cache.getJournalCache()
+  },
+  getProjectsCache () {
+    return cache.getProjectsCache()
+  },
+  getProjectsList () {
+    const projectsCache = cache.getProjectsCache()
+    return _.values(projectsCache)
   }
 }
