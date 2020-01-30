@@ -543,7 +543,7 @@ export default {
       this.firewallSize = head(this.firewallSizes)
       const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
       if (firewallNetwork) {
-        this.firewallNetworks =  [firewallNetwork.value]
+        this.firewallNetworks = [firewallNetwork.value]
       } else {
         this.firewallNetworks = undefined
       }
