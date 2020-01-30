@@ -18,9 +18,8 @@
 
 const { cacheResource } = require('./common')
 const { getSeeds } = require('../cache')
-const logger = require('../logger')
 const { registerHandler } = require('./common')
-const { bootstrapResource } = require('../services/terminals/terminalBootstrap')
+const { bootstrapper } = require('../services/terminals')
 const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
@@ -28,12 +27,9 @@ const {
 module.exports = io => {
   const emitter = dashboardClient['core.gardener.cloud'].seeds.watchList()
   cacheResource(emitter, getSeeds(), 'metadata.name')
-  registerHandler(emitter, async function (event) {
-    if (event.type === 'ERROR') {
-      logger.error('seed event error', event.object)
-    } else if (event.type === 'ADDED') {
-      const seed = event.object
-      bootstrapResource(seed)
+  registerHandler(emitter, ({ type, object }) => {
+    if (type === 'ADDED') {
+      bootstrapper.bootstrapResource(object)
     }
   })
 }

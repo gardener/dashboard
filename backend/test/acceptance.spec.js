@@ -48,10 +48,6 @@ describe('acceptance', function () {
       require('./acceptance/api.cloudprofiles.spec.js')(context)
     })
 
-    describe('domains', function () {
-      require('./acceptance/api.domains.spec.js')(context)
-    })
-
     describe('info', function () {
       require('./acceptance/api.info.spec.js')(context)
     })
@@ -99,5 +95,9 @@ describe('acceptance', function () {
 
   describe('webhook', function () {
     require('./acceptance/webhook.spec.js')(context)
+  })
+
+  describe('io', function () {
+    require('./acceptance/io.spec.js')(context)
   })
 })

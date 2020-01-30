@@ -23,7 +23,6 @@ module.exports = {
   '/info': require('./info'),
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
-  '/domains': require('./domains'),
   '/shoots': require('./shoots'),
   '/namespaces': require('./namespaces'),
   '/namespaces/:namespace/shoots': require('./shoots'),

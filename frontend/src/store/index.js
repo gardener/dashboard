@@ -44,7 +44,6 @@ import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
-import domains from './modules/domains'
 import projects from './modules/projects'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
@@ -133,9 +132,6 @@ const getters = {
   apiServerUrl (state) {
     return get(state.cfg, 'apiServerUrl', window.location.origin)
   },
-  domainList (state) {
-    return state.domains.all
-  },
   cloudProfileList (state) {
     return state.cloudProfiles.all
   },
@@ -165,6 +161,9 @@ const getters = {
     }
 
     return ({ type, cloudProfileName, region, zones }) => {
+      if (!cloudProfileName) {
+        return []
+      }
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const items = cloudProfile.data[type]
       if (!region || !zones) {
@@ -283,7 +282,7 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud'], getters.cloudProviderKindList)
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'vsphere'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -314,6 +313,18 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
+    }
+  },
+  loadBalancerClassNamesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const loadBalancerClasses = getters.loadBalancerClassesByCloudProfileName(cloudProfileName)
+      return uniq(map(loadBalancerClasses, 'name'))
+    }
+  },
+  loadBalancerClassesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
     }
   },
   floatingPoolNamesByCloudProfileName (state, getters) {
@@ -484,12 +495,6 @@ const actions = {
   },
   fetchCloudProfiles ({ dispatch }) {
     return dispatch('cloudProfiles/getAll')
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  fetchDomains ({ dispatch }) {
-    return dispatch('domains/getAll')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -808,7 +813,6 @@ const modules = {
   projects,
   members,
   cloudProfiles,
-  domains,
   shoots,
   infrastructureSecrets,
   journals

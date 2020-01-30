@@ -217,7 +217,15 @@ export default {
     shootResourceFromUIComponents () {
       const shootResource = cloneDeep(this.newShootResource)
 
-      const { infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName } = this.$refs.infrastructureDetails.getInfrastructureData()
+      const {
+        infrastructureKind,
+        cloudProfileName,
+        region,
+        secret,
+        floatingPoolName,
+        loadBalancerProviderName,
+        loadBalancerClasses
+      } = this.$refs.infrastructureDetails.getInfrastructureData()
       set(shootResource, 'spec.cloudProfileName', cloudProfileName)
       set(shootResource, 'spec.region', region)
       set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
@@ -231,6 +239,9 @@ export default {
       }
       if (!isEmpty(loadBalancerProviderName)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
+      }
+      if (!isEmpty(loadBalancerClasses)) {
+        set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -310,7 +321,16 @@ export default {
 
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
-      this.$refs.infrastructureDetails.setInfrastructureData({ infrastructureKind, cloudProfileName, region, secret, floatingPoolName, loadBalancerProviderName })
+      const loadBalancerClasses = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+      this.$refs.infrastructureDetails.setInfrastructureData({
+        infrastructureKind,
+        cloudProfileName,
+        region,
+        secret,
+        floatingPoolName,
+        loadBalancerProviderName,
+        loadBalancerClasses
+      })
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)

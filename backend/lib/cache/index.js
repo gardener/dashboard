@@ -18,7 +18,6 @@ const _ = require('lodash')
 
 const cloudProfiles = []
 const seeds = []
-const domains = []
 const quotas = []
 const journals = require('./journals')()
 
@@ -31,9 +30,6 @@ const cache = {
   },
   getSeeds () {
     return seeds
-  },
-  getDomains () {
-    return domains
   },
   getJournalCache () {
     return journals
@@ -70,9 +66,6 @@ module.exports = {
       return !seedProtected && !seedInVisible
     }
     return _.filter(cache.getSeeds(), predicate)
-  },
-  getDomains () {
-    return cache.getDomains()
   },
   getJournalCache () {
     return cache.getJournalCache()

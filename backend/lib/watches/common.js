@@ -17,7 +17,7 @@
 'use strict'
 
 const logger = require('../logger')
-const { findIndex, set, remove, get } = require('lodash')
+const { findIndex, set, remove, pick } = require('lodash')
 
 const events = [
   'ADDED',
@@ -43,7 +43,7 @@ function registerHandler (emitter, handler) {
     logger.debug('watch %s reconnect attempt %d after %d', emitter.resourceName, n, delay)
   })
   emitter.on('error', err => {
-    logger.error('watch error', err, emitter.resourceName)
+    logger.error('watch %s error occurred', emitter.resourceName, err)
   })
   emitter.on('event', (event) => {
     const type = event.type
@@ -59,26 +59,24 @@ function registerHandler (emitter, handler) {
 }
 exports.registerHandler = registerHandler
 
-function cacheResource (resourceEmitter, cache, keyPath) {
-  resourceEmitter.on('connect', () => {
-    remove(cache, () => true)
-  })
-  registerHandler(resourceEmitter, event => {
-    if (event.type === 'ADDED' || event.type === 'MODIFIED') {
-      const key = get(event.object, keyPath)
-      const index = findIndex(cache, [keyPath, key])
-      if (index !== -1) {
-        set(cache, index, event.object)
-      } else {
-        cache.push(event.object)
-      }
-    } else if (event.type === 'DELETED') {
-      const key = get(event.object, keyPath)
-      const predicate = item => get(item, keyPath) === key
-      const index = findIndex(cache, predicate)
-      if (index !== -1) {
-        cache.splice(index, 1)
-      }
+function cacheResource (resourceEmitter, cache, paths) {
+  resourceEmitter.on('connect', () => remove(cache, () => true))
+  registerHandler(resourceEmitter, ({ type, object }) => {
+    const index = findIndex(cache, pick(object, paths))
+    switch (type) {
+      case 'ADDED':
+      case 'MODIFIED':
+        if (index !== -1) {
+          set(cache, index, object)
+        } else {
+          cache.push(object)
+        }
+        break
+      case 'DELETED':
+        if (index !== -1) {
+          cache.splice(index, 1)
+        }
+        break
     }
   })
 }

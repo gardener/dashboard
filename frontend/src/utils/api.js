@@ -118,7 +118,6 @@ export function updateShootVersion ({ namespace, name, data }) {
 }
 
 export function updateShootMaintenance ({ namespace, name, data }) {
-  console.log(namespace, name, data)
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/maintenance`, data)
@@ -156,12 +155,6 @@ export function getShootSpec () {
 
 export function getCloudprofiles () {
   return getResource(`/api/cloudprofiles`)
-}
-
-/* Domains */
-
-export function getDomains () {
-  return getResource(`/api/domains`)
 }
 
 /* Projects */
