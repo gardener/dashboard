@@ -908,9 +908,9 @@ const actions = {
     commit('UNSET_FOCUSED_ELEMENT_ID', id)
     return state.focusedElementId
   },
-  setSplitpaneResize ({ commit }, value) {
+  setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SPLITPANE_RESIZE', value)
-    return state.splizpaneResize
+    return state.splitpaneResize
   }
 }
 

@@ -15,9 +15,15 @@ limitations under the License.
  -->
 
 <template>
-  <splitpanes :horizontal="splitpaneTreeItem.horizontal" @resize="resize" @resized="resize" @pane-add="resize" @pane-remove="resize">
-    <pane v-for="item in splitpaneTreeItem.items" :key="item.uuid" min-size="2">
-      <g-splitpane v-if="item.splitpane" :splitpaneTreeItem="item">
+  <splitpanes
+    :horizontal="splitpaneItemTree.horizontal"
+    @resize="resize"
+    @resized="resize"
+    @pane-add="resize"
+    @pane-remove="resize"
+  >
+    <pane v-for="item in splitpaneItemTree.items" :key="item.uuid" min-size="2">
+      <g-splitpane v-if="item.splitpane" :splitpaneItemTree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
@@ -46,7 +52,7 @@ export default {
     }
   },
   props: {
-    splitpaneTreeItem: {
+    splitpaneItemTree: {
       type: Object,
       default: undefined
     }

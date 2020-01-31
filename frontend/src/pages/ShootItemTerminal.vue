@@ -17,16 +17,19 @@ limitations under the License.
 <template>
   <div
     class="g-droppable-listener"
-    @dropped="droppedAt"
     style="height:100%; width:100%; background-color: #333"
     v-shortkey.once="{bottom: ['ctrl', 'shift', 'h'], right: ['ctrl', 'shift', 'v']}"
+    @dropped="droppedAt"
     @shortkey="addFromShortkey"
   >
-    <g-splitpane v-if="treeItem" :splitpaneTreeItem="treeItem">
+    <g-splitpane
+      v-if="itemTree"
+      :splitpaneItemTree="itemTree"
+      ref="splitpane"
+    >
       <template v-slot="{item}">
         <g-terminal
           :uuid="item.uuid"
-          :index="item.index"
           :data="item.data"
           @terminated="onTermination(item)"
           @split="orientation => onSplit(item, orientation)"
@@ -41,16 +44,9 @@ limitations under the License.
 
 import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
-import SymbolTree from 'symbol-tree'
 import get from 'lodash/get'
-import isEmpty from 'lodash/isEmpty'
-import keyBy from 'lodash/keyBy'
-import keys from 'lodash/keys'
 import map from 'lodash/map'
-import omit from 'lodash/omit'
 import pick from 'lodash/pick'
-import size from 'lodash/size'
-import values from 'lodash/values'
 import cloneDeep from 'lodash/cloneDeep'
 import difference from 'lodash/difference'
 import GSplitpane from '@/components/GSplitpane'
@@ -59,112 +55,15 @@ import TargetSelectionDialog from '@/dialogs/TargetSelectionDialog'
 import { TargetEnum } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { listTerminalSessions } from '@/utils/api'
+import { GSymbolTree, TreeItem } from '@/lib/g-symbol-tree'
 
 import 'splitpanes/dist/splitpanes.css'
 
 Vue.use(require('vue-shortkey'))
 
-const uuidv4 = require('uuid/v4')
-
-class TreeItem {
-  constructor ({ uuid = uuidv4(), data, index }) {
-    this.uuid = uuid
-    this.data = data
-    this.index = index
-  }
-}
-
-class SplitpaneTreeItem {
-  constructor ({ horizontal }) {
-    this.horizontal = horizontal
-    this.splitpane = true
-  }
-}
-
-function toTree (tree, parent) {
-  if (!tree.hasChildren(parent)) {
-    return undefined
-  }
-  const items = []
-  for (const child of tree.childrenIterator(parent)) {
-    const clonedChild = cloneDeep(child)
-    if (child instanceof SplitpaneTreeItem) {
-      clonedChild.items = toTree(tree, child)
-    }
-    items.push(clonedChild)
-  }
-  return items
-}
-
-function toSymbolTree ({ tree, parent, items, itemMap }) {
-  if (items) {
-    items.forEach(item => {
-      if (item.items) {
-        const splitpaneTreeItem = new SplitpaneTreeItem({ horizontal: item.horizontal })
-        tree.appendChild(parent, splitpaneTreeItem)
-        toSymbolTree({ tree, parent: splitpaneTreeItem, items: item.items, itemMap: itemMap })
-      } else {
-        const treeItem = itemMap[item.uuid]
-        if (treeItem) {
-          tree.appendChild(parent, treeItem)
-        }
-      }
-    })
-  }
-}
-
-function omitTerminatedSessions (itemMap, terminals) {
-  const uuids = keys(itemMap)
+function terminatedSessionIds (uuids, terminals) {
   const terminalSessionIds = map(terminals, 'metadata.identifier')
-  const uuidsToRemove = difference(uuids, terminalSessionIds)
-  return omit(itemMap, uuidsToRemove)
-}
-
-function cleanTree ({ tree, root, item }) {
-  if (root !== item && tree.childrenCount(item) === 1) {
-    const onlyChild = tree.firstChild(item)
-    tree.remove(onlyChild)
-    tree.insertBefore(item, onlyChild)
-    tree.remove(item)
-    return onlyChild
-  }
-  for (const child of tree.childrenIterator(item)) {
-    cleanTree({ tree, root, item: child })
-  }
-
-  return item
-}
-
-function ensureSplitpaneOrientation ({ tree, horizontal, targetParent, targetItem }) {
-  if (targetParent.horizontal === horizontal) {
-    return
-  }
-  if (tree.childrenCount(targetParent) === 1) {
-    targetParent.horizontal = horizontal
-    return
-  }
-
-  // set new splitpane with desired orientation at the position of the targetItem and place target item under new splitpane
-  const splitpane = new SplitpaneTreeItem({ horizontal })
-  tree.insertBefore(targetItem, splitpane)
-  targetParent = splitpane
-
-  tree.remove(targetItem)
-  tree.prependChild(targetParent, targetItem)
-}
-
-function lastLeaf ({ tree, item }) {
-  if (!item) {
-    return
-  }
-  const lastChild = tree.lastChild(item)
-  if (!lastChild) {
-    return item
-  }
-  const leaf = lastLeaf({ tree, lastChild })
-  if (!leaf) {
-    return lastChild
-  }
+  return difference(uuids, terminalSessionIds)
 }
 
 export default {
@@ -175,10 +74,8 @@ export default {
   },
   data () {
     return {
-      tree: new SymbolTree(),
-      itemMap: {},
-      root: new SplitpaneTreeItem({ horizontal: false }),
-      treeItem: undefined
+      tree: new GSymbolTree(),
+      itemTree: undefined
     }
   },
   mixins: [shootItem],
@@ -198,84 +95,15 @@ export default {
     },
     storeKey () {
       const { name, namespace, target } = this.terminalCoordinates
-      let storeKey = ''
-      if (target) {
-        storeKey += target
-      }
-      storeKey += `--${namespace}`
-      if (name) {
-        storeKey += `--${name}`
-      }
-      return storeKey
+      return `${target}--${namespace}--${name}`
     }
   },
   methods: {
     ...mapActions([
       'setSplitpaneResize'
     ]),
-    droppedAt ({ detail: { 'mouseOverId': position, 'sourceElementDropzoneId': sourceId, 'mouseOverDropzoneId': targetId } }) {
-      this.moveTo({ sourceId, targetId, position })
-    },
-    moveTo ({ sourceId, targetId, position }) {
-      if (!targetId || !sourceId) {
-        return
-      }
-
-      const targetItem = this.itemMap[targetId]
-      const sourceItem = this.itemMap[sourceId]
-      if (!targetItem || !sourceItem) {
-        return
-      }
-
-      const fitRequired = true // in some cases the resize event is not fired by the splitpanes library so we need to trigger fit manually
-
-      const targetParent = this.tree.parent(targetItem)
-      this.tree.remove(sourceItem)
-      switch (position) {
-        case 'top': {
-          ensureSplitpaneOrientation({ tree: this.tree, horizontal: true, targetParent, targetItem })
-          this.tree.insertBefore(targetItem, sourceItem)
-          break
-        }
-        case 'bottom': {
-          ensureSplitpaneOrientation({ tree: this.tree, horizontal: true, targetParent, targetItem })
-          this.tree.insertAfter(targetItem, sourceItem)
-          break
-        }
-        case 'left': {
-          ensureSplitpaneOrientation({ tree: this.tree, horizontal: false, targetParent, targetItem })
-          this.tree.insertBefore(targetItem, sourceItem)
-          break
-        }
-        case 'right': {
-          ensureSplitpaneOrientation({ tree: this.tree, horizontal: false, targetParent, targetItem })
-          this.tree.insertAfter(targetItem, sourceItem)
-          break
-        }
-      }
-
-      this.update(fitRequired)
-    },
-    update (fitRequired = false) {
-      this.root = cleanTree({ tree: this.tree, root: this.root, item: this.root })
-
-      this.updateTreeItem(fitRequired)
-    },
-    remove ({ id }) {
-      const item = this.itemMap[id]
-      if (!item) {
-        return
-      }
-
-      this.tree.remove(item)
-      Vue.delete(this.itemMap, id)
-
-      this.update()
-    },
     updateTreeItem (fitRequired = false) {
-      const clonedRoot = cloneDeep(this.root)
-      clonedRoot.items = toTree(this.tree, this.root)
-      this.treeItem = clonedRoot
+      this.itemTree = this.tree.toItemTree()
 
       this.store()
 
@@ -295,10 +123,8 @@ export default {
         targetId = this.focusedElementId
       }
       if (!targetId) {
-        const leaf = lastLeaf({ tree: this.tree, item: this.root })
-        if (leaf !== this.root) {
-          targetId = get(leaf, 'uuid')
-        }
+        const lastChild = this.tree.lastChild(this.tree.root, true)
+        targetId = get(lastChild, 'uuid')
       }
 
       const data = cloneDeep(this.terminalCoordinates)
@@ -312,7 +138,7 @@ export default {
         }
 
         if (!target) {
-          if (isEmpty(this.itemMap)) {
+          if (this.tree.isEmpty()) {
             this.leavePage()
           }
           return
@@ -320,51 +146,74 @@ export default {
         data.target = target
       }
 
-      const index = size(this.itemMap) + 1
-      const item = new TreeItem({ data, index })
-      const sourceId = item.uuid
-
-      Vue.set(this.itemMap, sourceId, item)
-
+      const item = new TreeItem({ data })
       if (targetId) {
+        this.tree.appendChild(this.tree.root, item)
+        const sourceId = item.uuid
+
         this.moveTo({ sourceId, targetId, position })
       } else {
-        this.tree.appendChild(this.root, item)
+        this.tree.appendChild(this.tree.root, item)
         this.updateTreeItem()
       }
     },
+    droppedAt ({ detail: { 'mouseOverId': position, 'sourceElementDropzoneId': sourceId, 'mouseOverDropzoneId': targetId } }) {
+      this.moveTo({ sourceId, targetId, position })
+    },
+    moveTo ({ sourceId, targetId, position }) {
+      const moved = this.tree.moveTo({ sourceId, targetId, position })
+
+      const fitRequired = moved // in some cases the resize event is not fired by the splitpanes library so we need to trigger fit manually
+      this.updateTreeItem(fitRequired)
+    },
+    remove ({ id }) {
+      this.tree.removeWithId(id)
+
+      this.updateTreeItem()
+    },
     store () {
-      if (isEmpty(this.itemMap)) {
+      if (this.tree.isEmpty()) {
         this.$localStorage.removeItem(this.storeKey)
         return
       }
       this.$localStorage.setItem(this.storeKey, JSON.stringify({
-        treeItemJson: this.treeItem,
-        items: values(this.itemMap)
+        itemTree: this.itemTree
       }))
     },
     async load () {
-      let fromStore = this.$localStorage.getItem(this.storeKey)
-      if (fromStore) {
-        const { treeItemJson, items } = JSON.parse(fromStore)
-        const treeItems = map(items, item => new TreeItem({ ...item }))
+      await this.restoreSessions()
 
-        const itemMap = keyBy(treeItems, 'uuid')
+      this.updateTreeItem()
+    },
+    async restoreSessions () {
+      const fromStore = this.$localStorage.getItem(this.storeKey)
+      if (!fromStore) {
+        this.add()
+        return
+      }
 
-        const { namespace } = this.terminalCoordinates
-        const { data: terminals } = await listTerminalSessions({ namespace })
-        this.itemMap = omitTerminatedSessions(itemMap, terminals)
+      let itemTree
+      try {
+        const json = JSON.parse(fromStore)
+        itemTree = json.itemTree
+      } catch (err) {
+        // could not restore session
+      }
+      if (!itemTree) {
+        this.add()
+        return
+      }
 
-        if (isEmpty(this.itemMap)) { // nothing to restore
-          this.add()
-          return
-        }
-        this.tree = new SymbolTree()
-        this.root = new SplitpaneTreeItem({ horizontal: treeItemJson.horizontal })
-        toSymbolTree({ tree: this.tree, parent: this.root, items: treeItemJson.items, itemMap: this.itemMap })
+      const { namespace } = this.terminalCoordinates
+      const { data: terminals } = await listTerminalSessions({ namespace })
 
-        this.update()
-      } else {
+      this.tree = GSymbolTree.fromItemTree(itemTree)
+
+      const uuids = this.tree.keys()
+      const terminatedIds = terminatedSessionIds(uuids, terminals)
+      this.tree.removeWithIds(terminatedIds)
+
+      if (this.tree.isEmpty()) { // nothing to restore
         this.add()
       }
     },
@@ -377,7 +226,7 @@ export default {
     },
     onTermination ({ uuid }) {
       this.remove({ id: uuid })
-      if (isEmpty(this.itemMap)) {
+      if (this.tree.isEmpty()) {
         this.leavePage()
       }
     },

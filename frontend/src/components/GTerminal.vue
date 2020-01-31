@@ -273,7 +273,6 @@ class TerminalSession {
   async createTerminal () {
     const body = this.vm.selectedConfig
     body.identifier = this.vm.uuid
-    body.index = this.vm.index
 
     const { data } = await createTerminal({ ...this.terminalCoordinates, body })
     return data
@@ -583,10 +582,6 @@ export default {
   props: {
     uuid: {
       type: String,
-      required: true
-    },
-    index: {
-      type: Number,
       required: true
     },
     data: {
