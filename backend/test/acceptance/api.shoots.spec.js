@@ -96,7 +96,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   it('should delete a shoot', async function () {
     const bearer = await user.bearer
     const deleteAnnotations = {
-      'confirmation.garden.sapcloud.io/deletion': 'true'
+      'confirmation.gardener.cloud/deletion': 'true'
     }
 
     k8s.stub.deleteShoot({ bearer, namespace, name, resourceVersion })
@@ -148,7 +148,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const metadata = {
       annotations: {
-        'garden.sapcloud.io/createdBy': 'baz@example.org',
+        'gardener.cloud/created-by': 'baz@example.org',
         'garden.sapcloud.io/purpose': 'evaluation'
       },
       labels: {
@@ -174,7 +174,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const actPurpose = body.metadata.annotations['garden.sapcloud.io/purpose']
     const expPurpose = metadata.annotations['garden.sapcloud.io/purpose']
     expect(actPurpose).to.equal(expPurpose)
-    const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/createdBy']
+    const actCreatedBy = body.metadata.annotations['gardener.cloud/created-by']
     const expCreatedBy = 'baz@example.org'
     expect(actCreatedBy).to.equal(expCreatedBy)
   })

@@ -321,7 +321,7 @@ export function availableK8sUpdatesForShoot (spec) {
 }
 
 export function getCreatedBy (metadata) {
-  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
+  return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
 export function hasAlertmanager (metadata) {
@@ -372,7 +372,9 @@ export function shootHasIssue (shoot) {
 
 export function isReconciliationDeactivated (metadata) {
   const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
-  return includes(truthyValues, get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']))
+  const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
+  const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
+  return includes(truthyValues, ignore)
 }
 
 export function isStatusProgressing (metadata) {

@@ -185,7 +185,7 @@ exports.remove = async function ({ user, name: namespace }) {
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
   const annotations = _.assign({
-    'confirmation.garden.sapcloud.io/deletion': 'true'
+    'confirmation.gardener.cloud/deletion': 'true'
   }, project.metadata.annotations)
   const body = { metadata: { annotations } }
   await client['core.gardener.cloud'].projects.mergePatch(name, body)
