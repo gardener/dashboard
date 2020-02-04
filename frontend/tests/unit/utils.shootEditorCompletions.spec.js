@@ -38,7 +38,7 @@ document.body.createTextRange = function () {
 
 const element = document.createElement('div')
 const options = {
-  indentUnit: 2,
+  indentUnit: 3,
   mode: 'text/x-yaml'
 }
 const editor = CodeMirror(element, options)
@@ -110,7 +110,7 @@ describe('utils', function () {
         expect(completions).to.be.an.instanceof(Array)
         expect(completions).to.have.length(1)
         const { text, string, property, type, description } = completions[0]
-        expect(text).to.equal('spec:\n  ')
+        expect(text).to.equal('spec:\n   ')
         expect(string).to.equal('spec')
         expect(property).to.equal('spec')
         expect(type).to.equal('Object')
@@ -118,7 +118,7 @@ describe('utils', function () {
       })
 
       it('should return properties of an object', function () {
-        setEditorContentAndCursor('spec:\n  ', 0, 0)
+        setEditorContentAndCursor('spec:\n   ', 0, 0)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
 
@@ -126,7 +126,7 @@ describe('utils', function () {
         completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
 
-        setEditorCursor(1, 2)
+        setEditorCursor(1, 3)
         completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
@@ -135,34 +135,32 @@ describe('utils', function () {
         expect(type0).to.equal('String')
 
         const { text: text2, type: type2 } = completions[2]
-        expect(text2).to.equal('metadata:\n    ')
+        expect(text2).to.equal('metadata:\n      ')
         expect(type2).to.equal('Object')
       })
 
       it('should provide code completion for array start', function () {
-        setEditorContentAndCursor('spec:\n  metadata:\n    ', 2, 0)
+        setEditorContentAndCursor('spec:\n  metadata:\n      ', 2, 0)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
 
-        setEditorCursor(2, 4)
+        setEditorCursor(2, 6)
         completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(2)
 
         const { text: text0, type: type0 } = completions[0]
-        expect(text0).to.equal('annotations:\n      ')
+        expect(text0).to.equal('annotations:\n         ')
         expect(type0).to.equal('Object')
 
         const { text: text1, type: type1 } = completions[1]
-        expect(text1).to.equal('managedFields:\n      - ')
+        expect(text1).to.equal('managedFields:\n         - ')
         expect(type1).to.equal('Array')
       })
 
       it('should provide code completion for first array item', function () {
-        setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n      - ', 3, 0)
+        setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - ', 3, 11)
         let completions = shootEditorCompletions.yamlHint(editor).list
-        // expect(completions).to.have.length(1) TODO: FIX ERROR
 
-        setEditorCursor(3, 8)
         completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
@@ -176,7 +174,7 @@ describe('utils', function () {
       })
 
       it('should provide code completion for second array item', function () {
-        setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n      - apiVersion: foo\n        ', 4, 8)
+        setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - apiVersion: foo\n           ', 4, 11)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
@@ -186,16 +184,17 @@ describe('utils', function () {
       })
 
       it('should provide code completion if first item of an array is an object', function () {
-        setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n      - ma', 3, 10)
+        setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - ma', 3, 12)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
-        const { type } = completions[0]
-        // expect(text).to.equal('- managedObjects:\n          ') TODO: FIX ERROR
+        const { text, type } = completions[0]
+
+        expect(text).to.equal('- managedObjects:\n            ')
         expect(type).to.equal('Object')
       })
 
       it('should provide code completion if context has object as first array item', function () {
-        setEditorContentAndCursor('spec:\n  metadata:\n    managedFields:\n      - managedObjects:\n          ', 4, 10)
+        setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - managedObjects:\n              ', 4, 14)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
         const { text, type } = completions[0]
@@ -204,16 +203,26 @@ describe('utils', function () {
       })
 
       it('should filter completions according to typed text', function () {
-        setEditorContentAndCursor('spec:\n  ', 1, 2)
+        setEditorContentAndCursor('spec:\n   ', 1, 3)
         let completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
-        setEditorContentAndCursor('spec:\n  ki', 1, 4)
+        setEditorContentAndCursor('spec:\n   ki', 1, 5)
         completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
 
         const { text, type } = completions[0]
         expect(text).to.equal('kind: ')
+        expect(type).to.equal('String')
+      })
+
+      it('should traverse path correctly, do not add properties on same level to path', function () {
+        setEditorContentAndCursor('spec:\n   metadata:\n      annotations:\n         foo: bar\n      managedFields:\n         - apiVersion: foo\n            ', 6, 12)
+        let completions = shootEditorCompletions.yamlHint(editor).list
+        expect(completions).to.have.length(3)
+
+        const { text, type } = completions[1]
+        expect(text).to.equal('fieldsType: ')
         expect(type).to.equal('String')
       })
     })

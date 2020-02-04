@@ -20,7 +20,6 @@ import CodeMirror from 'codemirror'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import reverse from 'lodash/reverse'
 import trim from 'lodash/trim'
 import nth from 'lodash/nth'
 import filter from 'lodash/filter'
@@ -39,12 +38,14 @@ export class ShootEditorCompletions {
   constructor (allShootCompletions, editorIndent) {
     this.shootCompletions = allShootCompletions
     this.indentUnit = editorIndent
+    this.arrayBulletIndent = 2 // -[space]
   }
 
-  yamlHint (editor) {
-    const cur = editor.getCursor()
-    const token = this.getYamlToken(editor, cur)
-    const list = this.getYamlCompletions(token, cur, editor)
+  // Callback function for CodeMirror autocomplete plugin
+  yamlHint (cm) {
+    const cur = cm.getCursor()
+    const token = this._getYamlToken(cm, cur)
+    const list = this._getYamlCompletions(token, cur, cm)
 
     return {
       list,
@@ -53,6 +54,7 @@ export class ShootEditorCompletions {
     }
   }
 
+  // Callback function for CodeMirror tooltip
   editorTooltip (e, cm) {
     let pos = cm.coordsChar({
       left: e.clientX,
@@ -60,19 +62,22 @@ export class ShootEditorCompletions {
     })
     const lineTokens = cm.getLineTokens(pos.line)
     const lineString = join(map(lineTokens, 'string'), '')
-    const result = lineString.match(/^(\s*)(.*?)([^\s]+):.*$/)
+    const result = lineString.match(/^(\s*)([^\s]+?):.*$/)
 
     if (result) {
-      const start = result[1].length + result[2].length
-      const end = start + result[3].length
-      const string = result[3].toLowerCase()
+      const indent = result[1]
+      const tokenString = result[2]
+      const start = indent.length
+      const end = start + tokenString.length
+      const string = tokenString.toLowerCase()
       const token = {
         start,
         end,
         string
       }
       if (token.start <= pos.ch && pos.ch <= token.end) {
-        const completions = this.getYamlCompletions(token, pos, cm, true)
+        // Ensure that mouse pointer is on propety and not somewhere else on this line
+        const completions = this._getYamlCompletions(token, pos, cm, true)
         if (completions.length === 1) {
           return first(completions)
         }
@@ -80,86 +85,41 @@ export class ShootEditorCompletions {
     }
   }
 
-  getYamlCompletions (token, cur, editor, exactMatch = false) {
-    let tprop = token
-    let line = cur.line
-    let context = []
-    while (line >= 0 && !(tprop.type === 'property' && tprop.indent === 0)) {
-      tprop = this.getYamlToken(editor, CodeMirror.Pos(line, 0))
-      if (tprop.indent < token.start &&
-          (context.length === 0 || context[context.length - 1].indent > tprop.indent)) {
-        if (tprop.type === 'property') {
-          context.push(tprop)
-        } else if (tprop.type === 'arrayStart') {
-          context.push(tprop)
-        }
-      }
-      line--
-    }
+  // callback function for cm editor enter function
+  enter (cm) {
+    const cur = cm.getCursor()
+    // const token = this._getYamlToken(cm, cur)
+    //
+    // const completionPath = this._getTokenCompletionPath(token, cur, cm)
+    // completionPath.push(token.propertyName)
+    // completionPath.push('type')
+    //
+    // const type = get(this.shootCompletions, completionPath)
+    //
+    // let extraIntent = ''
+    // if (type === 'object' || type === 'array' || token.type === 'arrayStart') {
+    //   extraIntent = `${repeat(' ', this.indentUnit)}`
+    // }
+    // const indentString = `${repeat(' ', token.start)}`
+    //
+    // cm.replaceSelection(`\n${indentString}${extraIntent}`)
 
-    return this.getCompletions(token, context, exactMatch)
+    const { lineString, lineTokens } = this._getTokenLine(cm, cur)
+    const result = lineString.match(/^(\s*)(-\s)?(.*?)?$/)
+    const indent = result[1]
+    const arrayStart = result[2]
+    let extraIntent = ''
+    if (arrayStart) {
+      extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
+    } else if (this._isTokenLineStartingObject(lineTokens)) {
+      extraIntent = `${repeat(' ', this.indentUnit)}`
+    }
+    cm.replaceSelection(`\n${indent}${extraIntent}`)
   }
 
-  getYamlToken (editor, cur) {
-    let token
-    let lineTokens = editor.getLineTokens(cur.line)
-    const lineString = join(map(lineTokens, 'string'), '')
-    forEach(lineTokens, lineToken => {
-      let result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
-      if (result) {
-        token = lineToken
-        token.type = 'arrayStart'
-        token.string = trim(last(words(lineString.substring(0, cur.ch).toLowerCase())))
-        token.indent = token.start = result[1].length
-        token.end = token.start + token.string.length + 2
-        if (lineTokens.length >= 2 && lineTokens[lineTokens.length - 1].string === ':') {
-          // arrayStart line can also start new object
-          let result = lineTokens[lineTokens.length - 2].string.match(/^(\s*)(.+?)$/)
-          token.propertyName = result[2]
-        }
-      }
-    })
-    if (!token) {
-      if (lineTokens.length >= 2 && lineTokens[lineTokens.length - 1].string === ':') {
-        token = lineTokens[lineTokens.length - 2]
-        let result = token.string.match(/^(\s*)(.+?)$/)
-        token.indent = token.start = result[1].length
-        token.propertyName = result[2]
-        token.type = 'property'
-      }
-    }
-    if (!token) {
-      token = editor.getTokenAt(cur, true)
-      token.string = trim(last(words(lineString.substring(0, cur.ch).toLowerCase())))
-      token.start = token.end - token.string.length
-    }
-    return token
-  }
-
-  getCompletions (token, context, exactMatch) {
-    const completionPath = flatMap(reverse(context), (pathToken, index, revContext) => {
-      if (pathToken.type === 'property') {
-        if (get(nth(revContext, index + 1), 'type') === 'arrayStart') {
-          // next item is array, so don't append 'properties'
-          return pathToken.propertyName
-        }
-        if (index === revContext.length - 1 && token.type === 'arrayStart') {
-          // current token is array, so list properties of its items
-          return [pathToken.propertyName, 'items', 'properties']
-        }
-        // normal property token
-        return [pathToken.propertyName, 'properties']
-      } else if (pathToken.type === 'arrayStart') {
-        if (pathToken.propertyName !== undefined && token.start === pathToken.indent + (this.indentUnit * 2)) {
-          // arrayStart line can also start new object, so list properties of specific item
-          return ['items', 'properties', pathToken.propertyName, 'properties']
-        }
-        // path token is array, so list properties of its items
-        return ['items', 'properties']
-      } else {
-        return []
-      }
-    })
+  // Get completions for token, exact match is used for tooltip function
+  _getYamlCompletions (token, cur, cm, exactMatch = false) {
+    const completionPath = this._getTokenCompletionPath(token, cur, cm)
 
     let completions
     if (completionPath.length > 0) {
@@ -169,33 +129,34 @@ export class ShootEditorCompletions {
     }
 
     let completionArray = []
-    const generateCompletionText = (key, type) => {
+    const generateCompletionText = (propertyName, type) => {
       const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}`
       if (type === 'array') {
-        return `${key}:\n${completionIndentStr}- `
+        return `${propertyName}:\n${completionIndentStr}- `
       } else if (type === 'object') {
-        return `${key}:\n${completionIndentStr}`
+        return `${propertyName}:\n${completionIndentStr}`
       } else {
-        return `${key}: `
+        return `${propertyName}: `
       }
     }
-    forIn(completions, (value, key) => {
-      const text = `${token.type === 'arrayStart' ? '- ' : ''}${generateCompletionText(key, value.type)}`
-      const string = key.toLowerCase()
+
+    forIn(completions, (completion, propertyName) => {
+      const text = `${token.type === 'arrayStart' ? '- ' : ''}${generateCompletionText(propertyName, completion.type)}`
+      const string = propertyName.toLowerCase()
       completionArray.push({
         text,
         string,
-        property: key,
-        type: upperFirst(value.type),
-        description: value.description,
+        property: propertyName,
+        type: upperFirst(completion.type),
+        description: completion.description,
         render: (el, self, data) => {
           const propertyWrapper = document.createElement('div')
-          propertyWrapper.innerHTML = `<span class="property">${key}</span><span class="type">${upperFirst(value.type)}</span>`
+          propertyWrapper.innerHTML = `<span class="property">${propertyName}</span><span class="type">${upperFirst(completion.type)}</span>`
           propertyWrapper.className = 'ghint-type'
           el.appendChild(propertyWrapper)
 
           const descWrapper = document.createElement('div')
-          descWrapper.innerHTML = `<span class="description">${value.description}</span>`
+          descWrapper.innerHTML = `<span class="description">${completion.description}</span>`
           descWrapper.className = 'ghint-desc'
           el.appendChild(descWrapper)
         }
@@ -210,5 +171,139 @@ export class ShootEditorCompletions {
       })
     }
     return completionArray
+  }
+
+  // get token at cursor position in editor with yaml content
+  _getYamlToken (cm, cur) {
+    let token
+    const { lineTokens, lineString } = this._getTokenLine(cm, cur)
+    forEach(lineTokens, lineToken => {
+      let result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
+      if (result) {
+        const indent = result[1]
+        token = lineToken
+        token.type = 'arrayStart'
+        token.string = this._getTokenStringFromLine(lineString, cur.ch)
+        token.indent = token.start = indent.length
+        token.end = token.start + token.string.length + this.arrayBulletIndent
+        token.propertyName = trim(token.string)
+
+        const objectToken = this._returnObjectTokenFromTokenLine(lineTokens)
+        if (objectToken) {
+          // arrayStart line can also start new object
+          token.propertyName = objectToken.propertyName
+        }
+      }
+    })
+    if (!token) {
+      token = this._returnObjectTokenFromTokenLine(lineTokens)
+    }
+    if (!token) {
+      token = cm.getTokenAt(cur, true)
+      token.string = this._getTokenStringFromLine(lineString, cur.ch)
+      token.start = token.end - token.string.length
+    }
+    return token
+  }
+
+  // returns path to completions in shootCompletions object
+  _getTokenCompletionPath (token, cur, cm) {
+    let currentToken = token
+    let line = cur.line
+    let tokenContext = []
+
+    while (line >= 0 && !this._isTopLevelProperty(currentToken)) {
+      currentToken = this._getYamlToken(cm, CodeMirror.Pos(line, 0))
+      if (this._isCurrentTokenParentOfToken(currentToken, token) &&
+        this._isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
+        if (currentToken.type === 'property') {
+          tokenContext.unshift(currentToken)
+        } else if (currentToken.type === 'arrayStart') {
+          tokenContext.unshift(currentToken)
+        }
+      }
+      line--
+    }
+
+    // token context contains all parrent tokens of `token, except for the token itself
+    const tokenPath = flatMap(tokenContext, (pathToken, index, tokenContext) => {
+      const isLeafContextToken = pathToken === last(tokenContext)
+      if (pathToken.type === 'property') {
+        const nextToken = nth(tokenContext, index + 1)
+        if (nextToken && nextToken.type === 'arrayStart') {
+          // next item is array, so don't append 'properties' to path
+          return pathToken.propertyName
+        }
+        if (isLeafContextToken && token.type === 'arrayStart') {
+          // leaf context token is array, so list properties of its items
+          return [pathToken.propertyName, 'items', 'properties']
+        }
+        // regular property token
+        return [pathToken.propertyName, 'properties']
+      } else if (pathToken.type === 'arrayStart') {
+        const isTokenIndentIndicatingObjectStart = token.start === pathToken.indent + this.indentUnit + this.arrayBulletIndent
+        if (pathToken.propertyName !== undefined && isLeafContextToken && isTokenIndentIndicatingObjectStart) {
+          // arrayStart line can also start new object, so list properties of item object
+          return ['items', 'properties', pathToken.propertyName, 'properties']
+        }
+        // path token is array, so list properties of its items
+        return ['items', 'properties']
+      } else {
+        return []
+      }
+    })
+
+    return tokenPath
+  }
+
+  // Utils
+  _isTopLevelProperty (token) {
+    return token.type === 'property' && token.indent === 0
+  }
+
+  _isCurrentTokenParentOfToken (currentToken, token) {
+    return currentToken.indent < token.start
+  }
+
+  _isContextInitial (context) {
+    return context.length === 0
+  }
+
+  _isCurrentTokenIndentSmallerThanContextRoot (currentToken, context) {
+    return this._isContextInitial(context) || first(context).indent > currentToken.indent
+  }
+
+  _getTokenStringFromLine (lineString, cursorChar) {
+    return trim(last(words(lineString.substring(0, cursorChar).toLowerCase())))
+  }
+
+  _isTokenLineStartingObject (lineTokens) {
+    const lineEndToken = last(lineTokens)
+    return lineEndToken.string === ':'
+  }
+
+  _returnObjectTokenFromTokenLine (lineTokens) {
+    if (lineTokens.length < 2) {
+      return
+    }
+    if (!this._isTokenLineStartingObject(lineTokens)) {
+      return
+    }
+
+    const token = lineTokens[lineTokens.length - 2]
+    let result = token.string.match(/^(\s*)(.+?)$/)
+    const indent = result[1]
+    const propertyName = result[2]
+    token.indent = token.start = indent.length
+    token.propertyName = propertyName
+    token.type = 'property'
+    return token
+  }
+
+  _getTokenLine (cm, cur) {
+    const lineTokens = cm.getLineTokens(cur.line)
+    const lineString = join(map(lineTokens, 'string'), '')
+
+    return { lineTokens, lineString }
   }
 }

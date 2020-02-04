@@ -165,7 +165,7 @@ export default {
       generation: undefined,
       lineHeight: 21,
       toolbarHeight: 48,
-      shootCompletions: {},
+      shootEditorCompletions: undefined,
       helpTooltip: {
         visible: false,
         posX: 0,
@@ -290,6 +290,9 @@ export default {
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
         },
+        'Enter': (instance) => {
+          this.shootEditorCompletions.enter(instance)
+        },
         'Ctrl-Space': 'autocomplete'
       }, this.extraKeys)
       const options = {
@@ -318,6 +321,9 @@ export default {
 
       CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
         options.completeSingle = false
+        if (!this.shootEditorCompletions) {
+          return
+        }
         return this.shootEditorCompletions.yamlHint(editor)
       })
 
@@ -327,6 +333,9 @@ export default {
         clearTimeout(cmTooltipFnTimerID)
         this.helpTooltip.visible = false
         cmTooltipFnTimerID = setTimeout(() => {
+          if (!this.shootEditorCompletions) {
+            return
+          }
           const tooltip = this.shootEditorCompletions.editorTooltip(e, cm)
           if (tooltip) {
             this.helpTooltip.visible = true
