@@ -23,7 +23,7 @@ limitations under the License.
     @pane-remove="resize"
   >
     <pane v-for="item in splitpaneItemTree.items" :key="item.uuid" min-size="2">
-      <g-splitpane v-if="item.splitpane" :splitpaneItemTree="item">
+      <g-splitpane v-if="instanceOfSplitpaneTreeItem(item)" :splitpaneItemTree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
@@ -38,6 +38,7 @@ limitations under the License.
 import { mapActions } from 'vuex'
 import { Splitpanes, Pane } from 'splitpanes'
 import GSplitpane from '@/components/GSplitpane'
+import { SplitpaneTreeItem } from '@/lib/g-symbol-tree'
 
 export default {
   name: 'GSplitpane',
@@ -61,6 +62,9 @@ export default {
     ...mapActions([
       'setSplitpaneResize'
     ]),
+    instanceOfSplitpaneTreeItem (item) {
+      return item instanceof SplitpaneTreeItem
+    },
     resize () {
       // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
       // dynamic dimensions calculated via css, which do not return correct values before rendering is complete

@@ -31,6 +31,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import { PositionEnum } from '@/lib/g-symbol-tree'
 
 export default {
   props: {
@@ -64,28 +65,28 @@ export default {
       return this.draggingDragAndDropId && this.draggingDragAndDropId !== this.uuid
     },
     fillTop () {
-      return this.fillOnPosition('top')
+      return this.fillOnPosition(PositionEnum.TOP)
     },
     fillLeft () {
-      return this.fillOnPosition('left')
+      return this.fillOnPosition(PositionEnum.LEFT)
     },
     fillRight () {
-      return this.fillOnPosition('right')
+      return this.fillOnPosition(PositionEnum.RIGHT)
     },
     fillBottom () {
-      return this.fillOnPosition('bottom')
+      return this.fillOnPosition(PositionEnum.BOTTOM)
     },
     strokeRectTop () {
-      return this.strokeRectOnPosition('top')
+      return this.strokeRectOnPosition(PositionEnum.TOP)
     },
     strokeRectLeft () {
-      return this.strokeRectOnPosition('left')
+      return this.strokeRectOnPosition(PositionEnum.LEFT)
     },
     strokeRectRight () {
-      return this.strokeRectOnPosition('right')
+      return this.strokeRectOnPosition(PositionEnum.RIGHT)
     },
     strokeRectBottom () {
-      return this.strokeRectOnPosition('bottom')
+      return this.strokeRectOnPosition(PositionEnum.BOTTOM)
     }
   },
   methods: {
@@ -114,7 +115,7 @@ export default {
       this.strokeRect = {}
       this.currentPosition = undefined
     },
-    dropped ({ detail: { 'mouseOverId': position } }) {
+    dropped () {
       this.mouseDown = false
 
       this.$emit('droppedAt', this.currentPosition)

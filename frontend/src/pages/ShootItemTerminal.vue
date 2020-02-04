@@ -55,7 +55,7 @@ import TargetSelectionDialog from '@/dialogs/TargetSelectionDialog'
 import { TargetEnum } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { listTerminalSessions } from '@/utils/api'
-import { GSymbolTree, TreeItem } from '@/lib/g-symbol-tree'
+import { GSymbolTree, TreeItem, PositionEnum } from '@/lib/g-symbol-tree'
 
 import 'splitpanes/dist/splitpanes.css'
 
@@ -103,7 +103,7 @@ export default {
       'setSplitpaneResize'
     ]),
     updateTreeItem (fitRequired = false) {
-      this.itemTree = this.tree.toItemTree()
+      this.itemTree = this.tree.toItemTree(this.tree.root)
 
       this.store()
 
@@ -115,7 +115,7 @@ export default {
         this.$nextTick(() => this.setSplitpaneResize(new Date()))
       }
     },
-    addFromShortkey ({ srcKey: position = 'right' } = {}) {
+    addFromShortkey ({ srcKey: position = PositionEnum.RIGHT } = {}) {
       return this.add({ position })
     },
     async add ({ position, targetId } = {}) {
@@ -161,7 +161,7 @@ export default {
       this.moveTo({ sourceId, targetId, position })
     },
     moveTo ({ sourceId, targetId, position }) {
-      const moved = this.tree.moveTo({ sourceId, targetId, position })
+      const moved = this.tree.moveToWithId({ sourceId, targetId, position })
 
       const fitRequired = moved // in some cases the resize event is not fired by the splitpanes library so we need to trigger fit manually
       this.updateTreeItem(fitRequired)
@@ -209,7 +209,7 @@ export default {
 
       this.tree = GSymbolTree.fromItemTree(itemTree)
 
-      const uuids = this.tree.keys()
+      const uuids = this.tree.ids()
       const terminatedIds = terminatedSessionIds(uuids, terminals)
       this.tree.removeWithIds(terminatedIds)
 
@@ -233,10 +233,10 @@ export default {
     onSplit ({ uuid: targetId }, orientation = 'horizontal') {
       switch (orientation) {
         case 'horizontal':
-          this.add({ position: 'right', targetId })
+          this.add({ position: PositionEnum.RIGHT, targetId })
           break
         case 'vertical':
-          this.add({ position: 'bottom', targetId })
+          this.add({ position: PositionEnum.BOTTOM, targetId })
           break
         default:
           break // ignore unknown orientation

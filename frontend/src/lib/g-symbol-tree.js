@@ -23,17 +23,23 @@ import values from 'lodash/values'
 import SymbolTree from 'symbol-tree'
 const uuidv4 = require('uuid/v4')
 
+export const PositionEnum = {
+  TOP: 'top',
+  BOTTOM: 'bottom',
+  LEFT: 'left',
+  RIGHT: 'right'
+}
+
 export class TreeItem {
-  constructor ({ uuid = uuidv4(), data }) {
+  constructor ({ uuid = uuidv4(), data } = {}) {
     this.uuid = uuid
     this.data = data
   }
 }
 
 export class SplitpaneTreeItem {
-  constructor ({ horizontal }) {
+  constructor ({ horizontal = false } = {}) {
     this.horizontal = horizontal
-    this.splitpane = true
   }
 }
 
@@ -95,7 +101,7 @@ export class GSymbolTree extends SymbolTree {
     return values(this.itemMap)
   }
 
-  keys () {
+  ids () {
     return keys(this.itemMap)
   }
 
@@ -103,7 +109,7 @@ export class GSymbolTree extends SymbolTree {
     return isEmpty(this.itemMap)
   }
 
-  moveTo ({ sourceId, targetId, position }) {
+  moveToWithId ({ sourceId, targetId, position }) {
     if (!targetId || !sourceId) {
       return false
     }
@@ -114,7 +120,7 @@ export class GSymbolTree extends SymbolTree {
       return false
     }
 
-    return this._moveItemToAndClean({ sourceItem, targetItem, position })
+    return this._moveToAndClean({ sourceItem, targetItem, position })
   }
 
   removeWithIds (ids) {
@@ -132,7 +138,7 @@ export class GSymbolTree extends SymbolTree {
     this.remove(item, clean)
   }
 
-  toItemTree (parent = this.root) {
+  toItemTree (parent) {
     const clonedParent = cloneDeep(parent)
     if (!this.hasChildren(parent)) {
       return undefined
@@ -169,8 +175,9 @@ export class GSymbolTree extends SymbolTree {
     }
   }
 
-  _moveItemToAndClean ({ sourceItem, targetItem, position }) {
+  _moveToAndClean ({ sourceItem, targetItem, position }) {
     const res = this._moveItemTo({ sourceItem, targetItem, position })
+
     this._clean()
 
     return res
@@ -180,22 +187,22 @@ export class GSymbolTree extends SymbolTree {
     const targetParent = this.parent(targetItem)
     this.remove(sourceItem)
     switch (position) {
-      case 'top': {
+      case PositionEnum.TOP: {
         this._ensureSplitpaneOrientation({ horizontal: true, targetParent, targetItem })
         this.insertBefore(targetItem, sourceItem)
         return true
       }
-      case 'bottom': {
+      case PositionEnum.BOTTOM: {
         this._ensureSplitpaneOrientation({ horizontal: true, targetParent, targetItem })
         this.insertAfter(targetItem, sourceItem)
         return true
       }
-      case 'left': {
+      case PositionEnum.LEFT: {
         this._ensureSplitpaneOrientation({ horizontal: false, targetParent, targetItem })
         this.insertBefore(targetItem, sourceItem)
         return true
       }
-      case 'right': {
+      case PositionEnum.RIGHT: {
         this._ensureSplitpaneOrientation({ horizontal: false, targetParent, targetItem })
         this.insertAfter(targetItem, sourceItem)
         return true
