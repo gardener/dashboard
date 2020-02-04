@@ -70,6 +70,12 @@ export default {
       // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
       this.$nextTick(() => this.setSplitpaneResize(new Date()))
     }
+  },
+  watch: {
+    // workaround for https://github.com/antoniandre/splitpanes/issues/79
+    'splitpaneItemTree.horizontal' (value) {
+      this.resize()
+    }
   }
 }
 

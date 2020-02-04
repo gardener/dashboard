@@ -102,18 +102,10 @@ export default {
     ...mapActions([
       'setSplitpaneResize'
     ]),
-    updateTreeItem (fitRequired = false) {
+    updateTreeItem () {
       this.itemTree = this.tree.toItemTree(this.tree.root)
 
       this.store()
-
-      if (fitRequired) {
-        // we need to make sure to adjust the size and geometry of each terminal after moving splitpanes
-
-        // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
-        // dynamic dimensions calculated via css, which do not return correct values before rendering is complete
-        this.$nextTick(() => this.setSplitpaneResize(new Date()))
-      }
     },
     addFromShortkey ({ srcKey: position = PositionEnum.RIGHT } = {}) {
       return this.add({ position })
@@ -161,12 +153,11 @@ export default {
       this.moveTo({ sourceId, targetId, position })
     },
     moveTo ({ sourceId, targetId, position }) {
-      const moved = this.tree.moveToWithId({ sourceId, targetId, position })
+      this.tree.moveToWithId({ sourceId, targetId, position })
 
-      const fitRequired = moved // in some cases the resize event is not fired by the splitpanes library so we need to trigger fit manually
-      this.updateTreeItem(fitRequired)
+      this.updateTreeItem()
     },
-    remove ({ id }) {
+    removeWithId (id) {
       this.tree.removeWithId(id)
 
       this.updateTreeItem()
@@ -225,7 +216,7 @@ export default {
       return this.$router.push({ name: 'ShootList', params: { namespace } })
     },
     onTermination ({ uuid }) {
-      this.remove({ id: uuid })
+      this.removeWithId(uuid)
       if (this.tree.isEmpty()) {
         this.leavePage()
       }

@@ -111,16 +111,16 @@ export class GSymbolTree extends SymbolTree {
 
   moveToWithId ({ sourceId, targetId, position }) {
     if (!targetId || !sourceId) {
-      return false
+      return
     }
 
     const targetItem = this.itemMap[targetId]
     const sourceItem = this.itemMap[sourceId]
     if (!targetItem || !sourceItem) {
-      return false
+      return
     }
 
-    return this._moveToAndClean({ sourceItem, targetItem, position })
+    this._moveToAndClean({ sourceItem, targetItem, position })
   }
 
   removeWithIds (ids) {
@@ -176,11 +176,9 @@ export class GSymbolTree extends SymbolTree {
   }
 
   _moveToAndClean ({ sourceItem, targetItem, position }) {
-    const res = this._moveItemTo({ sourceItem, targetItem, position })
+    this._moveItemTo({ sourceItem, targetItem, position })
 
     this._clean()
-
-    return res
   }
 
   _moveItemTo ({ sourceItem, targetItem, position }) {
@@ -190,25 +188,24 @@ export class GSymbolTree extends SymbolTree {
       case PositionEnum.TOP: {
         this._ensureSplitpaneOrientation({ horizontal: true, targetParent, targetItem })
         this.insertBefore(targetItem, sourceItem)
-        return true
+        break
       }
       case PositionEnum.BOTTOM: {
         this._ensureSplitpaneOrientation({ horizontal: true, targetParent, targetItem })
         this.insertAfter(targetItem, sourceItem)
-        return true
+        break
       }
       case PositionEnum.LEFT: {
         this._ensureSplitpaneOrientation({ horizontal: false, targetParent, targetItem })
         this.insertBefore(targetItem, sourceItem)
-        return true
+        break
       }
       case PositionEnum.RIGHT: {
         this._ensureSplitpaneOrientation({ horizontal: false, targetParent, targetItem })
         this.insertAfter(targetItem, sourceItem)
-        return true
+        break
       }
     }
-    return false
   }
 
   /*
