@@ -291,7 +291,7 @@ export default {
           instance.indentSelection('subtract')
         },
         'Enter': (instance) => {
-          this.shootEditorCompletions.enter(instance)
+          this.shootEditorCompletions.editorEnter(instance)
         },
         'Ctrl-Space': 'autocomplete'
       }, this.extraKeys)

@@ -14,10 +14,17 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/yaml/yaml.js'
+
+import repeat from 'lodash/repeat'
+
+import chai from 'chai'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
+chai.use(sinonChai)
+const expect = chai.expect
 
 document.body.createTextRange = function () {
   return {
@@ -189,7 +196,7 @@ describe('utils', function () {
         expect(completions).to.have.length(1)
         const { text, type } = completions[0]
 
-        expect(text).to.equal('- managedObjects:\n            ')
+        expect(text).to.equal('- managedObjects:\n              ')
         expect(type).to.equal('Object')
       })
 
@@ -262,6 +269,47 @@ describe('utils', function () {
         }
         tooltip = shootEditorCompletions.editorTooltip({}, editor)
         expect(tooltip).to.be.undefined
+      })
+    })
+    describe('#editorEnter', function () {
+      const sandbox = sinon.createSandbox()
+
+      afterEach(function () {
+        sandbox.restore()
+      })
+
+      it('should return a simple line break', function () {
+        const spy = sandbox.spy(editor, 'replaceSelection')
+        setEditorContentAndCursor('', 0, 0)
+        shootEditorCompletions.editorEnter(editor)
+        expect(spy).to.be.calledOnceWith('\n')
+
+        spy.resetHistory()
+        setEditorContentAndCursor('test', 0, 0)
+        shootEditorCompletions.editorEnter(editor)
+        expect(spy).to.be.calledOnceWith('\n')
+      })
+
+      it('should preserve indent after a regular line', function () {
+        const spy = sandbox.spy(editor, 'replaceSelection')
+        setEditorContentAndCursor('spec:\n  foo:bar', 1, 9)
+        shootEditorCompletions.editorEnter(editor)
+        expect(spy).to.be.calledOnceWith('\n  ')
+      })
+
+      it('should increase indent after an object or array', function () {
+        const spy = sandbox.spy(editor, 'replaceSelection')
+        setEditorContentAndCursor('spec:\n  foo:', 1, 6)
+        console.log(editor.options.indentUnit)
+        shootEditorCompletions.editorEnter(editor)
+        expect(spy).to.be.calledOnceWith(`\n  ${repeat(' ', editor.options.indentUnit)}`)
+      })
+
+      it('should increase indent after first item of an array', function () {
+        const spy = sandbox.spy(editor, 'replaceSelection')
+        setEditorContentAndCursor('spec:\n  foo:\n    - foo:bar', 2, 13)
+        shootEditorCompletions.editorEnter(editor)
+        expect(spy).to.be.calledOnceWith(`\n      `)
       })
     })
   })

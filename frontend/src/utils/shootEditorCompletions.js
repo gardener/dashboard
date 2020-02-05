@@ -86,30 +86,15 @@ export class ShootEditorCompletions {
   }
 
   // callback function for cm editor enter function
-  enter (cm) {
+  editorEnter (cm) {
     const cur = cm.getCursor()
-    // const token = this._getYamlToken(cm, cur)
-    //
-    // const completionPath = this._getTokenCompletionPath(token, cur, cm)
-    // completionPath.push(token.propertyName)
-    // completionPath.push('type')
-    //
-    // const type = get(this.shootCompletions, completionPath)
-    //
-    // let extraIntent = ''
-    // if (type === 'object' || type === 'array' || token.type === 'arrayStart') {
-    //   extraIntent = `${repeat(' ', this.indentUnit)}`
-    // }
-    // const indentString = `${repeat(' ', token.start)}`
-    //
-    // cm.replaceSelection(`\n${indentString}${extraIntent}`)
 
     const { lineString, lineTokens } = this._getTokenLine(cm, cur)
     const result = lineString.match(/^(\s*)(-\s)?(.*?)?$/)
     const indent = result[1]
-    const arrayStart = result[2]
+    const firstArrayItem = result[2]
     let extraIntent = ''
-    if (arrayStart) {
+    if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
     } else if (this._isTokenLineStartingObject(lineTokens)) {
       extraIntent = `${repeat(' ', this.indentUnit)}`
@@ -129,11 +114,11 @@ export class ShootEditorCompletions {
     }
 
     let completionArray = []
-    const generateCompletionText = (propertyName, type) => {
-      const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}`
-      if (type === 'array') {
+    const generateCompletionText = (propertyName, yamlType, tokenType) => {
+      const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}${repeat(' ', tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)}`
+      if (yamlType === 'array') {
         return `${propertyName}:\n${completionIndentStr}- `
-      } else if (type === 'object') {
+      } else if (yamlType === 'object') {
         return `${propertyName}:\n${completionIndentStr}`
       } else {
         return `${propertyName}: `
@@ -141,7 +126,7 @@ export class ShootEditorCompletions {
     }
 
     forIn(completions, (completion, propertyName) => {
-      const text = `${token.type === 'arrayStart' ? '- ' : ''}${generateCompletionText(propertyName, completion.type)}`
+      const text = `${token.type === 'firstArrayItem' ? '- ' : ''}${generateCompletionText(propertyName, completion.type, token.type)}`
       const string = propertyName.toLowerCase()
       completionArray.push({
         text,
@@ -182,7 +167,7 @@ export class ShootEditorCompletions {
       if (result) {
         const indent = result[1]
         token = lineToken
-        token.type = 'arrayStart'
+        token.type = 'firstArrayItem'
         token.string = this._getTokenStringFromLine(lineString, cur.ch)
         token.indent = token.start = indent.length
         token.end = token.start + token.string.length + this.arrayBulletIndent
@@ -190,7 +175,7 @@ export class ShootEditorCompletions {
 
         const objectToken = this._returnObjectTokenFromTokenLine(lineTokens)
         if (objectToken) {
-          // arrayStart line can also start new object
+          // firstArrayItem line can also start new object
           token.propertyName = objectToken.propertyName
         }
       }
@@ -218,7 +203,7 @@ export class ShootEditorCompletions {
         this._isCurrentTokenIndentSmallerThanContextRoot(currentToken, tokenContext)) {
         if (currentToken.type === 'property') {
           tokenContext.unshift(currentToken)
-        } else if (currentToken.type === 'arrayStart') {
+        } else if (currentToken.type === 'firstArrayItem') {
           tokenContext.unshift(currentToken)
         }
       }
@@ -230,20 +215,20 @@ export class ShootEditorCompletions {
       const isLeafContextToken = pathToken === last(tokenContext)
       if (pathToken.type === 'property') {
         const nextToken = nth(tokenContext, index + 1)
-        if (nextToken && nextToken.type === 'arrayStart') {
+        if (nextToken && nextToken.type === 'firstArrayItem') {
           // next item is array, so don't append 'properties' to path
           return pathToken.propertyName
         }
-        if (isLeafContextToken && token.type === 'arrayStart') {
+        if (isLeafContextToken && token.type === 'firstArrayItem') {
           // leaf context token is array, so list properties of its items
           return [pathToken.propertyName, 'items', 'properties']
         }
         // regular property token
         return [pathToken.propertyName, 'properties']
-      } else if (pathToken.type === 'arrayStart') {
+      } else if (pathToken.type === 'firstArrayItem') {
         const isTokenIndentIndicatingObjectStart = token.start === pathToken.indent + this.indentUnit + this.arrayBulletIndent
         if (pathToken.propertyName !== undefined && isLeafContextToken && isTokenIndentIndicatingObjectStart) {
-          // arrayStart line can also start new object, so list properties of item object
+          // firstArrayItem line can also start new object, so list properties of item object
           return ['items', 'properties', pathToken.propertyName, 'properties']
         }
         // path token is array, so list properties of its items
@@ -279,6 +264,9 @@ export class ShootEditorCompletions {
 
   _isTokenLineStartingObject (lineTokens) {
     const lineEndToken = last(lineTokens)
+    if (!lineEndToken) {
+      return false
+    }
     return lineEndToken.string === ':'
   }
 
