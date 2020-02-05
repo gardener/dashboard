@@ -25,6 +25,7 @@ const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
+const semver = require('semver')
 
 const { decodeBase64, getSeedNameFromShoot } = utils
 
@@ -229,6 +230,18 @@ exports.remove = async function ({ user, namespace, name }) {
   return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
 
+function getDashboarUrlPath(kubernetesVersion) {
+  if (!kubernetesVersion) {
+    return undefined
+  }
+  if (semver.lt(kubernetesVersion, '1.16.0')) {
+    return '/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/'
+  }
+  return '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
+
+}
+exports.getDashboarUrlPath = getDashboarUrlPath
+
 exports.info = async function ({ user, namespace, name }) {
   const client = user.client
 
@@ -281,6 +294,7 @@ exports.info = async function ({ user, namespace, name }) {
       .commit()
 
     data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
+    data.dashboardUrlPath = getDashboarUrlPath(shoot.spec.kubernetes.version)
   }
 
   const isAdmin = await authorization.isAdmin(user)

@@ -381,7 +381,8 @@ function getShoot ({
   region = 'foo-west',
   bindingName = 'foo-secret',
   seed = 'infra1-seed',
-  hibernation = { enabled: false }
+  hibernation = { enabled: false },
+  kubernetesVersion = '1.16.0'
 }) {
   const shoot = {
     metadata: {
@@ -399,7 +400,10 @@ function getShoot ({
       provider: {
         type: kind
       },
-      seedName: seed
+      seedName: seed,
+      kubernetes: {
+        version: kubernetesVersion
+      }
     },
     status: {}
   }
