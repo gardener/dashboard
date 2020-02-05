@@ -17,7 +17,7 @@
 import { expect } from 'chai'
 import { GSymbolTree, TreeItem, SplitpaneTreeItem, PositionEnum } from '@/lib/g-symbol-tree'
 
-describe.only('lib', function () {
+describe('lib', function () {
   describe('g-symbol-tree', function () {
     /* Tree:
     root (horizontal false)
@@ -241,6 +241,35 @@ describe.only('lib', function () {
         const actualItemTree = tmp.toItemTree(tmp.root)
 
         expect(actualItemTree).to.eql(itemTree)
+      })
+
+      it('should skip invalid items', function () {
+        let itemTree = {}
+        let tmp = GSymbolTree.fromItemTree(itemTree)
+        expect(tmp.isEmpty()).to.be.true
+        expect(tmp.firstChild(tmp.root)).to.be.null
+
+        itemTree = undefined
+        tmp = GSymbolTree.fromItemTree(itemTree)
+        expect(tmp.isEmpty()).to.be.true
+        expect(tmp.firstChild(tmp.root)).to.be.null
+
+        itemTree = {
+          horizontal: false,
+          items: [{
+            uuid: 'valid-item'
+          }, {
+            horizontal: true,
+            items: undefined
+          },
+          {},
+          { uuid: undefined },
+          { uuid: '' },
+          undefined]
+        }
+        tmp = GSymbolTree.fromItemTree(itemTree)
+        expect(tmp.items().length).to.be.equal(1)
+        expect(tmp.items()).to.eql([new TreeItem({ uuid: 'valid-item' })])
       })
     })
   })

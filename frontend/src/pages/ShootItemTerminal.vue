@@ -43,7 +43,7 @@ limitations under the License.
 <script>
 
 import Vue from 'vue'
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
@@ -99,9 +99,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
-      'setSplitpaneResize'
-    ]),
     updateTreeItem () {
       this.itemTree = this.tree.toItemTree(this.tree.root)
 

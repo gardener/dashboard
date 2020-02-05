@@ -19,6 +19,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import forEach from 'lodash/forEach'
 import isEmpty from 'lodash/isEmpty'
 import keys from 'lodash/keys'
+import compact from 'lodash/compact'
 import values from 'lodash/values'
 import SymbolTree from 'symbol-tree'
 const uuidv4 = require('uuid/v4')
@@ -155,9 +156,10 @@ export class GSymbolTree extends SymbolTree {
     return clonedParent
   }
 
-  static fromItemTree (itemTree) {
+  static fromItemTree (itemTree = {}) {
     const tree = new GSymbolTree({ horizontal: itemTree.horizontal })
-    tree._addTreeItems({ items: itemTree.items })
+    tree._addTreeItems(tree.root, itemTree.items)
+    tree._clean()
     return tree
   }
 
@@ -243,19 +245,20 @@ export class GSymbolTree extends SymbolTree {
     this.prependChild(targetParent, targetItem)
   }
 
-  _addTreeItems ({ parent = this.root, items }) {
-    if (items) {
+  _addTreeItems (parent, items) {
+    items = compact(items)
+    if (!isEmpty(items)) {
       items.forEach(item => {
-        const items = item.items
-        if (items) {
+        const isSplitpaneTreeItem = item.hasOwnProperty('horizontal')
+        const isTreeItem = !!item.uuid
+        if (isSplitpaneTreeItem) {
           const splitpaneTreeItem = new SplitpaneTreeItem({ horizontal: item.horizontal })
           this.appendChild(parent, splitpaneTreeItem)
-          this._addTreeItems({ parent: splitpaneTreeItem, items }) // recursion
-        } else {
+          this._addTreeItems(splitpaneTreeItem, item.items) // recursion
+        } else if (isTreeItem) {
           this.appendChild(parent, new TreeItem({ uuid: item.uuid, data: item.data }))
-        }
+        } // else: skip
       })
     }
-    this._clean()
   }
 }
