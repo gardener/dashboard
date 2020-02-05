@@ -255,10 +255,10 @@ export default {
       'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
-      'loadBalancerProviderNamesByCloudProfileName',
+      'loadBalancerProviderNamesByCloudProfileNameAndRegion',
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileName'
+      'floatingPoolNamesByCloudProfileNameAndRegion'
     ]),
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
@@ -318,7 +318,7 @@ export default {
       }
     },
     allLoadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
+      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
     },
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
@@ -334,7 +334,7 @@ export default {
       return loadBalancerClasses
     },
     allFloatingPoolNames () {
-      return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
+      return this.floatingPoolNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
     },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.secret)
