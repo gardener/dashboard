@@ -119,6 +119,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
+    const dashboardUrlPath = '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
     const seedShootIngressDomain = `${project}--${name}.ingress.${seedClusterName}`
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
@@ -139,6 +140,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res.body.logging_username).to.eql(loggingUser)
     expect(res.body.logging_password).to.eql(loggingPassword)
     expect(res.body.serverUrl).to.eql(shootServerUrl)
+    expect(res.body.dashboardUrlPath).to.eql(dashboardUrlPath)
     expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
   })
 
