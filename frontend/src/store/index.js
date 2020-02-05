@@ -40,6 +40,7 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
@@ -125,6 +126,16 @@ const iconForVendor = vendorName => {
 
 const vendorNeedsLicense = vendorName => {
   return vendorName === 'suse-jeos'
+}
+
+const matchesPropertyOrEmpty = (path, srcValue) => {
+  return object => {
+    const objValue = get(object, path)
+    if (!objValue) {
+      return true
+    }
+    return isEqual(objValue, srcValue)
+  }
 }
 
 // getters
@@ -309,10 +320,20 @@ const getters = {
       return []
     }
   },
-  loadBalancerProviderNamesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
+  floatingPoolNamesByCloudProfileNameAndRegion (state, getters) {
+    return (cloudProfileName, region) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders'), 'name'))
+      const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
+      const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      return uniq(map(availableFloatingPools, 'name'))
+    }
+  },
+  loadBalancerProviderNamesByCloudProfileNameAndRegion (state, getters) {
+    return (cloudProfileName, region) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const loadBalancerProviders = get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders')
+      const availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
+      return uniq(map(availableLoadBalancerProviders, 'name'))
     }
   },
   loadBalancerClassNamesByCloudProfileName (state, getters) {
@@ -325,12 +346,6 @@ const getters = {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
-    }
-  },
-  floatingPoolNamesByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.providerConfig.constraints.floatingPools'), 'name'))
     }
   },
   infrastructureSecretsByInfrastructureKind (state) {
