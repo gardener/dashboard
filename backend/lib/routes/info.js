@@ -78,18 +78,10 @@ async function fetchShootSpec (user) {
     return shootSpec
   }
   const client = user.client
-  try {
-    const res = await client.openAPI.get()
-    const data = JSON.parse(res)
-    const spec = await SwaggerParser.dereference(data)
 
-    const shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
-    return shootSpec
-  } catch (err) {
-    logger.warn(`Could not fetch shoot spec. Error: ${err.message}`)
-    if (err.code === 'ENOTFOUND' || err.code === 404 || err.statusCode === 404) {
-      return undefined
-    }
-    throw err
-  }
+  const res = await client.openAPI.get()
+  const spec = await SwaggerParser.dereference(res)
+
+  shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
+  return shootSpec
 }
