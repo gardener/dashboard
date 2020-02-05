@@ -17,12 +17,19 @@
 'use strict'
 
 const { version } = require('../../package')
+const SwaggerParser = require('swagger-parser')
 
 module.exports = function info ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const username = 'john.doe@example.org'
   const id = username
-  const aud = [ 'gardener' ]
+  const aud = ['gardener']
+
+  const sandbox = sinon.createSandbox()
+
+  afterEach(function () {
+    sandbox.restore()
+  })
 
   it('should reject requests csrf protection error', async function () {
     const res = await agent
@@ -58,7 +65,7 @@ module.exports = function info ({ agent, k8s, auth }) {
   })
 
   it('should reject requests with invalid audience', async function () {
-    const user = auth.createUser({ id, aud: [ 'invalid-audience' ] })
+    const user = auth.createUser({ id, aud: ['invalid-audience'] })
     const res = await agent
       .get('/api/info')
       .set('cookie', await user.cookie)
@@ -97,5 +104,21 @@ module.exports = function info ({ agent, k8s, auth }) {
     expect(res.body).to.have.property('version').that.is.equal(version)
     expect(res.body).not.to.have.property('gardenerVersion')
     expect(res.body).not.to.have.property('user')
+  })
+
+  it('should fetch shoot spec', async function () {
+    const user = auth.createUser({ id })
+    const bearer = await user.bearer
+    k8s.stub.fetchShootSpec(bearer)
+    sandbox.stub(SwaggerParser, 'dereference').callsFake((obj) => {
+      return obj
+    })
+    const res = await agent
+      .get('/api/info/shootspec')
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.property('spec').that.is.eql({ spec: { type: 'object' } })
   })
 }

@@ -77,26 +77,13 @@ async function fetchShootSpec (user) {
   if (shootSpec) {
     return shootSpec
   }
+  const client = user.client
   try {
-    const {
-      cluster: {
-        server: {
-          origin
-        },
-        certificateAuthority
-      }
-    } = dashboardClient
-    const uri = `${origin}/openapi/v2`
-    const { body } = await got(uri, {
-      ca: certificateAuthority,
-      headers: {
-        Authorization: `Bearer ${user.auth.bearer}`
-      },
-      responseType: 'json'
-    })
-    const spec = await SwaggerParser.dereference(body)
+    const res = await client.openAPI.get()
+    const data = JSON.parse(res)
+    const spec = await SwaggerParser.dereference(data)
 
-    shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
+    const shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
     return shootSpec
   } catch (err) {
     logger.warn(`Could not fetch shoot spec. Error: ${err.message}`)

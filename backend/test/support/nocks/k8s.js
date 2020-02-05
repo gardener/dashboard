@@ -1196,6 +1196,20 @@ const stub = {
     const adminScope = nockWithAuthorization(auth.bearer)
     reviewToken(adminScope)
     return adminScope
+  },
+  fetchShootSpec (bearer) {
+    const body = {
+      definitions: {
+        'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot': {
+          spec: {
+            type: 'object'
+          }
+        }
+      }
+    }
+    return nockWithAuthorization(bearer)
+      .get('/openapi/v2')
+      .reply(200, body)
   }
 }
 
