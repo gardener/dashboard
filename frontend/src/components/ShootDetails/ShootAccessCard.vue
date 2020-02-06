@@ -188,11 +188,15 @@ export default {
       if (!this.hasDashboardEnabled) {
         return ''
       }
-      if (this.hasDashboardTokenAuth) {
-        const pathname = get(this.cfg, 'dashboardUrl.pathname', '')
-        return `http://localhost:8001${pathname}`
+      if (!this.hasDashboardTokenAuth) {
+        return this.shootInfo.dashboardUrl || ''
       }
-      return this.shootInfo.dashboardUrl || ''
+
+      if (!this.shootInfo.dashboardUrlPath) {
+        return ''
+      }
+      const pathname = this.shootInfo.dashboardUrlPath
+      return `http://localhost:8001${pathname}`
     },
     dashboardUrlText () {
       if (this.hasDashboardTokenAuth) {

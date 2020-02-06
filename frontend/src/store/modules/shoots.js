@@ -157,7 +157,7 @@ const actions = {
         if (info.serverUrl) {
           const [, scheme, host] = uriPattern.exec(info.serverUrl)
           const authority = `//${replace(host, /^\/\//, '')}`
-          const pathname = get(rootState.cfg, 'dashboardUrl.pathname')
+          const pathname = info.dashboardUrlPath
           info.dashboardUrl = [scheme, authority, pathname].join('')
           info.dashboardUrlText = [scheme, host].join('')
         }

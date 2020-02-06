@@ -127,8 +127,6 @@ data:
         url: {{ .url }}
       {{- end }}
 {{- end }}
-      dashboardUrl:
-        pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
