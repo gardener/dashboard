@@ -321,6 +321,10 @@ Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 Copyright (c) 2013 Julian Gruber <julian@juliangruber.com>\
 [MIT License](https://github.com/juliangruber/reconnect-core#license)
 
+- [semver](https://github.com/npm/node-semver)\
+Copyright (c) Isaac Z. Schlueter and Contributors\
+[ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)
+
 - [socket.io](https://github.com/socketio/socket.io)\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
