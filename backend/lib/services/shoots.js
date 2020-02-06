@@ -230,7 +230,7 @@ exports.remove = async function ({ user, namespace, name }) {
   return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
 
-function getDashboarUrlPath(kubernetesVersion) {
+function getDashboardUrlPath (kubernetesVersion) {
   if (!kubernetesVersion) {
     return undefined
   }
@@ -238,9 +238,8 @@ function getDashboarUrlPath(kubernetesVersion) {
     return '/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/'
   }
   return '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
-
 }
-exports.getDashboarUrlPath = getDashboarUrlPath
+exports.getDashboardUrlPath = getDashboardUrlPath
 
 exports.info = async function ({ user, namespace, name }) {
   const client = user.client
@@ -294,7 +293,7 @@ exports.info = async function ({ user, namespace, name }) {
       .commit()
 
     data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
-    data.dashboardUrlPath = getDashboarUrlPath(shoot.spec.kubernetes.version)
+    data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
   const isAdmin = await authorization.isAdmin(user)
