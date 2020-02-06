@@ -163,8 +163,7 @@ function getProviderTemplate (infrastructureKind) {
         },
         controlPlaneConfig: {
           apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
-          kind: 'ControlPlaneConfig',
-          iamconfig: store.getters.iamconfigByCloudProfileName('metal')
+          kind: 'ControlPlaneConfig'
         }
       }
     case 'vsphere':

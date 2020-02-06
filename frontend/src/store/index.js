@@ -375,12 +375,6 @@ const getters = {
       })
     }
   },
-  iamconfigByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return get(cloudProfile, 'data.providerConfig.iamconfig')
-    }
-  },
 
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
