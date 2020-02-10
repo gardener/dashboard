@@ -20,25 +20,53 @@ limitations under the License.
       <v-toolbar card color="teal darken-2">
         <v-icon class="white--text pr-2">mdi-account</v-icon>
         <v-toolbar-title class="subheading white--text">
-          Main Contact
+          Technical Contact
         </v-toolbar-title>
       </v-toolbar>
-      <v-list v-if="!!owner" two-line subheader>
+      <v-list v-if="!!technicalContact" two-line subheader>
         <v-list-tile avatar>
           <v-list-tile-avatar>
-            <img :src="avatarUrl(owner)" />
+            <img :src="avatarUrl(technicalContact)" />
           </v-list-tile-avatar>
           <v-list-tile-content>
-            <v-list-tile-title>{{displayName(owner)}}</v-list-tile-title>
-            <v-list-tile-sub-title><a :href="'mailto:'+owner" class="cyan--text text--darken-2">{{owner}}</a></v-list-tile-sub-title>
+            <v-list-tile-title>{{displayName(technicalContact)}}</v-list-tile-title>
+            <v-list-tile-sub-title><a :href="'mailto:'+technicalContact" class="cyan--text text--darken-2">{{technicalContact}}</a></v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
       <v-list v-else two-line subheader>
         <v-list-tile avatar>
           <v-list-tile-content>
-            <v-list-tile-title>This project has no main contact configured.</v-list-tile-title>
-            <v-list-tile-sub-title>You can set a main contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the members from the list below.</v-list-tile-sub-title>
+            <v-list-tile-title>This project has no technical contact configured.</v-list-tile-title>
+            <v-list-tile-sub-title>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the members from the list below.</v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-card>
+
+    <v-card class="mr-extra mt-4" v-if="costObjectRequired">
+      <v-toolbar card color="lime darken-2">
+        <v-icon class="white--text pr-2">mdi-account</v-icon>
+        <v-toolbar-title class="subheading white--text">
+          Billing Contact
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-list v-if="!!billingContact" two-line subheader>
+        <v-list-tile avatar>
+          <v-list-tile-avatar>
+            <img :src="avatarUrl(billingContact)" />
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{displayName(billingContact)}}</v-list-tile-title>
+            <v-list-tile-sub-title><a :href="'mailto:'+billingContact" class="cyan--text text--darken-2">{{billingContact}}</a></v-list-tile-sub-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+      <v-list v-else two-line subheader>
+        <v-list-tile avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>This project has no billing contact configured.</v-list-tile-title>
+            <v-list-tile-sub-title>You need to set a billing contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page.</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -51,7 +79,7 @@ limitations under the License.
           Project Members
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="memberListWithoutOwner.length > 3"
+        <v-text-field v-if="memberListWithoutTechnicalContact.length > 3"
           class="searchField"
           prepend-inner-icon="search"
           color="green darken-2"
@@ -72,7 +100,7 @@ limitations under the License.
         </v-btn>
       </v-toolbar>
 
-      <v-card-text v-if="!memberListWithoutOwner.length">
+      <v-card-text v-if="!memberListWithoutTechnicalContact.length">
         <div class="title grey--text text--darken-1 my-3">Add members to your project.</div>
         <p class="body-1">
           Adding members to your project allows you to collaborate across your team.
@@ -200,7 +228,6 @@ import includes from 'lodash/includes'
 import toLower from 'lodash/toLower'
 import replace from 'lodash/replace'
 import sortBy from 'lodash/sortBy'
-import find from 'lodash/find'
 import download from 'downloadjs'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
@@ -218,6 +245,7 @@ import {
   isServiceAccount
 } from '@/utils'
 import { getMember } from '@/utils/api'
+import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
 
 export default {
   name: 'members',
@@ -248,24 +276,34 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'memberList',
-      'projectList'
+      'memberList'
     ]),
     project () {
-      const predicate = project => project.metadata.namespace === this.namespace
-      return find(this.projectList, predicate)
+      return projectFromProjectList()
     },
-    projectData () {
-      return this.project.data || {}
+    projectDetails () {
+      return getProjectDetails(this.project)
     },
-    owner () {
-      return toLower(this.projectData.owner)
+    costObjectSettings () {
+      return getCostObjectSettings(this.project)
+    },
+    costObjectRequired () {
+      return this.costObjectSettings.costObjectRequired
+    },
+    technicalContact () {
+      return this.projectDetails.technicalContact
+    },
+    billingContact () {
+      return this.projectDetails.billingContact
+    },
+    costObject () {
+      return this.projectDetails.costObject
     },
     serviceAccountList () {
       return filter(this.memberList, ({ username }) => isServiceAccount(username))
     },
-    memberListWithoutOwner () {
-      const predicate = ({ username }) => !this.isOwner(username) && !isServiceAccount(username)
+    memberListWithoutTechnicalContact () {
+      const predicate = ({ username }) => !this.isTechnicalContact(username) && !isServiceAccount(username)
       return filter(this.memberList, predicate)
     },
     sortedAndFilteredMemberList () {
@@ -276,7 +314,7 @@ export default {
         const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
-      return sortBy(filter(this.memberListWithoutOwner, predicate))
+      return sortBy(filter(this.memberListWithoutTechnicalContact, predicate))
     },
     allEmails () {
       const emails = []
@@ -323,8 +361,8 @@ export default {
     displayName (username) {
       return displayName(username)
     },
-    isOwner (username) {
-      return this.owner === toLower(username)
+    isTechnicalContact (username) {
+      return this.technicalContact === toLower(username)
     },
     isEmail (username) {
       return isEmail(username)

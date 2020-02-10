@@ -24,13 +24,12 @@ limitations under the License.
       </v-card-title>
       <v-card-text style="height: 300px; position: relative">
         <form>
-          <v-container fluid>
+          <v-container fluid grid-list-xl>
             <template v-if="isCreateMode">
               <v-layout row>
-                <v-flex xs5>
+                <v-flex xs6>
                   <v-text-field
                     color="deep-purple"
-                    xs5
                     ref="projectName"
                     label="Name"
                     v-model.trim="projectName"
@@ -38,29 +37,80 @@ limitations under the License.
                     @input="$v.projectName.$touch()"
                     @blur="$v.projectName.$touch()"
                     counter="10"
-                    tabindex="1"
+                    ></v-text-field>
+                </v-flex>
+                <v-flex xs6>
+                  <v-text-field
+                    color="deep-purple"
+                    label="Technical Contact"
+                    v-model="technicalContact"
+                    :error-messages="getFieldValidationErrors('technicalContact')"
+                    @input="$v.technicalContact.$touch()"
+                    @blur="$v.technicalContact.$touch()"
                     ></v-text-field>
                 </v-flex>
               </v-layout>
             </template>
             <template v-else>
               <v-layout row>
-                <v-flex xs5>
+                <v-flex xs6>
                   <div class="title pb-3">{{projectName}}</div>
                 </v-flex>
               </v-layout>
               <v-layout row>
-                <v-flex xs5>
+                <v-flex xs6>
                   <v-select
                     color="deep-purple"
-                    :items="ownerItems"
-                    label="Main Contact"
-                    v-model="owner"
-                    tabindex="1"
+                    :items="memberItems"
+                    label="Technical Contact"
+                    v-model="technicalContact"
+                    :error-messages="getFieldValidationErrors('technicalContact')"
+                    @input="$v.technicalContact.$touch()"
+                    @blur="$v.technicalContact.$touch()"
                     ></v-select>
                 </v-flex>
               </v-layout>
             </template>
+
+            <v-layout row v-if="costObjectRequired">
+              <v-flex xs6 v-if="isCreateMode">
+                <v-text-field
+                  color="deep-purple"
+                  label="Billing Contact"
+                  v-model="billingContact"
+                  :error-messages="getFieldValidationErrors('billingContact')"
+                  @input="$v.billingContact.$touch()"
+                  @blur="$v.billingContact.$touch()"
+                  ></v-text-field>
+              </v-flex>
+              <v-flex xs6 v-else>
+                <v-select
+                  color="deep-purple"
+                  :items="memberItems"
+                  label="Billing Contact"
+                  v-model="billingContact"
+                  :error-messages="getFieldValidationErrors('billingContact')"
+                  @input="$v.billingContact.$touch()"
+                  @blur="$v.billingContact.$touch()"
+                  ></v-select>
+              </v-flex>
+
+              <v-flex xs6>
+                <v-text-field
+                  color="deep-purple"
+                  ref="costObject"
+                  :label="costObjectLabel"
+                  :hint="costObjectHint"
+                  persistent-hint
+                  v-model="costObject"
+                  :error-messages="getFieldValidationErrors('costObject')"
+                  @input="$v.costObject.$touch()"
+                  @blur="$v.costObject.$touch()"
+                  >
+                </v-text-field>
+              </v-flex>
+            </v-layout>
+
             <v-layout row>
               <v-flex xs12>
                 <v-text-field
@@ -72,7 +122,6 @@ limitations under the License.
                   @input="$v.description.$touch()"
                   @blur="$v.description.$touch()"
                   counter="50"
-                  tabindex="2"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -82,7 +131,6 @@ limitations under the License.
                   color="deep-purple"
                   label="Purpose"
                   v-model="purpose"
-                  tabindex="3"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -120,33 +168,18 @@ limitations under the License.
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { required, maxLength } from 'vuelidate/lib/validators'
+import { maxLength, requiredIf, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import { getValidationErrors, setInputFocus, isServiceAccount } from '@/utils'
-import map from 'lodash/map'
+import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
+import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
+import map from 'lodash/map'
 import includes from 'lodash/includes'
-import concat from 'lodash/concat'
 import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
-import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
 const defaultProjectName = ''
-
-const validationErrors = {
-  description: {
-    maxLength: 'Description exceeds the maximum length'
-  },
-  projectName: {
-    required: 'Name is required',
-    maxLength: 'Name exceeds the maximum length',
-    resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
-    unique: 'Name is already in use',
-    noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
-    noStartEndHyphen: 'Name must not start or end with a hyphen'
-  }
-}
 
 export default {
   name: 'project-dialog',
@@ -167,10 +200,11 @@ export default {
       projectName: undefined,
       description: undefined,
       purpose: undefined,
-      owner: undefined,
+      technicalContact: undefined,
+      billingContact: undefined,
+      costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors,
       loading: false
     }
   },
@@ -180,8 +214,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'projectList',
-      'memberList'
+      'memberList',
+      'username'
     ]),
     visible: {
       get () {
@@ -192,15 +226,58 @@ export default {
       }
     },
     projectNames () {
-      return map(this.projectList, 'metadata.name')
+      return projectNamesFromProjectList()
     },
-    ownerItems () {
+    projectDetails () {
+      return getProjectDetails(this.project)
+    },
+    costObjectSettings () {
+      return getCostObjectSettings(this.project)
+    },
+    costObjectRequired () {
+      return this.costObjectSettings.costObjectRequired
+    },
+    costObjectLabel () {
+      return this.costObjectSettings.costObjectLabel
+    },
+    costObjectHint () {
+      return this.costObjectSettings.costObjectHint
+    },
+    costObjectRegex () {
+      return this.costObjectSettings.costObjectRegex
+    },
+    costObjectErrorMessage () {
+      return this.costObjectSettings.costObjectErrorMessage
+    },
+    currentProjectName () {
+      return this.projectDetails.projectName
+    },
+    currentDescription () {
+      return this.projectDetails.description
+    },
+    currentPurpose () {
+      return this.projectDetails.purpose
+    },
+    currentTechnicalContact () {
+      return this.projectDetails.technicalContact
+    },
+    currentBillingContact () {
+      return this.projectDetails.billingContact
+    },
+    currentCostObject () {
+      return this.projectDetails.costObject
+    },
+    memberItems () {
       const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
-      const owner = get(this.project, 'data.owner')
-      if (!owner || includes(members, owner)) {
-        return members
+      const technicalContact = this.currentTechnicalContact
+      const billingContact = this.currentBillingContact
+      if (technicalContact && !includes(members, technicalContact)) {
+        members.push(technicalContact)
       }
-      return concat(members, owner)
+      if (billingContact && !includes(members, billingContact)) {
+        members.push(billingContact)
+      }
+      return members
     },
     valid () {
       return !this.$v.$invalid
@@ -216,6 +293,24 @@ export default {
     },
     validators () {
       const validators = {
+        technicalContact: {
+          required: requiredIf(function () {
+            return this.costObjectRequired
+          })
+        },
+        billingContact: {
+          required: requiredIf(function () {
+            return this.costObjectRequired
+          })
+        },
+        costObject: {
+          required: requiredIf(function () {
+            return this.costObjectRequired
+          }),
+          validCostObject: value => {
+            return RegExp(this.costObjectRegex).test(value)
+          }
+        },
         description: {
           maxLength: maxLength(50)
         }
@@ -231,6 +326,31 @@ export default {
         }
       }
       return validators
+    },
+    validationErrors () {
+      return {
+        description: {
+          maxLength: 'Description exceeds the maximum length'
+        },
+        projectName: {
+          required: 'Name is required',
+          maxLength: 'Name exceeds the maximum length',
+          resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
+          unique: 'Name is already in use',
+          noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
+          noStartEndHyphen: 'Name must not start or end with a hyphen'
+        },
+        technicalContact: {
+          required: 'Technical Contact is required'
+        },
+        billingContact: {
+          required: 'Billing Contact is required'
+        },
+        costObject: {
+          required: `${this.costObjectLabel} is required`,
+          validCostObject: `${this.costObjectErrorMessage}`
+        }
+      }
     }
   },
   methods: {
@@ -301,7 +421,11 @@ export default {
 
         project.data.description = this.description
         project.data.purpose = this.purpose
-        project.data.owner = this.owner
+        project.data.owner = this.technicalContact
+        if (this.costObjectRequired) {
+          project.data.sponsor = this.billingContact
+          project.data.costObject = this.costObject
+        }
 
         return this.updateProject(project)
       }
@@ -315,15 +439,20 @@ export default {
         this.projectName = defaultProjectName
         this.description = undefined
         this.purpose = undefined
+        this.technicalContact = this.username
+        this.billingContact = this.username
+        this.costObject = undefined
+
         setInputFocus(this, 'projectName')
       } else {
-        const metadata = this.project ? this.project.metadata || {} : {}
-        const projectData = this.project ? this.project.data || {} : {}
-
-        this.projectName = metadata ? metadata.name || '' : ''
-        this.description = projectData.description
-        this.purpose = projectData.purpose
-        this.owner = projectData.owner
+        this.projectName = this.currentProjectName
+        this.description = this.currentDescription
+        this.purpose = this.currentPurpose
+        this.technicalContact = this.currentTechnicalContact
+        if (this.costObjectRequired) {
+          this.billingContact = this.currentBillingContact
+          this.costObject = this.currentCostObject
+        }
         setInputFocus(this, 'description')
       }
     }
