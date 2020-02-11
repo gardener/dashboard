@@ -22,7 +22,7 @@ limitations under the License.
         <span v-if="isCreateMode">Create Project</span>
         <span v-else>Update Project</span>
       </v-card-title>
-      <v-card-text style="height: 300px; position: relative">
+      <v-card-text>
         <form>
           <v-container fluid grid-list-xl>
             <template v-if="isCreateMode">
@@ -100,8 +100,6 @@ limitations under the License.
                   color="deep-purple"
                   ref="costObject"
                   :label="costObjectLabel"
-                  :hint="costObjectHint"
-                  persistent-hint
                   v-model="costObject"
                   :error-messages="getFieldValidationErrors('costObject')"
                   @input="$v.costObject.$touch()"
@@ -109,6 +107,11 @@ limitations under the License.
                   >
                 </v-text-field>
               </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-alert :value="true" dense type="info" outline color="deep-purple">
+                {{costObjectHint}}
+              </v-alert>
             </v-layout>
 
             <v-layout row>
