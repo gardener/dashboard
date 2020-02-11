@@ -27,7 +27,7 @@ limitations under the License.
           <shoot-status
             class="shootStatus"
             :operation="shootLastOperation"
-            :lastError="shootLastError"
+            :lastErrors="shootLastErrors"
             :popperKey="`${shootNamespace}/${shootName}_lastOp`"
             :isStatusHibernated="isShootStatusHibernated"
             :isHibernationProgressing="isShootStatusHibernationProgressing"

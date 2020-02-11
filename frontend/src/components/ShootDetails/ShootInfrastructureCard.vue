@@ -155,7 +155,7 @@ export default {
       return includes(this.namespaces, 'garden')
     },
     shootIngressDomainText () {
-      const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
+      const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginxIngress.enabled', false)
       if (!this.shootDomain || !nginxIngressEnabled) {
         return undefined
       }

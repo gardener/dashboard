@@ -108,9 +108,11 @@ describe('Store.Shoots', function () {
             progress: 100,
             state: 'Succeeded'
           },
-          lastError: {
-            description: 'foo'
-          },
+          lastErrors: [
+            {
+              description: 'foo'
+            }
+          ],
           conditions: [
             {
               status: 'False',

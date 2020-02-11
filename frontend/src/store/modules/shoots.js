@@ -54,7 +54,8 @@ import { isShootStatusHibernated,
   shootAddonList,
   utcMaintenanceWindowFromLocalBegin,
   randomLocalMaintenanceBegin,
-  generateWorker } from '@/utils'
+  generateWorker,
+  allErrorCodesFromLastErrors } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -240,7 +241,7 @@ const actions = {
   },
   resetNewShootResource ({ commit, rootState, rootGetters }) {
     const shootResource = {
-      apiVersion: 'core.gardener.cloud/v1alpha1',
+      apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
       metadata: {},
       spec: {
@@ -405,8 +406,10 @@ const getSortVal = (item, sortBy) => {
     case 'lastOperation':
       const operation = value || {}
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-      const isError = operation.state === 'Failed' || get(item, 'status.lastError')
-      const userError = isUserError(get(item, 'status.lastError.codes', []))
+      const lastErrors = get(item, 'status.lastErrors', [])
+      const isError = operation.state === 'Failed' || lastErrors.length
+      const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
+      const userError = isUserError(allErrorCodes)
       const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
@@ -546,7 +549,9 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     if (get(state, 'shootListFilters.userIssues', false)) {
       const predicate = item => {
-        return !isUserError(get(item, 'status.lastError.codes', []))
+        const lastErrors = get(item, 'status.lastErrors', [])
+        const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
+        return !isUserError(allErrorCodes)
       }
       items = filter(items, predicate)
     }

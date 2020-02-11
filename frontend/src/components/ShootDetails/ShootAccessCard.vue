@@ -211,10 +211,10 @@ export default {
       return this.shootInfo.cluster_password || ''
     },
     hasDashboardEnabled () {
-      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.enabled', false) === true
+      return get(this.shootItem, 'spec.addons.kubernetesDashboard.enabled', false) === true
     },
     hasDashboardTokenAuth () {
-      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.authenticationMode', 'basic') === 'token'
+      return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
 
     kubeconfig () {

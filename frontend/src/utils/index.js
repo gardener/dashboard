@@ -43,6 +43,8 @@ import join from 'lodash/join'
 import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
 import store from '../store'
 const uuidv4 = require('uuid/v4')
 
@@ -473,7 +475,7 @@ export function selfTerminationDaysForSecret (secret) {
   }
 
   const quotas = get(secret, 'quotas')
-  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1alpha1', kind: 'Project' } } })
+  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
     terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
   }
@@ -487,14 +489,14 @@ export function purposesForSecret (secret) {
 
 export const shootAddonList = [
   {
-    name: 'kubernetes-dashboard',
+    name: 'kubernetesDashboard',
     title: 'Dashboard',
     description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
     enabled: false
   },
   {
-    name: 'nginx-ingress',
+    name: 'nginxIngress',
     title: 'Nginx Ingress',
     description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
     visible: true,
@@ -597,4 +599,8 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   }
 
   return worker
+}
+
+export function allErrorCodesFromLastErrors (lastErrors) {
+  return uniq(compact(flatMap(lastErrors, 'codes')))
 }

@@ -129,8 +129,8 @@ export const shootItem = {
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
     },
-    shootLastError () {
-      return get(this.shootItem, 'status.lastError', {})
+    shootLastErrors () {
+      return get(this.shootItem, 'status.lastErrors', [])
     },
     shootConditions () {
       return get(this.shootItem, 'status.conditions', [])
