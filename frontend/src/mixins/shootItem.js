@@ -106,8 +106,14 @@ export const shootItem = {
     shootZones () {
       return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
     },
-    shootCidr () {
-      return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')
+    podsCidr () {
+      return get(this.shootSpec, 'networking.pods')
+    },
+    nodesCidr () {
+      return get(this.shootSpec, 'networking.nodes')
+    },
+    servicesCidr () {
+      return get(this.shootSpec, 'networking.services')
     },
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')
