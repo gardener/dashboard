@@ -388,9 +388,7 @@ function getShoot ({
     metadata: {
       name,
       namespace,
-      annotations: {
-        'garden.sapcloud.io/purpose': purpose
-      }
+      annotations: {}
     },
     spec: {
       secretBindingName: bindingName,
@@ -403,7 +401,8 @@ function getShoot ({
       seedName: seed,
       kubernetes: {
         version: kubernetesVersion
-      }
+      },
+      purpose
     },
     status: {}
   }
@@ -652,6 +651,16 @@ const stub = {
     return nockWithAuthorization(bearer)
       .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.hibernation.enabled = body.spec.hibernation.enabled
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replacePurpose ({ bearer, namespace, name, project }) {
+    const shoot = getShoot({ name, project })
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.spec.purpose = body.spec.purpose
         return true
       })
       .reply(200, () => shoot)

@@ -287,7 +287,7 @@ const actions = {
     set(shootResource, 'metadata.name', name)
 
     const purpose = head(purposesForSecret(secret))
-    set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+    set(shootResource, 'spec.purpose', purpose)
 
     const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
@@ -363,7 +363,7 @@ const getRawVal = (item, column) => {
   const spec = item.spec
   switch (column) {
     case 'purpose':
-      return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+      return get(spec, 'purpose')
     case 'lastOperation':
       return get(item, 'status.lastOperation')
     case 'createdAt':

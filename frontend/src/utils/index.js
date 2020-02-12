@@ -448,8 +448,8 @@ export function purposeRequiresHibernationSchedule (purpose) {
 }
 
 export function isShootHasNoHibernationScheduleWarning (shoot) {
+  const purpose = get(shoot, 'spec.purpose')
   const annotations = get(shoot, 'metadata.annotations', {})
-  const purpose = annotations['garden.sapcloud.io/purpose']
   if (purposeRequiresHibernationSchedule(purpose)) {
     const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
     if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
@@ -484,7 +484,7 @@ export function selfTerminationDaysForSecret (secret) {
 }
 
 export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production']
+  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production', 'testing']
 }
 
 export const shootAddonList = [

@@ -57,7 +57,7 @@ export const shootItem = {
       return this.shootAnnotations['shoot.garden.sapcloud.io/operation']
     },
     shootPurpose () {
-      return this.shootAnnotations['garden.sapcloud.io/purpose']
+      return get(this.shootSpec, 'purpose')
     },
     shootExpirationTimestamp () {
       return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']

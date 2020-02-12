@@ -37,7 +37,7 @@ limitations under the License.
 
 <script>
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
-import { addShootAnnotation } from '@/utils/api'
+import { updateShootPurpose } from '@/utils/api'
 import { purposesForSecret } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
@@ -76,13 +76,12 @@ export default {
     },
     async updateConfiguration () {
       try {
-        const purposeAnnotation = {
-          'garden.sapcloud.io/purpose': this.purpose
-        }
-        await addShootAnnotation({
+        await updateShootPurpose({
           namespace: this.shootNamespace,
           name: this.shootName,
-          data: purposeAnnotation
+          data: {
+            purpose: this.purpose
+          }
         })
       } catch (err) {
         const errorMessage = 'Could not update purpose'

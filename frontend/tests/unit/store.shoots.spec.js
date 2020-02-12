@@ -26,10 +26,7 @@ describe('Store.Shoots', function () {
       shoot2_foo: {
         metadata: {
           name: 'shoot2',
-          namespace: 'foo',
-          annotations: {
-            'garden.sapcloud.io/purpose': 'development'
-          }
+          namespace: 'foo'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -39,7 +36,8 @@ describe('Store.Shoots', function () {
           region: 'region1',
           provider: {
             type: 'infra1'
-          }
+          },
+          purpose: 'development'
         },
         status: {
           lastOperation: {
@@ -57,10 +55,7 @@ describe('Store.Shoots', function () {
       shoot1_foo: {
         metadata: {
           name: 'shoot1',
-          namespace: 'foo',
-          annotations: {
-            'garden.sapcloud.io/purpose': 'production'
-          }
+          namespace: 'foo'
         },
         spec: {
           creationTimestamp: '2020-02-01T20:00:00Z',
@@ -70,7 +65,8 @@ describe('Store.Shoots', function () {
           region: 'region1',
           provider: {
             type: 'infra2'
-          }
+          },
+          purpose: 'production'
         },
         status: {
           lastOperation: {
@@ -88,10 +84,7 @@ describe('Store.Shoots', function () {
       shoot3_foo: {
         metadata: {
           name: 'shoot3',
-          namespace: 'foo',
-          annotations: {
-            'garden.sapcloud.io/purpose': 'development'
-          }
+          namespace: 'foo'
         },
         spec: {
           creationTimestamp: '2020-01-01T20:00:00Z',
@@ -101,7 +94,8 @@ describe('Store.Shoots', function () {
           region: 'region2',
           provider: {
             type: 'infra1'
-          }
+          },
+          purpose: 'development'
         },
         status: {
           lastOperation: {
@@ -154,7 +148,7 @@ describe('Store.Shoots', function () {
     expect(sortedShoots[2].metadata.name).to.equal('shoot1')
   })
 
-  it('should sort shoots by purpose', function () {
+  it('should sort shoots by creationTimestamp', function () {
     store.dispatch('setShootListSortParams', { sortBy: 'creationTimestamp', descending: false })
 
     const sortedShoots = store.getters.shootList

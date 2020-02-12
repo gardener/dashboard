@@ -66,17 +66,16 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
-      .send({ metadata: {
-        name,
-        annotations: {
-          'garden.sapcloud.io/purpose': purpose
-        }
-      },
-      spec })
+      .send({
+        metadata: {
+          name,
+          namespace
+        },
+        spec
+      })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -148,8 +147,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const metadata = {
       annotations: {
-        'garden.sapcloud.io/createdBy': 'baz@example.org',
-        'garden.sapcloud.io/purpose': 'evaluation'
+        'garden.sapcloud.io/createdBy': 'baz@example.org'
       },
       labels: {
         foo: 'bar'
@@ -171,9 +169,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const actLabels = body.metadata.labels
     const expLabels = metadata.labels
     expect(actLabels).to.eql(expLabels)
-    const actPurpose = body.metadata.annotations['garden.sapcloud.io/purpose']
-    const expPurpose = metadata.annotations['garden.sapcloud.io/purpose']
-    expect(actPurpose).to.equal(expPurpose)
     const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/createdBy']
     const expCreatedBy = 'baz@example.org'
     expect(actCreatedBy).to.equal(expCreatedBy)
@@ -224,7 +219,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const worker = {
       name: 'worker-g5rk1'
     }
-    const workers = [ worker ]
+    const workers = [worker]
     k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
     const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`)
@@ -256,7 +251,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       start: '00 17 * * 1,2,3,4,5,6',
       end: '00 08 * * 1,2,3,4,5,6'
     }
-    const hibernationSchedules = [ schedule ]
+    const hibernationSchedules = [schedule]
     k8s.stub.replaceHibernationSchedules({ bearer, namespace, name, project })
     const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`)
@@ -280,5 +275,19 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body.metadata.annotations).to.eql(Object.assign({}, annotations, patchedAnnotations))
+  })
+
+  it('should replace purpose', async function () {
+    const bearer = await user.bearer
+    const purpose = 'testing'
+    k8s.stub.replacePurpose({ bearer, namespace, name, project })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/purpose`)
+      .set('cookie', await user.cookie)
+      .send({ purpose })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.purpose).to.equal(purpose)
   })
 }
