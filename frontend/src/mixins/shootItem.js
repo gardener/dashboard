@@ -23,7 +23,8 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
-      const confirmation = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmationDeprecated = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && confirmation === 'true'
@@ -54,13 +55,13 @@ export const shootItem = {
       return get(this.shootMetadata, 'annotations', {})
     },
     shootGardenOperation () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/operation']
+      return this.shootAnnotations['gardener.cloud/operation']
     },
     shootPurpose () {
       return this.shootAnnotations['garden.sapcloud.io/purpose']
     },
     shootExpirationTimestamp () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
+      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
     isShootActionsDisabledForPurpose () {
       return this.shootPurpose === 'infrastructure'
