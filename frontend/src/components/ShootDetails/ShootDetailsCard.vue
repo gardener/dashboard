@@ -174,7 +174,7 @@ export default {
   mixins: [shootItem],
   computed: {
     expirationTimestamp () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
+      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
     selfTerminationMessage () {
       if (this.isValidTerminationDate) {

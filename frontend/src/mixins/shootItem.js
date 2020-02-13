@@ -23,7 +23,8 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
-      const confirmation = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmationDeprecated = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && confirmation === 'true'
@@ -54,13 +55,13 @@ export const shootItem = {
       return get(this.shootMetadata, 'annotations', {})
     },
     shootGardenOperation () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/operation']
+      return this.shootAnnotations['gardener.cloud/operation']
     },
     shootPurpose () {
       return get(this.shootSpec, 'purpose')
     },
     shootExpirationTimestamp () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
+      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
     isShootActionsDisabledForPurpose () {
       return this.shootPurpose === 'infrastructure'
@@ -106,8 +107,14 @@ export const shootItem = {
     shootZones () {
       return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
     },
-    shootCidr () {
-      return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')
+    podsCidr () {
+      return get(this.shootSpec, 'networking.pods')
+    },
+    nodesCidr () {
+      return get(this.shootSpec, 'networking.nodes')
+    },
+    servicesCidr () {
+      return get(this.shootSpec, 'networking.services')
     },
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')

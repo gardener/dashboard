@@ -46,7 +46,7 @@ exports.create = async function ({ user, namespace, body }) {
   const username = user.id
 
   const annotations = {
-    'garden.sapcloud.io/createdBy': username
+    'gardener.cloud/created-by': username
   }
   if (_.get(body, 'spec.addons.kyma.enabled', false)) {
     annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
@@ -235,7 +235,7 @@ exports.patchAnnotations = patchAnnotations
 exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
   const annotations = {
-    'confirmation.garden.sapcloud.io/deletion': 'true'
+    'confirmation.gardener.cloud/deletion': 'true'
   }
   await patchAnnotations({ user, namespace, name, annotations })
 

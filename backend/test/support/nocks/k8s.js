@@ -407,7 +407,7 @@ function getShoot ({
     status: {}
   }
   if (createdBy) {
-    shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
+    shoot.metadata.annotations['gardener.cloud/created-by'] = createdBy
   }
   if (project) {
     shoot.status.technicalID = `shoot--${project}--${name}`
@@ -1055,7 +1055,7 @@ const stub = {
   deleteProject ({ bearer, namespace }) {
     const project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
-    const confirmationPath = ['metadata', 'annotations', 'confirmation.garden.sapcloud.io/deletion']
+    const confirmationPath = ['metadata', 'annotations', 'confirmation.gardener.cloud/deletion']
     return [
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
