@@ -79,7 +79,7 @@ limitations under the License.
           Project Members
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="memberListWithoutTechnicalContact.length > 3"
+        <v-text-field v-if="memberList.length > 3"
           class="searchField"
           prepend-inner-icon="search"
           color="green darken-2"
@@ -100,7 +100,7 @@ limitations under the License.
         </v-btn>
       </v-toolbar>
 
-      <v-card-text v-if="!memberListWithoutTechnicalContact.length">
+      <v-card-text v-if="!memberList.length">
         <div class="title grey--text text--darken-1 my-3">Add members to your project.</div>
         <p class="body-1">
           Adding members to your project allows you to collaborate across your team.
@@ -108,38 +108,13 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <template v-for="({ username }, index) in sortedAndFilteredMemberList">
-          <v-divider
-            v-if="index > 0"
-            inset
-            :key="`${username}-dividerKey`"
-          ></v-divider>
-          <v-list-tile
-            avatar
-            :key="username"
-          >
-            <v-list-tile-avatar>
-              <img :src="avatarUrl(username)" />
-            </v-list-tile-avatar>
-            <v-list-tile-content>
-              <v-list-tile-title>
-                {{displayName(username)}}
-              </v-list-tile-title>
-              <v-list-tile-sub-title>
-                <a v-if="isEmail(username)" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
-                <span v-else class="pl-2">{{username}}</span>
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-            <v-list-tile-action>
-              <v-tooltip top>
-                <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete(username)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-                <span>Delete Member</span>
-              </v-tooltip>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
+        <project-member-row
+          v-for="(member, index) in sortedAndFilteredMemberList"
+          :member="member"
+          :firstRow="index === 0"
+          :key="member.username"
+          @onDelete="onDelete"
+        ></project-member-row>
       </v-list>
     </v-card>
 
@@ -176,15 +151,15 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <member-service-accounts-row
-          v-for="(member, index) in sortedAndFilteredServiceAccountList"
-          :member="member"
+        <project-service-account-row
+          v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList"
+          :serviceAccount="serviceAccount"
           :firstRow="index === 0"
-          :key="member.username"
+          :key="serviceAccount.username"
           @onDownload="onDownload"
           @onKubeconfig="onKubeconfig"
           @onDelete="onDelete"
-        ></member-service-accounts-row>
+        ></project-service-account-row>
       </v-list>
     </v-card>
 
@@ -232,17 +207,21 @@ import download from 'downloadjs'
 import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
+import map from 'lodash/map'
+import upperFirst from 'lodash/upperFirst'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
-import MemberServiceAccountsRow from '@/components/MemberServiceAccountsRow'
+import ProjectMemberRow from '@/components/ProjectMemberRow'
+import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
   serviceAccountToDisplayName,
-  isServiceAccount
+  isServiceAccount,
+  getTimestampFormatted
 } from '@/utils'
 import { getMember } from '@/utils/api'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
@@ -253,7 +232,8 @@ export default {
     MemberAddDialog,
     MemberHelpDialog,
     CodeBlock,
-    MemberServiceAccountsRow
+    ProjectMemberRow,
+    ProjectServiceAccountRow
   },
   data () {
     return {
@@ -276,7 +256,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'memberList'
+      'userList'
     ]),
     project () {
       return projectFromProjectList()
@@ -300,21 +280,44 @@ export default {
       return this.projectDetails.costObject
     },
     serviceAccountList () {
-      return filter(this.memberList, ({ username }) => isServiceAccount(username))
+      const serviceAccounts = filter(this.userList, ({ username }) => isServiceAccount(username))
+      return map(serviceAccounts, serviceAccount => {
+        const { username } = serviceAccount
+        return {
+          ...serviceAccount,
+          avatarUrl: gravatarUrlGeneric(username),
+          displayName: displayName(username),
+          created: getTimestampFormatted(serviceAccount.creationTimestamp)
+        }
+      })
     },
-    memberListWithoutTechnicalContact () {
-      const predicate = ({ username }) => !this.isTechnicalContact(username) && !isServiceAccount(username)
-      return filter(this.memberList, predicate)
+    memberList () {
+      const members = filter(this.userList, ({ username }) => !isServiceAccount(username))
+      return map(members, member => {
+        const { username } = member
+        return {
+          ...member,
+          avatarUrl: gravatarUrlGeneric(username),
+          displayName: displayName(username),
+          isEmail: isEmail(username),
+          isTechnicalOrBillingContact: this.isTechnicalContact(username) || this.isBillingContact(username),
+          roleName: this.roleName(member.role)
+        }
+      })
     },
     sortedAndFilteredMemberList () {
       const predicate = ({ username }) => {
+        if(isServiceAccount(username)) {
+          return false
+        }
+
         if (!this.userFilter) {
           return true
         }
         const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
-      return sortBy(filter(this.memberListWithoutTechnicalContact, predicate))
+      return sortBy(filter(this.memberList, predicate), 'displayName')
     },
     allEmails () {
       const emails = []
@@ -334,7 +337,7 @@ export default {
         const name = serviceAccountToDisplayName(username)
         return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
-      return sortBy(filter(this.serviceAccountList, predicate))
+      return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
       return serviceAccountToDisplayName(this.currentServiceAccountName)
@@ -358,17 +361,17 @@ export default {
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    displayName (username) {
-      return displayName(username)
-    },
     isTechnicalContact (username) {
       return this.technicalContact === toLower(username)
     },
-    isEmail (username) {
-      return isEmail(username)
+    isBillingContact (username) {
+      return this.billingContact === toLower(username)
     },
     avatarUrl (username) {
       return gravatarUrlGeneric(username)
+    },
+    displayName (username) {
+      return displayName(username)
     },
     async downloadKubeconfig (name) {
       const namespace = this.namespace
@@ -400,6 +403,9 @@ export default {
     },
     onDelete (username) {
       this.deleteMember(username)
+    },
+    roleName (role) {
+      return upperFirst(role)
     }
   },
   mounted () {

@@ -19,23 +19,23 @@ limitations under the License.
     <v-divider v-if="!firstRow" inset></v-divider>
     <v-list-tile avatar>
       <v-list-tile-avatar>
-        <img :src="avatarUrl" />
+        <img :src="serviceAccount.avatarUrl" />
       </v-list-tile-avatar>
       <v-list-tile-content>
         <g-popper
-          :title="displayName"
+          :title="serviceAccount.displayName"
           toolbarColor="cyan darken-2"
-          :popperKey="`member_sa_${username}`"
+          :popperKey="`serviceAccount_sa_${serviceAccount.username}`"
 
         >
           <v-list-tile-title slot="popperRef" class="cursor-pointer">
-            {{displayName}}
+            {{serviceAccount.displayName}}
           </v-list-tile-title>
           <v-layout row
             fill-height
             align-center
           >
-            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
+            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="serviceAccount.createdBy"></account-avatar></span>
           </v-layout>
           <v-layout row
             fill-height
@@ -43,13 +43,13 @@ limitations under the License.
           >
             <span class="mr-3">Created at</span>
             <v-tooltip top>
-              <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
-              {{created}}
+              <span slot="activator" class="font-weight-bold"><time-string :date-time="serviceAccount.creationTimestamp" :pointInTime="-1"></time-string></span>
+              {{serviceAccount.created}}
             </v-tooltip>
           </v-layout>
         </g-popper>
         <v-list-tile-sub-title>
-          {{username}}
+          {{serviceAccount.username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace">
@@ -86,22 +86,18 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
-  displayName,
-  gravatarUrlGeneric,
-  isServiceAccount,
-  isServiceAccountFromNamespace,
-  getTimestampFormatted
+  isServiceAccountFromNamespace
 } from '@/utils'
 
 export default {
-  name: 'members',
+  name: 'project-service-account-row',
   components: {
     TimeString,
     GPopper,
     AccountAvatar
   },
   props: {
-    member: {
+    serviceAccount: {
       type: Object,
       required: true
     },
@@ -114,26 +110,8 @@ export default {
     ...mapState([
       'namespace'
     ]),
-    username () {
-      return this.member.username
-    },
-    created () {
-      return getTimestampFormatted(this.creationTimestamp)
-    },
-    createdBy () {
-      return this.member.createdBy
-    },
-    creationTimestamp () {
-      return this.member.creationTimestamp
-    },
-    displayName () {
-      return displayName(this.username)
-    },
-    avatarUrl () {
-      return gravatarUrlGeneric(this.username)
-    },
     isServiceAccountFromCurrentNamespace () {
-      return isServiceAccountFromNamespace(this.username, this.namespace)
+      return isServiceAccountFromNamespace(this.serviceAccount.username, this.namespace)
     },
     createdByClasses () {
       return !!this.createdBy ? ['font-weight-bold'] : ['grey--text']
@@ -141,13 +119,13 @@ export default {
   },
   methods: {
     async onDownload () {
-      this.$emit('onDownload', this.username)
+      this.$emit('onDownload', this.serviceAccount.username)
     },
     async onKubeconfig () {
-      this.$emit('onKubeconfig', this.username)
+      this.$emit('onKubeconfig', this.serviceAccount.username)
     },
     onDelete (username) {
-      this.$emit('onDelete', this.username)
+      this.$emit('onDelete', this.serviceAccount.username)
     }
   }
 }

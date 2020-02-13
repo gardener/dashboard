@@ -122,7 +122,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'memberList',
+      'userList',
       'projectList'
     ]),
     visible: {
@@ -202,10 +202,10 @@ export default {
       return ''
     },
     serviceAccountNames () {
-      return map(filter(this.memberList, isServiceAccount), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
+      return map(filter(this.userList, isServiceAccount), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
     },
     projectMembersNames () {
-      return filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      return filter(this.userList, ({ username }) => !isServiceAccount(username))
     }
   },
   methods: {

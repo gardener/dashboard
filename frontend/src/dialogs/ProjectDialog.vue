@@ -217,7 +217,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'memberList',
+      'userList',
       'username'
     ]),
     visible: {
@@ -271,7 +271,7 @@ export default {
       return this.projectDetails.costObject
     },
     memberItems () {
-      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
+      const members = filter(map(this.userList, 'username'), username => !isServiceAccount(username))
       const technicalContact = this.currentTechnicalContact
       const billingContact = this.currentBillingContact
       if (technicalContact && !includes(members, technicalContact)) {

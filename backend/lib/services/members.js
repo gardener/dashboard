@@ -44,9 +44,9 @@ function fromResource (project = {}, serviceAccounts = []) {
     .chain(project)
     .get('spec.members')
     .filter(['kind', 'User'])
-    .map('name')
-    .map(username => ({
+    .map(({ name: username, role }) => ({
       username,
+      role,
       ...serviceAccountsMetadata[username]
     }))
     .value()
