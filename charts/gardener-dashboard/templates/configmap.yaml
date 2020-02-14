@@ -155,3 +155,10 @@ data:
         type: {{ .Values.frontendConfig.alert.type }}
         message: {{ .Values.frontendConfig.alert.message }}
 {{- end }}
+{{- if .Values.frontendConfig.costObject }}
+      costObject:
+        label: {{ .Values.frontendConfig.costObject.label }}
+        hint: {{ .Values.frontendConfig.costObject.hint }}
+        regex: {{ .Values.frontendConfig.costObject.regex }}
+        errorMessage: {{ .Values.frontendConfig.costObject.errorMessage }}
+{{- end }}

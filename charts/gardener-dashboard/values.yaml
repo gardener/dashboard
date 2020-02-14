@@ -86,6 +86,13 @@ frontendConfig:
   #     It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.
   #   enabled: false
 
+  # # costObject is used for billing purposes and is assigned to the gardener project
+  # costObject:
+  #   label: Cost Center
+  #   hint: Costs for the control planes of the clusters in this project will be charged to this cost center. Projects with an invalid Cost Center will be charged to the personal Cost Center of the billing contact. Trial clusters are free of charge.
+  #   regex: ^([0-9]{10})$
+  #   errorMessage: Cost Center needs to have exactly 10 digits
+
 gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
