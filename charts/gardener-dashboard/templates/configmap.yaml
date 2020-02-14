@@ -162,3 +162,6 @@ data:
         regex: {{ .Values.frontendConfig.costObject.regex }}
         errorMessage: {{ .Values.frontendConfig.costObject.errorMessage }}
 {{- end }}
+{{- if .Values.frontendConfig.slaLink }}
+      slaLink: {{ .Values.frontendConfig.slaLink }}
+{{- end }}

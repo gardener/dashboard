@@ -93,6 +93,8 @@ frontendConfig:
   #   regex: ^([0-9]{10})$
   #   errorMessage: Cost Center needs to have exactly 10 digits
 
+  slaLink: https://foo.example.com/gardener-sla
+
 gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
