@@ -83,7 +83,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(_.concat(members, { username: 'baz@example.org' }))
+    expect(res.body).to.eql(_.concat(members, { role: 'admin', username: 'baz@example.org' }))
   })
 
   it('should not add member that is already a project member', async function () {

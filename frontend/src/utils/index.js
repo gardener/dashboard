@@ -496,7 +496,7 @@ export const shootAddonList = [
   {
     name: 'nginx-ingress',
     title: 'Nginx Ingress',
-    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
+    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
     visible: true,
     enabled: true
   }
