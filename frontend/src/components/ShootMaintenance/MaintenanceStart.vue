@@ -107,7 +107,7 @@ export default {
       }
     },
     reset () {
-      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateOSVersion, osUpdates: this.updateKubernetesVersion })
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateKubernetesVersion, osUpdates: this.updateOSVersion })
     }
   },
   watch: {

@@ -56,16 +56,12 @@ limitations under the License.
         </select-hint-colorizer>
       </v-flex>
       <v-flex class="regularInput">
-        <v-select
-          color="cyan darken-2"
-          label="Purpose"
-          :items="purposes"
-          v-model="purpose"
-          hint="Indicate the importance of the cluster"
-          persistent-hint
-          @input="onInputPurpose"
-          @blur="$v.purpose.$touch()"
-          ></v-select>
+        <purpose
+          ref="purpose"
+          :secret="secret"
+          @updatePurpose="onUpdatePurpose"
+          @valid="onPurposeValid">
+        </purpose>
       </v-flex>
     </v-layout>
 </v-container>
@@ -74,8 +70,9 @@ limitations under the License.
 <script>
 
 import SelectHintColorizer from '@/components/SelectHintColorizer'
+import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, purposesForSecret } from '@/utils'
+import { getValidationErrors } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
@@ -94,9 +91,6 @@ const validationErrors = {
   },
   kubernetesVersion: {
     required: 'Kubernetes version is required'
-  },
-  purpose: {
-    required: ' Purpose is required'
   }
 }
 
@@ -113,16 +107,14 @@ const validations = {
   },
   kubernetesVersion: {
     required
-  },
-  purpose: {
-    required
   }
 }
 
 export default {
   name: 'new-shoot-details',
   components: {
-    SelectHintColorizer
+    SelectHintColorizer,
+    Purpose
   },
   props: {
     userInterActionBus: {
@@ -137,6 +129,7 @@ export default {
       kubernetesVersion: undefined,
       purpose: undefined,
       valid: false,
+      purposeValid: false,
       cloudProfileName: undefined,
       secret: undefined,
       updateK8sMaintenance: undefined
@@ -151,9 +144,6 @@ export default {
       'sortedKubernetesVersions',
       'shootByNamespaceAndName'
     ]),
-    purposes () {
-      return purposesForSecret(this.secret)
-    },
     sortedKubernetesVersionsList () {
       return this.sortedKubernetesVersions(this.cloudProfileName)
     },
@@ -181,21 +171,20 @@ export default {
       this.$v.kubernetesVersion.$touch()
       this.validateInput()
     },
-    onInputPurpose () {
-      this.$v.name.$touch()
+    onUpdatePurpose (purpose) {
+      this.purpose = purpose
       this.userInterActionBus.emit('updatePurpose', this.purpose)
       this.validateInput()
     },
+    onPurposeValid (value) {
+      this.purposeValid = value
+    },
     validateInput () {
-      const valid = !this.$v.$invalid
+      const valid = !this.$v.$invalid && this.purposeValid
       if (this.valid !== valid) {
         this.valid = valid
         this.$emit('valid', valid)
       }
-    },
-    setDefaultPurpose () {
-      this.purpose = head(this.purposes)
-      this.onInputPurpose()
     },
     setDefaultKubernetesVersion () {
       this.kubernetesVersion = get(head(this.sortedKubernetesVersionsList), 'version')
@@ -213,8 +202,9 @@ export default {
       this.cloudProfileName = cloudProfileName
       this.secret = secret
       this.kubernetesVersion = kubernetesVersion
-      this.purpose = purpose
       this.updateK8sMaintenance = updateK8sMaintenance
+
+      this.$refs.purpose.setPurpose(purpose)
 
       this.validateInput()
     }
@@ -222,7 +212,7 @@ export default {
   mounted () {
     this.userInterActionBus.on('updateSecret', secret => {
       this.secret = secret
-      this.setDefaultPurpose()
+      this.$refs.purpose.setDefaultPurpose()
     })
     this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
       this.cloudProfileName = cloudProfileName

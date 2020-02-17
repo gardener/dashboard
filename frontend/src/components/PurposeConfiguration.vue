@@ -23,29 +23,30 @@ limitations under the License.
     maxWidth="400"
     caption="Configure Purpose">
     <template slot="actionComponent">
-      <v-select
-        color="cyan darken-2"
-        label="Purpose"
-        :items="purposes"
-        v-model="purpose"
-        hint="Indicate the importance of the cluster"
-        persistent-hint
-        ></v-select>
+      <purpose
+        ref="purpose"
+        :secret="secret"
+        @updatePurpose="onUpdatePurpose"
+        @valid="onPurposeValid">
+      </purpose>
     </template>
   </action-icon-dialog>
 </template>
 
 <script>
 import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import Purpose from '@/components/Purpose'
 import { updateShootPurpose } from '@/utils/api'
-import { purposesForSecret } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
+import { mapGetters } from 'vuex'
+import find from 'lodash/find'
 
 export default {
   name: 'purpose-configuration',
   components: {
-    ActionIconDialog
+    ActionIconDialog,
+    Purpose
   },
   props: {
     shootItem: {
@@ -55,18 +56,33 @@ export default {
   mixins: [shootItem],
   data () {
     return {
-      purpose: null
+      purpose: undefined,
+      purposeValid: false
     }
   },
   computed: {
+    ...mapGetters([
+      'infrastructureSecretsByCloudProfileName'
+    ]),
     valid () {
-      return !!this.purpose
+      return this.purposeValid
     },
-    purposes () {
-      return purposesForSecret(this.shootSecretBindingName)
+    secret () {
+      const secrets = this.infrastructureSecretsByCloudProfileName(this.shootCloudProfileName)
+      const secret = find(secrets, ['metadata.bindingName', this.shootSecretBindingName])
+      if (!secret) {
+        console.error('Secret must not be undefined')
+      }
+      return secret
     }
   },
   methods: {
+    onPurposeValid (value) {
+      this.purposeValid = value
+    },
+    onUpdatePurpose (purpose) {
+      this.purpose = purpose
+    },
     async onConfigurationDialogOpened () {
       this.reset()
       const confirmed = await this.$refs.actionDialog.waitForDialogClosed()
@@ -93,6 +109,7 @@ export default {
     },
     reset () {
       this.purpose = this.shootPurpose
+      this.$refs.purpose.setPurpose(this.purpose)
     }
   }
 }

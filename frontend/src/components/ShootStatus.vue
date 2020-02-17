@@ -43,7 +43,7 @@ limitations under the License.
     <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
     <v-divider class="my-2"></v-divider>
     <h4 class="error--text text-xs-left">Last Errors</h4>
-    <div v-for="lastErrorDescription in lastErrorDescriptions" v-bind:key="lastErrorDescription.description">
+    <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
       <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
         <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
       </template>
@@ -140,12 +140,10 @@ export default {
       return isUserError(this.allErrorCodes)
     },
     lastErrorDescriptions () {
-      return map(this.lastErrors, lastError => {
-        return {
-          description: lastError.description,
-          errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, `${code}.description`, code))
-        }
-      })
+      return map(this.lastErrors, lastError => ({
+        description: lastError.description,
+        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, `${code}.description`, code))
+      }))
     },
     allErrorCodes () {
       return allErrorCodesFromLastErrors(this.lastErrors)

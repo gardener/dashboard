@@ -81,7 +81,6 @@ exports.replace = async function ({ user, namespace, name, body }) {
   Object.assign(metadata, { labels, annotations })
   // compose new body
   body = { kind, apiVersion, metadata, spec, status }
-  body = { kind, apiVersion, metadata, spec, status }
   // replace
   return client['core.gardener.cloud'].shoots.update(namespace, name, body)
 }

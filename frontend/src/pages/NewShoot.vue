@@ -157,12 +157,12 @@ export default {
   data () {
     return {
       userInterActionBus: new EventEmitter(),
-      infrastructureValid: undefined,
-      infrastructureDetailsValid: undefined,
-      detailsValid: undefined,
-      workersValid: undefined,
-      maintenanceTimeValid: undefined,
-      hibernationScheduleValid: undefined,
+      infrastructureValid: false,
+      infrastructureDetailsValid: false,
+      detailsValid: false,
+      workersValid: false,
+      maintenanceTimeValid: false,
+      hibernationScheduleValid: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false

@@ -76,6 +76,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
+    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -147,7 +148,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const metadata = {
       annotations: {
-        'garden.sapcloud.io/created-by': 'baz@example.org'
+        'gardener.cloud/created-by': 'baz@example.org'
       },
       labels: {
         foo: 'bar'
@@ -169,7 +170,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const actLabels = body.metadata.labels
     const expLabels = metadata.labels
     expect(actLabels).to.eql(expLabels)
-    const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/created-by']
+    const actCreatedBy = body.metadata.annotations['gardener.cloud/created-by']
     const expCreatedBy = 'baz@example.org'
     expect(actCreatedBy).to.equal(expCreatedBy)
   })
