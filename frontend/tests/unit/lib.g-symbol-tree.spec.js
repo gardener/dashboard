@@ -16,6 +16,7 @@
 
 import { expect } from 'chai'
 import { GSymbolTree, TreeItem, SplitpaneTreeItem, PositionEnum } from '@/lib/g-symbol-tree'
+import cloneDeep from 'lodash/cloneDeep'
 
 describe('lib', function () {
   describe('g-symbol-tree', function () {
@@ -114,6 +115,30 @@ describe('lib', function () {
           expect(tree.childrenCount(newA)).to.be.equal(2)
           expect(tree.childrenToArray(newA)).to.eql([a, b2])
         })
+
+        it('should leave a2 where it is when moving below a1', function () {
+          const itemTree = {
+            horizontal: false,
+            items: [{
+              horizontal: true,
+              items: [{
+                uuid: 'a1',
+                data: undefined
+              }, {
+                uuid: 'a2',
+                data: undefined
+              }]
+            }, {
+              uuid: 'b1',
+              data: undefined
+            }]
+          }
+          const expectedItemTree = cloneDeep(itemTree)
+          const newTree = GSymbolTree.fromItemTree(itemTree)
+          newTree.moveToWithId({ sourceId: 'a2', targetId: 'a1', position: PositionEnum.BOTTOM })
+
+          expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+        })
       })
 
       describe('position top', function () {
@@ -134,6 +159,30 @@ describe('lib', function () {
           expect(tree.childrenCount(newA)).to.be.equal(2)
           expect(tree.childrenToArray(newA)).to.eql([b2, a])
           expect(tree.childrenCount(b)).to.be.equal(2)
+        })
+
+        it('should leave a1 where it is when moving above a2', function () {
+          const itemTree = {
+            horizontal: false,
+            items: [{
+              horizontal: true,
+              items: [{
+                uuid: 'a1',
+                data: undefined
+              }, {
+                uuid: 'a2',
+                data: undefined
+              }]
+            }, {
+              uuid: 'b1',
+              data: undefined
+            }]
+          }
+          const expectedItemTree = cloneDeep(itemTree)
+          const newTree = GSymbolTree.fromItemTree(itemTree)
+          newTree.moveToWithId({ sourceId: 'a1', targetId: 'a2', position: PositionEnum.TOP })
+
+          expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
         })
       })
     })
@@ -157,6 +206,7 @@ describe('lib', function () {
         tree.moveToWithId({ sourceId: b2.uuid, targetId: a.uuid, position: PositionEnum.RIGHT })
         tree.moveToWithId({ sourceId: b3.uuid, targetId: a.uuid, position: PositionEnum.RIGHT })
 
+        expect(tree.childrenCount(tree.root)).is.equal(5) // a, b3, b2, b1, c
         expect(tree.nextSibling(a)).is.equal(b3)
         expect(tree.nextSibling(b3)).is.equal(b2)
         expect(tree.nextSibling(b2)).is.equal(b1)
@@ -174,6 +224,49 @@ describe('lib', function () {
         expect(tree.childrenCount(tree.root)).to.be.equal(2)
         expect(tree.items().length).to.be.equal(2)
         expect(tree.nextSibling(a)).is.equal(c)
+      })
+
+      it('should cleanup root with only one `SplitpaneTreeItem` child', function () {
+        const itemTree = {
+          horizontal: true,
+          items: [{
+            horizontal: false,
+            items: [{
+              uuid: 'b1',
+              data: undefined
+            }, {
+              uuid: 'b2',
+              data: undefined
+            }]
+          }]
+        }
+        const expectedItemTree = {
+          horizontal: false,
+          items: [{
+            uuid: 'b1',
+            data: undefined
+          }, {
+            uuid: 'b2',
+            data: undefined
+          }]
+        }
+        const newTree = GSymbolTree.fromItemTree(itemTree)
+
+        expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+      })
+
+      it('should not cleanup root with only one `TreeItem` child', function () {
+        const itemTree = {
+          horizontal: true,
+          items: [{
+            uuid: 'b1',
+            data: undefined
+          }]
+        }
+        const expectedItemTree = cloneDeep(itemTree)
+        const newTree = GSymbolTree.fromItemTree(itemTree)
+
+        expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
       })
     })
 
@@ -230,6 +323,24 @@ describe('lib', function () {
           }]
         }
         expect(itemTree).to.eql(expectedItemTree)
+      })
+
+      it('should return undefined for empty tree', function () {
+        const newTree = new GSymbolTree()
+        const itemTree = newTree.toItemTree(newTree.root)
+
+        expect(itemTree).to.be.undefined
+      })
+
+      it('should return undefined for tree without `TreeItem`s', function () {
+        const newTree = new GSymbolTree()
+        const splitpane1 = new SplitpaneTreeItem()
+        const splitpane2 = new SplitpaneTreeItem()
+        newTree.appendChild(newTree.root, splitpane1)
+        newTree.appendChild(splitpane1, splitpane2)
+        const itemTree = newTree.toItemTree(newTree.root)
+
+        expect(itemTree).to.be.undefined
       })
     })
 

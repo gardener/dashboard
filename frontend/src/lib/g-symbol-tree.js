@@ -82,11 +82,11 @@ export class GSymbolTree extends SymbolTree {
     super.remove(removeObject)
 
     if (clean) {
-      this._clean()
+      this._clean(this.root)
     }
   }
 
-  lastChild (object, recursive = true) {
+  lastChild (object, recursive = false) {
     if (!object) {
       return
     }
@@ -127,7 +127,7 @@ export class GSymbolTree extends SymbolTree {
   removeWithIds (ids) {
     forEach(ids, id => this.removeWithId(id, false))
 
-    this._clean()
+    this._clean(this.root)
   }
 
   removeWithId (id, clean = true) {
@@ -152,14 +152,17 @@ export class GSymbolTree extends SymbolTree {
         items.push(cloneDeep(child))
       }
     }
-    clonedParent.items = items
+    clonedParent.items = compact(items)
+    if (isEmpty(clonedParent.items)) {
+      return undefined
+    }
     return clonedParent
   }
 
   static fromItemTree (itemTree = {}) {
     const tree = new GSymbolTree({ horizontal: itemTree.horizontal })
     tree._addTreeItems(tree.root, itemTree.items)
-    tree._clean()
+    tree._clean(tree.root)
     return tree
   }
 
@@ -180,12 +183,12 @@ export class GSymbolTree extends SymbolTree {
   _moveToAndClean ({ sourceItem, targetItem, position }) {
     this._moveItemTo({ sourceItem, targetItem, position })
 
-    this._clean()
+    this._clean(this.root)
   }
 
   _moveItemTo ({ sourceItem, targetItem, position }) {
     const targetParent = this.parent(targetItem)
-    this.remove(sourceItem)
+    this.remove(sourceItem, false)
     switch (position) {
       case PositionEnum.TOP: {
         this._ensureSplitpaneOrientation({ horizontal: true, targetParent, targetItem })
@@ -213,15 +216,19 @@ export class GSymbolTree extends SymbolTree {
   /*
     _clean should be called when items are removed from the tree or moved to a different parent.
   */
-  _clean (parent = this.root) {
-    if (this.root !== parent) {
-      if (this.childrenCount(parent) === 1) {
-        const onlyChild = this.firstChild(parent)
+  _clean (parent) {
+    if (this.childrenCount(parent) === 1) {
+      const onlyChild = this.firstChild(parent)
+      if (this.root !== parent || (this.root === parent && onlyChild instanceof SplitpaneTreeItem)) {
+        if (this.root === parent) {
+          this.root = onlyChild
+        }
         this.remove(onlyChild)
         this.insertBefore(parent, onlyChild)
         this.remove(parent)
       }
     }
+
     for (const child of this.childrenIterator(parent)) {
       this._clean(child)
     }
