@@ -61,6 +61,7 @@ limitations under the License.
           label="Purpose"
           :items="purposes"
           v-model="purpose"
+          :error-messages="getErrorMessages('purpose')"
           hint="Indicate the importance of the cluster"
           persistent-hint
           @input="onInputPurpose"

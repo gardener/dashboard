@@ -598,3 +598,14 @@ export function generateWorker (availableZones, cloudProfileName, region) {
 
   return worker
 }
+
+export const memberRoles = [
+  {
+    name: 'admin',
+    displayName: 'Admin'
+  },
+  {
+    name: 'viewer',
+    displayName: 'Viewer'
+  }
+]

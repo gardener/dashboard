@@ -22,35 +22,37 @@ limitations under the License.
         <span v-if="isUserDialog">Add user to Project</span>
         <span v-if="isServiceDialog">Add Service Account to Project</span>
       </v-card-title>
-
       <v-card-text>
-          <v-text-field
-            v-if="isUserDialog"
-            color="green darken-2"
-            ref="username"
-            label="User"
-            v-model.trim="username"
-            :error-messages="usernameErrors"
-            @input="$v.username.$touch()"
-            @keyup.enter="submit()"
-            hint="Enter the username who should become member of this project"
-            persistent-hint
-            tabindex="1"
-          ></v-text-field>
-          <v-text-field
-            v-if="isServiceDialog"
-            color="blue-grey"
-            ref="serviceAccountName"
-            label="Service Account"
-            v-model.trim="serviceAccountName"
-            :error-messages="serviceAccountNameErrors"
-            @input="$v.serviceAccountName.$touch()"
-            @keyup.enter="submit()"
-            hint="Enter the name of a Kubernetes Service Account"
-            persistent-hint
-            tabindex="1"
-          ></v-text-field>
+        <v-container grid-list-xl class="pa-0 ma-0">
+          <v-layout row wrap>
+            <v-flex xs8>
+              <v-text-field
+                :color="color"
+                ref="name"
+                :label="nameLabel"
+                v-model.trim="name"
+                :error-messages="getErrorMessages('name')"
+                @input="$v.name.$touch()"
+                @keyup.enter="submit()"
+                :hint="nameHint"
+                persistent-hint
+                tabindex="1"
+              ></v-text-field>
+            </v-flex>
+            <v-flex xs4>
+              <v-select
+                :color="color"
+                label="Role"
+                :items="memberRoles"
+                item-text="displayName"
+                item-value="name"
+                v-model="role"
+                @input="$v.role.$touch()"
+                ></v-select>
+            </v-flex>
+          </v-layout>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
+        </v-container>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -68,13 +70,14 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, memberRoles, getValidationErrors } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
+const defaultRole = 'admin'
 
 export default {
   name: 'add-member-dialog',
@@ -93,29 +96,32 @@ export default {
   },
   data () {
     return {
-      username: defaultUsername,
-      serviceAccountName: undefined,
+      validationErrors: undefined,
+      name: undefined,
+      role: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
   },
   validations () {
+    const validations = {
+      role: {
+        required
+      }
+    }
     if (this.isUserDialog) {
-      return {
-        username: {
+      validations.name = {
           required,
           unique: unique('projectMembersNames')
-        }
       }
     } else if (this.isServiceDialog) {
-      return {
-        serviceAccountName: {
+      validations.name = {
           required,
           resourceName,
           unique: unique('serviceAccountNames')
-        }
       }
     }
+    return validations
   },
   computed: {
     ...mapState([
@@ -133,35 +139,6 @@ export default {
         this.$emit('input', value)
       }
     },
-    usernameErrors () {
-      const errors = []
-      if (!this.$v.username.$dirty) {
-        return errors
-      }
-      if (!this.$v.username.required) {
-        errors.push('User is required')
-      }
-      if (!this.$v.username.unique) {
-        errors.push(`User '${this.username}' is already member of this project.`)
-      }
-      return errors
-    },
-    serviceAccountNameErrors () {
-      const errors = []
-      if (!this.$v.serviceAccountName.$dirty) {
-        return errors
-      }
-      if (!this.$v.serviceAccountName.required) {
-        errors.push('Service Account is required')
-      }
-      if (!this.$v.serviceAccountName.resourceName) {
-        errors.push('Must contain only alphanumeric characters or hypen')
-      }
-      if (!this.$v.serviceAccountName.unique) {
-        errors.push(`Service Account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`)
-      }
-      return errors
-    },
     valid () {
       return !this.$v.$invalid
     },
@@ -172,18 +149,34 @@ export default {
       return this.type === 'service'
     },
     textField () {
-      if (this.textFieldName) {
-        return this.$refs[this.textFieldName]
-      }
-      return undefined
+      return this.$refs.name
     },
-    textFieldName () {
+    memberRoles () {
+      return memberRoles
+    },
+    color () {
       if (this.isUserDialog) {
-        return 'username'
+        return 'green darken-2'
       } else if (this.isServiceDialog) {
-        return 'serviceAccountName'
+        return 'blue-grey'
       }
-      return undefined
+      return ''
+    },
+    nameLabel () {
+      if (this.isUserDialog) {
+        return 'User'
+      } else if (this.isServiceDialog) {
+        return 'Service Account'
+      }
+      return ''
+    },
+    nameHint () {
+      if (this.isUserDialog) {
+        return 'Enter the username who should become member of this project'
+      } else if (this.isServiceDialog) {
+        return 'Enter the name of a Kubernetes Service Account'
+      }
+      return ''
     },
     cardClass () {
       if (this.isUserDialog) {
@@ -215,6 +208,9 @@ export default {
     hide () {
       this.visible = false
     },
+    getErrorMessages (field) {
+      return getValidationErrors(this, field)
+    },
     async submit () {
       this.$v.$touch()
       if (this.valid) {
@@ -242,9 +238,32 @@ export default {
       this.hide()
     },
     reset () {
+      const validationErrors = {
+        role: {
+          required: 'Role is required'
+        }
+      }
+      if (this.isUserDialog) {
+        validationErrors.name = {
+            required: 'User is required',
+            unique: `User '${this.username}' is already member of this project.`
+        }
+      } else if (this.isServiceDialog) {
+        validationErrors.name = {
+            required: 'Service Account is required',
+            resourceName: 'Must contain only alphanumeric characters or hypen',
+            unique: `Service Account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
+        }
+      }
+      this.validationErrors = validationErrors
+      
       this.$v.$reset()
-      this.username = defaultUsername
-      this.serviceAccountName = this.defaultServiceName()
+      if (this.isUserDialog) {
+        this.name = defaultUsername
+      } else if (this.isServiceDialog) {
+        this.name = this.defaultServiceName()
+      }
+      this.role = defaultRole
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
@@ -253,7 +272,7 @@ export default {
     },
     setFocusAndSelection () {
       if (this.textField) {
-        setInputFocus(this, this.textFieldName)
+        setInputFocus(this, 'name')
       }
     },
     save () {

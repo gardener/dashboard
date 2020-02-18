@@ -209,6 +209,7 @@ import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import upperFirst from 'lodash/upperFirst'
+import find from 'lodash/find'
 import MemberAddDialog from '@/dialogs/MemberAddDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
@@ -221,7 +222,8 @@ import {
   isEmail,
   serviceAccountToDisplayName,
   isServiceAccount,
-  getTimestampFormatted
+  getTimestampFormatted,
+  memberRoles
 } from '@/utils'
 import { getMember } from '@/utils/api'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
@@ -405,6 +407,10 @@ export default {
       this.deleteMember(username)
     },
     roleName (role) {
+      const roleObject = find(memberRoles, {name: role})
+      if (roleObject) {
+        return roleObject.displayName
+      }
       return upperFirst(role)
     }
   },
