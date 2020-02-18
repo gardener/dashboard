@@ -82,7 +82,6 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
-import { hasAlertmanager } from '@/utils'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -120,7 +119,8 @@ export default {
       return get(this.shootItem, 'info.monitoring_password', '')
     },
     hasAlertmanager () {
-      return hasAlertmanager(get(this.shootItem, 'metadata'))
+      const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])
+      return emailReceivers.length > 0
     }
   }
 }
