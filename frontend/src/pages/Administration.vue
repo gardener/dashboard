@@ -76,6 +76,12 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">Purpose</label>
             <p class="subheading">{{purpose}}</p>
           </v-flex>
+          <v-flex xs12 v-if="slaLink">
+            <label class="caption grey--text text--darken-2">SLAs</label>
+            <p class="subheading">
+              <a :href="`${slaLink}`" target="_blank" class="cyan--text text--darken-2">{{slaLink}}</a>
+            </p>
+          </v-flex>
         </v-layout>
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
       </v-card-text>
@@ -104,7 +110,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import UpdateDialog from '@/dialogs/ProjectDialog'
 import GDialog from '@/dialogs/GDialog'
@@ -129,6 +135,9 @@ export default {
     }
   },
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     ...mapGetters([
       'shootList'
     ]),
@@ -176,6 +185,9 @@ export default {
     },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0
+    },
+    slaLink () {
+      return this.cfg.slaLink
     }
   },
   methods: {

@@ -111,6 +111,9 @@ limitations under the License.
             <v-layout row>
               <v-alert :value="true" dense type="info" outline color="deep-purple">
                 {{costObjectHint}}
+                <template v-if="slaLink">
+                  <br />SLAs: <a :href="`${slaLink}`" target="_blank" class="deep-purple--text">{{slaLink}}</a>
+                </template>
               </v-alert>
             </v-layout>
 
@@ -170,7 +173,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, requiredIf, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import { getValidationErrors, setInputFocus, isServiceAccount } from '@/utils'
@@ -219,6 +222,9 @@ export default {
     ...mapGetters([
       'userList',
       'username'
+    ]),
+    ...mapState([
+      'cfg'
     ]),
     visible: {
       get () {
@@ -354,6 +360,9 @@ export default {
           validCostObject: `${this.costObjectErrorMessage}`
         }
       }
+    },
+    slaLink () {
+      return this.cfg.slaLink
     }
   },
   methods: {

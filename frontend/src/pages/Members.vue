@@ -307,7 +307,7 @@ export default {
     },
     sortedAndFilteredMemberList () {
       const predicate = ({ username }) => {
-        if(isServiceAccount(username)) {
+        if (isServiceAccount(username)) {
           return false
         }
 
