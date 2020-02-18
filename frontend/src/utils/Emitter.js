@@ -202,9 +202,12 @@ class ShootSubscription extends AbstractSubscription {
       const { name, namespace } = target
       throttledNsEventEmitter.flush()
       try {
-        await store.dispatch('getShootInfo', { name, namespace })
+        await Promise.all([
+          store.dispatch('getShootInfo', { name, namespace }),
+          store.dispatch('getShootSeedInfo', { name, namespace })
+        ])
       } catch (err) {
-        console.error('SubscribeShootDone Error:', err.message)
+        console.error('SubscribeShootDone error:', err.message)
       }
     })
   }

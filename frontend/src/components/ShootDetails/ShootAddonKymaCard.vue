@@ -27,21 +27,7 @@ limitations under the License.
       </v-list-tile-content>
     </v-list-tile>
 
-    <v-list-tile v-if="isConsoleTileVisible">
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Console</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span class="grey--text" slot="activator">{{consoleUrl}}</span>
-            Console is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="consoleUrl" target="_blank" class="cyan--text text--darken-2">{{consoleUrl}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+    <link-list-tile v-if="isConsoleTileVisible" icon="developer_board" appTitle="Console" :url="consoleUrl" :urlText="consoleUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
     <v-divider v-if="isConsoleTileVisible && isCredentialsTileVisible" class="my-2" inset></v-divider>
 
@@ -51,13 +37,15 @@ limitations under the License.
 
 <script>
 import UsernamePassword from '@/components/UsernamePasswordListTile'
+import LinkListTile from '@/components/LinkListTile'
 import { shootItem } from '@/mixins/shootItem'
 import get from 'lodash/get'
 import { shootAddonByName } from '@/utils'
 
 export default {
   components: {
-    UsernamePassword
+    UsernamePassword,
+    LinkListTile
   },
   props: {
     shootItem: {

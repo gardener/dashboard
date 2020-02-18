@@ -18,6 +18,7 @@
 
 const common = require('../support/common')
 const kubeconfig = require('../../lib/kubernetes-config')
+const _ = require('lodash')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -113,10 +114,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const shootUser = 'shootFoo'
     const shootPassword = 'shootFooPwd'
-    const monitoringUser = 'monitoringFoo'
-    const monitoringPassword = 'monitoringFooPwd'
-    const loggingUser = 'loggingBar'
-    const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
     const dashboardUrlPath = '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
@@ -124,24 +121,46 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, seedName })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
+    expect(cleanKubeconfigSpy).to.have.callCount(2)
+    expect(_.keys(res.body).length).to.equal(6)
     expect(res.body).to.have.own.property('kubeconfig')
-    expect(cleanKubeconfigSpy).to.have.callCount(3)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
+    expect(res.body.serverUrl).to.eql(shootServerUrl)
+    expect(res.body.dashboardUrlPath).to.eql(dashboardUrlPath)
+    expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
+  })
+
+  it('should return shoot seed info', async function () {
+    const bearer = await user.bearer
+    const monitoringUser = 'monitoringFoo'
+    const monitoringPassword = 'monitoringFooPwd'
+    const loggingUser = 'loggingBar'
+    const loggingPassword = 'loggingBarPwd'
+    const seedClusterName = `${region}.${kind}.example.org`
+    const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
+
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    const res = await agent
+      .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(cleanKubeconfigSpy).to.have.callCount(1)
+    expect(_.keys(res.body).length).to.equal(4)
     expect(res.body.monitoring_username).to.eql(monitoringUser)
     expect(res.body.monitoring_password).to.eql(monitoringPassword)
     expect(res.body.logging_username).to.eql(loggingUser)
     expect(res.body.logging_password).to.eql(loggingPassword)
-    expect(res.body.serverUrl).to.eql(shootServerUrl)
-    expect(res.body.dashboardUrlPath).to.eql(dashboardUrlPath)
-    expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
   })
 
   it('should replace shoot', async function () {

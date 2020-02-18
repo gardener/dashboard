@@ -297,18 +297,34 @@ exports.info = async function ({ user, namespace, name }) {
   }
 
   const isAdmin = await authorization.isAdmin(user)
-  if (isAdmin) {
-    if (seed) {
-      try {
-        const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
-        const seedShootNamespace = shoot.status.technicalID
-        await assignComponentSecrets(seedClient, data, seedShootNamespace)
-      } catch (err) {
-        logger.error('Failed to retrieve information using seed core client', err)
-      }
-    }
-  } else {
+  if (!isAdmin) { // TODO return (user) component secrets also for admin?
     await assignComponentSecrets(client, data, namespace, name)
+  }
+
+  return data
+}
+
+exports.seedInfo = async function ({ user, namespace, name }) {
+  const client = user.client
+
+  const shoot = await read({ user, namespace, name })
+
+  const data = {}
+  let seed
+  if (shoot.spec.seedName) {
+    seed = getSeed(getSeedNameFromShoot(shoot))
+  }
+  const isAdmin = await authorization.isAdmin(user)
+  if (!isAdmin || !seed) {
+    return data
+  }
+
+  try {
+    const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+    const seedShootNamespace = shoot.status.technicalID
+    await assignComponentSecrets(seedClient, data, seedShootNamespace)
+  } catch (err) {
+    logger.error('Failed to retrieve information using seed core client', err)
   }
 
   return data
