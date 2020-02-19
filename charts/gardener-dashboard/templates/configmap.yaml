@@ -157,11 +157,13 @@ data:
 {{- end }}
 {{- if .Values.frontendConfig.costObject }}
       costObject:
-        label: {{ .Values.frontendConfig.costObject.label }}
-        hint: {{ .Values.frontendConfig.costObject.hint }}
+        title: {{ .Values.frontendConfig.costObject.title }}
+        description: {{ .Values.frontendConfig.costObject.description }}
         regex: {{ .Values.frontendConfig.costObject.regex }}
         errorMessage: {{ .Values.frontendConfig.costObject.errorMessage }}
 {{- end }}
-{{- if .Values.frontendConfig.slaLink }}
-      slaLink: {{ .Values.frontendConfig.slaLink }}
+{{- if .Values.frontendConfig.sla }}
+      sla:
+        title: {{ .Values.frontendConfig.sla.title }}
+        description: {{ .Values.frontendConfig.sla.description }}
 {{- end }}
