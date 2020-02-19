@@ -18,6 +18,7 @@ import find from 'lodash/find'
 import { getDateFormatted } from '@/utils'
 import store from '../store'
 import map from 'lodash/map'
+import get from 'lodash/get'
 
 export function projectFromProjectList () {
   const predicate = project => project.metadata.namespace === store.state.namespace
@@ -34,7 +35,7 @@ export function getProjectDetails (project) {
   const projectName = projectMetadata.name || ''
   const technicalContact = projectData.owner || ''
   const billingContact = projectData.owner || '' // TODO: Rename to sponsor
-  const costObject = 'xx-xxxx' // TODO get cost object from project
+  const costObject = get(project.metadata.annotations, 'billing.gardener.cloud/costObject')
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
   const description = projectData.description || ''
@@ -55,19 +56,23 @@ export function getProjectDetails (project) {
 }
 
 export function getCostObjectSettings () {
-  const costObject = store.state.cfg.costObject || {}
+  const costObject = store.state.cfg.costObject
+  if (!costObject) {
+    return {
+      costObjectSettingEnabled: false
+    }
+  }
 
-  const costObjectLabel = costObject.label || ''
-  const costObjectHint = costObject.hint || ''
+  const costObjectTitle = costObject.title || ''
+  const costObjectDescription = costObject.description || ''
   const costObjectRegex = costObject.regex
-  const costObjectRequired = !!costObjectRegex
   const costObjectErrorMessage = costObject.errorMessage
 
   return {
-    costObjectRequired,
+    costObjectSettingEnabled: true,
     costObjectRegex,
-    costObjectLabel,
-    costObjectHint,
+    costObjectTitle,
+    costObjectDescription,
     costObjectErrorMessage
   }
 }

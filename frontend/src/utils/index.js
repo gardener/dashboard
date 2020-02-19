@@ -528,6 +528,9 @@ export function addKymaAddon (options) {
 }
 
 export function compileMarkdown (text) {
+  if (!text) {
+    return undefined
+  }
   return DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,

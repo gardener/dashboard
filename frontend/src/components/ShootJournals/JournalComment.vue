@@ -35,8 +35,7 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
+import { compileMarkdown } from '@/utils'
 import TimeString from '@/components/TimeString'
 
 export default {
@@ -51,13 +50,7 @@ export default {
   },
   computed: {
     compiledMarkdown () {
-      const options = {
-        gfm: true,
-        breaks: true,
-        tables: true
-      }
-      const dirty = marked(get(this.comment, 'data.body', ''), options)
-      return DOMPurify.sanitize(dirty)
+      return compileMarkdown(get(this.comment, 'data.body', ''))
     },
     login () {
       return get(this.comment, 'data.user.login')

@@ -72,7 +72,20 @@ limitations under the License.
               </v-layout>
             </template>
 
-            <v-layout row v-if="costObjectRequired">
+            <v-layout row v-if="costObjectSettingEnabled">
+              <v-flex xs6>
+                <v-text-field
+                  color="deep-purple"
+                  ref="costObject"
+                  :label="costObjectTitle"
+                  v-model="costObject"
+                  :error-messages="getFieldValidationErrors('costObject')"
+                  @input="$v.costObject.$touch()"
+                  @blur="$v.costObject.$touch()"
+                  >
+                </v-text-field>
+              </v-flex>
+
               <v-flex xs6 v-if="isCreateMode">
                 <v-text-field
                   color="deep-purple"
@@ -94,26 +107,10 @@ limitations under the License.
                   @blur="$v.billingContact.$touch()"
                   ></v-select>
               </v-flex>
-
-              <v-flex xs6>
-                <v-text-field
-                  color="deep-purple"
-                  ref="costObject"
-                  :label="costObjectLabel"
-                  v-model="costObject"
-                  :error-messages="getFieldValidationErrors('costObject')"
-                  @input="$v.costObject.$touch()"
-                  @blur="$v.costObject.$touch()"
-                  >
-                </v-text-field>
-              </v-flex>
             </v-layout>
-            <v-layout row>
+            <v-layout row v-if="!!costObjectDescriptionCompiledMarkdown">
               <v-alert :value="true" dense type="info" outline color="deep-purple">
-                {{costObjectHint}}
-                <template v-if="slaLink">
-                  <br />SLAs: <a :href="`${slaLink}`" target="_blank" class="deep-purple--text">{{slaLink}}</a>
-                </template>
+                <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
               </v-alert>
             </v-layout>
 
@@ -176,7 +173,7 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, requiredIf, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, isServiceAccount } from '@/utils'
+import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
@@ -243,14 +240,14 @@ export default {
     costObjectSettings () {
       return getCostObjectSettings(this.project)
     },
-    costObjectRequired () {
-      return this.costObjectSettings.costObjectRequired
+    costObjectSettingEnabled () {
+      return this.costObjectSettings.costObjectSettingEnabled
     },
-    costObjectLabel () {
-      return this.costObjectSettings.costObjectLabel
+    costObjectTitle () {
+      return this.costObjectSettings.costObjectTitle
     },
-    costObjectHint () {
-      return this.costObjectSettings.costObjectHint
+    costObjectDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.costObjectSettings.costObjectDescription)
     },
     costObjectRegex () {
       return this.costObjectSettings.costObjectRegex
@@ -304,19 +301,19 @@ export default {
       const validators = {
         technicalContact: {
           required: requiredIf(function () {
-            return this.costObjectRequired
+            return this.costObjectSettingEnabled
           })
         },
         billingContact: {
           required: requiredIf(function () {
-            return this.costObjectRequired
+            return this.costObjectSettingEnabled
           })
         },
         costObject: {
-          required: requiredIf(function () {
-            return this.costObjectRequired
-          }),
           validCostObject: value => {
+            if (!this.costObjectRegex) {
+              return true
+            }
             return RegExp(this.costObjectRegex).test(value)
           }
         },
@@ -356,13 +353,9 @@ export default {
           required: 'Billing Contact is required'
         },
         costObject: {
-          required: `${this.costObjectLabel} is required`,
           validCostObject: `${this.costObjectErrorMessage}`
         }
       }
-    },
-    slaLink () {
-      return this.cfg.slaLink
     }
   },
   methods: {
@@ -434,7 +427,7 @@ export default {
         project.data.description = this.description
         project.data.purpose = this.purpose
         project.data.owner = this.technicalContact
-        if (this.costObjectRequired) {
+        if (this.costObjectSettingEnabled) {
           project.data.sponsor = this.billingContact
           project.data.costObject = this.costObject
         }
@@ -461,7 +454,7 @@ export default {
         this.description = this.currentDescription
         this.purpose = this.currentPurpose
         this.technicalContact = this.currentTechnicalContact
-        if (this.costObjectRequired) {
+        if (this.costObjectSettingEnabled) {
           this.billingContact = this.currentBillingContact
           this.costObject = this.currentCostObject
         }

@@ -42,7 +42,7 @@ limitations under the License.
             <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
           </v-flex>
           <v-flex lg4 xs12>
-            <template v-if="costObjectRequired">
+            <template v-if="costObjectSettingEnabled">
               <label class="caption grey--text text--darken-2">Billing Contact</label>
               <p class="subheading"><account-avatar :account-name="billingContact" :mail-to="true"></account-avatar></p>
             </template>
@@ -63,8 +63,8 @@ limitations under the License.
             </template>
           </v-flex>
           <v-flex lg4 xs12>
-            <template v-if="costObjectRequired">
-              <label class="caption grey--text text--darken-2">{{costObjectLabel}}</label>
+            <template v-if="costObjectSettingEnabled">
+              <label class="caption grey--text text--darken-2">{{costObjectTitle}}</label>
               <p class="subheading">{{costObject}}</p>
             </template>
           </v-flex>
@@ -76,11 +76,9 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">Purpose</label>
             <p class="subheading">{{purpose}}</p>
           </v-flex>
-          <v-flex xs12 v-if="slaLink">
-            <label class="caption grey--text text--darken-2">SLAs</label>
-            <p class="subheading">
-              <a :href="`${slaLink}`" target="_blank" class="cyan--text text--darken-2">{{slaLink}}</a>
-            </p>
+          <v-flex xs12 v-if="slaDescriptionCompiledMarkdown">
+            <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+            <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
           </v-flex>
         </v-layout>
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
@@ -117,6 +115,7 @@ import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
+import { compileMarkdown } from '@/utils'
 
 export default {
   name: 'administration',
@@ -150,11 +149,11 @@ export default {
     costObjectSettings () {
       return getCostObjectSettings(this.project)
     },
-    costObjectRequired () {
-      return this.costObjectSettings.costObjectRequired
+    costObjectSettingEnabled () {
+      return this.costObjectSettings.costObjectSettingEnabled
     },
-    costObjectLabel () {
-      return this.costObjectSettings.costObjectLabel
+    costObjectTitle () {
+      return this.costObjectSettings.costObjectTitle
     },
     projectName () {
       return this.projectDetails.projectName
@@ -166,7 +165,7 @@ export default {
       return this.projectDetails.billingContact
     },
     costObject () {
-      return this.projectDetails.costObject
+      return this.projectDetails.costObject || 'Not defined'
     },
     createdAt () {
       return this.projectDetails.createdAt
@@ -186,8 +185,14 @@ export default {
     isDeleteButtonDisabled () {
       return this.shootList.length > 0
     },
-    slaLink () {
-      return this.cfg.slaLink
+    sla () {
+      return this.cfg.sla || {}
+    },
+    slaDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.sla.description)
+    },
+    slaTitle () {
+      return this.sla.title || 'SLAs'
     }
   },
   methods: {

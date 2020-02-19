@@ -44,7 +44,7 @@ limitations under the License.
       </v-list>
     </v-card>
 
-    <v-card class="mr-extra mt-4" v-if="costObjectRequired">
+    <v-card class="mr-extra mt-4" v-if="costObjectSettingEnabled">
       <v-toolbar card color="lime darken-2">
         <v-icon class="white--text pr-2">mdi-account</v-icon>
         <v-toolbar-title class="subheading white--text">
@@ -277,8 +277,8 @@ export default {
     costObjectSettings () {
       return getCostObjectSettings(this.project)
     },
-    costObjectRequired () {
-      return this.costObjectSettings.costObjectRequired
+    costObjectSettingEnabled () {
+      return this.costObjectSettings.costObjectSettingEnabled
     },
     technicalContact () {
       return this.projectDetails.technicalContact
