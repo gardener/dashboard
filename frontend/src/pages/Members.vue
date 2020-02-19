@@ -114,6 +114,7 @@ limitations under the License.
           :firstRow="index === 0"
           :key="member.username"
           @onDelete="onDelete"
+          @onEdit="onEdit"
         ></project-member-row>
       </v-list>
     </v-card>
@@ -159,12 +160,15 @@ limitations under the License.
           @onDownload="onDownload"
           @onKubeconfig="onKubeconfig"
           @onDelete="onDelete"
+          @onEdit="onEdit"
         ></project-service-account-row>
       </v-list>
     </v-card>
 
-    <member-add-dialog type="user" v-model="memberAddDialog"></member-add-dialog>
-    <member-add-dialog type="service" v-model="serviceAccountAddDialog"></member-add-dialog>
+    <member-dialog type="adduser" v-model="memberAddDialog"></member-dialog>
+    <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
+    <member-dialog type="configuser" :username="configUsername" :userroles="configUserroles" v-model="memberConfigDialog"></member-dialog>
+    <member-dialog type="configservice" :username="configUsername" :userroles="configUserroles" v-model="serviceAccountConfigDialog"></member-dialog>
     <member-help-dialog type="user" v-model="memberHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -210,7 +214,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import upperFirst from 'lodash/upperFirst'
 import find from 'lodash/find'
-import MemberAddDialog from '@/dialogs/MemberAddDialog'
+import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
 import ProjectMemberRow from '@/components/ProjectMemberRow'
@@ -223,7 +227,7 @@ import {
   serviceAccountToDisplayName,
   isServiceAccount,
   getTimestampFormatted,
-  memberRoles
+  allMemberRoles
 } from '@/utils'
 import { getMember } from '@/utils/api'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
@@ -231,7 +235,7 @@ import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from
 export default {
   name: 'members',
   components: {
-    MemberAddDialog,
+    MemberDialog,
     MemberHelpDialog,
     CodeBlock,
     ProjectMemberRow,
@@ -241,9 +245,13 @@ export default {
     return {
       memberAddDialog: false,
       serviceAccountAddDialog: false,
+      memberConfigDialog: false,
+      serviceAccountConfigDialog: false,
       memberHelpDialog: false,
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
+      configUsername: undefined,
+      configUserroles: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -289,7 +297,8 @@ export default {
           ...serviceAccount,
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
-          created: getTimestampFormatted(serviceAccount.creationTimestamp)
+          created: getTimestampFormatted(serviceAccount.creationTimestamp),
+          roleNames: map(serviceAccount.roles, this.roleName)
         }
       })
     },
@@ -303,7 +312,7 @@ export default {
           displayName: displayName(username),
           isEmail: isEmail(username),
           isTechnicalOrBillingContact: this.isTechnicalContact(username) || this.isBillingContact(username),
-          roleName: this.roleName(member.role)
+          roleNames: map(member.roles, this.roleName)
         }
       })
     },
@@ -354,11 +363,17 @@ export default {
     openMemberAddDialog () {
       this.memberAddDialog = true
     },
+    openMemberConfigDialog () {
+      this.memberConfigDialog = true
+    },
     openMemberHelpDialog () {
       this.memberHelpDialog = true
     },
     openServiceAccountAddDialog () {
       this.serviceAccountAddDialog = true
+    },
+    openServiceAccountConfigDialog () {
+      this.serviceAccountConfigDialog = true
     },
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
@@ -406,8 +421,13 @@ export default {
     onDelete (username) {
       this.deleteMember(username)
     },
+    onEdit (username, userroles) {
+      this.configUsername = username
+      this.configUserroles = userroles
+      this.openMemberConfigDialog()
+    },
     roleName (role) {
-      const roleObject = find(memberRoles, {name: role})
+      const roleObject = find(allMemberRoles, { name: role })
       if (roleObject) {
         return roleObject.displayName
       }
@@ -421,8 +441,10 @@ export default {
     this.$bus.$on('esc-pressed', () => {
       this.memberAddDialog = false
       this.memberHelpDialog = false
+      this.memberConfigDialog = false
       this.serviceAccountAddDialog = false
       this.serviceAccountHelpDialog = false
+      this.serviceAccountConfigDialog = false
       this.kubeconfigDialog = false
       this.fab = false
     })

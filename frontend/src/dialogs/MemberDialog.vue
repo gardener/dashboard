@@ -19,21 +19,28 @@ limitations under the License.
     <v-card class="add_member" :class="cardClass">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <span v-if="isUserDialog">Add user to Project</span>
-        <span v-if="isServiceDialog">Add Service Account to Project</span>
+        <template v-if="isConfigDialog">
+          <span v-if="isUserDialog">Configure user</span>
+          <span v-if="isServiceDialog">Configure Service Account</span>
+        </template>
+        <template v-else>
+          <span v-if="isUserDialog">Add user to Project</span>
+          <span v-if="isServiceDialog">Add Service Account to Project</span>
+        </template>
       </v-card-title>
       <v-card-text>
         <v-container grid-list-xl class="pa-0 ma-0">
           <v-layout row wrap>
             <v-flex xs8>
               <v-text-field
+                :disabled="isConfigDialog"
                 :color="color"
                 ref="name"
                 :label="nameLabel"
                 v-model.trim="name"
                 :error-messages="getErrorMessages('name')"
                 @input="$v.name.$touch()"
-                @keyup.enter="submit()"
+                @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
                 tabindex="1"
@@ -42,13 +49,22 @@ limitations under the License.
             <v-flex xs4>
               <v-select
                 :color="color"
-                label="Role"
-                :items="memberRoles"
+                label="Roles"
+                :items="allMemberRoles"
+                multiple
+                small-chips
                 item-text="displayName"
                 item-value="name"
-                v-model="role"
-                @input="$v.role.$touch()"
-                ></v-select>
+                v-model="roles"
+                :error-messages="getErrorMessages('roles')"
+                @input="$v.roles.$touch()"
+                >
+                <template v-slot:selection="{ item, index }">
+                  <v-chip small :color="color" text-color="white" close @input="roles.splice(index, 1)">
+                    <span>{{ item.displayName }}</span>
+                  </v-chip>
+                </template>
+              </v-select>
             </v-flex>
           </v-layout>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
@@ -57,7 +73,8 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn flat @click.stop="submit" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
+        <v-btn v-if="isConfigDialog" flat @click.stop="submitConfigMember" :disabled="!valid" :class="buttonClass" tabindex="2">Update</v-btn>
+        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -70,17 +87,19 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, memberRoles, getValidationErrors } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, allMemberRoles, getValidationErrors } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
+import find from 'lodash/find'
 import includes from 'lodash/includes'
+import cloneDeep from 'lodash/cloneDeep'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
-const defaultRole = 'admin'
+const defaultRole = find(allMemberRoles, { name: 'admin' })
 
 export default {
-  name: 'add-member-dialog',
+  name: 'member-dialog',
   components: {
     GAlert
   },
@@ -92,36 +111,26 @@ export default {
     type: {
       type: String,
       required: true
+    },
+    username: {
+      type: String
+    },
+    userroles: {
+      type: Array
     }
   },
   data () {
     return {
       validationErrors: undefined,
       name: undefined,
-      role: undefined,
+      roles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
   },
   validations () {
-    const validations = {
-      role: {
-        required
-      }
-    }
-    if (this.isUserDialog) {
-      validations.name = {
-          required,
-          unique: unique('projectMembersNames')
-      }
-    } else if (this.isServiceDialog) {
-      validations.name = {
-          required,
-          resourceName,
-          unique: unique('serviceAccountNames')
-      }
-    }
-    return validations
+    // had to move the code to a computed property so that the getValidationErrors method can access it
+    return this.validators
   },
   computed: {
     ...mapState([
@@ -142,17 +151,40 @@ export default {
     valid () {
       return !this.$v.$invalid
     },
+    validators () {
+      const validators = {
+        roles: {
+          required
+        }
+      }
+      if (this.isUserDialog) {
+        validators.name = {
+          required,
+          unique: unique('projectMembersNames')
+        }
+      } else if (this.isServiceDialog) {
+        validators.name = {
+          required,
+          resourceName,
+          unique: unique('serviceAccountNames')
+        }
+      }
+      return validators
+    },
     isUserDialog () {
-      return this.type === 'user'
+      return this.type === 'adduser' || this.type === 'configuser'
     },
     isServiceDialog () {
-      return this.type === 'service'
+      return this.type === 'addservice' || this.type === 'configservice'
+    },
+    isConfigDialog () {
+      return this.type === 'configuser' || this.type === 'configservice'
     },
     textField () {
       return this.$refs.name
     },
-    memberRoles () {
-      return memberRoles
+    allMemberRoles () {
+      return allMemberRoles
     },
     color () {
       if (this.isUserDialog) {
@@ -195,10 +227,10 @@ export default {
       return ''
     },
     serviceAccountNames () {
-      return map(filter(this.userList, isServiceAccount), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName))
+      return map(filter(this.userList, ({ username }) => isServiceAccount(username)), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName.username))
     },
     projectMembersNames () {
-      return filter(this.userList, ({ username }) => !isServiceAccount(username))
+      return map(filter(this.userList, ({ username }) => !isServiceAccount(username)), 'username')
     }
   },
   methods: {
@@ -211,7 +243,7 @@ export default {
     getErrorMessages (field) {
       return getValidationErrors(this, field)
     },
-    async submit () {
+    async submitAddMember () {
       this.$v.$touch()
       if (this.valid) {
         try {
@@ -221,9 +253,9 @@ export default {
           const errorDetails = errorDetailsFromError(err)
           if (isConflict(err)) {
             if (this.isUserDialog) {
-              this.errorMessage = `User '${this.username}' is already member of this project.`
+              this.errorMessage = `User '${this.name}' is already member of this project.`
             } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
+              this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.name)}' already exists. Please try a different name.`
             }
           } else {
             this.errorMessage = 'Failed to add project member'
@@ -233,37 +265,51 @@ export default {
         }
       }
     },
+    async submitConfigMember () {
+      this.$v.$touch()
+      if (this.valid) {
+        // TODO
+      }
+    },
     cancel () {
       this.$v.$reset()
       this.hide()
     },
     reset () {
       const validationErrors = {
-        role: {
-          required: 'Role is required'
+        roles: {
+          required: 'You need to configure roles'
         }
       }
       if (this.isUserDialog) {
         validationErrors.name = {
-            required: 'User is required',
-            unique: `User '${this.username}' is already member of this project.`
+          required: 'User is required',
+          unique: `User '${this.username}' is already member of this project.`
         }
       } else if (this.isServiceDialog) {
         validationErrors.name = {
-            required: 'Service Account is required',
-            resourceName: 'Must contain only alphanumeric characters or hypen',
-            unique: `Service Account '${this.serviceAccountDisplayName(this.serviceAccountName)}' already exists. Please try a different name.`
+          required: 'Service Account is required',
+          resourceName: 'Must contain only alphanumeric characters or hypen',
+          unique: `Service Account '${this.serviceAccountDisplayName(this.username)}' already exists. Please try a different name.`
         }
       }
       this.validationErrors = validationErrors
-      
+
       this.$v.$reset()
-      if (this.isUserDialog) {
+
+      if (this.username) {
+        this.name = this.username
+      } else if (this.isUserDialog) {
         this.name = defaultUsername
       } else if (this.isServiceDialog) {
         this.name = this.defaultServiceName()
       }
-      this.role = defaultRole
+
+      if (this.userroles) {
+        this.roles = cloneDeep(this.userroles)
+      } else {
+        this.roles = [defaultRole]
+      }
 
       this.errorMessage = undefined
       this.detailedMessage = undefined
@@ -277,11 +323,11 @@ export default {
     },
     save () {
       if (this.isUserDialog) {
-        const username = toLower(this.username)
+        const username = toLower(this.name)
         return this.addMember(username)
       } else if (this.isServiceDialog) {
         const namespace = this.namespace
-        const name = toLower(this.serviceAccountName)
+        const name = toLower(this.name)
         return this.addMember(`system:serviceaccount:${namespace}:${name}`)
       }
     },

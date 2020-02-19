@@ -46,7 +46,7 @@ function fromResource (project = {}, serviceAccounts = []) {
     .filter(['kind', 'User'])
     .map(({ name: username, role }) => ({
       username,
-      role,
+      roles: [role], // TODO: use roles when available
       ...serviceAccountsMetadata[username]
     }))
     .value()
@@ -152,6 +152,7 @@ exports.get = async function ({ user, namespace, name }) {
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
     member.kind = 'ServiceAccount'
+    member.roles = [member.role] // TODO: use roles when available
     member.kubeconfig = dumpKubeconfig({
       user: serviceAccountName,
       context: contextName,

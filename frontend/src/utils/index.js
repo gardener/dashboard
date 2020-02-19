@@ -599,7 +599,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   return worker
 }
 
-export const memberRoles = [
+export const allMemberRoles = [
   {
     name: 'admin',
     displayName: 'Admin'
@@ -607,5 +607,13 @@ export const memberRoles = [
   {
     name: 'viewer',
     displayName: 'Viewer'
+  },
+  {
+    name: 'owner',
+    displayName: 'Technical Contact'
+  },
+  {
+    name: 'billing',
+    displayName: 'Billing Contact'
   }
 ]

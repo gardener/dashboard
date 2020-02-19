@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
-<template^>
+<template>
   <div>
     <v-divider v-if="!firstRow" inset></v-divider>
     <v-list-tile
@@ -29,12 +29,24 @@ limitations under the License.
           {{member.displayName}}
         </v-list-tile-title>
         <v-list-tile-sub-title>
-          <a v-if="member.isEmail" :href="`mailto:${member.username}`" class="cyan--text text--darken-2">{{member.username}}</a>
+          <a v-if="member.isEmail" :href="`mailto:${member.username}`" class="green--text text--darken-2">{{member.username}}</a>
           <span v-else class="pl-2">{{member.username}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
-          <v-chip small color="cyan darken-2" text-color="white">{{member.roleName}}</v-chip>
+        <v-layout row align-center>
+          <v-chip v-for="(roleName, index) in member.roleNames" :key="index" small color="green darken-2" text-color="white">
+            {{roleName}}
+          </v-chip>
+        </v-layout>
+      </v-list-tile-action>
+      <v-list-tile-action>
+        <v-tooltip top>
+          <v-btn slot="activator" icon class="green--text text--darken-2" @click.native.stop="onEdit">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <span>Configure Member</span>
+        </v-tooltip>
       </v-list-tile-action>
       <v-list-tile-action>
         <v-tooltip top>
@@ -50,18 +62,8 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState } from 'vuex'
-import TimeString from '@/components/TimeString'
-import GPopper from '@/components/GPopper'
-import AccountAvatar from '@/components/AccountAvatar'
-
 export default {
   name: 'project-member-row',
-  components: {
-    TimeString,
-    GPopper,
-    AccountAvatar
-  },
   props: {
     member: {
       type: Object,
@@ -74,7 +76,10 @@ export default {
   },
   methods: {
     onDelete (username) {
-      this.$emit('onDelete', this.username)
+      this.$emit('onDelete', this.member.username)
+    },
+    onEdit (username) {
+      this.$emit('onEdit', this.member.username, this.member.roles)
     }
   }
 }
