@@ -170,7 +170,7 @@ export default {
     },
     nameHint () {
       if (this.isUserDialog) {
-        return 'Enter the username who should become member of this project'
+        return 'Enter the username that should become a member of this project'
       } else if (this.isServiceDialog) {
         return 'Enter the name of a Kubernetes Service Account'
       }
