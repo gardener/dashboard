@@ -16,64 +16,10 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-if="isAdmin">
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span slot="activator">{{grafanaUrlOperators}}</span>
-            Grafana is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="grafanaUrlOperators" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlOperators}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile v-else>
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Grafana</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span slot="activator">{{grafanaUrlUsers}}</span>
-            Grafana is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="grafanaUrlUsers" target="_blank" class="cyan--text text--darken-2">{{grafanaUrlUsers}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile v-if="isAdmin">
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Prometheus</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span slot="activator">{{prometheusUrl}}</span>
-            Prometheus is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="prometheusUrl" target="_blank" class="cyan--text text--darken-2">{{prometheusUrl}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
-    <v-list-tile v-if="hasAlertmanager">
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Alertmanager</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span slot="activator">{{alertmanagerUrl}}</span>
-            Alertmanager is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="alertmanagerUrl" target="_blank" class="cyan--text text--darken-2">{{alertmanagerUrl}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+    <link-list-tile v-if="isAdmin" icon="developer_board" appTitle="Grafana" :url="grafanaUrlOperators" :urlText="grafanaUrlOperators" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+    <link-list-tile v-else icon="developer_board" appTitle="Grafana" :url="grafanaUrlUsers" :urlText="grafanaUrlUsers" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+    <link-list-tile v-if="isAdmin" appTitle="Prometheus" :url="prometheusUrl" :urlText="prometheusUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+    <link-list-tile v-if="hasAlertmanager" appTitle="Alertmanager" :url="alertmanagerUrl" :urlText="alertmanagerUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
     <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
     <username-password :username="username" :password="password"></username-password>
   </v-list>
@@ -82,12 +28,14 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import UsernamePassword from '@/components/UsernamePasswordListTile'
+import LinkListTile from '@/components/LinkListTile'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    UsernamePassword
+    UsernamePassword,
+    LinkListTile
   },
   props: {
     shootItem: {
@@ -113,10 +61,10 @@ export default {
       return get(this.shootItem, 'info.alertmanagerUrl', '')
     },
     username () {
-      return get(this.shootItem, 'info.monitoring_username', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_username', '') : get(this.shootItem, 'info.monitoring_username', '')
     },
     password () {
-      return get(this.shootItem, 'info.monitoring_password', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.monitoring_password', '') : get(this.shootItem, 'info.monitoring_password', '')
     },
     hasAlertmanager () {
       const emailReceivers = get(this.shootItem, 'spec.monitoring.alerting.emailReceivers', [])

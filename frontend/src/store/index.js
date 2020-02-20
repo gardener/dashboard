@@ -563,6 +563,12 @@ const actions = {
         dispatch('setError', err)
       })
   },
+  getShootSeedInfo ({ dispatch, commit }, { name, namespace }) {
+    return dispatch('shoots/getSeedInfo', { name, namespace })
+      .catch(err => {
+        dispatch('setError', err)
+      })
+  },
   getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
