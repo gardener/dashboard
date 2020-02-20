@@ -69,17 +69,17 @@ function createMachineImageComponent (selectedMachineImage) {
 }
 
 describe('MachineImage.vue', function () {
-  it('seleted image should be latest (multiple exist)', function () {
+  it('selected image should be latest (multiple exist)', function () {
     const machineImage = createMachineImageComponent(sampleMachineImages[2])
     expect(machineImage.selectedImageIsNotLatest).to.be.false
   })
 
-  it('seleted image should be latest (one exists)', function () {
+  it('selected image should be latest (one exists)', function () {
     const machineImage = createMachineImageComponent(sampleMachineImages[3])
     expect(machineImage.selectedImageIsNotLatest).to.be.false
   })
 
-  it('seleted image should not be latest', function () {
+  it('selected image should not be latest', function () {
     const machineImage = createMachineImageComponent(sampleMachineImages[1])
     expect(machineImage.selectedImageIsNotLatest).to.be.true
   })
