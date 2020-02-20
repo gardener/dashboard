@@ -205,7 +205,7 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings(this.project)
+      return getCostObjectSettings()
     },
     costObjectSettingEnabled () {
       return this.costObjectSettings.costObjectSettingEnabled
