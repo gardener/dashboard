@@ -275,7 +275,7 @@ const getters = {
   projectList (state) {
     return state.projects.all
   },
-  userList (state, getters) {
+  memberList (state, getters) {
     return state.members.all
   },
   infrastructureSecretList (state) {

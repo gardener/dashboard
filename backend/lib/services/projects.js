@@ -173,8 +173,8 @@ exports.patch = async function ({ user, name: namespace, body }) {
   const name = project.metadata.name
   // do not update createdBy and name
   const { metadata, data } = fromResource(project)
-  _.assign(data, _.omit(body.data, 'createdBy'))
-  _.assign(metadata, _.omit(body.metadata, 'name'))
+  _.assign(data, body.data)
+  _.assign(metadata, body.metadata)
   body = toResource({ metadata, data })
   body = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   return fromResource(body)

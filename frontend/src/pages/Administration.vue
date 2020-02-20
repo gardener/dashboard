@@ -142,22 +142,19 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings(this.project)
+      return getCostObjectSettings()
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.costObjectSettingEnabled
+      return this.costObjectSettings.enabled
     },
     costObjectTitle () {
-      return this.costObjectSettings.costObjectTitle
+      return this.costObjectSettings.title
     },
     projectName () {
       return this.projectDetails.projectName
     },
     technicalContact () {
       return this.projectDetails.technicalContact
-    },
-    billingContact () {
-      return this.projectDetails.billingContact
     },
     costObject () {
       return this.projectDetails.costObject || 'Not defined'

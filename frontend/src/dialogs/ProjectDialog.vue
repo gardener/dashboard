@@ -54,7 +54,6 @@ limitations under the License.
                    :items="memberItems"
                    label="Technical Contact"
                    v-model="technicalContact"
-                   tabindex="1"
                    ></v-select>
                </v-flex>
            </v-layout>
@@ -117,7 +116,6 @@ limitations under the License.
           flat
           :disabled="loading"
           @click.stop="cancel"
-          tabindex="5"
         >
           Cancel
         </v-btn>
@@ -125,7 +123,6 @@ limitations under the License.
           flat
           :loading="loading"
           :disabled="!valid || loading"
-          tabindex="4"
           @click.stop="submit"
           class="deep-purple--text"
         >
@@ -184,7 +181,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'userList',
+      'memberList',
       'username'
     ]),
     ...mapState([
@@ -208,19 +205,19 @@ export default {
       return getCostObjectSettings()
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.costObjectSettingEnabled
+      return this.costObjectSettings.enabled
     },
     costObjectTitle () {
-      return this.costObjectSettings.costObjectTitle
+      return this.costObjectSettings.title
     },
     costObjectDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.costObjectSettings.costObjectDescription)
+      return compileMarkdown(this.costObjectSettings.description)
     },
     costObjectRegex () {
-      return this.costObjectSettings.costObjectRegex
+      return this.costObjectSettings.regex
     },
     costObjectErrorMessage () {
-      return this.costObjectSettings.costObjectErrorMessage
+      return this.costObjectSettings.errorMessage
     },
     currentProjectName () {
       return this.projectDetails.projectName
@@ -238,7 +235,7 @@ export default {
       return this.projectDetails.costObject
     },
     memberItems () {
-      const members = filter(map(this.userList, 'username'), username => !isServiceAccount(username))
+      const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
       const technicalContact = this.currentTechnicalContact
       if (technicalContact && !includes(members, technicalContact)) {
         members.push(technicalContact)
@@ -261,16 +258,14 @@ export default {
     validators () {
       const validators = {
         technicalContact: {
-          required: requiredIf(function () {
-            return this.costObjectSettingEnabled
-          })
+          required
         },
         costObject: {
           validCostObject: value => {
             if (!this.costObjectRegex) {
               return true
             }
-            return RegExp(this.costObjectRegex).test(value)
+            return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
           }
         },
         description: {
@@ -400,7 +395,7 @@ export default {
         this.description = undefined
         this.purpose = undefined
         this.technicalContact = this.username
-        this.costObject = '' // use empty string as undefined cannot be evaluated by configurable regex
+        this.costObject = undefined
 
         setInputFocus(this, 'projectName')
       } else {
@@ -409,7 +404,7 @@ export default {
         this.purpose = this.currentPurpose
         this.technicalContact = this.currentTechnicalContact
         if (this.costObjectSettingEnabled) {
-          this.costObject = this.currentCostObject || ''
+          this.costObject = this.currentCostObject
         }
       }
     }

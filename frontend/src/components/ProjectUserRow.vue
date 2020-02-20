@@ -16,30 +16,29 @@ limitations under the License.
 
 <template>
   <div>
-    <v-divider v-if="!firstRow" inset></v-divider>
     <v-list-tile
       avatar
-      :key="member.username"
+      :key="username"
     >
       <v-list-tile-avatar>
-        <img :src="member.avatarUrl" />
+        <img :src="avatarUrl" />
       </v-list-tile-avatar>
       <v-list-tile-content>
         <v-list-tile-title>
-          {{member.displayName}}
+          {{displayName}}
         </v-list-tile-title>
         <v-list-tile-sub-title>
-          <a v-if="member.isEmail" :href="`mailto:${member.username}`" class="green--text text--darken-2">{{member.username}}</a>
-          <span v-else class="pl-2">{{member.username}}</span>
+          <a v-if="isEmail" :href="`mailto:${username}`" class="green--text text--darken-2">{{username}}</a>
+          <span v-else class="pl-2">{{username}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
         <v-tooltip top>
-          <v-btn :disabled="member.isTechnicalOrBillingContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
+          <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
-          <span v-if="member.isTechnicalOrBillingContact">This member is set as technical contact</span>
-          <span v-else>Delete Member</span>
+          <span v-if="isTechnicalContact">This user is set as technical contact</span>
+          <span v-else>Delete User</span>
         </v-tooltip>
       </v-list-tile-action>
     </v-list-tile>
@@ -48,20 +47,32 @@ limitations under the License.
 
 <script>
 export default {
-  name: 'project-member-row',
+  name: 'project-user-row',
   props: {
-    member: {
-      type: Object,
+    username: {
+      type: String,
       required: true
     },
-    firstRow: {
+    avatarUrl: {
+      type: String,
+      required: true
+    },
+    displayName: {
+      type: String,
+      required: true
+    },
+    isEmail: {
       type: Boolean,
-      default: false
+      required: true
+    },
+    isTechnicalContact: {
+      type: Boolean,
+      required: true
     }
   },
   methods: {
     onDelete (username) {
-      this.$emit('onDelete', this.member.username)
+      this.$emit('onDelete', this.username)
     }
   }
 }

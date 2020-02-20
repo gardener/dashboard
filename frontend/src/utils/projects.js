@@ -34,7 +34,6 @@ export function getProjectDetails (project) {
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
   const technicalContact = projectData.owner || ''
-  const billingContact = undefined // TODO: get from role
   const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
@@ -45,7 +44,6 @@ export function getProjectDetails (project) {
   return {
     projectName,
     technicalContact,
-    billingContact,
     costObject,
     createdAt,
     creationTimestamp,
@@ -59,20 +57,20 @@ export function getCostObjectSettings () {
   const costObject = store.state.cfg.costObject
   if (!costObject) {
     return {
-      costObjectSettingEnabled: false
+      enabled: false
     }
   }
 
-  const costObjectTitle = costObject.title || ''
-  const costObjectDescription = costObject.description || ''
-  const costObjectRegex = costObject.regex
-  const costObjectErrorMessage = costObject.errorMessage
+  const title = costObject.title || ''
+  const description = costObject.description || ''
+  const regex = costObject.regex
+  const errorMessage = costObject.errorMessage
 
   return {
-    costObjectSettingEnabled: true,
-    costObjectRegex,
-    costObjectTitle,
-    costObjectDescription,
-    costObjectErrorMessage
+    enabled: true,
+    regex,
+    title,
+    description,
+    errorMessage
   }
 }

@@ -38,35 +38,7 @@ limitations under the License.
         <v-list-tile avatar>
           <v-list-tile-content>
             <v-list-tile-title>This project has no technical contact configured.</v-list-tile-title>
-            <v-list-tile-sub-title>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the members from the list below.</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-card>
-
-    <v-card class="mr-extra mt-4" v-if="costObjectSettingEnabled">
-      <v-toolbar card color="lime darken-2">
-        <v-icon class="white--text pr-2">mdi-account</v-icon>
-        <v-toolbar-title class="subheading white--text">
-          Billing Contact
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-list v-if="!!billingContact" two-line subheader>
-        <v-list-tile avatar>
-          <v-list-tile-avatar>
-            <img :src="avatarUrl(billingContact)" />
-          </v-list-tile-avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>{{displayName(billingContact)}}</v-list-tile-title>
-            <v-list-tile-sub-title><a :href="'mailto:'+billingContact" class="cyan--text text--darken-2">{{billingContact}}</a></v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-      <v-list v-else two-line subheader>
-        <v-list-tile avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>This project has no billing contact configured.</v-list-tile-title>
-            <v-list-tile-sub-title>You need to set a billing contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page.</v-list-tile-sub-title>
+            <v-list-tile-sub-title>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the users from the list below.</v-list-tile-sub-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -76,10 +48,10 @@ limitations under the License.
       <v-toolbar card color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
-          Project Members
+          Project Users
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field v-if="memberList.length > 3"
+        <v-text-field v-if="userList.length > 3"
           class="searchField"
           prepend-inner-icon="search"
           color="green darken-2"
@@ -92,29 +64,34 @@ limitations under the License.
         <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
           <v-icon class="white--text">mdi-email-outline</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openMemberAddDialog">
+        <v-btn icon @click.native.stop="openUserAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openMemberHelpDialog">
+        <v-btn icon @click.native.stop="openUserHelpDialog">
           <v-icon class="white--text">mdi-help-circle-outline</v-icon>
         </v-btn>
       </v-toolbar>
 
-      <v-card-text v-if="!memberList.length">
-        <div class="title grey--text text--darken-1 my-3">Add members to your project.</div>
+      <v-card-text v-if="!userList.length">
+        <div class="title grey--text text--darken-1 my-3">Add users to your project.</div>
         <p class="body-1">
-          Adding members to your project allows you to collaborate across your team.
-          Project members have full access to all resources within your project.
+          Adding users to your project allows you to collaborate across your team.
+          Project users have full access to all resources within your project.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <project-member-row
-          v-for="(member, index) in sortedAndFilteredMemberList"
-          :member="member"
-          :firstRow="index === 0"
-          :key="member.username"
-          @onDelete="onDelete"
-        ></project-member-row>
+        <template v-for="(user, index) in sortedAndFilteredUserList">
+          <v-divider v-if="index !== 0" inset></v-divider>
+          <project-user-row
+            :username="user.username"
+            :avatarUrl="user.avatarUrl"
+            :displayName="user.displayName"
+            :isEmail="user.isEmail"
+            :isTechnicalContact="user.isTechnicalContact"
+            :key="user.username"
+            @onDelete="onDelete"
+          ></project-user-row>
+        </template>
       </v-list>
     </v-card>
 
@@ -151,23 +128,29 @@ limitations under the License.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
-        <project-service-account-row
-          v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList"
-          :serviceAccount="serviceAccount"
-          :firstRow="index === 0"
-          :key="serviceAccount.username"
-          @onDownload="onDownload"
-          @onKubeconfig="onKubeconfig"
-          @onDelete="onDelete"
-        ></project-service-account-row>
+        <template v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList">
+          <v-divider v-if="index !== 0" inset></v-divider>
+          <project-service-account-row
+            :username="serviceAccount.username"
+            :avatarUrl="serviceAccount.avatarUrl"
+            :displayName="serviceAccount.displayName"
+            :createdBy="serviceAccount.createdBy"
+            :creationTimestamp="serviceAccount.creationTimestamp"
+            :created="serviceAccount.created"
+            :key="serviceAccount.username"
+            @onDownload="onDownload"
+            @onKubeconfig="onKubeconfig"
+            @onDelete="onDelete"
+          ></project-service-account-row>
+        </template>
       </v-list>
     </v-card>
 
-    <member-dialog type="adduser" v-model="memberAddDialog"></member-dialog>
+    <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="configuser" :username="configUsername" :userroles="configUserroles" v-model="memberConfigDialog"></member-dialog>
-    <member-dialog type="configservice" :username="configUsername" :userroles="configUserroles" v-model="serviceAccountConfigDialog"></member-dialog>
-    <member-help-dialog type="user" v-model="memberHelpDialog"></member-help-dialog>
+    <member-dialog type="updateuser" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
       <v-card>
@@ -192,7 +175,7 @@ limitations under the License.
         <v-btn fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" @click="openMemberAddDialog">
+        <v-btn fab small color="grey lighten-2" @click="openUserAddDialog">
           <v-icon color="green darken-2">person</v-icon>
         </v-btn>
       </v-speed-dial>
@@ -213,7 +196,7 @@ import map from 'lodash/map'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
-import ProjectMemberRow from '@/components/ProjectMemberRow'
+import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import {
@@ -233,20 +216,20 @@ export default {
     MemberDialog,
     MemberHelpDialog,
     CodeBlock,
-    ProjectMemberRow,
+    ProjectUserRow,
     ProjectServiceAccountRow
   },
   data () {
     return {
-      memberAddDialog: false,
+      userAddDialog: false,
       serviceAccountAddDialog: false,
-      memberConfigDialog: false,
-      serviceAccountConfigDialog: false,
-      memberHelpDialog: false,
+      userUpdateDialog: false,
+      serviceAccountUpdateDialog: false,
+      userHelpDialog: false,
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
-      configUsername: undefined,
-      configUserroles: undefined,
+      updateMemberName: undefined,
+      updateUserRoles: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -261,7 +244,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'userList'
+      'memberList'
     ]),
     project () {
       return projectFromProjectList()
@@ -270,22 +253,19 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings(this.project)
+      return getCostObjectSettings()
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.costObjectSettingEnabled
+      return this.costObjectSettings.enabled
     },
     technicalContact () {
       return this.projectDetails.technicalContact
-    },
-    billingContact () {
-      return this.projectDetails.billingContact
     },
     costObject () {
       return this.projectDetails.costObject
     },
     serviceAccountList () {
-      const serviceAccounts = filter(this.userList, ({ username }) => isServiceAccount(username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
       return map(serviceAccounts, serviceAccount => {
         const { username } = serviceAccount
         return {
@@ -297,21 +277,21 @@ export default {
         }
       })
     },
-    memberList () {
-      const members = filter(this.userList, ({ username }) => !isServiceAccount(username))
-      return map(members, member => {
-        const { username } = member
+    userList () {
+      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      return map(users, user => {
+        const { username } = user
         return {
-          ...member,
+          ...user,
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           isEmail: isEmail(username),
-          isTechnicalOrBillingContact: this.isTechnicalContact(username) || this.isBillingContact(username),
-          roleNames: map(member.roles, this.roleName)
+          isTechnicalContact: this.isTechnicalContact(username),
+          roleNames: map(user.roles, this.roleName)
         }
       })
     },
-    sortedAndFilteredMemberList () {
+    sortedAndFilteredUserList () {
       const predicate = ({ username }) => {
         if (isServiceAccount(username)) {
           return false
@@ -323,11 +303,11 @@ export default {
         const name = replace(username, /@.*$/, '')
         return includes(toLower(name), toLower(this.userFilter))
       }
-      return sortBy(filter(this.memberList, predicate), 'displayName')
+      return sortBy(filter(this.userList, predicate), 'displayName')
     },
     allEmails () {
       const emails = []
-      forEach(this.memberList, ({ username }) => {
+      forEach(this.userList, ({ username }) => {
         if (isEmail(username)) {
           emails.push(username)
         }
@@ -354,29 +334,26 @@ export default {
       'deleteMember',
       'setError'
     ]),
-    openMemberAddDialog () {
-      this.memberAddDialog = true
+    openUserAddDialog () {
+      this.userAddDialog = true
     },
-    openMemberConfigDialog () {
-      this.memberConfigDialog = true
+    openUserUpdateDialog () {
+      this.userUpdateDialog = true
     },
-    openMemberHelpDialog () {
-      this.memberHelpDialog = true
+    openUserHelpDialog () {
+      this.userHelpDialog = true
     },
     openServiceAccountAddDialog () {
       this.serviceAccountAddDialog = true
     },
-    openServiceAccountConfigDialog () {
-      this.serviceAccountConfigDialog = true
+    openServiceAccountUpdateDialog () {
+      this.serviceAccountUpdateDialog = true
     },
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
     isTechnicalContact (username) {
       return this.technicalContact === toLower(username)
-    },
-    isBillingContact (username) {
-      return this.billingContact === toLower(username)
     },
     avatarUrl (username) {
       return gravatarUrlGeneric(username)
@@ -421,12 +398,12 @@ export default {
   },
   created () {
     this.$bus.$on('esc-pressed', () => {
-      this.memberAddDialog = false
-      this.memberHelpDialog = false
-      this.memberConfigDialog = false
+      this.userAddDialog = false
+      this.userHelpDialog = false
+      this.userUpdateDialog = false
       this.serviceAccountAddDialog = false
       this.serviceAccountHelpDialog = false
-      this.serviceAccountConfigDialog = false
+      this.serviceAccountUpdateDialog = false
       this.kubeconfigDialog = false
       this.fab = false
     })

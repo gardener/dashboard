@@ -19,12 +19,12 @@ limitations under the License.
     <v-card class="add_member" :class="cardClass">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <template v-if="isConfigDialog">
-          <span v-if="isUserDialog">Configure user</span>
-          <span v-if="isServiceDialog">Configure Service Account</span>
+        <template v-if="isUpdateDialog">
+          <span v-if="isUserDialog">Update User</span>
+          <span v-if="isServiceDialog">Update Service Account</span>
         </template>
         <template v-else>
-          <span v-if="isUserDialog">Add user to Project</span>
+          <span v-if="isUserDialog">Add User to Project</span>
           <span v-if="isServiceDialog">Add Service Account to Project</span>
         </template>
       </v-card-title>
@@ -33,7 +33,7 @@ limitations under the License.
           <v-layout row wrap>
             <v-flex xs12>
               <v-text-field
-                :disabled="isConfigDialog"
+                :disabled="isUpdateDialog"
                 :color="color"
                 ref="name"
                 :label="nameLabel"
@@ -50,11 +50,11 @@ limitations under the License.
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
+      </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn v-if="isConfigDialog" flat @click.stop="submitConfigMember" :disabled="!valid" :class="buttonClass" tabindex="2">Update</v-btn>
-        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
+        <v-btn flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -89,13 +89,12 @@ export default {
       type: String,
       required: true
     },
-    username: {
+    oldName: {
       type: String
     }
   },
   data () {
     return {
-      validationErrors: undefined,
       name: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
@@ -110,7 +109,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'userList',
+      'memberList',
       'projectList'
     ]),
     visible: {
@@ -129,7 +128,7 @@ export default {
       if (this.isUserDialog) {
         validators.name = {
           required,
-          unique: unique('projectMembersNames')
+          unique: unique('projectUserNames')
         }
       } else if (this.isServiceDialog) {
         validators.name = {
@@ -140,14 +139,30 @@ export default {
       }
       return validators
     },
+    validationErrors () {
+      const validationErrors = {}
+      if (this.isUserDialog) {
+        validationErrors.name = {
+          required: 'User is required',
+          unique: `User '${this.name}' is already member of this project.`
+        }
+      } else if (this.isServiceDialog) {
+        validationErrors.name = {
+          required: 'Service Account is required',
+          resourceName: 'Must contain only alphanumeric characters or hypen',
+          unique: `Service Account '${this.serviceAccountDisplayName(this.name)}' already exists. Please try a different name.`
+        }
+      }
+      return validationErrors
+    },
     isUserDialog () {
-      return this.type === 'adduser' || this.type === 'configuser'
+      return this.type === 'adduser' || this.type === 'updateuser'
     },
     isServiceDialog () {
-      return this.type === 'addservice' || this.type === 'configservice'
+      return this.type === 'addservice' || this.type === 'updateservice'
     },
-    isConfigDialog () {
-      return this.type === 'configuser' || this.type === 'configservice'
+    isUpdateDialog () {
+      return this.type === 'updateuser' || this.type === 'updateservice'
     },
     textField () {
       return this.$refs.name
@@ -158,7 +173,7 @@ export default {
       } else if (this.isServiceDialog) {
         return 'blue-grey'
       }
-      return ''
+      return undefined
     },
     nameLabel () {
       if (this.isUserDialog) {
@@ -166,15 +181,15 @@ export default {
       } else if (this.isServiceDialog) {
         return 'Service Account'
       }
-      return ''
+      return undefined
     },
     nameHint () {
       if (this.isUserDialog) {
-        return 'Enter the username that should become a member of this project'
+        return 'Enter the username that should become a user of this project'
       } else if (this.isServiceDialog) {
         return 'Enter the name of a Kubernetes Service Account'
       }
-      return ''
+      return undefined
     },
     cardClass () {
       if (this.isUserDialog) {
@@ -182,7 +197,7 @@ export default {
       } else if (this.isServiceDialog) {
         return 'add_service'
       }
-      return ''
+      return undefined
     },
     buttonClass () {
       if (this.isUserDialog) {
@@ -190,13 +205,13 @@ export default {
       } else if (this.isServiceDialog) {
         return 'blue-grey--text'
       }
-      return ''
+      return undefined
     },
     serviceAccountNames () {
-      return map(filter(this.userList, ({ username }) => isServiceAccount(username)), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName.username))
+      return map(filter(this.memberList, ({ username }) => isServiceAccount(username)), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName.username))
     },
-    projectMembersNames () {
-      return map(filter(this.userList, ({ username }) => !isServiceAccount(username)), 'username')
+    projectUserNames () {
+      return map(filter(this.memberList, ({ username }) => !isServiceAccount(username)), 'username')
     }
   },
   methods: {
@@ -231,36 +246,15 @@ export default {
         }
       }
     },
-    async submitConfigMember () {
-      this.$v.$touch()
-      if (this.valid) {
-        // TODO
-      }
-    },
     cancel () {
       this.$v.$reset()
       this.hide()
     },
     reset () {
-      const validationErrors = {}
-      if (this.isUserDialog) {
-        validationErrors.name = {
-          required: 'User is required',
-          unique: `User '${this.username}' is already member of this project.`
-        }
-      } else if (this.isServiceDialog) {
-        validationErrors.name = {
-          required: 'Service Account is required',
-          resourceName: 'Must contain only alphanumeric characters or hypen',
-          unique: `Service Account '${this.serviceAccountDisplayName(this.username)}' already exists. Please try a different name.`
-        }
-      }
-      this.validationErrors = validationErrors
-
       this.$v.$reset()
 
-      if (this.username) {
-        this.name = this.username
+      if (this.oldName) {
+        this.name = this.oldName
       } else if (this.isUserDialog) {
         this.name = defaultUsername
       } else if (this.isServiceDialog) {

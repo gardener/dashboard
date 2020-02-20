@@ -16,40 +16,39 @@ limitations under the License.
 
 <template^>
   <div>
-    <v-divider v-if="!firstRow" inset></v-divider>
     <v-list-tile avatar>
       <v-list-tile-avatar>
-        <img :src="serviceAccount.avatarUrl" />
+        <img :src="avatarUrl" />
       </v-list-tile-avatar>
       <v-list-tile-content>
         <g-popper
-          :title="serviceAccount.displayName"
+          :title="displayName"
           toolbarColor="cyan darken-2"
-          :popperKey="`serviceAccount_sa_${serviceAccount.username}`"
+          :popperKey="`serviceAccount_sa_${username}`"
 
         >
           <v-list-tile-title slot="popperRef" class="cursor-pointer">
-            {{serviceAccount.displayName}}
+            {{displayName}}
           </v-list-tile-title>
           <v-layout row
             fill-height
             align-center
           >
-            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="serviceAccount.createdBy"></account-avatar></span>
+            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
           </v-layout>
           <v-layout row
             fill-height
             align-center
           >
-            <span class="mr-3">Created at</span>
+            <span class="mr-3">Created</span>
             <v-tooltip top>
-              <span slot="activator" class="font-weight-bold"><time-string :date-time="serviceAccount.creationTimestamp" :pointInTime="-1"></time-string></span>
-              {{serviceAccount.created}}
+              <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
+              {{created}}
             </v-tooltip>
           </v-layout>
         </g-popper>
         <v-list-tile-sub-title>
-          {{serviceAccount.username}}
+          {{username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace">
@@ -97,13 +96,29 @@ export default {
     AccountAvatar
   },
   props: {
-    serviceAccount: {
-      type: Object,
+    username: {
+      type: String,
       required: true
     },
-    firstRow: {
-      type: Boolean,
-      default: false
+    avatarUrl: {
+      type: String,
+      required: true
+    },
+    displayName: {
+      type: String,
+      required: true
+    },
+    createdBy: {
+      type: String,
+      required: true
+    },
+    creationTimestamp: {
+      type: String,
+      required: true
+    },
+    created: {
+      type: String,
+      required: true
     }
   },
   computed: {
@@ -111,7 +126,7 @@ export default {
       'namespace'
     ]),
     isServiceAccountFromCurrentNamespace () {
-      return isServiceAccountFromNamespace(this.serviceAccount.username, this.namespace)
+      return isServiceAccountFromNamespace(this.username, this.namespace)
     },
     createdByClasses () {
       return !!this.createdBy ? ['font-weight-bold'] : ['grey--text']
@@ -119,13 +134,13 @@ export default {
   },
   methods: {
     async onDownload () {
-      this.$emit('onDownload', this.serviceAccount.username)
+      this.$emit('onDownload', this.username)
     },
     async onKubeconfig () {
-      this.$emit('onKubeconfig', this.serviceAccount.username)
+      this.$emit('onKubeconfig', this.username)
     },
     onDelete (username) {
-      this.$emit('onDelete', this.serviceAccount.username)
+      this.$emit('onDelete', this.username)
     }
   }
 }

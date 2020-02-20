@@ -88,8 +88,8 @@ frontendConfig:
 
   # # costObject is used for billing purposes and is assigned to the gardener project
   # costObject:
-  #   title: Cost Center
-  #   description: Costs for the control planes of the clusters in this project will be charged to this cost center. Projects with an invalid Cost Center will be charged to the personal Cost Center of the billing contact. Trial clusters are free of charge.
+  #   title: Cost Object
+  #   description: Costs for the control planes of the clusters in this project will be charged to this cost object.
   #   regex: ^([0-9]{10})$
   #   errorMessage: Invalid cost object
 
