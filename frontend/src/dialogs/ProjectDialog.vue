@@ -306,7 +306,7 @@ export default {
           required: 'Technical Contact is required'
         },
         costObject: {
-          validCostObject: `${this.costObjectErrorMessage}`
+          validCostObject: this.costObjectErrorMessage
         }
       }
     }
