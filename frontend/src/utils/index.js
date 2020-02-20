@@ -601,22 +601,3 @@ export function generateWorker (availableZones, cloudProfileName, region) {
 
   return worker
 }
-
-export const allMemberRoles = [
-  {
-    name: 'admin',
-    displayName: 'Admin'
-  },
-  {
-    name: 'viewer',
-    displayName: 'Viewer'
-  },
-  {
-    name: 'owner',
-    displayName: 'Technical Contact'
-  },
-  {
-    name: 'billing',
-    displayName: 'Billing Contact'
-  }
-]

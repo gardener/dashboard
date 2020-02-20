@@ -38,14 +38,8 @@ limitations under the License.
             <p class="subheading">{{projectName}}</p>
           </v-flex>
           <v-flex lg4 xs12>
-            <label class="caption grey--text text--darken-2">Main Contact</label>
+            <label class="caption grey--text text--darken-2">Technical Contact</label>
             <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
-          </v-flex>
-          <v-flex lg4 xs12>
-            <template v-if="costObjectSettingEnabled">
-              <label class="caption grey--text text--darken-2">Billing Contact</label>
-              <p class="subheading"><account-avatar :account-name="billingContact" :mail-to="true"></account-avatar></p>
-            </template>
           </v-flex>
           <v-flex lg4 xs12>
             <v-tooltip top>
@@ -138,7 +132,8 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
-      'shootList'
+      'shootList',
+      'projectList'
     ]),
     project () {
       return projectFromProjectList()
@@ -186,7 +181,7 @@ export default {
       return this.shootList.length > 0
     },
     sla () {
-      return this.cfg.sla || {}
+      return this.cfg.sla || {}
     },
     slaDescriptionCompiledMarkdown () {
       return compileMarkdown(this.sla.description)

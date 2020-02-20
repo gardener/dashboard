@@ -114,7 +114,6 @@ limitations under the License.
           :firstRow="index === 0"
           :key="member.username"
           @onDelete="onDelete"
-          @onEdit="onEdit"
         ></project-member-row>
       </v-list>
     </v-card>
@@ -160,7 +159,6 @@ limitations under the License.
           @onDownload="onDownload"
           @onKubeconfig="onKubeconfig"
           @onDelete="onDelete"
-          @onEdit="onEdit"
         ></project-service-account-row>
       </v-list>
     </v-card>
@@ -212,8 +210,6 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import upperFirst from 'lodash/upperFirst'
-import find from 'lodash/find'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
@@ -226,8 +222,7 @@ import {
   isEmail,
   serviceAccountToDisplayName,
   isServiceAccount,
-  getTimestampFormatted,
-  allMemberRoles
+  getTimestampFormatted
 } from '@/utils'
 import { getMember } from '@/utils/api'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
@@ -420,18 +415,6 @@ export default {
     },
     onDelete (username) {
       this.deleteMember(username)
-    },
-    onEdit (username, userroles) {
-      this.configUsername = username
-      this.configUserroles = userroles
-      this.openMemberConfigDialog()
-    },
-    roleName (role) {
-      const roleObject = find(allMemberRoles, { name: role })
-      if (roleObject) {
-        return roleObject.displayName
-      }
-      return upperFirst(role)
     }
   },
   mounted () {

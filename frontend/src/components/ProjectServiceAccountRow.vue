@@ -52,13 +52,6 @@ limitations under the License.
           {{serviceAccount.username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
-      <v-list-tile-action>
-        <v-layout row align-center>
-          <v-chip v-for="(roleName, index) in serviceAccount.roleNames" :key="index" small color="blue-grey darken-2" text-color="white">
-            {{roleName}}
-          </v-chip>
-        </v-layout>
-      </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace">
         <v-tooltip top>
           <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload">
@@ -73,14 +66,6 @@ limitations under the License.
             <v-icon>visibility</v-icon>
           </v-btn>
           <span>Show Kubeconfig</span>
-        </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action>
-        <v-tooltip top>
-          <v-btn slot="activator" icon class="blue-grey--text text--darken-2" @click.native.stop="onEdit">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <span>Configure Service Account</span>
         </v-tooltip>
       </v-list-tile-action>
       <v-list-tile-action>
@@ -138,9 +123,6 @@ export default {
     },
     async onKubeconfig () {
       this.$emit('onKubeconfig', this.serviceAccount.username)
-    },
-    onEdit (username) {
-      this.$emit('onEdit', this.serviceAccount.username, this.serviceAccount.roles)
     },
     onDelete (username) {
       this.$emit('onDelete', this.serviceAccount.username)

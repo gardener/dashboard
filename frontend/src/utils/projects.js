@@ -34,8 +34,8 @@ export function getProjectDetails (project) {
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
   const technicalContact = projectData.owner || ''
-  const billingContact = projectData.owner || '' // TODO: Rename to sponsor
-  const costObject = get(project.metadata.annotations, 'billing.gardener.cloud/costObject')
+  const billingContact = undefined // TODO: get from role
+  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
   const description = projectData.description || ''

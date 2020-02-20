@@ -31,7 +31,7 @@ limitations under the License.
       <v-card-text>
         <v-container grid-list-xl class="pa-0 ma-0">
           <v-layout row wrap>
-            <v-flex xs8>
+            <v-flex xs12>
               <v-text-field
                 :disabled="isConfigDialog"
                 :color="color"
@@ -45,26 +45,6 @@ limitations under the License.
                 persistent-hint
                 tabindex="1"
               ></v-text-field>
-            </v-flex>
-            <v-flex xs4>
-              <v-select
-                :color="color"
-                label="Roles"
-                :items="allMemberRoles"
-                multiple
-                small-chips
-                item-text="displayName"
-                item-value="name"
-                v-model="roles"
-                :error-messages="getErrorMessages('roles')"
-                @input="$v.roles.$touch()"
-                >
-                <template v-slot:selection="{ item, index }">
-                  <v-chip small :color="color" text-color="white" close @input="roles.splice(index, 1)">
-                    <span>{{ item.displayName }}</span>
-                  </v-chip>
-                </template>
-              </v-select>
             </v-flex>
           </v-layout>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
@@ -87,16 +67,13 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, allMemberRoles, getValidationErrors } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
-import find from 'lodash/find'
 import includes from 'lodash/includes'
-import cloneDeep from 'lodash/cloneDeep'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
-const defaultRole = find(allMemberRoles, { name: 'admin' })
 
 export default {
   name: 'member-dialog',
@@ -114,16 +91,12 @@ export default {
     },
     username: {
       type: String
-    },
-    userroles: {
-      type: Array
     }
   },
   data () {
     return {
       validationErrors: undefined,
       name: undefined,
-      roles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -152,11 +125,7 @@ export default {
       return !this.$v.$invalid
     },
     validators () {
-      const validators = {
-        roles: {
-          required
-        }
-      }
+      const validators = {}
       if (this.isUserDialog) {
         validators.name = {
           required,
@@ -182,9 +151,6 @@ export default {
     },
     textField () {
       return this.$refs.name
-    },
-    allMemberRoles () {
-      return allMemberRoles
     },
     color () {
       if (this.isUserDialog) {
@@ -276,11 +242,7 @@ export default {
       this.hide()
     },
     reset () {
-      const validationErrors = {
-        roles: {
-          required: 'You need to configure roles'
-        }
-      }
+      const validationErrors = {}
       if (this.isUserDialog) {
         validationErrors.name = {
           required: 'User is required',
@@ -303,12 +265,6 @@ export default {
         this.name = defaultUsername
       } else if (this.isServiceDialog) {
         this.name = this.defaultServiceName()
-      }
-
-      if (this.userroles) {
-        this.roles = cloneDeep(this.userroles)
-      } else {
-        this.roles = [defaultRole]
       }
 
       this.errorMessage = undefined

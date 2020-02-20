@@ -39,16 +39,6 @@ limitations under the License.
                     counter="10"
                     ></v-text-field>
                 </v-flex>
-                <v-flex xs6>
-                  <v-text-field
-                    color="deep-purple"
-                    label="Technical Contact"
-                    v-model="technicalContact"
-                    :error-messages="getFieldValidationErrors('technicalContact')"
-                    @input="$v.technicalContact.$touch()"
-                    @blur="$v.technicalContact.$touch()"
-                    ></v-text-field>
-                </v-flex>
               </v-layout>
             </template>
             <template v-else>
@@ -58,18 +48,16 @@ limitations under the License.
                 </v-flex>
               </v-layout>
               <v-layout row>
-                <v-flex xs6>
-                  <v-select
-                    color="deep-purple"
-                    :items="memberItems"
-                    label="Technical Contact"
-                    v-model="technicalContact"
-                    :error-messages="getFieldValidationErrors('technicalContact')"
-                    @input="$v.technicalContact.$touch()"
-                    @blur="$v.technicalContact.$touch()"
-                    ></v-select>
-                </v-flex>
-              </v-layout>
+               <v-flex xs6>
+                 <v-select
+                   color="deep-purple"
+                   :items="memberItems"
+                   label="Technical Contact"
+                   v-model="technicalContact"
+                   tabindex="1"
+                   ></v-select>
+               </v-flex>
+           </v-layout>
             </template>
 
             <v-layout row v-if="costObjectSettingEnabled">
@@ -86,27 +74,6 @@ limitations under the License.
                 </v-text-field>
               </v-flex>
 
-              <v-flex xs6 v-if="isCreateMode">
-                <v-text-field
-                  color="deep-purple"
-                  label="Billing Contact"
-                  v-model="billingContact"
-                  :error-messages="getFieldValidationErrors('billingContact')"
-                  @input="$v.billingContact.$touch()"
-                  @blur="$v.billingContact.$touch()"
-                  ></v-text-field>
-              </v-flex>
-              <v-flex xs6 v-else>
-                <v-select
-                  color="deep-purple"
-                  :items="memberItems"
-                  label="Billing Contact"
-                  v-model="billingContact"
-                  :error-messages="getFieldValidationErrors('billingContact')"
-                  @input="$v.billingContact.$touch()"
-                  @blur="$v.billingContact.$touch()"
-                  ></v-select>
-              </v-flex>
             </v-layout>
             <v-layout row v-if="!!costObjectDescriptionCompiledMarkdown">
               <v-alert :value="true" dense type="info" outline color="deep-purple">
@@ -178,6 +145,7 @@ import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/err
 import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
 import map from 'lodash/map'
+import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
@@ -204,7 +172,6 @@ export default {
       description: undefined,
       purpose: undefined,
       technicalContact: undefined,
-      billingContact: undefined,
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
@@ -267,22 +234,16 @@ export default {
     currentTechnicalContact () {
       return this.projectDetails.technicalContact
     },
-    currentBillingContact () {
-      return this.projectDetails.billingContact
-    },
     currentCostObject () {
       return this.projectDetails.costObject
     },
     memberItems () {
       const members = filter(map(this.userList, 'username'), username => !isServiceAccount(username))
       const technicalContact = this.currentTechnicalContact
-      const billingContact = this.currentBillingContact
       if (technicalContact && !includes(members, technicalContact)) {
         members.push(technicalContact)
       }
-      if (billingContact && !includes(members, billingContact)) {
-        members.push(billingContact)
-      }
+
       return members
     },
     valid () {
@@ -300,11 +261,6 @@ export default {
     validators () {
       const validators = {
         technicalContact: {
-          required: requiredIf(function () {
-            return this.costObjectSettingEnabled
-          })
-        },
-        billingContact: {
           required: requiredIf(function () {
             return this.costObjectSettingEnabled
           })
@@ -348,9 +304,6 @@ export default {
         },
         technicalContact: {
           required: 'Technical Contact is required'
-        },
-        billingContact: {
-          required: 'Billing Contact is required'
         },
         costObject: {
           validCostObject: `${this.costObjectErrorMessage}`
@@ -415,6 +368,9 @@ export default {
       if (this.isCreateMode) {
         const name = this.projectName
         const metadata = { name }
+        if (this.costObjectSettingEnabled) {
+          set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
+        }
 
         const description = this.description
         const purpose = this.purpose
@@ -428,8 +384,7 @@ export default {
         project.data.purpose = this.purpose
         project.data.owner = this.technicalContact
         if (this.costObjectSettingEnabled) {
-          project.data.sponsor = this.billingContact
-          project.data.costObject = this.costObject
+          set(project.metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
         }
 
         return this.updateProject(project)
@@ -445,8 +400,7 @@ export default {
         this.description = undefined
         this.purpose = undefined
         this.technicalContact = this.username
-        this.billingContact = this.username
-        this.costObject = undefined
+        this.costObject = '' // use empty string as undefined cannot be evaluated by configurable regex
 
         setInputFocus(this, 'projectName')
       } else {
@@ -455,10 +409,8 @@ export default {
         this.purpose = this.currentPurpose
         this.technicalContact = this.currentTechnicalContact
         if (this.costObjectSettingEnabled) {
-          this.billingContact = this.currentBillingContact
-          this.costObject = this.currentCostObject
+          this.costObject = this.currentCostObject || ''
         }
-        setInputFocus(this, 'description')
       }
     }
   },
