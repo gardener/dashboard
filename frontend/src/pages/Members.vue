@@ -328,10 +328,9 @@ export default {
     allEmails () {
       const emails = []
       forEach(this.memberList, ({ username }) => {
-        if (!isEmail(username)) {
-          return false
+        if (isEmail(username)) {
+          emails.push(username)
         }
-        emails.push(username)
       })
       return join(emails, ';')
     },
