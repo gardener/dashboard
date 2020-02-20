@@ -187,7 +187,7 @@ export default {
       return compileMarkdown(this.sla.description)
     },
     slaTitle () {
-      return this.sla.title || 'SLAs'
+      return this.sla.title
     }
   },
   methods: {

@@ -91,10 +91,10 @@ frontendConfig:
   #   title: Cost Center
   #   description: Costs for the control planes of the clusters in this project will be charged to this cost center. Projects with an invalid Cost Center will be charged to the personal Cost Center of the billing contact. Trial clusters are free of charge.
   #   regex: ^([0-9]{10})$
-  #   errorMessage: Cost Center needs to have exactly 10 digits
+  #   errorMessage: Invalid cost object
 
   # sla:
-  #   title: SLA Link
+  #   title: SLAs
   #   description: https://foo.example.com/gardener-sla
 
 gitHub:

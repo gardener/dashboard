@@ -117,6 +117,17 @@ limitations under the License.
         </v-card-title>
       </template>
 
+      <template v-if="slaDescriptionCompiledMarkdown">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem pr-1">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-file-document-outline</v-icon>
+          <v-flex class="pa-0">
+            <span class="grey--text">{{slaTitle}}</span><br>
+            <span class="slaDescription" v-html="slaDescriptionCompiledMarkdown" />
+          </v-flex>
+        </v-card-title>
+      </template>
+
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
@@ -151,9 +162,11 @@ import {
   isSelfTerminationWarning,
   isValidTerminationDate,
   getTimeStringTo,
-  shootAddonList
+  shootAddonList,
+  compileMarkdown
 } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -173,6 +186,9 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    ...mapState([
+      'cfg'
+    ]),
     expirationTimestamp () {
       return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
@@ -196,6 +212,15 @@ export default {
     },
     shootAddonNames () {
       return map(filter(shootAddonList, item => this.addon(item.name).enabled), 'title')
+    },
+    sla () {
+      return this.cfg.sla || {}
+    },
+    slaDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.sla.description)
+    },
+    slaTitle () {
+      return this.sla.title
     }
   }
 }
@@ -219,6 +244,10 @@ export default {
 
   .avatar {
     padding-right: 33px;
+  }
+
+  .slaDescription >>> p {
+    margin: 0px;
   }
 
 </style>
