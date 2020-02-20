@@ -297,7 +297,7 @@ exports.info = async function ({ user, namespace, name }) {
   }
 
   const isAdmin = await authorization.isAdmin(user)
-  if (!isAdmin) { // TODO return (user) component secrets also for admin?
+  if (!isAdmin) {
     await assignComponentSecrets(client, data, namespace, name)
   }
 
