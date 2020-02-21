@@ -260,8 +260,8 @@ export default {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
-        if (!header.hidden && get(header, 'adminOnly', false)) {
-          this.hideHeaderIfNotValue(header, this.admin)
+        if (get(header, 'adminOnly', false)) {
+          this.hideHeaderIfNotValue(header, this.isAdmin)
         }
       }
     },
@@ -275,7 +275,7 @@ export default {
         }
       }
     },
-    hideHeaderIfNotValue(header, value) {
+    hideHeaderIfNotValue (header, value) {
       if (!value) {
         header.hidden = true
       }
