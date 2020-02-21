@@ -81,7 +81,7 @@ limitations under the License.
       </v-card-text>
       <v-list two-line subheader v-else>
         <template v-for="(user, index) in sortedAndFilteredUserList">
-          <v-divider v-if="index !== 0" inset></v-divider>
+          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-user-row
             :username="user.username"
             :avatarUrl="user.avatarUrl"
@@ -129,7 +129,7 @@ limitations under the License.
       </v-card-text>
       <v-list two-line subheader v-else>
         <template v-for="(serviceAccount, index) in sortedAndFilteredServiceAccountList">
-          <v-divider v-if="index !== 0" inset></v-divider>
+          <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-service-account-row
             :username="serviceAccount.username"
             :avatarUrl="serviceAccount.avatarUrl"
@@ -253,10 +253,10 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings()
+      return getCostObjectSettings() || {}
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.enabled
+      return getCostObjectSettings() !== undefined
     },
     technicalContact () {
       return this.projectDetails.technicalContact

@@ -56,9 +56,7 @@ export function getProjectDetails (project) {
 export function getCostObjectSettings () {
   const costObject = store.state.cfg.costObject
   if (!costObject) {
-    return {
-      enabled: false
-    }
+    return undefined
   }
 
   const title = costObject.title || ''
@@ -67,7 +65,6 @@ export function getCostObjectSettings () {
   const errorMessage = costObject.errorMessage
 
   return {
-    enabled: true,
     regex,
     title,
     description,

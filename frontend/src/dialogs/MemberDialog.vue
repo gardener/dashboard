@@ -50,7 +50,6 @@ limitations under the License.
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>
-      </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
@@ -150,7 +149,7 @@ export default {
         validationErrors.name = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
-          unique: `Service Account '${this.serviceAccountDisplayName(this.name)}' already exists. Please try a different name.`
+          unique: `Service Account '${serviceAccountToDisplayName(this.name)}' already exists. Please try a different name.`
         }
       }
       return validationErrors
@@ -208,10 +207,12 @@ export default {
       return undefined
     },
     serviceAccountNames () {
-      return map(filter(this.memberList, ({ username }) => isServiceAccount(username)), serviceAccountName => this.serviceAccountDisplayName(serviceAccountName.username))
+      const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
+      return map(serviceAccounts, ({ username }) => serviceAccountToDisplayName(username))
     },
     projectUserNames () {
-      return map(filter(this.memberList, ({ username }) => !isServiceAccount(username)), 'username')
+      const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
+      return map(users, 'username')
     }
   },
   methods: {
@@ -236,7 +237,7 @@ export default {
             if (this.isUserDialog) {
               this.errorMessage = `User '${this.name}' is already member of this project.`
             } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${this.serviceAccountDisplayName(this.name)}' already exists. Please try a different name.`
+              this.errorMessage = `Service account '${serviceAccountToDisplayName(this.name)}' already exists. Please try a different name.`
             }
           } else {
             this.errorMessage = 'Failed to add project member'
@@ -280,9 +281,6 @@ export default {
         const name = toLower(this.name)
         return this.addMember(`system:serviceaccount:${namespace}:${name}`)
       }
-    },
-    serviceAccountDisplayName (serviceAccountName) {
-      return serviceAccountToDisplayName(serviceAccountName)
     },
     defaultServiceName () {
       let name = defaultServiceName

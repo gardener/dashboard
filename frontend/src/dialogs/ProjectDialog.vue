@@ -135,7 +135,7 @@ limitations under the License.
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex'
-import { maxLength, requiredIf, required } from 'vuelidate/lib/validators'
+import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
@@ -202,10 +202,10 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings()
+      return getCostObjectSettings() || {}
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.enabled
+      return getCostObjectSettings() !== undefined
     },
     costObjectTitle () {
       return this.costObjectSettings.title

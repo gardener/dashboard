@@ -41,6 +41,8 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">Technical Contact</label>
             <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
           </v-flex>
+        </v-layout>
+        <v-layout row wrap>
           <v-flex lg4 xs12>
             <v-tooltip top>
               <template slot="activator">
@@ -50,18 +52,18 @@ limitations under the License.
               <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
           </v-flex>
-          <v-flex lg4 xs12>
-            <template v-if="createdBy">
-              <label class="caption grey--text text--darken-2">Created By</label>
-              <p class="subheading"><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></p>
-            </template>
+          <v-flex lg4 xs12 v-if="createdBy">
+            <label class="caption grey--text text--darken-2">Created By</label>
+            <p class="subheading"><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></p>
           </v-flex>
+        </v-layout>
+        <v-layout row wrap v-if="costObjectSettingEnabled">
           <v-flex lg4 xs12>
-            <template v-if="costObjectSettingEnabled">
-              <label class="caption grey--text text--darken-2">{{costObjectTitle}}</label>
-              <p class="subheading">{{costObject}}</p>
-            </template>
+            <label class="caption grey--text text--darken-2">{{costObjectTitle}}</label>
+            <p class="subheading">{{costObject}}</p>
           </v-flex>
+        </v-layout>
+        <v-layout row wrap>
           <v-flex xs12 >
             <label class="caption grey--text text--darken-2">Description</label>
             <p class="subheading">{{description}}</p>
@@ -142,10 +144,10 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettings () {
-      return getCostObjectSettings()
+      return getCostObjectSettings() || {}
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings.enabled
+      return getCostObjectSettings() !== undefined
     },
     costObjectTitle () {
       return this.costObjectSettings.title
