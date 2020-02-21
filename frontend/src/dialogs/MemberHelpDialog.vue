@@ -19,15 +19,15 @@ limitations under the License.
     <v-card class="help_member" :class="cardClass">
       <v-card-title>
         <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <span v-if="isUserDialog">Project Members</span>
+        <span v-if="isUserDialog">Project Users</span>
         <span v-if="isServiceDialog">Service Accounts</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
-          <div class="title grey--text text--darken-1 my-3">Add members to your project.</div>
+          <div class="title grey--text text--darken-1 my-3">Add users to your project.</div>
           <p class="body-1">
-            Adding members to your project allows you to collaborate across your team.
-            Project members have full access to all resources within your project.
+            Adding users to your project allows you to collaborate across your team.
+            Project users have full access to all resources within your project.
           </p>
         </template>
         <template v-if="isServiceDialog">

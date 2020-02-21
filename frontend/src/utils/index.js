@@ -326,13 +326,6 @@ export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
-export function hasAlertmanager (metadata) {
-  if (get(metadata, ['annotations', 'garden.sapcloud.io/operatedBy'])) {
-    return true
-  }
-  return false
-}
-
 export function getProjectName (metadata) {
   const namespace = get(metadata, ['namespace'])
   const projectList = store.getters.projectList
@@ -500,9 +493,9 @@ export const shootAddonList = [
   {
     name: 'nginxIngress',
     title: 'Nginx Ingress',
-    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
+    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
     visible: true,
-    enabled: true
+    enabled: false
   }
 ]
 
@@ -532,6 +525,9 @@ export function addKymaAddon (options) {
 }
 
 export function compileMarkdown (text) {
+  if (!text) {
+    return undefined
+  }
   return DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,

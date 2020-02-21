@@ -93,16 +93,16 @@ export function addShootAnnotation ({ namespace, name, data }) {
   return patchResource(`/api/namespaces/${namespace}/shoots/${name}/metadata/annotations`, data)
 }
 
-export function getShoot ({ namespace, name }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  return getResource(`/api/namespaces/${namespace}/shoots/${name}`)
-}
-
 export function getShootInfo ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return getResource(`/api/namespaces/${namespace}/shoots/${name}/info`)
+}
+
+export function getShootSeedInfo ({ namespace, name }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return getResource(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
 }
 
 export function getShootAddonKyma ({ namespace, name }) {

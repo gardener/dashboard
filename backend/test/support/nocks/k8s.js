@@ -515,16 +515,8 @@ const stub = {
     shootServerUrl,
     shootUser,
     shootPassword,
-    monitoringUser,
-    monitoringPassword,
-    loggingUser,
-    loggingPassword,
-    seedSecretName,
     seedName
   }) {
-    const seedServerURL = 'https://seed.foo.bar:8443'
-    const technicalID = `shoot--${project}--${name}`
-
     const shootResult = getShoot({ name, project, kind, region, seed: seedName })
     shootResult.status.technicalID = `shoot--${project}--${name}`
 
@@ -543,6 +535,41 @@ const stub = {
         allowed: true
       }
     }
+
+    return [nockWithAuthorization(bearer)
+      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, () => shootResult)
+      .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
+      .reply(200, () => kubecfgResult)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
+      .reply(200, () => isAdminResult)]
+  },
+  getSeedInfo ({
+    bearer,
+    namespace,
+    name,
+    project,
+    kind,
+    region,
+    monitoringUser,
+    monitoringPassword,
+    loggingUser,
+    loggingPassword,
+    seedSecretName,
+    seedName
+  }) {
+    const seedServerURL = 'https://seed.foo.bar:8443'
+    const technicalID = `shoot--${project}--${name}`
+
+    const shootResult = getShoot({ name, project, kind, region, seed: seedName })
+    shootResult.status.technicalID = `shoot--${project}--${name}`
+
+    const isAdminResult = {
+      status: {
+        allowed: true
+      }
+    }
+
     const seedSecretResult = {
       data: {
         kubeconfig: encodeBase64(getKubeconfig({
@@ -567,8 +594,6 @@ const stub = {
     return [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shootResult)
-      .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
-      .reply(200, () => kubecfgResult)
       .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
       .reply(200, () => isAdminResult)
       .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)

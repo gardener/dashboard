@@ -67,7 +67,7 @@ limitations under the License.
       </v-card>
       <v-card flat class="mt-3">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-          Add-Ons
+          Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
         <v-card-text>
           <manage-shoot-addons

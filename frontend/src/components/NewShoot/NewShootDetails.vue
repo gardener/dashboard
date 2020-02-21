@@ -64,6 +64,12 @@ limitations under the License.
         </purpose>
       </v-flex>
     </v-layout>
+    <v-layout row wrap v-if="slaDescriptionCompiledMarkdown">
+      <v-flex xs12>
+        <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+        <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
+      </v-flex>
+    </v-layout>
 </v-container>
 </template>
 
@@ -72,7 +78,7 @@ limitations under the License.
 import SelectHintColorizer from '@/components/SelectHintColorizer'
 import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, compileMarkdown } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
@@ -138,7 +144,8 @@ export default {
   validations,
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'cfg'
     ]),
     ...mapGetters([
       'sortedKubernetesVersions',
@@ -157,6 +164,15 @@ export default {
       return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
         return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
       })
+    },
+    sla () {
+      return this.cfg.sla || {}
+    },
+    slaDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.sla.description)
+    },
+    slaTitle () {
+      return this.sla.title
     }
   },
   methods: {

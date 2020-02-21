@@ -152,7 +152,7 @@ function replaceIngressApiServer (client, { name = TERMINAL_KUBE_APISERVER, name
   return replaceResource(client.extensions.ingresses, { namespace, name, body })
 }
 
-function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, ip, ownerReferences }) {
+function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, ip, port, ownerReferences }) {
   const subsets = [
     {
       addresses: [
@@ -162,7 +162,7 @@ function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER,
       ],
       ports: [
         {
-          port: 443,
+          port,
           protocol: 'TCP'
         }
       ]
@@ -174,7 +174,7 @@ function replaceEndpointKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER,
   return replaceResource(client.core.endpoints, { namespace, name, body })
 }
 
-function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, externalName = undefined, ownerReferences, clusterIP = 'None' }) {
+function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, namespace, externalName = undefined, ownerReferences, clusterIP = 'None', targetPort }) {
   let type
   if (externalName) {
     type = 'ExternalName'
@@ -187,7 +187,7 @@ function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, 
       {
         port: 443,
         protocol: 'TCP',
-        targetPort: 443
+        targetPort
       }
     ],
     type, // optional
@@ -322,16 +322,21 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
 
 async function ensureTrustedCertForApiServer (client, { namespace, name, apiServerIngressHost, tlsHost, ingressAnnotations }) {
   const apiServerHostname = client.cluster.server.hostname
+  let port = parseInt(client.cluster.server.port)
+  if (isNaN(port)) {
+    port = 443
+  }
+
   let service
   // replace headless service
   if (net.isIP(apiServerHostname) !== 0) {
     const ip = apiServerHostname
-    await replaceEndpointKubeApiServer(client, { namespace, name, ip })
+    await replaceEndpointKubeApiServer(client, { namespace, name, ip, port })
 
-    service = await replaceServiceKubeApiServer(client, { namespace, name })
+    service = await replaceServiceKubeApiServer(client, { namespace, name, targetPort: port })
   } else {
     const externalName = apiServerHostname
-    service = await replaceServiceKubeApiServer(client, { namespace, name, externalName })
+    service = await replaceServiceKubeApiServer(client, { namespace, name, externalName, targetPort: port })
   }
   const serviceName = service.metadata.name
 

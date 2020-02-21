@@ -117,11 +117,16 @@ export default {
     info () {
       return get(this, 'value.info', {})
     },
+    seedInfo () {
+      return get(this, 'value.seedInfo', {})
+    },
     shootItem () {
       return get(this, 'value', {})
     },
     isLoggingFeatureGateEnabled () {
-      return !!this.info.logging_username && !!this.info.logging_password
+      const userCredentialsAvailable = !!this.info.logging_username && !!this.info.logging_password
+      const adminCredentialsAvailable = !!this.seedInfo.logging_username && !!this.seedInfo.logging_password
+      return userCredentialsAvailable || adminCredentialsAvailable
     },
     journals () {
       const params = this.$route.params
