@@ -147,6 +147,12 @@ export function updateShootAddons ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
 }
 
+export function updateShootPurpose ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/purpose`, data)
+}
+
 /* Cloud Profiles */
 
 export function getCloudprofiles () {

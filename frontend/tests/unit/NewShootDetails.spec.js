@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import NewShootDetails from '@/components/NewShoot/NewShootDetails.vue'
 import Vue from 'vue'
 import Vuex from 'vuex'
@@ -52,7 +52,7 @@ function createNewShootDetailsComponent (kubernetesVersion) {
   const propsData = {
     userInterActionBus: new EventEmitter()
   }
-  const wrapper = shallowMount(NewShootDetails, {
+  const wrapper = mount(NewShootDetails, {
     propsData,
     store,
     computed: {

@@ -70,8 +70,7 @@ export default {
   name: 'maintenance-components',
   props: {
     userInterActionBus: {
-      type: Object,
-      required: true
+      type: Object
     },
     title: {
       type: String,

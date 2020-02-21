@@ -41,14 +41,14 @@ limitations under the License.
       </v-tooltip>
     </div>
     <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
-    <template v-if="isError">
-      <v-divider class="my-2"></v-divider>
-      <h4 class="error--text text-xs-left">Last Error</h4>
-      <template v-for="errorCodeDescription in errorCodeDescriptions">
+    <v-divider class="my-2"></v-divider>
+    <h4 class="error--text text-xs-left">Last Errors</h4>
+    <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
+      <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
         <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
       </template>
-      <ansi-text class="error--text" :text="lastErrorDescription"></ansi-text>
-    </template>
+      <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
+    </div>
   </g-popper>
 </template>
 
@@ -58,7 +58,7 @@ import AnsiText from '@/components/AnsiText'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
-import { isUserError } from '@/utils'
+import { isUserError, allErrorCodesFromLastErrors } from '@/utils'
 
 const errorCodes = {
   'ERR_INFRA_UNAUTHORIZED': {
@@ -93,8 +93,8 @@ export default {
       type: Boolean,
       required: true
     },
-    lastError: {
-      type: Object,
+    lastErrors: {
+      type: Array,
       required: false
     },
     popperKey: {
@@ -122,7 +122,7 @@ export default {
       return this.operationState === 'Processing'
     },
     isError () {
-      return this.operationState === 'Failed' || this.operationState === 'Error' || this.lastErrorDescription
+      return this.operationState === 'Failed' || this.operationState === 'Error' || this.lastErrorDescriptions.length
     },
     isAborted () {
       return this.operationState === 'Aborted'
@@ -137,22 +137,22 @@ export default {
       return this.operationType === 'Reconcile'
     },
     isUserError () {
-      return isUserError(this.errorCodes)
+      return isUserError(this.allErrorCodes)
     },
-    lastErrorDescription () {
-      return get(this.lastError, 'description')
+    lastErrorDescriptions () {
+      return map(this.lastErrors, lastError => ({
+        description: lastError.description,
+        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, `${code}.description`, code))
+      }))
     },
-    errorCodes () {
-      return get(this.lastError, 'codes', [])
+    allErrorCodes () {
+      return allErrorCodesFromLastErrors(this.lastErrors)
     },
-    errorCodeDescriptions () {
-      return map(this.errorCodes, code => get(errorCodes, `${code}.description`, code))
-    },
-    errorCodeShortDescriptions () {
-      return map(this.errorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
+    allErrorCodeShortDescriptions () {
+      return map(this.allErrorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
     },
     errorCodeShortDescriptionsText () {
-      return join(this.errorCodeShortDescriptions, ', ')
+      return join(this.allErrorCodeShortDescriptions, ', ')
     },
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
@@ -211,8 +211,8 @@ export default {
       }
     }
   },
-  watch: {
-    statusTitle (statusTitle) {
+  methods: {
+    emitExtendedTitle (statusTitle) {
       // similar to tooltipText, except the progress is missing
       let extendedTitle = statusTitle
       if (this.isUserError) {
@@ -220,6 +220,14 @@ export default {
       }
 
       this.$emit('titleChange', extendedTitle)
+    }
+  },
+  mounted () {
+    this.emitExtendedTitle(this.statusTitle)
+  },
+  watch: {
+    statusTitle (statusTitle) {
+      this.emitExtendedTitle(statusTitle)
     }
   }
 }

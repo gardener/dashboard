@@ -601,6 +601,13 @@ export default function createRouter ({ store, userManager }) {
             return store.dispatch('subscribeShoots', { name: params.name, namespace })
               .then(() => undefined)
           case 'ShootItem':
+            return Promise
+              .all([
+                store.dispatch('fetchInfrastructureSecrets'), // Required for purpose configuration
+                store.dispatch('subscribeShoot', { name: params.name, namespace }),
+                store.dispatch('subscribeComments', { name: params.name, namespace })
+              ])
+              .then(() => undefined)
           case 'ShootItemHibernationSettings':
             return Promise
               .all([

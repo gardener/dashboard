@@ -157,12 +157,12 @@ export default {
   data () {
     return {
       userInterActionBus: new EventEmitter(),
-      infrastructureValid: undefined,
-      infrastructureDetailsValid: undefined,
-      detailsValid: undefined,
-      workersValid: undefined,
-      maintenanceTimeValid: undefined,
-      hibernationScheduleValid: undefined,
+      infrastructureValid: false,
+      infrastructureDetailsValid: false,
+      detailsValid: false,
+      workersValid: false,
+      maintenanceTimeValid: false,
+      hibernationScheduleValid: false,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       isShootCreated: false
@@ -247,7 +247,7 @@ export default {
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
       set(shootResource, 'metadata.name', name)
       set(shootResource, 'spec.kubernetes.version', kubernetesVersion)
-      set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+      set(shootResource, 'spec.purpose', purpose)
 
       const workers = this.$refs.manageWorkers.getWorkers()
       set(shootResource, 'spec.provider.workers', workers)
@@ -340,7 +340,7 @@ export default {
 
       const name = get(shootResource, 'metadata.name')
       const kubernetesVersion = get(shootResource, 'spec.kubernetes.version')
-      const purpose = get(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]')
+      const purpose = get(shootResource, 'spec.purpose')
       this.purpose = purpose
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 

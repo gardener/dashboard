@@ -74,7 +74,10 @@ export const shootItem = {
       return this.shootAnnotations['gardener.cloud/operation']
     },
     shootPurpose () {
-      return this.shootAnnotations['garden.sapcloud.io/purpose']
+      return get(this.shootSpec, 'purpose')
+    },
+    isTestingCluster () {
+      return this.shootPurpose === 'testing'
     },
     shootExpirationTimestamp () {
       return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
@@ -152,8 +155,8 @@ export const shootItem = {
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
     },
-    shootLastError () {
-      return get(this.shootItem, 'status.lastError', {})
+    shootLastErrors () {
+      return get(this.shootItem, 'status.lastErrors', [])
     },
     shootConditions () {
       return get(this.shootItem, 'status.conditions', [])
