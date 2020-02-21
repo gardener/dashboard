@@ -260,20 +260,24 @@ export default {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
-
-        if (!header.hidden && get(header, 'adminOnly', false)) {
-          header.hidden = !this.isAdmin
+        if (get(header, 'adminOnly', false)) {
+          this.hideHeaderIfNotValue(header, this.isAdmin)
         }
       }
     },
     hideNotAvailableColumns () {
       for (const header of this.allHeaders) {
         if (header.value === 'journalLabels') {
-          header.hidden = !this.gitHubRepoUrl
+          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
         }
         if (header.value === 'journal') {
-          header.hidden = !this.gitHubRepoUrl
+          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
         }
+      }
+    },
+    hideHeaderIfNotValue (header, value) {
+      if (!value) {
+        header.hidden = true
       }
     },
     toggleFilter (key) {
