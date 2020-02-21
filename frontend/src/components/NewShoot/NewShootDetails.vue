@@ -61,11 +61,18 @@ limitations under the License.
           label="Purpose"
           :items="purposes"
           v-model="purpose"
+          :error-messages="getErrorMessages('purpose')"
           hint="Indicate the importance of the cluster"
           persistent-hint
           @input="onInputPurpose"
           @blur="$v.purpose.$touch()"
           ></v-select>
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap v-if="slaDescriptionCompiledMarkdown">
+      <v-flex xs12>
+        <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+        <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
       </v-flex>
     </v-layout>
 </v-container>
@@ -75,7 +82,7 @@ limitations under the License.
 
 import SelectHintColorizer from '@/components/SelectHintColorizer'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, purposesForSecret } from '@/utils'
+import { getValidationErrors, purposesForSecret, compileMarkdown } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
@@ -145,7 +152,8 @@ export default {
   validations,
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'cfg'
     ]),
     ...mapGetters([
       'sortedKubernetesVersions',
@@ -167,6 +175,15 @@ export default {
       return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
         return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
       })
+    },
+    sla () {
+      return this.cfg.sla || {}
+    },
+    slaDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.sla.description)
+    },
+    slaTitle () {
+      return this.sla.title
     }
   },
   methods: {

@@ -29,7 +29,7 @@ const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
 function fromResource ({ metadata, spec = {} }) {
   const role = 'project'
-  const { name, resourceVersion, creationTimestamp } = metadata
+  const { name, resourceVersion, creationTimestamp, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
   return {
     metadata: {
@@ -37,7 +37,8 @@ function fromResource ({ metadata, spec = {} }) {
       namespace,
       resourceVersion,
       role,
-      creationTimestamp
+      creationTimestamp,
+      annotations
     },
     data: {
       createdBy: fromSubject(createdBy),
@@ -50,7 +51,7 @@ function fromResource ({ metadata, spec = {} }) {
 
 function toResource ({ metadata, data = {} }) {
   const { apiVersion, kind } = Resources.Project
-  const { name, namespace, resourceVersion } = metadata
+  const { name, namespace, resourceVersion, annotations } = metadata
   const { createdBy, owner } = data
 
   const description = data.description || null
@@ -61,7 +62,8 @@ function toResource ({ metadata, data = {} }) {
     kind,
     metadata: {
       name,
-      resourceVersion
+      resourceVersion,
+      annotations
     },
     spec: {
       namespace,
@@ -169,9 +171,10 @@ exports.patch = async function ({ user, name: namespace, body }) {
 
   const project = await client.getProjectByNamespace(namespace)
   const name = project.metadata.name
-  // do not update createdBy
+  // do not update createdBy and name
   const { metadata, data } = fromResource(project)
-  _.assign(data, _.omit(body.data, 'createdBy'))
+  _.assign(data, body.data)
+  _.assign(metadata, body.metadata)
   body = toResource({ metadata, data })
   body = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   return fromResource(body)

@@ -22,15 +22,14 @@ limitations under the License.
         <span v-if="isCreateMode">Create Project</span>
         <span v-else>Update Project</span>
       </v-card-title>
-      <v-card-text style="height: 300px; position: relative">
+      <v-card-text>
         <form>
-          <v-container fluid>
+          <v-container fluid grid-list-xl>
             <template v-if="isCreateMode">
               <v-layout row>
-                <v-flex xs5>
+                <v-flex xs6>
                   <v-text-field
                     color="deep-purple"
-                    xs5
                     ref="projectName"
                     label="Name"
                     v-model.trim="projectName"
@@ -38,29 +37,49 @@ limitations under the License.
                     @input="$v.projectName.$touch()"
                     @blur="$v.projectName.$touch()"
                     counter="10"
-                    tabindex="1"
                     ></v-text-field>
                 </v-flex>
               </v-layout>
             </template>
             <template v-else>
               <v-layout row>
-                <v-flex xs5>
+                <v-flex xs6>
                   <div class="title pb-3">{{projectName}}</div>
                 </v-flex>
               </v-layout>
               <v-layout row>
-                <v-flex xs5>
-                  <v-select
-                    color="deep-purple"
-                    :items="ownerItems"
-                    label="Main Contact"
-                    v-model="owner"
-                    tabindex="1"
-                    ></v-select>
-                </v-flex>
-              </v-layout>
+               <v-flex xs6>
+                 <v-select
+                   color="deep-purple"
+                   :items="memberItems"
+                   label="Technical Contact"
+                   v-model="technicalContact"
+                   ></v-select>
+               </v-flex>
+           </v-layout>
             </template>
+
+            <v-layout row v-if="costObjectSettingEnabled">
+              <v-flex xs6>
+                <v-text-field
+                  color="deep-purple"
+                  ref="costObject"
+                  :label="costObjectTitle"
+                  v-model="costObject"
+                  :error-messages="getFieldValidationErrors('costObject')"
+                  @input="$v.costObject.$touch()"
+                  @blur="$v.costObject.$touch()"
+                  >
+                </v-text-field>
+              </v-flex>
+
+            </v-layout>
+            <v-layout row v-if="!!costObjectDescriptionCompiledMarkdown">
+              <v-alert :value="true" dense type="info" outline color="deep-purple">
+                <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+              </v-alert>
+            </v-layout>
+
             <v-layout row>
               <v-flex xs12>
                 <v-text-field
@@ -72,7 +91,6 @@ limitations under the License.
                   @input="$v.description.$touch()"
                   @blur="$v.description.$touch()"
                   counter="50"
-                  tabindex="2"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -82,7 +100,6 @@ limitations under the License.
                   color="deep-purple"
                   label="Purpose"
                   v-model="purpose"
-                  tabindex="3"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -99,7 +116,6 @@ limitations under the License.
           flat
           :disabled="loading"
           @click.stop="cancel"
-          tabindex="5"
         >
           Cancel
         </v-btn>
@@ -107,7 +123,6 @@ limitations under the License.
           flat
           :loading="loading"
           :disabled="!valid || loading"
-          tabindex="4"
           @click.stop="submit"
           class="deep-purple--text"
         >
@@ -119,34 +134,20 @@ limitations under the License.
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
-import { required, maxLength } from 'vuelidate/lib/validators'
+import { mapActions, mapGetters, mapState } from 'vuex'
+import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, isServiceAccount } from '@/utils'
-import map from 'lodash/map'
+import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown } from '@/utils'
+import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
+import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
-import get from 'lodash/get'
+import map from 'lodash/map'
+import set from 'lodash/set'
 import includes from 'lodash/includes'
-import concat from 'lodash/concat'
 import filter from 'lodash/filter'
 import GAlert from '@/components/GAlert'
-import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
 
 const defaultProjectName = ''
-
-const validationErrors = {
-  description: {
-    maxLength: 'Description exceeds the maximum length'
-  },
-  projectName: {
-    required: 'Name is required',
-    maxLength: 'Name exceeds the maximum length',
-    resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
-    unique: 'Name is already in use',
-    noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
-    noStartEndHyphen: 'Name must not start or end with a hyphen'
-  }
-}
 
 export default {
   name: 'project-dialog',
@@ -167,10 +168,10 @@ export default {
       projectName: undefined,
       description: undefined,
       purpose: undefined,
-      owner: undefined,
+      technicalContact: undefined,
+      costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      validationErrors,
       loading: false
     }
   },
@@ -180,8 +181,11 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'projectList',
-      'memberList'
+      'memberList',
+      'username'
+    ]),
+    ...mapState([
+      'cfg'
     ]),
     visible: {
       get () {
@@ -192,15 +196,52 @@ export default {
       }
     },
     projectNames () {
-      return map(this.projectList, 'metadata.name')
+      return projectNamesFromProjectList()
     },
-    ownerItems () {
+    projectDetails () {
+      return getProjectDetails(this.project)
+    },
+    costObjectSettings () {
+      return getCostObjectSettings() || {}
+    },
+    costObjectSettingEnabled () {
+      return getCostObjectSettings() !== undefined
+    },
+    costObjectTitle () {
+      return this.costObjectSettings.title
+    },
+    costObjectDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.costObjectSettings.description)
+    },
+    costObjectRegex () {
+      return this.costObjectSettings.regex
+    },
+    costObjectErrorMessage () {
+      return this.costObjectSettings.errorMessage
+    },
+    currentProjectName () {
+      return this.projectDetails.projectName
+    },
+    currentDescription () {
+      return this.projectDetails.description
+    },
+    currentPurpose () {
+      return this.projectDetails.purpose
+    },
+    currentTechnicalContact () {
+      return this.projectDetails.technicalContact
+    },
+    currentCostObject () {
+      return this.projectDetails.costObject
+    },
+    memberItems () {
       const members = filter(map(this.memberList, 'username'), username => !isServiceAccount(username))
-      const owner = get(this.project, 'data.owner')
-      if (!owner || includes(members, owner)) {
-        return members
+      const technicalContact = this.currentTechnicalContact
+      if (technicalContact && !includes(members, technicalContact)) {
+        members.push(technicalContact)
       }
-      return concat(members, owner)
+
+      return members
     },
     valid () {
       return !this.$v.$invalid
@@ -216,6 +257,17 @@ export default {
     },
     validators () {
       const validators = {
+        technicalContact: {
+          required
+        },
+        costObject: {
+          validCostObject: value => {
+            if (!this.costObjectRegex) {
+              return true
+            }
+            return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
+          }
+        },
         description: {
           maxLength: maxLength(50)
         }
@@ -231,6 +283,27 @@ export default {
         }
       }
       return validators
+    },
+    validationErrors () {
+      return {
+        description: {
+          maxLength: 'Description exceeds the maximum length'
+        },
+        projectName: {
+          required: 'Name is required',
+          maxLength: 'Name exceeds the maximum length',
+          resourceName: 'Name must only be lowercase letters, numbers, and hyphens',
+          unique: 'Name is already in use',
+          noConsecutiveHyphen: 'Name must not contain consecutive hyphens',
+          noStartEndHyphen: 'Name must not start or end with a hyphen'
+        },
+        technicalContact: {
+          required: 'Technical Contact is required'
+        },
+        costObject: {
+          validCostObject: this.costObjectErrorMessage
+        }
+      }
     }
   },
   methods: {
@@ -290,6 +363,9 @@ export default {
       if (this.isCreateMode) {
         const name = this.projectName
         const metadata = { name }
+        if (this.costObjectSettingEnabled) {
+          set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
+        }
 
         const description = this.description
         const purpose = this.purpose
@@ -301,7 +377,10 @@ export default {
 
         project.data.description = this.description
         project.data.purpose = this.purpose
-        project.data.owner = this.owner
+        project.data.owner = this.technicalContact
+        if (this.costObjectSettingEnabled) {
+          set(project.metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
+        }
 
         return this.updateProject(project)
       }
@@ -315,16 +394,18 @@ export default {
         this.projectName = defaultProjectName
         this.description = undefined
         this.purpose = undefined
+        this.technicalContact = this.username
+        this.costObject = undefined
+
         setInputFocus(this, 'projectName')
       } else {
-        const metadata = this.project ? this.project.metadata || {} : {}
-        const projectData = this.project ? this.project.data || {} : {}
-
-        this.projectName = metadata ? metadata.name || '' : ''
-        this.description = projectData.description
-        this.purpose = projectData.purpose
-        this.owner = projectData.owner
-        setInputFocus(this, 'description')
+        this.projectName = this.currentProjectName
+        this.description = this.currentDescription
+        this.purpose = this.currentPurpose
+        this.technicalContact = this.currentTechnicalContact
+        if (this.costObjectSettingEnabled) {
+          this.costObject = this.currentCostObject
+        }
       }
     }
   },

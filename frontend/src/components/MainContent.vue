@@ -26,8 +26,7 @@ limitations under the License.
 <script>
 import set from 'lodash/set'
 import { mapGetters, mapActions } from 'vuex'
-import DOMPurify from 'dompurify'
-import marked from 'marked'
+import { compileMarkdown } from '@/utils'
 
 function setElementStyle (element, key, value) {
   if (element) {
@@ -61,13 +60,7 @@ export default {
       }
     },
     alertBannerMessageCompiledMarkdown () {
-      const options = {
-        gfm: true,
-        breaks: true,
-        tables: true
-      }
-      const dirty = marked(this.alertBannerMessage, options)
-      return DOMPurify.sanitize(dirty)
+      return compileMarkdown(this.alertBannerMessage)
     },
     key () {
       if (this.$route.name !== 'ShootItemTerminal') {

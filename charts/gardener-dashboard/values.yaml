@@ -86,6 +86,17 @@ frontendConfig:
   #     It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.
   #   enabled: false
 
+  # # costObject is used for billing purposes and is assigned to the gardener project
+  # costObject:
+  #   title: Cost Object
+  #   description: Costs for the control planes of the clusters in this project will be charged to this cost object.
+  #   regex: ^([0-9]{10})$
+  #   errorMessage: Invalid cost object
+
+  # sla:
+  #   title: SLAs
+  #   description: https://foo.example.com/gardener-sla
+
 gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
