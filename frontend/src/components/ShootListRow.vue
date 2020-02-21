@@ -143,7 +143,8 @@ import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import {
   isTypeDelete,
-  isShootHasNoHibernationScheduleWarning
+  isShootHasNoHibernationScheduleWarning,
+  getTimestampFormatted
 } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -225,6 +226,9 @@ export default {
     },
     shootLastUpdatedJournalTimestamp () {
       return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)
+    },
+    shootLastUpdatedJournal () {
+      return getTimestampFormatted(this.shootLastUpdatedJournalTimestamp)
     },
     shootJournalsLabels () {
       return this.journalsLabels(this.shootMetadata)
