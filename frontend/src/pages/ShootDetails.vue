@@ -42,9 +42,9 @@ limitations under the License.
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
 
-        <shoot-monitoring-card v-show="shootPurpose !== 'testing'" :shootItem="shootItem" class="mt-3"></shoot-monitoring-card>
+        <shoot-monitoring-card :shootItem="shootItem" class="mt-3"></shoot-monitoring-card>
 
-        <v-card v-show="isLoggingFeatureGateEnabled && shootPurpose !== 'testing'">
+        <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
             Logging
           </v-card-title>

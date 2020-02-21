@@ -40,6 +40,7 @@ limitations under the License.
             {{shootStatusTitle}}
         </div>
       </v-card-title>
+
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-speedometer</v-icon>
@@ -49,10 +50,13 @@ limitations under the License.
           <status-tags v-else :conditions="shootConditions" popperPlacement="bottom"></status-tags>
         </div>
       </v-card-title>
-      <template v-if="seedShootIngressDomain">
-        <v-divider class="my-2" inset></v-divider>
-        <cluster-metrics :shootItem="shootItem"></cluster-metrics>
-      </template>
+
+      <v-divider class="my-2" inset></v-divider>
+      <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
+        <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
+        <span class="subheading">{{metricsNotAvailableText}}</span>
+      </v-card-title>
+      <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
     </div>
   </v-card>
 </template>
@@ -86,6 +90,15 @@ export default {
   computed: {
     isLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)
+    },
+    metricsNotAvailableText () {
+      if (this.isTestingCluster) {
+        return 'Cluster Metrics not available for clusters with purpose testing'
+      }
+      if (!this.seedShootIngressDomain) {
+        return 'Cluster Metrics not available'
+      }
+      return undefined
     }
   },
   methods: {

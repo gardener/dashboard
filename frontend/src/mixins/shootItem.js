@@ -76,6 +76,9 @@ export const shootItem = {
     shootPurpose () {
       return get(this.shootSpec, 'purpose')
     },
+    isTestingCluster () {
+      return this.shootPurpose === 'testing'
+    },
     shootExpirationTimestamp () {
       return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },

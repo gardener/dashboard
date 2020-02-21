@@ -479,7 +479,7 @@ export function selfTerminationDaysForSecret (secret) {
 }
 
 export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production', 'testing']
+  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'testing', 'production']
 }
 
 export const shootAddonList = [

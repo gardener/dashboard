@@ -211,8 +211,8 @@ export default {
       }
     }
   },
-  watch: {
-    statusTitle (statusTitle) {
+  methods: {
+    emitExtendedTitle (statusTitle) {
       // similar to tooltipText, except the progress is missing
       let extendedTitle = statusTitle
       if (this.isUserError) {
@@ -220,6 +220,14 @@ export default {
       }
 
       this.$emit('titleChange', extendedTitle)
+    }
+  },
+  mounted () {
+    this.emitExtendedTitle(this.statusTitle)
+  },
+  watch: {
+    statusTitle (statusTitle) {
+      this.emitExtendedTitle(statusTitle)
     }
   }
 }
