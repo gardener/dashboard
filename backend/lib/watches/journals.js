@@ -22,10 +22,8 @@ const journals = require('../services/journals')
 const cache = require('../cache')
 const config = require('../config')
 const delay = require('delay')
-const pForever = require('p-forever')
-const _ = require('lodash')
 
-module.exports = (io, retryOptions = {}) => {
+module.exports = async (io, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for journals feature')
     return
@@ -73,20 +71,21 @@ module.exports = (io, retryOptions = {}) => {
   if (isNaN(pollIntervalSeconds)) {
     pollIntervalSeconds = undefined
   }
-  return pForever(async () => {
+
+  do {
     await loadAllOpenIssues()
     if (!pollIntervalSeconds) {
-      return pForever.end
+      break
     }
 
     const issueNumbers = journalCache.getIssueNumbers()
-    await _.forEach(issueNumbers, async number => {
+    for (const number of issueNumbers) {
       try {
         await journals.loadIssueComments({ number })
       } catch (err) {
         logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
       }
-    })
+    }
     await delay(pollIntervalSeconds * 1000)
-  })
+  } while (true)
 }

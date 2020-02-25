@@ -309,10 +309,6 @@ Copyright (c) 2016 Filip Skokan\
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/p-event/blob/master/license)
 
-- [p-forever](https://github.com/sindresorhus/p-forever)<>
-Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
-[MIT License](https://github.com/sindresorhus/p-forever/blob/master/license)
-
 - [p-retry](https://github.com/sindresorhus/p-retry)<>
 Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 [MIT License](https://github.com/sindresorhus/p-retry/blob/master/license)
