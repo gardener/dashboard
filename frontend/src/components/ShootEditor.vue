@@ -98,7 +98,7 @@ import 'codemirror/lib/codemirror.css'
 // lodash
 import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
-import omit from 'lodash/omit'
+import pick from 'lodash/pick'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 
@@ -159,7 +159,7 @@ export default {
     value () {
       const data = cloneDeep(this.shootContent)
       if (data) {
-        return omit(data, ['info'])
+        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
       }
       return undefined
     },
