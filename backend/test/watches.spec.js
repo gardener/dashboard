@@ -474,10 +474,9 @@ describe('watches', function () {
       cacheStub.returns(journalCache)
       loadOpenIssuesStub.throws(new Error('Unexpected'))
 
-      const promise = watches.journals(io)
+      await watches.journals(io)
       expect(cacheStub).to.be.calledOnce
       expect(loadOpenIssuesStub).to.be.calledOnce
-      await promise
       expect(errorSpy).to.be.calledOnce
     })
   })

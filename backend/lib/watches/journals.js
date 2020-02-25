@@ -21,6 +21,9 @@ const logger = require('../logger')
 const journals = require('../services/journals')
 const cache = require('../cache')
 const config = require('../config')
+const delay = require('delay')
+const pForever = require('p-forever')
+const _ = require('lodash')
 
 module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
@@ -66,5 +69,24 @@ module.exports = (io, retryOptions = {}) => {
     }
   }
 
-  return loadAllOpenIssues()
+  let pollIntervalSeconds = parseInt(config.gitHub.pollIntervalSeconds)
+  if (isNaN(pollIntervalSeconds)) {
+    pollIntervalSeconds = undefined
+  }
+  return pForever(async () => {
+    await loadAllOpenIssues()
+    if (!pollIntervalSeconds) {
+      return pForever.end
+    }
+
+    const issueNumbers = journalCache.getIssueNumbers()
+    await _.forEach(issueNumbers, async number => {
+      try {
+        await journals.loadIssueComments({ number })
+      } catch (err) {
+        logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
+      }
+    })
+    await delay(pollIntervalSeconds * 1000)
+  })
 }

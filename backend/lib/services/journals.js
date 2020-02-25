@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const logger = require('../logger')
 const github = require('../github')
-const { getJournalCache } = require('../cache')
+const cache = require('../cache')
 
 function fromLabel (item) {
   return _.pick(item, [
@@ -104,10 +104,16 @@ exports.getOpenIssues = getOpenIssues
 
 async function loadOpenIssues (...args) {
   const issues = await getOpenIssues(...args)
-  const cache = getJournalCache()
+  const journalCache = cache.getJournalCache()
   for (const issue of issues) {
-    cache.addOrUpdateIssue({ issue })
+    journalCache.addOrUpdateIssue({ issue })
   }
+
+  const deletedIssues = _.differenceBy(journalCache.getIssues(), issues, 'metadata.number')
+  for (const issue of deletedIssues) {
+    journalCache.removeIssue({ issue })
+  }
+
   return issues
 }
 exports.loadOpenIssues = exports.list = loadOpenIssues
@@ -118,8 +124,8 @@ async function finalizeIssue (number) {
 
   if (issue.metadata.state === 'closed') {
     logger.debug('Journal already closed. Removing from cache..')
-    const cache = getJournalCache()
-    cache.removeIssue({ issue })
+    const journalCache = cache.getJournalCache()
+    journalCache.removeIssue({ issue })
 
     return
   }
@@ -129,8 +135,8 @@ async function finalizeIssue (number) {
 }
 
 function deleteJournals ({ name, namespace }) {
-  const cache = getJournalCache()
-  const numbers = cache.getIssueNumbersForNameAndNamespace({ name, namespace })
+  const journalCache = cache.getJournalCache()
+  const numbers = journalCache.getIssueNumbersForNameAndNamespace({ name, namespace })
   if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
@@ -140,8 +146,8 @@ function deleteJournals ({ name, namespace }) {
 exports.deleteJournals = deleteJournals
 
 async function getIssueComments ({ number }) {
-  const cache = getJournalCache()
-  const { metadata: { name, namespace } } = cache.getIssue(number)
+  const journalCache = cache.getJournalCache()
+  const { metadata: { name, namespace } } = journalCache.getIssue(number)
   const githubComments = await github.getComments({ number })
   return _.map(githubComments, githubComment => fromComment(number, name, namespace, githubComment))
 }
@@ -149,10 +155,16 @@ exports.getIssueComments = getIssueComments
 
 async function loadIssueComments ({ number }) {
   const comments = await getIssueComments({ number })
-  const cache = getJournalCache()
+  const journalCache = cache.getJournalCache()
   for (const comment of comments) {
-    cache.addOrUpdateComment({ issueNumber: number, comment })
+    journalCache.addOrUpdateComment({ issueNumber: number, comment })
   }
+
+  const deletedComments = _.differenceBy(journalCache.getCommentsForIssue({ issueNumber: number }), comments, 'metadata.id')
+  for (const comment of deletedComments) {
+    journalCache.removeComment({ issueNumber: number, comment })
+  }
+
   return comments
 }
 exports.loadIssueComments = loadIssueComments
