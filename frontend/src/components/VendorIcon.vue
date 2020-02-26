@@ -17,11 +17,13 @@ limitations under the License.
 <template>
   <span>
     <img v-if="iconSrc" :src="iconSrc" :width="getWidth" :height="getHeight" :class="contentClass" style="vertical-align:middle">
-    <v-icon v-else :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
+    <v-icon v-else-if="isMdiIcon" :class="contentClass" style="font-size:1.5em">{{value}}</v-icon>
+    <v-icon v-else :class="contentClass" class="cyan--text text--darken-2" style="font-size:1.5em">mdi-blur-radial</v-icon>
   </span>
 </template>
 
 <script>
+import startsWith from 'lodash/startsWith'
 
 export default {
   props: {
@@ -87,6 +89,9 @@ export default {
         return 20
       }
       return this.width
+    },
+    isMdiIcon () {
+      return startsWith(this.value, 'mdi-')
     }
   }
 }
