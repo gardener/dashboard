@@ -48,12 +48,12 @@ function toNamespacedEvents ({ type, object }) {
 }
 
 module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
+  const nsp = io.of('/shoots')
   const emitter = dashboardClient['core.gardener.cloud'].shoots.watchListAllNamespaces()
   registerHandler(emitter, async event => {
     const { type, object } = event
     const { namespace, name, uid } = object.metadata
 
-    const nsp = io.of('/shoots')
     const namespacedEvents = toNamespacedEvents(event)
     nsp.to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
     nsp.to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)

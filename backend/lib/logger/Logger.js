@@ -17,6 +17,7 @@
 'use strict'
 
 const chalk = require('chalk')
+const util = require('util')
 
 const LEVELS = {
   trace: 1,
@@ -32,6 +33,10 @@ class Logger {
     this.logHttpRequestBody = logHttpRequestBody === true
     this.silent = /^test/.test(process.env.NODE_ENV)
     this.console = console
+  }
+
+  inspect (obj) {
+    return util.inspect(obj, { depth: Infinity, colors: true })
   }
 
   isDisabled (level) {
@@ -72,7 +77,7 @@ class Logger {
     if (!this.isDisabled(LEVELS.trace)) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (body && statusCode >= 300) {
-        msg += ' ' + body.toString('utf8')
+        msg += '\n' + this.inspect(body)
       }
       this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)
     }

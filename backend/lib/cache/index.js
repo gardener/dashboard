@@ -15,33 +15,57 @@
 //
 
 const _ = require('lodash')
+const { Store } = require('../kubernetes-client/cache')
+const createJournalCache = require('./journals')
 
-const cloudProfiles = []
-const seeds = []
-const quotas = []
-const journals = require('./journals')()
-const projects = {}
+class Cache {
+  constructor () {
+    this.synchronizationTriggered = false
+    this.cloudprofiles = new Store()
+    this.seeds = new Store()
+    this.quotas = new Store()
+    this.projects = new Store()
+    this.journalCache = createJournalCache()
+  }
 
-const cache = {
+  synchronize (dashboardClient) {
+    if (!this.synchronizationTriggered) {
+      dashboardClient['core.gardener.cloud'].cloudprofiles.syncList(this.cloudprofiles)
+      dashboardClient['core.gardener.cloud'].quotas.syncListAllNamespaces(this.quotas)
+      dashboardClient['core.gardener.cloud'].seeds.syncList(this.seeds)
+      dashboardClient['core.gardener.cloud'].projects.syncList(this.projects)
+      this.synchronizationTriggered = true
+    }
+  }
+
   getCloudProfiles () {
-    return cloudProfiles
-  },
+    return this.cloudprofiles.values()
+  }
+
   getQuotas () {
-    return quotas
-  },
+    return this.quotas.values()
+  }
+
   getSeeds () {
-    return seeds
-  },
+    return this.seeds.values()
+  }
+
+  getProjects () {
+    return this.projects.values()
+  }
+
   getJournalCache () {
-    return journals
-  },
-  getProjectsCache () {
-    return projects
+    return this.journalCache
   }
 }
 
+const cache = new Cache()
+
 module.exports = {
-  _cache: cache,
+  cache,
+  synchronize (dashboardClient) {
+    cache.synchronize(dashboardClient)
+  },
   getCloudProfiles () {
     return cache.getCloudProfiles()
   },
@@ -52,33 +76,25 @@ module.exports = {
     return cache.getSeeds()
   },
   getSeed (name) {
-    return _.cloneDeep(_.find(cache.getSeeds(), ['metadata.name', name]))
+    return _
+      .chain(cache.getSeeds())
+      .find(['metadata.name', name])
+      .cloneDeep()
+      .value()
   },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
-      const taints = _.get(item, 'spec.taints', [])
-      let seedProtected = false
-      let seedInVisible = false
-      _.forEach(taints, taint => {
-        if (taint.key === 'seed.gardener.cloud/protected') {
-          seedProtected = true
-        }
-        if (taint.key === 'seed.gardener.cloud/invisible') {
-          seedInVisible = true
-        }
-      })
-      return !seedProtected && !seedInVisible
+      const taints = _.get(item, 'spec.taints')
+      const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
+      const visible = !_.find(taints, ['key', 'seed.gardener.cloud/invisible'])
+      return unprotected && visible
     }
     return _.filter(cache.getSeeds(), predicate)
   },
+  getProjects () {
+    return cache.getProjects()
+  },
   getJournalCache () {
     return cache.getJournalCache()
-  },
-  getProjectsCache () {
-    return cache.getProjectsCache()
-  },
-  getProjectsList () {
-    const projectsCache = cache.getProjectsCache()
-    return _.values(projectsCache)
   }
 }

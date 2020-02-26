@@ -34,6 +34,7 @@ module.exports = function createServer (app) {
   const healthCheck = app.get('healthCheck')
   const logger = app.get('logger')
   const io = app.get('io')()
+  const synchronizer = app.get('synchronizer')
 
   // create server
   const server = http.createServer(app)
@@ -68,6 +69,9 @@ module.exports = function createServer (app) {
     logger.info(`Server listening on port ${port}`)
   }
 
-  server.startListening = () => server.listen(port, onListening)
+  server.startListening = () => {
+    synchronizer()
+    server.listen(port, onListening)
+  }
   return server
 }

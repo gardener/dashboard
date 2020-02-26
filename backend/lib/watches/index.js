@@ -16,9 +16,6 @@
 
 'use strict'
 
-exports.shoots = require('./shoots')
 exports.seeds = require('./seeds')
-exports.cloudprofiles = require('./cloudprofiles')
-exports.quotas = require('./quotas')
+exports.shoots = require('./shoots')
 exports.journals = require('./journals')
-exports.projects = require('./projects')

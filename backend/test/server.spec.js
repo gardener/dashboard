@@ -25,6 +25,7 @@ function createApplication (port) {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
   }
+  app.synchronizing = false
   app.io = {}
   app.log = []
   app.get = key => {
@@ -58,6 +59,10 @@ function createApplication (port) {
             }
           }
         }
+      case 'synchronizer':
+        return () => {
+          app.synchronizing = true
+        }
     }
   }
   return app
@@ -74,6 +79,7 @@ describe('server', function () {
     expect(server).to.equal(app.io.server)
     try {
       server.startListening()
+      expect(app.synchronizing).to.be.true
       await pEvent(server, 'listening', { timeout: 1000 })
       expect(app.log[0]).to.eql(['info', `Server listening on port ${port}`])
     } finally {

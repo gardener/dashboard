@@ -18,6 +18,7 @@
 
 const _ = require('lodash')
 const nock = require('nock')
+const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
 const hash = require('object-hash')
@@ -370,7 +371,8 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
       name,
       annotations: {
         'billing.gardener.cloud/costObject': costObject
-      }
+      },
+      uid: uuidv1()
     },
     spec: {
       namespace,

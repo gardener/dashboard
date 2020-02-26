@@ -18,7 +18,7 @@
 const _ = require('lodash')
 const { EventEmitter } = require('events')
 const fnv = require('fnv-plus')
-const { _cache: cache } = require('../../lib/cache')
+const { cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 

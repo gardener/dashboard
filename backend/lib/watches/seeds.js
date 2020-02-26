@@ -16,8 +16,6 @@
 
 'use strict'
 
-const { cacheResource } = require('./common')
-const { getSeeds } = require('../cache')
 const { registerHandler } = require('./common')
 const { bootstrapper } = require('../services/terminals')
 const {
@@ -26,7 +24,6 @@ const {
 
 module.exports = io => {
   const emitter = dashboardClient['core.gardener.cloud'].seeds.watchList()
-  cacheResource(emitter, getSeeds(), 'metadata.name')
   registerHandler(emitter, ({ type, object }) => {
     if (type === 'ADDED') {
       bootstrapper.bootstrapResource(object)

@@ -23,14 +23,21 @@ const pEvent = require('p-event')
 const http = require('http')
 const express = require('express')
 const jwt = require('jsonwebtoken')
+const WebSocket = require('ws')
+const { HTTPError } = require('got')
 
 const logger = require('../lib/logger')
 const mixins = require('../lib/kubernetes-client/mixins')
 const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
 const HttpClient = require('../lib/kubernetes-client/HttpClient')
-const { http: httpSymbols } = require('../lib/kubernetes-client/symbols')
+const ApiErrors = require('../lib/kubernetes-client/ApiErrors')
+const { Reflector, Store } = require('../lib/kubernetes-client/cache')
+const {
+  http: httpSymbols,
+  ws: wsSymbols
+} = require('../lib/kubernetes-client/symbols')
 const { attach, beforeRequest, beforeRedirect, afterResponse } = require('../lib/kubernetes-client/debug')
-const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable } = mixins
+const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Cacheable, Writable } = mixins
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */
@@ -42,38 +49,247 @@ describe('kubernetes-client', function () {
   })
 
   describe('mixins', function () {
-    it('should check that plain mixins do not occur in the inheritance hierarchy', function () {
+    const testStore = new Store()
+    let testOptions
+    let testReflector
+    let createReflectorStub
+    let runReflectorSpy
+
+    class EchoClient {
+      [httpSymbols.request] (...args) {
+        return args
+      }
+
+      [wsSymbols.connect] (...args) {
+        return args
+      }
+
+      static get group () {
+        return 'group'
+      }
+
+      static get version () {
+        return 'version'
+      }
+
+      static get names () {
+        return {
+          plural: 'dummies'
+        }
+      }
+    }
+
+    class TestReflector {
+      run () {}
+    }
+
+    function beforeEachCachableTest () {
+      testOptions = {
+        foo: 'bar'
+      }
+      testReflector = new TestReflector()
+      createReflectorStub = sandbox.stub(Reflector, 'create').returns(testReflector)
+      runReflectorSpy = sandbox.spy(testReflector, 'run')
+    }
+
+    describe('Version', function () {
       class V1Object extends V1(Object) {}
-      expect(new V1Object()).to.have.nested.property('constructor.version', 'v1')
-      expect(() => new V1Object() instanceof V1).to.throw(TypeError)
-
       class V1Alpha1Object extends V1Alpha1(Object) {}
-      expect(new V1Alpha1Object()).to.have.nested.property('constructor.version', 'v1alpha1')
-      expect(() => new V1Alpha1Object() instanceof V1Alpha1).to.throw(TypeError)
-
       class V1Beta1Object extends V1Beta1(Object) {}
-      expect(new V1Beta1Object()).to.have.nested.property('constructor.version', 'v1beta1')
-      expect(() => new V1Beta1Object() instanceof V1Beta1).to.throw(TypeError)
 
-      class CoreGroupObject extends CoreGroup(Object) {}
-      expect(() => new CoreGroupObject() instanceof CoreGroup).to.throw(TypeError)
-
-      class NamedGroupObject extends NamedGroup(Object) {}
-      expect(() => new NamedGroupObject() instanceof NamedGroup).to.throw(TypeError)
+      it('should check that Version mixins do not occur in the inheritance hierarchy', function () {
+        expect(new V1Object()).to.have.nested.property('constructor.version', 'v1')
+        expect(() => new V1Object() instanceof V1).to.throw(TypeError)
+        expect(new V1Alpha1Object()).to.have.nested.property('constructor.version', 'v1alpha1')
+        expect(() => new V1Alpha1Object() instanceof V1Alpha1).to.throw(TypeError)
+        expect(new V1Beta1Object()).to.have.nested.property('constructor.version', 'v1beta1')
+        expect(() => new V1Beta1Object() instanceof V1Beta1).to.throw(TypeError)
+      })
     })
 
-    it('should check that declared mixins do occur in the inheritance hierarchy', function () {
-      class ClusterScopedObject extends ClusterScoped(Object) {}
-      expect(new ClusterScopedObject()).to.be.an.instanceof(ClusterScoped)
+    describe('ApiGroup', function () {
+      class CoreGroupObject extends CoreGroup(Object) {}
+      class NamedGroupObject extends NamedGroup(Object) {}
 
-      class NamespaceScopedObject extends NamespaceScoped(Object) {}
-      expect(new NamespaceScopedObject()).to.be.an.instanceof(NamespaceScoped)
+      it('should check that ApiGroup mixins do not occur in the inheritance hierarchy', function () {
+        expect(() => new CoreGroupObject() instanceof CoreGroup).to.throw(TypeError)
+        expect(() => new NamedGroupObject() instanceof NamedGroup).to.throw(TypeError)
+      })
+    })
 
-      class ReadableNamespaceScopedObject extends Readable(NamespaceScopedObject) {}
-      expect(new ReadableNamespaceScopedObject()).to.be.an.instanceof(Readable)
+    describe('ClusterScoped', function () {
+      class TestObject extends mix(EchoClient).with(ClusterScoped, Readable, Cacheable, Observable) {}
 
-      class ReadableClusterScopedObject extends Readable(ClusterScopedObject) {}
-      expect(new ReadableClusterScopedObject()).to.be.an.instanceof(Readable)
+      it('should check that declared mixins do occur in the inheritance hierarchy', function () {
+        const testObject = new TestObject()
+        expect(testObject).to.have.nested.property('constructor.scope', 'Cluster')
+        expect(testObject).to.be.an.instanceof(ClusterScoped)
+        expect(testObject).to.be.an.instanceof(Readable)
+        expect(testObject).to.be.an.instanceof(Cacheable)
+        expect(testObject).to.be.an.instanceof(Observable)
+      })
+
+      describe('Readable', function () {
+        it('should get a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.get('name', { watch: false })
+          expect(url).to.equal('dummies/name')
+          expect(method).to.equal('get')
+          expect(searchParams.toString()).to.equal('')
+        })
+
+        it('should list a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.list({ watch: false })
+          expect(url).to.equal('dummies')
+          expect(method).to.equal('get')
+          expect(searchParams.toString()).to.equal('')
+        })
+
+        it('should watch a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.get('name', { watch: true })
+          expect(url).to.equal('dummies')
+          expect(method).to.be.undefined
+          expect(searchParams.toString()).to.equal('watch=true&fieldSelector=metadata.name%3Dname')
+        })
+
+        it('should watch a list of resources', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.list({ watch: true })
+          expect(url).to.equal('dummies')
+          expect(method).to.be.undefined
+          expect(searchParams.toString()).to.equal('watch=true')
+        })
+      })
+
+      describe('Cachable', function () {
+        beforeEach(beforeEachCachableTest)
+
+        it('should sync a list of resources', function () {
+          const testObject = new TestObject()
+          const reflector = testObject.syncList(testStore)
+          expect(createReflectorStub).to.be.calledOnce
+          const [listWatcher, store] = createReflectorStub.firstCall.args
+          expect(store).to.equal(testStore)
+          expect(listWatcher.group).to.equal(TestObject.group)
+          expect(listWatcher.version).to.equal(TestObject.version)
+          expect(listWatcher.names).to.eql(TestObject.names)
+          const listStub = sandbox.stub(testObject, 'list')
+          listWatcher.list(testOptions)
+          listWatcher.watch(testOptions)
+          expect(listStub).to.be.calledTwice
+          expect(listStub.firstCall.args).to.eql([testOptions])
+          expect(listStub.secondCall.args).to.eql([{ watch: true, ...testOptions }])
+          expect(runReflectorSpy).to.be.calledOnce
+          expect(reflector).to.equal(testReflector)
+        })
+      })
+    })
+
+    describe('NamespaceScoped', function () {
+      class TestObject extends mix(EchoClient).with(NamespaceScoped, Readable, Cacheable, Observable) {}
+
+      it('should check that declared mixins do occur in the inheritance hierarchy', function () {
+        const testObject = new TestObject()
+        expect(testObject).to.have.nested.property('constructor.scope', 'Namespaced')
+        expect(testObject).to.be.an.instanceof(NamespaceScoped)
+        expect(testObject).to.be.an.instanceof(Readable)
+        expect(testObject).to.be.an.instanceof(Cacheable)
+        expect(testObject).to.be.an.instanceof(Observable)
+      })
+
+      describe('Readable', function () {
+        it('should get a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.get('namespace', 'name', { watch: false })
+          expect(url).to.equal('namespaces/namespace/dummies/name')
+          expect(method).to.equal('get')
+          expect(searchParams.toString()).to.equal('')
+        })
+
+        it('should list a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.list('namespace', { watch: false })
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(method).to.equal('get')
+          expect(searchParams.toString()).to.equal('')
+        })
+
+        it('should list a resource across all namespaces', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.listAllNamespaces({ watch: false })
+          expect(url).to.equal('dummies')
+          expect(method).to.equal('get')
+          expect(searchParams.toString()).to.equal('')
+        })
+
+        it('should watch a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.get('namespace', 'name', { watch: true })
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(method).to.be.undefined
+          expect(searchParams.toString()).to.equal('watch=true&fieldSelector=metadata.name%3Dname')
+        })
+
+        it('should watch a list of resources', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.list('namespace', { watch: true })
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(method).to.be.undefined
+          expect(searchParams.toString()).to.equal('watch=true')
+        })
+
+        it('should watch a list of resources across all namespaces', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.listAllNamespaces({ watch: true })
+          expect(url).to.equal('dummies')
+          expect(method).to.be.undefined
+          expect(searchParams.toString()).to.equal('watch=true')
+        })
+      })
+
+      describe('Cachable', function () {
+        beforeEach(beforeEachCachableTest)
+
+        it('should sync a list of resources', function () {
+          const testObject = new TestObject()
+          const reflector = testObject.syncList('namesace', testStore)
+          expect(createReflectorStub).to.be.calledOnce
+          const [listWatcher, store] = createReflectorStub.firstCall.args
+          expect(store).to.equal(testStore)
+          expect(listWatcher.group).to.equal(TestObject.group)
+          expect(listWatcher.version).to.equal(TestObject.version)
+          expect(listWatcher.names).to.eql(TestObject.names)
+          const listStub = sandbox.stub(testObject, 'list')
+          listWatcher.list(testOptions)
+          listWatcher.watch(testOptions)
+          expect(listStub).to.be.calledTwice
+          expect(listStub.firstCall.args).to.eql(['namesace', testOptions])
+          expect(listStub.secondCall.args).to.eql(['namesace', { watch: true, ...testOptions }])
+          expect(runReflectorSpy).to.be.calledOnce
+          expect(reflector).to.equal(testReflector)
+        })
+
+        it('should sync a list of resources across all namespaces', function () {
+          const testObject = new TestObject()
+          const reflector = testObject.syncListAllNamespaces(testStore)
+          expect(createReflectorStub).to.be.calledOnce
+          const [listWatcher, store] = createReflectorStub.firstCall.args
+          expect(store).to.equal(testStore)
+          expect(listWatcher.group).to.equal(TestObject.group)
+          expect(listWatcher.version).to.equal(TestObject.version)
+          expect(listWatcher.names).to.eql(TestObject.names)
+          const listStub = sandbox.stub(testObject, 'listAllNamespaces')
+          listWatcher.list(testOptions)
+          listWatcher.watch(testOptions)
+          expect(listStub).to.be.calledTwice
+          expect(listStub.firstCall.args).to.eql([testOptions])
+          expect(listStub.secondCall.args).to.eql([{ watch: true, ...testOptions }])
+          expect(runReflectorSpy).to.be.calledOnce
+          expect(reflector).to.equal(testReflector)
+        })
+      })
     })
   })
 
@@ -283,20 +499,13 @@ describe('kubernetes-client', function () {
 
   describe('HttpClient', function () {
     let server
+    let wss
+    let origin
 
     const app = express()
     app.get('/foo', (req, res) => {
       res.send('bar')
     })
-
-    async function serve () {
-      server = http.createServer(app).listen(0, 'localhost')
-      await pEvent(server, 'listening', {
-        timeout: 100
-      })
-      const { address, port } = server.address()
-      return `http://${address}:${port}`
-    }
 
     class TestClient extends HttpClient {
       constructor (url, options) {
@@ -311,14 +520,33 @@ describe('kubernetes-client', function () {
       get () {
         return this[httpSymbols.request]('foo', { method: 'get' })
       }
+
+      echo (options) {
+        const searchParams = new URLSearchParams(options)
+        return this[wsSymbols.connect]('echo', { searchParams })
+      }
     }
 
-    after(function () {
+    beforeEach(async function () {
+      server = http.createServer(app)
+      wss = new WebSocket.Server({ server, path: '/echo' })
+      wss.on('connection', socket => {
+        socket.on('message', message => socket.send(message))
+      })
+      server.listen(0, 'localhost')
+      await pEvent(server, 'listening', {
+        timeout: 200
+      })
+      const { address, port } = server.address()
+      origin = `http://${address}:${port}`
+    })
+
+    afterEach(function () {
+      wss.close()
       server.close()
     })
 
     it('should assert "beforeRequest" hook parameters', async function () {
-      const origin = await serve()
       const client = new TestClient(origin, {
         headers: {
           foo: 'bar'
@@ -337,6 +565,15 @@ describe('kubernetes-client', function () {
       })
       const body = await client.get()
       expect(body).to.equal('bar')
+    })
+
+    it('should open a websocket echo socket', async function () {
+      const client = new TestClient(origin)
+      const echoSocket = client.echo()
+      await pEvent(echoSocket, 'open')
+      echoSocket.send('foobar')
+      const message = await pEvent(echoSocket, 'message')
+      expect(message).to.equal('foobar')
     })
   })
 
@@ -464,6 +701,56 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(args.httpVersion).to.equal(httpVersion)
       expect(args.headers.foo).to.equal('bar')
       expect(JSON.parse(args.body)).to.eql({ redirectUrls })
+    })
+  })
+
+  describe('ApiErrors', function () {
+    const { StatusError, isExpiredError, isResourceExpired, isGone } = ApiErrors
+    const code = 'code'
+    const message = 'message'
+    const reason = 'reason'
+
+    it('should create a StatusError instance', function () {
+      const statusError = new StatusError({ code, message, reason })
+      expect(statusError).to.be.an.instanceof(Error)
+      expect(statusError).to.have.property('stack')
+      expect(statusError.code).to.equal(code)
+      expect(statusError.message).to.equal(message)
+      expect(statusError.reason).to.equal(reason)
+    })
+
+    it('should check if a status error has code "Gone"', function () {
+      const code = 410
+      let error = new StatusError({ code })
+      expect(isGone(error)).to.be.true
+      expect(isExpiredError(error)).to.be.true
+      error = new HTTPError({ statusCode: code })
+      expect(isGone(error)).to.be.true
+      expect(isExpiredError(error)).to.be.true
+    })
+
+    it('should check if a status error has reason "Expired"', function () {
+      const reason = 'Expired'
+      let error = new StatusError({ reason })
+      expect(isResourceExpired(error)).to.be.true
+      expect(isExpiredError(error)).to.be.true
+      error = new HTTPError({ statusMessage: reason })
+      expect(isResourceExpired(error)).to.be.true
+      expect(isExpiredError(error)).to.be.true
+    })
+
+    it('should only consider StatusError or HTTPError instances', function () {
+      const error = new Error()
+      error.reason = 'Expired'
+      expect(isExpiredError(error)).to.be.false
+    })
+  })
+
+  describe('Store', function () {
+    it('should create a Store instance', function () {
+      const map = new Map()
+      const store = new Store(map)
+      expect(store).to.be.an.instanceof(Store)
     })
   })
 })

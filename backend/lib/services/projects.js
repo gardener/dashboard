@@ -24,7 +24,7 @@ const {
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
-const { getProjectsList } = require('../cache')
+const { getProjects } = require('../cache')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
@@ -98,7 +98,7 @@ async function validateDeletePreconditions ({ user, namespace }) {
 }
 
 exports.list = async function ({ user, qs = {} }) {
-  const projects = getProjectsList()
+  const projects = getProjects()
   const isAdmin = await authorization.isAdmin(user)
 
   const isMemberOf = project => _

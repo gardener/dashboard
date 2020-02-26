@@ -17,7 +17,8 @@
 'use strict'
 
 const got = require('got')
-const { http } = require('./symbols')
+const WebSocket = require('ws')
+const { http, ws } = require('./symbols')
 const { patchHttpErrorMessage } = require('./util')
 
 class HttpClient {
@@ -40,6 +41,40 @@ class HttpClient {
       throw patchHttpErrorMessage(err)
     }
   }
+
+  [ws.connect] (url, { searchParams } = {}) {
+    const {
+      prefixUrl,
+      ca,
+      key,
+      cert,
+      servername,
+      rejectUnauthorized,
+      headers
+    } = this[http.client].defaults.options
+    url = new URL(url, ensureTrailingSlashExists(prefixUrl))
+    url.protocol = url.protocol.replace(/^http/, 'ws')
+    if (searchParams) {
+      url.search = searchParams.toString()
+    }
+    return this.constructor.createWebSocket(url, {
+      origin: url.origin,
+      servername,
+      headers,
+      key,
+      cert,
+      ca,
+      rejectUnauthorized
+    })
+  }
+
+  static createWebSocket (url, options) {
+    return new WebSocket(url, options)
+  }
+}
+
+function ensureTrailingSlashExists (url) {
+  return url.endsWith('/') ? url : url + '/'
 }
 
 module.exports = HttpClient

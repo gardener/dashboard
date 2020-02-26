@@ -18,7 +18,7 @@
 
 const EventEmitter = require('events')
 const { AssertionError } = require('assert').strict
-const { encodeBase64, decodeBase64, getConfigValue, shootHasIssue, getSeedNameFromShoot } = require('../lib/utils')
+const { encodeBase64, decodeBase64, getConfigValue, shootHasIssue, getSeedNameFromShoot, getNameFromCallsite } = require('../lib/utils')
 const { AbstractBatchEmitter, EventsEmitter, NamespacedBatchEmitter } = require('../lib/utils/batchEmitter')
 
 describe('utils', function () {
@@ -73,6 +73,10 @@ describe('utils', function () {
         }
       }
       expect(getSeedNameFromShoot(shoot)).to.equal('foo')
+    })
+
+    it('should format a callsite', function () {
+      expect(getNameFromCallsite()).to.match(/lib\/utils\/index.js:\d+, Function=getNameFromCallsite/)
     })
   })
 

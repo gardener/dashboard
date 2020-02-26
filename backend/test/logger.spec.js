@@ -152,7 +152,7 @@ describe('logger', function () {
   it('should log a response message', function () {
     const logger = createNoisyLogger()
     logger.response(responseArgs)
-    const msg = `HTTP/1.1 ${statusCode} ${statusMessage} [${id}] ${body}`
+    const msg = `HTTP/1.1 ${statusCode} ${statusMessage} [${id}]\n${logger.inspect(body)}`
     expect(logger.console.args).to.eql(['D T ' + chalk.black.bgBlue('res') + '  : ' + msg])
   })
 })

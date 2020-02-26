@@ -23,7 +23,7 @@ const logger = require('../lib/logger')
 const { registerHandler } = require('../lib/watches/common')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
-const { _cache: cache } = require('../lib/cache')
+const { cache } = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const journals = require('../lib/services/journals')
 
@@ -36,15 +36,12 @@ describe('watches', function () {
   const bar = { metadata: { name: 'bar', uid: 2 } }
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
   const foobaz = { metadata: { namespace: 'foo', name: 'baz', uid: 5 } }
-  const barbaz = { metadata: { namespace: 'bar', name: 'baz', uid: 6 } }
 
   let emitter
-  let items
 
   beforeEach(function () {
     emitter = new EventEmitter()
     emitter.resourceName = resourceName
-    items = []
   })
 
   afterEach(function () {
@@ -95,64 +92,22 @@ describe('watches', function () {
     })
   })
 
-  describe('cloudprofiles', function () {
-    const kind = 'CloudProfile'
-    const { cloudprofiles } = dashboardClient['core.gardener.cloud']
-
-    it('should watch cloudprofiles', async function () {
-      const watchStub = sandbox.stub(cloudprofiles, 'watchList').returns(emitter)
-      const cacheStub = sandbox.stub(cache, 'getCloudProfiles').returns(items)
-      watches.cloudprofiles(io)
-      expect(watchStub).to.be.calledOnce
-      expect(cacheStub).to.be.calledOnce
-      items.push(foo)
-      emitter.emit('connect')
-      expect(items).to.be.empty
-      emitter.emit('event', { type: 'DELETED', object: foo })
-      expect(items).to.be.empty
-      emitter.emit('event', { type: 'ADDED', object: foo })
-      emitter.emit('event', { type: 'ADDED', object: bar })
-      expect(items).to.have.length(2)
-      emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
-      emitter.emit('event', { type: 'DELETED', object: foo })
-      expect(items).to.have.length(1)
-      expect(items[0]).to.eql({ kind, ...bar })
-    })
-  })
-
-  describe('quotas', function () {
-    const { quotas } = dashboardClient['core.gardener.cloud']
-
-    it('should watch quotas', async function () {
-      const watchStub = sandbox.stub(quotas, 'watchListAllNamespaces').returns(emitter)
-      const cacheStub = sandbox.stub(cache, 'getQuotas').returns(items)
-      watches.quotas(io)
-      expect(watchStub).to.be.calledOnce
-      expect(cacheStub).to.be.calledOnce
-      expect(items).to.be.empty
-      emitter.emit('event', { type: 'ADDED', object: foobaz })
-      emitter.emit('event', { type: 'ADDED', object: barbaz })
-      expect(items).to.have.length(2)
-      expect(items).to.eql([foobaz, barbaz])
-    })
-  })
-
   describe('seeds', function () {
+    const kind = 'Seeds'
     const { seeds } = dashboardClient['core.gardener.cloud']
 
     it('should watch seeds', async function () {
       const watchStub = sandbox.stub(seeds, 'watchList').returns(emitter)
-      const cacheStub = sandbox.stub(cache, 'getSeeds').returns(items)
       const bootstrapStub = sandbox.stub(bootstrapper, 'bootstrapResource')
       watches.seeds(io)
       expect(watchStub).to.be.calledOnce
-      expect(cacheStub).to.be.calledOnce
-      expect(items).to.be.empty
       emitter.emit('event', { type: 'ADDED', object: foo })
-      emitter.emit('event', { type: 'MODIFIED', object: bar })
-      expect(bootstrapStub).to.be.calledOnceWith(foo)
-      expect(items).to.have.length(2)
-      expect(items).to.eql([foo, bar])
+      emitter.emit('event', { type: 'ADDED', object: bar })
+      emitter.emit('event', { type: 'MODIFIED', object: { kind, ...bar } })
+      emitter.emit('event', { type: 'DELETED', object: bar })
+      expect(bootstrapStub).to.be.calledTwice
+      expect(bootstrapStub.firstCall).to.be.calledWith(foo)
+      expect(bootstrapStub.secondCall).to.be.calledWith(bar)
     })
   })
 

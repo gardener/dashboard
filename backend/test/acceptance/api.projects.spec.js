@@ -20,7 +20,7 @@ const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
 const { WatchBuilder } = require('../../lib/kubernetes-client')
-const { getProjectsCache } = require('../../lib/cache')
+const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -39,17 +39,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const description = 'description'
   const purpose = 'purpose'
   const data = { owner, description, purpose }
-  let cache
 
   beforeEach(function () {
-    cache = getProjectsCache()
-    _.remove(cache, () => true)
-
-    const projectList = k8s.projectList
-    _.forEach(projectList, project => {
-      const key = project.metadata.name
-      _.set(cache, key, project)
-    })
+    cache.projects.replace(k8s.projectList)
   })
 
   it('should return two projects', async function () {
