@@ -33,6 +33,21 @@ limitations under the License.
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
+        <v-layout row align-center>
+          <v-chip v-for="(roleName, index) in roleNames" :key="index" small color="green darken-2" text-color="white">
+            {{roleName}}
+          </v-chip>
+        </v-layout>
+      </v-list-tile-action>
+      <v-list-tile-action>
+        <v-tooltip top>
+          <v-btn slot="activator" icon class="green--text text--darken-2" @click.native.stop="onEdit">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <span>Update User</span>
+        </v-tooltip>
+      </v-list-tile-action>
+      <v-list-tile-action>
         <v-tooltip top>
           <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
             <v-icon>mdi-delete</v-icon>
@@ -68,11 +83,22 @@ export default {
     isTechnicalContact: {
       type: Boolean,
       required: true
+    },
+    roles: {
+      type: Array,
+      required: true
+    },
+    roleNames: {
+      type: Array,
+      required: true
     }
   },
   methods: {
     onDelete (username) {
-      this.$emit('onDelete', this.username)
+      this.$emit('delete', this.username)
+    },
+    onEdit (username) {
+      this.$emit('edit', this.username, this.roles)
     }
   }
 }

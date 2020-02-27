@@ -602,3 +602,14 @@ export function generateWorker (availableZones, cloudProfileName, region) {
 export function allErrorCodesFromLastErrors (lastErrors) {
   return uniq(compact(flatMap(lastErrors, 'codes')))
 }
+
+export const allMemberRoles = [
+  {
+    name: 'admin',
+    displayName: 'Admin'
+  },
+  {
+    name: 'viewer',
+    displayName: 'Viewer'
+  }
+]

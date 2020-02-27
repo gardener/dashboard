@@ -31,7 +31,7 @@ limitations under the License.
       <v-card-text>
         <v-container grid-list-xl class="pa-0 ma-0">
           <v-layout row wrap>
-            <v-flex xs12>
+            <v-flex xs8>
               <v-text-field
                 :disabled="isUpdateDialog"
                 :color="color"
@@ -46,6 +46,26 @@ limitations under the License.
                 tabindex="1"
               ></v-text-field>
             </v-flex>
+            <v-flex xs4>
+              <v-select
+                :color="color"
+                label="Roles"
+                :items="allMemberRoles"
+                multiple
+                small-chips
+                item-text="displayName"
+                item-value="name"
+                v-model="roles"
+                :error-messages="getErrorMessages('roles')"
+                @input="$v.roles.$touch()"
+                >
+                <template v-slot:selection="{ item, index }">
+                  <v-chip small :color="color" text-color="white" close @input="roles.splice(index, 1); $v.roles.$touch()">
+                    <span>{{ item.displayName }}</span>
+                  </v-chip>
+                </template>
+              </v-select>
+            </v-flex>
           </v-layout>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
@@ -53,7 +73,8 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
+        <v-btn v-if="isUpdateDialog" flat @click.stop="submitUpdateMember" :disabled="!valid" :class="buttonClass" tabindex="2">Update</v-btn>
+        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -66,13 +87,15 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors, allMemberRoles } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
+import find from 'lodash/find'
 import includes from 'lodash/includes'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
+const defaultRole = find(allMemberRoles, { name: 'admin' })
 
 export default {
   name: 'member-dialog',
@@ -88,13 +111,17 @@ export default {
       type: String,
       required: true
     },
-    oldName: {
+    currentName: {
       type: String
+    },
+    currentRoles: {
+      type: Array
     }
   },
   data () {
     return {
       name: undefined,
+      roles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -123,23 +150,34 @@ export default {
       return !this.$v.$invalid
     },
     validators () {
-      const validators = {}
-      if (this.isUserDialog) {
-        validators.name = {
-          required,
-          unique: unique('projectUserNames')
-        }
-      } else if (this.isServiceDialog) {
-        validators.name = {
-          required,
-          resourceName,
-          unique: unique('serviceAccountNames')
+      const validators = {
+        roles: {
+          required
+        },
+        name: {}
+      }
+      if (!this.isUpdateDialog) {
+        if (this.isUserDialog) {
+          validators.name = {
+            required,
+            unique: unique('projectUserNames')
+          }
+        } else if (this.isServiceDialog) {
+          validators.name = {
+            required,
+            resourceName,
+            unique: unique('serviceAccountNames')
+          }
         }
       }
       return validators
     },
     validationErrors () {
-      const validationErrors = {}
+      const validationErrors = {
+        roles: {
+          required: 'You need to configure roles'
+        }
+      }
       if (this.isUserDialog) {
         validationErrors.name = {
           required: 'User is required',
@@ -165,6 +203,9 @@ export default {
     },
     textField () {
       return this.$refs.name
+    },
+    allMemberRoles () {
+      return allMemberRoles
     },
     color () {
       if (this.isUserDialog) {
@@ -254,12 +295,18 @@ export default {
     reset () {
       this.$v.$reset()
 
-      if (this.oldName) {
-        this.name = this.oldName
+      if (this.currentName) {
+        this.name = this.currentName
       } else if (this.isUserDialog) {
         this.name = defaultUsername
       } else if (this.isServiceDialog) {
         this.name = this.defaultServiceName()
+      }
+
+      if (this.currentRoles) {
+        this.roles = map(this.currentRoles, role => find(allMemberRoles, { name: role }))
+      } else {
+        this.roles = [defaultRole]
       }
 
       this.errorMessage = undefined

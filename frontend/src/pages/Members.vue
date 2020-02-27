@@ -88,8 +88,11 @@ limitations under the License.
             :displayName="user.displayName"
             :isEmail="user.isEmail"
             :isTechnicalContact="user.isTechnicalContact"
+            :roles="user.roles"
+            :roleNames="user.roleNames"
             :key="user.username"
-            @onDelete="onDelete"
+            @delete="onDelete"
+            @edit="onEditUser"
           ></project-user-row>
         </template>
       </v-list>
@@ -137,10 +140,13 @@ limitations under the License.
             :createdBy="serviceAccount.createdBy"
             :creationTimestamp="serviceAccount.creationTimestamp"
             :created="serviceAccount.created"
+            :roles="serviceAccount.roles"
+            :roleNames="serviceAccount.roleNames"
             :key="serviceAccount.username"
-            @onDownload="onDownload"
-            @onKubeconfig="onKubeconfig"
-            @onDelete="onDelete"
+            @download="onDownload"
+            @kubeconfig="onKubeconfig"
+            @delete="onDelete"
+            @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
       </v-list>
@@ -148,8 +154,8 @@ limitations under the License.
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :currentName="updateMemberName" :currentRoles="updateMemberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :currentName="updateMemberName" :currentRoles="updateMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -193,6 +199,7 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import upperFirst from 'lodash/upperFirst'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import CodeBlock from '@/components/CodeBlock'
@@ -205,7 +212,8 @@ import {
   isEmail,
   serviceAccountToDisplayName,
   isServiceAccount,
-  getTimestampFormatted
+  getTimestampFormatted,
+  allMemberRoles
 } from '@/utils'
 import { getMember } from '@/utils/api'
 import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
@@ -229,7 +237,7 @@ export default {
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
       updateMemberName: undefined,
-      updateUserRoles: undefined,
+      updateMemberRoles: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -391,6 +399,23 @@ export default {
     },
     onDelete (username) {
       this.deleteMember(username)
+    },
+    onEditUser (username, userroles) {
+      this.updateMemberName = username
+      this.updateMemberRoles = userroles
+      this.openUserUpdateDialog()
+    },
+    onEditServiceAccount (username, userroles) {
+      this.updateMemberName = username
+      this.updateMemberRoles = userroles
+      this.openServiceAccountUpdateDialog()
+    },
+    roleName (role) {
+      const roleObject = find(allMemberRoles, { name: role })
+      if (roleObject) {
+        return roleObject.displayName
+      }
+      return upperFirst(role)
     }
   },
   mounted () {
