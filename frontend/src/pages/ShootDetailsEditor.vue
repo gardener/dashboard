@@ -136,6 +136,11 @@ export default {
         captionText: 'Confirm Overwrite',
         messageHtml: 'Meanwhile another user or process has changed the cluster resource.<br/>Are you sure you want to overwrite it?'
       })
+    },
+    focus () {
+      if (this.$refs.shootEditor) {
+        this.$refs.shootEditor.focus()
+      }
     }
   },
   mounted () {
