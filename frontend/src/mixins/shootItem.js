@@ -1,3 +1,19 @@
+//
+// Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
@@ -23,7 +39,8 @@ export const shootItem = {
       return this.shootMetadata.namespace
     },
     isShootMarkedForDeletion () {
-      const confirmation = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmationDeprecated = get(this.shootAnnotations, ['confirmation.garden.sapcloud.io/deletion'], 'false')
+      const confirmation = get(this.shootAnnotations, ['confirmation.gardener.cloud/deletion'], confirmationDeprecated)
       const deletionTimestamp = this.shootDeletionTimestamp
 
       return !!deletionTimestamp && confirmation === 'true'
@@ -54,13 +71,16 @@ export const shootItem = {
       return get(this.shootMetadata, 'annotations', {})
     },
     shootGardenOperation () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/operation']
+      return this.shootAnnotations['gardener.cloud/operation']
     },
     shootPurpose () {
-      return this.shootAnnotations['garden.sapcloud.io/purpose']
+      return get(this.shootSpec, 'purpose')
+    },
+    isTestingCluster () {
+      return this.shootPurpose === 'testing'
     },
     shootExpirationTimestamp () {
-      return this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
+      return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
     },
     isShootActionsDisabledForPurpose () {
       return this.shootPurpose === 'infrastructure'
@@ -106,8 +126,14 @@ export const shootItem = {
     shootZones () {
       return uniq(flatMap(get(this.shootSpec, 'provider.workers'), 'zones'))
     },
-    shootCidr () {
-      return get(this.shootSpec, 'provider.infrastructureConfig.networks.vpc.cidr')
+    podsCidr () {
+      return get(this.shootSpec, 'networking.pods')
+    },
+    nodesCidr () {
+      return get(this.shootSpec, 'networking.nodes')
+    },
+    servicesCidr () {
+      return get(this.shootSpec, 'networking.services')
     },
     shootDomain () {
       return get(this.shootSpec, 'dns.domain')
@@ -129,8 +155,8 @@ export const shootItem = {
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
     },
-    shootLastError () {
-      return get(this.shootItem, 'status.lastError', {})
+    shootLastErrors () {
+      return get(this.shootItem, 'status.lastErrors', [])
     },
     shootConditions () {
       return get(this.shootItem, 'status.conditions', [])

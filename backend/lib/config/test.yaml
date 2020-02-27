@@ -36,8 +36,6 @@ terminal:
 frontend:
   features:
     terminalEnabled: true
-  dashboardUrl:
-    pathname: /api/v1/namespaces/kube-system/services/kubernetes-dashboard/proxy/
   landingPageUrl: https://gardener.cloud/
   helpMenuItems:
   - title: Getting Started

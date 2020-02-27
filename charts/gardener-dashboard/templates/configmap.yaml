@@ -127,8 +127,6 @@ data:
         url: {{ .url }}
       {{- end }}
 {{- end }}
-      dashboardUrl:
-        pathname: /api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy
 {{- if .Values.frontendConfig.gitHubRepoUrl }}
       gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
 {{- end }}
@@ -156,4 +154,16 @@ data:
       alert:
         type: {{ .Values.frontendConfig.alert.type }}
         message: {{ .Values.frontendConfig.alert.message }}
+{{- end }}
+{{- if .Values.frontendConfig.costObject }}
+      costObject:
+        title: {{ .Values.frontendConfig.costObject.title }}
+        description: {{ .Values.frontendConfig.costObject.description }}
+        regex: {{ .Values.frontendConfig.costObject.regex }}
+        errorMessage: {{ .Values.frontendConfig.costObject.errorMessage }}
+{{- end }}
+{{- if .Values.frontendConfig.sla }}
+      sla:
+        title: {{ .Values.frontendConfig.sla.title }}
+        description: {{ .Values.frontendConfig.sla.description }}
 {{- end }}

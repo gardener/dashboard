@@ -37,25 +37,33 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">Name</label>
             <p class="subheading">{{projectName}}</p>
           </v-flex>
-          <v-flex lg8 xs12>
-            <label class="caption grey--text text--darken-2">Main Contact</label>
-            <p class="subheading"><account-avatar :account-name="owner" :mail-to="true"></account-avatar></p>
+          <v-flex lg4 xs12>
+            <label class="caption grey--text text--darken-2">Technical Contact</label>
+            <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
           </v-flex>
+        </v-layout>
+        <v-layout row wrap>
           <v-flex lg4 xs12>
             <v-tooltip top>
               <template slot="activator">
                 <label class="caption grey--text text--darken-2">Created At</label>
-                <p class="subheading">{{created}}</p>
+                <p class="subheading">{{createdAt}}</p>
               </template>
-              <time-string :dateTime="metadata.creationTimestamp" :pointInTime="-1"></time-string>
+              <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
           </v-flex>
-          <v-flex lg8 xs12 v-if="projectData.createdBy">
+          <v-flex lg4 xs12 v-if="createdBy">
             <label class="caption grey--text text--darken-2">Created By</label>
-            <p class="subheading">
-              <a :href="'mailto:'+projectData.createdBy" class="cyan--text text--darken-2">{{projectData.createdBy}}</a>
-            </p>
+            <p class="subheading"><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></p>
           </v-flex>
+        </v-layout>
+        <v-layout row wrap v-if="costObjectSettingEnabled">
+          <v-flex lg4 xs12>
+            <label class="caption grey--text text--darken-2">{{costObjectTitle}}</label>
+            <p class="subheading">{{costObject}}</p>
+          </v-flex>
+        </v-layout>
+        <v-layout row wrap>
           <v-flex xs12 >
             <label class="caption grey--text text--darken-2">Description</label>
             <p class="subheading">{{description}}</p>
@@ -63,6 +71,10 @@ limitations under the License.
           <v-flex xs12>
             <label class="caption grey--text text--darken-2">Purpose</label>
             <p class="subheading">{{purpose}}</p>
+          </v-flex>
+          <v-flex xs12 v-if="slaDescriptionCompiledMarkdown">
+            <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
+            <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
           </v-flex>
         </v-layout>
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
@@ -92,14 +104,14 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
-import find from 'lodash/find'
+import { mapGetters, mapState, mapActions } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import UpdateDialog from '@/dialogs/ProjectDialog'
 import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
-import { getDateFormatted } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
+import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
+import { compileMarkdown } from '@/utils'
 
 export default {
   name: 'administration',
@@ -119,39 +131,62 @@ export default {
   },
   computed: {
     ...mapState([
-      'namespace'
+      'cfg'
     ]),
     ...mapGetters([
-      'projectList',
-      'shootList'
+      'shootList',
+      'projectList'
     ]),
     project () {
-      const predicate = project => project.metadata.namespace === this.namespace
-      return find(this.projectList, predicate) || {}
+      return projectFromProjectList()
     },
-    projectData () {
-      return this.project.data || {}
+    projectDetails () {
+      return getProjectDetails(this.project)
     },
-    metadata () {
-      return this.project.metadata || {}
+    costObjectSettings () {
+      return getCostObjectSettings() || {}
+    },
+    costObjectSettingEnabled () {
+      return getCostObjectSettings() !== undefined
+    },
+    costObjectTitle () {
+      return this.costObjectSettings.title
     },
     projectName () {
-      return this.metadata.name || ''
+      return this.projectDetails.projectName
     },
-    owner () {
-      return this.projectData.owner || ''
+    technicalContact () {
+      return this.projectDetails.technicalContact
     },
-    created () {
-      return getDateFormatted(this.metadata.creationTimestamp)
+    costObject () {
+      return this.projectDetails.costObject || 'Not defined'
+    },
+    createdAt () {
+      return this.projectDetails.createdAt
+    },
+    creationTimestamp () {
+      return this.projectDetails.creationTimestamp
+    },
+    createdBy () {
+      return this.projectDetails.createdBy
     },
     description () {
-      return this.projectData.description || ''
+      return this.projectDetails.description
     },
     purpose () {
-      return this.projectData.purpose || ''
+      return this.projectDetails.purpose
     },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0
+    },
+    sla () {
+      return this.cfg.sla || {}
+    },
+    slaDescriptionCompiledMarkdown () {
+      return compileMarkdown(this.sla.description)
+    },
+    slaTitle () {
+      return this.sla.title
     }
   },
   methods: {

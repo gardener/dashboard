@@ -83,7 +83,7 @@ export default {
       this.reconcileTriggered = true
       this.currentGeneration = get(this.shootItem, 'metadata.generation')
 
-      const reconcile = { 'shoot.garden.sapcloud.io/operation': 'reconcile' }
+      const reconcile = { 'gardener.cloud/operation': 'reconcile' }
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: reconcile })
       } catch (err) {

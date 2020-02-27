@@ -55,7 +55,7 @@ class Extensions extends V1Beta1(NamedGroup(Resource)) {
   }
 }
 
-class GardenerCore extends V1Alpha1(NamedGroup(Resource)) {
+class GardenerCore extends V1Beta1(NamedGroup(Resource)) {
   static get group () {
     return 'core.gardener.cloud'
   }

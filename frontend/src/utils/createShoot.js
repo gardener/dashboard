@@ -70,7 +70,7 @@ export function getProviderTemplate (infrastructureKind) {
           apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: workerCIDR
+            workers: workerCIDR
           }
         },
         controlPlaneConfig: {
@@ -85,7 +85,7 @@ export function getProviderTemplate (infrastructureKind) {
           apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: workerCIDR
+            workers: workerCIDR
           }
         },
         controlPlaneConfig: {
@@ -158,7 +158,7 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
       return map(zones, (zone, index) => {
         return {
           name: zone,
-          worker: zoneNetworksAli[index]
+          workers: zoneNetworksAli[index]
         }
       })
     default:

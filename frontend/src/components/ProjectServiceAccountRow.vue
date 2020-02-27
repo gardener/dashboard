@@ -16,7 +16,6 @@ limitations under the License.
 
 <template^>
   <div>
-    <v-divider v-if="!firstRow" inset></v-divider>
     <v-list-tile avatar>
       <v-list-tile-avatar>
         <img :src="avatarUrl" />
@@ -25,7 +24,7 @@ limitations under the License.
         <g-popper
           :title="displayName"
           toolbarColor="cyan darken-2"
-          :popperKey="`member_sa_${username}`"
+          :popperKey="`serviceAccount_sa_${username}`"
 
         >
           <v-list-tile-title slot="popperRef" class="cursor-pointer">
@@ -41,7 +40,7 @@ limitations under the License.
             fill-height
             align-center
           >
-            <span class="mr-3">Created at</span>
+            <span class="mr-3">Created</span>
             <v-tooltip top>
               <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
               {{created}}
@@ -86,52 +85,46 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
-  displayName,
-  gravatarUrlGeneric,
-  isServiceAccount,
-  isServiceAccountFromNamespace,
-  getTimestampFormatted
+  isServiceAccountFromNamespace
 } from '@/utils'
 
 export default {
-  name: 'members',
+  name: 'project-service-account-row',
   components: {
     TimeString,
     GPopper,
     AccountAvatar
   },
   props: {
-    member: {
-      type: Object,
+    username: {
+      type: String,
       required: true
     },
-    firstRow: {
-      type: Boolean,
-      default: false
+    avatarUrl: {
+      type: String,
+      required: true
+    },
+    displayName: {
+      type: String,
+      required: true
+    },
+    createdBy: {
+      type: String,
+      required: true
+    },
+    creationTimestamp: {
+      type: String,
+      required: true
+    },
+    created: {
+      type: String,
+      required: true
     }
   },
   computed: {
     ...mapState([
       'namespace'
     ]),
-    username () {
-      return this.member.username
-    },
-    created () {
-      return getTimestampFormatted(this.creationTimestamp)
-    },
-    createdBy () {
-      return this.member.createdBy
-    },
-    creationTimestamp () {
-      return this.member.creationTimestamp
-    },
-    displayName () {
-      return displayName(this.username)
-    },
-    avatarUrl () {
-      return gravatarUrlGeneric(this.username)
-    },
     isServiceAccountFromCurrentNamespace () {
       return isServiceAccountFromNamespace(this.username, this.namespace)
     },

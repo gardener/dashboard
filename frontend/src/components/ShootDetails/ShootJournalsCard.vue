@@ -39,6 +39,9 @@ limitations under the License.
 <script>
 import get from 'lodash/get'
 import forEach from 'lodash/forEach'
+import join from 'lodash/join'
+import map from 'lodash/map'
+import compact from 'lodash/compact'
 import { mapState } from 'vuex'
 import Journal from '@/components/ShootJournals/Journal'
 import { canLinkToSeed } from '@/utils'
@@ -86,7 +89,9 @@ export default {
 
       const createdAt = `**Created At:** ${this.shootCreatedAt}`
       const lastOperation = `**Last Op:** ${get(this.shootLastOperation, 'description', '')}`
-      const lastError = `**Last Error:** ${get(this.shootLastError, 'description', '-')}`
+      let shootLastErrorDescriptions = compact(map(this.shootLastErrors, 'description'))
+      shootLastErrorDescriptions = join(shootLastErrorDescriptions, '\n')
+      const lastError = `**Last Errors:** ${shootLastErrorDescriptions || '-'}`
 
       const journalTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
       const body = encodeURIComponent(`

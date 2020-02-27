@@ -43,7 +43,7 @@ async function fetchGardenerVersion () {
         service,
         caBundle
       }
-    } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1alpha1.core.gardener.cloud')
+    } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1beta1.core.gardener.cloud')
     const uri = `https://${service.name}.${service.namespace}/version`
     const version = await got(uri, {
       ca: decodeBase64(caBundle),

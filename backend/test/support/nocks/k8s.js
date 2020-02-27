@@ -381,15 +381,14 @@ function getShoot ({
   region = 'foo-west',
   bindingName = 'foo-secret',
   seed = 'infra1-seed',
-  hibernation = { enabled: false }
+  hibernation = { enabled: false },
+  kubernetesVersion = '1.16.0'
 }) {
   const shoot = {
     metadata: {
       name,
       namespace,
-      annotations: {
-        'garden.sapcloud.io/purpose': purpose
-      }
+      annotations: {}
     },
     spec: {
       secretBindingName: bindingName,
@@ -399,12 +398,16 @@ function getShoot ({
       provider: {
         type: kind
       },
-      seedName: seed
+      seedName: seed,
+      kubernetes: {
+        version: kubernetesVersion
+      },
+      purpose
     },
     status: {}
   }
   if (createdBy) {
-    shoot.metadata.annotations['garden.sapcloud.io/createdBy'] = createdBy
+    shoot.metadata.annotations['gardener.cloud/created-by'] = createdBy
   }
   if (project) {
     shoot.status.technicalID = `shoot--${project}--${name}`
@@ -462,14 +465,14 @@ const stub = {
     }
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`)
       .reply(200, shoots)
   },
   getShoot ({ bearer, namespace, name, ...rest }) {
     const shoot = getShoot({ namespace, name, ...rest })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, shoot)
   },
   createShoot ({ bearer, namespace, spec, resourceVersion = 42 }) {
@@ -480,7 +483,7 @@ const stub = {
     const result = { metadata, spec }
 
     return nockWithAuthorization(bearer)
-      .post(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`, body => {
+      .post(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
@@ -494,12 +497,12 @@ const stub = {
     const result = { metadata }
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         _.assign(metadata, body.metadata)
         return true
       })
       .reply(200)
-      .delete(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
+      .delete(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => result)
   },
   getShootInfo ({
@@ -512,16 +515,8 @@ const stub = {
     shootServerUrl,
     shootUser,
     shootPassword,
-    monitoringUser,
-    monitoringPassword,
-    loggingUser,
-    loggingPassword,
-    seedSecretName,
     seedName
   }) {
-    const seedServerURL = 'https://seed.foo.bar:8443'
-    const technicalID = `shoot--${project}--${name}`
-
     const shootResult = getShoot({ name, project, kind, region, seed: seedName })
     shootResult.status.technicalID = `shoot--${project}--${name}`
 
@@ -540,6 +535,41 @@ const stub = {
         allowed: true
       }
     }
+
+    return [nockWithAuthorization(bearer)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, () => shootResult)
+      .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
+      .reply(200, () => kubecfgResult)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
+      .reply(200, () => isAdminResult)]
+  },
+  getSeedInfo ({
+    bearer,
+    namespace,
+    name,
+    project,
+    kind,
+    region,
+    monitoringUser,
+    monitoringPassword,
+    loggingUser,
+    loggingPassword,
+    seedSecretName,
+    seedName
+  }) {
+    const seedServerURL = 'https://seed.foo.bar:8443'
+    const technicalID = `shoot--${project}--${name}`
+
+    const shootResult = getShoot({ name, project, kind, region, seed: seedName })
+    shootResult.status.technicalID = `shoot--${project}--${name}`
+
+    const isAdminResult = {
+      status: {
+        allowed: true
+      }
+    }
+
     const seedSecretResult = {
       data: {
         kubeconfig: encodeBase64(getKubeconfig({
@@ -562,10 +592,8 @@ const stub = {
     }
 
     return [nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shootResult)
-      .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
-      .reply(200, () => kubecfgResult)
       .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
       .reply(200, () => isAdminResult)
       .get(`/api/v1/namespaces/garden/secrets/${seedSecretName}`)
@@ -579,9 +607,9 @@ const stub = {
   replaceShoot ({ bearer, namespace, name, project, createdBy }) {
     const shoot = getShoot({ name, project, createdBy })
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
       .reply(200, () => shoot)
-      .put(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .put(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         _.assign(shoot, body)
         return true
       })
@@ -591,7 +619,7 @@ const stub = {
     const shoot = getShoot({ name, project, createdBy })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         const payload = _.head(body)
         if (payload.op === 'replace' && payload.path === '/spec/kubernetes/version') {
           shoot.spec.kubernetes = _.assign({}, shoot.spec.kubernetes, payload.value)
@@ -603,7 +631,7 @@ const stub = {
   replaceWorkers ({ bearer, namespace, name, project, workers }) {
     const shoot = getShoot({ name, project })
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         const payload = _.head(body)
         if (payload.op === 'replace' && payload.path === '/spec/provider/workers') {
           shoot.spec.provider.workers = workers
@@ -616,7 +644,7 @@ const stub = {
     const shoot = getShoot({ name, project, createdBy })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.metadata.annotations = Object.assign({}, shoot.metadata.annotations, body.metadata.annotations)
         return true
       })
@@ -626,7 +654,7 @@ const stub = {
     const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.maintenance = body.spec.maintenance
         return true
       })
@@ -636,7 +664,7 @@ const stub = {
     const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.hibernation.schedules = body.spec.hibernation.schedules
         return true
       })
@@ -646,8 +674,18 @@ const stub = {
     const shoot = getShoot({ name, project })
 
     return nockWithAuthorization(bearer)
-      .patch(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${name}`, body => {
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
         shoot.spec.hibernation.enabled = body.spec.hibernation.enabled
+        return true
+      })
+      .reply(200, () => shoot)
+  },
+  replacePurpose ({ bearer, namespace, name, project }) {
+    const shoot = getShoot({ name, project })
+
+    return nockWithAuthorization(bearer)
+      .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
+        shoot.spec.purpose = body.spec.purpose
         return true
       })
       .reply(200, () => shoot)
@@ -660,7 +698,7 @@ const stub = {
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/secretbindings`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
       })
@@ -687,7 +725,7 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
-      .post(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/secretbindings`, body => {
+      .post(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`, body => {
         expect(body).to.not.have.nested.property('metadata.resourceVersion')
         _.assign(resultSecretBinding.metadata, body.metadata)
         _.assign(resultSecretBinding.secretRef, body.secretRef)
@@ -710,7 +748,7 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
       .patch(`/api/v1/namespaces/${namespace}/secrets/${name}`, body => {
         expect(body).to.not.have.nested.property('metadata.resourceVersion')
@@ -733,7 +771,7 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
   },
   deleteInfrastructureSecret ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
@@ -750,13 +788,13 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/shoots`)
       .reply(200, {
         items: [shoot]
       })
-      .delete(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .delete(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200)
       .delete(`/api/v1/namespaces/${bindingNamespace}/secrets/${name}`)
       .reply(200)
@@ -774,7 +812,7 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
   },
   deleteInfrastructureSecretReferencedByShoot ({ bearer, namespace, project, name, bindingName, bindingNamespace, cloudProfileName, resourceVersion = 42 }) {
@@ -792,9 +830,9 @@ const stub = {
     })
 
     return nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
       .reply(200, () => resultSecretBinding)
-      .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${bindingNamespace}/shoots`)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/shoots`)
       .reply(200, {
         items: [shoot, referencingShoot]
       })
@@ -805,7 +843,7 @@ const stub = {
     return [
       scope,
       nockWithAuthorization(auth.bearer)
-        .get('/apis/core.gardener.cloud/v1alpha1/projects')
+        .get('/apis/core.gardener.cloud/v1beta1/projects')
         .reply(200, {
           items: projectList
         })
@@ -853,18 +891,18 @@ const stub = {
     canGetSecretsInAllNamespaces(scope)
     if (target === 'garden') {
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
         .reply(404)
     } else {
       const shootResource = _.find(shootList, ['metadata.name', shootName])
       seedName = getSeedNameFromShoot(shootResource)
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${shootName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${shootName}`)
         .reply(200, shootResource)
     }
     if (target === 'cp') {
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
         .reply(200, {
           metadata: {
             name: seedName,
@@ -995,7 +1033,7 @@ const stub = {
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
         .reply(statusCode, () => result)
     ]
   },
@@ -1011,7 +1049,7 @@ const stub = {
     }
 
     return nockWithAuthorization(bearer)
-      .post('/apis/core.gardener.cloud/v1alpha1/projects', body => {
+      .post('/apis/core.gardener.cloud/v1beta1/projects', body => {
         const namespace = `garden-${body.metadata.name}`
         _
           .chain(result)
@@ -1030,9 +1068,9 @@ const stub = {
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
         .reply(200, () => project)
-        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           _.merge(newProject, body)
           return true
         })
@@ -1042,22 +1080,22 @@ const stub = {
   deleteProject ({ bearer, namespace }) {
     const project = readProject(namespace)
     const name = _.get(project, 'metadata.name')
-    const confirmationPath = ['metadata', 'annotations', 'confirmation.garden.sapcloud.io/deletion']
+    const confirmationPath = ['metadata', 'annotations', 'confirmation.gardener.cloud/deletion']
     return [
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
         .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`)
         .reply(200, {
           items: []
         })
-        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
         .reply(200, () => project)
-        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           return _.get(body, confirmationPath) === 'true'
         })
         .reply(200, () => _.set(project, confirmationPath, 'true'))
-        .delete(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+        .delete(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
         .reply(200, () => project)
     ]
   },
@@ -1065,7 +1103,7 @@ const stub = {
     const project = readProject(namespace)
     if (project) {
       const scope = nockWithAuthorization(bearer)
-        .get(`/apis/core.gardener.cloud/v1alpha1/projects/${project.metadata.name}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
         .reply(200, () => project)
       getServiceAccountsForNamespace(scope, namespace)
 
@@ -1089,11 +1127,11 @@ const stub = {
     const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
     if (!_.find(project.spec.members, ['name', username])) {
       scope
-        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           if (!_.find(body.spec.members, ['name', username])) {
             return false
           }
@@ -1116,11 +1154,11 @@ const stub = {
     const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
     if (_.find(project.spec.members, ['name', username])) {
       scope
-        .patch(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`, body => {
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           if (_.find(body.spec.members, ['name', username])) {
             return false
           }
@@ -1142,7 +1180,7 @@ const stub = {
     const name = project.metadata.name
     const isMember = _.findIndex(project.spec.members, ['name', username]) !== -1
     const scope = nockWithAuthorization(bearer)
-      .get(`/apis/core.gardener.cloud/v1alpha1/projects/${name}`)
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
     const scopes = [
       nockWithAuthorization(bearer)
@@ -1179,7 +1217,7 @@ const stub = {
     const statusCode = !version ? 404 : 200
     return [
       nockWithAuthorization(auth.bearer)
-        .get('/apis/apiregistration.k8s.io/v1/apiservices/v1alpha1.core.gardener.cloud')
+        .get('/apis/apiregistration.k8s.io/v1/apiservices/v1beta1.core.gardener.cloud')
         .reply(200, body),
       nock(serviceUrl)
         .get('/version')

@@ -18,6 +18,7 @@
 
 const common = require('../support/common')
 const kubeconfig = require('../../lib/kubernetes-config')
+const _ = require('lodash')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -66,13 +67,13 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const res = await agent
       .post(`/api/namespaces/${namespace}/shoots`)
       .set('cookie', await user.cookie)
-      .send({ metadata: {
-        name,
-        annotations: {
-          'garden.sapcloud.io/purpose': purpose
-        }
-      },
-      spec })
+      .send({
+        metadata: {
+          name,
+          namespace
+        },
+        spec
+      })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
@@ -96,7 +97,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   it('should delete a shoot', async function () {
     const bearer = await user.bearer
     const deleteAnnotations = {
-      'confirmation.garden.sapcloud.io/deletion': 'true'
+      'confirmation.gardener.cloud/deletion': 'true'
     }
 
     k8s.stub.deleteShoot({ bearer, namespace, name, resourceVersion })
@@ -113,41 +114,60 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const shootUser = 'shootFoo'
     const shootPassword = 'shootFooPwd'
-    const monitoringUser = 'monitoringFoo'
-    const monitoringPassword = 'monitoringFooPwd'
-    const loggingUser = 'loggingBar'
-    const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const shootServerUrl = 'https://seed.foo.bar:443'
+    const dashboardUrlPath = '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
     const seedShootIngressDomain = `${project}--${name}.ingress.${seedClusterName}`
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    k8s.stub.getShootInfo({ bearer, namespace, name, project, kind, region, seedClusterName, shootServerUrl, shootUser, shootPassword, seedName })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}/info`)
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
+    expect(cleanKubeconfigSpy).to.have.callCount(2)
+    expect(_.keys(res.body).length).to.equal(6)
     expect(res.body).to.have.own.property('kubeconfig')
-    expect(cleanKubeconfigSpy).to.have.callCount(3)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
+    expect(res.body.serverUrl).to.eql(shootServerUrl)
+    expect(res.body.dashboardUrlPath).to.eql(dashboardUrlPath)
+    expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
+  })
+
+  it('should return shoot seed info', async function () {
+    const bearer = await user.bearer
+    const monitoringUser = 'monitoringFoo'
+    const monitoringPassword = 'monitoringFooPwd'
+    const loggingUser = 'loggingBar'
+    const loggingPassword = 'loggingBarPwd'
+    const seedClusterName = `${region}.${kind}.example.org`
+    const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
+
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    const res = await agent
+      .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(cleanKubeconfigSpy).to.have.callCount(1)
+    expect(_.keys(res.body).length).to.equal(4)
     expect(res.body.monitoring_username).to.eql(monitoringUser)
     expect(res.body.monitoring_password).to.eql(monitoringPassword)
     expect(res.body.logging_username).to.eql(loggingUser)
     expect(res.body.logging_password).to.eql(loggingPassword)
-    expect(res.body.serverUrl).to.eql(shootServerUrl)
-    expect(res.body.seedShootIngressDomain).to.eql(seedShootIngressDomain)
   })
 
   it('should replace shoot', async function () {
     const bearer = await user.bearer
     const metadata = {
       annotations: {
-        'garden.sapcloud.io/createdBy': 'baz@example.org',
-        'garden.sapcloud.io/purpose': 'evaluation'
+        'gardener.cloud/created-by': 'baz@example.org'
       },
       labels: {
         foo: 'bar'
@@ -169,10 +189,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const actLabels = body.metadata.labels
     const expLabels = metadata.labels
     expect(actLabels).to.eql(expLabels)
-    const actPurpose = body.metadata.annotations['garden.sapcloud.io/purpose']
-    const expPurpose = metadata.annotations['garden.sapcloud.io/purpose']
-    expect(actPurpose).to.equal(expPurpose)
-    const actCreatedBy = body.metadata.annotations['garden.sapcloud.io/createdBy']
+    const actCreatedBy = body.metadata.annotations['gardener.cloud/created-by']
     const expCreatedBy = 'baz@example.org'
     expect(actCreatedBy).to.equal(expCreatedBy)
   })
@@ -222,7 +239,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const worker = {
       name: 'worker-g5rk1'
     }
-    const workers = [ worker ]
+    const workers = [worker]
     k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
     const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`)
@@ -254,7 +271,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       start: '00 17 * * 1,2,3,4,5,6',
       end: '00 08 * * 1,2,3,4,5,6'
     }
-    const hibernationSchedules = [ schedule ]
+    const hibernationSchedules = [schedule]
     k8s.stub.replaceHibernationSchedules({ bearer, namespace, name, project })
     const res = await agent
       .put(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/schedules`)
@@ -278,5 +295,19 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body.metadata.annotations).to.eql(Object.assign({}, annotations, patchedAnnotations))
+  })
+
+  it('should replace purpose', async function () {
+    const bearer = await user.bearer
+    const purpose = 'testing'
+    k8s.stub.replacePurpose({ bearer, namespace, name, project })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/purpose`)
+      .set('cookie', await user.cookie)
+      .send({ purpose })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.spec.purpose).to.equal(purpose)
   })
 }

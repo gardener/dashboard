@@ -26,8 +26,7 @@ limitations under the License.
     backgroundSrc="/static/background_openstack.svg"
     createTitle="Add new OpenStack Secret"
     replaceTitle="Replace OpenStack Secret"
-    @input="onInput"
-    @cloudProfileName="onCloudProfileNameUpdate">
+    @input="onInput">
 
     <template slot="data-slot">
       <v-layout column>
@@ -51,14 +50,6 @@ limitations under the License.
             :error-messages="getErrorMessages('tenantName')"
             @input="$v.tenantName.$touch()"
             @blur="$v.tenantName.$touch()"
-          ></v-text-field>
-        </v-flex>
-        <v-flex>
-          <v-text-field
-            color="black"
-            v-model="keystoneUrl"
-            label="Keystone URL"
-            disabled
           ></v-text-field>
         </v-flex>
         <v-flex>
@@ -97,7 +88,6 @@ import { mapGetters } from 'vuex'
 import SecretDialog from '@/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
-import get from 'lodash/get'
 
 const validationErrors = {
   domainName: {
@@ -134,8 +124,7 @@ export default {
       username: undefined,
       password: undefined,
       hideSecret: true,
-      validationErrors,
-      keystoneUrl: undefined
+      validationErrors
     }
   },
   validations () {
@@ -188,10 +177,6 @@ export default {
     onInput (value) {
       this.$emit('input', value)
     },
-    onCloudProfileNameUpdate (cloudProfileName) {
-      const cloudProfile = this.cloudProfileByName(cloudProfileName)
-      this.keystoneUrl = get(cloudProfile, 'data.providerConfig.keystoneURL')
-    },
     reset () {
       this.$v.$reset()
 
@@ -199,7 +184,6 @@ export default {
       this.tenantName = ''
       this.username = ''
       this.password = ''
-      this.keyStoneUrl = ''
 
       if (!this.isCreateMode) {
         if (this.secret.data) {

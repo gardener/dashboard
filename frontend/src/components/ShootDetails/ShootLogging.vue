@@ -16,34 +16,35 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-show="!!kibanaUrl">
+    <v-list-tile v-if="isTestingCluster">
       <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
+        <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
       </v-list-tile-action>
       <v-list-tile-content>
-        <v-list-tile-sub-title>Kibana</v-list-tile-sub-title>
         <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span slot="activator">{{kibanaUrl}}</span>
-            Kibana is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="kibanaUrl" target="_blank" class="cyan--text text--darken-2">{{kibanaUrl}}</a>
+          Logging Stack not available for clusters with purpose testing
         </v-list-tile-title>
       </v-list-tile-content>
     </v-list-tile>
-    <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
-    <username-password :username="username" :password="password"></username-password>
+    <template v-else>
+      <link-list-tile v-if="!!kibanaUrl" icon="developer_board" appTitle="Kibana" :url="kibanaUrl" :urlText="kibanaUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
+      <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
+      <username-password :username="username" :password="password"></username-password>
+    </template>
   </v-list>
 </template>
 
 <script>
 import UsernamePassword from '@/components/UsernamePasswordListTile'
+import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
+import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    UsernamePassword
+    UsernamePassword,
+    LinkListTile
   },
   props: {
     shootItem: {
@@ -52,14 +53,17 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    ...mapGetters([
+      'isAdmin'
+    ]),
     kibanaUrl () {
       return get(this.shootItem, 'info.kibanaUrl', '')
     },
     username () {
-      return get(this.shootItem, 'info.logging_username', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.logging_username', '') : get(this.shootItem, 'info.logging_username', '')
     },
     password () {
-      return get(this.shootItem, 'info.logging_password', '')
+      return this.isAdmin ? get(this.shootItem, 'seedInfo.logging_password', '') : get(this.shootItem, 'info.logging_password', '')
     }
   }
 }
