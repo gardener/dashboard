@@ -15,21 +15,21 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
-import SelectHintColorizer from '@/components/SelectHintColorizer.vue'
+import { shallowMount, mount } from '@vue/test-utils'
+import HintColorizer from '@/components/HintColorizer.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 Vue.use(Vuetify)
 
-describe('SelectHintColorizer.vue', function () {
+describe('HintColorizer.vue', function () {
   it('should be able to apply classname', function () {
     const propsData = {
       hintColor: 'orange'
     }
-    const wrapper = shallowMount(SelectHintColorizer, {
+    const wrapper = shallowMount(HintColorizer, {
       propsData
     })
-    const colorizerComponent = wrapper.find(SelectHintColorizer).vm
+    const colorizerComponent = wrapper.find(HintColorizer).vm
     expect(colorizerComponent.$el.className).to.contain('hintColor-orange')
 
     wrapper.setProps({ hintColor: 'cyan' })
@@ -38,5 +38,20 @@ describe('SelectHintColorizer.vue', function () {
 
     wrapper.setProps({ hintColor: 'default' })
     expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
+  })
+
+  it('should not overwrite error color class', async function () {
+    const data = () => {
+      return {
+        errorMessage: undefined
+      }
+    }
+    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage"></v-text-field></hint-colorizer>'
+    const wrapper = mount({ template, data, components: { HintColorizer } })
+    const { hintColorizer } = wrapper.vm.$refs
+    expect(hintColorizer.$el.className).to.contain('hintColor-orange')
+
+    wrapper.vm.errorMessage = 'invalid'
+    expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
   })
 })

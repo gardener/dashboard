@@ -53,20 +53,23 @@ limitations under the License.
           ></v-text-field>
         </v-flex>
         <v-flex>
-          <v-text-field
-          color="black"
-          v-model="username"
-          :label="usernameLabel"
-          :error-messages="getErrorMessages('username')"
-          @input="$v.username.$touch()"
-          @blur="$v.username.$touch()"
-          ></v-text-field>
+          <hint-colorizer hintColor="orange">
+            <v-text-field
+            color="black"
+            v-model="username"
+            label="Technical User"
+            :error-messages="getErrorMessages('username')"
+            @input="$v.username.$touch()"
+            @blur="$v.username.$touch()"
+            hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+            ></v-text-field>
+          </hint-colorizer>
         </v-flex>
         <v-flex>
           <v-text-field
             color="black"
             v-model="password"
-            :label="passwordLabel"
+            label="Password"
             :error-messages="getErrorMessages('password')"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
@@ -76,7 +79,6 @@ limitations under the License.
           ></v-text-field>
         </v-flex>
       </v-layout>
-      <p class="subheading mt-3">Do not use personalized login credentials. Instead, use credentials of a technical user.</p>
     </template>
 
   </secret-dialog>
@@ -88,6 +90,7 @@ import { mapGetters } from 'vuex'
 import SecretDialog from '@/dialogs/SecretDialog'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
+import HintColorizer from '@/components/HintColorizer'
 
 const validationErrors = {
   domainName: {
@@ -106,7 +109,8 @@ const validationErrors = {
 
 export default {
   components: {
-    SecretDialog
+    SecretDialog,
+    HintColorizer
   },
   props: {
     value: {
@@ -165,12 +169,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    usernameLabel () {
-      return this.isCreateMode ? 'Username' : 'New Username'
-    },
-    passwordLabel () {
-      return this.isCreateMode ? 'Password' : 'New Password'
     }
   },
   methods: {

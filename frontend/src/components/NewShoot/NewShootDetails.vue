@@ -30,7 +30,7 @@ limitations under the License.
           ></v-text-field>
       </v-flex>
       <v-flex class="regularInput">
-        <select-hint-colorizer hintColor="orange">
+        <hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
             label="Kubernetes Version"
@@ -53,7 +53,7 @@ limitations under the License.
               </v-list-tile-content>
             </template>
           </v-select>
-        </select-hint-colorizer>
+        </hint-colorizer>
       </v-flex>
       <v-flex class="regularInput">
         <purpose
@@ -75,7 +75,7 @@ limitations under the License.
 
 <script>
 
-import SelectHintColorizer from '@/components/SelectHintColorizer'
+import HintColorizer from '@/components/HintColorizer'
 import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
 import { getValidationErrors, compileMarkdown } from '@/utils'
@@ -119,7 +119,7 @@ const validations = {
 export default {
   name: 'new-shoot-details',
   components: {
-    SelectHintColorizer,
+    HintColorizer,
     Purpose
   },
   props: {

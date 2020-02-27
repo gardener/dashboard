@@ -21,11 +21,19 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
+
 export default {
-  name: 'select-hint-colorizer',
+  name: 'hint-colorizer',
   props: {
     hintColor: {
       type: String
+    }
+  },
+  computed: {
+    isSelectErrorColor () {
+      const color = get(this, '$children[0].$children[0].color')
+      return color === 'error'
     }
   },
   watch: {
@@ -44,12 +52,16 @@ export default {
           elementClasses.remove(className)
         }
       })
-      if (hintColor !== 'default') {
+
+      if (!this.isSelectErrorColor && hintColor !== 'default') {
         elementClasses.add(`hintColor-${hintColor}`)
       }
     }
   },
   mounted () {
+    this.applyHintColor(this.hintColor)
+  },
+  updated () {
     this.applyHintColor(this.hintColor)
   }
 }
