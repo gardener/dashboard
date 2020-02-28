@@ -25,6 +25,7 @@ const authorization = require('./authorization')
 const logger = require('../logger')
 const _ = require('lodash')
 const yaml = require('js-yaml')
+const semver = require('semver')
 
 const { decodeBase64, getSeedNameFromShoot } = utils
 
@@ -45,7 +46,7 @@ exports.create = async function ({ user, namespace, body }) {
   const username = user.id
 
   const annotations = {
-    'garden.sapcloud.io/createdBy': username
+    'gardener.cloud/created-by': username
   }
   if (_.get(body, 'spec.addons.kyma.enabled', false)) {
     annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
@@ -116,6 +117,17 @@ exports.replaceHibernationSchedules = async function ({ user, namespace, name, b
       hibernation: {
         schedules
       }
+    }
+  }
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
+}
+
+exports.replacePurpose = async function ({ user, namespace, name, body }) {
+  const client = user.client
+  const purpose = body.purpose
+  const payload = {
+    spec: {
+      purpose
     }
   }
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
@@ -222,12 +234,23 @@ exports.patchAnnotations = patchAnnotations
 exports.remove = async function ({ user, namespace, name }) {
   const client = user.client
   const annotations = {
-    'confirmation.garden.sapcloud.io/deletion': 'true'
+    'confirmation.gardener.cloud/deletion': 'true'
   }
   await patchAnnotations({ user, namespace, name, annotations })
 
   return client['core.gardener.cloud'].shoots.delete(namespace, name)
 }
+
+function getDashboardUrlPath (kubernetesVersion) {
+  if (!kubernetesVersion) {
+    return undefined
+  }
+  if (semver.lt(kubernetesVersion, '1.16.0')) {
+    return '/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/'
+  }
+  return '/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/'
+}
+exports.getDashboardUrlPath = getDashboardUrlPath
 
 exports.info = async function ({ user, namespace, name }) {
   const client = user.client
@@ -281,21 +304,38 @@ exports.info = async function ({ user, namespace, name }) {
       .commit()
 
     data.serverUrl = kubeconfig.fromKubeconfig(data.kubeconfig).url
+    data.dashboardUrlPath = getDashboardUrlPath(shoot.spec.kubernetes.version)
   }
 
   const isAdmin = await authorization.isAdmin(user)
-  if (isAdmin) {
-    if (seed) {
-      try {
-        const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
-        const seedShootNamespace = shoot.status.technicalID
-        await assignComponentSecrets(seedClient, data, seedShootNamespace)
-      } catch (err) {
-        logger.error('Failed to retrieve information using seed core client', err)
-      }
-    }
-  } else {
+  if (!isAdmin) {
     await assignComponentSecrets(client, data, namespace, name)
+  }
+
+  return data
+}
+
+exports.seedInfo = async function ({ user, namespace, name }) {
+  const client = user.client
+
+  const shoot = await read({ user, namespace, name })
+
+  const data = {}
+  let seed
+  if (shoot.spec.seedName) {
+    seed = getSeed(getSeedNameFromShoot(shoot))
+  }
+  const isAdmin = await authorization.isAdmin(user)
+  if (!isAdmin || !seed) {
+    return data
+  }
+
+  try {
+    const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
+    const seedShootNamespace = shoot.status.technicalID
+    await assignComponentSecrets(seedClient, data, seedShootNamespace)
+  } catch (err) {
+    logger.error('Failed to retrieve information using seed core client', err)
   }
 
   return data

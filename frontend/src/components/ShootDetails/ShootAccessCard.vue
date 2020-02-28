@@ -38,21 +38,7 @@ limitations under the License.
 
     <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
 
-    <v-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth">
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
-        <v-list-tile-title>
-          <v-tooltip v-if="isShootStatusHibernated" top>
-            <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
-            Dashboard is not running for hibernated clusters
-          </v-tooltip>
-          <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+    <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <v-list-tile>
@@ -152,6 +138,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
+import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import download from 'downloadjs'
@@ -163,7 +150,8 @@ export default {
     UsernamePassword,
     CodeBlock,
     CopyBtn,
-    TerminalListTile
+    TerminalListTile,
+    LinkListTile
   },
   props: {
     shootItem: {
@@ -188,11 +176,15 @@ export default {
       if (!this.hasDashboardEnabled) {
         return ''
       }
-      if (this.hasDashboardTokenAuth) {
-        const pathname = get(this.cfg, 'dashboardUrl.pathname', '')
-        return `http://localhost:8001${pathname}`
+      if (!this.hasDashboardTokenAuth) {
+        return this.shootInfo.dashboardUrl || ''
       }
-      return this.shootInfo.dashboardUrl || ''
+
+      if (!this.shootInfo.dashboardUrlPath) {
+        return ''
+      }
+      const pathname = this.shootInfo.dashboardUrlPath
+      return `http://localhost:8001${pathname}`
     },
     dashboardUrlText () {
       if (this.hasDashboardTokenAuth) {
@@ -207,10 +199,10 @@ export default {
       return this.shootInfo.cluster_password || ''
     },
     hasDashboardEnabled () {
-      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.enabled', false) === true
+      return get(this.shootItem, 'spec.addons.kubernetesDashboard.enabled', false) === true
     },
     hasDashboardTokenAuth () {
-      return get(this.shootItem, 'spec.addons.kubernetes-dashboard.authenticationMode', 'basic') === 'token'
+      return get(this.shootItem, 'spec.addons.kubernetesDashboard.authenticationMode', 'basic') === 'token'
     },
 
     kubeconfig () {

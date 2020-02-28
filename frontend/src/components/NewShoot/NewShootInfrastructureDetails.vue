@@ -30,6 +30,7 @@ limitations under the License.
       </v-flex>
       <v-flex class="regularInput">
         <v-select
+          ref="secret"
           color="cyan darken-2"
           label="Secret"
           :items="secretItems"
@@ -369,10 +370,10 @@ export default {
       'infrastructureSecretsByCloudProfileName',
       'regionsWithSeedByCloudProfileName',
       'regionsWithoutSeedByCloudProfileName',
-      'loadBalancerProviderNamesByCloudProfileName',
+      'loadBalancerProviderNamesByCloudProfileNameAndRegion',
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileName',
+      'floatingPoolNamesByCloudProfileNameAndRegion',
       'partitionIDsByCloudProfileNameAndRegion',
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
@@ -436,7 +437,7 @@ export default {
       }
     },
     allLoadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileName(this.cloudProfileName)
+      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
     },
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
@@ -464,7 +465,7 @@ export default {
       return loadBalancerClasses
     },
     allFloatingPoolNames () {
-      return this.floatingPoolNamesByCloudProfileName(this.cloudProfileName)
+      return this.floatingPoolNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
     },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.secret)
@@ -510,17 +511,17 @@ export default {
     onInputSecret () {
       if (this.isAddNewSecret(this.secret)) {
         this.onAddSecret()
-        this.secret = head(this.infrastructureSecretsByProfileName)
       } else {
         this.$v.secret.$touch()
-        this.userInterActionBus.emit('updateSecret', this.secret)
         this.validateInput()
+        this.userInterActionBus.emit('updateSecret', this.secret)
       }
     },
     onInputRegion () {
       this.$v.secret.$touch()
       this.partitionID = head(this.partitionIDs)
       this.onInputPartitionID()
+      this.$v.region.$touch()
       this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
     },
@@ -630,6 +631,12 @@ export default {
       return (item && item.value === 'ADD_NEW_SECRET') || item === 'ADD_NEW_SECRET'
     },
     onAddSecret () {
+      this.secret = undefined
+      this.$nextTick(() => {
+        // need to set in next ui loop as it would not render correctly otherwise
+        this.secret = head(this.infrastructureSecretsByProfileName)
+        this.onInputSecret()
+      })
       this.secretItemsBeforeAdd = cloneDeep(this.secretItems)
       this.addSecretDialogState[this.infrastructureKind].visible = true
     },
@@ -637,6 +644,7 @@ export default {
       const newSecret = head(differenceWith(this.secretItems, this.secretItemsBeforeAdd, isEqual))
       if (newSecret) {
         this.secret = newSecret
+        this.onInputSecret()
       }
     }
   },

@@ -15,15 +15,23 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import NewShootDetails from '@/components/NewShoot/NewShootDetails.vue'
 import Vue from 'vue'
+import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 import Vuelidate from 'vuelidate'
 const EventEmitter = require('events')
 
 Vue.use(Vuetify)
 Vue.use(Vuelidate)
+Vue.use(Vuex)
+
+const store = new Vuex.Store({
+  state: {
+    cfg: {}
+  }
+})
 
 const sampleVersions = [
   {
@@ -44,8 +52,9 @@ function createNewShootDetailsComponent (kubernetesVersion) {
   const propsData = {
     userInterActionBus: new EventEmitter()
   }
-  const wrapper = shallowMount(NewShootDetails, {
+  const wrapper = mount(NewShootDetails, {
     propsData,
+    store,
     computed: {
       sortedKubernetesVersionsList: () => sampleVersions
     }
@@ -57,17 +66,17 @@ function createNewShootDetailsComponent (kubernetesVersion) {
 }
 
 describe('NewShootDetails.vue', function () {
-  it('seleted kubernetes version should be latest (multiple same minor)', function () {
+  it('selected kubernetes version should be latest (multiple same minor)', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[1].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.false
   })
 
-  it('seleted kubernetes version should be latest (one minor)', function () {
+  it('selected kubernetes version should be latest (one minor)', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[2].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.false
   })
 
-  it('seleted kubernetes version should not be latest', function () {
+  it('selected kubernetes version should not be latest', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[0].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.true
   })

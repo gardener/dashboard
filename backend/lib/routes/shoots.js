@@ -182,6 +182,18 @@ router.route('/:name/info')
     }
   })
 
+router.route('/:name/seed-info')
+  .get(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      res.send(await shoots.seedInfo({ user, namespace, name }))
+    } catch (err) {
+      next(err)
+    }
+  })
+
 if (_.get(config, 'frontend.features.kymaEnabled', false)) {
   router.route('/:name/kyma')
     .get(async (req, res, next) => {
@@ -195,3 +207,16 @@ if (_.get(config, 'frontend.features.kymaEnabled', false)) {
       }
     })
 }
+
+router.route('/:name/spec/purpose')
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const body = req.body
+      res.send(await shoots.replacePurpose({ user, namespace, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })

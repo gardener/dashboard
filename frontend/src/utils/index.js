@@ -43,6 +43,8 @@ import join from 'lodash/join'
 import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
+import uniq from 'lodash/uniq'
+import flatMap from 'lodash/flatMap'
 import store from '../store'
 const uuidv4 = require('uuid/v4')
 
@@ -321,14 +323,7 @@ export function availableK8sUpdatesForShoot (spec) {
 }
 
 export function getCreatedBy (metadata) {
-  return get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
-}
-
-export function hasAlertmanager (metadata) {
-  if (get(metadata, ['annotations', 'garden.sapcloud.io/operatedBy'])) {
-    return true
-  }
-  return false
+  return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
 export function getProjectName (metadata) {
@@ -372,7 +367,9 @@ export function shootHasIssue (shoot) {
 
 export function isReconciliationDeactivated (metadata) {
   const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
-  return includes(truthyValues, get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore']))
+  const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
+  const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
+  return includes(truthyValues, ignore)
 }
 
 export function isStatusProgressing (metadata) {
@@ -448,8 +445,8 @@ export function purposeRequiresHibernationSchedule (purpose) {
 }
 
 export function isShootHasNoHibernationScheduleWarning (shoot) {
+  const purpose = get(shoot, 'spec.purpose')
   const annotations = get(shoot, 'metadata.annotations', {})
-  const purpose = annotations['garden.sapcloud.io/purpose']
   if (purposeRequiresHibernationSchedule(purpose)) {
     const hasNoScheduleFlag = !!annotations['dashboard.garden.sapcloud.io/no-hibernation-schedule']
     if (!hasNoScheduleFlag && isEmpty(get(shoot, 'spec.hibernation.schedules'))) {
@@ -475,7 +472,7 @@ export function selfTerminationDaysForSecret (secret) {
   }
 
   const quotas = get(secret, 'quotas')
-  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1alpha1', kind: 'Project' } } })
+  let terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'core.gardener.cloud/v1beta1', kind: 'Project' } } })
   if (!terminationDays) {
     terminationDays = clusterLifetimeDays(quotas, { spec: { scope: { apiVersion: 'v1', kind: 'Secret' } } })
   }
@@ -484,23 +481,23 @@ export function selfTerminationDaysForSecret (secret) {
 }
 
 export function purposesForSecret (secret) {
-  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'production']
+  return selfTerminationDaysForSecret(secret) ? ['evaluation'] : ['evaluation', 'development', 'testing', 'production']
 }
 
 export const shootAddonList = [
   {
-    name: 'kubernetes-dashboard',
+    name: 'kubernetesDashboard',
     title: 'Dashboard',
     description: 'General-purpose web UI for Kubernetes clusters. Several high-profile attacks have shown weaknesses, so installation is not recommend, especially not for production clusters.',
     visible: true,
     enabled: false
   },
   {
-    name: 'nginx-ingress',
+    name: 'nginxIngress',
     title: 'Nginx Ingress',
-    description: 'Default ingress-controller. Alternatively you may install any other ingress-controller of your liking. If you select this option, please note that Gardener will include it in its reconciliation and you can’t override it’s configuration.',
+    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
     visible: true,
-    enabled: true
+    enabled: false
   }
 ]
 
@@ -530,6 +527,9 @@ export function addKymaAddon (options) {
 }
 
 export function compileMarkdown (text) {
+  if (!text) {
+    return undefined
+  }
   return DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,
@@ -613,4 +613,8 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec }) {
     default:
       return true
   }
+}
+
+export function allErrorCodesFromLastErrors (lastErrors) {
+  return uniq(compact(flatMap(lastErrors, 'codes')))
 }

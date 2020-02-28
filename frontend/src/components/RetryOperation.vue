@@ -59,7 +59,7 @@ export default {
       const namespace = this.shootNamespace
       const name = this.shootName
 
-      const retryAnnotation = { 'shoot.garden.sapcloud.io/operation': 'retry' }
+      const retryAnnotation = { 'gardener.cloud/operation': 'retry' }
       try {
         await addShootAnnotation({ namespace, name, data: retryAnnotation })
       } catch (err) {

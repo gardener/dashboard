@@ -84,7 +84,7 @@ export default {
     async start () {
       this.actionTriggered = true
 
-      const data = { 'shoot.garden.sapcloud.io/operation': 'rotate-kubeconfig-credentials' }
+      const data = { 'gardener.cloud/operation': 'rotate-kubeconfig-credentials' }
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {

@@ -81,11 +81,31 @@ limitations under the License.
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">settings_ethernet</v-icon>
-        <v-flex class="pa-0">
-          <span class="grey--text">CIDR</span><br>
-          <span class="subheading">{{shootCidr}}</span>
-        </v-flex>
+        <v-layout class="py-2">
+          <v-flex shrink justify-center class="pr-0 pt-3">
+            <v-icon class="cyan--text text--darken-2 avatar">settings_ethernet</v-icon>
+          </v-flex>
+          <v-flex class="pa-0">
+            <v-layout row>
+              <v-flex>
+                <span class="grey--text">Pods CIDR</span><br>
+                <span class="subheading">{{podsCidr}}</span>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex>
+                <span class="grey--text">Nodes CIDR</span><br>
+                <span class="subheading">{{nodesCidr}}</span>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex>
+                <span class="grey--text">Services CIDR</span><br>
+                <span class="subheading">{{servicesCidr}}</span>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+        </v-layout>
       </v-card-title>
 
       <template v-if="!!shootIngressDomainText">
@@ -155,7 +175,7 @@ export default {
       return includes(this.namespaces, 'garden')
     },
     shootIngressDomainText () {
-      const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginx-ingress.enabled', false)
+      const nginxIngressEnabled = get(this.shootItem, 'spec.addons.nginxIngress.enabled', false)
       if (!this.shootDomain || !nginxIngressEnabled) {
         return undefined
       }

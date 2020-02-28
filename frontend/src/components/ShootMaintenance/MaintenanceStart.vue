@@ -92,7 +92,7 @@ export default {
     async startMaintenance () {
       this.maintenanceTriggered = true
 
-      const maintain = { 'shoot.garden.sapcloud.io/operation': 'maintain' }
+      const maintain = { 'gardener.cloud/operation': 'maintain' }
       try {
         await addShootAnnotation({ namespace: this.shootNamespace, name: this.shootName, data: maintain })
       } catch (err) {
@@ -107,7 +107,7 @@ export default {
       }
     },
     reset () {
-      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateOSVersion, osUpdates: this.updateKubernetesVersion })
+      this.$refs.maintenanceComponents.setComponentUpdates({ k8sUpdates: this.updateKubernetesVersion, osUpdates: this.updateOSVersion })
     }
   },
   watch: {

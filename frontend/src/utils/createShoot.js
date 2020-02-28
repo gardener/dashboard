@@ -22,7 +22,6 @@ import compact from 'lodash/compact'
 import find from 'lodash/find'
 import sample from 'lodash/sample'
 import includes from 'lodash/includes'
-import store from '../store'
 
 const workerCIDR = '10.250.0.0/16'
 
@@ -114,7 +113,7 @@ function getProviderTemplate (infrastructureKind) {
           apiVersion: 'gcp.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: workerCIDR
+            workers: workerCIDR
           }
         },
         controlPlaneConfig: {
@@ -129,7 +128,7 @@ function getProviderTemplate (infrastructureKind) {
           apiVersion: 'openstack.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'InfrastructureConfig',
           networks: {
-            worker: workerCIDR
+            workers: workerCIDR
           }
         },
         controlPlaneConfig: {
@@ -214,7 +213,7 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
       return map(zones, (zone, index) => {
         return {
           name: zone,
-          worker: zoneNetworksAli[index]
+          workers: zoneNetworksAli[index]
         }
       })
     default:

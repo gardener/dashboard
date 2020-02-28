@@ -201,10 +201,16 @@ class ShootSubscription extends AbstractSubscription {
     this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
       const { name, namespace } = target
       throttledNsEventEmitter.flush()
+      const promises = [
+        store.dispatch('getShootInfo', { name, namespace })
+      ]
+      if (store.getters.isAdmin) {
+        promises.push(store.dispatch('getShootSeedInfo', { name, namespace }))
+      }
       try {
-        await store.dispatch('getShootInfo', { name, namespace })
+        await Promise.all(promises)
       } catch (err) {
-        console.error('SubscribeShootDone Error:', err.message)
+        console.error('SubscribeShootDone error:', err.message)
       }
     })
   }

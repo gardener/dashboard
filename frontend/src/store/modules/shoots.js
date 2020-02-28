@@ -39,7 +39,7 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
-import { getShoot, getShootInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
+import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isShootStatusHibernated,
@@ -54,7 +54,8 @@ import { isShootStatusHibernated,
   shootAddonList,
   utcMaintenanceWindowFromLocalBegin,
   randomLocalMaintenanceBegin,
-  generateWorker } from '@/utils'
+  generateWorker,
+  allErrorCodesFromLastErrors } from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -115,30 +116,6 @@ const actions = {
     commit('CLEAR_ALL')
     return getters.items
   },
-  get ({ dispatch, commit, rootState }, { name, namespace }) {
-    const getShootIfNecessary = new Promise(async (resolve, reject) => {
-      if (!findItem({ name, namespace })) {
-        getShoot({ namespace, name })
-          .then(res => {
-            const item = res.data
-            commit('ITEM_PUT', { newItem: item, rootState })
-          }).then(() => resolve())
-          .catch(error => reject(error))
-      } else {
-        resolve()
-      }
-    })
-    return getShootIfNecessary
-      .then(() => dispatch('getInfo', { name, namespace }))
-      .then(() => findItem({ name, namespace }))
-      .catch(error => {
-        // shoot info not found -> ignore if KubernetesError
-        if (isNotFound(error)) {
-          return
-        }
-        throw error
-      })
-  },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
     return createShoot({ namespace, data })
@@ -150,42 +127,50 @@ const actions = {
    * Return the given info for a single shoot with the namespace/name.
    * This ends always in a server/backend call.
    */
-  getInfo ({ commit, rootState }, { name, namespace }) {
-    return getShootInfo({ namespace, name })
-      .then(res => res.data)
-      .then(info => {
-        if (info.serverUrl) {
-          const [, scheme, host] = uriPattern.exec(info.serverUrl)
-          const authority = `//${replace(host, /^\/\//, '')}`
-          const pathname = get(rootState.cfg, 'dashboardUrl.pathname')
-          info.dashboardUrl = [scheme, authority, pathname].join('')
-          info.dashboardUrlText = [scheme, host].join('')
-        }
+  async getInfo ({ commit, rootState }, { name, namespace }) {
+    try {
+      const { data: info } = await getShootInfo({ namespace, name })
+      if (info.serverUrl) {
+        const [, scheme, host] = uriPattern.exec(info.serverUrl)
+        const authority = `//${replace(host, /^\/\//, '')}`
+        const pathname = info.dashboardUrlPath
+        info.dashboardUrl = [scheme, authority, pathname].join('')
+        info.dashboardUrlText = [scheme, host].join('')
+      }
 
-        if (info.seedShootIngressDomain) {
-          const baseHost = info.seedShootIngressDomain
-          info.grafanaUrlUsers = `https://gu-${baseHost}`
-          info.grafanaUrlOperators = `https://go-${baseHost}`
+      if (info.seedShootIngressDomain) {
+        const baseHost = info.seedShootIngressDomain
+        info.grafanaUrlUsers = `https://gu-${baseHost}`
+        info.grafanaUrlOperators = `https://go-${baseHost}`
 
-          info.prometheusUrl = `https://p-${baseHost}`
+        info.prometheusUrl = `https://p-${baseHost}`
 
-          info.alertmanagerUrl = `https://au-${baseHost}`
+        info.alertmanagerUrl = `https://au-${baseHost}`
 
-          info.kibanaUrl = `https://k-${baseHost}`
-        }
-        return info
-      })
-      .then(info => {
-        commit('RECEIVE_INFO', { name, namespace, info })
-        return info
-      })
-      .catch(error => {
-        // shoot info not found -> ignore if KubernetesError
-        if (isNotFound(error)) {
-          return
-        }
-        throw error
-      })
+        info.kibanaUrl = `https://k-${baseHost}`
+      }
+      commit('RECEIVE_INFO', { name, namespace, info })
+      return info
+    } catch (error) {
+      // shoot info not found -> ignore if KubernetesError
+      if (isNotFound(error)) {
+        return
+      }
+      throw error
+    }
+  },
+  async getSeedInfo ({ commit, rootState }, { name, namespace }) {
+    try {
+      const { data: info } = await getShootSeedInfo({ namespace, name })
+      commit('RECEIVE_SEED_INFO', { name, namespace, info })
+      return info
+    } catch (error) {
+      // shoot seed info not found -> ignore if KubernetesError
+      if (isNotFound(error)) {
+        return
+      }
+      throw error
+    }
   },
   async getAddonKyma ({ commit, rootState }, { name, namespace }) {
     try {
@@ -240,7 +225,7 @@ const actions = {
   },
   resetNewShootResource ({ commit, rootState, rootGetters }) {
     const shootResource = {
-      apiVersion: 'core.gardener.cloud/v1alpha1',
+      apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
       metadata: {}
     }
@@ -257,11 +242,11 @@ const actions = {
     const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.region', region)
 
-    const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileName(cloudProfileName))
+    const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileNameAndRegion(cloudProfileName, region))
     if (!isEmpty(loadBalancerProviderName)) {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
     }
-    const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileName(cloudProfileName))
+    const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileNameAndRegion(cloudProfileName, region))
     if (!isEmpty(floatingPoolName)) {
       set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
     }
@@ -301,7 +286,7 @@ const actions = {
     set(shootResource, 'metadata.name', name)
 
     const purpose = head(purposesForSecret(secret))
-    set(shootResource, 'metadata.annotations["garden.sapcloud.io/purpose"]', purpose)
+    set(shootResource, 'spec.purpose', purpose)
 
     const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
@@ -377,7 +362,7 @@ const getRawVal = (item, column) => {
   const spec = item.spec
   switch (column) {
     case 'purpose':
-      return get(metadata, ['annotations', 'garden.sapcloud.io/purpose'])
+      return get(spec, 'purpose')
     case 'lastOperation':
       return get(item, 'status.lastOperation')
     case 'createdAt':
@@ -420,8 +405,10 @@ const getSortVal = (item, sortBy) => {
     case 'lastOperation':
       const operation = value || {}
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
-      const isError = operation.state === 'Failed' || get(item, 'status.lastError')
-      const userError = isUserError(get(item, 'status.lastError.codes', []))
+      const lastErrors = get(item, 'status.lastErrors', [])
+      const isError = operation.state === 'Failed' || lastErrors.length
+      const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
+      const userError = isUserError(allErrorCodes)
       const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
       if (ignoredFromReconciliation) {
@@ -561,7 +548,9 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     if (get(state, 'shootListFilters.userIssues', false)) {
       const predicate = item => {
-        return !isUserError(get(item, 'status.lastError.codes', []))
+        const lastErrors = get(item, 'status.lastErrors', [])
+        const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
+        return !isUserError(allErrorCodes)
       }
       items = filter(items, predicate)
     }
@@ -623,6 +612,12 @@ const mutations = {
     const item = findItem({ namespace, name })
     if (item !== undefined) {
       Vue.set(item, 'info', info)
+    }
+  },
+  RECEIVE_SEED_INFO (state, { namespace, name, info }) {
+    const item = findItem({ namespace, name })
+    if (item !== undefined) {
+      Vue.set(item, 'seedInfo', info)
     }
   },
   RECEIVE_ADDON_KYMA (state, { namespace, name, addonKyma }) {
