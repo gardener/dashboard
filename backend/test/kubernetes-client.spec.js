@@ -18,6 +18,7 @@
 'use strict'
 
 const EventEmitter = require('events')
+const { camelCase } = require('lodash')
 const { mix } = require('mixwith')
 const pEvent = require('p-event')
 const http = require('http')
@@ -31,7 +32,8 @@ const mixins = require('../lib/kubernetes-client/mixins')
 const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
 const HttpClient = require('../lib/kubernetes-client/HttpClient')
 const ApiErrors = require('../lib/kubernetes-client/ApiErrors')
-const { Reflector, Store } = require('../lib/kubernetes-client/cache')
+const { PatchType } = require('../lib/kubernetes-client/util')
+const { Reflector, Store, ListPager } = require('../lib/kubernetes-client/cache')
 const {
   http: httpSymbols,
   ws: wsSymbols
@@ -50,9 +52,13 @@ describe('kubernetes-client', function () {
 
   describe('mixins', function () {
     const testStore = new Store()
-    let testOptions
+    const testOptions = {
+      foo: 'bar'
+    }
     let testReflector
+    let testReconnector
     let createReflectorStub
+    let createReconnectorStub
     let runReflectorSpy
 
     class EchoClient {
@@ -83,13 +89,17 @@ describe('kubernetes-client', function () {
       run () {}
     }
 
+    class TestReconnector {}
+
     function beforeEachCachableTest () {
-      testOptions = {
-        foo: 'bar'
-      }
       testReflector = new TestReflector()
+      testReconnector = new TestReconnector()
       createReflectorStub = sandbox.stub(Reflector, 'create').returns(testReflector)
       runReflectorSpy = sandbox.spy(testReflector, 'run')
+    }
+
+    function beforeEachObservableTest () {
+      createReconnectorStub = sandbox.stub(WatchBuilder, 'create').returns(testReconnector)
     }
 
     describe('Version', function () {
@@ -118,7 +128,7 @@ describe('kubernetes-client', function () {
     })
 
     describe('ClusterScoped', function () {
-      class TestObject extends mix(EchoClient).with(ClusterScoped, Readable, Cacheable, Observable) {}
+      class TestObject extends mix(EchoClient).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', function () {
         const testObject = new TestObject()
@@ -127,6 +137,7 @@ describe('kubernetes-client', function () {
         expect(testObject).to.be.an.instanceof(Readable)
         expect(testObject).to.be.an.instanceof(Cacheable)
         expect(testObject).to.be.an.instanceof(Observable)
+        expect(testObject).to.be.an.instanceof(Writable)
       })
 
       describe('Readable', function () {
@@ -185,10 +196,99 @@ describe('kubernetes-client', function () {
           expect(reflector).to.equal(testReflector)
         })
       })
+
+      describe('Observable', function () {
+        beforeEach(beforeEachObservableTest)
+
+        it('should watch a resource', function () {
+          const testObject = new TestObject()
+          const reconnector = testObject.watch('name', testOptions)
+          expect(createReconnectorStub).to.be.calledOnce
+          const [object, url, searchParams, name] = createReconnectorStub.firstCall.args
+          expect(object).to.equal(testObject)
+          expect(url).to.equal('dummies')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(name).to.equal('name')
+          expect(reconnector).to.equal(testReconnector)
+        })
+
+        it('should watch a list of resources', function () {
+          const testObject = new TestObject()
+          const reconnector = testObject.watchList(testOptions)
+          expect(createReconnectorStub).to.be.calledOnce
+          const [object, url, searchParams] = createReconnectorStub.firstCall.args
+          expect(object).to.equal(testObject)
+          expect(url).to.equal('dummies')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(reconnector).to.equal(testReconnector)
+        })
+      })
+
+      describe('Writable', function () {
+        function patchMethodTest (patchType, testBody) {
+          const testObject = new TestObject()
+          const patchMethod = camelCase(patchType) + 'Patch'
+          const patchContentType = 'application/' + patchType + '-patch+json'
+          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('name', testBody, testOptions)
+          expect(url).to.equal('dummies/name')
+          expect(method).to.equal('patch')
+          expect(headers['Content-Type']).to.equal(patchContentType)
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        }
+
+        it('should create a resource', function () {
+          const testObject = new TestObject()
+          const testBody = { bar: 'foo' }
+          const [url, { method, searchParams, json }] = testObject.create(testBody, testOptions)
+          expect(url).to.equal('dummies')
+          expect(method).to.equal('post')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        })
+
+        it('should update a resource', function () {
+          const testObject = new TestObject()
+          const testBody = { bar: 'foo' }
+          const [url, { method, searchParams, json }] = testObject.update('name', testBody, testOptions)
+          expect(url).to.equal('dummies/name')
+          expect(method).to.equal('put')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        })
+
+        it('should merge patch a resource', function () {
+          patchMethodTest(PatchType.MERGE, { bar: 'foo' })
+        })
+
+        it('should strategic merge patch a resource', function () {
+          patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
+        })
+
+        it('should json patch a resource', function () {
+          patchMethodTest(PatchType.JSON, ['foo'])
+        })
+
+        it('should delete a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.delete('name', testOptions)
+          expect(url).to.equal('dummies/name')
+          expect(method).to.equal('delete')
+          expect(searchParams.toString()).to.equal('foo=bar')
+        })
+
+        it('should delete multiple resources', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.deleteCollection(testOptions)
+          expect(url).to.equal('dummies')
+          expect(method).to.equal('delete')
+          expect(searchParams.toString()).to.equal('foo=bar')
+        })
+      })
     })
 
     describe('NamespaceScoped', function () {
-      class TestObject extends mix(EchoClient).with(NamespaceScoped, Readable, Cacheable, Observable) {}
+      class TestObject extends mix(EchoClient).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', function () {
         const testObject = new TestObject()
@@ -197,6 +297,7 @@ describe('kubernetes-client', function () {
         expect(testObject).to.be.an.instanceof(Readable)
         expect(testObject).to.be.an.instanceof(Cacheable)
         expect(testObject).to.be.an.instanceof(Observable)
+        expect(testObject).to.be.an.instanceof(Writable)
       })
 
       describe('Readable', function () {
@@ -288,6 +389,106 @@ describe('kubernetes-client', function () {
           expect(listStub.secondCall.args).to.eql([{ watch: true, ...testOptions }])
           expect(runReflectorSpy).to.be.calledOnce
           expect(reflector).to.equal(testReflector)
+        })
+      })
+
+      describe('Observable', function () {
+        beforeEach(beforeEachObservableTest)
+
+        it('should watch a resource', function () {
+          const testObject = new TestObject()
+          const reconnector = testObject.watch('namespace', 'name', testOptions)
+          expect(createReconnectorStub).to.be.calledOnce
+          const [object, url, searchParams, name] = createReconnectorStub.firstCall.args
+          expect(object).to.equal(testObject)
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(name).to.equal('name')
+          expect(reconnector).to.equal(testReconnector)
+        })
+
+        it('should watch a list of resources', function () {
+          const testObject = new TestObject()
+          const reconnector = testObject.watchList('namespace', testOptions)
+          expect(createReconnectorStub).to.be.calledOnce
+          const [object, url, searchParams] = createReconnectorStub.firstCall.args
+          expect(object).to.equal(testObject)
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(reconnector).to.equal(testReconnector)
+        })
+
+        it('should watch a list of resources across all namespaces', function () {
+          const testObject = new TestObject()
+          const reconnector = testObject.watchListAllNamespaces(testOptions)
+          expect(createReconnectorStub).to.be.calledOnce
+          const [object, url, searchParams] = createReconnectorStub.firstCall.args
+          expect(object).to.equal(testObject)
+          expect(url).to.equal('dummies')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(reconnector).to.equal(testReconnector)
+        })
+      })
+
+      describe('Writable', function () {
+        function patchMethodTest (patchType, testBody) {
+          const testObject = new TestObject()
+          const patchMethod = camelCase(patchType) + 'Patch'
+          const patchContentType = 'application/' + patchType + '-patch+json'
+          const [url, { method, searchParams, headers, json }] = testObject[patchMethod]('namespace', 'name', testBody, testOptions)
+          expect(url).to.equal('namespaces/namespace/dummies/name')
+          expect(method).to.equal('patch')
+          expect(headers['Content-Type']).to.equal(patchContentType)
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        }
+
+        it('should create a resource', function () {
+          const testObject = new TestObject()
+          const testBody = { bar: 'foo' }
+          const [url, { method, searchParams, json }] = testObject.create('namespace', testBody, testOptions)
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(method).to.equal('post')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        })
+
+        it('should update a resource', function () {
+          const testObject = new TestObject()
+          const testBody = { bar: 'foo' }
+          const [url, { method, searchParams, json }] = testObject.update('namespace', 'name', testBody, testOptions)
+          expect(url).to.equal('namespaces/namespace/dummies/name')
+          expect(method).to.equal('put')
+          expect(searchParams.toString()).to.equal('foo=bar')
+          expect(json).to.equal(testBody)
+        })
+
+        it('should merge patch a resource', function () {
+          patchMethodTest(PatchType.MERGE, { bar: 'foo' })
+        })
+
+        it('should strategic merge patch a resource', function () {
+          patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
+        })
+
+        it('should json patch a resource', function () {
+          patchMethodTest(PatchType.JSON, ['foo'])
+        })
+
+        it('should delete a resource', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.delete('namespace', 'name', testOptions)
+          expect(url).to.equal('namespaces/namespace/dummies/name')
+          expect(method).to.equal('delete')
+          expect(searchParams.toString()).to.equal('foo=bar')
+        })
+
+        it('should delete multiple resources', function () {
+          const testObject = new TestObject()
+          const [url, { method, searchParams }] = testObject.deleteCollection('namespace', testOptions)
+          expect(url).to.equal('namespaces/namespace/dummies')
+          expect(method).to.equal('delete')
+          expect(searchParams.toString()).to.equal('foo=bar')
         })
       })
     })
@@ -746,11 +947,185 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
     })
   })
 
-  describe('Store', function () {
-    it('should create a Store instance', function () {
-      const map = new Map()
-      const store = new Store(map)
+  describe('cache', function () {
+    let map
+    let store
+    let event
+    let listWatcher
+    let reflector
+
+    const a = {
+      metadata: {
+        uid: 'a'
+      }
+    }
+
+    const b = {
+      metadata: {
+        uid: 'b'
+      }
+    }
+
+    class TestSocket extends EventEmitter {
+      constructor () {
+        super()
+        process.nextTick(() => this.emit('open'))
+      }
+
+      terminate () {
+        process.nextTick(() => this.emit('close'))
+      }
+    }
+
+    class TestListWatcher {
+      constructor (socket) {
+        this.group = 'group'
+        this.version = 'version'
+        this.names = {
+          plural: 'dummies'
+        }
+        this.socket = socket
+        this.expiredErrorForToken = undefined
+      }
+
+      list ({ limit, continue: continueToken, resourceVersion }) {
+        const metadata = {
+          resourceVersion: 'version',
+          selfLink: 'link'
+        }
+        if (!continueToken) {
+          if (limit !== 1) {
+            return { metadata, items: [a, b] }
+          } else {
+            return { metadata: { continue: 'b', ...metadata }, items: [a] }
+          }
+        } else if (continueToken === this.expiredErrorForToken) {
+          throw new ApiErrors.StatusError({
+            code: 410,
+            reason: 'Expired',
+            message: 'Resource is expired'
+          })
+        } else if (continueToken === 'b') {
+          return {
+            metadata: {},
+            items: [b]
+          }
+        }
+        expect.fail('Unexpected continue token')
+      }
+
+      watch () {
+        return (this.socket = new TestSocket())
+      }
+    }
+
+    beforeEach(function () {
+      map = new Map()
+      store = new Store(map, 0)
+      listWatcher = new TestListWatcher()
+      reflector = new Reflector(listWatcher, store)
+    })
+
+    afterEach(function () {
+      reflector.stop()
+    })
+
+    it('should create a Store instance', async function () {
       expect(store).to.be.an.instanceof(Store)
+
+      // replace [a]
+      expect(store.isSynchronized).to.be.false
+      event = Promise.all([
+        pEvent(store, 'cleared'),
+        pEvent(store, 'replaced')
+      ])
+      store.replace([a])
+      await event
+      expect(store.isSynchronized).to.be.true
+      expect(store.has(a)).to.be.true
+      expect(store.get('a')).to.equal(a)
+      expect(store.values()).to.eql([a])
+
+      // add b
+      event = pEvent(store, 'added')
+      store.add(b)
+      expect(await event).to.equal(b)
+      expect(store.keys()).to.eql(['a', 'b'])
+
+      // update a
+      event = pEvent(store, 'updated')
+      store.update(a)
+      expect(await event).to.equal(a)
+
+      // delete b
+      event = pEvent(store, 'deleted')
+      store.delete(b)
+      expect(await event).to.equal(b)
+      expect(store.keys()).to.eql(['a'])
+
+      store.synchronizing()
+      await pEvent(store, 'stale')
+      expect(store.isSynchronized).to.be.false
+    })
+
+    it('should return a list of paginated results', async function () {
+      const listPager = new ListPager(listWatcher, { pageSize: 1 })
+      expect(listPager).to.be.an.instanceof(ListPager)
+      expect(listPager.pageSize).to.equal(1)
+      expect(listPager.fullListIfExpired).to.be.true
+      const options = { resourceVersion: '0' }
+      const { metadata, items } = await listPager.list(options)
+      expect(metadata).to.eql({
+        resourceVersion: 'version',
+        selfLink: 'link',
+        paginated: true
+      })
+      expect(items).to.eql([a, b])
+    })
+
+    it('should return a full list', async function () {
+      const listPager = new ListPager(listWatcher, { pageSize: 2 })
+      expect(listPager).to.be.an.instanceof(ListPager)
+      expect(listPager.pageSize).to.equal(2)
+      expect(listPager.fullListIfExpired).to.be.true
+      const options = { resourceVersion: '0' }
+      const { metadata, items } = await listPager.list(options)
+      expect(metadata).to.eql({
+        resourceVersion: 'version',
+        selfLink: 'link'
+      })
+      expect(items).to.eql([a, b])
+    })
+
+    it('should throw an "Expired" error for the second page', async function () {
+      listWatcher.expiredErrorForToken = 'b'
+      const listPager = new ListPager(listWatcher, { pageSize: 1, fullListIfExpired: false })
+      expect(listPager).to.be.an.instanceof(ListPager)
+      expect(listPager.pageSize).to.equal(1)
+      expect(listPager.fullListIfExpired).to.be.false
+      const options = { resourceVersion: '0' }
+      try {
+        await listPager.list(options)
+        expect.fail('expected list to throw "Expired" error')
+      } catch (err) {
+        expect(ApiErrors.isExpiredError(err)).to.be.true
+      }
+      listPager.fullListIfExpired = true
+      const { metadata, items } = await listPager.list(options)
+      expect(metadata).to.eql({
+        resourceVersion: 'version',
+        selfLink: 'link',
+        paginated: true
+      })
+      expect(items).to.eql([a, b])
+    })
+
+    it('should create a Reflector instance', async function () {
+      expect(reflector).to.be.an.instanceof(Reflector)
+      event = pEvent(store, 'replaced')
+      reflector.run()
+      await event
+      expect(store.keys()).to.eql(['a', 'b'])
     })
   })
 })

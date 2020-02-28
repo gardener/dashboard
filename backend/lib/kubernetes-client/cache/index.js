@@ -17,9 +17,11 @@
 'use strict'
 
 const Reflector = require('./Reflector')
+const ListPager = require('./ListPager')
 const Store = require('./Store')
 
 module.exports = {
   Reflector,
+  ListPager,
   Store
 }

@@ -60,6 +60,7 @@ class Reflector {
     this.paginatedResult = false
     this.socket = undefined
     this.heartbeatIntervalId = undefined
+    this.stopped = false
   }
 
   get expectedTypeName () {
@@ -82,6 +83,11 @@ class Reflector {
     return this.lastSyncResourceVersion
   }
 
+  stop () {
+    this.stopped = true
+    this.terminate()
+  }
+
   async run () {
     logger.info('Starting reflector %s from %s', this.expectedTypeName, this.name)
     do {
@@ -89,6 +95,9 @@ class Reflector {
         await this.listAndWatch()
       } catch (err) {
         logger.error('%s: Failed to list and watch %s: %s', this.name, this.expectedTypeName, err)
+      }
+      if (this.stopped) {
+        return
       }
       logger.info('Restarting reflector %s from %s', this.expectedTypeName, this.name)
       await delay(randomize(this.period.asMilliseconds()))
@@ -107,6 +116,9 @@ class Reflector {
     } else if (options.resourceVersion !== '' && options.resourceVersion !== '0') {
       pager.pageSize = 0
     }
+
+    this.store.synchronizing()
+
     let list
     try {
       list = await pager.list(options)
@@ -177,6 +189,9 @@ class Reflector {
             logger.error('%s: watch of %s failed with: %s', this.name, this.expectedTypeName, err)
           }
           if (includes(RETRY_ERROR_CODES, err.code)) {
+            if (this.stopped) {
+              return
+            }
             await delay(randomize(this.period.asMilliseconds()))
             continue
           }
@@ -223,7 +238,6 @@ class Reflector {
     if (this.socket) {
       this.socket.terminate()
     }
-    this.store.resynchronizing()
   }
 
   async watchHandler (socket) {

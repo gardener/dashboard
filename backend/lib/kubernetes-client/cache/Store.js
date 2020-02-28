@@ -18,7 +18,6 @@
 
 const EventEmitter = require('events')
 const { get } = require('lodash')
-const moment = require('moment')
 
 const store = Symbol('store')
 const timeout = Symbol('timeout')
@@ -26,11 +25,11 @@ const timeoutId = Symbol('timeoutId')
 const synchronized = Symbol('synchronized')
 
 class Store extends EventEmitter {
-  constructor (map) {
+  constructor (map, timeout = 30 * 1000) {
     super()
     this[store] = map || new Map()
     this[synchronized] = false
-    this[timeout] = moment.duration(30, 'seconds')
+    this[timeout] = timeout
     this[timeoutId] = undefined
   }
 
@@ -38,11 +37,11 @@ class Store extends EventEmitter {
     return this[synchronized]
   }
 
-  resynchronizing () {
+  synchronizing () {
     this[timeoutId] = setTimeout(() => {
       this[synchronized] = false
       this.emit('stale')
-    }, this[timeout].asMilliseconds())
+    }, this[timeout])
   }
 
   keys () {
