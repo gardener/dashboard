@@ -19,6 +19,7 @@ import { shallowMount, mount } from '@vue/test-utils'
 import HintColorizer from '@/components/HintColorizer.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import { VSelect, VTextField } from 'vuetify/lib'
 Vue.use(Vuetify)
 
 describe('HintColorizer.vue', function () {
@@ -40,7 +41,7 @@ describe('HintColorizer.vue', function () {
     expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
   })
 
-  it('should not overwrite error color class', async function () {
+  it('should not overwrite error color class for v-text-field', async function () {
     const data = () => {
       return {
         errorMessage: undefined
@@ -53,5 +54,50 @@ describe('HintColorizer.vue', function () {
 
     wrapper.vm.errorMessage = 'invalid'
     expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
+  })
+
+  it('should not overwrite error color class for v-select', async function () {
+    const data = () => {
+      return {
+        errorMessage: undefined
+      }
+    }
+    const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage"></v-select></hint-colorizer>'
+    const wrapper = mount({ template, data, components: { HintColorizer } })
+    const { hintColorizer } = wrapper.vm.$refs
+    expect(hintColorizer.$el.className).to.contain('hintColor-orange')
+
+    wrapper.vm.errorMessage = 'invalid'
+    expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
+  })
+})
+
+describe('VSelect', function () {
+  it('should be able to overwrite v-select hint color class', function () {
+    const hint = 'hint test'
+    const propsData = {
+      hint,
+      'persistent-hint': true
+    }
+    const wrapper = shallowMount(VSelect, {
+      propsData
+    })
+    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
+    expect(hintElement.text()).to.equal(hint)
+  })
+})
+
+describe('VTextField', function () {
+  it('should be able to overwrite v-text-field hint color class', function () {
+    const hint = 'hint test'
+    const propsData = {
+      hint,
+      'persistent-hint': true
+    }
+    const wrapper = shallowMount(VTextField, {
+      propsData
+    })
+    const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
+    expect(hintElement.text()).to.equal(hint)
   })
 })
