@@ -66,17 +66,20 @@ limitations under the License.
           </hint-colorizer>
         </v-flex>
         <v-flex>
-          <v-text-field
-            color="black"
-            v-model="password"
-            label="Password"
-            :error-messages="getErrorMessages('password')"
-            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :type="hideSecret ? 'password' : 'text'"
-            @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.password.$touch()"
-            @blur="$v.password.$touch()"
-          ></v-text-field>
+          <hint-colorizer hintColor="orange">
+            <v-text-field
+              color="black"
+              v-model="password"
+              label="Password"
+              :error-messages="getErrorMessages('password')"
+              :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+              :type="hideSecret ? 'password' : 'text'"
+              @click:append="() => (hideSecret = !hideSecret)"
+              @input="$v.password.$touch()"
+              @blur="$v.password.$touch()"
+              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+            ></v-text-field>
+          </hint-colorizer>
         </v-flex>
       </v-layout>
     </template>
