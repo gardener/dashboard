@@ -38,7 +38,7 @@ E.g. the user wants to have a terminal for a shoot cluster. The kube-apiserver o
 User chooses the target and clicks in the browser on `Open terminal` button. A POST request is made to the dashboard backend to request a new terminal session.
 
 ### 2. Dashboard Backend - Create Terminal Resource
-According to the privileges of the user (operator / enduser) and the selected target, the dasboard backend creates a `terminal` resource **on behalf of the user** in the (virtual) garden and responds with a handle to the terminal session
+According to the privileges of the user (operator / enduser) and the selected target, the dashboard backend creates a `terminal` resource **on behalf of the user** in the (virtual) garden and responds with a handle to the terminal session.
 
 ### 3. Browser / Dashboard Frontend
 The frontend makes another POST request to the dashboard backend to fetch the terminal session. The Backend waits until the `terminal` resource is in a "ready" state (timeout 10s) before sending a response to the frontend. More to that later.
