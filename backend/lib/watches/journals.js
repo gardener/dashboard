@@ -22,7 +22,7 @@ const journals = require('../services/journals')
 const cache = require('../cache')
 const config = require('../config')
 
-module.exports = async (io, retryOptions = {}) => {
+module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for journals feature')
     return
