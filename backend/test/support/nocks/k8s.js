@@ -998,18 +998,18 @@ const stub = {
     canGetSecretsInAllNamespaces(scope)
     if (target === 'garden') {
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
         .reply(404)
     } else {
       const shootResource = _.find(shootList, ['metadata.name', shootName])
       seedName = getSeedNameFromShoot(shootResource)
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/${namespace}/shoots/${shootName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${shootName}`)
         .reply(200, shootResource)
     }
     if (target === 'cp') {
       scope
-        .get(`/apis/core.gardener.cloud/v1alpha1/namespaces/garden/shoots/${seedName}`)
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
         .reply(200, {
           metadata: {
             name: seedName,
