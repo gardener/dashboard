@@ -21,7 +21,6 @@ const logger = require('../logger')
 const journals = require('../services/journals')
 const cache = require('../cache')
 const config = require('../config')
-const delay = require('delay')
 
 module.exports = async (io, retryOptions = {}) => {
   if (!config.gitHub) {
@@ -67,25 +66,29 @@ module.exports = async (io, retryOptions = {}) => {
     }
   }
 
+  function pollJournals() {
+    return setInterval(async () => {
+      await loadAllOpenIssues()
+
+      const issueNumbers = journalCache.getIssueNumbers()
+      for (const number of issueNumbers) {
+        try {
+          await journals.loadIssueComments({ number })
+        } catch (err) {
+          logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
+        }
+      }
+    }, pollIntervalSeconds * 1000)
+  }
+
   let pollIntervalSeconds = parseInt(config.gitHub.pollIntervalSeconds)
   if (isNaN(pollIntervalSeconds)) {
     pollIntervalSeconds = undefined
   }
 
-  do {
-    await loadAllOpenIssues()
-    if (!pollIntervalSeconds) {
-      break
-    }
-
-    const issueNumbers = journalCache.getIssueNumbers()
-    for (const number of issueNumbers) {
-      try {
-        await journals.loadIssueComments({ number })
-      } catch (err) {
-        logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
-      }
-    }
-    await delay(pollIntervalSeconds * 1000)
-  } while (true)
+  if (!pollIntervalSeconds) {
+    return loadAllOpenIssues()
+  } else {
+    pollJournals()
+  }
 }
