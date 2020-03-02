@@ -148,7 +148,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       const containerImage = 'fooImage:0.1.2'
 
-
       common.stub.getCloudProfiles(sandbox)
       k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
 
