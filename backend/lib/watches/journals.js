@@ -66,7 +66,7 @@ module.exports = (io, retryOptions = {}) => {
     }
   }
 
-  function pollJournals() {
+  function pollJournals () {
     return setInterval(async () => {
       await loadAllOpenIssues()
 
