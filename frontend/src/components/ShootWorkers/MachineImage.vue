@@ -1,5 +1,5 @@
 <template>
-  <select-hint-colorizer :hintColor="hintColor">
+  <hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
       :items="machineImages"
@@ -30,12 +30,12 @@
         </span>
       </template>
     </v-select>
-  </select-hint-colorizer>
+  </hint-colorizer>
 </template>
 
 <script>
 import VendorIcon from '@/components/VendorIcon'
-import SelectHintColorizer from '@/components/SelectHintColorizer'
+import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import includes from 'lodash/includes'
@@ -68,7 +68,7 @@ const validations = {
 export default {
   components: {
     VendorIcon,
-    SelectHintColorizer
+    HintColorizer
   },
   props: {
     worker: {

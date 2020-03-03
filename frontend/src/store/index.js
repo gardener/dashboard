@@ -118,13 +118,6 @@ const vendorNameFromImageName = imageName => {
   return undefined
 }
 
-const iconForVendor = vendorName => {
-  if (!vendorName) {
-    return 'mdi-blur-radial'
-  }
-  return vendorName
-}
-
 const vendorNeedsLicense = vendorName => {
   return vendorName === 'suse-jeos'
 }
@@ -242,7 +235,7 @@ const getters = {
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,
-            icon: iconForVendor(vendorName),
+            icon: vendorName,
             needsLicense: vendorNeedsLicense(vendorName)
           }
         })
