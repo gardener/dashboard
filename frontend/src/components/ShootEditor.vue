@@ -111,11 +111,11 @@ import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 
 // lodash
-import omit from 'lodash/omit'
+import get from 'lodash/get'
+import pick from 'lodash/pick'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 import isEqual from 'lodash/isEqual'
-import get from 'lodash/get'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -183,7 +183,7 @@ export default {
     value () {
       const data = cloneDeep(this.shootContent)
       if (data) {
-        return omit(data, ['info'])
+        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
       }
       return undefined
     },

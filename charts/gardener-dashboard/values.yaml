@@ -105,6 +105,7 @@ gitHub:
   authentication:
     username: dashboard
     token: dummytoken
+  # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
 
 livenessProbe:
   enabled: true

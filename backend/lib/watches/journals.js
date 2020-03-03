@@ -66,5 +66,29 @@ module.exports = (io, retryOptions = {}) => {
     }
   }
 
-  return loadAllOpenIssues()
+  function pollJournals () {
+    return setInterval(async () => {
+      await loadAllOpenIssues()
+
+      const issueNumbers = journalCache.getIssueNumbers()
+      for (const number of issueNumbers) {
+        try {
+          await journals.loadIssueComments({ number })
+        } catch (err) {
+          logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
+        }
+      }
+    }, pollIntervalSeconds * 1000)
+  }
+
+  let pollIntervalSeconds = parseInt(config.gitHub.pollIntervalSeconds)
+  if (isNaN(pollIntervalSeconds)) {
+    pollIntervalSeconds = undefined
+  }
+
+  if (!pollIntervalSeconds) {
+    return loadAllOpenIssues()
+  } else {
+    pollJournals()
+  }
 }

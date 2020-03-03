@@ -87,7 +87,6 @@ describe('Store', function () {
     expect(suseImage).to.equal(dashboardMachineImages[1]) // check sorting
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
-    expect(fooImage.icon).to.equal('mdi-blur-radial')
     expect(fooImage.needsLicense).to.equal(false)
   })
 
