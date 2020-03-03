@@ -337,14 +337,15 @@ export default {
             return
           }
           const tooltip = this.shootEditorCompletions.editorTooltip(e, cm)
-          if (tooltip) {
-            this.helpTooltip.visible = true
-            this.helpTooltip.posX = e.clientX
-            this.helpTooltip.posY = e.clientY
-            this.helpTooltip.property = tooltip.property
-            this.helpTooltip.type = tooltip.type
-            this.helpTooltip.description = tooltip.description
+          if (!tooltip) {
+            return
           }
+          this.helpTooltip.visible = true
+          this.helpTooltip.posX = e.clientX
+          this.helpTooltip.posY = e.clientY
+          this.helpTooltip.property = tooltip.property
+          this.helpTooltip.type = tooltip.type
+          this.helpTooltip.description = tooltip.description
         })
       })
     },
