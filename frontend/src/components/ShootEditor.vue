@@ -327,12 +327,12 @@ export default {
         return this.shootEditorCompletions.yamlHint(editor)
       })
 
-      let cmTooltipFnTimerID
+      let timeoutId
       const cm = this.$instance
       CodeMirror.on(element, 'mouseover', (e) => {
-        clearTimeout(cmTooltipFnTimerID)
+        clearTimeout(timeoutId)
         this.helpTooltip.visible = false
-        cmTooltipFnTimerID = setTimeout(() => {
+        timeoutId = setTimeout(() => {
           if (!this.shootEditorCompletions) {
             return
           }
@@ -345,7 +345,7 @@ export default {
             this.helpTooltip.type = tooltip.type
             this.helpTooltip.description = tooltip.description
           }
-        })
+        }, 200)
       })
     },
     destroyInstance () {
