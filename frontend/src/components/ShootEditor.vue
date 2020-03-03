@@ -346,7 +346,7 @@ export default {
           this.helpTooltip.property = tooltip.property
           this.helpTooltip.type = tooltip.type
           this.helpTooltip.description = tooltip.description
-        })
+        }, 200)
       })
     },
     destroyInstance () {
