@@ -374,11 +374,11 @@ const getters = {
     return ({ cloudProfileName, partitionID }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const networks = get(cloudProfile, ['data', 'providerConfig', 'firewallNetworks', partitionID])
-      return map(toPairs(networks), network => {
+      return map(toPairs(networks), ([key, value]) => {
         return {
-          key: network[0],
-          value: network[1],
-          text: `${network[0]} [${network[1]}]`
+          key,
+          value,
+          text: `${key} [${value}]`
         }
       })
     }

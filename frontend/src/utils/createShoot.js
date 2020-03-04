@@ -28,7 +28,7 @@ const workerCIDR = '10.250.0.0/16'
 export function getSpecTemplate (infrastructureKind) {
   switch (infrastructureKind) {
     case 'metal':
-      return { // TODO: Remove when metal extension sets this config via mutating webhook
+      return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
         provider: getProviderTemplate(infrastructureKind),
         networking: {
           type: 'calico',

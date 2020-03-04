@@ -518,7 +518,6 @@ export default {
       }
     },
     onInputRegion () {
-      this.$v.secret.$touch()
       this.partitionID = head(this.partitionIDs)
       this.onInputPartitionID()
       this.$v.region.$touch()
