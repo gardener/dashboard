@@ -163,7 +163,7 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
+    }
   },
   methods: {
     onInput (value) {

@@ -32,12 +32,10 @@ limitations under the License.
 
 <script>
 import SecretDialogHelp from '@/dialogs/SecretDialogHelp'
-import CodeBlock from '@/components/CodeBlock'
 
 export default {
   components: {
-    SecretDialogHelp,
-    CodeBlock
+    SecretDialogHelp
   },
   props: {
     value: {

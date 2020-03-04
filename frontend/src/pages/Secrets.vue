@@ -204,7 +204,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding, infrastructureColor } from '@/utils'
+import { isOwnSecretBinding } from '@/utils'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
