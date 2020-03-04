@@ -25,11 +25,11 @@ const timeoutId = Symbol('timeoutId')
 const synchronized = Symbol('synchronized')
 
 class Store extends EventEmitter {
-  constructor (map, timeout = 30 * 1000) {
+  constructor (map, synchronizationTimeout = 30 * 1000) {
     super()
     this[store] = map || new Map()
     this[synchronized] = false
-    this[timeout] = timeout
+    this[timeout] = synchronizationTimeout
     this[timeoutId] = undefined
   }
 

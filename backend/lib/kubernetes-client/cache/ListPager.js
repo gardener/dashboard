@@ -101,6 +101,10 @@ class ListPager {
       list.metadata.paginated = true
     }
   }
+
+  static create (lister, options) {
+    return new this(lister, options)
+  }
 }
 
 module.exports = ListPager

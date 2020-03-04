@@ -34,16 +34,12 @@ const RETRY_ERROR_CODES = [
   'ENETUNREACH'
 ]
 
-function parseMessage (data) {
-  try {
-    return JSON.parse(data)
-  } catch (err) {
-    logger.error('Failed to parse message data', err)
-  }
-}
-
 function randomize (duration) {
   return Math.round(duration * (Math.random() + 1.0))
+}
+
+function getTypeName (apiVersion, kind) {
+  return `${apiVersion}, Kind=${kind}`
 }
 
 class Reflector {
@@ -60,12 +56,21 @@ class Reflector {
     this.paginatedResult = false
     this.socket = undefined
     this.heartbeatIntervalId = undefined
-    this.stopped = false
+    this.exit = false
+  }
+
+  get apiVersion () {
+    const { group, version } = this.listWatcher
+    return group ? `${group}/${version}` : version
+  }
+
+  get kind () {
+    const { names = {} } = this.listWatcher
+    return names.kind
   }
 
   get expectedTypeName () {
-    const { group, version, names: { kind } } = this.listWatcher
-    return `${group}/${version}, Kind=${kind}`
+    return getTypeName(this.apiVersion, this.kind)
   }
 
   get relistResourceVersion () {
@@ -84,28 +89,35 @@ class Reflector {
   }
 
   stop () {
-    this.stopped = true
+    this.exit = true
     this.terminate()
+  }
+
+  terminate () {
+    clearInterval(this.heartbeatIntervalId)
+    if (this.socket) {
+      this.socket.terminate()
+    }
   }
 
   async run () {
     logger.info('Starting reflector %s from %s', this.expectedTypeName, this.name)
-    do {
+    while (!this.exit) {
       try {
         await this.listAndWatch()
       } catch (err) {
         logger.error('%s: Failed to list and watch %s: %s', this.name, this.expectedTypeName, err)
       }
-      if (this.stopped) {
-        return
+      if (this.exit) {
+        break
       }
       logger.info('Restarting reflector %s from %s', this.expectedTypeName, this.name)
       await delay(randomize(this.period.asMilliseconds()))
-    } while (true)
+    }
   }
 
   async listAndWatch () {
-    const pager = new ListPager(this.listWatcher)
+    const pager = ListPager.create(this.listWatcher)
     const defaultPageSize = pager.pageSize
     const options = {
       resourceVersion: this.relistResourceVersion
@@ -166,11 +178,11 @@ class Reflector {
     this.store.replace(list.items)
     this.lastSyncResourceVersion = resourceVersion
 
-    do {
+    while (!this.exit) {
       const options = {
         allowWatchBookmarks: true,
         timeoutSeconds: randomize(this.minWatchTimeout.asSeconds()),
-        resourceVersion
+        resourceVersion: this.lastSyncResourceVersion
       }
       try {
         try {
@@ -189,12 +201,12 @@ class Reflector {
             logger.error('%s: watch of %s failed with: %s', this.name, this.expectedTypeName, err)
           }
           if (includes(RETRY_ERROR_CODES, err.code)) {
-            if (this.stopped) {
-              return
-            }
             await delay(randomize(this.period.asMilliseconds()))
             continue
           }
+          return
+        }
+        if (this.exit) {
           return
         }
         this.startHeartbeat(this.socket)
@@ -214,7 +226,7 @@ class Reflector {
       } finally {
         this.terminate()
       }
-    } while (true)
+    }
   }
 
   startHeartbeat (socket) {
@@ -233,13 +245,6 @@ class Reflector {
     this.heartbeatIntervalId = setInterval(ping, this.heartbeatInterval.asMilliseconds())
   }
 
-  terminate () {
-    clearInterval(this.heartbeatIntervalId)
-    if (this.socket) {
-      this.socket.terminate()
-    }
-  }
-
   async watchHandler (socket) {
     const start = Date.now()
     let count = 0
@@ -248,11 +253,23 @@ class Reflector {
     })
     for await (const data of asyncIterator) {
       count++
-      const { type, object } = parseMessage(data)
+      let event
+      try {
+        event = JSON.parse(data)
+      } catch (err) {
+        logger.error('%s: unable to parse watch event', this.name)
+        continue
+      }
+      const { type, object } = event
       if (type === 'ERROR') {
         throw new StatusError(object)
       }
-      const { resourceVersion } = object.metadata
+      const { apiVersion, kind, metadata: { resourceVersion } = {} } = object
+      if (apiVersion !== this.apiVersion || kind !== this.kind) {
+        const typeName = getTypeName(apiVersion, kind)
+        logger.error('%s: expected %s, but watch event object had %s', this.name, this.expectedTypeName, typeName)
+        continue
+      }
       switch (type) {
         case 'ADDED':
           this.store.add(object)
@@ -266,9 +283,13 @@ class Reflector {
         case 'BOOKMARK':
           break
         default:
-          logger.error(`Invalid event type "${type}"`)
+          logger.error('%s: unable to understand watch event %s', this.name, type)
       }
-      this.lastSyncResourceVersion = resourceVersion
+      if (resourceVersion) {
+        this.lastSyncResourceVersion = resourceVersion
+      } else {
+        logger.error('%s: received watch event object without resource version', this.name)
+      }
     }
     const watchDuration = Date.now() - start
     if (watchDuration < 1000 && count === 0) {
