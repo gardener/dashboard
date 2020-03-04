@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="aws"
-    color="orange darken-2"
+    color="orange darken-1"
     infraIcon="aws-white"
     backgroundSrc="/static/background_aws.svg"
     createTitle="Add new AWS Secret"
@@ -32,10 +32,10 @@ limitations under the License.
       <v-layout column>
         <v-flex>
           <v-text-field
-            color="orange darken-2"
-            ref="accessKeyId"
+            color="orange darken-1"
             v-model="accessKeyId"
-            :label="accessKeyIdLabel"
+            ref="accessKeyId"
+            label="Access Key Id"
             :error-messages="getErrorMessages('accessKeyId')"
             @input="$v.accessKeyId.$touch()"
             @blur="$v.accessKeyId.$touch()"
@@ -45,9 +45,9 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="orange darken-2"
+            color="orange darken-1"
             v-model="secretAccessKey"
-            :label="secretAccessKeyLabel"
+            label="Secret Access Key"
             :error-messages="getErrorMessages('secretAccessKey')"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
@@ -138,12 +138,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    accessKeyIdLabel () {
-      return this.isCreateMode ? 'Access Key Id' : 'New Access Key Id'
-    },
-    secretAccessKeyLabel () {
-      return this.isCreateMode ? 'Secret Access Key' : 'New Secret Access Key'
     }
   },
   methods: {

@@ -30,35 +30,30 @@ limitations under the License.
 
     <template slot="data-slot">
       <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="blue"
-            ref="accessKeyId"
-            v-model="accessKeyId"
-            :label="accessKeyIdLabel"
-            :error-messages="getErrorMessages('accessKeyId')"
-            @input="$v.accessKeyId.$touch()"
-            @blur="$v.accessKeyId.$touch()"
-            counter="128"
-            hint="e.g. AKIAIOSFODNN7EXAMPLE"
+            v-model="apiURL"
+            ref="apiURL"
+            label="API URL"
+            :error-messages="getErrorMessages('apiURL')"
+            @input="$v.apiURL.$touch()"
+            @blur="$v.apiURL.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
-
       <v-layout row>
-        <v-flex xs8>
+        <v-flex>
           <v-text-field
             color="blue"
-            v-model="secretAccessKey"
-            :label="secretAccessKeyLabel"
-            :error-messages="getErrorMessages('secretAccessKey')"
+            v-model="apiHMAC"
+            label="API HMAC"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
             @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.secretAccessKey.$touch()"
-            @blur="$v.secretAccessKey.$touch()"
-            counter="40"
-            hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
+            :error-messages="getErrorMessages('apiHMAC')"
+            @input="$v.apiHMAC.$touch()"
+            @blur="$v.apiHMAC.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -70,21 +65,17 @@ limitations under the License.
 
 <script>
 import SecretDialog from '@/dialogs/SecretDialog'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
+import { required, url } from 'vuelidate/lib/validators'
 import { alphaNumUnderscore, base64 } from '@/utils/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
-  accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
+  apiHMAC: {
+    required: 'You can\'t leave this empty.'
   },
-  secretAccessKey: {
+  apiURL: {
     required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 40 characters.',
-    base64: 'Invalid secret access key.'
+    url: 'You must enter a valid URL'
   }
 }
 
@@ -103,8 +94,8 @@ export default {
   },
   data () {
     return {
-      accessKeyId: undefined,
-      secretAccessKey: undefined,
+      apiHMAC: undefined,
+      apiURL: undefined,
       hideSecret: true,
       validationErrors
     }
@@ -119,34 +110,24 @@ export default {
     },
     secretData () {
       return {
-        accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
+        metalAPIHMac: this.apiHMAC,
+        metalAPIURL: this.apiURL
       }
     },
     validators () {
       const validators = {
-        accessKeyId: {
-          required,
-          minLength: minLength(16),
-          maxLength: maxLength(128),
-          alphaNumUnderscore
+        apiHMAC: {
+          required
         },
-        secretAccessKey: {
+        apiURL: {
           required,
-          minLength: minLength(40),
-          base64
+          url
         }
       }
       return validators
     },
     isCreateMode () {
       return !this.secret
-    },
-    accessKeyIdLabel () {
-      return this.isCreateMode ? 'Access Key Id' : 'New Access Key Id'
-    },
-    secretAccessKeyLabel () {
-      return this.isCreateMode ? 'Secret Access Key' : 'New Secret Access Key'
     }
   },
   methods: {
@@ -156,11 +137,11 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.accessKeyId = ''
-      this.secretAccessKey = ''
+      this.apiHMAC = ''
+      this.apiURL = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'accessKeyId')
+        setDelayedInputFocus(this, 'apiURL')
       }
     },
     getErrorMessages (field) {

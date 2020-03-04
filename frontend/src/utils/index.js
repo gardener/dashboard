@@ -398,27 +398,12 @@ export function isServiceAccountFromNamespace (username, namespace) {
 
 // expect colors to be in format <color> <optional:modifier>
 export function textColor (color) {
-  const colorArr = split(color, ' ')
-  const colorStr = colorArr[0]
-  const colorMod = colorArr[1]
+  const [colorStr, colorMod] = split(color, ' ')
   let textColor = `${colorStr}--text`
   if (colorMod) {
     textColor = `${textColor} text--${colorMod}`
   }
   return textColor
-}
-
-export function infrastructureColor (kind) {
-  switch (kind) {
-    case 'openstack':
-      return '#ED1944'
-    case 'azure':
-      return '#2075b8'
-    case 'aws':
-      return '#ff9900'
-    case 'metal':
-      return '#ff9900'
-  }
 }
 
 export function encodeBase64 (input) {

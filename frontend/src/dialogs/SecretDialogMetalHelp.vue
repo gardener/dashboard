@@ -17,17 +17,16 @@ limitations under the License.
 <template>
   <secret-dialog-help
     title="About Metal Secrets"
-    color="orange"
+    color="blue"
     backgroundSrc="/static/background_metal.svg"
     :value="value"
     @input="onInput">
     <div slot="help-content" class="helpContent">
-      <p>
-        Before you can provision and access a Kubernetes cluster, you need to add account credentials.
-        TODO describe
-      </p>
-      <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>
-    </div>
+     <p>
+       Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+       The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+     </p>
+   </div>
   </secret-dialog-help>
 </template>
 
@@ -44,71 +43,6 @@ export default {
     value: {
       type: Boolean,
       required: true
-    }
-  },
-  data () {
-    return {
-      template: {
-        'Version': '2012-10-17',
-        'Statement': [
-          {
-            'Effect': 'Allow',
-            'Action': 'autoscaling:*',
-            'Resource': '*'
-          },
-          {
-            'Effect': 'Allow',
-            'Action': 'ec2:*',
-            'Resource': '*'
-          },
-          {
-            'Effect': 'Allow',
-            'Action': 'elasticloadbalancing:*',
-            'Resource': '*'
-          },
-          {
-            'Action': [
-              'iam:GetInstanceProfile',
-              'iam:GetPolicy',
-              'iam:GetPolicyVersion',
-              'iam:GetRole',
-              'iam:GetRolePolicy',
-              'iam:ListPolicyVersions',
-              'iam:ListAttachedRolePolicies',
-              'iam:ListInstanceProfilesForRole',
-              'iam:CreateInstanceProfile',
-              'iam:CreatePolicy',
-              'iam:CreatePolicyVersion',
-              'iam:CreateRole',
-              'iam:CreateServiceLinkedRole',
-              'iam:AddRoleToInstanceProfile',
-              'iam:AttachRolePolicy',
-              'iam:DetachRolePolicy',
-              'iam:RemoveRoleFromInstanceProfile',
-              'iam:DeletePolicy',
-              'iam:DeletePolicyVersion',
-              'iam:DeleteRole',
-              'iam:DeleteRolePolicy',
-              'iam:DeleteInstanceProfile',
-              'iam:PutRolePolicy',
-              'iam:PassRole'
-            ],
-            'Effect': 'Allow',
-            'Resource': '*'
-          },
-          {
-            'Effect': 'Allow',
-            'Action': [
-              'route53:GetChange',
-              'route53:GetHostedZone',
-              'route53:ListResourceRecordSets',
-              'route53:ChangeResourceRecordSets',
-              'route53:ListHostedZones'
-            ],
-            'Resource': '*'
-          }
-        ]
-      }
     }
   },
   methods: {

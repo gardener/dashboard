@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="vsphere"
-    color="vsphere-bgcolor"
+    color="indigo darken-4"
     infraIcon="vsphere-white"
     backgroundSrc="/static/background_vsphere.svg"
     createTitle="Add new VMware vSphere Secret"
@@ -32,8 +32,9 @@ limitations under the License.
       <v-layout column>
         <v-flex class="mt-3">
           <v-text-field
-          color="black"
+          color="indigo darken-4"
           v-model="vsphereUsername"
+          ref="vsphereUsername"
           label="vSphere Username"
           :error-messages="getErrorMessages('vsphereUsername')"
           @input="$v.vsphereUsername.$touch()"
@@ -42,10 +43,9 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="black"
+            color="indigo darken-4"
             v-model="vspherePassword"
-            ref="vspherePassword"
-            :label="vspherePasswordLabel"
+            label="vSphere Password"
             :error-messages="getErrorMessages('vspherePassword')"
             :append-icon="hideVspherePassword ? 'visibility' : 'visibility_off'"
             :type="hideVspherePassword ? 'password' : 'text'"
@@ -56,7 +56,7 @@ limitations under the License.
         </v-flex>
         <v-flex class="mt-3">
           <v-text-field
-          color="black"
+          color="indigo darken-4"
           v-model="nsxtUsername"
           label="NSX-T Username"
           :error-messages="getErrorMessages('nsxtUsername')"
@@ -66,10 +66,9 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="black"
+            color="indigo darken-4"
             v-model="nsxtPassword"
-            ref="nsxtPassword"
-            :label="nsxtPasswordLabel"
+            label="NSX-T Password"
             :error-messages="getErrorMessages('nsxtPassword')"
             :append-icon="hideNsxtPassword ? 'visibility' : 'visibility_off'"
             :type="hideNsxtPassword ? 'password' : 'text'"
@@ -165,12 +164,6 @@ export default {
     isCreateMode () {
       return !this.secret
     },
-    vspherePasswordLabel () {
-      return this.isCreateMode ? 'vSphere Password' : 'New vSphere Password'
-    },
-    nsxtPasswordLabel () {
-      return this.isCreateMode ? 'NSX-T Password' : 'New NSX-T Password'
-    }
   },
   methods: {
     onInput (value) {
@@ -189,7 +182,7 @@ export default {
           this.vsphereUsername = this.secret.data.vsphereUsername
           this.nsxtUsername = this.secret.data.nsxtUsername
         }
-        setDelayedInputFocus(this, 'vspherePassword')
+        setDelayedInputFocus(this, 'vsphereUsername')
       }
     },
     getErrorMessages (field) {

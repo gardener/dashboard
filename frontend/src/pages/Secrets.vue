@@ -175,26 +175,26 @@ limitations under the License.
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="light-green darken-3" @click="onAdd('vsphere')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="vsphere-bgcolor" @click="onAdd('vsphere')">
           <infra-icon value="vsphere-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small class="metal-bgcolor" @click="onAdd('metal')">
+          <infra-icon value="metal-white" :width="20"></infra-icon>
+        </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small color="grey darken-4" @click="onAdd('alicloud')">
           <infra-icon value="alicloud-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small :color="infrastructureColor('openstack')" @click="onAdd('openstack')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="openstack-bgcolor" @click="onAdd('openstack')">
           <infra-icon value="openstack-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click="onAdd('gcp')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small color="green" @click="onAdd('gcp')">
           <infra-icon value="gcp-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small :color="infrastructureColor('azure')" @click="onAdd('azure')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="azure-bgcolor" @click="onAdd('azure')">
           <infra-icon value="azure-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small :color="infrastructureColor('aws')" @click="onAdd('aws')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="aws-bgcolor" @click="onAdd('aws')">
           <infra-icon value="aws-white" :width="20"></infra-icon>
-        </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small :color="infrastructureColor('metal')" @click="onAdd('metal')">
-          <infra-icon value="metal-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>
     </v-fab-transition>
