@@ -22,6 +22,7 @@ const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles }
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
+const cache = require('../cache')
 
 function toServiceAccountName ({ metadata: { name, namespace } }) {
   return `system:serviceaccount:${namespace}:${name}`
@@ -52,6 +53,11 @@ function fromResource (project = {}, serviceAccounts = []) {
     .value()
 }
 
+function readProject (client, namespace) {
+  const project = cache.findProjectByNamespace(namespace)
+  return client['core.gardener.cloud'].projects.get(project.metadata.name)
+}
+
 function createServiceaccount (client, { namespace, name, createdBy }) {
   const body = {
     metadata: {
@@ -78,7 +84,7 @@ async function deleteServiceaccount (client, { namespace, name }) {
 
 async function setProjectMember (client, { namespace, name, roles: memberRoles }) {
   // get project
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
   if (_.find(members, ['name', name])) {
@@ -122,7 +128,7 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
 
 async function unsetProjectMember (client, { namespace, name }) {
   // get project
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
   if (!_.find(members, ['name', name])) {
@@ -141,7 +147,10 @@ async function unsetProjectMember (client, { namespace, name }) {
 exports.list = async function ({ user, namespace }) {
   const client = user.client
 
-  const project = await client.getProjectByNamespace(namespace)
+  // get project
+  const project = await readProject(client, namespace)
+
+  // list serviceAccounts
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
 
   // get project members from project
@@ -151,7 +160,8 @@ exports.list = async function ({ user, namespace }) {
 exports.get = async function ({ user, namespace, name }) {
   const client = user.client
 
-  const project = await client.getProjectByNamespace(namespace)
+  // get project
+  const project = await readProject(client, namespace)
 
   const projectName = project.metadata.name
 

@@ -15,6 +15,7 @@
 //
 
 const _ = require('lodash')
+const { HTTPError } = require('got')
 const { Store } = require('../kubernetes-client/cache')
 const createJournalCache = require('./journals')
 
@@ -39,19 +40,19 @@ class Cache {
   }
 
   getCloudProfiles () {
-    return this.cloudprofiles.values()
+    return _.orderBy(this.cloudprofiles.values(), 'metadata.name')
   }
 
   getQuotas () {
-    return this.quotas.values()
+    return _.orderBy(this.quotas.values(), ['metadata.namespace', 'metadata.name'])
   }
 
   getSeeds () {
-    return this.seeds.values()
+    return _.orderBy(this.seeds.values(), 'metadata.name')
   }
 
   getProjects () {
-    return this.projects.values()
+    return _.orderBy(this.projects.values(), 'metadata.name')
   }
 
   getJournalCache () {
@@ -93,6 +94,16 @@ module.exports = {
   },
   getProjects () {
     return cache.getProjects()
+  },
+  findProjectByNamespace (namespace) {
+    const project = _.find(cache.getProjects(), ['spec.namespace', namespace])
+    if (!project) {
+      throw new HTTPError({
+        statusCode: 404,
+        statusMessage: `Namespace '${namespace}' is not related to a gardener project`
+      })
+    }
+    return project
   },
   getJournalCache () {
     return cache.getJournalCache()

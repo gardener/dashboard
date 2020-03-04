@@ -50,7 +50,7 @@ class Reflector {
     this.connectTimeout = moment.duration(5, 'seconds')
     this.heartbeatInterval = moment.duration(30, 'seconds')
     this.minWatchTimeout = moment.duration(50, 'minutes')
-    this.name = getNameFromCallsite(this.constructor)
+    this.name = getNameFromCallsite(this.constructor.create)
     this.isLastSyncResourceVersionExpired = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
@@ -187,10 +187,7 @@ class Reflector {
       try {
         try {
           this.socket = this.listWatcher.watch(options)
-          await pEvent(this.socket, 'open', {
-            timeout: this.connectTimeout.asMilliseconds(),
-            rejectionEvents: ['error', 'unexpected-response']
-          })
+          await pEvent(this.socket, 'open', { timeout: this.connectTimeout.asMilliseconds() })
         } catch (err) {
           if (isExpiredError(err)) {
             // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
