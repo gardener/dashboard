@@ -18,9 +18,27 @@
 
 const { Agent } = require('https')
 const _ = require('lodash')
-const Octokit = require('@octokit/rest')
+const { Octokit } = require('@octokit/rest')
 const config = require('../config')
 const logger = require('../logger')
+
+class OctokitLog {
+  static debug (...args) {
+    logger.debug(...args)
+  }
+
+  static info (...args) {
+    logger.info(...args)
+  }
+
+  static warn (...args) {
+    logger.warn(...args)
+  }
+
+  static error (...args) {
+    logger.error(...args)
+  }
+}
 
 function getAuthOptions (auth) {
   if (auth && _.isString(auth)) {
@@ -79,7 +97,7 @@ function init (options) {
     auth,
     baseUrl: _.replace(baseUrl, /\/$/, ''),
     previews: ['symmetra'],
-    log: logger,
+    log: OctokitLog,
     request: {
       agent,
       timeout
