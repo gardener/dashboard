@@ -324,9 +324,6 @@ export default {
     },
     isOwnSecretBinding (secret) {
       return isOwnSecretBinding(secret)
-    },
-    infrastructureColor (kind) {
-      return infrastructureColor(kind)
     }
   },
   mounted () {
