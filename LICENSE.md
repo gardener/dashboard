@@ -292,6 +292,10 @@ Copyright JS Foundation and other contributors <https://js.foundation/>\
 Copyright (c) 2014 Justin Fagnani\
 [Apache License 2.0](https://github.com/justinfagnani/mixwith.js/blob/master/LICENSE)
 
+- [moment](https://github.com/moment/moment)\
+Copyright (c) JS Foundation and other contributors\
+[MIT License](https://github.com/moment/moment/blob/develop/LICENSE)
+
 - [morgan](https://github.com/expressjs/morgan)\
 Copyright (c) 2014 Jonathan Ong <me@jongleberry.com>\
 Copyright (c) 2014-2017 Douglas Christopher Wilson <doug@somethingdoug.com>\
