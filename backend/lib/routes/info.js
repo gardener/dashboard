@@ -77,9 +77,9 @@ async function fetchShootSpec (user) {
   if (shootSpec) {
     return shootSpec
   }
-  const client = user.client
 
-  const res = await client.openAPI.get()
+  // Do not use client of user as the result gets cached and returned to other users
+  const res = await dashboardClient.openAPI.get()
   const spec = await SwaggerParser.dereference(res)
 
   shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
