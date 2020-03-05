@@ -16,7 +16,7 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const { Resources } = require('../kubernetes-client')
+const { dashboardClient, Resources, isHttpError } = require('../kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
@@ -25,8 +25,9 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas } = require('../cache')
 
-function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [] }) {
+function fromResource ({ secretBinding, cloudProviderKind, secret, project, quotas = [] }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
+  const costObject = _.get(project, 'metadata.annotations["billing.gardener.cloud/costObject"]')
 
   const infrastructureSecret = {}
   infrastructureSecret.metadata = _
@@ -36,7 +37,9 @@ function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [] }
       cloudProviderKind,
       cloudProfileName,
       bindingNamespace: _.get(secretBinding, 'metadata.namespace'),
-      bindingName: _.get(secretBinding, 'metadata.name')
+      bindingName: _.get(secretBinding, 'metadata.name'),
+      hasCostObject: !_.isEmpty(costObject),
+      projectName: _.get(project, 'metadata.name')
     })
     .value()
 
@@ -129,7 +132,7 @@ function resolveQuotas (secretBinding) {
   }
 }
 
-async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, secretList }) {
+async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, secretList, projectMap, namespace }) {
   return _
     .chain(secretBindings)
     .map(secretBinding => {
@@ -138,6 +141,11 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
         const cloudProfile = _.find(cloudProfileList, ['metadata.name', cloudProfileName])
         const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
         const secretName = _.get(secretBinding, 'secretRef.name')
+        const secretNamespace = _.get(secretBinding, 'secretRef.namespace', namespace)
+        const project = projectMap[secretNamespace]
+        if (!project) {
+          throw new Error(fmt('Could not determine project for namespace %s', secretNamespace))
+        }
         if (!cloudProviderKind) {
           throw new Error(fmt('Could not determine cloud provider kind for cloud profile name %s. Skipping infrastructure secret with name %s', cloudProfileName, secretName))
         }
@@ -149,6 +157,7 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
           secretBinding,
           cloudProviderKind,
           secret,
+          project,
           quotas: resolveQuotas(secretBinding)
         })
       } catch (err) {
@@ -177,10 +186,35 @@ exports.list = async function ({ user, namespace }) {
       client.core.secrets.list(namespace),
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
+
+    const getProjectPromises = _
+      .chain(secretBindings)
+      .map('secretRef.namespace')
+      .uniq()
+      .map(ns => {
+        if (!_.isEmpty(ns)) {
+          return ns
+        }
+        return namespace
+      })
+      /* reading projects with dashboard client as the referenced secret can be from a different project to which the user has no access.
+      we need to fetch the project name and hasCostObject info and pass it to the user (which is not a sensitive information, thus we can use the dashboard client) */
+      .map(ns => dashboardClient.getProjectByNamespace(ns).catch(err => {
+        if (isHttpError(err, 404)) {
+          return
+        }
+        throw err
+      }))
+      .value()
+
+    const projects = await Promise.all(getProjectPromises)
+    const projectMap = _.keyBy(projects, 'spec.namespace')
+
     return getInfrastructureSecrets({
       secretBindings,
       cloudProfileList,
-      secretList
+      secretList,
+      projectMap
     })
   } catch (err) {
     logger.error(err)
@@ -196,10 +230,17 @@ exports.create = async function ({ user, namespace, body }) {
   const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
+  const [
+    cloudProviderKind,
+    project
+  ] = await Promise.all([
+    getCloudProviderKind(cloudProfileName),
+    client.getProjectByNamespace(namespace)
+  ])
   return fromResource({
     secretBinding,
     secret,
+    project,
     cloudProviderKind,
     quotas: resolveQuotas(secretBinding)
   })
@@ -225,11 +266,18 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
   const secret = await client.core.secrets.mergePatch(namespace, secretName, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const cloudProviderKind = await getCloudProviderKind(cloudProfileName)
+  const [
+    cloudProviderKind,
+    project
+  ] = await Promise.all([
+    getCloudProviderKind(cloudProfileName),
+    client.getProjectByNamespace(namespace)
+  ])
 
   return fromResource({
     secretBinding,
     secret,
+    project,
     cloudProviderKind,
     quotas: resolveQuotas(secretBinding)
   })
