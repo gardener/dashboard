@@ -270,6 +270,24 @@ function canGetSecretsInAllNamespaces (scope) {
     })
 }
 
+function canAccessOpenAPI (scope) {
+  return scope
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
+      const { verb, path } = body.spec.nonResourceAttributes
+      return path === '/openapi/v2' && verb === 'get'
+    })
+    .reply(200, function (body) {
+      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+      const payload = jwt.decode(token)
+      const allowed = !_.isEmpty(payload.id)
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
+}
+
 function getKubeconfigSecret (scope, { namespace, name, server }) {
   const url = new URL(server)
   const secret = {
@@ -1236,6 +1254,8 @@ const stub = {
     return adminScope
   },
   fetchShootSpec (bearer) {
+    const scope = nockWithAuthorization(bearer)
+    canAccessOpenAPI(scope)
     const body = {
       definitions: {
         'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot': {
@@ -1245,9 +1265,12 @@ const stub = {
         }
       }
     }
-    return nockWithAuthorization(bearer)
-      .get('/openapi/v2')
-      .reply(200, body)
+    return [
+      scope,
+      nockWithAuthorization(auth.bearer)
+        .get('/openapi/v2')
+        .reply(200, body)
+    ]
   }
 }
 

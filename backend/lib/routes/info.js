@@ -22,6 +22,8 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const { dashboardClient, isHttpError } = require('../kubernetes-client')
 const { version } = require('../../package')
+const { canAccessOpenAPI } = require('../services/authorization')
+const { Forbidden } = require('../errors')
 const SwaggerParser = require('swagger-parser')
 const router = module.exports = express.Router()
 const _ = require('lodash')
@@ -74,6 +76,10 @@ router.route('/shootspec')
 let shootSpec // Cache, TODO: Need to update cache when apiserver gets updated
 
 async function fetchShootSpec (user) {
+  if (!await canAccessOpenAPI(user)) {
+    throw new Forbidden('User is not allowed to fetch the Open API specification')
+  }
+
   if (shootSpec) {
     return shootSpec
   }
