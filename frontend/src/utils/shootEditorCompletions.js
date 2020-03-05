@@ -35,8 +35,8 @@ import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
 
 export class ShootEditorCompletions {
-  constructor (allShootCompletions, editorIndent) {
-    this.shootCompletions = allShootCompletions
+  constructor (shootProperties, editorIndent) {
+    this.shootCompletions = shootProperties
     this.indentUnit = editorIndent
     this.arrayBulletIndent = 2 // -[space]
   }

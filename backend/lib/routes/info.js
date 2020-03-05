@@ -62,7 +62,7 @@ async function fetchGardenerVersion () {
   }
 }
 
-router.route('/shootspec')
+router.route('/openapi/shoot')
   .get(async (req, res, next) => {
     try {
       const user = req.user
@@ -73,21 +73,21 @@ router.route('/shootspec')
     }
   })
 
-let shootSpec // Cache, TODO: Need to update cache when apiserver gets updated
+let shootOpenAPISpecification // Cache, TODO: Need to update cache when apiserver gets updated
 
 async function fetchShootSpec (user) {
   if (!await canAccessOpenAPI(user)) {
     throw new Forbidden('User is not allowed to fetch the Open API specification')
   }
 
-  if (shootSpec) {
-    return shootSpec
+  if (shootOpenAPISpecification) {
+    return shootOpenAPISpecification
   }
 
   // Do not use client of user as the result gets cached and returned to other users
   const res = await dashboardClient.openAPI.get()
   const spec = await SwaggerParser.dereference(res)
 
-  shootSpec = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
-  return shootSpec
+  shootOpenAPISpecification = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
+  return shootOpenAPISpecification
 }

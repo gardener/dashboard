@@ -411,9 +411,9 @@ export default {
     this.update(this.value)
     this.refresh()
 
-    let shootCompletions = await getShootSpec()
-    shootCompletions = get(shootCompletions, 'data.spec.properties', {})
-    this.shootEditorCompletions = new ShootEditorCompletions(shootCompletions, this.$instance.options.indentUnit)
+    const shootOpenAPISpecification = await getShootSpec()
+    const shootProperties = get(shootOpenAPISpecification, 'data.spec.properties', {})
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
   },
   watch: {
     value: {

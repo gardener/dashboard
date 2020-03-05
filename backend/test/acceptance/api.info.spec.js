@@ -114,7 +114,7 @@ module.exports = function info ({ agent, k8s, auth }) {
       return obj
     })
     const res = await agent
-      .get('/api/info/shootspec')
+      .get('/api/info/openapi/shoot')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
