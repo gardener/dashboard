@@ -174,6 +174,28 @@ async function getCloudProviderKind (cloudProfileName) {
   return cloudProviderKind
 }
 
+async function getProjectByNamespaceIgnoreNotFound (client, namespace) {
+  let object
+  try {
+    object = await client.getProjectByNamespace(namespace)
+  } catch (err) {
+    if (!isHttpError(err, 404)) {
+      throw err
+    }
+  }
+  return object
+}
+
+async function getProjectMap (client, namespaces) {
+  const projectPromises = _.map(namespaces, namespace => getProjectByNamespaceIgnoreNotFound(client, namespace))
+  const projects = await Promise.all(projectPromises)
+  return _
+    .chain(projects)
+    .compact()
+    .keyBy('spec.namespace')
+    .value()
+}
+
 exports.list = async function ({ user, namespace }) {
   const client = user.client
 
@@ -187,28 +209,15 @@ exports.list = async function ({ user, namespace }) {
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
 
-    const getProjectPromises = _
+    const namespaces = _
       .chain(secretBindings)
-      .map('secretRef.namespace')
+      .map(secretBinding => _.get(secretBinding, 'secretRef.namespace', namespace))
       .uniq()
-      .map(ns => {
-        if (!_.isEmpty(ns)) {
-          return ns
-        }
-        return namespace
-      })
-      /* reading projects with dashboard client as the referenced secret can be from a different project to which the user has no access.
-      we need to fetch the project name and hasCostObject info and pass it to the user (which is not a sensitive information, thus we can use the dashboard client) */
-      .map(ns => dashboardClient.getProjectByNamespace(ns).catch(err => {
-        if (isHttpError(err, 404)) {
-          return
-        }
-        throw err
-      }))
       .value()
 
-    const projects = await Promise.all(getProjectPromises)
-    const projectMap = _.keyBy(projects, 'spec.namespace')
+    /* reading projects with dashboard client as the referenced secret can be from a different project to which the user has no access.
+    we need to fetch the project name and hasCostObject info and pass it to the user (which is not a sensitive information, thus we can use the dashboard client) */
+    const projectMap = await getProjectMap(dashboardClient, namespaces)
 
     return getInfrastructureSecrets({
       secretBindings,
@@ -235,7 +244,7 @@ exports.create = async function ({ user, namespace, body }) {
     project
   ] = await Promise.all([
     getCloudProviderKind(cloudProfileName),
-    client.getProjectByNamespace(namespace)
+    getProjectByNamespaceIgnoreNotFound(client, namespace)
   ])
   return fromResource({
     secretBinding,
@@ -271,7 +280,7 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
     project
   ] = await Promise.all([
     getCloudProviderKind(cloudProfileName),
-    client.getProjectByNamespace(namespace)
+    getProjectByNamespaceIgnoreNotFound(client, namespace)
   ])
 
   return fromResource({
