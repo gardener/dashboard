@@ -64,7 +64,7 @@ limitations under the License.
         <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
           <v-icon class="white--text">mdi-email-outline</v-icon>
         </v-btn>
-        <v-btn icon @click.native.stop="openUserAddDialog">
+        <v-btn v-if="canPatchProject" icon @click.native.stop="openUserAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openUserHelpDialog">
@@ -112,7 +112,7 @@ limitations under the License.
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-btn icon @click.native.stop="openServiceAccountAddDialog">
+        <v-btn v-if="canPatchProject" icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
@@ -166,7 +166,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
     </v-dialog>
-    <v-fab-transition>
+    <v-fab-transition v-if="canPatchProject">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <v-btn slot="activator" v-model="fab" color="teal darken-2" dark fab>
           <v-icon>add</v-icon>
@@ -208,7 +208,7 @@ import {
   getTimestampFormatted
 } from '@/utils'
 import { getMember } from '@/utils/api'
-import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
+import { getProjectDetails } from '@/utils/projects'
 
 export default {
   name: 'members',
@@ -244,19 +244,15 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'memberList'
+      'memberList',
+      'projectFromProjectList',
+      'canPatchProject'
     ]),
     project () {
-      return projectFromProjectList()
+      return this.projectFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
-    },
-    costObjectSettings () {
-      return getCostObjectSettings() || {}
-    },
-    costObjectSettingEnabled () {
-      return getCostObjectSettings() !== undefined
     },
     technicalContact () {
       return this.projectDetails.technicalContact

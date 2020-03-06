@@ -64,8 +64,12 @@ export default function createRouter ({ store, userManager }) {
     return store.getters.hasShootTerminalAccess
   }
 
-  function isTerminalEnabled () {
-    return store.getters.isTerminalEnabled
+  function canUseTerminalFeature () {
+    return store.getters.canUseTerminalFeature
+  }
+
+  function canGetSecrets () {
+    return store.getters.canGetSecrets
   }
 
   const mode = 'history'
@@ -327,7 +331,7 @@ export default function createRouter ({ store, userManager }) {
                     tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
-                    if (isTerminalEnabled()) {
+                    if (canUseTerminalFeature()) {
                       next()
                     } else {
                       next('/')
@@ -366,7 +370,10 @@ export default function createRouter ({ store, userManager }) {
           meta: {
             menu: {
               title: 'Secrets',
-              icon: 'mdi-key'
+              icon: 'mdi-key',
+              get hidden () {
+                return !canGetSecrets()
+              }
             },
             namespaced: true,
             projectScope: true,
@@ -499,9 +506,9 @@ export default function createRouter ({ store, userManager }) {
         const user = userManager.getUser()
         const storedUser = store.state.user
         if (!storedUser || storedUser.jti !== user.jti) {
-          const { data: { isAdmin, canCreateProject } } = await getPrivileges()
+          const { data: { isAdmin } } = await getPrivileges()
 
-          await store.dispatch('setUser', { ...user, isAdmin, canCreateProject })
+          await store.dispatch('setUser', { ...user, isAdmin })
         }
         return next()
       }
@@ -582,10 +589,13 @@ export default function createRouter ({ store, userManager }) {
         }
         case 'NewShoot':
         case 'NewShootEditor': {
-          await Promise.all([
-            store.dispatch('fetchInfrastructureSecrets'),
+          const promises = [
             store.dispatch('subscribeShoots')
-          ])
+          ]
+          if (canGetSecrets()) {
+            promises.push(store.dispatch('fetchInfrastructureSecrets'))
+          }
+          await Promise.all(promises)
           if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
             await store.dispatch('resetNewShootResource', { name: params.name, namespace })
           }
@@ -596,11 +606,14 @@ export default function createRouter ({ store, userManager }) {
           break
         }
         case 'ShootItem': {
-          await Promise.all([
-            store.dispatch('fetchInfrastructureSecrets'), // Required for purpose configuration
+          const promises = [
             store.dispatch('subscribeShoot', { name: params.name, namespace }),
             store.dispatch('subscribeComments', { name: params.name, namespace })
-          ])
+          ]
+          if (canGetSecrets()) {
+            promises.push(store.dispatch('fetchInfrastructureSecrets')) // Required for purpose configuration
+          }
+          await Promise.all(promises)
           break
         }
         case 'ShootItemHibernationSettings': {

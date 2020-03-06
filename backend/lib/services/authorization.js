@@ -48,11 +48,3 @@ exports.isAdmin = function (user) {
     resource: 'secrets'
   })
 }
-
-exports.canCreateProject = function (user) {
-  return hasAuthorization(user, {
-    verb: 'create',
-    group: 'core.gardener.cloud',
-    resource: 'projects'
-  })
-}

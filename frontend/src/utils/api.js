@@ -212,6 +212,11 @@ export function getPrivileges () {
   return getResource('/api/user/privileges')
 }
 
+export function getPrivilegesForNamespace ({ namespace }) {
+  namespace = encodeURIComponent(namespace)
+  return getResource(`/api/user/privileges/${namespace}`)
+}
+
 export function getToken () {
   return getResource('/api/user/token')
 }

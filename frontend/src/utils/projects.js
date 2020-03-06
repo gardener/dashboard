@@ -14,20 +14,8 @@
 // limitations under the License.
 //
 
-import find from 'lodash/find'
 import { getDateFormatted } from '@/utils'
-import store from '../store'
-import map from 'lodash/map'
 import get from 'lodash/get'
-
-export function projectFromProjectList () {
-  const predicate = project => project.metadata.namespace === store.state.namespace
-  return find(store.getters.projectList, predicate) || {}
-}
-
-export function projectNamesFromProjectList () {
-  return map(store.getters.projectList, 'metadata.name')
-}
 
 export function getProjectDetails (project) {
   const projectData = project.data || {}
@@ -50,24 +38,5 @@ export function getProjectDetails (project) {
     createdBy,
     description,
     purpose
-  }
-}
-
-export function getCostObjectSettings () {
-  const costObject = store.state.cfg.costObject
-  if (!costObject) {
-    return undefined
-  }
-
-  const title = costObject.title || ''
-  const description = costObject.description || ''
-  const regex = costObject.regex
-  const errorMessage = costObject.errorMessage
-
-  return {
-    regex,
-    title,
-    description,
-    errorMessage
   }
 }

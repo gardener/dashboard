@@ -22,7 +22,7 @@ limitations under the License.
         <v-icon class="white--text pr-2">mdi-cube</v-icon>
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-tooltip top>
+        <v-tooltip v-if="canDeleteProject" top>
           <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog" slot="activator">
             <v-icon>delete</v-icon>
           </v-btn>
@@ -80,7 +80,7 @@ limitations under the License.
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
       </v-card-text>
     </v-card>
-    <v-fab-transition>
+    <v-fab-transition v-if="canPatchProject">
       <v-btn fixed dark fab bottom right v-show="floatingButton" class="red darken-2" @click.native.stop="edit = true">
         <v-icon>edit</v-icon>
       </v-btn>
@@ -110,8 +110,9 @@ import UpdateDialog from '@/dialogs/ProjectDialog'
 import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { projectFromProjectList, getProjectDetails, getCostObjectSettings } from '@/utils/projects'
+import { getProjectDetails } from '@/utils/projects'
 import { compileMarkdown } from '@/utils'
+import get from 'lodash/get'
 
 export default {
   name: 'administration',
@@ -135,22 +136,23 @@ export default {
     ]),
     ...mapGetters([
       'shootList',
-      'projectList'
+      'projectList',
+      'canPatchProject',
+      'canDeleteProject',
+      'projectFromProjectList',
+      'costObjectSettings'
     ]),
     project () {
-      return projectFromProjectList()
+      return this.projectFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    costObjectSettings () {
-      return getCostObjectSettings() || {}
-    },
     costObjectSettingEnabled () {
-      return getCostObjectSettings() !== undefined
+      return this.costObjectSettings !== undefined
     },
     costObjectTitle () {
-      return this.costObjectSettings.title
+      return get(this.costObjectSettings, 'title')
     },
     projectName () {
       return this.projectDetails.projectName

@@ -123,7 +123,9 @@ export default {
   watch: {
     isShootSettingHibernated (value) {
       // hide dialog if hibernation state changes
-      this.$refs.actionDialog.hideDialog()
+      if (this.$refs.actionDialog) {
+        this.$refs.actionDialog.hideDialog()
+      }
     },
     isShootStatusHibernationProgressing (hibernationProgressing) {
       if (hibernationProgressing || !this.hibernationChanged) {

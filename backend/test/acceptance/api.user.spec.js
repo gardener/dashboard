@@ -33,8 +33,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.eql({
-      isAdmin: false,
-      canCreateProject: true
+      isAdmin: false
     })
   })
 
@@ -47,5 +46,23 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body.token).to.equal(bearer)
+  })
+
+  it('should return selfsubjectrules for the user', async function () {
+    const bearer = await user.bearer
+    const project = 'foo'
+    const namespace = `garden-${project}`
+    k8s.stub.getSelfSubjectRulesReview({ bearer, namespace })
+    const res = await agent
+      .get(`/api/user/privileges/${namespace}`)
+      .set('cookie', await user.cookie)
+
+    console.log(res.body)
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.have.property('resourceRules')
+    expect(res.body).to.have.property('nonResourceRules')
+    expect(res.body).to.have.property('incomplete')
+    expect(res.body.resourceRules.length).to.equal(2)
   })
 }

@@ -135,8 +135,9 @@ import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
-import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
+import { getProjectDetails } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
 import map from 'lodash/map'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -178,7 +179,9 @@ export default {
   computed: {
     ...mapGetters([
       'memberList',
-      'username'
+      'username',
+      'projectNamesFromProjectList',
+      'costObjectSettings'
     ]),
     ...mapState([
       'cfg'
@@ -192,28 +195,26 @@ export default {
       }
     },
     projectNames () {
-      return projectNamesFromProjectList()
+      return this.projectNamesFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    costObjectSettings () {
-      return getCostObjectSettings() || {}
-    },
     costObjectSettingEnabled () {
-      return getCostObjectSettings() !== undefined
+      return this.costObjectSettings !== undefined
     },
     costObjectTitle () {
-      return this.costObjectSettings.title
+      return get(this.costObjectSettings, 'title')
     },
     costObjectDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.costObjectSettings.description)
+      const description = get(this.costObjectSettings, 'description')
+      return compileMarkdown(description)
     },
     costObjectRegex () {
-      return this.costObjectSettings.regex
+      return get(this.costObjectSettings, 'regex')
     },
     costObjectErrorMessage () {
-      return this.costObjectSettings.errorMessage
+      return get(this.costObjectSettings, 'errorMessage')
     },
     currentProjectName () {
       return this.projectDetails.projectName

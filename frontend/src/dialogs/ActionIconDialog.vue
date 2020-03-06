@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <div>
+  <div v-if="canPatchShoots">
     <v-tooltip top max-width="600px">
       <v-btn slot="activator" :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled">
         <v-icon :medium="!smallIcon">{{icon}}</v-icon>
@@ -46,6 +46,7 @@ limitations under the License.
 <script>
 import GDialog from '@/dialogs/GDialog'
 import { shootItem } from '@/mixins/shootItem'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'action-icon-dialog',
@@ -111,6 +112,9 @@ export default {
   },
   mixins: [shootItem],
   computed: {
+    ...mapGetters([
+      'canPatchShoots'
+    ]),
     message: {
       get () {
         return this.errorMessage
@@ -153,7 +157,9 @@ export default {
       this.showDialog(false)
     },
     hideDialog () {
-      this.$refs.gDialog.hideDialog()
+      if (this.$refs.gDialog) {
+        this.$refs.gDialog.hideDialog()
+      }
     }
   }
 }
