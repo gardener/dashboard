@@ -93,7 +93,7 @@ limitations under the License.
                 class="project-list-tile"
                 v-for="(project, index) in visibleProjectList"
                 @click="onProjectClick($event, project)"
-                :class="{'grey lighten-4' : selectedProject === project}"
+                :class="{'grey lighten-4' : isProjectNameMatchingFilter(project.metadata.name)}"
                 :key="index"
               >
                 <v-list-tile-avatar>
@@ -103,7 +103,7 @@ limitations under the License.
                   <v-list-tile-title>{{project.metadata.name}}</v-list-tile-title>
                   <v-list-tile-sub-title class="project-owner">{{getProjectOwner(project)}}</v-list-tile-sub-title>
                 </v-list-tile-content>
-                <v-list-tile-action v-if="project.metadata.name === projectFilter">
+                <v-list-tile-action v-if="isProjectNameMatchingFilter(project.metadata.name)">
                   <v-chip small color="cyan darken-2">Exact match</v-chip>
                 </v-list-tile-action>
               </v-list-tile>
@@ -262,7 +262,7 @@ export default {
       const filteredList = filter(this.projectList, predicate)
 
       const exactMatch = item => {
-        return item.metadata.name === this.projectFilter ? 0 : 1
+        return this.isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
       }
       const sortedList = sortBy(filteredList, exactMatch, 'metadata.name')
       return sortedList
@@ -289,7 +289,7 @@ export default {
       }
     },
     projectFilterHasExactMatch () {
-      return get(head(this.sortedAndFilteredProjectList), 'metadata.name') === this.projectFilter
+      return this.isProjectNameMatchingFilter(get(head(this.sortedAndFilteredProjectList), 'metadata.name'))
     },
     selectedProject () {
       return this.sortedAndFilteredProjectListWithAllProjects[this.selectedProjectIndex]
@@ -378,6 +378,9 @@ export default {
           this.numberOfVisibleProjects++
         }
       }
+    },
+    isProjectNameMatchingFilter (projectName) {
+      return toLower(projectName) === toLower(this.projectFilter)
     }
   },
   watch: {
