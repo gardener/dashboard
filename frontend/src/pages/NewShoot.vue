@@ -378,7 +378,7 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster: isZonedCluster({ cloudProviderKind: infrastructureKind }) })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster: isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster: true }), isNewCluster: true })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       if (this.isKymaFeatureEnabled) {

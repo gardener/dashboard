@@ -92,7 +92,8 @@ export default {
       region: undefined,
       zonesNetworkConfiguration: undefined,
       zonedCluster: undefined,
-      updateOSMaintenance: undefined
+      updateOSMaintenance: undefined,
+      isNewCluster: false
     }
   },
   computed: {
@@ -184,13 +185,14 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster = true, updateOSMaintenance }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, isNewCluster }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
       this.zonedCluster = zonedCluster
+      this.isNewCluster = isNewCluster
     }
   },
   mounted () {
@@ -199,7 +201,8 @@ export default {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
         const cloudProfile = this.cloudProfileByName(cloudProfileName)
-        this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind })
+        // shootspec not required, userInterActionBus callback only called for new clusters
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind, isNewCluster: this.isNewCluster })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {

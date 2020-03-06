@@ -586,11 +586,11 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   return worker
 }
 
-export function isZonedCluster ({ cloudProviderKind, shootSpec }) {
+export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
   switch (cloudProviderKind) {
     case 'azure':
-      if (!shootSpec) {
-        return true // new cluster - clusters are always created as zoned clusters by the dashboard
+      if (isNewCluster) {
+        return true // new clusters are always created as zoned clusters by the dashboard
       }
       return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
     case 'metal':
