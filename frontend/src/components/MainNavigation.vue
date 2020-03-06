@@ -88,13 +88,13 @@ limitations under the License.
               </v-card-title>
               <v-divider></v-divider>
             </template>
-            <v-list light class="project-list" ref="projectList">
+            <v-list light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
               <v-list-tile
                 class="project-list-tile"
-                v-for="project in sortedAndFilteredProjectListWithAllProjects"
+                v-for="(project, index) in visibleProjectList"
                 @click="onProjectClick($event, project)"
                 :class="{'grey lighten-4' : selectedProject === project}"
-                :key="project.metadata.name"
+                :key="index"
               >
                 <v-list-tile-avatar>
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
@@ -174,6 +174,8 @@ import replace from 'lodash/replace'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import head from 'lodash/head'
+import slice from 'lodash/slice'
+import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
 
@@ -189,7 +191,8 @@ export default {
       projectFilter: '',
       projectMenu: false,
       allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } },
-      selectedProjectIndex: 0
+      selectedProjectIndex: 0,
+      numberOfVisibleProjects: 10
     }
   },
   computed: {
@@ -270,6 +273,11 @@ export default {
       }
       return this.sortedAndFilteredProjectList
     },
+    visibleProjectList () {
+      const projectList = this.sortedAndFilteredProjectListWithAllProjects
+      let endIndex = this.numberOfVisibleProjects
+      return slice(projectList, 0, endIndex)
+    },
     getProjectOwner () {
       return (project) => {
         return emailToDisplayName(get(project, 'data.owner'))
@@ -325,12 +333,14 @@ export default {
     },
     onInputProjectFilter () {
       this.selectedProjectIndex = 0
+      this.numberOfVisibleProjects = 10
       if (this.projectFilterHasExactMatch) {
         this.selectedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, { metadata: { name: this.projectFilter } })
       } else if (this.sortedAndFilteredProjectList.length === 1) {
         const project = head(this.sortedAndFilteredProjectList)
         this.selectedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, project)
       }
+      this.scrollSelectedProjectIntoView()
     },
     selectProjectWithKeys (keyDirection) {
       if (keyDirection === 'up') {
@@ -342,9 +352,31 @@ export default {
           this.selectedProjectIndex++
         }
       }
-      const el = get(this.$refs.projectList.$children[this.selectedProjectIndex], '$el')
+
+      if (this.selectedProjectIndex >= this.numberOfVisibleProjects - 1) {
+        this.numberOfVisibleProjects++
+      }
+
+      this.scrollSelectedProjectIntoView()
+    },
+    scrollSelectedProjectIntoView () {
+      const projectIndexInVisibleList = findIndex(this.visibleProjectList, this.selectedProject)
+      const el = get(this.$refs.projectList.$children[projectIndexInVisibleList], '$el')
+
       if (el) {
         el.scrollIntoView(false)
+      }
+    },
+    handleProjectListScroll (event) {
+      const parentEl = this.$refs.projectList.$el
+      const parentYPos = parentEl.getBoundingClientRect().top + parentEl.getBoundingClientRect().height
+      const lastProjectEl = get(last(this.$refs.projectList.$children), '$el')
+      const lastProjectElYPos = parentYPos - lastProjectEl.getBoundingClientRect().top
+      if (lastProjectElYPos > 0) {
+        // scrolled last element into view
+        if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
+          this.numberOfVisibleProjects++
+        }
       }
     }
   },
