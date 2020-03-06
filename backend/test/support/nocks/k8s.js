@@ -36,9 +36,9 @@ const quotas = [
 ]
 
 const secretBindingList = [
-  getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'garden-foo', 'secret1', quotas),
-  getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'garden-foo', 'secret2', quotas),
-  getSecretBinding('garden-foo', 'trial-infra1', 'infra1-profileName', 'garden-trial', 'trial-secret', quotas)
+  getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'secret1', 'garden-foo', quotas),
+  getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'secret2', 'garden-foo', quotas),
+  getSecretBinding('garden-foo', 'trial-infra1', 'infra1-profileName', 'trial-secret', 'garden-trial', quotas)
 ]
 
 const projectList = [
@@ -51,7 +51,8 @@ const projectList = [
       'system:serviceaccount:garden-foo:robot'
     ],
     description: 'foo-description',
-    purpose: 'foo-purpose'
+    purpose: 'foo-purpose',
+    costObject: '9999999999'
   }),
   getProject({
     name: 'bar',
@@ -76,6 +77,13 @@ const projectList = [
     createdBy: 'admin@example.org',
     description: 'secret-description',
     purpose: 'secret-purpose'
+  }),
+  getProject({
+    name: 'trial',
+    createdBy: 'admin@example.org',
+    description: 'trial-description',
+    purpose: 'trial-purpose',
+    costObject: '1234567890'
   })
 ]
 
@@ -326,7 +334,7 @@ function getUser (name) {
   }
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready' }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = "" }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -339,7 +347,10 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   createdBy = getUser(createdBy)
   return {
     metadata: {
-      name
+      name,
+      annotations: {
+        'billing.gardener.cloud/costObject': costObject
+      }
     },
     spec: {
       namespace,
@@ -697,7 +708,14 @@ const stub = {
     const infrastructureSecrets = !empty
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
-    return nockWithAuthorization(bearer)
+
+    const namespaces = _
+      .chain(secretBindings)
+      .map('secretRef.namespace')
+      .uniq()
+      .value()
+
+    const scopes = [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
@@ -706,6 +724,17 @@ const stub = {
       .reply(200, {
         items: infrastructureSecrets
       })
+    ]
+    const adminScope = nockWithAuthorization(auth.bearer)
+    namespaces.forEach(namespace => {
+      const project = readProject(namespace)
+      adminScope
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace))
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+        .reply(200, project)
+    });
+    return scopes
   },
   createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -717,6 +746,7 @@ const stub = {
       resourceVersion,
       cloudProfileName
     })
+    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
@@ -732,6 +762,10 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecretBinding)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(200, () => getProjectNamespace(namespace))
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+      .reply(200, project)
   },
   patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -746,6 +780,7 @@ const stub = {
       bindingNamespace,
       cloudProfileName
     })
+    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
@@ -756,6 +791,10 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(200, () => getProjectNamespace(namespace))
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+      .reply(200, project)
   },
   patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
