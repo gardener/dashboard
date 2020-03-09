@@ -93,7 +93,7 @@ limitations under the License.
                 class="project-list-tile"
                 v-for="(project, index) in visibleProjectList"
                 @click="onProjectClick($event, project)"
-                :class="{'grey lighten-4' : isProjectNameMatchingFilter(project.metadata.name)}"
+                :class="{'grey lighten-4' : index === highlightedProjectIndex}"
                 :key="index"
               >
                 <v-list-tile-avatar>
@@ -191,7 +191,7 @@ export default {
       projectFilter: '',
       projectMenu: false,
       allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } },
-      selectedProjectIndex: 0,
+      highlightedProjectIndex: 0,
       numberOfVisibleProjects: 10
     }
   },
@@ -292,8 +292,8 @@ export default {
       const projectName = get(head(this.sortedAndFilteredProjectList), 'metadata.name')
       return this.isProjectNameMatchingFilter(projectName)
     },
-    selectedProject () {
-      return this.sortedAndFilteredProjectListWithAllProjects[this.selectedProjectIndex]
+    highlightedProject () {
+      return this.sortedAndFilteredProjectListWithAllProjects[this.highlightedProjectIndex]
     }
   },
   methods: {
@@ -301,15 +301,18 @@ export default {
       'setSidebar'
     ]),
     onEnterProjectFilter () {
-      this.projectMenu = false
-      this.project = this.selectedProject
+      this.navigateToProject(this.highlightedProject)
     },
     onProjectClick (event, project) {
-      this.projectMenu = false
       if (event.isTrusted) {
+        // skip untrusted events - e.g. events triggered via enter key
+        this.navigateToProject(project)
+      }
+    },
+    navigateToProject (project) {
+      if (project !== this.project) {
+        this.projectMenu = false
         this.project = project
-      } else { // open item selected via keys
-        this.project = this.selectedProject
       }
     },
     openProjectDialog () {
@@ -333,35 +336,35 @@ export default {
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
     },
     onInputProjectFilter () {
-      this.selectedProjectIndex = 0
+      this.highlightedProjectIndex = 0
       this.numberOfVisibleProjects = 10
       if (this.projectFilterHasExactMatch) {
-        this.selectedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, { metadata: { name: this.projectFilter } })
+        this.highlightedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, { metadata: { name: this.projectFilter } })
       } else if (this.sortedAndFilteredProjectList.length === 1) {
         const project = head(this.sortedAndFilteredProjectList)
-        this.selectedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, project)
+        this.highlightedProjectIndex = findIndex(this.sortedAndFilteredProjectListWithAllProjects, project)
       }
       this.scrollSelectedProjectIntoView()
     },
     selectProjectWithKeys (keyDirection) {
       if (keyDirection === 'up') {
-        if (this.selectedProjectIndex > 0) {
-          this.selectedProjectIndex--
+        if (this.highlightedProjectIndex > 0) {
+          this.highlightedProjectIndex--
         }
       } else if (keyDirection === 'down') {
-        if (this.selectedProjectIndex < this.sortedAndFilteredProjectListWithAllProjects.length - 1) {
-          this.selectedProjectIndex++
+        if (this.highlightedProjectIndex < this.sortedAndFilteredProjectListWithAllProjects.length - 1) {
+          this.highlightedProjectIndex++
         }
       }
 
-      if (this.selectedProjectIndex >= this.numberOfVisibleProjects - 1) {
+      if (this.highlightedProjectIndex >= this.numberOfVisibleProjects - 1) {
         this.numberOfVisibleProjects++
       }
 
       this.scrollSelectedProjectIntoView()
     },
     scrollSelectedProjectIntoView () {
-      const projectIndexInVisibleList = findIndex(this.visibleProjectList, this.selectedProject)
+      const projectIndexInVisibleList = findIndex(this.visibleProjectList, this.highlightedProject)
       const el = get(this.$refs.projectList.$children[projectIndexInVisibleList], '$el')
 
       if (el) {
