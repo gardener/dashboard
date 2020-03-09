@@ -289,7 +289,8 @@ export default {
       }
     },
     projectFilterHasExactMatch () {
-      return this.isProjectNameMatchingFilter(get(head(this.sortedAndFilteredProjectList), 'metadata.name'))
+      const projectName = get(head(this.sortedAndFilteredProjectList), 'metadata.name')
+      return this.isProjectNameMatchingFilter(projectName)
     },
     selectedProject () {
       return this.sortedAndFilteredProjectListWithAllProjects[this.selectedProjectIndex]
@@ -371,11 +372,13 @@ export default {
       const parentEl = this.$refs.projectList.$el
       const parentYPos = parentEl.getBoundingClientRect().top + parentEl.getBoundingClientRect().height
       const lastProjectEl = get(last(this.$refs.projectList.$children), '$el')
-      const lastProjectElYPos = parentYPos - lastProjectEl.getBoundingClientRect().top
-      if (lastProjectElYPos > 0) {
-        // scrolled last element into view
-        if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
-          this.numberOfVisibleProjects++
+      if (lastProjectEl) {
+        const lastProjectElYPos = parentYPos - lastProjectEl.getBoundingClientRect().top
+        if (lastProjectElYPos > 0) {
+          // scrolled last element into view
+          if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
+            this.numberOfVisibleProjects++
+          }
         }
       }
     },
