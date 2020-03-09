@@ -552,14 +552,14 @@ export default function createRouter ({ store, userManager }) {
       const params = to.params || {}
       const query = to.query || {}
       const namespaces = store.getters.namespaces
-      const namespace = params.namespace || query.namespace
+      let namespace = params.namespace || query.namespace
       if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
         await store.dispatch('setNamespace', namespace)
       }
 
       if (!store.state.namespace) {
         const namespaces = store.getters.namespaces
-        const namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
+        namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
         await store.dispatch('setNamespace', namespace)
       }
 
