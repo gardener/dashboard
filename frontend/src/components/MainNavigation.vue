@@ -369,16 +369,17 @@ export default {
       }
     },
     handleProjectListScroll (event) {
-      const parentEl = this.$refs.projectList.$el
-      const parentYPos = parentEl.getBoundingClientRect().top + parentEl.getBoundingClientRect().height
+      const projectListEl = this.$refs.projectList.$el
+      const projectListBottomPosY = projectListEl.getBoundingClientRect().top + projectListEl.getBoundingClientRect().height
       const lastProjectEl = get(last(this.$refs.projectList.$children), '$el')
-      if (lastProjectEl) {
-        const lastProjectElYPos = parentYPos - lastProjectEl.getBoundingClientRect().top
-        if (lastProjectElYPos > 0) {
-          // scrolled last element into view
-          if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
-            this.numberOfVisibleProjects++
-          }
+      if (!lastProjectEl) {
+        return
+      }
+      const lastProjectElPosY = projectListBottomPosY - lastProjectEl.getBoundingClientRect().top
+      if (lastProjectElPosY > 0) {
+        // scrolled last element into view
+        if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
+          this.numberOfVisibleProjects++
         }
       }
     },
