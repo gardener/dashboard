@@ -101,7 +101,7 @@ gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
   repository: dummyrepo
-  webhookSecret: foobar
+  webhookSecret: foobar # optional if pollIntervalSeconds is defined
   authentication:
     username: dashboard
     token: dummytoken
