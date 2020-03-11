@@ -30,7 +30,7 @@ function loadGroup ({ name }) {
 }
 
 function load (options) {
-  const createInstance = Resource => new Resource(options)
+  const createInstance = Ctor => new Ctor({ ...options, responseType: 'json' })
   const createInstances = resourceGroup => _.mapValues(resourceGroup, createInstance)
   return _.mapValues(resourceGroups, createInstances)
 }

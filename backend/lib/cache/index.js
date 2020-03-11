@@ -29,12 +29,12 @@ class Cache {
     this.journalCache = createJournalCache()
   }
 
-  synchronize (dashboardClient) {
+  synchronize (client) {
     if (!this.synchronizationTriggered) {
-      dashboardClient['core.gardener.cloud'].cloudprofiles.syncList(this.cloudprofiles)
-      dashboardClient['core.gardener.cloud'].quotas.syncListAllNamespaces(this.quotas)
-      dashboardClient['core.gardener.cloud'].seeds.syncList(this.seeds)
-      dashboardClient['core.gardener.cloud'].projects.syncList(this.projects)
+      client['core.gardener.cloud'].cloudprofiles.syncList(this.cloudprofiles)
+      client['core.gardener.cloud'].quotas.syncListAllNamespaces(this.quotas)
+      client['core.gardener.cloud'].seeds.syncList(this.seeds)
+      client['core.gardener.cloud'].projects.syncList(this.projects)
       this.synchronizationTriggered = true
     }
   }
@@ -64,8 +64,8 @@ const cache = new Cache()
 
 module.exports = {
   cache,
-  synchronize (dashboardClient) {
-    cache.synchronize(dashboardClient)
+  synchronize (client) {
+    cache.synchronize(client)
   },
   getCloudProfiles () {
     return cache.getCloudProfiles()

@@ -59,6 +59,16 @@ class Logger {
     }
   }
 
+  connect ({ url, user, headers }) {
+    if (!this.isDisabled(LEVELS.trace + 1)) {
+      const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
+      const host = headers.host || url.host || '-'
+      const path = url.path || (url.pathname + url.search)
+      const msg = `CONNECT ${path} ${ident} ${host}`
+      this.console.log(this.ts + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg)
+    }
+  }
+
   request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
     if (!this.isDisabled(LEVELS.trace + 1)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'

@@ -19,16 +19,15 @@
 const got = require('got')
 const WebSocket = require('ws')
 const { http, ws } = require('./symbols')
+const { beforeConnect } = require('./debug')
 const { patchHttpErrorMessage } = require('./util')
+const Agent = require('agentkeepalive')
 
 class HttpClient {
-  constructor ({ url, ...options } = {}) {
-    const prefixUrl = this[http.prefixUrl](url)
-    this[http.client] = got.extend({ prefixUrl, ...options })
-  }
-
-  [http.prefixUrl] (url) {
-    return url
+  constructor ({ url, agent, ...options } = {}) {
+    const prefixUrl = this.constructor[http.prefixUrl](url)
+    agent = agent || this.constructor.createAgent(prefixUrl)
+    this[http.client] = got.extend({ prefixUrl, agent, ...options })
   }
 
   async [http.request] (url, { searchParams, ...options } = {}) {
@@ -42,8 +41,9 @@ class HttpClient {
     }
   }
 
-  [ws.connect] (url, { searchParams } = {}) {
+  [ws.connect] (url, { agent, searchParams } = {}) {
     const {
+      agent: defaultAgent,
       prefixUrl,
       ca,
       key,
@@ -52,24 +52,38 @@ class HttpClient {
       rejectUnauthorized,
       headers
     } = this[http.client].defaults.options
+    agent = agent || defaultAgent
     url = new URL(url, ensureTrailingSlashExists(prefixUrl))
-    url.protocol = url.protocol.replace(/^http/, 'ws')
     if (searchParams) {
       url.search = searchParams.toString()
     }
-    return this.constructor.createWebSocket(url, {
-      origin: url.origin,
+    const origin = url.origin
+    const options = {
+      agent,
+      origin,
       servername,
       headers,
       key,
       cert,
       ca,
       rejectUnauthorized
-    })
+    }
+    beforeConnect(url, options)
+    return this.constructor.createWebSocket(url, options)
+  }
+
+  static [http.prefixUrl] (url) {
+    return url
   }
 
   static createWebSocket (url, options) {
     return new WebSocket(url, options)
+  }
+
+  static createAgent (url, options) {
+    return /^https:/i.test(url)
+      ? new Agent.HttpsAgent(options)
+      : new Agent(options)
   }
 }
 

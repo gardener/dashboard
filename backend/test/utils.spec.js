@@ -76,7 +76,7 @@ describe('utils', function () {
     })
 
     it('should format a callsite', function () {
-      expect(getNameFromCallsite()).to.match(/lib\/utils\/index.js:\d+, Function=getNameFromCallsite/)
+      expect(getNameFromCallsite()).to.match(/utils\/index.js:\d+, Function=getNameFromCallsite/)
     })
   })
 

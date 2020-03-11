@@ -118,14 +118,11 @@ class Reflector {
 
   async listAndWatch () {
     const pager = ListPager.create(this.listWatcher)
-    const defaultPageSize = pager.pageSize
     const options = {
       resourceVersion: this.relistResourceVersion
     }
 
-    if (this.paginatedResult) {
-      pager.pageSize = defaultPageSize
-    } else if (options.resourceVersion !== '' && options.resourceVersion !== '0') {
+    if (!this.paginatedResult && options.resourceVersion !== '' && options.resourceVersion !== '0') {
       pager.pageSize = 0
     }
 

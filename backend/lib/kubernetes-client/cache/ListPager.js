@@ -39,10 +39,9 @@ class ListPager {
     this.fullListIfExpired = fullListIfExpired
   }
 
-  async list (options = {}) {
-    options = {
-      limit: this.pageSize,
-      ...options
+  async list ({ ...options } = {}) {
+    if (!options.limit && this.pageSize) {
+      options.limit = this.pageSize
     }
     const requestedResourceVersion = options.resourceVersion
     let list

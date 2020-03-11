@@ -17,6 +17,7 @@
 'use strict'
 
 const { camelCase } = require('lodash')
+const { Agent } = require('http')
 const { mix } = require('mixwith')
 const mixins = require('../lib/kubernetes-client/mixins')
 const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
@@ -44,11 +45,25 @@ describe('kubernetes-client', function () {
     }
     let testReflector
     let testReconnector
+    let testAgent
     let createReflectorStub
+    let createAgentStub
     let createReconnectorStub
     let runReflectorSpy
 
-    class EchoClient {
+    class TestAgent extends Agent {}
+
+    class TestClient {
+      get [httpSymbols.client] () {
+        return {
+          defaults: {
+            options: {
+              prefixUrl: 'url'
+            }
+          }
+        }
+      }
+
       [httpSymbols.request] (...args) {
         return args
       }
@@ -70,6 +85,10 @@ describe('kubernetes-client', function () {
           plural: 'dummies'
         }
       }
+
+      static createAgent (url, options) {
+        return testAgent
+      }
     }
 
     class TestReflector {
@@ -79,9 +98,11 @@ describe('kubernetes-client', function () {
     class TestReconnector {}
 
     function beforeEachCachableTest () {
+      testAgent = new TestAgent()
       testReflector = new TestReflector()
       testReconnector = new TestReconnector()
       createReflectorStub = sandbox.stub(Reflector, 'create').returns(testReflector)
+      createAgentStub = sandbox.stub(TestClient, 'createAgent').returns(testAgent)
       runReflectorSpy = sandbox.spy(testReflector, 'run')
     }
 
@@ -115,7 +136,7 @@ describe('kubernetes-client', function () {
     })
 
     describe('ClusterScoped', function () {
-      class TestObject extends mix(EchoClient).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {}
+      class TestObject extends mix(TestClient).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', function () {
         const testObject = new TestObject()
@@ -130,7 +151,7 @@ describe('kubernetes-client', function () {
       describe('Readable', function () {
         it('should get a resource', function () {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('name', { watch: false })
+          const [url, { method, searchParams }] = testObject.get('name', {})
           expect(url).to.equal('dummies/name')
           expect(method).to.equal('get')
           expect(searchParams.toString()).to.equal('')
@@ -138,7 +159,7 @@ describe('kubernetes-client', function () {
 
         it('should list a resource', function () {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list({ watch: false })
+          const [url, { method, searchParams }] = testObject.list({})
           expect(url).to.equal('dummies')
           expect(method).to.equal('get')
           expect(searchParams.toString()).to.equal('')
@@ -173,12 +194,22 @@ describe('kubernetes-client', function () {
           expect(listWatcher.group).to.equal(TestObject.group)
           expect(listWatcher.version).to.equal(TestObject.version)
           expect(listWatcher.names).to.eql(TestObject.names)
+          expect(createAgentStub).to.be.calledOnce
           const listStub = sandbox.stub(testObject, 'list')
           listWatcher.list(testOptions)
           listWatcher.watch(testOptions)
           expect(listStub).to.be.calledTwice
-          expect(listStub.firstCall.args).to.eql([testOptions])
-          expect(listStub.secondCall.args).to.eql([{ watch: true, ...testOptions }])
+          let listCallArgs
+          listCallArgs = listStub.firstCall.args
+          expect(listCallArgs.length).to.equal(1)
+          expect(listCallArgs[0].agent).to.equal(testAgent)
+          expect(listCallArgs[0].searchParams.get('watch')).to.be.null
+          expect(listCallArgs[0].searchParams.get('foo')).to.equal('bar')
+          listCallArgs = listStub.secondCall.args
+          expect(listCallArgs.length).to.equal(1)
+          expect(listCallArgs[0].agent).to.equal(testAgent)
+          expect(listCallArgs[0].searchParams.get('watch')).to.equal('true')
+          expect(listCallArgs[0].searchParams.get('foo')).to.equal('bar')
           expect(runReflectorSpy).to.be.calledOnce
           expect(reflector).to.equal(testReflector)
         })
@@ -275,7 +306,7 @@ describe('kubernetes-client', function () {
     })
 
     describe('NamespaceScoped', function () {
-      class TestObject extends mix(EchoClient).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {}
+      class TestObject extends mix(TestClient).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {}
 
       it('should check that declared mixins do occur in the inheritance hierarchy', function () {
         const testObject = new TestObject()
@@ -290,7 +321,7 @@ describe('kubernetes-client', function () {
       describe('Readable', function () {
         it('should get a resource', function () {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.get('namespace', 'name', { watch: false })
+          const [url, { method, searchParams }] = testObject.get('namespace', 'name', {})
           expect(url).to.equal('namespaces/namespace/dummies/name')
           expect(method).to.equal('get')
           expect(searchParams.toString()).to.equal('')
@@ -298,7 +329,7 @@ describe('kubernetes-client', function () {
 
         it('should list a resource', function () {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.list('namespace', { watch: false })
+          const [url, { method, searchParams }] = testObject.list('namespace', {})
           expect(url).to.equal('namespaces/namespace/dummies')
           expect(method).to.equal('get')
           expect(searchParams.toString()).to.equal('')
@@ -306,7 +337,7 @@ describe('kubernetes-client', function () {
 
         it('should list a resource across all namespaces', function () {
           const testObject = new TestObject()
-          const [url, { method, searchParams }] = testObject.listAllNamespaces({ watch: false })
+          const [url, { method, searchParams }] = testObject.listAllNamespaces({})
           expect(url).to.equal('dummies')
           expect(method).to.equal('get')
           expect(searchParams.toString()).to.equal('')
@@ -349,12 +380,24 @@ describe('kubernetes-client', function () {
           expect(listWatcher.group).to.equal(TestObject.group)
           expect(listWatcher.version).to.equal(TestObject.version)
           expect(listWatcher.names).to.eql(TestObject.names)
+          expect(createAgentStub).to.be.calledOnce
           const listStub = sandbox.stub(testObject, 'list')
           listWatcher.list(testOptions)
           listWatcher.watch(testOptions)
           expect(listStub).to.be.calledTwice
-          expect(listStub.firstCall.args).to.eql(['namesace', testOptions])
-          expect(listStub.secondCall.args).to.eql(['namesace', { watch: true, ...testOptions }])
+          let listCallArgs
+          listCallArgs = listStub.firstCall.args
+          expect(listCallArgs.length).to.equal(2)
+          expect(listCallArgs[0]).to.equal('namesace')
+          expect(listCallArgs[1].agent).to.equal(testAgent)
+          expect(listCallArgs[1].searchParams.get('watch')).to.be.null
+          expect(listCallArgs[1].searchParams.get('foo')).to.equal('bar')
+          listCallArgs = listStub.secondCall.args
+          expect(listCallArgs.length).to.equal(2)
+          expect(listCallArgs[0]).to.equal('namesace')
+          expect(listCallArgs[1].agent).to.equal(testAgent)
+          expect(listCallArgs[1].searchParams.get('watch')).to.equal('true')
+          expect(listCallArgs[1].searchParams.get('foo')).to.equal('bar')
           expect(runReflectorSpy).to.be.calledOnce
           expect(reflector).to.equal(testReflector)
         })
@@ -368,12 +411,22 @@ describe('kubernetes-client', function () {
           expect(listWatcher.group).to.equal(TestObject.group)
           expect(listWatcher.version).to.equal(TestObject.version)
           expect(listWatcher.names).to.eql(TestObject.names)
+          expect(createAgentStub).to.be.calledOnce
           const listStub = sandbox.stub(testObject, 'listAllNamespaces')
           listWatcher.list(testOptions)
           listWatcher.watch(testOptions)
           expect(listStub).to.be.calledTwice
-          expect(listStub.firstCall.args).to.eql([testOptions])
-          expect(listStub.secondCall.args).to.eql([{ watch: true, ...testOptions }])
+          let listCallArgs
+          listCallArgs = listStub.firstCall.args
+          expect(listCallArgs.length).to.equal(1)
+          expect(listCallArgs[0].agent).to.equal(testAgent)
+          expect(listCallArgs[0].searchParams.get('watch')).to.be.null
+          expect(listCallArgs[0].searchParams.get('foo')).to.equal('bar')
+          listCallArgs = listStub.secondCall.args
+          expect(listCallArgs.length).to.equal(1)
+          expect(listCallArgs[0].agent).to.equal(testAgent)
+          expect(listCallArgs[0].searchParams.get('watch')).to.equal('true')
+          expect(listCallArgs[0].searchParams.get('foo')).to.equal('bar')
           expect(runReflectorSpy).to.be.calledOnce
           expect(reflector).to.equal(testReflector)
         })

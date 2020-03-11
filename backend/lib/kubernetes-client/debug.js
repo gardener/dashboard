@@ -37,11 +37,7 @@ function afterResponse (response) {
   return response
 }
 
-function beforeRequest (options) {
-  const { url, method, headers, body, key, cert } = options
-  if (!('x-request-id' in headers)) {
-    headers['x-request-id'] = uuidv1()
-  }
+function getUser ({ headers, key, cert }) {
   const user = {
     id: undefined,
     type: undefined
@@ -79,11 +75,28 @@ function beforeRequest (options) {
       user.id = subject.commonName
     } catch (err) { /* ignore error */ }
   }
+  return user.id ? user : undefined
+}
+
+function beforeConnect (url, options) {
+  const { headers } = options
+  logger.connect({
+    url,
+    user: getUser(options),
+    headers: clone(headers)
+  })
+}
+
+function beforeRequest (options) {
+  const { url, method, headers, body } = options
+  if (!('x-request-id' in headers)) {
+    headers['x-request-id'] = uuidv1()
+  }
 
   logger.request({
     url,
     method,
-    user: user.id ? user : undefined,
+    user: getUser(options),
     headers: clone(headers),
     body
   })
@@ -127,6 +140,7 @@ function attach (options = {}) {
 
 module.exports = {
   attach,
+  beforeConnect,
   beforeRequest,
   beforeRedirect,
   afterResponse
