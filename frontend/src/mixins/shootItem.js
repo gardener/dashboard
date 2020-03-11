@@ -18,6 +18,7 @@ import get from 'lodash/get'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
+import find from 'lodash/find'
 
 import {
   getDateFormatted,
@@ -175,6 +176,17 @@ export const shootItem = {
     },
     isControlPlaneMigrating () {
       return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName
+    },
+    hibernationPossibleConstraint () {
+      const constraints = get(this.shootItem, 'status.constraints')
+      return find(constraints, ['type', 'HibernationPossible'])
+    },
+    isHibernationPossible () {
+      const status = get(this.hibernationPossibleConstraint, 'status', 'True')
+      return status !== 'False'
+    },
+    hibernationPossibleMessage () {
+      return get(this.hibernationPossibleConstraint, 'message', 'Hibernation currently not possible')
     }
   },
   methods: {
