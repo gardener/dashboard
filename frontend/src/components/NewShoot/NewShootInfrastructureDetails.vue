@@ -177,7 +177,7 @@ limitations under the License.
             deletable-chips
             multiple
           >
-            <template v-slot:item="{ item, tile }">
+            <template v-slot:item="{ item }">
                 <v-list-tile-action >
                   <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
                 </v-list-tile-action>
@@ -198,7 +198,8 @@ import CloudProfile from '@/components/CloudProfile'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
-import { includesIfAvailable } from '@/utils/validators'
+import { getCostObjectSettings, projectFromProjectList } from '@/utils/projects'
+import { includesIfAvailable, requiresCostObjectIfEnabled } from '@/utils/validators'
 import sortBy from 'lodash/sortBy'
 import head from 'lodash/head'
 import get from 'lodash/get'
@@ -212,45 +213,13 @@ import differenceWith from 'lodash/differenceWith'
 import intersection from 'lodash/intersection'
 import isEqual from 'lodash/isEqual'
 import find from 'lodash/find'
+import toUpper from 'lodash/toUpper'
 import { mapGetters, mapState } from 'vuex'
-
-const validationErrors = {
-  secret: {
-    required: 'Secret is required'
-  },
-  region: {
-    required: 'Region is required'
-  },
-  floatingPoolName: {
-    required: 'Floating Pools required'
-  },
-  loadBalancerProviderName: {
-    required: 'Load Balancer Providers required'
-  },
-  loadBalancerClassNames: {
-    required: 'Load Balancer Classes required',
-    includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`
-  },
-  partitionID: {
-    required: 'Partition ID is required'
-  },
-  projectID: {
-    required: 'Project ID is required'
-  },
-  firewallImage: {
-    required: 'Firewall Image is required'
-  },
-  firewallSize: {
-    required: 'Firewall Size is required'
-  },
-  firewallNetworks: {
-    required: 'Firewall Networks required'
-  }
-}
 
 const validations = {
   secret: {
-    required
+    required,
+    requiresCostObjectIfEnabled
   },
   region: {
     required
@@ -312,7 +281,6 @@ export default {
   },
   data () {
     return {
-      validationErrors,
       infrastructureKind: undefined,
       cloudProfileName: undefined,
       secret: undefined,
@@ -379,6 +347,58 @@ export default {
       'firewallNetworksByCloudProfileNameAndPartitionId',
       'firewallSizesByCloudProfileNameAndRegionAndZones'
     ]),
+    validationErrors () {
+      const validationErrors = {
+        secret: {
+          required: 'Secret is required',
+          requiresCostObjectIfEnabled: () => {
+            const projectName = get(this.secret, 'metadata.projectName')
+            const project = projectFromProjectList()
+            const isSecretInProject = project.metadata.name === projectName
+
+            return isSecretInProject ? `${this.costObjectTitle} is required. Go to the ADMINISTRATION page to edit the project and set the ${this.costObjectTitle}.` : `${this.costObjectTitle} is required and has to be set on the Project ${toUpper(projectName)}`
+          }
+        },
+        region: {
+          required: 'Region is required'
+        },
+        floatingPoolName: {
+          required: 'Floating Pools required'
+        },
+        loadBalancerProviderName: {
+          required: 'Load Balancer Providers required'
+        },
+        loadBalancerClassNames: {
+          required: 'Load Balancer Classes required',
+          includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`
+        },
+        partitionID: {
+          required: 'Partition ID is required'
+        },
+        projectID: {
+          required: 'Project ID is required'
+        },
+        firewallImage: {
+          required: 'Firewall Image is required'
+        },
+        firewallSize: {
+          required: 'Firewall Size is required'
+        },
+        firewallNetworks: {
+          required: 'Firewall Networks required'
+        }
+      }
+      return validationErrors
+    },
+    costObjectSettings () {
+      return getCostObjectSettings() || {}
+    },
+    costObjectSettingEnabled () {
+      return getCostObjectSettings() !== undefined
+    },
+    costObjectTitle () {
+      return this.costObjectSettings.title
+    },
     cloudProfiles () {
       return sortBy(this.cloudProfilesByCloudProviderKind(this.infrastructureKind), [(item) => item.metadata.name])
     },
@@ -628,6 +648,7 @@ export default {
       this.firewallImage = firewallImage
       this.firewallSize = firewallSize
       this.firewallNetworks = firewallNetworks
+      this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
       this.validateInput()
     },
     isAddNewSecret (item) {

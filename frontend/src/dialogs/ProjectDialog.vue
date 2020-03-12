@@ -87,10 +87,6 @@ limitations under the License.
                   ref="description"
                   label="Description"
                   v-model="description"
-                  :error-messages="getFieldValidationErrors('description')"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  counter="50"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -267,9 +263,6 @@ export default {
             }
             return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
           }
-        },
-        description: {
-          maxLength: maxLength(50)
         }
       }
       if (this.isCreateMode) {
@@ -286,9 +279,6 @@ export default {
     },
     validationErrors () {
       return {
-        description: {
-          maxLength: 'Description exceeds the maximum length'
-        },
         projectName: {
           required: 'Name is required',
           maxLength: 'Name exceeds the maximum length',

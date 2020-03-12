@@ -535,7 +535,7 @@ export default function createRouter ({ store, userManager }) {
     return store.dispatch('fetchCloudProfiles')
   }
 
-  function ensureDataLoaded (to, from, next) {
+  async function ensureDataLoaded (to, from, next) {
     const meta = to.meta || {}
     if (meta.public) {
       return next()
@@ -543,127 +543,129 @@ export default function createRouter ({ store, userManager }) {
     if (to.name === 'Error') {
       return next()
     }
-    Promise
-      .all([
+    try {
+      await Promise.all([
         ensureCloudProfilesLoaded(),
         ensureProjectsLoaded(),
         store.dispatch('unsubscribeComments')
       ])
-      .then(() => {
-        const params = to.params || {}
-        const query = to.query || {}
+      const params = to.params || {}
+      const query = to.query || {}
+      const namespaces = store.getters.namespaces
+      let namespace = params.namespace || query.namespace
+      if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
+        await store.dispatch('setNamespace', namespace)
+      }
+
+      if (!store.state.namespace) {
         const namespaces = store.getters.namespaces
-        const namespace = params.namespace || query.namespace
-        if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
-          return store.dispatch('setNamespace', namespace)
+        namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
+        await store.dispatch('setNamespace', namespace)
+      }
+
+      let redirectTo
+      switch (to.name) {
+        case 'Home': {
+          if (namespace) {
+            const name = 'ShootList'
+            redirectTo = { name, params: { namespace } }
+          }
+          break
         }
-      })
-      .then(() => {
-        if (!store.state.namespace) {
-          const namespaces = store.getters.namespaces
-          const namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
-          return store.dispatch('setNamespace', namespace)
+        case 'Secrets':
+        case 'Secret': {
+          await Promise.all([
+            store.dispatch('fetchInfrastructureSecrets'),
+            store.dispatch('subscribeShoots')
+          ])
+          break
         }
-      })
-      .then(() => {
-        const params = to.params || {}
-        const query = to.query || {}
-        const namespace = store.state.namespace
-        switch (to.name) {
-          case 'Home':
-            if (namespace) {
-              const name = 'ShootList'
-              return { name, params: { namespace } }
-            }
-            return undefined
-          case 'Secrets':
-          case 'Secret':
-            return Promise
-              .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('subscribeShoots')
-              ])
-              .then(() => undefined)
-          case 'NewShoot':
-          case 'NewShootEditor':
-            return Promise
-              .all([
-                store.dispatch('fetchInfrastructureSecrets'),
-                store.dispatch('subscribeShoots')
-              ])
-              .then(() => {
-                if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
-                  return store.dispatch('resetNewShootResource', { name: params.name, namespace })
-                }
-              })
-              .then(() => undefined)
-          case 'ShootList':
-            return store.dispatch('subscribeShoots', { name: params.name, namespace })
-              .then(() => undefined)
-          case 'ShootItem':
-            return Promise
-              .all([
-                store.dispatch('fetchInfrastructureSecrets'), // Required for purpose configuration
-                store.dispatch('subscribeShoot', { name: params.name, namespace }),
-                store.dispatch('subscribeComments', { name: params.name, namespace })
-              ])
-              .then(() => undefined)
-          case 'ShootItemHibernationSettings':
-            return Promise
-              .all([
-                store.dispatch('subscribeShoot', { name: params.name, namespace }),
-                store.dispatch('subscribeComments', { name: params.name, namespace })
-              ])
-              .then(() => undefined)
-          case 'ShootDetailsEditor':
-            return store.dispatch('subscribeShoot', { name: params.name, namespace })
-              .then(() => undefined)
-          case 'Members':
-          case 'Administration':
-            return Promise
-              .all([
-                store.dispatch('fetchMembers'),
-                store.dispatch('subscribeShoots')
-              ])
-              .then(() => undefined)
-          case 'Account':
-            if (query.namespace !== namespace) {
-              const name = 'Account'
-              return { name, query: { namespace } }
-            }
-            return undefined
-          default:
-            return undefined
+        case 'NewShoot':
+        case 'NewShootEditor': {
+          await Promise.all([
+            store.dispatch('fetchInfrastructureSecrets'),
+            store.dispatch('subscribeShoots')
+          ])
+          if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
+            await store.dispatch('resetNewShootResource', { name: params.name, namespace })
+          }
+          break
         }
-      })
-      .then(redirectTo => {
-        if (redirectTo) {
-          return next(redirectTo)
+        case 'ShootList': {
+          await store.dispatch('subscribeShoots', { name: params.name, namespace })
+          break
         }
+        case 'ShootItem': {
+          await Promise.all([
+            store.dispatch('fetchInfrastructureSecrets'), // Required for purpose configuration
+            store.dispatch('subscribeShoot', { name: params.name, namespace }),
+            store.dispatch('subscribeComments', { name: params.name, namespace })
+          ])
+          break
+        }
+        case 'ShootItemHibernationSettings': {
+          await Promise.all([
+            store.dispatch('subscribeShoot', { name: params.name, namespace }),
+            store.dispatch('subscribeComments', { name: params.name, namespace })
+          ])
+          break
+        }
+        case 'ShootDetailsEditor': {
+          await store.dispatch('subscribeShoot', { name: params.name, namespace })
+          break
+        }
+        case 'Members':
+        case 'Administration': {
+          await Promise.all([
+            store.dispatch('fetchMembers'),
+            store.dispatch('subscribeShoots')
+          ])
+          break
+        }
+        case 'Account': {
+          if (query.namespace !== namespace) {
+            const name = 'Account'
+            redirectTo = { name, query: { namespace } }
+          }
+          break
+        }
+      }
+      if (redirectTo) {
+        next(redirectTo)
+      } else {
         next()
-      })
-      .catch(err => next(err))
+      }
+    } catch (err) {
+      next(err)
+    }
   }
 
   /* router */
   const router = new Router(routerOptions)
 
   /* register navigation guards */
-  router.beforeEach((to, from, next) => {
-    store.dispatch('setLoading').then(() => next(), () => next())
+  router.beforeEach(async (to, from, next) => {
+    try {
+      await store.dispatch('setLoading')
+    } catch (err) {} // ignore
+    next()
   })
   router.beforeEach(ensureConfigurationLoaded)
   router.beforeEach(ensureUserAuthenticatedForNonPublicRoutes)
   router.beforeEach(ensureDataLoaded)
   router.afterEach((to, from) => {
-    store.dispatch('unsetLoading')
+    try {
+      store.dispatch('unsetLoading')
+    } catch (err) {} // ignore
   })
-  router.onError(err => {
+  router.onError(async err => {
     console.error('Router error:', err.message)
-    Promise.all([
-      store.dispatch('unsetLoading'),
-      store.dispatch('setError', err)
-    ])
+    try {
+      await Promise.all([
+        store.dispatch('unsetLoading'),
+        store.dispatch('setError', err)
+      ])
+    } catch (err) {} // ignore
   })
   return router
 }
