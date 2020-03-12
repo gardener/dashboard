@@ -449,7 +449,11 @@ export default {
       return this.firewallImagesByCloudProfileName(this.cloudProfileName)
     },
     firewallSizes () {
-      return map(this.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName: this.cloudProfileName, region: this.region, zones: [ this.partitionID ] }), 'name')
+      const cloudProfileName = this.cloudProfileName
+      const region = this.region
+      const zones = [this.partitionID]
+      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      return map(firewallSizes, 'name')
     },
     allFirewallNetworks () {
       return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
