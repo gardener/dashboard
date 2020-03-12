@@ -127,7 +127,7 @@ limitations under the License.
           </v-card>
         </v-menu>
       </template>
-      <v-list>
+      <v-list ref="mainMenu">
         <v-list-tile :to="{name: 'Home'}" exact v-if="hasNoProjects">
           <v-list-tile-action>
             <v-icon class="white--text">mdi-home-outline</v-icon>
@@ -402,38 +402,6 @@ export default {
 }
 </script>
 
-<style lang="styl">
-  .project-menu {
-    border-radius: 0;
-
-    .v-card {
-      border-radius: 0;
-
-      .project-filter {
-        align-items: center
-      }
-
-      .project-add > div {
-        justify-content: left;
-      }
-
-      .project-list {
-        height: auto;
-        max-height: (4 * 54px) + (2 * 8px);
-        overflow-y: auto;
-        max-width: 300px;
-
-        div > a {
-          height: 54px;
-        }
-        .project-owner {
-          font-size: 11px;
-        }
-      }
-    }
-  }
-</style>
-
 <style lang="styl" scoped>
   teaserHeight = 200px
 
@@ -525,11 +493,39 @@ export default {
         }
       }
     }
-  }
 
-  .project-list {
-    >>>.v-list__tile--highlighted {
-      background-color: transparent !important
+    .project-menu {
+      border-radius: 0;
+
+      >>>.v-card {
+        border-radius: 0;
+
+        .project-filter {
+          align-items: center
+        }
+
+        .project-add > div {
+          justify-content: left;
+        }
+
+        .project-list {
+          height: auto;
+          max-height: (4 * 54px) + (2 * 8px);
+          overflow-y: auto;
+          max-width: 300px;
+
+          div > a {
+            height: 54px;
+          }
+          .project-owner {
+            font-size: 11px;
+          }
+
+          .v-list__tile--highlighted {
+            background-color: transparent !important
+          }
+        }
+      }
     }
   }
 
