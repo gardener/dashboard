@@ -201,7 +201,11 @@ export default {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
         const cloudProfile = this.cloudProfileByName(cloudProfileName)
-        // shootspec not required, userInterActionBus callback only called for new clusters
+        /*
+         * do not pass shootspec as we have it not available in this component and it is (currently) not required
+         * do dtermine isZoned for new clusters. This event handler is only be called for new clusters, as the
+         * userInterActionBus is onlyset for the create cluster use case
+         */
         this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind, isNewCluster: this.isNewCluster })
         this.setDefaultWorker()
       })

@@ -84,8 +84,10 @@ export default {
 
       const workers = cloneDeep(this.shootWorkerGroups)
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
-
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion, zonesNetworkConfiguration, zonedCluster: isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })})
+      const cloudProfileName = this.shootCloudProfileName
+      const region = this.shootRegion
+      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster })
     },
     onWorkersValid (value) {
       this.workersValid = value
