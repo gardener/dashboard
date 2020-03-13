@@ -55,6 +55,7 @@ limitations under the License.
             class="project-selector elevation-4 ma-0 white--text"
             @keydown.down="selectProjectWithKeys('down')"
             @keydown.up="selectProjectWithKeys('up')"
+            @keyup.enter="navigateToHighlightedProject"
           >
             <v-icon class="pr-4">mdi-grid-large</v-icon>
             <span class="ml-2">{{projectName}}</span>
@@ -78,7 +79,7 @@ limitations under the License.
                   v-model="projectFilter"
                   ref="projectFilter"
                   @keyup.esc="projectFilter = ''"
-                  @keyup.enter="onEnterProjectFilter"
+                  @keyup.enter="navigateToHighlightedProject"
                   @input="onInputProjectFilter"
                   @keydown.down="selectProjectWithKeys('down')"
                   @keydown.up="selectProjectWithKeys('up')"
@@ -300,7 +301,7 @@ export default {
     ...mapActions([
       'setSidebar'
     ]),
-    onEnterProjectFilter () {
+    navigateToHighlightedProject () {
       this.navigateToProject(this.highlightedProject)
     },
     onProjectClick (event, project) {
@@ -310,8 +311,9 @@ export default {
       }
     },
     navigateToProject (project) {
+      this.projectMenu = false
+
       if (project !== this.project) {
-        this.projectMenu = false
         this.project = project
       }
     },
@@ -379,7 +381,8 @@ export default {
         return
       }
       const lastProjectElPosY = projectListBottomPosY - lastProjectEl.getBoundingClientRect().top
-      if (lastProjectElPosY > 0) {
+      const scrolledToLastElement = lastProjectElYPos > 0
+      if (scrolledToLastElement) {
         // scrolled last element into view
         if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
           this.numberOfVisibleProjects++
