@@ -205,10 +205,10 @@ import {
   isEmail,
   serviceAccountToDisplayName,
   isServiceAccount,
-  getTimestampFormatted
+  getTimestampFormatted,
+  getProjectDetails
 } from '@/utils'
 import { getMember } from '@/utils/api'
-import { getProjectDetails } from '@/utils/projects'
 
 export default {
   name: 'members',

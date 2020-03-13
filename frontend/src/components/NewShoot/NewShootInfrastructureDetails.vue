@@ -391,6 +391,9 @@ export default {
       }
       return validationErrors
     },
+    costObjectSettingEnabled () { // required internally for requiresCostObjectIfEnabled
+      return this.costObjectSettings !== undefined
+    },
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
     },

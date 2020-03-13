@@ -110,8 +110,7 @@ import UpdateDialog from '@/dialogs/ProjectDialog'
 import GDialog from '@/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { getProjectDetails } from '@/utils/projects'
-import { compileMarkdown } from '@/utils'
+import { compileMarkdown, getProjectDetails } from '@/utils'
 import get from 'lodash/get'
 
 export default {

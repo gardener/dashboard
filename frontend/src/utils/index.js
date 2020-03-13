@@ -334,6 +334,30 @@ export function getProjectName (metadata) {
   return projectName
 }
 
+export function getProjectDetails (project) {
+  const projectData = project.data || {}
+  const projectMetadata = project.metadata || {}
+  const projectName = projectMetadata.name || ''
+  const technicalContact = projectData.owner || ''
+  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
+  const creationTimestamp = projectMetadata.creationTimestamp
+  const createdAt = getDateFormatted(creationTimestamp)
+  const description = projectData.description || ''
+  const createdBy = projectData.createdBy || ''
+  const purpose = projectData.purpose || ''
+
+  return {
+    projectName,
+    technicalContact,
+    costObject,
+    createdAt,
+    creationTimestamp,
+    createdBy,
+    description,
+    purpose
+  }
+}
+
 export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
