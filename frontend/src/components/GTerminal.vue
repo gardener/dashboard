@@ -22,8 +22,22 @@ limitations under the License.
       :absolute="true"
       :auto-height="true"
       :top="true"
+      multi-line
     >
-      {{ snackbarText }}
+      <div>{{ snackbarText }}</div>
+      <g-popper
+        v-if="snackbarDetailsText"
+        title="Details"
+        toolbarColor="cyan darken-2"
+        :popperKey="`popper_snackbar_${uuid}`"
+        placement="bottom"
+        :boundariesSelector="`#boundary_${uuid}`"
+      >
+        {{snackbarDetailsText}}
+        <v-btn slot="popperRef" flat small class="cyan--text text--darken-2">
+          Details
+        </v-btn>
+      </g-popper>
       <v-btn flat color="cyan darken-2" @click="retry()">
         Retry
       </v-btn>
@@ -322,7 +336,7 @@ class TerminalSession {
       }
     } catch (err) {
       console.error('failed to wait until pod is running', err)
-      this.vm.showSnackbarTop('Could not connect to terminal')
+      this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
       this.setDisconnectedState()
       return
     }
@@ -595,6 +609,7 @@ export default {
       snackbarTop: false,
       errorSnackbarBottom: false,
       snackbarText: '',
+      snackbarDetailsText: undefined,
       spinner: undefined,
       loading: {
         imageBtn: false,
@@ -765,19 +780,20 @@ export default {
       this.snackbarTop = false
       this.errorSnackbarBottom = false
     },
-    showSnackbarTop (text) {
+    showSnackbarTop (text, detailsText) {
       this.snackbarTop = true
-      this.setSnackbarTextAndStopSpinner(text)
+      this.setSnackbarTextAndStopSpinner(text, detailsText)
     },
     showErrorSnackbarBottom (text) {
       this.errorSnackbarBottom = true
       this.setSnackbarTextAndStopSpinner(text)
     },
-    setSnackbarTextAndStopSpinner (text) {
+    setSnackbarTextAndStopSpinner (text, detailsText) {
       if (this.spinner) {
         this.spinner.stop()
       }
       this.snackbarText = text
+      this.snackbarDetailsText = detailsText
     },
     retry () {
       this.snackbarTop = false
