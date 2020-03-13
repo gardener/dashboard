@@ -111,7 +111,8 @@ limitations under the License.
           </v-flex>
           <v-flex shrink class="pa-0">
             <v-layout row>
-              <purpose-configuration :shootItem="shootItem"></purpose-configuration>
+              <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
+              <purpose-configuration v-if="canGetSecrets" :shootItem="shootItem"></purpose-configuration>
             </v-layout>
           </v-flex>
         </v-card-title>
@@ -166,7 +167,7 @@ import {
   compileMarkdown
 } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -188,6 +189,9 @@ export default {
   computed: {
     ...mapState([
       'cfg'
+    ]),
+    ...mapGetters([
+      'canGetSecrets'
     ]),
     expirationTimestamp () {
       return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']

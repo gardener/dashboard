@@ -26,7 +26,7 @@ limitations under the License.
       <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
     </v-flex>
     <v-divider></v-divider>
-    <v-flex v-if="canPatchShoots" :style="toolbarStyles">
+    <v-flex v-if="!isReadOnly" :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
         <v-flex d-flex>
           <v-tooltip top>
@@ -88,6 +88,7 @@ import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
 import download from 'downloadjs'
+import { shootItem } from '@/mixins/shootItem'
 
 // codemirror
 import CodeMirror from 'codemirror'
@@ -151,6 +152,7 @@ export default {
       toolbarHeight: 48
     }
   },
+  mixins: [shootItem],
   computed: {
     ...mapState([
       'namespace'
@@ -164,6 +166,9 @@ export default {
         return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
       }
       return undefined
+    },
+    shootItem () { // needed for mixin
+      return this.shootContent
     },
     containerStyles () {
       return {
@@ -193,6 +198,9 @@ export default {
       set (value) {
         this.$emit('update:detailedErrorMessage', value)
       }
+    },
+    isReadOnly () {
+      return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
     }
   },
   methods: {
@@ -280,7 +288,7 @@ export default {
         lineNumbers: true,
         lineWrapping: true,
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
-        readOnly: !this.canPatchShoots,
+        readOnly: this.isReadOnly,
         extraKeys
       }
       this.$instance = CodeMirror(element, options)
@@ -358,7 +366,10 @@ export default {
   },
   watch: {
     canPatchShoots (value) {
-      this.$instance.setOption('readOnly', !value)
+      this.$instance.setOption('readOnly', this.isReadOnly)
+    },
+    shootPurpose (value) {
+      this.$instance.setOption('readOnly', this.isReadOnly)
     },
     value: {
       deep: true,

@@ -62,17 +62,12 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'infrastructureSecretsByCloudProfileName',
-      'canGetSecrets'
+      'infrastructureSecretsByCloudProfileName'
     ]),
     valid () {
       return this.purposeValid
     },
     secret () {
-      if (!this.canGetSecrets) {
-        return undefined
-      }
-
       const secrets = this.infrastructureSecretsByCloudProfileName(this.shootCloudProfileName)
       const secret = find(secrets, ['metadata.bindingName', this.shootSecretBindingName])
       if (!secret) {
