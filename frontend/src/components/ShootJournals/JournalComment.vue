@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-layout>
-    <v-flex xs1>
+    <v-flex style="max-width: 60px;">
       <v-avatar size="40px">
         <img :src="avatarUrl" :title="login"/>
       </v-avatar>
