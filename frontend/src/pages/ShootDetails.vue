@@ -146,21 +146,24 @@ export default {
   methods: {
     ...mapActions([
       'getShootAddonKyma'
-    ])
+    ]),
+    fetchKymaInfo () {
+      if (!this.isKymaFeatureEnabled || !this.isKymaAddonEnabled) {
+        return
+      }
+
+      this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
+    }
   },
   mounted () {
     if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
       this.$refs.shootLifecycle.showHibernationConfigurationDialog()
     }
+    this.fetchKymaInfo()
   },
   watch: {
-    isKymaAddonEnabled (currentlyEnabled, previouslyEnabled) {
-      if (!this.isKymaFeatureEnabled) {
-        return
-      }
-      if (!previouslyEnabled && currentlyEnabled) {
-        this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
-      }
+    isKymaAddonEnabled () {
+      this.fetchKymaInfo()
     }
   }
 }
