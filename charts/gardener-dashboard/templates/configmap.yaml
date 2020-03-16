@@ -153,8 +153,11 @@ data:
 {{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
       seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}
 {{- end }}
-{{- if .Values.frontendConfig.gardenletRespectsSyncPeriodOverwrite }}
-      gardenletRespectsSyncPeriodOverwrite: {{ .Values.frontendConfig.gardenletRespectsSyncPeriodOverwrite }}
+{{- if .Values.frontendConfig.gardenlet }}
+{{- if .Values.frontendConfig.gardenlet.respectsSyncPeriodOverwrite }}
+      gardenlet:
+        respectsSyncPeriodOverwrite: {{ .Values.frontendConfig.gardenlet.respectsSyncPeriodOverwrite }}
+{{- end }}
 {{- end }}
 {{- if .Values.frontendConfig.alert }}
       alert:
