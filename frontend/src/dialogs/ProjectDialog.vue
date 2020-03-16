@@ -315,7 +315,6 @@ export default {
           const project = await this.save()
           this.loading = false
           this.hide()
-          this.$emit('submit', project)
           if (this.isCreateMode) {
             this.$router.push({
               name: 'Secrets',

@@ -33,7 +33,7 @@ limitations under the License.
           <span>You are not authorized to create projects</span>
         </v-tooltip>
       </v-card-text>
-      <project-create-dialog @submit="onProjectCreated" v-model="projectDialog">
+      <project-create-dialog v-model="projectDialog">
       </project-create-dialog>
     </v-card>
   </v-container>
@@ -75,18 +75,6 @@ export default {
   mounted () {
     if (this.$route.path === '/namespace/+') {
       this.projectDialog = true
-    }
-  },
-  methods: {
-    onProjectCreated ({ metadata } = {}) {
-      const name = 'ShootList'
-      let namespace = metadata.namespace
-      if (!namespace) {
-        namespace = this.namespaces[0]
-      }
-      if (namespace) {
-        this.$router.push({ name, params: { namespace } })
-      }
     }
   }
 }
