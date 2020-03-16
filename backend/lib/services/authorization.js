@@ -48,3 +48,30 @@ exports.isAdmin = function (user) {
     resource: 'secrets'
   })
 }
+
+/*
+SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
+*/
+exports.selfSubjectRulesReview = async function (user, namespace) {
+  if (!user) {
+    return false
+  }
+  const client = user.client
+  const { apiVersion, kind } = Resources.SelfSubjectRulesReview
+  const body = {
+    kind,
+    apiVersion,
+    spec: {
+      namespace
+    }
+  }
+  const {
+    status: {
+      resourceRules,
+      nonResourceRules,
+      incomplete,
+      evaluationError
+    } = {}
+  } = await client['authorization.k8s.io'].selfsubjectrulesreviews.create(body)
+  return { resourceRules, nonResourceRules, incomplete, evaluationError }
+}

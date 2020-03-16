@@ -19,9 +19,8 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon } from '@/utils'
-import { getPrivilegesForNamespace } from '@/utils/api'
-import { canI } from '@/utils/permissions'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon, canI } from '@/utils'
+import { getSubjectRules } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -69,7 +68,7 @@ const state = {
   cfg: null,
   ready: false,
   namespace: null,
-  privileges: { // privileges for state.namespace
+  subjectRules: { // selfSubjectRules for state.namespace
     resourceRules: null,
     nonResourceRules: null,
     incomplete: false,
@@ -559,15 +558,12 @@ const getters = {
     return getters['shoots/initialNewShootResource']
   },
   hasGardenTerminalAccess (state, getters) {
-    return getters.canUseTerminalFeature && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
   },
   hasControlPlaneTerminalAccess (state, getters) {
-    return getters.canUseTerminalFeature && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
   },
   hasShootTerminalAccess (state, getters) {
-    return getters.canUseTerminalFeature
-  },
-  canUseTerminalFeature (state, getters) {
     return getters.isTerminalEnabled && getters.canCreateTerminals
   },
   isTerminalEnabled (state, getters) {
@@ -577,30 +573,30 @@ const getters = {
     return get(state, 'cfg.features.kymaEnabled', false)
   },
   canCreateTerminals (state) {
-    return canI(state.privileges, 'create', 'dashboard.gardener.cloud', 'terminals')
+    return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
   },
   canCreateShoots (state) {
-    return canI(state.privileges, 'create', 'core.gardener.cloud', 'shoots')
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots')
   },
   canPatchShoots (state) {
-    return canI(state.privileges, 'patch', 'core.gardener.cloud', 'shoots')
+    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'shoots')
   },
   canDeleteShoots (state) {
-    return canI(state.privileges, 'delete', 'core.gardener.cloud', 'shoots')
+    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'shoots')
   },
   canGetSecrets (state) {
-    return canI(state.privileges, 'list', '', 'secrets')
+    return canI(state.subjectRules, 'list', '', 'secrets')
   },
   canCreateProject (state) {
-    return canI(state.privileges, 'create', 'core.gardener.cloud', 'projects')
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
   },
   canPatchProject (state, getters) {
     const name = getters.projectName
-    return canI(state.privileges, 'patch', 'core.gardener.cloud', 'projects', name)
+    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'projects', name)
   },
   canDeleteProject (state, getters) {
     const name = getters.projectName
-    return canI(state.privileges, 'delete', 'core.gardener.cloud', 'projects', name)
+    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'projects', name)
   }
 }
 
@@ -826,10 +822,10 @@ const actions = {
     commit('SET_NAMESPACE', namespace)
 
     try {
-      const { data: privileges } = await getPrivilegesForNamespace({ namespace })
-      commit('SET_PRIVILEGES', privileges)
+      const { data: subjectRules } = await getSubjectRules({ namespace })
+      commit('SET_SUBJECT_RULES', subjectRules)
     } catch (err) {
-      commit('SET_PRIVILEGES', undefined)
+      commit('SET_SUBJECT_RULES', undefined)
       throw err
     }
     return state.namespace
@@ -904,8 +900,8 @@ const mutations = {
       // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
     }
   },
-  SET_PRIVILEGES (state, value) {
-    state.privileges = value
+  SET_SUBJECT_RULES (state, value) {
+    state.subjectRules = value
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value

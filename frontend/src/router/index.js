@@ -64,8 +64,12 @@ export default function createRouter ({ store, userManager }) {
     return store.getters.hasShootTerminalAccess
   }
 
-  function canUseTerminalFeature () {
-    return store.getters.canUseTerminalFeature
+  function isTerminalEnabled () {
+    return store.getters.isTerminalEnabled
+  }
+
+  function canCreateTerminals () {
+    return store.getters.canCreateTerminals
   }
 
   function canGetSecrets () {
@@ -331,7 +335,7 @@ export default function createRouter ({ store, userManager }) {
                     tabs: shootItemTerminalTabs
                   },
                   beforeEnter: (to, from, next) => {
-                    if (canUseTerminalFeature()) {
+                    if (isTerminalEnabled() && canCreateTerminals()) {
                       next()
                     } else {
                       next('/')

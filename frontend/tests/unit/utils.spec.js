@@ -15,10 +15,10 @@
 //
 
 import { expect } from 'chai'
-import { canI } from '@/utils/permissions'
+import { canI } from '@/utils'
 
 describe('utils', function () {
-  describe('permissions', function () {
+  describe('authorization', function () {
     describe('#canI', function () {
       let rulesReview
 

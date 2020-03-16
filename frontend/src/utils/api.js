@@ -212,9 +212,10 @@ export function getPrivileges () {
   return getResource('/api/user/privileges')
 }
 
-export function getPrivilegesForNamespace ({ namespace }) {
-  namespace = encodeURIComponent(namespace)
-  return getResource(`/api/user/privileges/${namespace}`)
+export function getSubjectRules ({ namespace }) {
+  return callResourceMethod('/api/user/subjectrules/', {
+    namespace
+  })
 }
 
 export function getToken () {

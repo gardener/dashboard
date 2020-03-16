@@ -19,7 +19,6 @@
 const express = require('express')
 
 const { authorization } = require('../services')
-const { Resources } = require('../kubernetes-client')
 const router = module.exports = express.Router({
   mergeParams: true
 })
@@ -41,12 +40,12 @@ router.route('/privileges')
     }
   })
 
-router.route('/privileges/:namespace')
-  .get(async (req, res, next) => {
+router.route('/subjectrules')
+  .post(async (req, res, next) => {
     try {
       const user = req.user || {}
-      const namespace = req.params.namespace
-      const result = await selfSubjectRulesReview(user, namespace)
+      const { namespace } = req.body
+      const result = await authorization.selfSubjectRulesReview(user, namespace)
       res.send(result)
     } catch (err) {
       next(err)
@@ -60,30 +59,3 @@ router.route('/token')
       token
     })
   })
-
-/*
-SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
-*/
-async function selfSubjectRulesReview (user, namespace) {
-  if (!user) {
-    return false
-  }
-  const client = user.client
-  const { apiVersion, kind } = Resources.SelfSubjectRulesReview
-  const body = {
-    kind,
-    apiVersion,
-    spec: {
-      namespace
-    }
-  }
-  const {
-    status: {
-      resourceRules,
-      nonResourceRules,
-      incomplete,
-      evaluationError
-    } = {}
-  } = await client['authorization.k8s.io'].selfsubjectrulesreviews.create(body)
-  return { resourceRules, nonResourceRules, incomplete, evaluationError }
-}

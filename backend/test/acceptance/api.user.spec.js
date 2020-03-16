@@ -54,10 +54,10 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const namespace = `garden-${project}`
     k8s.stub.getSelfSubjectRulesReview({ bearer, namespace })
     const res = await agent
-      .get(`/api/user/privileges/${namespace}`)
+      .post('/api/user/subjectrules/')
       .set('cookie', await user.cookie)
+      .send({ namespace })
 
-    console.log(res.body)
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(res.body).to.have.property('resourceRules')

@@ -141,6 +141,7 @@ import map from 'lodash/map'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 import GAlert from '@/components/GAlert'
 
 const defaultProjectName = ''
@@ -200,7 +201,7 @@ export default {
       return getProjectDetails(this.project)
     },
     costObjectSettingEnabled () {
-      return this.costObjectSettings !== undefined
+      return !isEmpty(this.costObjectSettings)
     },
     costObjectTitle () {
       return get(this.costObjectSettings, 'title')
