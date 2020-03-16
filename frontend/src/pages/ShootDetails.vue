@@ -148,9 +148,10 @@ export default {
       'getShootAddonKyma'
     ]),
     fetchKymaInfo () {
-      if (!this.isKymaFeatureEnabled && this.isKymaAddonEnabled) {
+      if (!this.isKymaFeatureEnabled || !this.isKymaAddonEnabled) {
         return
       }
+
       this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
     }
   },
@@ -161,10 +162,8 @@ export default {
     this.fetchKymaInfo()
   },
   watch: {
-    isKymaAddonEnabled (currentlyEnabled, previouslyEnabled) {
-      if (!previouslyEnabled && currentlyEnabled) {
-        this.fetchKymaInfo()
-      }
+    isKymaAddonEnabled () {
+      this.fetchKymaInfo()
     }
   }
 }
