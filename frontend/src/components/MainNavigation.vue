@@ -290,7 +290,8 @@ export default {
       }
     },
     projectFilterHasExactMatch () {
-      const projectName = get(head(this.sortedAndFilteredProjectList), 'metadata.name')
+      const project = head(this.sortedAndFilteredProjectList)
+      const projectName = get(project, 'metadata.name')
       return this.isProjectNameMatchingFilter(projectName)
     },
     highlightedProject () {
@@ -381,7 +382,7 @@ export default {
         return
       }
       const lastProjectElPosY = projectListBottomPosY - lastProjectEl.getBoundingClientRect().top
-      const scrolledToLastElement = lastProjectElYPos > 0
+      const scrolledToLastElement = lastProjectElPosY > 0
       if (scrolledToLastElement) {
         // scrolled last element into view
         if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
