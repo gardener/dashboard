@@ -68,10 +68,12 @@ limitations under the License.
       </v-alert>
     </v-layout>
     <v-layout row v-if="!isHibernationPossible" class="pt-2">
-      <v-alert :value="true" type="warning" outline>
-        <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
-        <div>{{hibernationPossibleMessage}}</div>
-      </v-alert>
+      <v-flex>
+        <v-alert :value="true" type="warning" outline>
+          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
+          <div>{{hibernationPossibleMessage}}</div>
+        </v-alert>
+      </v-flex>
     </v-layout>
   </div>
 </template>
