@@ -16,8 +16,8 @@ limitations under the License.
 
 <template>
   <div>
-    <v-tooltip top>
-      <v-btn slot="activator" :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose">
+    <v-tooltip top max-width="600px">
+      <v-btn slot="activator" :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled">
         <v-icon :medium="!smallIcon">{{icon}}</v-icon>
       </v-btn>
       {{shootActionToolTip(caption)}}
@@ -103,6 +103,10 @@ export default {
     dialogColor: {
       type: String,
       default: 'orange'
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   mixins: [shootItem],
