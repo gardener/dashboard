@@ -154,9 +154,9 @@ data:
       seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}
 {{- end }}
 {{- if .Values.frontendConfig.gardenlet }}
-{{- if .Values.frontendConfig.gardenlet.respectsSyncPeriodOverwrite }}
+{{- if .Values.frontendConfig.gardenlet.respectSyncPeriodOverwrite }}
       gardenlet:
-        respectsSyncPeriodOverwrite: {{ .Values.frontendConfig.gardenlet.respectsSyncPeriodOverwrite }}
+        respectSyncPeriodOverwrite: {{ .Values.frontendConfig.gardenlet.respectSyncPeriodOverwrite }}
 {{- end }}
 {{- end }}
 {{- if .Values.frontendConfig.alert }}

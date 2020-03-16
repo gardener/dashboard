@@ -366,8 +366,8 @@ export function shootHasIssue (shoot) {
 }
 
 export function isReconciliationDeactivated (metadata) {
-  const respectsSyncPeriodOverwrite = get(store.state, 'cfg.gardenlet.respectsSyncPeriodOverwrite')
-  if (!respectsSyncPeriodOverwrite) {
+  const respectSyncPeriodOverwrite = get(store.state, 'cfg.gardenlet.respectSyncPeriodOverwrite')
+  if (!respectSyncPeriodOverwrite) {
     return false
   }
   const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']

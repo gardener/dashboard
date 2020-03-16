@@ -70,7 +70,7 @@ frontendConfig:
     production: ~
   seedCandidateDeterminationStrategy: SameRegion
   gardenlet:
-    respectsSyncPeriodOverwrite: true # this flag should be in sync with gardenlet-configuration controllers.shoot.respectSyncPeriodOverwrite https://github.com/gardener/gardener/blob/045b03f02d7bf47a9ef39e2981ce92b86e444bda/pkg/gardenlet/apis/config/v1alpha1/types.go#L223-L226
+    respectSyncPeriodOverwrite: true # this flag should be in sync with gardenlet-configuration controllers.shoot.respectSyncPeriodOverwrite https://github.com/gardener/gardener/blob/045b03f02d7bf47a9ef39e2981ce92b86e444bda/pkg/gardenlet/apis/config/v1alpha1/types.go#L223-L226
   features:
     terminalEnabled: false
     kymaEnabled: false
