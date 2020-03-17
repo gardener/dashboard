@@ -170,6 +170,9 @@ const getters = {
         return []
       }
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
       const items = cloudProfile.data[type]
       if (!region || !zones) {
         return items
@@ -297,10 +300,14 @@ const getters = {
   },
   minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
+      const defaultMinimumSize = '20Gi'
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return defaultMinimumSize
+      }
       const seedsForCloudProfile = cloudProfile.data.seeds
       const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
-      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || '20Gi'
+      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
@@ -346,7 +353,7 @@ const getters = {
     return ({ cloudProfileName, region }) => {
       // Partion IDs equal zones for metal infrastructure
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile.metadata.cloudProviderKind !== 'metal') {
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
         return
       }
       const partitionIDs = getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
@@ -357,7 +364,7 @@ const getters = {
     return ({ cloudProfileName, region }) => {
       // Firewall Sizes equals to list of image types for this zone
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile.metadata.cloudProviderKind !== 'metal') {
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
         return
       }
       const firewallSizes = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region })

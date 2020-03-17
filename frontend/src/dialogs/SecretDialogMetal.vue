@@ -33,12 +33,12 @@ limitations under the License.
         <v-flex>
           <v-text-field
             color="blue"
-            v-model="apiURL"
-            ref="apiURL"
+            v-model="apiUrl"
+            ref="apiUrl"
             label="API URL"
-            :error-messages="getErrorMessages('apiURL')"
-            @input="$v.apiURL.$touch()"
-            @blur="$v.apiURL.$touch()"
+            :error-messages="getErrorMessages('apiUrl')"
+            @input="$v.apiUrl.$touch()"
+            @blur="$v.apiUrl.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -46,14 +46,14 @@ limitations under the License.
         <v-flex>
           <v-text-field
             color="blue"
-            v-model="apiHMAC"
+            v-model="apiHmac"
             label="API HMAC"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
             @click:append="() => (hideSecret = !hideSecret)"
-            :error-messages="getErrorMessages('apiHMAC')"
-            @input="$v.apiHMAC.$touch()"
-            @blur="$v.apiHMAC.$touch()"
+            :error-messages="getErrorMessages('apiHmac')"
+            @input="$v.apiHmac.$touch()"
+            @blur="$v.apiHmac.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -69,10 +69,10 @@ import { required, url } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
-  apiHMAC: {
+  apiHmac: {
     required: 'You can\'t leave this empty.'
   },
-  apiURL: {
+  apiUrl: {
     required: 'You can\'t leave this empty.',
     url: 'You must enter a valid URL'
   }
@@ -93,8 +93,8 @@ export default {
   },
   data () {
     return {
-      apiHMAC: undefined,
-      apiURL: undefined,
+      apiHmac: undefined,
+      apiUrl: undefined,
       hideSecret: true,
       validationErrors
     }
@@ -109,16 +109,16 @@ export default {
     },
     secretData () {
       return {
-        metalAPIHMac: this.apiHMAC,
-        metalAPIURL: this.apiURL
+        metalAPIHMac: this.apiHmac,
+        metalAPIURL: this.apiUrl
       }
     },
     validators () {
       const validators = {
-        apiHMAC: {
+        apiHmac: {
           required
         },
-        apiURL: {
+        apiUrl: {
           required,
           url
         }
@@ -136,11 +136,11 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.apiHMAC = ''
-      this.apiURL = ''
+      this.apiHmac = ''
+      this.apiUrl = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'apiURL')
+        setDelayedInputFocus(this, 'apiUrl')
       }
     },
     getErrorMessages (field) {
