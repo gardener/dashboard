@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
+import chai from 'chai'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 import { mount } from '@vue/test-utils'
 import MainNavigation from '@/components/MainNavigation.vue'
 import Vue from 'vue'
@@ -22,14 +24,17 @@ import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 import noop from 'lodash/noop'
 
+chai.use(sinonChai)
+const expect = chai.expect
+
 Vue.use(Vuetify)
 Vue.use(Vuex)
 
 window.HTMLElement.prototype.scrollIntoView = noop
 
-let storeProjectList = []
+const storeProjectList = []
 
-let $store = new Vuex.Store({
+const $store = new Vuex.Store({
   state: {
     namespace: 'foo',
     sidebar: true,
@@ -72,7 +77,8 @@ const $router = {
         ]
       }
     ]
-  }
+  },
+  push: noop
 }
 
 function createMainNavigationComponent () {
@@ -104,10 +110,16 @@ function createProjectListItem (name) {
 }
 
 describe('MainNavigation.vue', function () {
+  const sandbox = sinon.createSandbox()
+
   beforeEach(function () {
-    storeProjectList.length = 0
+    storeProjectList.length = 0 // clear array
     storeProjectList.push(createProjectListItem('foo'))
     storeProjectList.push(createProjectListItem('bar'))
+  })
+
+  afterEach(function () {
+    sandbox.restore()
   })
 
   it('should have correct element and css class hierarchy', function () {
@@ -128,14 +140,16 @@ describe('MainNavigation.vue', function () {
     const projectMenuCard = wrapper.find('aside .project-menu .v-card')
     expect(projectMenuCard.element).not.to.be.undefined
 
-    const projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
+    let projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
     expect(projectMenuHighlightedTile.element).to.be.undefined
 
     // highlight (default v-list-tile highlighting)
     const projectList = wrapper.find('aside .project-menu .v-card .project-list')
+    expect(projectList.element).not.to.be.undefined
 
     projectList.trigger('keydown.down')
-    expect(projectList.element).not.to.be.undefined
+    projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
+    expect(projectMenuHighlightedTile.element).not.to.be.undefined
   })
 
   it('Filter input should be visible in case of more than 3 projects', function () {
@@ -153,7 +167,7 @@ describe('MainNavigation.vue', function () {
   it('Project list should be filtered by input', function () {
     storeProjectList.push(createProjectListItem('fooz'))
     storeProjectList.push(createProjectListItem('foobar'))
-    let wrapper = createMainNavigationComponent()
+    const wrapper = createMainNavigationComponent()
 
     let projectList = wrapper.vm.sortedAndFilteredProjectListWithAllProjects
     expect(projectList).to.have.length(5)
@@ -168,29 +182,143 @@ describe('MainNavigation.vue', function () {
     const projectListWrapper = wrapper.find({ ref: 'projectList' })
     const exactMatchEl = projectListWrapper.vm.$children[1].$el
     expect(exactMatchEl.className).to.contain('grey lighten-4')
-    const exactMatchChip = projectListWrapper.find('.v-chip__content')
-    expect(exactMatchChip.element).not.to.be.undefined
-    expect(exactMatchChip.text()).to.equal('Exact match')
   })
 
   it('Projects can be highlighted via arrow keys', function () {
-    storeProjectList.push(createProjectListItem('fooz'))
-    storeProjectList.push(createProjectListItem('foobar'))
-    let wrapper = createMainNavigationComponent()
+    storeProjectList.length = 0 // clear array
+    storeProjectList.push(createProjectListItem('a'))
+    storeProjectList.push(createProjectListItem('b'))
+    storeProjectList.push(createProjectListItem('c'))
+    storeProjectList.push(createProjectListItem('d'))
+    const wrapper = createMainNavigationComponent()
     const projectMenuButton = wrapper.find('aside .project-selector .v-btn__content')
 
-    expect(wrapper.vm.highlightedProjectIndex).to.equal(0)
+    expect(wrapper.vm.highlightedProjectName).to.be.undefined // undefined == first item == All Projects
     projectMenuButton.trigger('keydown.down')
+    // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
+    expect(wrapper.vm.highlightedProjectName).to.equal(storeProjectList[0].metadata.name)
     projectMenuButton.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProjectIndex).to.equal(2)
+    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[1])
     projectMenuButton.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProjectIndex).to.equal(1)
+    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[0])
 
     const projectFilterInput = wrapper.find('input')
     projectFilterInput.trigger('keydown.down')
     projectFilterInput.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProjectIndex).to.equal(3)
+    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[2])
     projectFilterInput.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProjectIndex).to.equal(2)
+    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[1])
+  })
+
+  it('Project list rendering should be lazy', function () {
+    storeProjectList.push(createProjectListItem('fooz'))
+    storeProjectList.push(createProjectListItem('foobar'))
+    storeProjectList.push(createProjectListItem('foozz'))
+    storeProjectList.push(createProjectListItem('foobarz'))
+    const wrapper = createMainNavigationComponent()
+    wrapper.setData({ numberOfVisibleProjects: 5 })
+    const projectListWrapper = wrapper.find({ ref: 'projectList' })
+
+    expect(wrapper.vm.visibleProjectList.length).to.equal(5)
+    expect(projectListWrapper.vm.$children.length).to.equal(5)
+
+    const projectFilterInput = wrapper.find('input')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keydown.down')
+
+    expect(wrapper.vm.visibleProjectList.length).to.equal(7)
+    expect(projectListWrapper.vm.$children.length).to.equal(7)
+  })
+
+  it('Project list scrolling should trigger lazy rendering', function () {
+    // stub bounding rect method to simulate actual scrolling
+    let methodCalled = 0
+    sandbox.stub(window.HTMLElement.prototype, 'getBoundingClientRect').callsFake(() => {
+      methodCalled++
+      switch (methodCalled) {
+        case 1: // FIRST
+        case 4: // SECOND
+        case 7: // THIRD
+          return {
+            top: 200
+          }
+        case 2: // FIRST
+        case 5: // SECOND
+        case 8: // THIRD
+          return {
+            height: 200
+          }
+        case 3: // FIRST
+        case 9: // THIRD
+          return {
+            top: 300 // scrolled into view
+          }
+        case 6: // SECOND
+          return {
+            top: 500 // NOT scrolled into view
+          }
+      }
+    })
+
+    storeProjectList.push(createProjectListItem('fooz'))
+    storeProjectList.push(createProjectListItem('foobar'))
+    storeProjectList.push(createProjectListItem('foozz'))
+    storeProjectList.push(createProjectListItem('foobarz'))
+    const wrapper = createMainNavigationComponent()
+    wrapper.setData({ numberOfVisibleProjects: 5 })
+    const projectListWrapper = wrapper.find({ ref: 'projectList' })
+
+    expect(wrapper.vm.visibleProjectList.length).to.equal(5)
+    expect(projectListWrapper.vm.$children.length).to.equal(5)
+
+    projectListWrapper.trigger('scroll') // scroll last element into view
+    expect(wrapper.vm.visibleProjectList.length).to.equal(6)
+    expect(projectListWrapper.vm.$children.length).to.equal(6)
+
+    projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
+    expect(wrapper.vm.visibleProjectList.length).to.equal(6)
+    expect(projectListWrapper.vm.$children.length).to.equal(6)
+
+    projectListWrapper.trigger('scroll') // scroll last element into view
+    expect(wrapper.vm.visibleProjectList.length).to.equal(7)
+    expect(projectListWrapper.vm.$children.length).to.equal(7)
+  })
+
+  it('Project list should navigate to highlighted project on enter', function () {
+    storeProjectList.length = 0 // clear array
+    storeProjectList.push(createProjectListItem('a'))
+    storeProjectList.push(createProjectListItem('b'))
+    storeProjectList.push(createProjectListItem('c'))
+    storeProjectList.push(createProjectListItem('d'))
+    const wrapper = createMainNavigationComponent()
+    const projectMenuButton = wrapper.find('aside .project-selector .v-btn__content')
+    const navigateSpy = sandbox.spy(wrapper.vm, 'navigateToProject')
+
+    // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
+    projectMenuButton.trigger('keydown.down')
+
+    projectMenuButton.trigger('keyup.enter')
+    expect(navigateSpy.getCall(0)).to.have.been.calledWith(storeProjectList[0])
+
+    const projectFilterInput = wrapper.find('input')
+    projectFilterInput.trigger('keydown.down')
+    projectFilterInput.trigger('keyup.enter')
+    expect(navigateSpy.getCall(1)).to.have.been.calledWith(storeProjectList[1])
+  })
+
+  it('Project list should navigate to project on click', function () {
+    const wrapper = createMainNavigationComponent()
+    const projectClickSpy = sandbox.spy(wrapper.vm, 'onProjectClick')
+    const navigateSpy = sandbox.spy(wrapper.vm, 'navigateToProject')
+
+    const projectListWrapper = wrapper.find({ ref: 'projectList' })
+    // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
+    projectListWrapper.findAll('.project-list-tile a').at(1).trigger('click')
+    expect(projectClickSpy).to.be.calledOnce
+    expect(navigateSpy).to.not.have.been.called // not called because of untrusted event
   })
 })
