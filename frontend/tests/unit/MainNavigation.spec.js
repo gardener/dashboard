@@ -257,16 +257,18 @@ describe('MainNavigation.vue', function () {
     expect(wrapper.vm.visibleProjectList.length).to.equal(6)
     expect(projectListWrapper.vm.$children.length).to.equal(6)
 
-    boundingRectStub.onCall(3).returns({ top: 200 })
-    boundingRectStub.onCall(4).returns({ height: 200 })
-    boundingRectStub.onCall(5).returns({ top: 500 }) // NOT scrolled into view
+    boundingRectStub.reset()
+    boundingRectStub.onCall(0).returns({ top: 200 })
+    boundingRectStub.onCall(1).returns({ height: 200 })
+    boundingRectStub.onCall(2).returns({ top: 500 }) // NOT scrolled into view
     projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
     expect(wrapper.vm.visibleProjectList.length).to.equal(6)
     expect(projectListWrapper.vm.$children.length).to.equal(6)
 
-    boundingRectStub.onCall(6).returns({ top: 200 })
-    boundingRectStub.onCall(7).returns({ height: 200 })
-    boundingRectStub.onCall(8).returns({ top: 300 }) // scrolled into view
+    boundingRectStub.reset()
+    boundingRectStub.onCall(0).returns({ top: 200 })
+    boundingRectStub.onCall(1).returns({ height: 200 })
+    boundingRectStub.onCall(2).returns({ top: 300 }) // scrolled into view
     projectListWrapper.trigger('scroll') // scroll last element into view
     expect(wrapper.vm.visibleProjectList.length).to.equal(7)
     expect(projectListWrapper.vm.$children.length).to.equal(7)

@@ -96,7 +96,7 @@ limitations under the License.
                 @click="onProjectClick($event, project)"
                 :class="{'grey lighten-4' : isHighlightedProject(project)}"
                 :key="project.metadata.name"
-                :g-id="project.metadata.name"
+                :data-g-project-name="project.metadata.name"
               >
                 <v-list-tile-avatar>
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
@@ -391,7 +391,7 @@ export default {
         return
       }
       const projectListItem = find(projectListChildren, child => {
-        return get(child, '$attrs.g-id') === this.highlightedProjectName
+        return get(child, '$attrs.data-g-project-name') === this.highlightedProjectName
       })
       if (!projectListItem) {
         return
