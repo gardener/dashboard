@@ -94,7 +94,7 @@ limitations under the License.
                 class="project-list-tile"
                 v-for="project in visibleProjectList"
                 @click="onProjectClick($event, project)"
-                :class="{'grey lighten-4' : project === highlightedProject}"
+                :class="{'grey lighten-4' : isHighlightedProject(project)}"
                 :key="project.metadata.name"
               >
                 <v-list-tile-avatar>
