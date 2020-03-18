@@ -386,7 +386,7 @@ export default {
         return
       }
       const projectListItem = find(projectListChildren, child => {
-        return get(child, '$vnode.data.key') === this.highlightedProject.metadata.name
+        return get(child, '$vnode.data.key') === this.highlightedProjectName
       })
       if (!projectListItem) {
         return
