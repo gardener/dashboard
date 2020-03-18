@@ -359,7 +359,7 @@ export default {
       this.$nextTick(() => this.scrollSelectedProjectIntoView())
     },
     selectProjectWithKeys (keyDirection) {
-      let currentHighlightedIndex = this.findProjectIndexCaseInsensitive(this.highlightedProject.metadata.name)
+      let currentHighlightedIndex = this.findProjectIndexCaseInsensitive(this.highlightedProjectName)
 
       if (keyDirection === 'up') {
         if (currentHighlightedIndex > 0) {
@@ -386,7 +386,7 @@ export default {
         return
       }
       const projectListItem = find(projectListChildren, child => {
-        return get(child, '$vnode.data.key') === this.highlightedProject.metadata.name
+        return get(child, '$vnode.data.key') === this.highlightedProjectName
       })
       if (!projectListItem) {
         return
