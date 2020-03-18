@@ -40,6 +40,7 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import toPairs from 'lodash/toPairs'
 import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
@@ -169,6 +170,9 @@ const getters = {
         return []
       }
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
       const items = cloudProfile.data[type]
       if (!region || !zones) {
         return items
@@ -286,7 +290,7 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'vsphere'], getters.cloudProviderKindList)
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
@@ -296,10 +300,14 @@ const getters = {
   },
   minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
+      const defaultMinimumSize = '20Gi'
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return defaultMinimumSize
+      }
       const seedsForCloudProfile = cloudProfile.data.seeds
       const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
-      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || '20Gi'
+      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
@@ -341,6 +349,48 @@ const getters = {
       return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
     }
   },
+  partitionIDsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Partion IDs equal zones for metal infrastructure
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+        return
+      }
+      const partitionIDs = getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+      return partitionIDs
+    }
+  },
+  firewallSizesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Firewall Sizes equals to list of image types for this zone
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+        return
+      }
+      const firewallSizes = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region })
+      return firewallSizes
+    }
+  },
+  firewallImagesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.firewallImages')
+    }
+  },
+  firewallNetworksByCloudProfileNameAndPartitionId (state, getters) {
+    return ({ cloudProfileName, partitionID }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const networks = get(cloudProfile, ['data', 'providerConfig', 'firewallNetworks', partitionID])
+      return map(toPairs(networks), ([key, value]) => {
+        return {
+          key,
+          value,
+          text: `${key} [${value}]`
+        }
+      })
+    }
+  },
+
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])

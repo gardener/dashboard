@@ -37,7 +37,7 @@ limitations under the License.
       <v-card-text>
         <v-container fluid>
           <div slot="message">
-            Are you sure to delete the secret <b>{{name}}</b>? <br /><span class="red--text text--darken-2">The operation
+            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>? <br /><span class="red--text font-weight-bold">The operation
             can not be undone.</span>
           </div>
         </v-container>
@@ -46,7 +46,7 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native="hide">Cancel</v-btn>
-        <v-btn flat @click.native="onDeleteSecret" class="blue--text">Delete Secret</v-btn>
+        <v-btn flat @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

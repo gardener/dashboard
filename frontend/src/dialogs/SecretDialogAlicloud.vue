@@ -33,9 +33,9 @@ limitations under the License.
         <v-flex>
           <v-text-field
             color="grey darken-4"
-            ref="accessKeyId"
             v-model="accessKeyId"
-            :label="accessKeyIdLabel"
+            ref="accessKeyId"
+            label="Access Key Id"
             :error-messages="getErrorMessages('accessKeyId')"
             @input="$v.accessKeyId.$touch()"
             @blur="$v.accessKeyId.$touch()"
@@ -47,7 +47,7 @@ limitations under the License.
           <v-text-field
             color="grey darken-4"
             v-model="accessKeySecret"
-            :label="accessKeySecretLabel"
+            label="Access Key Secret"
             :error-messages="getErrorMessages('accessKeySecret')"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
@@ -133,12 +133,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    accessKeyIdLabel () {
-      return this.isCreateMode ? 'Access Key Id' : 'New Access Key Id'
-    },
-    accessKeySecretLabel () {
-      return this.isCreateMode ? 'Access Key Secret ' : 'New Access Key Secret'
     }
   },
   methods: {

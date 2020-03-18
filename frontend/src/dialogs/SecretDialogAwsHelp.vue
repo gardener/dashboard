@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <secret-dialog-help
     title="About AWS Secrets"
-    color="orange"
+    color="orange darken-1"
     backgroundSrc="/static/background_aws.svg"
     :value="value"
     @input="onInput">
@@ -30,7 +30,7 @@ limitations under the License.
       </p>
       <p>
         Copy the AWS IAM policy document below and attach it to the IAM user
-        (<a class="orange--text text--darken-2" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
+        (<a class="orange--text text--darken-1" href="http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html" target="_blank">official
         documentation <v-icon style="font-size:80%">mdi-open-in-new</v-icon></a>).
       </p>
       <code-block height="250px" lang="json" :content="JSON.stringify(template, undefined, 2)"></code-block>

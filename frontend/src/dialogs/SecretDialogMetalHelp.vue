@@ -14,34 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
- <template>
-   <secret-dialog-help
-     title="About VMware vSphere Secrets"
-     color="indigo darken-4"
-     backgroundSrc="/static/background_vsphere.svg"
-     :value="value"
-     @input="onInput">
-     <div slot="help-content" class="helpContent">
-      <p>
-        Before you can provision and access a Kubernetes cluster on VMware vSphere, you need to add vSphere and NSX-T account credentials.
-        The Gardener needs these credentials to provision and operate the VMware vSphere infrastructure for your Kubernetes cluster.
-      </p>
-      <p>
-        Ensure that these accounts have privileges to <b>create, modify and delete VMs and Networking resources</b>.
-      </p>
-      <p>
-        Please read the
-        <a href="https://docs.vmware.com/de/VMware-vSphere/index.html"
-           target="_blank"
-           class="indigo--text text--darken-4">
-          VMware vSphere Documentation</a>
-          and the
-        <a href="https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html"
-          target="_blank"
-          class="indigo--text text--darken-4">
-         VMware NSX-T Data Center Documentation</a>.
-      </p>
-    </div>
+<template>
+  <secret-dialog-help
+    title="About Metal Secrets"
+    color="blue"
+    backgroundSrc="/static/background_metal.svg"
+    :value="value"
+    @input="onInput">
+    <div slot="help-content" class="helpContent">
+     <p>
+       Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+       The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+     </p>
+   </div>
   </secret-dialog-help>
 </template>
 

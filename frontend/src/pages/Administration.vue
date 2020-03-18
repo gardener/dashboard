@@ -97,7 +97,7 @@ limitations under the License.
       <template slot="message">
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
-        <i class="red--text text--darken-2">The operation can not be undone.</i>
+        <i class="red--text">The operation can not be undone.</i>
       </template>
     </g-dialog>
   </v-container>

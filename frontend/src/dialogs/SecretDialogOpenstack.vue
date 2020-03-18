@@ -33,8 +33,8 @@ limitations under the License.
         <v-flex>
           <v-text-field
             color="black"
-            ref="domainName"
             v-model="domainName"
+            ref="domainName"
             label="Domain Name"
             :error-messages="getErrorMessages('domainName')"
             @input="$v.domainName.$touch()"
@@ -44,7 +44,6 @@ limitations under the License.
         <v-flex>
           <v-text-field
             color="black"
-            ref="tenantName"
             v-model="tenantName"
             label="Tenant Name"
             :error-messages="getErrorMessages('tenantName')"

@@ -97,6 +97,70 @@ limitations under the License.
           ></v-select>
         </v-flex>
       </template>
+      <template v-else-if="infrastructureKind === 'metal'">
+        <v-flex class="regularInput">
+          <v-text-field
+            color="cyan darken-2"
+            label="Project ID"
+            v-model="projectID"
+            :error-messages="getErrorMessages('projectID')"
+            @input="onInputProjectID"
+            @blur="$v.projectID.$touch()"
+            hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
+            persistent-hint
+            ></v-text-field>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Partition ID"
+            :items="partitionIDs"
+            v-model="partitionID"
+            :error-messages="getErrorMessages('partitionID')"
+            @input="onInputPartitionID"
+            @blur="$v.partitionID.$touch()"
+            hint="Partion ID equals zone on other infrastructures"
+            persistent-hint
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Image"
+            :items="firewallImages"
+            v-model="firewallImage"
+            :error-messages="getErrorMessages('firewallImage')"
+            @input="onInputFirewallImage"
+            @blur="$v.firewallImage.$touch()"
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Size"
+            :items="firewallSizes"
+            v-model="firewallSize"
+            :error-messages="getErrorMessages('firewallSize')"
+            @input="onInputFirewallSize"
+            @blur="$v.firewallImage.$touch()"
+          ></v-select>
+        </v-flex>
+        <v-flex class="regularInput">
+          <v-select
+            color="cyan darken-2"
+            label="Firewall Networks"
+            :items="allFirewallNetworks"
+            v-model="firewallNetworks"
+            :error-messages="getErrorMessages('firewallNetworks')"
+            @input="onInputFirewallNetworks"
+            @blur="$v.firewallNetworks.$touch()"
+            chips
+            small-chips
+            deletable-chips
+            multiple
+          ></v-select>
+        </v-flex>
+      </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
         <v-flex class="regularInput">
           <v-select
@@ -148,6 +212,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import differenceWith from 'lodash/differenceWith'
 import intersection from 'lodash/intersection'
 import isEqual from 'lodash/isEqual'
+import find from 'lodash/find'
 import toUpper from 'lodash/toUpper'
 import { mapGetters, mapState } from 'vuex'
 
@@ -174,6 +239,31 @@ const validations = {
       return this.infrastructureKind === 'vsphere'
     }),
     includesKey: includesIfAvailable('default', 'allLoadBalancerClassNames')
+  },
+  partitionID: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallImage: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallSize: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  firewallNetworks: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
+  },
+  projectID: {
+    required: requiredIf(function () {
+      return this.infrastructureKind === 'metal'
+    })
   }
 }
 
@@ -198,6 +288,11 @@ export default {
       floatingPoolName: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
+      partitionID: undefined,
+      firewallImage: undefined,
+      firewallSize: undefined,
+      firewallNetworks: undefined,
+      projectID: undefined,
       valid: false,
       cloudProfileValid: true, // selection not shown in all cases, default to true
       addSecretDialogState: {
@@ -218,6 +313,10 @@ export default {
           help: false
         },
         alicloud: {
+          visible: false,
+          help: false
+        },
+        metal: {
           visible: false,
           help: false
         },
@@ -242,7 +341,11 @@ export default {
       'loadBalancerProviderNamesByCloudProfileNameAndRegion',
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileNameAndRegion'
+      'floatingPoolNamesByCloudProfileNameAndRegion',
+      'partitionIDsByCloudProfileNameAndRegion',
+      'firewallImagesByCloudProfileName',
+      'firewallNetworksByCloudProfileNameAndPartitionId',
+      'firewallSizesByCloudProfileNameAndRegionAndZones'
     ]),
     validationErrors () {
       const validationErrors = {
@@ -268,6 +371,21 @@ export default {
         loadBalancerClassNames: {
           required: 'Load Balancer Classes required',
           includesKey: ({ key }) => `Load Balancer Class "${key}" must be selected`
+        },
+        partitionID: {
+          required: 'Partition ID is required'
+        },
+        projectID: {
+          required: 'Project ID is required'
+        },
+        firewallImage: {
+          required: 'Firewall Image is required'
+        },
+        firewallSize: {
+          required: 'Firewall Size is required'
+        },
+        firewallNetworks: {
+          required: 'Firewall Networks required'
         }
       }
       return validationErrors
@@ -344,6 +462,22 @@ export default {
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
     },
+    partitionIDs () {
+      return this.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+    },
+    firewallImages () {
+      return this.firewallImagesByCloudProfileName(this.cloudProfileName)
+    },
+    firewallSizes () {
+      const cloudProfileName = this.cloudProfileName
+      const region = this.region
+      const zones = [this.partitionID]
+      const firewallSizes = this.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
+      return map(firewallSizes, 'name')
+    },
+    allFirewallNetworks () {
+      return this.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName: this.cloudProfileName, partitionID: this.partitionID })
+    },
     allLoadBalancerClasses () {
       const loadBalancerClasses = map(this.loadBalancerClassesByCloudProfileName(this.cloudProfileName), ({ name, ipPoolName }) => {
         return {
@@ -387,6 +521,9 @@ export default {
         this.loadBalancerClassNames = []
       }
       this.onInputLoadBalancerClassNames()
+      this.firewallImage = head(this.firewallImages)
+      this.onInputFirewallImage()
+      this.projectID = undefined
     },
     setDefaultCloudProfile () {
       this.cloudProfileName = get(head(this.cloudProfiles), 'metadata.name')
@@ -405,6 +542,8 @@ export default {
       }
     },
     onInputRegion () {
+      this.partitionID = head(this.partitionIDs)
+      this.onInputPartitionID()
       this.$v.region.$touch()
       this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
@@ -421,6 +560,33 @@ export default {
       // sort loadBalancerClassNames in the same order as they are listed in the cloudProfile
       this.loadBalancerClassNames = intersection(this.allLoadBalancerClassNames, this.loadBalancerClassNames)
       this.$v.loadBalancerClassNames.$touch()
+      this.validateInput()
+    },
+    onInputPartitionID () {
+      this.$v.partitionID.$touch()
+      this.firewallSize = head(this.firewallSizes)
+      const firewallNetwork = find(this.allFirewallNetworks, { key: 'internet' })
+      if (firewallNetwork) {
+        this.firewallNetworks = [firewallNetwork.value]
+      } else {
+        this.firewallNetworks = undefined
+      }
+      this.validateInput()
+    },
+    onInputProjectID () {
+      this.$v.projectID.$touch()
+      this.validateInput()
+    },
+    onInputFirewallImage () {
+      this.$v.firewallImage.$touch()
+      this.validateInput()
+    },
+    onInputFirewallSize () {
+      this.$v.firewallSize.$touch()
+      this.validateInput()
+    },
+    onInputFirewallNetworks () {
+      this.$v.firewallNetworks.$touch()
       this.validateInput()
     },
     onUpdateCloudProfileName () {
@@ -449,10 +615,27 @@ export default {
         region: this.region,
         floatingPoolName: this.floatingPoolName,
         loadBalancerProviderName: this.loadBalancerProviderName,
-        loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name }))
+        loadBalancerClasses: map(this.loadBalancerClassNames, name => ({ name })),
+        partitionID: this.partitionID,
+        projectID: this.projectID,
+        firewallImage: this.firewallImage,
+        firewallSize: this.firewallSize,
+        firewallNetworks: this.firewallNetworks
       }
     },
-    setInfrastructureData ({ infrastructureKind, cloudProfileName, secret, region, floatingPoolName, loadBalancerProviderName, loadBalancerClasses }) {
+    setInfrastructureData ({
+      infrastructureKind,
+      cloudProfileName,
+      secret,
+      region,
+      floatingPoolName,
+      loadBalancerProviderName,
+      loadBalancerClasses,
+      partitionID,
+      projectID,
+      firewallImage,
+      firewallSize,
+      firewallNetworks }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
@@ -460,7 +643,11 @@ export default {
       this.floatingPoolName = floatingPoolName
       this.loadBalancerProviderName = loadBalancerProviderName
       this.loadBalancerClassNames = map(loadBalancerClasses, 'name')
-
+      this.partitionID = partitionID
+      this.projectID = projectID
+      this.firewallImage = firewallImage
+      this.firewallSize = firewallSize
+      this.firewallNetworks = firewallNetworks
       this.$v.secret.$touch() // secret may not be valid (e.g. missing cost object). We want to show the error immediatley
       this.validateInput()
     },

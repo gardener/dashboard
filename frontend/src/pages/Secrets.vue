@@ -95,6 +95,21 @@ limitations under the License.
     ></secret>
 
     <secret
+    v-if="hasCloudProfileForCloudProviderKind('metal')"
+    class="mt-3"
+    infrastructureKey="metal"
+    infrastructureName="Metal Cloud"
+    secretDescriptorKey="metalHMAC"
+    icon="metal-white"
+    description="Make sure that the new credentials have the correct Metal Cloud permissions"
+    color="metal-bgcolor"
+    @add="onAdd"
+    @toogleHelp="onToogleHelp"
+    @update="onUpdate"
+    @delete="onDelete"
+    ></secret>
+
+    <secret
     v-if="hasCloudProfileForCloudProviderKind('vsphere')"
     class="mt-3"
     infrastructureKey="vsphere"
@@ -160,22 +175,25 @@ limitations under the License.
           <v-icon>add</v-icon>
           <v-icon>close</v-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="light-green darken-3" @click="onAdd('vsphere')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="vsphere-bgcolor" @click="onAdd('vsphere')">
           <infra-icon value="vsphere-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small class="grey darken-4" @click="onAdd('alicloud')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('metal')" fab dark small class="metal-bgcolor" @click="onAdd('metal')">
+          <infra-icon value="metal-white" :width="20"></infra-icon>
+        </v-btn>
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('alicloud')" fab dark small color="grey darken-4" @click="onAdd('alicloud')">
           <infra-icon value="alicloud-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small :color="infrastructureColor('openstack')" @click="onAdd('openstack')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('openstack')" fab dark small class="openstack-bgcolor" @click="onAdd('openstack')">
           <infra-icon value="openstack-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small class="green" @click="onAdd('gcp')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('gcp')" fab dark small color="green" @click="onAdd('gcp')">
           <infra-icon value="gcp-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small :color="infrastructureColor('azure')" @click="onAdd('azure')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('azure')" fab dark small class="azure-bgcolor" @click="onAdd('azure')">
           <infra-icon value="azure-white" :width="20"></infra-icon>
         </v-btn>
-        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small :color="infrastructureColor('aws')" @click="onAdd('aws')">
+        <v-btn v-if="hasCloudProfileForCloudProviderKind('aws')" fab dark small class="aws-bgcolor" @click="onAdd('aws')">
           <infra-icon value="aws-white" :width="20"></infra-icon>
         </v-btn>
       </v-speed-dial>
@@ -186,7 +204,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding, infrastructureColor } from '@/utils'
+import { isOwnSecretBinding } from '@/utils'
 import DeleteDialog from '@/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
@@ -225,6 +243,10 @@ export default {
           help: false
         },
         alicloud: {
+          visible: false,
+          help: false
+        },
+        metal: {
           visible: false,
           help: false
         },
@@ -290,6 +312,8 @@ export default {
           return '/static/background_openstack.svg'
         case 'alicloud':
           return '/static/background_alicloud.svg'
+        case 'metal':
+          return '/static/background_metal.svg'
         case 'vsphere':
           return '/static/background_vsphere.svg'
       }
@@ -300,9 +324,6 @@ export default {
     },
     isOwnSecretBinding (secret) {
       return isOwnSecretBinding(secret)
-    },
-    infrastructureColor (kind) {
-      return infrastructureColor(kind)
     }
   },
   mounted () {

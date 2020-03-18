@@ -402,25 +402,12 @@ export function isServiceAccountFromNamespace (username, namespace) {
 
 // expect colors to be in format <color> <optional:modifier>
 export function textColor (color) {
-  const colorArr = split(color, ' ')
-  const colorStr = colorArr[0]
-  const colorMod = colorArr[1]
+  const [colorStr, colorMod] = split(color, ' ')
   let textColor = `${colorStr}--text`
   if (colorMod) {
     textColor = `${textColor} text--${colorMod}`
   }
   return textColor
-}
-
-export function infrastructureColor (kind) {
-  switch (kind) {
-    case 'openstack':
-      return '#ED1944'
-    case 'azure':
-      return '#2075b8'
-    case 'aws':
-      return '#ff9900'
-  }
 }
 
 export function encodeBase64 (input) {
@@ -601,6 +588,20 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   }
 
   return worker
+}
+
+export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
+  switch (cloudProviderKind) {
+    case 'azure':
+      if (isNewCluster) {
+        return true // new clusters are always created as zoned clusters by the dashboard
+      }
+      return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
+    case 'metal':
+      return false // metal clusters do not support zones for worker groups
+    default:
+      return true
+  }
 }
 
 export function allErrorCodesFromLastErrors (lastErrors) {

@@ -21,7 +21,7 @@ limitations under the License.
     :dataValid="valid"
     :secret="secret"
     cloudProviderKind="azure"
-    color="blue"
+    color="blue darken-1"
     infraIcon="azure-white"
     backgroundSrc="/static/background_azure.svg"
     createTitle="Add new Azure Secret"
@@ -32,10 +32,10 @@ limitations under the License.
       <v-layout column>
         <v-flex>
           <v-text-field
-            color="blue"
-            ref="clientId"
+            color="blue darken-1"
             v-model="clientId"
-            :label="clientIdLabel"
+            ref="clientId"
+            label="Client Id"
             :error-messages="getErrorMessages('clientId')"
             @input="$v.clientId.$touch()"
             @blur="$v.clientId.$touch()"
@@ -43,11 +43,11 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="blue"
+            color="blue darken-1"
             v-model="clientSecret"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
-            :label="clientSecretLabel"
+            label="Client Secret"
             :error-messages="getErrorMessages('clientSecret')"
             @click:append="() => (hideSecret = !hideSecret)"
             @input="$v.clientSecret.$touch()"
@@ -56,9 +56,9 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="blue"
+            color="blue darken-1"
             v-model="tenantId"
-            :label="tenantIdLabel"
+            label="Tenant Id"
             :error-messages="getErrorMessages('tenantId')"
             @input="$v.tenantId.$touch()"
             @blur="$v.tenantId.$touch()"
@@ -66,9 +66,9 @@ limitations under the License.
         </v-flex>
         <v-flex>
           <v-text-field
-            color="blue"
+            color="blue darken-1"
             v-model="subscriptionId"
-            :label="subscriptionIdLabel"
+            label="Subscription Id"
             :error-messages="getErrorMessages('subscriptionId')"
             @input="$v.subscriptionId.$touch()"
             @blur="$v.subscriptionId.$touch()"
@@ -159,18 +159,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    clientIdLabel () {
-      return this.isCreateMode ? 'Client Id' : 'New Client Id'
-    },
-    clientSecretLabel () {
-      return this.isCreateMode ? 'Client Secret' : 'New Client Secret'
-    },
-    tenantIdLabel () {
-      return this.isCreateMode ? 'Tenant Id' : 'New Tenant Id'
-    },
-    subscriptionIdLabel () {
-      return this.isCreateMode ? 'Subscription Id' : 'New Subscription Id'
     }
   },
   methods: {

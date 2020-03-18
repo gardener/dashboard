@@ -20,42 +20,40 @@ limitations under the License.
     :data="secretData"
     :dataValid="valid"
     :secret="secret"
-    cloudProviderKind="aws"
-    color="orange darken-1"
-    infraIcon="aws-white"
-    backgroundSrc="/static/background_aws.svg"
-    createTitle="Add new AWS Secret"
-    replaceTitle="Replace AWS Secret"
+    cloudProviderKind="metal"
+    color="blue"
+    infraIcon="metal-white"
+    backgroundSrc="/static/background_metal.svg"
+    createTitle="Add new Metal Secret"
+    replaceTitle="Replace Metal Secret"
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout column>
+      <v-layout row>
         <v-flex>
           <v-text-field
-            color="orange darken-1"
-            v-model="accessKeyId"
-            ref="accessKeyId"
-            label="Access Key Id"
-            :error-messages="getErrorMessages('accessKeyId')"
-            @input="$v.accessKeyId.$touch()"
-            @blur="$v.accessKeyId.$touch()"
-            counter="128"
-            hint="e.g. AKIAIOSFODNN7EXAMPLE"
+            color="blue"
+            v-model="apiUrl"
+            ref="apiUrl"
+            label="API URL"
+            :error-messages="getErrorMessages('apiUrl')"
+            @input="$v.apiUrl.$touch()"
+            @blur="$v.apiUrl.$touch()"
           ></v-text-field>
         </v-flex>
+      </v-layout>
+      <v-layout row>
         <v-flex>
           <v-text-field
-            color="orange darken-1"
-            v-model="secretAccessKey"
-            label="Secret Access Key"
-            :error-messages="getErrorMessages('secretAccessKey')"
+            color="blue"
+            v-model="apiHmac"
+            label="API HMAC"
             :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
             :type="hideSecret ? 'password' : 'text'"
             @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.secretAccessKey.$touch()"
-            @blur="$v.secretAccessKey.$touch()"
-            counter="40"
-            hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
+            :error-messages="getErrorMessages('apiHmac')"
+            @input="$v.apiHmac.$touch()"
+            @blur="$v.apiHmac.$touch()"
           ></v-text-field>
         </v-flex>
       </v-layout>
@@ -67,21 +65,16 @@ limitations under the License.
 
 <script>
 import SecretDialog from '@/dialogs/SecretDialog'
-import { required, minLength, maxLength } from 'vuelidate/lib/validators'
-import { alphaNumUnderscore, base64 } from '@/utils/validators'
+import { required, url } from 'vuelidate/lib/validators'
 import { getValidationErrors, setDelayedInputFocus } from '@/utils'
 
 const validationErrors = {
-  accessKeyId: {
-    required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 16 characters.',
-    maxLength: 'It exceeds the maximum length of 128 characters.',
-    alphaNumUnderscore: 'Please use only alphanumeric characters and underscore.'
+  apiHmac: {
+    required: 'You can\'t leave this empty.'
   },
-  secretAccessKey: {
+  apiUrl: {
     required: 'You can\'t leave this empty.',
-    minLength: 'It must contain at least 40 characters.',
-    base64: 'Invalid secret access key.'
+    url: 'You must enter a valid URL'
   }
 }
 
@@ -100,8 +93,8 @@ export default {
   },
   data () {
     return {
-      accessKeyId: undefined,
-      secretAccessKey: undefined,
+      apiHmac: undefined,
+      apiUrl: undefined,
       hideSecret: true,
       validationErrors
     }
@@ -116,22 +109,18 @@ export default {
     },
     secretData () {
       return {
-        accessKeyID: this.accessKeyId,
-        secretAccessKey: this.secretAccessKey
+        metalAPIHMac: this.apiHmac,
+        metalAPIURL: this.apiUrl
       }
     },
     validators () {
       const validators = {
-        accessKeyId: {
-          required,
-          minLength: minLength(16),
-          maxLength: maxLength(128),
-          alphaNumUnderscore
+        apiHmac: {
+          required
         },
-        secretAccessKey: {
+        apiUrl: {
           required,
-          minLength: minLength(40),
-          base64
+          url
         }
       }
       return validators
@@ -147,11 +136,11 @@ export default {
     reset () {
       this.$v.$reset()
 
-      this.accessKeyId = ''
-      this.secretAccessKey = ''
+      this.apiHmac = ''
+      this.apiUrl = ''
 
       if (!this.isCreateMode) {
-        setDelayedInputFocus(this, 'accessKeyId')
+        setDelayedInputFocus(this, 'apiUrl')
       }
     },
     getErrorMessages (field) {
