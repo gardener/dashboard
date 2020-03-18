@@ -35,14 +35,14 @@ limitations under the License.
           <shoot-control-plane :shootItem="shootItem"></shoot-control-plane>
         </v-card>
 
-        <v-card>
+        <v-card v-if="canGetSecrets" class="mb-3">
           <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
 
-        <shoot-monitoring-card :shootItem="shootItem" class="mt-3"></shoot-monitoring-card>
+        <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
@@ -109,7 +109,8 @@ export default {
       'journalsByNamespaceAndName',
       'isAdmin',
       'hasControlPlaneTerminalAccess',
-      'isKymaFeatureEnabled'
+      'isKymaFeatureEnabled',
+      'canGetSecrets'
     ]),
     value () {
       return this.shootByNamespaceAndName(this.$route.params)

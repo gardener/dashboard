@@ -223,24 +223,6 @@ function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, 
   return { metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret }
 }
 
-function canCreateProjects (scope) {
-  return scope
-    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
-      const { namespace, verb, resource, group } = body.spec.resourceAttributes
-      return !namespace && group === 'core.gardener.cloud' && resource === 'projects' && verb === 'create'
-    })
-    .reply(200, function (uri, body) {
-      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
-      const payload = jwt.decode(token)
-      const allowed = _.endsWith(payload.id, 'example.org')
-      return _.assign({
-        status: {
-          allowed
-        }
-      }, body)
-    })
-}
-
 function reviewToken (scope) {
   return scope
     .post('/apis/authentication.k8s.io/v1/tokenreviews')
@@ -1266,8 +1248,46 @@ const stub = {
   getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    canCreateProjects(scope)
     return scope
+  },
+  getSelfSubjectRulesReview ({ bearer, namespace }) {
+    return nockWithAuthorization(bearer)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectrulesreviews', body => {
+        return body.spec.namespace === namespace
+      })
+      .reply(200, function (uri, body) {
+        const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+        const payload = jwt.decode(token)
+
+        let resourceRules = []
+        const nonResourceRules = []
+        const incomplete = false
+        if (_.endsWith(payload.id, 'example.org')) {
+          resourceRules = resourceRules.concat([{
+              verbs: ['get'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects'],
+              resourceName: ['foo']
+            },
+            {
+              verbs: ['create'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects']
+            }
+          ])
+        } else {
+          resourceRules = resourceRules.concat([{
+            verbs: ['get'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects'],
+            resourceName: ['foo']
+          }
+        ])
+        }
+        return {
+          status: { resourceRules, nonResourceRules, incomplete }
+        }
+      })
   },
   authorizeToken () {
     const adminScope = nockWithAuthorization(auth.bearer)

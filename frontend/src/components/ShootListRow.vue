@@ -111,13 +111,13 @@ limitations under the License.
     </td>
     <td class="action-button-group text-xs-right nowrap" v-if="this.headerVisible['actions']">
       <v-layout align-center justify-end row fill-height>
-        <v-tooltip top>
+        <v-tooltip top v-if="canGetSecrets">
           <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
             <v-icon size="22">mdi-key</v-icon>
           </v-btn>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <delete-cluster :shootItem="shootItem" small content-class="red--text"></delete-cluster>
+        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small content-class="red--text"></delete-cluster>
       </v-layout>
     </td>
   </tr>
@@ -179,7 +179,9 @@ export default {
   computed: {
     ...mapGetters([
       'lastUpdatedJournalByNameAndNamespace',
-      'journalsLabels'
+      'journalsLabels',
+      'canGetSecrets',
+      'canDeleteShoots'
     ]),
     headerVisible () {
       const headerVisible = {}

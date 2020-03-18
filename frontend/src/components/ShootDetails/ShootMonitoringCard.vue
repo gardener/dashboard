@@ -51,12 +51,14 @@ limitations under the License.
         </div>
       </v-card-title>
 
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
-        <span class="subheading">{{metricsNotAvailableText}}</span>
-      </v-card-title>
-      <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
+      <template v-if="canGetSecrets">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
+          <span class="subheading">{{metricsNotAvailableText}}</span>
+        </v-card-title>
+        <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
+      </template>
     </div>
   </v-card>
 </template>
@@ -68,6 +70,7 @@ import RetryOperation from '@/components/RetryOperation'
 import ClusterMetrics from '@/components/ClusterMetrics'
 import { isTypeDelete } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
+import { mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -88,6 +91,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'canGetSecrets'
+    ]),
     isLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)
     },

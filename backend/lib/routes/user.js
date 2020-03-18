@@ -31,17 +31,22 @@ router.route('/privileges')
   .get(async (req, res, next) => {
     try {
       const user = req.user || {}
-      const [
-        isAdmin,
-        canCreateProject
-      ] = await Promise.all([
-        authorization.isAdmin(user),
-        authorization.canCreateProject(user)
-      ])
+      const isAdmin = await authorization.isAdmin(user)
       res.send({
-        isAdmin,
-        canCreateProject
+        isAdmin
       })
+    } catch (err) {
+      next(err)
+    }
+  })
+
+router.route('/subjectrules')
+  .post(async (req, res, next) => {
+    try {
+      const user = req.user || {}
+      const { namespace } = req.body
+      const result = await authorization.selfSubjectRulesReview(user, namespace)
+      res.send(result)
     } catch (err) {
       next(err)
     }

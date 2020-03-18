@@ -51,7 +51,7 @@ limitations under the License.
           {{username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace">
+      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
           <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload">
             <v-icon>mdi-download</v-icon>
@@ -59,7 +59,7 @@ limitations under the License.
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-tile-action>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace">
+      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
           <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig">
             <v-icon>visibility</v-icon>
@@ -67,7 +67,7 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-tile-action>
-      <v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
           <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete">
             <v-icon>mdi-delete</v-icon>
@@ -87,6 +87,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import {
   isServiceAccountFromNamespace
 } from '@/utils'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'project-service-account-row',
@@ -124,6 +125,10 @@ export default {
   computed: {
     ...mapState([
       'namespace'
+    ]),
+    ...mapGetters([
+      'canPatchProject',
+      'canGetSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
       return isServiceAccountFromNamespace(this.username, this.namespace)

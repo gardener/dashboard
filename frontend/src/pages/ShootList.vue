@@ -143,7 +143,7 @@ limitations under the License.
         </v-card>
       </v-dialog>
     </v-card>
-    <v-fab-transition>
+    <v-fab-transition v-if="canCreateShoots">
       <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace: $route.params.namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
@@ -204,6 +204,12 @@ export default {
     },
     search (value) {
       this.setShootListSearchValue(value)
+    },
+    canGetSecrets () {
+      this.hideNotAvailableColumns()
+    },
+    canDeleteShoots () {
+      this.hideNotAvailableColumns()
     }
   },
   methods: {
@@ -273,6 +279,9 @@ export default {
         if (header.value === 'journal') {
           this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
         }
+        if (header.value === 'actions') {
+          this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
+        }
       }
     },
     hideHeaderIfNotValue (header, value) {
@@ -306,7 +315,11 @@ export default {
       item: 'shootByNamespaceAndName',
       selectedItem: 'selectedShoot',
       isAdmin: 'isAdmin',
-      getShootListFilters: 'getShootListFilters'
+      getShootListFilters: 'getShootListFilters',
+      canPatchShoots: 'canPatchShoots',
+      canDeleteShoots: 'canDeleteShoots',
+      canCreateShoots: 'canCreateShoots',
+      canGetSecrets: 'canGetSecrets'
     }),
     ...mapState([
       'shootsLoading',

@@ -32,7 +32,7 @@ limitations under the License.
           <span v-else class="pl-2">{{username}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
-      <v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
           <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
             <v-icon>mdi-delete</v-icon>
@@ -46,6 +46,8 @@ limitations under the License.
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'project-user-row',
   props: {
@@ -69,6 +71,11 @@ export default {
       type: Boolean,
       required: true
     }
+  },
+  computed: {
+    ...mapGetters([
+      'canPatchProject'
+    ])
   },
   methods: {
     onDelete (username) {

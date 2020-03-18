@@ -22,9 +22,11 @@ limitations under the License.
   >
   <div class="message">
     To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
-    Please navigate to the cluster details page to
-    <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
-    a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
+    <template v-if="canPatchShoots">
+      Please navigate to the cluster details page to
+      <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
+      a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
+    </template>
   </div>
     <v-tooltip top slot="popperRef">
       <v-icon slot="activator" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
@@ -36,6 +38,7 @@ limitations under the License.
 
 <script>
 import GPopper from '@/components/GPopper'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'hibernationschedulewarning',
@@ -54,6 +57,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'canPatchShoots'
+    ]),
     purposeText () {
       return this.purpose || ''
     }
