@@ -292,12 +292,6 @@ export default {
       const project = head(this.sortedAndFilteredProjectList)
       const projectName = get(project, 'metadata.name')
       return this.isProjectNameMatchingFilter(projectName)
-    },
-    highlightedProject () {
-      if (!this.highlightedProjectName) {
-        return head(this.sortedAndFilteredProjectListWithAllProjects)
-      }
-      return this.findProjectCaseInsensitive(this.highlightedProjectName)
     }
   },
   methods: {
@@ -313,6 +307,12 @@ export default {
       return findIndex(this.sortedAndFilteredProjectListWithAllProjects, project => {
         return toLower(projectName) === toLower(project.metadata.name)
       })
+    },
+    highlightedProject () {
+      if (!this.highlightedProjectName) {
+        return head(this.sortedAndFilteredProjectListWithAllProjects)
+      }
+      return this.findProjectCaseInsensitive(this.highlightedProjectName)
     },
     navigateToHighlightedProject () {
       this.navigateToProject(this.highlightedProject)
