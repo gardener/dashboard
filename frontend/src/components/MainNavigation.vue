@@ -315,7 +315,7 @@ export default {
       return this.findProjectCaseInsensitive(this.highlightedProjectName)
     },
     navigateToHighlightedProject () {
-      this.navigateToProject(this.highlightedProject)
+      this.navigateToProject(this.highlightedProject())
     },
     onProjectClick (event, project) {
       if (event.isTrusted) {
@@ -356,6 +356,7 @@ export default {
       if (this.projectFilterHasExactMatch) {
         this.highlightedProjectName = this.projectFilter
       }
+
       this.$nextTick(() => this.scrollSelectedProjectIntoView())
     },
     selectProjectWithKeys (keyDirection) {
