@@ -194,20 +194,22 @@ describe('MainNavigation.vue', function () {
     const projectMenuButton = wrapper.find('aside .project-selector .v-btn__content')
 
     expect(wrapper.vm.highlightedProjectName).to.be.undefined // undefined == first item == All Projects
+    const scrollIntoViewSpy = sandbox.spy(window.HTMLElement.prototype, 'scrollIntoView')
     projectMenuButton.trigger('keydown.down')
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item
     expect(wrapper.vm.highlightedProjectName).to.equal(storeProjectList[0].metadata.name)
     projectMenuButton.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[1])
+    expect(wrapper.vm.highlightedProject()).to.equal(storeProjectList[1])
     projectMenuButton.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[0])
+    expect(wrapper.vm.highlightedProject()).to.equal(storeProjectList[0])
 
     const projectFilterInput = wrapper.find('input')
     projectFilterInput.trigger('keydown.down')
     projectFilterInput.trigger('keydown.down')
-    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[2])
+    expect(wrapper.vm.highlightedProject()).to.equal(storeProjectList[2])
     projectFilterInput.trigger('keydown.up')
-    expect(wrapper.vm.highlightedProject).to.equal(storeProjectList[1])
+    expect(wrapper.vm.highlightedProject()).to.equal(storeProjectList[1])
+    expect(scrollIntoViewSpy.callCount).to.equal(6)
   })
 
   it('Project list rendering should be lazy', function () {
@@ -235,35 +237,6 @@ describe('MainNavigation.vue', function () {
   })
 
   it('Project list scrolling should trigger lazy rendering', function () {
-    // stub bounding rect method to simulate actual scrolling
-    let methodCalled = 0
-    sandbox.stub(window.HTMLElement.prototype, 'getBoundingClientRect').callsFake(() => {
-      methodCalled++
-      switch (methodCalled) {
-        case 1: // FIRST
-        case 4: // SECOND
-        case 7: // THIRD
-          return {
-            top: 200
-          }
-        case 2: // FIRST
-        case 5: // SECOND
-        case 8: // THIRD
-          return {
-            height: 200
-          }
-        case 3: // FIRST
-        case 9: // THIRD
-          return {
-            top: 300 // scrolled into view
-          }
-        case 6: // SECOND
-          return {
-            top: 500 // NOT scrolled into view
-          }
-      }
-    })
-
     storeProjectList.push(createProjectListItem('fooz'))
     storeProjectList.push(createProjectListItem('foobar'))
     storeProjectList.push(createProjectListItem('foozz'))
@@ -275,14 +248,25 @@ describe('MainNavigation.vue', function () {
     expect(wrapper.vm.visibleProjectList.length).to.equal(5)
     expect(projectListWrapper.vm.$children.length).to.equal(5)
 
+    // stub bounding rect method to simulate actual scrolling
+    const boundingRectStub = sandbox.stub(window.HTMLElement.prototype, 'getBoundingClientRect')
+    boundingRectStub.onCall(0).returns({ top: 200 })
+    boundingRectStub.onCall(1).returns({ height: 200 })
+    boundingRectStub.onCall(2).returns({ top: 300 }) // scrolled into view
     projectListWrapper.trigger('scroll') // scroll last element into view
     expect(wrapper.vm.visibleProjectList.length).to.equal(6)
     expect(projectListWrapper.vm.$children.length).to.equal(6)
 
+    boundingRectStub.onCall(3).returns({ top: 200 })
+    boundingRectStub.onCall(4).returns({ height: 200 })
+    boundingRectStub.onCall(5).returns({ top: 500 }) // NOT scrolled into view
     projectListWrapper.trigger('scroll') // scrolled, but NOT scrolled last element into view
     expect(wrapper.vm.visibleProjectList.length).to.equal(6)
     expect(projectListWrapper.vm.$children.length).to.equal(6)
 
+    boundingRectStub.onCall(6).returns({ top: 200 })
+    boundingRectStub.onCall(7).returns({ height: 200 })
+    boundingRectStub.onCall(8).returns({ top: 300 }) // scrolled into view
     projectListWrapper.trigger('scroll') // scroll last element into view
     expect(wrapper.vm.visibleProjectList.length).to.equal(7)
     expect(projectListWrapper.vm.$children.length).to.equal(7)

@@ -53,8 +53,8 @@ limitations under the License.
             block
             slot="activator"
             class="project-selector elevation-4 ma-0 white--text"
-            @keydown.down="selectProjectWithKeys('down')"
-            @keydown.up="selectProjectWithKeys('up')"
+            @keydown.down="highlightProjectWithKeys('down')"
+            @keydown.up="highlightProjectWithKeys('up')"
             @keyup.enter="navigateToHighlightedProject"
           >
             <v-icon class="pr-4">mdi-grid-large</v-icon>
@@ -81,8 +81,8 @@ limitations under the License.
                   @keyup.esc="projectFilter = ''"
                   @keyup.enter="navigateToHighlightedProject"
                   @input="onInputProjectFilter"
-                  @keydown.down="selectProjectWithKeys('down')"
-                  @keydown.up="selectProjectWithKeys('up')"
+                  @keydown.down="highlightProjectWithKeys('down')"
+                  @keydown.up="highlightProjectWithKeys('up')"
                   autofocus
                 >
                 </v-text-field>
@@ -96,6 +96,7 @@ limitations under the License.
                 @click="onProjectClick($event, project)"
                 :class="{'grey lighten-4' : isHighlightedProject(project)}"
                 :key="project.metadata.name"
+                :g-id="project.metadata.name"
               >
                 <v-list-tile-avatar>
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
@@ -357,10 +358,13 @@ export default {
         this.highlightedProjectName = this.projectFilter
       }
 
-      this.$nextTick(() => this.scrollSelectedProjectIntoView())
+      this.$nextTick(() => this.scrollHighlightedProjectIntoView())
     },
-    selectProjectWithKeys (keyDirection) {
-      let currentHighlightedIndex = this.findProjectIndexCaseInsensitive(this.highlightedProjectName)
+    highlightProjectWithKeys (keyDirection) {
+      let currentHighlightedIndex = 0
+      if (this.highlightedProjectName) {
+        currentHighlightedIndex = this.findProjectIndexCaseInsensitive(this.highlightedProjectName)
+      }
 
       if (keyDirection === 'up') {
         if (currentHighlightedIndex > 0) {
@@ -379,15 +383,15 @@ export default {
         this.numberOfVisibleProjects++
       }
 
-      this.scrollSelectedProjectIntoView()
+      this.scrollHighlightedProjectIntoView()
     },
-    scrollSelectedProjectIntoView () {
+    scrollHighlightedProjectIntoView () {
       const projectListChildren = get(this, '$refs.projectList.$children')
       if (!projectListChildren) {
         return
       }
       const projectListItem = find(projectListChildren, child => {
-        return get(child, '$vnode.data.key') === this.highlightedProjectName
+        return get(child, '$attrs.g-id') === this.highlightedProjectName
       })
       if (!projectListItem) {
         return
@@ -425,7 +429,7 @@ export default {
     isProjectNameMatchingFilter (projectName) {
       return toLower(projectName) === toLower(this.projectFilter)
     },
-    isHighlightedProject(project) {
+    isHighlightedProject (project) {
       return project.metadata.name === this.highlightedProjectName
     }
   },
