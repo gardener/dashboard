@@ -423,6 +423,9 @@ export default {
     },
     isProjectNameMatchingFilter (projectName) {
       return toLower(projectName) === toLower(this.projectFilter)
+    },
+    isHighlightedProject(project) {
+      return project.metadata.name === this.highlightedProjectName
     }
   },
   watch: {
