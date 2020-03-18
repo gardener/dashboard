@@ -366,6 +366,10 @@ export function shootHasIssue (shoot) {
 }
 
 export function isReconciliationDeactivated (metadata) {
+  const respectSyncPeriodOverwrite = get(store.state, 'cfg.gardenlet.respectSyncPeriodOverwrite')
+  if (!respectSyncPeriodOverwrite) {
+    return false
+  }
   const truthyValues = ['1', 't', 'T', 'true', 'TRUE', 'True']
   const ignoreDeprecated = get(metadata, ['annotations', 'shoot.garden.sapcloud.io/ignore'])
   const ignore = get(metadata, ['annotations', 'shoot.gardener.cloud/ignore'], ignoreDeprecated)
