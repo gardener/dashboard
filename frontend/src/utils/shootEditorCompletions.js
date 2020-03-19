@@ -116,11 +116,11 @@ export class ShootEditorCompletions {
       const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}${repeat(' ', tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)}`
       if (yamlType === 'array') {
         return `${propertyName}:\n${completionIndentStr}- `
-      } else if (yamlType === 'object') {
+      }  
+      if (yamlType === 'object') {
         return `${propertyName}:\n${completionIndentStr}`
-      } else {
-        return `${propertyName}: `
       }
+      return `${propertyName}: `
     }
 
     forIn(completions, (completion, propertyName) => {
