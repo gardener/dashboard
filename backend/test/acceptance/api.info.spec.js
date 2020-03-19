@@ -109,12 +109,12 @@ module.exports = function info ({ agent, k8s, auth }) {
   it('should fetch shoot spec', async function () {
     const user = auth.createUser({ id })
     const bearer = await user.bearer
-    k8s.stub.fetchShootSpec(bearer)
+    k8s.stub.getShootSchema(bearer)
     sandbox.stub(SwaggerParser, 'dereference').callsFake((obj) => {
       return obj
     })
     const res = await agent
-      .get('/api/info/openapi/shoot')
+      .get('/api/openapi/shoot')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)

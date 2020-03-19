@@ -22,11 +22,8 @@ const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const { dashboardClient, isHttpError } = require('../kubernetes-client')
 const { version } = require('../../package')
-const { canAccessOpenAPI } = require('../services/authorization')
-const { Forbidden } = require('../errors')
-const SwaggerParser = require('swagger-parser')
+
 const router = module.exports = express.Router()
-const _ = require('lodash')
 
 router.route('/')
   .get(async (req, res, next) => {
@@ -60,34 +57,4 @@ async function fetchGardenerVersion () {
     }
     throw err
   }
-}
-
-router.route('/openapi/shoot')
-  .get(async (req, res, next) => {
-    try {
-      const user = req.user
-      const spec = await fetchShootSpec(user)
-      res.send({ spec })
-    } catch (err) {
-      next(err)
-    }
-  })
-
-let shootOpenAPISpecification // Cache, TODO: Need to update cache when apiserver gets updated
-
-async function fetchShootSpec (user) {
-  if (!await canAccessOpenAPI(user)) {
-    throw new Forbidden('User is not allowed to fetch the Open API specification')
-  }
-
-  if (shootOpenAPISpecification) {
-    return shootOpenAPISpecification
-  }
-
-  // Do not use client of user as the result gets cached and returned to other users
-  const res = await dashboardClient.openAPI.get()
-  const spec = await SwaggerParser.dereference(res)
-
-  shootOpenAPISpecification = _.get(spec, ['definitions', 'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot'], {})
-  return shootOpenAPISpecification
 }

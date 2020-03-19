@@ -270,7 +270,7 @@ function canGetSecretsInAllNamespaces (scope) {
     })
 }
 
-function canAccessOpenAPI (scope) {
+function canGetOpenAPI (scope) {
   return scope
     .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
       const { verb, path } = body.spec.nonResourceAttributes
@@ -1253,9 +1253,9 @@ const stub = {
     reviewToken(adminScope)
     return adminScope
   },
-  fetchShootSpec (bearer) {
+  getShootSchema (bearer) {
     const scope = nockWithAuthorization(bearer)
-    canAccessOpenAPI(scope)
+    canGetOpenAPI(scope)
     const body = {
       definitions: {
         'com.github.gardener.gardener.pkg.apis.core.v1alpha1.Shoot': {

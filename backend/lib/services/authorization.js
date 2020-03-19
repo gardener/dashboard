@@ -61,7 +61,7 @@ exports.canCreateProject = function (user) {
   })
 }
 
-exports.canAccessOpenAPI = function (user) {
+exports.canGetOpenAPI = function (user) {
   return hasAuthorization(user, {
     nonResourceAttributes: {
       verb: 'get',

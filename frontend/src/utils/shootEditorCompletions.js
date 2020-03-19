@@ -56,7 +56,7 @@ export class ShootEditorCompletions {
 
   // Callback function for CodeMirror tooltip
   editorTooltip (e, cm) {
-    let pos = cm.coordsChar({
+    const pos = cm.coordsChar({
       left: e.clientX,
       top: e.clientY
     })

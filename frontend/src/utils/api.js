@@ -148,7 +148,7 @@ export function updateShootAddons ({ namespace, name, data }) {
 }
 
 export function getShootSpec () {
-  return getResource('/api/info/openapi/shoot')
+  return getResource('/api/openapi/shoot')
 }
 
 export function updateShootPurpose ({ namespace, name, data }) {

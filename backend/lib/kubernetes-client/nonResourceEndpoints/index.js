@@ -22,7 +22,7 @@ const OpenAPI = require('./OpenAPI')
 function load (options) {
   return {
     healthz: new Healthz(options),
-    openAPI: new OpenAPI(options)
+    openapi: new OpenAPI(options)
   }
 }
 
