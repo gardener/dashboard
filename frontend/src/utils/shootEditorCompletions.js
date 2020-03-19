@@ -113,7 +113,8 @@ export class ShootEditorCompletions {
 
     const completionArray = []
     const generateCompletionText = (propertyName, yamlType, tokenType) => {
-      const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}${repeat(' ', tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)}`
+      const numberOfSpaces = token.start + this.indentUnit + (tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)
+      const completionIndentStr = repeat(' ', numberOfSpaces)
       if (yamlType === 'array') {
         return `${propertyName}:\n${completionIndentStr}- `
       }  
