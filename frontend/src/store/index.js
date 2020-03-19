@@ -139,6 +139,16 @@ const matchesPropertyOrEmpty = (path, srcValue) => {
   }
 }
 
+const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
+  return region => {
+    if (cloudProviderKind === 'azure') {
+      // Azure regions may not be zoned, need to filter these out for the dashboard
+      return !!getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
+    }
+    return true
+  }
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -331,7 +341,28 @@ const getters = {
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
+      if (!cloudProfile) {
+        return []
+      }
+      const seeds = cloudProfile.data.seeds
+      if (!seeds) {
+        return []
+      }
+      const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
+      const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+      return uniqueSeedRegionsWithZones
+    }
+  },
+  regionsWithoutSeedByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile) {
+        const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
+        const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+        const regionsWithoutSeed = difference(regionsInCloudProfileWithZones, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+        return regionsWithoutSeed
+      }
+      return []
     }
   },
   minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
@@ -344,17 +375,6 @@ const getters = {
       const seedsForCloudProfile = cloudProfile.data.seeds
       const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
       return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
-    }
-  },
-  regionsWithoutSeedByCloudProfileName (state, getters) {
-    return (cloudProfileName) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      if (cloudProfile) {
-        const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
-        const regionsWithoutSeed = difference(regionsInCloudProfile, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
-        return regionsWithoutSeed
-      }
-      return []
     }
   },
   floatingPoolNamesByCloudProfileNameAndRegion (state, getters) {
