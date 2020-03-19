@@ -219,29 +219,31 @@ export class ShootEditorCompletions {
     // token context contains all parrent tokens of `token, except for the token itself
     const tokenPath = flatMap(tokenContext, (pathToken, index, tokenContext) => {
       const isLeafContextToken = pathToken === last(tokenContext)
-      if (pathToken.type === 'property') {
-        const nextToken = nth(tokenContext, index + 1)
-        if (nextToken && nextToken.type === 'firstArrayItem') {
-          // next item is array, so don't append 'properties' to path
-          return pathToken.propertyName
-        }
-        if (isLeafContextToken && token.type === 'firstArrayItem') {
-          // leaf context token is array, so list properties of its items
-          return [pathToken.propertyName, 'items', 'properties']
-        }
-        // regular property token
-        return [pathToken.propertyName, 'properties']
-      } else if (pathToken.type === 'firstArrayItem') {
-        const isTokenIndentIndicatingObjectStart = token.start === pathToken.indent + this.indentUnit + this.arrayBulletIndent
-        if (pathToken.propertyName !== undefined && isLeafContextToken && isTokenIndentIndicatingObjectStart) {
-          // firstArrayItem line can also start new object, so list properties of item object
-          return ['items', 'properties', pathToken.propertyName, 'properties']
-        }
-        // path token is array, so list properties of its items
-        return ['items', 'properties']
-      } else {
-        return []
+  switch (pathToken.type) {
+    case 'property': {
+      const nextToken = nth(tokenContext, index + 1)
+      if (nextToken && nextToken.type === 'firstArrayItem') {
+        // next item is array, so don't append 'properties' to path
+        return pathToken.propertyName
       }
+      if (isLeafContextToken && token.type === 'firstArrayItem') {
+        // leaf context token is array, so list properties of its items
+        return [pathToken.propertyName, 'items', 'properties']
+      }
+      // regular property token
+      return [pathToken.propertyName, 'properties']
+    }
+    case 'firstArrayItem': {
+      const isTokenIndentIndicatingObjectStart = token.start === pathToken.indent + this.indentUnit + this.arrayBulletIndent
+      if (pathToken.propertyName !== undefined && isLeafContextToken && isTokenIndentIndicatingObjectStart) {
+        // firstArrayItem line can also start new object, so list properties of item object
+        return ['items', 'properties', pathToken.propertyName, 'properties']
+      }
+      // path token is array, so list properties of its items
+      return ['items', 'properties']
+    }
+  }
+  return []
     })
 
     return tokenPath
