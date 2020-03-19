@@ -20,7 +20,7 @@ const { WatchBuilder } = require('../../lib/kubernetes-client')
 const { Terminal } = require('../../lib/kubernetes-client/resources/GardenerDashboard')
 const { ServiceAccount } = require('../../lib/kubernetes-client/resources/Core')
 const common = require('../support/common')
-const delay = require('delay')
+const pEvent = require('p-event')
 
 module.exports = function info ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -149,7 +149,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const containerImage = 'fooImage:0.1.2'
 
       common.stub.getCloudProfiles(sandbox)
-      k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
+      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
 
       const res = await agent
         .post('/api/terminals')
@@ -165,7 +165,15 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
           }
         })
 
-      delay(5)
+      const [, interceptor] = await pEvent(scope, 'replied', {
+        multiArgs: true,
+        filter ([, interceptor]) {
+          return interceptor.method === 'PATCH' && interceptor.statusCode === 200
+        }
+      })
+      const { metadata: { annotations } } = interceptor.replyFunction()
+      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
+
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql({
@@ -521,13 +529,13 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql([{
-        'metadata': {
+        metadata: {
           name: 'foo1',
           namespace: 'foo',
           identifier: '1'
         }
       }, {
-        'metadata': {
+        metadata: {
           name: 'foo2',
           namespace: 'foo',
           identifier: '2'
