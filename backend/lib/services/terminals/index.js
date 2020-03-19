@@ -108,7 +108,7 @@ function _imageHelpText (containerImage, imageDescriptions) {
     .value()
 }
 // exported for unit test
-exports._imageHelpText = _imageHelpText
+exports.findImageDescription = findImageDescription
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
   const serviceAccount = await client.core.serviceaccounts
