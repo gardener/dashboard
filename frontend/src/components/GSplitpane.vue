@@ -16,14 +16,14 @@ limitations under the License.
 
 <template>
   <splitpanes
-    :horizontal="splitpaneItemTree.horizontal"
+    :horizontal="splitpaneTree.horizontal"
     @resize="resize"
     @resized="resize"
     @pane-add="resize"
     @pane-remove="resize"
   >
-    <pane v-for="item in splitpaneItemTree.items" :key="item.uuid" min-size="2">
-      <g-splitpane v-if="instanceOfSplitpaneTreeItem(item)" :splitpaneItemTree="item">
+    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2">
+      <g-splitpane v-if="hasChildren(item)" :splitpaneTree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
         </template>
@@ -38,7 +38,7 @@ limitations under the License.
 import { mapActions } from 'vuex'
 import { Splitpanes, Pane } from 'splitpanes'
 import GSplitpane from '@/components/GSplitpane'
-import { SplitpaneTreeItem } from '@/lib/g-symbol-tree'
+import { SplitpaneTree } from '@/lib/g-symbol-tree'
 
 export default {
   name: 'GSplitpane',
@@ -47,13 +47,8 @@ export default {
     Pane,
     GSplitpane
   },
-  data () {
-    return {
-      items: undefined
-    }
-  },
   props: {
-    splitpaneItemTree: {
+    splitpaneTree: {
       type: Object,
       default: undefined
     }
@@ -62,8 +57,8 @@ export default {
     ...mapActions([
       'setSplitpaneResize'
     ]),
-    instanceOfSplitpaneTreeItem (item) {
-      return item instanceof SplitpaneTreeItem
+    hasChildren (item) {
+      return item instanceof SplitpaneTree
     },
     resize () {
       // use $nextTick as splitpanes library needs to be finished with rendering because fitAddon relies on
@@ -73,7 +68,7 @@ export default {
   },
   watch: {
     // workaround for https://github.com/antoniandre/splitpanes/issues/79
-    'splitpaneItemTree.horizontal' (value) {
+    'splitpaneTree.horizontal' (value) {
       this.resize()
     }
   }

@@ -23,8 +23,8 @@ limitations under the License.
     @shortkey="addFromShortkey"
   >
     <g-splitpane
-      v-if="itemTree"
-      :splitpaneItemTree="itemTree"
+      v-if="splitpaneTree"
+      :splitpaneTree="splitpaneTree"
       ref="splitpane"
     >
       <template v-slot="{item}">
@@ -42,7 +42,6 @@ limitations under the License.
 
 <script>
 
-import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
 import map from 'lodash/map'
@@ -55,11 +54,9 @@ import TargetSelectionDialog from '@/dialogs/TargetSelectionDialog'
 import { TargetEnum } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import { listTerminalSessions } from '@/utils/api'
-import { GSymbolTree, TreeItem, PositionEnum } from '@/lib/g-symbol-tree'
+import { GSymbolTree, Leaf, PositionEnum } from '@/lib/g-symbol-tree'
 
 import 'splitpanes/dist/splitpanes.css'
-
-Vue.use(require('vue-shortkey'))
 
 function terminatedSessionIds (uuids, terminals) {
   const terminalSessionIds = map(terminals, 'metadata.identifier')
@@ -75,7 +72,7 @@ export default {
   data () {
     return {
       tree: new GSymbolTree(),
-      itemTree: undefined
+      splitpaneTree: undefined // splitpaneTree is a json object representation of the GSymbolTree`this.tree`
     }
   },
   mixins: [shootItem],
@@ -99,8 +96,8 @@ export default {
     }
   },
   methods: {
-    updateTreeItem () {
-      this.itemTree = this.tree.toItemTree(this.tree.root)
+    updateSplitpaneTree () {
+      this.splitpaneTree = this.tree.toJSON(this.tree.root)
 
       this.store()
     },
@@ -135,7 +132,7 @@ export default {
         data.target = target
       }
 
-      const item = new TreeItem({ data })
+      const item = new Leaf({ data })
       if (targetId) {
         this.tree.appendChild(this.tree.root, item)
         const sourceId = item.uuid
@@ -143,7 +140,7 @@ export default {
         this.moveTo({ sourceId, targetId, position })
       } else {
         this.tree.appendChild(this.tree.root, item)
-        this.updateTreeItem()
+        this.updateSplitpaneTree()
       }
     },
     droppedAt ({ detail: { 'mouseOverId': position, 'sourceElementDropzoneId': sourceId, 'mouseOverDropzoneId': targetId } }) {
@@ -152,12 +149,12 @@ export default {
     moveTo ({ sourceId, targetId, position }) {
       this.tree.moveToWithId({ sourceId, targetId, position })
 
-      this.updateTreeItem()
+      this.updateSplitpaneTree()
     },
     removeWithId (id) {
       this.tree.removeWithId(id)
 
-      this.updateTreeItem()
+      this.updateSplitpaneTree()
     },
     store () {
       if (this.tree.isEmpty()) {
@@ -165,13 +162,13 @@ export default {
         return
       }
       this.$localStorage.setItem(this.storeKey, JSON.stringify({
-        itemTree: this.itemTree
+        splitpaneTree: this.splitpaneTree
       }))
     },
     async load () {
       await this.restoreSessions()
 
-      this.updateTreeItem()
+      this.updateSplitpaneTree()
     },
     async restoreSessions () {
       const fromStore = this.$localStorage.getItem(this.storeKey)
@@ -180,14 +177,14 @@ export default {
         return
       }
 
-      let itemTree
+      let splitpaneTree
       try {
         const json = JSON.parse(fromStore)
-        itemTree = json.itemTree
+        splitpaneTree = json.splitpaneTree
       } catch (err) {
         // could not restore session
       }
-      if (!itemTree) {
+      if (!splitpaneTree) {
         this.add()
         return
       }
@@ -195,7 +192,7 @@ export default {
       const { namespace } = this.terminalCoordinates
       const { data: terminals } = await listTerminalSessions({ namespace })
 
-      this.tree = GSymbolTree.fromItemTree(itemTree)
+      this.tree = GSymbolTree.fromJSON(splitpaneTree)
 
       const uuids = this.tree.ids()
       const terminatedIds = terminatedSessionIds(uuids, terminals)
@@ -226,9 +223,7 @@ export default {
         case 'vertical':
           this.add({ position: PositionEnum.BOTTOM, targetId })
           break
-        default:
-          break // ignore unknown orientation
-      }
+      } // ignore unknown orientations
     }
   },
   mounted () {

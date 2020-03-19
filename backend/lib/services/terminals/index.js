@@ -56,15 +56,16 @@ const TargetEnum = {
   SHOOT: 'shoot'
 }
 
-exports.create = function ({ user, coordinate: { namespace, name, target }, body = {} }) {
+exports.create = function ({ user, body }) {
+  const { coordinate: { namespace, name, target } } = body
   return getOrCreateTerminalSession({ user, namespace, name, target, body })
 }
 
-exports.config = async function ({ user, coordinate: { namespace, name, target } }) {
+exports.config = async function ({ user, body: { coordinate: { namespace, name, target } } }) {
   return getTerminalConfig({ user, namespace, name, target })
 }
 
-exports.list = function ({ user, coordinate: { namespace } }) {
+exports.list = function ({ user, body: { coordinate: { namespace } } }) {
   return listTerminalSessions({ user, namespace })
 }
 
@@ -90,14 +91,24 @@ function imageHelpText (terminal) {
   const containerImage = terminal.spec.host.pod.containerImage
   const imageDescriptions = getConfigValue('terminal.containerImageDescriptions')
 
-  const imageDescription = _
-    .chain(imageDescriptions)
-    .map(({ image, description }) => ({ image: new RegExp(image), description }))
-    .find(({ image }) => image.exec(containerImage))
-    .value()
-
-  return _.get(imageDescription, 'description')
+  return _imageHelpText(containerImage, imageDescriptions)
 }
+
+function _imageHelpText (containerImage, imageDescriptions) {
+  return _
+    .chain(imageDescriptions)
+    .find(({ image }) => {
+      if (_.startsWith(image, '/') && _.endsWith(image, '/')) {
+        image = image.substring(1, image.length - 1)
+        return new RegExp(image).test(containerImage)
+      }
+      return image === containerImage
+    })
+    .get('description')
+    .value()
+}
+// exported for unit test
+exports._imageHelpText = _imageHelpText
 
 async function readServiceAccountToken (client, { namespace, serviceAccountName }) {
   const serviceAccount = await client.core.serviceaccounts
@@ -526,15 +537,17 @@ function getSeedShootNamespace (shoot) {
   return seedShootNamespace
 }
 
-function ensureTerminalAllowed ({ method, isAdmin, target }) {
+function ensureTerminalAllowed ({ method, isAdmin, body }) {
   if (isAdmin) {
     return
   }
 
-  // list your terminal sessions is allowed for everybody
-  if (method === 'list') {
+  // whitelist methods for terminal sessions for everybody
+  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat'], method)) {
     return
   }
+
+  const { target } = body
 
   // non-admin users are only allowed to open terminals for shoots
   if (target === TargetEnum.SHOOT) {

@@ -197,7 +197,7 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState, mapActions, mapGetters } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import ora from 'ora'
 import get from 'lodash/get'
 import assign from 'lodash/assign'
@@ -711,9 +711,6 @@ export default {
     }
   },
   methods: {
-    ...mapActions([
-      'setFocusedElementId'
-    ]),
     focus () {
       this.term.focus()
     },

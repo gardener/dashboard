@@ -160,8 +160,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
             coordinate: {
               namespace,
               target
-            },
-            namespace
+            }
           }
         })
 
@@ -227,9 +226,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         .send({
           method: 'fetch',
           params: {
-            coordinate: {
-              target
-            },
             name,
             namespace
           }
@@ -288,9 +284,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         .send({
           method: 'heartbeat',
           params: {
-            coordinate: {
-              target
-            },
             name,
             namespace
           }
@@ -313,9 +306,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         .send({
           method: 'remove',
           params: {
-            coordinate: {
-              target
-            },
             name,
             namespace
           }
@@ -411,9 +401,6 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         .send({
           method: 'heartbeat',
           params: {
-            coordinate: {
-              target
-            },
             name,
             namespace
           }

@@ -900,14 +900,6 @@ const actions = {
   setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
     return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
   },
-  setFocusedElementId ({ commit }, id) {
-    commit('SET_FOCUSED_ELEMENT_ID', id)
-    return state.focusedElementId
-  },
-  unsetFocusedElementId ({ commit }, id) {
-    commit('UNSET_FOCUSED_ELEMENT_ID', id)
-    return state.focusedElementId
-  },
   setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
     commit('SPLITPANE_RESIZE', value)
     return state.splitpaneResize

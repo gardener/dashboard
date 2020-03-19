@@ -129,7 +129,7 @@ readinessProbe:
 #   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
 #   containerImageOperator: ~ # if not defined, value of containerImage will be used
 #   containerImageDescriptions:
-#   - image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*
+#   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
 #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef

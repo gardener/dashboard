@@ -198,7 +198,7 @@ function dispatchEvent (binding, dragState, event, eventType) {
   const droppableZoneBelow = elemBelow.closest('.g-droppable-zone')
   const droppableBelow = elemBelow.closest('.g-droppable')
   const anyDroppableBelow = droppableBelow || droppableZoneBelow
-  listeners.push(...[droppableZoneBelow, droppableBelow])
+  listeners.push(droppableZoneBelow, droppableBelow)
 
   let mouseOverId
   let mouseOverDropzoneId
@@ -289,10 +289,10 @@ function stopInputEvents (event) {
 
 /* Draggable Directive https://vuejs.org/v2/guide/custom-directive.html */
 export const gDraggable = {
-  bind: (el, binding, vnode) => {
+  bind (el, binding, vnode) {
     gDraggable.update(el, binding, vnode)
   },
-  update: (el, binding, vnode) => {
+  update (el, binding, vnode) {
     const handler = get(binding, 'value.handle.$el') || get(binding, 'value.handle') || el
     if (!handler.getAttribute('draggable')) {
       el.removeEventListener('mousedown', el._listener)
@@ -303,5 +303,7 @@ export const gDraggable = {
       handler.setAttribute('draggable', 'true')
     }
   },
-  unbind: () => dispose()
+  unbind () {
+    dispose()
+  }
 }

@@ -29,11 +29,10 @@ router.use(async (req, res, next) => {
     const user = req.user
 
     const { method, params: body } = req.body
-    const { coordinate: { target } } = body
 
     const isAdmin = req.user.isAdmin = await authorization.isAdmin(user)
 
-    terminals.ensureTerminalAllowed({ method, isAdmin, target })
+    terminals.ensureTerminalAllowed({ method, isAdmin, body })
     next()
   } catch (err) {
     next(err)
@@ -46,12 +45,11 @@ router.route('/')
       const user = req.user
 
       const { method, params: body } = req.body
-      const { coordinate } = body
 
       if (!_.includes(['create', 'fetch', 'list', 'config', 'remove', 'heartbeat'], method)) {
         throw new Error(`${method} not allowed for terminals`)
       }
-      res.send(await terminals[method]({ user, coordinate, body }))
+      res.send(await terminals[method]({ user, body }))
     } catch (err) {
       next(err)
     }

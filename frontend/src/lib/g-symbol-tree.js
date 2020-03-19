@@ -31,14 +31,14 @@ export const PositionEnum = {
   RIGHT: 'right'
 }
 
-export class TreeItem {
+export class Leaf {
   constructor ({ uuid = uuidv4(), data } = {}) {
     this.uuid = uuid
     this.data = data
   }
 }
 
-export class SplitpaneTreeItem {
+export class SplitpaneTree {
   constructor ({ horizontal = false } = {}) {
     this.horizontal = horizontal
   }
@@ -49,7 +49,7 @@ export class GSymbolTree extends SymbolTree {
     super(description)
 
     this.itemMap = {}
-    this.root = new SplitpaneTreeItem({ horizontal })
+    this.root = new SplitpaneTree({ horizontal })
   }
 
   appendChild (referenceObject, newObject) {
@@ -139,15 +139,15 @@ export class GSymbolTree extends SymbolTree {
     this.remove(item, clean)
   }
 
-  toItemTree (parent) {
+  toJSON (parent) {
     const clonedParent = cloneDeep(parent)
     if (!this.hasChildren(parent)) {
       return undefined
     }
     const items = []
     for (const child of this.childrenIterator(parent)) {
-      if (child instanceof SplitpaneTreeItem) {
-        items.push(this.toItemTree(child))
+      if (child instanceof SplitpaneTree) {
+        items.push(this.toJSON(child))
       } else {
         items.push(cloneDeep(child))
       }
@@ -159,22 +159,22 @@ export class GSymbolTree extends SymbolTree {
     return clonedParent
   }
 
-  static fromItemTree (itemTree = {}) {
-    const tree = new GSymbolTree({ horizontal: itemTree.horizontal })
-    tree._addTreeItems(tree.root, itemTree.items)
+  static fromJSON (splitpaneTree = {}) {
+    const tree = new GSymbolTree({ horizontal: splitpaneTree.horizontal })
+    tree._addItems(tree.root, splitpaneTree.items)
     tree._clean(tree.root)
     return tree
   }
 
   _addToItemMap (newItem) {
-    if (newItem instanceof TreeItem) {
+    if (newItem instanceof Leaf) {
       const key = newItem.uuid
       Vue.set(this.itemMap, key, newItem)
     }
   }
 
   _removeFromItemMap (removeObject) {
-    if (removeObject instanceof TreeItem) {
+    if (removeObject instanceof Leaf) {
       const key = removeObject.uuid
       Vue.delete(this.itemMap, key)
     }
@@ -219,7 +219,7 @@ export class GSymbolTree extends SymbolTree {
   _clean (parent) {
     if (this.childrenCount(parent) === 1) {
       const onlyChild = this.firstChild(parent)
-      if (this.root !== parent || (this.root === parent && onlyChild instanceof SplitpaneTreeItem)) {
+      if (this.root !== parent || (this.root === parent && onlyChild instanceof SplitpaneTree)) {
         if (this.root === parent) {
           this.root = onlyChild
         }
@@ -244,7 +244,7 @@ export class GSymbolTree extends SymbolTree {
     }
 
     // set new splitpane with desired orientation at the position of the targetItem and place target item under new splitpane
-    const splitpane = new SplitpaneTreeItem({ horizontal })
+    const splitpane = new SplitpaneTree({ horizontal })
     this.insertBefore(targetItem, splitpane)
     targetParent = splitpane
 
@@ -252,18 +252,18 @@ export class GSymbolTree extends SymbolTree {
     this.prependChild(targetParent, targetItem)
   }
 
-  _addTreeItems (parent, items) {
+  _addItems (parent, items) {
     items = compact(items)
     if (!isEmpty(items)) {
       items.forEach(item => {
-        const isSplitpaneTreeItem = item.hasOwnProperty('horizontal')
-        const isTreeItem = !!item.uuid
-        if (isSplitpaneTreeItem) {
-          const splitpaneTreeItem = new SplitpaneTreeItem({ horizontal: item.horizontal })
-          this.appendChild(parent, splitpaneTreeItem)
-          this._addTreeItems(splitpaneTreeItem, item.items) // recursion
-        } else if (isTreeItem) {
-          this.appendChild(parent, new TreeItem({ uuid: item.uuid, data: item.data }))
+        const isSplitpaneTree = item.hasOwnProperty('horizontal')
+        const isLeaf = !!item.uuid
+        if (isSplitpaneTree) {
+          const splitpaneTree = new SplitpaneTree({ horizontal: item.horizontal })
+          this.appendChild(parent, splitpaneTree)
+          this._addItems(splitpaneTree, item.items) // recursion
+        } else if (isLeaf) {
+          this.appendChild(parent, new Leaf({ uuid: item.uuid, data: item.data }))
         } // else: skip
       })
     }

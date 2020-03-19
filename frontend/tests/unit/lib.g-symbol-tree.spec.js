@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { GSymbolTree, TreeItem, SplitpaneTreeItem, PositionEnum } from '@/lib/g-symbol-tree'
+import { GSymbolTree, Leaf, SplitpaneTree, PositionEnum } from '@/lib/g-symbol-tree'
 import cloneDeep from 'lodash/cloneDeep'
 
 describe('lib', function () {
@@ -32,13 +32,13 @@ describe('lib', function () {
     let tree, a, b, c, b1, b2, b3
 
     beforeEach(function () {
-      a = new TreeItem({ uuid: 'a' })
-      b = new SplitpaneTreeItem({ horizontal: true })
-      c = new TreeItem({ uuid: 'c' })
+      a = new Leaf({ uuid: 'a' })
+      b = new SplitpaneTree({ horizontal: true })
+      c = new Leaf({ uuid: 'c' })
 
-      b1 = new TreeItem({ uuid: 'b1' })
-      b2 = new TreeItem({ uuid: 'b2' })
-      b3 = new TreeItem({ uuid: 'b3' })
+      b1 = new Leaf({ uuid: 'b1' })
+      b2 = new Leaf({ uuid: 'b2' })
+      b3 = new Leaf({ uuid: 'b3' })
 
       tree = new GSymbolTree({ horizontal: false })
       tree.appendChild(tree.root, a)
@@ -49,7 +49,7 @@ describe('lib', function () {
       tree.appendChild(b, b2)
       tree.appendChild(b, b3)
 
-      expect(tree.items().length).to.be.equal(5) // SplitpaneTreeItem's do not count
+      expect(tree.items().length).to.be.equal(5) // SplitpaneTree's do not count
     })
 
     describe('#moveToWithId', function () {
@@ -62,11 +62,11 @@ describe('lib', function () {
           expect(tree.nextSibling(b1)).is.equal(b3)
         })
 
-        it('should move b2 right to b1 and should create a new SplitpaneTreeItem', function () {
+        it('should move b2 right to b1 and should create a new SplitpaneTree', function () {
           tree.moveToWithId({ sourceId: b2.uuid, targetId: b1.uuid, position: PositionEnum.RIGHT })
 
           expect(tree.nextSibling(a)).is.equal(b)
-          expect(tree.firstChild(b)).is.instanceOf(SplitpaneTreeItem)
+          expect(tree.firstChild(b)).is.instanceOf(SplitpaneTree)
           const newB1 = tree.firstChild(b)
           expect(b.horizontal).to.be.true
           expect(newB1.horizontal).to.be.false
@@ -83,11 +83,11 @@ describe('lib', function () {
           expect(tree.nextSibling(b1)).is.equal(b3)
         })
 
-        it('should move b2 left to b1 and should create a new SplitpaneTreeItem', function () {
+        it('should move b2 left to b1 and should create a new SplitpaneTree', function () {
           tree.moveToWithId({ sourceId: b2.uuid, targetId: b1.uuid, position: PositionEnum.LEFT })
 
           expect(tree.nextSibling(a)).is.equal(b)
-          expect(tree.firstChild(b)).is.instanceOf(SplitpaneTreeItem)
+          expect(tree.firstChild(b)).is.instanceOf(SplitpaneTree)
           const newB1 = tree.firstChild(b)
           expect(b.horizontal).to.be.true
           expect(newB1.horizontal).to.be.false
@@ -105,10 +105,10 @@ describe('lib', function () {
           expect(tree.nextSibling(b3)).is.equal(b2)
         })
 
-        it('should move b2 below a and should create a new SplitpaneTreeItem', function () {
+        it('should move b2 below a and should create a new SplitpaneTree', function () {
           tree.moveToWithId({ sourceId: b2.uuid, targetId: a.uuid, position: PositionEnum.BOTTOM })
 
-          expect(tree.previousSibling(b)).is.instanceOf(SplitpaneTreeItem)
+          expect(tree.previousSibling(b)).is.instanceOf(SplitpaneTree)
           const newA = tree.previousSibling(b)
           expect(tree.root.horizontal).to.be.false
           expect(newA.horizontal).to.be.true
@@ -117,7 +117,7 @@ describe('lib', function () {
         })
 
         it('should leave a2 where it is when moving below a1', function () {
-          const itemTree = {
+          const splitpaneTree = {
             horizontal: false,
             items: [{
               horizontal: true,
@@ -133,11 +133,11 @@ describe('lib', function () {
               data: undefined
             }]
           }
-          const expectedItemTree = cloneDeep(itemTree)
-          const newTree = GSymbolTree.fromItemTree(itemTree)
+          const expectedSplitpaneTree = cloneDeep(splitpaneTree)
+          const newTree = GSymbolTree.fromJSON(splitpaneTree)
           newTree.moveToWithId({ sourceId: 'a2', targetId: 'a1', position: PositionEnum.BOTTOM })
 
-          expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+          expect(newTree.toJSON(newTree.root)).to.eql(expectedSplitpaneTree)
         })
       })
 
@@ -150,10 +150,10 @@ describe('lib', function () {
           expect(tree.nextSibling(b1)).is.equal(b3)
         })
 
-        it('should move b2 above a and should create a new SplitpaneTreeItem', function () {
+        it('should move b2 above a and should create a new SplitpaneTree', function () {
           tree.moveToWithId({ sourceId: b2.uuid, targetId: a.uuid, position: PositionEnum.TOP })
 
-          expect(tree.previousSibling(b)).is.instanceOf(SplitpaneTreeItem)
+          expect(tree.previousSibling(b)).is.instanceOf(SplitpaneTree)
           const newA = tree.previousSibling(b)
           expect(newA.horizontal).to.be.true
           expect(tree.childrenCount(newA)).to.be.equal(2)
@@ -162,7 +162,7 @@ describe('lib', function () {
         })
 
         it('should leave a1 where it is when moving above a2', function () {
-          const itemTree = {
+          const splitpaneTree = {
             horizontal: false,
             items: [{
               horizontal: true,
@@ -178,11 +178,11 @@ describe('lib', function () {
               data: undefined
             }]
           }
-          const expectedItemTree = cloneDeep(itemTree)
-          const newTree = GSymbolTree.fromItemTree(itemTree)
+          const expectedSplitpaneTree = cloneDeep(splitpaneTree)
+          const newTree = GSymbolTree.fromJSON(splitpaneTree)
           newTree.moveToWithId({ sourceId: 'a1', targetId: 'a2', position: PositionEnum.TOP })
 
-          expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+          expect(newTree.toJSON(newTree.root)).to.eql(expectedSplitpaneTree)
         })
       })
     })
@@ -226,8 +226,8 @@ describe('lib', function () {
         expect(tree.nextSibling(a)).is.equal(c)
       })
 
-      it('should cleanup root with only one `SplitpaneTreeItem` child', function () {
-        const itemTree = {
+      it('should cleanup root with only one `SplitpaneTree` child', function () {
+        const splitpaneTree = {
           horizontal: true,
           items: [{
             horizontal: false,
@@ -240,7 +240,7 @@ describe('lib', function () {
             }]
           }]
         }
-        const expectedItemTree = {
+        const expectedSplitpaneTree = {
           horizontal: false,
           items: [{
             uuid: 'b1',
@@ -250,23 +250,23 @@ describe('lib', function () {
             data: undefined
           }]
         }
-        const newTree = GSymbolTree.fromItemTree(itemTree)
+        const newTree = GSymbolTree.fromJSON(splitpaneTree)
 
-        expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+        expect(newTree.toJSON(newTree.root)).to.eql(expectedSplitpaneTree)
       })
 
-      it('should not cleanup root with only one `TreeItem` child', function () {
-        const itemTree = {
+      it('should not cleanup root with only one `Leaf` child', function () {
+        const splitpaneTree = {
           horizontal: true,
           items: [{
             uuid: 'b1',
             data: undefined
           }]
         }
-        const expectedItemTree = cloneDeep(itemTree)
-        const newTree = GSymbolTree.fromItemTree(itemTree)
+        const expectedSplitpaneTree = cloneDeep(splitpaneTree)
+        const newTree = GSymbolTree.fromJSON(splitpaneTree)
 
-        expect(newTree.toItemTree(newTree.root)).to.eql(expectedItemTree)
+        expect(newTree.toJSON(newTree.root)).to.eql(expectedSplitpaneTree)
       })
     })
 
@@ -277,8 +277,8 @@ describe('lib', function () {
         expect(lastChild).to.be.equal(c)
         expect(lastChildRecoursive).to.be.equal(c)
 
-        const c1 = new TreeItem({ uuid: 'c1' })
-        const c2 = new TreeItem({ uuid: 'c2' })
+        const c1 = new Leaf({ uuid: 'c1' })
+        const c2 = new Leaf({ uuid: 'c2' })
         tree.appendChild(c, c1)
         tree.appendChild(c, c2)
 
@@ -296,11 +296,11 @@ describe('lib', function () {
       })
     })
 
-    describe('#toItemTree', function () {
+    describe('#toJSON', function () {
       it('should create item-tree from tree', function () {
-        const itemTree = tree.toItemTree(tree.root)
+        const splitpaneTree = tree.toJSON(tree.root)
 
-        const expectedItemTree = {
+        const expectedSplitpaneTree = {
           horizontal: false,
           items: [{
             uuid: 'a',
@@ -322,50 +322,50 @@ describe('lib', function () {
             data: undefined
           }]
         }
-        expect(itemTree).to.eql(expectedItemTree)
+        expect(splitpaneTree).to.eql(expectedSplitpaneTree)
       })
 
       it('should return undefined for empty tree', function () {
         const newTree = new GSymbolTree()
-        const itemTree = newTree.toItemTree(newTree.root)
+        const splitpaneTree = newTree.toJSON(newTree.root)
 
-        expect(itemTree).to.be.undefined
+        expect(splitpaneTree).to.be.undefined
       })
 
-      it('should return undefined for tree without `TreeItem`s', function () {
+      it('should return undefined for tree without `Leaf`s', function () {
         const newTree = new GSymbolTree()
-        const splitpane1 = new SplitpaneTreeItem()
-        const splitpane2 = new SplitpaneTreeItem()
+        const splitpane1 = new SplitpaneTree()
+        const splitpane2 = new SplitpaneTree()
         newTree.appendChild(newTree.root, splitpane1)
         newTree.appendChild(splitpane1, splitpane2)
-        const itemTree = newTree.toItemTree(newTree.root)
+        const splitpaneTree = newTree.toJSON(newTree.root)
 
-        expect(itemTree).to.be.undefined
+        expect(splitpaneTree).to.be.undefined
       })
     })
 
-    describe('#fromItemTree', function () {
+    describe('#fromJSON', function () {
       it('should create tree from item-tree', function () {
-        const itemTree = tree.toItemTree(tree.root)
-        const tmp = GSymbolTree.fromItemTree(itemTree)
+        const splitpaneTree = tree.toJSON(tree.root)
+        const tmp = GSymbolTree.fromJSON(splitpaneTree)
 
-        const actualItemTree = tmp.toItemTree(tmp.root)
+        const actualSplitpaneTree = tmp.toJSON(tmp.root)
 
-        expect(actualItemTree).to.eql(itemTree)
+        expect(actualSplitpaneTree).to.eql(splitpaneTree)
       })
 
       it('should skip invalid items', function () {
-        let itemTree = {}
-        let tmp = GSymbolTree.fromItemTree(itemTree)
+        let splitpaneTree = {}
+        let tmp = GSymbolTree.fromJSON(splitpaneTree)
         expect(tmp.isEmpty()).to.be.true
         expect(tmp.firstChild(tmp.root)).to.be.null
 
-        itemTree = undefined
-        tmp = GSymbolTree.fromItemTree(itemTree)
+        splitpaneTree = undefined
+        tmp = GSymbolTree.fromJSON(splitpaneTree)
         expect(tmp.isEmpty()).to.be.true
         expect(tmp.firstChild(tmp.root)).to.be.null
 
-        itemTree = {
+        splitpaneTree = {
           horizontal: false,
           items: [{
             uuid: 'valid-item'
@@ -378,9 +378,9 @@ describe('lib', function () {
           { uuid: '' },
           undefined]
         }
-        tmp = GSymbolTree.fromItemTree(itemTree)
+        tmp = GSymbolTree.fromJSON(splitpaneTree)
         expect(tmp.items().length).to.be.equal(1)
-        expect(tmp.items()).to.eql([new TreeItem({ uuid: 'valid-item' })])
+        expect(tmp.items()).to.eql([new Leaf({ uuid: 'valid-item' })])
       })
     })
   })

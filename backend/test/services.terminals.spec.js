@@ -26,7 +26,8 @@ const { Resources } = require('../lib/kubernetes-client')
 const { Forbidden } = require('../lib/errors')
 
 const {
-  ensureTerminalAllowed
+  ensureTerminalAllowed,
+  _imageHelpText
 } = require('../lib/services/terminals')
 
 const {
@@ -152,6 +153,56 @@ describe('services', function () {
     })
 
     describe('terminals', function () {
+      describe('#_imageHelpText', function () {
+        it('should match regexp', async function () {
+          const containerImage = 'foo:bar'
+          const imageDescriptions = [{
+            image: '/foo:.*/',
+            description: 'baz'
+          }]
+          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.eq('baz')
+        })
+
+        it('should not match regexp', async function () {
+          const containerImage = 'foo:bar'
+
+          let imageDescriptions = [{
+            image: '/dummy:.*/',
+            description: 'baz'
+          }]
+          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+
+          imageDescriptions = [{
+            image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
+            description: 'baz'
+          }]
+          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+        })
+
+        it('should match exactly', async function () {
+          const containerImage = 'foo:bar'
+
+          const imageDescriptions = [{
+            image: 'foo:bar',
+            description: 'baz'
+          }]
+          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.eq('baz')
+        })
+
+        it('should not match', async function () {
+          const containerImage = 'foo:bar'
+
+          let imageDescriptions = [{
+            image: 'bar:foo',
+            description: 'baz'
+          }]
+          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+
+          expect(_imageHelpText('foo:bar', undefined)).to.be.undefined
+          expect(_imageHelpText('foo:bar', [])).to.be.undefined
+          expect(_imageHelpText('foo:bar', [{}])).to.be.undefined
+        })
+      })
       describe('#getGardenTerminalHostClusterSecretRef', function () {
         it('should return the secret reference by secretRef', async function () {
           const gardenTerminalHost = {
@@ -305,7 +356,7 @@ describe('services', function () {
         const method = 'foo'
         const target = 'foo'
         try {
-          ensureTerminalAllowed({ method, isAdmin, target})
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -316,7 +367,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'shoot'
         try {
-          ensureTerminalAllowed({ method, isAdmin, target})
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -327,7 +378,7 @@ describe('services', function () {
         const method = 'list'
         const target = 'foo'
         try {
-          ensureTerminalAllowed({ method, isAdmin, target})
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -338,7 +389,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'cp'
         try {
-          ensureTerminalAllowed({ method, isAdmin, target})
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
           expect.fail('Forbidden error expected')
         } catch (err) {
           expect(err).to.be.instanceof(Forbidden)
@@ -350,7 +401,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'garden'
         try {
-          ensureTerminalAllowed({ method, isAdmin, target})
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
           expect.fail('Forbidden error expected')
         } catch (err) {
           expect(err).to.be.instanceof(Forbidden)
