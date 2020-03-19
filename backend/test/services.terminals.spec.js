@@ -170,13 +170,13 @@ describe('services', function () {
             image: '/dummy:.*/',
             description: 'baz'
           }]
-          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
 
           imageDescriptions = [{
             image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
             description: 'baz'
           }]
-          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
         })
 
         it('should match exactly', async function () {
@@ -186,7 +186,7 @@ describe('services', function () {
             image: 'foo:bar',
             description: 'baz'
           }]
-          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match', async function () {
@@ -196,11 +196,11 @@ describe('services', function () {
             image: 'bar:foo',
             description: 'baz'
           }]
-          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
 
-          expect(_imageHelpText('foo:bar', undefined)).to.be.undefined
-          expect(_imageHelpText('foo:bar', [])).to.be.undefined
-          expect(_imageHelpText('foo:bar', [{}])).to.be.undefined
+          expect(findImageDescription('foo:bar', undefined)).to.be.undefined
+          expect(findImageDescription('foo:bar', [])).to.be.undefined
+          expect(findImageDescription('foo:bar', [{}])).to.be.undefined
         })
       })
       describe('#getGardenTerminalHostClusterSecretRef', function () {
