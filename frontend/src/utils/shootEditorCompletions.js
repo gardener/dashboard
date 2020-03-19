@@ -201,7 +201,7 @@ export class ShootEditorCompletions {
   _getTokenCompletionPath (token, cur, cm) {
     let currentToken = token
     let line = cur.line
-    let tokenContext = []
+    const tokenContext = []
 
     while (line >= 0 && !this._isTopLevelProperty(currentToken)) {
       currentToken = this._getYamlToken(cm, CodeMirror.Pos(line, 0))
