@@ -111,7 +111,7 @@ export class ShootEditorCompletions {
       completions = this.shootCompletions
     }
 
-    let completionArray = []
+    const completionArray = []
     const generateCompletionText = (propertyName, yamlType, tokenType) => {
       const completionIndentStr = `${repeat(' ', token.start)}${repeat(' ', this.indentUnit)}${repeat(' ', tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)}`
       if (yamlType === 'array') {
