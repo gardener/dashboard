@@ -125,7 +125,10 @@ export class ShootEditorCompletions {
     }
 
     forIn(completions, (completion, propertyName) => {
-      const text = `${token.type === 'firstArrayItem' ? '- ' : ''}${generateCompletionText(propertyName, completion.type, token.type)}`
+      let text = generateCompletionText(propertyName, completion.type, token.type)
+      if (token.type === 'firstArrayItem') {
+        text = '-' + text
+      }
       const string = propertyName.toLowerCase()
       completionArray.push({
         text,
