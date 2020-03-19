@@ -90,7 +90,7 @@ export class ShootEditorCompletions {
     const cur = cm.getCursor()
 
     const { lineString, lineTokens } = this._getTokenLine(cm, cur)
-    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/)
+    const [, indent, firstArrayItem] = lineString.match(/^(\s*)(-\s)?(.*?)?$/) || []
     let extraIntent = ''
     if (firstArrayItem) {
       extraIntent = `${repeat(' ', this.arrayBulletIndent)}`
