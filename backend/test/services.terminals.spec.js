@@ -153,7 +153,7 @@ describe('services', function () {
     })
 
     describe('terminals', function () {
-      describe('#_imageHelpText', function () {
+      describe('#findImageDescription', function () {
         it('should match regexp', async function () {
           const containerImage = 'foo:bar'
           const imageDescriptions = [{
