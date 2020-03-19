@@ -160,7 +160,7 @@ describe('services', function () {
             image: '/foo:.*/',
             description: 'baz'
           }]
-          expect(_imageHelpText(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match regexp', async function () {
