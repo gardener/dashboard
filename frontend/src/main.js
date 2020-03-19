@@ -35,6 +35,7 @@ if (version === false) {
       import('axios'),
       import('vue-snotify'),
       import('vue-cookie'),
+      import('vue-shortkey'),
       import('./utils/auth')
     ])
     .then(([
@@ -47,6 +48,7 @@ if (version === false) {
       { default: axios },
       { default: Snotify },
       { default: VueCookie },
+      ShortKey,
       { UserManager }
     ]) => axios
       .get('/config.json')
@@ -77,6 +79,7 @@ if (version === false) {
           Vuelidate,
           Snotify,
           VueCookie,
+          ShortKey,
           App,
           store,
           router: router({ store, userManager })
@@ -92,7 +95,7 @@ if (version === false) {
   renderNotSupportedBrowser(version)
 }
 
-function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, App, store, router }) {
+function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, ShortKey, App, store, router }) {
   /* eslint-disable no-new */
   Vue.use(Vuetify, {
     iconfont: 'md'
@@ -100,6 +103,7 @@ function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, App, store, route
   Vue.use(Vuelidate)
   Vue.use(Snotify)
   Vue.use(VueCookie)
+  Vue.use(ShortKey)
 
   Vue.config.productionTip = false
 

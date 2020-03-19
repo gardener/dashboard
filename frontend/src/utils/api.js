@@ -229,45 +229,60 @@ export function getInfo () {
 
 /* Terminals */
 
-export function createTerminal ({ namespace, name, target, body }) {
-  return invokeTerminalMethod('create', { namespace, name, target, body })
-}
-
-export function fetchTerminalSession ({ namespace, name, target, body }) {
-  return invokeTerminalMethod('fetch', { namespace, name, target, body })
-}
-
-export function deleteTerminal ({ namespace, name, target, body }) {
-  return invokeTerminalMethod('remove', { namespace, name, target, body })
-}
-
-export function heartbeat ({ namespace, name, target, body }) {
-  return invokeTerminalMethod('heartbeat', { namespace, name, target, body })
-}
-
-export function terminalConfig ({ namespace, name, target }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  target = encodeURIComponent(target)
-
-  let pathname = `/api/namespaces/${namespace}/terminals/${target}`
-  if (target !== 'garden') {
-    pathname += `/${name}`
+export function createTerminal ({ namespace, name, target, body = {} }) {
+  body.coordinate = {
+    name,
+    namespace,
+    target
   }
-  pathname += '/config'
-  return getResource(pathname)
+  return invokeTerminalMethod('create', body)
 }
 
-function invokeTerminalMethod (method, { namespace, name, target, body }) {
-  namespace = encodeURIComponent(namespace)
-  name = encodeURIComponent(name)
-  target = encodeURIComponent(target)
-
-  let pathname = `/api/namespaces/${namespace}/terminals/${target}`
-  if (target !== 'garden') {
-    pathname += `/${name}`
+export function fetchTerminalSession ({ namespace, name, target, body = {} }) {
+  body.coordinate = {
+    name,
+    namespace,
+    target
   }
-  return callResourceMethod(pathname, {
+  return invokeTerminalMethod('fetch', body)
+}
+
+export function listTerminalSessions ({ namespace, body = {} }) {
+  body.coordinate = {
+    namespace
+  }
+  return invokeTerminalMethod('list', body)
+}
+
+export function deleteTerminal ({ namespace, name, target, body = {} }) {
+  body.coordinate = {
+    name,
+    namespace,
+    target
+  }
+  return invokeTerminalMethod('remove', body)
+}
+
+export function heartbeat ({ namespace, name, target, body = {} }) {
+  body.coordinate = {
+    name,
+    namespace,
+    target
+  }
+  return invokeTerminalMethod('heartbeat', body)
+}
+
+export function terminalConfig ({ namespace, name, target, body = {} }) {
+  body.coordinate = {
+    name,
+    namespace,
+    target
+  }
+  return invokeTerminalMethod('config', body)
+}
+
+function invokeTerminalMethod (method, body) {
+  return callResourceMethod(`/api/terminals`, {
     method,
     params: body
   })

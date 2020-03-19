@@ -20,7 +20,7 @@ limitations under the License.
     ref="popper"
     trigger="click"
     :options="popperOptions"
-    boundaries-selector=".v-content__wrap"
+    :boundaries-selector="boundariesSelector"
     :disabled="disabled"
     @show="onPopperShow"
     @hide="onPopperHide"
@@ -96,6 +96,10 @@ export default {
     },
     disabled: {
       type: Boolean
+    },
+    boundariesSelector: {
+      type: String,
+      default: '.v-content__wrap'
     }
   },
   data () {

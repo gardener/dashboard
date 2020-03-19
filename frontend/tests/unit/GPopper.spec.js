@@ -14,22 +14,19 @@
 // limitations under the License.
 //
 
-'use strict'
+import { expect } from 'chai'
+import { mount } from '@vue/test-utils'
+import Vue from 'vue'
+import Vuetify from 'vuetify'
+import { VContent } from 'vuetify/lib'
+Vue.use(Vuetify)
 
-const _ = require('lodash')
-const config = require('../config')
-
-module.exports = {
-  '/info': require('./info'),
-  '/user': require('./user'),
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/shoots': require('./shoots'),
-  '/namespaces': require('./namespaces'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
-}
-
-if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  module.exports['/terminals'] = require('./terminals')
-}
+describe('GPopper.vue', function () {
+  describe('VContent', function () {
+    it('v-content__wrap class should exist', function () {
+      const wrapper = mount(VContent, {})
+      const element = wrapper.find('.v-content__wrap')
+      expect(element.constructor.name).to.be.eq('Wrapper') // if .v-content__wrap is not found the constructor name would be "ErrorWrapper"
+    })
+  })
+})

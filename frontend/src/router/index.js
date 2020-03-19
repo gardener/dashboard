@@ -21,8 +21,8 @@ import moment from 'moment-timezone'
 import includes from 'lodash/includes'
 import head from 'lodash/head'
 import get from 'lodash/get'
-import cloneDeep from 'lodash/cloneDeep'
 import { getPrivileges } from '@/utils/api'
+import { TargetEnum, targetText } from '@/utils'
 
 /* Layouts */
 const Login = () => import('@/layouts/Login')
@@ -54,14 +54,6 @@ export default function createRouter ({ store, userManager }) {
 
   function hasGardenTerminalAccess () {
     return store.getters.hasGardenTerminalAccess
-  }
-
-  function hasControlPlaneTerminalAccess () {
-    return store.getters.hasControlPlaneTerminalAccess
-  }
-
-  function hasShootTerminalAccess () {
-    return store.getters.hasShootTerminalAccess
   }
 
   function isTerminalEnabled () {
@@ -138,52 +130,12 @@ export default function createRouter ({ store, userManager }) {
     return get(route, 'params.name')
   }
 
-  const shootItemTerminalTabs = function () {
-    const tabs = []
-
-    if (hasControlPlaneTerminalAccess()) {
-      tabs.push({
-        key: 'terminalControlPlane',
-        title: 'Control Plane',
-        to: (route) => {
-          const params = cloneDeep(route.params)
-          params.target = 'cp'
-          return {
-            name: 'ShootItemTerminal',
-            params
-          }
-        }
-      })
-    }
-
-    if (hasShootTerminalAccess()) {
-      tabs.push({
-        key: 'terminalCluster',
-        title: 'Cluster',
-        to: (route) => {
-          const params = cloneDeep(route.params)
-          params.target = 'shoot'
-          return {
-            name: 'ShootItemTerminal',
-            params
-          }
-        }
-      })
-    }
-    return tabs
-  }
-
   const terminalBreadcrumbTitle = function (route) {
     const target = get(route, 'params.target')
-    switch (target) {
-      case 'cp':
-        return 'Control Plane Terminal'
-      case 'shoot':
-        return 'Cluster Terminal'
-      case 'garden':
-        return 'Garden Cluster Terminal'
-      default:
-        return undefined
+    if (targetText(target)) {
+      return `${targetText(target)} Terminal`
+    } else {
+      return 'Terminal'
     }
   }
 
@@ -325,14 +277,13 @@ export default function createRouter ({ store, userManager }) {
                   }
                 },
                 {
-                  path: 'term/:target',
+                  path: 'term',
                   name: 'ShootItemTerminal',
                   component: ShootItemTerminal,
                   meta: {
                     namespaced: true,
                     projectScope: true,
-                    breadcrumbText: terminalBreadcrumbTitle,
-                    tabs: shootItemTerminalTabs
+                    breadcrumbText: terminalBreadcrumbTitle
                   },
                   beforeEnter: (to, from, next) => {
                     if (isTerminalEnabled() && canCreateTerminals()) {
@@ -456,7 +407,7 @@ export default function createRouter ({ store, userManager }) {
           },
           beforeEnter: (to, from, next) => {
             if (hasGardenTerminalAccess()) {
-              to.params.target = 'garden'
+              to.params.target = TargetEnum.GARDEN
               next()
             } else {
               next('/')
@@ -627,7 +578,8 @@ export default function createRouter ({ store, userManager }) {
           ])
           break
         }
-        case 'ShootDetailsEditor': {
+        case 'ShootDetailsEditor':
+        case 'ShootItemTerminal': {
           await store.dispatch('subscribeShoot', { name: params.name, namespace })
           break
         }

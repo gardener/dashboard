@@ -426,9 +426,17 @@ Copyright (c) 2011 Olivier Poitrey rs@dailymotion.com\
 Copyright (c) Isaac Z. Schlueter and Contributors\
 [ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)
 
+- [splitpanes](https://github.com/antoniandre/splitpanes)\
+Copyright (c) 2018 Antoni Andre\
+[MIT License](https://github.com/antoniandre/splitpanes/blob/master/LICENSE)
+
 - [socket.io-client](https://github.com/socketio/socket.io-client)\
 Copyright (c) 2014 Guillermo Rauch\
 [MIT License](https://github.com/socketio/socket.io-client/blob/master/LICENSE)
+
+- [js-symbol-tree](https://github.com/jsdom/js-symbol-tree)\
+Copyright (c) 2015 Joris van der Wel\
+[MIT License](https://github.com/jsdom/js-symbol-tree/blob/master/LICENSE)
 
 - [url-template](https://github.com/bramstein/url-template)\
 Copyright (c) 2012-2014, Bram Stein\
@@ -453,6 +461,10 @@ Copyright (c) 2017 Igor Ognichenko\
 - [vue-router](https://github.com/vuejs/vue-router)\
 Copyright (c) 2013-present Evan You\
 [MIT License](https://github.com/vuejs/vue-router/blob/dev/LICENSE)
+
+- [vue-shortkey](https://github.com/iFgR/vue-shortkey)\
+Copyright (c) 2016 Fagner Araujo\
+[MIT License](https://github.com/iFgR/vue-shortkey/blob/master/LICENSE)
 
 - [vue-snotify](https://github.com/artemsky/vue-snotify)\
 Copyright (c) 2010-2017 Artem Kuznetsov\

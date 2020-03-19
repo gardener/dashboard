@@ -14,22 +14,35 @@
 // limitations under the License.
 //
 
-'use strict'
-
-const _ = require('lodash')
-const config = require('../config')
-
-module.exports = {
-  '/info': require('./info'),
-  '/user': require('./user'),
-  '/cloudprofiles': require('./cloudprofiles'),
-  '/shoots': require('./shoots'),
-  '/namespaces': require('./namespaces'),
-  '/namespaces/:namespace/shoots': require('./shoots'),
-  '/namespaces/:namespace/infrastructure-secrets': require('./infrastructureSecrets'),
-  '/namespaces/:namespace/members': require('./members')
+// initial state
+const state = {
+  draggingDragAndDropId: undefined
 }
 
-if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  module.exports['/terminals'] = require('./terminals')
+// getters
+const getters = {
+  draggingDragAndDropId: state => state.draggingDragAndDropId
+}
+
+// actions
+const actions = {
+  setDraggingDragAndDropId: ({ commit, rootState }, draggingDragAndDropId) => {
+    commit('SET_DRAGGING_DRAG_AND_DROP_ID', draggingDragAndDropId)
+    return state.draggingDragAndDropId
+  }
+}
+
+// mutations
+const mutations = {
+  SET_DRAGGING_DRAG_AND_DROP_ID (state, draggingDragAndDropId) {
+    state.draggingDragAndDropId = draggingDragAndDropId
+  }
+}
+
+export default {
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
 }

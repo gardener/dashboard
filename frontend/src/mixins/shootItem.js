@@ -25,7 +25,8 @@ import {
   getCreatedBy,
   isShootStatusHibernated,
   isReconciliationDeactivated,
-  getProjectName
+  getProjectName,
+  isTypeDelete
 } from '@/utils'
 
 export const shootItem = {
@@ -153,6 +154,9 @@ export const shootItem = {
       return this.shootInfo.seedShootIngressDomain || ''
     },
 
+    isShootLastOperationTypeDelete () {
+      return isTypeDelete(this.shootLastOperation)
+    },
     shootLastOperation () {
       return get(this.shootItem, 'status.lastOperation', {})
     },
