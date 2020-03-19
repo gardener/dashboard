@@ -94,7 +94,7 @@ function imageHelpText (terminal) {
   return findImageDescription(containerImage, imageDescriptions)
 }
 
-function findImageDescription(containerImage, imageDescriptions) {
+function findImageDescription (containerImage, imageDescriptions) {
   return _
     .chain(imageDescriptions)
     .find(({ image }) => {

@@ -715,7 +715,7 @@ const stub = {
         .reply(200, () => getProjectNamespace(namespace))
         .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
         .reply(200, project)
-    });
+    })
     return scopes
   },
   createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
