@@ -300,7 +300,6 @@ describe('utils', function () {
       it('should increase indent after an object or array', function () {
         const spy = sandbox.spy(editor, 'replaceSelection')
         setEditorContentAndCursor('spec:\n  foo:', 1, 6)
-        console.log(editor.options.indentUnit)
         shootEditorCompletions.editorEnter(editor)
         expect(spy).to.be.calledOnceWith(`\n  ${repeat(' ', editor.options.indentUnit)}`)
       })

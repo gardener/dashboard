@@ -33,6 +33,7 @@ import get from 'lodash/get'
 import forIn from 'lodash/forIn'
 import isEqual from 'lodash/isEqual'
 import first from 'lodash/first'
+import escape from 'lodash/escape'
 
 export class ShootEditorCompletions {
   constructor (shootProperties, editorIndent) {
@@ -111,13 +112,13 @@ export class ShootEditorCompletions {
       completions = this.shootCompletions
     }
 
-    const completionArray = []
+    let completionArray = []
     const generateCompletionText = (propertyName, yamlType, tokenType) => {
       const numberOfSpaces = token.start + this.indentUnit + (tokenType === 'firstArrayItem' ? this.arrayBulletIndent : 0)
       const completionIndentStr = repeat(' ', numberOfSpaces)
       if (yamlType === 'array') {
         return `${propertyName}:\n${completionIndentStr}- `
-      }  
+      }
       if (yamlType === 'object') {
         return `${propertyName}:\n${completionIndentStr}`
       }
@@ -127,7 +128,7 @@ export class ShootEditorCompletions {
     forIn(completions, (completion, propertyName) => {
       let text = generateCompletionText(propertyName, completion.type, token.type)
       if (token.type === 'firstArrayItem') {
-        text = '-' + text
+        text = '- ' + text
       }
       const string = propertyName.toLowerCase()
       completionArray.push({
@@ -138,12 +139,15 @@ export class ShootEditorCompletions {
         description: completion.description,
         render: (el, self, data) => {
           const propertyWrapper = document.createElement('div')
-          propertyWrapper.innerHTML = `<span class="property">${propertyName}</span><span class="type">${upperFirst(completion.type)}</span>`
+          const escapedType = escape(upperFirst(completion.type))
+          const escapedPropertyName = escape(propertyName)
+          const escapedDescription = escape(completion.description)
+          propertyWrapper.innerHTML = `<span class="property">${escapedPropertyName}</span><span class="type">${escapedType}</span>`
           propertyWrapper.className = 'ghint-type'
           el.appendChild(propertyWrapper)
 
           const descWrapper = document.createElement('div')
-          descWrapper.innerHTML = `<span class="description">${completion.description}</span>`
+          descWrapper.innerHTML = `<span class="description">${escapedDescription}</span>`
           descWrapper.className = 'ghint-desc'
           el.appendChild(descWrapper)
         }
