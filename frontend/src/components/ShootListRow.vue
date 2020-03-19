@@ -71,22 +71,35 @@ limitations under the License.
     <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
       <purpose-tag :purpose="shootPurpose"></purpose-tag>
     </td>
-    <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
+    <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
+      <shoot-version :shoot-item="shootItem"></shoot-version>
+    </td>
+    <td class="text-xs-left nowrap" v-if="this.headerVisible['status']">
       <div>
-        <shoot-status
-         :operation="shootLastOperation"
-         :lastErrors="shootLastErrors"
-         :popperKey="`${shootNamespace}/${shootName}`"
-         :isStatusHibernated="isShootStatusHibernated"
-         :isHibernationProgressing="isShootStatusHibernationProgressing"
-         :reconciliationDeactivated="isShootReconciliationDeactivated"
-         :shootDeleted="isTypeDelete">
-        </shoot-status>
+        <shoot-overall-status
+          :operation="shootLastOperation"
+          :lastErrors="shootLastErrors"
+          :isStatusHibernated="isShootStatusHibernated"
+          :isHibernationProgressing="isShootStatusHibernationProgressing"
+          :conditions="shootConditions"
+          :shootDeleted="isTypeDelete">
+        </shoot-overall-status>
         <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
-    <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :shoot-item="shootItem"></shoot-version>
+    <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
+      <div>
+        <shoot-status
+          :operation="shootLastOperation"
+          :popperKey="`${shootNamespace}/${shootName}`"
+          :isStatusHibernated="isShootStatusHibernated"
+          :lastErrors="shootLastErrors"
+          :isHibernationProgressing="isShootStatusHibernationProgressing"
+          :reconciliationDeactivated="isShootReconciliationDeactivated"
+          :shootDeleted="isTypeDelete">
+        </shoot-status>
+        <retry-operation :shootItem="shootItem"></retry-operation>
+      </div>
     </td>
     <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="shootConditions"></status-tags>
@@ -128,6 +141,7 @@ import { mapGetters } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
 import InfraIcon from '@/components/VendorIcon'
 import ShootStatus from '@/components/ShootStatus'
+import ShootOverallStatus from '@/components/ShootOverallStatus'
 import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
@@ -154,6 +168,7 @@ export default {
     StatusTags,
     PurposeTag,
     ShootStatus,
+    ShootOverallStatus,
     TimeString,
     ShootVersion,
     JournalLabels,
