@@ -27,7 +27,7 @@ const { Forbidden } = require('../lib/errors')
 
 const {
   ensureTerminalAllowed,
-  _imageHelpText
+  findImageDescription
 } = require('../lib/services/terminals')
 
 const {
