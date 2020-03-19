@@ -91,7 +91,7 @@ function imageHelpText (terminal) {
   const containerImage = terminal.spec.host.pod.containerImage
   const imageDescriptions = getConfigValue('terminal.containerImageDescriptions')
 
-  return _imageHelpText(containerImage, imageDescriptions)
+  return findImageDescription(containerImage, imageDescriptions)
 }
 
 function _imageHelpText (containerImage, imageDescriptions) {
