@@ -36,9 +36,9 @@ const quotas = [
 ]
 
 const secretBindingList = [
-  getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'garden-foo', 'secret1', quotas),
-  getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'garden-foo', 'secret2', quotas),
-  getSecretBinding('garden-foo', 'trial-infra1', 'infra1-profileName', 'garden-trial', 'trial-secret', quotas)
+  getSecretBinding('garden-foo', 'foo-infra1', 'infra1-profileName', 'secret1', 'garden-foo', quotas),
+  getSecretBinding('garden-foo', 'foo-infra3', 'infra3-profileName', 'secret2', 'garden-foo', quotas),
+  getSecretBinding('garden-foo', 'trial-infra1', 'infra1-profileName', 'trial-secret', 'garden-trial', quotas)
 ]
 
 const projectList = [
@@ -51,7 +51,8 @@ const projectList = [
       'system:serviceaccount:garden-foo:robot'
     ],
     description: 'foo-description',
-    purpose: 'foo-purpose'
+    purpose: 'foo-purpose',
+    costObject: '9999999999'
   }),
   getProject({
     name: 'bar',
@@ -76,6 +77,13 @@ const projectList = [
     createdBy: 'admin@example.org',
     description: 'secret-description',
     purpose: 'secret-purpose'
+  }),
+  getProject({
+    name: 'trial',
+    createdBy: 'admin@example.org',
+    description: 'trial-description',
+    purpose: 'trial-purpose',
+    costObject: '1234567890'
   })
 ]
 
@@ -215,24 +223,6 @@ function prepareSecretAndBindingMeta ({ name, namespace, data, resourceVersion, 
   return { metadataSecretBinding, secretRef, resultSecretBinding, metadataSecret, resultSecret }
 }
 
-function canCreateProjects (scope) {
-  return scope
-    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
-      const { namespace, verb, resource, group } = body.spec.resourceAttributes
-      return !namespace && group === 'core.gardener.cloud' && resource === 'projects' && verb === 'create'
-    })
-    .reply(200, function (uri, body) {
-      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
-      const payload = jwt.decode(token)
-      const allowed = _.endsWith(payload.id, 'example.org')
-      return _.assign({
-        status: {
-          allowed
-        }
-      }, body)
-    })
-}
-
 function reviewToken (scope) {
   return scope
     .post('/apis/authentication.k8s.io/v1/tokenreviews')
@@ -344,7 +334,7 @@ function getUser (name) {
   }
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready' }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = "" }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -357,7 +347,10 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   createdBy = getUser(createdBy)
   return {
     metadata: {
-      name
+      name,
+      annotations: {
+        'billing.gardener.cloud/costObject': costObject
+      }
     },
     spec: {
       namespace,
@@ -715,7 +708,14 @@ const stub = {
     const infrastructureSecrets = !empty
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
-    return nockWithAuthorization(bearer)
+
+    const namespaces = _
+      .chain(secretBindings)
+      .map('secretRef.namespace')
+      .uniq()
+      .value()
+
+    const scopes = [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
@@ -724,6 +724,17 @@ const stub = {
       .reply(200, {
         items: infrastructureSecrets
       })
+    ]
+    const adminScope = nockWithAuthorization(auth.bearer)
+    namespaces.forEach(namespace => {
+      const project = readProject(namespace)
+      adminScope
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace))
+        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+        .reply(200, project)
+    })
+    return scopes
   },
   createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -735,6 +746,7 @@ const stub = {
       resourceVersion,
       cloudProfileName
     })
+    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
@@ -750,6 +762,10 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecretBinding)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(200, () => getProjectNamespace(namespace))
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+      .reply(200, project)
   },
   patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -764,6 +780,7 @@ const stub = {
       bindingNamespace,
       cloudProfileName
     })
+    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
@@ -774,6 +791,10 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
+      .get(`/api/v1/namespaces/${namespace}`)
+      .reply(200, () => getProjectNamespace(namespace))
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
+      .reply(200, project)
   },
   patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -972,6 +993,88 @@ const stub = {
       .reply(200, () => terminal)
     return scope
   },
+  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, containerImage }) {
+    let terminal = {
+      metadata: {
+        namespace,
+        name,
+        annotations: {
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {
+        host: {
+          namespace: hostNamespace,
+          pod: {
+            containerImage
+          }
+        }
+      },
+      status: {}
+    }
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    if (target === 'garden') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
+        .reply(404)
+    } else {
+      const shootResource = _.find(shootList, ['metadata.name', shootName])
+      seedName = getSeedNameFromShoot(shootResource)
+      scope
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${shootName}`)
+        .reply(200, shootResource)
+    }
+    if (target === 'cp') {
+      scope
+        .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
+        .reply(200, {
+          metadata: {
+            name: seedName,
+            namespace: 'garden'
+          },
+          spec: {
+            seedName: 'soil-infra1'
+          }
+        })
+    }
+    if (target === 'shoot') {
+      const server = `https://${shootName}.cluster.foo.bar`
+      getKubeconfigSecret(scope, {
+        namespace,
+        name: `${shootName}.kubeconfig`,
+        server
+      })
+    } else {
+      getKubeconfigSecret(scope, {
+        namespace: 'garden',
+        name: `seedsecret-${seedName}`,
+        server: `https://${seedName}:8443`
+      })
+    }
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
+      .query(({ labelSelector }) => {
+        const labels = _
+          .chain(labelSelector)
+          .split(',')
+          .map(value => value.split('='))
+          .fromPairs()
+          .value()
+        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+      })
+      .reply(200, { items: [terminal] })
+      .patch(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`, body => {
+        terminal = _
+          .chain(terminal)
+          .cloneDeep()
+          .merge(body)
+          .value()
+        return true
+      })
+      .reply(200, () => terminal)
+    return scope
+  },
   fetchTerminal ({ bearer, hostUrl, host, serviceAccountSecretName, token }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
@@ -1032,6 +1135,47 @@ const stub = {
       .reply(200, () => terminal)
       .delete(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`)
       .reply(200, () => terminal)
+    return scope
+  },
+  listTerminalResources ({ bearer, username, namespace }) {
+    const terminal1 = {
+      metadata: {
+        name: 'foo1',
+        namespace: 'foo',
+        annotations: {
+          'dashboard.gardener.cloud/identifier': '1',
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {},
+      status: {}
+    }
+    const terminal2 = {
+      metadata: {
+        name: 'foo2',
+        namespace: 'foo',
+        annotations: {
+          'dashboard.gardener.cloud/identifier': '2',
+          'garden.sapcloud.io/createdBy': username
+        }
+      },
+      spec: {},
+      status: {}
+    }
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+    scope
+      .get(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`)
+      .query(({ labelSelector }) => {
+        const labels = _
+          .chain(labelSelector)
+          .split(',')
+          .map(value => value.split('='))
+          .fromPairs()
+          .value()
+        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+      })
+      .reply(200, { items: [terminal1, terminal2] })
     return scope
   },
   getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
@@ -1245,8 +1389,46 @@ const stub = {
   getPrivileges ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    canCreateProjects(scope)
     return scope
+  },
+  getSelfSubjectRulesReview ({ bearer, namespace }) {
+    return nockWithAuthorization(bearer)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectrulesreviews', body => {
+        return body.spec.namespace === namespace
+      })
+      .reply(200, function (uri, body) {
+        const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+        const payload = jwt.decode(token)
+
+        let resourceRules = []
+        const nonResourceRules = []
+        const incomplete = false
+        if (_.endsWith(payload.id, 'example.org')) {
+          resourceRules = resourceRules.concat([{
+              verbs: ['get'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects'],
+              resourceName: ['foo']
+            },
+            {
+              verbs: ['create'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects']
+            }
+          ])
+        } else {
+          resourceRules = resourceRules.concat([{
+            verbs: ['get'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects'],
+            resourceName: ['foo']
+          }
+        ])
+        }
+        return {
+          status: { resourceRules, nonResourceRules, incomplete }
+        }
+      })
   },
   authorizeToken () {
     const adminScope = nockWithAuthorization(auth.bearer)

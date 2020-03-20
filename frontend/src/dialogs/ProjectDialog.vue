@@ -87,10 +87,6 @@ limitations under the License.
                   ref="description"
                   label="Description"
                   v-model="description"
-                  :error-messages="getFieldValidationErrors('description')"
-                  @input="$v.description.$touch()"
-                  @blur="$v.description.$touch()"
-                  counter="50"
                   ></v-text-field>
               </v-flex>
             </v-layout>
@@ -137,14 +133,15 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown } from '@/utils'
+import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
-import { getProjectDetails, projectNamesFromProjectList, getCostObjectSettings } from '@/utils/projects'
 import cloneDeep from 'lodash/cloneDeep'
+import get from 'lodash/get'
 import map from 'lodash/map'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
+import isEmpty from 'lodash/isEmpty'
 import GAlert from '@/components/GAlert'
 
 const defaultProjectName = ''
@@ -182,7 +179,9 @@ export default {
   computed: {
     ...mapGetters([
       'memberList',
-      'username'
+      'username',
+      'projectNamesFromProjectList',
+      'costObjectSettings'
     ]),
     ...mapState([
       'cfg'
@@ -196,28 +195,26 @@ export default {
       }
     },
     projectNames () {
-      return projectNamesFromProjectList()
+      return this.projectNamesFromProjectList
     },
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    costObjectSettings () {
-      return getCostObjectSettings() || {}
-    },
     costObjectSettingEnabled () {
-      return getCostObjectSettings() !== undefined
+      return !isEmpty(this.costObjectSettings)
     },
     costObjectTitle () {
-      return this.costObjectSettings.title
+      return get(this.costObjectSettings, 'title')
     },
     costObjectDescriptionCompiledMarkdown () {
-      return compileMarkdown(this.costObjectSettings.description)
+      const description = get(this.costObjectSettings, 'description')
+      return compileMarkdown(description)
     },
     costObjectRegex () {
-      return this.costObjectSettings.regex
+      return get(this.costObjectSettings, 'regex')
     },
     costObjectErrorMessage () {
-      return this.costObjectSettings.errorMessage
+      return get(this.costObjectSettings, 'errorMessage')
     },
     currentProjectName () {
       return this.projectDetails.projectName
@@ -267,9 +264,6 @@ export default {
             }
             return RegExp(this.costObjectRegex).test(value || '') // undefined cannot be evaluated, use empty string as default
           }
-        },
-        description: {
-          maxLength: maxLength(50)
         }
       }
       if (this.isCreateMode) {
@@ -286,9 +280,6 @@ export default {
     },
     validationErrors () {
       return {
-        description: {
-          maxLength: 'Description exceeds the maximum length'
-        },
         projectName: {
           required: 'Name is required',
           maxLength: 'Name exceeds the maximum length',
@@ -325,7 +316,6 @@ export default {
           const project = await this.save()
           this.loading = false
           this.hide()
-          this.$emit('submit', project)
           if (this.isCreateMode) {
             this.$router.push({
               name: 'Secrets',

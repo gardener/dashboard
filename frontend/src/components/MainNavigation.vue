@@ -36,84 +36,97 @@ limitations under the License.
         </div>
       </div>
       <template v-if="projectList.length">
-      <v-menu
-        light
-        attach
-        offset-y
-        left
-        bottom
-        full-width
-        allow-overflow
-        open-on-click
-        :close-on-content-click="false"
-        content-class="project-menu"
-        v-model="projectMenu"
-      >
-        <v-btn block slot="activator" class="project-selector elevation-4 ma-0 white--text">
-          <v-icon class="pr-4">mdi-grid-large</v-icon>
-          <span class="ml-2">{{projectName}}</span>
-          <v-spacer></v-spacer>
-          <v-icon right>{{projectMenuIcon}}</v-icon>
-        </v-btn>
+        <v-menu
+          light
+          attach
+          offset-y
+          left
+          bottom
+          full-width
+          allow-overflow
+          open-on-click
+          :close-on-content-click="false"
+          content-class="project-menu"
+          v-model="projectMenu"
+        >
+          <v-btn
+            block
+            slot="activator"
+            class="project-selector elevation-4 ma-0 white--text"
+            @keydown.down="highlightProjectWithKeys('down')"
+            @keydown.up="highlightProjectWithKeys('up')"
+            @keyup.enter="navigateToHighlightedProject"
+          >
+            <v-icon class="pr-4">mdi-grid-large</v-icon>
+            <span class="ml-2">{{projectName}}</span>
+            <v-spacer></v-spacer>
+            <v-icon right>{{projectMenuIcon}}</v-icon>
+          </v-btn>
 
-        <v-card light>
-          <template v-if="projectList.length > 3">
-            <v-card-title class="pa-0 grey lighten-5">
-              <v-text-field
-                light
-                clearable
-                label="Filter projects"
-                single-line
-                hide-details
-                full-width
-                color="grey darken-1"
-                prepend-icon="search"
-                class="ml-4 project-filter"
-                v-model="projectFilter"
-                ref="projectFilter"
-                @keyup.esc="projectFilter = ''"
-                @keyup.enter="onProjectFilterSubmit()"
-                autofocus
+          <v-card light>
+            <template v-if="projectList.length > 3">
+              <v-card-title class="pa-0 grey lighten-5">
+                <v-text-field
+                  light
+                  clearable
+                  label="Filter projects"
+                  single-line
+                  hide-details
+                  full-width
+                  color="grey darken-1"
+                  prepend-icon="search"
+                  class="ml-4 project-filter"
+                  v-model="projectFilter"
+                  ref="projectFilter"
+                  @keyup.esc="projectFilter = ''"
+                  @keyup.enter="navigateToHighlightedProject"
+                  @input="onInputProjectFilter"
+                  @keydown.down="highlightProjectWithKeys('down')"
+                  @keydown.up="highlightProjectWithKeys('up')"
+                  autofocus
+                >
+                </v-text-field>
+              </v-card-title>
+              <v-divider></v-divider>
+            </template>
+            <v-list light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
+              <v-list-tile
+                class="project-list-tile"
+                v-for="project in visibleProjectList"
+                @click="onProjectClick($event, project)"
+                :class="{'grey lighten-4' : isHighlightedProject(project)}"
+                :key="project.metadata.name"
+                :data-g-project-name="project.metadata.name"
               >
-              </v-text-field>
-            </v-card-title>
-            <v-divider></v-divider>
-          </template>
-          <v-list light class="project-list">
-            <v-list-tile
-              v-for="project in sortedAndFilteredProjectList"
-              :key="project.metadata.name"
-              @click="onProjectSelect(project)"
-            >
-              <v-list-tile-avatar>
-                <v-icon v-if="project.metadata.name===projectName" color="teal">check</v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title>{{project.metadata.name}}</v-list-tile-title>
-                <v-list-tile-sub-title class="project-owner">{{getProjectOwner(project)}}</v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
-          </v-list>
-          <v-card-actions class="grey lighten-3">
-            <v-tooltip top :disabled="canCreateProject" style="width: 100%">
-              <v-btn
-                slot="activator"
-                flat
-                block
-                class="project-add text-xs-left teal--text"
-                :disabled="!canCreateProject"
-                @click.stop="openProjectDialog"
-              >
-                <v-icon>add</v-icon>
-                <span class="ml-2">Create Project</span>
-              </v-btn>
-              <span>You are not authorized to create projects</span>
-            </v-tooltip>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
+                <v-list-tile-avatar>
+                  <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
+                </v-list-tile-avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>{{project.metadata.name}}</v-list-tile-title>
+                  <v-list-tile-sub-title class="project-owner">{{getProjectOwner(project)}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
+            </v-list>
+            <v-card-actions class="grey lighten-3">
+              <v-tooltip top :disabled="canCreateProject" style="width: 100%">
+                <v-btn
+                  slot="activator"
+                  flat
+                  block
+                  class="project-add text-xs-left teal--text"
+                  :disabled="!canCreateProject"
+                  @click.stop="openProjectDialog"
+                >
+                  <v-icon>add</v-icon>
+                  <span class="ml-2">Create Project</span>
+                </v-btn>
+                <span>You are not authorized to create projects</span>
+              </v-tooltip>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
       </template>
-      <v-list>
+      <v-list ref="mainMenu">
         <v-list-tile :to="{name: 'Home'}" exact v-if="hasNoProjects">
           <v-list-tile-action>
             <v-icon class="white--text">mdi-home-outline</v-icon>
@@ -151,6 +164,7 @@ limitations under the License.
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'
 import find from 'lodash/find'
+import findIndex from 'lodash/findIndex'
 import filter from 'lodash/filter'
 import sortBy from 'lodash/sortBy'
 import toLower from 'lodash/toLower'
@@ -159,8 +173,12 @@ import replace from 'lodash/replace'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import head from 'lodash/head'
+import slice from 'lodash/slice'
+import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/dialogs/ProjectDialog'
+
+const initialVisibleProjects = 10
 
 export default {
   components: {
@@ -173,7 +191,9 @@ export default {
       projectDialog: false,
       projectFilter: '',
       projectMenu: false,
-      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } }
+      allProjectsItem: { metadata: { name: 'All Projects', namespace: '_all' } },
+      highlightedProjectName: undefined,
+      numberOfVisibleProjects: initialVisibleProjects
     }
   },
   computed: {
@@ -240,11 +260,24 @@ export default {
         const owner = toLower(replace(item.data.owner, /@.*$/, ''))
         return includes(name, filter) || includes(owner, filter)
       }
-      const sortedList = sortBy(filter(this.projectList, predicate))
-      if (sortedList.length > 1) {
-        sortedList.unshift(this.allProjectsItem)
+      const filteredList = filter(this.projectList, predicate)
+
+      const exactMatch = item => {
+        return this.isProjectNameMatchingFilter(item.metadata.name) ? 0 : 1
       }
+      const sortedList = sortBy(filteredList, [exactMatch, 'metadata.name'])
       return sortedList
+    },
+    sortedAndFilteredProjectListWithAllProjects () {
+      if (this.projectList.length > 1) {
+        return [this.allProjectsItem, ...this.sortedAndFilteredProjectList]
+      }
+      return this.sortedAndFilteredProjectList
+    },
+    visibleProjectList () {
+      const projectList = this.sortedAndFilteredProjectListWithAllProjects
+      let endIndex = this.numberOfVisibleProjects
+      return slice(projectList, 0, endIndex)
     },
     getProjectOwner () {
       return (project) => {
@@ -255,22 +288,47 @@ export default {
       return (route) => {
         return namespacedRoute(route, this.namespace)
       }
+    },
+    projectFilterHasExactMatch () {
+      const project = head(this.sortedAndFilteredProjectList)
+      const projectName = get(project, 'metadata.name')
+      return this.isProjectNameMatchingFilter(projectName)
     }
   },
   methods: {
     ...mapActions([
       'setSidebar'
     ]),
-    onProjectSelect (project) {
-      this.projectMenu = false
-      this.project = project
+    findProjectCaseInsensitive (projectName) {
+      return find(this.sortedAndFilteredProjectListWithAllProjects, project => {
+        return toLower(projectName) === toLower(project.metadata.name)
+      })
     },
-    onProjectFilterSubmit () {
-      if (this.projectMenu && this.sortedAndFilteredProjectList.length === 1) {
-        const project = head(this.sortedAndFilteredProjectList)
-        if (project) {
-          this.onProjectSelect(project)
-        }
+    findProjectIndexCaseInsensitive (projectName) {
+      return findIndex(this.sortedAndFilteredProjectListWithAllProjects, project => {
+        return toLower(projectName) === toLower(project.metadata.name)
+      })
+    },
+    highlightedProject () {
+      if (!this.highlightedProjectName) {
+        return head(this.sortedAndFilteredProjectListWithAllProjects)
+      }
+      return this.findProjectCaseInsensitive(this.highlightedProjectName)
+    },
+    navigateToHighlightedProject () {
+      this.navigateToProject(this.highlightedProject())
+    },
+    onProjectClick (event, project) {
+      if (event.isTrusted) {
+        // skip untrusted events - e.g. events triggered via enter key
+        this.navigateToProject(project)
+      }
+    },
+    navigateToProject (project) {
+      this.projectMenu = false
+
+      if (project !== this.project) {
+        this.project = project
       }
     },
     openProjectDialog () {
@@ -292,6 +350,87 @@ export default {
         name = fallback
       }
       return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
+    },
+    onInputProjectFilter () {
+      this.highlightedProjectName = undefined
+      this.numberOfVisibleProjects = initialVisibleProjects
+      if (this.projectFilterHasExactMatch) {
+        this.highlightedProjectName = this.projectFilter
+      }
+
+      this.$nextTick(() => this.scrollHighlightedProjectIntoView())
+    },
+    highlightProjectWithKeys (keyDirection) {
+      let currentHighlightedIndex = 0
+      if (this.highlightedProjectName) {
+        currentHighlightedIndex = this.findProjectIndexCaseInsensitive(this.highlightedProjectName)
+      }
+
+      if (keyDirection === 'up') {
+        if (currentHighlightedIndex > 0) {
+          currentHighlightedIndex--
+        }
+      } else if (keyDirection === 'down') {
+        if (currentHighlightedIndex < this.sortedAndFilteredProjectListWithAllProjects.length - 1) {
+          currentHighlightedIndex++
+        }
+      }
+
+      const newHighlightedProject = this.sortedAndFilteredProjectListWithAllProjects[currentHighlightedIndex]
+      this.highlightedProjectName = newHighlightedProject.metadata.name
+
+      if (currentHighlightedIndex >= this.numberOfVisibleProjects - 1) {
+        this.numberOfVisibleProjects++
+      }
+
+      this.scrollHighlightedProjectIntoView()
+    },
+    scrollHighlightedProjectIntoView () {
+      const projectListChildren = get(this, '$refs.projectList.$children')
+      if (!projectListChildren) {
+        return
+      }
+      const projectListItem = find(projectListChildren, child => {
+        return get(child, '$attrs.data-g-project-name') === this.highlightedProjectName
+      })
+      if (!projectListItem) {
+        return
+      }
+
+      const projectListElement = projectListItem.$el
+      if (projectListElement) {
+        projectListElement.scrollIntoView(false)
+      }
+    },
+    handleProjectListScroll (event) {
+      const projectListElement = this.$refs.projectList.$el
+      if (!projectListElement) {
+        return
+      }
+      const projectListBottomPosY = projectListElement.getBoundingClientRect().top + projectListElement.getBoundingClientRect().height
+      const projectListChildren = get(this, '$refs.projectList.$children')
+      if (!projectListChildren) {
+        return
+      }
+      const lastProjectElement = get(last(projectListChildren), '$el')
+      if (!lastProjectElement) {
+        return
+      }
+
+      const lastProjectElementPosY = projectListBottomPosY - lastProjectElement.getBoundingClientRect().top
+      const scrolledToLastElement = lastProjectElementPosY > 0
+      if (scrolledToLastElement) {
+        // scrolled last element into view
+        if (this.numberOfVisibleProjects <= this.sortedAndFilteredProjectListWithAllProjects.length) {
+          this.numberOfVisibleProjects++
+        }
+      }
+    },
+    isProjectNameMatchingFilter (projectName) {
+      return toLower(projectName) === toLower(this.projectFilter)
+    },
+    isHighlightedProject (project) {
+      return project.metadata.name === this.highlightedProjectName
     }
   },
   watch: {
@@ -305,38 +444,6 @@ export default {
   }
 }
 </script>
-
-<style lang="styl">
-  .project-menu {
-    border-radius: 0;
-
-    .v-card {
-      border-radius: 0;
-
-      .project-filter {
-        align-items: center
-      }
-
-      .project-add > div {
-        justify-content: left;
-      }
-
-      .project-list {
-        height: auto;
-        max-height: (4 * 54px) + (2 * 8px);
-        overflow-y: auto;
-        max-width: 300px;
-
-        div > a {
-          height: 54px;
-        }
-        .project-owner {
-          font-size: 11px;
-        }
-      }
-    }
-  }
-</style>
 
 <style lang="styl" scoped>
   teaserHeight = 200px
@@ -426,6 +533,40 @@ export default {
         color: white !important
         .icon {
           color: white !important
+        }
+      }
+    }
+
+    .project-menu {
+      border-radius: 0;
+
+      >>>.v-card {
+        border-radius: 0;
+
+        .project-filter {
+          align-items: center
+        }
+
+        .project-add > div {
+          justify-content: left;
+        }
+
+        .project-list {
+          height: auto;
+          max-height: (4 * 54px) + (2 * 8px);
+          overflow-y: auto;
+          max-width: 300px;
+
+          div > a {
+            height: 54px;
+          }
+          .project-owner {
+            font-size: 11px;
+          }
+
+          .v-list__tile--highlighted {
+            background-color: transparent !important
+          }
         }
       }
     }

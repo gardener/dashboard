@@ -17,7 +17,7 @@ limitations under the License.
  <template>
    <secret-dialog-help
      title="About OpenStack Secrets"
-     color="orange"
+     color="black"
      backgroundSrc="/static/background_openstack.svg"
      :value="value"
      @input="onInput">
@@ -33,7 +33,7 @@ limitations under the License.
         Read the
         <a href="https://docs.openstack.org/horizon/latest/admin/admin-manage-roles.html"
            target="_blank"
-           class="orange--text text--darken-2">
+           class="black--text">
           OpenStack help section<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to create and manage roles.
       </p>
     </div>

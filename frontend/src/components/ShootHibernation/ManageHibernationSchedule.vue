@@ -67,6 +67,14 @@ limitations under the License.
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-layout>
+    <v-layout row v-if="!isHibernationPossible" class="pt-2">
+      <v-flex>
+        <v-alert :value="true" type="warning" outline>
+          <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
+          <div>{{hibernationPossibleMessage}}</div>
+        </v-alert>
+      </v-flex>
+    </v-layout>
   </div>
 </template>
 
@@ -91,6 +99,13 @@ export default {
   props: {
     userInterActionBus: {
       type: Object
+    },
+    isHibernationPossible: {
+      type: Boolean,
+      default: true
+    },
+    hibernationPossibleMessage: {
+      type: String
     }
   },
   data () {

@@ -77,7 +77,7 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.native="cancel">Cancel</v-btn>
-        <v-btn flat @click.native="submit" :class="`${textColor}`" :disabled="!valid">{{submitButtonText}}</v-btn>
+        <v-btn flat @click.native="submit" :class="textColor" :disabled="!valid">{{submitButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

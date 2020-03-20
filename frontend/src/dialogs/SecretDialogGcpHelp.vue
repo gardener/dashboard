@@ -48,7 +48,7 @@ limitations under the License.
         Read the
         <a href="https://cloud.google.com/compute/docs/access/service-accounts"
            target="_blank"
-           class="green--text text--darken-2">
+           class="green--text">
           Service Account Documentation<v-icon style="font-size:80%">mdi-open-in-new</v-icon></a> on how to apply for credentials
         to service accounts.
       </p>

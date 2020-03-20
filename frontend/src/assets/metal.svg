@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Logo" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 353.1 279.7" style="enable-background:new 0 0 353.1 279.7;" xml:space="preserve">
+<style type="text/css">
+	.st0{opacity:0.6;fill:#009FE3;}
+	.st1{opacity:0.6;fill:#0063A5;}
+	.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+	.st3{opacity:0.5;fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<g id="Logo_1_">
+	<g id="Bildmarke">
+		<polygon class="st0" points="110,65.2 21.8,107.7 0,203.2 61.1,279.7 159,279.7 220,203.2 198.3,107.7 		"/>
+		<polygon class="st0" points="243,65.2 154.8,107.7 133,203.2 194.1,279.7 292,279.7 353.1,203.2 331.3,107.7 		"/>
+		<polygon class="st1" points="176.5,0 61.5,55.4 33.1,179.9 112.7,279.7 240.4,279.7 320,179.9 291.6,55.4 		"/>
+		<g id="Pictogramm">
+			<path class="st2" d="M176.5,163.2l-32.3,18.7l-32.3-18.7v-14.3l64.6-37.3l64.6,37.3v14.3l-32.3,18.7L176.5,163.2L176.5,163.2z
+				 M124.3,156l20,11.5l32.3-18.7l32.3,18.7l20-11.5l-52.3-30.2L124.3,156z"/>
+			<polygon class="st3" points="176.5,191.7 144.2,210.4 111.9,191.7 111.9,177.4 144.2,196.1 176.5,177.4 208.8,196.1 241.2,177.4
+				241.2,191.7 208.8,210.4 			"/>
+			<polygon class="st3" points="176.5,220.3 144.2,238.9 111.9,220.3 111.9,206 144.2,224.7 176.5,206 208.8,224.7 241.2,206
+				241.2,220.3 208.8,238.9 			"/>
+		</g>
+	</g>
+</g>
+</svg>

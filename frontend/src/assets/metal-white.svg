@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="359px" height="285px" viewBox="0 0 359 285" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <path d="M65.5,52.2 L33.2,70.9 L0.9,52.2 L0.9,37.9 L65.5,0.6 L130.1,37.9 L130.1,52.2 L97.8,70.9 L65.5,52.2 L65.5,52.2 Z M13.3,45 L33.3,56.5 L65.6,37.8 L97.9,56.5 L117.9,45 L65.6,14.8 L13.3,45 Z" id="path-1"></path>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="metal-stack-rgb" transform="translate(3.000000, 3.000000)">
+            <polygon id="Path" stroke="#979797" stroke-width="4" fill="#FFFFFF" fill-rule="nonzero" points="110 65.2 21.8 107.7 0 203.2 61.1 279.7 159 279.7 220 203.2 198.3 107.7"></polygon>
+            <polygon id="Path" stroke="#979797" stroke-width="4" fill="#FFFFFF" fill-rule="nonzero" points="243 65.2 154.8 107.7 133 203.2 194.1 279.7 292 279.7 353.1 203.2 331.3 107.7"></polygon>
+            <polygon id="Path" stroke="#979797" stroke-width="4" fill="#FFFFFF" fill-rule="nonzero" points="176.5 0 61.5 55.4 33.1 179.9 112.7 279.7 240.4 279.7 320 179.9 291.6 55.4"></polygon>
+            <g id="Pictogramm" transform="translate(111.000000, 111.000000)">
+                <g id="Shape" stroke="#979797">
+                    <use fill="#979797" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <use xlink:href="#path-1"></use>
+                </g>
+                <polygon id="Path" fill="#979797" opacity="0.5" points="65.5 80.7 33.2 99.4 0.9 80.7 0.9 66.4 33.2 85.1 65.5 66.4 97.8 85.1 130.2 66.4 130.2 80.7 97.8 99.4"></polygon>
+                <polygon id="Path" fill="#979797" opacity="0.5" points="65.5 109.3 33.2 127.9 0.9 109.3 0.9 95 33.2 113.7 65.5 95 97.8 113.7 130.2 95 130.2 109.3 97.8 127.9"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

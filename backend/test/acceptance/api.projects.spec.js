@@ -25,6 +25,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const name = 'foo'
   const namespace = `garden-${name}`
+  const annotations = {
+    'billing.gardener.cloud/costObject': '9999999999'
+  }
   const metadata = { name }
   const username = `${name}@example.org`
   const id = username
@@ -57,7 +60,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(3)
+    expect(res.body).to.have.length(4)
   })
 
   it('should return the foo project', async function () {
@@ -70,7 +73,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
   })
 
   it('should reject request with authorization error', async function () {
@@ -101,7 +104,8 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
       owner,
       description,
       purpose,
-      phase: 'Initial'
+      phase: 'Initial',
+      costObject: '9999999999'
     })
     // project with initializer
     const newProject = _.cloneDeep(project)
@@ -129,7 +133,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(watchStub).to.have.been.calledOnce
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
     expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 
@@ -192,7 +196,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, resourceVersion, role })
+    expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
     expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
   })
 

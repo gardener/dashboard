@@ -28,21 +28,14 @@ limitations under the License.
       </v-flex>
 
       <v-flex md6>
-        <v-card v-if="canRenderControlPlane" class="mb-3">
-          <v-card-title class="subheading white--text cyan darken-2">
-            Control Plane
-          </v-card-title>
-          <shoot-control-plane :shootItem="shootItem"></shoot-control-plane>
-        </v-card>
-
-        <v-card>
+        <v-card v-if="canGetSecrets" class="mb-3">
           <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
 
-        <shoot-monitoring-card :shootItem="shootItem" class="mt-3"></shoot-monitoring-card>
+        <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subheading white--text cyan darken-2 mt-3">
@@ -70,7 +63,6 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
-import ShootControlPlane from '@/components/ShootDetails/ShootControlPlane'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 import ShootAddonKymaCard from '@/components/ShootDetails/ShootAddonKymaCard'
 import ShootJournalsCard from '@/components/ShootDetails/ShootJournalsCard'
@@ -82,7 +74,6 @@ import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import get from 'lodash/get'
 import has from 'lodash/has'
-import isEmpty from 'lodash/isEmpty'
 import { shootAddonByName } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -91,7 +82,6 @@ import 'codemirror/mode/yaml/yaml.js'
 export default {
   name: 'shoot-item',
   components: {
-    ShootControlPlane,
     ShootDetailsCard,
     ShootInfrastructureCard,
     ShootLifecycleCard,
@@ -108,8 +98,8 @@ export default {
       'shootByNamespaceAndName',
       'journalsByNamespaceAndName',
       'isAdmin',
-      'hasControlPlaneTerminalAccess',
-      'isKymaFeatureEnabled'
+      'isKymaFeatureEnabled',
+      'canGetSecrets'
     ]),
     value () {
       return this.shootByNamespaceAndName(this.$route.params)
@@ -132,9 +122,6 @@ export default {
       const params = this.$route.params
       return this.journalsByNamespaceAndName(params)
     },
-    canRenderControlPlane () {
-      return !isEmpty(this.shootItem) && this.hasControlPlaneTerminalAccess
-    },
     isKymaAddonEnabled () {
       return has(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
     },
@@ -146,21 +133,24 @@ export default {
   methods: {
     ...mapActions([
       'getShootAddonKyma'
-    ])
+    ]),
+    fetchKymaInfo () {
+      if (!this.isKymaFeatureEnabled || !this.isKymaAddonEnabled) {
+        return
+      }
+
+      this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
+    }
   },
   mounted () {
     if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
       this.$refs.shootLifecycle.showHibernationConfigurationDialog()
     }
+    this.fetchKymaInfo()
   },
   watch: {
-    isKymaAddonEnabled (currentlyEnabled, previouslyEnabled) {
-      if (!this.isKymaFeatureEnabled) {
-        return
-      }
-      if (!previouslyEnabled && currentlyEnabled) {
-        this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
-      }
+    isKymaAddonEnabled () {
+      this.fetchKymaInfo()
     }
   }
 }

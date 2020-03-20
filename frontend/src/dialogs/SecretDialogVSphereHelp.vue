@@ -17,7 +17,7 @@ limitations under the License.
  <template>
    <secret-dialog-help
      title="About VMware vSphere Secrets"
-     color="vsphere-bgcolor"
+     color="indigo darken-4"
      backgroundSrc="/static/background_vsphere.svg"
      :value="value"
      @input="onInput">

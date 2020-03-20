@@ -41,14 +41,16 @@ limitations under the License.
       </v-tooltip>
     </div>
     <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
-    <v-divider class="my-2"></v-divider>
-    <h4 class="error--text text-xs-left">Last Errors</h4>
-    <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
-      <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
-        <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-      </template>
-      <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
-    </div>
+    <template v-if="lastErrorDescriptions.length">
+      <v-divider class="my-2"></v-divider>
+      <h4 class="error--text text-xs-left">Last Errors</h4>
+      <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
+        <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
+          <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
+        </template>
+        <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
+      </div>
+    </template>
   </g-popper>
 </template>
 

@@ -31,6 +31,9 @@ limitations under the License.
     <alicloud-dialog v-model="dialogState.alicloud.visible" :secret="selectedSecret" @input="onInput('alicloud')"></alicloud-dialog>
     <alicloud-help-dialog v-model="dialogState.alicloud.help" @input="onInput('alicloud')"></alicloud-help-dialog>
 
+    <metal-dialog v-model="dialogState.metal.visible" :secret="selectedSecret" @input="onInput('metal')"></metal-dialog>
+    <metal-help-dialog v-model="dialogState.metal.help" @input="onInput('metal')"></metal-help-dialog>
+
     <vsphere-dialog v-model="dialogState.vsphere.visible" :secret="selectedSecret" @input="onInput('vsphere')"></vsphere-dialog>
     <vsphere-help-dialog v-model="dialogState.vsphere.help" @input="onInput('vsphere')"></vsphere-help-dialog>
   </div>
@@ -47,6 +50,8 @@ import OpenstackDialog from '@/dialogs/SecretDialogOpenstack'
 import OpenstackHelpDialog from '@/dialogs/SecretDialogOpenstackHelp'
 import AlicloudDialog from '@/dialogs/SecretDialogAlicloud'
 import AlicloudHelpDialog from '@/dialogs/SecretDialogAlicloudHelp'
+import MetalDialog from '@/dialogs/SecretDialogMetal'
+import MetalHelpDialog from '@/dialogs/SecretDialogMetalHelp'
 import VsphereDialog from '@/dialogs/SecretDialogVSphere'
 import VsphereHelpDialog from '@/dialogs/SecretDialogVSphereHelp'
 
@@ -63,6 +68,8 @@ export default {
     OpenstackHelpDialog,
     AlicloudDialog,
     AlicloudHelpDialog,
+    MetalDialog,
+    MetalHelpDialog,
     VsphereDialog,
     VsphereHelpDialog
   },

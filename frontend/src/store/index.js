@@ -19,7 +19,8 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon } from '@/utils'
+import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon, canI } from '@/utils'
+import { getSubjectRules } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -40,12 +41,14 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import toPairs from 'lodash/toPairs'
 import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
 import shoots from './modules/shoots'
 import cloudProfiles from './modules/cloudProfiles'
 import projects from './modules/projects'
+import draggable from './modules/draggable'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
@@ -66,6 +69,12 @@ const state = {
   cfg: null,
   ready: false,
   namespace: null,
+  subjectRules: { // selfSubjectRules for state.namespace
+    resourceRules: null,
+    nonResourceRules: null,
+    incomplete: false,
+    evaluationError: null
+  },
   onlyShootsWithIssues: true,
   sidebar: true,
   user: null,
@@ -76,6 +85,9 @@ const state = {
   shootsLoading: false,
   websocketConnectionError: null,
   localTimezone: moment.tz.guess(),
+  focusedElementId: null,
+  splitpaneResize: null,
+  splitpaneLayouts: {},
   conditionCache: {
     APIServerAvailable: {
       displayName: 'API Server',
@@ -131,6 +143,16 @@ const matchesPropertyOrEmpty = (path, srcValue) => {
   }
 }
 
+const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
+  return region => {
+    if (cloudProviderKind === 'azure') {
+      // Azure regions may not be zoned, need to filter these out for the dashboard
+      return !!getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
+    }
+    return true
+  }
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -169,6 +191,9 @@ const getters = {
         return []
       }
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
       const items = cloudProfile.data[type]
       if (!region || !zones) {
         return items
@@ -268,6 +293,35 @@ const getters = {
   projectList (state) {
     return state.projects.all
   },
+  projectFromProjectList (state, getters) {
+    const predicate = project => project.metadata.namespace === state.namespace
+    return find(getters.projectList, predicate) || {}
+  },
+  projectName (state, getters) {
+    const project = getters.projectFromProjectList
+    return get(project, 'metadata.name')
+  },
+  projectNamesFromProjectList (state, getters) {
+    return map(getters.projectList, 'metadata.name')
+  },
+  costObjectSettings (state) {
+    const costObject = state.cfg.costObject
+    if (!costObject) {
+      return undefined
+    }
+
+    const title = costObject.title || ''
+    const description = costObject.description || ''
+    const regex = costObject.regex
+    const errorMessage = costObject.errorMessage
+
+    return {
+      regex,
+      title,
+      description,
+      errorMessage
+    }
+  },
   memberList (state, getters) {
     return state.members.all
   },
@@ -286,20 +340,21 @@ const getters = {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
   sortedCloudProviderKindList (state, getters) {
-    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'vsphere'], getters.cloudProviderKindList)
+    return intersection(['aws', 'azure', 'gcp', 'openstack', 'alicloud', 'metal', 'vsphere'], getters.cloudProviderKindList)
   },
   regionsWithSeedByCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      return uniq(map(get(cloudProfile, 'data.seeds'), 'data.region'))
-    }
-  },
-  minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
-    return ({ cloudProfileName, region }) => {
-      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
-      const seedsForCloudProfile = cloudProfile.data.seeds
-      const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
-      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || '20Gi'
+      if (!cloudProfile) {
+        return []
+      }
+      const seeds = cloudProfile.data.seeds
+      if (!seeds) {
+        return []
+      }
+      const uniqueSeedRegions = uniq(map(seeds, 'data.region'))
+      const uniqueSeedRegionsWithZones = filter(uniqueSeedRegions, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+      return uniqueSeedRegionsWithZones
     }
   },
   regionsWithoutSeedByCloudProfileName (state, getters) {
@@ -307,10 +362,23 @@ const getters = {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
         const regionsInCloudProfile = map(cloudProfile.data.regions, 'name')
-        const regionsWithoutSeed = difference(regionsInCloudProfile, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
+        const regionsInCloudProfileWithZones = filter(regionsInCloudProfile, isValidRegion(getters, cloudProfileName, cloudProfile.metadata.cloudProviderKind))
+        const regionsWithoutSeed = difference(regionsInCloudProfileWithZones, getters.regionsWithSeedByCloudProfileName(cloudProfileName))
         return regionsWithoutSeed
       }
       return []
+    }
+  },
+  minimumVolumeSizeByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const defaultMinimumSize = '20Gi'
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (!cloudProfile) {
+        return defaultMinimumSize
+      }
+      const seedsForCloudProfile = cloudProfile.data.seeds
+      const seedsMatchingCloudProfileAndRegion = find(seedsForCloudProfile, { data: { region } })
+      return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
   floatingPoolNamesByCloudProfileNameAndRegion (state, getters) {
@@ -341,6 +409,48 @@ const getters = {
       return get(cloudProfile, 'data.providerConfig.constraints.loadBalancerConfig.classes')
     }
   },
+  partitionIDsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Partion IDs equal zones for metal infrastructure
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+        return
+      }
+      const partitionIDs = getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
+      return partitionIDs
+    }
+  },
+  firewallSizesByCloudProfileNameAndRegionAndZones (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      // Firewall Sizes equals to list of image types for this zone
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (get(cloudProfile, 'metadata.cloudProviderKind') !== 'metal') {
+        return
+      }
+      const firewallSizes = getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region })
+      return firewallSizes
+    }
+  },
+  firewallImagesByCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      return get(cloudProfile, 'data.providerConfig.firewallImages')
+    }
+  },
+  firewallNetworksByCloudProfileNameAndPartitionId (state, getters) {
+    return ({ cloudProfileName, partitionID }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      const networks = get(cloudProfile, ['data', 'providerConfig', 'firewallNetworks', partitionID])
+      return map(toPairs(networks), ([key, value]) => {
+        return {
+          key,
+          value,
+          text: `${key} [${value}]`
+        }
+      })
+    }
+  },
+
   infrastructureSecretsByInfrastructureKind (state) {
     return (infrastructureKind) => {
       return filter(state.infrastructureSecrets.all, ['metadata.cloudProviderKind', infrastructureKind])
@@ -410,9 +520,6 @@ const getters = {
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
   },
-  canCreateProject (state) {
-    return get(state.user, 'canCreateProject', false)
-  },
   journalList (state) {
     return state.journals.all
   },
@@ -475,19 +582,54 @@ const getters = {
     return getters['shoots/initialNewShootResource']
   },
   hasGardenTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
   },
   hasControlPlaneTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled && getters.isAdmin
+    return getters.isTerminalEnabled && getters.canCreateTerminals && getters.isAdmin
   },
   hasShootTerminalAccess (state, getters) {
-    return getters.isTerminalEnabled
+    return getters.isTerminalEnabled && getters.canCreateTerminals
   },
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
   },
   isKymaFeatureEnabled (state, getters) {
     return get(state, 'cfg.features.kymaEnabled', false)
+  },
+  canCreateTerminals (state) {
+    return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
+  },
+  canCreateShoots (state) {
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'shoots')
+  },
+  canPatchShoots (state) {
+    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'shoots')
+  },
+  canDeleteShoots (state) {
+    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'shoots')
+  },
+  canGetSecrets (state) {
+    return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canCreateProject (state) {
+    return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
+  },
+  canPatchProject (state, getters) {
+    const name = getters.projectName
+    return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'projects', name)
+  },
+  canDeleteProject (state, getters) {
+    const name = getters.projectName
+    return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'projects', name)
+  },
+  draggingDragAndDropId (state, getters) {
+    return getters['draggable/draggingDragAndDropId']
+  },
+  focusedElementId (state) {
+    return state.focusedElementId
+  },
+  splitpaneResize (state) {
+    return state.splitpaneResize
   }
 }
 
@@ -709,8 +851,16 @@ const actions = {
 
     return state.cfg
   },
-  setNamespace ({ commit }, value) {
-    commit('SET_NAMESPACE', value)
+  async setNamespace ({ commit }, namespace) {
+    commit('SET_NAMESPACE', namespace)
+
+    try {
+      const { data: subjectRules } = await getSubjectRules({ namespace })
+      commit('SET_SUBJECT_RULES', subjectRules)
+    } catch (err) {
+      commit('SET_SUBJECT_RULES', undefined)
+      throw err
+    }
     return state.namespace
   },
   setOnlyShootsWithIssues ({ commit }, value) {
@@ -766,6 +916,13 @@ const actions = {
   setAlertBanner ({ commit }, value) {
     commit('SET_ALERT_BANNER', value)
     return state.alertBanner
+  },
+  setDraggingDragAndDropId ({ dispatch }, draggingDragAndDropId) {
+    return dispatch('draggable/setDraggingDragAndDropId', draggingDragAndDropId)
+  },
+  setSplitpaneResize ({ commit }, value) { // TODO setSplitpaneResize called too often
+    commit('SPLITPANE_RESIZE', value)
+    return state.splitpaneResize
   }
 }
 
@@ -782,6 +939,9 @@ const mutations = {
       state.namespace = value
       // no need to subscribe for shoots here as this is done in the router on demand (as not all routes require the shoots to be loaded)
     }
+  },
+  SET_SUBJECT_RULES (state, value) {
+    state.subjectRules = value
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value
@@ -820,12 +980,24 @@ const mutations = {
   },
   setCondition (state, { conditionKey, conditionValue }) {
     Vue.set(state.conditionCache, conditionKey, conditionValue)
+  },
+  SET_FOCUSED_ELEMENT_ID (state, value) {
+    state.focusedElementId = value
+  },
+  UNSET_FOCUSED_ELEMENT_ID (state, value) {
+    if (state.focusedElementId === value) {
+      state.focusedElementId = null
+    }
+  },
+  SPLITPANE_RESIZE (state, value) {
+    state.splitpaneResize = value
   }
 }
 
 const modules = {
   projects,
   members,
+  draggable,
   cloudProfiles,
   shoots,
   infrastructureSecrets,

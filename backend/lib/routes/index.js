@@ -32,5 +32,5 @@ module.exports = {
 }
 
 if (_.get(config, 'frontend.features.terminalEnabled', false)) {
-  module.exports['/namespaces/:namespace/terminals/:target'] = require('./terminals')
+  module.exports['/terminals'] = require('./terminals')
 }

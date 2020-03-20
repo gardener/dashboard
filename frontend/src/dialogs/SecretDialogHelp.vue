@@ -17,7 +17,6 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" max-width="750">
     <v-card>
-
       <v-img
         class="white--text"
         height="90px"
@@ -41,7 +40,7 @@ limitations under the License.
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn :class="`${color}--text`" flat  @click.native.stop="hide">
+        <v-btn :class="textColor" flat @click.native.stop="hide">
           Got it
         </v-btn>
       </v-card-actions>
@@ -50,6 +49,8 @@ limitations under the License.
 </template>
 
 <script>
+import { textColor } from '@/utils'
+
 export default {
   props: {
     title: {
@@ -77,6 +78,9 @@ export default {
       set (value) {
         this.$emit('input', value)
       }
+    },
+    textColor () {
+      return textColor(this.color)
     }
   },
   methods: {

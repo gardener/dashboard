@@ -36,7 +36,7 @@ limitations under the License.
             color="green"
             box
             v-model="serviceAccountKey"
-            :label="serviceAccountKeyLabel"
+            label="Service Account Key"
             :error-messages="getErrorMessages('serviceAccountKey')"
             @input="$v.serviceAccountKey.$touch()"
             @blur="$v.serviceAccountKey.$touch()"
@@ -107,9 +107,6 @@ export default {
     },
     isCreateMode () {
       return !this.secret
-    },
-    serviceAccountKeyLabel () {
-      return this.isCreateMode ? 'Service Account Key' : 'New Service Account Key'
     }
   },
   methods: {

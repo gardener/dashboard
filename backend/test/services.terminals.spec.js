@@ -23,6 +23,12 @@ const common = require('./support/common')
 const config = require('../lib/config')
 const { getSeed } = require('../lib/cache')
 const { Resources } = require('../lib/kubernetes-client')
+const { Forbidden } = require('../lib/errors')
+
+const {
+  ensureTerminalAllowed,
+  findImageDescription
+} = require('../lib/services/terminals')
 
 const {
   getGardenTerminalHostClusterSecretRef,
@@ -147,6 +153,56 @@ describe('services', function () {
     })
 
     describe('terminals', function () {
+      describe('#findImageDescription', function () {
+        it('should match regexp', async function () {
+          const containerImage = 'foo:bar'
+          const imageDescriptions = [{
+            image: '/foo:.*/',
+            description: 'baz'
+          }]
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+        })
+
+        it('should not match regexp', async function () {
+          const containerImage = 'foo:bar'
+
+          let imageDescriptions = [{
+            image: '/dummy:.*/',
+            description: 'baz'
+          }]
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+
+          imageDescriptions = [{
+            image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
+            description: 'baz'
+          }]
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+        })
+
+        it('should match exactly', async function () {
+          const containerImage = 'foo:bar'
+
+          const imageDescriptions = [{
+            image: 'foo:bar',
+            description: 'baz'
+          }]
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+        })
+
+        it('should not match', async function () {
+          const containerImage = 'foo:bar'
+
+          let imageDescriptions = [{
+            image: 'bar:foo',
+            description: 'baz'
+          }]
+          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+
+          expect(findImageDescription('foo:bar', undefined)).to.be.undefined
+          expect(findImageDescription('foo:bar', [])).to.be.undefined
+          expect(findImageDescription('foo:bar', [{}])).to.be.undefined
+        })
+      })
       describe('#getGardenTerminalHostClusterSecretRef', function () {
         it('should return the secret reference by secretRef', async function () {
           const gardenTerminalHost = {
@@ -291,6 +347,65 @@ describe('services', function () {
         const seed = { spec: { dns: { ingressDomain } } }
         const wildcardIngressDomain = getWildcardIngressDomainForSeed(seed)
         expect(wildcardIngressDomain).to.equal(`*.${ingressDomain}`)
+      })
+    })
+
+    describe('#ensureTerminalAllowed', function () {
+      it('should allow terminals for admins', function () {
+        const isAdmin = true
+        const method = 'foo'
+        const target = 'foo'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should allow terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'shoot'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should allow to list terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'list'
+        const target = 'foo'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+        } catch (err) {
+          expect.fail('No exception expected')
+        }
+      })
+
+      it('should disallow cp terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'cp'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          expect.fail('Forbidden error expected')
+        } catch (err) {
+          expect(err).to.be.instanceof(Forbidden)
+        }
+      })
+
+      it('should disallow garden terminals for project admins', function () {
+        const isAdmin = false
+        const method = 'create'
+        const target = 'garden'
+        try {
+          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          expect.fail('Forbidden error expected')
+        } catch (err) {
+          expect(err).to.be.instanceof(Forbidden)
+        }
       })
     })
 

@@ -37,6 +37,7 @@ import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
+import { isZonedCluster } from '@/utils'
 import get from 'lodash/get'
 import cloneDeep from 'lodash/cloneDeep'
 
@@ -58,16 +59,6 @@ export default {
     }
   },
   mixins: [shootItem],
-  computed: {
-    isZonedCluster () {
-      switch (this.shootCloudProviderKind) {
-        case 'azure':
-          return get(this.shootItem, 'spec.provider.infrastructureConfig.zoned', false)
-        default:
-          return true
-      }
-    }
-  },
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
@@ -93,8 +84,10 @@ export default {
 
       const workers = cloneDeep(this.shootWorkerGroups)
       const zonesNetworkConfiguration = get(this.shootItem, 'spec.provider.infrastructureConfig.networks.zones')
-
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion, zonesNetworkConfiguration, zonedCluster: this.isZonedCluster })
+      const cloudProfileName = this.shootCloudProfileName
+      const region = this.shootRegion
+      const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster })
     },
     onWorkersValid (value) {
       this.workersValid = value
