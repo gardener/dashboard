@@ -422,8 +422,8 @@ export default {
     this.update(this.value)
     this.refresh()
 
-    const shootOpenAPISpecification = await getShootSchemaDefinition()
-    const shootProperties = get(shootOpenAPISpecification, 'properties', {})
+    const shootSchemaDefinition = await getShootSchemaDefinition()
+    const shootProperties = get(shootSchemaDefinition, 'properties', {})
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
   },
   watch: {
