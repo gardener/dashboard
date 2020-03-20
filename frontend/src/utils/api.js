@@ -148,7 +148,10 @@ export function updateShootAddons ({ namespace, name, data }) {
 }
 
 export function getShootSpec () {
-  return getResource('/api/openapi/shoot')
+export function getShootSchemaDefinition () {
+  const definitions = await getResource('/api/openapi')
+  return definitions['com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot']
+}
 }
 
 export function updateShootPurpose ({ namespace, name, data }) {
