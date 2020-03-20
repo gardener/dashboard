@@ -1,4 +1,4 @@
-<!--
+s<!--
 Copyright (c) 2019 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,7 +98,7 @@ import CopyBtn from '@/components/CopyBtn'
 import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
-import { getShootSpec } from '@/utils/api'
+import { getShootSchemaDefinition } from '@/utils/api'
 import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
@@ -422,8 +422,8 @@ export default {
     this.update(this.value)
     this.refresh()
 
-    const shootOpenAPISpecification = await getShootSpec()
-    const shootProperties = get(shootOpenAPISpecification, 'data.spec.properties', {})
+    const shootOpenAPISpecification = await getShootSchemaDefinition()
+    const shootProperties = get(shootOpenAPISpecification, 'properties', {})
     this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
   },
   watch: {

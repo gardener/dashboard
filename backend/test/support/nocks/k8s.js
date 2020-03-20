@@ -334,7 +334,7 @@ function getUser (name) {
   }
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = "" }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = '' }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -1405,16 +1405,16 @@ const stub = {
         const incomplete = false
         if (_.endsWith(payload.id, 'example.org')) {
           resourceRules = resourceRules.concat([{
-              verbs: ['get'],
-              apiGroups: ['core.gardener.cloud'],
-              resources: ['projects'],
-              resourceName: ['foo']
-            },
-            {
-              verbs: ['create'],
-              apiGroups: ['core.gardener.cloud'],
-              resources: ['projects']
-            }
+            verbs: ['get'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects'],
+            resourceName: ['foo']
+          },
+          {
+            verbs: ['create'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects']
+          }
           ])
         } else {
           resourceRules = resourceRules.concat([{
@@ -1423,7 +1423,7 @@ const stub = {
             resources: ['projects'],
             resourceName: ['foo']
           }
-        ])
+          ])
         }
         return {
           status: { resourceRules, nonResourceRules, incomplete }
@@ -1435,7 +1435,7 @@ const stub = {
     reviewToken(adminScope)
     return adminScope
   },
-  getShootSchema (bearer) {
+  getShootDefinition (bearer) {
     const scope = nockWithAuthorization(bearer)
     canGetOpenAPI(scope)
     const body = {

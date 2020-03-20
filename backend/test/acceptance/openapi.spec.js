@@ -30,16 +30,17 @@ module.exports = function ({ agent, k8s, auth }) {
   it('should fetch shoot openapi schema', async function () {
     const user = auth.createUser({ id })
     const bearer = await user.bearer
-    k8s.stub.getShootSchema(bearer)
+    k8s.stub.getShootDefinition(bearer)
     sandbox.stub(SwaggerParser, 'dereference').callsFake((obj) => {
       return obj
     })
     const res = await agent
-      .get('/api/openapi/shoot')
+      .get('/api/openapi')
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.property('spec').that.is.eql({ spec: { type: 'object' } })
+    const shootDefinition = res.body['com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot']
+    expect(shootDefinition).to.have.property('spec').that.is.eql({ type: 'object' })
   })
 }
