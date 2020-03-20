@@ -1441,9 +1441,7 @@ const stub = {
     const body = {
       definitions: {
         'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot': {
-          spec: {
-            type: 'object'
-          }
+          type: 'object'
         }
       }
     }

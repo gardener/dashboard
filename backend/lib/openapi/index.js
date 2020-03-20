@@ -47,7 +47,7 @@ async function getSchemaDefinitions (user) {
   if (_.isEmpty(schemaDefinitions)) {
     // Do not use client of user as the result gets cached and returned to other users
     const swaggerApi = await dashboardClient.openapi.get()
-    const dereferencedSwaggerApi  = await SwaggerParser.dereference(swaggerApi)
+    const dereferencedSwaggerApi = await SwaggerParser.dereference(swaggerApi)
 
     const selectedSchemaDefinitions = _
       .chain(dereferencedSwaggerApi)
