@@ -89,7 +89,7 @@ function toTerminalMetadata (terminal) {
 
 function imageHelpText (terminal) {
   const containerImage = terminal.spec.host.pod.containerImage
-  const imageDescriptions = getConfigValue('terminal.containerImageDescriptions')
+  const imageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
 
   return findImageDescription(containerImage, imageDescriptions)
 }
