@@ -141,7 +141,8 @@ describe('utils', function () {
       it('should return properties of an object', function () {
         setEditorContentAndCursor('spec:\n   ', 0, 0)
         let completions = shootEditorCompletions.yamlHint(editor).list
-        expect(completions).to.have.length(1)
+        // completions length is 0 because we filter completion if already in this line - avoid duplicate completions
+        expect(completions).to.have.length(0)
 
         setEditorCursor(1, 0)
         completions = shootEditorCompletions.yamlHint(editor).list

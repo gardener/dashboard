@@ -166,6 +166,11 @@ export class ShootEditorCompletions {
         if (exactMatch) {
           return isEqual(completion.string, token.string)
         }
+        if (includes(words(token.string), completion.string)) {
+          // filter completion if already in this line - avoid duplicate completions
+          return false
+        }
+        // filter completions that to not match text already in line
         return includes(completion.string, token.string)
       })
     }
