@@ -26,41 +26,6 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 const expect = chai.expect
 
-document.body.createTextRange = function () {
-  return {
-    setEnd: function () {},
-    setStart: function () {},
-    getBoundingClientRect: function () {
-      return { right: 0 }
-    },
-    getClientRects: function () {
-      return {
-        length: 0,
-        left: 0,
-        right: 0
-      }
-    }
-  }
-}
-
-const element = document.createElement('div')
-const options = {
-  indentUnit: 3,
-  mode: 'text/x-yaml'
-}
-const editor = CodeMirror(element, options)
-
-const setEditorContentAndCursor = (content, line, ch) => {
-  const doc = editor.doc
-  doc.setValue(content)
-  setEditorCursor(line, ch)
-}
-
-const setEditorCursor = (line, ch) => {
-  const doc = editor.doc
-  doc.setCursor(CodeMirror.Pos(line, ch))
-}
-
 const shootCompletions = {
   spec: {
     type: 'object',
@@ -106,10 +71,59 @@ const shootCompletions = {
     }
   }
 }
-const shootEditorCompletions = new ShootEditorCompletions(shootCompletions, editor.options.indentUnit)
 
 describe('utils', function () {
   describe('shootEditorCompletions', function () {
+    let editor
+    let setEditorContentAndCursor
+    let setEditorCursor
+    let shootEditorCompletions
+
+    before(function () {
+      // cannot stub via sandbo as Jest does not implement the function and
+      // non existant functions cannot be stubbed using a sinon sandbox
+      document.body.createTextRange = function () {
+        return {
+          setEnd: function () {},
+          setStart: function () {},
+          getBoundingClientRect: function () {
+            return { right: 0 }
+          },
+          getClientRects: function () {
+            return {
+              length: 0,
+              left: 0,
+              right: 0
+            }
+          }
+        }
+      }
+
+      const element = document.createElement('div')
+      const options = {
+        indentUnit: 3,
+        mode: 'text/x-yaml'
+      }
+      editor = CodeMirror(element, options)
+
+      setEditorContentAndCursor = (content, line, ch) => {
+        const doc = editor.doc
+        doc.setValue(content)
+        setEditorCursor(line, ch)
+      }
+
+      setEditorCursor = (line, ch) => {
+        const doc = editor.doc
+        doc.setCursor(CodeMirror.Pos(line, ch))
+      }
+
+      shootEditorCompletions = new ShootEditorCompletions(shootCompletions, editor.options.indentUnit)
+    })
+
+    after(function () {
+      document.body.createTextRange = undefined
+    })
+
     describe('#yamlHint', function () {
       it('should return a simple hint', function () {
         setEditorContentAndCursor('', 0, 0)
