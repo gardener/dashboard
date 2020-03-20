@@ -139,10 +139,14 @@ export class ShootEditorCompletions {
         description: completion.description,
         render: (el, self, data) => {
           const propertyWrapper = document.createElement('div')
-          const escapedType = escape(upperFirst(completion.type))
-          const escapedPropertyName = escape(propertyName)
-          const escapedDescription = escape(completion.description)
-          propertyWrapper.innerHTML = `<span class="property">${escapedPropertyName}</span><span class="type">${escapedType}</span>`
+          propertyWrapper.innerHTML = [ 
+            '<span class="property">',
+            escape(propertyName)
+            '</span>',
+            '<span class="type">',
+            escape(upperFirst(completion.type))
+            '</span>'
+          ].join('')
           propertyWrapper.className = 'ghint-type'
           el.appendChild(propertyWrapper)
 
