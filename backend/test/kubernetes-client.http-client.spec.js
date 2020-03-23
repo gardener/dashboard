@@ -40,6 +40,7 @@ describe('kubernetes-client', function () {
     let server
     let wss
     let origin
+    let client
 
     const app = express()
     app.get('/foo', (req, res) => {
@@ -83,10 +84,11 @@ describe('kubernetes-client', function () {
     afterEach(function () {
       wss.close()
       server.close()
+      client[httpSymbols.agent].destroy()
     })
 
     it('should assert "beforeRequest" hook parameters', async function () {
-      const client = new TestClient(origin, {
+      client = new TestClient(origin, {
         headers: {
           foo: 'bar'
         },
@@ -107,7 +109,7 @@ describe('kubernetes-client', function () {
     })
 
     it('should open a websocket echo socket', async function () {
-      const client = new TestClient(origin)
+      client = new TestClient(origin)
       const echoSocket = client.echo()
       await pEvent(echoSocket, 'open')
       echoSocket.send('foobar')

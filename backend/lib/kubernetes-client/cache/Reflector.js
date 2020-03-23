@@ -16,7 +16,9 @@
 
 'use strict'
 
+const util = require('util')
 const delay = require('delay')
+const WebSocket = require('ws')
 const pEvent = require('p-event')
 const moment = require('moment')
 const { includes } = require('lodash')
@@ -42,21 +44,30 @@ function getTypeName (apiVersion, kind) {
   return `${apiVersion}, Kind=${kind}`
 }
 
+async function closeOrTerminateSocket (socket, gracePeriodMilliseconds = 1000) {
+  try {
+    await pEvent(socket, 'close', { timeout: gracePeriodMilliseconds })
+  } catch (err) {
+    socket.terminate()
+  }
+}
+
 class Reflector {
   constructor (listWatcher, store) {
     this.listWatcher = listWatcher
     this.store = store
     this.period = moment.duration(1, 'seconds')
+    this.gracePeriod = moment.duration(3, 'seconds')
     this.connectTimeout = moment.duration(5, 'seconds')
     this.heartbeatInterval = moment.duration(30, 'seconds')
+    this.heartbeatIntervalId = undefined
     this.minWatchTimeout = moment.duration(50, 'minutes')
     this.name = getNameFromCallsite(this.constructor.create)
     this.isLastSyncResourceVersionExpired = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
     this.socket = undefined
-    this.heartbeatIntervalId = undefined
-    this.exit = false
+    this.stopRequested = false
   }
 
   get apiVersion () {
@@ -88,27 +99,41 @@ class Reflector {
     return this.lastSyncResourceVersion
   }
 
-  stop () {
-    this.exit = true
-    this.terminate()
+  async stop () {
+    this.stopRequested = true
+    const agent = this.listWatcher.agent
+    if (agent && typeof agent.destroy === 'function') {
+      agent.destroy()
+    }
+    await this.close(4001, util.format('Stoping reflector %s from %s', this.expectedTypeName, this.name))
   }
 
-  terminate () {
-    clearInterval(this.heartbeatIntervalId)
+  async close (code = 4000, reason) {
     if (this.socket) {
-      this.socket.terminate()
+      switch (this.socket.readyState) {
+        case WebSocket.CONNECTING:
+        case WebSocket.OPEN:
+          this.socket.close(code, reason)
+          await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
+          break
+        case WebSocket.CLOSING:
+          await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
+          break
+        case WebSocket.CLOSED:
+          break
+      }
     }
   }
 
   async run () {
     logger.info('Starting reflector %s from %s', this.expectedTypeName, this.name)
-    while (!this.exit) {
+    while (!this.stopRequested) {
       try {
         await this.listAndWatch()
       } catch (err) {
         logger.error('%s: Failed to list and watch %s: %s', this.name, this.expectedTypeName, err)
       }
-      if (this.exit) {
+      if (this.stopRequested) {
         break
       }
       logger.info('Restarting reflector %s from %s', this.expectedTypeName, this.name)
@@ -174,14 +199,13 @@ class Reflector {
     this.isLastSyncResourceVersionExpired = false
     this.store.replace(list.items)
     this.lastSyncResourceVersion = resourceVersion
-
-    while (!this.exit) {
-      const options = {
-        allowWatchBookmarks: true,
-        timeoutSeconds: randomize(this.minWatchTimeout.asSeconds()),
-        resourceVersion: this.lastSyncResourceVersion
-      }
-      try {
+    try {
+      while (!this.stopRequested) {
+        const options = {
+          allowWatchBookmarks: true,
+          timeoutSeconds: randomize(this.minWatchTimeout.asSeconds()),
+          resourceVersion: this.lastSyncResourceVersion
+        }
         try {
           this.socket = this.listWatcher.watch(options)
           await pEvent(this.socket, 'open', { timeout: this.connectTimeout.asMilliseconds() })
@@ -200,10 +224,16 @@ class Reflector {
           }
           return
         }
-        if (this.exit) {
+        if (this.stopRequested) {
           return
         }
-        this.startHeartbeat(this.socket)
+        // run websocket heartbeat
+        (async () => {
+          try {
+            await this.heartbeat(this.socket)
+          } catch (err) { /* ignore error */ }
+        })()
+        // handle websocket messages
         try {
           await this.watchHandler(this.socket)
         } catch (err) {
@@ -217,16 +247,13 @@ class Reflector {
           }
           return
         }
-      } finally {
-        this.terminate()
       }
+    } finally {
+      await this.close(4002, util.format('Finally closing watch %s', this.expectedTypeName))
     }
   }
 
-  startHeartbeat (socket) {
-    function onPong () {
-      socket.isAlive = true
-    }
+  async heartbeat (socket) {
     function ping () {
       if (socket.isAlive === false) {
         socket.terminate()
@@ -235,8 +262,19 @@ class Reflector {
         socket.ping()
       }
     }
-    socket.on('pong', onPong)
-    this.heartbeatIntervalId = setInterval(ping, this.heartbeatInterval.asMilliseconds())
+
+    const heartbeatIntervalId = setInterval(ping, this.heartbeatInterval.asMilliseconds())
+    try {
+      const asyncIterator = pEvent.iterator(socket, 'pong', {
+        resolutionEvents: ['close']
+      })
+      // eslint-disable-next-line no-unused-vars
+      for await (const data of asyncIterator) {
+        socket.isAlive = true
+      }
+    } finally {
+      clearInterval(heartbeatIntervalId)
+    }
   }
 
   async watchHandler (socket) {

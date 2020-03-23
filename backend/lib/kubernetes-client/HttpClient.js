@@ -24,10 +24,16 @@ const { patchHttpErrorMessage } = require('./util')
 const Agent = require('agentkeepalive')
 
 class HttpClient {
-  constructor ({ url, agent, ...options } = {}) {
+  constructor ({ url, ...options } = {}) {
     const prefixUrl = this.constructor[http.prefixUrl](url)
-    agent = agent || this.constructor.createAgent(prefixUrl)
-    this[http.client] = got.extend({ prefixUrl, agent, ...options })
+    if (!Reflect.has(options, 'agent')) {
+      options.agent = this.constructor.createAgent(prefixUrl)
+    }
+    this[http.client] = got.extend({ prefixUrl, ...options })
+  }
+
+  get [http.agent] () {
+    return this[http.client].defaults.options.agent
   }
 
   async [http.request] (url, { searchParams, ...options } = {}) {
@@ -41,25 +47,23 @@ class HttpClient {
     }
   }
 
-  [ws.connect] (url, { agent, searchParams } = {}) {
+  [ws.connect] (url, { searchParams, ...connectOptions } = {}) {
+    const defaultOptions = this[http.client].defaults.options
     const {
-      agent: defaultAgent,
       prefixUrl,
+      servername,
+      headers,
       ca,
       key,
       cert,
-      servername,
-      rejectUnauthorized,
-      headers
-    } = this[http.client].defaults.options
-    agent = agent || defaultAgent
+      rejectUnauthorized
+    } = defaultOptions
     url = new URL(url, ensureTrailingSlashExists(prefixUrl))
     if (searchParams) {
       url.search = searchParams.toString()
     }
     const origin = url.origin
     const options = {
-      agent,
       origin,
       servername,
       headers,
@@ -67,6 +71,11 @@ class HttpClient {
       cert,
       ca,
       rejectUnauthorized
+    }
+    if (Reflect.has(connectOptions, 'agent')) {
+      options.agent = connectOptions.agent
+    } else if (Reflect.has(defaultOptions, 'agent')) {
+      options.agent = defaultOptions.agent
     }
     beforeConnect(url, options)
     return this.constructor.createWebSocket(url, options)

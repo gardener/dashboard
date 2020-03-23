@@ -168,6 +168,7 @@ ClusterScoped.Cacheable = superclass => class extends superclass {
     const { group, version, names } = this.constructor
     const agent = createAgent(this)
     const listWatcher = {
+      agent,
       group,
       version,
       names,
@@ -195,6 +196,7 @@ NamespaceScoped.Cacheable = superclass => class extends superclass {
     const { group, version, names } = this.constructor
     const agent = createAgent(this)
     const listWatcher = {
+      agent,
       group,
       version,
       names,
@@ -219,6 +221,7 @@ NamespaceScoped.Cacheable = superclass => class extends superclass {
     const { group, version, names } = this.constructor
     const agent = createAgent(this)
     const listWatcher = {
+      agent,
       group,
       version,
       names,

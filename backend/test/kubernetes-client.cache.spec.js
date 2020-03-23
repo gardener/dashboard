@@ -37,6 +37,7 @@ describe('kubernetes-client', function () {
     let map
     let store
     let listWatcher
+    let destroyAgentSpy
 
     function createDummy (metadata) {
       return {
@@ -54,9 +55,13 @@ describe('kubernetes-client', function () {
     class TestSocket extends EventEmitter {
       constructor ({ maxPingPongCount = Infinity } = {}) {
         super()
+        this.readyState = 0
         this.pingPongCount = 0
         this.maxPingPongCount = maxPingPongCount
-        process.nextTick(() => this.emit('open'))
+        process.nextTick(() => {
+          this.readyState = 1
+          this.emit('open')
+        })
       }
 
       ping () {
@@ -66,9 +71,25 @@ describe('kubernetes-client', function () {
         }
       }
 
-      terminate () {
-        process.nextTick(() => this.emit('close'))
+      close () {
+        if (this.readyState < 2) {
+          this.readyState = 2
+          process.nextTick(() => {
+            this.readyState = 3
+            this.emit('close')
+          })
+        }
       }
+
+      terminate () {
+        if (this.readyState < 2) {
+          this.close()
+        }
+      }
+    }
+
+    class Agent {
+      destroy () {}
     }
 
     class TestPager {
@@ -85,6 +106,7 @@ describe('kubernetes-client', function () {
 
     class TestListWatcher {
       constructor (socket) {
+        this.agent = new Agent()
         this.group = ''
         this.version = 'v1'
         this.names = {
@@ -150,6 +172,7 @@ describe('kubernetes-client', function () {
       map = new Map()
       store = new Store(map, 1)
       listWatcher = new TestListWatcher()
+      destroyAgentSpy = sandbox.spy(listWatcher.agent, 'destroy')
     })
 
     describe('Store', function () {
@@ -254,8 +277,9 @@ describe('kubernetes-client', function () {
         reflector.period = moment.duration(1)
       })
 
-      afterEach(function () {
-        reflector.stop()
+      afterEach(async function () {
+        await reflector.stop()
+        expect(destroyAgentSpy).to.be.calledOnce
       })
 
       it('should have property apiVersion', async function () {
@@ -283,12 +307,11 @@ describe('kubernetes-client', function () {
         expect(reflector.relistResourceVersion).to.equal('1')
       })
 
-      describe('#startHeartbeat', function () {
+      describe('#heartbeat', function () {
         it('should start the heartbeat', async function () {
           reflector.heartbeatInterval = moment.duration(1)
           const socket = new TestSocket({ maxPingPongCount: 3 })
-          reflector.startHeartbeat(socket)
-          await pEvent(socket, 'close')
+          await reflector.heartbeat(socket)
           expect(socket.pingPongCount).to.equal(3)
         })
       })
@@ -341,21 +364,26 @@ describe('kubernetes-client', function () {
         let watchStub
         let watchOptions
         let createPagerStub
-        let startHeartbeatStub
+        let heartbeatStub
         let watchHandlerStub
-        let terminateStub
+        let terminateSpy
+        let closeStub
 
         beforeEach(function () {
           reflector.period = moment.duration(1)
+          reflector.gracePeriod = moment.duration(1)
           reflector.minWatchTimeout = moment.duration(30, 'seconds')
           pager = new TestPager()
           socket = new EventEmitter()
           createPagerStub = sandbox.stub(ListPager, 'create').returns(pager)
           listStub = sandbox.stub(pager, 'list')
           watchStub = sandbox.stub(reflector.listWatcher, 'watch')
+          socket.readyState = 0
           socket.terminate = () => {}
-          terminateStub = sandbox.spy(socket, 'terminate')
-          startHeartbeatStub = sandbox.stub(reflector, 'startHeartbeat').callsFake(() => {
+          terminateSpy = sandbox.spy(socket, 'terminate')
+          socket.close = () => {}
+          closeStub = sandbox.stub(socket, 'close')
+          heartbeatStub = sandbox.stub(reflector, 'heartbeat').callsFake(() => {
             socket.isAlive = true
           })
           watchHandlerStub = sandbox.stub(reflector, 'watchHandler')
@@ -400,6 +428,9 @@ describe('kubernetes-client', function () {
             process.nextTick(() => socket.emit('error', expiredError))
             return socket
           })
+          closeStub.callsFake(() => {
+            process.nextTick(() => socket.emit('close'))
+          })
           await reflector.listAndWatch()
           expect(createPagerStub).to.be.calledOnce
           expect(listStub).to.be.calledOnce
@@ -413,7 +444,7 @@ describe('kubernetes-client', function () {
           expect(watchOptions.allowWatchBookmarks).to.be.true
           expect(watchOptions.timeoutSeconds).to.be.within(30, 60)
           expect(watchOptions.resourceVersion).to.equal('2')
-          expect(terminateStub).to.be.calledTwice
+          expect(closeStub).to.be.calledOnce
           expect(store.keys()).to.eql(['a', 'b'])
         })
 
@@ -429,17 +460,25 @@ describe('kubernetes-client', function () {
           })
           watchStub.callsFake(() => {
             process.nextTick(() => {
-              reflector.exit = true
+              reflector.stopRequested = true
+              socket.readyState = 1
               socket.emit('open')
             })
             return socket
+          })
+          closeStub.callsFake(() => {
+            process.nextTick(() => {
+              socket.readyState = 3
+              socket.emit('close')
+            })
           })
           await reflector.listAndWatch()
           expect(createPagerStub).to.be.calledOnce
           expect(listStub).to.be.calledOnce
           expect(listStub).to.be.calledOnce
           expect(watchStub).to.be.calledOnce
-          expect(terminateStub).to.be.calledOnce
+          expect(closeStub).to.be.calledOnce
+          expect(terminateSpy).not.to.be.called
         })
 
         it('should list, watch and fail', async function () {
@@ -453,6 +492,7 @@ describe('kubernetes-client', function () {
           })
           watchStub.callsFake(() => {
             process.nextTick(() => {
+              socket.readyState = 1
               socket.emit('open')
             })
             return socket
@@ -463,9 +503,10 @@ describe('kubernetes-client', function () {
           expect(listStub).to.be.calledOnce
           expect(listStub).to.be.calledOnce
           expect(watchStub).to.be.calledOnce
-          expect(startHeartbeatStub).to.be.calledOnceWithExactly(socket)
+          expect(heartbeatStub).to.be.calledOnceWithExactly(socket)
           expect(watchHandlerStub).to.be.calledOnceWithExactly(socket)
-          expect(terminateStub).to.be.calledOnce
+          expect(closeStub).to.be.calledOnce
+          expect(terminateSpy).to.be.calledOnce
         })
       })
 
@@ -477,6 +518,8 @@ describe('kubernetes-client', function () {
           listAndWatchStub.onCall(2).callsFake(() => reflector.stop())
           await reflector.run()
           expect(listAndWatchStub).to.have.callCount(3)
+          expect(destroyAgentSpy).to.be.calledOnce
+          destroyAgentSpy.resetHistory()
         })
 
         it('should run a reflector', async function () {

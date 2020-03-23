@@ -20,6 +20,7 @@ module.exports = {
   http: {
     prefixUrl: Symbol('http.prefixUrl'),
     client: Symbol('http.client'),
+    agent: Symbol('http.agent'),
     request: Symbol('http.request')
   },
   ws: {
