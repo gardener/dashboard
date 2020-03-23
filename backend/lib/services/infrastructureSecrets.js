@@ -173,7 +173,7 @@ function getCloudProviderKind (name) {
   return _.get(cloudProfile, 'metadata.cloudProviderKind')
 }
 
-function getProjectMap (client, namespaces) {
+function getProjectMap (namespaces) {
   const projects = _.map(namespaces, findProjectByNamespace)
   return _
     .chain(projects)
