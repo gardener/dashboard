@@ -716,13 +716,7 @@ const stub = {
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
 
-    const namespaces = _
-      .chain(secretBindings)
-      .map('secretRef.namespace')
-      .uniq()
-      .value()
-
-    const scopes = [nockWithAuthorization(bearer)
+    return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
@@ -731,17 +725,6 @@ const stub = {
       .reply(200, {
         items: infrastructureSecrets
       })
-    ]
-    const adminScope = nockWithAuthorization(auth.bearer)
-    namespaces.forEach(namespace => {
-      const project = readProject(namespace)
-      adminScope
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-        .reply(200, project)
-    })
-    return scopes
   },
   createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -753,7 +736,6 @@ const stub = {
       resourceVersion,
       cloudProfileName
     })
-    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
@@ -769,10 +751,6 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecretBinding)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-      .reply(200, project)
   },
   patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -787,7 +765,6 @@ const stub = {
       bindingNamespace,
       cloudProfileName
     })
-    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
@@ -798,10 +775,6 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-      .reply(200, project)
   },
   patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {

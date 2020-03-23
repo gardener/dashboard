@@ -16,14 +16,14 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const { dashboardClient, Resources, isHttpError } = require('../kubernetes-client')
+const { dashboardClient, Resources } = require('../kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']
 const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
-const { getQuotas } = require('../cache')
+const { getQuotas, findProjectByNamespace } = require('../cache')
 
 function fromResource ({ secretBinding, cloudProviderKind, secret, project, quotas = [] }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
@@ -168,27 +168,13 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
     .value()
 }
 
-async function getCloudProviderKind (cloudProfileName) {
-  const cloudProfile = await cloudprofiles.read({ name: cloudProfileName })
-  const cloudProviderKind = _.get(cloudProfile, 'metadata.cloudProviderKind')
-  return cloudProviderKind
+function getCloudProviderKind (name) {
+  const cloudProfile = cloudprofiles.read({ name })
+  return _.get(cloudProfile, 'metadata.cloudProviderKind')
 }
 
-async function getProjectByNamespaceIgnoreNotFound (client, namespace) {
-  let object
-  try {
-    object = await client.getProjectByNamespace(namespace)
-  } catch (err) {
-    if (!isHttpError(err, 404)) {
-      throw err
-    }
-  }
-  return object
-}
-
-async function getProjectMap (client, namespaces) {
-  const projectPromises = _.map(namespaces, namespace => getProjectByNamespaceIgnoreNotFound(client, namespace))
-  const projects = await Promise.all(projectPromises)
+function getProjectMap (client, namespaces) {
+  const projects = _.map(namespaces, findProjectByNamespace)
   return _
     .chain(projects)
     .compact()
@@ -239,13 +225,9 @@ exports.create = async function ({ user, namespace, body }) {
   const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const [
-    cloudProviderKind,
-    project
-  ] = await Promise.all([
-    getCloudProviderKind(cloudProfileName),
-    getProjectByNamespaceIgnoreNotFound(client, namespace)
-  ])
+  const cloudProviderKind = getCloudProviderKind(cloudProfileName)
+  const project = findProjectByNamespace(namespace)
+
   return fromResource({
     secretBinding,
     secret,
@@ -275,13 +257,8 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
   const secret = await client.core.secrets.mergePatch(namespace, secretName, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const [
-    cloudProviderKind,
-    project
-  ] = await Promise.all([
-    getCloudProviderKind(cloudProfileName),
-    getProjectByNamespaceIgnoreNotFound(client, namespace)
-  ])
+  const cloudProviderKind = getCloudProviderKind(cloudProfileName)
+  const project = findProjectByNamespace(namespace)
 
   return fromResource({
     secretBinding,

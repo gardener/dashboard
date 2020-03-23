@@ -18,6 +18,7 @@
 
 const _ = require('lodash')
 const common = require('../support/common')
+const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -36,6 +37,10 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const secret = 'mySecret'
   const data = { key, secret }
   const resourceVersion = 42
+
+  beforeEach(function () {
+    cache.projects.replace(k8s.projectList)
+  })
 
   it('should return three infrastructure secrets', async function () {
     const bearer = await user.bearer
