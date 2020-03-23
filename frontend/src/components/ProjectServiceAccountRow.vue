@@ -95,14 +95,13 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
   isServiceAccountFromNamespace
 } from '@/utils'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'project-service-account-row',
@@ -157,7 +156,7 @@ export default {
       return isServiceAccountFromNamespace(this.username, this.namespace)
     },
     createdByClasses () {
-      return !!this.createdBy ? ['font-weight-bold'] : ['grey--text']
+      return this.createdBy ? ['font-weight-bold'] : ['grey--text']
     }
   },
   methods: {
