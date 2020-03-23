@@ -212,7 +212,7 @@ export function getPrivileges () {
   return getResource('/api/user/privileges')
 }
 
-export function getSubjectRules ({ namespace }) {
+export function getSubjectRules ({ namespace = 'default' }) {
   return callResourceMethod('/api/user/subjectrules/', {
     namespace
   })
