@@ -67,45 +67,49 @@ limitations under the License.
         </v-flex>
       </v-card-title>
 
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem pr-1">
-        <div class="avatar">
-          <v-badge color="white cyan--text" overlap bottom>
-            <template v-slot:badge>
-              <v-icon color="cyan darken-2">mdi-refresh</v-icon>
-            </template>
-            <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
-          </v-badge>
-        </div>
-        <v-flex grow class="pa-0">
-          <span class="subheading">Rotate Kubeconfig</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
-            <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
-          </v-layout>
-        </v-flex>
-      </v-card-title>
+      <template v-if="canPatchShoots">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem pr-1">
+          <div class="avatar">
+            <v-badge color="white cyan--text" overlap bottom>
+              <template v-slot:badge>
+                <v-icon color="cyan darken-2">mdi-refresh</v-icon>
+              </template>
+              <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
+            </v-badge>
+          </div>
+          <v-flex grow class="pa-0">
+            <span class="subheading">Rotate Kubeconfig</span>
+          </v-flex>
+          <v-flex shrink class="pa-0">
+            <v-layout row>
+              <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
+            </v-layout>
+          </v-flex>
+        </v-card-title>
+      </template>
 
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem pr-1">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
-        <v-flex grow class="pa-0">
-          <span class="subheading">Delete Cluster</span><br>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
-            <delete-cluster :shootItem="shootItem"></delete-cluster>
-          </v-layout>
-        </v-flex>
-      </v-card-title>
+      <template v-if="canPatchShoots">
+        <v-divider class="my-2" inset></v-divider>
+        <v-card-title class="listItem pr-1">
+          <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
+          <v-flex grow class="pa-0">
+            <span class="subheading">Delete Cluster</span><br>
+          </v-flex>
+          <v-flex shrink class="pa-0">
+            <v-layout row>
+              <delete-cluster :shootItem="shootItem"></delete-cluster>
+            </v-layout>
+          </v-flex>
+        </v-card-title>
+      </template>
     </div>
   </v-card>
 </template>
 
 <script>
 
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
 import { isShootHasNoHibernationScheduleWarning } from '@/utils'
@@ -138,6 +142,9 @@ export default {
     ...mapState([
       'localTimezone'
     ]),
+    ...mapGetters([
+      'canPatchShoots'
+    ]),
     hibernationDescription () {
       if (this.isShootStatusHibernationProgressing) {
         if (this.isShootSettingHibernated) {
@@ -151,7 +158,7 @@ export default {
       if (this.shootHibernationSchedules.length > 0) {
         return 'Hibernation schedule configured'
       } else if (this.isShootHasNoHibernationScheduleWarning) {
-        return `Please configure a schedule for this ${purpose} cluster`
+        return this.canPatchShoots ? `Please configure a schedule for this ${purpose} cluster` : `A schedule should be configured for this ${purpose} cluster`
       } else {
         return 'No hibernation schedule configured'
       }

@@ -40,7 +40,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import semver from 'semver'
 import store from '../'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
-import { getProviderTemplate, workerCIDR, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
 import { isShootStatusHibernated,
   isUserError,
@@ -227,17 +227,11 @@ const actions = {
     const shootResource = {
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
-      metadata: {},
-      spec: {
-        networking: {
-          type: 'calico', // TODO: read network extension list, see https://github.com/gardener/dashboard/issues/452
-          nodes: workerCIDR
-        }
-      }
+      metadata: {}
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
-    set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
+    set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
 
     const cloudProfileName = get(head(rootGetters.cloudProfilesByCloudProviderKind(infrastructureKind)), 'metadata.name')
     set(shootResource, 'spec.cloudProfileName', cloudProfileName)
@@ -265,6 +259,27 @@ const actions = {
           : head(allLoadBalancerClassNames)
       ]
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+    }
+
+    const partitionIDs = rootGetters.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
+    const partitionID = head(partitionIDs)
+    if (!isEmpty(partitionID)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+    }
+    const firewallImages = rootGetters.firewallImagesByCloudProfileName(cloudProfileName)
+    const firewallImage = head(firewallImages)
+    if (!isEmpty(firewallImage)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+    }
+    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [ partitionID ] }), 'name')
+    const firewallSize = head(firewallSizes)
+    if (!isEmpty(firewallSize)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
+    }
+    const allFirewallNetworks = rootGetters.firewallNetworksByCloudProfileNameAndPartitionId({ cloudProfileName, partitionID })
+    const firewallNetworks = find(allFirewallNetworks, { key: 'internet' })
+    if (!isEmpty(firewallNetworks)) {
+      set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
     }
 
     const name = shortRandomString(10)

@@ -334,6 +334,30 @@ export function getProjectName (metadata) {
   return projectName
 }
 
+export function getProjectDetails (project) {
+  const projectData = project.data || {}
+  const projectMetadata = project.metadata || {}
+  const projectName = projectMetadata.name || ''
+  const technicalContact = projectData.owner || ''
+  const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
+  const creationTimestamp = projectMetadata.creationTimestamp
+  const createdAt = getDateFormatted(creationTimestamp)
+  const description = projectData.description || ''
+  const createdBy = projectData.createdBy || ''
+  const purpose = projectData.purpose || ''
+
+  return {
+    projectName,
+    technicalContact,
+    costObject,
+    createdAt,
+    creationTimestamp,
+    createdBy,
+    description,
+    purpose
+  }
+}
+
 export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
@@ -398,25 +422,12 @@ export function isServiceAccountFromNamespace (username, namespace) {
 
 // expect colors to be in format <color> <optional:modifier>
 export function textColor (color) {
-  const colorArr = split(color, ' ')
-  const colorStr = colorArr[0]
-  const colorMod = colorArr[1]
+  const [colorStr, colorMod] = split(color, ' ')
   let textColor = `${colorStr}--text`
   if (colorMod) {
     textColor = `${textColor} text--${colorMod}`
   }
   return textColor
-}
-
-export function infrastructureColor (kind) {
-  switch (kind) {
-    case 'openstack':
-      return '#ED1944'
-    case 'azure':
-      return '#2075b8'
-    case 'aws':
-      return '#ff9900'
-  }
 }
 
 export function encodeBase64 (input) {
@@ -502,7 +513,7 @@ export const shootAddonList = [
 const kymaAddonDescription = `Kyma is a platform for extending applications with serverless functions and microservices. As an integrated stack of the best cloud-native projects, including Istio, Kiali, Prometheus, Grafana, Jaeger, Knative, Ory Hydra, and Loki it allows running modern microservice or serverless applications on top of Kubernetes.
 Kyma comes with a new, lightweight Service Catalog you can use to easily connect services provided by hyperscalers such as Azure, GCP, or AWS, as well as SAP applications.
 
-To successfully run Kyma, the minimal cluster size should be **2 nodes (4 CPU and 16GB each)**, but it is recommended to have 3-5 nodes. Additionally, make sure your Kubernetes version is **1.15.x or lower**.
+To successfully run Kyma, the minimal cluster size should be **2 nodes (4 CPU and 16GB each)**, but it is recommended to have 3-5 nodes. Additionally, make sure your Kubernetes version is **1.16.x or lower**.
 
 You can find a link to Kyma management Console UI and credentials in the shoot cluster dashboard.
 To learn more, visit the [Kyma website](https://kyma-project.io). If you want to discuss Kyma, ask questions, and contribute, join the Kyma community in the [Slack channel](http://slack.kyma-project.io).`
@@ -599,6 +610,20 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   return worker
 }
 
+export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) {
+  switch (cloudProviderKind) {
+    case 'azure':
+      if (isNewCluster) {
+        return true // new clusters are always created as zoned clusters by the dashboard
+      }
+      return get(shootSpec, 'provider.infrastructureConfig.zoned', false)
+    case 'metal':
+      return false // metal clusters do not support zones for worker groups
+    default:
+      return true
+  }
+}
+
 export function allErrorCodesFromLastErrors (lastErrors) {
   return uniq(compact(flatMap(lastErrors, 'codes')))
 }
@@ -613,3 +638,39 @@ export const allMemberRoles = [
     displayName: 'Viewer'
   }
 ]
+
+function includesNameOrAll (list, name) {
+  return includes(list, name) || includes(list, '*')
+}
+
+export function canI ({ resourceRules } = {}, verb, apiGroup, resouce, resourceName) {
+  if (isEmpty(resourceRules)) {
+    return false
+  }
+
+  resourceRules = filter(resourceRules, ({ apiGroups }) => includesNameOrAll(apiGroups, apiGroup))
+  resourceRules = filter(resourceRules, ({ resources }) => includesNameOrAll(resources, resouce))
+  resourceRules = filter(resourceRules, ({ verbs }) => includesNameOrAll(verbs, verb))
+  resourceRules = filter(resourceRules, ({ resourceNames }) => isEmpty(resourceNames) || includesNameOrAll(resourceNames, resourceName))
+
+  return !isEmpty(resourceRules)
+}
+
+export const TargetEnum = {
+  GARDEN: 'garden',
+  CONTROL_PLANE: 'cp',
+  SHOOT: 'shoot'
+}
+
+export function targetText (target) {
+  switch (target) {
+    case TargetEnum.CONTROL_PLANE:
+      return 'Control Plane'
+    case TargetEnum.SHOOT:
+      return 'Cluster'
+    case TargetEnum.GARDEN:
+      return 'Garden Cluster'
+    default:
+      return undefined
+  }
+}

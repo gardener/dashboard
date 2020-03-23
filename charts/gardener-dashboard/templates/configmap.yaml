@@ -25,6 +25,9 @@ data:
       {{- end }}
       org: {{ .Values.gitHub.org }}
       repository: {{ .Values.gitHub.repository }}
+      {{- if .Values.gitHub.pollIntervalSeconds }}
+      pollIntervalSeconds: {{ .Values.gitHub.pollIntervalSeconds }}
+      {{- end }}
 {{- end }}
 {{- if .Values.oidc }}
     oidc:
@@ -55,6 +58,13 @@ data:
     terminal:
       containerImage: {{ .Values.terminal.containerImage }}
       containerImageOperator: {{ .Values.terminal.containerImageOperator }}
+      {{- if .Values.terminal.containerImageDescriptions }}
+      containerImageDescriptions:
+      {{- range .Values.terminal.containerImageDescriptions }}
+      - image: {{ .image }}
+        description: {{ .description }}
+      {{- end }}
+      {{- end }}
       gardenTerminalHost:
 {{- if .Values.terminal.gardenTerminalHost.secretRef }}
         apiServerIngressHost: {{ .Values.terminal.gardenTerminalHost.apiServerIngressHost }}

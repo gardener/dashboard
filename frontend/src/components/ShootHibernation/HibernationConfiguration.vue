@@ -24,6 +24,8 @@ limitations under the License.
     <template slot="actionComponent">
       <manage-hibernation-schedule
         ref="hibernationSchedule"
+        :isHibernationPossible="isHibernationPossible"
+        :hibernationPossibleMessage="hibernationPossibleMessage"
         @valid="onHibernationScheduleValid"
       ></manage-hibernation-schedule>
     </template>

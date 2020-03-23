@@ -201,9 +201,10 @@ class ShootSubscription extends AbstractSubscription {
     this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
       const { name, namespace } = target
       throttledNsEventEmitter.flush()
-      const promises = [
-        store.dispatch('getShootInfo', { name, namespace })
-      ]
+      const promises = []
+      if (store.getters.canGetSecrets) {
+        promises.push(store.dispatch('getShootInfo', { name, namespace }))
+      }
       if (store.getters.isAdmin) {
         promises.push(store.dispatch('getShootSeedInfo', { name, namespace }))
       }

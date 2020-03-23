@@ -136,8 +136,9 @@ import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
 import isEqual from 'lodash/isEqual'
 import unset from 'lodash/unset'
+import { isZonedCluster } from '@/utils'
 import { errorDetailsFromError } from '@/utils/error'
-import { getProviderTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
+import { getSpecTemplate, getZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 const EventEmitter = require('events')
 
 export default {
@@ -224,16 +225,21 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClasses
+        loadBalancerClasses,
+        partitionID,
+        projectID,
+        firewallImage,
+        firewallSize,
+        firewallNetworks
       } = this.$refs.infrastructureDetails.getInfrastructureData()
-      set(shootResource, 'spec.cloudProfileName', cloudProfileName)
-      set(shootResource, 'spec.region', region)
-      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
       const oldInfrastructureKind = get(shootResource, 'spec.provider.type')
       if (oldInfrastructureKind !== infrastructureKind) {
         // Infrastructure changed
-        set(shootResource, 'spec.provider', getProviderTemplate(infrastructureKind))
+        set(shootResource, 'spec', getSpecTemplate(infrastructureKind))
       }
+      set(shootResource, 'spec.cloudProfileName', cloudProfileName)
+      set(shootResource, 'spec.region', region)
+      set(shootResource, 'spec.secretBindingName', get(secret, 'metadata.bindingName'))
       if (!isEmpty(floatingPoolName)) {
         set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
       }
@@ -242,6 +248,21 @@ export default {
       }
       if (!isEmpty(loadBalancerClasses)) {
         set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
+      }
+      if (!isEmpty(partitionID)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.partitionID', partitionID)
+      }
+      if (!isEmpty(projectID)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.projectID', projectID)
+      }
+      if (!isEmpty(firewallImage)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
+      }
+      if (!isEmpty(firewallSize)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallSize)
+      }
+      if (!isEmpty(firewallNetworks)) {
+        set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -322,6 +343,13 @@ export default {
       const floatingPoolName = get(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName')
       const loadBalancerProviderName = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider')
       const loadBalancerClasses = get(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses')
+
+      const partitionID = get(shootResource, 'spec.provider.infrastructureConfig.partitionID')
+      const projectID = get(shootResource, 'spec.provider.infrastructureConfig.projectID')
+      const firewallImage = get(shootResource, 'spec.provider.infrastructureConfig.firewall.image')
+      const firewallSize = get(shootResource, 'spec.provider.infrastructureConfig.firewall.size')
+      const firewallNetworks = get(shootResource, 'spec.provider.infrastructureConfig.firewall.networks')
+
       this.$refs.infrastructureDetails.setInfrastructureData({
         infrastructureKind,
         cloudProfileName,
@@ -329,7 +357,12 @@ export default {
         secret,
         floatingPoolName,
         loadBalancerProviderName,
-        loadBalancerClasses
+        loadBalancerClasses,
+        partitionID,
+        projectID,
+        firewallImage,
+        firewallSize,
+        firewallNetworks
       })
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
@@ -345,7 +378,9 @@ export default {
       this.$refs.clusterDetails.setDetailsData({ name, kubernetesVersion, purpose, secret, cloudProfileName, updateK8sMaintenance: k8sUpdates })
 
       const workers = get(shootResource, 'spec.provider.workers')
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates })
+      const isNewCluster = true
+      const zonedCluster = isZonedCluster({ cloudProviderKind: infrastructureKind, isNewCluster })
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, updateOSMaintenance: osUpdates, zonedCluster, isNewCluster })
 
       const addons = cloneDeep(get(shootResource, 'spec.addons', {}))
       if (this.isKymaFeatureEnabled) {

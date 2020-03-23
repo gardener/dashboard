@@ -17,6 +17,7 @@
 import { withParams, regex, ref } from 'vuelidate/lib/validators/common'
 import { minValue } from 'vuelidate/lib/validators'
 import includes from 'lodash/includes'
+import get from 'lodash/get'
 import { parseSize } from '@/utils'
 
 const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/
@@ -53,6 +54,15 @@ const unique = key => withParams({ type: 'unique', key },
 const uniqueWorkerName = withParams({ type: 'uniqueWorkerName' },
   function unique (value) {
     return this.workers.filter(item => item.name === value).length === 1
+  }
+)
+
+const requiresCostObjectIfEnabled = withParams({ type: 'requiresCostObjectIfEnabled' },
+  function (infrastructureSecret) {
+    if (!this.costObjectSettingEnabled) {
+      return true
+    }
+    return get(infrastructureSecret, 'metadata.hasCostObject', false)
   }
 )
 
@@ -99,5 +109,6 @@ export {
   includesIfAvailable,
   minVolumeSize,
   uniqueWorkerName,
-  numberOrPercentage
+  numberOrPercentage,
+  requiresCostObjectIfEnabled
 }

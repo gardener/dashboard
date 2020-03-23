@@ -65,11 +65,15 @@ function init () {
     return issues[number]
   }
 
+  function getIssueNumbers () {
+    return _.map(getIssues(), 'metadata.number')
+  }
+
   function getIssueNumbersForNameAndNamespace ({ name, namespace }) {
     return _
       .chain(getIssues())
       .filter(_.matches({ metadata: { name, namespace } }))
-      .map(issue => issue.metadata.number)
+      .map('metadata.number')
       .value()
   }
 
@@ -119,9 +123,11 @@ function init () {
     const cachedItem = cachedList[identifier]
     if (cachedItem) {
       if (isCachedItemOlder(cachedItem, item)) {
-        logger.trace('updating', kind, identifier)
-        cachedList[identifier] = item
-        emitModified(kind, item)
+        if (!_.isEqual(cachedItem, item)) {
+          logger.trace('updating', kind, identifier)
+          cachedList[identifier] = item
+          emitModified(kind, item)
+        }
       } else {
         logger.warn(`skipped updating ${kind} with id ${identifier} as it was older`)
       }
@@ -144,6 +150,7 @@ function init () {
     getIssue,
     getIssues,
     getCommentsForIssue,
+    getIssueNumbers,
     getIssueNumbersForNameAndNamespace,
     addOrUpdateIssues,
     addOrUpdateIssue,

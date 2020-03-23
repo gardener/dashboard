@@ -23,9 +23,52 @@ import find from 'lodash/find'
 import sample from 'lodash/sample'
 import includes from 'lodash/includes'
 
-export const workerCIDR = '10.250.0.0/16'
+const workerCIDR = '10.250.0.0/16'
 
-export function getProviderTemplate (infrastructureKind) {
+export function getSpecTemplate (infrastructureKind) {
+  switch (infrastructureKind) {
+    case 'metal':
+      return { // TODO: Remove when metal extension sets this config via mutating webhook, see https://github.com/metal-stack/gardener-extension-provider-metal/issues/32
+        provider: getProviderTemplate(infrastructureKind),
+        networking: {
+          type: 'calico',
+          pods: '10.244.128.0/18',
+          services: '10.244.192.0/18',
+          providerConfig: {
+            apiVersion: 'calico.networking.extensions.gardener.cloud/v1alpha1',
+            kind: 'NetworkConfig',
+            backend: 'vxlan',
+            ipv4: {
+              autoDetectionMethod: 'interface=lo',
+              mode: 'Always',
+              pool: 'vxlan'
+            },
+            typha: {
+              enabled: true
+            }
+          }
+        },
+        kubernetes: {
+          kubeControllerManager: {
+            nodeCIDRMaskSize: 23
+          },
+          kubelet: {
+            maxPods: 510
+          }
+        }
+      }
+    default:
+      return {
+        provider: getProviderTemplate(infrastructureKind),
+        networking: {
+          type: 'calico', // TODO: read nework extension list, see https://github.com/gardener/dashboard/issues/452
+          nodes: workerCIDR
+        }
+      }
+  }
+}
+
+function getProviderTemplate (infrastructureKind) {
   switch (infrastructureKind) {
     case 'aws':
       return {
@@ -107,6 +150,18 @@ export function getProviderTemplate (infrastructureKind) {
         },
         controlPlaneConfig: {
           apiVersion: 'alicloud.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'ControlPlaneConfig'
+        }
+      }
+    case 'metal':
+      return {
+        type: 'metal',
+        infrastructureConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
+          kind: 'InfrastructureConfig'
+        },
+        controlPlaneConfig: {
+          apiVersion: 'metal.provider.extensions.gardener.cloud/v1alpha1',
           kind: 'ControlPlaneConfig'
         }
       }

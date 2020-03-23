@@ -15,28 +15,18 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount } from '@vue/test-utils'
-import SelectHintColorizer from '@/components/SelectHintColorizer.vue'
+import { mount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import { VContent } from 'vuetify/lib'
 Vue.use(Vuetify)
 
-describe('SelectHintColorizer.vue', function () {
-  it('should be able to apply classname', function () {
-    const propsData = {
-      hintColor: 'orange'
-    }
-    const wrapper = shallowMount(SelectHintColorizer, {
-      propsData
+describe('GPopper.vue', function () {
+  describe('VContent', function () {
+    it('v-content__wrap class should exist', function () {
+      const wrapper = mount(VContent, {})
+      const element = wrapper.find('.v-content__wrap')
+      expect(element.constructor.name).to.be.eq('Wrapper') // if .v-content__wrap is not found the constructor name would be "ErrorWrapper"
     })
-    const colorizerComponent = wrapper.find(SelectHintColorizer).vm
-    expect(colorizerComponent.$el.className).to.contain('hintColor-orange')
-
-    wrapper.setProps({ hintColor: 'cyan' })
-    expect(colorizerComponent.$el.className).to.contain('hintColor-cyan')
-    expect(colorizerComponent.$el.className).to.not.contain('hintColor-orange')
-
-    wrapper.setProps({ hintColor: 'default' })
-    expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
   })
 })

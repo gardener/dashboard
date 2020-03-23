@@ -26,9 +26,8 @@ limitations under the License.
       <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
     </v-flex>
     <v-divider></v-divider>
-    <v-flex :style="toolbarStyles">
+    <v-flex v-if="!isReadOnly" :style="toolbarStyles">
       <v-layout row align-center justify-space-between fill-height>
-        <slot name="toolbarItemsLeft"></slot>
         <v-flex d-flex>
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="untouched" @click="reload">
@@ -86,9 +85,10 @@ limitations under the License.
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import GAlert from '@/components/GAlert'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
 import download from 'downloadjs'
+import { shootItem } from '@/mixins/shootItem'
 
 // codemirror
 import CodeMirror from 'codemirror'
@@ -98,7 +98,7 @@ import 'codemirror/lib/codemirror.css'
 // lodash
 import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
-import omit from 'lodash/omit'
+import pick from 'lodash/pick'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
 
@@ -152,16 +152,23 @@ export default {
       toolbarHeight: 48
     }
   },
+  mixins: [shootItem],
   computed: {
     ...mapState([
       'namespace'
     ]),
+    ...mapGetters([
+      'canPatchShoots'
+    ]),
     value () {
       const data = cloneDeep(this.shootContent)
       if (data) {
-        return omit(data, ['info'])
+        return pick(data, ['kind', 'apiVersion', 'metadata', 'spec', 'status'])
       }
       return undefined
+    },
+    shootItem () { // needed for mixin
+      return this.shootContent
     },
     containerStyles () {
       return {
@@ -191,6 +198,9 @@ export default {
       set (value) {
         this.$emit('update:detailedErrorMessage', value)
       }
+    },
+    isReadOnly () {
+      return this.isShootActionsDisabledForPurpose || !this.canPatchShoots
     }
   },
   methods: {
@@ -278,6 +288,7 @@ export default {
         lineNumbers: true,
         lineWrapping: true,
         viewportMargin: Infinity, // make sure the whole shoot resource is laoded so that the browser's text search works on it
+        readOnly: this.isReadOnly,
         extraKeys
       }
       this.$instance = CodeMirror(element, options)
@@ -354,6 +365,12 @@ export default {
     this.refresh()
   },
   watch: {
+    canPatchShoots (value) {
+      this.$instance.setOption('readOnly', this.isReadOnly)
+    },
+    shootPurpose (value) {
+      this.$instance.setOption('readOnly', this.isReadOnly)
+    },
     value: {
       deep: true,
       handler (newValue, oldValue) {

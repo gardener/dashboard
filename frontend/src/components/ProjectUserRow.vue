@@ -39,7 +39,7 @@ limitations under the License.
           </v-chip>
         </v-layout>
       </v-list-tile-action>
-      <v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
           <v-btn slot="activator" icon class="green--text text--darken-2" @click.native.stop="onEdit">
             <v-icon>mdi-pencil</v-icon>
@@ -47,7 +47,7 @@ limitations under the License.
           <span>Update User</span>
         </v-tooltip>
       </v-list-tile-action>
-      <v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
           <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
             <v-icon>mdi-delete</v-icon>
@@ -61,6 +61,8 @@ limitations under the License.
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'project-user-row',
   props: {
@@ -92,6 +94,11 @@ export default {
       type: Array,
       required: true
     }
+  },
+  computed: {
+    ...mapGetters([
+      'canPatchProject'
+    ])
   },
   methods: {
     onDelete (username) {

@@ -3,8 +3,8 @@
   "check-coverage": true,
   "lines": 87,
   "statements": 87,
-  "functions": 90,
-  "branches": 65,
+  "functions": 91,
+  "branches": 66,
   "include": [
     "lib/**/*.js"
   ],

@@ -101,10 +101,11 @@ gitHub:
   apiUrl: https://api.foo-github.com
   org: dummyorg
   repository: dummyrepo
-  webhookSecret: foobar
+  webhookSecret: foobar # optional if pollIntervalSeconds is defined
   authentication:
     username: dashboard
     token: dummytoken
+  # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
 
 livenessProbe:
   enabled: true
@@ -125,6 +126,9 @@ readinessProbe:
 # terminal:
 #   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
 #   containerImageOperator: ~ # if not defined, value of containerImage will be used
+#   containerImageDescriptions:
+#   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
+#     description: Run `ghelp` to get information about installed tools and packages
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
 #     apiServerIngressHost: api.example.org # is host in browser-trusted certificate. Optional, but required if using secretRef
 #     secretRef:

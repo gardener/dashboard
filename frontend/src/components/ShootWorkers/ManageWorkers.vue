@@ -65,7 +65,7 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { generateWorker } from '@/utils'
+import { generateWorker, isZonedCluster } from '@/utils'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import map from 'lodash/map'
@@ -92,14 +92,15 @@ export default {
       region: undefined,
       zonesNetworkConfiguration: undefined,
       zonedCluster: undefined,
-      updateOSMaintenance: undefined
+      updateOSMaintenance: undefined,
+      isNewCluster: false
     }
   },
   computed: {
     ...mapGetters([
-      'cloudProfileByName',
       'machineTypesByCloudProfileName',
-      'zonesByCloudProfileNameAndRegion'
+      'zonesByCloudProfileNameAndRegion',
+      'cloudProfileByName'
     ]),
     allMachineTypes () {
       return this.machineTypesByCloudProfileName({ cloudProfileName: this.cloudProfileName })
@@ -184,13 +185,14 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster = true, updateOSMaintenance }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, isNewCluster }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
       this.zonedCluster = zonedCluster
+      this.isNewCluster = isNewCluster
     }
   },
   mounted () {
@@ -198,6 +200,13 @@ export default {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
+        const cloudProfile = this.cloudProfileByName(cloudProfileName)
+        /*
+         * do not pass shootspec as we have it not available in this component and it is (currently) not required
+         * do dtermine isZoned for new clusters. This event handler is only be called for new clusters, as the
+         * userInterActionBus is onlyset for the create cluster use case
+         */
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind, isNewCluster: this.isNewCluster })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {
