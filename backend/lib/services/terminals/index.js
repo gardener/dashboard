@@ -547,7 +547,7 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
     return
   }
 
-  const { target } = body
+  const { coordinate: { target } } = body
 
   // non-admin users are only allowed to open terminals for shoots
   if (target === TargetEnum.SHOOT) {

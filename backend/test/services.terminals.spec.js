@@ -356,7 +356,7 @@ describe('services', function () {
         const method = 'foo'
         const target = 'foo'
         try {
-          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -367,7 +367,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'shoot'
         try {
-          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -378,7 +378,7 @@ describe('services', function () {
         const method = 'list'
         const target = 'foo'
         try {
-          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
         } catch (err) {
           expect.fail('No exception expected')
         }
@@ -389,7 +389,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'cp'
         try {
-          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
           expect.fail('Forbidden error expected')
         } catch (err) {
           expect(err).to.be.instanceof(Forbidden)
@@ -401,7 +401,7 @@ describe('services', function () {
         const method = 'create'
         const target = 'garden'
         try {
-          ensureTerminalAllowed({ method, isAdmin, body: { target } })
+          ensureTerminalAllowed({ method, isAdmin, body: { coordinate: { target } } })
           expect.fail('Forbidden error expected')
         } catch (err) {
           expect(err).to.be.instanceof(Forbidden)
