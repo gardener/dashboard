@@ -107,7 +107,7 @@ async function updateProjectMember (client, { namespace, name, roles }) {
   const members = _.slice(project.spec.members, 0)
   const member = _.find(members, ['name', name])
   if (!member) {
-    throw new NotFound(`User '${name}' is no member of this project`)
+    throw new NotFound(`User '${name}' is not a member of this project`)
   }
   const role = roles.shift()
   _.assign(member, { role, roles })
