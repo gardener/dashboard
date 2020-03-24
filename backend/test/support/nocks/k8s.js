@@ -47,8 +47,18 @@ const projectList = [
     createdBy: 'bar@example.org',
     owner: 'foo@example.org',
     members: [
-      'bar@example.org',
-      'system:serviceaccount:garden-foo:robot'
+      {
+        name: 'foo@example.org',
+        roles: ['admin', 'owner']
+      },
+      {
+        name: 'bar@example.org',
+        roles: ['admin']
+      },
+      {
+        name: 'system:serviceaccount:garden-foo:robot',
+        roles: ['viewer']
+      }
     ],
     description: 'foo-description',
     purpose: 'foo-purpose',
@@ -59,8 +69,14 @@ const projectList = [
     createdBy: 'foo@example.org',
     owner: 'bar@example.org',
     members: [
-      'foo@example.org',
-      'system:serviceaccount:garden-bar:robot'
+      {
+        name: 'foo@example.org',
+        roles: ['admin', 'owner']
+      },
+      {
+        name: 'system:serviceaccount:garden-foo:robot',
+        roles: ['viewer', 'admin']
+      }
     ],
     description: 'bar-description',
     purpose: 'bar-purpose'
@@ -291,7 +307,7 @@ function getProjectMembers (project) {
   return _
     .chain(project)
     .get('spec.members')
-    .map(({ name: username }) => ({ username }))
+    .map(({ name: username, role, roles }) => ({ username, roles: roles ? [role, ...roles] : [role] }))
     .value()
 }
 
@@ -308,21 +324,26 @@ function getInfrastructureSecret (namespace, name, profileName, data = {}) {
   }
 }
 
-function getUser (name) {
-  return {
+function getUser (member) {
+  const name = member.name || member
+  const user = {
     apiGroup: 'rbac.authorization.k8s.io',
     kind: 'User',
     name
   }
+  if (member.roles) {
+    const roles = member.roles.slice()
+    const role = roles.shift()
+    _.assign(user, { role, roles })
+  }
+  return user
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = "" }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], memberRoles = [], description, purpose, phase = 'Ready', costObject = '' }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
     .chain(members)
-    .concat(owner)
-    .uniq()
     .map(getUser)
     .value()
   owner = getUser(owner)
@@ -1265,7 +1286,7 @@ const stub = {
         }
       })
   },
-  addMember ({ bearer, namespace, name: username }) {
+  addMember ({ bearer, namespace, name: username, roles }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
@@ -1285,6 +1306,31 @@ const stub = {
         .reply(200, () => newProject)
       getServiceAccountsForNamespace(scope, namespace)
     }
+    return [
+      nockWithAuthorization(bearer)
+        .get(`/api/v1/namespaces/${namespace}`)
+        .reply(200, () => getProjectNamespace(namespace)),
+      scope
+    ]
+  },
+  updateMember ({ bearer, namespace, name: username, roles }) {
+    const project = readProject(namespace)
+    const newProject = _.cloneDeep(project)
+    const name = project.metadata.name
+
+    const scope = nockWithAuthorization(bearer)
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
+      .reply(200, () => project)
+    const existingMember = _.find(project.spec.members, ['name', username])
+    if (existingMember) {
+      scope
+        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
+          _.assign(newProject.spec.members, body.spec.members)
+          return true
+        })
+        .reply(200, () => newProject)
+    }
+    getServiceAccountsForNamespace(scope, namespace)
     return [
       nockWithAuthorization(bearer)
         .get(`/api/v1/namespaces/${namespace}`)
@@ -1387,16 +1433,16 @@ const stub = {
         const incomplete = false
         if (_.endsWith(payload.id, 'example.org')) {
           resourceRules = resourceRules.concat([{
-              verbs: ['get'],
-              apiGroups: ['core.gardener.cloud'],
-              resources: ['projects'],
-              resourceName: ['foo']
-            },
-            {
-              verbs: ['create'],
-              apiGroups: ['core.gardener.cloud'],
-              resources: ['projects']
-            }
+            verbs: ['get'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects'],
+            resourceName: ['foo']
+          },
+          {
+            verbs: ['create'],
+            apiGroups: ['core.gardener.cloud'],
+            resources: ['projects']
+          }
           ])
         } else {
           resourceRules = resourceRules.concat([{
@@ -1405,7 +1451,7 @@ const stub = {
             resources: ['projects'],
             resourceName: ['foo']
           }
-        ])
+          ])
         }
         return {
           status: { resourceRules, nonResourceRules, incomplete }

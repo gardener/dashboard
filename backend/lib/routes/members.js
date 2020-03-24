@@ -55,6 +55,17 @@ router.route('/:name')
       next(err)
     }
   })
+  .put(async (req, res, next) => {
+    try {
+      const user = req.user
+      const namespace = req.params.namespace
+      const name = req.params.name
+      const roles = req.body.roles
+      res.send(await members.update({ user, namespace, name, roles }))
+    } catch (err) {
+      next(err)
+    }
+  })
   .delete(async (req, res, next) => {
     try {
       const user = req.user

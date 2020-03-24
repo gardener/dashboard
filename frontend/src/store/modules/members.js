@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import { getMembers, addMember, deleteMember } from '@/utils/api'
+import { getMembers, addMember, updateMember, deleteMember } from '@/utils/api'
 
 // initial state
 const state = {
@@ -38,10 +38,16 @@ const actions = {
         throw error
       })
   },
-  add: ({ commit, rootState }, name) => {
+  add: ({ commit, rootState }, data) => {
     const namespace = rootState.namespace
-    const data = { name }
     return addMember({ namespace, data })
+      .then(res => {
+        commit('RECEIVE', res.data)
+      })
+  },
+  update: ({ commit, rootState }, { name, roles }) => {
+    const namespace = rootState.namespace
+    return updateMember({ namespace, name, data: { roles } })
       .then(res => {
         commit('RECEIVE', res.data)
       })

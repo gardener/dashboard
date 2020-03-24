@@ -90,12 +90,12 @@ import { errorDetailsFromError, isConflict } from '@/utils/error'
 import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors, allMemberRoles } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
-import find from 'lodash/find'
+import compact from 'lodash/compact'
 import includes from 'lodash/includes'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
-const defaultRole = find(allMemberRoles, { name: 'admin' })
+const defaultRole = 'admin'
 
 export default {
   name: 'member-dialog',
@@ -205,12 +205,17 @@ export default {
       return this.$refs.name
     },
     allMemberRoles () {
-      return allMemberRoles
+      return compact(map(allMemberRoles, role => {
+        if (role.hidden !== true) {
+          return role
+        }
+      }))
     },
     color () {
       if (this.isUserDialog) {
         return 'green darken-2'
-      } else if (this.isServiceDialog) {
+      }
+      if (this.isServiceDialog) {
         return 'blue-grey'
       }
       return undefined
@@ -218,7 +223,8 @@ export default {
     nameLabel () {
       if (this.isUserDialog) {
         return 'User'
-      } else if (this.isServiceDialog) {
+      }
+      if (this.isServiceDialog) {
         return 'Service Account'
       }
       return undefined
@@ -226,7 +232,8 @@ export default {
     nameHint () {
       if (this.isUserDialog) {
         return 'Enter the username that should become a user of this project'
-      } else if (this.isServiceDialog) {
+      }
+      if (this.isServiceDialog) {
         return 'Enter the name of a Kubernetes Service Account'
       }
       return undefined
@@ -234,7 +241,8 @@ export default {
     cardClass () {
       if (this.isUserDialog) {
         return 'add_user'
-      } else if (this.isServiceDialog) {
+      }
+      if (this.isServiceDialog) {
         return 'add_service'
       }
       return undefined
@@ -242,7 +250,8 @@ export default {
     buttonClass () {
       if (this.isUserDialog) {
         return 'green--text darken-2'
-      } else if (this.isServiceDialog) {
+      }
+      if (this.isServiceDialog) {
         return 'blue-grey--text'
       }
       return undefined
@@ -254,11 +263,22 @@ export default {
     projectUserNames () {
       const users = filter(this.memberList, ({ username }) => !isServiceAccount(username))
       return map(users, 'username')
+    },
+    memberName () {
+      const name = toLower(this.name)
+      if (this.isUserDialog) {
+        return name
+      }
+      if (this.isServiceDialog) {
+        return `system:serviceaccount:${this.namespace}:${name}`
+      }
+      return undefined
     }
   },
   methods: {
     ...mapActions([
-      'addMember'
+      'addMember',
+      'updateMember'
     ]),
     hide () {
       this.visible = false
@@ -270,7 +290,9 @@ export default {
       this.$v.$touch()
       if (this.valid) {
         try {
-          await this.save()
+          const name = this.memberName
+          const roles = this.roles
+          await this.addMember({ name, roles })
           this.hide()
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
@@ -283,6 +305,22 @@ export default {
           } else {
             this.errorMessage = 'Failed to add project member'
           }
+          this.detailedErrorMessage = errorDetails.detailedMessage
+          console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
+        }
+      }
+    },
+    async submitUpdateMember () {
+      this.$v.$touch()
+      if (this.valid) {
+        try {
+          const name = this.memberName
+          const roles = this.roles
+          await this.updateMember({ name, roles })
+          this.hide()
+        } catch (err) {
+          const errorDetails = errorDetailsFromError(err)
+          this.errorMessage = 'Failed to update project member'
           this.detailedErrorMessage = errorDetails.detailedMessage
           console.error(this.errorMessage, errorDetails.errorCode, errorDetails.detailedMessage, err)
         }
@@ -304,7 +342,7 @@ export default {
       }
 
       if (this.currentRoles) {
-        this.roles = map(this.currentRoles, role => find(allMemberRoles, { name: role }))
+        this.roles = this.currentRoles.slice()
       } else {
         this.roles = [defaultRole]
       }
@@ -317,16 +355,6 @@ export default {
     setFocusAndSelection () {
       if (this.textField) {
         setInputFocus(this, 'name')
-      }
-    },
-    save () {
-      if (this.isUserDialog) {
-        const username = toLower(this.name)
-        return this.addMember(username)
-      } else if (this.isServiceDialog) {
-        const namespace = this.namespace
-        const name = toLower(this.name)
-        return this.addMember(`system:serviceaccount:${namespace}:${name}`)
       }
     },
     defaultServiceName () {

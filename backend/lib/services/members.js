@@ -44,9 +44,9 @@ function fromResource (project = {}, serviceAccounts = []) {
     .chain(project)
     .get('spec.members')
     .filter(['kind', 'User'])
-    .map(({ name: username, role }) => ({
+    .map(({ name: username, role, roles }) => ({
       username,
-      roles: [role], // TODO: use roles when available
+      roles: roles ? [role, ...roles] : [role],
       ...serviceAccountsMetadata[username]
     }))
     .value()
@@ -76,7 +76,7 @@ async function deleteServiceaccount (client, { namespace, name }) {
   }
 }
 
-async function setProjectMember (client, { namespace, name }) {
+async function setProjectMember (client, { namespace, name, roles }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
@@ -84,12 +84,34 @@ async function setProjectMember (client, { namespace, name }) {
   if (_.find(members, ['name', name])) {
     throw new Conflict(`User '${name}' is already member of this project`)
   }
+  const role = roles.shift()
   members.push({
     kind: 'User',
     name,
     apiGroup: 'rbac.authorization.k8s.io',
-    role: 'admin'
+    role,
+    roles
   })
+  const body = {
+    spec: {
+      members
+    }
+  }
+  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
+}
+
+async function updateProjectMember (client, { namespace, name, roles }) {
+  // get project
+  const project = await client.getProjectByNamespace(namespace)
+  // get project members from project
+  const members = _.slice(project.spec.members, 0)
+  const member = _.find(members, ['name', name])
+  if (!member) {
+    throw new NotFound(`User '${name}' is no member of this project`)
+  }
+  const role = roles.shift()
+  _.assign(member, { role, roles })
+
   const body = {
     spec: {
       members
@@ -152,7 +174,7 @@ exports.get = async function ({ user, namespace, name }) {
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
     member.kind = 'ServiceAccount'
-    member.roles = [member.role] // TODO: use roles when available
+    member.roles = member.roles ? [member.role, ...member.roles] : [member.role]
     member.kubeconfig = dumpKubeconfig({
       user: serviceAccountName,
       context: contextName,
@@ -166,7 +188,7 @@ exports.get = async function ({ user, namespace, name }) {
   return member
 }
 
-exports.create = async function ({ user, namespace, body: { name } }) {
+exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const client = user.client
 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
@@ -179,7 +201,16 @@ exports.create = async function ({ user, namespace, body: { name } }) {
   }
 
   // assign user to project
-  const project = await setProjectMember(client, { namespace, name })
+  const project = await setProjectMember(client, { namespace, name, roles })
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+  return fromResource(project, serviceAccounts)
+}
+
+exports.update = async function ({ user, namespace, name, roles }) {
+  const client = user.client
+
+  // update user in project
+  const project = await updateProjectMember(client, { namespace, name, roles })
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
   return fromResource(project, serviceAccounts)
 }

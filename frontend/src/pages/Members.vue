@@ -199,6 +199,8 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import compact from 'lodash/compact'
+import find from 'lodash/find'
 import upperFirst from 'lodash/upperFirst'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
@@ -277,7 +279,7 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleNames: map(serviceAccount.roles, this.roleName)
+          roleNames: compact(map(serviceAccount.roles, this.roleName))
         }
       })
     },
@@ -291,7 +293,7 @@ export default {
           displayName: displayName(username),
           isEmail: isEmail(username),
           isTechnicalContact: this.isTechnicalContact(username),
-          roleNames: map(user.roles, this.roleName)
+          roleNames: compact(map(user.roles, this.roleName))
         }
       })
     },
@@ -409,6 +411,9 @@ export default {
     roleName (role) {
       const roleObject = find(allMemberRoles, { name: role })
       if (roleObject) {
+        if (roleObject.hidden) {
+          return undefined
+        }
         return roleObject.displayName
       }
       return upperFirst(role)

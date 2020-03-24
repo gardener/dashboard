@@ -817,10 +817,17 @@ const actions = {
         return res
       })
   },
-  addMember ({ dispatch, commit }, name) {
-    return dispatch('members/add', name)
+  addMember ({ dispatch, commit }, { name, roles }) {
+    return dispatch('members/add', { name, roles })
       .then(res => {
         dispatch('setAlert', { message: 'Member added', type: 'success' })
+        return res
+      })
+  },
+  updateMember ({ dispatch, commit }, { name, roles }) {
+    return dispatch('members/update', { name, roles })
+      .then(res => {
+        dispatch('setAlert', { message: 'Member updated', type: 'success' })
         return res
       })
   },

@@ -39,6 +39,7 @@ limitations under the License.
           <v-layout row
             fill-height
             align-center
+            v-if="created && creationTimestamp"
           >
             <span class="mr-3">Created</span>
             <v-tooltip top>
@@ -124,16 +125,13 @@ export default {
       required: true
     },
     createdBy: {
-      type: String,
-      required: true
+      type: String
     },
     creationTimestamp: {
-      type: String,
-      required: true
+      type: String
     },
     created: {
-      type: String,
-      required: true
+      type: String
     },
     roles: {
       type: Array,
