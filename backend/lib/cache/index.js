@@ -40,19 +40,19 @@ class Cache {
   }
 
   getCloudProfiles () {
-    return _.orderBy(this.cloudprofiles.values(), 'metadata.name')
+    return _.orderBy(this.cloudprofiles.list(), 'metadata.name')
   }
 
   getQuotas () {
-    return _.orderBy(this.quotas.values(), ['metadata.namespace', 'metadata.name'])
+    return _.orderBy(this.quotas.list(), ['metadata.namespace', 'metadata.name'])
   }
 
   getSeeds () {
-    return _.orderBy(this.seeds.values(), 'metadata.name')
+    return _.orderBy(this.seeds.list(), 'metadata.name')
   }
 
   getProjects () {
-    return _.orderBy(this.projects.values(), 'metadata.name')
+    return _.orderBy(this.projects.list(), 'metadata.name')
   }
 
   getJournalCache () {

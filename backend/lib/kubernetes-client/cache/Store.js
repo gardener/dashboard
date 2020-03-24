@@ -21,16 +21,23 @@ const { get } = require('lodash')
 
 const store = Symbol('store')
 const timeout = Symbol('timeout')
+const keyPath = Symbol('keyPath')
+const keyFunc = Symbol('keyFunc')
 const timeoutId = Symbol('timeoutId')
 const synchronized = Symbol('synchronized')
 
 class Store extends EventEmitter {
-  constructor (map, synchronizationTimeout = 30 * 1000) {
+  constructor (map, options = {}) {
     super()
     this[store] = map || new Map()
     this[synchronized] = false
-    this[timeout] = synchronizationTimeout
     this[timeoutId] = undefined
+    this[timeout] = get(options, 'timeout', 30000)
+    this[keyPath] = get(options, 'keyPath', 'metadata.uid')
+  }
+
+  [keyFunc] (object) {
+    return get(object, this[keyPath])
   }
 
   get isSynchronized () {
@@ -44,31 +51,12 @@ class Store extends EventEmitter {
     }, this[timeout])
   }
 
-  keys () {
+  listKeys () {
     return Array.from(this[store].keys())
   }
 
-  values () {
+  list () {
     return Array.from(this[store].values())
-  }
-
-  getObjectKey (object, defaultValue) {
-    return get(object, 'metadata.uid', defaultValue)
-  }
-
-  get (objectOrKey) {
-    const key = this.getObjectKey(objectOrKey, objectOrKey)
-    return this[store].get(key)
-  }
-
-  set (object) {
-    const key = this.getObjectKey(object)
-    this[store].set(key, object)
-  }
-
-  has (objectOrKey) {
-    const key = this.getObjectKey(objectOrKey, objectOrKey)
-    return this[store].has(key)
   }
 
   clear () {
@@ -77,26 +65,46 @@ class Store extends EventEmitter {
   }
 
   delete (object) {
-    const key = this.getObjectKey(object)
-    const result = this[store].delete(key)
+    const key = this[keyFunc](object)
+    this[store].delete(key)
     this.emit('deleted', object)
-    return result
+  }
+
+  getByKey (key) {
+    return this[store].get(key)
+  }
+
+  get (object) {
+    const key = this[keyFunc](object)
+    return this.getByKey(key)
+  }
+
+  hasByKey (key) {
+    return this[store].has(key)
+  }
+
+  has (object) {
+    const key = this[keyFunc](object)
+    return this.hasByKey(key)
   }
 
   add (object) {
-    this.set(object)
+    const key = this[keyFunc](object)
+    this[store].set(key, object)
     this.emit('added', object)
   }
 
   update (object) {
-    this.set(object)
+    const key = this[keyFunc](object)
+    this[store].set(key, object)
     this.emit('updated', object)
   }
 
   replace (items) {
     this.clear()
     for (const object of items) {
-      this.set(object)
+      const key = this[keyFunc](object)
+      this[store].set(key, object)
     }
     clearTimeout(this[timeoutId])
     this[synchronized] = true

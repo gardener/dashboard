@@ -16,7 +16,7 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const { dashboardClient, Resources } = require('../kubernetes-client')
+const { Resources } = require('../kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
@@ -173,15 +173,6 @@ function getCloudProviderKind (name) {
   return _.get(cloudProfile, 'metadata.cloudProviderKind')
 }
 
-function getProjectMap (namespaces) {
-  const projects = _.map(namespaces, findProjectByNamespace)
-  return _
-    .chain(projects)
-    .compact()
-    .keyBy('spec.namespace')
-    .value()
-}
-
 exports.list = async function ({ user, namespace }) {
   const client = user.client
 
@@ -195,15 +186,22 @@ exports.list = async function ({ user, namespace }) {
       client['core.gardener.cloud'].secretbindings.list(namespace)
     ])
 
-    const namespaces = _
-      .chain(secretBindings)
-      .map(secretBinding => _.get(secretBinding, 'secretRef.namespace', namespace))
-      .uniq()
-      .value()
+    /*
+      The referenced secret can be from a different project to which the user has no access.
+      Below we read the project from the cache without any authorization check.
+      Only the name of project and the info if the project has a cost object is passed to the user.
+      Since this is not sensitive information no authorization check is required.
+    */
 
-    /* reading projects with dashboard client as the referenced secret can be from a different project to which the user has no access.
-    we need to fetch the project name and hasCostObject info and pass it to the user (which is not a sensitive information, thus we can use the dashboard client) */
-    const projectMap = await getProjectMap(dashboardClient, namespaces)
+    const getSecretRefNamespace = secretBinding => _.get(secretBinding, 'secretRef.namespace', namespace)
+    const projectMap = _
+      .chain(secretBindings)
+      .map(getSecretRefNamespace)
+      .uniq()
+      .map(findProjectByNamespace)
+      .compact()
+      .keyBy('spec.namespace')
+      .value()
 
     return getInfrastructureSecrets({
       secretBindings,
