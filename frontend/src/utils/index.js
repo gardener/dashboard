@@ -381,7 +381,8 @@ export function isUserError (errorCodes) {
     'ERR_INFRA_UNAUTHORIZED',
     'ERR_INFRA_INSUFFICIENT_PRIVILEGES',
     'ERR_INFRA_QUOTA_EXCEEDED',
-    'ERR_INFRA_DEPENDENCIES'
+    'ERR_INFRA_DEPENDENCIES',
+    'ERR_CLEANUP_CLUSTER_RESOURCES'
   ]
   return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
 }
