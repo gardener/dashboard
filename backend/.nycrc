@@ -4,7 +4,7 @@
   "lines": 87,
   "statements": 87,
   "functions": 91,
-  "branches": 66,
+  "branches": 65,
   "include": [
     "lib/**/*.js"
   ],

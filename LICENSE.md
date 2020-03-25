@@ -329,6 +329,10 @@ Copyright (c) Isaac Z. Schlueter and Contributors\
 Copyright (c) 2014-2017 Automattic <dev@cloudup.com>\
 [MIT License](https://github.com/socketio/socket.io/blob/master/LICENSE)
 
+- [swagger-parser](https://github.com/APIDevTools/swagger-parser)\
+Copyright (c) 2015 James Messinger\
+[MIT License](https://github.com/APIDevTools/swagger-parser/blob/master/LICENSE)
+
 - [uuid](https://github.com/kelektiv/node-uuid)\
 Copyright (c) 2010-2016 Robert Kieffer and other contributors\
 [MIT License](https://github.com/kelektiv/node-uuid/blob/master/LICENSE.md)

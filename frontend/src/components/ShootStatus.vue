@@ -78,6 +78,10 @@ const errorCodes = {
   'ERR_INFRA_DEPENDENCIES': {
     shortDescription: 'Infrastructure Dependencies',
     description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
+  },
+  'ERR_CLEANUP_CLUSTER_RESOURCES': {
+    shortDescription: 'Cleanup Cluster',
+    description: 'Cleaning up the cluster failed as some resource are stuck in deletion. Please remove these resources properly or a forceful deletion will happen if this error persists.'
   }
 }
 

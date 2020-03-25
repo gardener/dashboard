@@ -22,7 +22,7 @@ module.exports = function info ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const username = 'john.doe@example.org'
   const id = username
-  const aud = [ 'gardener' ]
+  const aud = ['gardener']
 
   it('should reject requests csrf protection error', async function () {
     const res = await agent
@@ -58,7 +58,7 @@ module.exports = function info ({ agent, k8s, auth }) {
   })
 
   it('should reject requests with invalid audience', async function () {
-    const user = auth.createUser({ id, aud: [ 'invalid-audience' ] })
+    const user = auth.createUser({ id, aud: ['invalid-audience'] })
     const res = await agent
       .get('/api/info')
       .set('cookie', await user.cookie)

@@ -15,6 +15,7 @@
 //
 
 import axios from 'axios'
+import get from 'lodash/get'
 
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
@@ -145,6 +146,11 @@ export function updateShootAddons ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/addons`, data)
+}
+
+export async function getShootSchemaDefinition () {
+  const definitions = await getResource('/api/openapi')
+  return get(definitions, ['data', 'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot'])
 }
 
 export function updateShootPurpose ({ namespace, name, data }) {

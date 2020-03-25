@@ -18,7 +18,7 @@
 
 const { Resources } = require('../kubernetes-client')
 
-async function hasAuthorization (user, resourceAttributes) {
+async function hasAuthorization (user, { resourceAttributes, nonResourceAttributes }) {
   if (!user) {
     return false
   }
@@ -28,7 +28,8 @@ async function hasAuthorization (user, resourceAttributes) {
     kind,
     apiVersion,
     spec: {
-      resourceAttributes
+      resourceAttributes,
+      nonResourceAttributes
     }
   }
   const {
@@ -38,14 +39,24 @@ async function hasAuthorization (user, resourceAttributes) {
   } = await client['authorization.k8s.io'].selfsubjectaccessreviews.create(body)
   return allowed
 }
-exports.hasAuthorization = hasAuthorization
 
 exports.isAdmin = function (user) {
   // if someone is allowed to get secrets in all namespaces he is considered to be an administrator
   return hasAuthorization(user, {
-    verb: 'get',
-    group: '',
-    resource: 'secrets'
+    resourceAttributes: {
+      verb: 'get',
+      group: '',
+      resource: 'secrets'
+    }
+  })
+}
+
+exports.canGetOpenAPI = function (user) {
+  return hasAuthorization(user, {
+    nonResourceAttributes: {
+      verb: 'get',
+      path: '/openapi/v2'
+    }
   })
 }
 

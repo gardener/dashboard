@@ -21,6 +21,7 @@ const config = require('../config')
 
 module.exports = {
   '/info': require('./info'),
+  '/openapi': require('../openapi'),
   '/user': require('./user'),
   '/cloudprofiles': require('./cloudprofiles'),
   '/shoots': require('./shoots'),

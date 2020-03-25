@@ -276,6 +276,24 @@ function canGetSecretsInAllNamespaces (scope) {
     })
 }
 
+function canGetOpenAPI (scope) {
+  return scope
+    .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews', body => {
+      const { verb, path } = body.spec.nonResourceAttributes
+      return path === '/openapi/v2' && verb === 'get'
+    })
+    .reply(200, function (body) {
+      const [, token] = _.split(this.req.headers.authorization, ' ', 2)
+      const payload = jwt.decode(token)
+      const allowed = !_.isEmpty(payload.id)
+      return _.assign({
+        status: {
+          allowed
+        }
+      }, body)
+    })
+}
+
 function getKubeconfigSecret (scope, { namespace, name, server }) {
   const url = new URL(server)
   const secret = {
@@ -339,7 +357,7 @@ function getUser (member) {
   return user
 }
 
-function getProject ({ name, namespace, createdBy, owner, members = [], memberRoles = [], description, purpose, phase = 'Ready', costObject = '' }) {
+function getProject ({ name, namespace, createdBy, owner, members = [], description, purpose, phase = 'Ready', costObject = '' }) {
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
@@ -1462,6 +1480,23 @@ const stub = {
     const adminScope = nockWithAuthorization(auth.bearer)
     reviewToken(adminScope)
     return adminScope
+  },
+  getShootDefinition (bearer) {
+    const scope = nockWithAuthorization(bearer)
+    canGetOpenAPI(scope)
+    const body = {
+      definitions: {
+        'com.github.gardener.gardener.pkg.apis.core.v1beta1.Shoot': {
+          type: 'object'
+        }
+      }
+    }
+    return [
+      scope,
+      nockWithAuthorization(auth.bearer)
+        .get('/openapi/v2')
+        .reply(200, body)
+    ]
   }
 }
 
