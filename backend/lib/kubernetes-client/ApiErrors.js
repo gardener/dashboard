@@ -16,8 +16,18 @@
 
 'use strict'
 
-const { get } = require('lodash')
+const { get, includes } = require('lodash')
 const { HTTPError } = require('got')
+const { TimeoutError } = require('p-timeout')
+
+const RETRY_ERROR_CODES = [
+  'ETIMEDOUT',
+  'ECONNRESET',
+  'EADDRINUSE',
+  'ECONNREFUSED',
+  'ENOTFOUND',
+  'ENETUNREACH'
+]
 
 class StatusError extends Error {
   constructor ({ code, message, reason }) {
@@ -55,9 +65,19 @@ function isExpiredError (err) {
   return isResourceExpired(err) || isGone(err)
 }
 
+function isTimeoutError (err) {
+  return err instanceof TimeoutError
+}
+
+function isRetryError (err) {
+  return includes(RETRY_ERROR_CODES, err.code) || isTimeoutError(err)
+}
+
 module.exports = {
   StatusError,
   isResourceExpired,
   isGone,
-  isExpiredError
+  isExpiredError,
+  isTimeoutError,
+  isRetryError
 }

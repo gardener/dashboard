@@ -16,25 +16,13 @@
 
 'use strict'
 
-const util = require('util')
 const delay = require('delay')
 const WebSocket = require('ws')
 const pEvent = require('p-event')
 const moment = require('moment')
-const { includes } = require('lodash')
 const logger = require('../../logger')
-const { getNameFromCallsite } = require('../../utils')
 const ListPager = require('./ListPager')
-const { isExpiredError, StatusError } = require('../ApiErrors')
-
-const RETRY_ERROR_CODES = [
-  'ETIMEDOUT',
-  'ECONNRESET',
-  'EADDRINUSE',
-  'ECONNREFUSED',
-  'ENOTFOUND',
-  'ENETUNREACH'
-]
+const { isExpiredError, isTimeoutError, isRetryError, StatusError } = require('../ApiErrors')
 
 function randomize (duration) {
   return Math.round(duration * (Math.random() + 1.0))
@@ -45,7 +33,11 @@ function getTypeName (apiVersion, kind) {
 }
 
 async function closeOrTerminateSocket (socket, gracePeriodMilliseconds = 1000) {
+  if (!socket || socket.readyState === WebSocket.CLOSED) {
+    return
+  }
   try {
+    socket.close(4006, 'Gracefully closing websocket')
     await pEvent(socket, 'close', { timeout: gracePeriodMilliseconds })
   } catch (err) {
     socket.terminate()
@@ -62,7 +54,6 @@ class Reflector {
     this.heartbeatInterval = moment.duration(30, 'seconds')
     this.heartbeatIntervalId = undefined
     this.minWatchTimeout = moment.duration(50, 'minutes')
-    this.name = getNameFromCallsite(this.constructor.create)
     this.isLastSyncResourceVersionExpired = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
@@ -99,44 +90,27 @@ class Reflector {
     return this.lastSyncResourceVersion
   }
 
-  async stop () {
+  stop () {
     this.stopRequested = true
     const agent = this.listWatcher.agent
     if (agent && typeof agent.destroy === 'function') {
       agent.destroy()
     }
-    await this.close(4001, util.format('Stoping reflector %s from %s', this.expectedTypeName, this.name))
-  }
-
-  async close (code = 4000, reason) {
-    if (this.socket) {
-      switch (this.socket.readyState) {
-        case WebSocket.CONNECTING:
-        case WebSocket.OPEN:
-          this.socket.close(code, reason)
-          await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
-          break
-        case WebSocket.CLOSING:
-          await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
-          break
-        case WebSocket.CLOSED:
-          break
-      }
-    }
+    return closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
   }
 
   async run () {
-    logger.info('Starting reflector %s from %s', this.expectedTypeName, this.name)
+    logger.info('Starting reflector %s', this.expectedTypeName)
     while (!this.stopRequested) {
       try {
         await this.listAndWatch()
       } catch (err) {
-        logger.error('%s: Failed to list and watch %s: %s', this.name, this.expectedTypeName, err)
+        logger.error('Failed to list and watch %s: %s', this.expectedTypeName, err)
       }
       if (this.stopRequested) {
         break
       }
-      logger.info('Restarting reflector %s from %s', this.expectedTypeName, this.name)
+      logger.info('Restarting reflector %s', this.expectedTypeName)
       await delay(randomize(this.period.asMilliseconds()))
     }
   }
@@ -169,11 +143,11 @@ class Reflector {
             resourceVersion: this.relistResourceVersion
           })
         } catch (err) {
-          logger.error('%s: Failed to call full list %s: %s', this.name, this.expectedTypeName, err)
+          logger.error('Failed to call full list %s: %s', this.expectedTypeName, err)
           return
         }
       }
-      logger.error('%s: Failed to call paginated list %s: %s', this.name, this.expectedTypeName, err)
+      logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err)
       return
     }
 
@@ -214,11 +188,14 @@ class Reflector {
             // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
             // So first try to LIST with setting RV to resource version of last observed object.
-            logger.info('%s: watch of %s not opened with: %s', this.name, this.expectedTypeName, err.message)
+            logger.info('Watch of %s not opened with: %s', this.expectedTypeName, err.message)
           } else {
-            logger.error('%s: watch of %s failed with: %s', this.name, this.expectedTypeName, err)
+            logger.error('Watch of %s failed with: %s', this.expectedTypeName, err)
           }
-          if (includes(RETRY_ERROR_CODES, err.code)) {
+          if (isTimeoutError(err)) {
+            await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
+          }
+          if (isRetryError(err)) {
             await delay(randomize(this.period.asMilliseconds()))
             continue
           }
@@ -241,15 +218,15 @@ class Reflector {
             // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
             // So first try to LIST with setting RV to resource version of last observed object.
-            logger.info('%s: watch of %s closed with: %s', this.name, this.expectedTypeName, err.message)
+            logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
           } else {
-            logger.warn('%s: watch of %s ended with: %s', this.name, this.expectedTypeName, err)
+            logger.warn('Watch of %s ended with: %s', this.expectedTypeName, err)
           }
           return
         }
       }
     } finally {
-      await this.close(4002, util.format('Finally closing watch %s', this.expectedTypeName))
+      await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
     }
   }
 
@@ -278,7 +255,7 @@ class Reflector {
   }
 
   async watchHandler (socket) {
-    const start = Date.now()
+    const begin = moment()
     let count = 0
     const asyncIterator = pEvent.iterator(socket, 'message', {
       resolutionEvents: ['close']
@@ -289,7 +266,7 @@ class Reflector {
       try {
         event = JSON.parse(data)
       } catch (err) {
-        logger.error('%s: unable to parse watch event', this.name)
+        logger.error('Unable to parse event for watch %', this.expectedTypeName)
         continue
       }
       const { type, object } = event
@@ -299,7 +276,7 @@ class Reflector {
       const { apiVersion, kind, metadata: { resourceVersion } = {} } = object
       if (apiVersion !== this.apiVersion || kind !== this.kind) {
         const typeName = getTypeName(apiVersion, kind)
-        logger.error('%s: expected %s, but watch event object had %s', this.name, this.expectedTypeName, typeName)
+        logger.error('Expected %s, but watch event object had %s', this.expectedTypeName, typeName)
         continue
       }
       switch (type) {
@@ -315,20 +292,21 @@ class Reflector {
         case 'BOOKMARK':
           break
         default:
-          logger.error('%s: unable to understand watch event %s', this.name, type)
+          logger.error('Unable to understand event %s for watch %s', type, this.expectedTypeName)
       }
       if (resourceVersion) {
         this.lastSyncResourceVersion = resourceVersion
       } else {
-        logger.error('%s: received watch event object without resource version', this.name)
+        logger.error('Received event object without resource version for watch %s', this.expectedTypeName)
       }
     }
-    const watchDuration = Date.now() - start
-    if (watchDuration < 1000 && count === 0) {
-      logger.error('Very short watch: %s: Unexpected watch close - watch lasted less than a second and no items received', this.name)
+    const end = moment()
+    const watchDuration = moment.duration(end.diff(begin))
+    if (watchDuration.asSeconds() < 1000 && count === 0) {
+      logger.error('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName)
       throw new Error('Very short watch')
     }
-    logger.info('%s: Watch close - %s total %d items received', this.name, this.expectedTypeName, count)
+    logger.info('Watch %s closed - total %d items received within ', this.expectedTypeName, count)
   }
 
   static create (listWatcher, store) {

@@ -29,6 +29,11 @@ class Cache {
     this.journalCache = createJournalCache()
   }
 
+  /*
+    In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
+    Be careful when reading information from the cache that an authorization check is done
+    or the information can be considered as not sensitive or public.
+  */
   synchronize (client) {
     if (!this.synchronizationTriggered) {
       client['core.gardener.cloud'].cloudprofiles.syncList(this.cloudprofiles)
@@ -40,19 +45,19 @@ class Cache {
   }
 
   getCloudProfiles () {
-    return _.orderBy(this.cloudprofiles.list(), 'metadata.name')
+    return this.cloudprofiles.list()
   }
 
   getQuotas () {
-    return _.orderBy(this.quotas.list(), ['metadata.namespace', 'metadata.name'])
+    return this.quotas.list()
   }
 
   getSeeds () {
-    return _.orderBy(this.seeds.list(), 'metadata.name')
+    return this.seeds.list()
   }
 
   getProjects () {
-    return _.orderBy(this.projects.list(), 'metadata.name')
+    return this.projects.list()
   }
 
   getJournalCache () {

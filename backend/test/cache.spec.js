@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { orderBy } = require('lodash')
 const cache = require('../lib/cache')
 const { cache: internalCache } = cache
 
@@ -120,10 +121,10 @@ describe('cache', function () {
         expect(syncSeedsSpy).to.be.calledOnce
         expect(syncProjectsSpy).to.be.calledOnce
         expect(cache.synchronizationTriggered).to.be.true
-        expect(cache.getCloudProfiles()).to.eql([a, c])
-        expect(cache.getQuotas()).to.eql([b, c, a])
-        expect(cache.getSeeds()).to.eql([a, b])
-        expect(cache.getProjects()).to.eql([a, b, c, d])
+        expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).to.eql([a, c])
+        expect(orderBy(cache.getQuotas(), 'metadata.uid')).to.eql([a, b, c])
+        expect(orderBy(cache.getSeeds(), 'metadata.uid')).to.eql([a, b])
+        expect(orderBy(cache.getProjects(), 'metadata.uid')).to.eql([a, b, c, d])
       })
     })
 
