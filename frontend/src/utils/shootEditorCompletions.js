@@ -229,7 +229,7 @@ export class ShootEditorCompletions {
       line--
     }
 
-    // token context contains all parrent tokens of `token, except for the token itself
+    // token context contains all parent tokens of `token, except for the token itself
     const tokenPath = flatMap(tokenContext, (pathToken, index, tokenContext) => {
       const isLeafContextToken = pathToken === last(tokenContext)
       switch (pathToken.type) {
