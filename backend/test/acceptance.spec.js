@@ -89,6 +89,10 @@ describe('acceptance', function () {
     require('./acceptance/healthz.spec.js')(context)
   })
 
+  describe('openapi', function () {
+    require('./acceptance/openapi.spec.js')(context)
+  })
+
   describe('security', function () {
     require('./acceptance/security.spec.js')(context)
   })

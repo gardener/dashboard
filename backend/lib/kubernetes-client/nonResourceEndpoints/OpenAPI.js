@@ -16,16 +16,17 @@
 
 'use strict'
 
-const Healthz = require('./Healthz')
-const OpenAPI = require('./OpenAPI')
+const HttpClient = require('../HttpClient')
+const { http } = require('../symbols')
 
-function load (options) {
-  return {
-    healthz: new Healthz(options),
-    openapi: new OpenAPI(options)
+class OpenAPI extends HttpClient {
+  constructor (options = {}) {
+    super({ ...options, responseType: 'json' })
+  }
+
+  get () {
+    return this[http.request]('openapi/v2', { method: 'get' })
   }
 }
 
-exports.assign = (object, options = {}) => {
-  return Object.assign(object, load(options))
-}
+module.exports = OpenAPI

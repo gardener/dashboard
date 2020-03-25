@@ -76,6 +76,17 @@ limitations under the License.
         <slot name="toolbarItemsRight"></slot>
       </v-layout>
     </v-flex>
+    <v-tooltip
+      right
+      absolute
+      :value="helpTooltip.visible"
+      :position-x="helpTooltip.posX"
+      :position-y="helpTooltip.posY"
+      max-width="800px"
+      >
+      <span class="font-weight-bold">{{helpTooltip.property}}</span><span class="font-style-italic ml-2">{{helpTooltip.type}}</span><br />
+      <span class="font-wrap">{{helpTooltip.description}}</span>
+    </v-tooltip>
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
@@ -87,20 +98,24 @@ import CopyBtn from '@/components/CopyBtn'
 import GAlert from '@/components/GAlert'
 import { mapState, mapGetters } from 'vuex'
 import { getProjectName } from '@/utils'
+import { getShootSchemaDefinition } from '@/utils/api'
+import { ShootEditorCompletions } from '@/utils/shootEditorCompletions'
 import download from 'downloadjs'
 import { shootItem } from '@/mixins/shootItem'
 
 // codemirror
 import CodeMirror from 'codemirror'
+import 'codemirror/addon/hint/show-hint.js'
+import 'codemirror/addon/hint/show-hint.css'
 import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/lib/codemirror.css'
 
 // lodash
-import isEqual from 'lodash/isEqual'
 import get from 'lodash/get'
 import pick from 'lodash/pick'
 import cloneDeep from 'lodash/cloneDeep'
 import assign from 'lodash/assign'
+import isEqual from 'lodash/isEqual'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -149,7 +164,16 @@ export default {
       },
       generation: undefined,
       lineHeight: 21,
-      toolbarHeight: 48
+      toolbarHeight: 48,
+      shootEditorCompletions: undefined,
+      helpTooltip: {
+        visible: false,
+        posX: 0,
+        posY: 0,
+        property: undefined,
+        type: undefined,
+        description: undefined
+      }
     }
   },
   mixins: [shootItem],
@@ -275,7 +299,11 @@ export default {
         },
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
-        }
+        },
+        'Enter': (instance) => {
+          this.shootEditorCompletions.editorEnter(instance)
+        },
+        'Ctrl-Space': 'autocomplete'
       }, this.extraKeys)
       const options = {
         mode: 'text/x-yaml',
@@ -301,6 +329,36 @@ export default {
         this.detailedErrorMessageInternal = undefined
       }
       this.$instance.on('change', onChange)
+
+      CodeMirror.registerHelper('hint', 'yaml', (editor, options) => {
+        options.completeSingle = false
+        if (!this.shootEditorCompletions) {
+          return
+        }
+        return this.shootEditorCompletions.yamlHint(editor)
+      })
+
+      let cmTooltipFnTimerID
+      const cm = this.$instance
+      CodeMirror.on(element, 'mouseover', (e) => {
+        clearTimeout(cmTooltipFnTimerID)
+        this.helpTooltip.visible = false
+        cmTooltipFnTimerID = setTimeout(() => {
+          if (!this.shootEditorCompletions) {
+            return
+          }
+          const tooltip = this.shootEditorCompletions.editorTooltip(e, cm)
+          if (!tooltip) {
+            return
+          }
+          this.helpTooltip.visible = true
+          this.helpTooltip.posX = e.clientX
+          this.helpTooltip.posY = e.clientY
+          this.helpTooltip.property = tooltip.property
+          this.helpTooltip.type = tooltip.type
+          this.helpTooltip.description = tooltip.description
+        }, 200)
+      })
     },
     destroyInstance () {
       if (this.$instance) {
@@ -359,10 +417,14 @@ export default {
       this.snackbar = true
     }
   },
-  mounted () {
+  async mounted () {
     this.createInstance(this.$refs.container)
     this.update(this.value)
     this.refresh()
+
+    const shootSchemaDefinition = await getShootSchemaDefinition()
+    const shootProperties = get(shootSchemaDefinition, 'properties', {})
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
   },
   watch: {
     canPatchShoots (value) {
@@ -403,4 +465,49 @@ export default {
      background: embedurl('../assets/tab.png')
      background-position: right
      background-repeat: no-repeat
+  .font-style-italic {
+    font-style: italic;
+  }
+
+  .font-wrap {
+    white-space: pre-wrap;
+  }
+
+</style>
+<style lang="styl">
+  @import '~vuetify/src/stylus/settings/_colors.styl';
+
+  .CodeMirror-hint {
+
+    .ghint-type  {
+      color: #000;
+
+      .property {
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .type {
+        font-style: italic;
+        padding-left: 10px;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .CodeMirror-hint .ghint-desc  {
+    white-space: pre-wrap;
+    max-width: 800px;
+    padding: 10px;
+
+    .description {
+      font-family: Roboto, sans-serif;
+      font-size: 13px;
+      color: $grey.darken-3;
+    }
+  }
+
+  .CodeMirror-hint-active {
+    background-color: $grey.lighten-4 !important;
+  }
+
 </style>
