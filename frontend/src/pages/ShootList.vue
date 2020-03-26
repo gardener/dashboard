@@ -274,10 +274,10 @@ export default {
     hideNotAvailableColumns () {
       for (const header of this.allHeaders) {
         if (header.value === 'journalLabels') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
+          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
         }
         if (header.value === 'journal') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
+          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
         }
         if (header.value === 'actions') {
           this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
@@ -285,9 +285,7 @@ export default {
       }
     },
     hideHeaderIfNotValue (header, value) {
-      if (!value) {
-        header.hidden = true
-      }
+      header.hidden = !value
     },
     toggleFilter (key) {
       if (this.showOnlyShootsWithIssues) {
