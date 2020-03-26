@@ -175,7 +175,7 @@ export default {
         statusTitle.push('Hibernated')
       }
       if (this.reconciliationDeactivated) {
-        statusTitle.push('Hibernated')
+        statusTitle.push('Reconciliation Deactivated')
       } else {
         statusTitle.push(`${this.operationType} ${this.operationState}`)
       }
