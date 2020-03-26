@@ -39,6 +39,16 @@ class StatusError extends Error {
   }
 }
 
+class CacheExpiredError extends Error {
+  constructor (message) {
+    super(message)
+    this.name = this.constructor.name
+    this.code = 410
+    this.reason = 'Expired'
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
+
 function getValue (err, key) {
   if (err instanceof StatusError) {
     return get(err, key)
@@ -69,15 +79,26 @@ function isTimeoutError (err) {
   return err instanceof TimeoutError
 }
 
+function isTooLargeResourceVersionError (err) {
+  return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
+}
+
 function isRetryError (err) {
   return includes(RETRY_ERROR_CODES, err.code) || isTimeoutError(err)
 }
 
+function getRetryAfterSeconds (err) {
+  return get(err, 'details.retryAfterSeconds')
+}
+
 module.exports = {
   StatusError,
+  CacheExpiredError,
   isResourceExpired,
   isGone,
   isExpiredError,
   isTimeoutError,
-  isRetryError
+  isTooLargeResourceVersionError,
+  isRetryError,
+  getRetryAfterSeconds
 }

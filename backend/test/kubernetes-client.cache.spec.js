@@ -422,15 +422,23 @@ describe('kubernetes-client', function () {
             }
           })
           watchStub.onCall(0).callsFake(() => {
-            process.nextTick(() => socket.emit('error', connectionRefusedError))
+            process.nextTick(() => {
+              socket.emit('error', connectionRefusedError)
+            })
             return socket
           })
           watchStub.onCall(1).callsFake(() => {
-            process.nextTick(() => socket.emit('error', expiredError))
+            process.nextTick(() => {
+              socket.readyState = 1
+              socket.emit('error', expiredError)
+            })
             return socket
           })
           closeStub.callsFake(() => {
-            process.nextTick(() => socket.emit('close'))
+            process.nextTick(() => {
+              socket.readyState = 3
+              socket.emit('close')
+            })
           })
           await reflector.listAndWatch()
           expect(createPagerStub).to.be.calledOnce
@@ -445,7 +453,7 @@ describe('kubernetes-client', function () {
           expect(watchOptions.allowWatchBookmarks).to.be.true
           expect(watchOptions.timeoutSeconds).to.be.within(30, 60)
           expect(watchOptions.resourceVersion).to.equal('2')
-          expect(closeStub).to.be.calledOnce
+          expect(closeStub).to.be.calledTwice
           expect(store.listKeys()).to.eql(['a', 'b'])
         })
 

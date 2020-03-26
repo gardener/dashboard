@@ -22,7 +22,13 @@ const pEvent = require('p-event')
 const moment = require('moment')
 const logger = require('../../logger')
 const ListPager = require('./ListPager')
-const { isExpiredError, isTimeoutError, isRetryError, StatusError } = require('../ApiErrors')
+const {
+  isExpiredError,
+  isRetryError,
+  isTooLargeResourceVersionError,
+  getRetryAfterSeconds,
+  StatusError
+} = require('../ApiErrors')
 
 function randomize (duration) {
   return Math.round(duration * (Math.random() + 1.0))
@@ -173,8 +179,8 @@ class Reflector {
     this.isLastSyncResourceVersionExpired = false
     this.store.replace(list.items)
     this.lastSyncResourceVersion = resourceVersion
-    try {
-      while (!this.stopRequested) {
+    while (!this.stopRequested) {
+      try {
         const options = {
           allowWatchBookmarks: true,
           timeoutSeconds: randomize(this.minWatchTimeout.asSeconds()),
@@ -191,9 +197,6 @@ class Reflector {
             logger.info('Watch of %s not opened with: %s', this.expectedTypeName, err.message)
           } else {
             logger.error('Watch of %s failed with: %s', this.expectedTypeName, err)
-          }
-          if (isTimeoutError(err)) {
-            await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
           }
           if (isRetryError(err)) {
             await delay(randomize(this.period.asMilliseconds()))
@@ -214,6 +217,14 @@ class Reflector {
         try {
           await this.watchHandler(this.socket)
         } catch (err) {
+          if (isTooLargeResourceVersionError(err)) {
+            logger.info('Watch of %s not opened with: %s', this.expectedTypeName, err.message)
+            const retryAfterSeconds = getRetryAfterSeconds(err)
+            if (retryAfterSeconds) {
+              await delay(randomize(retryAfterSeconds * 1000))
+            }
+            continue
+          }
           if (isExpiredError(err)) {
             // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
@@ -224,9 +235,9 @@ class Reflector {
           }
           return
         }
+      } finally {
+        await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
       }
-    } finally {
-      await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
     }
   }
 

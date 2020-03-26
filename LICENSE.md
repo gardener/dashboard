@@ -224,9 +224,10 @@ Copyright (c) 2012 Cloud9 IDE, Inc. (Mike de Boer)\
 Copyright (c) 2017-2018 Octokit contributors\
 [MIT License](https://github.com/octokit/rest.js/blob/master/LICENSE)
 
-- [@panva/jose](https://github.com/panva/jose)\
-Copyright (c) 2018 Filip Skokan\
-[MIT License](https://github.com/panva/jose/blob/master/LICENSE.md)
+- [agentkeepalive](https://github.com/node-modules/agentkeepalive)\
+Copyright(c) node-modules and other contributors.\
+Copyright(c) 2012 - 2015 fengmk2 <fengmk2@gmail.com>\
+[MIT License](https://github.com/node-modules/agentkeepalive/blob/master/LICENSE)
 
 - [base64url](https://github.com/brianloveswords/base64url)\
 Copyright (c) 2013–2016 Brian J. Brennan\
@@ -275,6 +276,10 @@ Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)\
 - [helmet](https://github.com/helmetjs/helmet)\
 Copyright (c) 2012-2018 Evan Hahn, Adam Baldwin\
 [MIT License](https://github.com/helmetjs/helmet/blob/master/LICENSE)
+
+- [jose](https://github.com/panva/jose)\
+Copyright (c) 2018 Filip Skokan\
+[MIT License](https://github.com/panva/jose/blob/master/LICENSE.md)
 
 - [js-yaml](https://github.com/nodeca/js-yaml)\
 Copyright (C) 2011-2015 by Vitaly Puzrin\

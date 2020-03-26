@@ -17,6 +17,7 @@
 const _ = require('lodash')
 const { HTTPError } = require('got')
 const { Store } = require('../kubernetes-client/cache')
+const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
 const createJournalCache = require('./journals')
 
 class Cache {
@@ -44,20 +45,27 @@ class Cache {
     }
   }
 
+  list (key) {
+    if (!this[key].isSynchronized) {
+      throw new CacheExpiredError(`Synchronization of "${key}" failed`)
+    }
+    return this[key].list()
+  }
+
   getCloudProfiles () {
-    return this.cloudprofiles.list()
+    return this.list('cloudprofiles')
   }
 
   getQuotas () {
-    return this.quotas.list()
+    return this.list('quotas')
   }
 
   getSeeds () {
-    return this.seeds.list()
+    return this.list('seeds')
   }
 
   getProjects () {
-    return this.projects.list()
+    return this.list('projects')
   }
 
   getJournalCache () {

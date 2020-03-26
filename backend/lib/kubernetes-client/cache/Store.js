@@ -41,10 +41,11 @@ class Store extends EventEmitter {
   }
 
   get isSynchronized () {
-    return this[synchronized]
+    return this[synchronized] !== false
   }
 
   synchronizing () {
+    this[synchronized] = undefined
     this[timeoutId] = setTimeout(() => {
       this[synchronized] = false
       this.emit('stale')

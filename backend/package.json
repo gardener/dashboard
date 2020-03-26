@@ -54,7 +54,6 @@
     "swagger-parser": "^8.0.1",
     "semver": "^7.1.2",
     "socket.io": "^2.3.0",
-    "stack-utils": "^2.0.1",
     "uuid": "^3.3.2",
     "ws": "^7.0.1",
     "x509.js": "^1.0.0"
