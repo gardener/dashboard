@@ -17,7 +17,7 @@
 'use strict'
 
 const { Server } = require('http')
-const pEvent = require('p-event')
+const delay = require('delay')
 const createServer = require('../lib/server')
 
 function createApplication (port) {
@@ -62,6 +62,7 @@ function createApplication (port) {
       case 'synchronizer':
         return () => {
           app.synchronizing = true
+          return delay(1)
         }
     }
   }
@@ -78,10 +79,10 @@ describe('server', function () {
     expect(server).to.be.instanceof(Server)
     expect(server).to.equal(app.io.server)
     try {
-      server.startListening()
+      await server.startListening()
       expect(app.synchronizing).to.be.true
-      await pEvent(server, 'listening', { timeout: 1000 })
-      expect(app.log[0]).to.eql(['info', `Server listening on port ${port}`])
+      expect(app.log[0].slice(0, 2)).to.eql(['info', 'Initial cache synchronization succeeded after %s'])
+      expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
     } finally {
       server.close()
     }

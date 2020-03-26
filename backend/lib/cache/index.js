@@ -16,6 +16,7 @@
 
 const _ = require('lodash')
 const { HTTPError } = require('got')
+const pEvent = require('p-event')
 const { Store } = require('../kubernetes-client/cache')
 const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
 const createJournalCache = require('./journals')
@@ -37,17 +38,28 @@ class Cache {
   */
   synchronize (client) {
     if (!this.synchronizationTriggered) {
-      client['core.gardener.cloud'].cloudprofiles.syncList(this.cloudprofiles)
-      client['core.gardener.cloud'].quotas.syncListAllNamespaces(this.quotas)
-      client['core.gardener.cloud'].seeds.syncList(this.seeds)
-      client['core.gardener.cloud'].projects.syncList(this.projects)
       this.synchronizationTriggered = true
+      return Promise.all(_
+        .chain(['cloudprofiles', 'quotas', 'seeds', 'projects'])
+        .map(async key => {
+          const store = this[key]
+          const cachable = client['core.gardener.cloud'][key]
+          const scope = cachable.constructor.scope
+          // eslint-disable-next-line no-unused-vars
+          const reflector = scope === 'Cluster'
+            ? cachable.syncList(store)
+            : cachable.syncListAllNamespaces(store)
+          return pEvent(store, 'replaced', {
+            rejectionEvents: ['stale']
+          })
+        })
+        .value())
     }
   }
 
   list (key) {
     if (!this[key].isSynchronized) {
-      throw new CacheExpiredError(`Synchronization of "${key}" failed`)
+      throw new CacheExpiredError(`The "${key}" service is currently not available. Please try again later.`)
     }
     return this[key].list()
   }

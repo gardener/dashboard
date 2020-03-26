@@ -17,6 +17,8 @@
 'use strict'
 
 const http = require('http')
+const moment = require('moment')
+const pTimeout = require('p-timeout')
 const delay = require('delay')
 const terminus = require('@godaddy/terminus')
 
@@ -65,13 +67,18 @@ module.exports = function createServer (app) {
     }
   })
 
-  function onListening () {
-    logger.info(`Server listening on port ${port}`)
-  }
-
-  server.startListening = () => {
-    synchronizer()
-    server.listen(port, onListening)
+  server.startListening = async () => {
+    const begin = moment()
+    try {
+      await pTimeout(synchronizer(), 5 * 1000)
+      const end = moment()
+      const synchronizationDuration = moment.duration(end.diff(begin))
+      logger.info('Initial cache synchronization succeeded after %s', synchronizationDuration.humanize())
+    } catch (err) {
+      logger.error('Initial cache synchronization timed out with: %s', err.message)
+    }
+    await new Promise(resolve => server.listen(port, resolve))
+    logger.info('Server listening on port %d', port)
   }
   return server
 }

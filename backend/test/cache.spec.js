@@ -31,27 +31,48 @@ describe('cache', function () {
 
   const list = [a, b, c, d]
 
-  const gardenerCore = {
-    cloudprofiles: {
-      syncList (store) {
-        store.replace([c, a])
-      }
-    },
-    quotas: {
-      syncListAllNamespaces (store) {
-        store.replace([c, a, b])
-      }
-    },
-    seeds: {
-      syncList (store) {
-        store.replace([b, a])
-      }
-    },
-    projects: {
-      syncList (store) {
-        store.replace([a, c, d, b])
-      }
+  function replace (store, items) {
+    return new Promise(resolve => {
+      process.nextTick(() => {
+        store.replace(items)
+        resolve()
+      })
+    })
+  }
+
+  class CloudProfile {
+    syncList (store) {
+      return replace(store, [a, c])
     }
+  }
+  CloudProfile.scope = 'Cluster'
+
+  class Quota {
+    syncListAllNamespaces (store) {
+      return replace(store, [a, b, c])
+    }
+  }
+  Quota.scope = 'Namespaced'
+
+  class Seed {
+    syncList (store) {
+      return replace(store, [a, b])
+    }
+  }
+  Seed.scope = 'Cluster'
+
+  class Project {
+    syncList (store) {
+      return replace(store, [a, b, c, d])
+    }
+  }
+  Project.scope = 'Cluster'
+
+  const gardenerCore = {
+    cloudprofiles: new CloudProfile(),
+    quotas: new Quota(),
+    seeds: new Seed(),
+    projects: new Project()
   }
 
   const testClient = {
@@ -100,7 +121,7 @@ describe('cache', function () {
       cache = new Cache()
     })
 
-    describe('#synchronize', function () {
+    describe('#synchronize', async function () {
       let syncCloudprofilesSpy
       let syncQuotasSpy
       let syncSeedsSpy
@@ -113,9 +134,9 @@ describe('cache', function () {
         syncProjectsSpy = sandbox.spy(gardenerCore.projects, 'syncList')
       })
 
-      it('should syncronize the cache', function () {
+      it('should syncronize the cache', async function () {
         expect(cache.synchronizationTriggered).to.be.false
-        cache.synchronize(testClient)
+        await cache.synchronize(testClient)
         expect(syncCloudprofilesSpy).to.be.calledOnce
         expect(syncQuotasSpy).to.be.calledOnce
         expect(syncSeedsSpy).to.be.calledOnce

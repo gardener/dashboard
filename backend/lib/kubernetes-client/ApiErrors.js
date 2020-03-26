@@ -79,6 +79,13 @@ function isTimeoutError (err) {
   return err instanceof TimeoutError
 }
 
+/*
+  In case of multiple apiserver instances the largest resourceVersion of watch caches
+  will not be in sync anymore. This could lead to situations where we try to start a watch
+  with a resourceVersion that is higher than the largest resourceVersion of particular watch cache.
+  The apiserver will throw a TooLargeResourceVersionError in this case.
+  https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go#L338-L344
+*/
 function isTooLargeResourceVersionError (err) {
   return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
 }
@@ -88,7 +95,7 @@ function isRetryError (err) {
 }
 
 function getRetryAfterSeconds (err) {
-  return get(err, 'details.retryAfterSeconds')
+  return get(err, 'details.retryAfterSeconds', 1)
 }
 
 module.exports = {

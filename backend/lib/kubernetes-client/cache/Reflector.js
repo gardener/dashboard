@@ -219,10 +219,7 @@ class Reflector {
         } catch (err) {
           if (isTooLargeResourceVersionError(err)) {
             logger.info('Watch of %s not opened with: %s', this.expectedTypeName, err.message)
-            const retryAfterSeconds = getRetryAfterSeconds(err)
-            if (retryAfterSeconds) {
-              await delay(randomize(retryAfterSeconds * 1000))
-            }
+            await delay(randomize(getRetryAfterSeconds(err) * 1000))
             continue
           }
           if (isExpiredError(err)) {
@@ -317,7 +314,7 @@ class Reflector {
       logger.error('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName)
       throw new Error('Very short watch')
     }
-    logger.info('Watch %s closed - total %d items received within ', this.expectedTypeName, count)
+    logger.info('Watch %s closed - total %d items received within %s', this.expectedTypeName, count, watchDuration.humanize())
   }
 
   static create (listWatcher, store) {

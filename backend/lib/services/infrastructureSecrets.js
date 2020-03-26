@@ -25,7 +25,7 @@ const cloudprofiles = require('./cloudprofiles')
 const shoots = require('./shoots')
 const { getQuotas, findProjectByNamespace } = require('../cache')
 
-function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject = false }) {
+function fromResource ({ secretBinding, cloudProviderKind, secret, quotas = [], projectName, hasCostObject }) {
   const cloudProfileName = secretBinding.metadata.labels['cloudprofile.garden.sapcloud.io/name']
 
   const infrastructureSecret = {}

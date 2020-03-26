@@ -24,13 +24,18 @@ const timeout = Symbol('timeout')
 const keyPath = Symbol('keyPath')
 const keyFunc = Symbol('keyFunc')
 const timeoutId = Symbol('timeoutId')
-const synchronized = Symbol('synchronized')
+const synchronizationState = Symbol('synchronizationState')
+
+const INITIAL = 'initial'
+const SYNCHRONIZED = 'synchronized'
+const SYNCHRONIZING = 'synchronizing'
+const STALE = 'stale'
 
 class Store extends EventEmitter {
   constructor (map, options = {}) {
     super()
     this[store] = map || new Map()
-    this[synchronized] = false
+    this[synchronizationState] = INITIAL
     this[timeoutId] = undefined
     this[timeout] = get(options, 'timeout', 30000)
     this[keyPath] = get(options, 'keyPath', 'metadata.uid')
@@ -41,13 +46,13 @@ class Store extends EventEmitter {
   }
 
   get isSynchronized () {
-    return this[synchronized] !== false
+    return this[synchronizationState] === SYNCHRONIZED || this[synchronizationState] === SYNCHRONIZING
   }
 
   synchronizing () {
-    this[synchronized] = undefined
+    this[synchronizationState] = SYNCHRONIZING
     this[timeoutId] = setTimeout(() => {
-      this[synchronized] = false
+      this[synchronizationState] = STALE
       this.emit('stale')
     }, this[timeout])
   }
@@ -108,7 +113,7 @@ class Store extends EventEmitter {
       this[store].set(key, object)
     }
     clearTimeout(this[timeoutId])
-    this[synchronized] = true
+    this[synchronizationState] = SYNCHRONIZED
     this.emit('replaced')
   }
 }
