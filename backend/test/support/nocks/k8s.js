@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const nock = require('nock')
 const yaml = require('js-yaml')
-const { encodeBase64, getSeedNameFromShoot } = require('../../../lib/utils')
+const { encodeBase64, getSeedNameFromShoot, toOneMemberRoleArray, toMemberRoleRolesArrays } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
 const { url, auth } = require('../../../lib/kubernetes-config').load()
@@ -325,7 +325,7 @@ function getProjectMembers (project) {
   return _
     .chain(project)
     .get('spec.members')
-    .map(({ name: username, role, roles }) => ({ username, roles: roles ? [role, ...roles] : [role] }))
+    .map(({ name: username, role, roles }) => ({ username, roles: toOneMemberRoleArray(role, roles) }))
     .value()
 }
 
@@ -350,8 +350,7 @@ function getUser (member) {
     name
   }
   if (member.roles) {
-    const roles = member.roles.slice()
-    const role = roles.shift()
+    const { role, roles } = toMemberRoleRolesArrays(member.roles)
     _.assign(user, { role, roles })
   }
   return user

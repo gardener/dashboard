@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64 } = require('../utils')
+const { decodeBase64, toOneMemberRoleArray, toMemberRoleRolesArrays } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
@@ -46,7 +46,7 @@ function fromResource (project = {}, serviceAccounts = []) {
     .filter(['kind', 'User'])
     .map(({ name: username, role, roles }) => ({
       username,
-      roles: roles ? [role, ...roles] : [role],
+      roles: toOneMemberRoleArray(role, roles),
       ...serviceAccountsMetadata[username]
     }))
     .value()
@@ -76,15 +76,15 @@ async function deleteServiceaccount (client, { namespace, name }) {
   }
 }
 
-async function setProjectMember (client, { namespace, name, roles }) {
+async function setProjectMember (client, { namespace, name, roles: memberRoles }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members = _.slice(project.spec.members, 0)
+  const members = [...project.spec.members]
   if (_.find(members, ['name', name])) {
     throw new Conflict(`User '${name}' is already member of this project`)
   }
-  const role = roles.shift()
+  const { role, roles } = toMemberRoleRolesArrays(memberRoles)
   members.push({
     kind: 'User',
     name,
@@ -100,16 +100,16 @@ async function setProjectMember (client, { namespace, name, roles }) {
   return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
-async function updateProjectMemberRoles (client, { namespace, name, roles }) {
+async function updateProjectMemberRoles (client, { namespace, name, roles: memberRoles }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members = _.slice(project.spec.members, 0)
+  const members = [...project.spec.members]
   const member = _.find(members, ['name', name])
   if (!member) {
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
-  const role = roles.shift()
+  const { role, roles } = toMemberRoleRolesArrays(memberRoles)
   _.assign(member, { role, roles })
 
   const body = {
@@ -124,7 +124,7 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members = _.slice(project.spec.members, 0)
+  const members =  [...project.spec.members]
   if (!_.find(members, ['name', name])) {
     return project
   }
@@ -173,9 +173,9 @@ exports.get = async function ({ user, namespace, name }) {
     const caData = secret.data['ca.crt']
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
-    member.kind = 'ServiceAccount'
-    member.roles = member.roles ? [member.role, ...member.roles] : [member.role]
-    member.kubeconfig = dumpKubeconfig({
+
+    const kind = 'ServiceAccount'
+    const kubeconfig = dumpKubeconfig({
       user: serviceAccountName,
       context: contextName,
       cluster: clusterName,
@@ -184,6 +184,12 @@ exports.get = async function ({ user, namespace, name }) {
       server,
       caData
     })
+
+    return {
+      ...member,
+      kind,
+      kubeconfig
+    }
   }
   return member
 }

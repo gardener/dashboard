@@ -186,7 +186,7 @@ export default {
         validationErrors.internalName = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
-          unique: `Service Account '${serviceAccountToDisplayName(this.internalName)}' already exists. Please try a different name.`
+          unique: `Service Account '${this.internalName}' already exists. Please try a different name.`
         }
       }
       return validationErrors
@@ -295,7 +295,7 @@ export default {
             if (this.isUserDialog) {
               this.errorMessage = `User '${name}' is already member of this project.`
             } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${serviceAccountToDisplayName(name)}' already exists. Please try a different name.`
+              this.errorMessage = `Service account '${name}' already exists. Please try a different name.`
             }
           } else {
             this.errorMessage = 'Failed to add project member'
@@ -328,12 +328,18 @@ export default {
     reset () {
       this.$v.$reset()
 
-      if (this.name) {
-        this.internalName = this.name
-      } else if (this.isUserDialog) {
-        this.internalName = defaultUsername
+      if (this.isUserDialog) {
+        if (this.name) {
+          this.internalName = this.name
+        } else {
+          this.internalName = defaultUsername
+        }
       } else if (this.isServiceDialog) {
-        this.internalName = this.defaultServiceName()
+        if (this.name) {
+          this.internalName = serviceAccountToDisplayName(this.name)
+        } else {
+          this.internalName = this.defaultServiceName()
+        }
       }
 
       if (this.roles) {
