@@ -629,7 +629,7 @@ export function allErrorCodesFromLastErrors (lastErrors) {
   return uniq(compact(flatMap(lastErrors, 'codes')))
 }
 
-export const allMemberRoles = [
+export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'admin',
     displayName: 'Admin'

@@ -54,7 +54,7 @@ limitations under the License.
       </v-list-tile-content>
       <v-list-tile-action>
         <v-layout row align-center>
-          <v-chip v-for="(roleName, index) in roleNames" :key="index" small color="blue-grey darken-2" text-color="white">
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="blue-grey darken-2" text-color="white">
             {{roleName}}
           </v-chip>
         </v-layout>
@@ -77,7 +77,7 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="blue-grey--text text--darken-2" @click.native.stop="onEdit">
+          <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onEdit">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
           <span>Update Service Account</span>
@@ -137,7 +137,7 @@ export default {
       type: Array,
       required: true
     },
-    roleNames: {
+    roleDisplayNames: {
       type: Array,
       required: true
     }
@@ -158,10 +158,10 @@ export default {
     }
   },
   methods: {
-    async onDownload () {
+    onDownload () {
       this.$emit('download', this.username)
     },
-    async onKubeconfig () {
+    onKubeconfig () {
       this.$emit('kubeconfig', this.username)
     },
     onEdit (username) {

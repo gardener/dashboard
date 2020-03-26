@@ -26,38 +26,31 @@ const getters = {}
 
 // actions
 const actions = {
-  getAll: ({ commit, rootState }) => {
+  async getAll ({ commit, rootState }) {
     const namespace = rootState.namespace
-    return getMembers({ namespace })
-      .then(res => {
-        commit('RECEIVE', res.data)
-        return state.all
-      })
-      .catch(error => {
-        commit('CLEAR')
-        throw error
-      })
+    try {
+      const res = await getMembers({ namespace })
+      commit('RECEIVE', res.data)
+      return state.all
+    } catch (error) {
+      commit('CLEAR')
+      throw error
+    }
   },
-  add: ({ commit, rootState }, data) => {
+  async add ({ commit, rootState }, data) {
     const namespace = rootState.namespace
-    return addMember({ namespace, data })
-      .then(res => {
-        commit('RECEIVE', res.data)
-      })
+    const res = await addMember({ namespace, data })
+    commit('RECEIVE', res.data)
   },
-  update: ({ commit, rootState }, { name, roles }) => {
+  async update ({ commit, rootState }, { name, roles }) {
     const namespace = rootState.namespace
-    return updateMember({ namespace, name, data: { roles } })
-      .then(res => {
-        commit('RECEIVE', res.data)
-      })
+    const res = await updateMember({ namespace, name, data: { roles } })
+    commit('RECEIVE', res.data)
   },
-  delete: ({ commit, rootState }, name) => {
+  async delete ({ commit, rootState }, name) {
     const namespace = rootState.namespace
-    return deleteMember({ namespace, name })
-      .then(res => {
-        commit('RECEIVE', res.data)
-      })
+    const res = await deleteMember({ namespace, name })
+    commit('RECEIVE', res.data)
   }
 }
 

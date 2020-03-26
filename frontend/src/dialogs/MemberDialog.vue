@@ -35,11 +35,11 @@ limitations under the License.
               <v-text-field
                 :disabled="isUpdateDialog"
                 :color="color"
-                ref="name"
+                ref="internalName"
                 :label="nameLabel"
-                v-model.trim="name"
-                :error-messages="getErrorMessages('name')"
-                @input="$v.name.$touch()"
+                v-model.trim="internalName"
+                :error-messages="getErrorMessages('internalName')"
+                @input="$v.internalName.$touch()"
                 @keyup.enter="submitAddMember()"
                 :hint="nameHint"
                 persistent-hint
@@ -50,17 +50,17 @@ limitations under the License.
               <v-select
                 :color="color"
                 label="Roles"
-                :items="allMemberRoles"
+                :items="roleItems"
                 multiple
                 small-chips
                 item-text="displayName"
                 item-value="name"
-                v-model="roles"
-                :error-messages="getErrorMessages('roles')"
-                @input="$v.roles.$touch()"
+                v-model="internalRoles"
+                :error-messages="getErrorMessages('internalRoles')"
+                @input="$v.internalRoles.$touch()"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small :color="color" text-color="white" close @input="roles.splice(index, 1); $v.roles.$touch()">
+                  <v-chip small :color="color" text-color="white" close @input="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
                     <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>
@@ -87,10 +87,9 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors, allMemberRoles } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
-import compact from 'lodash/compact'
 import includes from 'lodash/includes'
 
 const defaultUsername = ''
@@ -111,17 +110,17 @@ export default {
       type: String,
       required: true
     },
-    currentName: {
+    name: {
       type: String
     },
-    currentRoles: {
+    roles: {
       type: Array
     }
   },
   data () {
     return {
-      name: undefined,
-      roles: undefined,
+      internalName: undefined,
+      internalRoles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -151,19 +150,19 @@ export default {
     },
     validators () {
       const validators = {
-        roles: {
+        internalRoles: {
           required
         },
-        name: {}
+        internalName: {}
       }
       if (!this.isUpdateDialog) {
         if (this.isUserDialog) {
-          validators.name = {
+          validators.internalName = {
             required,
             unique: unique('projectUserNames')
           }
         } else if (this.isServiceDialog) {
-          validators.name = {
+          validators.internalName = {
             required,
             resourceName,
             unique: unique('serviceAccountNames')
@@ -174,20 +173,20 @@ export default {
     },
     validationErrors () {
       const validationErrors = {
-        roles: {
+        internalRoles: {
           required: 'You need to configure roles'
         }
       }
       if (this.isUserDialog) {
-        validationErrors.name = {
+        validationErrors.internalName = {
           required: 'User is required',
-          unique: `User '${this.name}' is already member of this project.`
+          unique: `User '${this.internalName}' is already member of this project.`
         }
       } else if (this.isServiceDialog) {
-        validationErrors.name = {
+        validationErrors.internalName = {
           required: 'Service Account is required',
           resourceName: 'Must contain only alphanumeric characters or hypen',
-          unique: `Service Account '${serviceAccountToDisplayName(this.name)}' already exists. Please try a different name.`
+          unique: `Service Account '${serviceAccountToDisplayName(this.internalName)}' already exists. Please try a different name.`
         }
       }
       return validationErrors
@@ -202,14 +201,10 @@ export default {
       return this.type === 'updateuser' || this.type === 'updateservice'
     },
     textField () {
-      return this.$refs.name
+      return this.$refs.internalName
     },
-    allMemberRoles () {
-      return compact(map(allMemberRoles, role => {
-        if (role.hidden !== true) {
-          return role
-        }
-      }))
+    roleItems () {
+      return filter(MEMBER_ROLE_DESCRIPTORS, role => role.hidden !== true)
     },
     color () {
       if (this.isUserDialog) {
@@ -265,7 +260,7 @@ export default {
       return map(users, 'username')
     },
     memberName () {
-      const name = toLower(this.name)
+      const name = toLower(this.internalName)
       if (this.isUserDialog) {
         return name
       }
@@ -291,16 +286,16 @@ export default {
       if (this.valid) {
         try {
           const name = this.memberName
-          const roles = this.roles
+          const roles = this.internalRoles
           await this.addMember({ name, roles })
           this.hide()
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
           if (isConflict(err)) {
             if (this.isUserDialog) {
-              this.errorMessage = `User '${this.name}' is already member of this project.`
+              this.errorMessage = `User '${name}' is already member of this project.`
             } else if (this.isServiceDialog) {
-              this.errorMessage = `Service account '${serviceAccountToDisplayName(this.name)}' already exists. Please try a different name.`
+              this.errorMessage = `Service account '${serviceAccountToDisplayName(name)}' already exists. Please try a different name.`
             }
           } else {
             this.errorMessage = 'Failed to add project member'
@@ -315,7 +310,7 @@ export default {
       if (this.valid) {
         try {
           const name = this.memberName
-          const roles = this.roles
+          const roles = this.internalRoles
           await this.updateMember({ name, roles })
           this.hide()
         } catch (err) {
@@ -333,18 +328,18 @@ export default {
     reset () {
       this.$v.$reset()
 
-      if (this.currentName) {
-        this.name = this.currentName
+      if (this.name) {
+        this.internalName = this.name
       } else if (this.isUserDialog) {
-        this.name = defaultUsername
+        this.internalName = defaultUsername
       } else if (this.isServiceDialog) {
-        this.name = this.defaultServiceName()
+        this.internalName = this.defaultServiceName()
       }
 
-      if (this.currentRoles) {
-        this.roles = this.currentRoles.slice()
+      if (this.roles) {
+        this.internalRoles = [...this.roles]
       } else {
-        this.roles = [defaultRole]
+        this.internalRoles = [defaultRole]
       }
 
       this.errorMessage = undefined

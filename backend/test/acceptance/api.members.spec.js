@@ -81,9 +81,10 @@ module.exports = function ({ agent, k8s, auth }) {
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
       .send({ metadata, name, roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(_.concat(members, { username: 'baz@example.org', roles: ['admin', 'owner'] }))
+    expect(res.body).to.eql(_.concat(members, { username: name, roles }))
   })
 
   it('should not add member that is already a project member', async function () {
@@ -107,10 +108,11 @@ module.exports = function ({ agent, k8s, auth }) {
       .put(`/api/namespaces/${namespace}/members/${name}`)
       .set('cookie', await user.cookie)
       .send({ metadata, roles })
+
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    const member = _.find(res.body, { username: 'bar@example.org' })
-    expect(member).to.eql({ username: 'bar@example.org', roles: ['newRole'] })
+    const member = _.find(res.body, { username: name })
+    expect(member).to.eql({ username: name, roles })
   })
 
   it('should delete a project member', async function () {

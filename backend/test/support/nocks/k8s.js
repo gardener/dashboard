@@ -1451,24 +1451,24 @@ const stub = {
         const incomplete = false
         if (_.endsWith(payload.id, 'example.org')) {
           resourceRules = resourceRules.concat([{
-            verbs: ['get'],
-            apiGroups: ['core.gardener.cloud'],
-            resources: ['projects'],
-            resourceName: ['foo']
-          },
-          {
-            verbs: ['create'],
-            apiGroups: ['core.gardener.cloud'],
-            resources: ['projects']
-          }
+              verbs: ['get'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects'],
+              resourceName: ['foo']
+            },
+            {
+              verbs: ['create'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects']
+            }
           ])
         } else {
           resourceRules = resourceRules.concat([{
-            verbs: ['get'],
-            apiGroups: ['core.gardener.cloud'],
-            resources: ['projects'],
-            resourceName: ['foo']
-          }
+              verbs: ['get'],
+              apiGroups: ['core.gardener.cloud'],
+              resources: ['projects'],
+              resourceName: ['foo']
+            }
           ])
         }
         return {

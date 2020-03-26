@@ -89,7 +89,7 @@ limitations under the License.
             :isEmail="user.isEmail"
             :isTechnicalContact="user.isTechnicalContact"
             :roles="user.roles"
-            :roleNames="user.roleNames"
+            :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
             @delete="onDelete"
             @edit="onEditUser"
@@ -141,7 +141,7 @@ limitations under the License.
             :creationTimestamp="serviceAccount.creationTimestamp"
             :created="serviceAccount.created"
             :roles="serviceAccount.roles"
-            :roleNames="serviceAccount.roleNames"
+            :roleDisplayNames="serviceAccount.roleDisplayNames"
             :key="serviceAccount.username"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
@@ -154,8 +154,8 @@ limitations under the License.
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :currentName="updateMemberName" :currentRoles="updateMemberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :currentName="updateMemberName" :currentRoles="updateMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :name="updatedMemberName" :roles="updatedMemberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="updatedMemberName" :roles="updatedMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -172,6 +172,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
     </v-dialog>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
     <v-fab-transition v-if="canPatchProject">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <v-btn slot="activator" v-model="fab" color="teal darken-2" dark fab>
@@ -199,11 +200,11 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
-import compact from 'lodash/compact'
 import find from 'lodash/find'
 import upperFirst from 'lodash/upperFirst'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import CodeBlock from '@/components/CodeBlock'
 import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
@@ -215,7 +216,7 @@ import {
   serviceAccountToDisplayName,
   isServiceAccount,
   getTimestampFormatted,
-  allMemberRoles,
+  MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
 } from '@/utils'
 import { getMember } from '@/utils/api'
@@ -227,7 +228,8 @@ export default {
     MemberHelpDialog,
     CodeBlock,
     ProjectUserRow,
-    ProjectServiceAccountRow
+    ProjectServiceAccountRow,
+    ConfirmDialog
   },
   data () {
     return {
@@ -238,8 +240,8 @@ export default {
       userHelpDialog: false,
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
-      updateMemberName: undefined,
-      updateMemberRoles: undefined,
+      updatedMemberName: undefined,
+      updatedMemberRoles: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -279,7 +281,7 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleNames: compact(map(serviceAccount.roles, this.roleName))
+          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles)
         }
       })
     },
@@ -293,7 +295,7 @@ export default {
           displayName: displayName(username),
           isEmail: isEmail(username),
           isTechnicalContact: this.isTechnicalContact(username),
-          roleNames: compact(map(user.roles, this.roleName))
+          roleDisplayNames: this.sortedRoleDisplayNames(user.roles)
         }
       })
     },
@@ -395,28 +397,44 @@ export default {
         this.kubeconfigDialog = true
       }
     },
-    onDelete (username) {
-      this.deleteMember(username)
+    confirmDelete (username) {
+      const memberName = displayName(username)
+      const projectName = this.projectDetails.projectName
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Member Deletion',
+        messageHtml: `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`,
+        dialogColor: 'red'
+      })
     },
-    onEditUser (username, userroles) {
-      this.updateMemberName = username
-      this.updateMemberRoles = userroles
+    async onDelete (username) {
+      const deletionConfirmed = await this.confirmDelete(username)
+      if (deletionConfirmed) {
+        this.deleteMember(username)
+      }
+    },
+    onEditUser (username, roles) {
+      this.updatedMemberName = username
+      this.updatedMemberRoles = roles
       this.openUserUpdateDialog()
     },
-    onEditServiceAccount (username, userroles) {
-      this.updateMemberName = username
-      this.updateMemberRoles = userroles
+    onEditServiceAccount (username, roles) {
+      this.updatedMemberName = username
+      this.updatedMemberRoles = roles
       this.openServiceAccountUpdateDialog()
     },
-    roleName (role) {
-      const roleObject = find(allMemberRoles, { name: role })
-      if (roleObject) {
-        if (roleObject.hidden) {
-          return undefined
+    sortedRoleDisplayNames (roleNames) {
+      const displayNames = []
+      forEach(roleNames, roleName => {
+        const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
+        if (!roleDescriptor) {
+          displayNames.push(upperFirst(roleName))
         }
-        return roleObject.displayName
-      }
-      return upperFirst(role)
+        if (!roleDescriptor.hidden) {
+          displayNames.push(roleDescriptor.displayName)
+        }
+      })
+      return displayNames.sort()
     }
   },
   mounted () {

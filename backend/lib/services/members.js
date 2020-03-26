@@ -100,7 +100,7 @@ async function setProjectMember (client, { namespace, name, roles }) {
   return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
-async function updateProjectMember (client, { namespace, name, roles }) {
+async function updateProjectMemberRoles (client, { namespace, name, roles }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
@@ -206,11 +206,11 @@ exports.create = async function ({ user, namespace, body: { name, roles } }) {
   return fromResource(project, serviceAccounts)
 }
 
-exports.update = async function ({ user, namespace, name, roles }) {
+exports.update = async function ({ user, namespace, name, body: { roles } }) {
   const client = user.client
 
   // update user in project
-  const project = await updateProjectMember(client, { namespace, name, roles })
+  const project = await updateProjectMemberRoles(client, { namespace, name, roles })
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
   return fromResource(project, serviceAccounts)
 }

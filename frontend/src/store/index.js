@@ -817,29 +817,24 @@ const actions = {
         return res
       })
   },
-  addMember ({ dispatch, commit }, { name, roles }) {
-    return dispatch('members/add', { name, roles })
-      .then(res => {
-        dispatch('setAlert', { message: 'Member added', type: 'success' })
-        return res
-      })
+  async addMember ({ dispatch, commit }, payload) {
+    const result = await dispatch('members/add', payload)
+    await dispatch('setAlert', { message: 'Member added', type: 'success' })
+    return result
   },
-  updateMember ({ dispatch, commit }, { name, roles }) {
-    return dispatch('members/update', { name, roles })
-      .then(res => {
-        dispatch('setAlert', { message: 'Member updated', type: 'success' })
-        return res
-      })
+  async updateMember ({ dispatch, commit }, payload) {
+    const result = await dispatch('members/update', payload)
+    await dispatch('setAlert', { message: 'Member updated', type: 'success' })
+    return result
   },
-  deleteMember ({ dispatch, commit }, name) {
-    return dispatch('members/delete', name)
-      .then(res => {
-        dispatch('setAlert', { message: 'Member deleted', type: 'success' })
-        return res
-      })
-      .catch(err => {
-        dispatch('setError', { message: `Delete member failed. ${err.message}` })
-      })
+  async deleteMember ({ dispatch, commit }, payload) {
+    try {
+      const result = await dispatch('members/delete', payload)
+      await dispatch('setAlert', { message: 'Member deleted', type: 'success' })
+      return result
+    } catch (err) {
+      await dispatch('setError', { message: `Delete member failed. ${err.message}` })
+    }
   },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)

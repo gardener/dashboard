@@ -60,8 +60,8 @@ router.route('/:name')
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
-      const roles = req.body.roles
-      res.send(await members.update({ user, namespace, name, roles }))
+      const body = req.body
+      res.send(await members.update({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

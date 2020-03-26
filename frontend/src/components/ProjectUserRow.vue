@@ -34,7 +34,7 @@ limitations under the License.
       </v-list-tile-content>
       <v-list-tile-action>
         <v-layout row align-center>
-          <v-chip v-for="(roleName, index) in roleNames" :key="index" small color="green darken-2" text-color="white">
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="green darken-2" text-color="white">
             {{roleName}}
           </v-chip>
         </v-layout>
@@ -90,7 +90,7 @@ export default {
       type: Array,
       required: true
     },
-    roleNames: {
+    roleDisplayNames: {
       type: Array,
       required: true
     }
