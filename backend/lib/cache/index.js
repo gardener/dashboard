@@ -17,13 +17,30 @@
 const _ = require('lodash')
 const { HTTPError } = require('got')
 const pEvent = require('p-event')
+const logger = require('../logger')
 const { Store } = require('../kubernetes-client/cache')
 const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
 const createJournalCache = require('./journals')
 
+async function initializeStoreSynchronization (store, cachable) {
+  const { scope, name } = cachable.constructor
+  try {
+    if (scope === 'Namespaced') {
+      cachable.syncListAllNamespaces(store)
+    } else {
+      cachable.syncList(store)
+    }
+    await pEvent(store, 'replaced', {
+      rejectionEvents: ['stale']
+    })
+  } catch (err) {
+    logger.warn('Initialization of %s store synchronization failed', name)
+  }
+}
+
 class Cache {
   constructor () {
-    this.synchronizationTriggered = false
+    this.synchronizationPromise = undefined
     this.cloudprofiles = new Store()
     this.seeds = new Store()
     this.quotas = new Store()
@@ -37,24 +54,12 @@ class Cache {
     or the information can be considered as not sensitive or public.
   */
   synchronize (client) {
-    if (!this.synchronizationTriggered) {
-      this.synchronizationTriggered = true
-      return Promise.all(_
-        .chain(['cloudprofiles', 'quotas', 'seeds', 'projects'])
-        .map(async key => {
-          const store = this[key]
-          const cachable = client['core.gardener.cloud'][key]
-          const scope = cachable.constructor.scope
-          // eslint-disable-next-line no-unused-vars
-          const reflector = scope === 'Cluster'
-            ? cachable.syncList(store)
-            : cachable.syncListAllNamespaces(store)
-          return pEvent(store, 'replaced', {
-            rejectionEvents: ['stale']
-          })
-        })
-        .value())
+    if (!this.synchronizationPromise) {
+      const keys = ['cloudprofiles', 'quotas', 'seeds', 'projects']
+      const iteratee = key => initializeStoreSynchronization(this[key], client['core.gardener.cloud'][key])
+      this.synchronizationPromise = Promise.all(keys.map(iteratee))
     }
+    return this.synchronizationPromise
   }
 
   list (key) {
@@ -90,7 +95,7 @@ const cache = new Cache()
 module.exports = {
   cache,
   synchronize (client) {
-    cache.synchronize(client)
+    return cache.synchronize(client)
   },
   getCloudProfiles () {
     return cache.getCloudProfiles()

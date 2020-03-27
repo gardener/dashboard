@@ -36,8 +36,14 @@ function createApplication (port) {
         return 1
       case 'logger':
         return {
+          debug (...args) {
+            app.log.push(['debug', ...args])
+          },
           log (...args) {
             app.log.push(['log', ...args])
+          },
+          warn (...args) {
+            app.log.push(['warn', ...args])
           },
           error (...args) {
             app.log.push(['error', ...args])
@@ -81,7 +87,7 @@ describe('server', function () {
     try {
       await server.startListening()
       expect(app.synchronizing).to.be.true
-      expect(app.log[0].slice(0, 2)).to.eql(['info', 'Initial cache synchronization succeeded after %s'])
+      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %s seconds'])
       expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
     } finally {
       server.close()

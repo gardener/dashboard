@@ -135,13 +135,13 @@ describe('cache', function () {
       })
 
       it('should syncronize the cache', async function () {
-        expect(cache.synchronizationTriggered).to.be.false
+        expect(cache.synchronizationPromise).to.be.undefined
         await cache.synchronize(testClient)
         expect(syncCloudprofilesSpy).to.be.calledOnce
         expect(syncQuotasSpy).to.be.calledOnce
         expect(syncSeedsSpy).to.be.calledOnce
         expect(syncProjectsSpy).to.be.calledOnce
-        expect(cache.synchronizationTriggered).to.be.true
+        expect(cache.synchronizationPromise).to.be.instanceof(Promise)
         expect(orderBy(cache.getCloudProfiles(), 'metadata.uid')).to.eql([a, c])
         expect(orderBy(cache.getQuotas(), 'metadata.uid')).to.eql([a, b, c])
         expect(orderBy(cache.getSeeds(), 'metadata.uid')).to.eql([a, b])

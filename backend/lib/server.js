@@ -73,9 +73,9 @@ module.exports = function createServer (app) {
       await pTimeout(synchronizer(), 5 * 1000)
       const end = moment()
       const synchronizationDuration = moment.duration(end.diff(begin))
-      logger.info('Initial cache synchronization succeeded after %s', synchronizationDuration.humanize())
+      logger.debug('Initial cache synchronization succeeded after %s seconds', synchronizationDuration.asSeconds().toFixed(1))
     } catch (err) {
-      logger.error('Initial cache synchronization timed out with: %s', err.message)
+      logger.warn('Initial cache synchronization timed out with: %s', err.message, err.stack)
     }
     await new Promise(resolve => server.listen(port, resolve))
     logger.info('Server listening on port %d', port)

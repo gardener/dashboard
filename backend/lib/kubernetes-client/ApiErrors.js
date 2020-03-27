@@ -98,6 +98,11 @@ function getRetryAfterSeconds (err) {
   return get(err, 'details.retryAfterSeconds', 1)
 }
 
+function getCurrentResourceVersion (err) {
+  const [, resourceVersion = ''] = /current:\s*(\d+)/.exec(err.message) || []
+  return resourceVersion
+}
+
 module.exports = {
   StatusError,
   CacheExpiredError,
@@ -107,5 +112,6 @@ module.exports = {
   isTimeoutError,
   isTooLargeResourceVersionError,
   isRetryError,
-  getRetryAfterSeconds
+  getRetryAfterSeconds,
+  getCurrentResourceVersion
 }

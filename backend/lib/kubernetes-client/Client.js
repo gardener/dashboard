@@ -40,6 +40,7 @@ class Client {
       servername,
       throwHttpErrors: true,
       resolveBodyOnly: true,
+      retry: 0,
       timeout: 30 * 1000,
       ...options
     }

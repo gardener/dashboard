@@ -26,7 +26,7 @@ const {
   isExpiredError,
   isRetryError,
   isTooLargeResourceVersionError,
-  getRetryAfterSeconds,
+  getCurrentResourceVersion,
   StatusError
 } = require('../ApiErrors')
 
@@ -149,11 +149,14 @@ class Reflector {
             resourceVersion: this.relistResourceVersion
           })
         } catch (err) {
-          logger.error('Failed to call full list %s: %s', this.expectedTypeName, err)
+          logger.error('Failed to call full list %s: %s', this.expectedTypeName, err.message)
           return
         }
       }
-      logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err)
+      if (isTooLargeResourceVersionError(err)) {
+        this.lastSyncResourceVersion = getCurrentResourceVersion(err)
+      }
+      logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
       return
     }
 
@@ -217,11 +220,6 @@ class Reflector {
         try {
           await this.watchHandler(this.socket)
         } catch (err) {
-          if (isTooLargeResourceVersionError(err)) {
-            logger.info('Watch of %s not opened with: %s', this.expectedTypeName, err.message)
-            await delay(randomize(getRetryAfterSeconds(err) * 1000))
-            continue
-          }
           if (isExpiredError(err)) {
             // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
