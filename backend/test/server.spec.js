@@ -87,7 +87,7 @@ describe('server', function () {
     try {
       await server.startListening()
       expect(app.synchronizing).to.be.true
-      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %s seconds'])
+      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %d ms'])
       expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
     } finally {
       server.close()
