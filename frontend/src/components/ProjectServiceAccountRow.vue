@@ -54,14 +54,14 @@ limitations under the License.
       </v-list-tile-content>
       <v-list-tile-action>
         <v-layout row align-center>
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="blue-grey darken-2" text-color="white">
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
             {{roleName}}
           </v-chip>
         </v-layout>
       </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload">
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onDownload">
             <v-icon>mdi-download</v-icon>
           </v-btn>
           <span>Download Kubeconfig</span>
@@ -69,7 +69,7 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig">
+          <v-btn slot="activator" small icon class="black--text" @click="onKubeconfig">
             <v-icon>visibility</v-icon>
           </v-btn>
           <span>Show Kubeconfig</span>
@@ -77,7 +77,7 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onEdit">
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
           <span>Update Service Account</span>

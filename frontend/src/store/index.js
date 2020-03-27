@@ -853,9 +853,12 @@ const actions = {
 
     return state.cfg
   },
-  async setNamespace ({ commit }, namespace) {
+  async setNamespace ({ dispatch, commit }, namespace) {
     commit('SET_NAMESPACE', namespace)
-
+    await dispatch('refreshSubjectRules', namespace)
+    return state.namespace
+  },
+  async refreshSubjectRules ({ commit }, namespace) {
     try {
       const { data: subjectRules } = await getSubjectRules({ namespace })
       commit('SET_SUBJECT_RULES', subjectRules)
@@ -863,7 +866,7 @@ const actions = {
       commit('SET_SUBJECT_RULES', undefined)
       throw err
     }
-    return state.namespace
+    return state.subjectRules
   },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)

@@ -84,6 +84,7 @@ limitations under the License.
           <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-user-row
             :username="user.username"
+            :isCurrentUser="user.isCurrentUser"
             :avatarUrl="user.avatarUrl"
             :displayName="user.displayName"
             :isEmail="user.isEmail"
@@ -135,6 +136,7 @@ limitations under the License.
           <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-service-account-row
             :username="serviceAccount.username"
+            :isCurrentUser="serviceAccount.isCurrentUser"
             :avatarUrl="serviceAccount.avatarUrl"
             :displayName="serviceAccount.displayName"
             :createdBy="serviceAccount.createdBy"
@@ -154,8 +156,8 @@ limitations under the License.
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :name="updatedMemberName" :roles="updatedMemberRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :name="updatedMemberName" :roles="updatedMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -258,7 +260,10 @@ export default {
     ...mapGetters([
       'memberList',
       'projectFromProjectList',
-      'canPatchProject'
+      'canPatchProject',
+      'username',
+      'isAdmin',
+      'projectList'
     ]),
     project () {
       return this.projectFromProjectList
@@ -281,7 +286,8 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles)
+          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
+          isCurrentUser: this.isCurrentUser(username)
         }
       })
     },
@@ -295,7 +301,8 @@ export default {
           displayName: displayName(username),
           isEmail: isEmail(username),
           isTechnicalContact: this.isTechnicalContact(username),
-          roleDisplayNames: this.sortedRoleDisplayNames(user.roles)
+          roleDisplayNames: this.sortedRoleDisplayNames(user.roles),
+          isCurrentUser: this.isCurrentUser(username)
         }
       })
     },
@@ -400,17 +407,31 @@ export default {
     confirmDelete (username) {
       const memberName = displayName(username)
       const projectName = this.projectDetails.projectName
+      let messageHtml
+      if (this.isCurrentUser(username)) {
+        messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
+      } else {
+        messageHtml = `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
+      }
       return this.$refs.confirmDialog.waitForConfirmation({
         confirmButtonText: 'Delete',
         captionText: 'Confirm Member Deletion',
-        messageHtml: `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`,
+        messageHtml,
         dialogColor: 'red'
       })
     },
     async onDelete (username) {
       const deletionConfirmed = await this.confirmDelete(username)
       if (deletionConfirmed) {
-        this.deleteMember(username)
+        await this.deleteMember(username)
+        if (this.isCurrentUser(username) && !this.isAdmin) {
+          if (this.projectList.length > 0) {
+            const p1 = this.projectList[0]
+            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+          } else {
+            this.$router.push({ name: 'Home', params: { } })
+          }
+        }
       }
     },
     onEditUser (username, roles) {
@@ -435,6 +456,9 @@ export default {
         }
       })
       return displayNames.sort()
+    },
+    isCurrentUser (username) {
+      return this.username === username
     }
   },
   mounted () {

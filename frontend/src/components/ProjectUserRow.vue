@@ -26,22 +26,23 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-title>
           {{displayName}}
+          <span v-if="isCurrentUser">(me)</span>
         </v-list-tile-title>
         <v-list-tile-sub-title>
-          <a v-if="isEmail" :href="`mailto:${username}`" class="green--text text--darken-2">{{username}}</a>
-          <span v-else class="pl-2">{{username}}</span>
+          <a v-if="isEmail" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
+          <span v-else>{{username}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
         <v-layout row align-center>
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="green darken-2" text-color="white">
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
             {{roleName}}
           </v-chip>
         </v-layout>
       </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="green--text text--darken-2" @click.native.stop="onEdit">
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
           <span>Update User</span>
@@ -93,6 +94,9 @@ export default {
     roleDisplayNames: {
       type: Array,
       required: true
+    },
+    isCurrentUser: {
+      type: Boolean
     }
   },
   computed: {

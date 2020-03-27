@@ -34,7 +34,7 @@ limitations under the License.
             <v-flex xs8>
               <v-text-field
                 :disabled="isUpdateDialog"
-                :color="color"
+                color="black"
                 ref="internalName"
                 :label="nameLabel"
                 v-model.trim="internalName"
@@ -48,7 +48,7 @@ limitations under the License.
             </v-flex>
             <v-flex xs4>
               <v-select
-                :color="color"
+                color="black"
                 label="Roles"
                 :items="roleItems"
                 multiple
@@ -60,7 +60,7 @@ limitations under the License.
                 @input="$v.internalRoles.$touch()"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small :color="color" text-color="white" close @input="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
+                  <v-chip small color="black" outline close @input="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
                     <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>
@@ -73,8 +73,8 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" flat @click.stop="submitUpdateMember" :disabled="!valid" :class="buttonClass" tabindex="2">Update</v-btn>
-        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" :class="buttonClass" tabindex="2">Add</v-btn>
+        <v-btn v-if="isUpdateDialog" flat @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
+        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">Add</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -115,6 +115,9 @@ export default {
     },
     roles: {
       type: Array
+    },
+    isCurrentUser: {
+      type: Boolean
     }
   },
   data () {
@@ -135,7 +138,8 @@ export default {
     ]),
     ...mapGetters([
       'memberList',
-      'projectList'
+      'projectList',
+      'isAdmin'
     ]),
     visible: {
       get () {
@@ -206,15 +210,6 @@ export default {
     roleItems () {
       return filter(MEMBER_ROLE_DESCRIPTORS, role => role.hidden !== true)
     },
-    color () {
-      if (this.isUserDialog) {
-        return 'green darken-2'
-      }
-      if (this.isServiceDialog) {
-        return 'blue-grey'
-      }
-      return undefined
-    },
     nameLabel () {
       if (this.isUserDialog) {
         return 'User'
@@ -242,15 +237,6 @@ export default {
       }
       return undefined
     },
-    buttonClass () {
-      if (this.isUserDialog) {
-        return 'green--text darken-2'
-      }
-      if (this.isServiceDialog) {
-        return 'blue-grey--text'
-      }
-      return undefined
-    },
     serviceAccountNames () {
       const serviceAccounts = filter(this.memberList, ({ username }) => isServiceAccount(username))
       return map(serviceAccounts, ({ username }) => serviceAccountToDisplayName(username))
@@ -273,7 +259,8 @@ export default {
   methods: {
     ...mapActions([
       'addMember',
-      'updateMember'
+      'updateMember',
+      'refreshSubjectRules'
     ]),
     hide () {
       this.visible = false
@@ -312,6 +299,9 @@ export default {
           const name = this.memberName
           const roles = this.internalRoles
           await this.updateMember({ name, roles })
+          if (this.isCurrentUser && !this.isAdmin) {
+            await this.refreshSubjectRules()
+          }
           this.hide()
         } catch (err) {
           const errorDetails = errorDetailsFromError(err)
