@@ -61,7 +61,7 @@ function joinMemberRoleAndRoles (role, roles) {
   return [role]
 }
 
-function toMemberRoleRolesArrays (roles) {
+function splitMemberRolesIntoRoleAndRoles (roles) {
   const role = _.head(roles) // do not shift role, gardener ignores duplicate role in roles array and will remove role field in future API version
   return { role, roles }
 }
