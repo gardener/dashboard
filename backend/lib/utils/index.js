@@ -53,7 +53,7 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
-function toOneMemberRoleArray(role, roles) {
+function toOneMemberRoleArray (role, roles) {
   if (roles) {
     // uniq to also support test scenarios, gardener discards duplicate roles
     return _.uniq([role, ...roles])
@@ -61,7 +61,7 @@ function toOneMemberRoleArray(role, roles) {
   return [role]
 }
 
-function toMemberRoleRolesArrays(roles) {
+function toMemberRoleRolesArrays (roles) {
   const role = _.head(roles) // do not shift role, gardener ignores duplicate role in roles array and will remove role field in future API version
   return { role, roles }
 }

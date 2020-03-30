@@ -124,7 +124,7 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members =  [...project.spec.members]
+  const members = [...project.spec.members]
   if (!_.find(members, ['name', name])) {
     return project
   }
