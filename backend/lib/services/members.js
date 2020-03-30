@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64 } = require('../utils')
+const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
@@ -44,9 +44,9 @@ function fromResource (project = {}, serviceAccounts = []) {
     .chain(project)
     .get('spec.members')
     .filter(['kind', 'User'])
-    .map('name')
-    .map(username => ({
+    .map(({ name: username, role, roles }) => ({
       username,
+      roles: joinMemberRoleAndRoles(role, roles),
       ...serviceAccountsMetadata[username]
     }))
     .value()
@@ -76,20 +76,42 @@ async function deleteServiceaccount (client, { namespace, name }) {
   }
 }
 
-async function setProjectMember (client, { namespace, name }) {
+async function setProjectMember (client, { namespace, name, roles: memberRoles }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members = _.slice(project.spec.members, 0)
+  const members = [...project.spec.members]
   if (_.find(members, ['name', name])) {
     throw new Conflict(`User '${name}' is already member of this project`)
   }
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
   members.push({
     kind: 'User',
     name,
     apiGroup: 'rbac.authorization.k8s.io',
-    role: 'admin'
+    role,
+    roles
   })
+  const body = {
+    spec: {
+      members
+    }
+  }
+  return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
+}
+
+async function updateProjectMemberRoles (client, { namespace, name, roles: memberRoles }) {
+  // get project
+  const project = await client.getProjectByNamespace(namespace)
+  // get project members from project
+  const members = [...project.spec.members]
+  const member = _.find(members, ['name', name])
+  if (!member) {
+    throw new NotFound(`User '${name}' is not a member of this project`)
+  }
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
+  _.assign(member, { role, roles })
+
   const body = {
     spec: {
       members
@@ -102,7 +124,7 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project
   const project = await client.getProjectByNamespace(namespace)
   // get project members from project
-  const members = _.slice(project.spec.members, 0)
+  const members = [...project.spec.members]
   if (!_.find(members, ['name', name])) {
     return project
   }
@@ -151,8 +173,9 @@ exports.get = async function ({ user, namespace, name }) {
     const caData = secret.data['ca.crt']
     const clusterName = 'garden'
     const contextName = `${clusterName}-${projectName}-${name}`
-    member.kind = 'ServiceAccount'
-    member.kubeconfig = dumpKubeconfig({
+
+    const kind = 'ServiceAccount'
+    const kubeconfig = dumpKubeconfig({
       user: serviceAccountName,
       context: contextName,
       cluster: clusterName,
@@ -161,11 +184,17 @@ exports.get = async function ({ user, namespace, name }) {
       server,
       caData
     })
+
+    return {
+      ...member,
+      kind,
+      kubeconfig
+    }
   }
   return member
 }
 
-exports.create = async function ({ user, namespace, body: { name } }) {
+exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const client = user.client
 
   const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
@@ -178,7 +207,16 @@ exports.create = async function ({ user, namespace, body: { name } }) {
   }
 
   // assign user to project
-  const project = await setProjectMember(client, { namespace, name })
+  const project = await setProjectMember(client, { namespace, name, roles })
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+  return fromResource(project, serviceAccounts)
+}
+
+exports.update = async function ({ user, namespace, name, body: { roles } }) {
+  const client = user.client
+
+  // update user in project
+  const project = await updateProjectMemberRoles(client, { namespace, name, roles })
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
   return fromResource(project, serviceAccounts)
 }

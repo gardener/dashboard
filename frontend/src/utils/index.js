@@ -629,6 +629,22 @@ export function allErrorCodesFromLastErrors (lastErrors) {
   return uniq(compact(flatMap(lastErrors, 'codes')))
 }
 
+export const MEMBER_ROLE_DESCRIPTORS = [
+  {
+    name: 'admin',
+    displayName: 'Admin'
+  },
+  {
+    name: 'viewer',
+    displayName: 'Viewer'
+  },
+  {
+    name: 'owner',
+    displayName: 'Technical Contact',
+    hidden: true // Do not show on UI as currently cannot be modified
+  }
+]
+
 function includesNameOrAll (list, name) {
   return includes(list, name) || includes(list, '*')
 }

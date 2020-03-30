@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
-<template^>
+<template>
   <div>
     <v-list-tile avatar>
       <v-list-tile-avatar>
@@ -39,6 +39,7 @@ limitations under the License.
           <v-layout row
             fill-height
             align-center
+            v-if="created && creationTimestamp"
           >
             <span class="mr-3">Created</span>
             <v-tooltip top>
@@ -51,9 +52,16 @@ limitations under the License.
           {{username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
+      <v-list-tile-action>
+        <v-layout row align-center>
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
+            {{roleName}}
+          </v-chip>
+        </v-layout>
+      </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="blue-grey--text" @click.native.stop="onDownload">
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onDownload">
             <v-icon>mdi-download</v-icon>
           </v-btn>
           <span>Download Kubeconfig</span>
@@ -61,10 +69,18 @@ limitations under the License.
       </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" small icon class="blue-grey--text" @click="onKubeconfig">
+          <v-btn slot="activator" small icon class="black--text" @click="onKubeconfig">
             <v-icon>visibility</v-icon>
           </v-btn>
           <span>Show Kubeconfig</span>
+        </v-tooltip>
+      </v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
+        <v-tooltip top>
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <span>Update Service Account</span>
         </v-tooltip>
       </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
@@ -80,14 +96,13 @@ limitations under the License.
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
   isServiceAccountFromNamespace
 } from '@/utils'
-import { mapGetters } from 'vuex'
 
 export default {
   name: 'project-service-account-row',
@@ -110,15 +125,20 @@ export default {
       required: true
     },
     createdBy: {
-      type: String,
-      required: true
+      type: String
     },
     creationTimestamp: {
-      type: String,
-      required: true
+      type: String
     },
     created: {
-      type: String,
+      type: String
+    },
+    roles: {
+      type: Array,
+      required: true
+    },
+    roleDisplayNames: {
+      type: Array,
       required: true
     }
   },
@@ -134,18 +154,21 @@ export default {
       return isServiceAccountFromNamespace(this.username, this.namespace)
     },
     createdByClasses () {
-      return !!this.createdBy ? ['font-weight-bold'] : ['grey--text']
+      return this.createdBy ? ['font-weight-bold'] : ['grey--text']
     }
   },
   methods: {
-    async onDownload () {
-      this.$emit('onDownload', this.username)
+    onDownload () {
+      this.$emit('download', this.username)
     },
-    async onKubeconfig () {
-      this.$emit('onKubeconfig', this.username)
+    onKubeconfig () {
+      this.$emit('kubeconfig', this.username)
+    },
+    onEdit (username) {
+      this.$emit('edit', this.username, this.roles)
     },
     onDelete (username) {
-      this.$emit('onDelete', this.username)
+      this.$emit('delete', this.username)
     }
   }
 }

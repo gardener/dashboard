@@ -197,6 +197,12 @@ export function addMember ({ namespace, data }) {
   return createResource(`/api/namespaces/${namespace}/members`, data)
 }
 
+export function updateMember ({ namespace, name, data }) {
+  namespace = encodeURIComponent(namespace)
+  name = encodeURIComponent(name)
+  return updateResource(`/api/namespaces/${namespace}/members/${name}`, data)
+}
+
 export function getMember ({ namespace, name }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)

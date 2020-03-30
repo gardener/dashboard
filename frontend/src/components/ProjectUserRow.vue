@@ -26,12 +26,28 @@ limitations under the License.
       <v-list-tile-content>
         <v-list-tile-title>
           {{displayName}}
+          <span v-if="isCurrentUser">(me)</span>
         </v-list-tile-title>
         <v-list-tile-sub-title>
-          <a v-if="isEmail" :href="`mailto:${username}`" class="green--text text--darken-2">{{username}}</a>
-          <span v-else class="pl-2">{{username}}</span>
+          <a v-if="isEmail" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
+          <span v-else>{{username}}</span>
         </v-list-tile-sub-title>
       </v-list-tile-content>
+      <v-list-tile-action>
+        <v-layout row align-center>
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
+            {{roleName}}
+          </v-chip>
+        </v-layout>
+      </v-list-tile-action>
+      <v-list-tile-action v-if="canPatchProject">
+        <v-tooltip top>
+          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <span>Update User</span>
+        </v-tooltip>
+      </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>
           <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
@@ -70,6 +86,17 @@ export default {
     isTechnicalContact: {
       type: Boolean,
       required: true
+    },
+    roles: {
+      type: Array,
+      required: true
+    },
+    roleDisplayNames: {
+      type: Array,
+      required: true
+    },
+    isCurrentUser: {
+      type: Boolean
     }
   },
   computed: {
@@ -79,7 +106,10 @@ export default {
   },
   methods: {
     onDelete (username) {
-      this.$emit('onDelete', this.username)
+      this.$emit('delete', this.username)
+    },
+    onEdit (username) {
+      this.$emit('edit', this.username, this.roles)
     }
   }
 }

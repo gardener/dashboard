@@ -84,12 +84,16 @@ limitations under the License.
           <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-user-row
             :username="user.username"
+            :isCurrentUser="user.isCurrentUser"
             :avatarUrl="user.avatarUrl"
             :displayName="user.displayName"
             :isEmail="user.isEmail"
             :isTechnicalContact="user.isTechnicalContact"
+            :roles="user.roles"
+            :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
-            @onDelete="onDelete"
+            @delete="onDelete"
+            @edit="onEditUser"
           ></project-user-row>
         </template>
       </v-list>
@@ -132,15 +136,19 @@ limitations under the License.
           <v-divider v-if="index !== 0" inset :key="index"></v-divider>
           <project-service-account-row
             :username="serviceAccount.username"
+            :isCurrentUser="serviceAccount.isCurrentUser"
             :avatarUrl="serviceAccount.avatarUrl"
             :displayName="serviceAccount.displayName"
             :createdBy="serviceAccount.createdBy"
             :creationTimestamp="serviceAccount.creationTimestamp"
             :created="serviceAccount.created"
+            :roles="serviceAccount.roles"
+            :roleDisplayNames="serviceAccount.roleDisplayNames"
             :key="serviceAccount.username"
-            @onDownload="onDownload"
-            @onKubeconfig="onKubeconfig"
-            @onDelete="onDelete"
+            @download="onDownload"
+            @kubeconfig="onKubeconfig"
+            @delete="onDelete"
+            @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
       </v-list>
@@ -148,8 +156,8 @@ limitations under the License.
 
     <member-dialog type="adduser" v-model="userAddDialog"></member-dialog>
     <member-dialog type="addservice" v-model="serviceAccountAddDialog"></member-dialog>
-    <member-dialog type="updateuser" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="userUpdateDialog"></member-dialog>
-    <member-dialog type="updateservice" :oldName="updateMemberName" :userroles="updateUserRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
+    <member-dialog type="updateuser" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="userUpdateDialog"></member-dialog>
+    <member-dialog type="updateservice" :name="updatedMemberName" :isCurrentUser="isCurrentUser(updatedMemberName)" :roles="updatedMemberRoles" v-model="serviceAccountUpdateDialog"></member-dialog>
     <member-help-dialog type="user" v-model="userHelpDialog"></member-help-dialog>
     <member-help-dialog type="service" v-model="serviceAccountHelpDialog"></member-help-dialog>
     <v-dialog v-model="kubeconfigDialog" persistent max-width="67%">
@@ -166,6 +174,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
     </v-dialog>
+    <confirm-dialog ref="confirmDialog"></confirm-dialog>
     <v-fab-transition v-if="canPatchProject">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <v-btn slot="activator" v-model="fab" color="teal darken-2" dark fab>
@@ -193,8 +202,12 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import find from 'lodash/find'
+import upperFirst from 'lodash/upperFirst'
+import escape from 'lodash/escape'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
+import ConfirmDialog from '@/dialogs/ConfirmDialog'
 import CodeBlock from '@/components/CodeBlock'
 import ProjectUserRow from '@/components/ProjectUserRow'
 import ProjectServiceAccountRow from '@/components/ProjectServiceAccountRow'
@@ -206,6 +219,7 @@ import {
   serviceAccountToDisplayName,
   isServiceAccount,
   getTimestampFormatted,
+  MEMBER_ROLE_DESCRIPTORS,
   getProjectDetails
 } from '@/utils'
 import { getMember } from '@/utils/api'
@@ -217,7 +231,8 @@ export default {
     MemberHelpDialog,
     CodeBlock,
     ProjectUserRow,
-    ProjectServiceAccountRow
+    ProjectServiceAccountRow,
+    ConfirmDialog
   },
   data () {
     return {
@@ -228,8 +243,8 @@ export default {
       userHelpDialog: false,
       serviceAccountHelpDialog: false,
       kubeconfigDialog: false,
-      updateMemberName: undefined,
-      updateUserRoles: undefined,
+      updatedMemberName: undefined,
+      updatedMemberRoles: undefined,
       userFilter: '',
       serviceAccountFilter: '',
       fab: false,
@@ -246,7 +261,10 @@ export default {
     ...mapGetters([
       'memberList',
       'projectFromProjectList',
-      'canPatchProject'
+      'canPatchProject',
+      'username',
+      'isAdmin',
+      'projectList'
     ]),
     project () {
       return this.projectFromProjectList
@@ -269,7 +287,8 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           created: getTimestampFormatted(serviceAccount.creationTimestamp),
-          roleNames: map(serviceAccount.roles, this.roleName)
+          roleDisplayNames: this.sortedRoleDisplayNames(serviceAccount.roles),
+          isCurrentUser: this.isCurrentUser(username)
         }
       })
     },
@@ -283,7 +302,8 @@ export default {
           displayName: displayName(username),
           isEmail: isEmail(username),
           isTechnicalContact: this.isTechnicalContact(username),
-          roleNames: map(user.roles, this.roleName)
+          roleDisplayNames: this.sortedRoleDisplayNames(user.roles),
+          isCurrentUser: this.isCurrentUser(username)
         }
       })
     },
@@ -385,8 +405,61 @@ export default {
         this.kubeconfigDialog = true
       }
     },
-    onDelete (username) {
-      this.deleteMember(username)
+    confirmDelete (username) {
+      const memberName = escape(displayName(username))
+      const projectName = escape(this.projectDetails.projectName)
+      let messageHtml
+      if (this.isCurrentUser(username)) {
+        messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
+      } else {
+        messageHtml = `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
+      }
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Member Deletion',
+        messageHtml,
+        dialogColor: 'red'
+      })
+    },
+    async onDelete (username) {
+      const deletionConfirmed = await this.confirmDelete(username)
+      if (deletionConfirmed) {
+        await this.deleteMember(username)
+        if (this.isCurrentUser(username) && !this.isAdmin) {
+          if (this.projectList.length > 0) {
+            const p1 = this.projectList[0]
+            this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
+          } else {
+            this.$router.push({ name: 'Home', params: { } })
+          }
+        }
+      }
+    },
+    onEditUser (username, roles) {
+      this.updatedMemberName = username
+      this.updatedMemberRoles = roles
+      this.openUserUpdateDialog()
+    },
+    onEditServiceAccount (username, roles) {
+      this.updatedMemberName = username
+      this.updatedMemberRoles = roles
+      this.openServiceAccountUpdateDialog()
+    },
+    sortedRoleDisplayNames (roleNames) {
+      const displayNames = []
+      forEach(roleNames, roleName => {
+        const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
+        if (!roleDescriptor) {
+          displayNames.push(upperFirst(roleName))
+        }
+        if (!roleDescriptor.hidden) {
+          displayNames.push(roleDescriptor.displayName)
+        }
+      })
+      return displayNames.sort()
+    },
+    isCurrentUser (username) {
+      return this.username === username
     }
   },
   mounted () {

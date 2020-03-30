@@ -75,26 +75,44 @@ module.exports = function ({ agent, k8s, auth }) {
   it('should add a project member', async function () {
     const bearer = await user.bearer
     const name = 'baz@example.org'
-    k8s.stub.addMember({ bearer, namespace, name })
+    const roles = ['admin', 'owner']
+    k8s.stub.addMember({ bearer, namespace, name, roles })
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name })
+      .send({ metadata, name, roles })
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.eql(_.concat(members, { username: 'baz@example.org' }))
+    expect(res.body).to.eql(_.concat(members, { username: name, roles }))
   })
 
   it('should not add member that is already a project member', async function () {
     const bearer = await user.bearer
     const name = 'foo@example.org'
-    k8s.stub.addMember({ bearer, namespace, name })
+    const roles = ['admin']
+    k8s.stub.addMember({ bearer, namespace, name, roles })
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
       .send({ metadata, name })
     expect(res).to.have.status(409)
+  })
+
+  it('should update roles of a project member', async function () {
+    const bearer = await user.bearer
+    const name = 'bar@example.org'
+    const roles = ['newRole']
+    k8s.stub.updateMember({ bearer, namespace, name, roles })
+    const res = await agent
+      .put(`/api/namespaces/${namespace}/members/${name}`)
+      .set('cookie', await user.cookie)
+      .send({ metadata, roles })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    const member = _.find(res.body, { username: name })
+    expect(member).to.eql({ username: name, roles })
   })
 
   it('should delete a project member', async function () {
