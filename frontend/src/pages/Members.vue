@@ -204,6 +204,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
 import upperFirst from 'lodash/upperFirst'
+import escape from 'lodash/escape'
 import MemberDialog from '@/dialogs/MemberDialog'
 import MemberHelpDialog from '@/dialogs/MemberHelpDialog'
 import ConfirmDialog from '@/dialogs/ConfirmDialog'
@@ -405,8 +406,8 @@ export default {
       }
     },
     confirmDelete (username) {
-      const memberName = displayName(username)
-      const projectName = this.projectDetails.projectName
+      const memberName = escape(displayName(username))
+      const projectName = escape(this.projectDetails.projectName)
       let messageHtml
       if (this.isCurrentUser(username)) {
         messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`

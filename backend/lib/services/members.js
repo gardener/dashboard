@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const config = require('../config')
-const { decodeBase64, toOneMemberRoleArray, toMemberRoleRolesArrays } = require('../utils')
+const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
 const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
@@ -46,7 +46,7 @@ function fromResource (project = {}, serviceAccounts = []) {
     .filter(['kind', 'User'])
     .map(({ name: username, role, roles }) => ({
       username,
-      roles: toOneMemberRoleArray(role, roles),
+      roles: joinMemberRoleAndRoles(role, roles),
       ...serviceAccountsMetadata[username]
     }))
     .value()
@@ -84,7 +84,7 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   if (_.find(members, ['name', name])) {
     throw new Conflict(`User '${name}' is already member of this project`)
   }
-  const { role, roles } = toMemberRoleRolesArrays(memberRoles)
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
   members.push({
     kind: 'User',
     name,
@@ -109,7 +109,7 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
   if (!member) {
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
-  const { role, roles } = toMemberRoleRolesArrays(memberRoles)
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
   _.assign(member, { role, roles })
 
   const body = {

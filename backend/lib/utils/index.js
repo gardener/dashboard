@@ -72,6 +72,6 @@ module.exports = {
   getConfigValue,
   getSeedNameFromShoot,
   shootHasIssue,
-  toOneMemberRoleArray,
-  toMemberRoleRolesArrays
+  joinMemberRoleAndRoles,
+  splitMemberRolesIntoRoleAndRoles
 }
