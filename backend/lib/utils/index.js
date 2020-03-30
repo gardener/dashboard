@@ -53,7 +53,7 @@ function shootHasIssue (shoot) {
   return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
 }
 
-function toOneMemberRoleArray (role, roles) {
+function joinMemberRoleAndRoles (role, roles) {
   if (roles) {
     // uniq to also support test scenarios, gardener discards duplicate roles
     return _.uniq([role, ...roles])
