@@ -205,13 +205,13 @@ export default {
       this.setShootListSearchValue(value)
     },
     canGetSecrets () {
-      this.hideNotAvailableColumns()
+      this.setColumnVisibility()
     },
     canDeleteShoots () {
-      this.hideNotAvailableColumns()
+      this.setColumnVisibility()
     },
     projectScope () {
-      this.hideNotAvailableColumns()
+      this.setColumnVisibility()
     }
   },
   methods: {
@@ -269,28 +269,25 @@ export default {
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
         if (get(header, 'adminOnly', false)) {
-          this.hideHeaderIfNotValue(header, this.isAdmin)
+          header.hidden = !this.isAdmin
         }
       }
     },
-    hideNotAvailableColumns () {
+    setColumnVisibility () {
       for (const header of this.allHeaders) {
         switch (header.value) {
           case 'journalLabels':
           case 'journal':
-            this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
+            header.hidden = !(this.gitHubRepoUrl && this.isAdmin)
             break
           case 'actions':
-            this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
+            header.hidden = !(this.canDeleteShoots || this.canGetSecrets)
             break
           case 'project':
-            this.hideHeaderIfNotValue(header, !this.projectScope)
+            header.hidden = !!this.projectScope
             break
         }
       }
-    },
-    hideHeaderIfNotValue (header, value) {
-      header.hidden = !value
     },
     toggleFilter (key) {
       if (this.showOnlyShootsWithIssues) {
@@ -395,7 +392,7 @@ export default {
   mounted () {
     this.floatingButton = true
     this.loadColumnsChecked()
-    this.hideNotAvailableColumns()
+    this.setColumnVisibility()
     this.setShootListFilters({
       progressing: true,
       userIssues: this.isAdmin,
