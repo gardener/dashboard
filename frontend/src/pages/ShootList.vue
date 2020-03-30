@@ -144,7 +144,7 @@ limitations under the License.
       </v-dialog>
     </v-card>
     <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace: $route.params.namespace } }">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -153,7 +153,6 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -209,6 +208,9 @@ export default {
       this.hideNotAvailableColumns()
     },
     canDeleteShoots () {
+      this.hideNotAvailableColumns()
+    },
+    projectScope () {
       this.hideNotAvailableColumns()
     }
   },
@@ -273,14 +275,17 @@ export default {
     },
     hideNotAvailableColumns () {
       for (const header of this.allHeaders) {
-        if (header.value === 'journalLabels') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
-        }
-        if (header.value === 'journal') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
-        }
-        if (header.value === 'actions') {
-          this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
+        switch (header.value) {
+          case 'journalLabels':
+          case 'journal':
+            this.hideHeaderIfNotValue(header, this.gitHubRepoUrl && this.isAdmin)
+            break
+          case 'actions':
+            this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
+            break
+          case 'project':
+            this.hideHeaderIfNotValue(header, !this.projectScope)
+            break
         }
       }
     },
@@ -322,7 +327,8 @@ export default {
     ...mapState([
       'shootsLoading',
       'onlyShootsWithIssues',
-      'cfg'
+      'cfg',
+      'namespace'
     ]),
     clusterAccessDialog: {
       get () {
@@ -344,7 +350,7 @@ export default {
       return this.headers.filter(e => e.checked === true)
     },
     projectScope () {
-      return this.$route.params.namespace !== '_all'
+      return this.namespace !== '_all'
     },
     showOnlyShootsWithIssues: {
       get () {
@@ -396,11 +402,6 @@ export default {
       deactivatedReconciliation: this.isAdmin,
       hasJournals: false
     })
-  },
-  beforeUpdate () {
-    const predicate = item => item.value === 'project'
-    const projectHeader = find(this.allHeaders, predicate)
-    projectHeader.hidden = this.projectScope
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
