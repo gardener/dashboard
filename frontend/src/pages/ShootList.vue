@@ -268,9 +268,6 @@ export default {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
-        if (get(header, 'adminOnly', false)) {
-          header.hidden = !this.isAdmin
-        }
       }
     },
     setColumnVisibility () {
@@ -286,6 +283,10 @@ export default {
           case 'project':
             header.hidden = !!this.projectScope
             break
+          default:
+            if (get(header, 'adminOnly', false)) {
+              header.hidden = !this.isAdmin
+            }
         }
       }
     },
