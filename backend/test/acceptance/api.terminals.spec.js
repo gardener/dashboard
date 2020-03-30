@@ -51,7 +51,7 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
         namespace,
         name,
         annotations: {
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       },
       spec: {

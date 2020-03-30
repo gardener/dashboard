@@ -975,7 +975,7 @@ const stub = {
           .map(value => value.split('='))
           .fromPairs()
           .value()
-        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+        return labels['dashboard.gardener.cloud/created-by-hash'] === hash(username)
       })
       .reply(200, { items: [] })
       .post(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`, body => {
@@ -999,7 +999,7 @@ const stub = {
         namespace,
         name,
         annotations: {
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       },
       spec: {
@@ -1061,7 +1061,7 @@ const stub = {
           .map(value => value.split('='))
           .fromPairs()
           .value()
-        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+        return labels['dashboard.gardener.cloud/created-by-hash'] === hash(username)
       })
       .reply(200, { items: [terminal] })
       .patch(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals/${name}`, body => {
@@ -1100,7 +1100,7 @@ const stub = {
         namespace,
         name,
         annotations: {
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       }
     }
@@ -1126,7 +1126,7 @@ const stub = {
         namespace,
         name,
         annotations: {
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       }
     }
@@ -1144,7 +1144,7 @@ const stub = {
         namespace: 'foo',
         annotations: {
           'dashboard.gardener.cloud/identifier': '1',
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       },
       spec: {},
@@ -1156,7 +1156,7 @@ const stub = {
         namespace: 'foo',
         annotations: {
           'dashboard.gardener.cloud/identifier': '2',
-          'garden.sapcloud.io/createdBy': username
+          'gardener.cloud/created-by': username
         }
       },
       spec: {},
@@ -1173,7 +1173,7 @@ const stub = {
           .map(value => value.split('='))
           .fromPairs()
           .value()
-        return labels['garden.sapcloud.io/createdBy'] === hash(username)
+        return labels['dashboard.gardener.cloud/created-by-hash'] === hash(username)
       })
       .reply(200, { items: [terminal1, terminal2] })
     return scope

@@ -139,10 +139,10 @@ async function listTerminals ({ user, namespace, identifier }) {
   const client = user.client
 
   const selectors = [
-    `garden.sapcloud.io/createdBy=${hash(username)}`
+    `dashboard.gardener.cloud/created-by-hash=${hash(username)}`
   ]
   if (identifier) {
-    selectors.push(`dashboard.gardener.cloud/identifier=${hash(identifier)}`)
+    selectors.push(`dashboard.gardener.cloud/identifier-hash=${hash(identifier)}`)
   }
   const query = {
     labelSelector: selectors.join(',')
@@ -153,7 +153,7 @@ async function listTerminals ({ user, namespace, identifier }) {
     .chain(terminals)
     .get('items')
     .filter(terminal => _.isEmpty(terminal.metadata.deletionTimestamp))
-    .filter(['metadata.annotations["garden.sapcloud.io/createdBy"]', username])
+    .filter(['metadata.annotations["gardener.cloud/created-by"]', username])
     .value()
 }
 
@@ -172,7 +172,7 @@ async function deleteTerminalSession ({ user, body }) {
 
   try {
     const terminal = await getTerminalResource(client, { namespace, name })
-    if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+    if (terminal.metadata.annotations['gardener.cloud/created-by'] !== username) {
       throw new Forbidden(`You are not allowed to delete terminal with name ${name}`)
     }
     await client['dashboard.gardener.cloud'].terminals.delete(namespace, name)
@@ -333,7 +333,7 @@ function getHostCluster ({ user, namespace, name, target, body, shootResource })
   return getShootHostCluster(client, { namespace, name, target, body, shootResource })
 }
 
-async function createTerminal ({ user, namespace, name, target, hostCluster, targetCluster, body }) {
+async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, body }) {
   const client = user.client
   const isAdmin = user.isAdmin
   const { identifier } = body
@@ -345,15 +345,10 @@ async function createTerminal ({ user, namespace, name, target, hostCluster, tar
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
-    'dashboard.gardener.cloud/hostCluster': hash(hostCluster),
-    'dashboard.gardener.cloud/targetCluster': hash(targetCluster),
-    'garden.sapcloud.io/createdBy': hash(user.id)
-  }
-  if (name) {
-    labels['garden.sapcloud.io/name'] = name
+    'dashboard.gardener.cloud/created-by-hash': hash(user.id)
   }
   if (identifier) {
-    labels['dashboard.gardener.cloud/identifier'] = hash(identifier)
+    labels['dashboard.gardener.cloud/identifier-hash'] = hash(identifier)
   }
 
   const annotations = {
@@ -427,7 +422,7 @@ function readTerminalUntilReady ({ user, namespace, name }) {
   const client = user.client
 
   const isTerminalReady = terminal => {
-    if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+    if (terminal.metadata.annotations['gardener.cloud/created-by'] !== username) {
       throw new Forbidden('You are not the user who created the terminal resource')
     }
     const podName = _.get(terminal, 'status.podName')
@@ -465,7 +460,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
   let terminal = await findExistingTerminalResource({ user, namespace, name, hostCluster, targetCluster, body })
   if (!terminal) {
     logger.debug(`No terminal found for user ${username}. Creating new..`)
-    terminal = await createTerminal({ user, namespace, name, target, hostCluster, targetCluster, body })
+    terminal = await createTerminal({ user, namespace, target, hostCluster, targetCluster, body })
   } else {
     logger.debug(`Found terminal for user ${username}: ${terminal.metadata.name}`)
     // do not wait for keepalive to return - run in parallel
@@ -575,7 +570,7 @@ async function heartbeatTerminalSession ({ user, body }) {
 
   const { name, namespace } = body
   const terminal = await getTerminalResource(client, { name, namespace })
-  if (terminal.metadata.annotations['garden.sapcloud.io/createdBy'] !== username) {
+  if (terminal.metadata.annotations['gardener.cloud/created-by'] !== username) {
     throw new Forbidden(`You are not allowed to keep terminal session alive with name ${terminal.metadata.name}`)
   }
 
