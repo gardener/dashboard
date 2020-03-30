@@ -17,7 +17,7 @@
 'use strict'
 
 const EventEmitter = require('events')
-const { get } = require('lodash')
+const { get, matches, matchesProperty, property, isPlainObject } = require('lodash')
 
 const store = Symbol('store')
 const timeout = Symbol('timeout')
@@ -83,6 +83,23 @@ class Store extends EventEmitter {
   get (object) {
     const key = this[keyFunc](object)
     return this.getByKey(key)
+  }
+
+  find (predicate) {
+    if (typeof predicate === 'string') {
+      predicate = property(predicate)
+    } else if (Array.isArray(predicate)) {
+      predicate = matchesProperty(...predicate)
+    } else if (isPlainObject(predicate)) {
+      predicate = matches(predicate)
+    } else if (typeof predicate !== 'function') {
+      throw new TypeError('Invalid predicate argument')
+    }
+    for (const object of this[store].values()) {
+      if (predicate(object)) {
+        return object
+      }
+    }
   }
 
   hasByKey (key) {

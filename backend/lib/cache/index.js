@@ -126,7 +126,7 @@ module.exports = {
     return cache.getProjects()
   },
   findProjectByNamespace (namespace) {
-    const project = _.find(cache.getProjects(), ['spec.namespace', namespace])
+    const project = cache.projects.find(['spec.namespace', namespace])
     if (!project) {
       throw new HTTPError({
         statusCode: 404,
