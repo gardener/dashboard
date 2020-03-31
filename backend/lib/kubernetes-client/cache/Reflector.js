@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { format: fmt } = require('util')
 const delay = require('delay')
 const WebSocket = require('ws')
 const pEvent = require('p-event')
@@ -308,9 +309,8 @@ class Reflector {
     }
     const end = moment()
     const watchDuration = moment.duration(end.diff(begin))
-    if (watchDuration.asSeconds() < 1000 && count === 0) {
-      logger.error('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName)
-      throw new Error('Very short watch')
+    if (watchDuration.asMilliseconds() < 1000 && count === 0) {
+      throw new Error(fmt('Very short watch %s - watch lasted less than a second and no items received', this.expectedTypeName))
     }
     logger.info('Watch %s closed - total %d items received within %s', this.expectedTypeName, count, watchDuration.humanize())
   }
