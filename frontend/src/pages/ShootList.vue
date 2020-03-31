@@ -144,7 +144,7 @@ limitations under the License.
       </v-dialog>
     </v-card>
     <v-fab-transition v-if="canCreateShoots">
-      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace: $route.params.namespace } }">
+      <v-btn v-if="projectScope" class="cyan darken-2" dark fab fixed bottom right v-show="floatingButton" :to="{ name: 'NewShoot', params: {  namespace } }">
         <v-icon dark ref="add">add</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -153,7 +153,6 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex'
-import find from 'lodash/find'
 import zipObject from 'lodash/zipObject'
 import map from 'lodash/map'
 import get from 'lodash/get'
@@ -206,10 +205,13 @@ export default {
       this.setShootListSearchValue(value)
     },
     canGetSecrets () {
-      this.hideNotAvailableColumns()
+      this.setColumnVisibility()
     },
     canDeleteShoots () {
-      this.hideNotAvailableColumns()
+      this.setColumnVisibility()
+    },
+    projectScope () {
+      this.setColumnVisibility()
     }
   },
   methods: {
@@ -266,27 +268,26 @@ export default {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
       for (const header of this.allHeaders) {
         header.checked = get(checkedColumns, header.value, header.defaultChecked)
-        if (get(header, 'adminOnly', false)) {
-          this.hideHeaderIfNotValue(header, this.isAdmin)
-        }
       }
     },
-    hideNotAvailableColumns () {
+    setColumnVisibility () {
       for (const header of this.allHeaders) {
-        if (header.value === 'journalLabels') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
+        switch (header.value) {
+          case 'journalLabels':
+          case 'journal':
+            header.hidden = !(this.gitHubRepoUrl && this.isAdmin)
+            break
+          case 'actions':
+            header.hidden = !(this.canDeleteShoots || this.canGetSecrets)
+            break
+          case 'project':
+            header.hidden = !!this.projectScope
+            break
+          default:
+            if (get(header, 'adminOnly', false)) {
+              header.hidden = !this.isAdmin
+            }
         }
-        if (header.value === 'journal') {
-          this.hideHeaderIfNotValue(header, this.gitHubRepoUrl)
-        }
-        if (header.value === 'actions') {
-          this.hideHeaderIfNotValue(header, this.canDeleteShoots || this.canGetSecrets)
-        }
-      }
-    },
-    hideHeaderIfNotValue (header, value) {
-      if (!value) {
-        header.hidden = true
       }
     },
     toggleFilter (key) {
@@ -324,7 +325,8 @@ export default {
     ...mapState([
       'shootsLoading',
       'onlyShootsWithIssues',
-      'cfg'
+      'cfg',
+      'namespace'
     ]),
     clusterAccessDialog: {
       get () {
@@ -346,7 +348,7 @@ export default {
       return this.headers.filter(e => e.checked === true)
     },
     projectScope () {
-      return this.$route.params.namespace !== '_all'
+      return this.namespace !== '_all'
     },
     showOnlyShootsWithIssues: {
       get () {
@@ -391,18 +393,13 @@ export default {
   mounted () {
     this.floatingButton = true
     this.loadColumnsChecked()
-    this.hideNotAvailableColumns()
+    this.setColumnVisibility()
     this.setShootListFilters({
       progressing: true,
       userIssues: this.isAdmin,
       deactivatedReconciliation: this.isAdmin,
       hasJournals: false
     })
-  },
-  beforeUpdate () {
-    const predicate = item => item.value === 'project'
-    const projectHeader = find(this.allHeaders, predicate)
-    projectHeader.hidden = this.projectScope
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
