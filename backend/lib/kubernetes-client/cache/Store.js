@@ -50,11 +50,14 @@ class Store extends EventEmitter {
   }
 
   synchronizing () {
-    this[synchronizationState] = SYNCHRONIZING
-    this[timeoutId] = setTimeout(() => {
-      this[synchronizationState] = STALE
-      this.emit('stale')
-    }, this[timeout])
+    if (this[synchronizationState] === INITIAL || this[synchronizationState] === SYNCHRONIZED) {
+      this[synchronizationState] = SYNCHRONIZING
+      clearTimeout(this[timeoutId])
+      this[timeoutId] = setTimeout(() => {
+        this[synchronizationState] = STALE
+        this.emit('stale')
+      }, this[timeout])
+    }
   }
 
   listKeys () {
