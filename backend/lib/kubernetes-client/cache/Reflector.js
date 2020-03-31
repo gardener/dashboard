@@ -25,7 +25,7 @@ const logger = require('../../logger')
 const ListPager = require('./ListPager')
 const {
   isExpiredError,
-  isRetryError,
+  isConnectionRefused,
   isTooLargeResourceVersionError,
   getCurrentResourceVersion,
   StatusError
@@ -51,6 +51,41 @@ async function closeOrTerminateSocket (socket, gracePeriodMilliseconds = 1000) {
   }
 }
 
+class BackoffManager {
+  constructor ({ min = 800, max = 15 * 1000, resetDuration = 60 * 1000, factor = 1.5, jitter = 0.1 } = {}) {
+    this.min = min
+    this.max = max
+    this.factor = factor
+    this.jitter = jitter > 0 && jitter <= 1 ? jitter : 0
+    this.resetDuration = resetDuration
+    this.attempt = 0
+    this.timeoutId = undefined
+  }
+
+  duration () {
+    this.clearTimeout()
+    this.timeoutId = setTimeout(() => this.reset(), this.resetDuration)
+    const attempt = this.attempt
+    this.attempt += 1
+    if (attempt > Math.floor(Math.log(this.max / this.min) / Math.log(this.factor))) {
+      return this.max
+    }
+    let duration = this.min * Math.pow(this.factor, attempt)
+    if (this.jitter) {
+      duration = Math.floor((1 + this.jitter * (2 * Math.random() - 1)) * duration)
+    }
+    return Math.min(Math.floor(duration), this.max)
+  }
+
+  reset () {
+    this.attempt = 0
+  }
+
+  clearTimeout () {
+    clearTimeout(this.timeoutId)
+  }
+}
+
 class Reflector {
   constructor (listWatcher, store) {
     this.listWatcher = listWatcher
@@ -66,6 +101,7 @@ class Reflector {
     this.paginatedResult = false
     this.socket = undefined
     this.stopRequested = false
+    this.backoffManager = new BackoffManager()
   }
 
   get apiVersion () {
@@ -103,6 +139,7 @@ class Reflector {
     if (agent && typeof agent.destroy === 'function') {
       agent.destroy()
     }
+    this.backoffManager.clearTimeout()
     return closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
   }
 
@@ -118,7 +155,7 @@ class Reflector {
         break
       }
       logger.info('Restarting reflector %s', this.expectedTypeName)
-      await delay(randomize(this.period.asMilliseconds()))
+      await delay(this.backoffManager.duration())
     }
   }
 
@@ -202,7 +239,7 @@ class Reflector {
           } else {
             logger.error('Watch of %s failed with: %s', this.expectedTypeName, err)
           }
-          if (isRetryError(err)) {
+          if (isConnectionRefused(err)) {
             await delay(randomize(this.period.asMilliseconds()))
             continue
           }

@@ -20,13 +20,9 @@ const { get, includes } = require('lodash')
 const { HTTPError } = require('got')
 const { TimeoutError } = require('p-timeout')
 
-const RETRY_ERROR_CODES = [
+const CONNECTION_ERROR_CODES = [
   'ETIMEDOUT',
-  'ECONNRESET',
-  'EADDRINUSE',
-  'ECONNREFUSED',
-  'ENOTFOUND',
-  'ENETUNREACH'
+  'ECONNREFUSED'
 ]
 
 class StatusError extends Error {
@@ -90,8 +86,8 @@ function isTooLargeResourceVersionError (err) {
   return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
 }
 
-function isRetryError (err) {
-  return includes(RETRY_ERROR_CODES, err.code) || isTimeoutError(err)
+function isConnectionRefused (err) {
+  return includes(CONNECTION_ERROR_CODES, err.code) || isTimeoutError(err)
 }
 
 function getRetryAfterSeconds (err) {
@@ -111,7 +107,7 @@ module.exports = {
   isExpiredError,
   isTimeoutError,
   isTooLargeResourceVersionError,
-  isRetryError,
+  isConnectionRefused,
   getRetryAfterSeconds,
   getCurrentResourceVersion
 }

@@ -276,6 +276,8 @@ describe('kubernetes-client', function () {
       beforeEach(function () {
         reflector = Reflector.create(listWatcher, store)
         reflector.period = moment.duration(1)
+        reflector.backoffManager.min = 1
+        reflector.backoffManager.max = 10
       })
 
       afterEach(async function () {
@@ -286,7 +288,6 @@ describe('kubernetes-client', function () {
       it('should have property apiVersion', async function () {
         expect(reflector.apiVersion).to.equal('v1')
         listWatcher.group = 'test'
-        expect(reflector.apiVersion).to.equal('test/v1')
       })
 
       it('should have property kind', async function () {
