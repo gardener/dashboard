@@ -108,7 +108,7 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
 
 async function updateProjectMemberRoles (client, { namespace, name, roles: memberRoles }) {
   // get project
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
   const member = _.find(members, ['name', name])

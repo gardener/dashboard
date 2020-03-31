@@ -1277,12 +1277,7 @@ const stub = {
         .reply(200, () => newProject)
     }
     getServiceAccountsForNamespace(scope, namespace)
-    return [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace)),
-      scope
-    ]
+    return scope
   },
   removeMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
@@ -1367,7 +1362,8 @@ const stub = {
         const nonResourceRules = []
         const incomplete = false
         if (_.endsWith(payload.id, 'example.org')) {
-          resourceRules = resourceRules.concat([{
+          resourceRules = resourceRules.concat([
+            {
               verbs: ['get'],
               apiGroups: ['core.gardener.cloud'],
               resources: ['projects'],
@@ -1380,7 +1376,8 @@ const stub = {
             }
           ])
         } else {
-          resourceRules = resourceRules.concat([{
+          resourceRules = resourceRules.concat([
+            {
               verbs: ['get'],
               apiGroups: ['core.gardener.cloud'],
               resources: ['projects'],
