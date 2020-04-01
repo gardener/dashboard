@@ -183,8 +183,9 @@ export function displayName (username) {
 
 export function parseSize (value) {
   const sizeRegex = /^(\d+)Gi$/
-  if (sizeRegex.test(value)) {
-    const [, sizeValue] = sizeRegex.exec(value)
+  const result = sizeRegex.exec(value)
+  if (result) {
+    const [, sizeValue] = result
     return sizeValue
   }
   console.error(`Could not parse size ${value} as it does not match regex ^(\\d+)Gi$`)
