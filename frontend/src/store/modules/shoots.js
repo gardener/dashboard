@@ -227,7 +227,9 @@ const actions = {
     const shootResource = {
       apiVersion: 'core.gardener.cloud/v1beta1',
       kind: 'Shoot',
-      metadata: {}
+      metadata: {
+        namespace: rootState.namespace
+      }
     }
 
     const infrastructureKind = head(rootGetters.sortedCloudProviderKindList)
