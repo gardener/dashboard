@@ -24,18 +24,27 @@ const timeout = Symbol('timeout')
 const keyPath = Symbol('keyPath')
 const keyFunc = Symbol('keyFunc')
 const timeoutId = Symbol('timeoutId')
-const synchronizationState = Symbol('synchronizationState')
+const state = Symbol('state')
 
-const INITIAL = 'initial'
-const SYNCHRONIZED = 'synchronized'
-const SYNCHRONIZING = 'synchronizing'
-const STALE = 'stale'
+const FRESH = 'FRESH'
+const REFRESHING = 'REFRESHING'
+const STALE = 'STALE'
 
+/*
+  The Store has three possible states (STALE, FRESH and REFRESHING).
+  The initial state of the store is STALE.
+  The store is FRESH when `replace` is called. This is allowed from any other state.
+  When a refresh (the `listWandWatch` method of the reflector is called) of the store is triggered
+  (e.g. because the watch has been closed or the connection has been lost) the `setRefreshing` method is called.
+  But a transition to REFRESHING is only possible from FRESH and not from STALE.
+  If no `replace` is called within the given timeout the store will become STALE.
+  From STALE the only possible transition is to FRESH by calling `replace`.
+*/
 class Store extends EventEmitter {
   constructor (map, options = {}) {
     super()
     this[store] = map || new Map()
-    this[synchronizationState] = INITIAL
+    this[state] = STALE
     this[timeoutId] = undefined
     this[timeout] = get(options, 'timeout', 30000)
     this[keyPath] = get(options, 'keyPath', 'metadata.uid')
@@ -45,16 +54,16 @@ class Store extends EventEmitter {
     return get(object, this[keyPath])
   }
 
-  get isSynchronized () {
-    return this[synchronizationState] === SYNCHRONIZED || this[synchronizationState] === SYNCHRONIZING
+  get isFresh () {
+    return this[state] !== STALE
   }
 
-  synchronizing () {
-    if (this[synchronizationState] === INITIAL || this[synchronizationState] === SYNCHRONIZED) {
-      this[synchronizationState] = SYNCHRONIZING
+  setRefreshing () {
+    if (this[state] === FRESH) {
+      this[state] = REFRESHING
       clearTimeout(this[timeoutId])
       this[timeoutId] = setTimeout(() => {
-        this[synchronizationState] = STALE
+        this[state] = STALE
         this.emit('stale')
       }, this[timeout])
     }
@@ -70,13 +79,11 @@ class Store extends EventEmitter {
 
   clear () {
     this[store].clear()
-    this.emit('cleared')
   }
 
   delete (object) {
     const key = this[keyFunc](object)
     this[store].delete(key)
-    this.emit('deleted', object)
   }
 
   getByKey (key) {
@@ -117,24 +124,22 @@ class Store extends EventEmitter {
   add (object) {
     const key = this[keyFunc](object)
     this[store].set(key, object)
-    this.emit('added', object)
   }
 
   update (object) {
     const key = this[keyFunc](object)
     this[store].set(key, object)
-    this.emit('updated', object)
   }
 
   replace (items) {
+    clearTimeout(this[timeoutId])
     this.clear()
     for (const object of items) {
       const key = this[keyFunc](object)
       this[store].set(key, object)
     }
-    clearTimeout(this[timeoutId])
-    this[synchronizationState] = SYNCHRONIZED
-    this.emit('replaced')
+    this[state] = FRESH
+    this.emit('fresh')
   }
 }
 

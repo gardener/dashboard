@@ -169,7 +169,7 @@ class Reflector {
       pager.pageSize = 0
     }
 
-    this.store.synchronizing()
+    this.store.setRefreshing()
 
     let list
     try {
@@ -239,6 +239,9 @@ class Reflector {
           } else {
             logger.error('Watch of %s failed with: %s', this.expectedTypeName, err)
           }
+          // If this is "connection refused" error, it means that most likely apiserver is not responsive.
+          // It doesn't make sense to re-list all objects because most likely we will be able to restart
+          // watch where we ended.
           if (isConnectionRefused(err)) {
             await delay(randomize(this.period.asMilliseconds()))
             continue

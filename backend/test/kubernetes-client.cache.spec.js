@@ -18,11 +18,11 @@
 
 const EventEmitter = require('events')
 const pEvent = require('p-event')
-const delay = require('delay')
 const moment = require('moment')
 
 const ApiErrors = require('../lib/kubernetes-client/ApiErrors')
 const { Reflector, Store, ListPager } = require('../lib/kubernetes-client/cache')
+const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */
@@ -50,6 +50,7 @@ describe('kubernetes-client', function () {
     const a = createDummy({ uid: 'a', resourceVersion: '1' })
     const b = createDummy({ uid: 'b', resourceVersion: '2' })
     const c = createDummy({ uid: 'c', resourceVersion: '3' })
+    const x = createDummy({ uid: 'a', resourceVersion: '4' })
     const bookmark = createDummy({ resourceVersion: '9' })
 
     class TestSocket extends EventEmitter {
@@ -119,7 +120,7 @@ describe('kubernetes-client', function () {
       }
 
       async list ({ limit, continue: continueToken }) {
-        await delay(1)
+        await nextTick()
         const metadata = {
           resourceVersion: '2',
           selfLink: 'link'
@@ -157,7 +158,7 @@ describe('kubernetes-client', function () {
       emitEvent (event) {
         const message = JSON.stringify(event)
         if (this.socket) {
-          setTimeout(() => this.socket.emit('message', message), 1)
+          this.socket.emit('message', message)
         } else {
           this.messages.push(message)
         }
@@ -176,43 +177,46 @@ describe('kubernetes-client', function () {
     })
 
     describe('Store', function () {
+      let clearSpy
+
+      beforeEach(function () {
+        clearSpy = sandbox.spy(store, 'clear')
+      })
+
       it('should add, update and delete elements', async function () {
         expect(store).to.be.an.instanceof(Store)
+        expect(store.isFresh).to.be.false
+
+        // refresh
+        store.setRefreshing()
+        expect(store.isFresh).to.be.false
 
         // replace [a]
-        expect(store.isSynchronized).to.be.false
-        const clearedAndReplaced = Promise.all([
-          pEvent(store, 'cleared'),
-          pEvent(store, 'replaced')
-        ])
         store.replace([a])
-        await clearedAndReplaced
-        expect(store.isSynchronized).to.be.true
+        expect(store.isFresh).to.be.true
+        expect(clearSpy).to.be.calledOnce
+        clearSpy.resetHistory()
         expect(store.has(a)).to.be.true
         expect(store.get(a)).to.equal(a)
         expect(store.getByKey('a')).to.equal(a)
         expect(store.list()).to.eql([a])
 
         // add b
-        const added = pEvent(store, 'added')
         store.add(b)
-        expect(await added).to.equal(b)
         expect(store.listKeys()).to.eql(['a', 'b'])
 
         // update a
-        const updated = pEvent(store, 'updated')
-        store.update(a)
-        expect(await updated).to.equal(a)
+        store.update(x)
+        expect(store.listKeys()).to.eql(['a', 'b'])
+        expect(store.getByKey('a')).to.equal(x)
 
         // delete b
-        const deleted = pEvent(store, 'deleted')
         store.delete(b)
-        expect(await deleted).to.equal(b)
         expect(store.listKeys()).to.eql(['a'])
 
-        store.synchronizing()
+        store.setRefreshing()
         await pEvent(store, 'stale')
-        expect(store.isSynchronized).to.be.false
+        expect(store.isFresh).to.be.false
       })
     })
 
@@ -535,17 +539,23 @@ describe('kubernetes-client', function () {
         it('should run a reflector', async function () {
           expect(reflector).to.be.an.instanceof(Reflector)
           reflector.run()
-          await pEvent(store, 'replaced')
+          await pEvent(store, 'fresh')
           expect(store.listKeys()).to.eql(['a', 'b'])
+          await pEvent(listWatcher.socket, 'open')
+          // wait until message loop has been established
+          await nextTick()
+
           // add c
           listWatcher.emitEvent({ type: 'ADDED', object: c })
-          await pEvent(store, 'added')
+          // wait until added event has been handled
+          await nextTick()
           expect(store.listKeys()).to.eql(['a', 'b', 'c'])
           // close websocket connection
           listWatcher.closeWatch()
           // delete c
           listWatcher.emitEvent({ type: 'DELETED', object: c })
-          await pEvent(store, 'deleted')
+          // wait until deleted event has been handled
+          await nextTick()
           expect(store.listKeys()).to.eql(['a', 'b'])
         })
       })

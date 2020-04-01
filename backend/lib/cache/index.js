@@ -30,9 +30,7 @@ async function initializeStoreSynchronization (store, cachable) {
     } else {
       cachable.syncList(store)
     }
-    await pEvent(store, 'replaced', {
-      rejectionEvents: ['stale']
-    })
+    await pEvent(store, 'fresh')
   } catch (err) {
     logger.warn('Initialization of %s store synchronization failed', name)
   }
@@ -63,7 +61,7 @@ class Cache {
   }
 
   list (key) {
-    if (!this[key].isSynchronized) {
+    if (!this[key].isFresh) {
       throw new CacheExpiredError(`The "${key}" service is currently not available. Please try again later.`)
     }
     return this[key].list()
