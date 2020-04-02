@@ -26,6 +26,8 @@ const keyFunc = Symbol('keyFunc')
 const timeoutId = Symbol('timeoutId')
 const state = Symbol('state')
 
+const defaultTimeout = 10 * 1000
+
 const FRESH = 'FRESH'
 const REFRESHING = 'REFRESHING'
 const STALE = 'STALE'
@@ -46,7 +48,7 @@ class Store extends EventEmitter {
     this[store] = map || new Map()
     this[state] = STALE
     this[timeoutId] = undefined
-    this[timeout] = get(options, 'timeout', 30000)
+    this[timeout] = get(options, 'timeout', defaultTimeout)
     this[keyPath] = get(options, 'keyPath', 'metadata.uid')
   }
 
