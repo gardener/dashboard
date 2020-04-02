@@ -24,12 +24,16 @@ const cookieParser = require('cookie-parser')
 const logger = require('./logger')
 const routes = require('./routes')
 const { authenticate } = require('./security')
-const { createClient } = require('./kubernetes-client')
+const { createClient, dashboardClient } = require('./kubernetes-client')
+const cache = require('./cache')
 const io = require('./io')
 const { frontendConfig, notFound, sendError } = require('./middleware')
 
 // configure router
 const router = express.Router()
+
+// cache synchronizer
+const synchronizer = () => cache.synchronize(dashboardClient)
 
 router.use(morgan('common', logger))
 router.use(cookieParser())
@@ -42,6 +46,7 @@ router.use(sendError)
 // exports
 module.exports = {
   router,
+  synchronizer,
   io,
   frontendConfig
 }

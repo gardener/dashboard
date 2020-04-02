@@ -16,16 +16,14 @@
 
 'use strict'
 
-const httpSymbols = [
-  'prefixUrl',
-  'client',
-  'request'
-]
-const http = {}
-for (const key of httpSymbols) {
-  http[key] = Symbol(`http.${key}`)
-}
-
 module.exports = {
-  http
+  http: {
+    prefixUrl: Symbol('http.prefixUrl'),
+    client: Symbol('http.client'),
+    agent: Symbol('http.agent'),
+    request: Symbol('http.request')
+  },
+  ws: {
+    connect: Symbol('ws.connect')
+  }
 }

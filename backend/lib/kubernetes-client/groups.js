@@ -19,49 +19,43 @@
 const HttpClient = require('./HttpClient')
 const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup } = require('./mixins')
 
-class Resource extends HttpClient {
-  constructor (options = {}) {
-    super({ ...options, responseType: 'json' })
-  }
-}
-
-class APIRegistration extends V1(NamedGroup(Resource)) {
+class APIRegistration extends V1(NamedGroup(HttpClient)) {
   static get group () {
     return 'apiregistration.k8s.io'
   }
 }
 
-class Authentication extends V1(NamedGroup(Resource)) {
+class Authentication extends V1(NamedGroup(HttpClient)) {
   static get group () {
     return 'authentication.k8s.io'
   }
 }
 
-class Authorization extends V1(NamedGroup(Resource)) {
+class Authorization extends V1(NamedGroup(HttpClient)) {
   static get group () {
     return 'authorization.k8s.io'
   }
 }
 
-class Core extends V1(CoreGroup(Resource)) {
+class Core extends V1(CoreGroup(HttpClient)) {
   static get group () {
     return ''
   }
 }
 
-class Extensions extends V1Beta1(NamedGroup(Resource)) {
+class Extensions extends V1Beta1(NamedGroup(HttpClient)) {
   static get group () {
     return 'extensions'
   }
 }
 
-class GardenerCore extends V1Beta1(NamedGroup(Resource)) {
+class GardenerCore extends V1Beta1(NamedGroup(HttpClient)) {
   static get group () {
     return 'core.gardener.cloud'
   }
 }
 
-class GardenerDashboard extends V1Alpha1(NamedGroup(Resource)) {
+class GardenerDashboard extends V1Alpha1(NamedGroup(HttpClient)) {
   static get group () {
     return 'dashboard.gardener.cloud'
   }

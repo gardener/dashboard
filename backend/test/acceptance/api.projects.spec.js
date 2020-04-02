@@ -20,6 +20,7 @@ const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
 const { WatchBuilder } = require('../../lib/kubernetes-client')
+const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -38,6 +39,10 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const description = 'description'
   const purpose = 'purpose'
   const data = { owner, description, purpose }
+
+  beforeEach(function () {
+    cache.projects.replace(k8s.projectList)
+  })
 
   it('should return two projects', async function () {
     const bearer = await user.bearer

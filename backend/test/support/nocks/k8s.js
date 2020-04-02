@@ -18,6 +18,7 @@
 
 const _ = require('lodash')
 const nock = require('nock')
+const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
 const hash = require('object-hash')
@@ -370,7 +371,8 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
       name,
       annotations: {
         'billing.gardener.cloud/costObject': costObject
-      }
+      },
+      uid: uuidv1()
     },
     spec: {
       namespace,
@@ -382,21 +384,6 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
     },
     status: {
       phase
-    }
-  }
-}
-
-function getProjectNamespace (namespace) {
-  const project = readProject(namespace)
-  const defaultName = namespace.replace(/^garden-/)
-  const name = _.get(project, 'metadata.name', defaultName)
-  return {
-    metadata: {
-      name: namespace,
-      labels: {
-        'garden.sapcloud.io/role': 'project',
-        'project.garden.sapcloud.io/name': name
-      }
     }
   }
 }
@@ -729,13 +716,7 @@ const stub = {
       ? _.filter(infrastructureSecretList, ['metadata.namespace', namespace])
       : []
 
-    const namespaces = _
-      .chain(secretBindings)
-      .map('secretRef.namespace')
-      .uniq()
-      .value()
-
-    const scopes = [nockWithAuthorization(bearer)
+    return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/secretbindings`)
       .reply(200, {
         items: secretBindings
@@ -744,17 +725,6 @@ const stub = {
       .reply(200, {
         items: infrastructureSecrets
       })
-    ]
-    const adminScope = nockWithAuthorization(auth.bearer)
-    namespaces.forEach(namespace => {
-      const project = readProject(namespace)
-      adminScope
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-        .reply(200, project)
-    })
-    return scopes
   },
   createInfrastructureSecret ({ bearer, namespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -766,7 +736,6 @@ const stub = {
       resourceVersion,
       cloudProfileName
     })
-    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .post(`/api/v1/namespaces/${namespace}/secrets`, body => {
@@ -782,10 +751,6 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecretBinding)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-      .reply(200, project)
   },
   patchInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -800,7 +765,6 @@ const stub = {
       bindingNamespace,
       cloudProfileName
     })
-    const project = readProject(namespace)
 
     return nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${bindingNamespace}/secretbindings/${bindingName}`)
@@ -811,10 +775,6 @@ const stub = {
         return true
       })
       .reply(200, () => resultSecret)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(200, () => getProjectNamespace(namespace))
-      .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
-      .reply(200, project)
   },
   patchSharedInfrastructureSecret ({ bearer, namespace, name, bindingName, bindingNamespace, data, cloudProfileName, resourceVersion = 42 }) {
     const {
@@ -899,14 +859,7 @@ const stub = {
   getProjects ({ bearer }) {
     const scope = nockWithAuthorization(bearer)
     canGetSecretsInAllNamespaces(scope)
-    return [
-      scope,
-      nockWithAuthorization(auth.bearer)
-        .get('/apis/core.gardener.cloud/v1beta1/projects')
-        .reply(200, {
-          items: projectList
-        })
-    ]
+    return scope
   },
   getTerminalConfig ({ bearer, namespace, shootName, target }) {
     const scope = nockWithAuthorization(bearer)
@@ -1211,13 +1164,9 @@ const stub = {
         message: 'Forbidden'
       }
     }
-    return [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace))
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-        .reply(statusCode, () => result)
-    ]
+    return nockWithAuthorization(bearer)
+      .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
+      .reply(statusCode, () => result)
   },
   createProject ({ bearer, resourceVersion = 42 }) {
     const result = {
@@ -1248,8 +1197,6 @@ const stub = {
 
     return [
       nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace))
         .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
         .reply(200, () => project)
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
@@ -1265,8 +1212,6 @@ const stub = {
     const confirmationPath = ['metadata', 'annotations', 'confirmation.gardener.cloud/deletion']
     return [
       nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace))
         .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots`)
         .reply(200, {
           items: []
@@ -1282,26 +1227,15 @@ const stub = {
     ]
   },
   getMembers ({ bearer, namespace }) {
+    const scope = nockWithAuthorization(bearer)
     const project = readProject(namespace)
     if (project) {
-      const scope = nockWithAuthorization(bearer)
+      scope
         .get(`/apis/core.gardener.cloud/v1beta1/projects/${project.metadata.name}`)
         .reply(200, () => project)
       getServiceAccountsForNamespace(scope, namespace)
-
-      return [
-        nockWithAuthorization(bearer)
-          .get(`/api/v1/namespaces/${namespace}`)
-          .reply(200, () => getProjectNamespace(namespace))
-      ]
     }
-    return nockWithAuthorization(bearer)
-      .get(`/api/v1/namespaces/${namespace}`)
-      .reply(404, () => {
-        return {
-          message: 'Namespace not found'
-        }
-      })
+    return scope
   },
   addMember ({ bearer, namespace, name: username, roles }) {
     const project = readProject(namespace)
@@ -1323,12 +1257,7 @@ const stub = {
         .reply(200, () => newProject)
       getServiceAccountsForNamespace(scope, namespace)
     }
-    return [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace)),
-      scope
-    ]
+    return scope
   },
   updateMember ({ bearer, namespace, name: username, roles }) {
     const project = readProject(namespace)
@@ -1348,12 +1277,7 @@ const stub = {
         .reply(200, () => newProject)
     }
     getServiceAccountsForNamespace(scope, namespace)
-    return [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace)),
-      scope
-    ]
+    return scope
   },
   removeMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
@@ -1375,12 +1299,7 @@ const stub = {
         .reply(200, () => newProject)
     }
     getServiceAccountsForNamespace(scope, namespace)
-    return [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace)),
-      scope
-    ]
+    return scope
   },
   getMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
@@ -1389,12 +1308,6 @@ const stub = {
     const scope = nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
-    const scopes = [
-      nockWithAuthorization(bearer)
-        .get(`/api/v1/namespaces/${namespace}`)
-        .reply(200, () => getProjectNamespace(namespace)),
-      scope
-    ]
     const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(username) || []
     if (serviceAccountNamespace === namespace && isMember) {
       const serviceAccount = _.find(serviceAccountList, ({ metadata }) => metadata.name === serviceAccountName && metadata.namespace === namespace)
@@ -1406,7 +1319,7 @@ const stub = {
         .get(`/api/v1/namespaces/${namespace}/secrets/${serviceAccountSecretName}`)
         .reply(200, serviceAccountSecret)
     }
-    return scopes
+    return scope
   },
   healthz () {
     return nockWithAuthorization(auth.bearer)
@@ -1449,7 +1362,8 @@ const stub = {
         const nonResourceRules = []
         const incomplete = false
         if (_.endsWith(payload.id, 'example.org')) {
-          resourceRules = resourceRules.concat([{
+          resourceRules = resourceRules.concat([
+            {
               verbs: ['get'],
               apiGroups: ['core.gardener.cloud'],
               resources: ['projects'],
@@ -1462,7 +1376,8 @@ const stub = {
             }
           ])
         } else {
-          resourceRules = resourceRules.concat([{
+          resourceRules = resourceRules.concat([
+            {
               verbs: ['get'],
               apiGroups: ['core.gardener.cloud'],
               resources: ['projects'],

@@ -17,6 +17,7 @@
 'use strict'
 
 const chalk = require('chalk')
+const util = require('util')
 
 const LEVELS = {
   trace: 1,
@@ -32,6 +33,10 @@ class Logger {
     this.logHttpRequestBody = logHttpRequestBody === true
     this.silent = /^test/.test(process.env.NODE_ENV)
     this.console = console
+  }
+
+  inspect (obj) {
+    return util.inspect(obj, { depth: Infinity, colors: true })
   }
 
   isDisabled (level) {
@@ -54,6 +59,16 @@ class Logger {
     }
   }
 
+  connect ({ url, user, headers }) {
+    if (!this.isDisabled(LEVELS.trace + 1)) {
+      const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
+      const host = headers.host || url.host || '-'
+      const path = url.path || (url.pathname + url.search)
+      const msg = `CONNECT ${path} ${ident} ${host}`
+      this.console.log(this.ts + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg)
+    }
+  }
+
   request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
     if (!this.isDisabled(LEVELS.trace + 1)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
@@ -72,7 +87,7 @@ class Logger {
     if (!this.isDisabled(LEVELS.trace)) {
       let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (body && statusCode >= 300) {
-        msg += ' ' + body.toString('utf8')
+        msg += '\n' + this.inspect(body)
       }
       this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)
     }

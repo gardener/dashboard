@@ -24,6 +24,7 @@ const {
 const { PreconditionFailed } = require('../errors')
 const shoots = require('./shoots')
 const authorization = require('./authorization')
+const cache = require('../cache')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
@@ -96,14 +97,14 @@ async function validateDeletePreconditions ({ user, namespace }) {
   }
 }
 
+function readProject (client, namespace) {
+  const project = cache.findProjectByNamespace(namespace)
+  return client['core.gardener.cloud'].projects.get(project.metadata.name)
+}
+
 exports.list = async function ({ user, qs = {} }) {
-  const [
-    projects,
-    isAdmin
-  ] = await Promise.all([
-    dashboardClient['core.gardener.cloud'].projects.list(),
-    authorization.isAdmin(user)
-  ])
+  const projects = cache.getProjects()
+  const isAdmin = await authorization.isAdmin(user)
 
   const isMemberOf = project => _
     .chain(project)
@@ -123,7 +124,6 @@ exports.list = async function ({ user, qs = {} }) {
     .value()
   return _
     .chain(projects)
-    .get('items')
     .filter(project => {
       if (!isAdmin && !isMemberOf(project)) {
         return false
@@ -162,14 +162,14 @@ exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
   const client = user.client
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   return fromResource(project)
 }
 
 exports.patch = async function ({ user, name: namespace, body }) {
   const client = user.client
 
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   const name = project.metadata.name
   // do not update createdBy and name
   const { metadata, data } = fromResource(project)
@@ -185,7 +185,7 @@ exports.remove = async function ({ user, name: namespace }) {
 
   const client = user.client
 
-  const project = await client.getProjectByNamespace(namespace)
+  const project = await readProject(client, namespace)
   const name = project.metadata.name
   const annotations = _.assign({
     'confirmation.gardener.cloud/deletion': 'true'

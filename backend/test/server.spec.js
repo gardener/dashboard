@@ -17,7 +17,7 @@
 'use strict'
 
 const { Server } = require('http')
-const pEvent = require('p-event')
+const delay = require('delay')
 const createServer = require('../lib/server')
 
 function createApplication (port) {
@@ -25,6 +25,7 @@ function createApplication (port) {
     res.writeHead(200, { 'Content-Type': 'text/plain' })
     res.end('ok', 'utf8')
   }
+  app.synchronizing = false
   app.io = {}
   app.log = []
   app.get = key => {
@@ -35,8 +36,14 @@ function createApplication (port) {
         return 1
       case 'logger':
         return {
+          debug (...args) {
+            app.log.push(['debug', ...args])
+          },
           log (...args) {
             app.log.push(['log', ...args])
+          },
+          warn (...args) {
+            app.log.push(['warn', ...args])
           },
           error (...args) {
             app.log.push(['error', ...args])
@@ -58,6 +65,11 @@ function createApplication (port) {
             }
           }
         }
+      case 'synchronizer':
+        return () => {
+          app.synchronizing = true
+          return delay(1)
+        }
     }
   }
   return app
@@ -73,9 +85,10 @@ describe('server', function () {
     expect(server).to.be.instanceof(Server)
     expect(server).to.equal(app.io.server)
     try {
-      server.startListening()
-      await pEvent(server, 'listening', { timeout: 1000 })
-      expect(app.log[0]).to.eql(['info', `Server listening on port ${port}`])
+      await server.startListening()
+      expect(app.synchronizing).to.be.true
+      expect(app.log[0].slice(0, 2)).to.eql(['debug', 'Initial cache synchronization succeeded after %d ms'])
+      expect(app.log[1].slice(0, 3)).to.eql(['info', 'Server listening on port %d', port])
     } finally {
       server.close()
     }

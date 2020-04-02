@@ -324,13 +324,9 @@ function init () {
   setupShootsNamespace(io.of('/shoots'))
   setupJournalsNamespace(io.of('/journals'))
   // start watches
-  _.forEach(watches, (watch, resourceName) => {
-    try {
-      watch(io)
-    } catch (err) {
-      logger.error(`watch ${resourceName} error`, err)
-    }
-  })
+  for (const watch of Object.values(watches)) {
+    watch(io)
+  }
   // return io instance
   return io
 }

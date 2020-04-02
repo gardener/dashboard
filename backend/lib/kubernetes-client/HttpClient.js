@@ -17,17 +17,23 @@
 'use strict'
 
 const got = require('got')
-const { http } = require('./symbols')
+const WebSocket = require('ws')
+const { http, ws } = require('./symbols')
+const { beforeConnect } = require('./debug')
 const { patchHttpErrorMessage } = require('./util')
+const Agent = require('agentkeepalive')
 
 class HttpClient {
   constructor ({ url, ...options } = {}) {
-    const prefixUrl = this[http.prefixUrl](url)
+    const prefixUrl = this.constructor[http.prefixUrl](url)
+    if (!Reflect.has(options, 'agent')) {
+      options.agent = this.constructor.createAgent(prefixUrl)
+    }
     this[http.client] = got.extend({ prefixUrl, ...options })
   }
 
-  [http.prefixUrl] (url) {
-    return url
+  get [http.agent] () {
+    return this[http.client].defaults.options.agent
   }
 
   async [http.request] (url, { searchParams, ...options } = {}) {
@@ -40,6 +46,58 @@ class HttpClient {
       throw patchHttpErrorMessage(err)
     }
   }
+
+  [ws.connect] (url, { searchParams, ...connectOptions } = {}) {
+    const defaultOptions = this[http.client].defaults.options
+    const {
+      prefixUrl,
+      servername,
+      headers,
+      ca,
+      key,
+      cert,
+      rejectUnauthorized
+    } = defaultOptions
+    url = new URL(url, ensureTrailingSlashExists(prefixUrl))
+    if (searchParams) {
+      url.search = searchParams.toString()
+    }
+    const origin = url.origin
+    const options = {
+      origin,
+      servername,
+      headers,
+      key,
+      cert,
+      ca,
+      rejectUnauthorized
+    }
+    if (Reflect.has(connectOptions, 'agent')) {
+      options.agent = connectOptions.agent
+    } else if (Reflect.has(defaultOptions, 'agent')) {
+      options.agent = defaultOptions.agent
+    }
+    beforeConnect(url, options)
+    return this.constructor.createWebSocket(url, options)
+  }
+
+  static [http.prefixUrl] (url) {
+    return url
+  }
+
+  static createWebSocket (url, options) {
+    return new WebSocket(url, options)
+  }
+
+  static createAgent (url, options) {
+    return /^https:/i.test(url)
+      ? new Agent.HttpsAgent(options)
+      : new Agent(options)
+  }
+}
+
+function ensureTrailingSlashExists (url) {
+  return url.endsWith('/') ? url : url + '/'
 }
 
 module.exports = HttpClient

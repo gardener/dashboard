@@ -27,6 +27,13 @@ function frontendConfig (req, res, next) {
   res.json(Object.assign(frontendConfig, config.frontend))
 }
 
+function noCache () {
+  return (req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private')
+    next()
+  }
+}
+
 function historyFallback (filename) {
   return (req, res, next) => {
     if (!_.includes(['GET', 'HEAD'], req.method) || !req.accepts('html')) {
@@ -116,6 +123,7 @@ const ErrorTemplate = _.template(`<!doctype html>
 
 module.exports = {
   frontendConfig,
+  noCache,
   historyFallback,
   notFound,
   sendError,

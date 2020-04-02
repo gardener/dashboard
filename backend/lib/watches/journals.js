@@ -18,20 +18,20 @@
 
 const pRetry = require('p-retry')
 const logger = require('../logger')
-const journals = require('../services/journals')
-const cache = require('../cache')
 const config = require('../config')
+const journals = require('../services/journals')
+const { getJournalCache } = require('../cache')
 
 module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
     logger.warn('Missing gitHub property in config for journals feature')
     return
   }
-
-  const journalCache = cache.getJournalCache()
+  const nsp = io.of('/journals')
+  const journalCache = getJournalCache()
   journalCache.onIssue(event => {
     const room = 'issues'
-    io.of('/journals').to(room).emit('events', {
+    nsp.to(room).emit('events', {
       kind: 'issues',
       events: [event]
     })
@@ -39,7 +39,7 @@ module.exports = (io, retryOptions = {}) => {
   journalCache.onComment(event => {
     const { namespace, name } = event.object.metadata
     const room = `comments_${namespace}/${name}`
-    io.of('/journals').to(room).emit('events', {
+    nsp.to(room).emit('events', {
       kind: 'comments',
       events: [event]
     })

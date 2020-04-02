@@ -15,29 +15,86 @@
 //
 
 const _ = require('lodash')
+const { HTTPError } = require('got')
+const pEvent = require('p-event')
+const logger = require('../logger')
+const { Store } = require('../kubernetes-client/cache')
+const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
+const createJournalCache = require('./journals')
 
-const cloudProfiles = []
-const seeds = []
-const quotas = []
-const journals = require('./journals')()
-
-const cache = {
-  getCloudProfiles () {
-    return cloudProfiles
-  },
-  getQuotas () {
-    return quotas
-  },
-  getSeeds () {
-    return seeds
-  },
-  getJournalCache () {
-    return journals
+async function initializeStoreSynchronization (store, cachable) {
+  const { scope, name } = cachable.constructor
+  try {
+    if (scope === 'Namespaced') {
+      cachable.syncListAllNamespaces(store)
+    } else {
+      cachable.syncList(store)
+    }
+    await pEvent(store, 'fresh')
+  } catch (err) {
+    logger.warn('Initialization of %s store synchronization failed', name)
   }
 }
 
+class Cache {
+  constructor () {
+    this.synchronizationPromise = undefined
+    this.cloudprofiles = new Store()
+    this.seeds = new Store()
+    this.quotas = new Store()
+    this.projects = new Store()
+    this.journalCache = createJournalCache()
+  }
+
+  /*
+    In file `lib/api.js` the synchronization is started with the privileged dashboardClient.
+    Be careful when reading information from the cache that an authorization check is done
+    or the information can be considered as not sensitive or public.
+  */
+  synchronize (client) {
+    if (!this.synchronizationPromise) {
+      const keys = ['cloudprofiles', 'quotas', 'seeds', 'projects']
+      const iteratee = key => initializeStoreSynchronization(this[key], client['core.gardener.cloud'][key])
+      this.synchronizationPromise = Promise.all(keys.map(iteratee))
+    }
+    return this.synchronizationPromise
+  }
+
+  list (key) {
+    if (!this[key].isFresh) {
+      throw new CacheExpiredError(`The "${key}" service is currently not available. Please try again later.`)
+    }
+    return this[key].list()
+  }
+
+  getCloudProfiles () {
+    return this.list('cloudprofiles')
+  }
+
+  getQuotas () {
+    return this.list('quotas')
+  }
+
+  getSeeds () {
+    return this.list('seeds')
+  }
+
+  getProjects () {
+    return this.list('projects')
+  }
+
+  getJournalCache () {
+    return this.journalCache
+  }
+}
+
+const cache = new Cache()
+
 module.exports = {
-  _cache: cache,
+  cache,
+  synchronize (client) {
+    return cache.synchronize(client)
+  },
   getCloudProfiles () {
     return cache.getCloudProfiles()
   },
@@ -48,24 +105,33 @@ module.exports = {
     return cache.getSeeds()
   },
   getSeed (name) {
-    return _.cloneDeep(_.find(cache.getSeeds(), ['metadata.name', name]))
+    return _
+      .chain(cache.getSeeds())
+      .find(['metadata.name', name])
+      .cloneDeep()
+      .value()
   },
   getVisibleAndNotProtectedSeeds () {
     const predicate = item => {
-      const taints = _.get(item, 'spec.taints', [])
-      let seedProtected = false
-      let seedInVisible = false
-      _.forEach(taints, taint => {
-        if (taint.key === 'seed.gardener.cloud/protected') {
-          seedProtected = true
-        }
-        if (taint.key === 'seed.gardener.cloud/invisible') {
-          seedInVisible = true
-        }
-      })
-      return !seedProtected && !seedInVisible
+      const taints = _.get(item, 'spec.taints')
+      const unprotected = !_.find(taints, ['key', 'seed.gardener.cloud/protected'])
+      const visible = !_.find(taints, ['key', 'seed.gardener.cloud/invisible'])
+      return unprotected && visible
     }
     return _.filter(cache.getSeeds(), predicate)
+  },
+  getProjects () {
+    return cache.getProjects()
+  },
+  findProjectByNamespace (namespace) {
+    const project = cache.projects.find(['spec.namespace', namespace])
+    if (!project) {
+      throw new HTTPError({
+        statusCode: 404,
+        statusMessage: `Namespace '${namespace}' is not related to a gardener project`
+      })
+    }
+    return project
   },
   getJournalCache () {
     return cache.getJournalCache()

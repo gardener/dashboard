@@ -18,6 +18,7 @@
 
 const { fromKubeconfig } = require('../../lib/kubernetes-config')
 const _ = require('lodash')
+const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -29,6 +30,10 @@ module.exports = function ({ agent, k8s, auth }) {
   const username = `${name}@example.org`
   const id = username
   const user = auth.createUser({ id })
+
+  beforeEach(function () {
+    cache.projects.replace(k8s.projectList)
+  })
 
   it('should return two project members', async function () {
     const bearer = await user.bearer
@@ -52,7 +57,7 @@ module.exports = function ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(404)
     expect(res).to.be.json
-    expect(res.body.message).to.match(/not found/i)
+    expect(res.body.message).to.match(/not related to a gardener project/i)
   })
 
   it('should return a service account', async function () {

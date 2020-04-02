@@ -40,6 +40,7 @@ class Client {
       servername,
       throwHttpErrors: true,
       resolveBodyOnly: true,
+      retry: 0,
       timeout: 30 * 1000,
       ...options
     }
@@ -89,15 +90,6 @@ class Client {
   async createKubeconfigClient (secretRef) {
     const kubeconfig = await this.getKubeconfig(secretRef)
     return new this.constructor(fromKubeconfig(kubeconfig))
-  }
-
-  async getProjectByNamespace (namespace) {
-    const ns = await this.core.namespaces.get(namespace)
-    const name = _.get(ns, ['metadata', 'labels', 'project.garden.sapcloud.io/name'])
-    if (!name) {
-      throw createHttpError(404, `Namespace '${namespace}' is not related to a gardener project`)
-    }
-    return this['core.gardener.cloud'].projects.get(name)
   }
 
   getShoot (...args) {
