@@ -45,7 +45,7 @@ limitations under the License.
           <v-text-field
             color="black"
             v-model="tenantName"
-            label="Tenant Name"
+            label="Project / Tenant Name"
             :error-messages="getErrorMessages('tenantName')"
             @input="$v.tenantName.$touch()"
             @blur="$v.tenantName.$touch()"
