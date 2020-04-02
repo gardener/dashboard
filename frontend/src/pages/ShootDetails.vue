@@ -24,6 +24,8 @@ limitations under the License.
 
         <shoot-external-tools-card :shootItem="shootItem" class="mt-3"></shoot-external-tools-card>
 
+        <gardenctl-card :shootItem="shootItem" class="mt-3"></gardenctl-card>
+
         <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-3"></shoot-lifecycle-card>
       </v-flex>
 
@@ -72,6 +74,7 @@ import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
+import GardenctlCard from '@/components/ShootDetails/GardenctlCard'
 import get from 'lodash/get'
 import has from 'lodash/has'
 import { shootAddonByName } from '@/utils'
@@ -90,7 +93,8 @@ export default {
     ShootJournalsCard,
     ShootMonitoringCard,
     ShootLogging,
-    ShootExternalToolsCard
+    ShootExternalToolsCard,
+    GardenctlCard
   },
   mixins: [shootItem],
   computed: {
