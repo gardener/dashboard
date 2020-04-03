@@ -51,14 +51,14 @@ describe('utils', function () {
       const shoot = {
         metadata: {
           labels: {
-            'shoot.garden.sapcloud.io/status': undefined
+            'shoot.gardener.cloud/status': undefined
           }
         }
       }
       expect(shootHasIssue(shoot)).to.be.false
-      shoot.metadata.labels['shoot.garden.sapcloud.io/status'] = 'healthy'
+      shoot.metadata.labels['shoot.gardener.cloud/status'] = 'healthy'
       expect(shootHasIssue(shoot)).to.be.false
-      shoot.metadata.labels['shoot.garden.sapcloud.io/status'] = 'unhealthy'
+      shoot.metadata.labels['shoot.gardener.cloud/status'] = 'unhealthy'
       expect(shootHasIssue(shoot)).to.be.true
     })
 
