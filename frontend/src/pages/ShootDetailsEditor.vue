@@ -125,7 +125,8 @@ export default {
     },
     confirmEditorNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
         captionText: 'Leave Editor?',
         messageHtml: 'Your changes have not been saved.<br/>Are you sure you want to leave the editor?'
       })
