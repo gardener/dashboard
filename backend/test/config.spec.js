@@ -63,7 +63,7 @@ describe('config', function () {
     describe('#loadConfig', function () {
       const sandbox = sinon.createSandbox()
       const requiredEnvironmentVariables = {
-        APISERVER_URL: 'apiServerUrl',
+        API_SERVER_URL: 'apiServerUrl',
         SESSION_SECRET: 'secret', // pragma: whitelist secret
         OIDC_ISSUER: 'issuer',
         OIDC_CLIENT_ID: 'client_id',

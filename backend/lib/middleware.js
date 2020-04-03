@@ -19,10 +19,7 @@
 const _ = require('lodash')
 const config = require('./config')
 const logger = require('./logger')
-const {
-  isHttpError,
-  dashboardClient // privileged client for the garden cluster
-} = require('./kubernetes-client')
+const { isHttpError } = require('./kubernetes-client')
 const { NotFound, InternalServerError } = require('./errors')
 
 function frontendConfig (req, res, next) {
