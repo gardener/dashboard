@@ -26,9 +26,7 @@ const {
 const { NotFound, InternalServerError } = require('./errors')
 
 function frontendConfig (req, res, next) {
-  const frontendConfig = {
-    apiServerUrl: _.get(config, 'apiServerUrl', dashboardClient.cluster.server.toString())
-  }
+  const frontendConfig = {}
   res.json(Object.assign(frontendConfig, config.frontend))
 }
 

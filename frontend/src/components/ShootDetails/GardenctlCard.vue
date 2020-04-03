@@ -132,4 +132,9 @@ export default {
     padding-right: 33px;
   }
 
+  >>> code {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+  }
+
 </style>
