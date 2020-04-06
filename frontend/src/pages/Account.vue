@@ -17,97 +17,169 @@ limitations under the License.
 <template>
   <v-container grid-list-lg fluid>
     <v-layout row wrap>
-      <v-flex md6 xs12>
+      <v-flex xs12 sm6 class="pr-3">
         <v-card>
-          <v-toolbar card class="teal darken-1" dark>
-            <v-icon class="white--text pr-2">{{icon}}</v-icon>
-            <v-toolbar-title>User Details</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <copy-btn
-              :clipboard-text="idToken"
-              tooltip-text="Copy ID Token to clipboard"
-              copy-success-text="Copied ID Token to clipboard!">
-            </copy-btn>
+          <v-toolbar card dark dense class="teal darken-2">
+            <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
-          <v-card-text>
-            <v-layout row wrap>
-              <v-flex xs12>
-                <label class="caption grey--text text--darken-2">Name</label>
-                <p class="pt-2">
+          <v-list two-line class="no-height">
+            <v-list-tile>
+              <v-list-tile-avatar>
+                <v-icon color="teal darken-2">{{icon}}</v-icon>
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title class="label pb-2">User</v-list-tile-title>
+                <v-list-tile-sub-title class="content pb-2">
                   <account-avatar :account-name="username" mailTo :size="32"/>
-                </p>
-              </v-flex>
-              <v-flex v-if="!!fullDisplayName" md6 xs12>
-                <label class="caption grey--text text--darken-2">Display Name</label>
-                <p class="subheading">{{fullDisplayName}}</p>
-              </v-flex>
-              <v-flex xs12>
-                <label class="caption grey--text text--darken-2">Groups</label>
-                <p>
-                  <v-chip v-for="(group, index) in groups" :key="index" label small outline disabled color="black">{{group}}</v-chip>
-                </p>
-              </v-flex>
-              <v-flex xs12>
-                <label class="caption grey--text text--darken-2">Session Expiration</label>
-                <p class="subheading">{{expiresAt}}</p>
-              </v-flex>
-            </v-layout>
-          </v-card-text>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <v-list-tile v-if="!!fullDisplayName">
+              <v-list-tile-avatar>
+                &nbsp;
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title class="label">Name</v-list-tile-title>
+                <v-list-tile-sub-title class="content pb-2">
+                  {{fullDisplayName}}
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <v-list-tile>
+              <v-list-tile-avatar>
+                &nbsp;
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title class="label">Groups</v-list-tile-title>
+                <v-list-tile-sub-title class="content">
+                  <span style="margin-left: -4px">
+                    <v-chip v-for="(group, index) in groups" :key="index" label small outline disabled color="black">{{group}}</v-chip>
+                  </span>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            </v-list-tile>
+            <v-divider inset class="my-2"/>
+            <v-list-tile>
+              <v-list-tile-avatar>
+                <v-icon color="teal darken-2">timelapse</v-icon>
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title class="label">Session</v-list-tile-title>
+                <v-list-tile-sub-title class="content">
+                   Expires {{expiresAt}}
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+            </v-list-tile>
+          </v-list>
         </v-card>
       </v-flex>
       <v-flex md6 xs12>
-        <v-card >
-          <v-toolbar card class="teal darken-1" dark>
-            <v-icon class="white--text pr-2">insert_drive_file</v-icon>
-            <v-toolbar-title>Kubeconfig</v-toolbar-title>
+        <v-card>
+          <v-toolbar card dark dense class="teal darken-2">
+            <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
-          <v-card-text>
-            <v-layout row wrap>
-              <v-flex xs12>
-                 The downloaded kubeconfig will use <a href="https://github.com/int128/kubelogin"><tt>kubelogin</tt></a>, also known as <tt>kubectl oidc-login</tt>.
-                 for login into the garden cluster. Below you can configure some of command line arguments of <tt>kubelogin</tt>.
-              </v-flex>
-              <v-flex xs12 d-flex>
-                <v-select
-                  color="teal darken-1"
-                  v-model="projectName"
-                  :items="projectNames"
-                  label="Project"
-                  hint="The namespace of the project will be the namespace of the <tt>current-context</tt>"
-                  persistent-hint
-                ></v-select>
-              </v-flex>
-              <v-flex xs12 d-flex>
-                <v-select
-                  color="teal darken-1"
-                  v-model="grantType"
-                  :items="grantTypes"
-                  label="Grant Type"
-                  hint="The authorization grant type to use"
-                  persistent-hint
-                ></v-select>
-              </v-flex>
-              <v-flex xs12 d-flex>
-                <v-switch
-                  color="teal darken-1"
-                  v-model="skipOpenBrowser"
-                  label="Skip Open Browser"
-                  hint="If true, it does not open the browser on authentication"
-                  persistent-hint
-                ></v-switch>
-              </v-flex>
-            </v-layout>
-          </v-card-text>
-          <v-card-actions class="grey lighten-4 mt-2">
-            <div class="ma-1">
-              <v-tooltip top>
-                <v-btn flat color="grey darken-4" slot="activator" @click="onDownload">
-                  Download
-                </v-btn>
-                <span>Download Kubeconfig</span>
-              </v-tooltip>
-            </div>
-          </v-card-actions>
+          <v-list>
+            <v-list-tile>
+              <v-list-tile-avatar>
+                <v-icon color="teal darken-2">mdi-key </v-icon>
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title class="label">Token</v-list-tile-title>
+                <v-list-tile-sub-title class="content">Personal bearer token for API authentication</v-list-tile-sub-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <copy-btn :clipboard-text="idToken"></copy-btn>
+              </v-list-tile-action>
+            </v-list-tile>
+            <v-divider inset class="my-2"/>
+            <v-list-tile>
+              <v-list-tile-avatar>
+                <v-icon color="teal darken-2">insert_drive_file</v-icon>
+              </v-list-tile-avatar>
+              <v-list-tile-content>
+                <v-list-tile-title>Kubeconfig</v-list-tile-title>
+              </v-list-tile-content>
+              <v-list-tile-action>
+                <v-tooltip top>
+                  <v-btn slot="activator" icon @click.native.stop="onDownload">
+                    <v-icon>mdi-download</v-icon>
+                  </v-btn>
+                  <span>Download Kubeconfig</span>
+                </v-tooltip>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <v-tooltip top>
+                  <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
+                    <v-icon>{{ expansionPanel ? 'expand_less' : 'expand_more' }}</v-icon>
+                  </v-btn>
+                  <span>{{ expansionPanel ? 'Collapse advanced options' : 'Show advanced options' }}</span>
+                </v-tooltip>
+              </v-list-tile-action>
+            </v-list-tile>
+            <v-expand-transition>
+              <v-card v-if="expansionPanel" flat class="mx-2 pb-2">
+                <v-card-text class="pt-1">
+                  <div>
+                    This <tt>kubeconfig</tt> has a user that initiates
+                    <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" target="_blank">
+                      <tt>OIDC</tt>
+                    </a>
+                    authentication via <tt>kubelogin</tt>.
+                    If not already done, please setup
+                    <a link href="https://github.com/int128/kubelogin#setup" target="_blank">
+                      <tt>kubelogin</tt>
+                    </a>
+                    according to their instructions.
+                    For more information about <tt>kubelogin</tt> please read the documentation on their website.
+                    <br>
+                    Below you can configure and preview some the <tt>kubeconfig</tt> file before download.
+                  </div>
+                  <v-tabs slider-color="grey lighten-5" color="teal darken-2" dark class="mt-2 elevation-1">
+                    <v-tab>Configure</v-tab>
+                    <v-tab>Preview</v-tab>
+                    <v-spacer/>
+                    <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+                    <v-tab-item class="pa-3">
+                      <v-layout row wrap>
+                        <v-flex xs12>
+                          <v-select
+                            color="teal darken-1"
+                            v-model="projectName"
+                            :items="projectNames"
+                            label="Project"
+                            hint="The namespace of the selected project will be the default namespace in the kubeconfig"
+                            persistent-hint
+                          ></v-select>
+                        </v-flex>
+                        <v-flex xs12>
+                          <v-select
+                            color="teal darken-1"
+                            v-model="grantType"
+                            :items="grantTypes"
+                            label="Grant Type"
+                            hint="The authorization grant type to use"
+                            persistent-hint
+                          ></v-select>
+                        </v-flex>
+                        <v-flex xs12>
+                          <v-switch
+                            color="teal darken-1"
+                            v-model="skipOpenBrowser"
+                            label="Skip Open Browser"
+                            hint="If true, it does not open the browser on authentication"
+                            persistent-hint
+                          ></v-switch>
+                        </v-flex>
+                      </v-layout>
+                    </v-tab-item>
+                    <v-tab-item>
+                      <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
+                    </v-tab-item>
+                  </v-tabs>
+                </v-card-text>
+              </v-card>
+            </v-expand-transition>
+          </v-list>
         </v-card>
       </v-flex>
     </v-layout>
@@ -116,6 +188,7 @@ limitations under the License.
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
 import download from 'downloadjs'
 import AccountAvatar from '@/components/AccountAvatar'
 import { getToken } from '@/utils/api'
@@ -123,6 +196,7 @@ import { mapState, mapGetters } from 'vuex'
 import moment from 'moment-timezone'
 import map from 'lodash/map'
 import find from 'lodash/find'
+import get from 'lodash/get'
 
 // js-yaml
 import jsyaml from 'js-yaml'
@@ -136,11 +210,13 @@ function safeDump (value) {
 export default {
   components: {
     CopyBtn,
+    CodeBlock,
     AccountAvatar
   },
   name: 'profile',
   data () {
     return {
+      expansionPanel: false,
       projectName: undefined,
       skipOpenBrowser: false,
       grantType: 'auto',
@@ -154,9 +230,7 @@ export default {
   async mounted () {
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
-      if (project) {
-        this.projectName = project.metadata.name
-      }
+      this.projectName = get(project, 'metadata.name', '')
       const { data } = await getToken()
       this.idToken = data.token
     } catch (err) {
@@ -176,6 +250,15 @@ export default {
       'isAdmin',
       'canCreateProject'
     ]),
+    expansionPanelIndex () {
+      switch (this.expansionPanel) {
+        case 'kubeconfig':
+        case 'settings':
+          return 0
+        default:
+          return null
+      }
+    },
     icon () {
       return this.isAdmin ? 'supervisor_account' : 'mdi-account'
     },
@@ -189,12 +272,20 @@ export default {
       return moment.duration(this.user.exp - Math.floor(Date.now() / 1000), 'seconds').humanize(true)
     },
     projectNames () {
-      return map(this.projectList, 'metadata.name')
+      const names = map(this.projectList, 'metadata.name')
+      names.unshift('')
+      return names
+    },
+    kubeconfigFilename () {
+      if (this.projectName) {
+        return `kubeconfig-garden-${this.projectName}.yaml`
+      }
+      return 'kubeconfig-garden.yaml'
     },
     kubeconfig () {
       const project = find(this.projectList, ['metadata.name', this.projectName])
-      const name = 'garden-' + project.metadata.name
-      const namespace = project.metadata.namespace
+      const name = 'garden-' + get(project, 'metadata.name', 'none')
+      const namespace = get(project, 'metadata.namespace')
       const {
         server,
         certificateAuthorityData,
@@ -237,7 +328,7 @@ export default {
           args
         }
       }
-      return {
+      return safeDump({
         kind: 'Config',
         apiVersion: 'v1',
         clusters: [{
@@ -254,15 +345,34 @@ export default {
           user
         }],
         preferences: {}
-      }
+      })
     }
   },
   methods: {
     onDownload () {
-      const filename = `kubeconfig-garden-${this.projectName}.yaml`
-      const data = safeDump(this.kubeconfig)
-      download(data, filename, 'text/yaml')
+      let filename = 'kubeconfig-garden'
+      if (this.projectName) {
+        filename += '-' + this.projectName
+      }
+      filename += '.yaml'
+      download(this.kubeconfig, filename, 'text/yaml')
     }
   }
 }
 </script>
+
+<style lang="stylus" scoped>
+  .no-height >>> [role=listitem] > :first-child {
+    height: unset;
+    min-height: 48px;
+  }
+  .label {
+    font-size: 14px !important;
+    color: rgba(0,0,0,0.54) !important;
+  }
+  .content {
+    font-size: 16px !important;
+    font-weight: 400 !important;
+    color: inherit !important;
+  }
+</style>

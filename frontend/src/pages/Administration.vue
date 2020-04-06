@@ -41,6 +41,7 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">Technical Contact</label>
             <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
           </v-flex>
+
         </v-layout>
         <v-layout row wrap>
           <v-flex lg4 xs12>
@@ -75,6 +76,14 @@ limitations under the License.
           <v-flex xs12 v-if="slaDescriptionCompiledMarkdown">
             <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
             <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
+          </v-flex>
+          <v-flex xs12>
+            <label class="caption grey--text text--darken-2">Command Line Interface Access</label>
+            <p class="subheading">
+              Go to
+              <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">My Account</router-link>
+              to download the <tt>kubeconfig</tt> for this project.
+            </p>
           </v-flex>
         </v-layout>
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
@@ -132,7 +141,8 @@ export default {
   },
   computed: {
     ...mapState([
-      'cfg'
+      'cfg',
+      'namespace'
     ]),
     ...mapGetters([
       'shootList',
