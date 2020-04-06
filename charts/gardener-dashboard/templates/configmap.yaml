@@ -177,3 +177,24 @@ data:
         title: {{ .Values.frontendConfig.sla.title }}
         description: {{ .Values.frontendConfig.sla.description }}
 {{- end }}
+{{- if .Values.oidc.kubectl }}
+      kubeconfig:
+        server: {{ required ".Values.apiServerUrl is required" .Values.apiServerUrl }}
+{{- if .Values.apiServerCa }}
+        certificateAuthorityData: {{ b64enc .Values.apiServerCa }}
+{{- else if eq .Values.apiServerSkipTlsVerify true }}
+        insecure-skip-tls-verify: true
+{{- end }}
+        oidc:
+          issuerUrl: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
+{{- with .Values.oidc.kubelogin }}
+          clientId: {{ .clientId | default "kube-kubectl" }}
+          clientSecret: {{ required ".Values.oidc.kubelogin.clientSecret"  .clientSecret }}
+{{- if .extraScopes }}
+          {{- range .extraScopes }}
+          extraScopes:
+          - {{ . }}
+          {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
