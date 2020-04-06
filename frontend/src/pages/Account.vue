@@ -30,7 +30,7 @@ limitations under the License.
               <v-list-tile-content>
                 <v-list-tile-title class="label pb-2">User</v-list-tile-title>
                 <v-list-tile-sub-title class="content pb-2">
-                  <account-avatar :account-name="username" mailTo :size="32"/>
+                  <account-avatar :account-name="username" mailTo color="teal darken-2" :size="32"/>
                 </v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>
@@ -84,8 +84,8 @@ limitations under the License.
                 <v-icon color="teal darken-2">mdi-key </v-icon>
               </v-list-tile-avatar>
               <v-list-tile-content>
-                <v-list-tile-title class="label">Token</v-list-tile-title>
-                <v-list-tile-sub-title class="content">Personal bearer token for API authentication</v-list-tile-sub-title>
+                <v-list-tile-title>Token</v-list-tile-title>
+                <v-list-tile-sub-title>Personal bearer token for API authentication</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <copy-btn :clipboard-text="idToken"></copy-btn>
@@ -117,24 +117,24 @@ limitations under the License.
               </v-list-tile-action>
             </v-list-tile>
             <v-expand-transition>
-              <v-card v-if="expansionPanel" flat class="mx-2 pb-2">
-                <v-card-text class="pt-1">
-                  <div>
-                    This <tt>kubeconfig</tt> has a user that initiates
-                    <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" target="_blank">
-                      <tt>OIDC</tt>
+              <v-card v-if="expansionPanel" flat class="mx-2">
+                <v-card-text class="pt-0">
+                  <div class="grey--text text--darken-2">
+                    The downloaded <tt>kubeconfig</tt> will initiate
+                    <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" target="_blank" class="teal--text text--darken-2">
+                      OIDC
                     </a>
                     authentication via <tt>kubelogin</tt>.
-                    If not already done, please setup
-                    <a link href="https://github.com/int128/kubelogin#setup" target="_blank">
-                      <tt>kubelogin</tt>
-                    </a>
-                    according to their instructions.
-                    For more information about <tt>kubelogin</tt> please read the documentation on their website.
-                    <br>
+                    If not already done, please install <tt>kubelogin</tt>
+                    according to the
+                    <a link href="https://github.com/int128/kubelogin#setup" target="_blank" class="teal--text text--darken-2">
+                      setup instructions
+                    </a>.
+                    For more information about please refer to the <tt>kubelogin</tt> documentation.
+                    <br/>
                     Below you can configure and preview some the <tt>kubeconfig</tt> file before download.
                   </div>
-                  <v-tabs slider-color="grey lighten-5" color="teal darken-2" dark class="mt-2 elevation-1">
+                  <v-tabs slider-color="grey lighten-5" color="grey lighten-3" class="mt-2 elevation-1">
                     <v-tab>Configure</v-tab>
                     <v-tab>Preview</v-tab>
                     <v-spacer/>
