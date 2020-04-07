@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-container grid-list-lg fluid>
     <v-layout row wrap>
-      <v-flex xs12 sm6 class="pr-3">
+      <v-flex xs12 md6>
         <v-card>
           <v-toolbar card dark dense class="teal darken-2">
             <v-toolbar-title>Details</v-toolbar-title>
@@ -73,7 +73,7 @@ limitations under the License.
           </v-list>
         </v-card>
       </v-flex>
-      <v-flex md6 xs12>
+      <v-flex xs12 md6>
         <v-card>
           <v-toolbar card dark dense class="teal darken-2">
             <v-toolbar-title>Access</v-toolbar-title>
@@ -98,47 +98,49 @@ limitations under the License.
               </v-list-tile-avatar>
               <v-list-tile-content>
                 <v-list-tile-title>Kubeconfig</v-list-tile-title>
+                <v-list-tile-sub-title>Personalized command line interface access</v-list-tile-sub-title>
               </v-list-tile-content>
               <v-list-tile-action>
                 <v-tooltip top>
                   <v-btn slot="activator" icon @click.native.stop="onDownload">
                     <v-icon>mdi-download</v-icon>
                   </v-btn>
-                  <span>Download Kubeconfig</span>
+                  <span>Download kubeconfig</span>
                 </v-tooltip>
+              </v-list-tile-action>
+              <v-list-tile-action>
+                <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
               </v-list-tile-action>
               <v-list-tile-action>
                 <v-tooltip top>
                   <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
-                    <v-icon>{{ expansionPanel ? 'expand_less' : 'expand_more' }}</v-icon>
+                    <v-icon>{{expansionPanelIcon}}</v-icon>
                   </v-btn>
-                  <span>{{ expansionPanel ? 'Collapse advanced options' : 'Show advanced options' }}</span>
+                  <span>{{expansionPanelTooltip}}</span>
                 </v-tooltip>
               </v-list-tile-action>
             </v-list-tile>
             <v-expand-transition>
-              <v-card v-if="expansionPanel" flat class="mx-2">
+              <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
                 <v-card-text class="pt-0">
                   <div class="grey--text text--darken-2">
                     The downloaded <tt>kubeconfig</tt> will initiate
-                    <a href="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" target="_blank" class="teal--text text--darken-2">
+                    <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="teal darken-2">
                       OIDC
-                    </a>
+                    </external-link>
                     authentication via <tt>kubelogin</tt>.
                     If not already done, please install <tt>kubelogin</tt>
                     according to the
-                    <a link href="https://github.com/int128/kubelogin#setup" target="_blank" class="teal--text text--darken-2">
+                    <external-link url="https://github.com/int128/kubelogin#setup" color="teal darken-2">
                       setup instructions
-                    </a>.
-                    For more information about please refer to the <tt>kubelogin</tt> documentation.
-                    <br/>
-                    Below you can configure and preview some the <tt>kubeconfig</tt> file before download.
+                    </external-link>.
+                    For more information please refer to the <tt>kubelogin</tt> documentation.
+                    <br>
+                    Below you can configure and preview the <tt>kubeconfig</tt> file before download.
                   </div>
                   <v-tabs slider-color="grey lighten-5" color="grey lighten-3" class="mt-2 elevation-1">
                     <v-tab>Configure</v-tab>
                     <v-tab>Preview</v-tab>
-                    <v-spacer/>
-                    <copy-btn :clipboard-text="kubeconfig"></copy-btn>
                     <v-tab-item class="pa-3">
                       <v-layout row wrap>
                         <v-flex xs12>
@@ -189,6 +191,7 @@ limitations under the License.
 <script>
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
+import ExternalLink from '@/components/ExternalLink'
 import download from 'downloadjs'
 import AccountAvatar from '@/components/AccountAvatar'
 import { getToken } from '@/utils/api'
@@ -211,6 +214,7 @@ export default {
   components: {
     CopyBtn,
     CodeBlock,
+    ExternalLink,
     AccountAvatar
   },
   name: 'profile',
@@ -250,14 +254,11 @@ export default {
       'isAdmin',
       'canCreateProject'
     ]),
-    expansionPanelIndex () {
-      switch (this.expansionPanel) {
-        case 'kubeconfig':
-        case 'settings':
-          return 0
-        default:
-          return null
-      }
+    expansionPanelIcon () {
+      return this.expansionPanel ? 'expand_less' : 'expand_more'
+    },
+    expansionPanelTooltip () {
+      return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'
     },
     icon () {
       return this.isAdmin ? 'supervisor_account' : 'mdi-account'
@@ -272,7 +273,7 @@ export default {
       return moment.duration(this.user.exp - Math.floor(Date.now() / 1000), 'seconds').humanize(true)
     },
     projectNames () {
-      const names = map(this.projectList, 'metadata.name')
+      const names = map(this.projectList, 'metadata.name').sort()
       names.unshift('')
       return names
     },
