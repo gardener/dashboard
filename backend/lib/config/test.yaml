@@ -2,6 +2,7 @@ port: 3030
 logLevel: info
 logFormat: text
 apiServerUrl: https://kubernetes.external.foo.bar
+apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
 gitHub:
   apiUrl: https://api.github.com
   org: gardener
@@ -22,6 +23,9 @@ oidc:
   redirect_uri: http://localhost:8080/auth/callback
   scope: 'openid email profile groups audience:server:client_id:dashboard audience:server:client_id:kube-kubectl'
   clockTolerance: 42
+  public:
+    clientId: kube-kubectl
+    clientSecret: uenbng5TrDKpSK7EJMSe2bKF
 terminal:
   containerImage: dummyImage:1.0.0
   containerImageDescriptions:

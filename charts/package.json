@@ -1,0 +1,83 @@
+{
+  "name": "@gardener-dashboard/charts",
+  "version": "0.0.0",
+  "description": "Gardener Dashboard Charts",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gardener/dashboard/tree/master/charts"
+  },
+  "contributors": [
+    "Koser, Holger <holger.koser@sap.com>",
+    "Sutter, Peter <peter.sutter@sap.com>",
+    "Gross, Lukas <lukas.gross@sap.com>"
+  ],
+  "private": true,
+  "scripts": {
+    "lint": "eslint --ext .js test",
+    "test": "cross-env NODE_ENV=test mocha"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "cross-env": "^7.0.0",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-friendly-formatter": "^4.0.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-mocha": "^6.2.2",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.15",
+    "mocha": "^7"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true,
+      "mocha": true,
+      "es6": true
+    },
+    "extends": "standard",
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "arrow-parens": 0,
+      "generator-star-spacing": 0,
+      "quote-props": [
+        "error",
+        "as-needed"
+      ]
+    },
+    "globals": {
+      "describe": true,
+      "it": true,
+      "before": true,
+      "after": true,
+      "beforeEach": true,
+      "afterEach": true,
+      "expect": true,
+      "helmTemplate": true
+    }
+  },
+  "mocha": {
+    "require": "test/support",
+    "check-leaks": true,
+    "diff": true,
+    "extension": [
+      "js"
+    ],
+    "package": "./package.json",
+    "reporter": "spec",
+    "slow": 75,
+    "timeout": 2000,
+    "ui": "bdd"
+  },
+  "engines": {
+    "node": ">= 12.3.1",
+    "yarn": ">= 1.16.0"
+  }
+}

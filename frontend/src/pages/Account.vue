@@ -138,7 +138,7 @@ limitations under the License.
                     <br>
                     Below you can configure and preview the <tt>kubeconfig</tt> file before download.
                   </div>
-                  <v-tabs slider-color="grey lighten-5" color="grey lighten-3" class="mt-2 elevation-1">
+                  <v-tabs slider-color="grey lighten-1" color="grey lighten-3" class="mt-2 elevation-1">
                     <v-tab>Configure</v-tab>
                     <v-tab>Preview</v-tab>
                     <v-tab-item class="pa-3">
@@ -194,7 +194,7 @@ import CodeBlock from '@/components/CodeBlock'
 import ExternalLink from '@/components/ExternalLink'
 import download from 'downloadjs'
 import AccountAvatar from '@/components/AccountAvatar'
-import { getToken } from '@/utils/api'
+import { getToken, getKubeconfigData } from '@/utils/api'
 import { mapState, mapGetters } from 'vuex'
 import moment from 'moment-timezone'
 import map from 'lodash/map'
@@ -222,6 +222,7 @@ export default {
     return {
       expansionPanel: false,
       projectName: undefined,
+      kubeconfigData: undefined,
       skipOpenBrowser: false,
       grantType: 'auto',
       grantTypes: [ 'auto', 'authcode', 'authcode-keyboard' ],
@@ -235,8 +236,15 @@ export default {
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
       this.projectName = get(project, 'metadata.name', '')
-      const { data } = await getToken()
+      const [
+        { data },
+        { data: kubeconfigData }
+      ] = await Promise.all([
+        getToken(),
+        getKubeconfigData()
+      ])
       this.idToken = data.token
+      this.kubeconfigData = kubeconfigData
     } catch (err) {
       console.error(err.message)
     }
@@ -295,8 +303,8 @@ export default {
           clientId,
           clientSecret,
           extraScopes = []
-        }
-      } = this.cfg.kubeconfig
+        } = {}
+      } = this.kubeconfigData || {}
       const cluster = {
         'certificate-authority-data': certificateAuthorityData,
         server

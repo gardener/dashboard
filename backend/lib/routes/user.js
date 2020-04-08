@@ -18,12 +18,13 @@
 
 const express = require('express')
 
+const config = require('../config')
 const { authorization } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
 })
 
-function getToken ({ auth = {} } = {}) {
+function getToken({ auth = {} } = {}) {
   return auth.bearer
 }
 
@@ -57,5 +58,39 @@ router.route('/token')
     const token = getToken(req.user)
     res.send({
       token
+    })
+  })
+
+router.route('/kubeconfig')
+  .get(async (req, res, next) => {
+    const user = req.user || {}
+    const {
+      apiServerUrl: server,
+      apiServerCaData: certificateAuthorityData,
+      apiServerSkipTlsVerify: insecureSkipTlsVerify,
+      oidc = {}
+    } = config
+    const {
+      issuer: issuerUrl,
+      public: { clientId, clientSecret } = {}
+    } = oidc
+    const extraScopes = []
+    if (oidc.scope) {
+      for (const scope of oidc.scope.split(' ')) {
+        if (scope !== 'openid' && !scope.startsWith('audience:server:client_id')) {
+          extraScopes.push(scope)
+        }
+      }
+    }
+    res.send({
+      server,
+      certificateAuthorityData,
+      insecureSkipTlsVerify,
+      oidc: {
+        issuerUrl,
+        clientId,
+        clientSecret,
+        extraScopes: extraScopes.length ? extraScopes : undefined
+      }
     })
   })
