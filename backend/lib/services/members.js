@@ -176,7 +176,7 @@ exports.get = async function ({ user, namespace, name }) {
   const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
   if (serviceAccountNamespace === namespace) {
     const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
-    const server = _.get(config, 'apiServerUrl', client.cluster.server.toString())
+    const server = config.apiServerUrl
     const secretName = _.first(serviceaccount.secrets).name
     const secret = await client.core.secrets.get(namespace, secretName)
     const token = decodeBase64(secret.data.token)

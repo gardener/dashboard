@@ -25,6 +25,7 @@ const { join: joinPath } = require('path')
 
 const environmentVariableDefinitions = {
   SESSION_SECRET: 'sessionSecret', // pragma: whitelist secret
+  API_SERVER_URL: 'apiServerUrl',
   OIDC_ISSUER: 'oidc.issuer',
   OIDC_CLIENT_ID: 'oidc.client_id',
   OIDC_CLIENT_SECRET: 'oidc.client_secret', // pragma: whitelist secret
@@ -97,15 +98,12 @@ module.exports = {
         if (this.existsSync(filename)) {
           _.merge(config, yaml.safeLoad(this.readFileSync(filename, 'utf8')))
         }
-        _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
       } catch (err) { /* ignore */ }
     }
     this.assignEnvironmentVariables(config, env)
-    if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {
-      _.unset(config, 'frontend.gitHubRepoUrl')
-    }
     const requiredConfigurationProperties = [
       'sessionSecret',
+      'apiServerUrl',
       'oidc.issuer',
       'oidc.client_id',
       'oidc.client_secret',
@@ -114,6 +112,13 @@ module.exports = {
     _.forEach(requiredConfigurationProperties, path => {
       assert.ok(_.get(config, path), `Configuration value '${path}' is required`)
     })
+
+    _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
+    _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
+    if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {
+      _.unset(config, 'frontend.gitHubRepoUrl')
+    }
+
     return config
   },
   existsSync,
