@@ -420,9 +420,10 @@ export default {
     },
     confirmNavigation () {
       return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Leave',
-        captionText: 'Leave Create Cluster Page?',
-        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your changes?'
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        captionText: 'Cancel Cluster Creation?',
+        messageHtml: 'Your cluster has not been created.<br/>Do you want to cancel cluster creation and discard your draft?'
       })
     },
     confirmNavigateToYamlIfInvalid () {
