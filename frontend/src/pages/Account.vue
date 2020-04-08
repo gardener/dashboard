@@ -91,96 +91,98 @@ limitations under the License.
                 <copy-btn :clipboard-text="idToken"></copy-btn>
               </v-list-tile-action>
             </v-list-tile>
-            <v-divider inset class="my-2"/>
-            <v-list-tile>
-              <v-list-tile-avatar>
-                <v-icon color="teal darken-2">insert_drive_file</v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title>Kubeconfig</v-list-tile-title>
-                <v-list-tile-sub-title>Personalized command line interface access</v-list-tile-sub-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
-                <v-tooltip top>
-                  <v-btn slot="activator" icon @click.native.stop="onDownload">
-                    <v-icon>mdi-download</v-icon>
-                  </v-btn>
-                  <span>Download kubeconfig</span>
-                </v-tooltip>
-              </v-list-tile-action>
-              <v-list-tile-action>
-                <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
-              </v-list-tile-action>
-              <v-list-tile-action>
-                <v-tooltip top>
-                  <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
-                    <v-icon>{{expansionPanelIcon}}</v-icon>
-                  </v-btn>
-                  <span>{{expansionPanelTooltip}}</span>
-                </v-tooltip>
-              </v-list-tile-action>
-            </v-list-tile>
-            <v-expand-transition>
-              <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
-                <v-card-text class="pt-0">
-                  <div class="grey--text text--darken-2">
-                    The downloaded <tt>kubeconfig</tt> will initiate
-                    <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="teal darken-2">
-                      OIDC
-                    </external-link>
-                    authentication via <tt>kubelogin</tt>.
-                    If not already done, please install <tt>kubelogin</tt>
-                    according to the
-                    <external-link url="https://github.com/int128/kubelogin#setup" color="teal darken-2">
-                      setup instructions
-                    </external-link>.
-                    For more information please refer to the <tt>kubelogin</tt> documentation.
-                    <br>
-                    Below you can configure and preview the <tt>kubeconfig</tt> file before download.
-                  </div>
-                  <v-tabs slider-color="grey lighten-1" color="grey lighten-3" class="mt-2 elevation-1">
-                    <v-tab>Configure</v-tab>
-                    <v-tab>Preview</v-tab>
-                    <v-tab-item class="pa-3">
-                      <v-layout row wrap>
-                        <v-flex xs12>
-                          <v-select
-                            color="teal darken-1"
-                            v-model="projectName"
-                            :items="projectNames"
-                            label="Project"
-                            hint="The namespace of the selected project will be the default namespace in the kubeconfig"
-                            persistent-hint
-                          ></v-select>
-                        </v-flex>
-                        <v-flex xs12>
-                          <v-select
-                            color="teal darken-1"
-                            v-model="grantType"
-                            :items="grantTypes"
-                            label="Grant Type"
-                            hint="The authorization grant type to use"
-                            persistent-hint
-                          ></v-select>
-                        </v-flex>
-                        <v-flex xs12>
-                          <v-switch
-                            color="teal darken-1"
-                            v-model="skipOpenBrowser"
-                            label="Skip Open Browser"
-                            hint="If true, it does not open the browser on authentication"
-                            persistent-hint
-                          ></v-switch>
-                        </v-flex>
-                      </v-layout>
-                    </v-tab-item>
-                    <v-tab-item>
-                      <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
-                    </v-tab-item>
-                  </v-tabs>
-                </v-card-text>
-              </v-card>
-            </v-expand-transition>
+            <template v-if="isKubeconfigEnabled">
+              <v-divider inset class="my-2"/>
+              <v-list-tile>
+                <v-list-tile-avatar>
+                  <v-icon color="teal darken-2">insert_drive_file</v-icon>
+                </v-list-tile-avatar>
+                <v-list-tile-content>
+                  <v-list-tile-title>Kubeconfig</v-list-tile-title>
+                  <v-list-tile-sub-title>Personalized command line interface access</v-list-tile-sub-title>
+                </v-list-tile-content>
+                <v-list-tile-action>
+                  <v-tooltip top>
+                    <v-btn slot="activator" icon @click.native.stop="onDownload">
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                    <span>Download kubeconfig</span>
+                  </v-tooltip>
+                </v-list-tile-action>
+                <v-list-tile-action>
+                  <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
+                </v-list-tile-action>
+                <v-list-tile-action>
+                  <v-tooltip top>
+                    <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
+                      <v-icon>{{expansionPanelIcon}}</v-icon>
+                    </v-btn>
+                    <span>{{expansionPanelTooltip}}</span>
+                  </v-tooltip>
+                </v-list-tile-action>
+              </v-list-tile>
+              <v-expand-transition>
+                <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
+                  <v-card-text class="pt-0">
+                    <div class="grey--text text--darken-2">
+                      The downloaded <tt>kubeconfig</tt> will initiate
+                      <external-link url="https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens" color="teal darken-2">
+                        OIDC
+                      </external-link>
+                      authentication via <tt>kubelogin</tt>.
+                      If not already done, please install <tt>kubelogin</tt>
+                      according to the
+                      <external-link url="https://github.com/int128/kubelogin#setup" color="teal darken-2">
+                        setup instructions
+                      </external-link>.
+                      For more information please refer to the <tt>kubelogin</tt> documentation.
+                      <br>
+                      Below you can configure and preview the <tt>kubeconfig</tt> file before download.
+                    </div>
+                    <v-tabs slider-color="grey lighten-1" color="grey lighten-3" class="mt-2 elevation-1">
+                      <v-tab>Configure</v-tab>
+                      <v-tab>Preview</v-tab>
+                      <v-tab-item class="pa-3">
+                        <v-layout row wrap>
+                          <v-flex xs12>
+                            <v-select
+                              color="teal darken-1"
+                              v-model="projectName"
+                              :items="projectNames"
+                              label="Project"
+                              hint="The namespace of the selected project will be the default namespace in the kubeconfig"
+                              persistent-hint
+                            ></v-select>
+                          </v-flex>
+                          <v-flex xs12>
+                            <v-select
+                              color="teal darken-1"
+                              v-model="grantType"
+                              :items="grantTypes"
+                              label="Grant Type"
+                              hint="The authorization grant type to use"
+                              persistent-hint
+                            ></v-select>
+                          </v-flex>
+                          <v-flex xs12>
+                            <v-switch
+                              color="teal darken-1"
+                              v-model="skipOpenBrowser"
+                              label="Skip Open Browser"
+                              hint="If true, it does not open the browser on authentication"
+                              persistent-hint
+                            ></v-switch>
+                          </v-flex>
+                        </v-layout>
+                      </v-tab-item>
+                      <v-tab-item>
+                        <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
+                      </v-tab-item>
+                    </v-tabs>
+                  </v-card-text>
+                </v-card>
+              </v-expand-transition>
+            </template>
           </v-list>
         </v-card>
       </v-flex>
@@ -194,7 +196,7 @@ import CodeBlock from '@/components/CodeBlock'
 import ExternalLink from '@/components/ExternalLink'
 import download from 'downloadjs'
 import AccountAvatar from '@/components/AccountAvatar'
-import { getToken, getKubeconfigData } from '@/utils/api'
+import { getToken } from '@/utils/api'
 import { mapState, mapGetters } from 'vuex'
 import moment from 'moment-timezone'
 import map from 'lodash/map'
@@ -236,15 +238,8 @@ export default {
     try {
       const project = find(this.projectList, ['metadata.namespace', this.namespace])
       this.projectName = get(project, 'metadata.name', '')
-      const [
-        { data },
-        { data: kubeconfigData }
-      ] = await Promise.all([
-        getToken(),
-        getKubeconfigData()
-      ])
+      const { data } = await getToken()
       this.idToken = data.token
-      this.kubeconfigData = kubeconfigData
     } catch (err) {
       console.error(err.message)
     }
@@ -253,14 +248,16 @@ export default {
     ...mapState([
       'user',
       'namespace',
-      'cfg'
+      'cfg',
+      'kubeconfigData'
     ]),
     ...mapGetters([
       'username',
       'projectList',
       'fullDisplayName',
       'isAdmin',
-      'canCreateProject'
+      'canCreateProject',
+      'isKubeconfigEnabled'
     ]),
     expansionPanelIcon () {
       return this.expansionPanel ? 'expand_less' : 'expand_more'
@@ -298,6 +295,7 @@ export default {
       const {
         server,
         certificateAuthorityData,
+        insecureSkipTlsVerify,
         oidc: {
           issuerUrl,
           clientId,
@@ -306,8 +304,12 @@ export default {
         } = {}
       } = this.kubeconfigData || {}
       const cluster = {
-        'certificate-authority-data': certificateAuthorityData,
         server
+      }
+      if (certificateAuthorityData) {
+        cluster['certificate-authority-data'] = certificateAuthorityData
+      } else if (insecureSkipTlsVerify) {
+        cluster['insecure-skip-tls-verify'] = true
       }
       const context = {
         cluster: name,
@@ -359,12 +361,7 @@ export default {
   },
   methods: {
     onDownload () {
-      let filename = 'kubeconfig-garden'
-      if (this.projectName) {
-        filename += '-' + this.projectName
-      }
-      filename += '.yaml'
-      download(this.kubeconfig, filename, 'text/yaml')
+      download(this.kubeconfig, this.kubeconfigFilename, 'text/yaml')
     }
   }
 }

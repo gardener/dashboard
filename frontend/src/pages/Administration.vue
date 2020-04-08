@@ -77,7 +77,7 @@ limitations under the License.
             <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
             <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
           </v-flex>
-          <v-flex xs12>
+          <v-flex xs12 v-if="isKubeconfigEnabled">
             <label class="caption grey--text text--darken-2">Command Line Interface Access</label>
             <p class="subheading">
               Go to
@@ -150,7 +150,8 @@ export default {
       'canPatchProject',
       'canDeleteProject',
       'projectFromProjectList',
-      'costObjectSettings'
+      'costObjectSettings',
+      'isKubeconfigEnabled'
     ]),
     project () {
       return this.projectFromProjectList

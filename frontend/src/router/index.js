@@ -509,6 +509,7 @@ export default function createRouter ({ store, userManager }) {
       await Promise.all([
         ensureCloudProfilesLoaded(),
         ensureProjectsLoaded(),
+        store.dispatch('fetchKubeconfigData'),
         store.dispatch('unsubscribeComments')
       ])
       const params = to.params || {}

@@ -20,7 +20,7 @@ import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
 import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon, canI } from '@/utils'
-import { getSubjectRules } from '@/utils/api'
+import { getSubjectRules, getKubeconfigData } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -67,6 +67,7 @@ if (debug) {
 // initial state
 const state = {
   cfg: null,
+  kubeconfigData: null,
   ready: false,
   namespace: null,
   subjectRules: { // selfSubjectRules for state.namespace
@@ -630,6 +631,9 @@ const getters = {
   },
   splitpaneResize (state) {
     return state.splitpaneResize
+  },
+  isKubeconfigEnabled (state) {
+    return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
   }
 }
 
@@ -868,6 +872,12 @@ const actions = {
     }
     return state.subjectRules
   },
+  async fetchKubeconfigData ({ commit }) {
+    if (!store.state.kubeconfigData) {
+      const { data } = await getKubeconfigData()
+      commit('SET_KUBECONFIG_DATA', data)
+    }
+  },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)
     return state.onlyShootsWithIssues
@@ -947,6 +957,9 @@ const mutations = {
   },
   SET_SUBJECT_RULES (state, value) {
     state.subjectRules = value
+  },
+  SET_KUBECONFIG_DATA (state, value) {
+    state.kubeconfigData = value
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value

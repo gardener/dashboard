@@ -10,11 +10,14 @@ image:
 
 logLevel: debug
 apiServerUrl: https://api.example.org
-# the certification authority of the kube apiserver or skip tls verify (insecure)
+# the certificateAuthorityData of the kube apiserver
+# apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ==
+# or the certificateAuthority of the kube apiserver
 # apiServerCa: |
 #   -----BEGIN CERTIFICATE-----
 #   Li4u
 #   -----END CERTIFICATE-----
+# or skip tls verify (insecure)
 # apiServerSkipTlsVerify: true
 containerPort: 8080
 servicePort: 8080
@@ -57,13 +60,11 @@ oidc:
   # redirectUri is the endpoint receiving the OTAC from the OpenID provider after successful login
   redirectUri: https://dashboard.ingress.example.org/auth/callback
   # configuration for kubeconfig download required by kubelogin
-  # kubelogin:
+  # public:
   #  # clientId is the identifier of the public oidc client use by kubelogin
   #  clientId: kube-kubectl
   #  # clientSecret is the public client secret use by kubelogin and all users
   #  clientSecret: ~
-  #  # extraScopes the additional scopes requested
-  #  extraScopes: [ profile, email, groups ]
 
 frontendConfig:
   landingPageUrl: https://github.com/gardener
