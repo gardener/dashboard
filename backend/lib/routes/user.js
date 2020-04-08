@@ -24,7 +24,7 @@ const router = module.exports = express.Router({
   mergeParams: true
 })
 
-function getToken({ auth = {} } = {}) {
+function getToken ({ auth = {} } = {}) {
   return auth.bearer
 }
 
@@ -63,7 +63,6 @@ router.route('/token')
 
 router.route('/kubeconfig')
   .get(async (req, res, next) => {
-    const user = req.user || {}
     const {
       apiServerUrl: server,
       apiServerCaData: certificateAuthorityData,
