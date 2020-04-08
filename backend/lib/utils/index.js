@@ -50,7 +50,7 @@ function getSeedNameFromShoot ({ spec = {} }) {
 }
 
 function shootHasIssue (shoot) {
-  return _.get(shoot, ['metadata', 'labels', 'shoot.garden.sapcloud.io/status'], 'healthy') !== 'healthy'
+  return _.get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
 
 function joinMemberRoleAndRoles (role, roles) {
