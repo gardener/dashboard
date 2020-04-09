@@ -35,15 +35,22 @@ import CopyBtn from '@/components/CopyBtn'
 import trim from 'lodash/trim'
 import split from 'lodash/split'
 import replace from 'lodash/replace'
-import highlight from 'highlight.js/lib/highlight.js'
-import highlightJSON from 'highlight.js/lib/languages/json'
-import highlightYAML from 'highlight.js/lib/languages/yaml'
-import highlightJavascript from 'highlight.js/lib/languages/javascript'
-import highlightBash from 'highlight.js/lib/languages/bash'
-highlight.registerLanguage('json', highlightJSON)
-highlight.registerLanguage('yaml', highlightYAML)
-highlight.registerLanguage('javascript', highlightJavascript)
-highlight.registerLanguage('bash', highlightBash)
+import hljs from 'highlight.js/lib/highlight.js'
+
+import bash from 'highlight.js/lib/languages/bash'
+import shell from 'highlight.js/lib/languages/shell'
+import json from 'highlight.js/lib/languages/json'
+import javascript from 'highlight.js/lib/languages/javascript'
+import yaml from 'highlight.js/lib/languages/yaml'
+
+import 'highlight.js/styles/docco.css'
+
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('shell', shell)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('yaml', yaml)
+
 export default {
   components: {
     CopyBtn
@@ -88,7 +95,7 @@ export default {
         })
         block.textContent = trim(lines.join('\n'))
       }
-      highlight.highlightBlock(block)
+      hljs.highlightBlock(block)
       this.$emit('highlightBlock')
     },
     onCopy () {
@@ -116,8 +123,8 @@ export default {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: $grey.lighten-3;
-    color: $grey.lighten-3;
+    background-color: $grey.lighten-5;
+    color: $grey.lighten-5;
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;
@@ -158,9 +165,12 @@ export default {
       margin: 0;
       white-space: pre;
     }
-    code {
+    code.hljs {
       padding: 0;
-      background: none;
+      white-space: pre !important;
+      color: initial;
+      background-color: initial;
+      font-weight: normal;
       box-shadow: none;
       -webkit-box-shadow: none;
       &:before {

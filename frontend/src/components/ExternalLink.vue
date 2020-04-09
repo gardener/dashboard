@@ -15,50 +15,47 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-avatar :size="size">
-      <img :src="avatarUrl"/>
-    </v-avatar>
-    <a v-if="mailTo && isEmail" :href="`mailto:${accountName}`" class="pl-2" :class="textColor">{{accountName}}</a>
-    <span v-else class="pl-2">{{accountName || '-unknown-'}}</span>
-  </div>
+  <a :href="url" target="_blank" :class="textColor">
+    <span :style="{ fontSize: size + 'px' }"><slot></slot></span><v-icon :size="size" :color="color">mdi-open-in-new</v-icon>
+  </a>
 </template>
 
 <script>
-import { gravatarUrlGeneric, isEmail } from '@/utils'
 import split from 'lodash/split'
 import map from 'lodash/map'
 
 export default {
+  name: 'external-link',
   props: {
-    accountName: {
-      type: String,
-      default: ''
+    url: {
+      type: String
+    },
+    text: {
+      type: String
+    },
+    size: {
+      type: Number,
+      default: 14
     },
     color: {
       type: String,
       default: 'cyan darken-2'
-    },
-    mailTo: {
-      type: Boolean,
-      default: false
-    },
-    size: {
-      type: Number,
-      default: 24
     }
   },
   computed: {
     textColor () {
       const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
       return map(split(this.color, ' '), iteratee)
-    },
-    avatarUrl () {
-      return gravatarUrlGeneric(this.accountName, this.size * 2)
-    },
-    isEmail () {
-      return isEmail(this.accountName)
     }
   }
 }
 </script>
+
+<style scoped>
+  a {
+    text-decoration: none;
+  }
+  a > span {
+    text-decoration-line: underline;
+  }
+</style>

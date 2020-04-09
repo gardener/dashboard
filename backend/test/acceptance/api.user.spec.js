@@ -16,6 +16,8 @@
 
 'use strict'
 
+const { apiServerUrl, apiServerCaData, oidc = {} } = require('../../lib/config')
+
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const name = 'bar'
@@ -64,5 +66,25 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res.body).to.have.property('nonResourceRules')
     expect(res.body).to.have.property('incomplete')
     expect(res.body.resourceRules.length).to.equal(2)
+  })
+
+  it('should return the kubeconfig data the user', async function () {
+    const bearer = await user.bearer
+    const res = await agent
+      .get('/api/user/kubeconfig')
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql({
+      server: apiServerUrl,
+      certificateAuthorityData: apiServerCaData,
+      oidc: {
+        issuerUrl: oidc.issuer,
+        clientId: oidc.public.clientId,
+        clientSecret: oidc.public.clientSecret,
+        extraScopes: ['email', 'profile', 'groups']
+      }
+    })
   })
 }

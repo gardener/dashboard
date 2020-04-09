@@ -15,6 +15,13 @@ data:
     logLevel: {{ .Values.logLevel }}
     logFormat: text
     apiServerUrl: {{ .Values.apiServerUrl }}
+{{- if .Values.apiServerCaData }}
+    apiServerCaData: {{ .Values.apiServerCaData }}
+{{- else if .Values.apiServerCa }}
+    apiServerCaData: {{ b64enc .Values.apiServerCa }}
+{{- else if eq .Values.apiServerSkipTlsVerify true }}
+    apiServerSkipTlsVerify: true
+{{- end }}
     readinessProbe:
       periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
 {{- if .Values.gitHub }}
@@ -52,6 +59,11 @@ data:
 {{- end }}
 {{- if .Values.oidc.clockTolerance }}
       clockTolerance: {{ .Values.oidc.clockTolerance }}
+{{- end }}
+{{- if .Values.oidc.public }}
+      public:
+        clientId: {{ .Values.oidc.public.clientId | default "kube-kubectl" }}
+        clientSecret: {{ required ".Values.oidc.public.clientSecret" .Values.oidc.public.clientSecret }}
 {{- end }}
 {{- end }}
     {{- if .Values.terminal }}
