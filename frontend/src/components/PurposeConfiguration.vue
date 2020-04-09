@@ -34,7 +34,7 @@ limitations under the License.
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import Purpose from '@/components/Purpose'
 import { updateShootPurpose } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'

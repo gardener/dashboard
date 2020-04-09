@@ -290,7 +290,7 @@ export default {
     },
     createInstance (element) {
       const extraKeys = assign({}, {
-        'Tab': (instance) => {
+        Tab: (instance) => {
           if (instance.somethingSelected()) {
             instance.indentSelection('add')
           } else {
@@ -300,7 +300,7 @@ export default {
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
         },
-        'Enter': (instance) => {
+        Enter: (instance) => {
           this.shootEditorCompletions.editorEnter(instance)
         },
         'Ctrl-Space': 'autocomplete'
@@ -456,26 +456,27 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .no-margin
-    margin: 0 !important
-  .position-relative
-    position: relative !important
-  >>> .cm-tab
-     background: embedurl('../assets/tab.png')
-     background-position: right
-     background-repeat: no-repeat
+<style lang="scss" scoped>
+  .no-margin {
+    margin: 0 !important;
+  }
+  .position-relative {
+    position: relative !important;
+  }
+  >>> .cm-tab {
+     background: embedurl('../assets/tab.png');
+     background-position: right;
+     background-repeat: no-repeat;
+  }
   .font-style-italic {
     font-style: italic;
   }
-
   .font-wrap {
     white-space: pre-wrap;
   }
-
 </style>
-<style lang="styl">
-  @import '~vuetify/src/stylus/settings/_colors.styl';
+<style lang="scss">
+  @import '~vuetify/src/styles/styles.sass';
 
   .CodeMirror-hint {
 
@@ -502,12 +503,12 @@ export default {
     .description {
       font-family: Roboto, sans-serif;
       font-size: 13px;
-      color: $grey.darken-3;
+      color: map-get($grey, 'darken-3');
     }
   }
 
   .CodeMirror-hint-active {
-    background-color: $grey.lighten-4 !important;
+    background-color: map-get($grey, 'lighten-4') !important;
   }
 
 </style>

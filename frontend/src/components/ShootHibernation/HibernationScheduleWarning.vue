@@ -67,7 +67,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .cursor-pointer {
     cursor: pointer;
   }

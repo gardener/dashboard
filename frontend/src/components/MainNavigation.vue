@@ -176,7 +176,7 @@ import head from 'lodash/head'
 import slice from 'lodash/slice'
 import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
-import ProjectCreateDialog from '@/dialogs/ProjectDialog'
+import ProjectCreateDialog from '@/components/dialogs/ProjectDialog'
 
 const initialVisibleProjects = 10
 
@@ -276,7 +276,7 @@ export default {
     },
     visibleProjectList () {
       const projectList = this.sortedAndFilteredProjectListWithAllProjects
-      let endIndex = this.numberOfVisibleProjects
+      const endIndex = this.numberOfVisibleProjects
       return slice(projectList, 0, endIndex)
     },
     getProjectOwner () {
@@ -445,60 +445,60 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  teaserHeight = 200px
+<style lang="scss" scoped>
+  $teaserHeight: 200px;
 
   aside {
-    overflow: hidden
+    overflow: hidden;
 
     .teaser {
-      height: teaserHeight
-      overflow: hidden
+      height: $teaserHeight;
+      overflow: hidden;
 
       .content {
         display: block;
         position: relative;
-        height: teaserHeight
-        overflow: hidden
-        background-color: #212121
-        text-align: center
+        height: $teaserHeight;
+        overflow: hidden;
+        background-color: #212121;
+        text-align: center;
 
         a {
-          text-decoration: none
+          text-decoration: none;
 
           .logo {
-            height: 80px
-            pointer-events: none
-            margin: 21px 0 0 0
-            transform: translateX(30%)
+            height: 80px;
+            pointer-events: none;
+            margin: 21px 0 0 0;
+            transform: translateX(30%);
           }
 
           h1 {
-            font-size: 40px
-            line-height: 40px
-            padding: 10px 0 0 0
-            margin: 0
-            letter-spacing: 4px
-            font-weight: 100
-            position: relative
+            font-size: 40px;
+            line-height: 40px;
+            padding: 10px 0 0 0;
+            margin: 0;
+            letter-spacing: 4px;
+            font-weight: 100;
+            position: relative;
 
             .version {
-              font-size: 10px
-              line-height: 10px
-              letter-spacing: 3px
-              position: absolute
-              top: 6px
-              right: 20px
+              font-size: 10px;
+              line-height: 10px;
+              letter-spacing: 3px;
+              position: absolute;
+              top: 6px;
+              right: 20px;
             }
           }
 
           h2 {
-            color: rgb(0, 137, 123)
-            font-size: 15px
-            font-weight: 300
-            padding: 0px
-            margin: 0px
-            letter-spacing: 0.8px
+            color: rgb(0, 137, 123);
+            font-size: 15px;
+            font-weight: 300;
+            padding: 0px;
+            margin: 0px;
+            letter-spacing: 0.8px;
           }
         }
 
@@ -506,33 +506,33 @@ export default {
     }
 
     .project-selector {
-      height: 60px
-      font-weight: 700
-      font-size: 16px
-      background-color: rgba(0,0,0,0.1) !important
+      height: 60px;
+      font-weight: 700;
+      font-size: 16px;
+      background-color: rgba(0,0,0,0.1) !important;
 
       >>> div {
-        justify-content: left
+        justify-content: left;
       }
     }
 
     .v-footer{
-      background-color: transparent
+      background-color: transparent;
       padding-left: 10px;
       padding-right: 10px;
     }
 
     >>> .v-list {
       .v-list__tile__title {
-          text-transform: uppercase
+          text-transform: uppercase;
           font-size: 13px;
           max-width: 180px;
       }
       .v-list__tile--active {
-        background: rgba(255,255,255,0.1) !important
-        color: white !important
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
         .icon {
-          color: white !important
+          color: white !important;
         }
       }
     }
@@ -544,7 +544,7 @@ export default {
         border-radius: 0;
 
         .project-filter {
-          align-items: center
+          align-items: center;
         }
 
         .project-add > div {

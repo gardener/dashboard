@@ -67,7 +67,8 @@ export default {
     items () {
       const selectionItemsForType = (versions, type) => {
         return map(versions, ({ version, expirationDateString }) => {
-          return { type,
+          return {
+            type,
             version,
             expirationDateString,
             text: `${this.currentk8sVersion} → ${version}`,

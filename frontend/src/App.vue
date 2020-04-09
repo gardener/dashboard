@@ -33,9 +33,7 @@ export default {
 }
 </script>
 
-<style lang="styl">
-  @import './stylus/main'
-
+<style lang="scss">
   [data-app] {
     .content > .container {
       min-height: calc(100vh - 156px)

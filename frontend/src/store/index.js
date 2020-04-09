@@ -273,7 +273,7 @@ const getters = {
     return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
-        return map(get(find(cloudProfile.data.regions, { 'name': region }), 'zones'), 'name')
+        return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
     }

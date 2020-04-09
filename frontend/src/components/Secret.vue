@@ -133,7 +133,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .card_disabled {
     opacity:0.3;
@@ -143,7 +143,7 @@ export default {
   .description_container {
     .description {
       padding: 30px;
-      padding-top: 10px
+      padding-top: 10px;
       opacity: 0.5;
     }
   }

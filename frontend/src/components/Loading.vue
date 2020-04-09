@@ -39,7 +39,7 @@ export default {
 }
 </script>
 
-<style lang="styl">
+<style lang="scss">
   .dialog--loading {
     box-shadow: none;
     border-radius: 0;

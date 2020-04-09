@@ -74,7 +74,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .statusTitle {
     line-height: 10px;
   }

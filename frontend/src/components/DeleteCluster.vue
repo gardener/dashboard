@@ -57,7 +57,7 @@ limitations under the License.
 
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
@@ -123,7 +123,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   p {
     margin-bottom: 0
   }

@@ -195,7 +195,7 @@ limitations under the License.
 
 <script>
 import CloudProfile from '@/components/CloudProfile'
-import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
+import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
 import { includesIfAvailable, requiresCostObjectIfEnabled } from '@/utils/validators'
@@ -633,7 +633,8 @@ export default {
       projectID,
       firewallImage,
       firewallSize,
-      firewallNetworks }) {
+      firewallNetworks
+    }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
@@ -679,7 +680,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .regularInput {
     max-width: 300px;
   }

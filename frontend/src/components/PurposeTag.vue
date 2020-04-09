@@ -61,7 +61,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .purpose-tag {
     margin: 1px;

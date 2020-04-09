@@ -91,7 +91,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .journalTitle {
     line-height: 10px;

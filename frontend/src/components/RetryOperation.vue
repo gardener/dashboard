@@ -73,7 +73,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
 .retry-operation-div {
   display: inline-block;

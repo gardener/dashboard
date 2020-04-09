@@ -98,7 +98,7 @@ limitations under the License.
 
 <script>
 import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
-import GDialog from '@/dialogs/GDialog'
+import GDialog from '@/components/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
@@ -213,7 +213,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .update_btn {
     min-width: 0px;
     margin: 0px;

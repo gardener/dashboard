@@ -192,7 +192,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .cardTitle {
     line-height: 10px;

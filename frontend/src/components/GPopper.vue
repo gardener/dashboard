@@ -61,7 +61,7 @@ limitations under the License.
 import Popper from 'vue-popperjs'
 import TimeString from '@/components/TimeString'
 import { closePopover } from '@/utils'
-import 'vue-popperjs/dist/css/vue-popper.css'
+import 'vue-popperjs/dist/vue-popper.css'
 import VueLazyload from 'vue-lazyload'
 import Vue from 'vue'
 
@@ -160,7 +160,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .popper {
     padding: 0px;

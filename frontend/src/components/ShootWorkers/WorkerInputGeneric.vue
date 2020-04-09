@@ -362,7 +362,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .regularInput {
     max-width: 300px;
   }

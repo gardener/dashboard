@@ -85,9 +85,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  @import '~vuetify/src/stylus/settings/_colors.styl';
-
+<style lang="scss" scoped>
   .select_infra_card {
     padding: 10px;
     opacity: 0.8;

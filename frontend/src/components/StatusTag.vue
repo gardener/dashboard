@@ -199,7 +199,7 @@ export default {
       return `${name} [${errorState}${since}]`
     },
     conditionMetadataFromType (type) {
-      let condition = this.conditionCache[type]
+      const condition = this.conditionCache[type]
       if (condition) {
         return condition
       }
@@ -231,7 +231,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .cursor-pointer >>> .v-chip__content {
     cursor: pointer;

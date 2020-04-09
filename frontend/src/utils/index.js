@@ -52,7 +52,7 @@ export function emailToDisplayName (value) {
   if (value) {
     const names = map(words(replace(value, /@.*$/, '')), capitalize)
     const givenName = names.shift()
-    return join(compact([ join(names, ' '), givenName ]), ', ')
+    return join(compact([join(names, ' '), givenName]), ', ')
   }
 }
 
@@ -161,7 +161,7 @@ export function fullDisplayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [ namespace, serviceaccount ] = split(username, ':', 4).slice(2)
+    const [namespace, serviceaccount] = split(username, ':', 4).slice(2)
     return toUpper(`${namespace} / ${serviceaccount}`)
   }
   return username
@@ -175,7 +175,7 @@ export function displayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [ , serviceaccount ] = split(username, ':', 4).slice(2)
+    const [, serviceaccount] = split(username, ':', 4).slice(2)
     return toUpper(serviceaccount)
   }
   return username

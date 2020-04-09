@@ -88,7 +88,7 @@ export default {
     },
     showWebsocketConnectionError () {
       if (!this.websocketConnectionNotification) {
-        this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, `No Connection`, {
+        this.websocketConnectionNotification = this.$snotify.warning(this.websocketConnectionNotificationMessage, 'No Connection', {
           timeout: 0,
           closeOnClick: false,
           position: SnotifyPosition.rightTop
@@ -104,8 +104,8 @@ export default {
   }
 }
 </script>
-<style lang="styl">
-  @import '~vuetify/src/stylus/settings/_colors.styl';
+<style lang="scss">
+  @import '~vuetify/src/styles/styles.sass';
   @import "~vue-snotify/styles/material.css";
 
   .snotify-rightTop {
@@ -113,7 +113,7 @@ export default {
   }
 
   .snotify-info {
-    background-color: $cyan.darken-2
+    background-color: map-get($cyan, 'darken-2');
   }
 
   .snotify {

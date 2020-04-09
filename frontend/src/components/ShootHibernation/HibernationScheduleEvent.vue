@@ -228,7 +228,7 @@ export default {
     setSelectedDays (scheduleEvent) {
       const days = get(scheduleEvent, 'start.weekdays', get(scheduleEvent, 'end.weekdays'))
       if (days) {
-        const daysArray = map(split(days, ','), day => find(this.weekdays, { 'value': parseInt(day) }))
+        const daysArray = map(split(days, ','), day => find(this.weekdays, { value: parseInt(day) }))
         if (!isEqual(daysArray, this.selectedDays)) {
           this.selectedDays = daysArray
         }
@@ -290,7 +290,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .weekday-select {
     width: 300px;
   }

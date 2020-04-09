@@ -80,7 +80,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .v-breadcrumbs {
     padding-left: 0px;

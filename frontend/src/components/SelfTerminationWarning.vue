@@ -53,7 +53,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .terminationIcon {
     margin-left: 10px;
   }

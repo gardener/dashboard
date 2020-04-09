@@ -6,7 +6,15 @@ const version = fs.readFileSync(path.resolve(__dirname, '../VERSION'), 'utf8').t
 process.env.VUE_APP_VERSION = version
 
 module.exports = {
-  configureWebpack: config => {
+  pages: {
+    index: {
+      entry: 'src/main.js',
+      template: 'public/index.html',
+      filename: 'index.html',
+      title: 'Kubernetes Gardener'
+    }
+  },
+  configureWebpack (config) {
     config.externals = /^ws$/i
   },
   devServer: {

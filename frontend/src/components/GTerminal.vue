@@ -228,8 +228,8 @@ import {
   heartbeat,
   terminalConfig
 } from '@/utils/api'
-import ConfirmDialog from '@/dialogs/ConfirmDialog'
-import TerminalSettingsDialog from '@/dialogs/TerminalSettingsDialog'
+import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
+import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
 import Disconnected from '@/components/icons/Disconnected'
@@ -869,9 +869,10 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .position-relative
+<style lang="scss" scoped>
+  .position-relative {
     position: relative !important
+  }
   .terminal-container {
       height: 100%;
       width: 100%;

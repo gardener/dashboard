@@ -244,7 +244,7 @@ export default {
   }
 }
 </script>
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .action-button-group {
     white-space: nowrap;
 

@@ -63,23 +63,23 @@ import join from 'lodash/join'
 import { isUserError, allErrorCodesFromLastErrors } from '@/utils'
 
 const errorCodes = {
-  'ERR_INFRA_UNAUTHORIZED': {
+  ERR_INFRA_UNAUTHORIZED: {
     shortDescription: 'Invalid Credentials',
     description: 'Invalid cloud provider credentials.'
   },
-  'ERR_INFRA_INSUFFICIENT_PRIVILEGES': {
+  ERR_INFRA_INSUFFICIENT_PRIVILEGES: {
     shortDescription: 'Insufficient Privileges',
     description: 'Cloud provider credentials have insufficient privileges.'
   },
-  'ERR_INFRA_QUOTA_EXCEEDED': {
+  ERR_INFRA_QUOTA_EXCEEDED: {
     shortDescription: 'Quota Exceeded',
     description: 'Cloud provider quota exceeded. Please request limit increases.'
   },
-  'ERR_INFRA_DEPENDENCIES': {
+  ERR_INFRA_DEPENDENCIES: {
     shortDescription: 'Infrastructure Dependencies',
     description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
   },
-  'ERR_CLEANUP_CLUSTER_RESOURCES': {
+  ERR_CLEANUP_CLUSTER_RESOURCES: {
     shortDescription: 'Cleanup Cluster',
     description: 'Cleaning up the cluster failed as some resource are stuck in deletion. Please remove these resources properly or a forceful deletion will happen if this error persists.'
   }
@@ -239,7 +239,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   /* overwrite message class from g-popper child component */
   >>> .message {

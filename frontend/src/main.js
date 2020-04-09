@@ -16,10 +16,11 @@
 
 import includes from 'lodash/includes'
 
-import 'typeface-roboto/index.css'
+import '@babel/polyfill'
+import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/dist/vuetify.min.css'
+import './sass/main.scss'
 
 const version = isIE()
 
@@ -31,7 +32,7 @@ if (version === false) {
       import('vuelidate'),
       import('./App'),
       import('./store'),
-      import('./router'),
+      import('./router/index'),
       import('axios'),
       import('vue-snotify'),
       import('vue-cookie'),
@@ -40,7 +41,7 @@ if (version === false) {
     ])
     .then(([
       { default: Vue },
-      Vuetify,
+      { default: Vuetify },
       { default: Vuelidate },
       { default: App },
       { default: store },
@@ -97,9 +98,7 @@ if (version === false) {
 
 function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, ShortKey, App, store, router }) {
   /* eslint-disable no-new */
-  Vue.use(Vuetify, {
-    iconfont: 'md'
-  })
+  Vue.use(Vuetify)
   Vue.use(Vuelidate)
   Vue.use(Snotify)
   Vue.use(VueCookie)
@@ -107,7 +106,10 @@ function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, ShortKey, App, st
 
   Vue.config.productionTip = false
 
+  const vuetify = new Vuetify({})
+
   new Vue({
+    vuetify,
     router,
     store,
     render: h => h(App)
@@ -116,7 +118,7 @@ function start ({ Vue, Vuetify, Vuelidate, Snotify, VueCookie, ShortKey, App, st
 
 function renderServerError (error) {
   const elem = document.getElementById('app')
-  elem.style.fontFamily = `'Roboto', sans-serif`
+  elem.style.fontFamily = 'Roboto, sans-serif'
   elem.style.fontSize = '14px'
   elem.style.fontWeight = '300'
   elem.style.lineHeight = '1.5'
@@ -149,7 +151,7 @@ function renderServerError (error) {
 function renderNotSupportedBrowser (version) {
   const browser = version >= 12 ? 'Microsoft Edge' : 'Internet Explorer'
   const elem = document.getElementById('app')
-  elem.style.fontFamily = `'Roboto', sans-serif`
+  elem.style.fontFamily = 'Roboto, sans-serif'
   elem.style.fontSize = '14px'
   elem.style.fontWeight = '300'
   elem.style.lineHeight = '1.5'

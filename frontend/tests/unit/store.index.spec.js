@@ -22,37 +22,37 @@ describe('Store', function () {
   it('should transform machine images from cloud profile', function () {
     const cpMachineImages = [
       {
-        'name': 'coreos',
-        'versions': [
+        name: 'coreos',
+        versions: [
           {
-            'version': '2135.6.0'
+            version: '2135.6.0'
           }
         ]
       },
       {
-        'name': 'suse-jeos',
-        'versions': [
+        name: 'suse-jeos',
+        versions: [
           {
-            'version': '15.1.20190927'
+            version: '15.1.20190927'
           },
           {
-            'version': '15.1.20191027',
-            'expirationDate': '2119-04-05T01:02:03Z' // not expired
+            version: '15.1.20191027',
+            expirationDate: '2119-04-05T01:02:03Z' // not expired
           },
           {
-            'version': '15.1.20191127',
-            'expirationDate': '2019-04-05T01:02:03Z' // expired
+            version: '15.1.20191127',
+            expirationDate: '2019-04-05T01:02:03Z' // expired
           }
         ]
       },
       {
-        'name': 'foo',
-        'versions': [
+        name: 'foo',
+        versions: [
           {
-            'version': '1.02.3' // invalid version (not semver compatible)
+            version: '1.02.3' // invalid version (not semver compatible)
           },
           {
-            'version': '1.2.3'
+            version: '1.2.3'
           }
         ]
       }
@@ -93,18 +93,18 @@ describe('Store', function () {
   it('should filter kubernetes versions from cloud profile', function () {
     const kubernetesVersions = [
       {
-        'version': '1.13.4'
+        version: '1.13.4'
       },
       {
-        'expirationDate': '2120-04-12T23:59:59Z', // not expired
-        'version': '1.16.3'
+        expirationDate: '2120-04-12T23:59:59Z', // not expired
+        version: '1.16.3'
       },
       {
-        'expirationDate': '2019-03-15T23:59:59Z', // expired
-        'version': '1.16.2'
+        expirationDate: '2019-03-15T23:59:59Z', // expired
+        version: '1.16.2'
       },
       {
-        'version': '1.06.2' // invalid version (not semver compatible)
+        version: '1.06.2' // invalid version (not semver compatible)
       }
     ]
 
@@ -143,13 +143,13 @@ describe('Store', function () {
   it('should return machineTypes by region and zones from cloud profile', function () {
     const cpMachineTypes = [
       {
-        'name': 'machineType1'
+        name: 'machineType1'
       },
       {
-        'name': 'machineType2'
+        name: 'machineType2'
       },
       {
-        'name': 'machineType3'
+        name: 'machineType3'
       }
     ]
 
@@ -212,13 +212,13 @@ describe('Store', function () {
   it('should return volumeTypes by region and zones from cloud profile', function () {
     const cpVolumeTypes = [
       {
-        'name': 'volumeType1'
+        name: 'volumeType1'
       },
       {
-        'name': 'volumeType2'
+        name: 'volumeType2'
       },
       {
-        'name': 'volumeType3'
+        name: 'volumeType3'
       }
     ]
 
