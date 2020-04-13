@@ -15,8 +15,8 @@ limitations under the License.
 -->
 
 <template>
-  <v-toolbar fixed app :tabs="!!tabs">
-    <v-toolbar-side-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-toolbar-side-icon>
+  <v-app-bar fixed app :tabs="!!tabs">
+    <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
     <div class="text-xs-center mr-4" v-if="helpMenuItems.length">
@@ -102,7 +102,7 @@ limitations under the License.
         {{tab.title}}
       </v-tab>
     </v-tabs>
-  </v-toolbar>
+  </v-app-bar>
 </template>
 
 <script>

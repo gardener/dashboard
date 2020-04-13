@@ -16,15 +16,14 @@ limitations under the License.
 
 <template>
   <v-breadcrumbs :items="breadcrumbItems">
-    <v-icon slot="divider" large>keyboard_arrow_right</v-icon>
-    <router-link
-      slot-scope="{item}"
-      slot="item"
-      :to="item.to"
-      :class="textClass(item)"
-    >
-      {{ item.text }}
-    </router-link>
+    <template v-slot:divider>
+      <v-icon large>chevron_right</v-icon>
+    </template>
+    <template v-slot:item="{ item }">
+      <router-link :to="item.to" :class="textClass(item)">
+        {{ item.text }}
+      </router-link>
+    </template>
   </v-breadcrumbs>
 </template>
 
