@@ -17,46 +17,42 @@ limitations under the License.
 <template>
   <v-app>
     <v-content>
-      <v-container fluid fill-height>
-        <v-layout row wrap >
-          <v-flex xs5 left>
-            <v-layout column fill-height>
-              <v-flex grow>
-                <img src="../assets/logo.svg" class="logo">
-                <h1>Gardener</h1>
-                <h2>Universal Kubernetes at Scale</h2>
-            </v-flex>
-            <v-flex shrink pl-2>
+      <v-container fluid class="fill-height align-stretch">
+        <v-row>
+          <v-col cols="5" class="d-flex flex-column left">
+            <div class="flex-grow-1">
+              <img src="../assets/logo.svg" class="logo">
+              <h1>Gardener</h1>
+              <h2>Universal Kubernetes at Scale</h2>
+            </div>
+            <div class="flex-grow-0 px-2">
               <img :src="footerLogoUrl" height="24">
-            </v-flex>
-          </v-layout>
-        </v-flex>
-        <v-flex xs7 right>
-          <v-layout column fill-height>
-            <v-flex shrink>
-              <h1>Enterprise-Grade Kubernetes Service</h1>
-              <h2>Infrastructure agnostic and working across all major public clouds</h2>
-            </v-flex>
-            <v-flex shrink v-if="landingPageUrl" hint>
-              <span>Discover what our service is about at the</span>
-              <a :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon size="20">mdi-open-in-new</v-icon></a>
-            </v-flex>
-            <v-flex grow actions>
-              <div class="loginButton orange lighten-2 elevation-2" @click.stop="handleLogin(primaryLoginType)">
-                Login <v-icon dark class="ml-1">mdi-login-variant</v-icon>
+            </div>
+          </v-col>
+          <v-col cols="7" class="d-flex flex-column right">
+              <div class="flex-shrink-1">
+                <h1>Enterprise-Grade Kubernetes Service</h1>
+                <h2>Infrastructure agnostic and working across all major public clouds</h2>
               </div>
-              <template v-if="showTokenLoginLink">
-                <div class="loginLink">
-                  <a @click.stop="handleLogin('token')">Login with Bearer Token</a>
+              <div v-if="landingPageUrl" class="flex-shrink-1 hint">
+                <span>Discover what our service is about at the</span>
+                <a :href="landingPageUrl" target="_blank">Gardener Landing Page <v-icon size="20">mdi-open-in-new</v-icon></a>
+              </div>
+              <div class="flex-grow-1 actions">
+                <div class="loginButton orange lighten-2 elevation-2" @click.stop="handleLogin(primaryLoginType)">
+                  Login <v-icon dark class="ml-1">mdi-login-variant</v-icon>
                 </div>
-              </template>
-            </v-flex>
-            <v-flex text-xs-right shrink pr-2>
-              &copy; {{ new Date().getFullYear() }}
-            </v-flex>
-          </v-layout>
-        </v-flex>
-        </v-layout>
+                <template v-if="showTokenLoginLink">
+                  <div class="loginLink">
+                    <a @click.stop="handleLogin('token')">Login with Bearer Token</a>
+                  </div>
+                </template>
+              </div>
+              <div class=" flex-shrink-1 text-right pr-2">
+                &copy; {{ new Date().getFullYear() }}
+              </div>
+          </v-col>
+        </v-row>
       </v-container>
     </v-content>
     <vue-snotify></vue-snotify>
@@ -82,8 +78,8 @@ limitations under the License.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn flat @click="closeDialog">Cancel</v-btn>
-          <v-btn color="teal darken-2" flat @click="submitToken">Ok</v-btn>
+          <v-btn text @click="closeDialog">Cancel</v-btn>
+          <v-btn text color="teal darken-2" @click="submitToken">Ok</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -207,113 +203,115 @@ $hexOutline: darken($hexArea,1);
   main {
     .container {
       padding: 0;
+      .row {
+        margin: 0;
+        .left {
+          background-color: #2c353d;
+          padding: 0;
 
-      .left {
-        background-color: #2c353d;
-        padding: 0;
-
-        .logo {
-          height: 20vw;
-          pointer-events: none;
-          display: block;
-          margin: auto;
-          margin-top: 100px;
-        }
-
-        h1 {
-          font-size: 4vw;
-          font-weight: 200;
-          width: 100%;
-          text-align: center;
-          color: $font1;
-          letter-spacing: 5px;
-        }
-
-        h2 {
-          font-size: 1.8vw;
-          font-weight: 300;
-          width: 100%;
-          color: #009F76;
-          text-align: center;
-        }
-      }
-
-      .right {
-        background-color: white;
-        padding: 100px 0px 0px 50px;
-        background:
-          radial-gradient(circle farthest-side at 0% 50%, $hexArea 23.5%, rgba(240, 166, 17, 0) 0) 21px 30px,
-          radial-gradient(circle farthest-side at 0% 50%, $hexOutline 24%, rgba(240, 166, 17, 0) 0) 19px 30px,
-          linear-gradient($hexArea 14%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 85%, $hexArea 0) 0 0,
-          linear-gradient(150deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
-          linear-gradient(30deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
-          linear-gradient(90deg, $hexOutline 2%, $hexArea 0, $hexArea 98%, $hexOutline 0%) 0 0 $hexOutline;
-        background-size: 40px 60px;
-
-        h1 {
-          font-size: 2.5vw;
-          width: 100%;
-          text-align: left;
-          font-family: 'Roboto', sans-serif;
-          color: $bg2;
-          white-space: nowrap;
-          font-weight: 400;
-        }
-
-        h2 {
-          font-size: 1.6vw;
-          width: 100%;
-          text-align: left;
-          font-weight: 400;
-        }
-
-        .hint {
-          padding-top: 48px;
-          font-size: 1.3vw;
-          width: 100%;
-          text-align: left;
-          font-weight: 500;
-
-          a {
-            color: #009688;
-            padding-left: 10px;
-            text-decoration: none;
-            &:hover {
-              color: #26A69A;
-            }
+          .logo {
+            height: 20vw;
+            pointer-events: none;
+            display: block;
+            margin: auto;
+            margin-top: 100px;
           }
 
-        }
-
-        .actions {
-          position: relative;
-
-          .loginButton {
-            padding: 10px;
-            padding-left: 40px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            bottom: 80px;
-            position: absolute;
-            right: 0px;
-            width: 40%;
+          h1 {
+            font-size: 4vw;
+            font-weight: 200;
+            width: 100%;
+            text-align: center;
+            color: $font1;
+            letter-spacing: 5px;
           }
 
-          .loginLink {
-            padding: 5px;
-            padding-left: 10px;
-            background-color: transparent;
-            font-size: 11px;
-            position: absolute;
-            right: 0px;
-            bottom: 50px;
-            width: 40%;
+          h2 {
+            font-size: 1.8vw;
+            font-weight: 300;
+            width: 100%;
+            color: #009F76;
+            text-align: center;
+          }
+        }
+
+        .right {
+          background-color: white;
+          padding: 100px 0px 0px 50px;
+          background:
+            radial-gradient(circle farthest-side at 0% 50%, $hexArea 23.5%, rgba(240, 166, 17, 0) 0) 21px 30px,
+            radial-gradient(circle farthest-side at 0% 50%, $hexOutline 24%, rgba(240, 166, 17, 0) 0) 19px 30px,
+            linear-gradient($hexArea 14%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 85%, $hexArea 0) 0 0,
+            linear-gradient(150deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
+            linear-gradient(30deg, $hexArea 24%, $hexOutline 0, $hexOutline 26%, rgba(240, 166, 17, 0) 0, rgba(240, 166, 17, 0) 74%, $hexOutline 0, $hexOutline 76%, $hexArea 0) 0 0,
+            linear-gradient(90deg, $hexOutline 2%, $hexArea 0, $hexArea 98%, $hexOutline 0%) 0 0 $hexOutline;
+          background-size: 40px 60px;
+
+          h1 {
+            font-size: 2.5vw;
+            width: 100%;
+            text-align: left;
+            font-family: 'Roboto', sans-serif;
+            color: $bg2;
+            white-space: nowrap;
+            font-weight: 400;
+          }
+
+          h2 {
+            font-size: 1.6vw;
+            width: 100%;
+            text-align: left;
+            font-weight: 400;
+          }
+
+          .hint {
+            padding-top: 48px;
+            font-size: 1.3vw;
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
 
             a {
-              color: #cfcfcf;
+              color: #009688;
+              padding-left: 10px;
+              text-decoration: none;
               &:hover {
-                color: #ffb74d;
+                color: #26A69A;
+              }
+            }
+
+          }
+
+          .actions {
+            position: relative;
+
+            .loginButton {
+              padding: 10px;
+              padding-left: 40px;
+              color: white;
+              font-size: 20px;
+              cursor: pointer;
+              bottom: 80px;
+              position: absolute;
+              right: 0px;
+              width: 40%;
+            }
+
+            .loginLink {
+              padding: 5px;
+              padding-left: 10px;
+              background-color: transparent;
+              font-size: 11px;
+              position: absolute;
+              right: 0px;
+              bottom: 50px;
+              width: 40%;
+
+              a {
+                color: #cfcfcf;
+                &:hover {
+                  color: #ffb74d;
+                }
               }
             }
           }
