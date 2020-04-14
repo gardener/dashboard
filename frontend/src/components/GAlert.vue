@@ -18,7 +18,7 @@ limitations under the License.
   <v-alert :color="color" dismissible v-model="alertVisible">
     <div class="subheading">
       {{message}}
-      <v-btn dark outline small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
+      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
         Details
       </v-btn>
     </div>

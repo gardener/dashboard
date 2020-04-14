@@ -34,7 +34,7 @@ limitations under the License.
           <v-textarea
             ref="serviceAccountKey"
             color="green"
-            box
+            filled
             v-model="serviceAccountKey"
             label="Service Account Key"
             :error-messages="getErrorMessages('serviceAccountKey')"

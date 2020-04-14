@@ -62,14 +62,14 @@ limitations under the License.
       </v-col>
     </v-row>
     <v-row v-if="parseError" class="pt-2">
-      <v-alert :value="true" type="warning" outline>
+      <v-alert :value="true" type="warning" outlined>
         One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
     </v-row>
     <v-row v-if="!isHibernationPossible" class="pt-2">
       <v-col>
-        <v-alert :value="true" type="warning" outline>
+        <v-alert :value="true" type="warning" outlined>
           <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
           <div>{{hibernationPossibleMessage}}</div>
         </v-alert>
