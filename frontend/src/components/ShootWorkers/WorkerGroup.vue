@@ -32,7 +32,7 @@ limitations under the License.
       slot="popperRef"
       small
       class="cursor-pointer my-0 ml-0"
-      outline
+      outlined
       color="cyan darken-2">
       {{workerGroup.name}}
     </v-chip>

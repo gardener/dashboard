@@ -30,7 +30,7 @@ limitations under the License.
           class="status-tag"
           :class="{ 'cursor-pointer': tag.message }"
           slot="activator"
-          outline
+          outlined
           :text-color="color"
           small
           :color="color">

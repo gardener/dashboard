@@ -135,7 +135,7 @@ limitations under the License.
         <v-col class="pa-0">
           <span class="grey--text">Add-ons (not actively monitored and provided on a best-effort basis only)</span><br>
           <span class="subheading" v-if="!this.shootAddonNames.length">No addons configured</span>
-          <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
+          <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outlined color="cyan darken-2">{{name}}</v-chip>
         </v-col>
         <v-col class="pa-0 shrink">
           <v-row >

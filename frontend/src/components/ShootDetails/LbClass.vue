@@ -21,7 +21,7 @@ limitations under the License.
     :popperKey="`lbclass_${name}`"
   >
     <span class="font-weight-bold">Floating Subnet ID:</span> {{floatingSubnetID}}
-    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
+    <v-chip slot="popperRef" small class="cursor-pointer my-0 ml-0" outlined color="cyan darken-2">{{name}}</v-chip>
   </g-popper>
 </template>
 

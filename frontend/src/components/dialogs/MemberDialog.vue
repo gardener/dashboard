@@ -60,7 +60,7 @@ limitations under the License.
                 @input="$v.internalRoles.$touch()"
                 >
                 <template v-slot:selection="{ item, index }">
-                  <v-chip small color="black" outline close @input="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
+                  <v-chip small color="black" outlined close @input="internalRoles.splice(index, 1); $v.internalRoles.$touch()">
                     <span>{{ item.displayName }}</span>
                   </v-chip>
                 </template>

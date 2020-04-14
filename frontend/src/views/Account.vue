@@ -19,9 +19,9 @@ limitations under the License.
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar card dark dense class="teal darken-2">
+          <v-app-bar flat dark dense class="teal darken-2">
             <v-toolbar-title>Details</v-toolbar-title>
-          </v-toolbar>
+          </v-app-bar>
           <v-list two-line class="no-height">
             <v-list-item>
               <v-list-item-avatar>
@@ -52,8 +52,8 @@ limitations under the License.
               <v-list-item-content>
                 <v-list-item-title class="label">Groups</v-list-item-title>
                 <v-list-item-subtitle class="content">
-                  <span style="margin-left: -4px">
-                    <v-chip v-for="(group, index) in groups" :key="index" label small outline disabled color="black">{{group}}</v-chip>
+                  <span>
+                    <v-chip v-for="(group, index) in groups" :key="index" label small outlined disabled color="black">{{group}}</v-chip>
                   </span>
                 </v-list-item-subtitle>
               </v-list-item-content>
@@ -75,9 +75,9 @@ limitations under the License.
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-toolbar card dark dense class="teal darken-2">
+          <v-app-bar flat dark dense class="teal darken-2">
             <v-toolbar-title>Access</v-toolbar-title>
-          </v-toolbar>
+          </v-app-bar>
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
@@ -139,7 +139,7 @@ limitations under the License.
                       <br>
                       Below you can configure and preview the <tt>kubeconfig</tt> file before download.
                     </div>
-                    <v-tabs slider-color="grey lighten-1" color="grey lighten-3" class="mt-2 elevation-1">
+                    <v-tabs slider-color="grey lighten-1" background-color="grey lighten-3" class="mt-2 elevation-1" color="black">
                       <v-tab>Configure</v-tab>
                       <v-tab>Preview</v-tab>
                       <v-tab-item class="pa-4">
