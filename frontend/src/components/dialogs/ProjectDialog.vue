@@ -75,7 +75,7 @@ limitations under the License.
 
             </v-row>
             <v-row v-if="!!costObjectDescriptionCompiledMarkdown">
-              <v-alert :value="true" dense type="info" outlined color="deep-purple">
+              <v-alert dense type="info" outlined color="deep-purple">
                 <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
               </v-alert>
             </v-row>
