@@ -224,7 +224,6 @@ export default {
     return {
       expansionPanel: false,
       projectName: undefined,
-      kubeconfigData: undefined,
       skipOpenBrowser: false,
       grantType: 'auto',
       grantTypes: ['auto', 'authcode', 'authcode-keyboard'],
