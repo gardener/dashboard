@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-card v-if="items.length">
-    <v-card-title class="subheading white--text cyan darken-2 statusTitle">
+    <v-card-title class="subtitle-1 white--text cyan darken-2 statusTitle">
       External Tools
     </v-card-title>
     <div class="list">

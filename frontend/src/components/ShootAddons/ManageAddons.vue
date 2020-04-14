@@ -25,7 +25,7 @@ limitations under the License.
         ></v-checkbox>
       </div>
       <div>
-        <div class="subheading font-weight-medium my-1" v-text="addonDefinition.title"/>
+        <div class="subtitle-1 font-weight-medium my-1" v-text="addonDefinition.title"/>
         <div class="addon-content mb-6" v-html="addonDefinition.description"/>
       </div>
     </div>

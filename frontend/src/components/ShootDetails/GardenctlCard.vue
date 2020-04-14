@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-card v-if="isAdmin">
-    <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+    <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
       Gardenctl
     </v-card-title>
     <div class="list">

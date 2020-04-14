@@ -31,7 +31,7 @@ limitations under the License.
 
       <v-col md="6">
         <v-card v-if="canGetSecrets" class="mb-4">
-          <v-card-title class="subheading white--text cyan darken-2">
+          <v-card-title class="subtitle-1 white--text cyan darken-2">
             Access
           </v-card-title>
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
@@ -40,14 +40,14 @@ limitations under the License.
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
-          <v-card-title class="subheading white--text cyan darken-2 mt-4">
+          <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
             Logging
           </v-card-title>
           <shoot-logging :shootItem="shootItem"></shoot-logging>
         </v-card>
 
         <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
-          <v-card-title class="subheading white--text cyan darken-2 mt-4">
+          <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
             {{kymaTitle}}
           </v-card-title>
           <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
@@ -161,7 +161,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .subheading.v-card__title {
+  .subtitle-1.v-card__title {
     line-height: 10px;
   }
 </style>

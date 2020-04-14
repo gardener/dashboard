@@ -68,7 +68,7 @@ export default {
         if (item.currentRoute) {
           return 'breadcrumb title'
         } else {
-          return 'breadcrumb subheading pointer'
+          return 'breadcrumb subtitle-1 pointer'
         }
       }
     },

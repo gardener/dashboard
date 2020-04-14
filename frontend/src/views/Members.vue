@@ -19,7 +19,7 @@ limitations under the License.
     <v-card class="mr-extra">
       <v-toolbar flat color="teal darken-2">
         <v-icon class="white--text pr-2">mdi-account</v-icon>
-        <v-toolbar-title class="subheading white--text">
+        <v-toolbar-title class="subtitle-1 white--text">
           Technical Contact
         </v-toolbar-title>
       </v-toolbar>
@@ -47,7 +47,7 @@ limitations under the License.
     <v-card class="mr-extra mt-6">
       <v-toolbar flat color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
-        <v-toolbar-title class="subheading white--text">
+        <v-toolbar-title class="subtitle-1 white--text">
           Project Users
         </v-toolbar-title>
         <v-spacer></v-spacer>
@@ -102,7 +102,7 @@ limitations under the License.
     <v-card class="mr-extra mt-6">
       <v-toolbar flat color="blue-grey">
         <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
-        <v-toolbar-title class="subheading white--text">
+        <v-toolbar-title class="subtitle-1 white--text">
           Service Accounts
         </v-toolbar-title>
         <v-spacer></v-spacer>

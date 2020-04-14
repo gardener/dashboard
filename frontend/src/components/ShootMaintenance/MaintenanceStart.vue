@@ -27,7 +27,7 @@ limitations under the License.
     <template slot="actionComponent">
       <v-row >
         <v-col>
-          <div class="subheading pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+          <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
         </v-col>
         <maintenance-components
           title="The following updates will be performed"

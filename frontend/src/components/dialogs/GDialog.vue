@@ -25,7 +25,7 @@ limitations under the License.
           <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
         </div>
       </v-card-title>
-      <v-card-text class="subheadingfont" :style="{'max-height': maxHeight}">
+      <v-card-text :style="{'max-height': maxHeight}">
         <slot name="message">
           This is a generic dialog template.
         </slot>

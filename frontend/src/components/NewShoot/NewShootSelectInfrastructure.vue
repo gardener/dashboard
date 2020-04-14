@@ -29,7 +29,7 @@ limitations under the License.
           <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
         </div>
         <div class="mt-2" >
-          <span class="subheading">{{infrastructureKind}}</span>
+          <span class="subtitle-1 ">{{infrastructureKind}}</span>
         </div>
       </div>
     </v-card>

@@ -67,7 +67,7 @@ limitations under the License.
     <v-row  v-if="slaDescriptionCompiledMarkdown">
       <v-col cols="12">
         <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
-        <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
+        <p class="subtitle-1 " v-html="slaDescriptionCompiledMarkdown" />
       </v-col>
     </v-row>
 </v-container>

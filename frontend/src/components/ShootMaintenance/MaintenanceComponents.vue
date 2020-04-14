@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <v-col cols="12">
-      <div class="subheading pt-4">{{title}}</div>
+      <div class="subtitle-1 pt-4">{{title}}</div>
     </v-col>
     <v-col cols="12">
       <v-list two-line>

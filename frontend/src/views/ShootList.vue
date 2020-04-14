@@ -21,7 +21,7 @@ limitations under the License.
         <img src="../assets/certified_kubernetes_white.svg" height="60" class="pl-1">
         <v-toolbar-title class="white--text">
           <div class="headline">Kubernetes Clusters</div>
-          <div class="subheading">{{headlineSubtitle}}</div>
+          <div class="subtitle-1 ">{{headlineSubtitle}}</div>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-text-field v-if="search || items.length > 3"

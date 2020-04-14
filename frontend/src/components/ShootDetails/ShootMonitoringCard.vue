@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 statusTitle">
+    <v-card-title class="subtitle-1 white--text cyan darken-2 statusTitle">
       Monitoring
     </v-card-title>
     <div class="list">
@@ -55,7 +55,7 @@ limitations under the License.
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
-          <span class="subheading">{{metricsNotAvailableText}}</span>
+          <span class="subtitle-1 ">{{metricsNotAvailableText}}</span>
         </v-card-title>
         <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
       </template>

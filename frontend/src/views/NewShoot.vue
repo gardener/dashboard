@@ -18,7 +18,7 @@ limitations under the License.
   <div class="newshoot-container">
     <v-container fluid class="newshoot-cards">
       <v-card flat>
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Infrastructure
         </v-card-title>
         <v-card-text>
@@ -30,7 +30,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Cluster Details
         </v-card-title>
         <v-card-text>
@@ -42,7 +42,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Infrastructure Details
         </v-card-title>
         <v-card-text>
@@ -54,7 +54,7 @@ limitations under the License.
         </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Worker
         </v-card-title>
         <v-card-text>
@@ -66,7 +66,7 @@ limitations under the License.
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
         <v-card-text>
@@ -77,7 +77,7 @@ limitations under the License.
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Maintenance
         </v-card-title>
         <v-card-text>
@@ -92,7 +92,7 @@ limitations under the License.
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
-        <v-card-title class="subheading white--text cyan darken-2 cardTitle">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Hibernation
         </v-card-title>
         <v-card-text>
