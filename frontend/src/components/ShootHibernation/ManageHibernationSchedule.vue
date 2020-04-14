@@ -37,7 +37,7 @@ limitations under the License.
             outline
             fab
             icon
-            class="cyan darken-2 mx-0 my-0">
+            class="cyan darken-2">
             <v-icon class="cyan--text text--darken-2">add</v-icon>
           </v-btn>
           <v-btn

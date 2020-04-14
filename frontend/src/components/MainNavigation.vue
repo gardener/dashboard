@@ -52,7 +52,7 @@ limitations under the License.
             <v-btn
               v-on="on"
               block
-              class="project-selector elevation-4 ma-0 white--text"
+              class="project-selector elevation-4 white--text"
               @keydown.down="highlightProjectWithKeys('down')"
               @keydown.up="highlightProjectWithKeys('up')"
               @keyup.enter="navigateToHighlightedProject"

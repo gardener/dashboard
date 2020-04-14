@@ -61,7 +61,7 @@ limitations under the License.
     <draggable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag" @click="deleteTerminal">
+          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag" @click="deleteTerminal">
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
@@ -79,7 +79,7 @@ limitations under the License.
               :boundariesSelector="`#boundary_${uuid}`"
             >
               <span v-html="compiledImageHelpText"></span>
-              <v-btn slot="popperRef" v-if="terminalSession.imageHelpText" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag">
+              <v-btn slot="popperRef" v-if="terminalSession.imageHelpText" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
                 <v-icon>mdi-help-circle-outline</v-icon>
               </v-btn>
             </g-popper>
@@ -92,7 +92,7 @@ limitations under the License.
             min-width="400px"
           >
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag">
+              <v-btn v-on="on" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
                 <v-icon>mdi-menu</v-icon>
               </v-btn>
             </template>
@@ -138,7 +138,7 @@ limitations under the License.
             dark
           >
             <v-tooltip slot="activator" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
-              <v-btn small text slot="activator" class="text-none grey--text text--lighten-1  ml-0 systemBarButton">
+              <v-btn small text slot="activator" class="text-none grey--text text--lighten-1  systemBarButton">
                 <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
                   <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                   <disconnected v-else></disconnected>
