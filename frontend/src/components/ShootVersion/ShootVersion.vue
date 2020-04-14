@@ -23,7 +23,7 @@ limitations under the License.
         class="update_btn"
         :class="buttonInactive"
         small
-        round
+        rounded
         @click="showUpdateDialog"
         :outline="!k8sPatchAvailable"
         :dark="k8sPatchAvailable"
