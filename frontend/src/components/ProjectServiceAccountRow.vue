@@ -16,78 +16,92 @@ limitations under the License.
 
 <template>
   <div>
-    <v-list-tile avatar>
-      <v-list-tile-avatar>
+    <v-list-item>
+      <v-list-item-avatar>
         <img :src="avatarUrl" />
-      </v-list-tile-avatar>
-      <v-list-tile-content>
+      </v-list-item-avatar>
+      <v-list-item-content>
         <g-popper
           :title="displayName"
           toolbarColor="cyan darken-2"
           :popperKey="`serviceAccount_sa_${username}`"
 
         >
-          <v-list-tile-title slot="popperRef" class="cursor-pointer">
+          <v-list-item-title slot="popperRef" class="cursor-pointer">
             {{displayName}}
-          </v-list-tile-title>
-          <v-row class="fill-height"                         align="center"
+          </v-list-item-title>
+          <v-row class="fill-height" align="center"
           >
-            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
+            <span class="mr-2">Created by</span><span :class="createdByClasses">
+              <account-avatar :account-name="createdBy"></account-avatar>
+            </span>
           </v-row>
-          <v-row class="fill-height"                         align="center"
+          <v-row class="fill-height" align="center"
             v-if="created && creationTimestamp"
           >
             <span class="mr-4">Created</span>
             <v-tooltip top>
-              <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
+              <template v-slot:activator="{ on }">
+                <span v-on="on" class="font-weight-bold">
+                  <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
+                </span>
+              </template>
               {{created}}
             </v-tooltip>
           </v-row>
         </g-popper>
-        <v-list-tile-sub-title>
+        <v-list-item-subtitle>
           {{username}}
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+        </v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action>
         <v-row align="center">
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
+          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
             {{roleName}}
           </v-chip>
         </v-row>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+      </v-list-item-action>
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="black--text" @click.native.stop="onDownload">
-            <v-icon>mdi-download</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon class="black--text" @click.native.stop="onDownload">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
           <span>Download Kubeconfig</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+      </v-list-item-action>
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>
-          <v-btn slot="activator" small icon class="black--text" @click="onKubeconfig">
-            <v-icon>visibility</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" small icon class="black--text" @click="onKubeconfig">
+              <v-icon>visibility</v-icon>
+            </v-btn>
+          </template>
           <span>Show Kubeconfig</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon class="black--text" @click.native.stop="onEdit">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </template>
           <span>Update Service Account</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon class="red--text" @click.native.stop="onDelete">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </template>
           <span>Delete Service Account</span>
         </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
+      </v-list-item-action>
+    </v-list-item>
   </div>
 </template>
 

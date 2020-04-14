@@ -21,12 +21,16 @@ limitations under the License.
     <v-spacer></v-spacer>
     <div class="text-center mr-6" v-if="helpMenuItems.length">
       <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
-        <v-tooltip left slot="activator" open-delay="500">
-          <v-btn slot="activator" icon class="cyan--text text--darken-2">
-            <v-icon medium>help_outline</v-icon>
-          </v-btn>
-          Info
-        </v-tooltip>
+        <template v-slot:activator="{ on }">
+          <v-tooltip v-on="on" left open-delay="500">
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon class="cyan--text text--darken-2">
+                <v-icon medium>help_outline</v-icon>
+              </v-btn>
+            </template>
+            <span>Info</span>
+          </v-tooltip>
+        </template>
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -52,27 +56,34 @@ limitations under the License.
     </div>
     <div class="text-center">
       <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="menu">
-        <v-tooltip left slot="activator" open-delay="500">
-          <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>
-            <v-icon slot="badge" small dark>supervisor_account</v-icon>
-            <v-avatar size="40px">
-              <img :src="avatarUrl" />
-            </v-avatar>
-          </v-badge>
-          <v-avatar v-else slot="activator" size="40px">
-            <img :src="avatarUrl" />
-          </v-avatar>
-          <span v-if="isAdmin">
-            {{avatarTitle}}
-            <v-chip small color="cyan darken-2" dark>
-              <v-avatar>
-                <v-icon>supervisor_account</v-icon>
+        <template v-slot:activator="{ on }">
+          <v-tooltip v-on="on" left open-delay="500">
+            <template v-slot:activator="{ on }">
+              <v-badge v-if="isAdmin" v-on="on" color="cyan darken-2" bottom overlap>
+                <template v-slot:badge>
+                  <v-icon small dark>supervisor_account</v-icon>
+                </template>
+                <v-avatar size="40px">
+                  <img :src="avatarUrl" />
+                </v-avatar>
+              </v-badge>
+              <v-avatar v-else v-on="on" size="40px">
+                <img :src="avatarUrl" />
               </v-avatar>
-              <span class="operator">Operator</span>
-            </v-chip>
-          </span>
-          <span v-else>{{avatarTitle}}</span>
-        </v-tooltip>
+            </template>
+            <span v-if="isAdmin">
+              {{avatarTitle}}
+              <v-chip small color="cyan darken-2" dark>
+                <v-avatar>
+                  <v-icon>supervisor_account</v-icon>
+                </v-avatar>
+                <span class="operator">Operator</span>
+              </v-chip>
+            </span>
+            <span v-else>{{avatarTitle}}</span>
+          </v-tooltip>
+        </template>
+
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -97,11 +108,13 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <v-tabs v-if="tabs && tabs.length > 1" slot="extension" slider-color="grey darken-3">
-      <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
-        {{tab.title}}
-      </v-tab>
-    </v-tabs>
+    <template v-slot:extension>
+      <v-tabs v-if="tabs && tabs.length > 1" slider-color="grey darken-3">
+        <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
+          {{tab.title}}
+        </v-tab>
+      </v-tabs>
+    </template>
   </v-app-bar>
 </template>
 

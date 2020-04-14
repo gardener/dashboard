@@ -23,17 +23,17 @@ limitations under the License.
       <v-list>
         <template v-for="({ title, url, icon = 'link' }, index) in items">
         <v-divider v-if="index" :key="index" class="my-2" inset></v-divider>
-        <v-list-tile :key="title">
-          <v-list-tile-action>
+        <v-list-item :key="title">
+          <v-list-item-action>
             <v-icon class="cyan--text text--darken-2">{{icon}}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-sub-title>{{title}}</v-list-tile-sub-title>
-            <v-list-tile-title>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+            <v-list-item-title>
               <a :href="expandUrl(url)" target="_blank" class="cyan--text text--darken-2">{{expandUrl(url)}}</a>
-            </v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         </template>
       </v-list>
     </div>

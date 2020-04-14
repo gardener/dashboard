@@ -28,9 +28,11 @@ limitations under the License.
       {{snackbarText}}
     </v-snackbar>
     <v-tooltip top>
-      <v-btn slot="activator" icon ref="copy">
-        <v-icon :small="true">content_copy</v-icon>
-      </v-btn>
+      <template v-slot:activator="{ on }">
+        <v-btn v-on="on" icon ref="copy">
+          <v-icon :small="true">content_copy</v-icon>
+        </v-btn>
+      </template>
       <span>{{tooltipText}}</span>
     </v-tooltip>
   </div>

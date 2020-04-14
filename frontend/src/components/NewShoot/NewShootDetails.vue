@@ -45,12 +45,12 @@ limitations under the License.
             persistent-hint
             >
             <template v-slot:item="{ item }">
-              <v-list-tile-content>
-                <v-list-tile-title>{{item.version}}</v-list-tile-title>
-                <v-list-tile-sub-title v-if="item.expirationDateString">
+              <v-list-item-content>
+                <v-list-item-title>{{item.version}}</v-list-item-title>
+                <v-list-item-subtitle v-if="item.expirationDateString">
                   <span>Expires: {{item.expirationDateString}}</span>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
+                </v-list-item-subtitle>
+              </v-list-item-content>
             </template>
           </v-select>
         </hint-colorizer>

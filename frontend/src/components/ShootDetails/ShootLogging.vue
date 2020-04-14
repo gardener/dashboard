@@ -16,16 +16,16 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-if="isTestingCluster">
-      <v-list-tile-action>
+    <v-list-item v-if="isTestingCluster">
+      <v-list-item-action>
         <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>
           Logging Stack not available for clusters with purpose testing
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+        </v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
     <template v-else>
       <link-list-tile v-if="!!kibanaUrl" icon="developer_board" appTitle="Kibana" :url="kibanaUrl" :urlText="kibanaUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
       <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>

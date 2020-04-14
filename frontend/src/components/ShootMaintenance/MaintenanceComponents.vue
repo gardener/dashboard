@@ -21,44 +21,44 @@ limitations under the License.
     </v-col>
     <v-col cols="12">
       <v-list two-line>
-        <v-list-tile class="list-complete-item" v-if="selectable || osUpdates">
-          <v-list-tile-action>
+        <v-list-item class="list-complete-item" v-if="selectable || osUpdates">
+          <v-list-item-action>
             <v-checkbox v-if="selectable" color="cyan darken-2" v-model="osUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Operating System</v-list-tile-title>
-            <v-list-tile-sub-title>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Operating System</v-list-item-title>
+            <v-list-item-subtitle>
               Update the operating system of the workers<br />
               (requires rolling update of all workers, ensure proper pod disruption budgets to ensure availability of your workload)
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile class="list-complete-item" v-if="selectable || k8sUpdates">
-          <v-list-tile-action>
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item class="list-complete-item" v-if="selectable || k8sUpdates">
+          <v-list-item-action>
             <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title >Kubernetes Patch Version</v-list-tile-title>
-            <v-list-tile-sub-title>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title >Kubernetes Patch Version</v-list-item-title>
+            <v-list-item-subtitle>
               Update the control plane of the cluster and the worker components<br />
               (control plane, most notably the API server, will be briefly unavailable during switch-over)
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile class="list-complete-item" v-if="showNoUpdates">
-          <v-list-tile-action>
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item class="list-complete-item" v-if="showNoUpdates">
+          <v-list-item-action>
             <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
             <v-icon v-else>mdi-close-circle-outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title >Updates disabled</v-list-tile-title>
-            <v-list-tile-sub-title>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title >Updates disabled</v-list-item-title>
+            <v-list-item-subtitle>
               All automatic updates have been disabled for this cluster
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+            </v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-col>
   </div>

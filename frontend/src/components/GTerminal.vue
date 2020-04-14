@@ -92,13 +92,13 @@ limitations under the License.
             min-width="400px"
           >
             <template v-slot:activator="{ on }">
-              <v-btn slot="activator" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag" v-on="on">
+              <v-btn v-on="on" icon small class="text-none grey--text text--lighten-1 ml-0 systemBarButton g-ignore-drag">
                 <v-icon>mdi-menu</v-icon>
               </v-btn>
             </template>
             <v-card tile>
               <v-card-actions>
-                <v-btn small block slot="activator" flat class="action-button" @click="split('horizontal')">
+                <v-btn small block flat class="action-button" @click="split('horizontal')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
@@ -108,7 +108,7 @@ limitations under the License.
                 </v-btn>
               </v-card-actions>
               <v-card-actions>
-                <v-btn small block slot="activator" flat class="action-button" @click="split('vertical')">
+                <v-btn small block flat class="action-button" @click="split('vertical')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
@@ -119,7 +119,7 @@ limitations under the License.
               </v-card-actions>
               <v-divider class="mt-1 mb-1"></v-divider>
               <v-card-actions>
-                <v-btn small block slot="activator" flat class="action-button" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
+                <v-btn small block flat class="action-button" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
                   <v-icon small class="mr-2">mdi-settings</v-icon>
                   Settings
                 </v-btn>

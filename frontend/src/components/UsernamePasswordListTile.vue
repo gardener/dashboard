@@ -16,49 +16,49 @@ limitations under the License.
 
 <template>
   <div v-show="(!!username || !!email) && !!password">
-    <v-list-tile v-if="username">
-      <v-list-tile-action>
+    <v-list-item v-if="username">
+      <v-list-item-action>
         <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>User</v-list-tile-sub-title>
-        <v-list-tile-title>{{username}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-subtitle>User</v-list-item-subtitle>
+        <v-list-item-title>{{username}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
         <copy-btn :clipboard-text="username"></copy-btn>
-      </v-list-tile-action>
-    </v-list-tile>
-    <v-list-tile v-if="email">
-      <v-list-tile-action>
+      </v-list-item-action>
+    </v-list-item>
+    <v-list-item v-if="email">
+      <v-list-item-action>
         <v-icon v-if="!username" class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Email</v-list-tile-sub-title>
-        <v-list-tile-title>{{email}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-subtitle>Email</v-list-item-subtitle>
+        <v-list-item-title>{{email}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
         <copy-btn :clipboard-text="email"></copy-btn>
-      </v-list-tile-action>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Password</v-list-tile-sub-title>
-        <v-list-tile-title>{{passwordText}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+      </v-list-item-action>
+    </v-list-item>
+    <v-list-item>
+      <v-list-item-action>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-subtitle>Password</v-list-item-subtitle>
+        <v-list-item-title>{{passwordText}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
         <copy-btn :clipboard-text="password"></copy-btn>
-      </v-list-tile-action>
-      <v-list-tile-action>
+      </v-list-item-action>
+      <v-list-item-action>
         <v-tooltip top>
           <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
             <v-icon>{{visibilityIcon}}</v-icon>
           </v-btn>
           <span>{{passwordVisibilityTitle}}</span>
         </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
+      </v-list-item-action>
+    </v-list-item>
   </div>
 </template>
 

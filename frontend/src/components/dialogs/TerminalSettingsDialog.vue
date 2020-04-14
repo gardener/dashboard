@@ -80,12 +80,12 @@ limitations under the License.
           class="ml-2"
         >
           <template slot="item" slot-scope="data">
-            <v-list-tile-content>
-              <v-list-tile-title>{{data.item.data.kubernetesHostname}}</v-list-tile-title>
-              <v-list-tile-sub-title>
+            <v-list-item-content>
+              <v-list-item-title>{{data.item.data.kubernetesHostname}}</v-list-item-title>
+              <v-list-item-subtitle>
                 <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
+              </v-list-item-subtitle>
+            </v-list-item-content>
           </template>
           <template slot="selection" slot-scope="data">
             <span :class="nodeTextColor" class="ml-2">

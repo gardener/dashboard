@@ -23,11 +23,14 @@ limitations under the License.
         <v-toolbar-title>Project Details</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip v-if="canDeleteProject" top>
-          <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog" slot="activator">
-            <v-icon>delete</v-icon>
-          </v-btn>
-          <span v-if="isDeleteButtonDisabled">You can only delete projects that do not contain clusters</span>
-          <span v-else>Delete Project</span>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                <v-icon>delete</v-icon>
+              </v-btn>
+            </div>
+          </template>
+          <span v-text="isDeleteButtonDisabled ? 'You can only delete projects that do not contain clusters' : 'Delete Project'" />
         </v-tooltip>
       </v-toolbar>
 
@@ -45,13 +48,15 @@ limitations under the License.
         </v-row>
         <v-row >
           <v-col lg="4" cols="12">
-            <v-tooltip top>
-              <template slot="activator">
-                <label class="caption grey--text text--darken-2">Created At</label>
-                <p class="subheading">{{createdAt}}</p>
-              </template>
-              <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
-            </v-tooltip>
+            <label class="caption grey--text text--darken-2">Created At</label>
+            <p>
+              <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                  <span v-on="on" class="subheading">{{createdAt}}</span>
+                </template>
+                <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
+              </v-tooltip>
+            </p>
           </v-col>
           <v-col lg="4" cols="12" v-if="createdBy">
             <label class="caption grey--text text--darken-2">Created By</label>

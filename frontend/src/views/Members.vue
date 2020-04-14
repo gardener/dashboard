@@ -17,35 +17,35 @@ limitations under the License.
 <template>
   <v-container fluid>
     <v-card class="mr-extra">
-      <v-toolbar card color="teal darken-2">
+      <v-toolbar flat color="teal darken-2">
         <v-icon class="white--text pr-2">mdi-account</v-icon>
         <v-toolbar-title class="subheading white--text">
           Technical Contact
         </v-toolbar-title>
       </v-toolbar>
       <v-list v-if="!!technicalContact" two-line subheader>
-        <v-list-tile avatar>
-          <v-list-tile-avatar>
+        <v-list-item>
+          <v-list-item-avatar>
             <img :src="avatarUrl(technicalContact)" />
-          </v-list-tile-avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>{{displayName(technicalContact)}}</v-list-tile-title>
-            <v-list-tile-sub-title><a :href="'mailto:'+technicalContact" class="cyan--text text--darken-2">{{technicalContact}}</a></v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title>{{displayName(technicalContact)}}</v-list-item-title>
+            <v-list-item-subtitle><a :href="'mailto:'+technicalContact" class="cyan--text text--darken-2">{{technicalContact}}</a></v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       <v-list v-else two-line subheader>
-        <v-list-tile avatar>
-          <v-list-tile-content>
-            <v-list-tile-title>This project has no technical contact configured.</v-list-tile-title>
-            <v-list-tile-sub-title>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the users from the list below.</v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
+        <v-list-item avatar>
+          <v-list-item-content>
+            <v-list-item-title>This project has no technical contact configured.</v-list-item-title>
+            <v-list-item-subtitle>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the users from the list below.</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-card>
 
     <v-card class="mr-extra mt-6">
-      <v-toolbar card color="green darken-2">
+      <v-toolbar flat color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
           Project Users
@@ -100,7 +100,7 @@ limitations under the License.
     </v-card>
 
     <v-card class="mr-extra mt-6">
-      <v-toolbar card color="blue-grey">
+      <v-toolbar flat color="blue-grey">
         <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
           Service Accounts

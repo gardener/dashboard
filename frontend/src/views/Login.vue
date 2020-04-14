@@ -19,7 +19,7 @@ limitations under the License.
     <v-content>
       <v-container fluid class="fill-height align-stretch">
         <v-row>
-          <v-col cols="5" class="d-flex flex-column float-left">
+          <v-col cols="5" class="d-flex flex-column">
             <div class="flex-grow-1">
               <img src="../assets/logo.svg" class="logo">
               <h1>Gardener</h1>
@@ -29,7 +29,7 @@ limitations under the License.
               <img :src="footerLogoUrl" height="24">
             </div>
           </v-col>
-          <v-col cols="7" class="d-flex flex-column float-right">
+          <v-col cols="7" class="d-flex flex-column">
               <div class="flex-shrink-1">
                 <h1>Enterprise-Grade Kubernetes Service</h1>
                 <h2>Infrastructure agnostic and working across all major public clouds</h2>
@@ -205,7 +205,7 @@ $hexOutline: darken($hexArea,1);
       padding: 0;
       .row {
         margin: 0;
-        .left {
+        .col:nth-child(1) {
           background-color: #2c353d;
           padding: 0;
 
@@ -235,7 +235,7 @@ $hexOutline: darken($hexArea,1);
           }
         }
 
-        .right {
+        .col:nth-child(2) {
           background-color: white;
           padding: 100px 0px 0px 50px;
           background:

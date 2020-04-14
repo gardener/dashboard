@@ -42,26 +42,27 @@ limitations under the License.
           offset-y
           left
           bottom
-          full-width
           allow-overflow
           open-on-click
           :close-on-content-click="false"
           content-class="project-menu"
           v-model="projectMenu"
         >
-          <v-btn
-            block
-            slot="activator"
-            class="project-selector elevation-4 ma-0 white--text"
-            @keydown.down="highlightProjectWithKeys('down')"
-            @keydown.up="highlightProjectWithKeys('up')"
-            @keyup.enter="navigateToHighlightedProject"
-          >
-            <v-icon class="pr-6">mdi-grid-large</v-icon>
-            <span class="ml-2">{{projectName}}</span>
-            <v-spacer></v-spacer>
-            <v-icon right>{{projectMenuIcon}}</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              v-on="on"
+              block
+              class="project-selector elevation-4 ma-0 white--text"
+              @keydown.down="highlightProjectWithKeys('down')"
+              @keydown.up="highlightProjectWithKeys('up')"
+              @keyup.enter="navigateToHighlightedProject"
+            >
+              <v-icon class="pr-6">mdi-grid-large</v-icon>
+              <span class="ml-2">{{projectName}}</span>
+              <v-spacer></v-spacer>
+              <v-icon right>{{projectMenuIcon}}</v-icon>
+            </v-btn>
+          </template>
 
           <v-card light>
             <template v-if="projectList.length > 3">
@@ -90,7 +91,7 @@ limitations under the License.
               <v-divider></v-divider>
             </template>
             <v-list light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
-              <v-list-tile
+              <v-list-item
                 class="project-list-tile"
                 v-for="project in visibleProjectList"
                 @click="onProjectClick($event, project)"
@@ -98,14 +99,14 @@ limitations under the License.
                 :key="project.metadata.name"
                 :data-g-project-name="project.metadata.name"
               >
-                <v-list-tile-avatar>
+                <v-list-item-avatar>
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
-                </v-list-tile-avatar>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{project.metadata.name}}</v-list-tile-title>
-                  <v-list-tile-sub-title class="project-owner">{{getProjectOwner(project)}}</v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>{{project.metadata.name}}</v-list-item-title>
+                  <v-list-item-subtitle class="project-owner">{{getProjectOwner(project)}}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
             </v-list>
             <v-card-actions class="grey lighten-3">
               <v-tooltip top :disabled="canCreateProject" style="width: 100%">
@@ -127,24 +128,24 @@ limitations under the License.
         </v-menu>
       </template>
       <v-list ref="mainMenu">
-        <v-list-tile :to="{name: 'Home'}" exact v-if="hasNoProjects">
-          <v-list-tile-action>
+        <v-list-item :to="{name: 'Home'}" exact v-if="hasNoProjects">
+          <v-list-item-action>
             <v-icon class="white--text">mdi-home-outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title class="subheading">Home</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title class="subheading">Home</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-tile v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
-              <v-list-tile-action>
+            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
+              <v-list-item-action>
                 <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title class="subheading" >{{route.meta.menu.title}}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </template>
         </template>
       </v-list>

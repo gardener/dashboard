@@ -30,14 +30,14 @@ limitations under the License.
     >
     <template slot="actionComponent">
       <v-list>
-        <v-list-tile-content>
-          <v-list-tile-sub-title>
+        <v-list-item-content>
+          <v-list-item-subtitle>
             Created By
-          </v-list-tile-sub-title>
-          <v-list-tile-title>
+          </v-list-item-subtitle>
+          <v-list-item-title>
             <account-avatar :account-name="shootCreatedBy" :size="22"></account-avatar>
-          </v-list-tile-title>
-        </v-list-tile-content>
+          </v-list-item-title>
+        </v-list-item-content>
       </v-list>
       <p>
         Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.

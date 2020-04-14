@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" lazy @keydown.esc="resolveAction(false)">
+  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
       <v-card-title :class="titleColorClass">
         <div class="headline">

@@ -178,12 +178,12 @@ limitations under the License.
             multiple
           >
             <template v-slot:item="{ item }">
-                <v-list-tile-action >
+                <v-list-item-action >
                   <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content :class="{ 'grey--text': item.disabled }">
-                  <v-list-tile-title>{{ item.text }}</v-list-tile-title>
-                </v-list-tile-content>
+                </v-list-item-action>
+                <v-list-item-content :class="{ 'grey--text': item.disabled }">
+                  <v-list-item-title>{{ item.text }}</v-list-item-title>
+                </v-list-item-content>
             </template>
           </v-select>
         </v-col>

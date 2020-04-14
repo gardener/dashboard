@@ -143,7 +143,7 @@ describe('MainNavigation.vue', function () {
     let projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
     expect(projectMenuHighlightedTile.element).to.be.undefined
 
-    // highlight (default v-list-tile highlighting)
+    // highlight (default v-list-item highlighting)
     const projectList = wrapper.find('aside .project-menu .v-card .project-list')
     expect(projectList.element).not.to.be.undefined
 

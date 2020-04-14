@@ -23,53 +23,53 @@ limitations under the License.
             <v-toolbar-title>Details</v-toolbar-title>
           </v-toolbar>
           <v-list two-line class="no-height">
-            <v-list-tile>
-              <v-list-tile-avatar>
+            <v-list-item>
+              <v-list-item-avatar>
                 <v-icon color="teal darken-2">{{icon}}</v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title class="label pb-2">User</v-list-tile-title>
-                <v-list-tile-sub-title class="content pb-2">
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title class="label pb-2">User</v-list-item-title>
+                <v-list-item-subtitle class="content pb-2">
                   <account-avatar :account-name="username" mailTo color="teal darken-2" :size="32"/>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile v-if="!!fullDisplayName">
-              <v-list-tile-avatar>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item v-if="!!fullDisplayName">
+              <v-list-item-avatar>
                 &nbsp;
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title class="label">Name</v-list-tile-title>
-                <v-list-tile-sub-title class="content pb-2">
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title class="label">Name</v-list-item-title>
+                <v-list-item-subtitle class="content pb-2">
                   {{fullDisplayName}}
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile>
-              <v-list-tile-avatar>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-avatar>
                 &nbsp;
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title class="label">Groups</v-list-tile-title>
-                <v-list-tile-sub-title class="content">
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title class="label">Groups</v-list-item-title>
+                <v-list-item-subtitle class="content">
                   <span style="margin-left: -4px">
                     <v-chip v-for="(group, index) in groups" :key="index" label small outline disabled color="black">{{group}}</v-chip>
                   </span>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
             <v-divider inset class="my-2"/>
-            <v-list-tile>
-              <v-list-tile-avatar>
+            <v-list-item>
+              <v-list-item-avatar>
                 <v-icon color="teal darken-2">timelapse</v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title class="label">Session</v-list-tile-title>
-                <v-list-tile-sub-title class="content">
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title class="label">Session</v-list-item-title>
+                <v-list-item-subtitle class="content">
                    Expires {{expiresAt}}
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
-            </v-list-tile>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
         </v-card>
       </v-col>
@@ -79,48 +79,48 @@ limitations under the License.
             <v-toolbar-title>Access</v-toolbar-title>
           </v-toolbar>
           <v-list>
-            <v-list-tile>
-              <v-list-tile-avatar>
+            <v-list-item>
+              <v-list-item-avatar>
                 <v-icon color="teal darken-2">mdi-key </v-icon>
-              </v-list-tile-avatar>
-              <v-list-tile-content>
-                <v-list-tile-title>Token</v-list-tile-title>
-                <v-list-tile-sub-title>Personal bearer token for API authentication</v-list-tile-sub-title>
-              </v-list-tile-content>
-              <v-list-tile-action>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>Token</v-list-item-title>
+                <v-list-item-subtitle>Personal bearer token for API authentication</v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
                 <copy-btn :clipboard-text="idToken"></copy-btn>
-              </v-list-tile-action>
-            </v-list-tile>
+              </v-list-item-action>
+            </v-list-item>
             <template v-if="isKubeconfigEnabled">
               <v-divider inset class="my-2"/>
-              <v-list-tile>
-                <v-list-tile-avatar>
+              <v-list-item>
+                <v-list-item-avatar>
                   <v-icon color="teal darken-2">insert_drive_file</v-icon>
-                </v-list-tile-avatar>
-                <v-list-tile-content>
-                  <v-list-tile-title>Kubeconfig</v-list-tile-title>
-                  <v-list-tile-sub-title>Personalized command line interface access</v-list-tile-sub-title>
-                </v-list-tile-content>
-                <v-list-tile-action>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title>Kubeconfig</v-list-item-title>
+                  <v-list-item-subtitle>Personalized command line interface access</v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action>
                   <v-tooltip top>
                     <v-btn slot="activator" icon @click.native.stop="onDownload">
                       <v-icon>mdi-download</v-icon>
                     </v-btn>
                     <span>Download kubeconfig</span>
                   </v-tooltip>
-                </v-list-tile-action>
-                <v-list-tile-action>
+                </v-list-item-action>
+                <v-list-item-action>
                   <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
-                </v-list-tile-action>
-                <v-list-tile-action>
+                </v-list-item-action>
+                <v-list-item-action>
                   <v-tooltip top>
                     <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
                       <v-icon>{{expansionPanelIcon}}</v-icon>
                     </v-btn>
                     <span>{{expansionPanelTooltip}}</span>
                   </v-tooltip>
-                </v-list-tile-action>
-              </v-list-tile>
+                </v-list-item-action>
+              </v-list-item>
               <v-expand-transition>
                 <v-card v-if="expansionPanel" flat class="mx-2 mt-2">
                   <v-card-text class="pt-0">

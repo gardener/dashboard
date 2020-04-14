@@ -27,13 +27,13 @@ limitations under the License.
   >
   <template v-slot:item="{ item }">
     <v-tooltip top :disabled="!item.notNextMinor">
-      <v-list-tile-content slot="activator">
-        <v-list-tile-title v-if="!item.notNextMinor">{{item.text}}</v-list-tile-title>
-        <v-list-tile-title v-else class="text--disabled">{{item.text}}</v-list-tile-title>
-        <v-list-tile-sub-title v-if="item.expirationDateString">
+      <v-list-item-content slot="activator">
+        <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
+        <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
+        <v-list-item-subtitle v-if="item.expirationDateString">
           <span>Expires: {{item.expirationDateString}}</span>
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
+        </v-list-item-subtitle>
+      </v-list-item-content>
       <span>You cannot upgrade your cluster more than one minor version at a time</span>
     </v-tooltip>
   </template>

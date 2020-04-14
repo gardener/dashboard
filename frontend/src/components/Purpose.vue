@@ -29,12 +29,12 @@ limitations under the License.
       @input="onInputPurpose"
       @blur="$v.internalPurpose.$touch()">
       <template v-slot:item="{ item }">
-        <v-list-tile-content>
-          <v-list-tile-title>{{item.purpose}}</v-list-tile-title>
-          <v-list-tile-sub-title>
+        <v-list-item-content>
+          <v-list-item-title>{{item.purpose}}</v-list-item-title>
+          <v-list-item-subtitle>
             {{item.description}}
-          </v-list-tile-sub-title>
-        </v-list-tile-content>
+          </v-list-item-subtitle>
+        </v-list-item-content>
       </template>
     </v-select>
   </div>

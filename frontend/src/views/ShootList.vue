@@ -45,81 +45,81 @@ limitations under the License.
           </div>
           <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
-            <v-list-tile v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
-              <v-list-tile-action>
+            <v-list-item v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
+              <v-list-item-action>
                 <v-icon :color="checkboxColor(item.checked)" v-text="checkboxIcon(item.checked)"/>
-              </v-list-tile-action>
-              <v-list-tile-content class="grey--text text--darken-2">
-                <v-list-tile-title>{{ item.text }}</v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
-            <v-list-tile>
-              <v-list-tile-content>
+              </v-list-item-action>
+              <v-list-item-content class="grey--text text--darken-2">
+                <v-list-item-title>{{ item.text }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-content>
                 <v-tooltip top style="width: 100%">
                   <v-btn slot="activator" block flat class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
                     Reset
                   </v-btn>
                   <span>Reset to Defaults</span>
                 </v-tooltip>
-              </v-list-tile-content>
-            </v-list-tile>
+              </v-list-item-content>
+            </v-list-item>
           </v-list>
           <v-list subheader dense v-if="!projectScope">
             <v-subheader>Filter Table</v-subheader>
-            <v-list-tile @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
-              <v-list-tile-action>
+            <v-list-item @click.stop="showOnlyShootsWithIssues = !showOnlyShootsWithIssues">
+              <v-list-item-action>
                 <v-icon :color="checkboxColor(showOnlyShootsWithIssues)" v-text="checkboxIcon(showOnlyShootsWithIssues)"/>
-              </v-list-tile-action>
-              <v-list-tile-content class="grey--text text--darken-2">
-                <v-list-tile-title>Show only clusters with issues</v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
+              </v-list-item-action>
+              <v-list-item-content class="grey--text text--darken-2">
+                <v-list-item-title>Show only clusters with issues</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
             <template v-if="isAdmin">
-              <v-list-tile
+              <v-list-item
                 @click.stop="toggleFilter('progressing')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass">
-                <v-list-tile-action>
+                <v-list-item-action>
                   <v-icon :color="checkboxColor(isFilterActive('progressing'))" v-text="checkboxIcon(isFilterActive('progressing'))"/>
-                </v-list-tile-action>
-                <v-list-tile-content class="grey--text text--darken-2">
-                  <v-list-tile-title>Hide progressing clusters</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-              <v-list-tile
+                </v-list-item-action>
+                <v-list-item-content class="grey--text text--darken-2">
+                  <v-list-item-title>Hide progressing clusters</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item
                 @click.stop="toggleFilter('userIssues')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass">
-                <v-list-tile-action>
+                <v-list-item-action>
                   <v-icon :color="checkboxColor(isFilterActive('userIssues'))" v-text="checkboxIcon(isFilterActive('userIssues'))"/>
-                </v-list-tile-action>
-                <v-list-tile-content class="grey--text text--darken-2">
-                  <v-list-tile-title>Hide user issues</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-              <v-list-tile
+                </v-list-item-action>
+                <v-list-item-content class="grey--text text--darken-2">
+                  <v-list-item-title>Hide user issues</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item
                 @click.stop="toggleFilter('deactivatedReconciliation')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass">
-                <v-list-tile-action>
+                <v-list-item-action>
                   <v-icon :color="checkboxColor(isFilterActive('deactivatedReconciliation'))" v-text="checkboxIcon(isFilterActive('deactivatedReconciliation'))"/>
-                </v-list-tile-action>
-                <v-list-tile-content class="grey--text text--darken-2">
-                  <v-list-tile-title>Hide clusters with deactivated reconciliation</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
-              <v-list-tile
+                </v-list-item-action>
+                <v-list-item-content class="grey--text text--darken-2">
+                  <v-list-item-title>Hide clusters with deactivated reconciliation</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item
                 @click.stop="toggleFilter('hasJournals')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass"
                 v-if="!!gitHubRepoUrl">
-                <v-list-tile-action>
+                <v-list-item-action>
                   <v-icon :color="checkboxColor(isFilterActive('hasJournals'))" v-text="checkboxIcon(isFilterActive('hasJournals'))"/>
-                </v-list-tile-action>
-                <v-list-tile-content class="grey--text text--darken-2">
-                  <v-list-tile-title>Hide clusters with journal entries</v-list-tile-title>
-                </v-list-tile-content>
-              </v-list-tile>
+                </v-list-item-action>
+                <v-list-item-content class="grey--text text--darken-2">
+                  <v-list-item-title>Hide clusters with journal entries</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
             </template>
           </v-list>
         </v-menu>
@@ -130,7 +130,7 @@ limitations under the License.
         </template>
       </v-data-table>
 
-      <v-dialog v-model="clusterAccessDialog" max-width="600" lazy>
+      <v-dialog v-model="clusterAccessDialog" max-width="600">
         <v-card>
           <v-card-title class="teal darken-1 grey--text text--lighten-4">
             <div class="headline">Cluster Access <code class="cluster_name">{{currentName}}</code></div>
