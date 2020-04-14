@@ -45,8 +45,8 @@ limitations under the License.
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.native="hide">Cancel</v-btn>
-        <v-btn flat @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
+        <v-btn text @click.native="hide">Cancel</v-btn>
+        <v-btn text @click.native="onDeleteSecret" color="red">Delete Secret</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

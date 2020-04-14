@@ -32,7 +32,7 @@ limitations under the License.
     </v-container>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
-      <v-btn flat class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
+      <v-btn text class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
         Add Comment
         <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
       </v-btn>

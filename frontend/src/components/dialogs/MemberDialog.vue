@@ -72,9 +72,9 @@ limitations under the License.
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.stop="cancel" tabindex="3">Cancel</v-btn>
-        <v-btn v-if="isUpdateDialog" flat @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
-        <v-btn v-else flat @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">Add</v-btn>
+        <v-btn text @click.stop="cancel" tabindex="3">Cancel</v-btn>
+        <v-btn v-if="isUpdateDialog" text @click.stop="submitUpdateMember" :disabled="!valid" class="black--text" tabindex="2">Update</v-btn>
+        <v-btn v-else text @click.stop="submitAddMember" :disabled="!valid" class="black--text" tabindex="2">Add</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

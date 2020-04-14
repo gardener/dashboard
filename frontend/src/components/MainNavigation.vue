@@ -112,7 +112,7 @@ limitations under the License.
               <v-tooltip top :disabled="canCreateProject" style="width: 100%">
                 <v-btn
                   slot="activator"
-                  flat
+                  text
                   block
                   class="project-add text-left teal--text"
                   :disabled="!canCreateProject"

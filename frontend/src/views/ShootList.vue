@@ -56,7 +56,7 @@ limitations under the License.
             <v-list-item>
               <v-list-item-content>
                 <v-tooltip top style="width: 100%">
-                  <v-btn slot="activator" block flat class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
+                  <v-btn slot="activator" block text class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
                     Reset
                   </v-btn>
                   <span>Reset to Defaults</span>

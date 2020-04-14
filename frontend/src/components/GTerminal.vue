@@ -34,14 +34,14 @@ limitations under the License.
         :boundariesSelector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
-        <v-btn slot="popperRef" flat small class="cyan--text text--darken-2">
+        <v-btn slot="popperRef" text small class="cyan--text text--darken-2">
           Details
         </v-btn>
       </g-popper>
-      <v-btn flat color="cyan darken-2" @click="retry()">
+      <v-btn text color="cyan darken-2" @click="retry()">
         Retry
       </v-btn>
-      <v-btn flat color="cyan darken-2" @click="hideSnackbar()">
+      <v-btn text color="cyan darken-2" @click="hideSnackbar()">
         Close
       </v-btn>
     </v-snackbar>
@@ -54,7 +54,7 @@ limitations under the License.
       color="red"
     >
       {{ snackbarText }}
-      <v-btn flat @click="hideSnackbar()">
+      <v-btn text @click="hideSnackbar()">
         Close
       </v-btn>
     </v-snackbar>
@@ -98,7 +98,7 @@ limitations under the License.
             </template>
             <v-card tile>
               <v-card-actions>
-                <v-btn small block flat class="action-button" @click="split('horizontal')">
+                <v-btn small block text class="action-button" @click="split('horizontal')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
@@ -108,7 +108,7 @@ limitations under the License.
                 </v-btn>
               </v-card-actions>
               <v-card-actions>
-                <v-btn small block flat class="action-button" @click="split('vertical')">
+                <v-btn small block text class="action-button" @click="split('vertical')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
@@ -119,7 +119,7 @@ limitations under the License.
               </v-card-actions>
               <v-divider class="mt-1 mb-1"></v-divider>
               <v-card-actions>
-                <v-btn small block flat class="action-button" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
+                <v-btn small block text class="action-button" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
                   <v-icon small class="mr-2">mdi-settings</v-icon>
                   Settings
                 </v-btn>
@@ -138,7 +138,7 @@ limitations under the License.
             dark
           >
             <v-tooltip slot="activator" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
-              <v-btn small flat slot="activator" class="text-none grey--text text--lighten-1  ml-0 systemBarButton">
+              <v-btn small text slot="activator" class="text-none grey--text text--lighten-1  ml-0 systemBarButton">
                 <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
                   <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                   <disconnected v-else></disconnected>
@@ -149,7 +149,7 @@ limitations under the License.
             </v-tooltip>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small slot="activator" flat class="actionButton" @click="retry()">
+                <v-btn small slot="activator" text class="actionButton" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>
@@ -161,7 +161,7 @@ limitations under the License.
           </v-menu>
 
           <v-tooltip v-if="imageShortText" top>
-            <v-btn small flat slot="activator" @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+            <v-btn small text slot="activator" @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
               <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
               <span>{{imageShortText}}</span>
             </v-btn>
@@ -169,7 +169,7 @@ limitations under the License.
           </v-tooltip>
 
           <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
-            <v-btn small flat slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+            <v-btn small text slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
               <v-icon class="mr-2">mdi-shield-account</v-icon>
               <span>{{privilegedModeText}}</span>
             </v-btn>
@@ -179,7 +179,7 @@ limitations under the License.
           </v-tooltip>
 
           <v-tooltip v-if="terminalSession.node && target === 'shoot'" top>
-            <v-btn small flat slot="activator" @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+            <v-btn small text slot="activator" @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
               <v-icon :size="14" class="mr-2">mdi-server</v-icon>
               <span>{{terminalSession.node}}</span>
             </v-btn>

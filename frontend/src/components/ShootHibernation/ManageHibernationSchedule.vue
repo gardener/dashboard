@@ -42,7 +42,7 @@ limitations under the License.
           </v-btn>
           <v-btn
             @click="addSchedule"
-            flat
+            text
             class="cyan--text text--darken-2">
             Add Hibernation Schedule
           </v-btn>

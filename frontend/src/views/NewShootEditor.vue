@@ -30,7 +30,7 @@ limitations under the License.
       <template slot="toolbarItemsRight">
         <v-divider vertical></v-divider>
         <v-col class="d-flex fill-height align-center" >
-          <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
+          <v-btn text @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
         </v-col>
       </template>
     </shoot-editor>

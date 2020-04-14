@@ -109,7 +109,7 @@ limitations under the License.
     <div class="toolbar">
       <v-row align="center" justify="end">
         <v-divider vertical></v-divider>
-        <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
+        <v-btn text @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
       </v-row>
     </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>

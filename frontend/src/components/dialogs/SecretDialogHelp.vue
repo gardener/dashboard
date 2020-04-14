@@ -40,7 +40,7 @@ limitations under the License.
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn :class="textColor" flat @click.native.stop="hide">
+        <v-btn :class="textColor" text @click.native.stop="hide">
           Got it
         </v-btn>
       </v-card-actions>

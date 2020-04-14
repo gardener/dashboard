@@ -109,14 +109,14 @@ limitations under the License.
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn
-          flat
+          text
           :disabled="loading"
           @click.stop="cancel"
         >
           Cancel
         </v-btn>
         <v-btn
-          flat
+          text
           :loading="loading"
           :disabled="!valid || loading"
           @click.stop="submit"

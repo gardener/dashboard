@@ -40,7 +40,7 @@ limitations under the License.
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click.stop="hide" :class="buttonClass" tabindex="2">Ok</v-btn>
+        <v-btn text @click.stop="hide" :class="buttonClass" tabindex="2">Ok</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

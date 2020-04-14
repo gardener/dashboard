@@ -53,7 +53,7 @@ limitations under the License.
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
-          flat
+          text
           class="cyan--text text--darken-2">
           Add Worker Group
         </v-btn>

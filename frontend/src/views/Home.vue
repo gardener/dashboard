@@ -22,7 +22,7 @@ limitations under the License.
         <v-tooltip top :disabled="canCreateProject">
           <v-btn
             slot="activator"
-            flat
+            text
             class="text-left teal--text"
             :disabled="!canCreateProject"
             @click.native.stop="projectDialog = true"

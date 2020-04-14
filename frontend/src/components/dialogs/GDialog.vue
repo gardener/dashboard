@@ -45,8 +45,8 @@ limitations under the License.
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn flat @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
-        <v-btn flat @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
+        <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
+        <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

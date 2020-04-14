@@ -31,7 +31,7 @@ limitations under the License.
          We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
        </template>
        <template slot="toolbarItemsRight">
-        <v-btn flat @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
+        <v-btn text @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
        </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>

@@ -44,7 +44,7 @@ limitations under the License.
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
             <v-card-actions :key="index">
-              <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
+              <v-btn block text class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
                 <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>
                 {{item.title}}
                 <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
@@ -93,14 +93,14 @@ limitations under the License.
             </div>
           </v-card-title>
           <v-card-actions>
-            <v-btn block flat class="action-button cyan--text text--darken-2" :to="accountLink" title="My Account">
+            <v-btn block text class="action-button cyan--text text--darken-2" :to="accountLink" title="My Account">
               <v-icon left>account_circle</v-icon>
               My Account
             </v-btn>
           </v-card-actions>
           <v-divider></v-divider>
           <v-card-actions>
-            <v-btn block flat class="action-button pink--text" @click.native.stop="handleLogout" title="Logout">
+            <v-btn block text class="action-button pink--text" @click.native.stop="handleLogout" title="Logout">
               <v-icon left>exit_to_app</v-icon>
               Logout
             </v-btn>
