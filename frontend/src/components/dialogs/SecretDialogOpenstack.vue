@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout column>
-        <v-flex>
+      <div class="d-flex flex-column">
+        <div class="pa-2">
           <v-text-field
             color="black"
             v-model="domainName"
@@ -40,8 +40,8 @@ limitations under the License.
             @input="$v.domainName.$touch()"
             @blur="$v.domainName.$touch()"
           ></v-text-field>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <v-text-field
             color="black"
             v-model="tenantName"
@@ -50,8 +50,8 @@ limitations under the License.
             @input="$v.tenantName.$touch()"
             @blur="$v.tenantName.$touch()"
           ></v-text-field>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <hint-colorizer hintColor="orange">
             <v-text-field
             color="black"
@@ -63,8 +63,8 @@ limitations under the License.
             hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
             ></v-text-field>
           </hint-colorizer>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <hint-colorizer hintColor="orange">
             <v-text-field
               color="black"
@@ -79,8 +79,8 @@ limitations under the License.
               hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
             ></v-text-field>
           </hint-colorizer>
-        </v-flex>
-      </v-layout>
+        </div>
+      </div>
     </template>
 
   </secret-dialog>

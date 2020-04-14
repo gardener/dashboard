@@ -15,10 +15,10 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="py-0 ma-0">
-    <v-layout row align-center>
-      <v-layout row wrap>
-        <v-flex class="regularInput">
+  <v-container  class="py-0 ma-0">
+    <v-row align="center">
+      <v-row >
+        <v-col class="regularInput">
           <v-text-field
             color="cyan darken-2"
             :error-messages="getErrorMessages('worker.name')"
@@ -28,16 +28,16 @@ limitations under the License.
             counter="15"
             label="Group Name">
           </v-text-field>
-        </v-flex>
-        <v-flex>
+        </v-col>
+        <v-col>
           <machine-type
           :machineTypes="machineTypes"
           :worker="worker"
           @updateMachineType="onUpdateMachineType"
           @valid="onMachineTypeValid">
           </machine-type>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <machine-image
           :machineImages="machineImages"
           :worker="worker"
@@ -45,16 +45,16 @@ limitations under the License.
           @updateMachineImage="onUpdateMachineImage"
           @valid="onMachineImageValid">
           </machine-image>
-        </v-flex>
-        <v-flex v-if="volumeInCloudProfile" class="regularInput">
+        </v-col>
+        <v-col v-if="volumeInCloudProfile" class="regularInput">
           <volume-type
           :volumeTypes="volumeTypes"
           :worker="worker"
           @updateVolumeType="onUpdateVolumeType"
           @valid="onVolumeTypeValid">
           </volume-type>
-        </v-flex>
-        <v-flex v-if="volumeInCloudProfile" class="smallInput">
+        </v-col>
+        <v-col v-if="volumeInCloudProfile" class="smallInput">
           <size-input
             :min="minimumVolumeSize"
             color="cyan darken-2"
@@ -64,8 +64,8 @@ limitations under the License.
             label="Volume Size"
             v-model="worker.volume.size"
           ></size-input>
-        </v-flex>
-        <v-flex class="smallInput">
+        </v-col>
+        <v-col class="smallInput">
           <v-text-field
             min="0"
             color="cyan darken-2"
@@ -75,8 +75,8 @@ limitations under the License.
             type="number"
             v-model="innerMin"
             label="Autoscaler Min."></v-text-field>
-        </v-flex>
-        <v-flex class="smallInput">
+        </v-col>
+        <v-col class="smallInput">
           <v-text-field
             min="0"
             color="cyan darken-2"
@@ -87,8 +87,8 @@ limitations under the License.
             v-model="innerMax"
             label="Autoscaler Max."
           ></v-text-field>
-        </v-flex>
-        <v-flex class="smallInput">
+        </v-col>
+        <v-col class="smallInput">
           <v-text-field
             min="0"
             color="cyan darken-2"
@@ -97,8 +97,8 @@ limitations under the License.
             @blur="$v.worker.maxSurge.$touch()"
             v-model="maxSurge"
             label="Max. Surge"></v-text-field>
-        </v-flex>
-        <v-flex class="regularInput" v-if="zonedCluster">
+        </v-col>
+        <v-col class="regularInput" v-if="zonedCluster">
           <v-select
             color="cyan darken-2"
             label="Zone"
@@ -109,12 +109,12 @@ limitations under the License.
             @blur="$v.worker.zones.$touch()"
             multiple
             ></v-select>
-        </v-flex>
-      </v-layout>
-      <v-flex class="ml-3">
+        </v-col>
+      </v-row>
+      <v-col class="ml-4">
         <slot name="action"></slot>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

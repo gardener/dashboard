@@ -22,22 +22,22 @@ limitations under the License.
         height="130px"
         :src="backgroundSrc"
       >
-        <v-container fill-height>
-          <v-layout align-center justify-start row fill-height>
-            <v-flex xs1>
+        <v-container class="fill-height" >
+          <v-row class="fill-height" align="center" justify="start" >
+            <v-col cols="1">
               <infra-icon v-model="infraIcon" :width="42"></infra-icon>
-            </v-flex>
-            <v-flex>
-              <div class="credential_title ml-3">{{title}}</div>
-            </v-flex>
-          </v-layout>
+            </v-col>
+            <v-col>
+              <div class="credential_title ml-4">{{title}}</div>
+            </v-col>
+          </v-row>
         </v-container>
       </v-img>
 
       <v-card-text>
         <v-container fluid>
-          <v-layout row>
-            <v-flex>
+          <v-row >
+            <v-col>
               <template v-if="isCreateMode">
                 <v-text-field
                   :color="color"
@@ -50,13 +50,13 @@ limitations under the License.
                 ></v-text-field>
               </template>
               <template v-else>
-                <div class="title pb-3">{{secretName}}</div>
+                <div class="title pb-4">{{secretName}}</div>
               </template>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
 
-          <v-layout row v-show="cloudProfiles.length !== 1">
-            <v-flex>
+          <v-row v-show="cloudProfiles.length !== 1">
+            <v-col>
               <cloud-profile
                 ref="cloudProfile"
                 v-model="cloudProfileName"
@@ -64,8 +64,8 @@ limitations under the License.
                 :cloudProfiles="cloudProfiles"
                 :color="color">
               </cloud-profile>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
 
           <slot name="data-slot"></slot>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>

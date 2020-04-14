@@ -28,7 +28,7 @@ limitations under the License.
       <v-radio-group
         v-model="selectedTarget"
         label="Terminal Target"
-        class="mt-4"
+        class="mt-6"
         :hint="hint"
         persistent-hint
       >

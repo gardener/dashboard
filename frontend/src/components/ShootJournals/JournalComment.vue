@@ -15,21 +15,21 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout>
-    <v-flex style="max-width: 60px;">
+  <v-row dense>
+    <v-col style="max-width: 60px;">
       <v-avatar size="40px">
         <img :src="avatarUrl" :title="login"/>
       </v-avatar>
-    </v-flex>
-    <v-flex fluid>
+    </v-col>
+    <v-col class="fluid" >
       <div class="comment">
         <div class="comment-header">
           <span style="font-weight: 700">{{login}}</span> commented <a :href="htmlUrl" target="_blank"><time-string :dateTime="createdAt" :pointInTime="-1"></time-string></a>
         </div>
         <div class="comment-body" v-html="compiledMarkdown"></div>
       </div>
-    </v-flex>
-  </v-layout>
+    </v-col>
+  </v-row>
 
 </template>
 

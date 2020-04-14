@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout v-resize="onResize" column fill-height :class="backgroundClass" class="position-relative" :id="`boundary_${uuid}`">
+  <v-row v-resize="onResize" :class="backgroundClass" class="flex-column fill-height position-relative" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
       :timeout="0"
@@ -129,7 +129,7 @@ limitations under the License.
         </v-system-bar>
       </template>
       <template v-slot:component>
-        <v-flex ref="container" class="terminal-container"></v-flex>
+        <v-col ref="container" class="terminal-container"></v-col>
         <v-system-bar dark class="systemBarBottom" :class="backgroundClass">
           <v-menu
             v-model="connectionMenu"
@@ -193,7 +193,7 @@ limitations under the License.
       :target="target"
     ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>

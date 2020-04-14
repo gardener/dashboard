@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout align-center row class="ma-0">
+  <v-row align="center" class="ma-0">
     <v-tooltip top :disabled="!isControlPlaneMigrating">
       <template slot="activator">
         <template v-if="isControlPlaneMigrating">
@@ -36,7 +36,7 @@ limitations under the License.
       <v-icon size=14 color="white">mdi-arrow-right</v-icon>
       <span class="font-weight-bold">{{shootSeedName}}</span>
     </v-tooltip>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>

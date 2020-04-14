@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout column>
-        <v-flex>
+      <div class="d-flex flex-column">
+        <div class="pa-2">
           <v-text-field
             color="grey darken-4"
             v-model="accessKeyId"
@@ -42,8 +42,8 @@ limitations under the License.
             counter="128"
             hint="e.g. QNJebZ17v5Q7pYpP"
           ></v-text-field>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <v-text-field
             color="grey darken-4"
             v-model="accessKeySecret"
@@ -57,8 +57,8 @@ limitations under the License.
             counter="30"
             hint="e.g. WJalrXUtnFEMIK7MDENG/bPxRfiCYz"
           ></v-text-field>
-        </v-flex>
-      </v-layout>
+        </div>
+      </div>
     </template>
 
   </secret-dialog>

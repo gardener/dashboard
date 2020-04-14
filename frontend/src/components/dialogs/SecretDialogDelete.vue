@@ -22,15 +22,15 @@ limitations under the License.
         height="130px"
         :src="backgroundSrc"
       >
-        <v-container fill-height>
-          <v-layout align-center justify-start row fill-height>
-            <v-flex xs1>
+        <v-container class="fill-height" >
+          <v-row class="fill-height" align="center" justify="start" >
+            <v-col cols="1">
               <v-icon x-large class="white--text icon">mdi-alert-outline</v-icon>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
               <div class="credential_title">Confirm Delete</div>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-container>
       </v-img>
 

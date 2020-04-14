@@ -33,7 +33,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('azure')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="azure"
     infrastructureName="Microsoft Azure Cloud"
     icon="azure-white"
@@ -48,7 +48,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('gcp')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="gcp"
     infrastructureName="Google Cloud Platform"
     icon="gcp-white"
@@ -63,7 +63,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('openstack')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="openstack"
     infrastructureName="OpenStack"
     icon="openstack-white"
@@ -81,7 +81,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('alicloud')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="alicloud"
     infrastructureName="Alibaba Cloud"
     secretDescriptorKey="accessKeyID"
@@ -96,7 +96,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('metal')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="metal"
     infrastructureName="Metal Cloud"
     secretDescriptorKey="metalHMAC"
@@ -111,7 +111,7 @@ limitations under the License.
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('vsphere')"
-    class="mt-3"
+    class="mt-4"
     infrastructureKey="vsphere"
     infrastructureName="VMware vSphere"
     secretDescriptorKey="vsphereUsername"
@@ -141,7 +141,7 @@ limitations under the License.
     <template v-if="showDisabledCloudProviders">
 
       <disabled-secret
-      class="mt-3"
+      class="mt-4"
       infrastructureName="Digital Ocean"
       icon="digital-ocean"
       description="Before you can provision and access a Kubernetes cluster on Digital Ocean, you need to add account credentials."
@@ -149,7 +149,7 @@ limitations under the License.
       ></disabled-secret>
 
       <disabled-secret
-      class="mt-3"
+      class="mt-4"
       infrastructureName="China Telecom"
       icon="china-telecom"
       description="Before you can provision and access a Kubernetes cluster on China Telecom, you need to add account credentials."
@@ -157,7 +157,7 @@ limitations under the License.
       ></disabled-secret>
 
       <disabled-secret
-      class="mt-3"
+      class="mt-4"
       infrastructureName="Nutanix"
       icon="mdi-xamarin"
       description="Before you can provision and access a Kubernetes cluster on Nutanix, you need to add account credentials."

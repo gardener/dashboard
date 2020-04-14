@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="pa-0 ma-0">
-    <v-layout>
-      <v-flex class="regularInput">
+  <v-container  class="pa-0 ma-0">
+    <v-row>
+      <v-col class="regularInput">
         <v-text-field
           color="cyan darken-2"
           label="Maintenance Start Time"
@@ -29,8 +29,8 @@ limitations under the License.
           persistent-hint
           hint="Provide start of maintenance time window in which Gardener may schedule automated cluster updates."
         ></v-text-field>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <v-autocomplete
           color="cyan darken-2"
           label="Timezone"
@@ -38,8 +38,8 @@ limitations under the License.
           v-model="selectedTimezone"
           >
         </v-autocomplete>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

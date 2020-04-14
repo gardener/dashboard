@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <transition-group name="list">
-    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"
@@ -37,9 +37,9 @@ limitations under the License.
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </worker-input-generic>
-    </v-layout>
-    <v-layout row key="addWorker" class="list-item pt-2">
-      <v-flex>
+    </v-row>
+    <v-row key="addWorker" class="list-item pt-2">
+      <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           small
@@ -57,8 +57,8 @@ limitations under the License.
           class="cyan--text text--darken-2">
           Add Worker Group
         </v-btn>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </transition-group>
 </template>
 

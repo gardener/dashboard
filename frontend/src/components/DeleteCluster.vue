@@ -46,10 +46,10 @@ limitations under the License.
         <i class="red--text text--darken-2">This action cannot be undone.</i>
       </p>
       <p v-if="isShootReconciliationDeactivated">
-        <v-layout row fill-height>
+        <v-row class="fill-height" >
           <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
           <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-        </v-layout>
+        </v-row>
       </p>
     </template>
   </action-icon-dialog>

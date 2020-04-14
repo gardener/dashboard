@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row wrap>
+  <v-row >
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
       class="select_infra_card"
@@ -24,16 +24,16 @@ limitations under the License.
       :key="infrastructureKind"
       hover
       >
-      <v-layout align-center justify-center column>
-        <v-flex>
+      <div class="d-flex flex-column justify-center align-center">
+        <div>
           <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
-        </v-flex>
-        <v-flex mt-2>
+        </div>
+        <div class="mt-2" >
           <span class="subheading">{{infrastructureKind}}</span>
-        </v-flex>
-      </v-layout>
+        </div>
+      </div>
     </v-card>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>

@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout column>
-        <v-flex>
+      <div class="d-flex flex-column">
+        <div class="pa-2">
           <v-textarea
             ref="serviceAccountKey"
             color="green"
@@ -43,8 +43,8 @@ limitations under the License.
             hint="Enter or drop a service account key in JSON format"
             persistent-hint
           ></v-textarea>
-        </v-flex>
-      </v-layout>
+        </div>
+      </div>
     </template>
 
   </secret-dialog>

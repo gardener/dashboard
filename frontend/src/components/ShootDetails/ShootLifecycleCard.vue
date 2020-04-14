@@ -22,49 +22,49 @@ limitations under the License.
     <div class="list">
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-sleep</v-icon>
-        <v-flex grow class="pa-0">
+        <v-col class="pa-0 grow">
           <span class="subheading">Hibernation</span><br>
-          <v-layout align-center row fill-height class="ma-0">
+          <v-row align="center" class="ma-0 fill-height">
             <v-icon v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
             <v-progress-circular v-if="isShootStatusHibernationProgressing" indeterminate size=12 width=2 color="grey" class="mr-1"></v-progress-circular>
             <span class="grey--text">{{hibernationDescription}}</span>
-          </v-layout>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+          </v-row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <change-hibernation :shootItem="shootItem"></change-hibernation>
             <hibernation-configuration ref="hibernationConfiguration" :shootItem="shootItem"></hibernation-configuration>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-wrench-outline</v-icon>
-        <v-flex grow class="pa-0">
+        <v-col class="pa-0 grow">
           <span class="subheading">Maintenance</span><br>
           <span class="grey--text">{{maintenanceDescription}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <maintenance-start :shootItem="shootItem"></maintenance-start>
             <maintenance-configuration :shootItem="shootItem"></maintenance-configuration>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
-        <v-flex grow class="pa-0">
+        <v-col class="pa-0 grow">
           <span class="subheading">Reconcile</span><br>
           <span class="grey--text">{{reconcileDescription}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <reconcile-start :shootItem="shootItem"></reconcile-start>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <template v-if="canPatchShoots">
@@ -78,14 +78,14 @@ limitations under the License.
               <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
             </v-badge>
           </div>
-          <v-flex grow class="pa-0">
+          <v-col class="pa-0 grow">
             <span class="subheading">Rotate Kubeconfig</span>
-          </v-flex>
-          <v-flex shrink class="pa-0">
-            <v-layout row>
+          </v-col>
+          <v-col class="pa-0 shrink">
+            <v-row >
               <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
       </template>
 
@@ -93,14 +93,14 @@ limitations under the License.
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
-          <v-flex grow class="pa-0">
+          <v-col class="pa-0 grow">
             <span class="subheading">Delete Cluster</span><br>
-          </v-flex>
-          <v-flex shrink class="pa-0">
-            <v-layout row>
+          </v-col>
+          <v-col class="pa-0 shrink">
+            <v-row >
               <delete-cluster :shootItem="shootItem"></delete-cluster>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
       </template>
     </div>

@@ -19,7 +19,7 @@ limitations under the License.
     <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
-    <div class="text-xs-center mr-4" v-if="helpMenuItems.length">
+    <div class="text-center mr-6" v-if="helpMenuItems.length">
       <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
         <v-tooltip left slot="activator" open-delay="500">
           <v-btn slot="activator" icon class="cyan--text text--darken-2">
@@ -50,7 +50,7 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <div class="text-xs-center">
+    <div class="text-center">
       <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="menu">
         <v-tooltip left slot="activator" open-delay="500">
           <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>

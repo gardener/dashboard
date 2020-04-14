@@ -32,12 +32,12 @@ limitations under the License.
         <v-spacer></v-spacer>
       </v-card-actions>
     </v-card>
-    <v-layout v-if="journals.length && !!gitHubRepoUrl" align-center justify-center row>
-      <v-btn flat class="action-button cyan--text text--darken-2 mt-3" :href="createJournalLink" target="_blank" title="Create Journal">
+    <v-row v-if="journals.length && !!gitHubRepoUrl" align="center" justify="center" >
+      <v-btn flat class="action-button cyan--text text--darken-2 mt-4" :href="createJournalLink" target="_blank" title="Create Journal">
         Create Journal
         <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
       </v-btn>
-    </v-layout>
+    </v-row>
   </div>
 
 </template>

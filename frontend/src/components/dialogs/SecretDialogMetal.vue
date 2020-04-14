@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout row>
-        <v-flex>
+      <v-row >
+        <v-col>
           <v-text-field
             color="blue"
             v-model="apiUrl"
@@ -40,10 +40,10 @@ limitations under the License.
             @input="$v.apiUrl.$touch()"
             @blur="$v.apiUrl.$touch()"
           ></v-text-field>
-        </v-flex>
-      </v-layout>
-      <v-layout row>
-        <v-flex>
+        </v-col>
+      </v-row>
+      <v-row >
+        <v-col>
           <v-text-field
             color="blue"
             v-model="apiHmac"
@@ -55,8 +55,8 @@ limitations under the License.
             @input="$v.apiHmac.$touch()"
             @blur="$v.apiHmac.$touch()"
           ></v-text-field>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </template>
 
   </secret-dialog>

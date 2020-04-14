@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
  <template>
-   <v-layout fill-height>
+   <v-row class="fill-height" >
      <shoot-editor
        :modificationWarning="modificationWarning"
        @dismissModificationWarning="onDismissModificationWarning"
@@ -35,7 +35,7 @@ limitations under the License.
        </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>

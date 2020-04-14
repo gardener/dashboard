@@ -34,11 +34,11 @@ limitations under the License.
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
-        <v-layout row align-center>
+        <v-row align="center">
           <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
             {{roleName}}
           </v-chip>
-        </v-layout>
+        </v-row>
       </v-list-tile-action>
       <v-list-tile-action v-if="canPatchProject">
         <v-tooltip top>

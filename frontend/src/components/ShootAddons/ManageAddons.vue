@@ -15,23 +15,21 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout column>
-    <v-flex xs12>
-      <v-layout row v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
-        <v-flex class="addon-action">
-          <v-checkbox
-            color="cyan darken-2"
-            v-model="addons[addonDefinition.name].enabled"
-            :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
-          ></v-checkbox>
-        </v-flex>
-        <v-flex>
-          <div class="subheading font-weight-medium my-1" v-text="addonDefinition.title"/>
-          <div class="addon-content mb-4" v-html="addonDefinition.description"/>
-        </v-flex>
-      </v-layout>
-    </v-flex>
-  </v-layout>
+  <div class="d-flex flex-column">
+    <div class="pa-2" v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+      <div class="addon-action">
+        <v-checkbox
+          color="cyan darken-2"
+          v-model="addons[addonDefinition.name].enabled"
+          :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+        ></v-checkbox>
+      </div>
+      <div>
+        <div class="subheading font-weight-medium my-1" v-text="addonDefinition.title"/>
+        <div class="addon-content mb-6" v-html="addonDefinition.description"/>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>

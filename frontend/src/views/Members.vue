@@ -44,7 +44,7 @@ limitations under the License.
       </v-list>
     </v-card>
 
-    <v-card class="mr-extra mt-4">
+    <v-card class="mr-extra mt-6">
       <v-toolbar card color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
@@ -73,7 +73,7 @@ limitations under the License.
       </v-toolbar>
 
       <v-card-text v-if="!userList.length">
-        <div class="title grey--text text--darken-1 my-3">Add users to your project.</div>
+        <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
         <p class="body-1">
           Adding users to your project allows you to collaborate across your team.
           Project users have full access to all resources within your project.
@@ -99,7 +99,7 @@ limitations under the License.
       </v-list>
     </v-card>
 
-    <v-card class="mr-extra mt-4">
+    <v-card class="mr-extra mt-6">
       <v-toolbar card color="blue-grey">
         <v-icon class="white--text pr-2">mdi-monitor-multiple</v-icon>
         <v-toolbar-title class="subheading white--text">
@@ -125,7 +125,7 @@ limitations under the License.
       </v-toolbar>
 
       <v-card-text v-if="!serviceAccountList.length">
-        <div class="title grey--text text--darken-1 my-3">Add service accounts to your project.</div>
+        <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
         <p class="body-1">
           Adding service accounts to your project allows you to automate processes in your project.
           Service accounts have full access to all resources within your project.

@@ -29,9 +29,9 @@ limitations under the License.
         </template>
       </v-card-title>
       <v-card-text>
-        <v-container grid-list-xl class="pa-0 ma-0">
-          <v-layout row wrap>
-            <v-flex xs8>
+        <v-container  class="pa-0 ma-0">
+          <v-row >
+            <v-col cols="8">
               <v-text-field
                 :disabled="isUpdateDialog"
                 color="black"
@@ -45,8 +45,8 @@ limitations under the License.
                 persistent-hint
                 tabindex="1"
               ></v-text-field>
-            </v-flex>
-            <v-flex xs4>
+            </v-col>
+            <v-col cols="4">
               <v-select
                 color="black"
                 label="Roles"
@@ -65,8 +65,8 @@ limitations under the License.
                   </v-chip>
                 </template>
               </v-select>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
         </v-container>
       </v-card-text>

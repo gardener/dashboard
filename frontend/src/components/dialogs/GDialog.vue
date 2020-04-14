@@ -40,7 +40,7 @@ limitations under the License.
           type="text"
           :color="textFieldColor">
         </v-text-field>
-        <g-alert color="error" class="mt-3" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
+        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>

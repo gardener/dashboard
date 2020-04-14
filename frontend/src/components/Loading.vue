@@ -16,12 +16,12 @@ limitations under the License.
 
 <template>
   <v-dialog v-model="loading" lazy persistent absolute content-class="dialog--loading" max-width="100">
-    <v-container text-xs-center>
-      <v-layout row>
-        <v-flex xs12>
+    <v-container class="text-center" >
+      <v-row >
+        <v-col cols="12">
           <v-progress-circular indeterminate :size="50" class="primary--text"></v-progress-circular>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </v-container>
   </v-dialog>
 </template>

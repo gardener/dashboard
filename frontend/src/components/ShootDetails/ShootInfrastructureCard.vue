@@ -22,100 +22,100 @@ limitations under the License.
     <div class="list">
 
       <v-card-title class="listItem">
-        <v-layout class="py-2">
-          <v-flex shrink justify-center class="pr-0 pt-3">
+        <v-row class="py-2">
+          <v-col class="pr-0 pt-4 shrink justify-center">
             <v-icon class="cyan--text text--darken-2 avatar">cloud_queue</v-icon>
-          </v-flex>
-          <v-flex class="pa-0">
-            <v-layout row>
-              <v-flex>
+          </v-col>
+          <v-col class="pa-0">
+            <v-row >
+              <v-col>
                 <span class="grey--text">Provider</span><br>
                 <span class="subheading">{{shootCloudProviderKind}}</span>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex>
+              </v-col>
+            </v-row>
+            <v-row >
+              <v-col>
                 <span class="grey--text">Credential</span><br>
                 <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
                   <span class="subheading">{{shootSecretBindingName}}</span>
                 </router-link>
                 <span v-else>{{shootSecretBindingName}}</span>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex>
+              </v-col>
+            </v-row>
+            <v-row >
+              <v-col>
                 <span class="grey--text">{{regionZoneTitle}}</span><br>
                 <span class="subheading">{{regionZoneText}}</span>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-        </v-layout>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
       </v-card-title>
 
       <template v-if="showSeedInfo">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
-          <v-layout class="py-2">
-            <v-flex shrink justify-center class="pr-0 pt-3">
+          <v-row class="py-2">
+            <v-col class="pr-0 pt-4 shrink justify-center">
               <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
-            </v-flex>
-            <v-flex class="pa-0">
-              <v-layout row>
-                <v-flex>
+            </v-col>
+            <v-col class="pa-0">
+              <v-row >
+                <v-col>
                   <span class="grey--text">Seed</span><br>
                   <shoot-seed-name :shootItem="shootItem" />
-                </v-flex>
+                </v-col>
                 <copy-btn :clipboard-text="shootSeedName"></copy-btn>
-              </v-layout>
-              <v-layout row>
-                <v-flex>
+              </v-row>
+              <v-row >
+                <v-col>
                   <span class="grey--text">Technical Id</span><br>
                   <span class="subheading">{{shootTechnicalId}}</span>
-                </v-flex>
+                </v-col>
                 <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-              </v-layout>
-            </v-flex>
-          </v-layout>
+              </v-row>
+            </v-col>
+          </v-row>
         </v-card-title>
       </template>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
-        <v-layout class="py-2">
-          <v-flex shrink justify-center class="pr-0 pt-3">
+        <v-row class="py-2">
+          <v-col class="pr-0 pt-4 shrink justify-center">
             <v-icon class="cyan--text text--darken-2 avatar">settings_ethernet</v-icon>
-          </v-flex>
-          <v-flex class="pa-0">
-            <v-layout row>
-              <v-flex>
+          </v-col>
+          <v-col class="pa-0">
+            <v-row >
+              <v-col>
                 <span class="grey--text">Pods CIDR</span><br>
                 <span class="subheading">{{podsCidr}}</span>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex>
+              </v-col>
+            </v-row>
+            <v-row >
+              <v-col>
                 <span class="grey--text">Nodes CIDR</span><br>
                 <span class="subheading">{{nodesCidr}}</span>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex>
+              </v-col>
+            </v-row>
+            <v-row >
+              <v-col>
                 <span class="grey--text">Services CIDR</span><br>
                 <span class="subheading">{{servicesCidr}}</span>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-        </v-layout>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
       </v-card-title>
 
       <template v-if="!!shootIngressDomainText">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-earth</v-icon>
-          <v-flex class="pa-0">
+          <v-col class="pa-0">
             <span class="grey--text">Ingress Domain</span><br>
             <span class="subheading">{{shootIngressDomainText}}</span>
-          </v-flex>
+          </v-col>
         </v-card-title>
       </template>
 
@@ -123,7 +123,7 @@ limitations under the License.
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
-          <v-flex class="pa-0">
+          <v-col class="pa-0">
             <span class="grey--text">Available Load Balancer Classes</span><br>
             <lb-class
             v-for="lbClass in shootLoadbalancerClasses"
@@ -131,7 +131,7 @@ limitations under the License.
             :floatingSubnetID="lbClass.floatingSubnetID"
             :key="lbClass.name"
             ></lb-class>
-          </v-flex>
+          </v-col>
         </v-card-title>
       </template>
 

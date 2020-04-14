@@ -32,19 +32,19 @@ limitations under the License.
       </v-toolbar>
 
       <v-card-text>
-        <v-layout row wrap>
-          <v-flex lg4 xs12>
+        <v-row >
+          <v-col lg="4" cols="12">
             <label class="caption grey--text text--darken-2">Name</label>
             <p class="subheading">{{projectName}}</p>
-          </v-flex>
-          <v-flex lg4 xs12>
+          </v-col>
+          <v-col lg="4" cols="12">
             <label class="caption grey--text text--darken-2">Technical Contact</label>
             <p class="subheading"><account-avatar :account-name="technicalContact" :mail-to="true"></account-avatar></p>
-          </v-flex>
+          </v-col>
 
-        </v-layout>
-        <v-layout row wrap>
-          <v-flex lg4 xs12>
+        </v-row>
+        <v-row >
+          <v-col lg="4" cols="12">
             <v-tooltip top>
               <template slot="activator">
                 <label class="caption grey--text text--darken-2">Created At</label>
@@ -52,40 +52,40 @@ limitations under the License.
               </template>
               <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
-          </v-flex>
-          <v-flex lg4 xs12 v-if="createdBy">
+          </v-col>
+          <v-col lg="4" cols="12" v-if="createdBy">
             <label class="caption grey--text text--darken-2">Created By</label>
             <p class="subheading"><account-avatar :account-name="createdBy" :mail-to="true"></account-avatar></p>
-          </v-flex>
-        </v-layout>
-        <v-layout row wrap v-if="costObjectSettingEnabled">
-          <v-flex lg4 xs12>
+          </v-col>
+        </v-row>
+        <v-row  v-if="costObjectSettingEnabled">
+          <v-col lg="4" cols="12">
             <label class="caption grey--text text--darken-2">{{costObjectTitle}}</label>
             <p class="subheading">{{costObject}}</p>
-          </v-flex>
-        </v-layout>
-        <v-layout row wrap>
-          <v-flex xs12 >
+          </v-col>
+        </v-row>
+        <v-row >
+          <v-col cols="12" >
             <label class="caption grey--text text--darken-2">Description</label>
             <p class="subheading">{{description}}</p>
-          </v-flex>
-          <v-flex xs12>
+          </v-col>
+          <v-col cols="12">
             <label class="caption grey--text text--darken-2">Purpose</label>
             <p class="subheading">{{purpose}}</p>
-          </v-flex>
-          <v-flex xs12 v-if="slaDescriptionCompiledMarkdown">
+          </v-col>
+          <v-col cols="12" v-if="slaDescriptionCompiledMarkdown">
             <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
             <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
-          </v-flex>
-          <v-flex xs12 v-if="isKubeconfigEnabled">
+          </v-col>
+          <v-col cols="12" v-if="isKubeconfigEnabled">
             <label class="caption grey--text text--darken-2">Command Line Interface Access</label>
             <p class="subheading">
               Go to
               <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }">My Account</router-link>
               to download the <tt>kubeconfig</tt> for this project.
             </p>
-          </v-flex>
-        </v-layout>
+          </v-col>
+        </v-row>
         <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
       </v-card-text>
     </v-card>

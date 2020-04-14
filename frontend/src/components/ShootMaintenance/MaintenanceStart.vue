@@ -25,16 +25,16 @@ limitations under the License.
     maxWidth="850"
     confirmButtonText="Trigger now">
     <template slot="actionComponent">
-      <v-layout row wrap>
-        <v-flex>
-          <div class="subheading pt-3">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-        </v-flex>
+      <v-row >
+        <v-col>
+          <div class="subheading pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+        </v-col>
         <maintenance-components
           title="The following updates will be performed"
           :selectable="false"
           ref="maintenanceComponents"
         ></maintenance-components>
-      </v-layout>
+      </v-row>
     </template>
   </action-icon-dialog>
 </template>

@@ -25,12 +25,12 @@ limitations under the License.
     maxWidth="600"
     confirmButtonText="Trigger now">
     <template slot="actionComponent">
-      <v-layout row wrap>
-        <v-flex>
-          <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
+      <v-row >
+        <v-col>
+          <div class="subheading pt-4">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
           </div>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </template>
   </action-icon-dialog>
 </template>

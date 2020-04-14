@@ -22,15 +22,15 @@ limitations under the License.
         height="90px"
         :src="backgroundSrc"
       >
-        <v-container fill-height>
-          <v-layout align-center justify-start row fill-height>
-            <v-flex xs1>
+        <v-container class="fill-height" >
+          <v-row class="fill-height" align="center" justify="start" >
+            <v-col cols="1">
               <v-icon large class="white--text">mdi-help-circle-outline</v-icon>
-            </v-flex>
-            <v-flex>
+            </v-col>
+            <v-col>
               <div class="credential_title">{{title}}</div>
-            </v-flex>
-          </v-layout>
+            </v-col>
+          </v-row>
         </v-container>
       </v-img>
 

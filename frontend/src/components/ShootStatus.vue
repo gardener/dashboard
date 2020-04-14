@@ -43,10 +43,10 @@ limitations under the License.
     <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
     <template v-if="lastErrorDescriptions.length">
       <v-divider class="my-2"></v-divider>
-      <h4 class="error--text text-xs-left">Last Errors</h4>
+      <h4 class="error--text text-left">Last Errors</h4>
       <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
         <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
-          <h3 class="error--text text-xs-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
+          <h3 class="error--text text-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
         </template>
         <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
       </div>

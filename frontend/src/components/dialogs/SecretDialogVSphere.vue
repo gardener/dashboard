@@ -29,8 +29,8 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-layout column>
-        <v-flex class="mt-3">
+      <div class="d-flex flex-column">
+        <div class="pa-2">
           <v-text-field
           color="indigo darken-4"
           v-model="vsphereUsername"
@@ -40,8 +40,8 @@ limitations under the License.
           @input="$v.vsphereUsername.$touch()"
           @blur="$v.vsphereUsername.$touch()"
           ></v-text-field>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <v-text-field
             color="indigo darken-4"
             v-model="vspherePassword"
@@ -53,8 +53,8 @@ limitations under the License.
             @input="$v.vspherePassword.$touch()"
             @blur="$v.vspherePassword.$touch()"
           ></v-text-field>
-        </v-flex>
-        <v-flex class="mt-3">
+        </div>
+        <div class="pa-2">
           <v-text-field
           color="indigo darken-4"
           v-model="nsxtUsername"
@@ -63,8 +63,8 @@ limitations under the License.
           @input="$v.nsxtUsername.$touch()"
           @blur="$v.nsxtUsername.$touch()"
           ></v-text-field>
-        </v-flex>
-        <v-flex>
+        </div>
+        <div class="pa-2">
           <v-text-field
             color="indigo darken-4"
             v-model="nsxtPassword"
@@ -76,8 +76,8 @@ limitations under the License.
             @input="$v.nsxtPassword.$touch()"
             @blur="$v.nsxtPassword.$touch()"
           ></v-text-field>
-        </v-flex>
-      </v-layout>
+        </div>
+      </div>
     </template>
 
   </secret-dialog>

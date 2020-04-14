@@ -15,9 +15,9 @@ limitations under the License.
  -->
 
 <template>
-  <v-container grid-list-lg fluid>
-    <v-layout row wrap>
-      <v-flex xs12 md6>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12" md="6">
         <v-card>
           <v-toolbar card dark dense class="teal darken-2">
             <v-toolbar-title>Details</v-toolbar-title>
@@ -72,8 +72,8 @@ limitations under the License.
             </v-list-tile>
           </v-list>
         </v-card>
-      </v-flex>
-      <v-flex xs12 md6>
+      </v-col>
+      <v-col cols="12" md="6">
         <v-card>
           <v-toolbar card dark dense class="teal darken-2">
             <v-toolbar-title>Access</v-toolbar-title>
@@ -142,9 +142,9 @@ limitations under the License.
                     <v-tabs slider-color="grey lighten-1" color="grey lighten-3" class="mt-2 elevation-1">
                       <v-tab>Configure</v-tab>
                       <v-tab>Preview</v-tab>
-                      <v-tab-item class="pa-3">
-                        <v-layout row wrap>
-                          <v-flex xs12>
+                      <v-tab-item class="pa-4">
+                        <v-row >
+                          <v-col cols="12">
                             <v-select
                               color="teal darken-1"
                               v-model="projectName"
@@ -153,8 +153,8 @@ limitations under the License.
                               hint="The namespace of the selected project will be the default namespace in the kubeconfig"
                               persistent-hint
                             ></v-select>
-                          </v-flex>
-                          <v-flex xs12>
+                          </v-col>
+                          <v-col cols="12">
                             <v-select
                               color="teal darken-1"
                               v-model="grantType"
@@ -163,8 +163,8 @@ limitations under the License.
                               hint="The authorization grant type to use"
                               persistent-hint
                             ></v-select>
-                          </v-flex>
-                          <v-flex xs12>
+                          </v-col>
+                          <v-col cols="12">
                             <v-switch
                               color="teal darken-1"
                               v-model="skipOpenBrowser"
@@ -172,8 +172,8 @@ limitations under the License.
                               hint="If true, it does not open the browser on authentication"
                               persistent-hint
                             ></v-switch>
-                          </v-flex>
-                        </v-layout>
+                          </v-col>
+                        </v-row>
                       </v-tab-item>
                       <v-tab-item>
                         <code-block lang="yaml" :content="kubeconfig" :show-copy-button="false"></code-block>
@@ -185,8 +185,8 @@ limitations under the License.
             </template>
           </v-list>
         </v-card>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 

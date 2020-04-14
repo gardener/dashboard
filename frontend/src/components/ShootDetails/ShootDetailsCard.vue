@@ -22,50 +22,50 @@ limitations under the License.
     <div class="list">
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">info_outline</v-icon>
-        <v-flex class="pa-0">
+        <v-col class="pa-0">
           <span class="grey--text">Name</span><br>
           <span class="subheading">{{shootName}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <copy-btn :clipboard-text="shootName"></copy-btn>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <template v-if="expirationTimestamp">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-clock-outline</v-icon>
-          <v-flex class="pa-0">
+          <v-col class="pa-0">
             <span class="grey--text">Cluster Termination</span><br>
-            <v-layout align-center row fill-height class="pa-0 ma-0">
+            <v-row align="center" class="pa-0 ma-0 fill-height">
               <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
               <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
               <span class="pl-2 subheading">{{selfTerminationMessage}}</span>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
       </template>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-cube-outline</v-icon>
-        <v-flex class="pa-0">
+        <v-col class="pa-0">
           <span class="grey--text">Kubernetes Version</span><br>
           <span class="subheading">{{shootK8sVersion}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <shoot-version :shoot-item="shootItem" :chip-style="false"></shoot-version>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-server</v-icon>
-        <v-flex grow class="pa-0">
+        <v-col class="pa-0 grow">
           <span class="grey--text">Worker Groups</span><br>
           <worker-group
           v-for="workerGroup in shootWorkerGroups"
@@ -73,23 +73,23 @@ limitations under the License.
           :cloudProfileName="shootCloudProfileName"
           :key="workerGroup.name"
           ></worker-group>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <worker-configuration :shootItem="shootItem"></worker-configuration>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem">
-        <v-layout class="py-2">
-          <v-flex shrink justify-center class="pr-0 pt-3">
+        <v-row class="py-2">
+          <v-col class="pr-0 pt-4 shrink justify-center">
             <v-icon class="cyan--text text--darken-2 avatar">perm_identity</v-icon>
-          </v-flex>
-          <v-flex class="pa-0">
+          </v-col>
+          <v-col class="pa-0">
             <span class="grey--text">Created by</span><br>
-            <account-avatar :account-name="shootCreatedBy" :mail-to="true" class="pb-3"></account-avatar>
+            <account-avatar :account-name="shootCreatedBy" :mail-to="true" class="pb-4"></account-avatar>
             <v-tooltip top>
               <template slot="activator">
                 <span class="grey--text">Created at</span><br>
@@ -97,24 +97,24 @@ limitations under the License.
               </template>
               <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
-          </v-flex>
-        </v-layout>
+          </v-col>
+        </v-row>
       </v-card-title>
 
       <template v-if="!!shootPurpose">
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">label_outline</v-icon>
-          <v-flex class="pa-0">
+          <v-col class="pa-0">
             <span class="grey--text">Purpose</span><br>
             <span class="subheading">{{shootPurpose}}</span>
-          </v-flex>
-          <v-flex shrink class="pa-0">
-            <v-layout row>
+          </v-col>
+          <v-col class="pa-0 shrink">
+            <v-row >
               <!-- the selectable purposes depend on the used secretbinding which the user needs to be able to read in order to properly show the purpose configuration dialog -->
               <purpose-configuration v-if="canGetSecrets" :shootItem="shootItem"></purpose-configuration>
-            </v-layout>
-          </v-flex>
+            </v-row>
+          </v-col>
         </v-card-title>
       </template>
 
@@ -122,26 +122,26 @@ limitations under the License.
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-file-document-outline</v-icon>
-          <v-flex class="pa-0">
+          <v-col class="pa-0">
             <span class="grey--text">{{slaTitle}}</span><br>
             <span class="slaDescription" v-html="slaDescriptionCompiledMarkdown" />
-          </v-flex>
+          </v-col>
         </v-card-title>
       </template>
 
       <v-divider class="my-2" inset></v-divider>
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
-        <v-flex class="pa-0">
+        <v-col class="pa-0">
           <span class="grey--text">Add-ons (not actively monitored and provided on a best-effort basis only)</span><br>
           <span class="subheading" v-if="!this.shootAddonNames.length">No addons configured</span>
           <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outline color="cyan darken-2">{{name}}</v-chip>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
+        </v-col>
+        <v-col class="pa-0 shrink">
+          <v-row >
             <addon-configuration :shootItem="shootItem"></addon-configuration>
-          </v-layout>
-        </v-flex>
+          </v-row>
+        </v-col>
       </v-card-title>
     </div>
   </v-card>

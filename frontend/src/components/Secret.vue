@@ -30,7 +30,7 @@ limitations under the License.
       </v-btn>
     </v-toolbar>
     <div class="description_container" v-if="!hasRows">
-      <div class="description mt-3">
+      <div class="description mt-4">
         {{description}}
       </div>
     </div>

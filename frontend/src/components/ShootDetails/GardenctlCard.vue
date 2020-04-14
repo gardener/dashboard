@@ -21,20 +21,20 @@ limitations under the License.
     </v-card-title>
     <div class="list">
       <v-card-title class="listItem" >
-        <v-layout class="py-2">
-          <v-flex shrink justify-center class="pr-0 pt-3">
+        <v-row class="py-2">
+          <v-col class="pr-0 pt-4 shrink justify-center">
             <v-icon class="cyan--text text--darken-2 avatar">mdi-console-line</v-icon>
-          </v-flex>
-          <v-flex class="pa-0">
-            <v-layout row v-for="command in commands" :key="command.title">
-              <v-flex>
+          </v-col>
+          <v-col class="pa-0">
+            <v-row v-for="command in commands" :key="command.title">
+              <v-col>
                 <span class="grey--text">{{command.title}}</span><br>
                 <code>{{command.value}}</code>
-              </v-flex>
+              </v-col>
               <copy-btn :clipboard-text="command.value"></copy-btn>
-            </v-layout>
-          </v-flex>
-        </v-layout>
+            </v-row>
+          </v-col>
+        </v-row>
       </v-card-title>
     </div>
   </v-card>

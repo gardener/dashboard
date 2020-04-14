@@ -40,7 +40,7 @@ limitations under the License.
           v-if="isAdmin"
           v-model="selectedRunOnShootWorker"
           label="Terminal Runtime"
-          class="mt-4"
+          class="mt-6"
           hint='Choose "Cluster" if you want to troubleshoot a worker node of the cluster'
           persistent-hint
         >
@@ -95,7 +95,7 @@ limitations under the License.
         </v-select>
         <v-alert
           v-if="isAdmin && selectedRunOnShootWorker"
-          class="ml-4 mt-4 mb-2"
+          class="ml-6 mt-6 mb-2"
           :value="true"
           type="info"
           color="cyan darken-2"

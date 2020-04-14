@@ -24,7 +24,7 @@ limitations under the License.
     >
       <div class="teaser">
         <div class="content center">
-          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="right white--text">
+          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
@@ -57,7 +57,7 @@ limitations under the License.
             @keydown.up="highlightProjectWithKeys('up')"
             @keyup.enter="navigateToHighlightedProject"
           >
-            <v-icon class="pr-4">mdi-grid-large</v-icon>
+            <v-icon class="pr-6">mdi-grid-large</v-icon>
             <span class="ml-2">{{projectName}}</span>
             <v-spacer></v-spacer>
             <v-icon right>{{projectMenuIcon}}</v-icon>
@@ -75,7 +75,7 @@ limitations under the License.
                   full-width
                   color="grey darken-1"
                   prepend-icon="search"
-                  class="ml-4 project-filter"
+                  class="ml-6 project-filter"
                   v-model="projectFilter"
                   ref="projectFilter"
                   @keyup.esc="projectFilter = ''"
@@ -113,7 +113,7 @@ limitations under the License.
                   slot="activator"
                   flat
                   block
-                  class="project-add text-xs-left teal--text"
+                  class="project-add text-left teal--text"
                   :disabled="!canCreateProject"
                   @click.stop="openProjectDialog"
                 >

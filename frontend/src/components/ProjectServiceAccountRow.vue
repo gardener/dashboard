@@ -30,34 +30,30 @@ limitations under the License.
           <v-list-tile-title slot="popperRef" class="cursor-pointer">
             {{displayName}}
           </v-list-tile-title>
-          <v-layout row
-            fill-height
-            align-center
+          <v-row class="fill-height"                         align="center"
           >
             <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
-          </v-layout>
-          <v-layout row
-            fill-height
-            align-center
+          </v-row>
+          <v-row class="fill-height"                         align="center"
             v-if="created && creationTimestamp"
           >
-            <span class="mr-3">Created</span>
+            <span class="mr-4">Created</span>
             <v-tooltip top>
               <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
               {{created}}
             </v-tooltip>
-          </v-layout>
+          </v-row>
         </g-popper>
         <v-list-tile-sub-title>
           {{username}}
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
-        <v-layout row align-center>
+        <v-row align="center">
           <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
             {{roleName}}
           </v-chip>
-        </v-layout>
+        </v-row>
       </v-list-tile-action>
       <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
         <v-tooltip top>

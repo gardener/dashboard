@@ -16,10 +16,10 @@ limitations under the License.
 
 <template>
   <div>
-    <v-flex xs12>
-      <div class="subheading pt-3">{{title}}</div>
-    </v-flex>
-    <v-flex xs12>
+    <v-col cols="12">
+      <div class="subheading pt-4">{{title}}</div>
+    </v-col>
+    <v-col cols="12">
       <v-list two-line>
         <v-list-tile class="list-complete-item" v-if="selectable || osUpdates">
           <v-list-tile-action>
@@ -60,7 +60,7 @@ limitations under the License.
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
-    </v-flex>
+    </v-col>
   </div>
 </template>
 

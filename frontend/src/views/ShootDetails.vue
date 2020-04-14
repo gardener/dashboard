@@ -15,22 +15,22 @@ limitations under the License.
  -->
 <template>
 
-  <v-container fluid grid-list-lg>
-    <v-layout d-flex wrap row>
-      <v-flex md6>
+  <v-container fluid>
+    <v-row class="d-flex">
+      <v-col md="6">
         <shoot-details-card :shootItem="shootItem"></shoot-details-card>
 
-        <shoot-infrastructure-card :shootItem="shootItem" class="mt-3"></shoot-infrastructure-card>
+        <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
 
-        <shoot-external-tools-card :shootItem="shootItem" class="mt-3"></shoot-external-tools-card>
+        <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
 
-        <gardenctl-card :shootItem="shootItem" class="mt-3"></gardenctl-card>
+        <gardenctl-card :shootItem="shootItem" class="mt-4"></gardenctl-card>
 
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-3"></shoot-lifecycle-card>
-      </v-flex>
+        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
+      </v-col>
 
-      <v-flex md6>
-        <v-card v-if="canGetSecrets" class="mb-3">
+      <v-col md="6">
+        <v-card v-if="canGetSecrets" class="mb-4">
           <v-card-title class="subheading white--text cyan darken-2">
             Access
           </v-card-title>
@@ -40,24 +40,24 @@ limitations under the License.
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
 
         <v-card v-show="isLoggingFeatureGateEnabled">
-          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text cyan darken-2 mt-4">
             Logging
           </v-card-title>
           <shoot-logging :shootItem="shootItem"></shoot-logging>
         </v-card>
 
         <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
-          <v-card-title class="subheading white--text cyan darken-2 mt-3">
+          <v-card-title class="subheading white--text cyan darken-2 mt-4">
             {{kymaTitle}}
           </v-card-title>
           <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
         </v-card>
 
-        <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="shootItem" class="mt-3"></shoot-journals-card>
+        <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="shootItem" class="mt-4"></shoot-journals-card>
 
-      </v-flex>
+      </v-col>
 
-    </v-layout>
+    </v-row>
 
   </v-container>
 

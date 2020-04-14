@@ -29,7 +29,7 @@ limitations under the License.
             ></new-shoot-select-infrastructure>
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Cluster Details
         </v-card-title>
@@ -41,7 +41,7 @@ limitations under the License.
             ></new-shoot-details>
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Infrastructure Details
         </v-card-title>
@@ -53,7 +53,7 @@ limitations under the License.
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Worker
         </v-card-title>
@@ -65,7 +65,7 @@ limitations under the License.
          ></manage-workers>
        </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Add-Ons (not actively monitored and provided on a best-effort basis only)
         </v-card-title>
@@ -76,7 +76,7 @@ limitations under the License.
            ></manage-shoot-addons>
        </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Maintenance
         </v-card-title>
@@ -91,7 +91,7 @@ limitations under the License.
           ></maintenance-components>
        </v-card-text>
       </v-card>
-      <v-card flat class="mt-3">
+      <v-card flat class="mt-4">
         <v-card-title class="subheading white--text cyan darken-2 cardTitle">
           Hibernation
         </v-card-title>
@@ -107,10 +107,10 @@ limitations under the License.
     </v-container>
     <v-divider></v-divider>
     <div class="toolbar">
-      <v-layout align-center justify-end>
+      <v-row align="center" justify="end">
         <v-divider vertical></v-divider>
         <v-btn flat @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2 mr-0">Create</v-btn>
-      </v-layout>
+      </v-row>
     </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>

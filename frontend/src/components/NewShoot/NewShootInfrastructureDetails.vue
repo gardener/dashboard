@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="pa-0 ma-0">
-    <v-layout row wrap>
-      <v-flex v-show="cloudProfiles.length > 1" class="regularInput">
+  <v-container  class="pa-0 ma-0">
+    <v-row >
+      <v-col v-show="cloudProfiles.length > 1" class="regularInput">
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -27,8 +27,8 @@ limitations under the License.
           @input="onUpdateCloudProfileName"
           color="cyan darken-2">
         </cloud-profile>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <v-select
           ref="secret"
           color="cyan darken-2"
@@ -58,8 +58,8 @@ limitations under the License.
             <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
           </template>
         </v-select>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <v-select
           color="cyan darken-2"
           label="Region"
@@ -71,9 +71,9 @@ limitations under the License.
           @input="onInputRegion"
           @blur="$v.region.$touch()"
           ></v-select>
-      </v-flex>
+      </v-col>
       <template v-if="infrastructureKind === 'openstack'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
           label="Floating Pools"
@@ -83,8 +83,8 @@ limitations under the License.
           @input="onInputFloatingPoolName"
           @blur="$v.floatingPoolName.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
           label="Load Balancer Providers"
@@ -95,10 +95,10 @@ limitations under the License.
           @blur="$v.loadBalancerProviderName.$touch()"
           persistent-hint
           ></v-select>
-        </v-flex>
+        </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'metal'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-text-field
             color="cyan darken-2"
             label="Project ID"
@@ -109,8 +109,8 @@ limitations under the License.
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             ></v-text-field>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
             label="Partition ID"
@@ -122,8 +122,8 @@ limitations under the License.
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
             label="Firewall Image"
@@ -133,8 +133,8 @@ limitations under the License.
             @input="onInputFirewallImage"
             @blur="$v.firewallImage.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
             label="Firewall Size"
@@ -144,8 +144,8 @@ limitations under the License.
             @input="onInputFirewallSize"
             @blur="$v.firewallImage.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
             label="Firewall Networks"
@@ -159,10 +159,10 @@ limitations under the License.
             deletable-chips
             multiple
           ></v-select>
-        </v-flex>
+        </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
             label="Load Balancer Classes"
@@ -186,9 +186,9 @@ limitations under the License.
                 </v-list-tile-content>
             </template>
           </v-select>
-        </v-flex>
+        </v-col>
       </template>
-    </v-layout>
+    </v-row>
     <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
 </template>

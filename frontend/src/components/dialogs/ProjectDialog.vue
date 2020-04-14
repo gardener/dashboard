@@ -24,10 +24,10 @@ limitations under the License.
       </v-card-title>
       <v-card-text>
         <form>
-          <v-container fluid grid-list-xl>
+          <v-container fluid >
             <template v-if="isCreateMode">
-              <v-layout row>
-                <v-flex xs6>
+              <v-row >
+                <v-col cols="6">
                   <v-text-field
                     color="deep-purple"
                     ref="projectName"
@@ -38,29 +38,29 @@ limitations under the License.
                     @blur="$v.projectName.$touch()"
                     counter="10"
                     ></v-text-field>
-                </v-flex>
-              </v-layout>
+                </v-col>
+              </v-row>
             </template>
             <template v-else>
-              <v-layout row>
-                <v-flex xs6>
-                  <div class="title pb-3">{{projectName}}</div>
-                </v-flex>
-              </v-layout>
-              <v-layout row>
-               <v-flex xs6>
+              <v-row >
+                <v-col cols="6">
+                  <div class="title pb-4">{{projectName}}</div>
+                </v-col>
+              </v-row>
+              <v-row >
+               <v-col cols="6">
                  <v-select
                    color="deep-purple"
                    :items="memberItems"
                    label="Technical Contact"
                    v-model="technicalContact"
                    ></v-select>
-               </v-flex>
-           </v-layout>
+               </v-col>
+           </v-row>
             </template>
 
-            <v-layout row v-if="costObjectSettingEnabled">
-              <v-flex xs6>
+            <v-row v-if="costObjectSettingEnabled">
+              <v-col cols="6">
                 <v-text-field
                   color="deep-purple"
                   ref="costObject"
@@ -71,34 +71,34 @@ limitations under the License.
                   @blur="$v.costObject.$touch()"
                   >
                 </v-text-field>
-              </v-flex>
+              </v-col>
 
-            </v-layout>
-            <v-layout row v-if="!!costObjectDescriptionCompiledMarkdown">
+            </v-row>
+            <v-row v-if="!!costObjectDescriptionCompiledMarkdown">
               <v-alert :value="true" dense type="info" outline color="deep-purple">
                 <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
               </v-alert>
-            </v-layout>
+            </v-row>
 
-            <v-layout row>
-              <v-flex xs12>
+            <v-row >
+              <v-col cols="12">
                 <v-text-field
                   color="deep-purple"
                   ref="description"
                   label="Description"
                   v-model="description"
                   ></v-text-field>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex xs12>
+              </v-col>
+            </v-row>
+            <v-row >
+              <v-col cols="12">
                 <v-text-field
                   color="deep-purple"
                   label="Purpose"
                   v-model="purpose"
                   ></v-text-field>
-              </v-flex>
-            </v-layout>
+              </v-col>
+            </v-row>
             <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
           </v-container>
         </form>

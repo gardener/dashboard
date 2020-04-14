@@ -23,7 +23,7 @@ limitations under the License.
           <v-btn
             slot="activator"
             flat
-            class="text-xs-left teal--text"
+            class="text-left teal--text"
             :disabled="!canCreateProject"
             @click.native.stop="projectDialog = true"
           >

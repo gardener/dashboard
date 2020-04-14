@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout fill-height>
+  <v-row class="fill-height" >
     <shoot-editor
       :modificationWarning="modificationWarning"
       @dismissModificationWarning="onDismissModificationWarning"
@@ -29,13 +29,13 @@ limitations under the License.
       </template>
       <template slot="toolbarItemsRight">
         <v-divider vertical></v-divider>
-        <v-flex d-flex fill-height align-center>
+        <v-col class="d-flex fill-height align-center" >
           <v-btn flat @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
-        </v-flex>
+        </v-col>
       </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>

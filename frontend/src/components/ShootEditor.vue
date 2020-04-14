@@ -15,29 +15,29 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout column fill-height class="position-relative">
-    <v-flex v-if="!clean && !!modificationWarning" class="shrink">
+  <v-row class="fill-height flex-column position-relative">
+    <v-col v-if="!clean && !!modificationWarning" class="shrink">
       <v-alert :value="modificationWarning" @input="onDismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
         <slot name="modificationWarning"></slot>
       </v-alert>
-    </v-flex>
-    <v-flex ref="container" :style="containerStyles"></v-flex>
-    <v-flex v-if="errorMessageInternal" class="shrink">
+    </v-col>
+    <v-col ref="container" :style="containerStyles"></v-col>
+    <v-col v-if="errorMessageInternal" class="shrink">
       <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
-    </v-flex>
+    </v-col>
     <v-divider></v-divider>
-    <v-flex v-if="!isReadOnly" :style="toolbarStyles">
-      <v-layout row align-center justify-space-between fill-height>
-        <v-flex d-flex>
+    <v-col v-if="!isReadOnly" :style="toolbarStyles">
+      <v-row class="fill-height" align="center" justify="space-between" >
+        <v-col class="d-flex" >
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="untouched" @click="reload">
               <v-icon small>mdi-reload</v-icon>
             </v-btn>
             <span>Discard and Reload</span>
           </v-tooltip>
-        </v-flex>
+        </v-col>
         <v-divider vertical></v-divider>
-        <v-flex d-flex>
+        <v-col class="d-flex" >
           <v-tooltip top>
             <v-btn icon slot="activator" :disabled="!historySize.undo" @click="undo">
               <v-icon small>mdi-undo</v-icon>
@@ -50,17 +50,17 @@ limitations under the License.
             </v-btn>
             <span>Redo</span>
           </v-tooltip>
-        </v-flex>
+        </v-col>
         <v-divider vertical></v-divider>
-        <v-flex d-flex>
+        <v-col class="d-flex" >
           <v-tooltip top>
             <v-btn icon slot="activator" @click="downloadContent">
               <v-icon small>mdi-download</v-icon>
             </v-btn>
             <span>Download</span>
           </v-tooltip>
-        </v-flex >
-        <v-flex d-flex>
+        </v-col >
+        <v-col class="d-flex" >
           <copy-btn
             :clipboard-text="getContent()"
             @click.native.stop="focus"
@@ -70,12 +70,12 @@ limitations under the License.
             @copyFailed="onCopyFailed"
           >
           </copy-btn>
-        </v-flex>
+        </v-col>
         <v-divider vertical></v-divider>
-        <v-flex d-flex xs12></v-flex>
+        <v-col class="d-flex" cols="12"></v-col>
         <slot name="toolbarItemsRight"></slot>
-      </v-layout>
-    </v-flex>
+      </v-row>
+    </v-col>
     <v-tooltip
       right
       absolute
@@ -90,7 +90,7 @@ limitations under the License.
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>
