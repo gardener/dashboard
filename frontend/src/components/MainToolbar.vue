@@ -15,16 +15,23 @@ limitations under the License.
 -->
 
 <template>
-  <v-app-bar fixed app :tabs="!!tabs">
+  <v-app-bar app tile fixed>
     <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
     <div class="text-center mr-6" v-if="helpMenuItems.length">
-      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
-        <template v-slot:activator="{ on }">
-          <v-tooltip v-on="on" left open-delay="500">
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon class="cyan--text text--darken-2">
+      <v-menu
+        v-model="help"
+        open-on-click
+        close-on-content-click
+        offset-y
+        nudge-bottom="12"
+        transition="slide-y-transition"
+      >
+        <template v-slot:activator="{ on: menu }">
+          <v-tooltip left open-delay="500">
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon class="cyan--text text--darken-2">
                 <v-icon medium>help_outline</v-icon>
               </v-btn>
             </template>
@@ -55,19 +62,23 @@ limitations under the License.
       </v-menu>
     </div>
     <div class="text-center">
-      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="menu">
-        <template v-slot:activator="{ on }">
-          <v-tooltip v-on="on" left open-delay="500">
-            <template v-slot:activator="{ on }">
-              <v-badge v-if="isAdmin" v-on="on" color="cyan darken-2" bottom overlap>
-                <template v-slot:badge>
-                  <v-icon small dark>supervisor_account</v-icon>
-                </template>
-                <v-avatar size="40px">
+      <v-menu
+        v-model="menu"
+        open-on-click
+        close-on-content-click
+        offset-y
+        nudge-bottom="16"
+        transition="slide-y-transition"
+      >
+        <template v-slot:activator="{ on: menu }">
+          <v-tooltip left open-delay="500">
+            <template v-slot:activator="{ on: tooltip }">
+              <v-badge v-if="isAdmin"  color="cyan darken-2" bottom overlap icon="supervisor_account">
+                <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
               </v-badge>
-              <v-avatar v-else v-on="on" size="40px">
+              <v-avatar v-else v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                 <img :src="avatarUrl" />
               </v-avatar>
             </template>
@@ -108,8 +119,8 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <template v-slot:extension>
-      <v-tabs v-if="tabs && tabs.length > 1" slider-color="grey darken-3">
+    <template v-if="tabs && tabs.length > 1" v-slot:extension>
+      <v-tabs slider-color="grey darken-3" color="black">
         <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -216,6 +227,8 @@ export default {
   .content {
     text-align: center;
     display: block;
+    padding-left: 8px;
+    padding-right: 8px;
     width: 100%;
   }
 
@@ -236,5 +249,4 @@ export default {
   >>> .v-toolbar__extension {
     padding: 0;
   }
-
 </style>

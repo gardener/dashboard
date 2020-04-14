@@ -24,7 +24,7 @@ limitations under the License.
     >
       <div class="teaser">
         <div class="content center">
-          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text">
+          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text ma-2">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
@@ -32,7 +32,6 @@ limitations under the License.
             <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
             <h2>Universal Kubernetes at Scale</h2>
           </a>
-
         </div>
       </div>
       <template v-if="projectList.length">
@@ -64,11 +63,10 @@ limitations under the License.
             </v-btn>
           </template>
 
-          <v-card light>
+          <v-card>
             <template v-if="projectList.length > 3">
               <v-card-title class="pa-0 grey lighten-5">
                 <v-text-field
-                  light
                   clearable
                   label="Filter projects"
                   single-line
@@ -76,7 +74,7 @@ limitations under the License.
                   full-width
                   color="grey darken-1"
                   prepend-icon="search"
-                  class="ml-6 project-filter"
+                  class="pl-4 mt-0 pt-0 project-filter"
                   v-model="projectFilter"
                   ref="projectFilter"
                   @keyup.esc="projectFilter = ''"
@@ -103,7 +101,7 @@ limitations under the License.
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title>{{project.metadata.name}}</v-list-item-title>
+                  <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
                   <v-list-item-subtitle class="project-owner">{{getProjectOwner(project)}}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
@@ -449,7 +447,7 @@ export default {
 <style lang="scss" scoped>
   $teaserHeight: 200px;
 
-  aside {
+  .v-navigation-drawer {
     overflow: hidden;
 
     .teaser {
@@ -507,29 +505,28 @@ export default {
     }
 
     .project-selector {
-      height: 60px;
+      height: 60px !important;
       font-weight: 700;
       font-size: 16px;
       background-color: rgba(0,0,0,0.1) !important;
 
-      >>> div {
+      div {
         justify-content: left;
       }
     }
 
     .v-footer{
       background-color: transparent;
-      padding-left: 10px;
-      padding-right: 10px;
+      padding-left: 8px;
+      padding-right: 8px;
     }
 
-    >>> .v-list {
-      .v-list__tile__title {
-          text-transform: uppercase;
-          font-size: 13px;
-          max-width: 180px;
+    .v-list {
+      .v-list-item__title {
+        text-transform: uppercase !important;
+        max-width: 180px;
       }
-      .v-list__tile--active {
+      .v-list-item--active {
         background: rgba(255,255,255,0.1) !important;
         color: white !important;
         .icon {
@@ -541,11 +538,12 @@ export default {
     .project-menu {
       border-radius: 0;
 
-      >>>.v-card {
+      .v-card {
         border-radius: 0;
 
         .project-filter {
           align-items: center;
+          font-weight: normal;
         }
 
         .project-add > div {
@@ -561,11 +559,13 @@ export default {
           div > a {
             height: 54px;
           }
+          .project-name {
+            font-size: 14px;
+          }
           .project-owner {
             font-size: 11px;
           }
-
-          .v-list__tile--highlighted {
+          .v-list-item--highlighted {
             background-color: transparent !important
           }
         }

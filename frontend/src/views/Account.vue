@@ -19,10 +19,10 @@ limitations under the License.
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-app-bar flat dark dense class="teal darken-2">
+          <v-toolbar flat dark dense class="teal darken-2">
             <v-toolbar-title>Details</v-toolbar-title>
-          </v-app-bar>
-          <v-list two-line class="no-height">
+          </v-toolbar>
+          <v-list dense>
             <v-list-item>
               <v-list-item-avatar>
                 <v-icon color="teal darken-2">{{icon}}</v-icon>
@@ -52,13 +52,15 @@ limitations under the License.
               <v-list-item-content>
                 <v-list-item-title class="label">Groups</v-list-item-title>
                 <v-list-item-subtitle class="content">
-                  <span>
-                    <v-chip v-for="(group, index) in groups" :key="index" label small outlined disabled color="black">{{group}}</v-chip>
-                  </span>
+                  <div class="py-1">
+                    <v-chip v-for="(group, index) in groups" :key="index" label small class="mr-2">{{group}}</v-chip>
+                  </div>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
-            <v-divider inset class="my-2"/>
+          </v-list>
+          <v-divider inset/>
+          <v-list>
             <v-list-item>
               <v-list-item-avatar>
                 <v-icon color="teal darken-2">timelapse</v-icon>
@@ -367,12 +369,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .no-height >>> [role=listitem] > :first-child {
-    height: unset;
-    min-height: 48px;
-  }
   .label {
     font-size: 14px !important;
+    font-weight: 400 !important;
     color: rgba(0,0,0,0.54) !important;
   }
   .content {
