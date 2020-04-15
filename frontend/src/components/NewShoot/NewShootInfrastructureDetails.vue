@@ -35,6 +35,8 @@ limitations under the License.
           item-color="cyan darken-2"
           label="Secret"
           :items="secretItems"
+          item-value="metadata.name"
+          return-object
           v-model="secret"
           :error-messages="getErrorMessages('secret')"
           @input="onInputSecret"
