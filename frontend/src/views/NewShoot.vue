@@ -106,11 +106,9 @@ limitations under the License.
       <g-alert ref="errorAlert" color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage" class="error-alert"></g-alert>
     </v-container>
     <v-divider></v-divider>
-    <div class="toolbar">
-      <v-row align="center" justify="end">
-        <v-divider vertical></v-divider>
-        <v-btn text @click.native.stop="createClicked()" :disabled="!valid" class="cyan--text text--darken-2">Create</v-btn>
-      </v-row>
+    <div class="d-flex align-center justify-end toolbar">
+      <v-divider vertical></v-divider>
+      <v-btn text @click.native.stop="createClicked()" :disabled="!valid" color="cyan darken-2">Create</v-btn>
     </div>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>

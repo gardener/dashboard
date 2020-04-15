@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-row class="fill-height" >
+  <div class="fill-height">
     <shoot-editor
       :modificationWarning="modificationWarning"
       @dismissModificationWarning="onDismissModificationWarning"
@@ -23,11 +23,11 @@ limitations under the License.
       :detailedErrorMessage.sync="detailedErrorMessage"
       :shootContent="newShootResource"
       ref="shootEditor">
-      <template slot="modificationWarning">
+      <template v-slot:modificationWarning>
         By modifying the resource directly you may create an invalid cluster resource.
         If the resource is invalid, you may lose data when switching back to the overview page.
       </template>
-      <template slot="toolbarItemsRight">
+      <template v-slot:toolbarItemsRight>
         <v-divider vertical></v-divider>
         <v-col class="d-flex fill-height align-center" >
           <v-btn text @click.native.stop="createClicked()" class="cyan--text text--darken-2">Create</v-btn>
@@ -35,7 +35,7 @@ limitations under the License.
       </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-row>
+  </div>
 </template>
 
 <script>
