@@ -31,7 +31,7 @@ limitations under the License.
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="{ ...tooltip, ...menu }" icon class="cyan--text text--darken-2">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
                 <v-icon medium>help_outline</v-icon>
               </v-btn>
             </template>
@@ -50,9 +50,9 @@ limitations under the License.
           <v-divider></v-divider>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
-            <v-card-actions :key="index">
-              <v-btn block text class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>
+            <v-card-actions :key="index" class="px-3">
+              <v-btn block text color="cyan darken-2" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
+                <v-icon color="cyan darken-2" class="mr-3">{{item.icon}}</v-icon>
                 {{item.title}}
                 <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
               </v-btn>
@@ -73,7 +73,7 @@ limitations under the License.
         <template v-slot:activator="{ on: menu }">
           <v-tooltip left open-delay="500">
             <template v-slot:activator="{ on: tooltip }">
-              <v-badge v-if="isAdmin"  color="cyan darken-2" bottom overlap icon="supervisor_account">
+              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="supervisor_account">
                 <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
                   <img :src="avatarUrl" />
                 </v-avatar>
@@ -103,16 +103,17 @@ limitations under the License.
               <div class="caption" v-if="isAdmin">Operator</div>
             </div>
           </v-card-title>
-          <v-card-actions>
-            <v-btn block text class="action-button cyan--text text--darken-2" :to="accountLink" title="My Account">
-              <v-icon left>account_circle</v-icon>
+          <v-divider></v-divider>
+          <v-card-actions class="px-3">
+            <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
+              <v-icon class="mr-3">account_circle</v-icon>
               My Account
             </v-btn>
           </v-card-actions>
           <v-divider></v-divider>
-          <v-card-actions>
-            <v-btn block text class="action-button pink--text" @click.native.stop="handleLogout" title="Logout">
-              <v-icon left>exit_to_app</v-icon>
+          <v-card-actions class="px-3">
+            <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
+              <v-icon class="mr-3">exit_to_app</v-icon>
               Logout
             </v-btn>
           </v-card-actions>
@@ -120,7 +121,7 @@ limitations under the License.
       </v-menu>
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
-      <v-tabs slider-color="grey darken-3" color="black">
+      <v-tabs slider-color="grey darken-3" background-color="white" color="black">
         <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
@@ -223,17 +224,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
   .content {
     text-align: center;
     display: block;
     padding-left: 8px;
     padding-right: 8px;
     width: 100%;
-  }
-
-  .action-button >>> .v-btn__content {
-    justify-content: left
   }
 
   .link-icon {
@@ -244,9 +240,5 @@ export default {
   .operator {
     color: white;
     font-weight: bold;
-  }
-
-  >>> .v-toolbar__extension {
-    padding: 0;
   }
 </style>
