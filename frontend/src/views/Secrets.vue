@@ -171,10 +171,12 @@ limitations under the License.
 
     <v-fab-transition>
       <v-speed-dial fixed bottom right v-show="floatingButton" direction="top" transition="slide-y-reverse-transition" v-model="dialogState.speedDial">
-        <v-btn slot="activator" class="cyan darken-2" dark fab v-model="dialogState.speedDial">
-          <v-icon v-if="dialogState.speedDial">close</v-icon>
-          <v-icon v-else>add</v-icon>
-        </v-btn>
+        <template v-slot:activator>
+          <v-btn class="cyan darken-2" dark fab v-model="dialogState.speedDial">
+            <v-icon v-if="dialogState.speedDial">close</v-icon>
+            <v-icon v-else>add</v-icon>
+          </v-btn>
+        </template>
         <v-btn v-if="hasCloudProfileForCloudProviderKind('vsphere')" fab dark small class="vsphere-bgcolor" @click="onAdd('vsphere')">
           <infra-icon value="vsphere-white" :width="20"></infra-icon>
         </v-btn>

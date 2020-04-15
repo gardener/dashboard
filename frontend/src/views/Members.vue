@@ -177,10 +177,12 @@ limitations under the License.
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
     <v-fab-transition v-if="canPatchProject">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
-        <v-btn slot="activator" v-model="fab" color="teal darken-2" dark fab>
-          <v-icon v-if="fab">close</v-icon>
-          <v-icon v-else>add</v-icon>
-        </v-btn>
+        <template v-slot:activator>
+          <v-btn v-model="fab" color="teal darken-2" dark fab>
+            <v-icon v-if="fab">close</v-icon>
+            <v-icon v-else>add</v-icon>
+          </v-btn>
+        </template>
         <v-btn fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
