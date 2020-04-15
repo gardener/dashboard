@@ -28,7 +28,7 @@ limitations under the License.
     <div class="popper">
       <v-card>
         <v-toolbar ref="toolbar" :height="30" :color="toolbarColor" dark flat>
-          <v-toolbar-title class="subtitle-1 ">{{title}}</v-toolbar-title>
+          <v-toolbar-title class="subtitle-1">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn small icon @click.native.stop="closePopover">
             <v-icon class="subtitle-1">mdi-close</v-icon>

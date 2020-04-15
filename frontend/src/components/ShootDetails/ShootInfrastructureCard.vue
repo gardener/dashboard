@@ -30,14 +30,14 @@ limitations under the License.
             <v-row >
               <v-col>
                 <span class="grey--text">Provider</span><br>
-                <span class="subtitle-1 ">{{shootCloudProviderKind}}</span>
+                <span class="subtitle-1">{{shootCloudProviderKind}}</span>
               </v-col>
             </v-row>
             <v-row >
               <v-col>
                 <span class="grey--text">Credential</span><br>
                 <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
-                  <span class="subtitle-1 ">{{shootSecretBindingName}}</span>
+                  <span class="subtitle-1">{{shootSecretBindingName}}</span>
                 </router-link>
                 <span v-else>{{shootSecretBindingName}}</span>
               </v-col>
@@ -45,7 +45,7 @@ limitations under the License.
             <v-row >
               <v-col>
                 <span class="grey--text">{{regionZoneTitle}}</span><br>
-                <span class="subtitle-1 ">{{regionZoneText}}</span>
+                <span class="subtitle-1">{{regionZoneText}}</span>
               </v-col>
             </v-row>
           </v-col>
@@ -70,7 +70,7 @@ limitations under the License.
               <v-row >
                 <v-col>
                   <span class="grey--text">Technical Id</span><br>
-                  <span class="subtitle-1 ">{{shootTechnicalId}}</span>
+                  <span class="subtitle-1">{{shootTechnicalId}}</span>
                 </v-col>
                 <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
               </v-row>
@@ -89,19 +89,19 @@ limitations under the License.
             <v-row >
               <v-col>
                 <span class="grey--text">Pods CIDR</span><br>
-                <span class="subtitle-1 ">{{podsCidr}}</span>
+                <span class="subtitle-1">{{podsCidr}}</span>
               </v-col>
             </v-row>
             <v-row >
               <v-col>
                 <span class="grey--text">Nodes CIDR</span><br>
-                <span class="subtitle-1 ">{{nodesCidr}}</span>
+                <span class="subtitle-1">{{nodesCidr}}</span>
               </v-col>
             </v-row>
             <v-row >
               <v-col>
                 <span class="grey--text">Services CIDR</span><br>
-                <span class="subtitle-1 ">{{servicesCidr}}</span>
+                <span class="subtitle-1">{{servicesCidr}}</span>
               </v-col>
             </v-row>
           </v-col>
@@ -114,7 +114,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2 avatar">mdi-earth</v-icon>
           <v-col class="pa-0">
             <span class="grey--text">Ingress Domain</span><br>
-            <span class="subtitle-1 ">{{shootIngressDomainText}}</span>
+            <span class="subtitle-1">{{shootIngressDomainText}}</span>
           </v-col>
         </v-card-title>
       </template>

@@ -55,7 +55,7 @@ limitations under the License.
         <v-divider class="my-2" inset></v-divider>
         <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
-          <span class="subtitle-1 ">{{metricsNotAvailableText}}</span>
+          <span class="subtitle-1">{{metricsNotAvailableText}}</span>
         </v-card-title>
         <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
       </template>

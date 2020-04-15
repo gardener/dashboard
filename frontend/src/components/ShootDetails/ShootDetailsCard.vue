@@ -24,7 +24,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">info_outline</v-icon>
         <v-col class="pa-0">
           <span class="grey--text">Name</span><br>
-          <span class="subtitle-1 ">{{shootName}}</span>
+          <span class="subtitle-1">{{shootName}}</span>
         </v-col>
         <v-col class="pa-0 shrink">
           <v-row >
@@ -42,7 +42,7 @@ limitations under the License.
             <v-row align="center" class="pa-0 ma-0 fill-height">
               <v-icon v-if="!isSelfTerminationWarning" color="cyan darken-2" small>mdi-information</v-icon>
               <v-icon v-else color="warning" small>mdi-alert-circle</v-icon>
-              <span class="pl-2 subtitle-1 ">{{selfTerminationMessage}}</span>
+              <span class="pl-2 subtitle-1">{{selfTerminationMessage}}</span>
             </v-row>
           </v-col>
         </v-card-title>
@@ -53,7 +53,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-cube-outline</v-icon>
         <v-col class="pa-0">
           <span class="grey--text">Kubernetes Version</span><br>
-          <span class="subtitle-1 ">{{shootK8sVersion}}</span>
+          <span class="subtitle-1">{{shootK8sVersion}}</span>
         </v-col>
         <v-col class="pa-0 shrink">
           <v-row >
@@ -93,7 +93,7 @@ limitations under the License.
             <v-tooltip top>
               <template slot="activator">
                 <span class="grey--text">Created at</span><br>
-                <span class="subtitle-1 ">{{shootCreatedAt}}</span>
+                <span class="subtitle-1">{{shootCreatedAt}}</span>
               </template>
               <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>
@@ -107,7 +107,7 @@ limitations under the License.
           <v-icon class="cyan--text text--darken-2 avatar">label_outline</v-icon>
           <v-col class="pa-0">
             <span class="grey--text">Purpose</span><br>
-            <span class="subtitle-1 ">{{shootPurpose}}</span>
+            <span class="subtitle-1">{{shootPurpose}}</span>
           </v-col>
           <v-col class="pa-0 shrink">
             <v-row >
@@ -134,7 +134,7 @@ limitations under the License.
         <v-icon class="cyan--text text--darken-2 avatar">mdi-puzzle</v-icon>
         <v-col class="pa-0">
           <span class="grey--text">Add-ons (not actively monitored and provided on a best-effort basis only)</span><br>
-          <span class="subtitle-1 " v-if="!this.shootAddonNames.length">No addons configured</span>
+          <span class="subtitle-1" v-if="!this.shootAddonNames.length">No addons configured</span>
           <v-chip v-for="(name, index) in this.shootAddonNames" :key="index" small class="my-0 ml-0" outlined color="cyan darken-2">{{name}}</v-chip>
         </v-col>
         <v-col class="pa-0 shrink">

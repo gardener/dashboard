@@ -23,7 +23,7 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-sleep</v-icon>
         <v-col class="pa-0 grow">
-          <span class="subtitle-1 ">Hibernation</span><br>
+          <span class="subtitle-1">Hibernation</span><br>
           <v-row align="center" class="ma-0 fill-height">
             <v-icon v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
             <v-progress-circular v-if="isShootStatusHibernationProgressing" indeterminate size=12 width=2 color="grey" class="mr-1"></v-progress-circular>
@@ -42,7 +42,7 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-wrench-outline</v-icon>
         <v-col class="pa-0 grow">
-          <span class="subtitle-1 ">Maintenance</span><br>
+          <span class="subtitle-1">Maintenance</span><br>
           <span class="grey--text">{{maintenanceDescription}}</span>
         </v-col>
         <v-col class="pa-0 shrink">
@@ -57,7 +57,7 @@ limitations under the License.
       <v-card-title class="listItem pr-1">
         <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
         <v-col class="pa-0 grow">
-          <span class="subtitle-1 ">Reconcile</span><br>
+          <span class="subtitle-1">Reconcile</span><br>
           <span class="grey--text">{{reconcileDescription}}</span>
         </v-col>
         <v-col class="pa-0 shrink">
@@ -79,7 +79,7 @@ limitations under the License.
             </v-badge>
           </div>
           <v-col class="pa-0 grow">
-            <span class="subtitle-1 ">Rotate Kubeconfig</span>
+            <span class="subtitle-1">Rotate Kubeconfig</span>
           </v-col>
           <v-col class="pa-0 shrink">
             <v-row >
@@ -94,7 +94,7 @@ limitations under the License.
         <v-card-title class="listItem pr-1">
           <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
           <v-col class="pa-0 grow">
-            <span class="subtitle-1 ">Delete Cluster</span><br>
+            <span class="subtitle-1">Delete Cluster</span><br>
           </v-col>
           <v-col class="pa-0 shrink">
             <v-row >
