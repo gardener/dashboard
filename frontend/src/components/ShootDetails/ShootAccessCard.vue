@@ -96,40 +96,39 @@ limitations under the License.
 
     <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" class="my-2" inset></v-divider>
 
-    <v-expansion-panel v-if="isKubeconfigTileVisible" :value="expandKubeconfigIndex" readonly>
-      <v-expansion-panel-content hide-actions>
-        <v-list-item slot="header">
-          <v-list-item-action>
-            <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Kubeconfig</v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-tooltip top>
-              <v-btn slot="activator" icon @click.native.stop="onDownload">
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
-              <span>Download Kubeconfig</span>
-            </v-tooltip>
-          </v-list-item-action>
-          <v-list-item-action>
-            <copy-btn :clipboard-text="kubeconfig"></copy-btn>
-          </v-list-item-action>
-          <v-list-item-action>
-            <v-tooltip top>
-              <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
-                <v-icon>{{visibilityIconKubeconfig}}</v-icon>
-              </v-btn>
-              <span>{{kubeconfigVisibilityTitle}}</span>
-            </v-tooltip>
-          </v-list-item-action>
-        </v-list-item>
-        <v-card>
-          <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
-        </v-card>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
+    <v-list-item>
+      <v-list-item-action>
+        <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Kubeconfig</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
+        <v-tooltip top>
+          <v-btn slot="activator" icon @click.native.stop="onDownload">
+            <v-icon>mdi-download</v-icon>
+          </v-btn>
+          <span>Download Kubeconfig</span>
+        </v-tooltip>
+      </v-list-item-action>
+      <v-list-item-action>
+        <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+      </v-list-item-action>
+      <v-list-item-action>
+        <v-tooltip top>
+          <v-btn slot="activator" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig">
+            <v-icon>{{visibilityIconKubeconfig}}</v-icon>
+          </v-btn>
+          <span>{{kubeconfigVisibilityTitle}}</span>
+        </v-tooltip>
+      </v-list-item-action>
+    </v-list-item>
+    <v-expand-transition>
+      <v-card v-if="expansionPanelKubeconfig">
+        <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
+      </v-card>
+    </v-expand-transition>
+
   </v-list>
 </template>
 
@@ -160,7 +159,7 @@ export default {
   },
   data () {
     return {
-      expandKubeconfigIndex: null,
+      expansionPanelKubeconfig: false,
       showToken: false
     }
   },
@@ -211,21 +210,18 @@ export default {
       return get(this.shootInfo, 'kubeconfig')
     },
     visibilityIconKubeconfig () {
-      if (this.isKubeconfigVisible) {
+      if (this.expansionPanelKubeconfig) {
         return 'visibility_off'
       } else {
         return 'visibility'
       }
     },
     kubeconfigVisibilityTitle () {
-      if (this.isKubeconfigVisible) {
+      if (this.expansionPanelKubeconfig) {
         return 'Hide Kubeconfig'
       } else {
         return 'Show Kubeconfig'
       }
-    },
-    isKubeconfigVisible () {
-      return this.expandKubeconfigIndex === 0
     },
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
@@ -283,12 +279,6 @@ export default {
     reset () {
       this.hideKubekonfig()
     },
-    hideKubekonfig () {
-      this.expandKubeconfigIndex = null
-    },
-    showKubeconfig () {
-      this.expandKubeconfigIndex = 0
-    },
     onDownload () {
       const kubeconfig = this.kubeconfig
       if (kubeconfig) {
@@ -305,14 +295,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .v-expansion-panel {
-    box-shadow: none;
-  }
-
-  >>> .v-expansion-panel__header {
-    cursor: auto;
-    padding: 0;
-  }
 
   .scroll {
     overflow-x: scroll;
