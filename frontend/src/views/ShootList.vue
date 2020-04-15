@@ -124,8 +124,8 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :pagination.sync="pagination" must-sort :loading="shootsLoading" :rows-per-page-items="[5,10,20]">
-        <template slot="items" slot-scope="props">
+      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :options.sync="options" must-sort :loading="shootsLoading" :rows-per-page-items="[5,10,20]">
+        <template slot="item" slot-scope="props">
           <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
         </template>
       </v-data-table>
@@ -189,15 +189,15 @@ export default {
       ],
       dialog: null,
       tableMenu: false,
-      pagination: this.$localStorage.getObject('dataTable_pagination') || { rowsPerPage: 10 },
+      options: this.$localStorage.getObject('dataTable_options') || { itemsPerPage: 10 },
       cachedItems: null,
       clearSelectedShootTimerID: undefined
     }
   },
   watch: {
-    pagination (value) {
+    options (value) {
       if (value) {
-        this.$localStorage.setObject('dataTable_pagination', pick(value, ['sortBy', 'descending', 'rowsPerPage']))
+        this.$localStorage.setObject('dataTable_options', pick(value, ['sortBy', 'descending', 'itemsPerPage']))
         this.setShootListSortParams(value)
       }
     },
@@ -262,7 +262,7 @@ export default {
       }
       this.saveColumnsChecked()
 
-      this.pagination = { rowsPerPage: 10 }
+      this.options = { itemsPerPage: 10 }
     },
     loadColumnsChecked () {
       const checkedColumns = this.$localStorage.getObject('dataTable_checkedColumns') || {}
