@@ -17,8 +17,8 @@ limitations under the License.
 <template>
   <v-container fluid class="shootlist">
     <v-card class="mr-extra">
-      <v-toolbar card height="70" color="cyan darken-2">
-        <img src="../assets/certified_kubernetes_white.svg" height="60" class="pl-1">
+      <v-toolbar flat height="72" color="cyan darken-2">
+        <img src="../assets/certified_kubernetes_white.svg" height="60" class="ml-1 mr-3">
         <v-toolbar-title class="white--text">
           <div class="headline">Kubernetes Clusters</div>
           <div class="subtitle-1 ">{{headlineSubtitle}}</div>
@@ -29,20 +29,24 @@ limitations under the License.
           color="cyan darken-2"
           label="Search"
           clearable
+          hide-details
+          flat
           solo
           v-model="search"
           @keyup.esc="search=''"
           class="search_textfield"
         ></v-text-field>
         <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute full-width>
-          <div slot="activator">
+          <template v-slot:activator="{ on: menu }">
             <v-tooltip open-delay="500" top>
-              <v-btn slot="activator" icon>
-                <v-icon class="cursor-pointer" color="white">more_vert</v-icon>
-              </v-btn>
+              <template v-slot:activator="{ on: tooltip }">
+                <v-btn v-on="{ ...menu, ...tooltip}" icon>
+                  <v-icon class="cursor-pointer" color="white">more_vert</v-icon>
+                </v-btn>
+              </template>
               Table Options
             </v-tooltip>
-          </div>
+          </template>
           <v-list subheader dense>
             <v-subheader>Column Selection</v-subheader>
             <v-list-item v-for="item in headers" :key="item.text" @click.stop="setColumnChecked(item)">
@@ -56,9 +60,11 @@ limitations under the License.
             <v-list-item>
               <v-list-item-content>
                 <v-tooltip top style="width: 100%">
-                  <v-btn slot="activator" block text class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
-                    Reset
-                  </v-btn>
+                  <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" block text class="text-center cyan--text text--darken-2" @click.stop="resetColumnsChecked">
+                      Reset
+                    </v-btn>
+                  </template>
                   <span>Reset to Defaults</span>
                 </v-tooltip>
               </v-list-item-content>
@@ -124,9 +130,22 @@ limitations under the License.
           </v-list>
         </v-menu>
       </v-toolbar>
-      <v-data-table class="shootListTable" :headers="visibleHeaders" :items="items" :options.sync="options" must-sort :loading="shootsLoading" :rows-per-page-items="[5,10,20]">
-        <template slot="item" slot-scope="props">
-          <shoot-list-row :shootItem="props.item" :visibleHeaders="visibleHeaders" @showDialog="showDialog" :key="props.item.metadata.uid"></shoot-list-row>
+      <v-data-table
+        class="shootListTable"
+        :headers="visibleHeaders"
+        :items="items"
+        :options.sync="options"
+        must-sort
+        :loading="shootsLoading"
+        :rows-per-page-items="[5,10,20]"
+      >
+        <template v-slot:item="{ item }">
+          <shoot-list-row
+            :shootItem="item"
+            :visibleHeaders="visibleHeaders"
+            @showDialog="showDialog"
+            :key="item.metadata.uid"
+          ></shoot-list-row>
         </template>
       </v-data-table>
 
@@ -429,7 +448,7 @@ export default {
     color: rgb(0, 137, 123);
   }
 
-  .shootListTable >>> table.table {
+  .shootListTable table.table {
     thead, tbody {
       th, td {
         padding: 10px;
@@ -437,7 +456,7 @@ export default {
     }
   }
 
-  .shootListTable >>> table {
+  .shootListTable table {
     tbody, thead {
       td:first-child, th:first-child {
         padding-left: 24px;
@@ -456,7 +475,7 @@ export default {
     min-width: 125px;
   }
 
-  >>> .v-input__slot {
+  .v-input__slot {
     margin: 0px;
   }
 
