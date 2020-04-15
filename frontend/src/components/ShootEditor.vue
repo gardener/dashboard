@@ -33,7 +33,6 @@ limitations under the License.
     <div ref="container" :style="containerStyles"></div>
     <div v-if="errorMessageInternal" class="flex-shrink-1">
       <g-alert
-        tile
         color="error"
         class="ma-0"
         :message.sync="errorMessageInternal"

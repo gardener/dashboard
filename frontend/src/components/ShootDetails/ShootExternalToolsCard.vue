@@ -16,37 +16,41 @@ limitations under the License.
 
 <template>
   <v-card v-if="items.length">
-    <v-card-title class="subtitle-1 white--text cyan darken-2 statusTitle">
-      External Tools
-    </v-card-title>
-    <div class="list">
-      <v-list>
-        <template v-for="({ title, url, icon = 'link' }, index) in items">
-        <v-divider v-if="index" :key="index" class="my-2" inset></v-divider>
+    <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar-title class="subtitle-1">External Tools</v-toolbar-title>
+    </v-toolbar>
+    <v-list>
+      <template v-for="({ title, url, icon = 'link' }, index) in items">
+        <v-divider v-if="index" :key="index" inset class="my-2"></v-divider>
         <v-list-item :key="title">
-          <v-list-item-action>
-            <v-icon class="cyan--text text--darken-2">{{icon}}</v-icon>
-          </v-list-item-action>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">{{icon}}</v-icon>
+          </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
             <v-list-item-title>
-              <a :href="expandUrl(url)" target="_blank" class="cyan--text text--darken-2">{{expandUrl(url)}}</a>
+              <external-link :url="expandUrl(url)" color="cyan darken-2" size="16">
+                {{expandUrl(url)}}
+              </external-link>
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        </template>
-      </v-list>
-    </div>
+      </template>
+    </v-list>
   </v-card>
 </template>
 
 <script>
 import get from 'lodash/get'
 import template from 'url-template'
+import ExternalLink from '@/components/ExternalLink'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState } from 'vuex'
 
 export default {
+  components: {
+    ExternalLink
+  },
   mixins: [shootItem],
   props: {
     shootItem: {
@@ -73,14 +77,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .statusTitle {
-    line-height: 10px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-</style>

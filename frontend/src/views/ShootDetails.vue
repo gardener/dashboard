@@ -14,53 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-
   <v-container fluid>
     <v-row class="d-flex">
-      <v-col md="6">
+      <v-col cols="12" md="6">
         <shoot-details-card :shootItem="shootItem"></shoot-details-card>
-
         <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
-
         <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
-
         <gardenctl-card :shootItem="shootItem" class="mt-4"></gardenctl-card>
-
         <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
       </v-col>
-
-      <v-col md="6">
+      <v-col cols="12" md="6">
         <v-card v-if="canGetSecrets" class="mb-4">
           <v-card-title class="subtitle-1 white--text cyan darken-2">
             Access
           </v-card-title>
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
-
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-
         <v-card v-show="isLoggingFeatureGateEnabled">
           <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
             Logging
           </v-card-title>
           <shoot-logging :shootItem="shootItem"></shoot-logging>
         </v-card>
-
         <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
           <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
             {{kymaTitle}}
           </v-card-title>
           <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
         </v-card>
-
         <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="shootItem" class="mt-4"></shoot-journals-card>
-
       </v-col>
-
     </v-row>
-
   </v-container>
-
 </template>
 
 <script>
