@@ -56,6 +56,8 @@ limitations under the License.
           prepend-inner-icon="search"
           color="green darken-2"
           label="Search"
+          hide-details
+          flat
           solo
           clearable
           v-model="userFilter"
@@ -109,8 +111,10 @@ limitations under the License.
         <v-text-field v-if="serviceAccountList.length > 3"
           class="searchField"
           prepend-inner-icon="search"
-          color="green darken-2"
+          color="blue-grey"
           label="Search"
+          hide-details
+          flat
           solo
           clearable
           v-model="serviceAccountFilter"
