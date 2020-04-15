@@ -30,9 +30,9 @@ limitations under the License.
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
           slot="action"
-          outline
+          outlined
           icon
-          class="grey--text lighten-2"
+          color="grey"
           @click.native.stop="onRemoveWorker(index)">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -44,10 +44,11 @@ limitations under the License.
           :disabled="!(allMachineTypes.length > 0)"
           small
           @click="addWorker"
-          outline
+          outlined
           fab
           icon
-          class="cyan darken-2 ml-1">
+          class="ml-1"
+          color="cyan darken-2">
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn

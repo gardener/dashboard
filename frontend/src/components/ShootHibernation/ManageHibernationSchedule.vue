@@ -34,16 +34,16 @@ limitations under the License.
           <v-btn
             small
             @click="addSchedule"
-            outline
+            outlined
             fab
             icon
-            class="cyan darken-2">
+            color="cyan darken-2">
             <v-icon class="cyan--text text--darken-2">add</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
             text
-            class="cyan--text text--darken-2">
+            color="cyan darken-2">
             Add Hibernation Schedule
           </v-btn>
         </v-col>

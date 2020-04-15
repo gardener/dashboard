@@ -73,9 +73,9 @@ limitations under the License.
       <v-col class="ml-4">
         <v-btn
           small
-          outline
+          outlined
           icon
-          class="grey--text lighten-2"
+          color="grey"
           @click.native.stop="removeScheduleEvent">
           <v-icon>mdi-close</v-icon>
         </v-btn>

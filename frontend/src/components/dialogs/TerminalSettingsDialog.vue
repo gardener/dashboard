@@ -99,7 +99,7 @@ limitations under the License.
           :value="true"
           type="info"
           color="cyan darken-2"
-          outline
+          outlined
         >
           <strong>Terminal will be running in an untrusted environment!</strong><br>
           Do not enter credentials or sensitive data within the terminal session that cluster owners should not have access to, as the terminal will be running on one of the worker nodes.
