@@ -81,9 +81,11 @@ limitations under the License.
         </v-list-item-action>
         <v-list-item-action>
           <v-tooltip top>
-            <v-btn slot="activator" icon @click.native.stop="showToken = !showToken">
-              <v-icon>{{visibilityIcon}}</v-icon>
-            </v-btn>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="showToken = !showToken">
+                <v-icon>{{visibilityIcon}}</v-icon>
+              </v-btn>
+            </template>
             <span>{{tokenVisibilityTitle}}</span>
           </v-tooltip>
         </v-list-item-action>
@@ -105,9 +107,11 @@ limitations under the License.
       </v-list-item-content>
       <v-list-item-action>
         <v-tooltip top>
-          <v-btn slot="activator" icon @click.native.stop="onDownload">
-            <v-icon>mdi-download</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onDownload">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
@@ -116,9 +120,11 @@ limitations under the License.
       </v-list-item-action>
       <v-list-item-action>
         <v-tooltip top>
-          <v-btn slot="activator" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig">
-            <v-icon>{{visibilityIconKubeconfig}}</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig">
+              <v-icon>{{visibilityIconKubeconfig}}</v-icon>
+            </v-btn>
+          </template>
           <span>{{kubeconfigVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>

@@ -91,9 +91,9 @@ limitations under the License.
             <span class="grey--text">Created by</span><br>
             <account-avatar :account-name="shootCreatedBy" :mail-to="true" class="pb-4"></account-avatar>
             <v-tooltip top>
-              <template slot="activator">
-                <span class="grey--text">Created at</span><br>
-                <span class="subtitle-1">{{shootCreatedAt}}</span>
+              <template v-slot:activator="{ on }">
+                <span v-on="on" class="grey--text">Created at</span><br>
+                <span v-on="on" class="subtitle-1">{{shootCreatedAt}}</span>
               </template>
               <time-string :dateTime="shootMetadata.creationTimestamp" :pointInTime="-1"></time-string>
             </v-tooltip>

@@ -25,9 +25,11 @@ limitations under the License.
     </v-list-item-content>
     <v-list-item-action>
       <v-tooltip top>
-        <v-btn slot="activator" icon :to=to :disabled="disabled">
-          <v-icon>mdi-console-line</v-icon>
-        </v-btn>
+        <template v-slot:activator="{ on }">
+          <v-btn v-on="on" icon :to=to :disabled="disabled">
+            <v-icon>mdi-console-line</v-icon>
+          </v-btn>
+        </template>
         <span>{{buttonDescription || description}}</span>
       </v-tooltip>
     </v-list-item-action>

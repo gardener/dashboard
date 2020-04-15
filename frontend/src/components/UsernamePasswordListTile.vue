@@ -52,9 +52,11 @@ limitations under the License.
       </v-list-item-action>
       <v-list-item-action>
         <v-tooltip top>
-          <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
-            <v-icon>{{visibilityIcon}}</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword">
+              <v-icon>{{visibilityIcon}}</v-icon>
+            </v-btn>
+          </template>
           <span>{{passwordVisibilityTitle}}</span>
         </v-tooltip>
       </v-list-item-action>

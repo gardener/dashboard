@@ -41,10 +41,12 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
-        <v-row class="fill-height" align="center" justify="start" slot="activator">
-          <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
-          <div>{{ shootRegion }}</div>
-        </v-row>
+        <template v-slot:activator="{ on }">
+          <v-row v-on="on" class="fill-height" align="center" justify="start">
+            <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
+            <div>{{ shootRegion }}</div>
+          </v-row>
+        </template>
         <span>{{ shootCloudProviderKind }} [{{ shootRegion }}]</span>
       </v-tooltip>
     </td>
@@ -62,9 +64,11 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
-        <div slot="activator">
-          <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
-        </div>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
+          </div>
+        </template>
         {{ shootCreatedAt }}
       </v-tooltip>
     </td>
@@ -93,11 +97,13 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>
-        <div slot="activator">
-          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-            <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
-          </router-link>
-        </div>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+              <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
+            </router-link>
+          </div>
+        </template>
         {{ shootLastUpdatedJournal }}
       </v-tooltip>
     </td>
