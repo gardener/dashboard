@@ -77,9 +77,9 @@ limitations under the License.
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-app-bar flat dark dense class="teal darken-2">
+          <v-toolbar flat dark dense class="teal darken-2">
             <v-toolbar-title>Access</v-toolbar-title>
-          </v-app-bar>
+          </v-toolbar>
           <v-list>
             <v-list-item>
               <v-list-item-avatar>
@@ -103,22 +103,26 @@ limitations under the License.
                   <v-list-item-title>Kubeconfig</v-list-item-title>
                   <v-list-item-subtitle>Personalized command line interface access</v-list-item-subtitle>
                 </v-list-item-content>
-                <v-list-item-action>
+                <v-list-item-action class="mx-0">
                   <v-tooltip top>
-                    <v-btn slot="activator" icon @click.native.stop="onDownload">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" icon @click.native.stop="onDownload">
+                        <v-icon>mdi-download</v-icon>
+                      </v-btn>
+                    </template>
                     <span>Download kubeconfig</span>
                   </v-tooltip>
                 </v-list-item-action>
-                <v-list-item-action>
+                <v-list-item-action class="mx-0">
                   <copy-btn :clipboard-text="kubeconfig" tooltipText="Copy kubeconfig to clipboard"></copy-btn>
                 </v-list-item-action>
-                <v-list-item-action>
+                <v-list-item-action class="mx-0">
                   <v-tooltip top>
-                    <v-btn slot="activator" icon @click.native.stop="expansionPanel = !expansionPanel">
-                      <v-icon>{{expansionPanelIcon}}</v-icon>
-                    </v-btn>
+                    <template v-slot:activator="{ on }">
+                      <v-btn v-on="on" icon @click.native.stop="expansionPanel = !expansionPanel">
+                        <v-icon>{{expansionPanelIcon}}</v-icon>
+                      </v-btn>
+                    </template>
                     <span>{{expansionPanelTooltip}}</span>
                   </v-tooltip>
                 </v-list-item-action>

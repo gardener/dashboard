@@ -69,6 +69,8 @@ limitations under the License.
                 <v-text-field
                   clearable
                   label="Filter projects"
+                  solo
+                  flat
                   single-line
                   hide-details
                   full-width
