@@ -137,7 +137,7 @@ limitations under the License.
         :options.sync="options"
         must-sort
         :loading="shootsLoading"
-        :rows-per-page-items="[5,10,20]"
+        :footer-props="{ 'items-per-page-options': [5,10,20] }"
       >
         <template v-slot:item="{ item }">
           <shoot-list-row
