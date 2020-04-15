@@ -543,15 +543,33 @@ export function addKymaAddon (options) {
   shootAddonList.push(kymaAddon)
 }
 
-export function compileMarkdown (text) {
+export function textColorFromColor (color) {
+  const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
+  return map(split(color, ' '), iteratee)
+}
+
+export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
   if (!text) {
     return undefined
   }
-  return DOMPurify.sanitize(marked(text, {
+  let html = DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,
     tables: true
   }))
+
+  const linkRegex = /<a (.*?)>(.*?)<\/a>/g
+
+  if (linkColor) {
+    const textColor = join(textColorFromColor(linkColor), ' ')
+    html = html.replace(linkRegex, `<a class="${textColor}" $1>$2</a>`)
+  }
+
+  if (transformToExternalLinks) {
+    html = html.replace(linkRegex, '<a style="text-decoration: none" target="_blank" $1><span style="text-decoration: underline">$2</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i></a>')
+  }
+
+  return html
 }
 
 export function shootAddonByName (name) {

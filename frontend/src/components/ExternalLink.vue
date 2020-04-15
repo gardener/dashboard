@@ -21,8 +21,7 @@ limitations under the License.
 </template>
 
 <script>
-import split from 'lodash/split'
-import map from 'lodash/map'
+import { textColorFromColor } from '@/utils'
 
 export default {
   name: 'external-link',
@@ -44,8 +43,7 @@ export default {
   },
   computed: {
     textColor () {
-      const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
-      return map(split(this.color, ' '), iteratee)
+      return textColorFromColor(this.color)
     }
   }
 }
