@@ -15,67 +15,102 @@ limitations under the License.
  -->
 
 <template>
-  <v-row class="fill-height flex-column position-relative">
-    <v-col v-if="!clean && !!modificationWarning" class="shrink">
-      <v-alert :value="modificationWarning" @input="onDismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
+  <div class="d-flex flex-column fill-height position-relative">
+    <div v-if="!clean && !!modificationWarning" class="flex-shrink-1">
+      <v-alert
+        tile
+        type="warning"
+        dismissible
+        color="cyan darken-2"
+        transition="slide-y-transition"
+        class="ma-0"
+        :value="modificationWarning"
+        @input="onDismissModificationWarning"
+      >
         <slot name="modificationWarning"></slot>
       </v-alert>
-    </v-col>
-    <v-col ref="container" :style="containerStyles"></v-col>
-    <v-col v-if="errorMessageInternal" class="shrink">
-      <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
-    </v-col>
+    </div>
+    <div ref="container" :style="containerStyles"></div>
+    <div v-if="errorMessageInternal" class="flex-shrink-1">
+      <g-alert
+        tile
+        color="error"
+        class="ma-0"
+        :message.sync="errorMessageInternal"
+        :detailedMessage.sync="detailedErrorMessageInternal"
+      ></g-alert>
+    </div>
     <v-divider></v-divider>
-    <v-col v-if="!isReadOnly" :style="toolbarStyles">
-      <v-row class="fill-height" align="center" justify="space-between" >
-        <v-col class="d-flex" >
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="untouched" @click="reload">
-              <v-icon small>mdi-reload</v-icon>
-            </v-btn>
-            <span>Discard and Reload</span>
-          </v-tooltip>
-        </v-col>
-        <v-divider vertical></v-divider>
-        <v-col class="d-flex" >
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="!historySize.undo" @click="undo">
-              <v-icon small>mdi-undo</v-icon>
-            </v-btn>
-            <span>Undo</span>
-          </v-tooltip>
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="!historySize.redo" @click="redo">
-              <v-icon small>mdi-redo</v-icon>
-            </v-btn>
-            <span>Redo</span>
-          </v-tooltip>
-        </v-col>
-        <v-divider vertical></v-divider>
-        <v-col class="d-flex" >
-          <v-tooltip top>
-            <v-btn icon slot="activator" @click="downloadContent">
-              <v-icon small>mdi-download</v-icon>
-            </v-btn>
-            <span>Download</span>
-          </v-tooltip>
-        </v-col >
-        <v-col class="d-flex" >
-          <copy-btn
-            :clipboard-text="getContent()"
-            @click.native.stop="focus"
-            tooltip-text='Copy'
-            :user-feedback="false"
-            @copy="onCopy"
-            @copyFailed="onCopyFailed"
-          >
-          </copy-btn>
-        </v-col>
-        <v-divider vertical></v-divider>
-        <v-col class="d-flex" cols="12"></v-col>
-        <slot name="toolbarItemsRight"></slot>
-      </v-row>
-    </v-col>
+    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
+        <div class="d-flex align-center justify-start fill-height">
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="untouched" @click="reload">
+                    <v-icon small>mdi-reload</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Discard and Reload</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="!historySize.undo" @click="undo">
+                    <v-icon small>mdi-undo</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Undo</span>
+            </v-tooltip>
+          </div>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="!historySize.redo" @click="redo">
+                    <v-icon small>mdi-redo</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Redo</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon @click="downloadContent">
+                    <v-icon small>mdi-download</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Download</span>
+            </v-tooltip>
+          </div>
+          <div class="px-2">
+            <copy-btn
+              :clipboard-text="getContent()"
+              @click.native.stop="focus"
+              tooltip-text='Copy'
+              :user-feedback="false"
+              @copy="onCopy"
+              @copyFailed="onCopyFailed"
+            >
+            </copy-btn>
+          </div>
+          <v-divider vertical></v-divider>
+        </div>
+        <div class="d-flex fill-height align-center justify-end">
+          <v-divider vertical></v-divider>
+          <slot name="toolbarItemsRight"></slot>
+        </div>
+    </div>
     <v-tooltip
       right
       absolute
@@ -90,7 +125,7 @@ limitations under the License.
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-  </v-row>
+  </div>
 </template>
 
 <script>
@@ -196,6 +231,7 @@ export default {
     },
     containerStyles () {
       return {
+        flex: '1 1 auto',
         height: `${this.lineHeight * 15}px`,
         minHeight: `${this.lineHeight * 3}px`
       }
@@ -463,8 +499,8 @@ export default {
   .position-relative {
     position: relative !important;
   }
-  >>> .cm-tab {
-     background: embedurl('../assets/tab.png');
+  ::v-deep .cm-tab {
+     background: url('../assets/tab.png');
      background-position: right;
      background-repeat: no-repeat;
   }

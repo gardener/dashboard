@@ -14,28 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 
- <template>
-   <v-row class="fill-height" >
-     <shoot-editor
-       :modificationWarning="modificationWarning"
-       @dismissModificationWarning="onDismissModificationWarning"
-       :errorMessage.sync="errorMessage"
-       :detailedErrorMessage.sync="detailedErrorMessage"
-       :shootContent="shootContent"
-       :extraKeys="extraKeys"
-       @clean="onClean"
-       @conflictPath="onConflictPath"
-       ref="shootEditor">
-       <template slot="modificationWarning">
-         By modifying the resource directly you may cause serious problems in your cluster.
-         We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
-       </template>
-       <template slot="toolbarItemsRight">
-        <v-btn text @click.native.stop="save()" :disabled="clean" class="cyan--text text--darken-2">Save</v-btn>
-       </template>
+<template>
+  <div class="fill-height">
+    <shoot-editor
+      :modificationWarning="modificationWarning"
+      @dismissModificationWarning="onDismissModificationWarning"
+      :errorMessage.sync="errorMessage"
+      :detailedErrorMessage.sync="detailedErrorMessage"
+      :shootContent="shootContent"
+      :extraKeys="extraKeys"
+      @clean="onClean"
+      @conflictPath="onConflictPath"
+      ref="shootEditor"
+    >
+      <template v-slot:modificationWarning>
+        By modifying the resource directly you may cause serious problems in your cluster.
+        We cannot guarantee that you can solve problems that result from using Cluster Editor incorrectly.
+      </template>
+      <template v-slot:toolbarItemsRight>
+        <v-btn text @click.native.stop="save()" :disabled="clean" color="cyan darken-2">Save</v-btn>
+      </template>
     </shoot-editor>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-row>
+  </div>
 </template>
 
 <script>

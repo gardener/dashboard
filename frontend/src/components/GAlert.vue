@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-alert :color="color" dismissible v-model="alertVisible">
+  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
     <div class="subtitle-1">
       {{message}}
       <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
@@ -43,6 +43,13 @@ export default {
     color: {
       type: String,
       required: true
+    },
+    tile: {
+      type: Boolean
+    },
+    dark: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
