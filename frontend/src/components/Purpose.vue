@@ -19,6 +19,7 @@ limitations under the License.
     <v-select
       hint="Indicate the importance of the cluster"
       color="cyan darken-2"
+      item-color="cyan darken-2"
       label="Purpose"
       :items="purposes"
       item-text="purpose"

@@ -2,6 +2,7 @@
   <hint-colorizer hintColor="orange">
     <v-select
       color="cyan darken-2"
+      item-color="cyan darken-2"
       :items="machineTypeItems"
       item-text="name"
       item-value="name"

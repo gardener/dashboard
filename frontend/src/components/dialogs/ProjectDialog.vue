@@ -51,6 +51,7 @@ limitations under the License.
                <v-col cols="6">
                  <v-select
                    color="deep-purple"
+                   item-color="deep-purple"
                    :items="memberItems"
                    label="Technical Contact"
                    v-model="technicalContact"

@@ -2,6 +2,7 @@
   <hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
+      item-color="cyan darken-2"
       :items="machineImages"
       return-object
       :error-messages="getErrorMessages('worker.machine.image')"

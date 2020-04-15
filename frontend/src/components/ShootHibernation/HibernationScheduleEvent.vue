@@ -21,6 +21,7 @@ limitations under the License.
         <v-col class="weekday-select">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           v-model="selectedDays"
           ref="selectedDays"
           @blur="touchIfNothingFocused"

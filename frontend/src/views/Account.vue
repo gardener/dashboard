@@ -149,6 +149,7 @@ limitations under the License.
                           <v-col cols="12">
                             <v-select
                               color="teal darken-1"
+                              item-color="teal darken-1"
                               v-model="projectName"
                               :items="projectNames"
                               label="Project"
@@ -159,6 +160,7 @@ limitations under the License.
                           <v-col cols="12">
                             <v-select
                               color="teal darken-1"
+                              item-color="teal darken-1"
                               v-model="grantType"
                               :items="grantTypes"
                               label="Grant Type"

@@ -69,6 +69,7 @@ limitations under the License.
           :disabled="!selectedRunOnShootWorker"
           no-data-text="No workers available"
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Node"
           placeholder="Change worker node..."
           :items="shootNodes"

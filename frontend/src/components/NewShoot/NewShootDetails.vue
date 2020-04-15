@@ -33,6 +33,7 @@ limitations under the License.
         <hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Kubernetes Version"
             item-text="version"
             item-value="version"

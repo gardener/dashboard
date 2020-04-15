@@ -17,6 +17,8 @@ limitations under the License.
 <template>
   <v-select
     :items="items"
+    color="cyan darken-2"
+    item-color="cyan darken-2"
     item-value="version"
     v-model="selectedItem"
     :label="label"

@@ -32,6 +32,7 @@ limitations under the License.
         <v-select
           ref="secret"
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Secret"
           :items="secretItems"
           v-model="secret"
@@ -47,12 +48,12 @@ limitations under the License.
               <span class="pl-2">{{get(data.item, 'title')}}</span>
             </template>
             <template v-else>
-              {{get(data.item, 'metadata.name')}}
+              <span>{{get(data.item, 'metadata.name')}}</span>
               <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
             </template>
           </template>
           <template slot="selection" slot-scope="data">
-            <span class="black--text">
+            <span>
               {{get(data.item, 'metadata.name')}}
             </span>
             <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
@@ -62,6 +63,7 @@ limitations under the License.
       <v-col class="regularInput">
         <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Region"
           :items="regionItems"
           :hint="regionHint"
@@ -76,6 +78,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Floating Pools"
           :items="allFloatingPoolNames"
           v-model="floatingPoolName"
@@ -87,6 +90,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Load Balancer Providers"
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
@@ -101,6 +105,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-text-field
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Project ID"
             v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
@@ -113,6 +118,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Partition ID"
             :items="partitionIDs"
             v-model="partitionID"
@@ -126,6 +132,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Image"
             :items="firewallImages"
             v-model="firewallImage"
@@ -137,6 +144,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Size"
             :items="firewallSizes"
             v-model="firewallSize"
@@ -148,6 +156,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Networks"
             :items="allFirewallNetworks"
             v-model="firewallNetworks"
@@ -165,6 +174,7 @@ limitations under the License.
         <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
             v-model="loadBalancerClassNames"

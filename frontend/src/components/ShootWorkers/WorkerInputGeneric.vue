@@ -101,6 +101,7 @@ limitations under the License.
         <v-col class="regularInput" v-if="zonedCluster">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Zone"
             :items="availableZones"
             :error-messages="getErrorMessages('worker.zones')"
