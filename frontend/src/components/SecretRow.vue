@@ -20,7 +20,9 @@ limitations under the License.
       <v-list-item-title>
         {{secret.metadata.name}}
         <v-tooltip v-if="!isOwnSecretBinding" top>
-          <v-icon slot="activator">mdi-share</v-icon>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on">mdi-share</v-icon>
+          </template>
           <span>Secret shared by {{secretOwner}}</span>
         </v-tooltip>
         <span style="opacity:0.5">({{relatedShootCountLabel}})</span>

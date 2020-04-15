@@ -36,7 +36,7 @@ limitations under the License.
           @keyup.esc="search=''"
           class="search_textfield"
         ></v-text-field>
-        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute full-width>
+        <v-menu :nudge-bottom="20" :nudge-right="20" left v-model="tableMenu" absolute>
           <template v-slot:activator="{ on: menu }">
             <v-tooltip open-delay="500" top>
               <template v-slot:activator="{ on: tooltip }">

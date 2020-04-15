@@ -23,7 +23,9 @@ limitations under the License.
       <v-list-item-subtitle>{{appTitle}}</v-list-item-subtitle>
       <v-list-item-title>
         <v-tooltip v-if="isShootStatusHibernated" top>
-          <span slot="activator">{{urlText}}</span>
+          <template v-slot:activator="{ on }">
+            <span v-on="on">{{urlText}}</span>
+          </template>
           {{appTitle}} is not running for hibernated clusters
         </v-tooltip>
         <a v-else :href="url" target="_blank" class="cyan--text text--darken-2">{{urlText}}</a>

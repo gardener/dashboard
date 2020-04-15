@@ -62,7 +62,9 @@ limitations under the License.
         <v-list-item-content>
           <v-list-item-title>
             <v-tooltip v-if="isShootStatusHibernated" top>
-              <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
+              <template v-slot:activator="{ on }">
+                <span v-on="on" class="grey--text">{{dashboardUrlText}}</span>
+              </template>
               Dashboard is not running for hibernated clusters
             </v-tooltip>
             <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
@@ -283,7 +285,7 @@ export default {
   },
   methods: {
     reset () {
-      this.hideKubekonfig()
+      this.expansionPanelKubeconfig = false
     },
     onDownload () {
       const kubeconfig = this.kubeconfig

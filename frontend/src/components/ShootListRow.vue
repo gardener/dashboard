@@ -22,7 +22,7 @@ limitations under the License.
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <v-row align="center" class="pa-0 ma-0 fill-height">
+      <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
         <v-col class="grow" >
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
             {{ shootName }}
@@ -118,9 +118,11 @@ limitations under the License.
     <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
       <v-row class="fill-height" align="center" justify="end" >
         <v-tooltip top v-if="canGetSecrets">
-          <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon size="22">mdi-key</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+              <v-icon size="22">mdi-key</v-icon>
+            </v-btn>
+          </template>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
         <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small content-class="red--text"></delete-cluster>

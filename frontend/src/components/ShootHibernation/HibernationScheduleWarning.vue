@@ -29,7 +29,9 @@ limitations under the License.
     </template>
   </div>
     <v-tooltip top slot="popperRef">
-      <v-icon slot="activator" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
+      <template v-slot:activator="{ on: tooltip }">
+        <v-icon v-on="tooltip" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
+      </template>
       <span>No Hibernation Schedule</span>
     </v-tooltip>
   </g-popper>

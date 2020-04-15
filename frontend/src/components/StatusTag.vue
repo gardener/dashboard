@@ -26,16 +26,18 @@ limitations under the License.
       :placement="popperPlacement"
       :disabled="!tag.message">
       <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
-        <v-chip
-          class="status-tag"
-          :class="{ 'cursor-pointer': tag.message }"
-          slot="activator"
-          outlined
-          :text-color="color"
-          small
-          :color="color">
-          {{chipText}}
-        </v-chip>
+        <template v-slot:activator="{ on }">
+          <v-chip
+            v-on="on"
+            class="status-tag"
+            :class="{ 'cursor-pointer': tag.message }"
+            outlined
+            :text-color="color"
+            small
+            :color="color">
+            {{chipText}}
+          </v-chip>
+        </template>
         <span class="font-weight-bold">{{chipTooltip.title}}</span>
         <div v-if="chipTooltip.description">
           {{chipTooltip.description}}
