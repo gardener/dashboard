@@ -20,7 +20,6 @@ limitations under the License.
       v-model="snackbarTop"
       :timeout="0"
       :absolute="true"
-      :auto-height="true"
       :top="true"
       multi-line
     >
@@ -49,7 +48,6 @@ limitations under the License.
       v-model="errorSnackbarBottom"
       :timeout="0"
       :absolute="true"
-      :auto-height="true"
       :bottom="true"
       color="red"
     >
@@ -61,7 +59,7 @@ limitations under the License.
     <draggable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag" @click="deleteTerminal">
+          <v-btn :disabled="!isTerminalSessionCreated" icon x-small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag" @click="deleteTerminal">
             <v-icon>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
@@ -69,20 +67,21 @@ limitations under the License.
           <span>{{terminalTitle}}</span>
           <v-spacer></v-spacer>
           <v-tooltip v-if="terminalSession.imageHelpText" top class="g-ignore-drag">
-            <!-- g-popper boundariesSelector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
-            <g-popper
-              slot="activator"
-              :title="`${imageShortText} Help`"
-              toolbarColor="cyan darken-2"
-              :popperKey="`popper_${uuid}`"
-              placement="bottom"
-              :boundariesSelector="`#boundary_${uuid}`"
-            >
-              <span v-html="compiledImageHelpText"></span>
-              <v-btn slot="popperRef" v-if="terminalSession.imageHelpText" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
-                <v-icon>mdi-help-circle-outline</v-icon>
-              </v-btn>
-            </g-popper>
+            <template v-slot:activator="{ on: tooltip }">
+              <!-- g-popper boundariesSelector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
+              <g-popper
+                :title="`${imageShortText} Help`"
+                toolbarColor="cyan darken-2"
+                :popperKey="`popper_${uuid}`"
+                placement="bottom"
+                :boundariesSelector="`#boundary_${uuid}`"
+              >
+                <span v-html="compiledImageHelpText"></span>
+                <v-btn v-on="tooltip" slot="popperRef" v-if="terminalSession.imageHelpText" icon x-small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
+                  <v-icon>mdi-help-circle-outline</v-icon>
+                </v-btn>
+              </g-popper>
+            </template>
             Help
           </v-tooltip>
           <v-menu
@@ -91,14 +90,14 @@ limitations under the License.
             dark
             min-width="400px"
           >
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
+            <template v-slot:activator="{ on: menu }">
+              <v-btn v-on="menu" icon x-small class="text-none grey--text text--lighten-1 systemBarButton g-ignore-drag">
                 <v-icon>mdi-menu</v-icon>
               </v-btn>
             </template>
             <v-card tile>
               <v-card-actions>
-                <v-btn small block text class="action-button" @click="split('horizontal')">
+                <v-btn small block text class="justify-start" @click="split('horizontal')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-vertically></split-vertically>
                   </icon-base>
@@ -108,7 +107,7 @@ limitations under the License.
                 </v-btn>
               </v-card-actions>
               <v-card-actions>
-                <v-btn small block text class="action-button" @click="split('vertical')">
+                <v-btn small block text class="justify-start" @click="split('vertical')">
                   <icon-base width="16" height="16" viewBox="0 -2 20 20" class="mr-2">
                     <split-horizontally></split-horizontally>
                   </icon-base>
@@ -119,7 +118,7 @@ limitations under the License.
               </v-card-actions>
               <v-divider class="mt-1 mb-1"></v-divider>
               <v-card-actions>
-                <v-btn small block text class="action-button" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
+                <v-btn small block text class="justify-start" @click="configure('settingsBtn')" :loading="loading.settingsBtn">
                   <v-icon small class="mr-2">mdi-settings</v-icon>
                   Settings
                 </v-btn>
@@ -137,19 +136,23 @@ limitations under the License.
             offset-y
             dark
           >
-            <v-tooltip slot="activator" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
-              <v-btn small text slot="activator" class="text-none grey--text text--lighten-1  systemBarButton">
-                <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
-                  <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
-                  <disconnected v-else></disconnected>
-                </icon-base>
-                <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionStateText}}</span>
-              </v-btn>
-              {{terminalSession.detailedConnectionStateText || connectionStateText}}
-            </v-tooltip>
+            <template v-slot:activator="{ on: menu }">
+              <v-tooltip v-on="menu" :disabled="connectionMenu" top class="ml-2" style="min-width: 110px">
+                <template v-slot:activator="{ on: tooltip }">
+                  <v-btn v-on="tooltip" small text class="text-none grey--text text--lighten-1  systemBarButton">
+                    <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
+                      <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
+                      <disconnected v-else></disconnected>
+                    </icon-base>
+                    <span class="text-none grey--text text--lighten-1" style="font-size: 13px">{{connectionStateText}}</span>
+                  </v-btn>
+                </template>
+                {{terminalSession.detailedConnectionStateText || connectionStateText}}
+              </v-tooltip>
+            </template>
             <v-card tile>
               <v-card-actions v-if="terminalSession.connectionState === TerminalSession.DISCONNECTED">
-                <v-btn small slot="activator" text class="actionButton" @click="retry()">
+                <v-btn small text class="actionButton" @click="retry()">
                   <v-icon small left>mdi-reload</v-icon>
                   Reconnect
                 </v-btn>
@@ -161,28 +164,34 @@ limitations under the License.
           </v-menu>
 
           <v-tooltip v-if="imageShortText" top>
-            <v-btn small text slot="activator" @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
-              <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
-              <span>{{imageShortText}}</span>
-            </v-btn>
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="tooltip" small text @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+                <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
+                <span>{{imageShortText}}</span>
+              </v-btn>
+            </template>
             Image: {{terminalSession.image}}
           </v-tooltip>
 
           <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
-            <v-btn small text slot="activator" @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
-              <v-icon class="mr-2">mdi-shield-account</v-icon>
-              <span>{{privilegedModeText}}</span>
-            </v-btn>
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="tooltip" small text @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+                <v-icon class="mr-2">mdi-shield-account</v-icon>
+                <span>{{privilegedModeText}}</span>
+              </v-btn>
+            </template>
             <strong>Privileged:</strong> {{terminalSession.privileged}}<br/>
             <strong>Host PID:</strong> {{terminalSession.hostPID}}<br/>
             <strong>Host Network:</strong> {{terminalSession.hostNetwork}}
           </v-tooltip>
 
           <v-tooltip v-if="terminalSession.node && target === 'shoot'" top>
-            <v-btn small text slot="activator" @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
-              <v-icon :size="14" class="mr-2">mdi-server</v-icon>
-              <span>{{terminalSession.node}}</span>
-            </v-btn>
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="tooltip" small text @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+                <v-icon :size="14" class="mr-2">mdi-server</v-icon>
+                <span>{{terminalSession.node}}</span>
+              </v-btn>
+            </template>
             Node: {{terminalSession.node}}
           </v-tooltip>
         </v-system-bar>
@@ -901,12 +910,6 @@ export default {
   .systemBarButton {
     min-width: 20px;
     max-height: 25px;
-    margin-top: 0;
-    margin-left: 0;
-    margin-bottom: 0;
   }
 
-  .action-button >>> .v-btn__content {
-    justify-content: left
-  }
 </style>
