@@ -488,7 +488,7 @@ export default {
     margin-right: 20px !important;
   }
 
-  >>> .v-input__slot {
+  .v-input__slot {
     margin: 0px;
   }
 

@@ -30,14 +30,12 @@ limitations under the License.
           <span v-else>{{username}}</span>
         </v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-action>
-        <v-row align="center">
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-            {{roleName}}
-          </v-chip>
-        </v-row>
+      <v-list-item-action class="ml-1">
+        <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
+          {{roleName}}
+        </v-chip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject">
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon class="black--text" @click.native.stop="onEdit">
@@ -47,7 +45,7 @@ limitations under the License.
           <span>Update User</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject">
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">

@@ -54,14 +54,12 @@ limitations under the License.
           {{username}}
         </v-list-item-subtitle>
       </v-list-item-content>
-      <v-list-item-action>
-        <v-row align="center">
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-            {{roleName}}
-          </v-chip>
-        </v-row>
+      <v-list-item-action class="ml-1">
+        <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
+          {{roleName}}
+        </v-chip>
       </v-list-item-action>
-      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon class="black--text" @click.native.stop="onDownload">
@@ -71,7 +69,7 @@ limitations under the License.
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" small icon class="black--text" @click="onKubeconfig">
@@ -81,7 +79,7 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject">
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon class="black--text" @click.native.stop="onEdit">
@@ -91,7 +89,7 @@ limitations under the License.
           <span>Update Service Account</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject">
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon class="red--text" @click.native.stop="onDelete">
