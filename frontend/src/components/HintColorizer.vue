@@ -71,7 +71,7 @@ export default {
   @import '~vuetify/src/styles/styles.sass';
 
   .hintColor-orange {
-    >>>.v-messages__wrapper {
+    ::v-deep .v-messages__wrapper {
       .v-messages__message {
         color: map-get($orange, 'darken-2') !important;
       }
