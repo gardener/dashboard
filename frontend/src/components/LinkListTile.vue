@@ -19,7 +19,7 @@ limitations under the License.
     <v-list-item-icon>
       <v-icon v-if="icon" color="cyan darken-2">{{icon}}</v-icon>
     </v-list-item-icon>
-    <v-list-item-content>
+    <v-list-item-content :class="contentClass">
       <v-list-item-subtitle>{{appTitle}}</v-list-item-subtitle>
       <v-list-item-title class="pt-1">
         <v-tooltip v-if="isShootStatusHibernated" top>
@@ -55,6 +55,9 @@ export default {
     },
     isShootStatusHibernated: {
       type: Boolean
+    },
+    contentClass: {
+      type: String
     }
   }
 }
