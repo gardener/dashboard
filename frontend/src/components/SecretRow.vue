@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-list-item>
     <v-list-item-content>
-      <v-list-item-title>
+      <v-list-item-title class="mb-1">
         {{secret.metadata.name}}
         <v-tooltip v-if="!isOwnSecretBinding" top>
           <template v-slot:activator="{ on }">

@@ -20,7 +20,7 @@ limitations under the License.
     <!-- Header -->
     <v-toolbar :class="toolbarClass" dark>
       <infra-icon v-model="icon" :width="32"></infra-icon>
-      <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
+      <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
         <v-icon class="white--text">add</v-icon>
