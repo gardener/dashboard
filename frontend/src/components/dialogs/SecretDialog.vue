@@ -36,36 +36,32 @@ limitations under the License.
 
       <v-card-text>
         <v-container fluid>
-          <v-row >
-            <v-col>
-              <template v-if="isCreateMode">
-                <v-text-field
-                  :color="color"
-                  ref="secretName"
-                  v-model.trim="secretName"
-                  label="Secret Name"
-                  :error-messages="getErrorMessages('secretName')"
-                  @input="$v.secretName.$touch()"
-                  @blur="$v.secretName.$touch()"
-                ></v-text-field>
-              </template>
-              <template v-else>
-                <div class="title pb-4">{{secretName}}</div>
-              </template>
-            </v-col>
-          </v-row>
+          <div>
+            <template v-if="isCreateMode">
+              <v-text-field
+                :color="color"
+                ref="secretName"
+                v-model.trim="secretName"
+                label="Secret Name"
+                :error-messages="getErrorMessages('secretName')"
+                @input="$v.secretName.$touch()"
+                @blur="$v.secretName.$touch()"
+              ></v-text-field>
+            </template>
+            <template v-else>
+              <div class="title pb-4">{{secretName}}</div>
+            </template>
+            </div>
 
-          <v-row v-show="cloudProfiles.length !== 1">
-            <v-col>
-              <cloud-profile
-                ref="cloudProfile"
-                v-model="cloudProfileName"
-                :isCreateMode="isCreateMode"
-                :cloudProfiles="cloudProfiles"
-                :color="color">
-              </cloud-profile>
-            </v-col>
-          </v-row>
+          <div v-show="cloudProfiles.length !== 1">
+            <cloud-profile
+              ref="cloudProfile"
+              v-model="cloudProfileName"
+              :isCreateMode="isCreateMode"
+              :cloudProfiles="cloudProfiles"
+              :color="color">
+            </cloud-profile>
+          </div>
 
           <slot name="data-slot"></slot>
           <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>

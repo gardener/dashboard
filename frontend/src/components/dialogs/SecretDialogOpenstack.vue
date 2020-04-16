@@ -29,57 +29,55 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <div class="d-flex flex-column">
-        <div class="pa-2">
+      <div>
+        <v-text-field
+          color="black"
+          v-model="domainName"
+          ref="domainName"
+          label="Domain Name"
+          :error-messages="getErrorMessages('domainName')"
+          @input="$v.domainName.$touch()"
+          @blur="$v.domainName.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="black"
+          v-model="tenantName"
+          label="Project / Tenant Name"
+          :error-messages="getErrorMessages('tenantName')"
+          @input="$v.tenantName.$touch()"
+          @blur="$v.tenantName.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <hint-colorizer hintColor="orange">
+          <v-text-field
+          color="black"
+          v-model="username"
+          label="Technical User"
+          :error-messages="getErrorMessages('username')"
+          @input="$v.username.$touch()"
+          @blur="$v.username.$touch()"
+          hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
+          ></v-text-field>
+        </hint-colorizer>
+      </div>
+      <div>
+        <hint-colorizer hintColor="orange">
           <v-text-field
             color="black"
-            v-model="domainName"
-            ref="domainName"
-            label="Domain Name"
-            :error-messages="getErrorMessages('domainName')"
-            @input="$v.domainName.$touch()"
-            @blur="$v.domainName.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="black"
-            v-model="tenantName"
-            label="Project / Tenant Name"
-            :error-messages="getErrorMessages('tenantName')"
-            @input="$v.tenantName.$touch()"
-            @blur="$v.tenantName.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <hint-colorizer hintColor="orange">
-            <v-text-field
-            color="black"
-            v-model="username"
-            label="Technical User"
-            :error-messages="getErrorMessages('username')"
-            @input="$v.username.$touch()"
-            @blur="$v.username.$touch()"
+            v-model="password"
+            label="Password"
+            :error-messages="getErrorMessages('password')"
+            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+            :type="hideSecret ? 'password' : 'text'"
+            @click:append="() => (hideSecret = !hideSecret)"
+            @input="$v.password.$touch()"
+            @blur="$v.password.$touch()"
             hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-            ></v-text-field>
-          </hint-colorizer>
-        </div>
-        <div class="pa-2">
-          <hint-colorizer hintColor="orange">
-            <v-text-field
-              color="black"
-              v-model="password"
-              label="Password"
-              :error-messages="getErrorMessages('password')"
-              :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-              :type="hideSecret ? 'password' : 'text'"
-              @click:append="() => (hideSecret = !hideSecret)"
-              @input="$v.password.$touch()"
-              @blur="$v.password.$touch()"
-              hint="Do not use personalized login credentials. Instead, use credentials of a technical user"
-            ></v-text-field>
-          </hint-colorizer>
-        </div>
+          ></v-text-field>
+        </hint-colorizer>
       </div>
     </template>
 

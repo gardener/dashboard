@@ -29,35 +29,33 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <div class="d-flex flex-column">
-        <div class="pa-2">
-          <v-text-field
-            color="orange darken-1"
-            v-model="accessKeyId"
-            ref="accessKeyId"
-            label="Access Key Id"
-            :error-messages="getErrorMessages('accessKeyId')"
-            @input="$v.accessKeyId.$touch()"
-            @blur="$v.accessKeyId.$touch()"
-            counter="128"
-            hint="e.g. AKIAIOSFODNN7EXAMPLE"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="orange darken-1"
-            v-model="secretAccessKey"
-            label="Secret Access Key"
-            :error-messages="getErrorMessages('secretAccessKey')"
-            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :type="hideSecret ? 'password' : 'text'"
-            @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.secretAccessKey.$touch()"
-            @blur="$v.secretAccessKey.$touch()"
-            counter="40"
-            hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
-          ></v-text-field>
-        </div>
+      <div>
+        <v-text-field
+          color="orange darken-1"
+          v-model="accessKeyId"
+          ref="accessKeyId"
+          label="Access Key Id"
+          :error-messages="getErrorMessages('accessKeyId')"
+          @input="$v.accessKeyId.$touch()"
+          @blur="$v.accessKeyId.$touch()"
+          counter="128"
+          hint="e.g. AKIAIOSFODNN7EXAMPLE"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="orange darken-1"
+          v-model="secretAccessKey"
+          label="Secret Access Key"
+          :error-messages="getErrorMessages('secretAccessKey')"
+          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :type="hideSecret ? 'password' : 'text'"
+          @click:append="() => (hideSecret = !hideSecret)"
+          @input="$v.secretAccessKey.$touch()"
+          @blur="$v.secretAccessKey.$touch()"
+          counter="40"
+          hint="e.g. wJalrXUtnFEMIK7MDENG/bPxRfiCYzEXAMPLEKEY"
+        ></v-text-field>
       </div>
     </template>
 

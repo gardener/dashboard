@@ -29,21 +29,19 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <div class="d-flex flex-column">
-        <div class="pa-2">
-          <v-textarea
-            ref="serviceAccountKey"
-            color="green"
-            filled
-            v-model="serviceAccountKey"
-            label="Service Account Key"
-            :error-messages="getErrorMessages('serviceAccountKey')"
-            @input="$v.serviceAccountKey.$touch()"
-            @blur="$v.serviceAccountKey.$touch()"
-            hint="Enter or drop a service account key in JSON format"
-            persistent-hint
-          ></v-textarea>
-        </div>
+      <div>
+        <v-textarea
+          ref="serviceAccountKey"
+          color="green"
+          filled
+          v-model="serviceAccountKey"
+          label="Service Account Key"
+          :error-messages="getErrorMessages('serviceAccountKey')"
+          @input="$v.serviceAccountKey.$touch()"
+          @blur="$v.serviceAccountKey.$touch()"
+          hint="Enter or drop a service account key in JSON format"
+          persistent-hint
+        ></v-textarea>
       </div>
     </template>
 

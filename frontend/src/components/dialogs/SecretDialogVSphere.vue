@@ -29,54 +29,52 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <div class="d-flex flex-column">
-        <div class="pa-2">
-          <v-text-field
+      <div>
+        <v-text-field
+        color="indigo darken-4"
+        v-model="vsphereUsername"
+        ref="vsphereUsername"
+        label="vSphere Username"
+        :error-messages="getErrorMessages('vsphereUsername')"
+        @input="$v.vsphereUsername.$touch()"
+        @blur="$v.vsphereUsername.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
           color="indigo darken-4"
-          v-model="vsphereUsername"
-          ref="vsphereUsername"
-          label="vSphere Username"
-          :error-messages="getErrorMessages('vsphereUsername')"
-          @input="$v.vsphereUsername.$touch()"
-          @blur="$v.vsphereUsername.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="indigo darken-4"
-            v-model="vspherePassword"
-            label="vSphere Password"
-            :error-messages="getErrorMessages('vspherePassword')"
-            :append-icon="hideVspherePassword ? 'visibility' : 'visibility_off'"
-            :type="hideVspherePassword ? 'password' : 'text'"
-            @click:append="() => (hideVspherePassword = !hideVspherePassword)"
-            @input="$v.vspherePassword.$touch()"
-            @blur="$v.vspherePassword.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
+          v-model="vspherePassword"
+          label="vSphere Password"
+          :error-messages="getErrorMessages('vspherePassword')"
+          :append-icon="hideVspherePassword ? 'visibility' : 'visibility_off'"
+          :type="hideVspherePassword ? 'password' : 'text'"
+          @click:append="() => (hideVspherePassword = !hideVspherePassword)"
+          @input="$v.vspherePassword.$touch()"
+          @blur="$v.vspherePassword.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+        color="indigo darken-4"
+        v-model="nsxtUsername"
+        label="NSX-T Username"
+        :error-messages="getErrorMessages('nsxtUsername')"
+        @input="$v.nsxtUsername.$touch()"
+        @blur="$v.nsxtUsername.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
           color="indigo darken-4"
-          v-model="nsxtUsername"
-          label="NSX-T Username"
-          :error-messages="getErrorMessages('nsxtUsername')"
-          @input="$v.nsxtUsername.$touch()"
-          @blur="$v.nsxtUsername.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="indigo darken-4"
-            v-model="nsxtPassword"
-            label="NSX-T Password"
-            :error-messages="getErrorMessages('nsxtPassword')"
-            :append-icon="hideNsxtPassword ? 'visibility' : 'visibility_off'"
-            :type="hideNsxtPassword ? 'password' : 'text'"
-            @click:append="() => (hideNsxtPassword = !hideNsxtPassword)"
-            @input="$v.nsxtPassword.$touch()"
-            @blur="$v.nsxtPassword.$touch()"
-          ></v-text-field>
-        </div>
+          v-model="nsxtPassword"
+          label="NSX-T Password"
+          :error-messages="getErrorMessages('nsxtPassword')"
+          :append-icon="hideNsxtPassword ? 'visibility' : 'visibility_off'"
+          :type="hideNsxtPassword ? 'password' : 'text'"
+          @click:append="() => (hideNsxtPassword = !hideNsxtPassword)"
+          @input="$v.nsxtPassword.$touch()"
+          @blur="$v.nsxtPassword.$touch()"
+        ></v-text-field>
       </div>
     </template>
 

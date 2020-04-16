@@ -29,34 +29,30 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <v-row >
-        <v-col>
-          <v-text-field
-            color="blue"
-            v-model="apiUrl"
-            ref="apiUrl"
-            label="API URL"
-            :error-messages="getErrorMessages('apiUrl')"
-            @input="$v.apiUrl.$touch()"
-            @blur="$v.apiUrl.$touch()"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row >
-        <v-col>
-          <v-text-field
-            color="blue"
-            v-model="apiHmac"
-            label="API HMAC"
-            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :type="hideSecret ? 'password' : 'text'"
-            @click:append="() => (hideSecret = !hideSecret)"
-            :error-messages="getErrorMessages('apiHmac')"
-            @input="$v.apiHmac.$touch()"
-            @blur="$v.apiHmac.$touch()"
-          ></v-text-field>
-        </v-col>
-      </v-row>
+      <div>
+        <v-text-field
+          color="blue"
+          v-model="apiUrl"
+          ref="apiUrl"
+          label="API URL"
+          :error-messages="getErrorMessages('apiUrl')"
+          @input="$v.apiUrl.$touch()"
+          @blur="$v.apiUrl.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="blue"
+          v-model="apiHmac"
+          label="API HMAC"
+          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :type="hideSecret ? 'password' : 'text'"
+          @click:append="() => (hideSecret = !hideSecret)"
+          :error-messages="getErrorMessages('apiHmac')"
+          @input="$v.apiHmac.$touch()"
+          @blur="$v.apiHmac.$touch()"
+        ></v-text-field>
+      </div>
     </template>
 
   </secret-dialog>

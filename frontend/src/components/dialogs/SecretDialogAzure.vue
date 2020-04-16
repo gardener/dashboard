@@ -29,51 +29,49 @@ limitations under the License.
     @input="onInput">
 
     <template slot="data-slot">
-      <div class="d-flex flex-column">
-        <div class="pa-2">
-          <v-text-field
-            color="blue darken-1"
-            v-model="clientId"
-            ref="clientId"
-            label="Client Id"
-            :error-messages="getErrorMessages('clientId')"
-            @input="$v.clientId.$touch()"
-            @blur="$v.clientId.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="blue darken-1"
-            v-model="clientSecret"
-            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
-            :type="hideSecret ? 'password' : 'text'"
-            label="Client Secret"
-            :error-messages="getErrorMessages('clientSecret')"
-            @click:append="() => (hideSecret = !hideSecret)"
-            @input="$v.clientSecret.$touch()"
-            @blur="$v.clientSecret.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="blue darken-1"
-            v-model="tenantId"
-            label="Tenant Id"
-            :error-messages="getErrorMessages('tenantId')"
-            @input="$v.tenantId.$touch()"
-            @blur="$v.tenantId.$touch()"
-          ></v-text-field>
-        </div>
-        <div class="pa-2">
-          <v-text-field
-            color="blue darken-1"
-            v-model="subscriptionId"
-            label="Subscription Id"
-            :error-messages="getErrorMessages('subscriptionId')"
-            @input="$v.subscriptionId.$touch()"
-            @blur="$v.subscriptionId.$touch()"
-          ></v-text-field>
-        </div>
+      <div>
+        <v-text-field
+          color="blue darken-1"
+          v-model="clientId"
+          ref="clientId"
+          label="Client Id"
+          :error-messages="getErrorMessages('clientId')"
+          @input="$v.clientId.$touch()"
+          @blur="$v.clientId.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="blue darken-1"
+          v-model="clientSecret"
+          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :type="hideSecret ? 'password' : 'text'"
+          label="Client Secret"
+          :error-messages="getErrorMessages('clientSecret')"
+          @click:append="() => (hideSecret = !hideSecret)"
+          @input="$v.clientSecret.$touch()"
+          @blur="$v.clientSecret.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="blue darken-1"
+          v-model="tenantId"
+          label="Tenant Id"
+          :error-messages="getErrorMessages('tenantId')"
+          @input="$v.tenantId.$touch()"
+          @blur="$v.tenantId.$touch()"
+        ></v-text-field>
+      </div>
+      <div>
+        <v-text-field
+          color="blue darken-1"
+          v-model="subscriptionId"
+          label="Subscription Id"
+          :error-messages="getErrorMessages('subscriptionId')"
+          @input="$v.subscriptionId.$touch()"
+          @blur="$v.subscriptionId.$touch()"
+        ></v-text-field>
       </div>
     </template>
 
