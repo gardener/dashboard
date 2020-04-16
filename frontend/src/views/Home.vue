@@ -21,16 +21,17 @@ limitations under the License.
         <h3>Let's get started</h3>
         <v-tooltip top :disabled="canCreateProject">
           <template v-slot:activator="{ on }">
-            <v-btn
-              v-on="on"
-              text
-              class="text-left teal--text"
-              :disabled="!canCreateProject"
-              @click.native.stop="projectDialog = true"
-            >
-              <v-icon>add</v-icon>
-              <span class="ml-2">{{createProjectBtnText}}</span>
-            </v-btn>
+            <div v-on="on">
+              <v-btn
+                text
+                class="text-left teal--text"
+                :disabled="!canCreateProject"
+                @click.native.stop="projectDialog = true"
+              >
+                <v-icon>add</v-icon>
+                <span class="ml-2">{{createProjectBtnText}}</span>
+              </v-btn>
+            </div>
           </template>
           <span>You are not authorized to create projects</span>
         </v-tooltip>

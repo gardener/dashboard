@@ -18,9 +18,11 @@ limitations under the License.
   <div v-if="canPatchShoots">
     <v-tooltip top max-width="600px">
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled">
-          <v-icon :medium="!smallIcon">{{icon}}</v-icon>
-        </v-btn>
+        <div v-on="on">
+          <v-btn :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled">
+            <v-icon :medium="!smallIcon">{{icon}}</v-icon>
+          </v-btn>
+        </div>
       </template>
       {{shootActionToolTip(caption)}}
     </v-tooltip>

@@ -18,33 +18,33 @@ limitations under the License.
   <div>
     <v-tooltip top>
       <template v-slot:activator="{ on: tooltip }">
-        <v-btn
-          v-if="chipStyle"
-          v-on="tooltip"
-          class="update_btn"
-          :class="buttonInactive"
-          small
-          rounded
-          @click="showUpdateDialog"
-          :outlined="!k8sPatchAvailable"
-          :dark="k8sPatchAvailable"
-          :ripple="canUpdate"
-          depressed
-          color="cyan darken-2"
-        >
-          <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
-          {{shootK8sVersion}}
-        </v-btn>
-        <v-btn
-          v-else-if="!!availableK8sUpdates"
-          v-on="tooltip"
-          @click="showUpdateDialog"
-          icon
-          :disabled="!canUpdate"
-        >
-          <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
-          <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-        </v-btn>
+        <div v-on="tooltip">
+          <v-btn
+            v-if="chipStyle"
+            class="update_btn"
+            :class="buttonInactive"
+            small
+            rounded
+            @click="showUpdateDialog"
+            :outlined="!k8sPatchAvailable"
+            :dark="k8sPatchAvailable"
+            :ripple="canUpdate"
+            depressed
+            color="cyan darken-2"
+          >
+            <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
+            {{shootK8sVersion}}
+          </v-btn>
+          <v-btn
+            v-else-if="!!availableK8sUpdates"
+            @click="showUpdateDialog"
+            icon
+            :disabled="!canUpdate"
+          >
+            <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
+            <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
+          </v-btn>
+        </div>
       </template>
       <span>{{tooltipText}}</span>
     </v-tooltip>

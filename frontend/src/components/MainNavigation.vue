@@ -111,17 +111,18 @@ limitations under the License.
             <v-card-actions class="grey lighten-3">
               <v-tooltip top :disabled="canCreateProject" style="width: 100%">
                 <template v-slot:activator="{ on }">
-                  <v-btn
-                    v-on="on"
-                    text
-                    block
-                    class="project-add text-left teal--text"
-                    :disabled="!canCreateProject"
-                    @click.stop="openProjectDialog"
-                  >
-                    <v-icon>add</v-icon>
-                    <span class="ml-2">Create Project</span>
-                  </v-btn>
+                  <div v-on="on">
+                    <v-btn
+                      text
+                      block
+                      class="project-add text-left teal--text"
+                      :disabled="!canCreateProject"
+                      @click.stop="openProjectDialog"
+                    >
+                      <v-icon>add</v-icon>
+                      <span class="ml-2">Create Project</span>
+                    </v-btn>
+                  </div>
                 </template>
                 <span>You are not authorized to create projects</span>
               </v-tooltip>

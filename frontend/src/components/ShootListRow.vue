@@ -119,9 +119,11 @@ limitations under the License.
       <v-row class="fill-height" align="center" justify="end" >
         <v-tooltip top v-if="canGetSecrets">
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-              <v-icon size="22">mdi-key</v-icon>
-            </v-btn>
+            <div v-on="on">
+              <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                <v-icon size="22">mdi-key</v-icon>
+              </v-btn>
+            </div>
           </template>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
