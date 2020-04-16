@@ -63,8 +63,6 @@ export function serviceAccountToDisplayName (serviceAccount) {
 }
 
 export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
-  const textarea = textField.$refs['input-slot']
-
   function drop (event) {
     event.stopPropagation()
     event.preventDefault()
@@ -93,6 +91,7 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value
     event.dataTransfer.dropEffect = 'copy'
   }
 
+  const textarea = textField.$refs['input-slot']
   textarea.addEventListener('dragover', dragOver, false)
   textarea.addEventListener('drop', drop, false)
 }
