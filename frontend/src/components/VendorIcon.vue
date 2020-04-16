@@ -76,6 +76,8 @@ export default {
           return require('@/assets/coreos.svg')
         case 'suse-jeos':
           return require('@/assets/suse.svg')
+        case 'suse-chost':
+          return require('@/assets/suse.svg')
         case 'ubuntu':
           return require('@/assets/ubuntu.svg')
         case 'metal':
