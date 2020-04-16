@@ -156,7 +156,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .cursor-pointer >>> .v-chip__content {
+  .cursor-pointer ::v-deep .v-chip__content {
     cursor: pointer;
   }
 </style>

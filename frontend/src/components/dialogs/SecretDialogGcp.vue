@@ -144,7 +144,7 @@ export default {
 
 <style lang="scss" scoped>
 
-  >>> .v-input__control textarea {
+  ::v-deep .v-input__control textarea {
     font-family: monospace;
     font-size: 14px;
   }

@@ -79,7 +79,7 @@ export default {
 
 <style scoped>
 
-.addon-content >>>  p {
+.addon-content ::v-deep  p {
   margin-bottom: 4px;
 }
 

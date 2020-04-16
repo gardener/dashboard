@@ -74,7 +74,7 @@ export default {
     box-shadow: none;
   }
 
-  >>> .v-expansion-panel__header {
+  ::v-deep .v-expansion-panel__header {
     cursor: auto;
     padding: 0;
   }

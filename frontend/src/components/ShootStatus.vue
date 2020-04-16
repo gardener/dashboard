@@ -244,7 +244,7 @@ export default {
 <style lang="scss" scoped>
 
   /* overwrite message class from g-popper child component */
-  >>> .message {
+  ::v-deep .message {
     max-height: 800px;
   }
 

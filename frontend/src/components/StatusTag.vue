@@ -235,7 +235,7 @@ export default {
 
 <style lang="scss" scoped>
 
-  .cursor-pointer >>> .v-chip__content {
+  .cursor-pointer ::v-deep .v-chip__content {
     cursor: pointer;
   }
 
@@ -243,7 +243,7 @@ export default {
     margin: 1px;
   }
 
-  .status-tag >>> .v-chip__content {
+  .status-tag ::v-deep .v-chip__content {
     margin: -4px;
   }
 </style>

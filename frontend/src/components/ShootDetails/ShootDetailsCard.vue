@@ -286,7 +286,7 @@ export default {
     padding-right: 33px;
   }
 
-  .slaDescription >>> p {
+  .slaDescription ::v-deep p {
     margin: 0px;
   }
 

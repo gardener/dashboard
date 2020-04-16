@@ -135,7 +135,7 @@ export default {
     padding-right: 8px;
   }
 
-  .retryOperation >>> .v-btn {
+  .retryOperation ::v-deep .v-btn {
     margin-right: 4px;
     margin-left: 0px;
     margin-bottom: 0px;

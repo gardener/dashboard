@@ -96,7 +96,7 @@ export default {
     word-break: break-word;
   }
 
-  >>> .flex {
+  ::v-deep .flex {
     width: 200px;
   }
 

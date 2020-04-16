@@ -178,7 +178,7 @@ export default {
     margin-top: 1.2em;
   }
 
-  >>> .v-toolbar__content {
+  ::v-deep .v-toolbar__content {
     padding: 0px 16px;
   }
 
