@@ -35,7 +35,7 @@ limitations under the License.
         </v-list-item-action>
       </v-list-item>
       <template v-if="expirationTimestamp">
-        <v-divider inset class="my-2"></v-divider>
+        <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
             <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
@@ -60,7 +60,7 @@ limitations under the License.
           </v-list-item-content>
         </v-list-item>
       </template>
-      <v-divider inset class="my-2"></v-divider>
+      <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
           <v-icon color="cyan darken-2">mdi-cube-outline</v-icon>
@@ -75,7 +75,7 @@ limitations under the License.
           <shoot-version :shoot-item="shootItem" :chip-style="false"></shoot-version>
         </v-list-item-action>
       </v-list-item>
-      <v-divider inset class="my-2"></v-divider>
+      <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
           <v-icon color="cyan darken-2">mdi-server</v-icon>
@@ -95,7 +95,7 @@ limitations under the License.
           <worker-configuration :shootItem="shootItem"></worker-configuration>
         </v-list-item-action>
       </v-list-item>
-      <v-divider inset class="my-2"></v-divider>
+      <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
           <v-icon color="cyan darken-2">perm_identity</v-icon>
@@ -109,7 +109,7 @@ limitations under the License.
       </v-list-item>
       <v-list-item>
         <v-list-item-icon/>
-        <v-list-item-content>
+        <v-list-item-content class="pt-0">
           <v-list-item-subtitle v-on="on">Created at</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             <v-tooltip top>
@@ -122,7 +122,7 @@ limitations under the License.
         </v-list-item-content>
       </v-list-item>
       <template v-if="!!shootPurpose">
-        <v-divider inset class="my-2"></v-divider>
+        <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
             <v-icon color="cyan darken-2">label_outline</v-icon>
@@ -140,20 +140,18 @@ limitations under the License.
         </v-list-item>
       </template>
       <template v-if="slaDescriptionCompiledMarkdown">
-        <v-divider inset class="my-2"></v-divider>
+        <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
             <v-icon color="cyan darken-2">mdi-file-document-outline</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-            <v-list-item-title class="pt-1">
-              {{slaDescriptionCompiledMarkdown}}
-            </v-list-item-title>
+            <v-list-item-title class="pt-1 markdown" v-html="slaDescriptionCompiledMarkdown"/>
           </v-list-item-content>
         </v-list-item>
       </template>
-      <v-divider inset class="my-2"></v-divider>
+      <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
           <v-icon color="cyan darken-2">mdi-puzzle</v-icon>
@@ -286,8 +284,10 @@ export default {
     padding-right: 33px;
   }
 
-  .slaDescription ::v-deep p {
-    margin: 0px;
+  .markdown {
+    ::v-deep > p {
+      margin: 0px;
+    }
   }
 
 </style>

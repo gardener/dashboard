@@ -16,12 +16,12 @@ limitations under the License.
 
 <template>
   <v-list-item>
-    <v-list-item-action>
-      <v-icon v-if="icon" class="cyan--text text--darken-2">{{icon}}</v-icon>
-    </v-list-item-action>
+    <v-list-item-icon>
+      <v-icon v-if="icon" color="cyan darken-2">{{icon}}</v-icon>
+    </v-list-item-icon>
     <v-list-item-content>
       <v-list-item-subtitle>{{appTitle}}</v-list-item-subtitle>
-      <v-list-item-title>
+      <v-list-item-title class="pt-1">
         <v-tooltip v-if="isShootStatusHibernated" top>
           <template v-slot:activator="{ on }">
             <span v-on="on">{{urlText}}</span>

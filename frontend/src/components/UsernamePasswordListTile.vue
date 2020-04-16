@@ -17,40 +17,39 @@ limitations under the License.
 <template>
   <div v-show="(!!username || !!email) && !!password">
     <v-list-item v-if="username">
-      <v-list-item-action>
-        <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-item-action>
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">perm_identity</v-icon>
+      </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>User</v-list-item-subtitle>
-        <v-list-item-title>{{username}}</v-list-item-title>
+        <v-list-item-title class="pt-1">{{username}}</v-list-item-title>
       </v-list-item-content>
       <v-list-item-action>
         <copy-btn :clipboard-text="username"></copy-btn>
       </v-list-item-action>
     </v-list-item>
     <v-list-item v-if="email">
-      <v-list-item-action>
-        <v-icon v-if="!username" class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-item-action>
+      <v-list-item-icon>
+        <v-icon v-if="!username" color="cyan darken-2">perm_identity</v-icon>
+      </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Email</v-list-item-subtitle>
-        <v-list-item-title>{{email}}</v-list-item-title>
+        <v-list-item-title class="pt-1">{{email}}</v-list-item-title>
       </v-list-item-content>
       <v-list-item-action>
         <copy-btn :clipboard-text="email"></copy-btn>
       </v-list-item-action>
     </v-list-item>
     <v-list-item>
-      <v-list-item-action>
-      </v-list-item-action>
+      <v-list-item-icon/>
       <v-list-item-content>
         <v-list-item-subtitle>Password</v-list-item-subtitle>
-        <v-list-item-title>{{passwordText}}</v-list-item-title>
+        <v-list-item-title class="pt-1">{{passwordText}}</v-list-item-title>
       </v-list-item-content>
-      <v-list-item-action>
+      <v-list-item-action class="mx-0">
         <copy-btn :clipboard-text="password"></copy-btn>
       </v-list-item-action>
-      <v-list-item-action>
+      <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword">

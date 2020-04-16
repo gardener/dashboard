@@ -17,9 +17,9 @@ limitations under the License.
 <template>
   <v-list>
     <v-list-item v-show="!isAnyTileVisible">
-      <v-list-item-action>
-        <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
-      </v-list-item-action>
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+      </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>
           Access information currently not available
@@ -36,30 +36,22 @@ limitations under the License.
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
       <v-list-item>
-        <v-list-item-action>
-          <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-        </v-list-item-action>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">developer_board</v-icon>
+        </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-action>
-        </v-list-item-action>
-        <v-list-item-content>
-          <v-list-item-action-text>Access Dashboard using the kubectl command-line tool by running the following command: <code>kubectl proxy</code>. Kubectl will make Dashboard available at:</v-list-item-action-text>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-action>
-        </v-list-item-action>
-        <v-list-item-content>
+          <v-list-item-subtitle class="caption wrap-text py-2">
+            Access Dashboard using the kubectl command-line tool by running the following command:
+            <code>kubectl proxy</code>.
+            Kubectl will make Dashboard available at:
+          </v-list-item-subtitle>
           <v-list-item-title>
             <v-tooltip v-if="isShootStatusHibernated" top>
               <template v-slot:activator="{ on }">
@@ -72,16 +64,17 @@ limitations under the License.
         </v-list-item-content>
       </v-list-item>
       <v-list-item v-if="token">
-        <v-list-item-action>
-        </v-list-item-action>
-        <v-list-item-content>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
           <v-list-item-subtitle>Token</v-list-item-subtitle>
-          <v-list-item-title><pre class="scroll">{{tokenText}}</pre></v-list-item-title>
+          <v-list-item-title class="pt-1">
+            <pre class="scroll">{{tokenText}}</pre>
+          </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
+        <v-list-item-action class="mx-0">
           <copy-btn :clipboard-text="token"></copy-btn>
         </v-list-item-action>
-        <v-list-item-action>
+        <v-list-item-action class="mx-0">
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" icon @click.native.stop="showToken = !showToken">
@@ -94,20 +87,20 @@ limitations under the License.
       </v-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
 
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
 
-    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" class="my-2" inset></v-divider>
+    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" inset></v-divider>
 
     <v-list-item>
-      <v-list-item-action>
-        <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-      </v-list-item-action>
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">insert_drive_file</v-icon>
+      </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>Kubeconfig</v-list-item-title>
       </v-list-item-content>
-      <v-list-item-action>
+      <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="onDownload">
@@ -117,10 +110,10 @@ limitations under the License.
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action>
+      <v-list-item-action class="mx-0">
         <copy-btn :clipboard-text="kubeconfig"></copy-btn>
       </v-list-item-action>
-      <v-list-item-action>
+      <v-list-item-action class="mx-0">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig">
@@ -132,11 +125,10 @@ limitations under the License.
       </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
-      <v-card v-if="expansionPanelKubeconfig">
+      <v-card v-if="expansionPanelKubeconfig" flat class="mb-n2">
         <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
       </v-card>
     </v-expand-transition>
-
   </v-list>
 </template>
 
@@ -306,6 +298,17 @@ export default {
 
   .scroll {
     overflow-x: scroll;
+  }
+
+  .wrap-text {
+    line-height: inherit;
+    overflow: auto !important;
+    white-space: normal !important;
+      code {
+        box-shadow: none !important;
+        padding: 1px;
+        color: black;
+      }
   }
 
 </style>
