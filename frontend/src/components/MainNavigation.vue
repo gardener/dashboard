@@ -90,7 +90,7 @@ limitations under the License.
               </v-card-title>
               <v-divider></v-divider>
             </template>
-            <v-list light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
+            <v-list flat light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
               <v-list-item
                 class="project-list-tile"
                 v-for="project in visibleProjectList"
@@ -513,10 +513,6 @@ export default {
       font-weight: 700;
       font-size: 16px;
       background-color: rgba(0,0,0,0.1) !important;
-
-      div {
-        justify-content: left;
-      }
     }
 
     .v-footer{
@@ -560,6 +556,10 @@ export default {
           overflow-y: auto;
           max-width: 300px;
 
+          div:hover {
+            background-color: #F5F5F5
+          }
+
           div > a {
             height: 54px;
           }
@@ -568,9 +568,6 @@ export default {
           }
           .project-owner {
             font-size: 11px;
-          }
-          .v-list-item--highlighted {
-            background-color: transparent !important
           }
         }
       }

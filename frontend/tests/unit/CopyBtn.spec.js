@@ -28,9 +28,20 @@ global.requestAnimationFrame = cb => cb()
 const components = { CopyBtn }
 
 describe('CopyBtn.vue', function () {
+  let vuetify
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
   it('should ensure that the clipboard container is the dialog content', function () {
-    const template = '<v-dialog ref="dialog"><copy-btn ref="btn"/></v-dialog>'
-    const wrapper = mount({ template, components })
+    const template = '<v-dialog v-model="visible" ref="dialog"><copy-btn ref="btn"/></v-dialog>'
+    const data = () => {
+      return {
+        visible: true
+      }
+    }
+    const wrapper = mount({ template, data, components }, { vuetify })
     const { btn, dialog } = wrapper.vm.$refs
     expect(dialog.$refs.content).to.not.be.undefined
     expect(btn.clipboard.container).to.equal(dialog.$refs.content)

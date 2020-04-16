@@ -117,10 +117,11 @@ describe('Store.Shoots', function () {
       }
     }
 
+    // Modifies state of module even if we do not include state in the root store
+    // TODO: This is all a bit hacky, think of a cleaner solution on how to create the store
     state.shoots.shoots = shootItems
 
     store = new Vuex.Store({
-      state,
       actions,
       getters,
       mutations,

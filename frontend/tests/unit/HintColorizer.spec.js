@@ -56,39 +56,49 @@ describe('HintColorizer.vue', function () {
   })
 
   it('should not overwrite error color class for v-text-field', async function () {
-    const data = () => {
+    let data = () => {
       return {
         errorMessage: undefined
       }
     }
     const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage"></v-text-field></hint-colorizer>'
-    const wrapper = mount({ template, data, components: { HintColorizer } }, { vuetify })
-    const { hintColorizer } = wrapper.vm.$refs
+    let wrapper = mount({ template, data, components: { HintColorizer } }, {
+      vuetify
+    })
+    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.contain('hintColor-orange')
 
-    expect(hintColorizer.$el.className).to.contain('hintColor-orange')
-
-    wrapper.setData({ errorMessage: 'invalid' })
-
-    await Vue.nextTick()
-    expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
+    data = () => {
+      return {
+        errorMessage: 'invalid'
+      }
+    }
+    wrapper = mount({ template, data, components: { HintColorizer } }, {
+      vuetify
+    })
+    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.not.contain('hintColor-orange')
   })
 
   it('should not overwrite error color class for v-select', async function () {
-    const data = () => {
+    let data = () => {
       return {
         errorMessage: undefined
       }
     }
     const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage"></v-select></hint-colorizer>'
-    const wrapper = mount({ template, data, components: { HintColorizer } }, { vuetify })
-    const { hintColorizer } = wrapper.vm.$refs
+    let wrapper = mount({ template, data, components: { HintColorizer } }, {
+      vuetify
+    })
+    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.contain('hintColor-orange')
 
-    expect(hintColorizer.$el.className).to.contain('hintColor-orange')
-
-    wrapper.setData({ errorMessage: 'invalid' })
-
-    await Vue.nextTick()
-    expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
+    data = () => {
+      return {
+        errorMessage: 'invalid'
+      }
+    }
+    wrapper = mount({ template, data, components: { HintColorizer } }, {
+      vuetify
+    })
+    expect(wrapper.vm.$refs.hintColorizer.$el.className).to.not.contain('hintColor-orange')
   })
 })
 
