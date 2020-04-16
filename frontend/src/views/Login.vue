@@ -90,7 +90,7 @@ limitations under the License.
 import { mapState, mapActions } from 'vuex'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
-import { setInputFocus } from '@/utils'
+import { setDelayedInputFocus } from '@/utils'
 
 export default {
   data () {
@@ -147,7 +147,7 @@ export default {
     handleLogin (loginType) {
       if (loginType === 'token') {
         this.dialog = true
-        setInputFocus(this, 'token')
+        setDelayedInputFocus(this, 'token')
       } else {
         try {
           this.$userManager.signinWithOidc(this.redirectPath)
