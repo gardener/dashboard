@@ -34,7 +34,7 @@ limitations under the License.
         </v-container>
       </v-img>
 
-      <v-card-text>
+      <v-card-text class="pa-4">
         <slot name="help-content"></slot>
       </v-card-text>
 
