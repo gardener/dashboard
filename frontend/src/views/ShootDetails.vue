@@ -25,22 +25,22 @@ limitations under the License.
       </v-col>
       <v-col cols="12" md="6">
         <v-card v-if="canGetSecrets" class="mb-4">
-          <v-card-title class="subtitle-1 white--text cyan darken-2">
-            Access
-          </v-card-title>
+          <v-toolbar flat dark dense color="cyan darken-2">
+            <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
+          </v-toolbar>
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-        <v-card v-show="isLoggingFeatureGateEnabled">
-          <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
-            Logging
-          </v-card-title>
+        <v-card v-if="isLoggingFeatureGateEnabled" class="mt-4">
+          <v-toolbar flat dark dense color="cyan darken-2">
+            <v-toolbar-title class="subtitle-1">Logging</v-toolbar-title>
+          </v-toolbar>
           <shoot-logging :shootItem="shootItem"></shoot-logging>
         </v-card>
-        <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled">
-          <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4">
-            {{kymaTitle}}
-          </v-card-title>
+        <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled" class="mt-4">
+          <v-toolbar flat dark dense color="cyan darken-2">
+            <v-toolbar-title class="subtitle-1">{{kymaTitle}}</v-toolbar-title>
+          </v-toolbar>
           <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
         </v-card>
         <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="shootItem" class="mt-4"></shoot-journals-card>
@@ -145,9 +145,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .subtitle-1.v-card__title {
-    line-height: 10px;
-  }
-</style>
