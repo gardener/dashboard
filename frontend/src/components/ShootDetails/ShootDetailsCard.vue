@@ -110,7 +110,7 @@ limitations under the License.
       <v-list-item>
         <v-list-item-icon/>
         <v-list-item-content class="pt-0">
-          <v-list-item-subtitle v-on="on">Created at</v-list-item-subtitle>
+          <v-list-item-subtitle>Created at</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
             <v-tooltip top>
               <template v-slot:activator="{ on }">

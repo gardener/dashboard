@@ -29,7 +29,7 @@ limitations under the License.
           <v-list-item-content>
             <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
             <v-list-item-title>
-              <external-link :url="expandUrl(url)" color="cyan darken-2" size="16">
+              <external-link :url="expandUrl(url)" color="cyan darken-2" :size="16">
                 {{expandUrl(url)}}
               </external-link>
             </v-list-item-title>
