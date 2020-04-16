@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-row v-resize="onResize" :class="backgroundClass" class="flex-column fill-height position-relative" :id="`boundary_${uuid}`">
+  <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height position-relative" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
       :timeout="0"
@@ -128,7 +128,7 @@ limitations under the License.
         </v-system-bar>
       </template>
       <template v-slot:component>
-        <v-col ref="container" class="terminal-container"></v-col>
+        <div ref="container" class="terminal-container"></div>
         <v-system-bar dark class="systemBarBottom" :class="backgroundClass">
           <v-menu
             v-model="connectionMenu"
@@ -202,7 +202,7 @@ limitations under the License.
       :target="target"
     ></terminal-settings-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-  </v-row>
+  </div>
 </template>
 
 <script>
@@ -883,15 +883,16 @@ export default {
     position: relative !important
   }
   .terminal-container {
-      height: 100%;
-      width: 100%;
-      margin-top: 4px;
-      margin-left: 4px;
-      margin-bottom: 0;
-      margin-right: 0;
-      max-height: calc(100% - 50px);
-      /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
-      opacity: .99;
+    flex: 1 1 auto;
+    height: 100%;
+    width: 100%;
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-bottom: 0;
+    margin-right: 0;
+    max-height: calc(100% - 50px);
+    /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
+    opacity: .99;
   }
   .terminal {
     font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
