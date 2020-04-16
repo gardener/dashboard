@@ -16,21 +16,29 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-item v-if="isTestingCluster">
-      <v-list-item-action>
-        <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
-      </v-list-item-action>
+    <template v-if="!isTestingCluster">
+      <link-list-tile v-if="!!kibanaUrl"
+        icon="developer_board"
+        appTitle="Kibana"
+        :url="kibanaUrl"
+        :urlText="kibanaUrl"
+        :isShootStatusHibernated="isShootStatusHibernated"
+      ></link-list-tile>
+      <template v-if="username && password">
+        <v-divider inset></v-divider>
+        <username-password :username="username" :password="password"></username-password>
+      </template>
+    </template>
+    <v-list-item v-else>
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+      </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-title>
           Logging Stack not available for clusters with purpose testing
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <template v-else>
-      <link-list-tile v-if="!!kibanaUrl" icon="developer_board" appTitle="Kibana" :url="kibanaUrl" :urlText="kibanaUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
-      <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
-      <username-password :username="username" :password="password"></username-password>
-    </template>
   </v-list>
 </template>
 
@@ -68,15 +76,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .v-expansion-panel {
-    box-shadow: none;
-  }
-
-  ::v-deep .v-expansion-panel__header {
-    cursor: auto;
-    padding: 0;
-  }
-
-</style>

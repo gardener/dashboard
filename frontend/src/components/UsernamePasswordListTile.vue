@@ -32,7 +32,7 @@ limitations under the License.
       <v-list-item-icon>
         <v-icon v-if="!username" color="cyan darken-2">perm_identity</v-icon>
       </v-list-item-icon>
-      <v-list-item-content>
+      <v-list-item-content class="pt-0">
         <v-list-item-subtitle>Email</v-list-item-subtitle>
         <v-list-item-title class="pt-1">{{email}}</v-list-item-title>
       </v-list-item-content>
@@ -42,7 +42,7 @@ limitations under the License.
     </v-list-item>
     <v-list-item>
       <v-list-item-icon/>
-      <v-list-item-content>
+      <v-list-item-content class="pt-0">
         <v-list-item-subtitle>Password</v-list-item-subtitle>
         <v-list-item-title class="pt-1">{{passwordText}}</v-list-item-title>
       </v-list-item-content>
