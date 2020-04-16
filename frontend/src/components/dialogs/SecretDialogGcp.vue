@@ -80,7 +80,8 @@ export default {
   data () {
     return {
       serviceAccountKey: undefined,
-      validationErrors
+      validationErrors,
+      dropHandlerInitialized: false
     }
   },
   validations () {
@@ -124,20 +125,33 @@ export default {
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)
+    },
+    initializeDropHandlerOnce () {
+      if (this.dropHandlerInitialized) {
+        return
+      }
+
+      this.dropHandlerInitialized = true
+      const onDrop = (value) => {
+        this.serviceAccountKey = value
+      }
+      handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
     }
   },
   watch: {
     value: function (value) {
       if (value) {
         this.reset()
+
+        // Mounted does not guarantee that all child components have also been mounted.
+        // In addition, the serviceAccountKey ref is within a slot of a v-dialog, which is by default lazily loaded.
+        // We initialize the drop handler once the dialog is shown by watching the `value`.
+        // We use $nextTick to make sure the entire view has been rendered
+        this.$nextTick(() => {
+          this.initializeDropHandlerOnce()
+        })
       }
     }
-  },
-  mounted () {
-    const onDrop = (value) => {
-      this.serviceAccountKey = value
-    }
-    handleTextFieldDrop(this.$refs.serviceAccountKey, /json/, onDrop)
   }
 }
 </script>
