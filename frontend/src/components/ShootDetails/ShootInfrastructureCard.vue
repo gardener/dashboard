@@ -16,126 +16,137 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
-      Infrastructure
-    </v-card-title>
-    <div class="list">
-
-      <v-card-title class="listItem">
-        <v-row class="py-2">
-          <v-col class="pr-0 pt-4 shrink justify-center">
-            <v-icon class="cyan--text text--darken-2 avatar">cloud_queue</v-icon>
-          </v-col>
-          <v-col class="pa-0">
-            <v-row >
-              <v-col>
-                <span class="grey--text">Provider</span><br>
-                <span class="subtitle-1">{{shootCloudProviderKind}}</span>
-              </v-col>
-            </v-row>
-            <v-row >
-              <v-col>
-                <span class="grey--text">Credential</span><br>
-                <router-link v-if="canLinkToSecret" slot="activator" class="cyan--text text--darken-2" :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }">
-                  <span class="subtitle-1">{{shootSecretBindingName}}</span>
-                </router-link>
-                <span v-else>{{shootSecretBindingName}}</span>
-              </v-col>
-            </v-row>
-            <v-row >
-              <v-col>
-                <span class="grey--text">{{regionZoneTitle}}</span><br>
-                <span class="subtitle-1">{{regionZoneText}}</span>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-      </v-card-title>
-
+    <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar-title class="subtitle-1">Infrastructure</v-toolbar-title>
+    </v-toolbar>
+    <v-list>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">cloud_queue</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Provider</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{shootCloudProviderKind}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>Credential</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            <router-link v-if="canLinkToSecret"
+              class="cyan--text text--darken-2"
+              :to="{ name: 'Secret', params: { name: shootSecretBindingName, namespace: shootNamespace } }"
+            >
+              <span class="subtitle-1">{{shootSecretBindingName}}</span>
+            </router-link>
+            <span v-else>{{shootSecretBindingName}}</span>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>{{regionZoneTitle}}</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{regionZoneText}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <template v-if="showSeedInfo">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem">
-          <v-row class="py-2">
-            <v-col class="pr-0 pt-4 shrink justify-center">
-              <v-icon class="cyan--text text--darken-2 avatar">spa</v-icon>
-            </v-col>
-            <v-col class="pa-0">
-              <v-row >
-                <v-col>
-                  <span class="grey--text">Seed</span><br>
-                  <shoot-seed-name :shootItem="shootItem" />
-                </v-col>
-                <copy-btn :clipboard-text="shootSeedName"></copy-btn>
-              </v-row>
-              <v-row >
-                <v-col>
-                  <span class="grey--text">Technical Id</span><br>
-                  <span class="subtitle-1">{{shootTechnicalId}}</span>
-                </v-col>
-                <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-              </v-row>
-            </v-col>
-          </v-row>
-        </v-card-title>
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">spa</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Seed</v-list-item-subtitle>
+            <v-list-item-title class="pt-1">
+              <shoot-seed-name :shootItem="shootItem" />
+            </v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <copy-btn :clipboard-text="shootSeedName"></copy-btn>
+          </v-list-item-action>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-icon/>
+          <v-list-item-content class="pt-0">
+            <v-list-item-subtitle>Technical Id</v-list-item-subtitle>
+            <v-list-item-title class="pt-1">
+              {{shootTechnicalId}}
+            </v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
+          </v-list-item-action>
+        </v-list-item>
       </template>
-
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem">
-        <v-row class="py-2">
-          <v-col class="pr-0 pt-4 shrink justify-center">
-            <v-icon class="cyan--text text--darken-2 avatar">settings_ethernet</v-icon>
-          </v-col>
-          <v-col class="pa-0">
-            <v-row >
-              <v-col>
-                <span class="grey--text">Pods CIDR</span><br>
-                <span class="subtitle-1">{{podsCidr}}</span>
-              </v-col>
-            </v-row>
-            <v-row >
-              <v-col>
-                <span class="grey--text">Nodes CIDR</span><br>
-                <span class="subtitle-1">{{nodesCidr}}</span>
-              </v-col>
-            </v-row>
-            <v-row >
-              <v-col>
-                <span class="grey--text">Services CIDR</span><br>
-                <span class="subtitle-1">{{servicesCidr}}</span>
-              </v-col>
-            </v-row>
-          </v-col>
-        </v-row>
-      </v-card-title>
-
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">settings_ethernet</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Pods CIDR</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{podsCidr}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>Nodes CIDR</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{nodesCidr}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item>
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>Services CIDR</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            {{servicesCidr}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <template v-if="!!shootIngressDomainText">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem">
-          <v-icon class="cyan--text text--darken-2 avatar">mdi-earth</v-icon>
-          <v-col class="pa-0">
-            <span class="grey--text">Ingress Domain</span><br>
-            <span class="subtitle-1">{{shootIngressDomainText}}</span>
-          </v-col>
-        </v-card-title>
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">mdi-earth</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Ingress Domain</v-list-item-subtitle>
+            <v-list-item-title class="pt-1">
+              {{shootIngressDomainText}}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </template>
-
       <template v-if="!!shootLoadbalancerClasses">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem">
-          <v-icon class="cyan--text text--darken-2 avatar">mdi-ip-network-outline</v-icon>
-          <v-col class="pa-0">
-            <span class="grey--text">Available Load Balancer Classes</span><br>
-            <lb-class
-            v-for="lbClass in shootLoadbalancerClasses"
-            :name="lbClass.name"
-            :floatingSubnetID="lbClass.floatingSubnetID"
-            :key="lbClass.name"
-            ></lb-class>
-          </v-col>
-        </v-card-title>
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">mdi-ip-network-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Available Load Balancer Classes</v-list-item-subtitle>
+            <v-list-item-title class="d-flex align-center pt-1">
+              <lb-class v-for="{ name, floatingSubnetID } in shootLoadbalancerClasses"
+                :name="name"
+                :floatingSubnetID="floatingSubnetID"
+                :key="name"
+              ></lb-class>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </template>
-
-    </div>
+    </v-list>
   </v-card>
 </template>
 
@@ -215,25 +226,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .cardTitle {
-    line-height: 10px;
-  }
-
-  .listItem {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .avatar {
-    padding-right: 33px;
-  }
-
-</style>
