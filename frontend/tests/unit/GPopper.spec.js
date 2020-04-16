@@ -22,9 +22,15 @@ import { VContent } from 'vuetify/lib'
 Vue.use(Vuetify)
 
 describe('GPopper.vue', function () {
+  let vuetify
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
   describe('VContent', function () {
     it('v-content__wrap class should exist', function () {
-      const wrapper = mount(VContent, {})
+      const wrapper = mount(VContent, { vuetify })
       const element = wrapper.find('.v-content__wrap')
       expect(element.constructor.name).to.be.eq('Wrapper') // if .v-content__wrap is not found the constructor name would be "ErrorWrapper"
     })

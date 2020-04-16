@@ -27,6 +27,11 @@ Vue.use(Vuetify)
 Vue.use(Vuelidate)
 Vue.use(Vuex)
 
+// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
+global.requestAnimationFrame = cb => cb()
+
+let vuetify
+
 const store = new Vuex.Store({
   state: {
     cfg: {}
@@ -53,6 +58,7 @@ function createNewShootDetailsComponent (kubernetesVersion) {
     userInterActionBus: new EventEmitter()
   }
   const wrapper = mount(NewShootDetails, {
+    vuetify,
     propsData,
     store,
     computed: {
@@ -66,6 +72,10 @@ function createNewShootDetailsComponent (kubernetesVersion) {
 }
 
 describe('NewShootDetails.vue', function () {
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
   it('selected kubernetes version should be latest (multiple same minor)', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[1].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.false

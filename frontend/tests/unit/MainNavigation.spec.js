@@ -32,7 +32,11 @@ Vue.use(Vuex)
 
 window.HTMLElement.prototype.scrollIntoView = noop
 
+// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
+global.requestAnimationFrame = cb => cb()
+
 const storeProjectList = []
+let vuetify
 
 const $store = new Vuex.Store({
   state: {
@@ -83,6 +87,7 @@ const $router = {
 
 function createMainNavigationComponent () {
   const wrapper = mount(MainNavigation, {
+    vuetify,
     mocks: {
       $route,
       $router,
@@ -116,6 +121,7 @@ describe('MainNavigation.vue', function () {
     storeProjectList.length = 0 // clear array
     storeProjectList.push(createProjectListItem('foo'))
     storeProjectList.push(createProjectListItem('bar'))
+    vuetify = new Vuetify()
   })
 
   afterEach(function () {
@@ -124,31 +130,32 @@ describe('MainNavigation.vue', function () {
 
   it('should have correct element and css class hierarchy', function () {
     const wrapper = createMainNavigationComponent()
-    const topArea = wrapper.find('aside > .teaser > .content')
+
+    const topArea = wrapper.find('nav .teaser > .content')
     expect(topArea.element).not.to.be.undefined
 
-    const projectSelector = wrapper.find('aside .project-selector > div')
+    const projectSelector = wrapper.find('nav .project-selector > div')
     expect(projectSelector.element).not.to.be.undefined
 
-    const listTitle = wrapper.find('aside .v-list .v-list__tile__title')
+    const listTitle = wrapper.find('nav .v-list .v-list__tile__title')
     expect(listTitle.element).not.to.be.undefined
 
     const mainMenu = wrapper.find({ ref: 'mainMenu' })
     const listTile = mainMenu.find('.v-list__tile__title')
     expect(listTile.element).not.to.be.undefined
 
-    const projectMenuCard = wrapper.find('aside .project-menu .v-card')
+    const projectMenuCard = wrapper.find('nav .project-menu .v-card')
     expect(projectMenuCard.element).not.to.be.undefined
 
-    let projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
+    let projectMenuHighlightedTile = wrapper.find('nav .project-menu .v-card .project-list .v-list__tile--highlighted')
     expect(projectMenuHighlightedTile.element).to.be.undefined
 
     // highlight (default v-list-item highlighting)
-    const projectList = wrapper.find('aside .project-menu .v-card .project-list')
+    const projectList = wrapper.find('nav .project-menu .v-card .project-list')
     expect(projectList.element).not.to.be.undefined
 
     projectList.trigger('keydown.down')
-    projectMenuHighlightedTile = wrapper.find('aside .project-menu .v-card .project-list .v-list__tile--highlighted')
+    projectMenuHighlightedTile = wrapper.find('nav .project-menu .v-card .project-list .v-list__tile--highlighted')
     expect(projectMenuHighlightedTile.element).not.to.be.undefined
   })
 
@@ -191,7 +198,7 @@ describe('MainNavigation.vue', function () {
     storeProjectList.push(createProjectListItem('c'))
     storeProjectList.push(createProjectListItem('d'))
     const wrapper = createMainNavigationComponent()
-    const projectMenuButton = wrapper.find('aside .project-selector .v-btn__content')
+    const projectMenuButton = wrapper.find('nav .project-selector .v-btn__content')
 
     expect(wrapper.vm.highlightedProjectName).to.be.undefined // undefined == first item == All Projects
     const scrollIntoViewSpy = sandbox.spy(window.HTMLElement.prototype, 'scrollIntoView')
@@ -281,7 +288,7 @@ describe('MainNavigation.vue', function () {
     storeProjectList.push(createProjectListItem('c'))
     storeProjectList.push(createProjectListItem('d'))
     const wrapper = createMainNavigationComponent()
-    const projectMenuButton = wrapper.find('aside .project-selector .v-btn__content')
+    const projectMenuButton = wrapper.find('nav .project-selector .v-btn__content')
     const navigateSpy = sandbox.spy(wrapper.vm, 'navigateToProject')
 
     // 2nd item is 1st in storeProjectList as vm projectList has 'all projects' item

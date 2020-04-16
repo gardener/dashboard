@@ -15,29 +15,43 @@
 //
 
 import { expect } from 'chai'
-import { shallowMount, mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import HintColorizer from '@/components/HintColorizer.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { VSelect, VTextField } from 'vuetify/lib'
 Vue.use(Vuetify)
 
+// see issue https://github.com/vuejs/vue-test-utils/issues/974#issuecomment-423721358
+global.requestAnimationFrame = cb => cb()
+
 describe('HintColorizer.vue', function () {
-  it('should be able to apply classname', function () {
+  let vuetify
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
+  it('should be able to apply classname', async function () {
     const propsData = {
       hintColor: 'orange'
     }
-    const wrapper = shallowMount(HintColorizer, {
+    const wrapper = mount(HintColorizer, {
+      vuetify,
       propsData
     })
     const colorizerComponent = wrapper.find(HintColorizer).vm
     expect(colorizerComponent.$el.className).to.contain('hintColor-orange')
 
     wrapper.setProps({ hintColor: 'cyan' })
+
+    await Vue.nextTick()
     expect(colorizerComponent.$el.className).to.contain('hintColor-cyan')
     expect(colorizerComponent.$el.className).to.not.contain('hintColor-orange')
 
     wrapper.setProps({ hintColor: 'default' })
+
+    await Vue.nextTick()
     expect(colorizerComponent.$el.className).to.not.contain('hintColor-cyan')
   })
 
@@ -48,11 +62,14 @@ describe('HintColorizer.vue', function () {
       }
     }
     const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-text-field :error-messages="errorMessage"></v-text-field></hint-colorizer>'
-    const wrapper = mount({ template, data, components: { HintColorizer } })
+    const wrapper = mount({ template, data, components: { HintColorizer } }, { vuetify })
     const { hintColorizer } = wrapper.vm.$refs
+
     expect(hintColorizer.$el.className).to.contain('hintColor-orange')
 
-    wrapper.vm.errorMessage = 'invalid'
+    wrapper.setData({ errorMessage: 'invalid' })
+
+    await Vue.nextTick()
     expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
   })
 
@@ -63,23 +80,33 @@ describe('HintColorizer.vue', function () {
       }
     }
     const template = '<hint-colorizer hintColor="orange" ref="hintColorizer"><v-select :error-messages="errorMessage"></v-select></hint-colorizer>'
-    const wrapper = mount({ template, data, components: { HintColorizer } })
+    const wrapper = mount({ template, data, components: { HintColorizer } }, { vuetify })
     const { hintColorizer } = wrapper.vm.$refs
+
     expect(hintColorizer.$el.className).to.contain('hintColor-orange')
 
-    wrapper.vm.errorMessage = 'invalid'
+    wrapper.setData({ errorMessage: 'invalid' })
+
+    await Vue.nextTick()
     expect(hintColorizer.$el.className).to.not.contain('hintColor-orange')
   })
 })
 
 describe('VSelect', function () {
+  let vuetify
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
   it('should be able to overwrite v-select hint color class', function () {
     const hint = 'hint test'
     const propsData = {
       hint,
       'persistent-hint': true
     }
-    const wrapper = shallowMount(VSelect, {
+    const wrapper = mount(VSelect, {
+      vuetify,
       propsData
     })
     const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')
@@ -88,13 +115,20 @@ describe('VSelect', function () {
 })
 
 describe('VTextField', function () {
+  let vuetify
+
+  beforeEach(() => {
+    vuetify = new Vuetify()
+  })
+
   it('should be able to overwrite v-text-field hint color class', function () {
     const hint = 'hint test'
     const propsData = {
       hint,
       'persistent-hint': true
     }
-    const wrapper = shallowMount(VTextField, {
+    const wrapper = mount(VTextField, {
+      vuetify,
       propsData
     })
     const hintElement = wrapper.find('.v-messages__wrapper > .v-messages__message')

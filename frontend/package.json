@@ -87,6 +87,7 @@
     "sinon": "^9.0.2",
     "sinon-chai": "^3.5.0",
     "vue-cli-plugin-vuetify": "~2.0.5",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "null-loader": "^4.0.0"
   }
 }
