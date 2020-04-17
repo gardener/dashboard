@@ -115,3 +115,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  ::v-deep .hljs-meta {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+</style>
