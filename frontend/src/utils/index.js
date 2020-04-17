@@ -565,7 +565,7 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
   if (!text) {
     return undefined
   }
-  let html = DOMPurify.sanitize(marked(text, {
+  const html = DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,
     tables: true
@@ -574,24 +574,25 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
   const textColorClasses = textColorFromColor(linkColor)
   console.log(textColorClasses)
   const documentFragment = htmlToDocumentFragment(html)
-  if (documentFragment) {
-    const linkElements = documentFragment.querySelectorAll('a')
-    linkElements.forEach(linkElement => {
-      if (textColorClasses.length) {
-        linkElement.classList.add(...textColorClasses)
-      }
-
-      if (transformToExternalLinks) {
-        linkElement.setAttribute('style', 'text-decoration: none')
-        linkElement.setAttribute('target', '_blank')
-        const linkText = linkElement.innerHTML
-        linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
-      }
-    })
+  if (!documentFragment) {
+    return html
   }
 
-  html = documentFragmentToHtml(documentFragment)
-  return html
+  const linkElements = documentFragment.querySelectorAll('a')
+  linkElements.forEach(linkElement => {
+    if (textColorClasses.length) {
+      linkElement.classList.add(...textColorClasses)
+    }
+
+    if (transformToExternalLinks) {
+      linkElement.setAttribute('style', 'text-decoration: none')
+      linkElement.setAttribute('target', '_blank')
+      const linkText = linkElement.innerHTML
+      linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
+    }
+  })
+
+  return documentFragmentToHtml(documentFragment)
 }
 
 export function shootAddonByName (name) {
