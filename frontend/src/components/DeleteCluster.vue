@@ -21,13 +21,13 @@ limitations under the License.
     ref="actionDialog"
     :caption="caption"
     icon="delete"
-    :iconClass="contentClass"
+    :iconColor="iconColor"
     dialogColor="red"
     confirmButtonText="Delete"
     confirm-required
     :smallIcon="small"
     maxWidth="600"
-    >
+  >
     <template slot="actionComponent">
       <v-list>
         <v-list-item-content>
@@ -75,9 +75,8 @@ export default {
       type: Boolean,
       default: false
     },
-    contentClass: {
-      type: String,
-      default: undefined
+    iconColor: {
+      type: String
     }
   },
   mixins: [shootItem],

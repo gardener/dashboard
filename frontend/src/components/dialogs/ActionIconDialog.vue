@@ -19,7 +19,14 @@ limitations under the License.
     <v-tooltip top max-width="600px">
       <template v-slot:activator="{ on }">
         <div v-on="on">
-          <v-btn :small="smallIcon" icon @click="showDialog" :class="iconClass" :loading="loading" :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled">
+          <v-btn
+            icon
+            :small="smallIcon"
+            :color="iconColor"
+            :loading="loading"
+            :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
+            @click="showDialog"
+          >
             <v-icon :medium="!smallIcon">{{icon}}</v-icon>
           </v-btn>
         </div>
@@ -37,12 +44,10 @@ limitations under the License.
       :confirmColor="dialogColor"
       :defaultColor="dialogColor"
       ref="gDialog"
-      >
-      <template slot="caption">{{caption}}</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
-        <slot name="actionComponent"></slot>
-      </template>
+    >
+      <template v-slot:caption>{{caption}}</template>
+      <template v-slot:affectedObjectName>{{shootName}}</template>
+      <template v-slot:message><slot name="actionComponent"></slot></template>
     </g-dialog>
   </div>
 </template>
@@ -98,8 +103,9 @@ export default {
       type: Boolean,
       default: false
     },
-    iconClass: {
-      type: String
+    iconColor: {
+      type: String,
+      default: 'rgba(0, 0, 0, 0.87)'
     },
     smallIcon: {
       type: Boolean,

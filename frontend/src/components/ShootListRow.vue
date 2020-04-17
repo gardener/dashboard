@@ -127,7 +127,7 @@ limitations under the License.
           </template>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small content-class="red--text"></delete-cluster>
+        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small icon-color="red"></delete-cluster>
       </v-row>
     </td>
   </tr>
