@@ -79,6 +79,10 @@ export default {
 
 <style scoped>
 
+.g-subtitle {
+  white-space: normal;
+}
+
 .g-subtitle ::v-deep  p {
   margin-bottom: 4px;
 }
