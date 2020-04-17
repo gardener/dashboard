@@ -548,6 +548,19 @@ export function textColorFromColor (color) {
   return map(split(color, ' '), iteratee)
 }
 
+function htmlToDocumentFragment (html) {
+  var template = document.createElement('template')
+  html = html.trim() // Never return a text node of whitespace as the result
+  template.innerHTML = html
+  return template.content
+}
+
+function documentFragmentToHtml (documentFragment) {
+  const div = document.createElement('div')
+  div.appendChild(documentFragment.cloneNode(true))
+  return div.innerHTML
+}
+
 export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
   if (!text) {
     return undefined
@@ -558,17 +571,26 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
     tables: true
   }))
 
-  const linkRegex = /<a (.*?)>(.*?)<\/a>/g
+  const textColorClasses = textColorFromColor(linkColor)
+  console.log(textColorClasses)
+  const documentFragment = htmlToDocumentFragment(html)
+  if (documentFragment) {
+    const linkElements = documentFragment.querySelectorAll('a')
+    linkElements.forEach(linkElement => {
+      if (textColorClasses.length) {
+        linkElement.classList.add(...textColorClasses)
+      }
 
-  if (linkColor) {
-    const textColor = join(textColorFromColor(linkColor), ' ')
-    html = html.replace(linkRegex, `<a class="${textColor}" $1>$2</a>`)
+      if (transformToExternalLinks) {
+        linkElement.setAttribute('style', 'text-decoration: none')
+        linkElement.setAttribute('target', '_blank')
+        const linkText = linkElement.innerHTML
+        linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
+      }
+    })
   }
 
-  if (transformToExternalLinks) {
-    html = html.replace(linkRegex, '<a style="text-decoration: none" target="_blank" $1><span style="text-decoration: underline">$2</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i></a>')
-  }
-
+  html = documentFragmentToHtml(documentFragment)
   return html
 }
 
