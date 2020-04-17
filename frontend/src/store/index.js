@@ -124,6 +124,8 @@ const vendorNameFromImageName = imageName => {
     return 'coreos'
   } else if (lowerCaseName.includes('ubuntu')) {
     return 'ubuntu'
+  } else if (lowerCaseName.includes('gardenlinux')) {
+    return 'gardenlinux'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
     return 'suse-jeos'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
