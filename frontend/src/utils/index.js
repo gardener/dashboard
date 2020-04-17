@@ -572,7 +572,6 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
   }))
 
   const textColorClasses = textColorFromColor(linkColor)
-  console.log(textColorClasses)
   const documentFragment = htmlToDocumentFragment(html)
   if (!documentFragment) {
     return html
