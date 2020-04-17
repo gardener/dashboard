@@ -15,21 +15,21 @@ limitations under the License.
 -->
 
 <template>
-  <div class="d-flex flex-column">
-    <div class="pa-2" v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
-      <div class="addon-action">
+  <v-list three-line>
+    <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name" class="">
+      <v-list-item-action>
         <v-checkbox
           color="cyan darken-2"
           v-model="addons[addonDefinition.name].enabled"
           :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>
-      </div>
-      <div>
-        <div class="subtitle-1 font-weight-medium my-1" v-text="addonDefinition.title"/>
-        <div class="addon-content mb-6" v-html="addonDefinition.description"/>
-      </div>
-    </div>
-  </div>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
+        <v-list-item-subtitle class="d-flex flex-column" v-html="addonDefinition.description"></v-list-item-subtitle>
+      </v-list-item-content>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script>
@@ -76,18 +76,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-.addon-content ::v-deep  p {
-  margin-bottom: 4px;
-}
-
-.addon-action {
-  min-height: 50px;
-  width: 56px;
-  min-width: 56px;
-  max-width: 56px;
-  margin: 0;
-}
-</style>
