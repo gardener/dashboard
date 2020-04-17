@@ -15,18 +15,18 @@ limitations under the License.
 -->
 
 <template>
-  <v-list three-line>
-    <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name" class="">
-      <v-list-item-action>
+  <v-list two-line>
+    <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+      <v-list-item-action class="align-self-start">
         <v-checkbox
           color="cyan darken-2"
           v-model="addons[addonDefinition.name].enabled"
           :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
         ></v-checkbox>
       </v-list-item-action>
-      <v-list-item-content>
+      <v-list-item-content  class="align-self-start">
         <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
-        <v-list-item-subtitle class="d-flex flex-column" v-html="addonDefinition.description"></v-list-item-subtitle>
+        <v-list-item-subtitle class="d-flex flex-column g-subtitle" v-html="addonDefinition.description"></v-list-item-subtitle>
       </v-list-item-content>
     </v-list-item>
   </v-list>
@@ -76,3 +76,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+.g-subtitle ::v-deep  p {
+  margin-bottom: 4px;
+}
+
+</style>
+
