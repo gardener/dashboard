@@ -104,8 +104,7 @@ export default {
       default: false
     },
     iconColor: {
-      type: String,
-      default: 'rgba(0, 0, 0, 0.87)'
+      type: String
     },
     smallIcon: {
       type: Boolean,

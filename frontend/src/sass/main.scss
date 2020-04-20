@@ -15,6 +15,13 @@
  */
 
  /** Gardener Styles */
+ @import '~vuetify/src/styles/styles.sass';
+
+.v-list-item__action {
+   .v-btn.v-btn--icon {
+    color: map-deep-get($material-theme, 'text', 'primary');
+  }
+}
 
 .cursor-pointer {
   cursor: pointer;
