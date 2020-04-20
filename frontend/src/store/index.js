@@ -40,6 +40,8 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
+import startsWith from 'lodash/startsWith'
+import endsWith from 'lodash/endsWith'
 import max from 'lodash/max'
 import toPairs from 'lodash/toPairs'
 import isEqual from 'lodash/isEqual'
@@ -386,7 +388,11 @@ const getters = {
     return (cloudProfileName, region) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
-      const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      availableFloatingPools = filter(floatingPools, fp => {
+        const wildcard = startsWith(fp.name, '*') || endsWith(fp.name, '*')
+        return !wildcard // TODO introduce wildcard component to make wildcard fps (and potential other values) configurable on UI
+      })
       return uniq(map(availableFloatingPools, 'name'))
     }
   },
