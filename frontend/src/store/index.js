@@ -55,8 +55,6 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 import semver from 'semver'
-import startsWith from 'lodash/startsWith'
-import endsWith from 'lodash/endsWith'
 
 Vue.use(Vuex)
 
