@@ -21,35 +21,35 @@ limitations under the License.
         <img :src="avatarUrl" />
       </v-list-item-avatar>
       <v-list-item-content>
-        <g-popper
-          :title="displayName"
-          toolbarColor="cyan darken-2"
-          :popperKey="`serviceAccount_sa_${username}`"
+        <v-list-item-title class="cursor-pointer" stlye="max-width: 200px;">
+          <g-popper
+            :title="displayName"
+            toolbarColor="cyan darken-2"
+            :popperKey="`serviceAccount_sa_${username}`"
 
-        >
-          <v-list-item-title slot="popperRef" class="cursor-pointer">
-            {{displayName}}
-          </v-list-item-title>
-          <v-row class="fill-height" align="center"
           >
-            <span class="mr-2">Created by</span><span :class="createdByClasses">
-              <account-avatar :account-name="createdBy"></account-avatar>
-            </span>
-          </v-row>
-          <v-row class="fill-height" align="center"
-            v-if="created && creationTimestamp"
-          >
-            <span class="mr-4">Created</span>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <span v-on="on" class="font-weight-bold">
-                  <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
-                </span>
-              </template>
-              {{created}}
-            </v-tooltip>
-          </v-row>
-        </g-popper>
+            <span slot="popperRef">{{displayName}}</span>
+            <v-row class="fill-height" align="center"
+            >
+              <span class="mr-2">Created by</span><span :class="createdByClasses">
+                <account-avatar :account-name="createdBy"></account-avatar>
+              </span>
+            </v-row>
+            <v-row class="fill-height" align="center"
+              v-if="created && creationTimestamp"
+            >
+              <span class="mr-4">Created</span>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <span v-on="on" class="font-weight-bold">
+                    <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
+                  </span>
+                </template>
+                {{created}}
+              </v-tooltip>
+            </v-row>
+          </g-popper>
+        </v-list-item-title>
         <v-list-item-subtitle>
           {{username}}
         </v-list-item-subtitle>
