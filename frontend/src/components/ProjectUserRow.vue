@@ -31,9 +31,11 @@ limitations under the License.
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
-        <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-          {{roleName}}
-        </v-chip>
+       <v-row>
+          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
+            {{roleName}}
+          </v-chip>
+        </v-row>
       </v-list-item-action>
       <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
