@@ -23,6 +23,22 @@
   }
 }
 
+.secret-dialog {
+  .help-content {
+    a {
+      text-decoration: none;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 400;
+    }
+    p {
+      font-size: 16px;
+      font-weight: 300;
+    }
+  }
+}
+
 .cursor-pointer {
   cursor: pointer;
 }

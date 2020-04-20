@@ -16,11 +16,10 @@ limitations under the License.
 
 <template >
   <v-dialog v-model="visible" max-width="650">
-    <v-card class="help_member" :class="cardClass">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <span v-if="isUserDialog">Project Users</span>
-        <span v-if="isServiceDialog">Service Accounts</span>
+    <v-card :class="cardClass">
+      <v-card-title class="dialog-title white--text align-center justify-start">
+        <v-icon large dark>mdi-account-plus</v-icon>
+        <span class="headline ml-5">{{ title}}</span>
       </v-card-title>
       <v-card-text>
         <template v-if="isUserDialog">
@@ -68,6 +67,9 @@ export default {
         this.$emit('input', value)
       }
     },
+    title () {
+      return this.isUserDialog ? 'Project Users' : 'Service Accounts'
+    },
     isUserDialog () {
       return this.type === 'user'
     },
@@ -100,29 +102,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .help_member {
-    .v-card__title{
+  .help_user, .help_service {
+    .dialog-title {
       background-size: cover;
-      color: white;
       height: 130px;
-      span{
-        font-size: 25px !important;
-        padding-left: 30px;
-        font-weight: 400 !important;
-        padding-top: 15px !important;
-      }
-      .icon {
-        font-size: 50px !important;
-      }
     }
   }
   .help_user {
-    .v-card__title{
+    .dialog-title {
       background-image: url('../../assets/add_user_background.svg');
     }
   }
   .help_service {
-    .v-card__title{
+    .dialog-title {
       background-image: url('../../assets/add_service_background.svg');
     }
   }

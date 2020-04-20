@@ -21,7 +21,7 @@ limitations under the License.
      backgroundSrc="/static/background_gcp.svg"
      :value="value"
      @input="onInput">
-     <div slot="help-content" class="helpContent">
+     <div slot="help-content" class="help-content">
       <p>
         A service account is a special account that can be used by services and applications running on your Google
         Compute Engine instance to interact with other Google Cloud Platform APIs. Applications can use service
@@ -77,19 +77,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-  .helpContent {
-    a {
-      text-decoration: none;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 400;
-    }
-    p {
-      font-size: 16px;
-      font-weight: 300;
-    }
+  .help-content {
     ul {
       margin-top: 20px;
       margin-bottom: 20px;
@@ -103,5 +91,4 @@ export default {
       }
     }
   }
-
 </style>
