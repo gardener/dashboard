@@ -17,15 +17,15 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
-      <v-card-title :class="titleColorClass">
-        <div class="headline">
+      <v-toolbar flat :class="titleColorClass">
+        <v-toolbar-title>
           <slot name="caption">
             Confirm Dialog
           </slot>&nbsp;
           <code :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
-        </div>
-      </v-card-title>
-      <v-card-text :style="{'max-height': maxHeight}">
+        </v-toolbar-title>
+      </v-toolbar>
+      <v-card-text class="pa-3" :style="{'max-height': maxHeight}">
         <slot name="message">
           This is a generic dialog template.
         </slot>
