@@ -53,6 +53,8 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 import semver from 'semver'
+import startsWith from 'lodash/startsWith'
+import endsWith from 'lodash/endsWith'
 
 Vue.use(Vuex)
 
@@ -388,7 +390,11 @@ const getters = {
     return (cloudProfileName, region) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
-      const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      availableFloatingPools = filter(floatingPools, fp => {
+        const wildcard = startsWith(fp.name, '*') || endsWith(fp.name, '*')
+        return !wildcard // TODO introduce wildcard component to make wildcard fps (and potential other values) configurable on UI
+      })
       return uniq(map(availableFloatingPools, 'name'))
     }
   },
