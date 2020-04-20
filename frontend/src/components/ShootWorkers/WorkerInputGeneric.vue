@@ -15,108 +15,107 @@ limitations under the License.
 -->
 
 <template>
-  <v-container  class="py-0 ma-0">
-    <v-row align="center">
-      <v-row >
-        <v-col class="regularInput">
-          <v-text-field
-            color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.name')"
-            @input="onInputName"
-            @blur="$v.worker.name.$touch()"
-            v-model="worker.name"
-            counter="15"
-            label="Group Name">
-          </v-text-field>
-        </v-col>
-        <v-col>
-          <machine-type
-          :machineTypes="machineTypes"
-          :worker="worker"
-          @updateMachineType="onUpdateMachineType"
-          @valid="onMachineTypeValid">
-          </machine-type>
-        </v-col>
-        <v-col class="regularInput">
-          <machine-image
-          :machineImages="machineImages"
-          :worker="worker"
-          :updateOSMaintenance="updateOSMaintenance"
-          @updateMachineImage="onUpdateMachineImage"
-          @valid="onMachineImageValid">
-          </machine-image>
-        </v-col>
-        <v-col v-if="volumeInCloudProfile" class="regularInput">
-          <volume-type
-          :volumeTypes="volumeTypes"
-          :worker="worker"
-          @updateVolumeType="onUpdateVolumeType"
-          @valid="onVolumeTypeValid">
-          </volume-type>
-        </v-col>
-        <v-col v-if="volumeInCloudProfile" class="smallInput">
-          <size-input
-            :min="minimumVolumeSize"
-            color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.volume.size')"
-            @input="onInputVolumeSize"
-            @blur="$v.worker.volume.size.$touch()"
-            label="Volume Size"
-            v-model="worker.volume.size"
-          ></size-input>
-        </v-col>
-        <v-col class="smallInput">
-          <v-text-field
-            min="0"
-            color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.minimum')"
-            @input="onInputminimum"
-            @blur="$v.worker.minimum.$touch()"
-            type="number"
-            v-model="innerMin"
-            label="Autoscaler Min."></v-text-field>
-        </v-col>
-        <v-col class="smallInput">
-          <v-text-field
-            min="0"
-            color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.maximum')"
-            @input="onInputmaximum"
-            @blur="$v.worker.maximum.$touch()"
-            type="number"
-            v-model="innerMax"
-            label="Autoscaler Max."
-          ></v-text-field>
-        </v-col>
-        <v-col class="smallInput">
-          <v-text-field
-            min="0"
-            color="cyan darken-2"
-            :error-messages="getErrorMessages('worker.maxSurge')"
-            @input="onInputMaxSurge"
-            @blur="$v.worker.maxSurge.$touch()"
-            v-model="maxSurge"
-            label="Max. Surge"></v-text-field>
-        </v-col>
-        <v-col class="regularInput" v-if="zonedCluster">
-          <v-select
-            color="cyan darken-2"
-            item-color="cyan darken-2"
-            label="Zone"
-            :items="availableZones"
-            :error-messages="getErrorMessages('worker.zones')"
-            v-model="worker.zones"
-            @input="onInputZones"
-            @blur="$v.worker.zones.$touch()"
-            multiple
-            ></v-select>
-        </v-col>
-      </v-row>
-      <v-col class="ml-4">
-        <slot name="action"></slot>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="d-flex flex-nowrap align-center">
+    <div class="d-flex flex-wrap">
+      <div class="regularInput">
+        <v-text-field
+          color="cyan darken-2"
+          :error-messages="getErrorMessages('worker.name')"
+          @input="onInputName"
+          @blur="$v.worker.name.$touch()"
+          v-model="worker.name"
+          counter="15"
+          label="Group Name">
+        </v-text-field>
+      </div>
+      <div class="regularInput">
+        <machine-type
+        :machineTypes="machineTypes"
+        :worker="worker"
+        @updateMachineType="onUpdateMachineType"
+        @valid="onMachineTypeValid">
+        </machine-type>
+      </div>
+      <div class="regularInput">
+        <machine-image
+        :machineImages="machineImages"
+        :worker="worker"
+        :updateOSMaintenance="updateOSMaintenance"
+        @updateMachineImage="onUpdateMachineImage"
+        @valid="onMachineImageValid">
+        </machine-image>
+      </div>
+      <div v-if="volumeInCloudProfile" class="regularInput">
+        <volume-type
+        :volumeTypes="volumeTypes"
+        :worker="worker"
+        @updateVolumeType="onUpdateVolumeType"
+        @valid="onVolumeTypeValid">
+        </volume-type>
+      </div>
+      <div v-if="volumeInCloudProfile" class="smallInput">
+        <size-input
+          :min="minimumVolumeSize"
+          color="cyan darken-2"
+          :error-messages="getErrorMessages('worker.volume.size')"
+          @input="onInputVolumeSize"
+          @blur="$v.worker.volume.size.$touch()"
+          label="Volume Size"
+          v-model="worker.volume.size"
+        ></size-input>
+      </div>
+      <div class="smallInput">
+        <v-text-field
+          min="0"
+          color="cyan darken-2"
+          :error-messages="getErrorMessages('worker.minimum')"
+          @input="onInputminimum"
+          @blur="$v.worker.minimum.$touch()"
+          type="number"
+          v-model="innerMin"
+          label="Autoscaler Min."></v-text-field>
+      </div>
+      <div class="smallInput">
+        <v-text-field
+          min="0"
+          color="cyan darken-2"
+          :error-messages="getErrorMessages('worker.maximum')"
+          @input="onInputmaximum"
+          @blur="$v.worker.maximum.$touch()"
+          type="number"
+          v-model="innerMax"
+          label="Autoscaler Max."
+        ></v-text-field>
+      </div>
+      <div class="smallInput">
+        <v-text-field
+          min="0"
+          color="cyan darken-2"
+          :error-messages="getErrorMessages('worker.maxSurge')"
+          @input="onInputMaxSurge"
+          @blur="$v.worker.maxSurge.$touch()"
+          v-model="maxSurge"
+          label="Max. Surge"></v-text-field>
+      </div>
+
+      <div class="regularInput" v-if="zonedCluster">
+        <v-select
+          color="cyan darken-2"
+          item-color="cyan darken-2"
+          label="Zone"
+          :items="availableZones"
+          :error-messages="getErrorMessages('worker.zones')"
+          v-model="worker.zones"
+          @input="onInputZones"
+          @blur="$v.worker.zones.$touch()"
+          multiple
+          ></v-select>
+      </div>
+    </div>
+    <div class="ml-4">
+      <slot name="action"></slot>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -366,8 +365,12 @@ export default {
 <style lang="scss" scoped>
   .regularInput {
     max-width: 300px;
+    flex: 1 1 auto;
+    padding: 12px;
   }
   .smallInput {
     max-width: 120px;
+    flex: 1 1 auto;
+    padding: 12px;
   }
 </style>

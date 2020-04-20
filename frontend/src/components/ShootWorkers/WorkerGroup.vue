@@ -21,12 +21,15 @@ limitations under the License.
     :popperKey="`worker_group_${workerGroup.name}`"
 
   >
-    <v-row class="fill-height"      v-for="(line,index) in description"
-     :key="index"
-          align="center">
-     <span class="ma-1">
-       <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-     </span>
+    <v-row
+      class="fill-height"
+      v-for="(line,index) in description"
+      :key="index"
+      align="center"
+    >
+      <span class="ma-1">
+        <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
+      </span>
     </v-row>
     <v-chip
       slot="popperRef"
