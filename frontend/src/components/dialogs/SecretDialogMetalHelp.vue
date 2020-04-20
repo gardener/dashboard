@@ -50,21 +50,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .help-content {
-    a {
-      text-decoration: none;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 400;
-    }
-    p {
-      font-size: 16px;
-      font-weight: 300;
-    }
-  }
-
-</style>
