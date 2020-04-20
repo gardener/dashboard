@@ -128,12 +128,14 @@ const vendorNameFromImageName = imageName => {
     return 'ubuntu'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
     return 'suse-jeos'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
+    return 'suse-chost'
   }
   return undefined
 }
 
 const vendorNeedsLicense = vendorName => {
-  return vendorName === 'suse-jeos'
+  return vendorName === 'suse-jeos' || vendorName === 'suse-chost'
 }
 
 const matchesPropertyOrEmpty = (path, srcValue) => {

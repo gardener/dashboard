@@ -30,7 +30,7 @@ describe('Store', function () {
         ]
       },
       {
-        name: 'suse-jeos',
+        name: 'suse-chost',
         versions: [
           {
             version: '15.1.20190927'
@@ -72,17 +72,17 @@ describe('Store', function () {
     const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
     expect(dashboardMachineImages).to.have.length(4)
 
-    const expiredImage = find(dashboardMachineImages, { name: 'suse-jeos', version: '15.1.20191127' })
+    const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
     expect(expiredImage).to.equal(undefined)
 
     const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
     expect(invalidImage).to.equal(undefined)
 
-    const suseImage = find(dashboardMachineImages, { name: 'suse-jeos', version: '15.1.20191027' })
+    const suseImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191027' })
     expect(suseImage.expirationDate).to.equal('2119-04-05T01:02:03Z')
     expect(suseImage.expirationDateString).to.not.equal(undefined)
-    expect(suseImage.vendorName).to.equal('suse-jeos')
-    expect(suseImage.icon).to.equal('suse-jeos')
+    expect(suseImage.vendorName).to.equal('suse-chost')
+    expect(suseImage.icon).to.equal('suse-chost')
     expect(suseImage.needsLicense).to.equal(true)
     expect(suseImage).to.equal(dashboardMachineImages[1]) // check sorting
 
