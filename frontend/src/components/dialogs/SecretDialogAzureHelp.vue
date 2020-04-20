@@ -21,7 +21,7 @@ limitations under the License.
     backgroundSrc="/static/background_azure.svg"
     :value="value"
     @input="onInput">
-    <div slot="help-content" class="helpContent">
+    <div slot="help-content" class="help-content">
       <p>
         Before you can provision and access a Kubernetes cluster on Azure, you need to add account credentials.
         The Gardener needs the credentials to provision and operate the Azure infrastructure for your Kubernetes cluster.
@@ -60,21 +60,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .helpContent {
-    a {
-      text-decoration: none;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 400;
-    }
-    p {
-      font-size: 16px;
-      font-weight: 300;
-    }
-  }
-
-</style>

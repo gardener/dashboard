@@ -16,17 +16,10 @@ limitations under the License.
 
 <template >
   <v-dialog v-model="visible" max-width="650">
-    <v-card class="add_member" :class="cardClass">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-account-plus</v-icon>
-        <template v-if="isUpdateDialog">
-          <span v-if="isUserDialog">Update User</span>
-          <span v-if="isServiceDialog">Update Service Account</span>
-        </template>
-        <template v-else>
-          <span v-if="isUserDialog">Add User to Project</span>
-          <span v-if="isServiceDialog">Add Service Account to Project</span>
-        </template>
+    <v-card :class="cardClass">
+      <v-card-title class="dialog-title white--text align-center justify-start">
+        <v-icon large dark>mdi-account-plus</v-icon>
+        <span class="headline ml-5">{{title}}</span>
       </v-card-title>
       <v-card-text>
         <v-container  class="pa-0 ma-0">
@@ -195,6 +188,9 @@ export default {
       }
       return validationErrors
     },
+    title () {
+      return this.isUpdateDialog ? `Update ${this.nameLabel}` : `Add ${this.nameLabel} to Project`
+    },
     isUserDialog () {
       return this.type === 'adduser' || this.type === 'updateuser'
     },
@@ -211,13 +207,7 @@ export default {
       return filter(MEMBER_ROLE_DESCRIPTORS, role => role.hidden !== true)
     },
     nameLabel () {
-      if (this.isUserDialog) {
-        return 'User'
-      }
-      if (this.isServiceDialog) {
-        return 'Service Account'
-      }
-      return undefined
+      return this.isUserDialog ? 'User' : 'Service Account'
     },
     nameHint () {
       if (this.isUserDialog) {
@@ -376,29 +366,19 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .add_member {
-    .v-card__title{
+  .add_user, .add_service {
+    .dialog-title {
       background-size: cover;
-      color: white;
       height: 130px;
-      span{
-        font-size: 25px !important;
-        padding-left: 30px;
-        font-weight: 400 !important;
-        padding-top: 15px !important;
-      }
-      .icon {
-        font-size: 50px !important;
-      }
     }
   }
   .add_user {
-    .v-card__title{
+    .dialog-title {
       background-image: url('../../assets/add_user_background.svg');
     }
   }
   .add_service {
-    .v-card__title{
+    .dialog-title {
       background-image: url('../../assets/add_service_background.svg');
     }
   }

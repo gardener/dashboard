@@ -21,7 +21,7 @@ limitations under the License.
     backgroundSrc="/static/background_aws.svg"
     :value="value"
     @input="onInput">
-    <div slot="help-content" class="helpContent">
+    <div slot="help-content" class="help-content">
       <p>
         Before you can provision and access a Kubernetes cluster, you need to add account credentials. To manage
         credentials for AWS Identity and Access Management (IAM), use the
@@ -125,21 +125,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .helpContent {
-    a {
-      text-decoration: none;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 400;
-    }
-    p {
-      font-size: 16px;
-      font-weight: 300;
-    }
-  }
-
-</style>

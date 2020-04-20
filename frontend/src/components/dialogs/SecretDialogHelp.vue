@@ -18,23 +18,17 @@ limitations under the License.
   <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-img
-        class="white--text"
+        class="white--text align-center justify-start"
         height="90px"
         :src="backgroundSrc"
       >
-        <v-container class="fill-height" >
-          <v-row class="fill-height" align="center" justify="start" >
-            <v-col cols="1">
-              <v-icon large class="white--text">mdi-help-circle-outline</v-icon>
-            </v-col>
-            <v-col>
-              <div class="credential_title">{{title}}</div>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-card-title>
+          <v-icon large dark>mdi-help-circle-outline</v-icon>
+          <span class="headline ml-5">{{title}}</span>
+        </v-card-title>
       </v-img>
 
-      <v-card-text class="pa-4">
+      <v-card-text class="secret-dialog pa-4">
         <slot name="help-content"></slot>
       </v-card-text>
 
@@ -90,16 +84,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .infra_icon {
-    font-size: 90px !important;
-  }
-
-  .credential_title {
-    font-size: 24px;
-    font-weight: 400;
-  }
-
-</style>

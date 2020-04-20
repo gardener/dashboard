@@ -21,7 +21,7 @@ limitations under the License.
      backgroundSrc="/static/background_vsphere.svg"
      :value="value"
      @input="onInput">
-     <div slot="help-content" class="helpContent">
+     <div slot="help-content" class="help-content">
       <p>
         Before you can provision and access a Kubernetes cluster on VMware vSphere, you need to add vSphere and NSX-T account credentials.
         The Gardener needs these credentials to provision and operate the VMware vSphere infrastructure for your Kubernetes cluster.
@@ -65,21 +65,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .helpContent {
-    a {
-      text-decoration: none;
-    }
-    h1 {
-      font-size: 22px;
-      font-weight: 400;
-    }
-    p {
-      font-size: 16px;
-      font-weight: 300;
-    }
-  }
-
-</style>

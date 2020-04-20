@@ -18,22 +18,15 @@ limitations under the License.
   <v-dialog v-model="visible" max-width="750">
     <v-card>
       <v-img
-        class="white--text"
+        class="white--text align-center justify-start"
         height="130px"
         :src="backgroundSrc"
       >
-        <v-container class="fill-height" >
-          <v-row class="fill-height" align="center" justify="start" >
-            <v-col cols="1">
-              <infra-icon v-model="infraIcon" :width="42"></infra-icon>
-            </v-col>
-            <v-col>
-              <div class="credential_title ml-4">{{title}}</div>
-            </v-col>
-          </v-row>
-        </v-container>
+        <v-card-title>
+          <infra-icon v-model="infraIcon" :width="42"></infra-icon>
+          <span class="headline ml-5">{{title}}</span>
+        </v-card-title>
       </v-img>
-
       <v-card-text>
         <v-container fluid>
           <div>
@@ -351,12 +344,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .credential_title {
-    font-size: 30px;
-    font-weight: 400;
-  }
-
-</style>

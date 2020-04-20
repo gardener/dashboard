@@ -15,12 +15,11 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" persistent scrollable max-width="600px">
-    <v-card class="project">
-      <v-card-title>
-        <v-icon x-large class="white--text">mdi-cube</v-icon>
-        <span v-if="isCreateMode">Create Project</span>
-        <span v-else>Update Project</span>
+  <v-dialog v-model="visible" persistent scrollable max-width="600">
+    <v-card>
+      <v-card-title class="dialog-title white--text align-center justify-start">
+        <v-icon large dark>mdi-cube</v-icon>
+        <span class="headline ml-5">{{title}}</span>
       </v-card-title>
       <v-card-text>
         <form>
@@ -194,6 +193,9 @@ export default {
       set (value) {
         this.$emit('input', value)
       }
+    },
+    title () {
+      return this.isCreateMode ? 'Create Project' : 'Update Project'
     },
     projectNames () {
       return this.projectNamesFromProjectList
@@ -410,23 +412,10 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  .project {
-    .v-card__title{
-      background-image: url('../../assets/project_background.svg');
-      background-size: cover;
-      color: white;
-      height: 130px;
-      span{
-        font-size: 25px !important;
-        padding-left: 30px;
-        font-weight: 400 !important;
-        padding-top: 15px !important;
-      }
-      .icon {
-        font-size: 50px !important;
-      }
-    }
+<style lang="scss" scoped>
+  .dialog-title {
+    background-size: cover;
+    height: 130px;
+    background-image: url('../../assets/project_background.svg');
   }
-
 </style>
