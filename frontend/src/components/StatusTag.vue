@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <span v-if="visible">
+  <div v-if="visible">
     <g-popper
       @input="onPopperInput"
       @rendered="popperRendered=true"
@@ -25,24 +25,26 @@ limitations under the License.
       :popperKey="popperKeyWithType"
       :placement="popperPlacement"
       :disabled="!tag.message">
-      <v-tooltip slot="popperRef" top max-width="400px" :disabled="tooltipDisabled">
-        <template v-slot:activator="{ on }">
-          <v-chip
-            v-on="on"
-            class="status-tag"
-            :class="{ 'cursor-pointer': tag.message }"
-            outlined
-            :text-color="color"
-            small
-            :color="color">
-            {{chipText}}
-          </v-chip>
-        </template>
-        <span class="font-weight-bold">{{chipTooltip.title}}</span>
-        <div v-if="chipTooltip.description">
-          {{chipTooltip.description}}
-        </div>
-      </v-tooltip>
+      <div slot="popperRef">
+        <v-tooltip top max-width="400px" :disabled="tooltipDisabled">
+          <template v-slot:activator="{ on }">
+            <v-chip
+              v-on="on"
+              class="status-tag"
+              :class="{ 'cursor-pointer': tag.message }"
+              outlined
+              :text-color="color"
+              small
+              :color="color">
+              {{chipText}}
+            </v-chip>
+          </template>
+          <span class="font-weight-bold">{{chipTooltip.title}}</span>
+          <div v-if="chipTooltip.description">
+            {{chipTooltip.description}}
+          </div>
+        </v-tooltip>
+      </div>
       <ansi-text :text="tag.message"></ansi-text>
     </g-popper>
     <time-string
@@ -53,7 +55,7 @@ limitations under the License.
       :pointInTime="-1"
       :withoutPrefixOrSuffix="true">
     </time-string>
-  </span>
+  </div>
 </template>
 
 <script>

@@ -38,9 +38,7 @@ limitations under the License.
           <slot></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
-              <template v-if="showPlaceholder">
-                &nbsp;
-              </template>
+              <div v-if="showPlaceholder" style="height: 22px;"></div>
               <lazy-component @show="showPlaceholder=false">
                 <span v-if="!!time.caption">{{time.caption}}</span>
                 <time-string :dateTime="time.dateTime" :pointInTime="-1"></time-string>
