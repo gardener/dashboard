@@ -2,7 +2,9 @@
   <hint-colorizer :hintColor="hintColor">
     <v-select
       color="cyan darken-2"
+      item-color="cyan darken-2"
       :items="machineImages"
+      item-value="key"
       return-object
       :error-messages="getErrorMessages('worker.machine.image')"
       @input="onInputMachineImage"
@@ -13,15 +15,15 @@
       persistent-hint
     >
       <template v-slot:item="{ item }">
-        <v-list-tile-action>
+        <v-list-item-action>
           <vendor-icon v-model="item.icon"></vendor-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Name: {{item.name}} | Version: {{item.version}}</v-list-tile-title>
-          <v-list-tile-sub-title v-if="itemDescription(item).length > 0">
+        </v-list-item-action>
+        <v-list-item-content>
+          <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
+          <v-list-item-subtitle v-if="itemDescription(item).length > 0">
             {{itemDescription(item)}}
-          </v-list-tile-sub-title>
-        </v-list-tile-content>
+          </v-list-item-subtitle>
+        </v-list-item-content>
       </template>
       <template v-slot:selection="{ item }">
         <vendor-icon v-model="item.icon"></vendor-icon>

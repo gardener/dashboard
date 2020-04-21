@@ -25,6 +25,7 @@ limitations under the License.
       label="Cloud Profile"
       :error-messages="getErrorMessages('value')"
       :color="color"
+      :item-color="color"
       @input="onInput"
       @blur="$v.value.$touch()"
       ></v-select>

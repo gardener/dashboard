@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout row wrap>
+  <v-row >
     <v-card
       v-for="infrastructureKind in sortedCloudProviderKindList"
       class="select_infra_card"
@@ -24,16 +24,16 @@ limitations under the License.
       :key="infrastructureKind"
       hover
       >
-      <v-layout align-center justify-center column>
-        <v-flex>
+      <div class="d-flex flex-column justify-center align-center">
+        <div>
           <infra-icon :value="infrastructureKind" :height="60"></infra-icon>
-        </v-flex>
-        <v-flex mt-2>
-          <span class="subheading">{{infrastructureKind}}</span>
-        </v-flex>
-      </v-layout>
+        </div>
+        <div class="mt-2" >
+          <span class="subtitle-1">{{infrastructureKind}}</span>
+        </div>
+      </div>
     </v-card>
-  </v-layout>
+  </v-row>
 </template>
 
 <script>
@@ -85,9 +85,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  @import '~vuetify/src/stylus/settings/_colors.styl';
-
+<style lang="scss" scoped>
   .select_infra_card {
     padding: 10px;
     opacity: 0.8;

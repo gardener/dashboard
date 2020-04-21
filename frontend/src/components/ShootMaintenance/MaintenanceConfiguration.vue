@@ -35,7 +35,7 @@ limitations under the License.
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import { updateShootMaintenance } from '@/utils/api'

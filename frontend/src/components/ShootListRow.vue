@@ -22,13 +22,13 @@ limitations under the License.
       </router-link>
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
-      <v-layout align-center row fill-height class="pa-0 ma-0">
-        <v-flex grow>
+      <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
+        <v-col class="grow" >
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
             {{ shootName }}
           </router-link>
-        </v-flex>
-        <v-flex shrink>
+        </v-col>
+        <v-col class="shrink" >
           <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
           <hibernation-schedule-warning
             v-if="isShootHasNoHibernationScheduleWarning"
@@ -36,15 +36,17 @@ limitations under the License.
             :namespace="shootNamespace"
             :purpose="shootPurpose">
           </hibernation-schedule-warning>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
       <v-tooltip top>
-        <v-layout align-center justify-start row fill-height slot="activator">
-          <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
-          <div>{{ shootRegion }}</div>
-        </v-layout>
+        <template v-slot:activator="{ on }">
+          <v-row v-on="on" class="fill-height" align="center" justify="start">
+            <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
+            <div>{{ shootRegion }}</div>
+          </v-row>
+        </template>
         <span>{{ shootCloudProviderKind }} [{{ shootRegion }}]</span>
       </v-tooltip>
     </td>
@@ -52,26 +54,28 @@ limitations under the License.
       <shoot-seed-name :shootItem="shootItem" />
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
-      <v-layout align-center justify-start row fill-height slot="activator">
+      <v-row class="fill-height flex-nowrap" align="center" justify="start" slot="activator">
         <span>{{shootTechnicalId}}</span>
         <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-      </v-layout>
+      </v-row>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="shootCreatedBy"></account-avatar>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdAt']">
       <v-tooltip top>
-        <div slot="activator">
-          <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
-        </div>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <time-string :date-time="shootCreationTimestamp" :pointInTime="-1"></time-string>
+          </div>
+        </template>
         {{ shootCreatedAt }}
       </v-tooltip>
     </td>
-    <td class="nowrap text-xs-center" v-if="this.headerVisible['purpose']">
+    <td class="nowrap text-center" v-if="this.headerVisible['purpose']">
       <purpose-tag :purpose="shootPurpose"></purpose-tag>
     </td>
-    <td class="text-xs-left nowrap" v-if="this.headerVisible['lastOperation']">
+    <td class="text-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
         <shoot-status
          :operation="shootLastOperation"
@@ -85,19 +89,21 @@ limitations under the License.
         <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
-    <td class="nowrap text-xs-center" v-if="this.headerVisible['k8sVersion']">
+    <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">
       <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
-    <td class="nowrap text-xs-center" v-if="this.headerVisible['readiness']">
+    <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="shootConditions"></status-tags>
     </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>
-        <div slot="activator">
-          <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-            <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
-          </router-link>
-        </div>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
+              <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
+            </router-link>
+          </div>
+        </template>
         {{ shootLastUpdatedJournal }}
       </v-tooltip>
     </td>
@@ -109,16 +115,20 @@ limitations under the License.
         <journal-labels :labels="shootJournalsLabels"></journal-labels>
       </template>
     </td>
-    <td class="action-button-group text-xs-right nowrap" v-if="this.headerVisible['actions']">
-      <v-layout align-center justify-end row fill-height>
+    <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
+      <v-row class="fill-height" align="center" justify="end" >
         <v-tooltip top v-if="canGetSecrets">
-          <v-btn small icon class="cyan--text text--darken-2" slot="activator" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
-            <v-icon size="22">mdi-key</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn small icon class="cyan--text text--darken-2" :disabled="isClusterAccessDialogDisabled" @click="showDialog('access')">
+                <v-icon size="22">mdi-key</v-icon>
+              </v-btn>
+            </div>
+          </template>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small content-class="red--text"></delete-cluster>
-      </v-layout>
+        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small icon-color="red"></delete-cluster>
+      </v-row>
     </td>
   </tr>
 </template>
@@ -244,7 +254,7 @@ export default {
   }
 }
 </script>
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .action-button-group {
     white-space: nowrap;
 

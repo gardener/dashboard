@@ -25,22 +25,22 @@ limitations under the License.
     maxWidth="850"
     confirmButtonText="Trigger now">
     <template slot="actionComponent">
-      <v-layout row wrap>
-        <v-flex>
-          <div class="subheading pt-3">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
-        </v-flex>
+      <v-row >
+        <v-col>
+          <div class="subtitle-1 pt-4">Do you want to start the maintenance of your cluster outside of the configured maintenance time window?</div>
+        </v-col>
         <maintenance-components
           title="The following updates will be performed"
           :selectable="false"
           ref="maintenanceComponents"
         ></maintenance-components>
-      </v-layout>
+      </v-row>
     </template>
   </action-icon-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -132,7 +132,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .progress-icon {
     font-size: 15px;
   }

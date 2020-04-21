@@ -15,23 +15,27 @@ limitations under the License.
 -->
 
 <template>
-  <v-list-tile>
-    <v-list-tile-action>
-      <v-icon class="cyan--text text--darken-2">mdi-console</v-icon>
-    </v-list-tile-action>
-    <v-list-tile-content>
-      <v-list-tile-title>Terminal</v-list-tile-title>
-      <v-list-tile-sub-title>{{description}}</v-list-tile-sub-title>
-    </v-list-tile-content>
-    <v-list-tile-action>
+  <v-list-item>
+    <v-list-item-icon>
+      <v-icon color="cyan darken-2">mdi-console</v-icon>
+    </v-list-item-icon>
+    <v-list-item-content>
+      <v-list-item-title>Terminal</v-list-item-title>
+      <v-list-item-subtitle class="pt-1">{{description}}</v-list-item-subtitle>
+    </v-list-item-content>
+    <v-list-item-action>
       <v-tooltip top>
-        <v-btn slot="activator" icon :to=to :disabled="disabled">
-          <v-icon>mdi-console-line</v-icon>
-        </v-btn>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-btn icon :to=to :disabled="disabled">
+              <v-icon>mdi-console-line</v-icon>
+            </v-btn>
+          </div>
+        </template>
         <span>{{buttonDescription || description}}</span>
       </v-tooltip>
-    </v-list-tile-action>
-  </v-list-tile>
+    </v-list-item-action>
+  </v-list-item>
 </template>
 
 <script>

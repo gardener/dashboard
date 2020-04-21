@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="pa-0 ma-0">
-    <v-layout row wrap>
-      <v-flex class="regularInput">
+  <v-container  class="pa-0 ma-0">
+    <v-row >
+      <v-col class="regularInput">
         <v-text-field
           ref="name"
           color="cyan darken-2"
@@ -28,11 +28,12 @@ limitations under the License.
           @input="onInputName"
           @blur="$v.name.$touch()"
           ></v-text-field>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Kubernetes Version"
             item-text="version"
             item-value="version"
@@ -45,31 +46,31 @@ limitations under the License.
             persistent-hint
             >
             <template v-slot:item="{ item }">
-              <v-list-tile-content>
-                <v-list-tile-title>{{item.version}}</v-list-tile-title>
-                <v-list-tile-sub-title v-if="item.expirationDateString">
+              <v-list-item-content>
+                <v-list-item-title>{{item.version}}</v-list-item-title>
+                <v-list-item-subtitle v-if="item.expirationDateString">
                   <span>Expires: {{item.expirationDateString}}</span>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
+                </v-list-item-subtitle>
+              </v-list-item-content>
             </template>
           </v-select>
         </hint-colorizer>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <purpose
           ref="purpose"
           :secret="secret"
           @updatePurpose="onUpdatePurpose"
           @valid="onPurposeValid">
         </purpose>
-      </v-flex>
-    </v-layout>
-    <v-layout row wrap v-if="slaDescriptionCompiledMarkdown">
-      <v-flex xs12>
+      </v-col>
+    </v-row>
+    <v-row  v-if="slaDescriptionCompiledMarkdown">
+      <v-col cols="12">
         <label class="caption grey--text text--darken-2">{{slaTitle}}</label>
-        <p class="subheading" v-html="slaDescriptionCompiledMarkdown" />
-      </v-flex>
-    </v-layout>
+        <p class="subtitle-1" v-html="slaDescriptionCompiledMarkdown" />
+      </v-col>
+    </v-row>
 </v-container>
 </template>
 
@@ -241,7 +242,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .regularInput {
     max-width: 300px;
   }

@@ -116,15 +116,17 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  @import '~vuetify/src/stylus/settings/_colors.styl';
+<style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
+
+  $grey-lighten-5: map-get($grey, 'lighten-5');
 
   .code-block {
     overflow: hidden;
     position: relative;
     border-radius: 2px;
-    background-color: $grey.lighten-5;
-    color: $grey.lighten-5;
+    background-color: $grey-lighten-5;
+    color: $grey-lighten-5;
     font-family: "Operator Mono", "Fira Code", Menlo, Hack, "Roboto Mono", "Liberation Mono", Monaco, monospace;
     font-size: 14px;
     line-height: 1.4em;

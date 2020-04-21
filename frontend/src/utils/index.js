@@ -52,7 +52,7 @@ export function emailToDisplayName (value) {
   if (value) {
     const names = map(words(replace(value, /@.*$/, '')), capitalize)
     const givenName = names.shift()
-    return join(compact([ join(names, ' '), givenName ]), ', ')
+    return join(compact([join(names, ' '), givenName]), ', ')
   }
 }
 
@@ -63,8 +63,6 @@ export function serviceAccountToDisplayName (serviceAccount) {
 }
 
 export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value) => {}) {
-  const textarea = textField.$refs['input-slot']
-
   function drop (event) {
     event.stopPropagation()
     event.preventDefault()
@@ -93,6 +91,7 @@ export function handleTextFieldDrop (textField, fileTypePattern, onDrop = (value
     event.dataTransfer.dropEffect = 'copy'
   }
 
+  const textarea = textField.$refs['input-slot']
   textarea.addEventListener('dragover', dragOver, false)
   textarea.addEventListener('drop', drop, false)
 }
@@ -161,7 +160,7 @@ export function fullDisplayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [ namespace, serviceaccount ] = split(username, ':', 4).slice(2)
+    const [namespace, serviceaccount] = split(username, ':', 4).slice(2)
     return toUpper(`${namespace} / ${serviceaccount}`)
   }
   return username
@@ -175,7 +174,7 @@ export function displayName (username) {
     return emailToDisplayName(username)
   }
   if (isServiceAccount(username)) {
-    const [ , serviceaccount ] = split(username, ':', 4).slice(2)
+    const [, serviceaccount] = split(username, ':', 4).slice(2)
     return toUpper(serviceaccount)
   }
   return username
@@ -543,15 +542,55 @@ export function addKymaAddon (options) {
   shootAddonList.push(kymaAddon)
 }
 
-export function compileMarkdown (text) {
+export function textColorFromColor (color) {
+  const iteratee = value => /^(darken|lighten|accent)-\d$/.test(value) ? 'text--' + value : value + '--text'
+  return map(split(color, ' '), iteratee)
+}
+
+function htmlToDocumentFragment (html) {
+  var template = document.createElement('template')
+  html = html.trim() // Never return a text node of whitespace as the result
+  template.innerHTML = html
+  return template.content
+}
+
+function documentFragmentToHtml (documentFragment) {
+  const div = document.createElement('div')
+  div.appendChild(documentFragment.cloneNode(true))
+  return div.innerHTML
+}
+
+export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToExternalLinks = true) {
   if (!text) {
     return undefined
   }
-  return DOMPurify.sanitize(marked(text, {
+  const html = DOMPurify.sanitize(marked(text, {
     gfm: true,
     breaks: true,
     tables: true
   }))
+
+  const textColorClasses = textColorFromColor(linkColor)
+  const documentFragment = htmlToDocumentFragment(html)
+  if (!documentFragment) {
+    return html
+  }
+
+  const linkElements = documentFragment.querySelectorAll('a')
+  linkElements.forEach(linkElement => {
+    if (textColorClasses.length) {
+      linkElement.classList.add(...textColorClasses)
+    }
+
+    if (transformToExternalLinks) {
+      linkElement.setAttribute('style', 'text-decoration: none')
+      linkElement.setAttribute('target', '_blank')
+      const linkText = linkElement.innerHTML
+      linkElement.innerHTML = `<span style="text-decoration: underline">${linkText}</span> <i class="v-icon mdi mdi-open-in-new" style="font-size: 80%"></i>`
+    }
+  })
+
+  return documentFragmentToHtml(documentFragment)
 }
 
 export function shootAddonByName (name) {

@@ -15,10 +15,10 @@ limitations under the License.
 -->
 
 <template>
-  <v-alert :color="color" dismissible v-model="alertVisible">
-    <div class="subheading">
+  <v-alert :color="color" :tile="tile" :dark="dark" dismissible v-model="alertVisible">
+    <div class="subtitle-1">
       {{message}}
-      <v-btn dark outline small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
+      <v-btn dark outlined small v-if="!!detailedMessage" @click="detailedMessageVisible = !detailedMessageVisible">
         Details
       </v-btn>
     </div>
@@ -43,6 +43,13 @@ export default {
     color: {
       type: String,
       required: true
+    },
+    tile: {
+      type: Boolean
+    },
+    dark: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
@@ -66,7 +73,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .fade-enter-active, .fade-leave-active {
     transition: opacity .5s;
   }

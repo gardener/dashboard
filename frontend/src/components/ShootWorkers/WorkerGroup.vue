@@ -21,20 +21,21 @@ limitations under the License.
     :popperKey="`worker_group_${workerGroup.name}`"
 
   >
-    <v-layout row
-     v-for="(line,index) in description"
-     :key="index"
-     fill-height
-     align-center>
-     <span class="ma-1">
-       <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-     </span>
-    </v-layout>
+    <v-row
+      class="fill-height"
+      v-for="(line,index) in description"
+      :key="index"
+      align="center"
+    >
+      <span class="ma-1">
+        <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
+      </span>
+    </v-row>
     <v-chip
       slot="popperRef"
       small
       class="cursor-pointer my-0 ml-0"
-      outline
+      outlined
       color="cyan darken-2">
       {{workerGroup.name}}
     </v-chip>
@@ -157,8 +158,8 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .cursor-pointer >>> .v-chip__content {
+<style lang="scss" scoped>
+  .cursor-pointer ::v-deep .v-chip__content {
     cursor: pointer;
   }
 </style>

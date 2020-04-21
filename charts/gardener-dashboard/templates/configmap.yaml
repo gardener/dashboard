@@ -19,7 +19,7 @@ data:
     apiServerCaData: {{ .Values.apiServerCaData }}
 {{- else if .Values.apiServerCa }}
     apiServerCaData: {{ b64enc .Values.apiServerCa }}
-{{- else if eq .Values.apiServerSkipTlsVerify true }}
+{{- else if eq (default false .Values.apiServerSkipTlsVerify) true }}
     apiServerSkipTlsVerify: true
 {{- end }}
     readinessProbe:

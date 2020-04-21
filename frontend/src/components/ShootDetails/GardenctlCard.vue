@@ -15,40 +15,44 @@ limitations under the License.
 -->
 
 <template>
-  <v-card v-if="isAdmin">
-    <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-      Gardenctl
-    </v-card-title>
-    <div class="list">
-      <v-card-title class="listItem" >
-        <v-layout class="py-2">
-          <v-flex shrink justify-center class="pr-0 pt-3">
-            <v-icon class="cyan--text text--darken-2 avatar">mdi-console-line</v-icon>
-          </v-flex>
-          <v-flex class="pa-0">
-            <v-layout row v-for="command in commands" :key="command.title">
-              <v-flex>
-                <span class="grey--text">{{command.title}}</span><br>
-                <code>{{command.value}}</code>
-              </v-flex>
-              <copy-btn :clipboard-text="command.value"></copy-btn>
-            </v-layout>
-          </v-flex>
-        </v-layout>
-      </v-card-title>
-    </div>
+  <v-card v-if="isAdmin" three-line>
+    <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar-title class="subtitle-1">Gardenctl</v-toolbar-title>
+    </v-toolbar>
+    <v-list>
+      <v-list-item v-for="({ title, value }, index) in commands" :key="title">
+        <v-list-item-icon>
+          <v-icon v-if="index === 0" color="cyan darken-2">mdi-console-line</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+          <v-list-item-title>
+            <code-block
+              lang="shell"
+              :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
+              :show-copy-button="false"
+            ></code-block>
+          </v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action>
+          <copy-btn :clipboard-text="value"></copy-btn>
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
   </v-card>
 </template>
 
 <script>
 import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 
 export default {
   components: {
-    CopyBtn
+    CopyBtn,
+    CodeBlock
   },
   props: {
     shootItem: {
@@ -112,29 +116,12 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-
-  .cardTitle {
-    line-height: 10px;
+<style scoped>
+  ::v-deep .hljs-meta {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
   }
-
-  .listItem {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .avatar {
-    padding-right: 33px;
-  }
-
-  >>> code {
-    box-shadow: none;
-    -webkit-box-shadow: none;
-  }
-
 </style>

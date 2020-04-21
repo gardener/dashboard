@@ -15,6 +15,7 @@
 // limitations under the License.
 //
 
+/* eslint-disable no-unused-expressions */
 'use strict'
 
 const fs = require('fs')
@@ -24,14 +25,14 @@ const crypto = require('crypto')
 const yaml = require('js-yaml')
 const { merge, chain } = require('lodash')
 
-function writeValues(filename, values = {}) {
-  const ca = '-----BEGIN RSA PRIVATE KEY-----\nLi4u\n-----END RSA PRIVATE KEY-----'
+const ca = '-----BEGIN RSA PRIVATE KEY-----\nLi4u\n-----END RSA PRIVATE KEY-----'
+
+function writeValues (filename, values = {}) {
   const defaultValues = {
     image: {
       tag: '1.26.0-dev-4d529c1'
     },
     apiServerUrl: 'https://api.garden.example.org',
-    apiServerCa: ca,
     hosts: [
       'gardener.ingress.garden.example.org'
     ],
@@ -48,11 +49,7 @@ function writeValues(filename, values = {}) {
       issuerUrl: 'https://identity.garden.example.org',
       clientId: 'dashboard',
       clientSecret: 'dashboardSecret',
-      ca,
-      public: {
-        clientId: 'kube-kubectl',
-        clientSecret: 'kubeKubectlSecret'
-      }
+      ca
     },
     frontendConfig: {
       landingPageUrl: 'https://gardener.cloud/',
@@ -93,11 +90,11 @@ function writeValues(filename, values = {}) {
     }
   }
   values = merge(defaultValues, values)
-  fs.writeFileSync(filename, yaml.safeDump(values))
+  fs.writeFileSync(filename, yaml.safeDump(values, { skipInvalid: true }))
   return values
 }
 
-function decodeBase64(data) {
+function decodeBase64 (data) {
   return Buffer.from(data, 'base64').toString('utf8')
 }
 
@@ -133,7 +130,15 @@ describe('gardener-dashboard', function () {
       const name = 'gardener-dashboard-configmap'
 
       it('should render the template', async function () {
-        const values = writeValues(filename, {})
+        const values = writeValues(filename, {
+          apiServerCa: ca,
+          oidc: {
+            public: {
+              clientId: 'kube-kubectl',
+              clientSecret: 'kubeKubectlSecret'
+            }
+          }
+        })
         const documents = await helmTemplate(template, filename)
         const config = chain(documents)
           .find(['metadata.name', name])
@@ -150,6 +155,27 @@ describe('gardener-dashboard', function () {
         expect(oidc.issuer).to.equal(values.oidc.issuerUrl)
         expect(oidc.public.clientId).to.equal(values.oidc.public.clientId)
         expect(oidc.public.clientSecret).to.equal(values.oidc.public.clientSecret)
+      })
+
+      it('should render the template without kubeconfig download', async function () {
+        const values = writeValues(filename, {})
+        const documents = await helmTemplate(template, filename)
+        const config = chain(documents)
+          .find(['metadata.name', name])
+          .get('data["config.yaml"]')
+          .thru(yaml.safeLoad)
+          .value()
+        const {
+          apiServerUrl,
+          apiServerCaData,
+          apiServerSkipTlsVerify,
+          oidc
+        } = config
+        expect(apiServerUrl).to.equal(values.apiServerUrl)
+        expect(apiServerCaData).to.be.undefined
+        expect(apiServerSkipTlsVerify).to.be.undefined
+        expect(oidc.issuer).to.equal(values.oidc.issuerUrl)
+        expect(oidc.public).to.be.undefined
       })
     })
   })

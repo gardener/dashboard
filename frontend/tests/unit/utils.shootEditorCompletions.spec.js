@@ -197,7 +197,7 @@ describe('utils', function () {
 
       it('should provide code completion for second array item', function () {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - apiVersion: foo\n           ', 4, 11)
-        let completions = shootEditorCompletions.yamlHint(editor).list
+        const completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
         const { text, type } = completions[1]
@@ -207,7 +207,7 @@ describe('utils', function () {
 
       it('should provide code completion if first item of an array is an object', function () {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - ma', 3, 12)
-        let completions = shootEditorCompletions.yamlHint(editor).list
+        const completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
         const { text, type } = completions[0]
 
@@ -217,7 +217,7 @@ describe('utils', function () {
 
       it('should provide code completion if context has object as first array item', function () {
         setEditorContentAndCursor('spec:\n   metadata:\n      managedFields:\n         - managedObjects:\n              ', 4, 14)
-        let completions = shootEditorCompletions.yamlHint(editor).list
+        const completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(1)
         const { text, type } = completions[0]
         expect(text).to.equal('foo: ')
@@ -240,7 +240,7 @@ describe('utils', function () {
 
       it('should traverse path correctly, do not add properties on same level to path', function () {
         setEditorContentAndCursor('spec:\n   metadata:\n      annotations:\n         foo: bar\n      managedFields:\n         - apiVersion: foo\n            ', 6, 12)
-        let completions = shootEditorCompletions.yamlHint(editor).list
+        const completions = shootEditorCompletions.yamlHint(editor).list
         expect(completions).to.have.length(3)
 
         const { text, type } = completions[1]
@@ -323,7 +323,7 @@ describe('utils', function () {
         const spy = sandbox.spy(editor, 'replaceSelection')
         setEditorContentAndCursor('spec:\n  foo:\n    - foo:bar', 2, 13)
         shootEditorCompletions.editorEnter(editor)
-        expect(spy).to.be.calledOnceWith(`\n      `)
+        expect(spy).to.be.calledOnceWith('\n      ')
       })
     })
   })

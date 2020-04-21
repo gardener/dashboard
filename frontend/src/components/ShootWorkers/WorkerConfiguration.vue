@@ -32,7 +32,7 @@ limitations under the License.
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'

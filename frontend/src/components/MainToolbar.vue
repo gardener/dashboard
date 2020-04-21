@@ -15,18 +15,29 @@ limitations under the License.
 -->
 
 <template>
-  <v-toolbar fixed app :tabs="!!tabs">
-    <v-toolbar-side-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-toolbar-side-icon>
+  <v-app-bar app tile fixed>
+    <v-app-bar-nav-icon v-if="!sidebar" @click.native.stop="setSidebar(!sidebar)"></v-app-bar-nav-icon>
     <breadcrumb></breadcrumb>
     <v-spacer></v-spacer>
-    <div class="text-xs-center mr-4" v-if="helpMenuItems.length">
-      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="help">
-        <v-tooltip left slot="activator" open-delay="500">
-          <v-btn slot="activator" icon class="cyan--text text--darken-2">
-            <v-icon medium>help_outline</v-icon>
-          </v-btn>
-          Info
-        </v-tooltip>
+    <div class="text-center mr-6" v-if="helpMenuItems.length">
+      <v-menu
+        v-model="help"
+        open-on-click
+        close-on-content-click
+        offset-y
+        nudge-bottom="12"
+        transition="slide-y-transition"
+      >
+        <template v-slot:activator="{ on: menu }">
+          <v-tooltip left open-delay="500">
+            <template v-slot:activator="{ on: tooltip }">
+              <v-btn v-on="{ ...tooltip, ...menu }" icon color="cyan darken-2">
+                <v-icon medium>help_outline</v-icon>
+              </v-btn>
+            </template>
+            <span>Info</span>
+          </v-tooltip>
+        </template>
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -39,9 +50,9 @@ limitations under the License.
           <v-divider></v-divider>
           <template v-for="(item, index) in helpMenuItems">
             <v-divider v-if="index !== 0" :key="`d-${index}`"></v-divider>
-            <v-card-actions :key="index">
-              <v-btn block flat class="action-button cyan--text text--darken-2" :href="item.url" :target="helpTarget(item)" :title="item.title">
-                <v-icon left color="cyan darken-2">{{item.icon}}</v-icon>
+            <v-card-actions :key="index" class="px-3">
+              <v-btn block text color="cyan darken-2" class="justify-start" :href="item.url" :target="helpTarget(item)" :title="item.title">
+                <v-icon color="cyan darken-2" class="mr-3">{{item.icon}}</v-icon>
                 {{item.title}}
                 <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
               </v-btn>
@@ -50,29 +61,40 @@ limitations under the License.
         </v-card>
       </v-menu>
     </div>
-    <div class="text-xs-center">
-      <v-menu offset-y open-on-click :nudge-bottom="12" transition="slide-y-transition" :close-on-content-click="true" v-model="menu">
-        <v-tooltip left slot="activator" open-delay="500">
-          <v-badge v-if="isAdmin" slot="activator" color="cyan darken-2" bottom overlap>
-            <v-icon slot="badge" small dark>supervisor_account</v-icon>
-            <v-avatar size="40px">
-              <img :src="avatarUrl" />
-            </v-avatar>
-          </v-badge>
-          <v-avatar v-else slot="activator" size="40px">
-            <img :src="avatarUrl" />
-          </v-avatar>
-          <span v-if="isAdmin">
-            {{avatarTitle}}
-            <v-chip small color="cyan darken-2" dark>
-              <v-avatar>
-                <v-icon>supervisor_account</v-icon>
+    <div class="text-center">
+      <v-menu
+        v-model="menu"
+        open-on-click
+        close-on-content-click
+        offset-y
+        nudge-bottom="16"
+        transition="slide-y-transition"
+      >
+        <template v-slot:activator="{ on: menu }">
+          <v-tooltip left open-delay="500">
+            <template v-slot:activator="{ on: tooltip }">
+              <v-badge v-if="isAdmin" color="cyan darken-2" bottom overlap icon="supervisor_account">
+                <v-avatar v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
+                  <img :src="avatarUrl" />
+                </v-avatar>
+              </v-badge>
+              <v-avatar v-else v-on="{ ...menu, ...tooltip }" size="40px" class="cursor-pointer">
+                <img :src="avatarUrl" />
               </v-avatar>
-              <span class="operator">Operator</span>
-            </v-chip>
-          </span>
-          <span v-else>{{avatarTitle}}</span>
-        </v-tooltip>
+            </template>
+            <span v-if="isAdmin">
+              {{avatarTitle}}
+              <v-chip small color="cyan darken-2" dark>
+                <v-avatar>
+                  <v-icon>supervisor_account</v-icon>
+                </v-avatar>
+                <span class="operator">Operator</span>
+              </v-chip>
+            </span>
+            <span v-else>{{avatarTitle}}</span>
+          </v-tooltip>
+        </template>
+
         <v-card tile>
           <v-card-title primary-title>
             <div class="content">
@@ -81,28 +103,31 @@ limitations under the License.
               <div class="caption" v-if="isAdmin">Operator</div>
             </div>
           </v-card-title>
-          <v-card-actions>
-            <v-btn block flat class="action-button cyan--text text--darken-2" :to="accountLink" title="My Account">
-              <v-icon left>account_circle</v-icon>
+          <v-divider></v-divider>
+          <v-card-actions class="px-3">
+            <v-btn block text color="cyan darken-2" class="justify-start" :to="accountLink" title="My Account">
+              <v-icon class="mr-3">account_circle</v-icon>
               My Account
             </v-btn>
           </v-card-actions>
           <v-divider></v-divider>
-          <v-card-actions>
-            <v-btn block flat class="action-button pink--text" @click.native.stop="handleLogout" title="Logout">
-              <v-icon left>exit_to_app</v-icon>
+          <v-card-actions class="px-3">
+            <v-btn block text color="pink" class="justify-start" @click.native.stop="handleLogout" title="Logout">
+              <v-icon class="mr-3">exit_to_app</v-icon>
               Logout
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-menu>
     </div>
-    <v-tabs v-if="tabs && tabs.length > 1" slot="extension" slider-color="grey darken-3">
-      <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
-        {{tab.title}}
-      </v-tab>
-    </v-tabs>
-  </v-toolbar>
+    <template v-if="tabs && tabs.length > 1" v-slot:extension>
+      <v-tabs slider-color="grey darken-3" background-color="white" color="black">
+        <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
+          {{tab.title}}
+        </v-tab>
+      </v-tabs>
+    </template>
+  </v-app-bar>
 </template>
 
 <script>
@@ -198,16 +223,13 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-
+<style lang="scss" scoped>
   .content {
     text-align: center;
     display: block;
+    padding-left: 8px;
+    padding-right: 8px;
     width: 100%;
-  }
-
-  .action-button >>> .v-btn__content {
-    justify-content: left
   }
 
   .link-icon {
@@ -219,9 +241,4 @@ export default {
     color: white;
     font-weight: bold;
   }
-
-  >>> .v-toolbar__extension {
-    padding: 0;
-  }
-
 </style>

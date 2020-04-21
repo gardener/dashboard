@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <transition-group name="list">
-    <v-layout row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+    <v-row v-for="(worker, index) in internalWorkers" :key="worker.id" class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
       <worker-input-generic
         ref="workerInput"
         :worker="worker"
@@ -30,35 +30,36 @@ limitations under the License.
         <v-btn v-show="index>0 || internalWorkers.length>1"
           small
           slot="action"
-          outline
+          outlined
           icon
-          class="grey--text lighten-2"
+          color="grey"
           @click.native.stop="onRemoveWorker(index)">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </worker-input-generic>
-    </v-layout>
-    <v-layout row key="addWorker" class="list-item pt-2">
-      <v-flex>
+    </v-row>
+    <v-row key="addWorker" class="list-item pt-2">
+      <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           small
           @click="addWorker"
-          outline
+          outlined
           fab
           icon
-          class="cyan darken-2 ml-1">
+          class="ml-1"
+          color="cyan darken-2">
           <v-icon class="cyan--text text--darken-2">add</v-icon>
         </v-btn>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"
           @click="addWorker"
-          flat
+          text
           class="cyan--text text--darken-2">
           Add Worker Group
         </v-btn>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </transition-group>
 </template>
 

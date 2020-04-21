@@ -16,11 +16,35 @@ limitations under the License.
 
 <template>
   <v-list>
-    <link-list-tile v-if="isAdmin" icon="developer_board" appTitle="Grafana" :url="grafanaUrlOperators" :urlText="grafanaUrlOperators" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
-    <link-list-tile v-else icon="developer_board" appTitle="Grafana" :url="grafanaUrlUsers" :urlText="grafanaUrlUsers" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
-    <link-list-tile v-if="isAdmin" appTitle="Prometheus" :url="prometheusUrl" :urlText="prometheusUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
-    <link-list-tile v-if="hasAlertmanager" appTitle="Alertmanager" :url="alertmanagerUrl" :urlText="alertmanagerUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
-    <v-divider v-show="!!username && !!password" class="my-2" inset></v-divider>
+    <link-list-tile v-if="isAdmin"
+      icon="developer_board"
+      appTitle="Grafana"
+      :url="grafanaUrlOperators"
+      :urlText="grafanaUrlOperators"
+      :isShootStatusHibernated="isShootStatusHibernated"
+    ></link-list-tile>
+    <link-list-tile v-else
+      icon="developer_board"
+      appTitle="Grafana"
+      :url="grafanaUrlUsers"
+      :urlText="grafanaUrlUsers"
+      :isShootStatusHibernated="isShootStatusHibernated"
+    ></link-list-tile>
+    <link-list-tile v-if="isAdmin"
+      appTitle="Prometheus"
+      :url="prometheusUrl"
+      :urlText="prometheusUrl"
+      :isShootStatusHibernated="isShootStatusHibernated"
+      content-class="pt-0"
+    ></link-list-tile>
+    <link-list-tile v-if="hasAlertmanager"
+      appTitle="Alertmanager"
+      :url="alertmanagerUrl"
+      :urlText="alertmanagerUrl"
+      :isShootStatusHibernated="isShootStatusHibernated"
+      content-class="pt-0"
+    ></link-list-tile>
+    <v-divider v-show="!!username && !!password" inset></v-divider>
     <username-password :username="username" :password="password"></username-password>
   </v-list>
 </template>

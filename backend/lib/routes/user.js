@@ -19,6 +19,7 @@
 const express = require('express')
 
 const config = require('../config')
+const { encodeBase64 } = require('../utils')
 const { authorization } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
@@ -73,23 +74,31 @@ router.route('/kubeconfig')
       issuer: issuerUrl,
       public: { clientId, clientSecret } = {}
     } = oidc
-    const extraScopes = []
-    if (oidc.scope) {
-      for (const scope of oidc.scope.split(' ')) {
-        if (scope !== 'openid' && !scope.startsWith('audience:server:client_id')) {
-          extraScopes.push(scope)
-        }
-      }
-    }
-    res.send({
+    const body = {
       server,
       certificateAuthorityData,
       insecureSkipTlsVerify,
       oidc: {
         issuerUrl,
         clientId,
-        clientSecret,
-        extraScopes: extraScopes.length ? extraScopes : undefined
+        clientSecret
       }
-    })
+    }
+    if (oidc.scope) {
+      const extraScopes = []
+      for (const scope of oidc.scope.split(' ')) {
+        if (scope !== 'openid' && !scope.startsWith('audience:server:client_id')) {
+          extraScopes.push(scope)
+        }
+      }
+      if (extraScopes.length) {
+        body.oidc.extraScopes = extraScopes
+      }
+    }
+    if (oidc.ca) {
+      body.oidc.certificateAuthorityData = encodeBase64(oidc.ca)
+    } else if (oidc.rejectUnauthorized === false) {
+      body.oidc.insecureSkipTlsVerify = true
+    }
+    res.send(body)
   })

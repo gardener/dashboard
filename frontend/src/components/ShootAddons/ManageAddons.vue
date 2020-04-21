@@ -15,23 +15,21 @@ limitations under the License.
 -->
 
 <template>
-  <v-layout column>
-    <v-flex xs12>
-      <v-layout row v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
-        <v-flex class="addon-action">
-          <v-checkbox
-            color="cyan darken-2"
-            v-model="addons[addonDefinition.name].enabled"
-            :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
-          ></v-checkbox>
-        </v-flex>
-        <v-flex>
-          <div class="subheading font-weight-medium my-1" v-text="addonDefinition.title"/>
-          <div class="addon-content mb-4" v-html="addonDefinition.description"/>
-        </v-flex>
-      </v-layout>
-    </v-flex>
-  </v-layout>
+  <v-list two-line>
+    <v-list-item v-for="addonDefinition in addonDefinitionList" :key="addonDefinition.name">
+      <v-list-item-action class="align-self-start">
+        <v-checkbox
+          color="cyan darken-2"
+          v-model="addons[addonDefinition.name].enabled"
+          :disabled="!isCreateMode && addonDefinition.forbidDisable && addons[addonDefinition.name].enabled"
+        ></v-checkbox>
+      </v-list-item-action>
+      <v-list-item-content  class="align-self-start">
+        <v-list-item-title class="mb-2">{{addonDefinition.title}}</v-list-item-title>
+        <v-list-item-subtitle class="d-flex flex-column g-subtitle" v-html="addonDefinition.description"></v-list-item-subtitle>
+      </v-list-item-content>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script>
@@ -81,15 +79,12 @@ export default {
 
 <style scoped>
 
-.addon-content >>>  p {
+.g-subtitle {
+  white-space: normal;
+}
+
+.g-subtitle ::v-deep  p {
   margin-bottom: 4px;
 }
 
-.addon-action {
-  min-height: 50px;
-  width: 56px;
-  min-width: 56px;
-  max-width: 56px;
-  margin: 0;
-}
 </style>

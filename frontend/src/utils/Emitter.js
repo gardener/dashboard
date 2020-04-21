@@ -42,7 +42,7 @@ class Connector {
   }
 
   onDisconnect (reason) {
-    console.error(`socket connection lost because`, reason)
+    console.error('socket connection lost because', reason)
     store.dispatch('setWebsocketConnectionError', { reason })
     forEach(this.handlers, handler => handler.onDisconnect())
   }

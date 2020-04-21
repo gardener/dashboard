@@ -16,82 +16,93 @@ limitations under the License.
 
 <template>
   <div>
-    <v-list-tile avatar>
-      <v-list-tile-avatar>
+    <v-list-item>
+      <v-list-item-avatar>
         <img :src="avatarUrl" />
-      </v-list-tile-avatar>
-      <v-list-tile-content>
-        <g-popper
-          :title="displayName"
-          toolbarColor="cyan darken-2"
-          :popperKey="`serviceAccount_sa_${username}`"
-
-        >
-          <v-list-tile-title slot="popperRef" class="cursor-pointer">
-            {{displayName}}
-          </v-list-tile-title>
-          <v-layout row
-            fill-height
-            align-center
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title class="cursor-pointer">
+          <g-popper
+            :title="displayName"
+            toolbarColor="cyan darken-2"
+            :popperKey="`serviceAccount_sa_${username}`"
           >
-            <span class="mr-2">Created by</span><span :class="createdByClasses"><account-avatar :account-name="createdBy"></account-avatar></span>
-          </v-layout>
-          <v-layout row
-            fill-height
-            align-center
-            v-if="created && creationTimestamp"
-          >
-            <span class="mr-3">Created</span>
-            <v-tooltip top>
-              <span slot="activator" class="font-weight-bold"><time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string></span>
-              {{created}}
-            </v-tooltip>
-          </v-layout>
-        </g-popper>
-        <v-list-tile-sub-title>
+            <template v-slot:popperRef>
+              <span>{{displayName}}</span>
+            </template>
+            <div class="d-flex flex-column service-account">
+              <div class="d-flex justify-start">
+                <label>Created by</label>
+                <div :class="createdByClasses">
+                  <account-avatar :account-name="createdBy"></account-avatar>
+                </div>
+              </div>
+              <div class="d-flex justify-start">
+                <label>Created</label>
+                <div>
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <span v-on="on" class="font-weight-bold">
+                        <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
+                      </span>
+                    </template>
+                    {{created}}
+                  </v-tooltip>
+                </div>
+              </div>
+            </div>
+          </g-popper>
+        </v-list-item-title>
+        <v-list-item-subtitle>
           {{username}}
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
-        <v-layout row align-center>
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
-            {{roleName}}
-          </v-chip>
-        </v-layout>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+        </v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action class="ml-1">
+        <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
+          {{roleName}}
+        </v-chip>
+      </v-list-item-action>
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="black--text" @click.native.stop="onDownload">
-            <v-icon>mdi-download</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onDownload">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
           <span>Download Kubeconfig</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets">
+      </v-list-item-action>
+      <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
-          <v-btn slot="activator" small icon class="black--text" @click="onKubeconfig">
-            <v-icon>visibility</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click="onKubeconfig">
+              <v-icon>visibility</v-icon>
+            </v-btn>
+          </template>
           <span>Show Kubeconfig</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onEdit">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </template>
           <span>Update Service Account</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="red--text" @click.native.stop="onDelete">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </template>
           <span>Delete Service Account</span>
         </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
+      </v-list-item-action>
+    </v-list-item>
   </div>
 </template>
 
@@ -174,8 +185,16 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .cursor-pointer {
     cursor: pointer;
+  }
+  .service-account {
+    text-align: left !important;
+    margin: -4px;
+    label {
+      min-width: 5rem;
+      padding-right: 4px;
+    }
   }
 </style>

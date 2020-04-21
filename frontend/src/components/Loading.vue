@@ -15,15 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-dialog v-model="loading" lazy persistent absolute content-class="dialog--loading" max-width="100">
-    <v-container text-xs-center>
-      <v-layout row>
-        <v-flex xs12>
-          <v-progress-circular indeterminate :size="50" class="primary--text"></v-progress-circular>
-        </v-flex>
-      </v-layout>
-    </v-container>
-  </v-dialog>
+  <v-overlay :value="loading">
+    <v-progress-circular indeterminate size="64"></v-progress-circular>
+  </v-overlay>
 </template>
 
 <script>
@@ -38,11 +32,3 @@ export default {
   }
 }
 </script>
-
-<style lang="styl">
-  .dialog--loading {
-    box-shadow: none;
-    border-radius: 0;
-    overflow: hidden;
-  }
-</style>

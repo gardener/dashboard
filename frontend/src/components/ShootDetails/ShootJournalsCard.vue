@@ -15,31 +15,30 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <v-card v-for="journal in journals" :key="journal.metadata.issueNumber">
-      <journal :journal="journal"></journal>
-    </v-card>
-    <v-card v-if="journals.length === 0 && !!gitHubRepoUrl">
-      <v-card-title class="subheading white--text cyan darken-2 journalTitle">
-        Journal
-      </v-card-title>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn flat class="action-button cyan--text text--darken-2" :href="createJournalLink" target="_blank" title="Create Journal">
-          Create Journal
-          <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
+  <div v-if="gitHubRepoUrl">
+    <template v-if="journals.length">
+      <v-card v-for="journal in journals" :key="journal.metadata.issueNumber">
+        <journal :journal="journal"></journal>
+      </v-card>
+      <div class="d-flex align-center justify-center mt-4">
+        <v-btn text color="cyan darken-2" :href="createJournalLink" target="_blank" title="Create Journal">
+          <span class="pr-2">Create Journal</span>
+          <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
-        <v-spacer></v-spacer>
+      </div>
+    </template>
+    <v-card v-else>
+      <v-toolbar flat dark dense color="cyan darken-2">
+        <v-toolbar-title class="subtitle-1">Journal</v-toolbar-title>
+      </v-toolbar>
+      <v-card-actions class="d-flex justify-center">
+        <v-btn text color="cyan darken-2" :href="createJournalLink" target="_blank" title="Create Journal">
+          <span class="pr-2">Create Journal</span>
+          <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
+        </v-btn>
       </v-card-actions>
     </v-card>
-    <v-layout v-if="journals.length && !!gitHubRepoUrl" align-center justify-center row>
-      <v-btn flat class="action-button cyan--text text--darken-2 mt-3" :href="createJournalLink" target="_blank" title="Create Journal">
-        Create Journal
-        <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-layout>
   </div>
-
 </template>
 
 <script>
@@ -115,14 +114,9 @@ ${this.errorConditions}`)
 }
 </script>
 
-<style lang="styl" scoped>
-
-  .journalTitle {
-    line-height: 10px;
-  }
-
+<style lang="scss" scoped>
   .link-icon {
-    font-size: 120%;
+    font-size: 1.2em;
     text-decoration: none;
   }
 </style>

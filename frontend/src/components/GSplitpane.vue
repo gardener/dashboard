@@ -76,7 +76,7 @@ export default {
 
 </script>
 
-<style lang="styl">
+<style lang="scss">
   .splitpanes--vertical > .splitpanes__splitter {
     min-width: 2px !important;
     background-color: #000

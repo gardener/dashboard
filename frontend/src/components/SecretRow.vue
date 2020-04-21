@@ -15,42 +15,52 @@ limitations under the License.
 -->
 
 <template>
-  <v-list-tile>
-    <v-list-tile-content>
-      <v-list-tile-title>
+  <v-list-item>
+    <v-list-item-content>
+      <v-list-item-title class="mb-1">
         {{secret.metadata.name}}
         <v-tooltip v-if="!isOwnSecretBinding" top>
-          <v-icon slot="activator">mdi-share</v-icon>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on">mdi-share</v-icon>
+          </template>
           <span>Secret shared by {{secretOwner}}</span>
         </v-tooltip>
         <span style="opacity:0.5">({{relatedShootCountLabel}})</span>
-      </v-list-tile-title>
-      <v-list-tile-sub-title>
+      </v-list-item-title>
+      <v-list-item-subtitle>
         <slot name="rowSubTitle" :data="secret.data">{{secretDescriptor}}</slot>
-      </v-list-tile-sub-title>
-    </v-list-tile-content>
+      </v-list-item-subtitle>
+    </v-list-item-content>
 
-    <v-list-tile-action>
+    <v-list-item-action>
       <v-tooltip top>
-        <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete" slot="activator">
-          <v-icon class="red--text">delete</v-icon>
-        </v-btn>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-btn :disabled="isDeleteButtonDisabled" icon @click.native.stop="onDelete">
+              <v-icon class="red--text">delete</v-icon>
+            </v-btn>
+          </div>
+        </template>
         <span v-if="!isOwnSecretBinding">You can only delete secrets that are owned by you</span>
         <span v-else-if="relatedShootCount > 0">You can only delete secrets that are currently unused</span>
         <span v-else>Delete Secret</span>
       </v-tooltip>
-    </v-list-tile-action>
+    </v-list-item-action>
 
-    <v-list-tile-action>
+    <v-list-item-action>
       <v-tooltip top>
-        <v-btn :disabled="!isOwnSecretBinding" icon @click.native.stop="onUpdate" slot="activator">
-          <v-icon class="cyan--text text--darken-2">edit</v-icon>
-        </v-btn>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-btn :disabled="!isOwnSecretBinding" icon @click.native.stop="onUpdate">
+              <v-icon class="cyan--text text--darken-2">edit</v-icon>
+            </v-btn>
+          </div>
+        </template>
         <span v-if="!isOwnSecretBinding">You can only edit secrets that are owned by you</span>
         <span v-else>Edit Secret</span>
       </v-tooltip>
-    </v-list-tile-action>
-  </v-list-tile>
+    </v-list-item-action>
+  </v-list-item>
 </template>
 
 <script>

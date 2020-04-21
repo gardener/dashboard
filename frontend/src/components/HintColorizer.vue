@@ -67,14 +67,12 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  @import '~vuetify/src/stylus/settings/_colors.styl';
+<style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
 
   .hintColor-orange {
-    >>>.v-messages__wrapper {
-      .v-messages__message {
-        color: $orange.darken-2 !important;
-      }
+    ::v-deep .v-messages__message {
+      color: map-get($orange, 'darken-2') !important;
     }
   }
 </style>

@@ -17,9 +17,11 @@ limitations under the License.
 <template>
   <div class="retry-operation-div" v-if="canRetry">
     <v-tooltip top>
-      <v-btn small icon slot="activator" flat class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
-        <v-icon>mdi-reload</v-icon>
-      </v-btn>
+      <template v-slot:activator="{ on }">
+        <v-btn v-on="on" small icon text class="cyan--text text--darken-2 retryButton" @click="onRetryOperation">
+          <v-icon>mdi-reload</v-icon>
+        </v-btn>
+      </template>
       Retry Operation
     </v-tooltip>
   </div>
@@ -73,7 +75,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
 .retry-operation-div {
   display: inline-block;

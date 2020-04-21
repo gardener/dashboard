@@ -21,23 +21,23 @@ limitations under the License.
     ref="actionDialog"
     :caption="caption"
     icon="delete"
-    :iconClass="contentClass"
+    :iconColor="iconColor"
     dialogColor="red"
     confirmButtonText="Delete"
     confirm-required
     :smallIcon="small"
     maxWidth="600"
-    >
+  >
     <template slot="actionComponent">
       <v-list>
-        <v-list-tile-content>
-          <v-list-tile-sub-title>
+        <v-list-item-content>
+          <v-list-item-subtitle>
             Created By
-          </v-list-tile-sub-title>
-          <v-list-tile-title>
+          </v-list-item-subtitle>
+          <v-list-item-title>
             <account-avatar :account-name="shootCreatedBy" :size="22"></account-avatar>
-          </v-list-tile-title>
-        </v-list-tile-content>
+          </v-list-item-title>
+        </v-list-item-content>
       </v-list>
       <p>
         Type <b>{{shootName}}</b> below and confirm the deletion of the cluster and all of its content.
@@ -46,10 +46,10 @@ limitations under the License.
         <i class="red--text text--darken-2">This action cannot be undone.</i>
       </p>
       <p v-if="isShootReconciliationDeactivated">
-        <v-layout row fill-height>
+        <v-row class="fill-height" >
           <v-icon color="orange" class="mr-1">mdi-alert-box</v-icon>
           <span>The cluster will not be deleted as long as reconciliation is deactivated.</span>
-        </v-layout>
+        </v-row>
       </p>
     </template>
   </action-icon-dialog>
@@ -57,7 +57,7 @@ limitations under the License.
 
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
@@ -75,9 +75,8 @@ export default {
       type: Boolean,
       default: false
     },
-    contentClass: {
-      type: String,
-      default: undefined
+    iconColor: {
+      type: String
     }
   },
   mixins: [shootItem],
@@ -123,7 +122,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   p {
     margin-bottom: 0
   }

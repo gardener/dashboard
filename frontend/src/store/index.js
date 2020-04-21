@@ -40,6 +40,8 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
+import startsWith from 'lodash/startsWith'
+import endsWith from 'lodash/endsWith'
 import max from 'lodash/max'
 import toPairs from 'lodash/toPairs'
 import isEqual from 'lodash/isEqual'
@@ -53,8 +55,6 @@ import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
 import journals from './modules/journals'
 import semver from 'semver'
-import startsWith from 'lodash/startsWith'
-import endsWith from 'lodash/endsWith'
 
 Vue.use(Vuex)
 
@@ -260,8 +260,10 @@ const getters = {
 
         return map(versions, ({ version, expirationDate }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
+          const name = machineImage.name
           return {
-            name: machineImage.name,
+            key: name + '/' + version,
+            name,
             version,
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
@@ -279,7 +281,7 @@ const getters = {
     return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
-        return map(get(find(cloudProfile.data.regions, { 'name': region }), 'zones'), 'name')
+        return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
     }

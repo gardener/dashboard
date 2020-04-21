@@ -16,16 +16,16 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-show="!isAnyTileVisible">
-      <v-list-tile-action>
+    <v-list-item v-show="!isAnyTileVisible">
+      <v-list-item-action>
         <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>
           {{kymaTitle}} information currently not available
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+        </v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
 
     <link-list-tile v-if="isConsoleTileVisible" icon="developer_board" appTitle="Console" :url="consoleUrl" :urlText="consoleUrl" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
@@ -83,12 +83,12 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .v-expansion-panel {
     box-shadow: none;
   }
 
-  >>> .v-expansion-panel__header {
+  ::v-deep .v-expansion-panel__header {
     cursor: auto;
     padding: 0;
   }

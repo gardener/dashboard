@@ -96,7 +96,7 @@ export default {
     strokeRectOnPosition (position) {
       return this.mouseDown ? this.strokeRect[position] : undefined
     },
-    dragOver ({ detail: { 'mouseOverId': position } }) {
+    dragOver ({ detail: { mouseOverId: position } }) {
       if (position === 'dropzone') {
         return
       }
