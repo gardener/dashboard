@@ -13,10 +13,10 @@
       label="Volume Type"
       :hint="hint"
       persistent-hint>
-      <template slot="item" slot-scope="data">
+      <template v-slot:item="{ item }">
         <v-list-item-content>
-          <v-list-item-title>{{data.item.name}}</v-list-item-title>
-          <v-list-item-subtitle v-if="data.item.class">Class: {{data.item.class}}</v-list-item-subtitle>
+          <v-list-item-title>{{item.name}}</v-list-item-title>
+          <v-list-item-subtitle v-if="item.class">Class: {{item.class}}</v-list-item-subtitle>
         </v-list-item-content>
       </template>
     </v-select>
