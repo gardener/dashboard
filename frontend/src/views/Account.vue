@@ -101,7 +101,7 @@ limitations under the License.
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
-                  <v-list-item-subtitle>Personalized command line interface access. Requires <tt>kubelogin</tt> kubectl plugin</v-list-item-subtitle>
+                  <v-list-item-subtitle class="line-clamp-2">Personalized command line interface access (requires <tt>kubelogin</tt> kubectl plugin)</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
@@ -303,12 +303,7 @@ export default {
         server,
         certificateAuthorityData,
         insecureSkipTlsVerify,
-        oidc: {
-          issuerUrl,
-          clientId,
-          clientSecret,
-          extraScopes = []
-        } = {}
+        oidc = {}
       } = this.kubeconfigData || {}
       const cluster = {
         server
@@ -328,12 +323,19 @@ export default {
       const args = [
         'oidc-login',
         'get-token',
-        '--oidc-issuer-url=' + issuerUrl,
-        '--oidc-client-id=' + clientId,
-        '--oidc-client-secret=' + clientSecret
+        '--oidc-issuer-url=' + oidc.issuerUrl,
+        '--oidc-client-id=' + oidc.clientId,
+        '--oidc-client-secret=' + oidc.clientSecret
       ]
-      for (const scope of extraScopes) {
-        args.push('--oidc-extra-scope=' + scope)
+      if (Array.isArray(oidc.extraScopes)) {
+        for (const scope of oidc.extraScopes) {
+          args.push('--oidc-extra-scope=' + scope)
+        }
+      }
+      if (oidc.certificateAuthorityData) {
+        args.push('--certificate-authority-data=' + oidc.certificateAuthorityData)
+      } else if (oidc.insecureSkipTlsVerify) {
+        args.push('--insecure-skip-tls-verify')
       }
       args.push('--grant-type=' + this.grantType)
       if (this.skipOpenBrowser) {
@@ -384,5 +386,11 @@ export default {
     font-size: 16px !important;
     font-weight: 400 !important;
     color: inherit !important;
+  }
+  .line-clamp-2 {
+    white-space: initial;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 </style>
