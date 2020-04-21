@@ -16,6 +16,7 @@
 
 'use strict'
 
+const { encodeBase64 } = require('../../lib/utils')
 const { apiServerUrl, apiServerCaData, oidc = {} } = require('../../lib/config')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
@@ -83,6 +84,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
         issuerUrl: oidc.issuer,
         clientId: oidc.public.clientId,
         clientSecret: oidc.public.clientSecret,
+        certificateAuthorityData: encodeBase64(oidc.ca),
         extraScopes: ['email', 'profile', 'groups']
       }
     })
