@@ -49,7 +49,7 @@ limitations under the License.
       </v-card>
       <lazy-component @show="emitRendered()"></lazy-component>
     </div>
-    <template slot="reference">
+    <template v-slot:reference>
       <slot name="popperRef"></slot>
     </template>
   </popper>

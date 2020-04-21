@@ -25,7 +25,7 @@ limitations under the License.
     :confirmRequired="confirmRequired"
     :disabled="!isHibernationPossible"
     maxWidth="600">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
         Type <b>{{shootName}}</b> below and confirm to hibernate your cluster.<br /><br />

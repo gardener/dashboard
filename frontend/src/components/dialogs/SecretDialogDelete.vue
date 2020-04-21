@@ -36,10 +36,12 @@ limitations under the License.
 
       <v-card-text>
         <v-container fluid>
-          <div slot="message">
-            Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>? <br /><span class="red--text font-weight-bold">The operation
-            can not be undone.</span>
-          </div>
+          <template v-slot:message>
+            <div>
+              Are you sure to delete the secret <span class="font-weight-bold">{{name}}</span>?<br/>
+              <span class="red--text font-weight-bold">The operation can not be undone.</span>
+            </div>
+          </template>
         </v-container>
         <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
       </v-card-text>

@@ -28,7 +28,7 @@ limitations under the License.
     :smallIcon="small"
     maxWidth="600"
   >
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <v-list>
         <v-list-item-content>
           <v-list-item-subtitle>

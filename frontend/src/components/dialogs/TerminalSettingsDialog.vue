@@ -25,8 +25,8 @@ limitations under the License.
     defaultColor="cyan-darken-2"
     ref="gDialog"
     >
-    <template slot="caption">Change Terminal Settings</template>
-    <template slot="message">
+    <template v-slot:caption>Change Terminal Settings</template>
+    <template v-slot:message>
       <v-text-field
         color="cyan darken-2"
         v-model="selectedContainerImage"
@@ -80,17 +80,17 @@ limitations under the License.
           :class="{ 'ml-4': isAdmin }"
           class="ml-2"
         >
-          <template slot="item" slot-scope="data">
+          <template v-slot:item="{ item }">
             <v-list-item-content>
-              <v-list-item-title>{{data.item.data.kubernetesHostname}}</v-list-item-title>
+              <v-list-item-title>{{item.data.kubernetesHostname}}</v-list-item-title>
               <v-list-item-subtitle>
-                <span>Ready: {{data.item.data.readyStatus}} | Version: {{data.item.data.version}} | Created: <time-string :date-time="data.item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
+                <span>Ready: {{item.data.readyStatus}} | Version: {{item.data.version}} | Created: <time-string :date-time="item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
               </v-list-item-subtitle>
             </v-list-item-content>
           </template>
-          <template slot="selection" slot-scope="data">
+          <template v-slot:selection="{ item }">
             <span :class="nodeTextColor" class="ml-2">
-            {{data.item.data.kubernetesHostname}} [{{data.item.data.version}}]
+            {{item.data.kubernetesHostname}} [{{item.data.version}}]
             </span>
           </template>
         </v-select>

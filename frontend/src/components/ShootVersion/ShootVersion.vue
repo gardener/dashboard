@@ -58,9 +58,9 @@ limitations under the License.
       defaultColor="orange"
       ref="gDialog"
       >
-      <template slot="caption">Update Cluster</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
+      <template v-slot:caption>Update Cluster</template>
+      <template v-slot:affectedObjectName>{{shootName}}</template>
+      <template v-slot:message>
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
           :currentk8sVersion="shootK8sVersion"

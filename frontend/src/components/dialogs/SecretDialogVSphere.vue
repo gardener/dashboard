@@ -28,7 +28,7 @@ limitations under the License.
     replaceTitle="Replace VMware vSphere Secret"
     @input="onInput">
 
-    <template slot="data-slot">
+    <template v-slot:data-slot>
       <div>
         <v-text-field
         color="indigo darken-4"

@@ -44,21 +44,21 @@ limitations under the License.
           persistent-hint
           :hint="secretHint"
           >
-          <template slot="item" slot-scope="data">
-            <template v-if="isAddNewSecret(data.item)">
+          <template v-slot:item="{ item }">
+            <template v-if="isAddNewSecret(item)">
               <v-icon>mdi-plus</v-icon>
-              <span class="pl-2">{{get(data.item, 'title')}}</span>
+              <span class="pl-2">{{get(item, 'title')}}</span>
             </template>
             <template v-else>
-              <span>{{get(data.item, 'metadata.name')}}</span>
-              <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+              <span>{{get(item, 'metadata.name')}}</span>
+              <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
             </template>
           </template>
-          <template slot="selection" slot-scope="data">
+          <template v-slot:selection="{ item }">
             <span>
-              {{get(data.item, 'metadata.name')}}
+              {{get(item, 'metadata.name')}}
             </span>
-            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+            <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
           </template>
         </v-select>
       </v-col>

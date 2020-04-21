@@ -21,7 +21,7 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Maintenance">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <maintenance-time
         ref="maintenanceTime"
         :time-window-begin="data.timeWindowBegin"

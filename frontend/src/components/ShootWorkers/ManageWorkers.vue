@@ -27,15 +27,16 @@ limitations under the License.
         :zonedCluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
         @valid="onWorkerValid">
-        <v-btn v-show="index>0 || internalWorkers.length>1"
-          small
-          slot="action"
-          outlined
-          icon
-          color="grey"
-          @click.native.stop="onRemoveWorker(index)">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+        <template v-slot:action>
+          <v-btn v-show="index>0 || internalWorkers.length>1"
+            small
+            outlined
+            icon
+            color="grey"
+            @click.native.stop="onRemoveWorker(index)">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
       </worker-input-generic>
     </v-row>
     <v-row key="addWorker" class="list-item pt-2">

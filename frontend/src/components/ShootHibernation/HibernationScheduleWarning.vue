@@ -28,14 +28,16 @@ limitations under the License.
         a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
       </template>
     </div>
-    <div slot="popperRef">
-      <v-tooltip top>
-        <template v-slot:activator="{ on: tooltip }">
-          <v-icon v-on="tooltip" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
-        </template>
-        <span>No Hibernation Schedule</span>
-      </v-tooltip>
-    </div>
+    <template v-slot:popperRef>
+      <div>
+        <v-tooltip top>
+          <template v-slot:activator="{ on: tooltip }">
+            <v-icon v-on="tooltip" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
+          </template>
+          <span>No Hibernation Schedule</span>
+        </v-tooltip>
+      </div>
+    </template>
   </g-popper>
 
 </template>

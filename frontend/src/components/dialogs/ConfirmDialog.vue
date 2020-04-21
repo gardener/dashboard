@@ -22,8 +22,8 @@ limitations under the License.
     :max-width="maxWidth"
     :defaultColor="dialogColor"
     >
-    <template slot="caption">{{captionText}}</template>
-    <template slot="message">
+    <template v-slot:caption>{{captionText}}</template>
+    <template v-slot:message>
       <div v-html="messageHtml"></div>
     </template>
   </g-dialog>
