@@ -101,7 +101,7 @@ limitations under the License.
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title>Kubeconfig</v-list-item-title>
-                  <v-list-item-subtitle>Personalized command line interface access</v-list-item-subtitle>
+                  <v-list-item-subtitle>Personalized command line interface access. Requires <tt>kubelogin</tt> kubectl plugin</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action class="mx-0">
                   <v-tooltip top>
