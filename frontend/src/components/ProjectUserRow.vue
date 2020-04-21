@@ -31,16 +31,14 @@ limitations under the License.
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
-       <v-row>
-          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-            {{roleName}}
-          </v-chip>
-        </v-row>
+        <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="grey darken-4" outlined>
+          {{roleName}}
+        </v-chip>
       </v-list-item-action>
       <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-btn v-on="on" icon class="black--text" @click.native.stop="onEdit">
+            <v-btn v-on="on" icon @click.native.stop="onEdit">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
@@ -51,7 +49,7 @@ limitations under the License.
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="isTechnicalContact" icon class="red--text" @click.native.stop="onDelete">
+              <v-btn :disabled="isTechnicalContact" icon color="red" @click.native.stop="onDelete">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </div>
