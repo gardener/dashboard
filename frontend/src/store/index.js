@@ -260,8 +260,10 @@ const getters = {
 
         return map(versions, ({ version, expirationDate }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
+          const name = machineImage.name
           return {
-            name: machineImage.name,
+            key: name + '/' + version,
+            name,
             version,
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),

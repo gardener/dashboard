@@ -4,6 +4,7 @@
       color="cyan darken-2"
       item-color="cyan darken-2"
       :items="machineImages"
+      item-value="key"
       return-object
       :error-messages="getErrorMessages('worker.machine.image')"
       @input="onInputMachineImage"
