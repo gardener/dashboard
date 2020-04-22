@@ -199,8 +199,8 @@ const actions = {
       }
     }
   },
-  setListSortParams ({ commit, rootState }, pagination) {
-    const sortParams = pick(pagination, ['sortBy', 'descending'])
+  setListSortParams ({ commit, rootState }, options) {
+    const sortParams = pick(options, ['sortBy', 'sortDesc'])
     if (!isEqual(sortParams, state.sortParams)) {
       commit('SET_SORTPARAMS', { rootState, sortParams })
     }
@@ -455,8 +455,10 @@ const shoots = (state) => {
 }
 
 const setSortedItems = (state, rootState) => {
-  const sortBy = get(state, 'sortParams.sortBy')
-  const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
+  const sortBy = head(get(state, 'sortParams.sortBy'))
+  const sortDesc = get(state, 'sortParams.sortDesc', [false])
+  const descending = head(sortDesc) ? 'desc' : 'asc'
+  console.log(sortBy, descending)
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(a, 'name') > getRawVal(b, 'name')) {

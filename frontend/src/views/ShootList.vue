@@ -216,7 +216,7 @@ export default {
   watch: {
     options (value) {
       if (value) {
-        this.$localStorage.setObject('dataTable_options', pick(value, ['sortBy', 'descending', 'itemsPerPage']))
+        this.$localStorage.setObject('dataTable_options', pick(value, ['sortBy', 'sortDesc', 'itemsPerPage']))
         this.setShootListSortParams(value)
       }
     },
