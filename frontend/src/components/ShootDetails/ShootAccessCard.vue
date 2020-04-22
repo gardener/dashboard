@@ -36,7 +36,7 @@ limitations under the License.
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
@@ -87,13 +87,13 @@ limitations under the License.
       </v-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
+    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
 
-    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" inset></v-divider>
+    <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <v-list-item>
+    <v-list-item v-if="isKubeconfigTileVisible">
       <v-list-item-icon>
         <v-icon color="cyan darken-2">insert_drive_file</v-icon>
       </v-list-item-icon>
@@ -129,6 +129,10 @@ limitations under the License.
         <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
       </v-card>
     </v-expand-transition>
+
+    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+
+    <gardenctl-commands v-if="isGardenctlTileVisible" :shootItem="shootItem"></gardenctl-commands>
   </v-list>
 </template>
 
@@ -137,6 +141,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
+import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -150,7 +155,8 @@ export default {
     CodeBlock,
     CopyBtn,
     TerminalListTile,
-    LinkListTile
+    LinkListTile,
+    GardenctlCommands
   },
   props: {
     shootItem: {
@@ -246,6 +252,9 @@ export default {
     },
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
+    },
+    isGardenctlTileVisible () {
+      return this.isAdmin
     },
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess

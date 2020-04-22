@@ -15,44 +15,27 @@ limitations under the License.
 -->
 
 <template>
-  <v-card v-if="isAdmin" three-line>
-    <v-toolbar flat dark dense color="cyan darken-2">
-      <v-toolbar-title class="subtitle-1">Gardenctl</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
-      <v-list-item v-for="({ title, value }, index) in commands" :key="title">
-        <v-list-item-icon>
-          <v-icon v-if="index === 0" color="cyan darken-2">mdi-console-line</v-icon>
-        </v-list-item-icon>
-        <v-list-item-content>
-          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-          <v-list-item-title>
-            <code-block
-              lang="shell"
-              :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
-              :show-copy-button="false"
-            ></code-block>
-          </v-list-item-title>
-        </v-list-item-content>
-        <v-list-item-action>
-          <copy-btn :clipboard-text="value"></copy-btn>
-        </v-list-item-action>
-      </v-list-item>
-    </v-list>
-  </v-card>
+  <div>
+    <div v-for="({ title, subtitle, value }, index) in commands" :key="title">
+      <gardenctl-command
+        :title="title"
+        :subtitle="subtitle"
+        :value="value"
+        :isFirstItem="index === 0"
+      ></gardenctl-command>
+    </div>
+  </div>
 </template>
 
 <script>
-import CopyBtn from '@/components/CopyBtn'
-import CodeBlock from '@/components/CodeBlock'
+import GardenctlCommand from '@/components/ShootDetails/GardenctlCommand'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 
 export default {
   components: {
-    CopyBtn,
-    CodeBlock
+    GardenctlCommand
   },
   props: {
     shootItem: {
@@ -65,8 +48,7 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
-      'projectFromProjectList',
-      'isAdmin'
+      'projectFromProjectList'
     ]),
     projectName () {
       const project = this.projectFromProjectList
@@ -75,11 +57,13 @@ export default {
     commands () {
       return [
         {
-          title: 'Target Seed',
+          title: 'Target Control Plane',
+          subtitle: 'Gardenctl command to target the shoot namespace on the seed cluster',
           value: this.targetSeedCommand
         },
         {
-          title: 'Target Shoot',
+          title: 'Target Cluster',
+          subtitle: 'Gardenctl command to target the shoot cluster',
           value: this.targetShootCommand
         }
       ]
@@ -115,13 +99,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  ::v-deep .hljs-meta {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-  }
-</style>
