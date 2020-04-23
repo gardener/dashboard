@@ -15,16 +15,16 @@ limitations under the License.
 -->
 
 <template>
-  <div>
-    <div v-for="({ title, subtitle, value }, index) in commands" :key="title">
-      <gardenctl-command
-        :title="title"
-        :subtitle="subtitle"
-        :value="value"
-        :isFirstItem="index === 0"
-      ></gardenctl-command>
-    </div>
-  </div>
+  <v-list>
+    <gardenctl-command
+      v-for="({ title, subtitle, value }, index) in commands"
+      :key="title"
+      :title="title"
+      :subtitle="subtitle"
+      :value="value"
+      :isFirstItem="index === 0"
+    ></gardenctl-command>
+  </v-list>
 </template>
 
 <script>

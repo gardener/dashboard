@@ -125,7 +125,7 @@ limitations under the License.
       </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
-      <v-card v-if="expansionPanelKubeconfig" flat class="mb-n2">
+      <v-card v-if="expansionPanelKubeconfig" flat>
         <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
       </v-card>
     </v-expand-transition>
