@@ -457,7 +457,7 @@ const shoots = (state) => {
 const setSortedItems = (state, rootState) => {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
-  const descending = head(sortDesc) ? 'desc' : 'asc'
+  const sortOrder = head(sortDesc) ? 'desc' : 'asc'
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
@@ -467,7 +467,7 @@ const setSortedItems = (state, rootState) => {
       }
       return 0
     }
-    const inverse = descending === 'desc' ? -1 : 1
+    const inverse = sortOrder === 'desc' ? -1 : 1
     if (sortBy === 'k8sVersion') {
       const sortedShoots = shoots(state)
       sortedShoots.sort((a, b) => {
@@ -503,7 +503,7 @@ const setSortedItems = (state, rootState) => {
       })
       state.sortedShoots = sortedShoots
     } else {
-      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
     }
   } else {
     state.sortedShoots = shoots(state)
