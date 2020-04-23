@@ -29,8 +29,8 @@ limitations under the License.
     </v-snackbar>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" icon ref="copy">
-          <v-icon :small="true">content_copy</v-icon>
+        <v-btn v-on="on" icon ref="copy" :color="color">
+          <v-icon :small="true">{{icon}}</v-icon>
         </v-btn>
       </template>
       <span>{{tooltipText}}</span>
@@ -46,10 +46,6 @@ export default {
     clipboardText: {
       type: String,
       default: ''
-    },
-    copySuccessText: {
-      type: String,
-      default: 'Copied to clipboard'
     },
     copyFailedText: {
       type: String,
@@ -68,15 +64,16 @@ export default {
     return {
       snackbar: false,
       clipboard: undefined,
-      copyFailed: false
+      copySucceeded: false,
+      timeoutId: undefined
     }
   },
   computed: {
     snackbarText () {
-      return this.copyFailed ? this.copyFailedText : this.copySuccessText
+      return this.copyFailedText
     },
     snackbarColor () {
-      return this.copyFailed ? 'error' : undefined
+      return 'error'
     },
     clipboardOptions () {
       const options = {
@@ -91,6 +88,18 @@ export default {
         vm = vm.$parent
       }
       return options
+    },
+    icon () {
+      if (this.copySucceeded) {
+        return 'mdi-check'
+      }
+      return 'mdi-content-copy'
+    },
+    color () {
+      if (this.copySucceeded) {
+        return 'success'
+      }
+      return undefined
     }
   },
   methods: {
@@ -100,14 +109,17 @@ export default {
       }
       this.clipboard = new Clipboard(this.$refs.copy.$el, this.clipboardOptions)
       this.clipboard.on('success', (event) => {
-        this.snackbar = true
-        this.copyFailed = false
+        this.copySucceeded = true
+        clearTimeout(this.timeoutId)
+        this.timeoutId = setTimeout(() => {
+          this.copySucceeded = false
+        }, 1000);
         this.$emit('copy')
       })
       this.clipboard.on('error', err => {
         console.error('error', err)
-        this.copyFailed = true
         this.snackbar = true
+        this.copySucceeded = false
         this.$emit('copyFailed')
       })
     }
