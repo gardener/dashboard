@@ -41,7 +41,7 @@ limitations under the License.
       </v-list-item>
       <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
         <v-list-item-icon></v-list-item-icon>
-        <v-list-item-content>
+        <v-list-item-content class="pt-0">
           <code-block
             lang="shell"
             :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
