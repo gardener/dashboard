@@ -458,7 +458,6 @@ const setSortedItems = (state, rootState) => {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
   const descending = head(sortDesc) ? 'desc' : 'asc'
-  console.log(sortBy, descending)
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
