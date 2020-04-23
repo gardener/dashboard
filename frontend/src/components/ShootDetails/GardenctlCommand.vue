@@ -84,11 +84,7 @@ export default {
       return this.expansionPanel ? 'visibility_off' : 'visibility'
     },
     visibilityTitle () {
-      if (this.expansionPanel) {
-        return 'Hide Command'
-      } else {
-        return 'Show Command'
-      }
+      return this.expansionPanel ? 'Hide Command' : 'Show Command'
     }
   }
 }
