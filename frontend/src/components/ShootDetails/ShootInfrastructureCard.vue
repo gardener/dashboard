@@ -25,9 +25,9 @@ limitations under the License.
           <v-icon color="cyan darken-2">cloud_queue</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>Provider</v-list-item-subtitle>
+          <v-list-item-subtitle>{{vendorTitle}}</v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            {{shootCloudProviderKind}}
+            <vendor :shootItem="shootItem" :extended="true"></vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -43,15 +43,6 @@ limitations under the License.
               <span class="subtitle-1">{{shootSecretBindingName}}</span>
             </router-link>
             <span v-else>{{shootSecretBindingName}}</span>
-          </v-list-item-title>
-        </v-list-item-content>
-      </v-list-item>
-      <v-list-item>
-        <v-list-item-icon/>
-        <v-list-item-content class="pt-0">
-          <v-list-item-subtitle>{{regionZoneTitle}}</v-list-item-subtitle>
-          <v-list-item-title class="pt-1">
-            {{regionZoneText}}
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -154,11 +145,11 @@ limitations under the License.
 
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import join from 'lodash/join'
 import includes from 'lodash/includes'
 import find from 'lodash/find'
 import CopyBtn from '@/components/CopyBtn'
 import ShootSeedName from '@/components/ShootSeedName'
+import Vendor from '@/components/Vendor'
 import LbClass from '@/components/ShootDetails/LbClass'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -166,7 +157,8 @@ export default {
   components: {
     CopyBtn,
     ShootSeedName,
-    LbClass
+    LbClass,
+    Vendor
   },
   props: {
     shootItem: {
@@ -199,20 +191,11 @@ export default {
       const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
       return get(shootFloatingPool, 'loadBalancerClasses')
     },
-    shootZonesText () {
-      return join(this.shootZones, ', ')
-    },
-    regionZoneText () {
+    vendorTitle () {
       if (this.shootZones.length > 0) {
-        return `${this.shootRegion} / ${this.shootZonesText}`
+        return `Provider / Region / ${this.zoneTitle}`
       }
-      return this.shootRegion
-    },
-    regionZoneTitle () {
-      if (this.shootZones.length > 0) {
-        return `Region / ${this.zoneTitle}`
-      }
-      return 'Region'
+      return 'Provider / Region'
     },
     zoneTitle () {
       if (this.shootZones.length > 1) {
