@@ -81,11 +81,7 @@ export default {
   },
   computed: {
     visibilityIcon () {
-      if (this.expansionPanel) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.expansionPanel ? 'visibility_off' : 'visibility'
     },
     visibilityTitle () {
       if (this.expansionPanel) {
