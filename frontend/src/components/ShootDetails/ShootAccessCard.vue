@@ -216,18 +216,10 @@ export default {
       return get(this.shootInfo, 'kubeconfig')
     },
     visibilityIconKubeconfig () {
-      if (this.expansionPanelKubeconfig) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.expansionPanelKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
     },
     kubeconfigVisibilityTitle () {
-      if (this.expansionPanelKubeconfig) {
-        return 'Hide Kubeconfig'
-      } else {
-        return 'Show Kubeconfig'
-      }
+      return this.expansionPanelKubeconfig ? 'Hide Kubeconfig' : 'Show Kubeconfig'
     },
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
@@ -263,25 +255,13 @@ export default {
       return this.shootInfo.cluster_token || ''
     },
     tokenText () {
-      if (this.showToken) {
-        return this.token
-      } else {
-        return '****************'
-      }
+      return this.showToken ? this.token : '****************'
     },
     tokenVisibilityTitle () {
-      if (this.showToken) {
-        return 'Hide token'
-      } else {
-        return 'Show token'
-      }
+      return this.showToken ? 'Hide token' : 'Show token'
     },
     visibilityIcon () {
-      if (this.showToken) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
     }
   },
   methods: {

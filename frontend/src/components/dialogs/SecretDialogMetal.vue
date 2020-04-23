@@ -45,7 +45,7 @@ limitations under the License.
           color="blue"
           v-model="apiHmac"
           label="API HMAC"
-          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           @click:append="() => (hideSecret = !hideSecret)"
           :error-messages="getErrorMessages('apiHmac')"

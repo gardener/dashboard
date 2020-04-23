@@ -93,25 +93,13 @@ export default {
   },
   computed: {
     passwordText () {
-      if (this.showPassword) {
-        return this.password
-      } else {
-        return '****************'
-      }
+      return this.showPassword ? this.password : '****************'
     },
     passwordVisibilityTitle () {
-      if (this.showPassword) {
-        return 'Hide password'
-      } else {
-        return 'Show password'
-      }
+      return this.showPassword ? 'Hide password' : 'Show password'
     },
     visibilityIcon () {
-      if (this.showPassword) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.showPassword ? 'mdi-eye-off' : 'mdi-eye'
     }
   },
   watch: {
