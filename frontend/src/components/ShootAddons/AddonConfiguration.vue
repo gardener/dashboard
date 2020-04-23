@@ -23,7 +23,7 @@ limitations under the License.
     maxWidth="900"
     max-height="60vh"
     >
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-shoot-addons
         ref="addons"
         :isCreateMode="false"

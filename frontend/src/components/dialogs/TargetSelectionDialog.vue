@@ -23,8 +23,8 @@ limitations under the License.
     defaultColor="cyan-darken-2"
     ref="gDialog"
     >
-    <template slot="caption">Select Target</template>
-    <template slot="message">
+    <template v-slot:caption>Select Target</template>
+    <template v-slot:message>
       <v-radio-group
         v-model="selectedTarget"
         label="Terminal Target"

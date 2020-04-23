@@ -25,7 +25,7 @@ limitations under the License.
     maxWidth="600"
     :confirmRequired="true"
     confirmButtonText="Rotate">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <v-row >
         <v-col>
           <div class="py-4">Do you want to start rotation of kubeconfig credentials?

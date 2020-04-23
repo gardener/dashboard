@@ -22,7 +22,7 @@ limitations under the License.
     ref="actionDialog"
     maxWidth="400"
     caption="Configure Purpose">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <purpose
         ref="purpose"
         :secret="secret"

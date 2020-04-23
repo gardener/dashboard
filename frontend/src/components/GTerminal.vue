@@ -33,9 +33,11 @@ limitations under the License.
         :boundariesSelector="`#boundary_${uuid}`"
       >
         {{snackbarDetailsText}}
-        <v-btn slot="popperRef" text small class="cyan--text text--darken-2">
-          Details
-        </v-btn>
+        <template v-slot:popperRef>
+          <v-btn text small color="cyan darken-2">
+            Details
+          </v-btn>
+        </template>
       </g-popper>
       <v-btn text color="cyan darken-2" @click="retry()">
         Retry
@@ -59,7 +61,7 @@ limitations under the License.
     <draggable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small class="text-none grey--text text--lighten-1 systemBarButton ml-1 mr-1 g-ignore-drag" @click="deleteTerminal">
+          <v-btn :disabled="!isTerminalSessionCreated" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag" @click="deleteTerminal">
             <v-icon class="mr-0" small>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
@@ -77,9 +79,11 @@ limitations under the License.
                 :boundariesSelector="`#boundary_${uuid}`"
               >
                 <span v-html="compiledImageHelpText"></span>
-                <v-btn v-on="tooltip" slot="popperRef" v-if="terminalSession.imageHelpText" icon small class="text-none grey--text text--lighten-1 systemBarButton ml-1 mr-1 g-ignore-drag">
-                  <v-icon class="mr-0" small>mdi-help-circle-outline</v-icon>
-                </v-btn>
+                <template v-slot:popperRef>
+                  <v-btn v-on="tooltip" v-if="terminalSession.imageHelpText" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag">
+                    <v-icon class="mr-0" small>mdi-help-circle-outline</v-icon>
+                  </v-btn>
+                </template>
               </g-popper>
             </template>
             Help
@@ -91,7 +95,7 @@ limitations under the License.
             min-width="400px"
           >
             <template v-slot:activator="{ on: menu }">
-              <v-btn v-on="menu" icon small class="text-none grey--text text--lighten-1 systemBarButton ml-1 mr-1 g-ignore-drag">
+              <v-btn v-on="menu" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag">
                 <v-icon class="mr-0" small>mdi-menu</v-icon>
               </v-btn>
             </template>
@@ -139,7 +143,7 @@ limitations under the License.
             <template v-slot:activator="{ on: menu }">
               <v-tooltip v-on="menu" :disabled="connectionMenu" top style="min-width: 110px">
                 <template v-slot:activator="{ on: tooltip }">
-                  <v-btn v-on="tooltip" small text class="text-none grey--text text--lighten-1 systemBarButton">
+                  <v-btn v-on="tooltip" small text color="grey lighten-1" class="text-none systemBarButton">
                     <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
                       <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                       <disconnected v-else></disconnected>
@@ -165,7 +169,7 @@ limitations under the License.
 
           <v-tooltip v-if="imageShortText" top>
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" text @click="configure('imageBtn')" :loading="loading.imageBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+              <v-btn v-on="tooltip" text @click="configure('imageBtn')" :loading="loading.imageBtn" color="grey lighten-1" class="text-none systemBarButton">
                 <v-icon class="mr-2">mdi-layers-triple-outline</v-icon>
                 <span>{{imageShortText}}</span>
               </v-btn>
@@ -175,7 +179,7 @@ limitations under the License.
 
           <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" small text @click="configure('secContextBtn')" :loading="loading.secContextBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+              <v-btn v-on="tooltip" small text @click="configure('secContextBtn')" :loading="loading.secContextBtn" color="grey lighten-1" class="text-none systemBarButton">
                 <v-icon class="mr-2">mdi-shield-account</v-icon>
                 <span>{{privilegedModeText}}</span>
               </v-btn>
@@ -187,7 +191,7 @@ limitations under the License.
 
           <v-tooltip v-if="terminalSession.node && target === 'shoot'" top>
             <template v-slot:activator="{ on: tooltip }">
-              <v-btn v-on="tooltip" small text @click="configure('nodeBtn')" :loading="loading.nodeBtn" class="text-none grey--text text--lighten-1 systemBarButton">
+              <v-btn v-on="tooltip" small text @click="configure('nodeBtn')" :loading="loading.nodeBtn" color="grey lighten-1" class="text-none systemBarButton">
                 <v-icon :size="14" class="mr-2">mdi-server</v-icon>
                 <span>{{terminalSession.node}}</span>
               </v-btn>

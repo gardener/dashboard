@@ -74,8 +74,8 @@ limitations under the License.
     @update="onUpdate"
     @delete="onDelete"
     >
-      <template v-if="isOwnSecretBinding(props.secret)" slot="rowSubTitle" slot-scope="props">
-        {{props.secret.data.domainName}} / {{props.secret.data.tenantName}}
+      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
+        {{secret.data.domainName}} / {{secret.data.tenantName}}
       </template>
     </secret>
 
@@ -123,7 +123,7 @@ limitations under the License.
     @update="onUpdate"
     @delete="onDelete"
     >
-      <template v-if="isOwnSecretBinding(secret)" slot="rowSubTitle" slot-scope="{ secret }">
+      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <span v-on="on">{{secret.data.vsphereUsername}}</span>

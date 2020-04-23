@@ -20,13 +20,16 @@ limitations under the License.
     color="blue"
     backgroundSrc="/static/background_metal.svg"
     :value="value"
-    @input="onInput">
-    <div slot="help-content" class="help-content">
-     <p>
-       Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
-       The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
-     </p>
-   </div>
+    @input="onInput"
+  >
+    <template v-slot:help-content>
+      <div class="help-content">
+        <p>
+          Before you can provision and access a Kubernetes cluster on Metal Stack, you need to provide HMAC credentials and the endpoint of your Metal API.
+          The Gardener needs the credentials to provision and operate the Metal Stack infrastructure for your Kubernetes cluster.
+        </p>
+      </div>
+    </template>
   </secret-dialog-help>
 </template>
 

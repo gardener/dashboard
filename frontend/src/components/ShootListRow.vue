@@ -54,10 +54,10 @@ limitations under the License.
       <shoot-seed-name :shootItem="shootItem" />
     </td>
     <td class="nowrap" v-if="this.headerVisible['technicalId']">
-      <v-row class="fill-height flex-nowrap" align="center" justify="start" slot="activator">
+      <div class="d-flex align-center justify-start flex-nowrap fill-height">
         <span>{{shootTechnicalId}}</span>
         <copy-btn :clipboard-text="shootTechnicalId"></copy-btn>
-      </v-row>
+      </div>
     </td>
     <td class="nowrap" v-if="this.headerVisible['createdBy']">
       <account-avatar :account-name="shootCreatedBy"></account-avatar>

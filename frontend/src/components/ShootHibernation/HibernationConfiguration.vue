@@ -21,7 +21,7 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Hibernation Schedule">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-hibernation-schedule
         ref="hibernationSchedule"
         :isHibernationPossible="isHibernationPossible"

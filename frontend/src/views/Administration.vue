@@ -105,10 +105,10 @@ limitations under the License.
       :errorMessage.sync="errorMessage"
       :detailedErrorMessage.sync="detailedErrorMessage"
       ref="gDialog">
-      <template slot="caption">
+      <template v-slot:caption>
         Confirm Delete
       </template>
-      <template slot="message">
+      <template v-slot:message>
         Are you sure to delete the project <b>{{projectName}}</b>?
         <br />
         <i class="red--text">The operation can not be undone.</i>

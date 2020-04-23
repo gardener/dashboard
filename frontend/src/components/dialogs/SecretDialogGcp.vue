@@ -28,7 +28,7 @@ limitations under the License.
     replaceTitle="Replace Google Secret"
     @input="onInput">
 
-    <template slot="data-slot">
+    <template v-slot:data-slot>
       <div>
         <v-textarea
           ref="serviceAccountKey"

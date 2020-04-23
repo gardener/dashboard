@@ -27,18 +27,17 @@ limitations under the License.
       :key="index"
       align="center"
     >
-      <span class="ma-1">
-        <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-      </span>
+      <span class="ma-1 font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
     </v-row>
-    <v-chip
-      slot="popperRef"
-      small
-      class="cursor-pointer my-0 ml-0"
-      outlined
-      color="cyan darken-2">
-      {{workerGroup.name}}
-    </v-chip>
+    <template v-slot:popperRef>
+      <v-chip
+        small
+        class="cursor-pointer my-0 ml-0"
+        outlined
+        color="cyan darken-2">
+        {{workerGroup.name}}
+      </v-chip>
+    </template>
   </g-popper>
 </template>
 

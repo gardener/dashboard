@@ -24,7 +24,7 @@ limitations under the License.
     icon="mdi-refresh"
     maxWidth="600"
     confirmButtonText="Trigger now">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <v-row >
         <v-col>
           <div class="subtitle-1 pt-4">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />

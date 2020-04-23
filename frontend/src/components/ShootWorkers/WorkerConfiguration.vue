@@ -22,7 +22,7 @@ limitations under the License.
     ref="actionDialog"
     maxWidth="760"
     caption="Configure Workers">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-workers
       ref="manageWorkers"
       @valid="onWorkersValid"
