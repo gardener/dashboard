@@ -16,26 +16,55 @@ limitations under the License.
 
 <template>
   <v-list>
-    <gardenctl-command
-      v-for="({ title, subtitle, value }, index) in commands"
-      :key="title"
-      :title="title"
-      :subtitle="subtitle"
-      :value="value"
-      :isFirstItem="index === 0"
-    ></gardenctl-command>
+    <template v-for="({ title, subtitle, value }, index) in commands">
+      <v-list-item :key="title">
+        <v-list-item-icon>
+          <v-icon v-if="index === 0" color="cyan darken-2">mdi-console-line</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>{{title}}</v-list-item-title>
+          <v-list-item-subtitle>{{subtitle}}</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action>
+          <copy-btn :clipboard-text="value"></copy-btn>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="toggle(index)">
+                <v-icon>{{visibilityIcon(index)}}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{visibilityTitle(index)}}</span>
+          </v-tooltip>
+        </v-list-item-action>
+      </v-list-item>
+      <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
+        <v-list-item-icon></v-list-item-icon>
+        <v-list-item-content>
+          <code-block
+            lang="shell"
+            :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
+            :show-copy-button="false"
+          ></code-block>
+        </v-list-item-content>
+      </v-list-item>
+    </template>
   </v-list>
 </template>
 
 <script>
-import GardenctlCommand from '@/components/ShootDetails/GardenctlCommand'
+import CopyBtn from '@/components/CopyBtn'
+import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
+import Vue from 'vue'
 
 export default {
   components: {
-    GardenctlCommand
+    CopyBtn,
+    CodeBlock
   },
   props: {
     shootItem: {
@@ -43,6 +72,11 @@ export default {
     }
   },
   mixins: [shootItem],
+  data () {
+    return {
+      expansionPanel: []
+    }
+  },
   computed: {
     ...mapState([
       'cfg'
@@ -96,6 +130,27 @@ export default {
 
       return `gardenctl target ${args.join(' ')}`
     }
+  },
+  methods: {
+    visibilityIcon (index) {
+      return this.expansionPanel[index] ? 'mdi-eye-off' : 'mdi-eye'
+    },
+    visibilityTitle (index) {
+      return this.expansionPanel[index] ? 'Hide Command' : 'Show Command'
+    },
+    toggle (index) {
+      Vue.set(this.expansionPanel, index, !this.expansionPanel[index])
+    }
   }
 }
 </script>
+
+<style scoped>
+  ::v-deep .hljs-meta {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+</style>
