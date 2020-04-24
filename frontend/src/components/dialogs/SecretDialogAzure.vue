@@ -44,7 +44,7 @@ limitations under the License.
         <v-text-field
           color="blue darken-1"
           v-model="clientSecret"
-          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           label="Client Secret"
           :error-messages="getErrorMessages('clientSecret')"

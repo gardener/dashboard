@@ -48,7 +48,7 @@ limitations under the License.
           v-model="accessKeySecret"
           label="Access Key Secret"
           :error-messages="getErrorMessages('accessKeySecret')"
-          :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+          :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
           :type="hideSecret ? 'password' : 'text'"
           @click:append="() => (hideSecret = !hideSecret)"
           @input="$v.accessKeySecret.$touch()"

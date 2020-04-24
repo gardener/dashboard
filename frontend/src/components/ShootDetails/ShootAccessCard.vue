@@ -36,7 +36,7 @@ limitations under the License.
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
@@ -87,13 +87,13 @@ limitations under the License.
       </v-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" inset></v-divider>
+    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
 
-    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" inset></v-divider>
+    <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <v-list-item>
+    <v-list-item v-if="isKubeconfigTileVisible">
       <v-list-item-icon>
         <v-icon color="cyan darken-2">insert_drive_file</v-icon>
       </v-list-item-icon>
@@ -125,10 +125,14 @@ limitations under the License.
       </v-list-item-action>
     </v-list-item>
     <v-expand-transition>
-      <v-card v-if="expansionPanelKubeconfig" flat class="mb-n2">
+      <v-card v-if="expansionPanelKubeconfig" flat>
         <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
       </v-card>
     </v-expand-transition>
+
+    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+
+    <gardenctl-commands v-if="isGardenctlTileVisible" :shootItem="shootItem"></gardenctl-commands>
   </v-list>
 </template>
 
@@ -137,6 +141,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
+import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -150,7 +155,8 @@ export default {
     CodeBlock,
     CopyBtn,
     TerminalListTile,
-    LinkListTile
+    LinkListTile,
+    GardenctlCommands
   },
   props: {
     shootItem: {
@@ -210,18 +216,10 @@ export default {
       return get(this.shootInfo, 'kubeconfig')
     },
     visibilityIconKubeconfig () {
-      if (this.expansionPanelKubeconfig) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.expansionPanelKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
     },
     kubeconfigVisibilityTitle () {
-      if (this.expansionPanelKubeconfig) {
-        return 'Hide Kubeconfig'
-      } else {
-        return 'Show Kubeconfig'
-      }
+      return this.expansionPanelKubeconfig ? 'Hide Kubeconfig' : 'Show Kubeconfig'
     },
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
@@ -247,6 +245,9 @@ export default {
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
     },
+    isGardenctlTileVisible () {
+      return this.isAdmin
+    },
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
     },
@@ -254,25 +255,13 @@ export default {
       return this.shootInfo.cluster_token || ''
     },
     tokenText () {
-      if (this.showToken) {
-        return this.token
-      } else {
-        return '****************'
-      }
+      return this.showToken ? this.token : '****************'
     },
     tokenVisibilityTitle () {
-      if (this.showToken) {
-        return 'Hide token'
-      } else {
-        return 'Show token'
-      }
+      return this.showToken ? 'Hide token' : 'Show token'
     },
     visibilityIcon () {
-      if (this.showToken) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
     }
   },
   methods: {

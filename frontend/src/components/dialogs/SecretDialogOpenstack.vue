@@ -70,7 +70,7 @@ limitations under the License.
             v-model="password"
             label="Password"
             :error-messages="getErrorMessages('password')"
-            :append-icon="hideSecret ? 'visibility' : 'visibility_off'"
+            :append-icon="hideSecret ? 'mdi-eye' : 'mdi-eye-off'"
             :type="hideSecret ? 'password' : 'text'"
             @click:append="() => (hideSecret = !hideSecret)"
             @input="$v.password.$touch()"

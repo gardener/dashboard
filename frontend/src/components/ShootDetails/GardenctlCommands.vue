@@ -15,31 +15,42 @@ limitations under the License.
 -->
 
 <template>
-  <v-card v-if="isAdmin" three-line>
-    <v-toolbar flat dark dense color="cyan darken-2">
-      <v-toolbar-title class="subtitle-1">Gardenctl</v-toolbar-title>
-    </v-toolbar>
-    <v-list>
-      <v-list-item v-for="({ title, value }, index) in commands" :key="title">
+  <v-list>
+    <template v-for="({ title, subtitle, value }, index) in commands">
+      <v-list-item :key="title">
         <v-list-item-icon>
           <v-icon v-if="index === 0" color="cyan darken-2">mdi-console-line</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
-          <v-list-item-title>
-            <code-block
-              lang="shell"
-              :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
-              :show-copy-button="false"
-            ></code-block>
-          </v-list-item-title>
+          <v-list-item-title>{{title}}</v-list-item-title>
+          <v-list-item-subtitle>{{subtitle}}</v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action>
           <copy-btn :clipboard-text="value"></copy-btn>
         </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="toggle(index)">
+                <v-icon>{{visibilityIcon(index)}}</v-icon>
+              </v-btn>
+            </template>
+            <span>{{visibilityTitle(index)}}</span>
+          </v-tooltip>
+        </v-list-item-action>
       </v-list-item>
-    </v-list>
-  </v-card>
+      <v-list-item v-if="expansionPanel[index]" :key="'expansion-' + title">
+        <v-list-item-icon></v-list-item-icon>
+        <v-list-item-content class="pt-0">
+          <code-block
+            lang="shell"
+            :content="'$ ' + value.replace(/ --/g, ' \\\n    --')"
+            :show-copy-button="false"
+          ></code-block>
+        </v-list-item-content>
+      </v-list-item>
+    </template>
+  </v-list>
 </template>
 
 <script>
@@ -48,6 +59,7 @@ import CodeBlock from '@/components/CodeBlock'
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
+import Vue from 'vue'
 
 export default {
   components: {
@@ -60,13 +72,17 @@ export default {
     }
   },
   mixins: [shootItem],
+  data () {
+    return {
+      expansionPanel: []
+    }
+  },
   computed: {
     ...mapState([
       'cfg'
     ]),
     ...mapGetters([
-      'projectFromProjectList',
-      'isAdmin'
+      'projectFromProjectList'
     ]),
     projectName () {
       const project = this.projectFromProjectList
@@ -75,11 +91,13 @@ export default {
     commands () {
       return [
         {
-          title: 'Target Seed',
+          title: 'Target Control Plane',
+          subtitle: 'Gardenctl command to target the shoot namespace on the seed cluster',
           value: this.targetSeedCommand
         },
         {
-          title: 'Target Shoot',
+          title: 'Target Cluster',
+          subtitle: 'Gardenctl command to target the shoot cluster',
           value: this.targetShootCommand
         }
       ]
@@ -111,6 +129,17 @@ export default {
       }
 
       return `gardenctl target ${args.join(' ')}`
+    }
+  },
+  methods: {
+    visibilityIcon (index) {
+      return this.expansionPanel[index] ? 'mdi-eye-off' : 'mdi-eye'
+    },
+    visibilityTitle (index) {
+      return this.expansionPanel[index] ? 'Hide Command' : 'Show Command'
+    },
+    toggle (index) {
+      Vue.set(this.expansionPanel, index, !this.expansionPanel[index])
     }
   }
 }
