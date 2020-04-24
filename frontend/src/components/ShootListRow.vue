@@ -40,15 +40,7 @@ limitations under the License.
       </v-row>
     </td>
     <td class="nowrap" v-if="this.headerVisible['infrastructure']">
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <v-row v-on="on" class="fill-height" align="center" justify="start">
-            <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
-            <div>{{ shootRegion }}</div>
-          </v-row>
-        </template>
-        <span>{{ shootCloudProviderKind }} [{{ shootRegion }}]</span>
-      </v-tooltip>
+      <vendor :shootItem="shootItem"></vendor>
     </td>
     <td class="nowrap" v-if="this.headerVisible['seed']">
       <shoot-seed-name :shootItem="shootItem" />
@@ -136,7 +128,7 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import AccountAvatar from '@/components/AccountAvatar'
-import InfraIcon from '@/components/VendorIcon'
+import Vendor from '@/components/Vendor'
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
@@ -160,7 +152,6 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    InfraIcon,
     StatusTags,
     PurposeTag,
     ShootStatus,
@@ -173,7 +164,8 @@ export default {
     AccountAvatar,
     DeleteCluster,
     CopyBtn,
-    ShootSeedName
+    ShootSeedName,
+    Vendor
   },
   props: {
     shootItem: {

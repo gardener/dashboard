@@ -30,27 +30,29 @@ limitations under the License.
             <template v-slot:popperRef>
               <span>{{displayName}}</span>
             </template>
-            <div class="d-flex flex-column service-account">
-              <div class="d-flex justify-start">
-                <label>Created by</label>
-                <div :class="createdByClasses">
-                  <account-avatar :account-name="createdBy"></account-avatar>
-                </div>
-              </div>
-              <div class="d-flex justify-start">
-                <label>Created</label>
-                <div>
-                  <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                      <span v-on="on" class="font-weight-bold">
-                        <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
-                      </span>
-                    </template>
-                    {{created}}
-                  </v-tooltip>
-                </div>
-              </div>
-            </div>
+            <v-list class="pa-0">
+              <v-list-item class="px-0">
+                <v-list-item-content class="pt-1">
+                  <v-list-item-subtitle>Created by</v-list-item-subtitle>
+                  <v-list-item-title><account-avatar :account-name="createdBy"></account-avatar></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item class="px-0">
+                <v-list-item-content class="pt-1">
+                  <v-list-item-subtitle>Created</v-list-item-subtitle>
+                  <v-list-item-title>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <span v-on="on">
+                          <time-string :date-time="creationTimestamp" :pointInTime="-1"></time-string>
+                        </span>
+                      </template>
+                      {{created}}
+                    </v-tooltip>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
           </g-popper>
         </v-list-item-title>
         <v-list-item-subtitle>
@@ -189,12 +191,7 @@ export default {
   .cursor-pointer {
     cursor: pointer;
   }
-  .service-account {
-    text-align: left !important;
-    margin: -4px;
-    label {
-      min-width: 5rem;
-      padding-right: 4px;
-    }
+  ::v-deep .popper {
+    text-align: initial;
   }
 </style>

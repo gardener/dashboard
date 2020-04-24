@@ -19,16 +19,7 @@ limitations under the License.
     :title="workerGroup.name"
     toolbarColor="cyan darken-2"
     :popperKey="`worker_group_${workerGroup.name}`"
-
   >
-    <v-row
-      class="fill-height"
-      v-for="(line,index) in description"
-      :key="index"
-      align="center"
-    >
-      <span class="ma-1 font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-    </v-row>
     <template v-slot:popperRef>
       <v-chip
         small
@@ -38,6 +29,14 @@ limitations under the License.
         {{workerGroup.name}}
       </v-chip>
     </template>
+    <v-list class="pa-0">
+      <v-list-item v-for="({title, value, description}) in description" :key="title" class="px-0">
+        <v-list-item-content class="pt-1">
+          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+          <v-list-item-title>{{value}} {{description}}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
   </g-popper>
 </template>
 
@@ -161,4 +160,9 @@ export default {
   .cursor-pointer ::v-deep .v-chip__content {
     cursor: pointer;
   }
+
+  ::v-deep .popper {
+    text-align: initial;
+  }
+
 </style>

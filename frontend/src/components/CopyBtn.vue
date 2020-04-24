@@ -113,7 +113,7 @@ export default {
         clearTimeout(this.timeoutId)
         this.timeoutId = setTimeout(() => {
           this.copySucceeded = false
-        }, 1000);
+        }, 1000)
         this.$emit('copy')
       })
       this.clipboard.on('error', err => {
