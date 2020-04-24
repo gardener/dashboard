@@ -25,9 +25,11 @@ limitations under the License.
           <v-icon color="cyan darken-2">cloud_queue</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>{{vendorTitle}}</v-list-item-subtitle>
+          <v-list-item-subtitle>
+            <vendor title extended :shootItem="shootItem"></vendor>
+          </v-list-item-subtitle>
           <v-list-item-title class="pt-1">
-            <vendor :shootItem="shootItem" :extended="true"></vendor>
+            <vendor extended :shootItem="shootItem"></vendor>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -190,18 +192,6 @@ export default {
       const shootFloatingPoolName = get(this.shootItem, 'spec.provider.infrastructureConfig.floatingPoolName')
       const shootFloatingPool = find(profileFloatingPools, { name: shootFloatingPoolName })
       return get(shootFloatingPool, 'loadBalancerClasses')
-    },
-    vendorTitle () {
-      if (this.shootZones.length > 0) {
-        return `Provider / Region / ${this.zoneTitle}`
-      }
-      return 'Provider / Region'
-    },
-    zoneTitle () {
-      if (this.shootZones.length > 1) {
-        return 'Zones'
-      }
-      return 'Zone'
     },
     canLinkToSecret () {
       return this.shootSecretBindingName && this.shootNamespace

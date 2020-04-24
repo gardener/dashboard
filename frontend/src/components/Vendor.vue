@@ -15,22 +15,37 @@ limitations under the License.
 -->
 
 <template>
-  <v-tooltip top>
+  <span v-if="title">{{ shootZones.length ? `Provider / Region / ${zoneTitle}` : 'Provider / Region' }}</span>
+  <!-- we make the tooltip background transparent so that it does not conflict with the cards background -->
+  <v-tooltip v-else top color="rgba(0, 0, 0, 1)" content-class="tooltip">
     <template v-slot:activator="{ on }">
-      <span v-on="on" class="d-flex">
+      <span v-on="on">
         <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>
-        <span>{{ description }}</span>
+        {{ description }}
       </span>
     </template>
-    <div>
-      <span class="font-weight-bold">Provider:</span> <infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>{{ shootCloudProviderKind }}
-    </div>
-    <div>
-      <span class="font-weight-bold">Region:</span> {{ shootRegion }}
-    </div>
-    <div v-if="shootZones.length">
-      <span class="font-weight-bold">{{zoneTitle}}:</span> {{shootZonesText}}
-    </div>
+    <v-card>
+      <v-list>
+        <v-list-item>
+          <v-list-item-content class="pa-0">
+            <v-list-item-subtitle>Provider</v-list-item-subtitle>
+            <v-list-item-title><infra-icon v-model="shootCloudProviderKind" content-class="mr-2"></infra-icon>{{ shootCloudProviderKind }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-content class="pa-0">
+            <v-list-item-subtitle>Region</v-list-item-subtitle>
+            <v-list-item-title>{{ shootRegion }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item v-if="shootZones.length">
+          <v-list-item-content class="pa-0">
+            <v-list-item-subtitle>{{zoneTitle}}</v-list-item-subtitle>
+            <v-list-item-title>{{shootZonesText}}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card>
   </v-tooltip>
 </template>
 
@@ -47,6 +62,10 @@ export default {
     shootItem: {
       type: Object,
       required: true
+    },
+    title: {
+      type: Boolean,
+      default: false
     },
     extended: {
       type: Boolean,
@@ -81,3 +100,10 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .tooltip {
+    opacity: 1 !important;
+    padding: 0;
+  }
+</style>
