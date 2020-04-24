@@ -19,7 +19,6 @@ limitations under the License.
     :title="workerGroup.name"
     toolbarColor="cyan darken-2"
     :popperKey="`worker_group_${workerGroup.name}`"
-
   >
     <template v-slot:popperRef>
       <v-chip
@@ -31,8 +30,8 @@ limitations under the License.
       </v-chip>
     </template>
     <v-list class="pa-0">
-      <v-list-item v-for="({title, value, description}) in description" :key="title" class="pa-0">
-        <v-list-item-content class="pa-0">
+      <v-list-item v-for="({title, value, description}) in description" :key="title" class="px-0">
+        <v-list-item-content class="pt-1">
           <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
           <v-list-item-title>{{value}} {{description}}</v-list-item-title>
         </v-list-item-content>
