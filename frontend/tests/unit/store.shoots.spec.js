@@ -130,7 +130,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by name', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'name', descending: true })
+    store.dispatch('setShootListSortParams', { sortBy: ['name'], sortDesc: [true] })
 
     const sortedShoots = store.getters.shootList
 
@@ -140,7 +140,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by purpose', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'purpose', descending: true })
+    store.dispatch('setShootListSortParams', { sortBy: ['purpose'], sortDesc: [true] })
 
     const sortedShoots = store.getters.shootList
 
@@ -150,7 +150,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by creationTimestamp', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'creationTimestamp', descending: false })
+    store.dispatch('setShootListSortParams', { sortBy: ['creationTimestamp'], sortDesc: [false] })
 
     const sortedShoots = store.getters.shootList
 
@@ -160,7 +160,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by kubernetes version', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'k8sVersion', descending: false })
+    store.dispatch('setShootListSortParams', { sortBy: ['k8sVersion'], sortDesc: [false] })
 
     const sortedShoots = store.getters.shootList
 
@@ -170,7 +170,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by infrastructure', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'infrastructure', descending: true })
+    store.dispatch('setShootListSortParams', { sortBy: ['infrastructure'], sortDesc: [true] })
 
     const sortedShoots = store.getters.shootList
 
@@ -180,7 +180,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by lastOperation (status)', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'lastOperation', descending: true })
+    store.dispatch('setShootListSortParams', { sortBy: ['lastOperation'], sortDesc: [true] })
 
     const sortedShoots = store.getters.shootList
 
@@ -190,7 +190,7 @@ describe('Store.Shoots', function () {
   })
 
   it('should sort shoots by readiness', function () {
-    store.dispatch('setShootListSortParams', { sortBy: 'readiness', descending: false })
+    store.dispatch('setShootListSortParams', { sortBy: ['readiness'], sortDesc: [false] })
 
     const sortedShoots = store.getters.shootList
 
