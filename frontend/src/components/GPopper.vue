@@ -49,7 +49,8 @@ limitations under the License.
       </v-card>
       <lazy-component @show="emitRendered()"></lazy-component>
     </div>
-    <template v-slot:reference>
+    <!-- Using old slot syntax. Corresponding issue: https://github.com/RobinCK/vue-popper/issues/88 -->
+    <template slot="reference">
       <slot name="popperRef"></slot>
     </template>
   </popper>
