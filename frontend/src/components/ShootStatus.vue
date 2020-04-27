@@ -86,6 +86,14 @@ const errorCodes = {
   ERR_CLEANUP_CLUSTER_RESOURCES: {
     shortDescription: 'Cleanup Cluster',
     description: 'Cleaning up the cluster failed as some resource are stuck in deletion. Please remove these resources properly or a forceful deletion will happen if this error persists.'
+  },
+  ERR_INFRA_RESOURCES_DEPLETED: {
+    shortDescription: 'Infrastructure Resources Depleted',
+    description: 'The underlying infrastructure provider proclaimed that it does not have enough resources to fulfill your request at this point in time. You might want to wait or change your shoot configuration.'
+  },
+  ERR_CONFIGURATION_PROBLEM: {
+    shortDescription: 'Configuration Problem',
+    description: 'There is a configuration problem that is most likely caused by your Shoot specification. Please double-check the error message and resolve the problem.'
   }
 }
 
