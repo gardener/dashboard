@@ -316,15 +316,18 @@ function getConfigFromBody (body) {
   return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
 }
 
-function getHostCluster ({ user, namespace, name, target, body, shootResource }) {
+function getPreferredHost ({ user, body }) {
+  const defaultHost = user.isAdmin ? 'seed' : 'shoot'
+  return _.get(body, 'preferredHost', defaultHost)
+}
+
+function getHostCluster ({ user, namespace, name, target, preferredHost, body, shootResource }) {
   const client = user.client
 
   if (target === TargetEnum.GARDEN) {
     return getGardenTerminalHostCluster(client, { body })
   }
 
-  const defaultHost = user.isAdmin ? 'seed' : 'shoot'
-  const preferredHost = _.get(body, 'preferredHost', defaultHost)
   if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
     return getSeedHostCluster(client, { namespace, name, target, body, shootResource })
   }
@@ -333,10 +336,10 @@ function getHostCluster ({ user, namespace, name, target, body, shootResource })
   return getShootHostCluster(client, { namespace, name, target, body, shootResource })
 }
 
-async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, body }) {
+async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost }) {
   const client = user.client
   const isAdmin = user.isAdmin
-  const { identifier } = body
+
   const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
 
   const podLabels = getPodLabels(target)
@@ -352,7 +355,8 @@ async function createTerminal ({ user, namespace, target, hostCluster, targetClu
   }
 
   const annotations = {
-    'dashboard.gardener.cloud/identifier': identifier
+    'dashboard.gardener.cloud/identifier': identifier,
+    'dashboard.gardener.cloud/preferredHost': preferredHost
   }
   const prefix = `term-${target}-`
   const terminalResource = toTerminalResource({ prefix, namespace, annotations, labels, host: terminalHost, target: terminalTarget })
@@ -437,13 +441,22 @@ function readTerminalUntilReady ({ user, namespace, name }) {
 async function getOrCreateTerminalSession ({ user, namespace, name, target, body = {} }) {
   const username = user.id
   const client = user.client
-  const shootResource = await getShootResource({ user, namespace, name, target })
+
+  let [
+    terminal,
+    shootResource
+  ] = await Promise.all([
+    findExistingTerminalResource({ user, namespace, body }),
+    getShootResource({ user, namespace, name, target })
+  ])
+
+  const preferredHost = _.get(terminal, 'metadata.annotations["dashboard.gardener.cloud/preferredHost"]', getPreferredHost({ user, body }))
 
   const [
     hostCluster,
     targetCluster
   ] = await Promise.all([
-    getHostCluster({ user, namespace, name, target, body, shootResource }),
+    getHostCluster({ user, namespace, name, target, preferredHost, body, shootResource }),
     getTargetCluster({ user, namespace, name, target, shootResource })
   ])
 
@@ -457,10 +470,10 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     throw new Error('Host kubeconfig does not exist (yet)')
   }
 
-  let terminal = await findExistingTerminalResource({ user, namespace, name, hostCluster, targetCluster, body })
   if (!terminal) {
     logger.debug(`No terminal found for user ${username}. Creating new..`)
-    terminal = await createTerminal({ user, namespace, target, hostCluster, targetCluster, body })
+    const { identifier } = body
+    terminal = await createTerminal({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost })
   } else {
     logger.debug(`Found terminal for user ${username}: ${terminal.metadata.name}`)
     // do not wait for keepalive to return - run in parallel

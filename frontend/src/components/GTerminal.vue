@@ -141,9 +141,9 @@ limitations under the License.
             dark
           >
             <template v-slot:activator="{ on: menu }">
-              <v-tooltip v-on="menu" :disabled="connectionMenu" top style="min-width: 110px">
+              <v-tooltip :disabled="connectionMenu" top style="min-width: 110px">
                 <template v-slot:activator="{ on: tooltip }">
-                  <v-btn v-on="tooltip" small text color="grey lighten-1" class="text-none systemBarButton">
+                  <v-btn v-on="{ ...tooltip, ...menu }" small text color="grey lighten-1" class="text-none systemBarButton">
                     <icon-base width="18" height="18" viewBox="-2 -2 30 30" iconColor="#bdbdbd" class="mr-2">
                       <connected v-if="terminalSession.connectionState === TerminalSession.CONNECTED"></connected>
                       <disconnected v-else></disconnected>

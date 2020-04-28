@@ -952,6 +952,8 @@ const stub = {
       })
       .reply(200, { items: [] })
       .post(`/apis/dashboard.gardener.cloud/v1alpha1/namespaces/${namespace}/terminals`, body => {
+        expect(body.metadata.annotations).to.have.property('dashboard.gardener.cloud/preferredHost')
+
         const { metadata, spec: { host } } = body
         const suffix = '0815'
         _.merge(terminal, body)
@@ -966,13 +968,14 @@ const stub = {
       .reply(200, () => terminal)
     return scope
   },
-  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, containerImage }) {
+  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, containerImage, preferredHost = 'seed' }) {
     let terminal = {
       metadata: {
         namespace,
         name,
         annotations: {
-          'gardener.cloud/created-by': username
+          'gardener.cloud/created-by': username,
+          'dashboard.gardener.cloud/preferredHost': preferredHost
         }
       },
       spec: {
