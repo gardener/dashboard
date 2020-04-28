@@ -457,6 +457,58 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       })
     })
 
+    it('should reuse a terminal session', async function () {
+      const user = auth.createUser({ id, aud })
+      const bearer = await user.bearer
+
+      const containerImage = 'fooImage:0.1.2'
+      const preferredHost = 'shoot'
+
+      const shootName = 'fooShoot'
+      const kubeApiServer = common.getKubeApiServer(namespace, shootName, ingressDomain)
+
+      common.stub.getCloudProfiles(sandbox)
+      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, shootName, target, hostNamespace, containerImage, preferredHost })
+
+      const res = await agent
+        .post('/api/terminals')
+        .set('cookie', await user.cookie)
+        .send({
+          method: 'create',
+          params: {
+            coordinate: {
+              name: shootName,
+              namespace,
+              target
+            }
+          }
+        })
+
+      const [, interceptor] = await pEvent(scope, 'replied', {
+        multiArgs: true,
+        filter ([, interceptor]) {
+          return interceptor.method === 'PATCH' && interceptor.statusCode === 200
+        }
+      })
+      const { metadata: { annotations } } = interceptor.replyFunction()
+      expect(annotations['dashboard.gardener.cloud/operation']).to.eql('keepalive')
+
+      expect(res).to.have.status(200)
+      expect(res).to.be.json
+      expect(res.body).to.eql({
+        metadata: {
+          namespace,
+          name
+        },
+        hostCluster: {
+          kubeApiServer,
+          namespace: hostNamespace
+        },
+        imageHelpText: 'Foo Image Description'
+      })
+    })
+
+
     it('should read the terminal config', async function () {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
