@@ -22,7 +22,10 @@ limitations under the License.
           <slot name="caption">
             Confirm Dialog
           </slot>
-          <code class="ml-2" :class="textColorClass" v-if="$slots.affectedObjectName"><slot name="affectedObjectName"></slot></code>
+          <template v-if="$slots.affectedObjectName">
+            &nbsp;
+            <code :class="textColorClass"><slot name="affectedObjectName"></slot></code>
+          </template>
         </v-toolbar-title>
       </v-toolbar>
       <v-card-text class="pa-3" :style="{'max-height': maxHeight}">
