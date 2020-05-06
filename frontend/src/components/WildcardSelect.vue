@@ -28,10 +28,17 @@ limitations under the License.
        @input="onInput"
       @blur="$v.wildcardSelectedValue.$touch()"
     >
-
+      <template v-slot:item="{ item }">
+        <v-list-item-content>
+          <v-list-item-title>{{item.text}}</v-list-item-title>
+          <v-list-item-subtitle v-if="item.isWildcard">
+            Wildcard
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </template>
     </v-select>
     <v-text-field
-      v-if="wildcardSelectedValue.startsWithWildcard || wildcardSelectedValue.endsWithWildcard"
+      v-if="wildcardSelectedValue.isWildcard"
       :class="textFieldClass"
       color="cyan darken-2"
       :label="wildcardTextFieldLabel"
@@ -55,7 +62,7 @@ import { required, requiredIf } from 'vuelidate/lib/validators'
 const validations = {
   wildcardVariablePart: {
     required: requiredIf(function () {
-      return this.wildcardSelectedValue.startsWithWildcard || this.wildcardSelectedValue.endsWithWildcard
+      return this.wildcardSelectedValue.isWildcard
     })
   },
   wildcardSelectedValue: {
@@ -119,7 +126,8 @@ export default {
           text: selectedValue,
           value: selectedValue,
           startsWithWildcard,
-          endsWithWildcard
+          endsWithWildcard,
+          isWildcard: startsWithWildcard | endsWithWildcard
         }
       })
     },
