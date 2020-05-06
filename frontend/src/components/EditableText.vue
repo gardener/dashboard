@@ -22,27 +22,26 @@ limitations under the License.
     origin="top left"
     left
     transition="slide-x-reverse-transition"
-    :max-width="boxWidth"
+    :max-width="contentWidth"
     v-model="isActive"
   >
     <template v-slot:activator="{ on }">
-      <v-row no-gutters align="center" justify="space-between">
+      <v-row  no-gutters align="center" justify="space-between">
         <v-col
-          ref="box"
+          ref="content"
           v-on="on"
-          v-ripple="{ class: `grey--text text--lighten-4` }"
-          class="box"
-          :class="{ 'box--bounce': boxBounce }"
+          class="grow content"
+          :class="{ 'content--bounce': contentBounce }"
         >
           {{value}}
         </v-col>
-        <v-col class="action">
+        <v-col class="shrink">
           <v-btn
             v-on="on"
             icon
-            :color="isActive ? 'error' : color"
+            :color="activatorColor"
           >
-            <v-icon size="16">{{ isActive ?  'close' : 'edit' }}</v-icon>
+            <v-icon size="18">{{activatorIcon}}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
@@ -65,14 +64,6 @@ limitations under the License.
         :color="color"
       >
         <template v-slot:append>
-          <!--v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" icon color="secondary" @click="onCancel">
-                <v-icon>close</v-icon>
-              </v-btn>
-            </template>
-            <span>Cancel</span>
-          </v-tooltip-->
           <v-tooltip top>
             <template v-slot:activator="{ on }">
               <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
@@ -157,9 +148,10 @@ export default {
   },
   data () {
     return {
-      boxWidth: 500,
+      contentWidth: 500,
       timeoutId: undefined,
-      boxBounce: false,
+      closeable: false,
+      contentBounce: false,
       active: false,
       loading: false,
       messages: [],
@@ -169,22 +161,18 @@ export default {
     }
   },
   computed: {
-    vInputComponent () {
-      return Array.isArray(this.items) ? 'v-select' : 'v-text-field'
-    },
     isActive: {
       get () {
         return this.active
       },
       set (value) {
-        if (this.$refs.box) {
-          const { width } = this.$refs.box.getBoundingClientRect()
-          this.boxWidth = width - 8
+        if (this.$refs.content) {
+          const { width } = this.$refs.content.getBoundingClientRect()
+          this.contentWidth = width - 8
         }
         this.active = value
       }
     },
-
     hasMessages: {
       get () {
         return !!this.messages.length
@@ -202,6 +190,24 @@ export default {
       set (value) {
         this.lazyValue = value
       }
+    },
+    activatorColor () {
+      if (this.contentBounce) {
+        return 'success'
+      }
+      if (this.closeable) {
+        return 'error'
+      }
+      return this.color
+    },
+    activatorIcon () {
+      if (this.contentBounce) {
+        return 'done'
+      }
+      if (this.closeable) {
+        return 'close'
+      }
+      return 'edit'
     }
   },
   methods: {
@@ -229,9 +235,10 @@ export default {
         setImmediate(() => {
           this.isActive = false
         })
-        this.boxBounce = true
+        this.contentBounce = true
+        clearTimeout(this.timeoutId)
         this.timeoutId = setTimeout(() => {
-          this.boxBounce = false
+          this.contentBounce = false
         }, 1000)
       } catch (err) {
         this.messages.push(JSON.stringify([err.message, err.detailedMessage]))
@@ -247,6 +254,7 @@ export default {
     },
     reset () {
       this.messages = []
+      this.closeable = false
       this.errorDetails = false
       const textField = this.$refs.textField
       if (textField) {
@@ -258,6 +266,9 @@ export default {
     active (value) {
       if (value) {
         clearTimeout(this.timeoutId)
+        this.timeoutId = setTimeout(() => {
+          this.closeable = true
+        }, 250)
         this.internalValue = this.value
         this.$emit('open')
         setTimeout(() => {
@@ -273,6 +284,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  @import '~vuetify/src/styles/styles.sass';
+
+  $green-base: map-get($green, 'base');
+
   .alert-expansion-panel {
     &--active .v-icon {
       transform: rotate(-180deg)
@@ -289,37 +304,22 @@ export default {
     font-family: monospace;
     margin-left: 28px;
   }
-  .action {
-    max-width: 36px;
-  }
-  .box {
+  .content {
     cursor: pointer;
-    padding: 3px 0;
-    border-color: transparent;
-    border-style: solid;
-    border-width: 0 0 thin 0;
     animation-duration: 900ms;
     animation-iteration-count: 1;
     transform-origin: bottom;
-    &:hover {
-      border-color: rgba(0,0,0,.42);
-      border-image: repeating-linear-gradient(90deg,rgba(0,0,0,.38) 0,rgba(0,0,0,.38) 2px,transparent 0,transparent 4px) 1 repeat;
-    }
     &--bounce {
       animation-name: bounce;
       animation-timing-function: ease;
     }
   }
 
-  @mixin success-text {
-    color: #388E3C;
-  }
-
   @keyframes bounce {
-    0%   { transform: scale(1,1)    translateY(0);    @include success-text; }
-    10%  { transform: scale(1.1,.9) translateY(0);    @include success-text; }
-    30%  { transform: scale(.9,1.1) translateY(-4px); @include success-text; }
-    50%  { transform: scale(1,1)    translateY(0);    @include success-text; }
+    0%   { transform: scale(1,1)    translateY(0);    color: $green-base; }
+    10%  { transform: scale(1.1,.9) translateY(0);    color: $green-base; }
+    30%  { transform: scale(.9,1.1) translateY(-4px); color: $green-base; }
+    50%  { transform: scale(1,1)    translateY(0);    color: $green-base; }
     100% { transform: scale(1,1)    translateY(0); }
   }
 </style>

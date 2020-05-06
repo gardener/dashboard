@@ -16,205 +16,213 @@ limitations under the License.
 
 <template>
   <v-container fluid>
-    <v-row class="masonry mx-n1">
+    <v-row no-gutters>
       <v-col cols="12" md="6">
-        <v-card>
-          <v-toolbar flat dark dense :color="color">
-            <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
-          </v-toolbar>
-          <v-list>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">info_outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Name</v-list-item-subtitle>
-                <v-list-item-title>
-                  {{projectName}}
-                </v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action>
-                <copy-btn :clipboard-text="projectName" tooltipText="Copy project name to clipboard"></copy-btn>
-              </v-list-item-action>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">mdi-text-subject</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Description</v-list-item-subtitle>
-                <v-list-item-title class="wrap-text">
-                  <editable-text
-                    :color="color"
-                    :value="description"
-                    :save="updateDescription"
-                  />
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider inset/>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">mdi-account-cog-outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
-                <v-list-item-title>
-                  <editable-account
-                    :color="color"
-                    :value="technicalContact"
-                    :items="memberItems"
-                    :save="updateTechnicalContact"
-                  ></editable-account>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider inset/>
-            <v-list-item v-if="createdBy">
-              <v-list-item-avatar>
-                <v-icon :color="color">mdi-account-clock-outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Created By</v-list-item-subtitle>
-                <v-list-item-title>
-                  <account-avatar :account-name="createdBy" mail-to :color="color"></account-avatar>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon v-if="!createdBy" :color="color">mdi-clock-outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Created At</v-list-item-subtitle>
-                <v-list-item-title>
-                  <v-tooltip right>
-                    <template v-slot:activator="{ on }">
-                      <span v-on="on" class="subtitle-1">{{createdAt}}</span>
-                    </template>
-                    <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
-                  </v-tooltip>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <v-divider inset/>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">label_outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>Purpose</v-list-item-subtitle>
-                <v-list-item-title class="wrap-text">
-                   <editable-text
-                    :color="color"
-                    :value="purpose"
-                    :save="updatePurpose"
-                  />
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-            <template v-if="slaDescriptionCompiledMarkdown">
-              <v-divider inset/>
-              <v-list-item>
-                <v-list-item-avatar>
-                  <v-icon :color="color">mdi-file-document-outline</v-icon>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
-                  <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionCompiledMarkdown"></v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </template>
-          </v-list>
-        </v-card>
+        <v-row no-gutters class="flex-column">
+          <v-col class="pa-3">
+            <v-card>
+              <v-toolbar flat dark dense :color="color">
+                <v-toolbar-title class="subtitle-1">Details</v-toolbar-title>
+              </v-toolbar>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">info_outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Name</v-list-item-subtitle>
+                    <v-list-item-title>
+                      {{projectName}}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <copy-btn :color="color" :clipboard-text="projectName" tooltipText="Copy project name to clipboard"></copy-btn>
+                  </v-list-item-action>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">mdi-text-subject</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Description</v-list-item-subtitle>
+                    <v-list-item-title class="wrap-text">
+                      <editable-text
+                        :color="color"
+                        :value="description"
+                        :save="updateDescription"
+                      />
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider inset/>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">mdi-account-cog-outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
+                    <v-list-item-title>
+                      <editable-account
+                        :color="color"
+                        :value="technicalContact"
+                        :items="memberItems"
+                        :rules="[rules.technicalContact]"
+                        no-data-text="No project member available"
+                        :save="updateTechnicalContact"
+                      ></editable-account>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider inset/>
+                <v-list-item v-if="createdBy">
+                  <v-list-item-avatar>
+                    <v-icon :color="color">mdi-account-clock-outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Created By</v-list-item-subtitle>
+                    <v-list-item-title>
+                      <account-avatar :account-name="createdBy" mail-to :color="color"></account-avatar>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon v-if="!createdBy" :color="color">mdi-clock-outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Created At</v-list-item-subtitle>
+                    <v-list-item-title>
+                      <v-tooltip right>
+                        <template v-slot:activator="{ on }">
+                          <span v-on="on" class="subtitle-1">{{createdAt}}</span>
+                        </template>
+                        <time-string :dateTime="creationTimestamp" :pointInTime="-1"></time-string>
+                      </v-tooltip>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-divider inset/>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">label_outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>Purpose</v-list-item-subtitle>
+                    <v-list-item-title class="wrap-text">
+                      <editable-text
+                        :color="color"
+                        :value="purpose"
+                        :save="updatePurpose"
+                      />
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+                <template v-if="slaDescriptionCompiledMarkdown">
+                  <v-divider inset/>
+                  <v-list-item>
+                    <v-list-item-avatar>
+                      <v-icon :color="color">mdi-file-document-outline</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-subtitle>{{slaTitle}}</v-list-item-subtitle>
+                      <v-list-item-title class="markdown wrap-text" v-html="slaDescriptionCompiledMarkdown"></v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
+              </v-list>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
-      <v-col cols="12" md="6" v-if="canDeleteProject">
-        <v-card>
-          <v-toolbar flat dark dense :color="color">
-            <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
-          </v-toolbar>
-          <v-list>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">mdi-delete-circle-outline</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title>Delete Project</v-list-item-title>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-tooltip v-if="canDeleteProject" top>
-                  <template v-slot:activator="{ on }">
-                    <div v-on="on">
-                      <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
-                        <v-icon>delete</v-icon>
-                      </v-btn>
-                    </div>
-                  </template>
-                  <span v-text="isDeleteButtonDisabled ? 'You can only delete projects that do not contain clusters' : 'Delete Project'" />
-                </v-tooltip>
-              </v-list-item-action>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="6" v-if="costObjectSettingEnabled">
-        <v-card>
-          <v-toolbar flat dark dense :color="color">
-            <v-toolbar-title class="subtitle-1">Billing</v-toolbar-title>
-          </v-toolbar>
-          <v-list>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">payment</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>{{costObjectTitle}}</v-list-item-subtitle>
-                <v-list-item-title>
-                  <editable-text
-                    :color="color"
-                    :value="costObject"
-                    :rules="[rules.costObject]"
-                    :save="updateCostObject"
-                  >
-                    <template v-if="costObjectDescriptionCompiledMarkdown" v-slot:info>
-                      <v-alert icon="info_outline" dense text tile :color="color" class="mb-0" >
-                        <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
-                      </v-alert>
-                    </template>
-                  </editable-text>
-                </v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="6" v-if="isKubeconfigEnabled">
-        <v-card>
-          <v-toolbar flat dark dense :color="color">
-            <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
-          </v-toolbar>
-          <v-list>
-            <v-list-item>
-              <v-list-item-avatar>
-                <v-icon :color="color">insert_drive_file</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title>Command Line Interface Access</v-list-item-title>
-                <v-list-item-subtitle class="wrap-text">
-                  Go to
-                  <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }" :class="textColor">
-                    My Account
-                  </router-link>
-                  to download the <tt>kubeconfig</tt> for this project.
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
-        </v-card>
+      <v-col cols="12" md="6">
+        <v-row no-gutters class="flex-column">
+          <v-col v-if="canDeleteProject" class="pa-3">
+            <v-card>
+              <v-toolbar flat dark dense :color="color">
+                <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
+              </v-toolbar>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">mdi-delete-circle-outline</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Delete Project</v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-tooltip v-if="canDeleteProject" top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
+                            <v-icon>delete</v-icon>
+                          </v-btn>
+                        </div>
+                      </template>
+                      <span v-text="isDeleteButtonDisabled ? 'You can only delete projects that do not contain clusters' : 'Delete Project'" />
+                    </v-tooltip>
+                  </v-list-item-action>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
+          <v-col v-if="costObjectSettingEnabled" class="pa-3">
+            <v-card>
+              <v-toolbar flat dark dense :color="color">
+                <v-toolbar-title class="subtitle-1">Billing</v-toolbar-title>
+              </v-toolbar>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">payment</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>{{costObjectTitle}}</v-list-item-subtitle>
+                    <v-list-item-title>
+                      <editable-text
+                        :color="color"
+                        :value="costObject"
+                        :rules="[rules.costObject]"
+                        :save="updateCostObject"
+                      >
+                        <template v-if="costObjectDescriptionCompiledMarkdown" v-slot:info>
+                          <v-alert icon="info_outline" dense text tile :color="color" class="mb-0" >
+                            <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                          </v-alert>
+                        </template>
+                      </editable-text>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
+          <v-col v-if="isKubeconfigEnabled" class="pa-3">
+            <v-card>
+              <v-toolbar flat dark dense :color="color">
+                <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
+              </v-toolbar>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-avatar>
+                    <v-icon :color="color">insert_drive_file</v-icon>
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title>Command Line Interface Access</v-list-item-title>
+                    <v-list-item-subtitle class="wrap-text">
+                      Go to
+                      <router-link :to="{ name: 'Account', query: { namespace: this.namespace } }" :class="textColor">
+                        My Account
+                      </router-link>
+                      to download the <tt>kubeconfig</tt> for this project.
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
-
-    <update-dialog v-model="edit" :project="project" mode="update"></update-dialog>
 
     <g-dialog
       defaultColor="red"
@@ -240,13 +248,13 @@ import CopyBtn from '@/components/CopyBtn'
 import EditableText from '@/components/EditableText'
 import EditableAccount from '@/components/EditableAccount'
 import AccountAvatar from '@/components/AccountAvatar'
-import UpdateDialog from '@/components/dialogs/ProjectDialog'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
 import { compileMarkdown, getProjectDetails, textColor, isServiceAccount, gravatarUrlGeneric } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
+import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
 
 export default {
@@ -256,7 +264,6 @@ export default {
     EditableAccount,
     EditableText,
     AccountAvatar,
-    UpdateDialog,
     GDialog,
     TimeString
   },
@@ -269,6 +276,15 @@ export default {
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       rules: {
+        technicalContact: value => {
+          if (!value) {
+            return 'Technical Contact is required'
+          }
+          if (!includes(this.memberItems, value)) {
+            return 'Technical Contact must be a project member'
+          }
+          return true
+        },
         costObject: (value = '') => {
           if (!this.costObjectRegExp) {
             return true
@@ -455,9 +471,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  ::v-deep .v-select .v-input__slot {
-    padding-left: 0 !important;
-  }
   .markdown {
     ::v-deep > p {
       margin: 0px;

@@ -28,7 +28,7 @@ limitations under the License.
     <template v-slot:activator="{ on }">
       <v-row  no-gutters align="center" justify="space-between">
         <v-col
-          ref="box"
+          ref="content"
           class="grow content"
           :class="{ 'content--bounce': contentBounce }"
         >
@@ -38,9 +38,9 @@ limitations under the License.
           <v-btn
             v-on="on"
             icon
-            :color="isActive ? 'error' : color"
+            :color="activatorColor"
           >
-            <v-icon size="16">{{ isActive ?  'close' : 'edit' }}</v-icon>
+            <v-icon size="18">{{activatorIcon}}</v-icon>
           </v-btn>
         </v-col>
       </v-row>
@@ -51,6 +51,7 @@ limitations under the License.
         :items="items"
         ref="editable"
         autocomplete="off"
+        :no-data-text="noDataText"
         hide-selected
         v-model="internalValue"
         @update:error="value => error = value"
@@ -68,18 +69,23 @@ limitations under the License.
           <account-avatar :account-name="value" :color="color"></account-avatar>
         </template>
         <template v-slot:item="{ item: value }">
-            <v-list-item-content>
-              <account-avatar :account-name="value" :color="color"></account-avatar>
-            </v-list-item-content>
+          <v-list-item-content>
+            <account-avatar :account-name="value" :color="color"></account-avatar>
+          </v-list-item-content>
         </template>
         <template v-slot:append-outer>
           <v-tooltip top>
             <template v-slot:activator="{ on }">
-              <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
+              <v-btn
+                v-on="on"
+                :disabled="error"
+                icon
+                color="success"
+                @click="onSave">
                 <v-icon>done</v-icon>
               </v-btn>
             </template>
-            <span>Save</span>
+            <div>Save</div>
           </v-tooltip>
         </template>
         <template v-slot:message="{ key, message }">
@@ -157,6 +163,9 @@ export default {
     color: {
       type: String,
       default: 'blue-grey darken-2'
+    },
+    noDataText: {
+      type: String
     }
   },
   data () {
@@ -178,8 +187,8 @@ export default {
         return this.active
       },
       set (value) {
-        if (this.$refs.box) {
-          const { width } = this.$refs.box.getBoundingClientRect()
+        if (this.$refs.content) {
+          const { width } = this.$refs.content.getBoundingClientRect()
           this.contentWidth = width - 8
         }
         this.active = value
@@ -202,6 +211,24 @@ export default {
       set (value) {
         this.lazyValue = value
       }
+    },
+    activatorColor () {
+      if (this.contentBounce) {
+        return 'success'
+      }
+      if (this.isActive) {
+        return 'error'
+      }
+      return this.color
+    },
+    activatorIcon () {
+      if (this.contentBounce) {
+        return 'done'
+      }
+      if (this.isActive) {
+        return 'close'
+      }
+      return 'edit'
     }
   },
   methods: {
@@ -273,6 +300,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  ::v-deep .v-text-field .v-input__append-outer {
+    margin: 0 8px 0 0;
+    align-self: center;
+  }
   .alert-expansion-panel {
     &--active .v-icon {
       transform: rotate(-180deg)
@@ -292,13 +323,6 @@ export default {
   .action {
     max-width: 36px;
   }
-  ::v-deep .v-text-field .v-input__append-outer {
-    align-self: top;
-    margin-left: 0px;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    padding-right: 12px;
-  }
   .content {
     padding: 3px 0;
     animation-duration: 900ms;
@@ -310,15 +334,11 @@ export default {
     }
   }
 
-  @mixin success-text {
-    color: #388E3C;
-  }
-
   @keyframes bounce {
-    0%   { transform: scale(1,1)    translateY(0);    @include success-text; }
-    10%  { transform: scale(1.1,.9) translateY(0);    @include success-text; }
-    30%  { transform: scale(.9,1.1) translateY(-4px); @include success-text; }
-    50%  { transform: scale(1,1)    translateY(0);    @include success-text; }
+    0%   { transform: scale(1,1)    translateY(0); }
+    10%  { transform: scale(1.1,.9) translateY(0); }
+    30%  { transform: scale(.9,1.1) translateY(-4px); }
+    50%  { transform: scale(1,1)    translateY(0); }
     100% { transform: scale(1,1)    translateY(0); }
   }
 </style>
