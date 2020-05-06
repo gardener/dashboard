@@ -293,11 +293,11 @@ export default {
     line-height: inherit;
     overflow: auto !important;
     white-space: normal !important;
-      code {
-        box-shadow: none !important;
-        padding: 1px;
-        color: black;
-      }
+    code {
+      box-shadow: none !important;
+      padding: 1px;
+      color: black;
+    }
   }
 
 </style>

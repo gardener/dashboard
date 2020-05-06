@@ -30,7 +30,7 @@ limitations under the License.
               <v-list-item-content>
                 <v-list-item-title class="label pb-2">User</v-list-item-title>
                 <v-list-item-subtitle class="content pb-2">
-                  <account-avatar :account-name="username" mailTo color="teal darken-2" :size="32"/>
+                  <account-avatar :account-name="username" mail-to color="teal darken-2" :size="32"/>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>

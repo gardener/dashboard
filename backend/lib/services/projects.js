@@ -53,10 +53,7 @@ function fromResource ({ metadata, spec = {} }) {
 function toResource ({ metadata, data = {} }) {
   const { apiVersion, kind } = Resources.Project
   const { name, namespace, resourceVersion, annotations } = metadata
-  const { createdBy, owner } = data
-
-  const description = data.description || null
-  const purpose = data.purpose || null
+  const { createdBy, owner, description = null, purpose = null } = data
 
   return {
     apiVersion,
@@ -74,6 +71,29 @@ function toResource ({ metadata, data = {} }) {
       purpose
     }
   }
+}
+
+function toResourceMergePatchDocument ({ metadata: { annotations } = {}, data = {} }) {
+  const document = {}
+  if (!_.isEmpty(annotations)) {
+    document.metadata = { annotations }
+  }
+  if (!_.isEmpty(data)) {
+    document.spec = {}
+    for (let [key, value] of Object.entries(data)) {
+      if (value) {
+        switch (key) {
+          case 'owner':
+            value = toSubject(value)
+            break
+        }
+        document.spec[key] = value
+      } else if (value === null) {
+        document.spec[key] = null
+      }
+    }
+  }
+  return document
 }
 
 function fromSubject ({ name } = {}) {
@@ -97,9 +117,8 @@ async function validateDeletePreconditions ({ user, namespace }) {
   }
 }
 
-function readProject (client, namespace) {
-  const project = cache.findProjectByNamespace(namespace)
-  return client['core.gardener.cloud'].projects.get(project.metadata.name)
+function getProjectName (namespace) {
+  return cache.findProjectByNamespace(namespace).metadata.name
 }
 
 exports.list = async function ({ user, qs = {} }) {
@@ -162,22 +181,17 @@ exports.projectInitializationTimeout = PROJECT_INITIALIZATION_TIMEOUT
 
 exports.read = async function ({ user, name: namespace }) {
   const client = user.client
-  const project = await readProject(client, namespace)
+  const name = getProjectName(namespace)
+  const project = await client['core.gardener.cloud'].projects.get(name)
   return fromResource(project)
 }
 
-exports.patch = async function ({ user, name: namespace, body }) {
+exports.patch = async function ({ user, name: namespace, body: { metadata, data } }) {
   const client = user.client
-
-  const project = await readProject(client, namespace)
-  const name = project.metadata.name
-  // do not update createdBy and name
-  const { metadata, data } = fromResource(project)
-  _.assign(data, body.data)
-  _.assign(metadata, body.metadata)
-  body = toResource({ metadata, data })
-  body = await client['core.gardener.cloud'].projects.mergePatch(name, body)
-  return fromResource(body)
+  const name = getProjectName(namespace)
+  const body = toResourceMergePatchDocument({ metadata, data })
+  const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  return fromResource(project)
 }
 
 exports.remove = async function ({ user, name: namespace }) {
@@ -185,13 +199,15 @@ exports.remove = async function ({ user, name: namespace }) {
 
   const client = user.client
 
-  const project = await readProject(client, namespace)
-  const name = project.metadata.name
-  const annotations = _.assign({
-    'confirmation.gardener.cloud/deletion': 'true'
-  }, project.metadata.annotations)
-  const body = { metadata: { annotations } }
-  await client['core.gardener.cloud'].projects.mergePatch(name, body)
+  const name = getProjectName(namespace)
+  const body = {
+    metadata: {
+      annotations: {
+        'confirmation.gardener.cloud/deletion': 'true'
+      }
+    }
+  }
+  const project = await client['core.gardener.cloud'].projects.mergePatch(name, body)
   await client['core.gardener.cloud'].projects.delete(name)
   return fromResource(project)
 }

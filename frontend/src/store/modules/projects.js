@@ -16,7 +16,7 @@
 
 import findIndex from 'lodash/findIndex'
 import assign from 'lodash/assign'
-import { getProjects, createProject, updateProject, deleteProject } from '@/utils/api'
+import { getProjects, createProject, patchProject, updateProject, deleteProject } from '@/utils/api'
 
 // initial state
 const state = {
@@ -42,6 +42,14 @@ const actions = {
   },
   create ({ commit, rootState }, { metadata, data }) {
     return createProject({ data: { metadata, data } })
+      .then(res => {
+        commit('ITEM_PUT', res.data)
+        return res.data
+      })
+  },
+  patch ({ commit, rootState }, { metadata, data }) {
+    const namespace = metadata.namespace || rootState.namespace
+    return patchProject({ namespace, data: { metadata, data } })
       .then(res => {
         commit('ITEM_PUT', res.data)
         return res.data

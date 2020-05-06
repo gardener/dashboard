@@ -784,6 +784,9 @@ const actions = {
         return res
       })
   },
+  patchProject ({ dispatch, commit }, data) {
+    return dispatch('projects/patch', data)
+  },
   updateProject ({ dispatch, commit }, data) {
     return dispatch('projects/update', data)
       .then(res => {
