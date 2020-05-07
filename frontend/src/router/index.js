@@ -25,21 +25,21 @@ import { getPrivileges } from '@/utils/api'
 import { TargetEnum, targetText } from '@/utils'
 
 /* Layouts */
-const Login = () => import('@/layouts/Login')
-const Default = () => import('@/layouts/Default')
+const Login = () => import('@/views/Login')
+const Default = () => import('@/views/Default')
 
 /* Pages */
-const Home = () => import('@/pages/Home')
-const NewShoot = () => import('@/pages/NewShoot')
-const ShootList = () => import('@/pages/ShootList')
-const ShootItemTerminal = () => import('@/pages/ShootItemTerminal')
-const ShootDetails = () => import('@/pages/ShootDetails')
-const ShootDetailsEditor = () => import('@/pages/ShootDetailsEditor')
-const NewShootEditor = () => import('@/pages/NewShootEditor')
-const Secrets = () => import('@/pages/Secrets')
-const Members = () => import('@/pages/Members')
-const Account = () => import('@/pages/Account')
-const Administration = () => import('@/pages/Administration')
+const Home = () => import('@/views/Home')
+const NewShoot = () => import('@/views/NewShoot')
+const ShootList = () => import('@/views/ShootList')
+const ShootItemTerminal = () => import('@/views/ShootItemTerminal')
+const ShootDetails = () => import('@/views/ShootDetails')
+const ShootDetailsEditor = () => import('@/views/ShootDetailsEditor')
+const NewShootEditor = () => import('@/views/NewShootEditor')
+const Secrets = () => import('@/views/Secrets')
+const Members = () => import('@/views/Members')
+const Account = () => import('@/views/Account')
+const Administration = () => import('@/views/Administration')
 
 Vue.use(Router)
 
@@ -419,7 +419,12 @@ export default function createRouter ({ store, userManager }) {
   ]
   const zeroPoint = { x: 0, y: 0 }
   const scrollBehavior = (to, from, savedPosition) => savedPosition || zeroPoint
-  const routerOptions = { mode, scrollBehavior, routes }
+  const routerOptions = {
+    mode,
+    base: process.env.BASE_URL,
+    scrollBehavior,
+    routes
+  }
 
   /* automatic signout when token expires */
   let timeoutID
@@ -434,7 +439,7 @@ export default function createRouter ({ store, userManager }) {
         console.log(`automatic signout ${moment.duration(delay).humanize(true)}`)
         timeoutID = setTimeout(() => userManager.signout(), delay)
       } else {
-        console.error(`Expiration time of a new token is not expected to be in the past`)
+        console.error('Expiration time of a new token is not expected to be in the past')
       }
     }
   })
@@ -509,6 +514,7 @@ export default function createRouter ({ store, userManager }) {
       await Promise.all([
         ensureCloudProfilesLoaded(),
         ensureProjectsLoaded(),
+        store.dispatch('fetchKubeconfigData'),
         store.dispatch('unsubscribeComments')
       ])
       const params = to.params || {}

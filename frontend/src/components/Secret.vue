@@ -20,7 +20,7 @@ limitations under the License.
     <!-- Header -->
     <v-toolbar :class="toolbarClass" dark>
       <infra-icon v-model="icon" :width="32"></infra-icon>
-      <v-toolbar-title>{{infrastructureName}}</v-toolbar-title>
+      <v-toolbar-title class="ml-4">{{infrastructureName}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="!disabled" icon @click.native.stop="onAdd()">
         <v-icon class="white--text">add</v-icon>
@@ -30,7 +30,7 @@ limitations under the License.
       </v-btn>
     </v-toolbar>
     <div class="description_container" v-if="!hasRows">
-      <div class="description mt-3">
+      <div class="description mt-4">
         {{description}}
       </div>
     </div>
@@ -46,7 +46,7 @@ limitations under the License.
         @delete="onDelete"
       >
         <!-- forward slot -->
-        <template slot="rowSubTitle">
+        <template v-slot:rowSubTitle>
           <slot name="rowSubTitle" :secret="row"></slot>
         </template>
       </secret-row>
@@ -133,7 +133,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .card_disabled {
     opacity:0.3;
@@ -143,7 +143,7 @@ export default {
   .description_container {
     .description {
       padding: 30px;
-      padding-top: 10px
+      padding-top: 10px;
       opacity: 0.5;
     }
   }

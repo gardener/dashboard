@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <div>
     <transition-group name="list">
-      <v-layout row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
+      <v-row v-for="(scheduleEvent, index) in parsedScheduleEvents" :key="scheduleEvent.id"  class="list-item pt-2" :class="{ 'grey lighten-5': index % 2 }">
         <hibernation-schedule-event
           ref="scheduleEvents"
           :scheduleEvent="scheduleEvent"
@@ -28,29 +28,29 @@ limitations under the License.
           @updateLocation="onUpdateLocation"
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
-      </v-layout>
-      <v-layout row v-if="!parseError" key="addSchedule" class="list-item pt-2">
-        <v-flex>
+      </v-row>
+      <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
+        <v-col>
           <v-btn
             small
             @click="addSchedule"
-            outline
+            outlined
             fab
             icon
-            class="cyan darken-2 mx-0 my-0">
+            color="cyan darken-2">
             <v-icon class="cyan--text text--darken-2">add</v-icon>
           </v-btn>
           <v-btn
             @click="addSchedule"
-            flat
-            class="cyan--text text--darken-2">
+            text
+            color="cyan darken-2">
             Add Hibernation Schedule
           </v-btn>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </transition-group>
-    <v-layout row v-show="showNoScheduleCheckbox" key="noSchedule" align-center class="list-item pt-4">
-      <v-flex>
+    <v-row v-show="showNoScheduleCheckbox" key="noSchedule" align="center" class="list-item pt-6">
+      <v-col>
         <v-checkbox
           v-model="confirmNoSchedule"
           color="cyan darken-2"
@@ -59,22 +59,22 @@ limitations under the License.
           hint="Check the box above to avoid getting prompted for setting a hibernation schedule"
           persistent-hint>
         </v-checkbox>
-      </v-flex>
-    </v-layout>
-    <v-layout row v-if="parseError" class="pt-2">
-      <v-alert :value="true" type="warning" outline>
+      </v-col>
+    </v-row>
+    <v-row v-if="parseError" class="pt-2">
+      <v-alert type="warning" outlined>
         One or more errors occured while parsing hibernation schedules. Your configuration may still be valid - the Dashboard UI currently only supports basic schedules.<br />
         You probably configured crontab lines for your hibernation schedule manually. Please edit your schedules directly in the cluster specification. You can also delete it there and come back to this screen to configure your schedule via the Dashboard UI.
       </v-alert>
-    </v-layout>
-    <v-layout row v-if="!isHibernationPossible" class="pt-2">
-      <v-flex>
-        <v-alert :value="true" type="warning" outline>
+    </v-row>
+    <v-row v-if="!isHibernationPossible" class="pt-2">
+      <v-col>
+        <v-alert type="warning" outlined>
           <div class="font-weight-bold">Your hibernation schedule may not have any effect:</div>
           <div>{{hibernationPossibleMessage}}</div>
         </v-alert>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

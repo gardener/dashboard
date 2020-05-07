@@ -25,24 +25,24 @@ limitations under the License.
     maxWidth="600"
     :confirmRequired="true"
     confirmButtonText="Rotate">
-    <template slot="actionComponent">
-      <v-layout row wrap>
-        <v-flex>
-          <div class="py-3">Do you want to start rotation of kubeconfig credentials?
+    <template v-slot:actionComponent>
+      <v-row >
+        <v-col>
+          <div class="py-4">Do you want to start rotation of kubeconfig credentials?
           </div>
-          <v-alert :value="true" dense color="warning" icon="priority_high" outline>
+          <v-alert dense color="warning" icon="priority_high" outlined>
             The current kubeconfig credentials will be revoked.
           </v-alert>
-          <div class="pt-3">Type <strong>{{shootName}}</strong> below and confirm revokation of current kubeconfig credentials.
+          <div class="pt-4">Type <strong>{{shootName}}</strong> below and confirm revokation of current kubeconfig credentials.
           </div>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </template>
   </action-icon-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
 import { shootItem } from '@/mixins/shootItem'
@@ -120,7 +120,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .progress-icon {
     font-size: 15px;
   }

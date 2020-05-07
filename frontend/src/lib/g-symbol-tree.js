@@ -256,7 +256,7 @@ export class GSymbolTree extends SymbolTree {
     items = compact(items)
     if (!isEmpty(items)) {
       items.forEach(item => {
-        const isSplitpaneTree = item.hasOwnProperty('horizontal')
+        const isSplitpaneTree = Reflect.has(item, 'horizontal')
         const isLeaf = !!item.uuid
         if (isSplitpaneTree) {
           const splitpaneTree = new SplitpaneTree({ horizontal: item.horizontal })

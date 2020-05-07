@@ -20,6 +20,7 @@ class FocusAddon {
   constructor (uuid) {
     this.uuid = uuid
   }
+
   activate (terminal) {
     terminal.textarea.onfocus = () => {
       store.commit('SET_FOCUSED_ELEMENT_ID', this.uuid)

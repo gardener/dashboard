@@ -15,67 +15,101 @@ limitations under the License.
  -->
 
 <template>
-  <v-layout column fill-height class="position-relative">
-    <v-flex v-if="!clean && !!modificationWarning" class="shrink">
-      <v-alert :value="modificationWarning" @input="onDismissModificationWarning" type="warning" dismissible color="cyan darken-2" transition="slide-y-transition" class="ma-0">
+  <div class="d-flex flex-column fill-height position-relative">
+    <div v-if="!clean && !!modificationWarning" class="flex-shrink-1">
+      <v-alert
+        tile
+        type="warning"
+        dismissible
+        color="cyan darken-2"
+        transition="slide-y-transition"
+        class="ma-0"
+        :value="modificationWarning"
+        @input="onDismissModificationWarning"
+      >
         <slot name="modificationWarning"></slot>
       </v-alert>
-    </v-flex>
-    <v-flex ref="container" :style="containerStyles"></v-flex>
-    <v-flex v-if="errorMessageInternal" class="shrink">
-      <g-alert color="error" :message.sync="errorMessageInternal" :detailedMessage.sync="detailedErrorMessageInternal"></g-alert>
-    </v-flex>
+    </div>
+    <div ref="container" :style="containerStyles"></div>
+    <div v-if="errorMessageInternal" class="flex-shrink-1">
+      <g-alert
+        color="error"
+        class="ma-0"
+        :message.sync="errorMessageInternal"
+        :detailedMessage.sync="detailedErrorMessageInternal"
+      ></g-alert>
+    </div>
     <v-divider></v-divider>
-    <v-flex v-if="!isReadOnly" :style="toolbarStyles">
-      <v-layout row align-center justify-space-between fill-height>
-        <v-flex d-flex>
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="untouched" @click="reload">
-              <v-icon small>mdi-reload</v-icon>
-            </v-btn>
-            <span>Discard and Reload</span>
-          </v-tooltip>
-        </v-flex>
-        <v-divider vertical></v-divider>
-        <v-flex d-flex>
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="!historySize.undo" @click="undo">
-              <v-icon small>mdi-undo</v-icon>
-            </v-btn>
-            <span>Undo</span>
-          </v-tooltip>
-          <v-tooltip top>
-            <v-btn icon slot="activator" :disabled="!historySize.redo" @click="redo">
-              <v-icon small>mdi-redo</v-icon>
-            </v-btn>
-            <span>Redo</span>
-          </v-tooltip>
-        </v-flex>
-        <v-divider vertical></v-divider>
-        <v-flex d-flex>
-          <v-tooltip top>
-            <v-btn icon slot="activator" @click="downloadContent">
-              <v-icon small>mdi-download</v-icon>
-            </v-btn>
-            <span>Download</span>
-          </v-tooltip>
-        </v-flex >
-        <v-flex d-flex>
-          <copy-btn
-            :clipboard-text="getContent()"
-            @click.native.stop="focus"
-            tooltip-text='Copy'
-            :user-feedback="false"
-            @copy="onCopy"
-            @copyFailed="onCopyFailed"
-          >
-          </copy-btn>
-        </v-flex>
-        <v-divider vertical></v-divider>
-        <v-flex d-flex xs12></v-flex>
-        <slot name="toolbarItemsRight"></slot>
-      </v-layout>
-    </v-flex>
+    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
+        <div class="d-flex align-center justify-start fill-height">
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="untouched" @click="reload">
+                    <v-icon small>mdi-reload</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Discard and Reload</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="!historySize.undo" @click="undo">
+                    <v-icon small>mdi-undo</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Undo</span>
+            </v-tooltip>
+          </div>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon :disabled="!historySize.redo" @click="redo">
+                    <v-icon small>mdi-redo</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Redo</span>
+            </v-tooltip>
+          </div>
+          <v-divider vertical></v-divider>
+          <div class="px-2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn icon @click="downloadContent">
+                    <v-icon small>mdi-download</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Download</span>
+            </v-tooltip>
+          </div>
+          <div class="px-2">
+            <copy-btn
+              :clipboard-text="getContent()"
+              @click.native.stop="focus"
+              tooltip-text='Copy'
+              :user-feedback="false"
+              @copy="onCopy"
+              @copyFailed="onCopyFailed"
+            >
+            </copy-btn>
+          </div>
+          <v-divider vertical></v-divider>
+        </div>
+        <div class="d-flex fill-height align-center justify-end">
+          <v-divider vertical></v-divider>
+          <slot name="toolbarItemsRight"></slot>
+        </div>
+    </div>
     <v-tooltip
       right
       absolute
@@ -90,7 +124,7 @@ limitations under the License.
     <v-snackbar v-model="snackbar" top absolute :color="snackbarColor" :timeout="snackbarTimeout">
       {{ snackbarText }}
     </v-snackbar>
-  </v-layout>
+  </div>
 </template>
 
 <script>
@@ -196,6 +230,7 @@ export default {
     },
     containerStyles () {
       return {
+        flex: '1 1 auto',
         height: `${this.lineHeight * 15}px`,
         minHeight: `${this.lineHeight * 3}px`
       }
@@ -290,7 +325,7 @@ export default {
     },
     createInstance (element) {
       const extraKeys = assign({}, {
-        'Tab': (instance) => {
+        Tab: (instance) => {
           if (instance.somethingSelected()) {
             instance.indentSelection('add')
           } else {
@@ -300,7 +335,7 @@ export default {
         'Shift-Tab': (instance) => {
           instance.indentSelection('subtract')
         },
-        'Enter': (instance) => {
+        Enter: (instance) => {
           this.shootEditorCompletions.editorEnter(instance)
         },
         'Ctrl-Space': 'autocomplete'
@@ -456,26 +491,27 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .no-margin
-    margin: 0 !important
-  .position-relative
-    position: relative !important
-  >>> .cm-tab
-     background: embedurl('../assets/tab.png')
-     background-position: right
-     background-repeat: no-repeat
+<style lang="scss" scoped>
+  .no-margin {
+    margin: 0 !important;
+  }
+  .position-relative {
+    position: relative !important;
+  }
+  ::v-deep .cm-tab {
+     background: url('../assets/tab.png');
+     background-position: right;
+     background-repeat: no-repeat;
+  }
   .font-style-italic {
     font-style: italic;
   }
-
   .font-wrap {
     white-space: pre-wrap;
   }
-
 </style>
-<style lang="styl">
-  @import '~vuetify/src/stylus/settings/_colors.styl';
+<style lang="scss">
+  @import '~vuetify/src/styles/styles.sass';
 
   .CodeMirror-hint {
 
@@ -502,12 +538,12 @@ export default {
     .description {
       font-family: Roboto, sans-serif;
       font-size: 13px;
-      color: $grey.darken-3;
+      color: map-get($grey, 'darken-3');
     }
   }
 
   .CodeMirror-hint-active {
-    background-color: $grey.lighten-4 !important;
+    background-color: map-get($grey, 'lighten-4') !important;
   }
 
 </style>

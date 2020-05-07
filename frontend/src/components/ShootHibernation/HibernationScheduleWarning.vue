@@ -20,18 +20,24 @@ limitations under the License.
     toolbarColor="cyan darken-2"
     :popperKey="`no_hibernation_${namespace}/${name}`"
   >
-  <div class="message">
-    To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
-    <template v-if="canPatchShoots">
-      Please navigate to the cluster details page to
-      <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
-      a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
+    <div class="message">
+      To reduce expenses, this <span class="font-weight-bold">{{purposeText}}</span> cluster should have a hibernation schedule.
+      <template v-if="canPatchShoots">
+        Please navigate to the cluster details page to
+        <router-link  class="cyan--text text--darken-2" :to="{ name: 'ShootItemHibernationSettings', params: { name, namespace } }">configure</router-link>
+        a hibernation schedule or explicitly deactivate scheduled hibernation for this cluster.
+      </template>
+    </div>
+    <template v-slot:popperRef>
+      <div>
+        <v-tooltip top>
+          <template v-slot:activator="{ on: tooltip }">
+            <v-icon v-on="tooltip" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
+          </template>
+          <span>No Hibernation Schedule</span>
+        </v-tooltip>
+      </div>
     </template>
-  </div>
-    <v-tooltip top slot="popperRef">
-      <v-icon slot="activator" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
-      <span>No Hibernation Schedule</span>
-    </v-tooltip>
   </g-popper>
 
 </template>
@@ -67,7 +73,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .cursor-pointer {
     cursor: pointer;
   }

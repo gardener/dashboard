@@ -21,7 +21,7 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     caption="Configure Hibernation Schedule">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-hibernation-schedule
         ref="hibernationSchedule"
         :isHibernationPossible="isHibernationPossible"
@@ -33,7 +33,7 @@ limitations under the License.
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'

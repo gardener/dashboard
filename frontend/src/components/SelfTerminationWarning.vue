@@ -16,9 +16,9 @@ limitations under the License.
 
 <template>
   <v-tooltip top v-if="expirationTimestamp">
-    <template slot="activator">
-      <v-icon color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
-      <v-icon color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
+    <template v-slot:activator="{ on }">
+      <v-icon v-on="on" color="warning" class="terminationIcon" v-if="isSelfTerminationWarning">mdi-clock-alert</v-icon>
+      <v-icon v-on="on" color="cyan darken-2" class="terminationIcon" v-else>mdi-clock</v-icon>
     </template>
     <span v-if="isValidTerminationDate">This cluster will self terminate<span class="font-weight-bold"><time-string :date-time="expirationTimestamp"></time-string></span></span>
     <span v-else>This cluster is about to self terminate</span>
@@ -53,7 +53,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .terminationIcon {
     margin-left: 10px;
   }

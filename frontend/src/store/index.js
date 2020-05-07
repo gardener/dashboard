@@ -20,7 +20,7 @@ import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
 import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon, canI } from '@/utils'
-import { getSubjectRules } from '@/utils/api'
+import { getSubjectRules, getKubeconfigData } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
@@ -40,6 +40,8 @@ import pick from 'lodash/pick'
 import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
+import startsWith from 'lodash/startsWith'
+import endsWith from 'lodash/endsWith'
 import max from 'lodash/max'
 import toPairs from 'lodash/toPairs'
 import isEqual from 'lodash/isEqual'
@@ -67,6 +69,7 @@ if (debug) {
 // initial state
 const state = {
   cfg: null,
+  kubeconfigData: null,
   ready: false,
   namespace: null,
   subjectRules: { // selfSubjectRules for state.namespace
@@ -123,14 +126,18 @@ const vendorNameFromImageName = imageName => {
     return 'coreos'
   } else if (lowerCaseName.includes('ubuntu')) {
     return 'ubuntu'
+  } else if (lowerCaseName.includes('gardenlinux')) {
+    return 'gardenlinux'
   } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('jeos')) {
     return 'suse-jeos'
+  } else if (lowerCaseName.includes('suse') && lowerCaseName.includes('chost')) {
+    return 'suse-chost'
   }
   return undefined
 }
 
 const vendorNeedsLicense = vendorName => {
-  return vendorName === 'suse-jeos'
+  return vendorName === 'suse-jeos' || vendorName === 'suse-chost'
 }
 
 const matchesPropertyOrEmpty = (path, srcValue) => {
@@ -253,8 +260,10 @@ const getters = {
 
         return map(versions, ({ version, expirationDate }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
+          const name = machineImage.name
           return {
-            name: machineImage.name,
+            key: name + '/' + version,
+            name,
             version,
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
@@ -272,7 +281,7 @@ const getters = {
     return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       if (cloudProfile) {
-        return map(get(find(cloudProfile.data.regions, { 'name': region }), 'zones'), 'name')
+        return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
     }
@@ -385,7 +394,11 @@ const getters = {
     return (cloudProfileName, region) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
-      const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      availableFloatingPools = filter(floatingPools, fp => {
+        const wildcard = startsWith(fp.name, '*') || endsWith(fp.name, '*')
+        return !wildcard // TODO introduce wildcard component to make wildcard fps (and potential other values) configurable on UI
+      })
       return uniq(map(availableFloatingPools, 'name'))
     }
   },
@@ -630,6 +643,9 @@ const getters = {
   },
   splitpaneResize (state) {
     return state.splitpaneResize
+  },
+  isKubeconfigEnabled (state) {
+    return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
   }
 }
 
@@ -731,8 +747,8 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  setShootListSortParams ({ dispatch }, pagination) {
-    return dispatch('shoots/setListSortParams', pagination)
+  setShootListSortParams ({ dispatch }, options) {
+    return dispatch('shoots/setListSortParams', options)
       .catch(err => {
         dispatch('setError', err)
       })
@@ -868,6 +884,12 @@ const actions = {
     }
     return state.subjectRules
   },
+  async fetchKubeconfigData ({ commit }) {
+    if (!store.state.kubeconfigData) {
+      const { data } = await getKubeconfigData()
+      commit('SET_KUBECONFIG_DATA', data)
+    }
+  },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)
     return state.onlyShootsWithIssues
@@ -947,6 +969,9 @@ const mutations = {
   },
   SET_SUBJECT_RULES (state, value) {
     state.subjectRules = value
+  },
+  SET_KUBECONFIG_DATA (state, value) {
+    state.kubeconfigData = value
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value

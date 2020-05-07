@@ -45,7 +45,7 @@ export default {
   },
   methods: {
     format (value) {
-      return parseSize(value) + 'Gi'
+      return value + 'Gi'
     },
     emitBlur (e) {
       this.$emit('blur', e)

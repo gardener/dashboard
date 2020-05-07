@@ -15,9 +15,15 @@ limitations under the License.
 -->
 
 <template>
-  <span>
-    <status-tag v-for="condition in filteredConditions" :condition="condition" :popper-key="condition.type" :key="condition.type" :popperPlacement="popperPlacement"></status-tag>
-  </span>
+  <div class="d-flex flex-nowrap justify-center">
+    <status-tag
+      v-for="condition in filteredConditions"
+      :condition="condition"
+      :popper-key="condition.type"
+      :key="condition.type"
+      :popperPlacement="popperPlacement">
+    </status-tag>
+  </div>
 </template>
 
 <script>

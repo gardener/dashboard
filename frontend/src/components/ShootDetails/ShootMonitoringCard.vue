@@ -16,50 +16,62 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 statusTitle">
-      Monitoring
-    </v-card-title>
-    <div class="list">
-      <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
-        <div>
-          <span class="grey--text">Status</span><br>
-          <shoot-status
-            class="shootStatus"
-            :operation="shootLastOperation"
-            :lastErrors="shootLastErrors"
-            :popperKey="`${shootNamespace}/${shootName}_lastOp`"
-            :isStatusHibernated="isShootStatusHibernated"
-            :isHibernationProgressing="isShootStatusHibernationProgressing"
-            :reconciliationDeactivated="isShootReconciliationDeactivated"
-            :shootDeleted="isShootLastOperationTypeDelete"
-            popperPlacement="bottom"
-            @titleChange="onShootStatusTitleChange">
-          </shoot-status>
-          <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
+    <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar-title class="subtitle-1">Monitoring</v-toolbar-title>
+    </v-toolbar>
+    <v-list>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-tractor</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Status</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1">
+            <shoot-status
+              class="pr-2"
+              :operation="shootLastOperation"
+              :lastErrors="shootLastErrors"
+              :popperKey="`${shootNamespace}/${shootName}_lastOp`"
+              :isStatusHibernated="isShootStatusHibernated"
+              :isHibernationProgressing="isShootStatusHibernationProgressing"
+              :reconciliationDeactivated="isShootReconciliationDeactivated"
+              :shootDeleted="isShootLastOperationTypeDelete"
+              popperPlacement="bottom"
+              @titleChange="onShootStatusTitleChange">
+            </shoot-status>
+            <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
             {{shootStatusTitle}}
-        </div>
-      </v-card-title>
-
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-speedometer</v-icon>
-        <div>
-          <span class="grey--text">Readiness</span><br>
-          <template v-if="shootConditions.length === 0">-</template>
-          <status-tags v-else :conditions="shootConditions" popperPlacement="bottom"></status-tags>
-        </div>
-      </v-card-title>
-
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-speedometer</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Readiness</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1">
+            <span v-if="!shootConditions.length">-</span>
+            <status-tags v-else :conditions="shootConditions" popperPlacement="bottom"></status-tags>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <template v-if="canGetSecrets">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem" v-if="!!metricsNotAvailableText">
-          <v-icon class="cyan--text text--darken-2 avatar">mdi-alert-circle-outline</v-icon>
-          <span class="subheading">{{metricsNotAvailableText}}</span>
-        </v-card-title>
-        <cluster-metrics :shootItem="shootItem" v-else></cluster-metrics>
+        <v-divider inset></v-divider>
+        <cluster-metrics v-if="!metricsNotAvailableText" :shootItem="shootItem"></cluster-metrics>
+        <v-list-item v-else>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>
+              {{metricsNotAvailableText}}
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </template>
-    </div>
+    </v-list>
   </v-card>
 </template>
 
@@ -111,35 +123,10 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-
-  .statusTitle {
-    line-height: 10px;
+<style lang="scss" scoped>
+  .retryOperation {
+    ::v-deep .v-btn {
+      margin: 0 4px 0 0;
+    }
   }
-
-  .listItem {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .avatar {
-    padding-right: 33px;
-  }
-
-  .shootStatus {
-    padding-right: 8px;
-  }
-
-  .retryOperation >>> .v-btn {
-    margin-right: 4px;
-    margin-left: 0px;
-    margin-bottom: 0px;
-    margin-top: 0px;
-  }
-
 </style>

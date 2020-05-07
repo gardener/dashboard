@@ -2,6 +2,7 @@
   <hint-colorizer hintColor="orange">
     <v-select
       color="cyan darken-2"
+      item-color="cyan darken-2"
       :items="volumeTypeItems"
       item-text="name"
       item-value="name"
@@ -12,11 +13,11 @@
       label="Volume Type"
       :hint="hint"
       persistent-hint>
-      <template slot="item" slot-scope="data">
-        <v-list-tile-content>
-          <v-list-tile-title>{{data.item.name}}</v-list-tile-title>
-          <v-list-tile-sub-title v-if="data.item.class">Class: {{data.item.class}}</v-list-tile-sub-title>
-        </v-list-tile-content>
+      <template v-slot:item="{ item }">
+        <v-list-item-content>
+          <v-list-item-title>{{item.name}}</v-list-item-title>
+          <v-list-item-subtitle v-if="item.class">Class: {{item.class}}</v-list-item-subtitle>
+        </v-list-item-content>
       </template>
     </v-select>
   </hint-colorizer>

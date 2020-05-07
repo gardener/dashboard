@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 mt-3 journalTitle">
+    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 journalTitle">
       Journal {{journalTitle}} <journal-labels :labels="journal.data.labels"></journal-labels>
     </v-card-title>
 
@@ -26,13 +26,13 @@ limitations under the License.
       <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
       <time-string :dateTime="journal.metadata.created_at" :pointInTime="-1"></time-string>
     </v-container>
-    <v-container grid-list-md>
+    <v-container>
       <journal-comment :comment="journal"></journal-comment>
       <journal-comment v-for="comment in commentsForJournal" :key="comment.metadata.id" :comment="comment"></journal-comment>
     </v-container>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
-      <v-btn flat class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
+      <v-btn text class="action-button cyan--text text--darken-2" :href="addCommentLink" target="_blank" title="Add Comment">
         Add Comment
         <v-icon color="cyan darken-2" class="link-icon pl-2">mdi-open-in-new</v-icon>
       </v-btn>
@@ -91,7 +91,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .journalTitle {
     line-height: 10px;

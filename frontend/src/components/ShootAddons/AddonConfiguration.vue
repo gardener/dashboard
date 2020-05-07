@@ -23,7 +23,7 @@ limitations under the License.
     maxWidth="900"
     max-height="60vh"
     >
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-shoot-addons
         ref="addons"
         :isCreateMode="false"
@@ -34,7 +34,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -83,7 +83,7 @@ export default {
       const addons = cloneDeep(get(this.shootItem, 'spec.addons', {}))
       if (this.isKymaFeatureEnabled) {
         const kymaEnabled = !!get(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
-        addons['kyma'] = { enabled: kymaEnabled }
+        addons.kyma = { enabled: kymaEnabled }
       }
       this.$refs.addons.updateAddons(addons)
     }

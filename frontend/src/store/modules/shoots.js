@@ -42,7 +42,8 @@ import store from '../'
 import { getShootInfo, getShootSeedInfo, createShoot, deleteShoot, getShootAddonKyma } from '@/utils/api'
 import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZone } from '@/utils/createShoot'
 import { isNotFound } from '@/utils/error'
-import { isShootStatusHibernated,
+import {
+  isShootStatusHibernated,
   isUserError,
   isReconciliationDeactivated,
   isStatusProgressing,
@@ -55,7 +56,8 @@ import { isShootStatusHibernated,
   utcMaintenanceWindowFromLocalBegin,
   randomLocalMaintenanceBegin,
   generateWorker,
-  allErrorCodesFromLastErrors } from '@/utils'
+  allErrorCodesFromLastErrors
+} from '@/utils'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -197,8 +199,8 @@ const actions = {
       }
     }
   },
-  setListSortParams ({ commit, rootState }, pagination) {
-    const sortParams = pick(pagination, ['sortBy', 'descending'])
+  setListSortParams ({ commit, rootState }, options) {
+    const sortParams = pick(options, ['sortBy', 'sortDesc'])
     if (!isEqual(sortParams, state.sortParams)) {
       commit('SET_SORTPARAMS', { rootState, sortParams })
     }
@@ -273,7 +275,7 @@ const actions = {
     if (!isEmpty(firewallImage)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.image', firewallImage)
     }
-    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [ partitionID ] }), 'name')
+    const firewallSizes = map(rootGetters.firewallSizesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones: [partitionID] }), 'name')
     const firewallSize = head(firewallSizes)
     if (!isEmpty(firewallSize)) {
       set(shootResource, 'spec.provider.infrastructureConfig.firewall.size', firewallImage)
@@ -379,9 +381,10 @@ const getRawVal = (item, column) => {
       return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
     case 'seed':
       return get(item, 'spec.seedName')
-    case 'journalLabels':
+    case 'journalLabels': {
       const labels = store.getters.journalsLabels(metadata)
       return join(map(labels, 'name'), ' ')
+    }
     default:
       return metadata[column]
   }
@@ -404,7 +407,7 @@ const getSortVal = (item, sortBy) => {
         default:
           return 4
       }
-    case 'lastOperation':
+    case 'lastOperation': {
       const operation = value || {}
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const lastErrors = get(item, 'status.lastErrors', [])
@@ -436,10 +439,12 @@ const getSortVal = (item, sortBy) => {
         return 500
       }
       return 700
-    case 'readiness':
+    }
+    case 'readiness': {
       const errorConditions = filter(get(status, 'conditions'), condition => get(condition, 'status') !== 'True')
       const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
       return lastErrorTransitionTime
+    }
     default:
       return toLower(value)
   }
@@ -450,8 +455,9 @@ const shoots = (state) => {
 }
 
 const setSortedItems = (state, rootState) => {
-  const sortBy = get(state, 'sortParams.sortBy')
-  const descending = get(state, 'sortParams.descending', false) ? 'desc' : 'asc'
+  const sortBy = head(get(state, 'sortParams.sortBy'))
+  const sortDesc = get(state, 'sortParams.sortDesc', [false])
+  const sortOrder = head(sortDesc) ? 'desc' : 'asc'
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
@@ -461,7 +467,7 @@ const setSortedItems = (state, rootState) => {
       }
       return 0
     }
-    const inverse = descending === 'desc' ? -1 : 1
+    const inverse = sortOrder === 'desc' ? -1 : 1
     if (sortBy === 'k8sVersion') {
       const sortedShoots = shoots(state)
       sortedShoots.sort((a, b) => {
@@ -497,7 +503,7 @@ const setSortedItems = (state, rootState) => {
       })
       state.sortedShoots = sortedShoots
     } else {
-      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [descending, 'asc'])
+      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
     }
   } else {
     state.sortedShoots = shoots(state)

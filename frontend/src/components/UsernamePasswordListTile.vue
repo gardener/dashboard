@@ -16,49 +16,50 @@ limitations under the License.
 
 <template>
   <div v-show="(!!username || !!email) && !!password">
-    <v-list-tile v-if="username">
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>User</v-list-tile-sub-title>
-        <v-list-tile-title>{{username}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+    <v-list-item v-if="username">
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">perm_identity</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content>
+        <v-list-item-subtitle>User</v-list-item-subtitle>
+        <v-list-item-title class="pt-1">{{username}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
         <copy-btn :clipboard-text="username"></copy-btn>
-      </v-list-tile-action>
-    </v-list-tile>
-    <v-list-tile v-if="email">
-      <v-list-tile-action>
-        <v-icon v-if="!username" class="cyan--text text--darken-2">perm_identity</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Email</v-list-tile-sub-title>
-        <v-list-tile-title>{{email}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+      </v-list-item-action>
+    </v-list-item>
+    <v-list-item v-if="email">
+      <v-list-item-icon>
+        <v-icon v-if="!username" color="cyan darken-2">perm_identity</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content class="pt-0">
+        <v-list-item-subtitle>Email</v-list-item-subtitle>
+        <v-list-item-title class="pt-1">{{email}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action>
         <copy-btn :clipboard-text="email"></copy-btn>
-      </v-list-tile-action>
-    </v-list-tile>
-    <v-list-tile>
-      <v-list-tile-action>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-sub-title>Password</v-list-tile-sub-title>
-        <v-list-tile-title>{{passwordText}}</v-list-tile-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
+      </v-list-item-action>
+    </v-list-item>
+    <v-list-item>
+      <v-list-item-icon/>
+      <v-list-item-content class="pt-0">
+        <v-list-item-subtitle>Password</v-list-item-subtitle>
+        <v-list-item-title class="pt-1">{{passwordText}}</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action class="mx-0">
         <copy-btn :clipboard-text="password"></copy-btn>
-      </v-list-tile-action>
-      <v-list-tile-action>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
         <v-tooltip top>
-          <v-btn slot="activator" icon @click.native.stop="showPassword = !showPassword">
-            <v-icon>{{visibilityIcon}}</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="showPassword = !showPassword">
+              <v-icon>{{visibilityIcon}}</v-icon>
+            </v-btn>
+          </template>
           <span>{{passwordVisibilityTitle}}</span>
         </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
+      </v-list-item-action>
+    </v-list-item>
   </div>
 </template>
 
@@ -92,25 +93,13 @@ export default {
   },
   computed: {
     passwordText () {
-      if (this.showPassword) {
-        return this.password
-      } else {
-        return '****************'
-      }
+      return this.showPassword ? this.password : '****************'
     },
     passwordVisibilityTitle () {
-      if (this.showPassword) {
-        return 'Hide password'
-      } else {
-        return 'Show password'
-      }
+      return this.showPassword ? 'Hide password' : 'Show password'
     },
     visibilityIcon () {
-      if (this.showPassword) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.showPassword ? 'mdi-eye-off' : 'mdi-eye'
     }
   },
   watch: {

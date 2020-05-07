@@ -24,19 +24,19 @@ limitations under the License.
     icon="mdi-refresh"
     maxWidth="600"
     confirmButtonText="Trigger now">
-    <template slot="actionComponent">
-      <v-layout row wrap>
-        <v-flex>
-          <div class="subheading pt-3">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
+    <template v-slot:actionComponent>
+      <v-row >
+        <v-col>
+          <div class="subtitle-1 pt-4">Do you want to trigger a reconcile of your cluster outside of the regular reconciliation schedule?<br />
           </div>
-        </v-flex>
-      </v-layout>
+        </v-col>
+      </v-row>
     </template>
   </action-icon-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
@@ -122,7 +122,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .progress-icon {
     font-size: 15px;
   }

@@ -162,17 +162,17 @@ export function updateShootPurpose ({ namespace, name, data }) {
 /* Cloud Profiles */
 
 export function getCloudprofiles () {
-  return getResource(`/api/cloudprofiles`)
+  return getResource('/api/cloudprofiles')
 }
 
 /* Projects */
 
 export function getProjects () {
-  return getResource(`/api/namespaces`)
+  return getResource('/api/namespaces')
 }
 
 export function createProject ({ data }) {
-  return createResource(`/api/namespaces`, data)
+  return createResource('/api/namespaces', data)
 }
 
 export function updateProject ({ namespace, data }) {
@@ -234,9 +234,13 @@ export function getToken () {
   return getResource('/api/user/token')
 }
 
+export function getKubeconfigData () {
+  return getResource('/api/user/kubeconfig')
+}
+
 /* Info */
 export function getInfo () {
-  return getResource(`/api/info`)
+  return getResource('/api/info')
 }
 
 /* Terminals */
@@ -294,7 +298,7 @@ export function terminalConfig ({ namespace, name, target, body = {} }) {
 }
 
 function invokeTerminalMethod (method, body) {
-  return callResourceMethod(`/api/terminals`, {
+  return callResourceMethod('/api/terminals', {
     method,
     params: body
   })

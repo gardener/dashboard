@@ -97,7 +97,7 @@ export default {
 }
 </script>
 
-<style lang="styl">
+<style lang="scss">
   .alertBannerMessage {
     a {
       color: white !important;

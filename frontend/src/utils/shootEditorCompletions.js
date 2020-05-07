@@ -182,7 +182,7 @@ export class ShootEditorCompletions {
     let token
     const { lineTokens, lineString } = this._getTokenLine(cm, cur)
     forEach(lineTokens, lineToken => {
-      let result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
+      const result = lineToken.string.match(/^(\s*)-\s(.*)?$/)
       if (result) {
         const indent = result[1]
         token = lineToken

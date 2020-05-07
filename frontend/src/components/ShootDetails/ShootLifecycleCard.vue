@@ -16,99 +16,112 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subheading white--text cyan darken-2 cardTitle">
-      Lifecycle
-    </v-card-title>
-    <div class="list">
-      <v-card-title class="listItem pr-1">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-sleep</v-icon>
-        <v-flex grow class="pa-0">
-          <span class="subheading">Hibernation</span><br>
-          <v-layout align-center row fill-height class="ma-0">
-            <v-icon v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing" small class="pr-1" color="cyan darken-2">mdi-calendar-alert</v-icon>
-            <v-progress-circular v-if="isShootStatusHibernationProgressing" indeterminate size=12 width=2 color="grey" class="mr-1"></v-progress-circular>
-            <span class="grey--text">{{hibernationDescription}}</span>
-          </v-layout>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
-            <change-hibernation :shootItem="shootItem"></change-hibernation>
-            <hibernation-configuration ref="hibernationConfiguration" :shootItem="shootItem"></hibernation-configuration>
-          </v-layout>
-        </v-flex>
-      </v-card-title>
-
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem pr-1">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-wrench-outline</v-icon>
-        <v-flex grow class="pa-0">
-          <span class="subheading">Maintenance</span><br>
-          <span class="grey--text">{{maintenanceDescription}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
-            <maintenance-start :shootItem="shootItem"></maintenance-start>
-            <maintenance-configuration :shootItem="shootItem"></maintenance-configuration>
-          </v-layout>
-        </v-flex>
-      </v-card-title>
-
-      <v-divider class="my-2" inset></v-divider>
-      <v-card-title class="listItem pr-1">
-        <v-icon class="cyan--text text--darken-2 avatar">mdi-tractor</v-icon>
-        <v-flex grow class="pa-0">
-          <span class="subheading">Reconcile</span><br>
-          <span class="grey--text">{{reconcileDescription}}</span>
-        </v-flex>
-        <v-flex shrink class="pa-0">
-          <v-layout row>
-            <reconcile-start :shootItem="shootItem"></reconcile-start>
-          </v-layout>
-        </v-flex>
-      </v-card-title>
-
+    <v-toolbar flat dark dense color="cyan darken-2">
+      <v-toolbar-title class="subtitle-1">Lifecycle</v-toolbar-title>
+    </v-toolbar>
+    <v-list>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-sleep</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Hibernation</v-list-item-title>
+          <v-list-item-subtitle class="d-flex align-center pt-1">
+            <v-icon
+              v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing"
+              small
+              class="pr-1"
+              color="cyan darken-2"
+            >mdi-calendar-alert</v-icon>
+            <v-progress-circular v-if="isShootStatusHibernationProgressing"
+              indeterminate
+              size="12"
+              width="2"
+              color="grey"
+              class="mr-1"
+            ></v-progress-circular>
+            {{hibernationDescription}}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action class="mx-0">
+          <change-hibernation :shootItem="shootItem"></change-hibernation>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <hibernation-configuration ref="hibernationConfiguration" :shootItem="shootItem"></hibernation-configuration>
+        </v-list-item-action>
+      </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-wrench-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Maintenance</v-list-item-title>
+          <v-list-item-subtitle class="pt-1">
+            {{maintenanceDescription}}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action class="mx-0">
+          <maintenance-start :shootItem="shootItem"></maintenance-start>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <maintenance-configuration :shootItem="shootItem"></maintenance-configuration>
+        </v-list-item-action>
+      </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-tractor</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title>Reconcile</v-list-item-title>
+          <v-list-item-subtitle class="pt-1">
+            {{reconcileDescription}}
+          </v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-action class="mx-0">
+          <reconcile-start :shootItem="shootItem"></reconcile-start>
+        </v-list-item-action>
+      </v-list-item>
       <template v-if="canPatchShoots">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem pr-1">
-          <div class="avatar">
-            <v-badge color="white cyan--text" overlap bottom>
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-badge color="white" overlap bottom>
               <template v-slot:badge>
                 <v-icon color="cyan darken-2">mdi-refresh</v-icon>
               </template>
-              <v-icon class="cyan--text text--darken-2">mdi-file</v-icon>
+              <v-icon color="cyan darken-2">mdi-file</v-icon>
             </v-badge>
-          </div>
-          <v-flex grow class="pa-0">
-            <span class="subheading">Rotate Kubeconfig</span>
-          </v-flex>
-          <v-flex shrink class="pa-0">
-            <v-layout row>
-              <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
-            </v-layout>
-          </v-flex>
-        </v-card-title>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>
+              Rotate Kubeconfig
+            </v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <rotate-kubeconfig-start :shootItem="shootItem"></rotate-kubeconfig-start>
+          </v-list-item-action>
+        </v-list-item>
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">mdi-delete-circle-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title>
+              Delete Cluster
+            </v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <delete-cluster :shootItem="shootItem"></delete-cluster>
+          </v-list-item-action>
+        </v-list-item>
       </template>
-
-      <template v-if="canPatchShoots">
-        <v-divider class="my-2" inset></v-divider>
-        <v-card-title class="listItem pr-1">
-          <v-icon class="cyan--text text--darken-2 avatar">mdi-delete-circle-outline</v-icon>
-          <v-flex grow class="pa-0">
-            <span class="subheading">Delete Cluster</span><br>
-          </v-flex>
-          <v-flex shrink class="pa-0">
-            <v-layout row>
-              <delete-cluster :shootItem="shootItem"></delete-cluster>
-            </v-layout>
-          </v-flex>
-        </v-card-title>
-      </template>
-    </div>
+    </v-list>
   </v-card>
 </template>
-
 <script>
-
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
 import moment from 'moment-timezone'
@@ -121,7 +134,6 @@ import DeleteCluster from '@/components/DeleteCluster'
 import ReconcileStart from '@/components/ReconcileStart'
 import RotateKubeconfigStart from '@/components/RotateKubeconfigStart'
 import { shootItem } from '@/mixins/shootItem'
-
 export default {
   components: {
     ChangeHibernation,
@@ -153,7 +165,6 @@ export default {
           return 'Waking up Cluster...'
         }
       }
-
       const purpose = this.shootPurpose || ''
       if (this.shootHibernationSchedules.length > 0) {
         return 'Hibernation schedule configured'
@@ -191,25 +202,3 @@ export default {
   }
 }
 </script>
-
-<style lang="styl" scoped>
-
-  .cardTitle {
-    line-height: 10px;
-  }
-
-  .listItem {
-    padding-top: 0px;
-    padding-bottom: 0px;
-  }
-
-  .list {
-    padding-top: 8px;
-    padding-bottom: 8px;
-  }
-
-  .avatar {
-    padding-right: 33px;
-  }
-
-</style>

@@ -18,6 +18,8 @@
 
 const express = require('express')
 
+const config = require('../config')
+const { encodeBase64 } = require('../utils')
 const { authorization } = require('../services')
 const router = module.exports = express.Router({
   mergeParams: true
@@ -58,4 +60,45 @@ router.route('/token')
     res.send({
       token
     })
+  })
+
+router.route('/kubeconfig')
+  .get(async (req, res, next) => {
+    const {
+      apiServerUrl: server,
+      apiServerCaData: certificateAuthorityData,
+      apiServerSkipTlsVerify: insecureSkipTlsVerify,
+      oidc = {}
+    } = config
+    const {
+      issuer: issuerUrl,
+      public: { clientId, clientSecret } = {}
+    } = oidc
+    const body = {
+      server,
+      certificateAuthorityData,
+      insecureSkipTlsVerify,
+      oidc: {
+        issuerUrl,
+        clientId,
+        clientSecret
+      }
+    }
+    if (oidc.scope) {
+      const extraScopes = []
+      for (const scope of oidc.scope.split(' ')) {
+        if (scope !== 'openid' && !scope.startsWith('audience:server:client_id')) {
+          extraScopes.push(scope)
+        }
+      }
+      if (extraScopes.length) {
+        body.oidc.extraScopes = extraScopes
+      }
+    }
+    if (oidc.ca) {
+      body.oidc.certificateAuthorityData = encodeBase64(oidc.ca)
+    } else if (oidc.rejectUnauthorized === false) {
+      body.oidc.insecureSkipTlsVerify = true
+    }
+    res.send(body)
   })

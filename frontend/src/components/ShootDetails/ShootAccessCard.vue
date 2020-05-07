@@ -16,16 +16,16 @@ limitations under the License.
 
 <template>
   <v-list>
-    <v-list-tile v-show="!isAnyTileVisible">
-      <v-list-tile-action>
-        <v-icon class="cyan--text text--darken-2">mdi-alert-circle-outline</v-icon>
-      </v-list-tile-action>
-      <v-list-tile-content>
-        <v-list-tile-title>
+    <v-list-item v-show="!isAnyTileVisible">
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content>
+        <v-list-item-title>
           Access information currently not available
-        </v-list-tile-title>
-      </v-list-tile-content>
-    </v-list-tile>
+        </v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
     <terminal-list-tile
       v-if="isTerminalTileVisible"
       :shoot-item=shootItem
@@ -36,100 +36,103 @@ limitations under the License.
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
     <template v-if="isDashboardTileVisible && hasDashboardTokenAuth">
-      <v-list-tile>
-        <v-list-tile-action>
-          <v-icon class="cyan--text text--darken-2">developer_board</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-sub-title>Dashboard</v-list-tile-sub-title>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-list-tile>
-        <v-list-tile-action>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-action-text>Access Dashboard using the kubectl command-line tool by running the following command: <code>kubectl proxy</code>. Kubectl will make Dashboard available at:</v-list-tile-action-text>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-list-tile>
-        <v-list-tile-action>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">developer_board</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Dashboard</v-list-item-subtitle>
+          <v-list-item-subtitle class="caption wrap-text py-2">
+            Access Dashboard using the kubectl command-line tool by running the following command:
+            <code>kubectl proxy</code>.
+            Kubectl will make Dashboard available at:
+          </v-list-item-subtitle>
+          <v-list-item-title>
             <v-tooltip v-if="isShootStatusHibernated" top>
-              <span class="grey--text" slot="activator">{{dashboardUrlText}}</span>
+              <template v-slot:activator="{ on }">
+                <span v-on="on" class="grey--text">{{dashboardUrlText}}</span>
+              </template>
               Dashboard is not running for hibernated clusters
             </v-tooltip>
             <a v-else :href="dashboardUrl" target="_blank" class="cyan--text text--darken-2">{{dashboardUrlText}}</a>
-          </v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
-      <v-list-tile v-if="token">
-        <v-list-tile-action>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-sub-title>Token</v-list-tile-sub-title>
-          <v-list-tile-title><pre class="scroll">{{tokenText}}</pre></v-list-tile-title>
-        </v-list-tile-content>
-        <v-list-tile-action>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item v-if="token">
+        <v-list-item-icon/>
+        <v-list-item-content class="pt-0">
+          <v-list-item-subtitle>Token</v-list-item-subtitle>
+          <v-list-item-title class="pt-1">
+            <pre class="scroll">{{tokenText}}</pre>
+          </v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action class="mx-0">
           <copy-btn :clipboard-text="token"></copy-btn>
-        </v-list-tile-action>
-        <v-list-tile-action>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
           <v-tooltip top>
-            <v-btn slot="activator" icon @click.native.stop="showToken = !showToken">
-              <v-icon>{{visibilityIcon}}</v-icon>
-            </v-btn>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on" icon @click.native.stop="showToken = !showToken">
+                <v-icon>{{visibilityIcon}}</v-icon>
+              </v-btn>
+            </template>
             <span>{{tokenVisibilityTitle}}</span>
           </v-tooltip>
-        </v-list-tile-action>
-      </v-list-tile>
+        </v-list-item-action>
+      </v-list-item>
     </template>
 
-    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible)" class="my-2" inset></v-divider>
+    <v-divider v-if="isDashboardTileVisible && (isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <username-password v-if="isCredentialsTileVisible" :username="username" :password="password"></username-password>
 
-    <v-divider v-if="isCredentialsTileVisible && isKubeconfigTileVisible" class="my-2" inset></v-divider>
+    <v-divider v-if="isCredentialsTileVisible && (isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
-    <v-expansion-panel v-if="isKubeconfigTileVisible" :value="expandKubeconfigIndex" readonly>
-      <v-expansion-panel-content hide-actions>
-        <v-list-tile slot="header">
-          <v-list-tile-action>
-            <v-icon class="cyan--text text--darken-2">insert_drive_file</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Kubeconfig</v-list-tile-title>
-          </v-list-tile-content>
-          <v-list-tile-action>
-            <v-tooltip top>
-              <v-btn slot="activator" icon @click.native.stop="onDownload">
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
-              <span>Download Kubeconfig</span>
-            </v-tooltip>
-          </v-list-tile-action>
-          <v-list-tile-action>
-            <copy-btn :clipboard-text="kubeconfig"></copy-btn>
-          </v-list-tile-action>
-          <v-list-tile-action>
-            <v-tooltip top>
-              <v-btn slot="activator" icon @click.native.stop="isKubeconfigVisible ? hideKubekonfig() : showKubeconfig()">
-                <v-icon>{{visibilityIconKubeconfig}}</v-icon>
-              </v-btn>
-              <span>{{kubeconfigVisibilityTitle}}</span>
-            </v-tooltip>
-          </v-list-tile-action>
-        </v-list-tile>
-        <v-card>
-          <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
-        </v-card>
-      </v-expansion-panel-content>
-    </v-expansion-panel>
+    <v-list-item v-if="isKubeconfigTileVisible">
+      <v-list-item-icon>
+        <v-icon color="cyan darken-2">insert_drive_file</v-icon>
+      </v-list-item-icon>
+      <v-list-item-content>
+        <v-list-item-title>Kubeconfig</v-list-item-title>
+      </v-list-item-content>
+      <v-list-item-action class="mx-0">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onDownload">
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </template>
+          <span>Download Kubeconfig</span>
+        </v-tooltip>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <copy-btn :clipboard-text="kubeconfig"></copy-btn>
+      </v-list-item-action>
+      <v-list-item-action class="mx-0">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="expansionPanelKubeconfig = !expansionPanelKubeconfig">
+              <v-icon>{{visibilityIconKubeconfig}}</v-icon>
+            </v-btn>
+          </template>
+          <span>{{kubeconfigVisibilityTitle}}</span>
+        </v-tooltip>
+      </v-list-item-action>
+    </v-list-item>
+    <v-expand-transition>
+      <v-card v-if="expansionPanelKubeconfig" flat>
+        <code-block lang="yaml" :content="shootInfo.kubeconfig" :show-copy-button="false"></code-block>
+      </v-card>
+    </v-expand-transition>
+
+    <v-divider v-if="isKubeconfigTileVisible && isGardenctlTileVisible" inset></v-divider>
+
+    <gardenctl-commands v-if="isGardenctlTileVisible" :shootItem="shootItem"></gardenctl-commands>
   </v-list>
 </template>
 
@@ -138,6 +141,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
+import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
@@ -151,7 +155,8 @@ export default {
     CodeBlock,
     CopyBtn,
     TerminalListTile,
-    LinkListTile
+    LinkListTile,
+    GardenctlCommands
   },
   props: {
     shootItem: {
@@ -160,7 +165,7 @@ export default {
   },
   data () {
     return {
-      expandKubeconfigIndex: null,
+      expansionPanelKubeconfig: false,
       showToken: false
     }
   },
@@ -211,21 +216,10 @@ export default {
       return get(this.shootInfo, 'kubeconfig')
     },
     visibilityIconKubeconfig () {
-      if (this.isKubeconfigVisible) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.expansionPanelKubeconfig ? 'mdi-eye-off' : 'mdi-eye'
     },
     kubeconfigVisibilityTitle () {
-      if (this.isKubeconfigVisible) {
-        return 'Hide Kubeconfig'
-      } else {
-        return 'Show Kubeconfig'
-      }
-    },
-    isKubeconfigVisible () {
-      return this.expandKubeconfigIndex === 0
+      return this.expansionPanelKubeconfig ? 'Hide Kubeconfig' : 'Show Kubeconfig'
     },
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
@@ -251,6 +245,9 @@ export default {
     isKubeconfigTileVisible () {
       return !!this.kubeconfig
     },
+    isGardenctlTileVisible () {
+      return this.isAdmin
+    },
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
     },
@@ -258,36 +255,18 @@ export default {
       return this.shootInfo.cluster_token || ''
     },
     tokenText () {
-      if (this.showToken) {
-        return this.token
-      } else {
-        return '****************'
-      }
+      return this.showToken ? this.token : '****************'
     },
     tokenVisibilityTitle () {
-      if (this.showToken) {
-        return 'Hide token'
-      } else {
-        return 'Show token'
-      }
+      return this.showToken ? 'Hide token' : 'Show token'
     },
     visibilityIcon () {
-      if (this.showToken) {
-        return 'visibility_off'
-      } else {
-        return 'visibility'
-      }
+      return this.showToken ? 'mdi-eye-off' : 'mdi-eye'
     }
   },
   methods: {
     reset () {
-      this.hideKubekonfig()
-    },
-    hideKubekonfig () {
-      this.expandKubeconfigIndex = null
-    },
-    showKubeconfig () {
-      this.expandKubeconfigIndex = 0
+      this.expansionPanelKubeconfig = false
     },
     onDownload () {
       const kubeconfig = this.kubeconfig
@@ -304,18 +283,21 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .v-expansion-panel {
-    box-shadow: none;
-  }
-
-  >>> .v-expansion-panel__header {
-    cursor: auto;
-    padding: 0;
-  }
+<style lang="scss" scoped>
 
   .scroll {
     overflow-x: scroll;
+  }
+
+  .wrap-text {
+    line-height: inherit;
+    overflow: auto !important;
+    white-space: normal !important;
+      code {
+        box-shadow: none !important;
+        padding: 1px;
+        color: black;
+      }
   }
 
 </style>

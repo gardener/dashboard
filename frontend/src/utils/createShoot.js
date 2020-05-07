@@ -193,7 +193,7 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 
 export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
   switch (infrastructureKind) {
-    case 'aws':
+    case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, maxNumberOfZones)
       return map(zones, (zone, index) => {
         const bigNetWorks = splitCIDR(zoneNetworksAws[index], 2)
@@ -208,7 +208,8 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
           internal: internalNetwork
         }
       })
-    case 'alicloud':
+    }
+    case 'alicloud': {
       const zoneNetworksAli = splitCIDR(workerCIDR, maxNumberOfZones)
       return map(zones, (zone, index) => {
         return {
@@ -216,8 +217,7 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
           workers: zoneNetworksAli[index]
         }
       })
-    default:
-      return undefined
+    }
   }
 }
 

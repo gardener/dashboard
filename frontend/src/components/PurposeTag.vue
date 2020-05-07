@@ -16,7 +16,9 @@ limitations under the License.
 
 <template>
   <v-tooltip top>
-    <v-chip class="purpose-tag" slot="activator" v-if="!!shortPurpose" :outline="!isCritical" :text-color="textColor" color="cyan darken-2" small>{{ shortPurpose }}</v-chip>
+    <template v-slot:activator="{ on }">
+      <v-chip v-on="on" class="purpose-tag" v-if="!!shortPurpose" :outlined="!isCritical" :text-color="textColor" color="cyan darken-2" small>{{ shortPurpose }}</v-chip>
+    </template>
     <span>{{ purpose }}</span>
   </v-tooltip>
 </template>
@@ -61,13 +63,13 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .purpose-tag {
     margin: 1px;
   }
 
-  .purpose-tag >>> .v-chip__content {
+  .purpose-tag ::v-deep .v-chip__content {
     margin: -4px;
   }
 

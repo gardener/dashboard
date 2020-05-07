@@ -33,7 +33,7 @@ exports.list = async function ({ user, namespace, shootsWithIssuesOnly = false }
   const client = user.client
   const query = {}
   if (shootsWithIssuesOnly) {
-    query.labelSelector = 'shoot.garden.sapcloud.io/status!=healthy'
+    query.labelSelector = 'shoot.gardener.cloud/status!=healthy'
   }
   if (!namespace) {
     return client['core.gardener.cloud'].shoots.listAllNamespaces(query)

@@ -15,12 +15,13 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="py-0 ma-0">
-    <v-layout row align-center>
-      <v-layout row wrap>
-        <v-flex class="weekday-select">
+  <v-container  class="py-0 ma-0">
+    <v-row align="center">
+      <v-row >
+        <v-col class="weekday-select">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           v-model="selectedDays"
           ref="selectedDays"
           @blur="touchIfNothingFocused"
@@ -34,8 +35,8 @@ limitations under the License.
           small-chips
           deletable-chips
         ></v-select>
-        </v-flex>
-        <v-flex class="time-select">
+        </v-col>
+        <v-col class="time-select">
           <v-text-field
             color="cyan darken-2"
             label="Wake up at"
@@ -46,8 +47,8 @@ limitations under the License.
             :error-messages="getErrorMessages('wakeUpTime')"
             type="time"
           ></v-text-field>
-        </v-flex>
-        <v-flex class="time-select">
+        </v-col>
+        <v-col class="time-select">
           <v-text-field
             color="cyan darken-2"
             label="Hibernate at"
@@ -58,8 +59,8 @@ limitations under the License.
             :error-messages="getErrorMessages('hibernateTime')"
             type="time"
           ></v-text-field>
-        </v-flex>
-        <v-flex class="timezone-select">
+        </v-col>
+        <v-col class="timezone-select">
           <v-autocomplete
             color="cyan darken-2"
             label="Timezone"
@@ -68,19 +69,19 @@ limitations under the License.
             @input="onInputSelectedTimezone"
             >
           </v-autocomplete>
-        </v-flex>
-      </v-layout>
-      <v-flex class="ml-3">
+        </v-col>
+      </v-row>
+      <v-col class="ml-4">
         <v-btn
           small
-          outline
+          outlined
           icon
-          class="grey--text lighten-2"
+          color="grey"
           @click.native.stop="removeScheduleEvent">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-      </v-flex>
-    </v-layout>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -228,7 +229,7 @@ export default {
     setSelectedDays (scheduleEvent) {
       const days = get(scheduleEvent, 'start.weekdays', get(scheduleEvent, 'end.weekdays'))
       if (days) {
-        const daysArray = map(split(days, ','), day => find(this.weekdays, { 'value': parseInt(day) }))
+        const daysArray = map(split(days, ','), day => find(this.weekdays, { value: parseInt(day) }))
         if (!isEqual(daysArray, this.selectedDays)) {
           this.selectedDays = daysArray
         }
@@ -290,7 +291,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .weekday-select {
     width: 300px;
   }

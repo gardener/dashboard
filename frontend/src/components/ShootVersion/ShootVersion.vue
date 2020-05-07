@@ -17,33 +17,35 @@ limitations under the License.
 <template>
   <div>
     <v-tooltip top>
-      <v-btn
-        v-if="chipStyle"
-        slot="activator"
-        class="update_btn"
-        :class="buttonInactive"
-        small
-        round
-        @click="showUpdateDialog"
-        :outline="!k8sPatchAvailable"
-        :dark="k8sPatchAvailable"
-        :ripple="canUpdate"
-        depressed
-        color="cyan darken-2"
-      >
-        <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
-        {{shootK8sVersion}}
-      </v-btn>
-      <v-btn
-        v-else-if="!!availableK8sUpdates"
-        slot="activator"
-        @click="showUpdateDialog"
-        icon
-        :disabled="!canUpdate"
-      >
-        <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
-        <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
-      </v-btn>
+      <template v-slot:activator="{ on: tooltip }">
+        <div v-on="tooltip">
+          <v-btn
+            v-if="chipStyle"
+            class="update_btn"
+            :class="buttonInactive"
+            small
+            rounded
+            @click="showUpdateDialog"
+            :outlined="!k8sPatchAvailable"
+            :dark="k8sPatchAvailable"
+            :ripple="canUpdate"
+            depressed
+            color="cyan darken-2"
+          >
+            <v-icon small v-if="availableK8sUpdates">arrow_drop_up</v-icon>
+            {{shootK8sVersion}}
+          </v-btn>
+          <v-btn
+            v-else-if="!!availableK8sUpdates"
+            @click="showUpdateDialog"
+            icon
+            :disabled="!canUpdate"
+          >
+            <v-icon v-if="k8sPatchAvailable">mdi-arrow-up-bold-circle</v-icon>
+            <v-icon v-else>mdi-arrow-up-bold-circle-outline</v-icon>
+          </v-btn>
+        </div>
+      </template>
       <span>{{tooltipText}}</span>
     </v-tooltip>
     <g-dialog
@@ -56,9 +58,9 @@ limitations under the License.
       defaultColor="orange"
       ref="gDialog"
       >
-      <template slot="caption">Update Cluster</template>
-      <template slot="affectedObjectName">{{shootName}}</template>
-      <template slot="message">
+      <template v-slot:caption>Update Cluster</template>
+      <template v-slot:affectedObjectName>{{shootName}}</template>
+      <template v-slot:message>
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
           :currentk8sVersion="shootK8sVersion"
@@ -98,7 +100,7 @@ limitations under the License.
 
 <script>
 import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
-import GDialog from '@/dialogs/GDialog'
+import GDialog from '@/components/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
 import get from 'lodash/get'
@@ -213,20 +215,14 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .update_btn {
-    min-width: 0px;
-    margin: 0px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  .update_btn >>> i {
-    margin-left: -8px;
+    padding-left: 2px !important;
+    padding-right: 4px !important;
   }
 
   .update_btn_inactive {
-    cursor: default;
+    cursor: default !important;
   }
 
   a {

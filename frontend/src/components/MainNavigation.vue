@@ -24,7 +24,7 @@ limitations under the License.
     >
       <div class="teaser">
         <div class="content center">
-          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="right white--text">
+          <v-btn @click.native.stop="setSidebar(!isActive)" icon class="float-right white--text ma-2">
             <v-icon>mdi-chevron-double-left</v-icon>
           </v-btn>
           <a href="/">
@@ -32,7 +32,6 @@ limitations under the License.
             <h1 class="white--text">Gardener <span class="version">{{version}}</span></h1>
             <h2>Universal Kubernetes at Scale</h2>
           </a>
-
         </div>
       </div>
       <template v-if="projectList.length">
@@ -42,40 +41,42 @@ limitations under the License.
           offset-y
           left
           bottom
-          full-width
           allow-overflow
           open-on-click
           :close-on-content-click="false"
           content-class="project-menu"
           v-model="projectMenu"
         >
-          <v-btn
-            block
-            slot="activator"
-            class="project-selector elevation-4 ma-0 white--text"
-            @keydown.down="highlightProjectWithKeys('down')"
-            @keydown.up="highlightProjectWithKeys('up')"
-            @keyup.enter="navigateToHighlightedProject"
-          >
-            <v-icon class="pr-4">mdi-grid-large</v-icon>
-            <span class="ml-2">{{projectName}}</span>
-            <v-spacer></v-spacer>
-            <v-icon right>{{projectMenuIcon}}</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              v-on="on"
+              block
+              class="project-selector elevation-4 white--text"
+              @keydown.down="highlightProjectWithKeys('down')"
+              @keydown.up="highlightProjectWithKeys('up')"
+              @keyup.enter="navigateToHighlightedProject"
+            >
+              <v-icon class="pr-6">mdi-grid-large</v-icon>
+              <span class="ml-2">{{projectName}}</span>
+              <v-spacer></v-spacer>
+              <v-icon right>{{projectMenuIcon}}</v-icon>
+            </v-btn>
+          </template>
 
-          <v-card light>
+          <v-card>
             <template v-if="projectList.length > 3">
               <v-card-title class="pa-0 grey lighten-5">
                 <v-text-field
-                  light
                   clearable
                   label="Filter projects"
+                  solo
+                  flat
                   single-line
                   hide-details
                   full-width
                   color="grey darken-1"
                   prepend-icon="search"
-                  class="ml-4 project-filter"
+                  class="pl-4 mt-0 pt-0 project-filter"
                   v-model="projectFilter"
                   ref="projectFilter"
                   @keyup.esc="projectFilter = ''"
@@ -89,8 +90,8 @@ limitations under the License.
               </v-card-title>
               <v-divider></v-divider>
             </template>
-            <v-list light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
-              <v-list-tile
+            <v-list flat light class="project-list" ref="projectList" @scroll.native="handleProjectListScroll">
+              <v-list-item
                 class="project-list-tile"
                 v-for="project in visibleProjectList"
                 @click="onProjectClick($event, project)"
@@ -98,28 +99,31 @@ limitations under the License.
                 :key="project.metadata.name"
                 :data-g-project-name="project.metadata.name"
               >
-                <v-list-tile-avatar>
+                <v-list-item-avatar>
                   <v-icon v-if="project.metadata.name === projectName" color="teal">check</v-icon>
-                </v-list-tile-avatar>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{project.metadata.name}}</v-list-tile-title>
-                  <v-list-tile-sub-title class="project-owner">{{getProjectOwner(project)}}</v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
+                  <v-list-item-subtitle class="project-owner">{{getProjectOwner(project)}}</v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
             </v-list>
             <v-card-actions class="grey lighten-3">
               <v-tooltip top :disabled="canCreateProject" style="width: 100%">
-                <v-btn
-                  slot="activator"
-                  flat
-                  block
-                  class="project-add text-xs-left teal--text"
-                  :disabled="!canCreateProject"
-                  @click.stop="openProjectDialog"
-                >
-                  <v-icon>add</v-icon>
-                  <span class="ml-2">Create Project</span>
-                </v-btn>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      text
+                      block
+                      class="project-add text-left teal--text"
+                      :disabled="!canCreateProject"
+                      @click.stop="openProjectDialog"
+                    >
+                      <v-icon>add</v-icon>
+                      <span class="ml-2">Create Project</span>
+                    </v-btn>
+                  </div>
+                </template>
                 <span>You are not authorized to create projects</span>
               </v-tooltip>
             </v-card-actions>
@@ -127,24 +131,24 @@ limitations under the License.
         </v-menu>
       </template>
       <v-list ref="mainMenu">
-        <v-list-tile :to="{name: 'Home'}" exact v-if="hasNoProjects">
-          <v-list-tile-action>
+        <v-list-item :to="{name: 'Home'}" exact v-if="hasNoProjects">
+          <v-list-item-action>
             <v-icon class="white--text">mdi-home-outline</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title class="subheading">Home</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title class="subtitle-1">Home</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <template v-if="namespace">
           <template v-for="(route, index) in routes">
-            <v-list-tile v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
-              <v-list-tile-action>
+            <v-list-item v-if="!route.meta.menu.hidden" :to="namespacedRoute(route)" :key="index">
+              <v-list-item-action>
                 <v-icon small class="white--text">{{route.meta.menu.icon}}</v-icon>
-              </v-list-tile-action>
-              <v-list-tile-content>
-                <v-list-tile-title class="subheading" >{{route.meta.menu.title}}</v-list-tile-title>
-              </v-list-tile-content>
-            </v-list-tile>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title class="subtitle-1" >{{route.meta.menu.title}}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
           </template>
         </template>
       </v-list>
@@ -176,7 +180,7 @@ import head from 'lodash/head'
 import slice from 'lodash/slice'
 import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
-import ProjectCreateDialog from '@/dialogs/ProjectDialog'
+import ProjectCreateDialog from '@/components/dialogs/ProjectDialog'
 
 const initialVisibleProjects = 10
 
@@ -276,7 +280,7 @@ export default {
     },
     visibleProjectList () {
       const projectList = this.sortedAndFilteredProjectListWithAllProjects
-      let endIndex = this.numberOfVisibleProjects
+      const endIndex = this.numberOfVisibleProjects
       return slice(projectList, 0, endIndex)
     },
     getProjectOwner () {
@@ -445,60 +449,60 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  teaserHeight = 200px
+<style lang="scss" scoped>
+  $teaserHeight: 200px;
 
-  aside {
-    overflow: hidden
+  .v-navigation-drawer {
+    overflow: hidden;
 
     .teaser {
-      height: teaserHeight
-      overflow: hidden
+      height: $teaserHeight;
+      overflow: hidden;
 
       .content {
         display: block;
         position: relative;
-        height: teaserHeight
-        overflow: hidden
-        background-color: #212121
-        text-align: center
+        height: $teaserHeight;
+        overflow: hidden;
+        background-color: #212121;
+        text-align: center;
 
         a {
-          text-decoration: none
+          text-decoration: none;
 
           .logo {
-            height: 80px
-            pointer-events: none
-            margin: 21px 0 0 0
-            transform: translateX(30%)
+            height: 80px;
+            pointer-events: none;
+            margin: 21px 0 0 0;
+            transform: translateX(30%);
           }
 
           h1 {
-            font-size: 40px
-            line-height: 40px
-            padding: 10px 0 0 0
-            margin: 0
-            letter-spacing: 4px
-            font-weight: 100
-            position: relative
+            font-size: 40px;
+            line-height: 40px;
+            padding: 10px 0 0 0;
+            margin: 0;
+            letter-spacing: 4px;
+            font-weight: 100;
+            position: relative;
 
             .version {
-              font-size: 10px
-              line-height: 10px
-              letter-spacing: 3px
-              position: absolute
-              top: 6px
-              right: 20px
+              font-size: 10px;
+              line-height: 10px;
+              letter-spacing: 3px;
+              position: absolute;
+              top: 6px;
+              right: 20px;
             }
           }
 
           h2 {
-            color: rgb(0, 137, 123)
-            font-size: 15px
-            font-weight: 300
-            padding: 0px
-            margin: 0px
-            letter-spacing: 0.8px
+            color: rgb(0, 137, 123);
+            font-size: 15px;
+            font-weight: 300;
+            padding: 0px;
+            margin: 0px;
+            letter-spacing: 0.8px;
           }
         }
 
@@ -506,33 +510,28 @@ export default {
     }
 
     .project-selector {
-      height: 60px
-      font-weight: 700
-      font-size: 16px
-      background-color: rgba(0,0,0,0.1) !important
-
-      >>> div {
-        justify-content: left
-      }
+      height: 60px !important;
+      font-weight: 700;
+      font-size: 16px;
+      background-color: rgba(0,0,0,0.1) !important;
     }
 
     .v-footer{
-      background-color: transparent
-      padding-left: 10px;
-      padding-right: 10px;
+      background-color: transparent;
+      padding-left: 8px;
+      padding-right: 8px;
     }
 
-    >>> .v-list {
-      .v-list__tile__title {
-          text-transform: uppercase
-          font-size: 13px;
-          max-width: 180px;
+    .v-list {
+      .v-list-item__title {
+        text-transform: uppercase !important;
+        max-width: 180px;
       }
-      .v-list__tile--active {
-        background: rgba(255,255,255,0.1) !important
-        color: white !important
+      .v-list-item--active {
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
         .icon {
-          color: white !important
+          color: white !important;
         }
       }
     }
@@ -540,11 +539,12 @@ export default {
     .project-menu {
       border-radius: 0;
 
-      >>>.v-card {
+      .v-card {
         border-radius: 0;
 
         .project-filter {
-          align-items: center
+          align-items: center;
+          font-weight: normal;
         }
 
         .project-add > div {
@@ -557,15 +557,18 @@ export default {
           overflow-y: auto;
           max-width: 300px;
 
+          div:hover {
+            background-color: #F5F5F5
+          }
+
           div > a {
             height: 54px;
           }
+          .project-name {
+            font-size: 14px;
+          }
           .project-owner {
             font-size: 11px;
-          }
-
-          .v-list__tile--highlighted {
-            background-color: transparent !important
           }
         }
       }

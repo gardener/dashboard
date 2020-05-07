@@ -138,13 +138,13 @@ describe('watches', function () {
     const foobarUnhealthy = _
       .chain(foobar)
       .cloneDeep()
-      .set('metadata.labels["shoot.garden.sapcloud.io/status"]', 'unhealthy')
+      .set('metadata.labels["shoot.gardener.cloud/status"]', 'unhealthy')
       .value()
 
     const foobazUnhealthy = _
       .chain(foobaz)
       .cloneDeep()
-      .set('metadata.labels["shoot.garden.sapcloud.io/status"]', 'unhealthy')
+      .set('metadata.labels["shoot.gardener.cloud/status"]', 'unhealthy')
       .value()
 
     let shootsWithIssues

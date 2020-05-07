@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-container grid-list-xl class="pa-0 ma-0">
-    <v-layout row wrap>
-      <v-flex v-show="cloudProfiles.length > 1" class="regularInput">
+  <v-container  class="pa-0 ma-0">
+    <v-row >
+      <v-col v-show="cloudProfiles.length > 1" class="regularInput">
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -27,13 +27,16 @@ limitations under the License.
           @input="onUpdateCloudProfileName"
           color="cyan darken-2">
         </cloud-profile>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <v-select
           ref="secret"
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Secret"
           :items="secretItems"
+          item-value="metadata.name"
+          return-object
           v-model="secret"
           :error-messages="getErrorMessages('secret')"
           @input="onInputSecret"
@@ -41,27 +44,28 @@ limitations under the License.
           persistent-hint
           :hint="secretHint"
           >
-          <template slot="item" slot-scope="data">
-            <template v-if="isAddNewSecret(data.item)">
+          <template v-slot:item="{ item }">
+            <template v-if="isAddNewSecret(item)">
               <v-icon>mdi-plus</v-icon>
-              <span class="pl-2">{{get(data.item, 'title')}}</span>
+              <span class="pl-2">{{get(item, 'title')}}</span>
             </template>
             <template v-else>
-              {{get(data.item, 'metadata.name')}}
-              <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+              <span>{{get(item, 'metadata.name')}}</span>
+              <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
             </template>
           </template>
-          <template slot="selection" slot-scope="data">
-            <span class="black--text">
-              {{get(data.item, 'metadata.name')}}
+          <template v-slot:selection="{ item }">
+            <span>
+              {{get(item, 'metadata.name')}}
             </span>
-            <v-icon v-if="!isOwnSecretBinding(data.item)">mdi-share</v-icon>
+            <v-icon v-if="!isOwnSecretBinding(item)">mdi-share</v-icon>
           </template>
         </v-select>
-      </v-flex>
-      <v-flex class="regularInput">
+      </v-col>
+      <v-col class="regularInput">
         <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Region"
           :items="regionItems"
           :hint="regionHint"
@@ -71,11 +75,12 @@ limitations under the License.
           @input="onInputRegion"
           @blur="$v.region.$touch()"
           ></v-select>
-      </v-flex>
+      </v-col>
       <template v-if="infrastructureKind === 'openstack'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Floating Pools"
           :items="allFloatingPoolNames"
           v-model="floatingPoolName"
@@ -83,10 +88,11 @@ limitations under the License.
           @input="onInputFloatingPoolName"
           @blur="$v.floatingPoolName.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
           color="cyan darken-2"
+          item-color="cyan darken-2"
           label="Load Balancer Providers"
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
@@ -95,12 +101,13 @@ limitations under the License.
           @blur="$v.loadBalancerProviderName.$touch()"
           persistent-hint
           ></v-select>
-        </v-flex>
+        </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'metal'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-text-field
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Project ID"
             v-model="projectID"
             :error-messages="getErrorMessages('projectID')"
@@ -109,10 +116,11 @@ limitations under the License.
             hint="Clusters with same Project ID share IP ranges to allow load balancing accross multiple partitions"
             persistent-hint
             ></v-text-field>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Partition ID"
             :items="partitionIDs"
             v-model="partitionID"
@@ -122,10 +130,11 @@ limitations under the License.
             hint="Partion ID equals zone on other infrastructures"
             persistent-hint
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Image"
             :items="firewallImages"
             v-model="firewallImage"
@@ -133,10 +142,11 @@ limitations under the License.
             @input="onInputFirewallImage"
             @blur="$v.firewallImage.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Size"
             :items="firewallSizes"
             v-model="firewallSize"
@@ -144,10 +154,11 @@ limitations under the License.
             @input="onInputFirewallSize"
             @blur="$v.firewallImage.$touch()"
           ></v-select>
-        </v-flex>
-        <v-flex class="regularInput">
+        </v-col>
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Firewall Networks"
             :items="allFirewallNetworks"
             v-model="firewallNetworks"
@@ -159,12 +170,13 @@ limitations under the License.
             deletable-chips
             multiple
           ></v-select>
-        </v-flex>
+        </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
-        <v-flex class="regularInput">
+        <v-col class="regularInput">
           <v-select
             color="cyan darken-2"
+            item-color="cyan darken-2"
             label="Load Balancer Classes"
             :items="allLoadBalancerClasses"
             v-model="loadBalancerClassNames"
@@ -178,24 +190,24 @@ limitations under the License.
             multiple
           >
             <template v-slot:item="{ item }">
-                <v-list-tile-action >
+                <v-list-item-action >
                   <v-icon :color="item.disabled ? 'grey' : ''">{{ isLoadBalancerClassSelected(item) ? 'check_box' : 'check_box_outline_blank'}}</v-icon>
-                </v-list-tile-action>
-                <v-list-tile-content :class="{ 'grey--text': item.disabled }">
-                  <v-list-tile-title>{{ item.text }}</v-list-tile-title>
-                </v-list-tile-content>
+                </v-list-item-action>
+                <v-list-item-content :class="{ 'grey--text': item.disabled }">
+                  <v-list-item-title>{{ item.text }}</v-list-item-title>
+                </v-list-item-content>
             </template>
           </v-select>
-        </v-flex>
+        </v-col>
       </template>
-    </v-layout>
+    </v-row>
     <secret-dialog-wrapper :dialogState="addSecretDialogState" @dialogClosed="onSecretDialogClosed"></secret-dialog-wrapper>
   </v-container>
 </template>
 
 <script>
 import CloudProfile from '@/components/CloudProfile'
-import SecretDialogWrapper from '@/dialogs/SecretDialogWrapper'
+import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
 import { includesIfAvailable, requiresCostObjectIfEnabled } from '@/utils/validators'
@@ -633,7 +645,8 @@ export default {
       projectID,
       firewallImage,
       firewallSize,
-      firewallNetworks }) {
+      firewallNetworks
+    }) {
       this.infrastructureKind = infrastructureKind
       this.cloudProfileName = cloudProfileName
       this.secret = secret
@@ -679,7 +692,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .regularInput {
     max-width: 300px;
   }

@@ -28,19 +28,17 @@ limitations under the License.
     <div class="popper">
       <v-card>
         <v-toolbar ref="toolbar" :height="30" :color="toolbarColor" dark flat>
-          <v-toolbar-title class="subheading">{{title}}</v-toolbar-title>
+          <v-toolbar-title class="subtitle-1">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn small icon @click.native.stop="closePopover">
-            <v-icon class="subheading">close</v-icon>
+            <v-icon class="subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
           <slot></slot>
           <div v-if="!!time">
             <div class="timestamp grey--text">
-              <template v-if="showPlaceholder">
-                &nbsp;
-              </template>
+              <div v-if="showPlaceholder" style="height: 22px;"></div>
               <lazy-component @show="showPlaceholder=false">
                 <span v-if="!!time.caption">{{time.caption}}</span>
                 <time-string :dateTime="time.dateTime" :pointInTime="-1"></time-string>
@@ -51,6 +49,7 @@ limitations under the License.
       </v-card>
       <lazy-component @show="emitRendered()"></lazy-component>
     </div>
+    <!-- Using old slot syntax. Corresponding issue: https://github.com/RobinCK/vue-popper/issues/88 -->
     <template slot="reference">
       <slot name="popperRef"></slot>
     </template>
@@ -61,7 +60,7 @@ limitations under the License.
 import Popper from 'vue-popperjs'
 import TimeString from '@/components/TimeString'
 import { closePopover } from '@/utils'
-import 'vue-popperjs/dist/css/vue-popper.css'
+import 'vue-popperjs/dist/vue-popper.css'
 import VueLazyload from 'vue-lazyload'
 import Vue from 'vue'
 
@@ -160,7 +159,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
 
   .popper {
     padding: 0px;
@@ -178,7 +177,7 @@ export default {
     margin-top: 1.2em;
   }
 
-  >>> .v-toolbar__content {
+  ::v-deep .v-toolbar__content {
     padding: 0px 16px;
   }
 

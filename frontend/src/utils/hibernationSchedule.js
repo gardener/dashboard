@@ -38,14 +38,14 @@ function scheduleEventObjFromRegex (regexVal) {
 
     // replace weekday shortnames, * and 7 with default integer values
     const intVals = {
-      'MON': 1,
-      'TUE': 2,
-      'WED': 3,
-      'THU': 4,
-      'FRI': 5,
-      'SAT': 6,
-      'SUN': 0,
-      '7': 0,
+      MON: 1,
+      TUE: 2,
+      WED: 3,
+      THU: 4,
+      FRI: 5,
+      SAT: 6,
+      SUN: 0,
+      7: 0,
       '*': '1,2,3,4,5,6,0'
     }
     weekdays = replace(weekdays, /[7*]|MON|TUE|WED|THU|FRI|SAT|SUN/g, weekday => intVals[weekday])
@@ -107,7 +107,7 @@ export function parsedScheduleEventsFromCrontabBlock (crontabBlock) {
     parseError = true
   }
   if (!cronStart && !cronEnd) {
-    parseError = `No start or end value in crontab block`
+    parseError = 'No start or end value in crontab block'
   }
   if (!parseError) {
     const scheduleEvents = []

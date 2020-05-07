@@ -28,7 +28,7 @@ limitations under the License.
       </v-btn>
     </v-toolbar>
     <div class="description_container">
-      <div class="description mt-3">
+      <div class="description mt-4">
         {{description}}
       </div>
     </div>
@@ -71,7 +71,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .card_disabled {
     opacity:0.5;
   }

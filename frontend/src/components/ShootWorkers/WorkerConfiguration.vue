@@ -22,7 +22,7 @@ limitations under the License.
     ref="actionDialog"
     maxWidth="760"
     caption="Configure Workers">
-    <template slot="actionComponent">
+    <template v-slot:actionComponent>
       <manage-workers
       ref="manageWorkers"
       @valid="onWorkersValid"
@@ -32,7 +32,7 @@ limitations under the License.
 </template>
 
 <script>
-import ActionIconDialog from '@/dialogs/ActionIconDialog'
+import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'

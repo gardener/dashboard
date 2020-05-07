@@ -16,48 +16,49 @@ limitations under the License.
 
 <template>
   <div>
-    <v-list-tile
-      avatar
-      :key="username"
-    >
-      <v-list-tile-avatar>
+    <v-list-item :key="username">
+      <v-list-item-avatar>
         <img :src="avatarUrl" />
-      </v-list-tile-avatar>
-      <v-list-tile-content>
-        <v-list-tile-title>
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title>
           {{displayName}}
           <span v-if="isCurrentUser">(me)</span>
-        </v-list-tile-title>
-        <v-list-tile-sub-title>
+        </v-list-item-title>
+        <v-list-item-subtitle>
           <a v-if="isEmail" :href="`mailto:${username}`" class="cyan--text text--darken-2">{{username}}</a>
           <span v-else>{{username}}</span>
-        </v-list-tile-sub-title>
-      </v-list-tile-content>
-      <v-list-tile-action>
-        <v-layout row align-center>
-          <v-chip v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outline>
-            {{roleName}}
-          </v-chip>
-        </v-layout>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+        </v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action class="ml-1">
+        <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="grey darken-4" outlined>
+          {{roleName}}
+        </v-chip>
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
-          <v-btn slot="activator" icon class="black--text" @click.native.stop="onEdit">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <v-btn v-on="on" icon @click.native.stop="onEdit">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </template>
           <span>Update User</span>
         </v-tooltip>
-      </v-list-tile-action>
-      <v-list-tile-action v-if="canPatchProject">
+      </v-list-item-action>
+      <v-list-item-action v-if="canPatchProject" class="ml-1">
         <v-tooltip top>
-          <v-btn :disabled="isTechnicalContact" slot="activator" icon class="red--text" @click.native.stop="onDelete">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn :disabled="isTechnicalContact" icon color="red" @click.native.stop="onDelete">
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </div>
+          </template>
           <span v-if="isTechnicalContact">This user is set as technical contact</span>
           <span v-else>Delete User</span>
         </v-tooltip>
-      </v-list-tile-action>
-    </v-list-tile>
+      </v-list-item-action>
+    </v-list-item>
   </div>
 </template>
 
@@ -115,7 +116,7 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
+<style lang="scss" scoped>
   .cursor-pointer {
     cursor: pointer;
   }

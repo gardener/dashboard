@@ -19,25 +19,24 @@ limitations under the License.
     :title="workerGroup.name"
     toolbarColor="cyan darken-2"
     :popperKey="`worker_group_${workerGroup.name}`"
-
   >
-    <v-layout row
-     v-for="(line,index) in description"
-     :key="index"
-     fill-height
-     align-center>
-     <span class="ma-1">
-       <span class="font-weight-bold">{{line.title}}:</span> {{line.value}} {{line.description}}
-     </span>
-    </v-layout>
-    <v-chip
-      slot="popperRef"
-      small
-      class="cursor-pointer my-0 ml-0"
-      outline
-      color="cyan darken-2">
-      {{workerGroup.name}}
-    </v-chip>
+    <template v-slot:popperRef>
+      <v-chip
+        small
+        class="cursor-pointer my-0 ml-0"
+        outlined
+        color="cyan darken-2">
+        {{workerGroup.name}}
+      </v-chip>
+    </template>
+    <v-list class="pa-0">
+      <v-list-item v-for="({title, value, description}) in description" :key="title" class="px-0">
+        <v-list-item-content class="pt-1">
+          <v-list-item-subtitle>{{title}}</v-list-item-subtitle>
+          <v-list-item-title>{{value}} {{description}}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </v-list>
   </g-popper>
 </template>
 
@@ -157,8 +156,13 @@ export default {
 }
 </script>
 
-<style lang="styl" scoped>
-  .cursor-pointer >>> .v-chip__content {
+<style lang="scss" scoped>
+  .cursor-pointer ::v-deep .v-chip__content {
     cursor: pointer;
   }
+
+  ::v-deep .popper {
+    text-align: initial;
+  }
+
 </style>
