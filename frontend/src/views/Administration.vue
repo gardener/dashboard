@@ -405,9 +405,6 @@ export default {
     updateTechnicalContact (value) {
       return this.updateProperty('owner', value)
     },
-    onMenuActive (value) {
-      console.log('onMenuActive', value)
-    },
     updateDescription (value) {
       return this.updateProperty('description', value)
     },
