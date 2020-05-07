@@ -74,40 +74,7 @@ limitations under the License.
           </v-tooltip>
         </template>
         <template v-slot:message="{ key, message }">
-          <div v-if="!msgType(message)">
-            {{msgText(message)}}
-          </div>
-          <v-alert
-            v-else
-            v-model="hasMessages"
-            text dense
-            dismissible
-            close-label="Dismiss error"
-            border="left"
-            color="error"
-            class="pl-2 mb-1"
-          >
-            <v-row
-              no-gutters
-              align="center"
-              class="alert-expansion-panel"
-              :class="{ 'alert-expansion-panel--active': errorDetails }"
-            >
-              <v-col class="shrink">
-                <v-btn icon small color="error" @click="toogleErrorDetails">
-                  <v-icon size="18">expand_more</v-icon>
-                </v-btn>
-              </v-col>
-              <v-col class="grow alert-title" @click="toogleErrorDetails">
-                {{msgText(message)}}
-              </v-col>
-            </v-row>
-            <v-row v-if="errorDetails" no-gutters align="center">
-              <v-col class="alert-subtitle">
-                {{msgDescription(message)}}
-              </v-col>
-            </v-row>
-          </v-alert>
+          <editable-message :message="message" @close="clearMessages"/>
         </template>
       </v-text-field>
     </v-card>
@@ -115,17 +82,13 @@ limitations under the License.
 </template>
 
 <script>
-
-function normalizeMessage (msg) {
-  try {
-    const [message, detailedMessage] = JSON.parse(msg)
-    return [1, message, detailedMessage]
-  } catch (err) { /* ignore error */ }
-  return [0, msg]
-}
+import EditableMessage from '@/components/EditableMessage'
 
 export default {
   name: 'editable-text',
+  components: {
+    EditableMessage
+  },
   props: {
     items: {
       type: Array
@@ -150,12 +113,10 @@ export default {
     return {
       contentWidth: 500,
       timeoutId: undefined,
-      closeable: false,
       contentBounce: false,
       active: false,
       loading: false,
       messages: [],
-      errorDetails: false,
       error: undefined,
       lazyValue: undefined
     }
@@ -173,16 +134,6 @@ export default {
         this.active = value
       }
     },
-    hasMessages: {
-      get () {
-        return !!this.messages.length
-      },
-      set (value) {
-        if (!value) {
-          this.messages = []
-        }
-      }
-    },
     internalValue: {
       get () {
         return this.lazyValue
@@ -195,33 +146,21 @@ export default {
       if (this.contentBounce) {
         return 'success'
       }
-      if (this.closeable) {
-        return 'error'
-      }
       return this.color
     },
     activatorIcon () {
       if (this.contentBounce) {
         return 'done'
       }
-      if (this.closeable) {
+      if (this.isActive) {
         return 'close'
       }
       return 'edit'
     }
   },
   methods: {
-    msgType (msg) {
-      return normalizeMessage(msg)[0]
-    },
-    msgText (msg) {
-      return normalizeMessage(msg)[1]
-    },
-    msgDescription (msg) {
-      return normalizeMessage(msg)[2]
-    },
-    toogleErrorDetails () {
-      this.errorDetails = !this.errorDetails
+    clearMessages () {
+      this.messages = []
     },
     onCancel () {
       this.internalValue = this.value
@@ -236,7 +175,6 @@ export default {
           this.isActive = false
         })
         this.contentBounce = true
-        clearTimeout(this.timeoutId)
         this.timeoutId = setTimeout(() => {
           this.contentBounce = false
         }, 1000)
@@ -254,8 +192,6 @@ export default {
     },
     reset () {
       this.messages = []
-      this.closeable = false
-      this.errorDetails = false
       const textField = this.$refs.textField
       if (textField) {
         textField.resetValidation()
@@ -266,9 +202,6 @@ export default {
     active (value) {
       if (value) {
         clearTimeout(this.timeoutId)
-        this.timeoutId = setTimeout(() => {
-          this.closeable = true
-        }, 250)
         this.internalValue = this.value
         this.$emit('open')
         setTimeout(() => {
@@ -288,22 +221,6 @@ export default {
 
   $green-base: map-get($green, 'base');
 
-  .alert-expansion-panel {
-    &--active .v-icon {
-      transform: rotate(-180deg)
-    }
-  }
-  .alert-title {
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  .alert-subtitle {
-    padding-top: 2px;
-    font-size: 14px;
-    font-family: monospace;
-    margin-left: 28px;
-  }
   .content {
     cursor: pointer;
     animation-duration: 900ms;

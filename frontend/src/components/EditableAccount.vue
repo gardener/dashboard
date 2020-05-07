@@ -45,7 +45,7 @@ limitations under the License.
         </v-col>
       </v-row>
     </template>
-    <v-card tile >
+    <v-card tile>
       <slot name="info"></slot>
       <v-autocomplete
         :items="items"
@@ -89,40 +89,7 @@ limitations under the License.
           </v-tooltip>
         </template>
         <template v-slot:message="{ key, message }">
-          <div v-if="!msgType(message)">
-            {{msgText(message)}}
-          </div>
-          <v-alert
-            v-else
-            v-model="hasMessages"
-            text dense
-            dismissible
-            close-label="Dismiss error"
-            border="left"
-            color="error"
-            class="pl-2 mb-1"
-          >
-            <v-row
-              no-gutters
-              align="center"
-              class="alert-expansion-panel"
-              :class="{ 'alert-expansion-panel--active': errorDetails }"
-            >
-              <v-col class="shrink">
-                <v-btn icon small color="error" @click="toogleErrorDetails">
-                  <v-icon size="18">expand_more</v-icon>
-                </v-btn>
-              </v-col>
-              <v-col class="grow alert-title" @click="toogleErrorDetails">
-                {{msgText(message)}}
-              </v-col>
-            </v-row>
-            <v-row v-if="errorDetails" no-gutters align="center">
-              <v-col class="alert-subtitle">
-                {{msgDescription(message)}}
-              </v-col>
-            </v-row>
-          </v-alert>
+          <editable-message :message="message" @close="clearMessages"/>
         </template>
       </v-autocomplete>
     </v-card>
@@ -130,19 +97,13 @@ limitations under the License.
 </template>
 
 <script>
+import EditableMessage from '@/components/EditableMessage'
 import AccountAvatar from '@/components/AccountAvatar'
-
-function normalizeMessage (msg) {
-  try {
-    const [message, detailedMessage] = JSON.parse(msg)
-    return [1, message, detailedMessage]
-  } catch (err) { /* ignore error */ }
-  return [0, msg]
-}
 
 export default {
   name: 'editable-account',
   components: {
+    EditableMessage,
     AccountAvatar
   },
   props: {
@@ -176,7 +137,6 @@ export default {
       active: false,
       loading: false,
       messages: [],
-      errorDetails: false,
       error: undefined,
       lazyValue: undefined
     }
@@ -194,16 +154,6 @@ export default {
         this.active = value
       }
     },
-    hasMessages: {
-      get () {
-        return !!this.messages.length
-      },
-      set (value) {
-        if (!value) {
-          this.messages = []
-        }
-      }
-    },
     internalValue: {
       get () {
         return this.lazyValue
@@ -215,9 +165,6 @@ export default {
     activatorColor () {
       if (this.contentBounce) {
         return 'success'
-      }
-      if (this.isActive) {
-        return 'error'
       }
       return this.color
     },
@@ -232,17 +179,8 @@ export default {
     }
   },
   methods: {
-    msgType (msg) {
-      return normalizeMessage(msg)[0]
-    },
-    msgText (msg) {
-      return normalizeMessage(msg)[1]
-    },
-    msgDescription (msg) {
-      return normalizeMessage(msg)[2]
-    },
-    toogleErrorDetails () {
-      this.errorDetails = !this.errorDetails
+    clearMessages () {
+      this.messages = []
     },
     onCancel () {
       this.internalValue = this.value
@@ -274,7 +212,6 @@ export default {
     },
     reset () {
       this.messages = []
-      this.errorDetails = false
       const editable = this.$refs.editable
       if (editable) {
         editable.resetValidation()
@@ -301,28 +238,10 @@ export default {
 
 <style lang="scss" scoped>
   ::v-deep .v-text-field .v-input__append-outer {
-    margin: 0 8px 0 0;
-    align-self: center;
+    margin: 6px 8px 6px 0;
+    align-self: baseline;
   }
-  .alert-expansion-panel {
-    &--active .v-icon {
-      transform: rotate(-180deg)
-    }
-  }
-  .alert-title {
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  .alert-subtitle {
-    padding-top: 2px;
-    font-size: 14px;
-    font-family: monospace;
-    margin-left: 28px;
-  }
-  .action {
-    max-width: 36px;
-  }
+
   .content {
     padding: 3px 0;
     animation-duration: 900ms;

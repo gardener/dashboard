@@ -37,7 +37,6 @@
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.15",
     "marked": "^0.8.2",
-    "masonry-layout": "^4.2.2",
     "material-design-icons-iconfont": "^5.0.1",
     "md5": "^2.2.1",
     "moment-timezone": "^0.5.28",
