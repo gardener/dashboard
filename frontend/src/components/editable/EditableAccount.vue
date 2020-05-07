@@ -90,14 +90,14 @@ limitations under the License.
                     icon
                     color="success"
                     @click="onSave">
-                    <v-icon>done</v-icon>
+                    <v-icon>mdi-check</v-icon>
                   </v-btn>
                 </template>
                 <div>Save</div>
               </v-tooltip>
             </template>
             <template v-slot:message="{ key, message }">
-              <editable-message :message="message" @close="clearMessages"/>
+              <error-message :message="message" @close="clearMessages"/>
             </template>
           </v-autocomplete>
         </v-card>
@@ -106,13 +106,13 @@ limitations under the License.
 </template>
 
 <script>
-import EditableMessage from '@/components/EditableMessage'
 import AccountAvatar from '@/components/AccountAvatar'
+import ErrorMessage from './ErrorMessage'
 
 export default {
   name: 'editable-account',
   components: {
-    EditableMessage,
+    ErrorMessage,
     AccountAvatar
   },
   props: {
@@ -183,12 +183,12 @@ export default {
     },
     activatorIcon () {
       if (this.contentBounce) {
-        return 'done'
+        return 'mdi-check'
       }
       if (this.isActive) {
-        return 'close'
+        return 'mdi-close'
       }
-      return 'edit'
+      return 'mdi-pencil'
     }
   },
   methods: {

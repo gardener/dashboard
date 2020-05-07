@@ -27,7 +27,7 @@ limitations under the License.
               <v-list>
                 <v-list-item>
                   <v-list-item-avatar>
-                    <v-icon :color="color">info_outline</v-icon>
+                    <v-icon :color="color">mdi-information-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-subtitle>Name</v-list-item-subtitle>
@@ -157,7 +157,7 @@ limitations under the License.
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
                           <v-btn :color="color" :disabled="isDeleteButtonDisabled" icon @click.native.stop="showDialog">
-                            <v-icon>delete</v-icon>
+                            <v-icon>mdi-delete</v-icon>
                           </v-btn>
                         </div>
                       </template>
@@ -249,8 +249,8 @@ limitations under the License.
 <script>
 import { mapGetters, mapState, mapActions } from 'vuex'
 import CopyBtn from '@/components/CopyBtn'
-import EditableText from '@/components/EditableText'
-import EditableAccount from '@/components/EditableAccount'
+import EditableText from '@/components/editable/EditableText'
+import EditableAccount from '@/components/editable/EditableAccount'
 import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'

@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <div>
-    <template v-if="!msg.type">
+    <template v-if="!msg.isAlert">
       {{msg.text}}
     </template>
     <v-alert
@@ -37,7 +37,7 @@ limitations under the License.
       >
         <v-col class="shrink">
           <v-btn icon small color="error" @click="expanded = !expanded">
-            <v-icon size="18">expand_more</v-icon>
+            <v-icon size="18">mdi-chevron-down</v-icon>
           </v-btn>
         </v-col>
         <v-col class="grow alert-title" @click="expanded = !expanded">
@@ -71,9 +71,9 @@ export default {
     msg () {
       try {
         const [text, description] = JSON.parse(this.message)
-        return { type: 1, text, description }
+        return { isAlert: true, text, description }
       } catch (err) { /* ignore error */ }
-      return { type: 0, text: this.message }
+      return { isAlert: false, text: this.message }
     }
   },
   methods: {

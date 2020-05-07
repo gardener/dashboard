@@ -72,14 +72,14 @@ limitations under the License.
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
-                  <v-icon>done</v-icon>
+                  <v-icon>mdi-check</v-icon>
                 </v-btn>
               </template>
               <span>Save</span>
             </v-tooltip>
           </template>
           <template v-slot:message="{ key, message }">
-            <editable-message :message="message" @close="clearMessages"/>
+            <error-message :message="message" @close="clearMessages"/>
           </template>
         </v-text-field>
       </v-card>
@@ -88,12 +88,12 @@ limitations under the License.
 </template>
 
 <script>
-import EditableMessage from '@/components/EditableMessage'
+import ErrorMessage from './ErrorMessage'
 
 export default {
   name: 'editable-text',
   components: {
-    EditableMessage
+    ErrorMessage
   },
   props: {
     items: {
@@ -160,12 +160,12 @@ export default {
     },
     activatorIcon () {
       if (this.contentBounce) {
-        return 'done'
+        return 'mdi-check'
       }
       if (this.isActive) {
-        return 'close'
+        return 'mdi-close'
       }
-      return 'edit'
+      return 'mdi-pencil'
     }
   },
   methods: {
