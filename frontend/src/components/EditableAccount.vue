@@ -15,85 +15,94 @@ limitations under the License.
  -->
 
 <template>
-  <v-menu
-    ref="menu"
-    :close-on-click="true"
-    :close-on-content-click="false"
-    origin="top left"
-    left
-    transition="slide-x-reverse-transition"
-    :max-width="contentWidth"
-    v-model="isActive"
-  >
-    <template v-slot:activator="{ on }">
-      <v-row  no-gutters align="center" justify="space-between">
-        <v-col
-          ref="content"
-          class="grow content"
-          :class="{ 'content--bounce': contentBounce }"
-        >
-          <account-avatar :account-name="value" mail-to :color="color"></account-avatar>
-        </v-col>
-        <v-col class="shrink">
-          <v-btn
-            v-on="on"
-            icon
-            :color="activatorColor"
-          >
-            <v-icon size="18">{{activatorIcon}}</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </template>
-    <v-card tile>
-      <slot name="info"></slot>
-      <v-autocomplete
-        :items="items"
-        ref="editable"
-        autocomplete="off"
-        :no-data-text="noDataText"
-        hide-selected
-        v-model="internalValue"
-        @update:error="value => error = value"
-        solo
-        chips
-        flat
-        single-line
-        hide-details="auto"
-        :loading="loading"
-        :messages="messages"
-        :rules="rules"
-        :color="color"
+  <div>
+    <account-avatar
+      v-if="readOnly"
+      :account-name="value"
+      mail-to
+      :color="color"
+    ></account-avatar>
+    <v-menu
+        v-else
+        ref="menu"
+        :close-on-click="true"
+        :close-on-content-click="false"
+        origin="top left"
+        left
+        transition="slide-x-reverse-transition"
+        :max-width="contentWidth"
+        v-model="isActive"
       >
-        <template v-slot:selection="{ item: value }">
-          <account-avatar :account-name="value" :color="color"></account-avatar>
-        </template>
-        <template v-slot:item="{ item: value }">
-          <v-list-item-content>
-            <account-avatar :account-name="value" :color="color"></account-avatar>
-          </v-list-item-content>
-        </template>
-        <template v-slot:append-outer>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
+        <template v-slot:activator="{ on }">
+          <v-row  no-gutters align="center" justify="space-between">
+            <v-col
+              ref="content"
+              class="grow content"
+              :class="{ 'content--bounce': contentBounce }"
+            >
+              <account-avatar :account-name="value" mail-to :color="color"></account-avatar>
+            </v-col>
+            <v-col class="shrink">
               <v-btn
                 v-on="on"
-                :disabled="error"
                 icon
-                color="success"
-                @click="onSave">
-                <v-icon>done</v-icon>
+                :color="activatorColor"
+              >
+                <v-icon size="18">{{activatorIcon}}</v-icon>
               </v-btn>
+            </v-col>
+          </v-row>
+        </template>
+        <v-card tile>
+          <slot name="info"></slot>
+          <v-autocomplete
+            :items="items"
+            ref="editable"
+            autocomplete="off"
+            :no-data-text="noDataText"
+            hide-selected
+            v-model="internalValue"
+            @update:error="value => error = value"
+            solo
+            chips
+            flat
+            single-line
+            hide-details="auto"
+            :loading="loading"
+            :messages="messages"
+            :rules="rules"
+            :color="color"
+          >
+            <template v-slot:selection="{ item: value }">
+              <account-avatar :account-name="value" :color="color"></account-avatar>
             </template>
-            <div>Save</div>
-          </v-tooltip>
-        </template>
-        <template v-slot:message="{ key, message }">
-          <editable-message :message="message" @close="clearMessages"/>
-        </template>
-      </v-autocomplete>
-    </v-card>
-  </v-menu>
+            <template v-slot:item="{ item: value }">
+              <v-list-item-content>
+                <account-avatar :account-name="value" :color="color"></account-avatar>
+              </v-list-item-content>
+            </template>
+            <template v-slot:append-outer>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    v-on="on"
+                    :disabled="error"
+                    icon
+                    color="success"
+                    @click="onSave">
+                    <v-icon>done</v-icon>
+                  </v-btn>
+                </template>
+                <div>Save</div>
+              </v-tooltip>
+            </template>
+            <template v-slot:message="{ key, message }">
+              <editable-message :message="message" @close="clearMessages"/>
+            </template>
+          </v-autocomplete>
+        </v-card>
+      </v-menu>
+  </div>
 </template>
 
 <script>
@@ -127,6 +136,10 @@ export default {
     },
     noDataText: {
       type: String
+    },
+    readOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data () {

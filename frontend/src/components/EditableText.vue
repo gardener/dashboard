@@ -15,70 +15,76 @@ limitations under the License.
  -->
 
 <template>
-  <v-menu
-    ref="menu"
-    :close-on-click="true"
-    :close-on-content-click="false"
-    origin="top left"
-    left
-    transition="slide-x-reverse-transition"
-    :max-width="contentWidth"
-    v-model="isActive"
-  >
-    <template v-slot:activator="{ on }">
-      <v-row  no-gutters align="center" justify="space-between">
-        <v-col
-          ref="content"
-          v-on="on"
-          class="grow content"
-          :class="{ 'content--bounce': contentBounce }"
-        >
-          {{value}}
-        </v-col>
-        <v-col class="shrink">
-          <v-btn
-            v-on="on"
-            icon
-            :color="activatorColor"
-          >
-            <v-icon size="18">{{activatorIcon}}</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
+  <div>
+    <template v-if="readOnly">
+      {{value}}
     </template>
-    <v-card flat @keydown.esc="onCancel" @keydown.enter="onSave">
-      <slot name="info"></slot>
-      <v-text-field
-        :items="items"
-        ref="textField"
-        autocomplete="off"
-        v-model="internalValue"
-        @update:error="value => error = value"
-        solo
-        flat
-        single-line
-        hide-details="auto"
-        :loading="loading"
-        :messages="messages"
-        :rules="rules"
-        :color="color"
-      >
-        <template v-slot:append>
-          <v-tooltip top>
-            <template v-slot:activator="{ on }">
-              <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
-                <v-icon>done</v-icon>
-              </v-btn>
-            </template>
-            <span>Save</span>
-          </v-tooltip>
-        </template>
-        <template v-slot:message="{ key, message }">
-          <editable-message :message="message" @close="clearMessages"/>
-        </template>
-      </v-text-field>
-    </v-card>
-  </v-menu>
+    <v-menu
+      v-else
+      ref="menu"
+      :close-on-click="true"
+      :close-on-content-click="false"
+      origin="top left"
+      left
+      transition="slide-x-reverse-transition"
+      :max-width="contentWidth"
+      v-model="isActive"
+    >
+      <template v-slot:activator="{ on }">
+        <v-row  no-gutters align="center" justify="space-between">
+          <v-col
+            ref="content"
+            v-on="on"
+            class="grow content"
+            :class="{ 'content--bounce': contentBounce }"
+          >
+            {{value}}
+          </v-col>
+          <v-col class="shrink">
+            <v-btn
+              v-on="on"
+              icon
+              :color="activatorColor"
+            >
+              <v-icon size="18">{{activatorIcon}}</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </template>
+      <v-card flat @keydown.esc="onCancel" @keydown.enter="onSave">
+        <slot name="info"></slot>
+        <v-text-field
+          :items="items"
+          ref="textField"
+          autocomplete="off"
+          v-model="internalValue"
+          @update:error="value => error = value"
+          solo
+          flat
+          single-line
+          hide-details="auto"
+          :loading="loading"
+          :messages="messages"
+          :rules="rules"
+          :color="color"
+        >
+          <template v-slot:append>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <v-btn v-on="on" :disabled="error" icon color="success" @click="onSave">
+                  <v-icon>done</v-icon>
+                </v-btn>
+              </template>
+              <span>Save</span>
+            </v-tooltip>
+          </template>
+          <template v-slot:message="{ key, message }">
+            <editable-message :message="message" @close="clearMessages"/>
+          </template>
+        </v-text-field>
+      </v-card>
+    </v-menu>
+  </div>
 </template>
 
 <script>
@@ -107,6 +113,10 @@ export default {
     color: {
       type: String,
       default: 'blue-grey darken-2'
+    },
+    readOnly: {
+      type: Boolean,
+      default: false
     }
   },
   data () {

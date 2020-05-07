@@ -36,7 +36,7 @@ limitations under the License.
                     </v-list-item-title>
                   </v-list-item-content>
                   <v-list-item-action>
-                    <copy-btn :color="color" :clipboard-text="projectName" tooltipText="Copy project name to clipboard"></copy-btn>
+                    <copy-btn :color="color" :clipboard-text="projectName" tooltip-text="Copy project name to clipboard"></copy-btn>
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
@@ -47,6 +47,7 @@ limitations under the License.
                     <v-list-item-subtitle>Description</v-list-item-subtitle>
                     <v-list-item-title class="wrap-text">
                       <editable-text
+                        :read-only="!canPatchProject"
                         :color="color"
                         :value="description"
                         :save="updateDescription"
@@ -63,9 +64,10 @@ limitations under the License.
                     <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-account
+                        :read-only="!canPatchProject"
                         :color="color"
                         :value="technicalContact"
-                        :items="memberItems"
+                        :items="userList"
                         :rules="[rules.technicalContact]"
                         no-data-text="No project member available"
                         :save="updateTechnicalContact"
@@ -104,12 +106,13 @@ limitations under the License.
                 <v-divider inset/>
                 <v-list-item>
                   <v-list-item-avatar>
-                    <v-icon :color="color">label_outline</v-icon>
+                    <v-icon :color="color">mdi-label-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-subtitle>Purpose</v-list-item-subtitle>
                     <v-list-item-title class="wrap-text">
                       <editable-text
+                        :read-only="!canPatchProject"
                         :color="color"
                         :value="purpose"
                         :save="updatePurpose"
@@ -173,19 +176,20 @@ limitations under the License.
               <v-list>
                 <v-list-item>
                   <v-list-item-avatar>
-                    <v-icon :color="color">payment</v-icon>
+                    <v-icon :color="color">mdi-credit-card-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-subtitle>{{costObjectTitle}}</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-text
+                        :read-only="!canPatchProject"
                         :color="color"
                         :value="costObject"
                         :rules="[rules.costObject]"
                         :save="updateCostObject"
                       >
                         <template v-if="costObjectDescriptionCompiledMarkdown" v-slot:info>
-                          <v-alert icon="info_outline" dense text tile :color="color" class="mb-0" >
+                          <v-alert icon="mdi-information-outline" dense text tile :color="color" class="mb-0" >
                             <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
                           </v-alert>
                         </template>
@@ -204,7 +208,7 @@ limitations under the License.
               <v-list>
                 <v-list-item>
                   <v-list-item-avatar>
-                    <v-icon :color="color">insert_drive_file</v-icon>
+                    <v-icon :color="color">mdi-file</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-title>Command Line Interface Access</v-list-item-title>
@@ -280,7 +284,7 @@ export default {
           if (!value) {
             return 'Technical Contact is required'
           }
-          if (!includes(this.memberItems, value)) {
+          if (!includes(this.userList, value)) {
             return 'Technical Contact must be a project member'
           }
           return true
@@ -315,7 +319,7 @@ export default {
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    memberItems () {
+    userList () {
       const members = new Set()
       for (const { username } of this.memberList) {
         if (!isServiceAccount(username)) {
@@ -412,10 +416,12 @@ export default {
     },
     updateCostObject (value) {
       if (this.costObjectSettingEnabled) {
-        return this.updateProperty('costObject', value)
+        return this.updateProperty('costObject', value, {
+          error: 'Failed to update billing information of project'
+        })
       }
     },
-    async updateProperty (key, value = null) {
+    async updateProperty (key, value = null, options = {}) {
       const { metadata: { name, namespace } } = this.project
       try {
         const mergePatchDocument = {
@@ -432,11 +438,8 @@ export default {
         // eslint-disable-next-line no-unused-vars
         const body = await this.patchProject(mergePatchDocument)
       } catch (err) {
-        const error = new Error(`Failed to update project ${key}`)
-        const errorDetails = errorDetailsFromError(err)
-        error.code = errorDetails.errorCode
-        error.detailedMessage = errorDetails.detailedMessage
-        throw error
+        const { error = `Failed to update project ${key}` } = options
+        throw Object.assign(new Error(error), errorDetailsFromError(err))
       }
     },
     async showDialog () {
