@@ -152,8 +152,18 @@ const matchesPropertyOrEmpty = (path, srcValue) => {
 
 const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
   return region => {
-    // Filter regions that are not defined in cloud profile or have no zones defined
-    return !!getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
+    if (cloudProviderKind === 'azure') {
+      // Azure regions may not be zoned, need to filter these out for the dashboard
+      return !!getters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region }).length
+    }
+
+    // Filter regions that are not defined in cloud profile
+    const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+    if (cloudProfile) {
+      return !!(find(cloudProfile.data.regions, { name: region }))
+    }
+
+    return true
   }
 }
 

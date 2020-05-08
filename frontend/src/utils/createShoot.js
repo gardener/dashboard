@@ -177,6 +177,9 @@ function getProviderTemplate (infrastructureKind) {
 }
 
 export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
+  if (numberOfNetworks < 1) {
+    return []
+  }
   const cidrToSplit = new Netmask(cidrToSplitStr)
   const numberOfSplits = Math.ceil(Math.log(numberOfNetworks) / Math.log(2))
   const newBitmask = cidrToSplit.bitmask + numberOfSplits
