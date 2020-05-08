@@ -15,9 +15,9 @@ limitations under the License.
 -->
 
 <template>
-  <v-container  class="pa-0 ma-0">
+  <v-container class="pa-0 ma-0">
     <v-row >
-      <v-col class="regularInput">
+      <v-col cols="3">
         <v-text-field
           ref="name"
           color="cyan darken-2"
@@ -29,7 +29,7 @@ limitations under the License.
           @blur="$v.name.$touch()"
           ></v-text-field>
       </v-col>
-      <v-col class="regularInput">
+      <v-col cols="3">
         <hint-colorizer hintColor="orange">
           <v-select
             color="cyan darken-2"
@@ -56,7 +56,7 @@ limitations under the License.
           </v-select>
         </hint-colorizer>
       </v-col>
-      <v-col class="regularInput">
+      <v-col cols="3">
         <purpose
           ref="purpose"
           :secret="secret"
@@ -241,9 +241,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .regularInput {
-    max-width: 300px;
-  }
-</style>
