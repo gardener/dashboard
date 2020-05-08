@@ -175,6 +175,11 @@ export function createProject ({ data }) {
   return createResource('/api/namespaces', data)
 }
 
+export function patchProject ({ namespace, data }) {
+  namespace = encodeURIComponent(namespace)
+  return patchResource(`/api/namespaces/${namespace}`, data)
+}
+
 export function updateProject ({ namespace, data }) {
   namespace = encodeURIComponent(namespace)
   return updateResource(`/api/namespaces/${namespace}`, data)

@@ -188,7 +188,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res.body.message).to.equal(`Resource "${name}" could not be initialized within ${timeout} ms`)
   })
 
-  it('should patch a project', async function () {
+  it('should update a project', async function () {
     const bearer = await user.bearer
     const resourceVersion = 43
     const createdBy = k8s.readProject(namespace).spec.createdBy.name
@@ -203,6 +203,22 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.be.json
     expect(res.body.metadata).to.eql({ name, namespace, annotations, resourceVersion, role })
     expect(res.body.data).to.eql({ createdBy, owner, description, purpose })
+  })
+
+  it('should patch a project', async function () {
+    const bearer = await user.bearer
+    const description = 'foobar'
+
+    k8s.stub.patchProject({ bearer, namespace })
+
+    const res = await agent
+      .patch(`/api/namespaces/${namespace}`)
+      .set('cookie', await user.cookie)
+      .send({ data: { description } })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body.data.description).to.equal(description)
   })
 
   it('should delete a project', async function () {

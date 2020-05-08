@@ -16,7 +16,7 @@
 
 import findIndex from 'lodash/findIndex'
 import assign from 'lodash/assign'
-import { getProjects, createProject, updateProject, deleteProject } from '@/utils/api'
+import { getProjects, createProject, patchProject, updateProject, deleteProject } from '@/utils/api'
 
 // initial state
 const state = {
@@ -32,36 +32,34 @@ const getters = {
 
 // actions
 const actions = {
-  getAll ({ commit, rootState }) {
-    return getProjects()
-      .then(res => {
-        const list = res.data
-        commit('RECEIVE', list)
-        return state.all
-      })
+  async getAll ({ commit, rootState }) {
+    const res = await getProjects()
+    const list = res.data
+    commit('RECEIVE', list)
+    return state.all
   },
-  create ({ commit, rootState }, { metadata, data }) {
-    return createProject({ data: { metadata, data } })
-      .then(res => {
-        commit('ITEM_PUT', res.data)
-        return res.data
-      })
+  async create ({ commit, rootState }, { metadata, data }) {
+    const res = await createProject({ data: { metadata, data } })
+    commit('ITEM_PUT', res.data)
+    return res.data
   },
-  update ({ commit, rootState }, { metadata, data }) {
+  async patch ({ commit, rootState }, { metadata, data }) {
     const namespace = metadata.namespace || rootState.namespace
-    return updateProject({ namespace, data: { metadata, data } })
-      .then(res => {
-        commit('ITEM_PUT', res.data)
-        return res.data
-      })
+    const res = await patchProject({ namespace, data: { metadata, data } })
+    commit('ITEM_PUT', res.data)
+    return res.data
   },
-  delete: ({ commit, rootState }, { metadata }) => {
+  async update ({ commit, rootState }, { metadata, data }) {
+    const namespace = metadata.namespace || rootState.namespace
+    const res = await updateProject({ namespace, data: { metadata, data } })
+    commit('ITEM_PUT', res.data)
+    return res.data
+  },
+  async delete ({ commit, rootState }, { metadata }) {
     const namespace = metadata.namespace
-    return deleteProject({ namespace })
-      .then(res => {
-        commit('ITEM_DELETED', metadata)
-        return state.all
-      })
+    await deleteProject({ namespace })
+    commit('ITEM_DELETED', metadata)
+    return state.all
   }
 }
 

@@ -21,14 +21,14 @@ limitations under the License.
         <v-icon large dark>mdi-cube</v-icon>
         <span class="headline ml-5">{{title}}</span>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="dialog-content">
         <form>
           <v-container fluid >
             <template v-if="isCreateMode">
               <v-row >
-                <v-col cols="6">
+                <v-col cols="12">
                   <v-text-field
-                    color="deep-purple"
+                    :color="color"
                     ref="projectName"
                     label="Name"
                     v-model.trim="projectName"
@@ -47,22 +47,22 @@ limitations under the License.
                 </v-col>
               </v-row>
               <v-row >
-               <v-col cols="6">
-                 <v-select
-                   color="deep-purple"
-                   item-color="deep-purple"
-                   :items="memberItems"
-                   label="Technical Contact"
-                   v-model="technicalContact"
-                   ></v-select>
-               </v-col>
-           </v-row>
+                <v-col cols="6">
+                  <v-select
+                    :color="color"
+                    :item-color="color"
+                    :items="memberItems"
+                    label="Technical Contact"
+                    v-model="technicalContact"
+                  ></v-select>
+                </v-col>
+              </v-row>
             </template>
 
             <v-row v-if="costObjectSettingEnabled">
-              <v-col cols="6">
+              <v-col cols="12">
                 <v-text-field
-                  color="deep-purple"
+                  :color="color"
                   ref="costObject"
                   :label="costObjectTitle"
                   v-model="costObject"
@@ -71,19 +71,16 @@ limitations under the License.
                   @blur="$v.costObject.$touch()"
                   >
                 </v-text-field>
+                <v-alert v-if="!!costObjectDescriptionCompiledMarkdown" dense type="info" outlined :color="color">
+                  <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
+                </v-alert>
               </v-col>
-
-            </v-row>
-            <v-row v-if="!!costObjectDescriptionCompiledMarkdown">
-              <v-alert dense type="info" outlined color="deep-purple">
-                <div class="alertBannerMessage" v-html="costObjectDescriptionCompiledMarkdown"></div>
-              </v-alert>
             </v-row>
 
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  color="deep-purple"
+                  :color="color"
                   ref="description"
                   label="Description"
                   v-model="description"
@@ -93,7 +90,7 @@ limitations under the License.
             <v-row >
               <v-col cols="12">
                 <v-text-field
-                  color="deep-purple"
+                  :color="color"
                   label="Purpose"
                   v-model="purpose"
                   ></v-text-field>
@@ -120,7 +117,7 @@ limitations under the License.
           :loading="loading"
           :disabled="!valid || loading"
           @click.stop="submit"
-          class="deep-purple--text"
+          :color="color"
         >
           {{submitButtonText}}
         </v-btn>
@@ -169,7 +166,8 @@ export default {
       costObject: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined,
-      loading: false
+      loading: false,
+      color: 'blue-grey darken-2'
     }
   },
   validations () {
@@ -417,5 +415,8 @@ export default {
     background-size: cover;
     height: 130px;
     background-image: url('../../assets/project_background.svg');
+  }
+  .dialog-content {
+    height: auto;
   }
 </style>

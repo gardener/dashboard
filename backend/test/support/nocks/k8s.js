@@ -1200,8 +1200,6 @@ const stub = {
 
     return [
       nockWithAuthorization(bearer)
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-        .reply(200, () => project)
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           _.merge(newProject, body)
           return true
@@ -1219,8 +1217,6 @@ const stub = {
         .reply(200, {
           items: []
         })
-        .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
-        .reply(200, () => project)
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
           return _.get(body, confirmationPath) === 'true'
         })

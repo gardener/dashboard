@@ -61,6 +61,16 @@ router.route('/:namespace')
       next(err)
     }
   })
+  .patch(async (req, res, next) => {
+    try {
+      const user = req.user
+      const name = req.params.namespace
+      const body = req.body
+      res.send(await projects.patch({ user, name, body }))
+    } catch (err) {
+      next(err)
+    }
+  })
   .delete(async (req, res, next) => {
     try {
       const user = req.user

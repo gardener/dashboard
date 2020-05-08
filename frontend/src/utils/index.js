@@ -134,21 +134,25 @@ export function getValidationErrors (vm, field) {
   return errors
 }
 
-export function setDelayedInputFocus (vm, fieldName) {
+export function setDelayedInputFocus (vm, fieldName, { delay = 200, ...options } = {}) {
   setTimeout(() => {
-    setInputFocus(vm, fieldName)
-  }, 200)
+    setInputFocus(vm, fieldName, options)
+  }, delay)
 }
 
-export function setInputFocus (vm, fieldName) {
+export function setInputFocus (vm, fieldName, { noSelect = false } = {}) {
   const fieldRef = vm.$refs[fieldName]
   if (fieldRef) {
-    const inputRef = fieldRef.$refs.input
-    vm.$nextTick(() => {
-      // Ensure that the input field has been rendered
-      inputRef.focus()
-      inputRef.select()
-    })
+    if (noSelect) {
+      fieldRef.focus()
+    } else {
+      const inputRef = fieldRef.$refs.input
+      vm.$nextTick(() => {
+        // Ensure that the input field has been rendered
+        inputRef.focus()
+        inputRef.select()
+      })
+    }
   }
 }
 

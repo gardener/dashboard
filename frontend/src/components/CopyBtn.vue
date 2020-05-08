@@ -29,7 +29,7 @@ limitations under the License.
     </v-snackbar>
     <v-tooltip top>
       <template v-slot:activator="{ on }">
-        <v-btn v-on="on" icon ref="copy" :color="color">
+        <v-btn v-on="on" icon ref="copy" :color="btnColor">
           <v-icon :small="true">{{icon}}</v-icon>
         </v-btn>
       </template>
@@ -54,6 +54,9 @@ export default {
     tooltipText: {
       type: String,
       default: 'Copy to clipboard'
+    },
+    color: {
+      type: String
     },
     userFeedback: {
       type: Boolean,
@@ -95,11 +98,11 @@ export default {
       }
       return 'mdi-content-copy'
     },
-    color () {
+    btnColor () {
       if (this.copySucceeded) {
         return 'success'
       }
-      return undefined
+      return this.color
     }
   },
   methods: {
