@@ -143,7 +143,7 @@ export function setDelayedInputFocus (vm, fieldName, { delay = 200, ...options }
 export function setInputFocus (vm, fieldName, { noSelect = false } = {}) {
   const fieldRef = vm.$refs[fieldName]
   if (fieldRef) {
-    if (noSelect === true) {
+    if (noSelect) {
       fieldRef.focus()
     } else {
       const inputRef = fieldRef.$refs.input
