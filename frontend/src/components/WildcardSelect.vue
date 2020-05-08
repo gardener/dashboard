@@ -25,15 +25,18 @@ limitations under the License.
       return-object
       v-model="wildcardSelectedValue"
       :error-messages="getErrorMessages('wildcardSelectedValue')"
-       @input="onInput"
+      @input="onInput"
       @blur="$v.wildcardSelectedValue.$touch()"
+      :hint="wildcardSelectHint"
+      persistent-hint
     >
       <template v-slot:item="{ item }">
         <v-list-item-content>
-          <v-list-item-title>{{item.text}}</v-list-item-title>
-          <v-list-item-subtitle v-if="item.isWildcard">
-            Wildcard
-          </v-list-item-subtitle>
+          <v-list-item-title>
+            <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
+            <span>{{item.text}}</span>
+            <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
+          </v-list-item-title>
         </v-list-item-content>
       </template>
     </v-select>
@@ -78,10 +81,6 @@ export default {
     },
     wildcardSelectLabel: {
       type: String
-    },
-    wildcardTextFieldLabel: {
-      type: String,
-      default: 'Name'
     },
     value: {
       type: String
@@ -131,6 +130,16 @@ export default {
         }
       })
     },
+    wildcardTextFieldLabel () {
+      return this.wildcardSelectedValue.startsWithWildcard ? 'Prefix' : 'Suffix'
+    },
+    wildcardSelectHint () {
+      if (!this.wildcardSelectedValue.isWildcard) {
+        return undefined
+      }
+      const label = this.wildcardSelectedValue.startsWithWildcard ? 'prefix' : 'suffix'
+      return `Selected wildcard value requires a ${label} which needs to be specified`
+    },
     internalValue () {
       if (this.wildcardSelectedValue.startsWithWildcard) {
         return `${this.wildcardVariablePart}${this.wildcardSelectedValue.value}`
@@ -175,8 +184,8 @@ export default {
           }
         }
       })
-      this.$emit('valid', this.valid)
-      this.$v.wildcardVariablePart.$touch()
+
+      this.onInput()
     }
   },
   validations,
