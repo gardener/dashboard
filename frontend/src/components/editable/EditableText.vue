@@ -38,7 +38,8 @@ limitations under the License.
             class="grow content"
             :class="{ 'content--bounce': contentBounce }"
           >
-            {{value}}
+            <template v-if="value">{{value}}</template>
+            <div v-else class="body-2 font-weight-light text--disabled">{{noValueText}}</div>
           </v-col>
           <v-col class="shrink">
             <v-btn
@@ -113,6 +114,10 @@ export default {
     color: {
       type: String,
       default: 'blue-grey darken-2'
+    },
+    noValueText: {
+      type: String,
+      default: 'Not defined'
     },
     readOnly: {
       type: Boolean,

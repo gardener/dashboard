@@ -60,6 +60,7 @@ limitations under the License.
             ref="editable"
             autocomplete="off"
             :no-data-text="noDataText"
+            :placeholder="placeholder"
             hide-selected
             v-model="internalValue"
             @update:error="value => error = value"
@@ -133,6 +134,9 @@ export default {
     color: {
       type: String,
       default: 'blue-grey darken-2'
+    },
+    placeholder: {
+      type: String
     },
     noDataText: {
       type: String

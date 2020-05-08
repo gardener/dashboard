@@ -69,6 +69,7 @@ limitations under the License.
                         :value="technicalContact"
                         :items="userList"
                         :rules="[rules.technicalContact]"
+                        placeholder="Select the technical contact"
                         no-data-text="No project member available"
                         :save="updateTechnicalContact"
                       ></editable-account>
@@ -358,7 +359,7 @@ export default {
       return gravatarUrlGeneric(this.technicalContact, 48)
     },
     costObject () {
-      return this.projectDetails.costObject || 'Not defined'
+      return this.projectDetails.costObject
     },
     createdAt () {
       return this.projectDetails.createdAt
@@ -370,10 +371,10 @@ export default {
       return this.projectDetails.createdBy
     },
     description () {
-      return this.projectDetails.description || 'None'
+      return this.projectDetails.description
     },
     purpose () {
-      return this.projectDetails.purpose || 'None'
+      return this.projectDetails.purpose
     },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0
@@ -406,19 +407,28 @@ export default {
       return this.updateProperty('owner', value)
     },
     updateDescription (value) {
+      if (!value) {
+        value = null
+      }
       return this.updateProperty('description', value)
     },
     updatePurpose (value) {
+      if (!value) {
+        value = null
+      }
       return this.updateProperty('purpose', value)
     },
     updateCostObject (value) {
       if (this.costObjectSettingEnabled) {
+        if (!value) {
+          value = null
+        }
         return this.updateProperty('costObject', value, {
           error: 'Failed to update billing information of project'
         })
       }
     },
-    async updateProperty (key, value = null, options = {}) {
+    async updateProperty (key, value, options = {}) {
       const { metadata: { name, namespace } } = this.project
       try {
         const mergePatchDocument = {
