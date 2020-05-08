@@ -90,6 +90,7 @@ limitations under the License.
 
 <script>
 import ErrorMessage from './ErrorMessage'
+import { setDelayedInputFocus } from '@/utils'
 
 export default {
   name: 'editable-text',
@@ -199,12 +200,6 @@ export default {
         this.loading = false
       }
     },
-    focus () {
-      const textField = this.$refs.textField
-      if (textField) {
-        textField.focus()
-      }
-    },
     reset () {
       this.messages = []
       const textField = this.$refs.textField
@@ -219,9 +214,9 @@ export default {
         clearTimeout(this.timeoutId)
         this.internalValue = this.value
         this.$emit('open')
-        setTimeout(() => {
-          this.focus()
-        }, 50)
+        setDelayedInputFocus(this, 'textField', {
+          delay: 50
+        })
       } else {
         this.reset()
         this.$emit('close')

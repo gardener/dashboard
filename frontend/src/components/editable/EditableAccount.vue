@@ -109,6 +109,7 @@ limitations under the License.
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
 import ErrorMessage from './ErrorMessage'
+import { setDelayedInputFocus } from '@/utils'
 
 export default {
   name: 'editable-account',
@@ -221,12 +222,6 @@ export default {
         this.loading = false
       }
     },
-    focus () {
-      const editable = this.$refs.editable
-      if (editable) {
-        editable.focus()
-      }
-    },
     reset () {
       this.messages = []
       const editable = this.$refs.editable
@@ -241,9 +236,10 @@ export default {
         clearTimeout(this.timeoutId)
         this.internalValue = this.value
         this.$emit('open')
-        setTimeout(() => {
-          this.focus()
-        }, 50)
+        setDelayedInputFocus(this, 'editable', {
+          delay: 50,
+          noSelect: true
+        })
       } else {
         this.reset()
         this.$emit('close')
