@@ -32,9 +32,27 @@ global.requestAnimationFrame = cb => cb()
 
 let vuetify
 
+const projectList = [
+  {
+    metadata: {
+      name: 'foo',
+      namespace: 'garden-foo'
+    },
+    data: {
+      owner: 'owner'
+    }
+  }
+]
+
 const store = new Vuex.Store({
   state: {
+    namespace: 'garden-foo',
     cfg: {}
+  },
+  getters: {
+    projectList: () => {
+      return projectList
+    }
   }
 })
 
@@ -89,5 +107,10 @@ describe('NewShootDetails.vue', function () {
   it('selected kubernetes version should not be latest', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[0].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.true
+  })
+
+  it('maximum shoot name length should depend on project name', function () {
+    const shootDetails = createNewShootDetailsComponent()
+    expect(shootDetails.maxShootNameLength).to.equal(18)
   })
 })

@@ -22,11 +22,12 @@ limitations under the License.
           ref="name"
           color="cyan darken-2"
           label="Cluster Name"
-          counter="10"
+          :counter="maxShootNameLength"
           v-model="name"
           :error-messages="getErrorMessages('name')"
           @input="onInputName"
           @blur="$v.name.$touch()"
+          hint="Maximum name length depends on project name"
           ></v-text-field>
       </v-col>
       <v-col class="regularInput">
@@ -101,22 +102,6 @@ const validationErrors = {
   }
 }
 
-const validations = {
-  name: {
-    required,
-    maxLength: maxLength(10),
-    noConsecutiveHyphen,
-    noStartEndHyphen, // Order is important for UI hints
-    resourceName,
-    unique (value) {
-      return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
-    }
-  },
-  kubernetesVersion: {
-    required
-  }
-}
-
 export default {
   name: 'new-shoot-details',
   components: {
@@ -142,7 +127,9 @@ export default {
       updateK8sMaintenance: undefined
     }
   },
-  validations,
+  validations () {
+    return this.validators
+  },
   computed: {
     ...mapState([
       'namespace',
@@ -150,7 +137,8 @@ export default {
     ]),
     ...mapGetters([
       'sortedKubernetesVersions',
-      'shootByNamespaceAndName'
+      'shootByNamespaceAndName',
+      'projectList'
     ]),
     sortedKubernetesVersionsList () {
       return this.sortedKubernetesVersions(this.cloudProfileName)
@@ -174,6 +162,31 @@ export default {
     },
     slaTitle () {
       return this.sla.title
+    },
+    projectName () {
+      const predicate = item => item.metadata.namespace === this.namespace
+      const project = find(this.projectList, predicate)
+      return project.metadata.name
+    },
+    maxShootNameLength () {
+      return 21 - this.projectName.length
+    },
+    validators () {
+      return {
+        name: {
+          required,
+          maxLength: maxLength(this.maxShootNameLength),
+          noConsecutiveHyphen,
+          noStartEndHyphen, // Order is important for UI hints
+          resourceName,
+          unique (value) {
+            return this.shootByNamespaceAndName({ namespace: this.namespace, name: value }) === undefined
+          }
+        },
+        kubernetesVersion: {
+          required
+        }
+      }
     }
   },
   methods: {
