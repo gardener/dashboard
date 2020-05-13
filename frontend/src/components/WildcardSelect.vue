@@ -57,8 +57,9 @@ limitations under the License.
 import startsWith from 'lodash/startsWith'
 import endsWith from 'lodash/endsWith'
 import map from 'lodash/map'
-import forEach from 'lodash/forEach'
 import trim from 'lodash/trim'
+import filter from 'lodash/filter'
+import head from 'lodash/head'
 import { getValidationErrors } from '@/utils'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 
@@ -126,7 +127,7 @@ export default {
           value: selectedValue,
           startsWithWildcard,
           endsWithWildcard,
-          isWildcard: startsWithWildcard | endsWithWildcard
+          isWildcard: startsWithWildcard || endsWithWildcard
         }
       })
     },
@@ -163,27 +164,32 @@ export default {
       }
       this.$emit('input', this.internalValue)
     },
-    setInternalValue (value) {
-      const rawValue = trim(value, '*')
-      if (!rawValue) {
+    setInternalValue (newValue) {
+      const matches = filter(this.wildcardSelectItemObjects, (item) => {
+        if (item.startsWithWildcard) {
+          return new RegExp('^.+' + item.value + '$').test(newValue)
+        }
+        if (item.endsWithWildcard) {
+          return new RegExp('^' + item.value + '.+$').test(newValue)
+        }
+        return new RegExp('^' + item.value + '$').test(newValue)
+      })
+      matches.sort(function (a, b) {
+        return b.value.length - a.value.length
+      })
+
+      const bestMatch = head(matches)
+      if (!bestMatch) {
         return
       }
-      const valueLength = rawValue.length
-      let smallestVariablePartLength = valueLength
-      forEach(this.wildcardSelectItemObjects, itemObject => {
-        if (rawValue.includes(itemObject.value)) {
-          const variablePartLength = valueLength - itemObject.value.length
-          if (variablePartLength < smallestVariablePartLength) {
-            smallestVariablePartLength = variablePartLength
-            this.wildcardSelectedValue = itemObject
-            if (smallestVariablePartLength > 0) {
-              this.wildcardVariablePart = rawValue.replace(itemObject.value, '')
-            } else {
-              this.wildcardVariablePart = ''
-            }
-          }
-        }
-      })
+
+      this.wildcardSelectedValue = bestMatch
+      if (bestMatch.isWildcard) {
+        const value = trim(newValue, '*')
+        this.wildcardVariablePart = value.replace(bestMatch.value, '')
+      } else {
+        this.wildcardVariablePart = ''
+      }
 
       this.onInput()
     }
