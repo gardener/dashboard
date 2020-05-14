@@ -59,6 +59,13 @@ describe('utils', function () {
         expect(splittedCidrs[3]).is.equal('10.250.96.0/19')
         expect(splittedCidrs[4]).is.equal('10.250.128.0/19')
       })
+
+      it('should not break when zone count is zero', function () {
+        const splittedCidrs = splitCIDR('10.250.0.0/16', 0)
+
+        expect(splittedCidrs).to.be.an.instanceof(Array)
+        expect(splittedCidrs).to.have.length(0)
+      })
     })
   })
 })
