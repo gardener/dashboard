@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-container  class="pa-0 ma-0">
     <v-row >
-      <v-col v-show="cloudProfiles.length > 1" class="regularInput">
+      <v-col v-show="cloudProfiles.length > 1" cols="3">
         <cloud-profile
           ref="cloudProfile"
           v-model="cloudProfileName"
@@ -28,7 +28,7 @@ limitations under the License.
           color="cyan darken-2">
         </cloud-profile>
       </v-col>
-      <v-col class="regularInput">
+      <v-col cols="3">
         <v-select
           ref="secret"
           color="cyan darken-2"
@@ -62,7 +62,7 @@ limitations under the License.
           </template>
         </v-select>
       </v-col>
-      <v-col class="regularInput">
+      <v-col cols="3">
         <v-select
           color="cyan darken-2"
           item-color="cyan darken-2"
@@ -77,23 +77,19 @@ limitations under the License.
           ></v-select>
       </v-col>
       <template v-if="infrastructureKind === 'openstack'">
-        <v-col class="regularInput">
-          <v-select
-          color="cyan darken-2"
-          item-color="cyan darken-2"
-          label="Floating Pools"
-          :items="allFloatingPoolNames"
-          v-model="floatingPoolName"
-          :error-messages="getErrorMessages('floatingPoolName')"
-          @input="onInputFloatingPoolName"
-          @blur="$v.floatingPoolName.$touch()"
-          ></v-select>
+        <v-col cols="3">
+          <wildcard-select
+            v-model="floatingPoolName"
+            :wildcardSelectItems="allFloatingPoolNames"
+            wildcardSelectLabel="Floating Pool"
+            @valid="onFloatingPoolWildcardValid"
+            ></wildcard-select>
         </v-col>
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
           color="cyan darken-2"
           item-color="cyan darken-2"
-          label="Load Balancer Providers"
+          label="Load Balancer Provider"
           :items="allLoadBalancerProviderNames"
           v-model="loadBalancerProviderName"
           :error-messages="getErrorMessages('loadBalancerProviderName')"
@@ -104,7 +100,7 @@ limitations under the License.
         </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'metal'">
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-text-field
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -117,7 +113,7 @@ limitations under the License.
             persistent-hint
             ></v-text-field>
         </v-col>
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -131,7 +127,7 @@ limitations under the License.
             persistent-hint
           ></v-select>
         </v-col>
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -143,7 +139,7 @@ limitations under the License.
             @blur="$v.firewallImage.$touch()"
           ></v-select>
         </v-col>
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -155,7 +151,7 @@ limitations under the License.
             @blur="$v.firewallImage.$touch()"
           ></v-select>
         </v-col>
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -173,7 +169,7 @@ limitations under the License.
         </v-col>
       </template>
       <template v-else-if="infrastructureKind === 'vsphere'">
-        <v-col class="regularInput">
+        <v-col cols="3">
           <v-select
             color="cyan darken-2"
             item-color="cyan darken-2"
@@ -207,6 +203,7 @@ limitations under the License.
 
 <script>
 import CloudProfile from '@/components/CloudProfile'
+import WildcardSelect from '@/components/WildcardSelect'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import { required, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, isOwnSecretBinding, selfTerminationDaysForSecret } from '@/utils'
@@ -234,11 +231,6 @@ const validations = {
   },
   region: {
     required
-  },
-  floatingPoolName: {
-    required: requiredIf(function () {
-      return this.infrastructureKind === 'openstack'
-    })
   },
   loadBalancerProviderName: {
     required: requiredIf(function () {
@@ -282,6 +274,7 @@ export default {
   name: 'new-shoot-infrastructure',
   components: {
     CloudProfile,
+    WildcardSelect,
     SecretDialogWrapper
   },
   props: {
@@ -297,6 +290,8 @@ export default {
       secret: undefined,
       region: undefined,
       floatingPoolName: undefined,
+      floatingPoolValid: true,
+      fpname: undefined,
       loadBalancerProviderName: undefined,
       loadBalancerClassNames: [],
       partitionID: undefined,
@@ -374,9 +369,6 @@ export default {
         },
         region: {
           required: 'Region is required'
-        },
-        floatingPoolName: {
-          required: 'Floating Pools required'
         },
         loadBalancerProviderName: {
           required: 'Load Balancer Providers required'
@@ -520,7 +512,6 @@ export default {
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
       this.floatingPoolName = head(this.allFloatingPoolNames)
-      this.onInputFloatingPoolName()
       if (!isEmpty(this.allLoadBalancerClassNames)) {
         this.loadBalancerClassNames = [
           includes(this.allLoadBalancerClassNames, 'default')
@@ -558,8 +549,8 @@ export default {
       this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
     },
-    onInputFloatingPoolName () {
-      this.$v.floatingPoolName.$touch()
+    onFloatingPoolWildcardValid (valid) {
+      this.floatingPoolValid = valid
       this.validateInput()
     },
     onInputLoadBalancerProviderName () {
@@ -611,7 +602,7 @@ export default {
       }
     },
     validateInput () {
-      const valid = !this.$v.$invalid && this.cloudProfileValid
+      const valid = !this.$v.$invalid && this.cloudProfileValid && this.floatingPoolValid
       if (this.valid !== valid) {
         this.valid = valid
         this.$emit('valid', valid)
@@ -691,9 +682,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  .regularInput {
-    max-width: 300px;
-  }
-</style>
