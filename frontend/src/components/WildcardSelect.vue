@@ -34,7 +34,7 @@ limitations under the License.
         <v-list-item-content>
           <v-list-item-title>
             <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
-            <span>{{item.text}}</span>
+            <span>{{item.value}}</span>
             <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
           </v-list-item-title>
         </v-list-item-content>
@@ -112,22 +112,25 @@ export default {
       return map(this.wildcardSelectItems, item => {
         let startsWithWildcard = false
         let endsWithWildcard = false
+        const value = trim(item, '*')
+        let pattern = value
 
-        let selectedValue = item
         if (startsWith(item, '*')) {
           startsWithWildcard = true
+          pattern = '.+' + pattern
         }
         if (endsWith(item, '*')) {
           endsWithWildcard = true
+          pattern = pattern + '.+'
         }
-        selectedValue = trim(item, '*')
 
         return {
-          text: selectedValue,
-          value: selectedValue,
+          text: value,
+          value,
           startsWithWildcard,
           endsWithWildcard,
-          isWildcard: startsWithWildcard || endsWithWildcard
+          isWildcard: startsWithWildcard || endsWithWildcard,
+          regex: new RegExp('^' + pattern + '$')
         }
       })
     },
@@ -166,13 +169,7 @@ export default {
     },
     setInternalValue (newValue) {
       const matches = filter(this.wildcardSelectItemObjects, (item) => {
-        if (item.startsWithWildcard) {
-          return new RegExp('^.+' + item.value + '$').test(newValue)
-        }
-        if (item.endsWithWildcard) {
-          return new RegExp('^' + item.value + '.+$').test(newValue)
-        }
-        return new RegExp('^' + item.value + '$').test(newValue)
+        return item.regex.test(newValue)
       })
       matches.sort(function (a, b) {
         return b.value.length - a.value.length
