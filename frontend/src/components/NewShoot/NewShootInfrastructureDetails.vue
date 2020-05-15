@@ -545,6 +545,9 @@ export default {
     onInputRegion () {
       this.partitionID = head(this.partitionIDs)
       this.onInputPartitionID()
+      this.floatingPoolName = head(this.allFloatingPoolNames)
+      this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
+      this.onInputLoadBalancerProviderName()
       this.$v.region.$touch()
       this.userInterActionBus.emit('updateRegion', this.region)
       this.validateInput()
