@@ -100,6 +100,9 @@ export default {
     },
     onHibernationScheduleValid (value) {
       this.hibernationScheduleValid = value
+    },
+    showDialog () { // called from ShootLifeCycleCard
+      this.$refs.actionDialog.showDialog()
     }
   }
 }
