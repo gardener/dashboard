@@ -566,7 +566,8 @@ export default function createRouter ({ store, userManager }) {
           await store.dispatch('subscribeShoots', { name: params.name, namespace })
           break
         }
-        case 'ShootItem': {
+        case 'ShootItem':
+        case 'ShootItemHibernationSettings': {
           const promises = [
             store.dispatch('subscribeShoot', { name: params.name, namespace }),
             store.dispatch('subscribeComments', { name: params.name, namespace })
@@ -575,13 +576,6 @@ export default function createRouter ({ store, userManager }) {
             promises.push(store.dispatch('fetchInfrastructureSecrets')) // Required for purpose configuration
           }
           await Promise.all(promises)
-          break
-        }
-        case 'ShootItemHibernationSettings': {
-          await Promise.all([
-            store.dispatch('subscribeShoot', { name: params.name, namespace }),
-            store.dispatch('subscribeComments', { name: params.name, namespace })
-          ])
           break
         }
         case 'ShootDetailsEditor':
