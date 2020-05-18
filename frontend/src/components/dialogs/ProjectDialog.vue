@@ -19,45 +19,25 @@ limitations under the License.
     <v-card>
       <v-card-title class="dialog-title white--text align-center justify-start">
         <v-icon large dark>mdi-cube</v-icon>
-        <span class="headline ml-5">{{title}}</span>
+        <span class="headline ml-5">Create Project</span>
       </v-card-title>
       <v-card-text class="dialog-content">
         <form>
           <v-container fluid >
-            <template v-if="isCreateMode">
-              <v-row >
-                <v-col cols="12">
-                  <v-text-field
-                    :color="color"
-                    ref="projectName"
-                    label="Name"
-                    v-model.trim="projectName"
-                    :error-messages="getFieldValidationErrors('projectName')"
-                    @input="$v.projectName.$touch()"
-                    @blur="$v.projectName.$touch()"
-                    counter="10"
-                    ></v-text-field>
-                </v-col>
-              </v-row>
-            </template>
-            <template v-else>
-              <v-row >
-                <v-col cols="6">
-                  <div class="title pb-4">{{projectName}}</div>
-                </v-col>
-              </v-row>
-              <v-row >
-                <v-col cols="6">
-                  <v-select
-                    :color="color"
-                    :item-color="color"
-                    :items="memberItems"
-                    label="Technical Contact"
-                    v-model="technicalContact"
-                  ></v-select>
-                </v-col>
-              </v-row>
-            </template>
+            <v-row >
+              <v-col cols="12">
+                <v-text-field
+                  :color="color"
+                  ref="projectName"
+                  label="Name"
+                  v-model.trim="projectName"
+                  :error-messages="getFieldValidationErrors('projectName')"
+                  @input="$v.projectName.$touch()"
+                  @blur="$v.projectName.$touch()"
+                  counter="10"
+                  ></v-text-field>
+              </v-col>
+            </v-row>
 
             <v-row v-if="costObjectSettingEnabled">
               <v-col cols="12">
@@ -100,7 +80,7 @@ limitations under the License.
           </v-container>
         </form>
         <v-snackbar :value="loading" bottom right absolute :timeout="0">
-          <span>{{snackbarText}}</span>
+          <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>
       <v-card-actions>
@@ -119,7 +99,7 @@ limitations under the License.
           @click.stop="submit"
           :color="color"
         >
-          {{submitButtonText}}
+          Create
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -130,9 +110,8 @@ limitations under the License.
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { maxLength, required } from 'vuelidate/lib/validators'
 import { resourceName, unique, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import { getValidationErrors, setInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
+import { getValidationErrors, setInputFocus, setDelayedInputFocus, isServiceAccount, compileMarkdown, getProjectDetails } from '@/utils'
 import { errorDetailsFromError, isConflict, isGatewayTimeout } from '@/utils/error'
-import cloneDeep from 'lodash/cloneDeep'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import set from 'lodash/set'
@@ -192,9 +171,6 @@ export default {
         this.$emit('input', value)
       }
     },
-    title () {
-      return this.isCreateMode ? 'Create Project' : 'Update Project'
-    },
     projectNames () {
       return this.projectNamesFromProjectList
     },
@@ -244,15 +220,6 @@ export default {
     valid () {
       return !this.$v.$invalid
     },
-    isCreateMode () {
-      return !this.project
-    },
-    submitButtonText () {
-      return this.isCreateMode ? 'Create' : 'Save'
-    },
-    snackbarText () {
-      return this.isCreateMode ? 'Creating project ...' : 'Updating project ...'
-    },
     validators () {
       const validators = {
         technicalContact: {
@@ -267,15 +234,13 @@ export default {
           }
         }
       }
-      if (this.isCreateMode) {
-        validators.projectName = {
-          required,
-          maxLength: maxLength(10),
-          noConsecutiveHyphen,
-          noStartEndHyphen, // Order is important for UI hints
-          resourceName,
-          unique: unique('projectNames')
-        }
+      validators.projectName = {
+        required,
+        maxLength: maxLength(10),
+        noConsecutiveHyphen,
+        noStartEndHyphen, // Order is important for UI hints
+        resourceName,
+        unique: unique('projectNames')
       }
       return validators
     },
@@ -317,27 +282,21 @@ export default {
           const project = await this.save()
           this.loading = false
           this.hide()
-          if (this.isCreateMode) {
-            this.$router.push({
-              name: 'Secrets',
-              params: {
-                namespace: project.metadata.namespace
-              }
-            })
-          }
+          this.$router.push({
+            name: 'Secrets',
+            params: {
+              namespace: project.metadata.namespace
+            }
+          })
         } catch (err) {
           this.loading = false
-          if (this.isCreateMode) {
-            if (isConflict(err)) {
-              this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
-              setInputFocus(this, 'projectName')
-            } else if (isGatewayTimeout(err)) {
-              this.errorMessage = 'Project has been created but initialization is still pending.'
-            } else {
-              this.errorMessage = 'Failed to create project.'
-            }
+          if (isConflict(err)) {
+            this.errorMessage = `Project name '${this.projectName}' is already taken. Please try a different name.`
+            setInputFocus(this, 'projectName')
+          } else if (isGatewayTimeout(err)) {
+            this.errorMessage = 'Project has been created but initialization is still pending.'
           } else {
-            this.errorMessage = 'Failed to update project.'
+            this.errorMessage = 'Failed to create project.'
           }
 
           const { errorCode, detailedMessage } = errorDetailsFromError(err)
@@ -351,53 +310,30 @@ export default {
       this.$emit('cancel')
     },
     save () {
-      if (this.isCreateMode) {
-        const name = this.projectName
-        const metadata = { name }
-        if (this.costObjectSettingEnabled) {
-          set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
-        }
-
-        const description = this.description
-        const purpose = this.purpose
-        const data = { description, purpose }
-
-        return this.createProject({ metadata, data })
-      } else {
-        const project = cloneDeep(this.project)
-
-        project.data.description = this.description
-        project.data.purpose = this.purpose
-        project.data.owner = this.technicalContact
-        if (this.costObjectSettingEnabled) {
-          set(project.metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
-        }
-
-        return this.updateProject(project)
+      const name = this.projectName
+      const metadata = { name }
+      if (this.costObjectSettingEnabled) {
+        set(metadata, ['annotations', 'billing.gardener.cloud/costObject'], this.costObject)
       }
+
+      const description = this.description
+      const purpose = this.purpose
+      const data = { description, purpose }
+
+      return this.createProject({ metadata, data })
     },
     reset () {
       this.$v.$reset()
       this.errorMessage = undefined
       this.detailedMessage = undefined
 
-      if (this.isCreateMode) {
-        this.projectName = defaultProjectName
-        this.description = undefined
-        this.purpose = undefined
-        this.technicalContact = this.username
-        this.costObject = undefined
+      this.projectName = defaultProjectName
+      this.description = undefined
+      this.purpose = undefined
+      this.technicalContact = this.username
+      this.costObject = undefined
 
-        setInputFocus(this, 'projectName')
-      } else {
-        this.projectName = this.currentProjectName
-        this.description = this.currentDescription
-        this.purpose = this.currentPurpose
-        this.technicalContact = this.currentTechnicalContact
-        if (this.costObjectSettingEnabled) {
-          this.costObject = this.currentCostObject
-        }
-      }
+      setDelayedInputFocus(this, 'projectName')
     }
   },
   watch: {
