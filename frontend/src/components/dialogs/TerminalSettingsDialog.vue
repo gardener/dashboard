@@ -60,7 +60,7 @@ limitations under the License.
           color="cyan darken-2"
           v-model="selectedPrivilegedMode"
           label="Privileged"
-          hint="Enable to schedule a <strong>privileged</strong> Container, with <strong>hostPID</strong> and <strong>hostNetwork</strong> enabled. The host root filesystem will be mounted under the path <strong>/hostroot.</strong>"
+          hint="Enable to schedule a privileged Container, with hostPID and hostNetwork enabled. The host root filesystem will be mounted under the path /hostroot."
           persistent-hint
           :class="{ 'ml-4': isAdmin }"
           class="ml-2"
