@@ -28,8 +28,10 @@ import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
+import compact from 'lodash/compact'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
@@ -42,6 +44,7 @@ import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
 import toPairs from 'lodash/toPairs'
+import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
@@ -163,6 +166,47 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
 
     return true
   }
+}
+
+function mapOption (optionValue, shootResource) {
+  const key = get(optionValue, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = get(optionValue, 'isSelectedByDefault', false)
+  const inputInverted = get(optionValue, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  const option = {
+    value
+  }
+  return [key, option]
+}
+
+function mapAccessRestriction (accessRestrictionValue, shootResource) {
+  const key = get(accessRestrictionValue, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = get(accessRestrictionValue, 'isSelectedByDefault', false)
+  const inputInverted = get(accessRestrictionValue, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  let optionsPair = map(get(accessRestrictionValue, 'options'), option => mapOption(option, shootResource))
+  optionsPair = compact(optionsPair)
+  const options = fromPairs(optionsPair)
+
+  const accessRestriction = {
+    value,
+    options
+  }
+  return [key, accessRestriction]
 }
 
 // getters
@@ -289,6 +333,46 @@ const getters = {
         return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
+    }
+  },
+  accessRestrictionDefinitionsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      if (!cloudProfileName) {
+        return undefined
+      }
+      if (!region) {
+        return undefined
+      }
+
+      const labels = getters.labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      if (isEmpty(labels)) {
+        return undefined
+      }
+
+      return filter(state.cfg.accessRestrictions, ({ key }) => {
+        if (!key) {
+          return false
+        }
+        return labels[key] === 'true'
+      })
+    }
+  },
+  accessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const accessRestrictionDefinition = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+
+      let accessRestrictionsMap = map(accessRestrictionDefinition, accessRestrictionDefinition => mapAccessRestriction(accessRestrictionDefinition, shootResource))
+      accessRestrictionsMap = compact(accessRestrictionsMap)
+      return fromPairs(accessRestrictionsMap)
+    }
+  },
+  labelsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile) {
+        return get(find(cloudProfile.data.regions, { name: region }), 'labels')
+      }
+      return {}
     }
   },
   defaultMachineImageForCloudProfileName (state, getters) {

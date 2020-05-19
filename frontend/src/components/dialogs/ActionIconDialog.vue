@@ -31,7 +31,8 @@ limitations under the License.
           </v-btn>
         </div>
       </template>
-      {{shootActionToolTip(caption)}}
+      <template v-if="tooltip">{{tooltip}}</template>
+      <template v-else>{{shootActionToolTip(caption)}}</template>
     </v-tooltip>
     <g-dialog
       :confirmButtonText="confirmButtonText"
@@ -77,6 +78,9 @@ export default {
       default: 'mdi-settings-outline'
     },
     caption: {
+      type: String
+    },
+    tooltip: {
       type: String
     },
     confirmButtonText: {
