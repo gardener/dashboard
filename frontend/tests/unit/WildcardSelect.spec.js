@@ -27,6 +27,7 @@ Vue.use(Vuelidate)
 const sampleWildcardItems = [
   '*Foo',
   'Foo',
+  '*',
   'Bar*',
   'BarBla'
 ]
@@ -82,5 +83,32 @@ describe('WildcardSelect.vue', function () {
     expect(wildcardSelectedValue.value).to.equal('BarBla')
     expect(wildcardSelectedValue.isWildcard).to.be.false
     expect(wildcardVariablePart).to.equal('')
+  })
+
+  it('should select wildcard if inital value is wildcard', function () {
+    const wildcardSelect = createWildcardSelecteComponent('Bar*')
+    const wildcardSelectedValue = wildcardSelect.wildcardSelectedValue
+    const wildcardVariablePart = wildcardSelect.wildcardVariablePart
+    expect(wildcardSelectedValue.value).to.equal('Bar')
+    expect(wildcardSelectedValue.endsWithWildcard).to.be.true
+    expect(wildcardVariablePart).to.equal('')
+  })
+
+  it('Should select initial custom wildcard value', function () {
+    const wildcardSelect = createWildcardSelecteComponent('*')
+    const wildcardSelectedValue = wildcardSelect.wildcardSelectedValue
+    const wildcardVariablePart = wildcardSelect.wildcardVariablePart
+    expect(wildcardSelectedValue.value).to.equal('')
+    expect(wildcardSelectedValue.customWildcard).to.be.true
+    expect(wildcardVariablePart).to.equal('')
+  })
+
+  it('Should select custom wildcard', function () {
+    const wildcardSelect = createWildcardSelecteComponent('RandomValue')
+    const wildcardSelectedValue = wildcardSelect.wildcardSelectedValue
+    const wildcardVariablePart = wildcardSelect.wildcardVariablePart
+    expect(wildcardSelectedValue.value).to.equal('')
+    expect(wildcardSelectedValue.customWildcard).to.be.true
+    expect(wildcardVariablePart).to.equal('RandomValue')
   })
 })
