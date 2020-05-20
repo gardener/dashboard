@@ -60,9 +60,11 @@ limitations under the License.
         </v-list-item-subtitle>
       </v-list-item-content>
       <v-list-item-action class="ml-1">
-        <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-          {{roleName}}
-        </v-chip>
+        <div d-flex flex-row>
+          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
+            {{roleName}}
+          </v-chip>
+        </div>
       </v-list-item-action>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>

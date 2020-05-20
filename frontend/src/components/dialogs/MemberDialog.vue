@@ -42,6 +42,7 @@ limitations under the License.
             <v-col cols="4">
               <v-select
                 color="black"
+                item-color="black"
                 label="Roles"
                 :items="roleItems"
                 multiple
@@ -80,10 +81,12 @@ import { required } from 'vuelidate/lib/validators'
 import { resourceName, unique } from '@/utils/validators'
 import GAlert from '@/components/GAlert'
 import { errorDetailsFromError, isConflict } from '@/utils/error'
-import { serviceAccountToDisplayName, isServiceAccount, setInputFocus, getValidationErrors, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
+import { serviceAccountToDisplayName, isServiceAccount, setDelayedInputFocus, getValidationErrors, MEMBER_ROLE_DESCRIPTORS } from '@/utils'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
+import forEach from 'lodash/forEach'
+import find from 'lodash/find'
 
 const defaultUsername = ''
 const defaultServiceName = 'robot'
@@ -117,6 +120,7 @@ export default {
     return {
       internalName: undefined,
       internalRoles: undefined,
+      hiddenRoles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -199,9 +203,6 @@ export default {
     },
     isUpdateDialog () {
       return this.type === 'updateuser' || this.type === 'updateservice'
-    },
-    textField () {
-      return this.$refs.internalName
     },
     roleItems () {
       return filter(MEMBER_ROLE_DESCRIPTORS, role => role.hidden !== true)
@@ -287,7 +288,7 @@ export default {
       if (this.valid) {
         try {
           const name = this.memberName
-          const roles = this.internalRoles
+          const roles = [...this.internalRoles, ...this.hiddenRoles]
           await this.updateMember({ name, roles })
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
@@ -323,9 +324,18 @@ export default {
       }
 
       if (this.roles) {
-        this.internalRoles = [...this.roles]
+        this.internalRoles = []
+        this.hiddenRoles = []
+        forEach(this.roles, role => {
+          if (find(this.roleItems, { name: role })) {
+            this.internalRoles.push(role)
+          } else {
+            this.hiddenRoles.push(role)
+          }
+        })
       } else {
         this.internalRoles = [defaultRole]
+        this.hiddenRoles = []
       }
 
       this.errorMessage = undefined
@@ -334,9 +344,7 @@ export default {
       this.setFocusAndSelection()
     },
     setFocusAndSelection () {
-      if (this.textField) {
-        setInputFocus(this, 'name')
-      }
+      setDelayedInputFocus(this, 'internalName')
     },
     defaultServiceName () {
       let name = defaultServiceName
@@ -354,12 +362,6 @@ export default {
       if (value) {
         this.reset()
       }
-    }
-  },
-  mounted () {
-    if (this.textField) {
-      const input = this.textField.$refs.input
-      input.style.textTransform = 'lowercase'
     }
   }
 }
