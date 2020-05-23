@@ -454,7 +454,7 @@ export default {
       const displayNames = []
       forEach(roleNames, roleName => {
         const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
-        if (roleDescriptor && !roleDescriptor.hidden) {
+        if (roleDescriptor) {
           displayNames.push(roleDescriptor.displayName)
         }
       })

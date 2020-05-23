@@ -82,8 +82,9 @@ limitations under the License.
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-subtitle>Worker Groups</v-list-item-subtitle>
-          <v-list-item-title class="d-flex align-center pt-1">
+          <v-list-item-title class="d-flex flex-wrap align-center pt-1">
             <worker-group
+            class="mr-2 mb-2"
             v-for="workerGroup in shootWorkerGroups"
             :workerGroup="workerGroup"
             :cloudProfileName="shootCloudProfileName"

@@ -120,7 +120,7 @@ export default {
     return {
       internalName: undefined,
       internalRoles: undefined,
-      hiddenRoles: undefined,
+      unsupportedRoles: undefined,
       errorMessage: undefined,
       detailedErrorMessage: undefined
     }
@@ -205,7 +205,7 @@ export default {
       return this.type === 'updateuser' || this.type === 'updateservice'
     },
     roleItems () {
-      return filter(MEMBER_ROLE_DESCRIPTORS, role => role.hidden !== true)
+      return MEMBER_ROLE_DESCRIPTORS
     },
     nameLabel () {
       return this.isUserDialog ? 'User' : 'Service Account'
@@ -288,7 +288,7 @@ export default {
       if (this.valid) {
         try {
           const name = this.memberName
-          const roles = [...this.internalRoles, ...this.hiddenRoles]
+          const roles = [...this.internalRoles, ...this.unsupportedRoles]
           await this.updateMember({ name, roles })
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()
@@ -325,17 +325,17 @@ export default {
 
       if (this.roles) {
         this.internalRoles = []
-        this.hiddenRoles = []
+        this.unsupportedRoles = []
         forEach(this.roles, role => {
           if (find(this.roleItems, { name: role })) {
             this.internalRoles.push(role)
           } else {
-            this.hiddenRoles.push(role)
+            this.unsupportedRoles.push(role)
           }
         })
       } else {
         this.internalRoles = [defaultRole]
-        this.hiddenRoles = []
+        this.unsupportedRoles = []
       }
 
       this.errorMessage = undefined
