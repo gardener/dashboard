@@ -40,7 +40,7 @@ limitations under the License.
       ></g-alert>
     </div>
     <v-divider></v-divider>
-    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex justify-center justify-space-between">
+    <div v-if="!isReadOnly" :style="toolbarStyles" class="d-flex align-center justify-space-between">
         <div class="d-flex align-center justify-start fill-height">
           <div class="px-2">
             <v-tooltip top>
