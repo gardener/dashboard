@@ -74,8 +74,10 @@ limitations under the License.
     @update="onUpdate"
     @delete="onDelete"
     >
-      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
-        {{secret.data.domainName}} / {{secret.data.tenantName}}
+      <template v-slot:rowSubTitle="{ secret }">
+        <template v-if="isOwnSecretBinding(secret)">
+           {{secret.data.domainName}} / {{secret.data.tenantName}}
+        </template>
       </template>
     </secret>
 
@@ -123,18 +125,20 @@ limitations under the License.
     @update="onUpdate"
     @delete="onDelete"
     >
-      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{secret.data.vsphereUsername}}</span>
-          </template>
-          <span>vSphere Username</span>
-        </v-tooltip> / <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{secret.data.nsxtUsername}}</span>
-          </template>
-          <span>NSX-T Username</span>
-        </v-tooltip>
+      <template v-slot:rowSubTitle="{ secret }">
+        <template v-if="isOwnSecretBinding(secret)">
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">{{secret.data.vsphereUsername}}</span>
+            </template>
+            <span>vSphere Username</span>
+          </v-tooltip> / <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">{{secret.data.nsxtUsername}}</span>
+            </template>
+            <span>NSX-T Username</span>
+          </v-tooltip>
+        </template>
       </template>
     </secret>
 
