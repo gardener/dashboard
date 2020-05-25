@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <div v-if="definitions">
-    <v-row v-for="(definition, index)  in definitions" :key="definition.key">
+    <v-row v-for="(definition, index) in definitions" :key="definition.key">
       <v-list :class="{ 'grey lighten-5': index % 2 }">
         <v-list-item v-if="definition">
           <v-list-item-action class="action-select">
