@@ -38,16 +38,28 @@ limitations under the License.
     <!-- List of the added secrets -->
     <v-list two-line v-else>
       <secret-row
-        v-for="row in rows"
-        :key="row.metadata.name"
-        :secret="row"
+        v-for="secret in rows"
+        :key="secret.metadata.name"
+        :secret="secret"
         :secretDescriptorKey="secretDescriptorKey"
         @update="onUpdate"
         @delete="onDelete"
       >
-        <!-- forward slot -->
-        <template v-slot:rowSubTitle>
-          <slot name="rowSubTitle" :secret="row"></slot>
+       <template v-if="infrastructureKey === 'openstack' && isOwnSecretBinding(secret)" v-slot:rowSubTitle>
+          {{secret.data.domainName}} / {{secret.data.tenantName}}
+        </template>
+        <template v-else-if="infrastructureKey === 'vsphere' && isOwnSecretBinding(secret)" v-slot:rowSubTitle>
+          <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">{{secret.data.vsphereUsername}}</span>
+            </template>
+            <span>vSphere Username</span>
+          </v-tooltip> / <v-tooltip top>
+            <template v-slot:activator="{ on }">
+              <span v-on="on">{{secret.data.nsxtUsername}}</span>
+            </template>
+            <span>NSX-T Username</span>
+          </v-tooltip>
         </template>
       </secret-row>
     </v-list>
@@ -59,6 +71,7 @@ limitations under the License.
 import { mapGetters } from 'vuex'
 import SecretRow from '@/components/SecretRow'
 import InfraIcon from '@/components/VendorIcon'
+import { isOwnSecretBinding } from '@/utils'
 
 export default {
   components: {
@@ -128,6 +141,9 @@ export default {
     },
     onDelete (row) {
       this.$emit('delete', row)
+    },
+    isOwnSecretBinding (secret) {
+      return isOwnSecretBinding(secret)
     }
   }
 }
