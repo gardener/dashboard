@@ -152,7 +152,7 @@ limitations under the License.
           </v-list-item-content>
         </v-list-item>
       </template>
-      <template v-if="cfg.accessRestrictions">
+      <template v-if="cfg.accessRestriction">
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>

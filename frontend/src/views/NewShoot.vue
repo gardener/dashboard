@@ -53,7 +53,7 @@ limitations under the License.
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
-      <v-card flat class="mt-4" v-if="cfg.accessRestrictions">
+      <v-card flat class="mt-4" v-if="cfg.accessRestriction">
         <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
          Access Restrictions
         </v-card-title>

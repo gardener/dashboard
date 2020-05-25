@@ -56,17 +56,21 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
+      'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
       'accessRestrictionDefinitionsByCloudProfileNameAndRegion'
     ]),
     disabled () {
       const accessRestrictionDefinitions = this.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
       return isEmpty(accessRestrictionDefinitions)
     },
+    noItemsText () {
+      return this.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
+    },
     tooltip () {
       if (!this.disabled) {
         return undefined
       }
-      return `No access restriction options available for region ${this.shootRegion}`
+      return this.noItemsText
     }
   },
   methods: {

@@ -43,6 +43,7 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
 import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
@@ -331,6 +332,17 @@ const getters = {
       return []
     }
   },
+  accessRestrictionNoItemsTextForCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName: cloudProfile, region }) => {
+      const noItemsText = get(state, 'cfg.accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
+
+      const compiled = template(noItemsText)
+      return compiled({
+        region,
+        cloudProfile
+      })
+    }
+  },
   accessRestrictionDefinitionsByCloudProfileNameAndRegion (state, getters) {
     return ({ cloudProfileName, region }) => {
       if (!cloudProfileName) {
@@ -345,7 +357,8 @@ const getters = {
         return undefined
       }
 
-      return filter(state.cfg.accessRestrictions, ({ key }) => {
+      const items = get(state, 'cfg.accessRestriction.items')
+      return filter(items, ({ key }) => {
         if (!key) {
           return false
         }

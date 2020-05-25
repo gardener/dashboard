@@ -189,21 +189,13 @@ data:
         title: {{ .Values.frontendConfig.sla.title }}
         description: {{ .Values.frontendConfig.sla.description }}
 {{- end }}
-{{- if .Values.frontendConfig.accessRestrictions }}
-      accessRestrictions:
-      {{- range .Values.frontendConfig.accessRestrictions }}
-      - key: {{ .key }}
-        display:
-          visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
-          title: {{ .display.title }}{{- end }}{{- if .display.description }}
-          description: {{ .display.description }}{{- end }}
-        input:
-          title: {{ .input.title }}{{- if .input.description }}
-          description: {{ .input.description }}{{- end }}
-          inverted: {{ .input.inverted | default false }}
-        {{- if .options }}
-        options:
-        {{- range .options }}
+{{- if .Values.frontendConfig.accessRestriction }}
+      accessRestriction:
+        {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
+        noItemsText: {{  .Values.frontendConfig.accessRestriction.noItemsText }}
+        {{- end }}
+        items:
+        {{- range .Values.frontendConfig.accessRestriction.items }}
         - key: {{ .key }}
           display:
             visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
@@ -213,7 +205,19 @@ data:
             title: {{ .input.title }}{{- if .input.description }}
             description: {{ .input.description }}{{- end }}
             inverted: {{ .input.inverted | default false }}
+          {{- if .options }}
+          options:
+          {{- range .options }}
+          - key: {{ .key }}
+            display:
+              visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+              title: {{ .display.title }}{{- end }}{{- if .display.description }}
+              description: {{ .display.description }}{{- end }}
+            input:
+              title: {{ .input.title }}{{- if .input.description }}
+              description: {{ .input.description }}{{- end }}
+              inverted: {{ .input.inverted | default false }}
+          {{- end }}
+          {{- end }}
         {{- end }}
-        {{- end }}
-      {{- end }}
 {{- end }}

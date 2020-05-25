@@ -50,7 +50,7 @@ limitations under the License.
     </v-row>
   </div>
   <div v-else class="pt-4">
-    No access restriction options available for region {{region}}
+    {{noItemsText}}
   </div>
 </template>
 
@@ -82,12 +82,16 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
+      'accessRestrictionNoItemsTextForCloudProfileNameAndRegion',
       'accessRestrictionDefinitionsByCloudProfileNameAndRegion',
       'accessRestrictionsForShootByCloudProfileNameAndRegion',
       'labelsByCloudProfileNameAndRegion'
     ]),
     definitions () {
       return this.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
+    },
+    noItemsText () {
+      return this.accessRestrictionNoItemsTextForCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     }
   },
   methods: {
