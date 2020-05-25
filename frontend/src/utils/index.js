@@ -299,9 +299,6 @@ export function getTimeStringTo (time, toTime, withoutPrefix = false) {
 }
 
 export function isOwnSecretBinding (secret) {
-  if (!secret) {
-    return false
-  }
   return get(secret, 'metadata.namespace') === get(secret, 'metadata.bindingNamespace')
 }
 
