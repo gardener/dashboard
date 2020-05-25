@@ -400,7 +400,6 @@ const getters = {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
       const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
-      availableFloatingPools.push({ name: '*' })
       return uniq(map(availableFloatingPools, 'name'))
     }
   },
