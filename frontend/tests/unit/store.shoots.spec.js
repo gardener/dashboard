@@ -16,7 +16,14 @@
 
 import Vuex from 'vuex'
 import { expect } from 'chai'
-import { state, actions, getters, mutations, modules } from '@/store'
+import {
+  state,
+  actions,
+  getters,
+  mutations,
+  modules,
+  mapAccessRestriction
+} from '@/store'
 
 let store
 
@@ -197,5 +204,84 @@ describe('Store.Shoots', function () {
     expect(sortedShoots[0].metadata.name).to.equal('shoot3')
     expect(sortedShoots[1].metadata.name).to.equal('shoot1')
     expect(sortedShoots[2].metadata.name).to.equal('shoot2')
+  })
+})
+
+describe('Store.AccessRestrictions', function () {
+  let definition
+  let shootResource
+
+  beforeEach(() => {
+    definition = {
+      key: 'foo',
+      input: {
+        inverted: false
+      },
+      options: [
+        {
+          key: 'foo-option-1',
+          input: {
+            inverted: false
+          }
+        },
+        {
+          key: 'foo-option-2',
+          input: {
+            inverted: true
+          }
+        }
+      ]
+    }
+
+    shootResource = {
+      metadata: {
+        annotations: {
+          'foo-option-1': 'false'
+        }
+      },
+      spec: {
+        seedSelector: {
+          matchLabels: {
+            foo: 'true'
+          }
+        }
+      }
+    }
+  })
+
+  it('should map definition and shoot resources to access restriction data model', function () {
+    const accessRestrictionPair = mapAccessRestriction(definition, shootResource)
+    expect(accessRestrictionPair).to.eql([
+      'foo',
+      {
+        value: true,
+        options: {
+          'foo-option-1': {
+            value: false
+          },
+          'foo-option-2': {
+            value: true // value inverted as defined in definition
+          }
+        }
+      }
+    ])
+  })
+
+  it('should invert access restriction', function () {
+    definition.input.inverted = true
+    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    expect(accessRestriction.value).to.equal(false)
+  })
+
+  it('should not invert option', function () {
+    definition.options[1].input.inverted = false
+    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    expect(accessRestriction.options['foo-option-2'].value).to.equal(false)
+  })
+
+  it('should invert option', function () {
+    definition.options[1].input.inverted = true
+    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    expect(accessRestriction.options['foo-option-2'].value).to.equal(true)
   })
 })
