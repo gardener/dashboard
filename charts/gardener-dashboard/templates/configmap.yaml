@@ -203,8 +203,8 @@ data:
             description: {{ .display.description }}{{- end }}
           input:
             title: {{ .input.title }}{{- if .input.description }}
-            description: {{ .input.description }}{{- end }}
-            inverted: {{ .input.inverted | default false }}
+            description: {{ .input.description }}{{- end }}{{- if .input.inverted }}
+            inverted: {{ .input.inverted }}{{- end }}
           {{- if .options }}
           options:
           {{- range .options }}
@@ -215,8 +215,8 @@ data:
               description: {{ .display.description }}{{- end }}
             input:
               title: {{ .input.title }}{{- if .input.description }}
-              description: {{ .input.description }}{{- end }}
-              inverted: {{ .input.inverted | default false }}
+              description: {{ .input.description }}{{- end }}{{- if .input.inverted }}
+              inverted: {{ .input.inverted }}{{- end }}
           {{- end }}
           {{- end }}
         {{- end }}

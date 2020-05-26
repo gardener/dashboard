@@ -177,6 +177,156 @@ describe('gardener-dashboard', function () {
         expect(oidc.issuer).to.equal(values.oidc.issuerUrl)
         expect(oidc.public).to.be.undefined
       })
+
+      describe('access restrictions', function () {
+        it('should render the template without options', async function () {
+          const values = writeValues(filename, {
+            frontendConfig: {
+                accessRestriction: {
+                  noItemsText: 'no items text',
+                  items: [
+                    {
+                      key: 'foo',
+                      display: {
+                        visibleIf: true 
+                      },
+                      input: {
+                        title: 'Foo'
+                      }
+                    }
+                  ]
+                }
+              }
+            })
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const {
+            frontend: {
+              accessRestriction: {
+                noItemsText,
+                items
+              }
+            }
+          } = config
+          expect(noItemsText).to.equal('no items text')
+          expect(items.length).to.equal(1)
+          expect(items[0]).to.eql({
+            key: 'foo',
+            display: {
+              visibleIf: true 
+            },
+            input: {
+              title: 'Foo'
+            }
+          })
+        })
+
+        it('should render the template with options', async function () {
+          const values = writeValues(filename, {
+            frontendConfig: {
+                accessRestriction: {
+                  items: [
+                    {
+                      key: 'foo',
+                      display: {
+                        visibleIf: true,
+                        title: 'display Foo',
+                        description: 'display Foo description',
+                      },
+                      input: {
+                        title: 'input Foo',
+                        description: 'input Foo description',
+                        inverted: true
+                      },
+                      options: [
+                        {
+                          key: 'foo-option-1',
+                          display: {
+                            visibleIf: false,
+                            title: 'display Foo Option 1',
+                            description: 'display Foo  Option 1 description',
+                          },
+                          input: {
+                            title: 'input Foo Option 1',
+                            description: 'input Foo  Option 1 description',
+                            inverted: false
+                          }
+                        },
+                        {
+                          key: 'foo-option-2',
+                          display: {
+                            visibleIf: true,
+                          },
+                          input: {
+                            title: 'input Foo Option 2',
+                            description: 'input Foo  Option 2 description',
+                            inverted: true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            })
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const {
+            frontend: {
+              accessRestriction: {
+                items
+              }
+            }
+          } = config
+          expect(items.length).to.equal(1)
+          expect(items[0]).to.eql({
+            key: 'foo',
+            display: {
+              visibleIf: true,
+              title: 'display Foo',
+              description: 'display Foo description',
+            },
+            input: {
+              title: 'input Foo',
+              description: 'input Foo description',
+              inverted: true
+            },
+            options: [
+              {
+                key: 'foo-option-1',
+                display: {
+                  visibleIf: false,
+                  title: 'display Foo Option 1',
+                  description: 'display Foo  Option 1 description',
+                },
+                input: {
+                  title: 'input Foo Option 1',
+                  description: 'input Foo  Option 1 description',
+                }
+              },
+              {
+                key: 'foo-option-2',
+                display: {
+                  visibleIf: true,
+                },
+                input: {
+                  title: 'input Foo Option 2',
+                  description: 'input Foo  Option 2 description',
+                  inverted: true
+                }
+              }
+            ]
+          })
+        })
+      })
     })
   })
 })
