@@ -43,7 +43,6 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
-import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import compact from 'lodash/compact'
@@ -51,6 +50,10 @@ import { mapState } from 'vuex'
 import Journal from '@/components/ShootJournals/Journal'
 import { canLinkToSeed } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
+
+function code (value) {
+  return '` ' + value + ' `'
+}
 
 export default {
   components: {
@@ -71,11 +74,8 @@ export default {
       'cfg'
     ]),
     errorConditions () {
-      let errorConditions = ''
-      forEach(this.shootConditions, condition => {
-        errorConditions = `${errorConditions}\n**${condition.type}:** ${condition.message}`
-      })
-      return errorConditions
+      const errorConditions = map(this.shootConditions, ({ type, message }) => `**${type}:** ${code(message)}`)
+      return join(errorConditions, '\n')
     },
     gitHubRepoUrl () {
       return this.cfg.gitHubRepoUrl
@@ -93,8 +93,9 @@ export default {
       const seed = `**Seed:** ${seedLinkOrName}`
 
       const createdAt = `**Created At:** ${this.shootCreatedAt}`
-      const lastOperation = `**Last Op:** ${get(this.shootLastOperation, 'description', '')}`
+      const lastOperation = `**Last Operation:** ${code(get(this.shootLastOperation, 'description', ''))}`
       let shootLastErrorDescriptions = compact(map(this.shootLastErrors, 'description'))
+      shootLastErrorDescriptions = map(shootLastErrorDescriptions, code)
       shootLastErrorDescriptions = join(shootLastErrorDescriptions, '\n')
       const lastError = `**Last Errors:** ${shootLastErrorDescriptions || '-'}`
 
