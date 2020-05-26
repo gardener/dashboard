@@ -73,11 +73,7 @@ limitations under the License.
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
-    >
-      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
-        {{secret.data.domainName}} / {{secret.data.tenantName}}
-      </template>
-    </secret>
+    ></secret>
 
     <secret
     v-if="hasCloudProfileForCloudProviderKind('alicloud')"
@@ -122,21 +118,7 @@ limitations under the License.
     @toogleHelp="onToogleHelp"
     @update="onUpdate"
     @delete="onDelete"
-    >
-      <template v-if="isOwnSecretBinding(secret)" v-slot:rowSubTitle="{ secret }">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{secret.data.vsphereUsername}}</span>
-          </template>
-          <span>vSphere Username</span>
-        </v-tooltip> / <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <span v-on="on">{{secret.data.nsxtUsername}}</span>
-          </template>
-          <span>NSX-T Username</span>
-        </v-tooltip>
-      </template>
-    </secret>
+    ></secret>
 
     <template v-if="showDisabledCloudProviders">
 
@@ -206,7 +188,6 @@ limitations under the License.
 <script>
 import { mapGetters } from 'vuex'
 import get from 'lodash/get'
-import { isOwnSecretBinding } from '@/utils'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
 import Secret from '@/components/Secret'
@@ -323,9 +304,6 @@ export default {
     },
     hideDialogs () {
       merge(this.dialogState, this.initialDialogState)
-    },
-    isOwnSecretBinding (secret) {
-      return isOwnSecretBinding(secret)
     }
   },
   mounted () {

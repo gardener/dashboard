@@ -209,7 +209,6 @@ import forEach from 'lodash/forEach'
 import join from 'lodash/join'
 import map from 'lodash/map'
 import find from 'lodash/find'
-import upperFirst from 'lodash/upperFirst'
 import escape from 'lodash/escape'
 import MemberDialog from '@/components/dialogs/MemberDialog'
 import MemberHelpDialog from '@/components/dialogs/MemberHelpDialog'
@@ -455,10 +454,7 @@ export default {
       const displayNames = []
       forEach(roleNames, roleName => {
         const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
-        if (!roleDescriptor) {
-          displayNames.push(upperFirst(roleName))
-        }
-        if (!roleDescriptor.hidden) {
+        if (roleDescriptor) {
           displayNames.push(roleDescriptor.displayName)
         }
       })

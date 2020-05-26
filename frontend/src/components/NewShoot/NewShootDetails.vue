@@ -80,7 +80,7 @@ limitations under the License.
 import HintColorizer from '@/components/HintColorizer'
 import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, compileMarkdown } from '@/utils'
+import { getValidationErrors, compileMarkdown, setDelayedInputFocus } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import head from 'lodash/head'
@@ -251,6 +251,8 @@ export default {
     this.userInterActionBus.on('updateK8sMaintenance', updateK8sMaintenance => {
       this.updateK8sMaintenance = updateK8sMaintenance
     })
+
+    setDelayedInputFocus(this, 'name')
   }
 }
 </script>

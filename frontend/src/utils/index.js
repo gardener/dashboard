@@ -689,11 +689,6 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'viewer',
     displayName: 'Viewer'
-  },
-  {
-    name: 'owner',
-    displayName: 'Technical Contact',
-    hidden: true // Do not show on UI as currently cannot be modified
   }
 ]
 
