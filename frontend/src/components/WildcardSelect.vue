@@ -18,6 +18,7 @@ limitations under the License.
   <div class="d-flex flex-row">
     <v-select
       class="selectClass"
+      :class="selectClass"
       color="cyan darken-2"
       item-color="cyan darken-2"
       :label="wildcardSelectLabel"
@@ -30,12 +31,21 @@ limitations under the License.
       :hint="wildcardSelectHint"
       persistent-hint
     >
+      <template v-slot:selection="{ item }">
+        <span v-if="item.customWildcard">&lt;Custom&gt;</span>
+        <span v-else>{{item.value}}</span>
+      </template>
       <template v-slot:item="{ item }">
         <v-list-item-content>
           <v-list-item-title>
-            <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
-            <span>{{item.value}}</span>
-            <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
+            <template v-if="item.value.length">
+              <span v-if="item.startsWithWildcard">&lt;prefix&gt;</span>
+              <span>{{item.value}}</span>
+              <span v-if="item.endsWithWildcard">&lt;suffix&gt;</span>
+            </template>
+            <template v-else>
+               <span v-if="item.isWildcard">Custom {{wildcardSelectLabel}}</span>
+            </template>
           </v-list-item-title>
         </v-list-item-content>
       </template>
@@ -108,41 +118,63 @@ export default {
     textFieldClass () {
       return this.wildcardSelectedValue.startsWithWildcard ? 'textFieldStartClass' : 'textFieldEndClass'
     },
+    selectClass () {
+      if (this.wildcardSelectedValue.customWildcard) {
+        return 'selectSmallClass'
+      }
+      return undefined
+    },
     wildcardSelectItemObjects () {
       return map(this.wildcardSelectItems, item => {
         let startsWithWildcard = false
         let endsWithWildcard = false
+        let customWildcard = false
         const value = trim(item, '*')
         let pattern = value
 
-        if (startsWith(item, '*')) {
+        if (item === '*') {
+          customWildcard = true
+          pattern = '.*'
+        } else if (startsWith(item, '*')) {
           startsWithWildcard = true
-          pattern = '.+' + pattern
-        }
-        if (endsWith(item, '*')) {
+          pattern = '.*' + pattern
+        } else if (endsWith(item, '*')) {
           endsWithWildcard = true
-          pattern = pattern + '.+'
+          pattern = pattern + '.*'
         }
 
         return {
-          text: value,
           value,
           startsWithWildcard,
           endsWithWildcard,
-          isWildcard: startsWithWildcard || endsWithWildcard,
+          customWildcard,
+          isWildcard: startsWithWildcard || endsWithWildcard || customWildcard,
           regex: new RegExp('^' + pattern + '$')
         }
       })
     },
     wildcardTextFieldLabel () {
-      return this.wildcardSelectedValue.startsWithWildcard ? 'Prefix' : 'Suffix'
+      if (this.wildcardSelectedValue.startsWithWildcard) {
+        return 'Prefix'
+      }
+      if (this.wildcardSelectedValue.endsWithWildcard) {
+        return 'Suffix'
+      }
+      if (this.wildcardSelectedValue.customWildcard) {
+        return `Custom ${this.wildcardSelectLabel}`
+      }
+      return undefined
     },
     wildcardSelectHint () {
       if (!this.wildcardSelectedValue.isWildcard) {
         return undefined
       }
-      const label = this.wildcardSelectedValue.startsWithWildcard ? 'prefix' : 'suffix'
-      return `Selected wildcard value requires a ${label} which needs to be specified`
+      if (this.wildcardSelectedValue.customWildcard) {
+        return `Specify custom ${this.wildcardSelectLabel}`
+      } else {
+        const label = this.wildcardSelectedValue.startsWithWildcard ? 'prefix' : 'suffix'
+        return `Selected wildcard value requires a ${label} which needs to be specified`
+      }
     },
     internalValue () {
       if (this.wildcardSelectedValue.startsWithWildcard) {
@@ -150,6 +182,9 @@ export default {
       }
       if (this.wildcardSelectedValue.endsWithWildcard) {
         return `${this.wildcardSelectedValue.value}${this.wildcardVariablePart}`
+      }
+      if (this.wildcardSelectedValue.customWildcard) {
+        return this.wildcardVariablePart
       }
       return this.wildcardSelectedValue.value
     }
@@ -173,6 +208,21 @@ export default {
       })
       matches.sort(function (a, b) {
         return b.value.length - a.value.length
+      })
+      matches.sort(function (a, b) {
+        if (a.isWildcard && !b.isWildcard) {
+          return 1
+        }
+        if (b.isWildcard && !a.isWildcard) {
+          return -1
+        }
+        if (a.customWildcard && !b.customWildcard) {
+          return 1
+        }
+        if (b.customWildcard && !a.customWildcard) {
+          return -1
+        }
+        return 0
       })
 
       const bestMatch = head(matches)
@@ -214,5 +264,8 @@ export default {
   .textFieldEndClass {
     order: 2;
     margin-left: 5px;
+  }
+  .selectSmallClass {
+    max-width: 120px;
   }
 </style>
