@@ -21,6 +21,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import Vuetify from 'vuetify'
 import Vuelidate from 'vuelidate'
+import noop from 'lodash/noop'
 const EventEmitter = require('events')
 
 Vue.use(Vuetify)
@@ -52,6 +53,9 @@ const store = new Vuex.Store({
   getters: {
     projectList: () => {
       return projectList
+    },
+    shootByNamespaceAndName: () => {
+      return noop
     }
   }
 })
