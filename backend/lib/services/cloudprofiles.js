@@ -68,7 +68,13 @@ exports.list = function () {
   return _
     .chain(cloudProfiles)
     .map(assignSeedsToCloudProfileIteratee(seeds))
-    .filter('data.seeds')
+    .filter(cloudProfile => {
+      if (!_.isEmpty(cloudProfile.data.seeds)) {
+        return true
+      }
+      console.log(`No matching seed for cloud profile with name ${cloudProfile.metadata.name} found`)
+      return false
+    })
     .value()
 }
 
