@@ -17,6 +17,9 @@
 import { expect } from 'chai'
 import { getters } from '@/store'
 import find from 'lodash/find'
+import noop from 'lodash/noop'
+
+global.console.error = noop // do not log (expected) errors in tests
 
 describe('Store', function () {
   it('should transform machine images from cloud profile', function () {
@@ -291,5 +294,169 @@ describe('Store', function () {
     const items = getters.machineTypesOrVolumeTypesByCloudProfileNameAndRegionAndZones({}, getters)({ })
     expect(items).to.be.an.instanceof(Array)
     expect(items).to.have.length(0)
+  })
+
+  it('should return floating pool names by region and domain from cloud profile', function () {
+    const cpFloatingPools = [
+      {
+        name: 'global FP'
+      },
+      {
+        name: 'regional FP',
+        region: 'region1'
+      },
+      {
+        name: 'regional non constraining FP',
+        region: 'region2',
+        nonConstraining: true
+      },
+      {
+        name: 'domain specific FP',
+        domain: 'domain1'
+      },
+      {
+        name: 'domain specific non constraining FP',
+        domain: 'domain2',
+        nonConstraining: true
+      },
+      {
+        name: 'domain specific, regional FP',
+        domain: 'domain3',
+        region: 'region3'
+      },
+      {
+        name: 'additional domain specific, regional FP',
+        domain: 'domain3',
+        region: 'region3'
+      },
+      {
+        name: 'domain specific, regional non constraining FP',
+        domain: 'domain4',
+        region: 'region4',
+        nonConstraining: true
+      }
+    ]
+
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return {
+          data: {
+            providerConfig: {
+              constraints: {
+                floatingPools: cpFloatingPools
+              }
+            }
+          }
+        }
+      },
+      floatingPoolNamesByCloudProfileNameAndRegionAndDomain (...args) {
+        return getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, this)(...args)
+      }
+    }
+
+    const cloudProfileName = 'foo'
+
+    let region = 'fooRegion'
+    let secretDomain = 'fooDomain'
+    let dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(1)
+    expect(dashboardFloatingPools[0]).to.equal('global FP')
+
+    region = 'region1'
+    secretDomain = 'fooDomain'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(1)
+    expect(dashboardFloatingPools[0]).to.equal('regional FP')
+
+    region = 'region2'
+    secretDomain = 'fooDomain'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(2)
+    expect(dashboardFloatingPools[0]).to.equal('global FP')
+    expect(dashboardFloatingPools[1]).to.equal('regional non constraining FP')
+
+    region = 'fooRegion'
+    secretDomain = 'domain1'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(1)
+    expect(dashboardFloatingPools[0]).to.equal('domain specific FP')
+
+    region = 'fooRegion'
+    secretDomain = 'domain2'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(2)
+    expect(dashboardFloatingPools[0]).to.equal('global FP')
+    expect(dashboardFloatingPools[1]).to.equal('domain specific non constraining FP')
+
+    region = 'region3'
+    secretDomain = 'domain3'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(2)
+    expect(dashboardFloatingPools[0]).to.equal('domain specific, regional FP')
+    expect(dashboardFloatingPools[1]).to.equal('additional domain specific, regional FP')
+
+    region = 'region4'
+    secretDomain = 'domain4'
+    dashboardFloatingPools = getters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({}, storeGetters)({ cloudProfileName, region, secretDomain })
+    expect(dashboardFloatingPools).to.have.length(2)
+    expect(dashboardFloatingPools[0]).to.equal('global FP')
+    expect(dashboardFloatingPools[1]).to.equal('domain specific, regional non constraining FP')
+  })
+
+  it('should return load balancer provider names by region from cloud profile', function () {
+    const cpLoadBalancerProviders = [
+      {
+        name: 'global LB'
+      },
+      {
+        name: 'regional LB',
+        region: 'region1'
+      },
+      {
+        name: 'additional regional LB',
+        region: 'region1'
+      },
+      {
+        name: 'other regional LB',
+        region: 'region2'
+      }
+    ]
+
+    const storeGetters = {
+      cloudProfileByName (cloudProfileName) {
+        expect(cloudProfileName).to.equal('foo')
+        return {
+          data: {
+            providerConfig: {
+              constraints: {
+                loadBalancerProviders: cpLoadBalancerProviders
+              }
+            }
+          }
+        }
+      },
+      loadBalancerProviderNamesByCloudProfileNameAndRegion (...args) {
+        return getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, this)(...args)
+      }
+    }
+
+    const cloudProfileName = 'foo'
+
+    let region = 'fooRegion'
+    let dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
+    expect(dashboardLoadBalancerProviderNames).to.have.length(1)
+    expect(dashboardLoadBalancerProviderNames[0]).to.equal('global LB')
+
+    region = 'region1'
+    dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
+    expect(dashboardLoadBalancerProviderNames).to.have.length(2)
+    expect(dashboardLoadBalancerProviderNames[0]).to.equal('regional LB')
+    expect(dashboardLoadBalancerProviderNames[1]).to.equal('additional regional LB')
+
+    region = 'region2'
+    dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
+    expect(dashboardLoadBalancerProviderNames).to.have.length(1)
+    expect(dashboardLoadBalancerProviderNames[0]).to.equal('other regional LB')
   })
 })

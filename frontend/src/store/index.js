@@ -395,19 +395,37 @@ const getters = {
       return max(map(seedsMatchingCloudProfileAndRegion, 'volume.minimumSize')) || defaultMinimumSize
     }
   },
-  floatingPoolNamesByCloudProfileNameAndRegion (state, getters) {
-    return (cloudProfileName, region) => {
+  floatingPoolNamesByCloudProfileNameAndRegionAndDomain (state, getters) {
+    return ({ cloudProfileName, region, secretDomain }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const floatingPools = get(cloudProfile, 'data.providerConfig.constraints.floatingPools')
-      const availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
+      availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain))
+
+      if (find(availableFloatingPools, fp => {
+        return !!fp.region && !fp.nonConstraining
+      })) {
+        availableFloatingPools = filter(availableFloatingPools, { region })
+      }
+      if (find(availableFloatingPools, fp => {
+        return !!fp.domain && !fp.nonConstraining
+      })) {
+        availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
+      }
+
       return uniq(map(availableFloatingPools, 'name'))
     }
   },
   loadBalancerProviderNamesByCloudProfileNameAndRegion (state, getters) {
-    return (cloudProfileName, region) => {
+    return ({ cloudProfileName, region }) => {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const loadBalancerProviders = get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders')
-      const availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
+      let availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
+      if (find(availableLoadBalancerProviders, lb => {
+        return !!lb.region
+      })) {
+        availableLoadBalancerProviders = filter(availableLoadBalancerProviders, { region })
+      }
       return uniq(map(availableLoadBalancerProviders, 'name'))
     }
   },

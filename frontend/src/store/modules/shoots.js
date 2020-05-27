@@ -246,11 +246,12 @@ const actions = {
     const region = head(rootGetters.regionsWithSeedByCloudProfileName(cloudProfileName))
     set(shootResource, 'spec.region', region)
 
-    const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileNameAndRegion(cloudProfileName, region))
+    const loadBalancerProviderName = head(rootGetters.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName, region }))
     if (!isEmpty(loadBalancerProviderName)) {
       set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerProvider', loadBalancerProviderName)
     }
-    const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileNameAndRegion(cloudProfileName, region))
+    const secretDomain = get(secret, 'data.domainName')
+    const floatingPoolName = head(rootGetters.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain }))
     if (!isEmpty(floatingPoolName)) {
       set(shootResource, 'spec.provider.infrastructureConfig.floatingPoolName', floatingPoolName)
     }
