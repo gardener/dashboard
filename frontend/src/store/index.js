@@ -175,8 +175,10 @@ function mapOption (optionValue, shootResource) {
     return
   }
 
+  const isSelectedByDefault = false
   const inputInverted = get(optionValue, 'input.inverted', false)
-  const rawValue = get(shootResource, ['metadata', 'annotations', key]) === 'true'
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
   const value = inputInverted ? !rawValue : rawValue
 
   const option = {
@@ -191,8 +193,10 @@ function mapAccessRestriction (accessRestrictionDefinition, shootResource) {
     return
   }
 
+  const isSelectedByDefault = false
   const inputInverted = get(accessRestrictionDefinition, 'input.inverted', false)
-  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key]) === 'true'
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
   const value = inputInverted ? !rawValue : rawValue
 
   let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOption(option, shootResource))

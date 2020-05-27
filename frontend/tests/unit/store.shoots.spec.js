@@ -229,6 +229,18 @@ describe('Store.AccessRestrictions', function () {
           input: {
             inverted: true
           }
+        },
+        {
+          key: 'foo-option-3',
+          input: {
+            inverted: true
+          }
+        },
+        {
+          key: 'foo-option-4',
+          input: {
+            inverted: true
+          }
         }
       ]
     }
@@ -236,7 +248,9 @@ describe('Store.AccessRestrictions', function () {
     shootResource = {
       metadata: {
         annotations: {
-          'foo-option-1': 'false'
+          'foo-option-1': 'false',
+          'foo-option-2': 'false',
+          'foo-option-3': 'true'
         }
       },
       spec: {
@@ -261,6 +275,12 @@ describe('Store.AccessRestrictions', function () {
           },
           'foo-option-2': {
             value: true // value inverted as defined in definition
+          },
+          'foo-option-3': {
+            value: false // value inverted as defined in definition
+          },
+          'foo-option-4': {
+            value: false // value not set in spec always maps to false
           }
         }
       }
