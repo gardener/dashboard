@@ -29,13 +29,15 @@ limitations under the License.
           </router-link>
         </v-col>
         <v-col class="shrink" >
-          <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
-          <hibernation-schedule-warning
-            v-if="isShootHasNoHibernationScheduleWarning"
-            :name="shootName"
-            :namespace="shootNamespace"
-            :purpose="shootPurpose">
-          </hibernation-schedule-warning>
+          <div class="d-flex flew-row">
+            <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
+            <hibernation-schedule-warning
+              v-if="isShootHasNoHibernationScheduleWarning"
+              :name="shootName"
+              :namespace="shootNamespace"
+              :purpose="shootPurpose">
+            </hibernation-schedule-warning>
+          </div>
         </v-col>
       </v-row>
     </td>
