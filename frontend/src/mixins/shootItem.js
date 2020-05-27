@@ -167,7 +167,7 @@ export const shootItem = {
       return get(this.shootItem, 'status.conditions', [])
     },
     shootObservedGeneration () {
-      return get(this.shootItem, 'status.observedGeneration', [])
+      return get(this.shootItem, 'status.observedGeneration')
     },
     shootTechnicalId () {
       return get(this.shootItem, 'status.technicalID')
