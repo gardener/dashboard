@@ -46,7 +46,7 @@ export default {
   mixins: [shootItem],
   computed: {
     canRetry () {
-      const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration
+      const reconcileScheduled = this.shootGenerationValue !== this.shootObservedGeneration && !!this.shootObservedGeneration
 
       return get(this.shootLastOperation, 'state') === 'Failed' &&
           !this.isShootReconciliationDeactivated &&
