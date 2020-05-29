@@ -127,7 +127,8 @@ const shootList = [
     project: 'foo',
     createdBy: 'fooCreator',
     purpose: 'fooPurpose',
-    bindingName: 'barSecretName'
+    bindingName: 'barSecretName',
+    seed: 'infra4-seed-without-secretRef'
   })
 ]
 

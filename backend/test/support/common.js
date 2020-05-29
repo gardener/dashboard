@@ -22,7 +22,15 @@ const { cache } = require('../../lib/cache')
 const createJournalCache = require('../../lib/cache/journals')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
-function getSeed (name, region, kind, seedProtected = false, seedVisible = true, labels = {}) {
+function getSeed ({
+  name,
+  region,
+  kind,
+  seedProtected = false,
+  seedVisible = true,
+  labels = {},
+  withSecretRef = true
+}) {
   const seed = {
     kind: 'Seed',
     metadata: {
@@ -33,10 +41,6 @@ function getSeed (name, region, kind, seedProtected = false, seedVisible = true,
       provider: {
         type: kind,
         region
-      },
-      secretRef: {
-        name: `seedsecret-${name}`,
-        namespace: 'garden'
       },
       dns: {
         ingressDomain: `ingress.${region}.${kind}.example.org`
@@ -53,6 +57,12 @@ function getSeed (name, region, kind, seedProtected = false, seedVisible = true,
     seed.spec.taints.push({
       key: 'seed.gardener.cloud/invisible'
     })
+  }
+  if (withSecretRef) {
+    seed.spec.secretRef = {
+      name: `seedsecret-${name}`,
+      namespace: 'garden'
+    }
   }
 
   return seed
@@ -111,13 +121,14 @@ const cloudProfileList = [
 ]
 
 const seedList = [
-  getSeed('soil-infra1', 'foo-east', 'infra1', true, false),
-  getSeed('infra1-seed', 'foo-east', 'infra1'),
-  getSeed('infra1-seed2', 'foo-west', 'infra1'),
-  getSeed('infra3-seed', 'foo-europe', 'infra3'),
-  getSeed('infra3-seed-with-selector', 'foo-europe', 'infra3', false, true, { foo: 'bar' }),
-  getSeed('infra3-seed-protected', 'foo-europe', 'infra3', true),
-  getSeed('infra3-seed-invisible', 'foo-europe', 'infra3', false, false)
+  getSeed({ name: 'soil-infra1', region: 'foo-east', kind: 'infra1', seedProtected: true, seedVisible: false }),
+  getSeed({ name: 'infra1-seed', region: 'foo-east', kind: 'infra1' }),
+  getSeed({ name: 'infra1-seed2', region: 'foo-west', kind: 'infra1' }),
+  getSeed({ name: 'infra3-seed', region: 'foo-europe', kind: 'infra3' }),
+  getSeed({ name: 'infra4-seed-without-secretRef', region: 'foo-south', kind: 'infra1', withSecretRef: false }),
+  getSeed({ name: 'infra3-seed-with-selector', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: true, labels: { foo: 'bar' } }),
+  getSeed({ name: 'infra3-seed-protected', region: 'foo-europe', kind: 'infra3', seedProtected: true }),
+  getSeed({ name: 'infra3-seed-invisible', region: 'foo-europe', kind: 'infra3', seedProtected: false, seedVisible: false })
 ]
 
 const quotaList = [
