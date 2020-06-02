@@ -311,7 +311,7 @@ async function ensureTrustedCertForSeedApiServer (client, seed) {
   const seedName = seed.metadata.name
   const namespace = 'garden'
 
-  if (!seedResource.spec.secretRef) {
+  if (!seed.spec.secretRef) {
     logger.info(`Bootstrapping Seed ${seedName} aborted as 'spec.secretRef' on the seed is missing`)
     return
   }
