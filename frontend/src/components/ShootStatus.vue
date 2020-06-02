@@ -64,38 +64,7 @@ import AnsiText from '@/components/AnsiText'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
-import { isUserError, allErrorCodesFromLastErrors } from '@/utils'
-
-const errorCodes = {
-  ERR_INFRA_UNAUTHORIZED: {
-    shortDescription: 'Invalid Credentials',
-    description: 'Invalid cloud provider credentials.'
-  },
-  ERR_INFRA_INSUFFICIENT_PRIVILEGES: {
-    shortDescription: 'Insufficient Privileges',
-    description: 'Cloud provider credentials have insufficient privileges.'
-  },
-  ERR_INFRA_QUOTA_EXCEEDED: {
-    shortDescription: 'Quota Exceeded',
-    description: 'Cloud provider quota exceeded. Please request limit increases.'
-  },
-  ERR_INFRA_DEPENDENCIES: {
-    shortDescription: 'Infrastructure Dependencies',
-    description: 'Infrastructure operation failed as unmanaged resources exist in your cloud provider account. Please delete all manually created resources related to this Shoot.'
-  },
-  ERR_CLEANUP_CLUSTER_RESOURCES: {
-    shortDescription: 'Cleanup Cluster',
-    description: 'Cleaning up the cluster failed as some resource are stuck in deletion. Please remove these resources properly or a forceful deletion will happen if this error persists.'
-  },
-  ERR_INFRA_RESOURCES_DEPLETED: {
-    shortDescription: 'Infrastructure Resources Depleted',
-    description: 'The underlying infrastructure provider proclaimed that it does not have enough resources to fulfill your request at this point in time. You might want to wait or change your shoot configuration.'
-  },
-  ERR_CONFIGURATION_PROBLEM: {
-    shortDescription: 'Configuration Problem',
-    description: 'There is a configuration problem that is most likely caused by your Shoot specification. Please double-check the error message and resolve the problem.'
-  }
-}
+import { isUserError, allErrorCodesFromLastErrorsOrConditions, errorCodes } from '@/utils/errorCodes'
 
 export default {
   components: {
@@ -164,7 +133,7 @@ export default {
       }))
     },
     allErrorCodes () {
-      return allErrorCodesFromLastErrors(this.lastErrors)
+      return allErrorCodesFromLastErrorsOrConditions(this.lastErrors)
     },
     allErrorCodeShortDescriptions () {
       return map(this.allErrorCodes, code => get(errorCodes, `${code}.shortDescription`, code))

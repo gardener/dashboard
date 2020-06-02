@@ -44,7 +44,6 @@ import { getSpecTemplate, getDefaultZonesNetworkConfiguration, getControlPlaneZo
 import { isNotFound } from '@/utils/error'
 import {
   isShootStatusHibernated,
-  isUserError,
   isReconciliationDeactivated,
   isStatusProgressing,
   getCreatedBy,
@@ -55,9 +54,9 @@ import {
   shootAddonList,
   utcMaintenanceWindowFromLocalBegin,
   randomLocalMaintenanceBegin,
-  generateWorker,
-  allErrorCodesFromLastErrors
+  generateWorker
 } from '@/utils'
+import { isUserError, allErrorCodesFromLastErrorsOrConditions } from '@/utils/errorCodes'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -412,7 +411,7 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const lastErrors = get(item, 'status.lastErrors', [])
       const isError = operation.state === 'Failed' || lastErrors.length
-      const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
+      const allErrorCodes = allErrorCodesFromLastErrorsOrConditions(lastErrors)
       const userError = isUserError(allErrorCodes)
       const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
@@ -557,8 +556,10 @@ const setFilteredAndSortedItems = (state, rootState) => {
     if (get(state, 'shootListFilters.userIssues', false)) {
       const predicate = item => {
         const lastErrors = get(item, 'status.lastErrors', [])
-        const allErrorCodes = allErrorCodesFromLastErrors(lastErrors)
-        return !isUserError(allErrorCodes)
+        const allLastErrorCodes = allErrorCodesFromLastErrorsOrConditions(lastErrors)
+        const conditions = get(item, 'status.conditions', [])
+        const allConditionCodes = allErrorCodesFromLastErrorsOrConditions(conditions)
+        return !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
       }
       items = filter(items, predicate)
     }
