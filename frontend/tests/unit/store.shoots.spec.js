@@ -22,7 +22,7 @@ import {
   getters,
   mutations,
   modules,
-  mapAccessRestriction
+  mapAccessRestrictionForInput
 } from '@/store'
 
 let store
@@ -264,7 +264,7 @@ describe('Store.AccessRestrictions', function () {
   })
 
   it('should map definition and shoot resources to access restriction data model', function () {
-    const accessRestrictionPair = mapAccessRestriction(definition, shootResource)
+    const accessRestrictionPair = mapAccessRestrictionForInput(definition, shootResource)
     expect(accessRestrictionPair).to.eql([
       'foo',
       {
@@ -289,19 +289,19 @@ describe('Store.AccessRestrictions', function () {
 
   it('should invert access restriction', function () {
     definition.input.inverted = true
-    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
     expect(accessRestriction.value).to.equal(false)
   })
 
   it('should not invert option', function () {
     definition.options[1].input.inverted = false
-    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
     expect(accessRestriction.options['foo-option-2'].value).to.equal(false)
   })
 
   it('should invert option', function () {
     definition.options[1].input.inverted = true
-    const [, accessRestriction] = mapAccessRestriction(definition, shootResource)
+    const [, accessRestriction] = mapAccessRestrictionForInput(definition, shootResource)
     expect(accessRestriction.options['foo-option-2'].value).to.equal(true)
   })
 })

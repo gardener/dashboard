@@ -160,41 +160,8 @@ limitations under the License.
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-subtitle>Access Restrictions</v-list-item-subtitle>
-            <v-list-item-title v-if="selectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
-              <v-row v-for="{ key, title, description, options } in selectedAccessRestrictions" :key="key" class="mx-0 mb-1">
-                <v-tooltip
-                  top
-                  :disabled="!description"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-chip
-                      v-on="on"
-                      small
-                      outlined
-                      color="cyan darken-2"
-                      class="mr-2 mb-1"
-                    >{{title}}</v-chip>
-                  </template>
-                  {{description}}
-                </v-tooltip>
-                <v-tooltip
-                  v-for="{ key: optionsKey, title, description } in options"
-                  :key="`${key}_${optionsKey}`"
-                  top
-                  :disabled="!description"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-chip
-                      v-on="on"
-                      small
-                      outlined
-                      color="cyan darken-2"
-                      class="mr-2"
-                    >{{title}}</v-chip>
-                  </template>
-                  {{description}}
-                </v-tooltip>
-              </v-row>
+            <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
+              <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
             </v-list-item-title>
             <v-list-item-title v-else class="d-flex align-center pt-1">
               No access restrictions configured
@@ -238,6 +205,7 @@ limitations under the License.
 
 <script>
 
+import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
 import TimeString from '@/components/TimeString'
 import WorkerGroup from '@/components/ShootWorkers/WorkerGroup'
@@ -249,7 +217,6 @@ import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
 import CopyBtn from '@/components/CopyBtn'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
-import compact from 'lodash/compact'
 import {
   isSelfTerminationWarning,
   isValidTerminationDate,
@@ -260,58 +227,9 @@ import {
 import { shootItem } from '@/mixins/shootItem'
 import { mapState, mapGetters } from 'vuex'
 
-function optionMap (optionDefinition, option) {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description
-    }
-  } = optionDefinition
-  const { value } = option
-
-  const optionVisible = visibleIf === value
-  if (!optionVisible) {
-    return undefined // skip
-  }
-
-  return {
-    key,
-    title,
-    description
-  }
-}
-
-function accessRestrictionMap (definition, accessRestriction) {
-  const {
-    key,
-    display: {
-      visibleIf = false,
-      title = key,
-      description
-    },
-    options: optionDefinitions
-  } = definition
-  const { value, options } = accessRestriction
-
-  const accessRestrictionVisible = visibleIf === value
-  if (!accessRestrictionVisible) {
-    return undefined // skip
-  }
-
-  const optionsList = compact(map(optionDefinitions, optionDefinition => optionMap(optionDefinition, options[optionDefinition.key])))
-
-  return {
-    key,
-    title,
-    description,
-    options: optionsList
-  }
-}
-
 export default {
   components: {
+    AccessRestrictionChips,
     AccountAvatar,
     TimeString,
     WorkerGroup,
@@ -333,9 +251,7 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
-      'canGetSecrets',
-      'accessRestrictionsForShootByCloudProfileNameAndRegion',
-      'accessRestrictionDefinitionsByCloudProfileNameAndRegion'
+      'canGetSecrets'
     ]),
     expirationTimestamp () {
       return this.shootAnnotations['shoot.gardener.cloud/expiration-timestamp'] || this.shootAnnotations['shoot.garden.sapcloud.io/expirationTimestamp']
@@ -352,15 +268,6 @@ export default {
     },
     isValidTerminationDate () {
       return isValidTerminationDate(this.expirationTimestamp)
-    },
-    accessRestrictionDefinitions () {
-      return this.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
-    },
-    accessRestrictions () {
-      return this.accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
-    },
-    selectedAccessRestrictions () {
-      return compact(map(this.accessRestrictionDefinitions, definition => accessRestrictionMap(definition, this.accessRestrictions[definition.key])))
     },
     addon () {
       return (name) => {

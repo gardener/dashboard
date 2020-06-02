@@ -169,7 +169,7 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
   }
 }
 
-function mapOption (optionValue, shootResource) {
+function mapOptionForInput (optionValue, shootResource) {
   const key = get(optionValue, 'key')
   if (!key) {
     return
@@ -187,7 +187,7 @@ function mapOption (optionValue, shootResource) {
   return [key, option]
 }
 
-function mapAccessRestriction (accessRestrictionDefinition, shootResource) {
+function mapAccessRestrictionForInput (accessRestrictionDefinition, shootResource) {
   const key = get(accessRestrictionDefinition, 'key')
   if (!key) {
     return
@@ -199,7 +199,7 @@ function mapAccessRestriction (accessRestrictionDefinition, shootResource) {
   const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
   const value = inputInverted ? !rawValue : rawValue
 
-  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOption(option, shootResource))
+  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOptionForInput(option, shootResource))
   optionsPair = compact(optionsPair)
   const options = fromPairs(optionsPair)
 
@@ -208,6 +208,54 @@ function mapAccessRestriction (accessRestrictionDefinition, shootResource) {
     options
   }
   return [key, accessRestriction]
+}
+
+function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    }
+  } = optionDefinition
+
+  const optionVisible = visibleIf === value
+  if (!optionVisible) {
+    return undefined // skip
+  }
+
+  return {
+    key,
+    title,
+    description
+  }
+}
+
+function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { value, options } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    },
+    options: optionDefinitions
+  } = definition
+
+  const accessRestrictionVisible = visibleIf === value
+  if (!accessRestrictionVisible) {
+    return undefined // skip
+  }
+
+  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition: optionDefinition, option: options[optionDefinition.key] })))
+
+  return {
+    key,
+    title,
+    description,
+    options: optionsList
+  }
 }
 
 // getters
@@ -372,11 +420,19 @@ const getters = {
   },
   accessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
     return ({ shootResource, cloudProfileName, region }) => {
-      const accessRestrictionDefinition = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
 
-      let accessRestrictionsMap = map(accessRestrictionDefinition, accessRestrictionDefinition => mapAccessRestriction(accessRestrictionDefinition, shootResource))
+      let accessRestrictionsMap = map(definitions, definition => mapAccessRestrictionForInput(definition, shootResource))
       accessRestrictionsMap = compact(accessRestrictionsMap)
       return fromPairs(accessRestrictionsMap)
+    }
+  },
+  selectedAccessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const accessRestrictions = getters.accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
+
+      return compact(map(definitions, definition => mapAccessRestrictionForDisplay({ definition, accessRestriction: accessRestrictions[definition.key] })))
     }
   },
   labelsByCloudProfileNameAndRegion (state, getters) {
@@ -1184,5 +1240,5 @@ export {
   mutations,
   modules,
   plugins,
-  mapAccessRestriction
+  mapAccessRestrictionForInput
 }
