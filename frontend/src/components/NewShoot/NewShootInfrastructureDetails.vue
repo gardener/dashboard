@@ -347,7 +347,7 @@ export default {
       'loadBalancerProviderNamesByCloudProfileNameAndRegion',
       'loadBalancerClassesByCloudProfileName',
       'loadBalancerClassNamesByCloudProfileName',
-      'floatingPoolNamesByCloudProfileNameAndRegion',
+      'floatingPoolNamesByCloudProfileNameAndRegionAndDomain',
       'partitionIDsByCloudProfileNameAndRegion',
       'firewallImagesByCloudProfileName',
       'firewallNetworksByCloudProfileNameAndPartitionId',
@@ -459,7 +459,7 @@ export default {
       }
     },
     allLoadBalancerProviderNames () {
-      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
+      return this.loadBalancerProviderNamesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
     allLoadBalancerClassNames () {
       return this.loadBalancerClassNamesByCloudProfileName(this.cloudProfileName)
@@ -491,7 +491,10 @@ export default {
       return loadBalancerClasses
     },
     allFloatingPoolNames () {
-      return this.floatingPoolNamesByCloudProfileNameAndRegion(this.cloudProfileName, this.region)
+      const cloudProfileName = this.cloudProfileName
+      const region = this.region
+      const secretDomain = get(this.secret, 'data.domainName')
+      return this.floatingPoolNamesByCloudProfileNameAndRegionAndDomain({ cloudProfileName, region, secretDomain })
     },
     selfTerminationDays () {
       return selfTerminationDaysForSecret(this.secret)
