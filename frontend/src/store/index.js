@@ -402,14 +402,12 @@ const getters = {
       let availableFloatingPools = filter(floatingPools, matchesPropertyOrEmpty('region', region))
       availableFloatingPools = filter(availableFloatingPools, matchesPropertyOrEmpty('domain', secretDomain))
 
-      if (find(availableFloatingPools, fp => {
-        return !!fp.region && !fp.nonConstraining
-      })) {
+      const hasRegionSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.region && !fp.nonConstraining)
+      if (hasRegionSpecificFloatingPool) {
         availableFloatingPools = filter(availableFloatingPools, { region })
       }
-      if (find(availableFloatingPools, fp => {
-        return !!fp.domain && !fp.nonConstraining
-      })) {
+      const hasDomainSpecificFloatingPool = find(availableFloatingPools, fp => !!fp.domain && !fp.nonConstraining)
+      if (hasDomainSpecificFloatingPool) {
         availableFloatingPools = filter(availableFloatingPools, { domain: secretDomain })
       }
 
@@ -421,9 +419,8 @@ const getters = {
       const cloudProfile = getters.cloudProfileByName(cloudProfileName)
       const loadBalancerProviders = get(cloudProfile, 'data.providerConfig.constraints.loadBalancerProviders')
       let availableLoadBalancerProviders = filter(loadBalancerProviders, matchesPropertyOrEmpty('region', region))
-      if (find(availableLoadBalancerProviders, lb => {
-        return !!lb.region
-      })) {
+      const hasRegionSpecificLoadBalancerProvider = find(availableLoadBalancerProviders, lb => !!lb.region)
+      if (hasRegionSpecificLoadBalancerProvider) {
         availableLoadBalancerProviders = filter(availableLoadBalancerProviders, { region })
       }
       return uniq(map(availableLoadBalancerProviders, 'name'))
