@@ -154,13 +154,13 @@ export default {
       return isUserError(this.condition.codes)
     },
     allErrorCodeShortDescriptions () {
-      return map(this.condition.codes, code => get(errorCodes, `${code}.shortDescription`, code))
+      return map(this.condition.codes, code => get(errorCodes, [code, 'shortDescription'], code))
     },
     errorCodeShortDescriptionsText () {
       return join(this.allErrorCodeShortDescriptions, ', ')
     },
     errorCodeDescriptions () {
-      return map(this.condition.codes, code => get(errorCodes, `${code}.description`, code))
+      return map(this.condition.codes, code => get(errorCodes, [code, 'description'], code))
     },
     popperKeyWithType () {
       return `statusTag_${this.popperKey}`

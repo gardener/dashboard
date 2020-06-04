@@ -23,8 +23,8 @@ import compact from 'lodash/compact'
 import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 
-export function allErrorCodesFromLastErrorsOrConditions (lastErrorsOrConditionsarray) {
-  return uniq(compact(flatMap(lastErrorsOrConditionsarray, 'codes')))
+export function errorCodesFromArray (array) {
+  return uniq(compact(flatMap(array, 'codes')))
 }
 
 export function isUserError (errorCodes) {

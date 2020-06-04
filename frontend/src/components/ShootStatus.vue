@@ -64,7 +64,7 @@ import AnsiText from '@/components/AnsiText'
 import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
-import { isUserError, allErrorCodesFromLastErrorsOrConditions, errorCodes } from '@/utils/errorCodes'
+import { isUserError, errorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
   components: {
@@ -129,14 +129,14 @@ export default {
     lastErrorDescriptions () {
       return map(this.lastErrors, lastError => ({
         description: lastError.description,
-        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, `${code}.description`, code))
+        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, [code, 'description'], code))
       }))
     },
     allErrorCodes () {
-      return allErrorCodesFromLastErrorsOrConditions(this.lastErrors)
+      return errorCodesFromArray(this.lastErrors)
     },
     allErrorCodeShortDescriptions () {
-      return map(this.allErrorCodes, code => get(errorCodes, `${code}.shortDescription`, code))
+      return map(this.allErrorCodes, code => get(errorCodes, [code, 'shortDescription'], code))
     },
     errorCodeShortDescriptionsText () {
       return join(this.allErrorCodeShortDescriptions, ', ')

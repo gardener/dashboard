@@ -56,7 +56,7 @@ import {
   randomLocalMaintenanceBegin,
   generateWorker
 } from '@/utils'
-import { isUserError, allErrorCodesFromLastErrorsOrConditions } from '@/utils/errorCodes'
+import { isUserError, errorCodesFromArray } from '@/utils/errorCodes'
 
 const uriPattern = /^([^:/?#]+:)?(\/\/[^/?#]*)?([^?#]*)(\?[^#]*)?(#.*)?/
 
@@ -411,7 +411,7 @@ const getSortVal = (item, sortBy) => {
       const inProgress = operation.progress !== 100 && operation.state !== 'Failed' && !!operation.progress
       const lastErrors = get(item, 'status.lastErrors', [])
       const isError = operation.state === 'Failed' || lastErrors.length
-      const allErrorCodes = allErrorCodesFromLastErrorsOrConditions(lastErrors)
+      const allErrorCodes = errorCodesFromArray(lastErrors)
       const userError = isUserError(allErrorCodes)
       const ignoredFromReconciliation = isReconciliationDeactivated(get(item, 'metadata', {}))
 
@@ -556,9 +556,9 @@ const setFilteredAndSortedItems = (state, rootState) => {
     if (get(state, 'shootListFilters.userIssues', false)) {
       const predicate = item => {
         const lastErrors = get(item, 'status.lastErrors', [])
-        const allLastErrorCodes = allErrorCodesFromLastErrorsOrConditions(lastErrors)
+        const allLastErrorCodes = errorCodesFromArray(lastErrors)
         const conditions = get(item, 'status.conditions', [])
-        const allConditionCodes = allErrorCodesFromLastErrorsOrConditions(conditions)
+        const allConditionCodes = errorCodesFromArray(conditions)
         return !isUserError(allLastErrorCodes) && !isUserError(allConditionCodes)
       }
       items = filter(items, predicate)
