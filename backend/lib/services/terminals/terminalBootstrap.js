@@ -248,6 +248,11 @@ async function ensureTrustedCertForShootApiServer (client, shootResource) {
   const seedName = getSeedNameFromShoot(shootResource)
   const seedResource = await client['core.gardener.cloud'].seeds.get(seedName)
 
+  if (!seedResource.spec.secretRef) {
+    logger.info(`Bootstrapping Shoot ${namespace}/${name} aborted as 'spec.secretRef' on the seed is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
+    return
+  }
+
   // calculate ingress domain
   const apiServerIngressHost = getKubeApiServerHostForShoot(shootResource, seedResource)
   const seedWildcardIngressDomain = getWildcardIngressDomainForSeed(seedResource)
@@ -305,6 +310,11 @@ async function ensureTrustedCertForGardenTerminalHostApiServer () {
 async function ensureTrustedCertForSeedApiServer (client, seed) {
   const seedName = seed.metadata.name
   const namespace = 'garden'
+
+  if (!seed.spec.secretRef) {
+    logger.info(`Bootstrapping Seed ${seedName} aborted as 'spec.secretRef' on the seed is missing`)
+    return
+  }
 
   const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
 
