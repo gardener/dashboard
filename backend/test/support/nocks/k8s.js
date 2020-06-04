@@ -623,6 +623,31 @@ const stub = {
       .get(`/api/v1/namespaces/${technicalID}/secrets/logging-ingress-credentials`)
       .reply(200, loggingSecretResult)]
   },
+  getSeedInfoNoSecretRef ({
+    bearer,
+    namespace,
+    name,
+    project,
+    kind,
+    region,
+    seedName
+  }) {
+    const shootResult = getShoot({ name, project, kind, region, seed: seedName })
+    shootResult.status.technicalID = `shoot--${project}--${name}`
+
+    const isAdminResult = {
+      status: {
+        allowed: true
+      }
+    }
+
+    return [nockWithAuthorization(bearer)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
+      .reply(200, () => shootResult)
+      .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
+      .reply(200, () => isAdminResult)
+    ]
+  },
   replaceShoot ({ bearer, namespace, name, project, createdBy }) {
     const shoot = getShoot({ name, project, createdBy })
     return nockWithAuthorization(bearer)
