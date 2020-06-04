@@ -202,6 +202,7 @@ export default {
         { text: 'STATUS', value: 'lastOperation', align: 'left', checked: false, defaultChecked: true, hidden: false },
         { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
         { text: 'READINESS', value: 'readiness', sortable: true, align: 'center', checked: false, defaultChecked: true, hidden: false },
+        { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: false },
         { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
         { text: 'JOURNAL LABELS', value: 'journalLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
         { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
@@ -302,6 +303,10 @@ export default {
           case 'project':
             header.hidden = !!this.projectScope
             break
+          case 'accessRestrictions': {
+            header.hidden = !this.cfg.accessRestriction
+            break
+          }
           default:
             if (get(header, 'adminOnly', false)) {
               header.hidden = !this.isAdmin

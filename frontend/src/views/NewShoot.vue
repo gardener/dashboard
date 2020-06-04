@@ -53,16 +53,27 @@ limitations under the License.
             ></new-shoot-infrastructure-details>
         </v-card-text>
       </v-card>
+      <v-card flat class="mt-4" v-if="cfg.accessRestriction">
+        <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
+         Access Restrictions
+        </v-card-title>
+        <v-card-text>
+          <access-restrictions
+            ref="accessRestrictions"
+            :userInterActionBus="userInterActionBus"
+          ></access-restrictions>
+        </v-card-text>
+      </v-card>
       <v-card flat class="mt-4">
         <v-card-title class="subtitle-1 white--text cyan darken-2 cardTitle">
           Worker
         </v-card-title>
         <v-card-text>
           <manage-workers
-          ref="manageWorkers"
-          :userInterActionBus="userInterActionBus"
-          @valid="onWorkersValid"
-         ></manage-workers>
+            ref="manageWorkers"
+            :userInterActionBus="userInterActionBus"
+            @valid="onWorkersValid"
+          ></manage-workers>
        </v-card-text>
       </v-card>
       <v-card flat class="mt-4">
@@ -118,6 +129,7 @@ limitations under the License.
 
 import NewShootSelectInfrastructure from '@/components/NewShoot/NewShootSelectInfrastructure'
 import NewShootInfrastructureDetails from '@/components/NewShoot/NewShootInfrastructureDetails'
+import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
 import NewShootDetails from '@/components/NewShoot/NewShootDetails'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
@@ -144,6 +156,7 @@ export default {
   components: {
     NewShootSelectInfrastructure,
     NewShootInfrastructureDetails,
+    AccessRestrictions,
     NewShootDetails,
     ManageShootAddons,
     MaintenanceComponents,
@@ -169,7 +182,8 @@ export default {
   },
   computed: {
     ...mapState([
-      'namespace'
+      'namespace',
+      'cfg'
     ]),
     ...mapGetters([
       'newShootResource',
@@ -261,6 +275,10 @@ export default {
       }
       if (!isEmpty(firewallNetworks)) {
         set(shootResource, 'spec.provider.infrastructureConfig.firewall.networks', firewallNetworks)
+      }
+
+      if (this.$refs.accessRestrictions) {
+        this.$refs.accessRestrictions.applyTo(shootResource)
       }
 
       const { name, kubernetesVersion, purpose } = this.$refs.clusterDetails.getDetailsData()
@@ -362,6 +380,10 @@ export default {
         firewallSize,
         firewallNetworks
       })
+
+      if (this.$refs.accessRestrictions) {
+        this.$refs.accessRestrictions.setAccessRestrictions({ shootResource, cloudProfileName, region })
+      }
 
       const utcBegin = get(shootResource, 'spec.maintenance.timeWindow.begin')
       const k8sUpdates = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', true)

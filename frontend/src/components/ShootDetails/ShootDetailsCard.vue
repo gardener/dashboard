@@ -152,6 +152,27 @@ limitations under the License.
           </v-list-item-content>
         </v-list-item>
       </template>
+      <template v-if="cfg.accessRestriction">
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="cyan darken-2">mdi-earth</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Access Restrictions</v-list-item-subtitle>
+            <v-list-item-title v-if="shootSelectedAccessRestrictions.length" class="d-flex align-center pt-1 flex-wrap">
+              <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+            </v-list-item-title>
+            <v-list-item-title v-else class="d-flex align-center pt-1">
+              No access restrictions configured
+            </v-list-item-title>
+          </v-list-item-content>
+          <v-list-item-action>
+            <access-restrictions-configuration
+              :shootItem="shootItem"></access-restrictions-configuration>
+          </v-list-item-action>
+        </v-list-item>
+      </template>
       <v-divider inset></v-divider>
       <v-list-item>
         <v-list-item-icon>
@@ -184,10 +205,12 @@ limitations under the License.
 
 <script>
 
+import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
 import TimeString from '@/components/TimeString'
 import WorkerGroup from '@/components/ShootWorkers/WorkerGroup'
 import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
+import AccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/AccessRestrictionsConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
@@ -206,10 +229,12 @@ import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
+    AccessRestrictionChips,
     AccountAvatar,
     TimeString,
     WorkerGroup,
     WorkerConfiguration,
+    AccessRestrictionsConfiguration,
     PurposeConfiguration,
     AddonConfiguration,
     ShootVersion,

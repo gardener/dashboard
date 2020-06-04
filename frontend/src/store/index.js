@@ -28,8 +28,10 @@ import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
+import compact from 'lodash/compact'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
@@ -41,7 +43,9 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
+import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
@@ -162,6 +166,95 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
     }
 
     return true
+  }
+}
+
+function mapOptionForInput (optionValue, shootResource) {
+  const key = get(optionValue, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = false
+  const inputInverted = get(optionValue, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  const option = {
+    value
+  }
+  return [key, option]
+}
+
+function mapAccessRestrictionForInput (accessRestrictionDefinition, shootResource) {
+  const key = get(accessRestrictionDefinition, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = false
+  const inputInverted = get(accessRestrictionDefinition, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOptionForInput(option, shootResource))
+  optionsPair = compact(optionsPair)
+  const options = fromPairs(optionsPair)
+
+  const accessRestriction = {
+    value,
+    options
+  }
+  return [key, accessRestriction]
+}
+
+function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    }
+  } = optionDefinition
+
+  const optionVisible = visibleIf === value
+  if (!optionVisible) {
+    return undefined // skip
+  }
+
+  return {
+    key,
+    title,
+    description
+  }
+}
+
+function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { value, options } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    },
+    options: optionDefinitions
+  } = definition
+
+  const accessRestrictionVisible = visibleIf === value
+  if (!accessRestrictionVisible) {
+    return undefined // skip
+  }
+
+  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition: optionDefinition, option: options[optionDefinition.key] })))
+
+  return {
+    key,
+    title,
+    description,
+    options: optionsList
   }
 }
 
@@ -289,6 +382,66 @@ const getters = {
         return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
+    }
+  },
+  accessRestrictionNoItemsTextForCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName: cloudProfile, region }) => {
+      const noItemsText = get(state, 'cfg.accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
+
+      const compiled = template(noItemsText)
+      return compiled({
+        region,
+        cloudProfile
+      })
+    }
+  },
+  accessRestrictionDefinitionsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      if (!cloudProfileName) {
+        return undefined
+      }
+      if (!region) {
+        return undefined
+      }
+
+      const labels = getters.labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      if (isEmpty(labels)) {
+        return undefined
+      }
+
+      const items = get(state, 'cfg.accessRestriction.items')
+      return filter(items, ({ key }) => {
+        if (!key) {
+          return false
+        }
+        return labels[key] === 'true'
+      })
+    }
+  },
+  accessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+
+      let accessRestrictionsMap = map(definitions, definition => mapAccessRestrictionForInput(definition, shootResource))
+      accessRestrictionsMap = compact(accessRestrictionsMap)
+      return fromPairs(accessRestrictionsMap)
+    }
+  },
+  selectedAccessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const accessRestrictions = getters.accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
+
+      return compact(map(definitions, definition => mapAccessRestrictionForDisplay({ definition, accessRestriction: accessRestrictions[definition.key] })))
+    }
+  },
+  labelsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile) {
+        return get(find(cloudProfile.data.regions, { name: region }), 'labels')
+      }
+      return {}
     }
   },
   defaultMachineImageForCloudProfileName (state, getters) {
@@ -1101,5 +1254,6 @@ export {
   getters,
   mutations,
   modules,
-  plugins
+  plugins,
+  mapAccessRestrictionForInput
 }

@@ -89,6 +89,9 @@ limitations under the License.
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="shootConditions"></status-tags>
     </td>
+    <td v-if="this.headerVisible['accessRestrictions']">
+      <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+    </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
@@ -129,6 +132,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
 import Vendor from '@/components/Vendor'
 import ShootStatus from '@/components/ShootStatus'
@@ -154,6 +158,7 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
+    AccessRestrictionChips,
     StatusTags,
     PurposeTag,
     ShootStatus,
