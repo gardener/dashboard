@@ -20,6 +20,7 @@ limitations under the License.
       <v-tooltip
         top
         :disabled="!description"
+        max-width="600px"
       >
         <template v-slot:activator="{ on }">
           <v-chip
@@ -37,6 +38,7 @@ limitations under the License.
         :key="`${key}_${optionsKey}`"
         top
         :disabled="!description"
+        max-width="600px"
       >
         <template v-slot:activator="{ on }">
           <v-chip
@@ -58,7 +60,7 @@ limitations under the License.
 export default {
   props: {
     selectedAccessRestrictions: {
-      type: Object
+      type: Array
     }
   }
 }
