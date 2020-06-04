@@ -36,15 +36,12 @@ import words from 'lodash/words'
 import find from 'lodash/find'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
-import every from 'lodash/every'
 import startsWith from 'lodash/startsWith'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import last from 'lodash/last'
 import sample from 'lodash/sample'
 import compact from 'lodash/compact'
-import uniq from 'lodash/uniq'
-import flatMap from 'lodash/flatMap'
 import store from '../store'
 const uuidv4 = require('uuid/v4')
 
@@ -382,22 +379,6 @@ export function canLinkToSeed ({ namespace, seedName }) {
   return seedName && namespace !== 'garden'
 }
 
-export function isUserError (errorCodes) {
-  if (isEmpty(errorCodes)) {
-    return false
-  }
-
-  const userErrorCodes = [
-    'ERR_INFRA_UNAUTHORIZED',
-    'ERR_INFRA_INSUFFICIENT_PRIVILEGES',
-    'ERR_INFRA_QUOTA_EXCEEDED',
-    'ERR_INFRA_DEPENDENCIES',
-    'ERR_CLEANUP_CLUSTER_RESOURCES',
-    'ERR_INFRA_RESOURCES_DEPLETED',
-    'ERR_CONFIGURATION_PROBLEM'
-  ]
-  return every(errorCodes, errorCode => includes(userErrorCodes, errorCode))
-}
 export function shootHasIssue (shoot) {
   return get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }
@@ -675,10 +656,6 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) 
     default:
       return true
   }
-}
-
-export function allErrorCodesFromLastErrors (lastErrors) {
-  return uniq(compact(flatMap(lastErrors, 'codes')))
 }
 
 export const MEMBER_ROLE_DESCRIPTORS = [

@@ -37,6 +37,7 @@ limitations under the License.
                 :text-color="color"
                 small
                 :color="color">
+                <v-icon v-if="isUserError" small left>mdi-account-alert</v-icon>
                 {{chipText}}
               </v-chip>
             </template>
@@ -46,6 +47,9 @@ limitations under the License.
             </div>
           </v-tooltip>
         </div>
+      </template>
+      <template v-for="errorCodeDescription in errorCodeDescriptions">
+        <h3 class="error--text text-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
       </template>
       <ansi-text :text="tag.message"></ansi-text>
     </g-popper>
@@ -76,6 +80,7 @@ import GPopper from '@/components/GPopper'
 import TimeString from '@/components/TimeString'
 import AnsiText from '@/components/AnsiText'
 import { mapGetters, mapState, mapMutations } from 'vuex'
+import { isUserError, errorCodes } from '@/utils/errorCodes'
 
 export default {
   components: {
@@ -118,8 +123,12 @@ export default {
       return this.generateChipTitle({ name: this.tag.name, timeString: this.lastTransitionString })
     },
     chipTooltip () {
+      let title = this.generateChipTitle({ name: this.tag.name })
+      if (this.isUserError) {
+        title = title.concat(`; ${this.errorCodeShortDescriptionsText}`)
+      }
       return {
-        title: this.generateChipTitle({ name: this.tag.name }),
+        title,
         description: this.tag.description
       }
     },
@@ -140,6 +149,18 @@ export default {
         return true
       }
       return false
+    },
+    isUserError () {
+      return isUserError(this.condition.codes)
+    },
+    allErrorCodeShortDescriptions () {
+      return map(this.condition.codes, code => get(errorCodes, [code, 'shortDescription'], code))
+    },
+    errorCodeShortDescriptionsText () {
+      return join(this.allErrorCodeShortDescriptions, ', ')
+    },
+    errorCodeDescriptions () {
+      return map(this.condition.codes, code => get(errorCodes, [code, 'description'], code))
     },
     popperKeyWithType () {
       return `statusTag_${this.popperKey}`
