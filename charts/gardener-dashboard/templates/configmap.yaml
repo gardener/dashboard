@@ -192,7 +192,8 @@ data:
 {{- if .Values.frontendConfig.accessRestriction }}
       accessRestriction:
         {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
-        noItemsText: {{  .Values.frontendConfig.accessRestriction.noItemsText }}
+        noItemsText: |-
+{{  .Values.frontendConfig.accessRestriction.noItemsText | trim | indent 10 }}
         {{- end }}
         items:
         {{- range .Values.frontendConfig.accessRestriction.items }}
@@ -202,9 +203,15 @@ data:
             title: {{ .display.title }}{{- end }}{{- if .display.description }}
             description: {{ .display.description }}{{- end }}
           input:
-            title: {{ .input.title }}{{- if .input.description }}
-            description: {{ .input.description }}{{- end }}{{- if .input.inverted }}
-            inverted: {{ .input.inverted }}{{- end }}
+            title: |-
+{{ .input.title | trim | indent 14 }}
+            {{- if .input.description }}
+            description: |-
+{{ .input.description | trim | indent 14 }}
+            {{- end }}
+            {{- if .input.inverted }}
+            inverted: {{ .input.inverted }}
+            {{- end }}
           {{- if .options }}
           options:
           {{- range .options }}
@@ -214,9 +221,15 @@ data:
               title: {{ .display.title }}{{- end }}{{- if .display.description }}
               description: {{ .display.description }}{{- end }}
             input:
-              title: {{ .input.title }}{{- if .input.description }}
-              description: {{ .input.description }}{{- end }}{{- if .input.inverted }}
-              inverted: {{ .input.inverted }}{{- end }}
+              title: |-
+{{ .input.title | trim | indent 16 }}
+              {{- if .input.description }}
+              description: |-
+{{ .input.description | trim | indent 16 }}
+              {{- end }}
+              {{- if .input.inverted }}
+              inverted: {{ .input.inverted }}
+              {{- end }}
           {{- end }}
           {{- end }}
         {{- end }}
