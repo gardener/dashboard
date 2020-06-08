@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="statusTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <template v-slot:popperRef>
       <div class="shoot-status-div">
         <v-tooltip top>
@@ -40,36 +40,106 @@ limitations under the License.
               <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
             </div>
           </template>
-          <div>{{ tooltipText }}</div>
+          <div>
+            <span class="font-weight-bold">{{tooltip.title}}</span>
+            <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
+            <div v-for="({ shortDescription, userError }, index) in tooltip.errorCodeObjects" :key="index">
+              <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
+              <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
+            </div>
+          </div>
         </v-tooltip>
       </div>
     </template>
-    <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
-    <template v-if="lastErrorDescriptions.length">
-      <v-divider class="my-2"></v-divider>
-      <h4 class="error--text text-left">Last Errors</h4>
-      <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
-        <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
-          <h3 class="error--text text-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-        </template>
-        <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
-      </div>
-    </template>
+    <v-list>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">info_outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Status</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1">
+            {{statusTitle}}
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-post-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Last Message</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1 message-block">
+            <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1">
+            <lazy-component @show="showPlaceholder=false">
+                <time-string :dateTime="operation.lastUpdateTime" :pointInTime="-1"></time-string>
+             </lazy-component>
+             <v-progress-circular v-if="showPlaceholder" indeterminate size="18" width="1"></v-progress-circular>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+      <template v-if="lastErrorDescriptions.length">
+        <v-divider inset></v-divider>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon color="error">mdi-alert-circle-outline</v-icon>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-subtitle>Last Errors</v-list-item-subtitle>
+            <v-list-item-title class="d-flex flex-column align-left pt-1 message-block">
+              <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
+                <v-divider v-if="index > 0" class="my-2"></v-divider>
+                <v-alert
+                  v-for="({ description, userError }, index) in lastErrorDescription.errorCodeObjects" :key="index"
+                  color="error"
+                  dark
+                  :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
+                  :prominent="!!userError ? true : false"
+                >
+                  <h4 v-if="userError">Action required</h4>
+                  {{description}}
+                </v-alert>
+                <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
+              </div>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-list>
   </g-popper>
 </template>
 
 <script>
 import GPopper from '@/components/GPopper'
 import AnsiText from '@/components/AnsiText'
-import get from 'lodash/get'
 import map from 'lodash/map'
 import join from 'lodash/join'
-import { isUserError, errorCodes, errorCodesFromArray } from '@/utils/errorCodes'
+import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
+import VueLazyload from 'vue-lazyload'
+import Vue from 'vue'
+import TimeString from '@/components/TimeString'
+
+Vue.use(VueLazyload, {
+  lazyComponent: true
+})
 
 export default {
   components: {
     GPopper,
-    AnsiText
+    AnsiText,
+    TimeString
   },
   props: {
     operation: {
@@ -104,6 +174,11 @@ export default {
       type: String
     }
   },
+  data () {
+    return {
+      showPlaceholder: true
+    }
+  },
   computed: {
     showProgress () {
       return this.operationState === 'Processing'
@@ -129,17 +204,11 @@ export default {
     lastErrorDescriptions () {
       return map(this.lastErrors, lastError => ({
         description: lastError.description,
-        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, [code, 'description'], code))
+        errorCodeObjects: objectsFromErrorCodes(lastError.codes)
       }))
     },
     allErrorCodes () {
       return errorCodesFromArray(this.lastErrors)
-    },
-    allErrorCodeShortDescriptions () {
-      return map(this.allErrorCodes, code => get(errorCodes, [code, 'shortDescription'], code))
-    },
-    errorCodeShortDescriptionsText () {
-      return join(this.allErrorCodeShortDescriptions, ', ')
     },
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
@@ -163,16 +232,12 @@ export default {
 
       return join(statusTitle, ', ')
     },
-    tooltipText () {
-      let tooltipText = this.statusTitle
-      if (this.showProgress) {
-        tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
+    tooltip () {
+      return {
+        title: this.statusTitle,
+        progress: this.showProgress ? this.operation.progress : undefined,
+        errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes)
       }
-      if (this.isUserError) {
-        tooltipText = tooltipText.concat(`; ${this.errorCodeShortDescriptionsText}`)
-      }
-
-      return tooltipText
     },
     popperMessage () {
       let message = this.operation.description
@@ -200,7 +265,7 @@ export default {
   },
   methods: {
     emitExtendedTitle (statusTitle) {
-      // similar to tooltipText, except the progress is missing
+      // similar to tooltip, except the progress is missing
       let extendedTitle = statusTitle
       if (this.isUserError) {
         extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
@@ -272,6 +337,18 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
+  }
+
+  ::v-deep .v-card  {
+    .v-card__text {
+      padding: 0px;
+      text-align: left;
+    }
+  }
+
+  .message-block {
+    max-height: 250px;
+    overflow-y: scroll;
   }
 
 </style>
