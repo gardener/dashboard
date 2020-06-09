@@ -20,7 +20,7 @@ const pEvent = require('p-event')
 const logger = require('../logger')
 const { Store } = require('../kubernetes-client/cache')
 const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
-const createJournalCache = require('./journals')
+const createTicketCache = require('./tickets')
 
 async function initializeStoreSynchronization (store, cachable) {
   const { scope, name } = cachable.constructor
@@ -43,7 +43,7 @@ class Cache {
     this.seeds = new Store()
     this.quotas = new Store()
     this.projects = new Store()
-    this.journalCache = createJournalCache()
+    this.ticketCache = createTicketCache()
   }
 
   /*
@@ -83,8 +83,8 @@ class Cache {
     return this.list('projects')
   }
 
-  getJournalCache () {
-    return this.journalCache
+  getTicketCache () {
+    return this.ticketCache
   }
 }
 
@@ -133,7 +133,7 @@ module.exports = {
     }
     return project
   },
-  getJournalCache () {
-    return cache.getJournalCache()
+  getTicketCache () {
+    return cache.getTicketCache()
   }
 }

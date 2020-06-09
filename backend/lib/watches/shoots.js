@@ -19,17 +19,17 @@
 const logger = require('../logger')
 const { registerHandler } = require('./common')
 const { shootHasIssue } = require('../utils')
-const { journals } = require('../services')
+const { tickets } = require('../services')
 const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
 const { bootstrapper } = require('../services/terminals')
 
-async function deleteJournals ({ namespace, name }) {
+async function deleteTickets ({ namespace, name }) {
   try {
-    await journals.deleteJournals({ namespace, name })
+    await tickets.deleteTickets({ namespace, name })
   } catch (error) {
-    logger.error('failed to delete journals for %s/%s: %s', namespace, name, error)
+    logger.error('failed to delete tickets for %s/%s: %s', namespace, name, error)
   }
 }
 
@@ -83,7 +83,7 @@ module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
         if (bootstrapper.isResourcePending(object)) {
           bootstrapper.removePendingResource(object)
         }
-        deleteJournals(object.metadata)
+        deleteTickets(object.metadata)
         break
     }
   })

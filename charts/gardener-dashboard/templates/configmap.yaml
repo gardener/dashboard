@@ -149,8 +149,10 @@ data:
         url: {{ .url }}
       {{- end }}
 {{- end }}
-{{- if .Values.frontendConfig.gitHubRepoUrl }}
-      gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
+{{- if .Values.frontendConfig.ticket }}
+      ticket:
+        hideClustersWithLabel: {{ .Values.frontendConfig.ticket.hideClustersWithLabel }}
+        gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
 {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}

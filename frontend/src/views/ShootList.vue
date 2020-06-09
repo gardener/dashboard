@@ -115,15 +115,15 @@ limitations under the License.
                 </v-list-item-content>
               </v-list-item>
               <v-list-item
-                @click.stop="toggleFilter('hasJournals')"
+                @click.stop="toggleFilter('hideTicketsWithLabel')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass"
                 v-if="!!gitHubRepoUrl">
                 <v-list-item-action>
-                  <v-icon :color="checkboxColor(isFilterActive('hasJournals'))" v-text="checkboxIcon(isFilterActive('hasJournals'))"/>
+                  <v-icon :color="checkboxColor(isFilterActive('hideTicketsWithLabel'))" v-text="checkboxIcon(isFilterActive('hideTicketsWithLabel'))"/>
                 </v-list-item-action>
                 <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide clusters with journal entries</v-list-item-title>
+                  <v-list-item-title>Hide clusters with <code class="code">{{hideClustersWithLabel}}</code> ticket label</v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </template>
@@ -203,8 +203,8 @@ export default {
         { text: 'VERSION', value: 'k8sVersion', align: 'center', checked: false, defaultChecked: true, hidden: false },
         { text: 'READINESS', value: 'readiness', sortable: true, align: 'center', checked: false, defaultChecked: true, hidden: false },
         { text: 'ACCESS RESTRICTIONS', value: 'accessRestrictions', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: false },
-        { text: 'JOURNAL', value: 'journal', sortable: false, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
-        { text: 'JOURNAL LABELS', value: 'journalLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
+        { text: 'TICKET', value: 'ticket', sortable: true, align: 'left', checked: false, defaultChecked: false, hidden: false, adminOnly: true },
+        { text: 'TICKET LABELS', value: 'ticketLabels', sortable: false, align: 'left', checked: false, defaultChecked: true, hidden: false, adminOnly: true },
         { text: 'ACTIONS', value: 'actions', sortable: false, align: 'right', checked: false, defaultChecked: true, hidden: false }
       ],
       dialog: null,
@@ -293,9 +293,9 @@ export default {
     setColumnVisibility () {
       for (const header of this.allHeaders) {
         switch (header.value) {
-          case 'journalLabels':
-          case 'journal':
-            header.hidden = !(this.gitHubRepoUrl && this.isAdmin)
+          case 'ticketLabels':
+          case 'ticket':
+            header.hidden = !this.gitHubRepoUrl
             break
           case 'actions':
             header.hidden = !(this.canDeleteShoots || this.canGetSecrets)
@@ -404,14 +404,17 @@ export default {
         if (this.isFilterActive('deactivatedReconciliation')) {
           subtitle.push('Deactivated Reconciliation')
         }
-        if (this.isFilterActive('hasJournals')) {
-          subtitle.push('Has Journals')
+        if (this.isFilterActive('hideTicketsWithLabel')) {
+          subtitle.push('Has Tickets')
         }
       }
       return join(subtitle, ', ')
     },
     gitHubRepoUrl () {
-      return this.cfg.gitHubRepoUrl
+      return get(this.cfg, 'ticket.gitHubRepoUrl')
+    },
+    hideClustersWithLabel () {
+      return get(this.cfg, 'ticket.hideClustersWithLabel')
     }
   },
   mounted () {
@@ -422,7 +425,7 @@ export default {
       progressing: true,
       userIssues: this.isAdmin,
       deactivatedReconciliation: this.isAdmin,
-      hasJournals: false
+      hideTicketsWithLabel: false
     })
   },
   beforeRouteEnter (to, from, next) {
@@ -482,6 +485,10 @@ export default {
 
   .v-input__slot {
     margin: 0px;
+  }
+
+  code {
+    box-shadow: none !important;
   }
 
 </style>

@@ -19,7 +19,7 @@ const _ = require('lodash')
 const { EventEmitter } = require('events')
 const fnv = require('fnv-plus')
 const { cache } = require('../../lib/cache')
-const createJournalCache = require('../../lib/cache/journals')
+const createTicketCache = require('../../lib/cache/tickets')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed ({
@@ -149,11 +149,11 @@ const stub = {
     const getQuotasStub = sandbox.stub(cache, 'getQuotas')
     getQuotasStub.returns(quotaList)
   },
-  getJournalCache (sandbox) {
-    const getJournalCacheStub = sandbox.stub(cache, 'getJournalCache')
-    const journalCache = createJournalCache()
-    getJournalCacheStub.returns(journalCache)
-    return journalCache
+  getTicketCache (sandbox) {
+    const getTicketCacheStub = sandbox.stub(cache, 'getTicketCache')
+    const ticketCache = createTicketCache()
+    getTicketCacheStub.returns(ticketCache)
+    return ticketCache
   }
 }
 
@@ -200,7 +200,7 @@ function createReconnectorStub (events = [], name) {
 
 module.exports = {
   stub,
-  createJournalCache,
+  createTicketCache,
   createReconnectorStub,
   getKubeApiServer,
   getSeed

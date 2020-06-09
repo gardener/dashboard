@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const common = require('../support/common')
 const { createHubSignature } = require('../../lib/github/webhook')
-const { loadOpenIssues } = require('../../lib/services/journals')
+const { loadOpenIssues } = require('../../lib/services/tickets')
 
 class CacheEvent {
   constructor ({ cache, type, id, timeout = 1000 }) {
@@ -65,7 +65,7 @@ module.exports = function ({ agent, sandbox, github }) {
   let cache
 
   beforeEach(async function () {
-    cache = common.stub.getJournalCache(sandbox)
+    cache = common.stub.getTicketCache(sandbox)
     github.stub.getIssues({state: 'open'})
     await loadOpenIssues()
   })

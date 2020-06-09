@@ -42,7 +42,7 @@ limitations under the License.
           </v-toolbar>
           <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
         </v-card>
-        <shoot-journals-card v-if="isAdmin" :journals="journals" :shootItem="shootItem" class="mt-4"></shoot-journals-card>
+        <tickets-card :tickets="tickets" :shootItem="shootItem" class="mt-4"></tickets-card>
       </v-col>
     </v-row>
   </v-container>
@@ -50,9 +50,9 @@ limitations under the License.
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import TicketsCard from '@/components/TicketsCard'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 import ShootAddonKymaCard from '@/components/ShootDetails/ShootAddonKymaCard'
-import ShootJournalsCard from '@/components/ShootDetails/ShootJournalsCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
 import ShootLogging from '@/components/ShootDetails/ShootLogging'
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
@@ -74,7 +74,7 @@ export default {
     ShootLifecycleCard,
     ShootAccessCard,
     ShootAddonKymaCard,
-    ShootJournalsCard,
+    TicketsCard,
     ShootMonitoringCard,
     ShootLogging,
     ShootExternalToolsCard
@@ -83,8 +83,7 @@ export default {
   computed: {
     ...mapGetters([
       'shootByNamespaceAndName',
-      'journalsByNamespaceAndName',
-      'isAdmin',
+      'ticketsByNamespaceAndName',
       'isKymaFeatureEnabled',
       'canGetSecrets'
     ]),
@@ -105,9 +104,9 @@ export default {
       const adminCredentialsAvailable = !!this.seedInfo.logging_username && !!this.seedInfo.logging_password
       return userCredentialsAvailable || adminCredentialsAvailable
     },
-    journals () {
+    tickets () {
       const params = this.$route.params
-      return this.journalsByNamespaceAndName(params)
+      return this.ticketsByNamespaceAndName(params)
     },
     isKymaAddonEnabled () {
       return has(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')

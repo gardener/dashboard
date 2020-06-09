@@ -77,12 +77,12 @@ function writeValues (filename, values = {}) {
           url: 'https://apps.garden.example.org/foo/bar{?namespace,name}'
         }
       ],
-      gitHubRepoUrl: 'https://github.com/gardener/journals'
+      gitHubRepoUrl: 'https://github.com/gardener/tickets'
     },
     gitHub: {
       apiUrl: 'https://github.com/api/v3/',
       org: 'gardener',
-      repository: 'journals',
+      repository: 'tickets',
       webhookSecret: 'webhookSecret',
       authentication: {
         token: 'webhookAuthenticationToken'

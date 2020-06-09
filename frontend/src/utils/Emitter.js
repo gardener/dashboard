@@ -235,7 +235,7 @@ class ShootSubscription extends AbstractSubscription {
   }
 }
 
-class AbstractJournalsSubscription extends AbstractSubscription {
+class AbstractTicketsSubscription extends AbstractSubscription {
   constructor (connector) {
     super(connector)
 
@@ -245,60 +245,49 @@ class AbstractJournalsSubscription extends AbstractSubscription {
   }
 }
 
-class IssuesSubscription extends AbstractJournalsSubscription {
+class IssuesSubscription extends AbstractTicketsSubscription {
   onConnect () {
     super.onConnect()
 
-    if (store.getters.isAdmin && !this.subscribedTo) {
+    if (!this.subscribedTo) {
       this.subscribeIssues()
     }
   }
 
   subscribeIssues () {
-    if (store.getters.isAdmin) {
-      this.subscribeOnNextTrigger({}) // no need to pass any parameter, except an empty object; could be improved
-      this.subscribe()
-    }
+    this.subscribeOnNextTrigger({}) // no need to pass any parameter, except an empty object; could be improved
+    this.subscribe()
   }
 
   async _subscribe () {
-    if (store.getters.isAdmin) {
-      await Promise.all([
-        store.dispatch('clearIssues')
-      ])
+    await Promise.all([
+      store.dispatch('clearIssues')
+    ])
 
-      this.socket.emit('subscribeIssues')
-      return true
-    }
-    return false
+    this.socket.emit('subscribeIssues')
+    return true
   }
 }
 
-class CommentsSubscription extends AbstractJournalsSubscription {
+class CommentsSubscription extends AbstractTicketsSubscription {
   subscribeComments ({ name, namespace }) {
     this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
   }
 
   async _subscribe () {
-    if (store.getters.isAdmin) {
-      await Promise.all([
-        store.dispatch('clearComments')
-      ])
+    await Promise.all([
+      store.dispatch('clearComments')
+    ])
 
-      const { name, namespace } = this.subscribeTo
-      this.socket.emit('subscribeComments', { name, namespace })
-      return true
-    }
-    return false
+    const { name, namespace } = this.subscribeTo
+    this.socket.emit('subscribeComments', { name, namespace })
+    return true
   }
 
   _unsubscribe () {
-    if (store.getters.isAdmin) {
-      this.socket.emit('unsubscribeComments')
-      return true
-    }
-    return false
+    this.socket.emit('unsubscribeComments')
+    return true
   }
 }
 
@@ -310,16 +299,16 @@ const socketConfig = {
 }
 
 const shootsConnector = new Connector(io(`${url}/shoots`, socketConfig))
-const journalsConnector = new Connector(io(`${url}/journals`, socketConfig))
+const ticketsConnector = new Connector(io(`${url}/tickets`, socketConfig))
 
 const shootsEmitter = Emitter(new ShootsSubscription(shootsConnector))
 const shootEmitter = Emitter(new ShootSubscription(shootsConnector))
-const journalIssuesEmitter = Emitter(new IssuesSubscription(journalsConnector))
-const journalCommentsEmitter = Emitter(new CommentsSubscription(journalsConnector))
+const ticketIssuesEmitter = Emitter(new IssuesSubscription(ticketsConnector))
+const ticketCommentsEmitter = Emitter(new CommentsSubscription(ticketsConnector))
 
 /* Web Socket Connection */
 
-forEach([shootsConnector, journalsConnector], connector => {
+forEach([shootsConnector, ticketsConnector], connector => {
   const socket = connector.socket
   socket.on('connect', attempt => connector.onConnect(attempt))
   socket.on('reconnect', attempt => connector.onConnect(attempt))
@@ -356,18 +345,16 @@ forEach([shootsConnector, journalsConnector], connector => {
 const wrapper = {
   connect (forceful) {
     shootsConnector.connect()
-    if (store.getters.isAdmin) {
-      journalsConnector.connect()
-    }
+    ticketsConnector.connect()
   },
   disconnect () {
     shootsConnector.disconnect()
-    journalsConnector.disconnect()
+    ticketsConnector.disconnect()
   },
   shootsEmitter,
   shootEmitter,
-  journalIssuesEmitter,
-  journalCommentsEmitter
+  ticketIssuesEmitter,
+  ticketCommentsEmitter
 }
 
 export default wrapper

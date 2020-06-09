@@ -17,7 +17,7 @@
 'use strict'
 
 const _ = require('lodash')
-const createJournalCache = require('../lib/cache/journals')
+const createTicketCache = require('../lib/cache/tickets')
 
 function timestamp (secondsFromNow = 0) {
   return new Date(Date.now() + secondsFromNow * 1000).toISOString().replace(/\.\d+Z$/, 'Z')
@@ -48,7 +48,7 @@ function createComment ({ number, id, updatedAt }) {
 
 describe('cache', function () {
   /* eslint no-unused-expressions: 0 */
-  describe('journals', function () {
+  describe('tickets', function () {
     const sandbox = sinon.createSandbox()
     const firstIssue = createIssue({ number: 1 })
     const secondIssue = createIssue({ number: 2 })
@@ -60,7 +60,7 @@ describe('cache', function () {
     let emitSpy
 
     beforeEach(function () {
-      cache = createJournalCache()
+      cache = createTicketCache()
       emitter = cache.emitter
       emitSpy = sandbox.spy(emitter, 'emit')
       cache.addOrUpdateIssues({ issues: allIssues })

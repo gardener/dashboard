@@ -149,9 +149,9 @@ describe('cache', function () {
       })
     })
 
-    describe('#getJournalCache', function () {
-      it('should return the journal cache', function () {
-        expect(cache.getJournalCache()).to.equal(cache.journalCache)
+    describe('#getTicketCache', function () {
+      it('should return the ticket cache', function () {
+        expect(cache.getTicketCache()).to.equal(cache.ticketCache)
       })
     })
   })

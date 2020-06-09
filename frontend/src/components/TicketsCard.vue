@@ -16,24 +16,24 @@ limitations under the License.
 
 <template>
   <div v-if="gitHubRepoUrl">
-    <template v-if="journals.length">
-      <v-card v-for="journal in journals" :key="journal.metadata.issueNumber">
-        <journal :journal="journal"></journal>
+    <template v-if="tickets.length">
+      <v-card v-for="ticket in tickets" :key="ticket.metadata.issueNumber">
+        <ticket :ticket="ticket"></ticket>
       </v-card>
       <div class="d-flex align-center justify-center mt-4">
-        <v-btn text color="cyan darken-2" :href="createJournalLink" target="_blank" title="Create Journal">
-          <span class="pr-2">Create Journal</span>
+        <v-btn text color="cyan darken-2" :href="createTicketLink" target="_blank" title="Create Ticket">
+          <span class="pr-2">Create Ticket</span>
           <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
       </div>
     </template>
     <v-card v-else>
       <v-toolbar flat dark dense color="cyan darken-2">
-        <v-toolbar-title class="subtitle-1">Journal</v-toolbar-title>
+        <v-toolbar-title class="subtitle-1">Ticket</v-toolbar-title>
       </v-toolbar>
       <v-card-actions class="d-flex justify-center">
-        <v-btn text color="cyan darken-2" :href="createJournalLink" target="_blank" title="Create Journal">
-          <span class="pr-2">Create Journal</span>
+        <v-btn text color="cyan darken-2" :href="createTicketLink" target="_blank" title="Create Ticket">
+          <span class="pr-2">Create Ticket</span>
           <v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon>
         </v-btn>
       </v-card-actions>
@@ -47,7 +47,7 @@ import join from 'lodash/join'
 import map from 'lodash/map'
 import compact from 'lodash/compact'
 import { mapState } from 'vuex'
-import Journal from '@/components/ShootJournals/Journal'
+import Ticket from '@/components/ShootTickets/Ticket'
 import { canLinkToSeed } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
@@ -57,10 +57,10 @@ function code (value) {
 
 export default {
   components: {
-    Journal
+    Ticket
   },
   props: {
-    journals: {
+    tickets: {
       type: Array
     },
     shootItem: {
@@ -78,12 +78,12 @@ export default {
       return join(errorConditions, '\n')
     },
     gitHubRepoUrl () {
-      return this.cfg.gitHubRepoUrl
+      return get(this.cfg, 'ticket.gitHubRepoUrl')
     },
     canLinkToSeed () {
       return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
-    createJournalLink () {
+    createTicketLink () {
       const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
 
       const dashboardShootLink = `**Shoot:** [${this.shootNamespace}/${this.shootName}](${url})`
@@ -99,7 +99,7 @@ export default {
       shootLastErrorDescriptions = join(shootLastErrorDescriptions, '\n')
       const lastError = `**Last Errors:** ${shootLastErrorDescriptions || '-'}`
 
-      const journalTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
+      const ticketTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
       const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}
@@ -109,7 +109,7 @@ ${lastOperation}
 ${lastError}
 ${this.errorConditions}`)
 
-      return `${this.gitHubRepoUrl}/issues/new?title=${journalTitle}&body=${body}`
+      return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}`
     }
   }
 }
