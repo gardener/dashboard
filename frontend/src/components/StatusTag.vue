@@ -40,8 +40,7 @@ limitations under the License.
               </v-chip>
             </template>
             <span class="font-weight-bold">{{chipTooltip.title}}</span>
-            <div v-for="({ shortDescription, userError }, index) in chipTooltip.errorCodeObjects" :key="index">
-              <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
+            <div v-for="({ shortDescription }, index) in chipTooltip.userErrorCodeObjects" :key="index">
               <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
             </div>
             <div v-if="chipTooltip.description">
@@ -73,6 +72,7 @@ import snakeCase from 'lodash/snakeCase'
 import includes from 'lodash/includes'
 import upperFirst from 'lodash/upperFirst'
 import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
 
 import GPopper from '@/components/GPopper'
 import ShootMessageDetails from '@/components/ShootMessageDetails'
@@ -137,7 +137,7 @@ export default {
       return {
         title: this.chipTitle,
         description: this.tag.description,
-        errorCodeObjects: objectsFromErrorCodes(this.tag.codes)
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
       }
     },
     isError () {

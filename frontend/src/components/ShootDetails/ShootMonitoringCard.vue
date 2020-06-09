@@ -37,10 +37,12 @@ limitations under the License.
               :reconciliationDeactivated="isShootReconciliationDeactivated"
               :shootDeleted="isShootLastOperationTypeDelete"
               popperPlacement="bottom"
-              @titleChange="onShootStatusTitleChange">
+              showStatusText
+              >
+              <template v-slot:retryButtonSlot>
+                <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
+              </template>
             </shoot-status>
-            <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
-            {{shootStatusTitle}}
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
@@ -96,11 +98,6 @@ export default {
     }
   },
   mixins: [shootItem],
-  data () {
-    return {
-      shootStatusTitle: ''
-    }
-  },
   computed: {
     ...mapGetters([
       'canGetSecrets'
@@ -113,11 +110,6 @@ export default {
         return 'Cluster Metrics not available'
       }
       return undefined
-    }
-  },
-  methods: {
-    onShootStatusTitleChange (shootStatusTitle) {
-      this.shootStatusTitle = shootStatusTitle
     }
   }
 }

@@ -79,8 +79,10 @@ limitations under the License.
          :isHibernationProgressing="isShootStatusHibernationProgressing"
          :reconciliationDeactivated="isShootReconciliationDeactivated"
          :shootDeleted="isTypeDelete">
+          <template v-slot:retryButtonSlot>
+            <retry-operation :shootItem="shootItem"></retry-operation>
+          </template>
         </shoot-status>
-        <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">

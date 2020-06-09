@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <g-popper :title="statusTitle" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <template v-slot:popperRef>
-      <div class="shoot-status-div">
+      <div class="shoot-status-div d-flex flex-row">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
@@ -43,13 +43,21 @@ limitations under the License.
           <div>
             <span class="font-weight-bold">{{tooltip.title}}</span>
             <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
-            <div v-for="({ shortDescription, userError }, index) in tooltip.errorCodeObjects" :key="index">
+            <div v-for="({ shortDescription }, index) in tooltip.userErrorCodeObjects" :key="index">
               <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
               <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
             </div>
           </div>
         </v-tooltip>
+        <slot name="retryButtonSlot"></slot>
+        <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
+      <template v-if="showStatusText && tooltip.userErrorCodeObjects.length">
+        <div v-for="({ shortDescription }, index) in tooltip.userErrorCodeObjects" :key="index">
+          <span class="font-weight-bold error--text">{{shortDescription}} - Action required</span>
+        </div>
+        <span class="error--text">Please click on the user error icon for more information.</span>
+      </template>
     </template>
     <shoot-message-details
       :statusTitle="statusTitle"
@@ -65,6 +73,7 @@ import GPopper from '@/components/GPopper'
 import ShootMessageDetails from '@/components/ShootMessageDetails'
 import join from 'lodash/join'
 import map from 'lodash/map'
+import filter from 'lodash/filter'
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
@@ -103,6 +112,10 @@ export default {
     },
     popperPlacement: {
       type: String
+    },
+    showStatusText: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -156,7 +169,7 @@ export default {
       return {
         title: this.statusTitle,
         progress: this.showProgress ? this.operation.progress : undefined,
-        errorCodeObjects: objectsFromErrorCodes(this.allErrorCodes)
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
       }
     },
     operationType () {
@@ -187,25 +200,6 @@ export default {
         return undefined
       }
       return message
-    }
-  },
-  methods: {
-    emitExtendedTitle (statusTitle) {
-      // similar to tooltip, except the progress is missing
-      let extendedTitle = statusTitle
-      if (this.isUserError) {
-        extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
-      }
-
-      this.$emit('titleChange', extendedTitle)
-    }
-  },
-  mounted () {
-    this.emitExtendedTitle(this.statusTitle)
-  },
-  watch: {
-    statusTitle (statusTitle) {
-      this.emitExtendedTitle(statusTitle)
     }
   }
 }
