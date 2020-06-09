@@ -40,7 +40,7 @@ export function objectsFromErrorCodes (errorCodesArray) {
   return map(errorCodesArray, code => get(errorCodes, code, { code }))
 }
 
-export const errorCodes = {
+const errorCodes = {
   ERR_INFRA_UNAUTHORIZED: {
     shortDescription: 'Invalid Credentials',
     description: 'Invalid cloud provider credentials.',

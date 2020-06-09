@@ -52,9 +52,10 @@ limitations under the License.
       </div>
     </template>
     <shoot-message-details
-      :operation="operation"
       :statusTitle="statusTitle"
-      :lastErrors="lastErrors"
+      :lastMessage="lastMessage"
+      :errorDescriptions="errorDescriptions"
+      :lastUpdateTime="operation.lastUpdateTime"
     />
   </g-popper>
 </template>
@@ -63,6 +64,7 @@ limitations under the License.
 import GPopper from '@/components/GPopper'
 import ShootMessageDetails from '@/components/ShootMessageDetails'
 import join from 'lodash/join'
+import map from 'lodash/map'
 import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
 
 export default {
@@ -171,6 +173,20 @@ export default {
       } else {
         return 'cyan darken-2'
       }
+    },
+    errorDescriptions () {
+      return map(this.lastErrors, lastError => ({
+        description: lastError.description,
+        errorCodeObjects: objectsFromErrorCodes(lastError.codes)
+      }))
+    },
+    lastMessage () {
+      let message = this.operation.description
+      message = message || 'No description'
+      if (message === this.lastErrorDescription) {
+        return undefined
+      }
+      return message
     }
   },
   methods: {

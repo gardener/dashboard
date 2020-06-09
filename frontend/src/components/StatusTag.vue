@@ -18,10 +18,8 @@ limitations under the License.
   <div v-if="visible">
     <g-popper
       @input="onPopperInput"
-      @rendered="popperRendered=true"
       :title="chipTitle"
       :toolbarColor="color"
-      :time="{ caption: 'Last updated:', dateTime: tag.lastUpdateTime }"
       :popperKey="popperKeyWithType"
       :placement="popperPlacement"
       :disabled="!tag.message">
@@ -42,25 +40,24 @@ limitations under the License.
               </v-chip>
             </template>
             <span class="font-weight-bold">{{chipTooltip.title}}</span>
+            <div v-for="({ shortDescription, userError }, index) in chipTooltip.errorCodeObjects" :key="index">
+              <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
+              <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
+            </div>
             <div v-if="chipTooltip.description">
               {{chipTooltip.description}}
             </div>
           </v-tooltip>
         </div>
       </template>
-      <template v-for="errorCodeDescription in errorCodeDescriptions">
-        <h3 class="error--text text-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-      </template>
-      <ansi-text :text="tag.message"></ansi-text>
+      <shoot-message-details
+        :statusTitle="chipTitle"
+        :lastMessage="nonErrorMessage"
+        :errorDescriptions="errorDescriptions"
+        :lastUpdateTime="tag.lastUpdateTime"
+        :lastTransitionTime="tag.lastTransitionTime"
+      />
     </g-popper>
-    <time-string
-      v-if="popperRendered"
-      v-show="false"
-      :dateTime="tag.lastTransitionTime"
-      :currentString.sync="lastTransitionString"
-      :pointInTime="-1"
-      :withoutPrefixOrSuffix="true">
-    </time-string>
   </div>
 </template>
 
@@ -75,18 +72,17 @@ import first from 'lodash/first'
 import snakeCase from 'lodash/snakeCase'
 import includes from 'lodash/includes'
 import upperFirst from 'lodash/upperFirst'
+import isEmpty from 'lodash/isEmpty'
 
 import GPopper from '@/components/GPopper'
-import TimeString from '@/components/TimeString'
-import AnsiText from '@/components/AnsiText'
+import ShootMessageDetails from '@/components/ShootMessageDetails'
 import { mapGetters, mapState, mapMutations } from 'vuex'
-import { isUserError, errorCodes } from '@/utils/errorCodes'
+import { isUserError, objectsFromErrorCodes } from '@/utils/errorCodes'
 
 export default {
   components: {
     GPopper,
-    TimeString,
-    AnsiText
+    ShootMessageDetails
   },
   props: {
     condition: {
@@ -103,8 +99,6 @@ export default {
   },
   data () {
     return {
-      popperRendered: false,
-      lastTransitionString: undefined,
       popperVisible: false
     }
   },
@@ -120,20 +114,34 @@ export default {
       return this.tag.shortName || ''
     },
     chipTitle () {
-      return this.generateChipTitle({ name: this.tag.name, timeString: this.lastTransitionString })
+      let errorState
+      const name = this.tag.name
+
+      if (this.isError) {
+        errorState = 'ERROR'
+      }
+      if (this.isUnknown) {
+        errorState = 'UNKNOWN'
+      }
+      if (this.isProgressing) {
+        errorState = 'PROGRESSING'
+      }
+
+      if (!errorState) {
+        return name
+      }
+
+      return `${name} [${errorState}]`
     },
     chipTooltip () {
-      let title = this.generateChipTitle({ name: this.tag.name })
-      if (this.isUserError) {
-        title = title.concat(`; ${this.errorCodeShortDescriptionsText}`)
-      }
       return {
-        title,
-        description: this.tag.description
+        title: this.chipTitle,
+        description: this.tag.description,
+        errorCodeObjects: objectsFromErrorCodes(this.tag.codes)
       }
     },
     isError () {
-      if (this.tag.status === 'False') {
+      if (this.tag.status === 'False' || !isEmpty(this.tag.codes)) {
         return true
       }
       return false
@@ -151,26 +159,34 @@ export default {
       return false
     },
     isUserError () {
-      return isUserError(this.condition.codes)
+      return isUserError(this.tag.codes)
     },
-    allErrorCodeShortDescriptions () {
-      return map(this.condition.codes, code => get(errorCodes, [code, 'shortDescription'], code))
+    errorDescriptions () {
+      if (this.isError) {
+        return [
+          {
+            description: this.tag.message,
+            errorCodeObjects: objectsFromErrorCodes(this.tag.codes)
+          }
+        ]
+      }
+      return undefined
     },
-    errorCodeShortDescriptionsText () {
-      return join(this.allErrorCodeShortDescriptions, ', ')
-    },
-    errorCodeDescriptions () {
-      return map(this.condition.codes, code => get(errorCodes, [code, 'description'], code))
+    nonErrorMessage () {
+      if (!this.isError) {
+        return this.tag.message
+      }
+      return undefined
     },
     popperKeyWithType () {
       return `statusTag_${this.popperKey}`
     },
     tag () {
-      const { lastTransitionTime, lastUpdateTime, message, status, type } = this.condition
+      const { lastTransitionTime, lastUpdateTime, message, status, type, codes } = this.condition
       const id = type
       const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
 
-      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status }
+      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status, codes }
     },
     color () {
       if (this.isError) {
@@ -201,30 +217,6 @@ export default {
     ...mapMutations([
       'setCondition'
     ]),
-    generateChipTitle ({ name, timeString }) {
-      let since = ''
-      let errorState
-
-      if (this.isError) {
-        errorState = 'ERROR'
-      }
-      if (this.isUnknown) {
-        errorState = 'UNKNOWN'
-      }
-      if (this.isProgressing) {
-        errorState = 'PROGRESSING'
-      }
-
-      if (!errorState) {
-        return name
-      }
-
-      if (timeString) {
-        since = ` since ${timeString}`
-      }
-
-      return `${name} [${errorState}${since}]`
-    },
     conditionMetadataFromType (type) {
       const condition = this.conditionCache[type]
       if (condition) {
@@ -271,4 +263,11 @@ export default {
   .status-tag ::v-deep .v-chip__content {
     margin: -4px;
   }
+
+  ::v-deep .v-card  {
+  .v-card__text {
+    padding: 0px;
+    text-align: left;
+  }
+}
 </style>
