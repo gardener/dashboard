@@ -52,11 +52,10 @@ limitations under the License.
         <slot name="retryButtonSlot"></slot>
         <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
-      <template v-if="showStatusText && tooltip.userErrorCodeObjects.length">
-        <div v-for="({ shortDescription }, index) in tooltip.userErrorCodeObjects" :key="index">
-          <span class="font-weight-bold error--text">{{shortDescription}} - Action required</span>
+      <template v-if="showStatusText">
+        <div v-for="({ description }, index) in tooltip.userErrorCodeObjects" :key="index">
+          <div class="font-weight-bold error--text">{{description}}</div>
         </div>
-        <span class="error--text">Please click on the user error icon for more information.</span>
       </template>
     </template>
     <shoot-message-details

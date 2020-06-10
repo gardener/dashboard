@@ -18,7 +18,7 @@ limitations under the License.
   <div v-if="visible">
     <g-popper
       @input="onPopperInput"
-      :title="chipTitle"
+      :title="tag.name"
       :toolbarColor="color"
       :popperKey="popperKeyWithType"
       :placement="popperPlacement"
@@ -39,18 +39,22 @@ limitations under the License.
                 {{chipText}}
               </v-chip>
             </template>
-            <span class="font-weight-bold">{{chipTooltip.title}}</span>
+            <div class="font-weight-bold">{{chipTooltip.title}}</div>
+            <div>Status: {{chipTooltip.status}}</div>
             <div v-for="({ shortDescription }, index) in chipTooltip.userErrorCodeObjects" :key="index">
               <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
             </div>
-            <div v-if="chipTooltip.description">
-              {{chipTooltip.description}}
-            </div>
+            <template v-if="chipTooltip.description">
+              <v-divider color="white"></v-divider>
+              <div>
+                {{chipTooltip.description}}
+              </div>
+            </template>
           </v-tooltip>
         </div>
       </template>
       <shoot-message-details
-        :statusTitle="chipTitle"
+        :statusTitle="chipStatus"
         :lastMessage="nonErrorMessage"
         :errorDescriptions="errorDescriptions"
         :lastUpdateTime="tag.lastUpdateTime"
@@ -113,29 +117,25 @@ export default {
     chipText () {
       return this.tag.shortName || ''
     },
-    chipTitle () {
-      let errorState
-      const name = this.tag.name
+    chipStatus () {
+      let status = 'Healthy'
 
       if (this.isError) {
-        errorState = 'ERROR'
+        status = 'Error'
       }
       if (this.isUnknown) {
-        errorState = 'UNKNOWN'
+        status = 'Unknown'
       }
       if (this.isProgressing) {
-        errorState = 'PROGRESSING'
+        status = 'Progressing'
       }
 
-      if (!errorState) {
-        return name
-      }
-
-      return `${name} [${errorState}]`
+      return status
     },
     chipTooltip () {
       return {
-        title: this.chipTitle,
+        title: this.tag.name,
+        status: this.chipStatus,
         description: this.tag.description,
         userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
       }

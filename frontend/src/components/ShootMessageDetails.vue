@@ -18,12 +18,12 @@ limitations under the License.
   <v-list>
     <v-list-item>
       <v-list-item-icon>
-        <v-icon :color="hasError ? 'error' : 'cyan darken-2'">info_outline</v-icon>
+        <v-icon color="cyan darken-2">info_outline</v-icon>
       </v-list-item-icon>
       <v-list-item-content>
         <v-list-item-subtitle>Status</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
-          <span :class="hasError ? 'error--text' : 'black--text'" >{{statusTitle}}</span>
+          {{statusTitle}}
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
@@ -55,9 +55,7 @@ limitations under the License.
       </v-list-item-content>
     </v-list-item>
      <v-list-item v-if="lastTransitionTime">
-      <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
-      </v-list-item-icon>
+      <v-list-item-icon />
       <v-list-item-content>
         <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
@@ -75,7 +73,7 @@ limitations under the License.
           <v-icon color="error">mdi-alert-circle-outline</v-icon>
         </v-list-item-icon>
         <v-list-item-content>
-          <v-list-item-subtitle>Last Errors</v-list-item-subtitle>
+          <v-list-item-subtitle>{{errorDescriptions.length > 1 ? 'Last Errors' : 'Last Error'}}</v-list-item-subtitle>
           <v-list-item-title class="d-flex flex-column align-left pt-1 message-block">
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
@@ -148,7 +146,7 @@ export default {
 <style lang="scss" scoped>
 
   .message-block {
-    max-height: 250px;
+    max-height: 230px;
     overflow-y: scroll;
   }
 
