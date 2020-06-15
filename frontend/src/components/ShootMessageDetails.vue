@@ -78,7 +78,7 @@ limitations under the License.
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({ description, userError }, index) in lastErrorDescription.errorCodeObjects" :key="index"
+                v-for="({ description, userError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
                 dark
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"

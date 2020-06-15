@@ -41,7 +41,7 @@ limitations under the License.
             </template>
             <div class="font-weight-bold">{{chipTooltip.title}}</div>
             <div>Status: {{chipTooltip.status}}</div>
-            <div v-for="({ shortDescription }, index) in chipTooltip.userErrorCodeObjects" :key="index">
+            <div v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects" :key="shortDescription">
               <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
             </div>
             <template v-if="chipTooltip.description">
