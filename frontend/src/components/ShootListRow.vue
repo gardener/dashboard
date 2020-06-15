@@ -72,16 +72,8 @@ limitations under the License.
     <td class="text-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
         <shoot-status
-         :operation="shootLastOperation"
-         :lastErrors="shootLastErrors"
          :popperKey="`${shootNamespace}/${shootName}`"
-         :isStatusHibernated="isShootStatusHibernated"
-         :isHibernationProgressing="isShootStatusHibernationProgressing"
-         :reconciliationDeactivated="isShootReconciliationDeactivated"
-         :shootDeleted="isTypeDelete">
-          <template v-slot:retryButtonSlot>
-            <retry-operation :shootItem="shootItem"></retry-operation>
-          </template>
+         :shootItem="shootItem">
         </shoot-status>
       </div>
     </td>
@@ -138,7 +130,6 @@ import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import RetryOperation from '@/components/RetryOperation'
 import JournalLabels from '@/components/ShootJournals/JournalLabels'
 import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
@@ -162,7 +153,6 @@ export default {
     TimeString,
     ShootVersion,
     JournalLabels,
-    RetryOperation,
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,

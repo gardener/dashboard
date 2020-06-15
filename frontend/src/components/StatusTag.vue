@@ -119,7 +119,7 @@ export default {
     },
     chipStatus () {
       if (this.isError) {
-       return 'Error'
+        return 'Error'
       }
       if (this.isUnknown) {
         return 'Unknown'

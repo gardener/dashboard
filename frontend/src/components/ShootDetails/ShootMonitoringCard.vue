@@ -29,19 +29,11 @@ limitations under the License.
           <v-list-item-title class="d-flex align-center pt-1">
             <shoot-status
               class="pr-2"
-              :operation="shootLastOperation"
-              :lastErrors="shootLastErrors"
+              :shootItem="shootItem"
               :popperKey="`${shootNamespace}/${shootName}_lastOp`"
-              :isStatusHibernated="isShootStatusHibernated"
-              :isHibernationProgressing="isShootStatusHibernationProgressing"
-              :reconciliationDeactivated="isShootReconciliationDeactivated"
-              :shootDeleted="isShootLastOperationTypeDelete"
               popperPlacement="bottom"
               showStatusText
               >
-              <template v-slot:retryButtonSlot>
-                <retry-operation class="retryOperation" :shootItem="shootItem"></retry-operation>
-              </template>
             </shoot-status>
           </v-list-item-title>
         </v-list-item-content>
@@ -80,7 +72,6 @@ limitations under the License.
 <script>
 import ShootStatus from '@/components/ShootStatus'
 import StatusTags from '@/components/StatusTags'
-import RetryOperation from '@/components/RetryOperation'
 import ClusterMetrics from '@/components/ClusterMetrics'
 import { shootItem } from '@/mixins/shootItem'
 import { mapGetters } from 'vuex'
@@ -89,7 +80,6 @@ export default {
   components: {
     ShootStatus,
     StatusTags,
-    RetryOperation,
     ClusterMetrics
   },
   props: {
