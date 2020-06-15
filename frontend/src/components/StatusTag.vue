@@ -118,19 +118,17 @@ export default {
       return this.tag.shortName || ''
     },
     chipStatus () {
-      let status = 'Healthy'
-
       if (this.isError) {
-        status = 'Error'
+       return 'Error'
       }
       if (this.isUnknown) {
-        status = 'Unknown'
+        return 'Unknown'
       }
       if (this.isProgressing) {
-        status = 'Progressing'
+        return 'Progressing'
       }
 
-      return status
+      return 'Healthy'
     },
     chipTooltip () {
       return {
