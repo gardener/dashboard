@@ -19,12 +19,12 @@
 const _ = require('lodash')
 const nock = require('nock')
 
-const { createJournalCache } = require('../common')
+const { createTicketCache } = require('../common')
 
 const webhookSecret = toHex('webhookSecret')
 const url = 'https://api.github.com'
 const owner = 'gardener'
-const repo = 'journal-dev'
+const repo = 'ticket-dev'
 const auth = {
   token: toHex('token')
 }
@@ -64,7 +64,7 @@ function createGithubIssue ({
     body,
     number,
     state,
-    html_url: `https://github.com/gardener/journal-dev/issues/${number}`,
+    html_url: `https://github.com/gardener/ticket-dev/issues/${number}`,
     user: {
       id: 21031061,
       avatar_url: 'https://avatars1.githubusercontent.com/u/21031061?v=4',
@@ -97,7 +97,7 @@ function createGithubComment ({
     updated_at,
     body,
     number,
-    html_url: `https://github.com/gardener/journal-dev/issues/${number}#issuecomment-${id}`,
+    html_url: `https://github.com/gardener/ticket-dev/issues/${number}#issuecomment-${id}`,
     user: {
       id: 21031061,
       avatar_url: 'https://avatars1.githubusercontent.com/u/21031061?v=4',
@@ -169,7 +169,7 @@ module.exports = {
   auth,
   webhookSecret,
   formatTime,
-  createJournalCache,
+  createTicketCache,
   createGithubIssue,
   createGithubComment,
   githubIssueList,

@@ -6,7 +6,7 @@ apiServerCaData: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkxpNHUKLS0tLS1FTkQgQ0VSVEl
 gitHub:
   apiUrl: https://api.github.com
   org: gardener
-  repository: journal-dev
+  repository: ticket-dev
   webhookSecret: 776562686f6f6b536563726574
   authentication:
     token: 746f6b656e

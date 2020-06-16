@@ -36,7 +36,7 @@ const INDEX_FILENAME = join(PUBLIC_DIRNAME, 'index.html')
 // csp sources
 const connectSrc = ['\'self\'', 'wss:', 'ws:']
 const imgSrc = ['\'self\'', 'data:', 'https://www.gravatar.com']
-const gitHubRepoUrl = _.get(config, 'frontend.gitHubRepoUrl')
+const gitHubRepoUrl = _.get(config, 'frontend.ticket.gitHubRepoUrl')
 if (gitHubRepoUrl) {
   const url = new URL(gitHubRepoUrl)
   imgSrc.push(url.origin)

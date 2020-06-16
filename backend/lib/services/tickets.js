@@ -31,7 +31,7 @@ function fromLabel (item) {
 
 function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
-  const [, namespace, name, journalTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
+  const [, namespace, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
   return {
     kind: 'issue',
     metadata: _
@@ -59,7 +59,7 @@ function fromIssue (issue) {
       ])
       .assign({
         labels,
-        journalTitle
+        ticketTitle
       })
       .value()
   }
@@ -104,14 +104,14 @@ exports.getOpenIssues = getOpenIssues
 
 async function loadOpenIssues (...args) {
   const issues = await getOpenIssues(...args)
-  const journalCache = cache.getJournalCache()
+  const ticketCache = cache.getTicketCache()
   for (const issue of issues) {
-    journalCache.addOrUpdateIssue({ issue })
+    ticketCache.addOrUpdateIssue({ issue })
   }
 
-  const deletedIssues = _.differenceBy(journalCache.getIssues(), issues, 'metadata.number')
+  const deletedIssues = _.differenceBy(ticketCache.getIssues(), issues, 'metadata.number')
   for (const issue of deletedIssues) {
-    journalCache.removeIssue({ issue })
+    ticketCache.removeIssue({ issue })
   }
 
   return issues
@@ -123,9 +123,9 @@ async function finalizeIssue (number) {
   const issue = fromIssue(githubIssue)
 
   if (issue.metadata.state === 'closed') {
-    logger.debug('Journal already closed. Removing from cache..')
-    const journalCache = cache.getJournalCache()
-    journalCache.removeIssue({ issue })
+    logger.debug('Ticket already closed. Removing from cache..')
+    const ticketCache = cache.getTicketCache()
+    ticketCache.removeIssue({ issue })
 
     return
   }
@@ -134,20 +134,20 @@ async function finalizeIssue (number) {
   await github.closeIssue({ number })
 }
 
-function deleteJournals ({ name, namespace }) {
-  const journalCache = cache.getJournalCache()
-  const numbers = journalCache.getIssueNumbersForNameAndNamespace({ name, namespace })
+function deleteTickets ({ name, namespace }) {
+  const ticketCache = cache.getTicketCache()
+  const numbers = ticketCache.getIssueNumbersForNameAndNamespace({ name, namespace })
   if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
-  logger.debug('Deleting journal for shoot %s/%s. Affected issue numbers: %s', namespace, name, _.join(numbers, ', '))
+  logger.debug('Deleting ticket for shoot %s/%s. Affected issue numbers: %s', namespace, name, _.join(numbers, ', '))
   return Promise.all(_.map(numbers, finalizeIssue))
 }
-exports.deleteJournals = deleteJournals
+exports.deleteTickets = deleteTickets
 
 async function getIssueComments ({ number }) {
-  const journalCache = cache.getJournalCache()
-  const { metadata: { name, namespace } } = journalCache.getIssue(number)
+  const ticketCache = cache.getTicketCache()
+  const { metadata: { name, namespace } } = ticketCache.getIssue(number)
   const githubComments = await github.getComments({ number })
   return _.map(githubComments, githubComment => fromComment(number, name, namespace, githubComment))
 }
@@ -155,14 +155,14 @@ exports.getIssueComments = getIssueComments
 
 async function loadIssueComments ({ number }) {
   const comments = await getIssueComments({ number })
-  const journalCache = cache.getJournalCache()
+  const ticketCache = cache.getTicketCache()
   for (const comment of comments) {
-    journalCache.addOrUpdateComment({ issueNumber: number, comment })
+    ticketCache.addOrUpdateComment({ issueNumber: number, comment })
   }
 
-  const deletedComments = _.differenceBy(journalCache.getCommentsForIssue({ issueNumber: number }), comments, 'metadata.id')
+  const deletedComments = _.differenceBy(ticketCache.getCommentsForIssue({ issueNumber: number }), comments, 'metadata.id')
   for (const comment of deletedComments) {
-    journalCache.removeComment({ issueNumber: number, comment })
+    ticketCache.removeComment({ issueNumber: number, comment })
   }
 
   return comments

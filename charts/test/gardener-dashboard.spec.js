@@ -76,17 +76,7 @@ function writeValues (filename, values = {}) {
           icon: 'apps',
           url: 'https://apps.garden.example.org/foo/bar{?namespace,name}'
         }
-      ],
-      gitHubRepoUrl: 'https://github.com/gardener/journals'
-    },
-    gitHub: {
-      apiUrl: 'https://github.com/api/v3/',
-      org: 'gardener',
-      repository: 'journals',
-      webhookSecret: 'webhookSecret',
-      authentication: {
-        token: 'webhookAuthenticationToken'
-      }
+      ]
     }
   }
   values = merge(defaultValues, values)
@@ -182,22 +172,22 @@ describe('gardener-dashboard', function () {
         it('should render the template without options', async function () {
           const values = writeValues(filename, {
             frontendConfig: {
-                accessRestriction: {
-                  noItemsText: 'no items text',
-                  items: [
-                    {
-                      key: 'foo',
-                      display: {
-                        visibleIf: true 
-                      },
-                      input: {
-                        title: 'Foo'
-                      }
+              accessRestriction: {
+                noItemsText: 'no items text',
+                items: [
+                  {
+                    key: 'foo',
+                    display: {
+                      visibleIf: true 
+                    },
+                    input: {
+                      title: 'Foo'
                     }
-                  ]
-                }
+                  }
+                ]
               }
-            })
+            }
+          })
           const documents = await helmTemplate(template, filename)
           const config = chain(documents)
             .find(['metadata.name', name])
@@ -228,51 +218,51 @@ describe('gardener-dashboard', function () {
         it('should render the template with options', async function () {
           const values = writeValues(filename, {
             frontendConfig: {
-                accessRestriction: {
-                  items: [
-                    {
-                      key: 'foo',
-                      display: {
-                        visibleIf: true,
-                        title: 'display Foo',
-                        description: 'display Foo description',
-                      },
-                      input: {
-                        title: 'input Foo',
-                        description: 'input Foo description',
-                        inverted: true
-                      },
-                      options: [
-                        {
-                          key: 'foo-option-1',
-                          display: {
-                            visibleIf: false,
-                            title: 'display Foo Option 1',
-                            description: 'display Foo  Option 1 description',
-                          },
-                          input: {
-                            title: 'input Foo Option 1',
-                            description: 'input Foo  Option 1 description',
-                            inverted: false
-                          }
+              accessRestriction: {
+                items: [
+                  {
+                    key: 'foo',
+                    display: {
+                      visibleIf: true,
+                      title: 'display Foo',
+                      description: 'display Foo description',
+                    },
+                    input: {
+                      title: 'input Foo',
+                      description: 'input Foo description',
+                      inverted: true
+                    },
+                    options: [
+                      {
+                        key: 'foo-option-1',
+                        display: {
+                          visibleIf: false,
+                          title: 'display Foo Option 1',
+                          description: 'display Foo  Option 1 description',
                         },
-                        {
-                          key: 'foo-option-2',
-                          display: {
-                            visibleIf: true,
-                          },
-                          input: {
-                            title: 'input Foo Option 2',
-                            description: 'input Foo  Option 2 description',
-                            inverted: true
-                          }
+                        input: {
+                          title: 'input Foo Option 1',
+                          description: 'input Foo  Option 1 description',
+                          inverted: false
                         }
-                      ]
-                    }
-                  ]
-                }
+                      },
+                      {
+                        key: 'foo-option-2',
+                        display: {
+                          visibleIf: true,
+                        },
+                        input: {
+                          title: 'input Foo Option 2',
+                          description: 'input Foo  Option 2 description',
+                          inverted: true
+                        }
+                      }
+                    ]
+                  }
+                ]
               }
-            })
+            }
+          })
           const documents = await helmTemplate(template, filename)
           const config = chain(documents)
             .find(['metadata.name', name])
@@ -325,6 +315,64 @@ describe('gardener-dashboard', function () {
               }
             ]
           })
+        })
+      })
+
+      describe('tickets', function () {
+        it('should render the template', async function () {
+          const values = writeValues(filename, {
+            frontendConfig: {
+              ticket: {
+                gitHubRepoUrl: 'https://github.com/gardener/tickets',
+                hideClustersWithLabel: 'ignore'
+              }
+            },
+            gitHub: {
+              apiUrl: 'https://github.com/api/v3/',
+              org: 'gardener',
+              repository: 'tickets',
+              webhookSecret: 'webhookSecret',
+              authentication: {
+                username: 'dashboard-tickets',
+                token: 'webhookAuthenticationToken'
+              }
+            }
+          })
+
+          const documents = await helmTemplate(template, filename)
+          const config = chain(documents)
+            .find(['metadata.name', name])
+            .get('data["config.yaml"]')
+            .thru(yaml.safeLoad)
+            .value()
+          const {
+            frontend: {
+              ticket
+            },
+            gitHub
+          } = config
+          expect(ticket).to.eql({
+            gitHubRepoUrl: 'https://github.com/gardener/tickets',
+            hideClustersWithLabel: 'ignore'
+          })
+          expect(gitHub).to.eql({
+            apiUrl: 'https://github.com/api/v3/',
+            org: 'gardener',
+            repository: 'tickets'
+          })
+
+          const githubSecret = chain(documents)
+          .find(['metadata.name', 'gardener-dashboard-github'])
+          .get('data')
+          .value()
+          const {
+            'authentication.username': username,
+            'authentication.token': token,
+            webhookSecret
+          } = githubSecret
+          expect(decodeBase64(username)).to.equal('dashboard-tickets')
+          expect(decodeBase64(token)).to.equal('webhookAuthenticationToken')
+          expect(decodeBase64(webhookSecret)).to.equal('webhookSecret')
         })
       })
     })
