@@ -109,13 +109,18 @@ export default {
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
-      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hintText.push('If you select a version which is not the latest, you should disable automatic operating system updates')
+      if (this.updateOSMaintenance && (this.selectedImageIsNotLatest || this.machineImage.isDeprecated)) {
+        hintText.push('If you select a version which is not the latest or deprecated, you should disable automatic operating system updates')
+      }
+      if (this.machineImage.isPreview) {
+        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not yet recommended for production usage')
       }
       return join(hintText, ' / ')
     },
     hintColor () {
-      if (this.machineImage.needsLicense || (this.updateOSMaintenance && this.selectedImageIsNotLatest)) {
+      if (this.machineImage.needsLicense ||
+        (this.updateOSMaintenance && (this.selectedImageIsNotLatest || this.machineImage.isDeprecated)) ||
+        this.machineImage.isPreview) {
         return 'orange'
       }
       return 'default'
@@ -146,6 +151,9 @@ export default {
     },
     itemDescription (machineImage) {
       const itemDescription = []
+      if (machineImage.classification) {
+        itemDescription.push(`Classification: ${machineImage.classification}`)
+      }
       if (machineImage.needsLicense) {
         itemDescription.push('Enterprise support license required')
       }

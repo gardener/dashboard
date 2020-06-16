@@ -356,13 +356,17 @@ const getters = {
           return semver.rcompare(a.version, b.version)
         })
 
-        return map(versions, ({ version, expirationDate }) => {
+        return map(versions, ({ version, expirationDate, classification }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
           const name = machineImage.name
           return {
             key: name + '/' + version,
             name,
             version,
+            classification,
+            isPreview: classification === 'preview',
+            isSupported: classification === 'supported',
+            isDeprecated: classification === 'deprecated',
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,

@@ -25,7 +25,7 @@ describe('Store', function () {
   it('should transform machine images from cloud profile', function () {
     const cpMachineImages = [
       {
-        name: 'coreos',
+        name: 'garden-linux',
         versions: [
           {
             version: '2135.6.0'
@@ -40,7 +40,8 @@ describe('Store', function () {
           },
           {
             version: '15.1.20191027',
-            expirationDate: '2119-04-05T01:02:03Z' // not expired
+            expirationDate: '2119-04-05T01:02:03Z', // not expired
+            classification: 'supported'
           },
           {
             version: '15.1.20191127',
@@ -87,10 +88,15 @@ describe('Store', function () {
     expect(suseImage.vendorName).to.equal('suse-chost')
     expect(suseImage.icon).to.equal('suse-chost')
     expect(suseImage.needsLicense).to.equal(true)
+    expect(suseImage.classification).to.equal('supported')
+    expect(suseImage.isSupported).to.equal(true)
+    expect(suseImage.isDeprecated).to.equal(false)
+    expect(suseImage.isPreview).to.equal(false)
     expect(suseImage).to.equal(dashboardMachineImages[1]) // check sorting
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
     expect(fooImage.needsLicense).to.equal(false)
+    expect(fooImage.isSupported).to.equal(false)
   })
 
   it('should filter kubernetes versions from cloud profile', function () {
