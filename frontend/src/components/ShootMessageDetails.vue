@@ -47,10 +47,9 @@ limitations under the License.
       <v-list-item-content>
         <v-list-item-subtitle>Last Updated</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
-          <lazy-component @show="showLastUpdateTimePlaceholder=false">
-              <time-string :dateTime="lastUpdateTime" :pointInTime="-1"></time-string>
-            </lazy-component>
-            <v-progress-circular v-if="showLastUpdateTimePlaceholder" indeterminate size="18" width="1"></v-progress-circular>
+          <v-lazy>
+            <time-string :dateTime="lastUpdateTime" :pointInTime="-1"></time-string>
+          </v-lazy>
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
@@ -59,10 +58,9 @@ limitations under the License.
       <v-list-item-content>
         <v-list-item-subtitle>Last Status Change</v-list-item-subtitle>
         <v-list-item-title class="d-flex align-center pt-1">
-          <lazy-component @show="showLastTransitionTimePlaceholder=false">
-              <time-string :dateTime="lastTransitionTime" :pointInTime="-1"></time-string>
-            </lazy-component>
-            <v-progress-circular v-if="showLastTransitionTimePlaceholder" indeterminate size="18" width="1"></v-progress-circular>
+          <v-lazy>
+            <time-string :dateTime="lastTransitionTime" :pointInTime="-1"></time-string>
+          </v-lazy>
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
@@ -98,14 +96,8 @@ limitations under the License.
 
 <script>
 import AnsiText from '@/components/AnsiText'
-import VueLazyload from 'vue-lazyload'
-import Vue from 'vue'
 import TimeString from '@/components/TimeString'
 import isEmpty from 'lodash/isEmpty'
-
-Vue.use(VueLazyload, {
-  lazyComponent: true
-})
 
 export default {
   components: {

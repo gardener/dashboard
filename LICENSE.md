@@ -463,10 +463,6 @@ Copyright (c) 2013-present, Yuxi (Evan) You\
 Copyright (c) 2016 Alf Henderson\
 [MIT License](https://github.com/alfhen/vue-cookie/blob/master/LICENSE)
 
-- [vue-lazyload](https://github.com/hilongjw/vue-lazyload)\
-Copyright (c) 2016 Awe\
-[MIT License](https://github.com/hilongjw/vue-lazyload/blob/master/LICENSE)
-
 - [vue-popperjs](https://github.com/RobinCK/vue-popper)\
 Copyright (c) 2017 Igor Ognichenko\
 [MIT License](https://github.com/RobinCK/vue-popper/blob/master/LICENSE)
