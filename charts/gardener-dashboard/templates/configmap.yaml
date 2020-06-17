@@ -149,8 +149,10 @@ data:
         url: {{ .url }}
       {{- end }}
 {{- end }}
-{{- if .Values.frontendConfig.gitHubRepoUrl }}
-      gitHubRepoUrl: {{ .Values.frontendConfig.gitHubRepoUrl }}
+{{- if .Values.frontendConfig.ticket }}
+      ticket:
+        hideClustersWithLabel: {{ .Values.frontendConfig.ticket.hideClustersWithLabel }}
+        gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
 {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
@@ -188,4 +190,49 @@ data:
       sla:
         title: {{ .Values.frontendConfig.sla.title }}
         description: {{ .Values.frontendConfig.sla.description }}
+{{- end }}
+{{- if .Values.frontendConfig.accessRestriction }}
+      accessRestriction:
+        {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
+        noItemsText: |-
+{{  .Values.frontendConfig.accessRestriction.noItemsText | trim | indent 10 }}
+        {{- end }}
+        items:
+        {{- range .Values.frontendConfig.accessRestriction.items }}
+        - key: {{ .key }}
+          display:
+            visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+            title: {{ .display.title }}{{- end }}{{- if .display.description }}
+            description: {{ .display.description }}{{- end }}
+          input:
+            title: |-
+{{ .input.title | trim | indent 14 }}
+            {{- if .input.description }}
+            description: |-
+{{ .input.description | trim | indent 14 }}
+            {{- end }}
+            {{- if .input.inverted }}
+            inverted: {{ .input.inverted }}
+            {{- end }}
+          {{- if .options }}
+          options:
+          {{- range .options }}
+          - key: {{ .key }}
+            display:
+              visibleIf: {{ .display.visibleIf }}{{- if .display.title }}
+              title: {{ .display.title }}{{- end }}{{- if .display.description }}
+              description: {{ .display.description }}{{- end }}
+            input:
+              title: |-
+{{ .input.title | trim | indent 16 }}
+              {{- if .input.description }}
+              description: |-
+{{ .input.description | trim | indent 16 }}
+              {{- end }}
+              {{- if .input.inverted }}
+              inverted: {{ .input.inverted }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
 {{- end }}

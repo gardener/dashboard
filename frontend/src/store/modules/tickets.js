@@ -27,8 +27,11 @@ import matchesProperty from 'lodash/matchesProperty'
 import orderBy from 'lodash/orderBy'
 import unionBy from 'lodash/unionBy'
 
-const eqlNameAndNamespace = ({ namespace, name, state = undefined }) => {
-  const source = { metadata: { namespace, name } }
+const eql = ({ namespace, name, state = undefined }) => {
+  const source = { metadata: { namespace } }
+  if (name) {
+    source.metadata.name = name
+  }
   if (state) {
     source.metadata.state = state
   }
@@ -45,24 +48,24 @@ const state = {
   allComments: {}
 }
 
-const getOpenIssues = (state, name, namespace) => {
-  return filter(state.all, eqlNameAndNamespace({ name, namespace, state: 'open' }))
+const getOpenIssues = ({ state, name, namespace }) => {
+  return filter(state.all, eql({ name, namespace, state: 'open' }))
 }
 // getters
 const getters = {
   items: state => state.all,
   issues: (state) => ({ name, namespace }) => {
-    return getOpenIssues(state, name, namespace)
+    return getOpenIssues({ state, name, namespace })
   },
   comments: (state) => ({ issueNumber }) => {
     return state.allComments[issueNumber]
   },
-  lastUpdated: (state) => ({ name, namespace }) => {
-    const lastUpdatedIssue = head(getOpenIssues(state, name, namespace))
-    return get(lastUpdatedIssue, 'metadata.updated_at')
+  latestUpdated: (state) => ({ name, namespace }) => {
+    const latestUpdatedIssue = head(getOpenIssues({ state, name, namespace }))
+    return get(latestUpdatedIssue, 'metadata.updated_at')
   },
   labels: (state) => ({ name, namespace }) => {
-    const issues = getOpenIssues(state, name, namespace)
+    const issues = getOpenIssues({ state, name, namespace })
     const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
     return labels
   }
@@ -83,7 +86,7 @@ const actions = {
   }
 }
 
-const orderJournalsByUpdatedAt = () => {
+const orderTicketsByUpdatedAt = () => {
   state.all = orderBy(state.all, ['metadata.updated_at'], ['desc'])
 }
 // mutations
@@ -102,7 +105,7 @@ const mutations = {
           console.error('undhandled event type', event.type)
       }
     })
-    orderJournalsByUpdatedAt()
+    orderTicketsByUpdatedAt()
   },
   HANDLE_COMMENTS_EVENTS (state, events) {
     forEach(events, event => {
@@ -118,7 +121,7 @@ const mutations = {
           console.error('undhandled event type', event.type)
       }
     })
-    orderJournalsByUpdatedAt()
+    orderTicketsByUpdatedAt()
   },
   CLEAR_ISSUES (state) {
     state.all = []

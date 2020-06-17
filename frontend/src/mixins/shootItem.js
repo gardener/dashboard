@@ -19,6 +19,7 @@ import uniq from 'lodash/uniq'
 import flatMap from 'lodash/flatMap'
 import cloneDeep from 'lodash/cloneDeep'
 import find from 'lodash/find'
+import { mapGetters } from 'vuex'
 
 import {
   getDateFormatted,
@@ -31,6 +32,9 @@ import {
 
 export const shootItem = {
   computed: {
+    ...mapGetters([
+      'selectedAccessRestrictionsForShootByCloudProfileNameAndRegion'
+    ]),
     shootMetadata () {
       return get(this.shootItem, 'metadata', {})
     },
@@ -177,6 +181,9 @@ export const shootItem = {
     },
     shootStatusSeedName () {
       return get(this.shootItem, 'status.seed')
+    },
+    shootSelectedAccessRestrictions () {
+      return this.selectedAccessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource: this.shootItem, cloudProfileName: this.shootCloudProfileName, region: this.shootRegion })
     },
     isControlPlaneMigrating () {
       return this.shootStatusSeedName && this.shootSeedName && this.shootStatusSeedName !== this.shootSeedName

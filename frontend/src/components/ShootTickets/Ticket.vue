@@ -16,19 +16,19 @@ limitations under the License.
 
 <template>
   <v-card>
-    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 journalTitle">
-      Journal {{journalTitle}} <journal-labels :labels="journal.data.labels"></journal-labels>
+    <v-card-title class="subtitle-1 white--text cyan darken-2 mt-4 ticketTitle">
+      Ticket {{ticketTitle}} <ticket-labels :labels="ticket.data.labels"></ticket-labels>
     </v-card-title>
 
     <v-container>
       <span class="font-weight-bold">{{login}}</span> created this
-      <a :href="journalHtmlUrl" target="_blank" class="cyan--text text--darken-2">journal</a>
-      <a :href="journalHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
-      <time-string :dateTime="journal.metadata.created_at" :pointInTime="-1"></time-string>
+      <a :href="ticketHtmlUrl" target="_blank" class="cyan--text text--darken-2">ticket</a>
+      <a :href="ticketHtmlUrl" target="_blank" class="link-icon"><v-icon color="cyan darken-2" class="link-icon">mdi-open-in-new</v-icon></a>
+      <time-string :dateTime="ticket.metadata.created_at" :pointInTime="-1"></time-string>
     </v-container>
     <v-container>
-      <journal-comment :comment="journal"></journal-comment>
-      <journal-comment v-for="comment in commentsForJournal" :key="comment.metadata.id" :comment="comment"></journal-comment>
+      <ticket-comment :comment="ticket"></ticket-comment>
+      <ticket-comment v-for="comment in commentsForTicket" :key="comment.metadata.id" :comment="comment"></ticket-comment>
     </v-container>
     <v-card-actions v-if="!!gitHubRepoUrl">
       <v-spacer></v-spacer>
@@ -45,17 +45,17 @@ limitations under the License.
 import get from 'lodash/get'
 import { mapState, mapGetters } from 'vuex'
 import TimeString from '@/components/TimeString'
-import JournalLabels from '@/components/ShootJournals/JournalLabels'
-import JournalComment from '@/components/ShootJournals/JournalComment'
+import TicketLabels from '@/components/ShootTickets/TicketLabels'
+import TicketComment from '@/components/ShootTickets/TicketComment'
 
 export default {
   components: {
     TimeString,
-    JournalLabels,
-    JournalComment
+    TicketLabels,
+    TicketComment
   },
   props: {
-    journal: {
+    ticket: {
       type: Object,
       required: true
     }
@@ -65,27 +65,27 @@ export default {
       'cfg'
     ]),
     ...mapGetters([
-      'journalCommentsByIssueNumber'
+      'ticketCommentsByIssueNumber'
     ]),
-    journalTitle () {
-      const title = get(this.journal, 'data.journalTitle')
+    ticketTitle () {
+      const title = get(this.ticket, 'data.ticketTitle')
       return title ? ` - ${title}` : ''
     },
     login () {
-      return get(this.journal, 'data.user.login')
+      return get(this.ticket, 'data.user.login')
     },
-    journalHtmlUrl () {
-      return get(this.journal, 'data.html_url')
+    ticketHtmlUrl () {
+      return get(this.ticket, 'data.html_url')
     },
-    commentsForJournal () {
-      const issueNumber = get(this.journal, 'metadata.number')
-      return this.journalCommentsByIssueNumber({ issueNumber })
+    commentsForTicket () {
+      const issueNumber = get(this.ticket, 'metadata.number')
+      return this.ticketCommentsByIssueNumber({ issueNumber })
     },
     gitHubRepoUrl () {
-      return this.cfg.gitHubRepoUrl
+      return get(this.cfg, 'ticket.gitHubRepoUrl')
     },
     addCommentLink () {
-      return `${this.journalHtmlUrl}#new_comment_field`
+      return `${this.ticketHtmlUrl}#new_comment_field`
     }
   }
 }
@@ -93,7 +93,7 @@ export default {
 
 <style lang="scss" scoped>
 
-  .journalTitle {
+  .ticketTitle {
     line-height: 10px;
   }
 

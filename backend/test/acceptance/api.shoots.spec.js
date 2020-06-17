@@ -19,6 +19,7 @@
 const common = require('../support/common')
 const kubeconfig = require('../../lib/kubernetes-config')
 const _ = require('lodash')
+const logger = require('../../lib/logger')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -161,6 +162,23 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res.body.monitoring_password).to.eql(monitoringPassword)
     expect(res.body.logging_username).to.eql(loggingUser)
     expect(res.body.logging_password).to.eql(loggingPassword)
+  })
+
+  it('should not return shoot seed info when seed.spec.secretRef missing', async function () {
+    const bearer = await user.bearer
+    const seedName = 'infra4-seed-without-secretRef' // seed without spec.secretRef
+
+    const infoSpy = sandbox.spy(logger, 'info')
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.getSeedInfoNoSecretRef({ bearer, namespace, name, project, kind, region, seedName })
+    const res = await agent
+      .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
+      .set('cookie', await user.cookie)
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(_.keys(res.body).length).to.equal(0)
+    expect(infoSpy).to.be.calledOnce
   })
 
   it('should replace shoot', async function () {

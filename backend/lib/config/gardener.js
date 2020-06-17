@@ -115,8 +115,8 @@ module.exports = {
 
     _.set(config, 'frontend.primaryLoginType', config.oidc ? 'oidc' : 'token')
     _.set(config, 'frontend.apiServerUrl', config.apiServerUrl)
-    if (!config.gitHub && _.has(config, 'frontend.gitHubRepoUrl')) {
-      _.unset(config, 'frontend.gitHubRepoUrl')
+    if (!config.gitHub && _.has(config, 'frontend.ticket')) {
+      _.unset(config, 'frontend.ticket')
     }
 
     return config

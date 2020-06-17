@@ -83,24 +83,27 @@ limitations under the License.
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="shootConditions" :secretName="shootSecretBindingName"></status-tags>
     </td>
-    <td class="nowrap" v-if="this.headerVisible['journal']">
+    <td v-if="this.headerVisible['accessRestrictions']">
+      <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
+    </td>
+    <td class="nowrap" v-if="this.headerVisible['ticket']">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
-              <time-string :date-time="shootLastUpdatedJournalTimestamp" :pointInTime="-1"></time-string>
+              <time-string :date-time="shootLastUpdatedTicketTimestamp" :pointInTime="-1"></time-string>
             </router-link>
           </div>
         </template>
-        {{ shootLastUpdatedJournal }}
+        {{ shootLastUpdatedTicket }}
       </v-tooltip>
     </td>
-    <td v-if="this.headerVisible['journalLabels']">
-      <template v-if="shootLastUpdatedJournalTimestamp && !shootJournalsLabels.length">
+    <td v-if="this.headerVisible['ticketLabels']">
+      <template v-if="shootLastUpdatedTicketTimestamp && !shootTicketsLabels.length">
         None
       </template>
       <template v-else>
-        <journal-labels :labels="shootJournalsLabels"></journal-labels>
+        <ticket-labels :labels="shootTicketsLabels"></ticket-labels>
       </template>
     </td>
     <td class="action-button-group text-right nowrap" v-if="this.headerVisible['actions']">
@@ -123,6 +126,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import AccessRestrictionChips from '@/components/ShootAccessRestrictions/AccessRestrictionChips'
 import AccountAvatar from '@/components/AccountAvatar'
 import Vendor from '@/components/Vendor'
 import ShootStatus from '@/components/ShootStatus'
@@ -130,7 +134,7 @@ import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import JournalLabels from '@/components/ShootJournals/JournalLabels'
+import TicketLabels from '@/components/ShootTickets/TicketLabels'
 import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
@@ -147,12 +151,13 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
+    AccessRestrictionChips,
     StatusTags,
     PurposeTag,
     ShootStatus,
     TimeString,
     ShootVersion,
-    JournalLabels,
+    TicketLabels,
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,
@@ -174,8 +179,8 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'lastUpdatedJournalByNameAndNamespace',
-      'journalsLabels',
+      'latestUpdatedTicketByNameAndNamespace',
+      'ticketsLabels',
       'canGetSecrets',
       'canDeleteShoots'
     ]),
@@ -222,14 +227,14 @@ export default {
     isShootHasNoHibernationScheduleWarning () {
       return isShootHasNoHibernationScheduleWarning(this.shootItem)
     },
-    shootLastUpdatedJournalTimestamp () {
-      return this.lastUpdatedJournalByNameAndNamespace(this.shootMetadata)
+    shootLastUpdatedTicketTimestamp () {
+      return this.latestUpdatedTicketByNameAndNamespace(this.shootMetadata)
     },
-    shootLastUpdatedJournal () {
-      return getTimestampFormatted(this.shootLastUpdatedJournalTimestamp)
+    shootLastUpdatedTicket () {
+      return getTimestampFormatted(this.shootLastUpdatedTicketTimestamp)
     },
-    shootJournalsLabels () {
-      return this.journalsLabels(this.shootMetadata)
+    shootTicketsLabels () {
+      return this.ticketsLabels(this.shootMetadata)
     }
   },
   methods: {

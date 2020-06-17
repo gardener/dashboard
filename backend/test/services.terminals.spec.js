@@ -24,6 +24,7 @@ const config = require('../lib/config')
 const { getSeed } = require('../lib/cache')
 const { Resources } = require('../lib/kubernetes-client')
 const { Forbidden } = require('../lib/errors')
+const logger = require('../lib/logger')
 
 const {
   ensureTerminalAllowed,
@@ -55,6 +56,7 @@ describe('services', function () {
   /* eslint no-unused-expressions: 0 */
   describe('terminals', function () {
     const seedName = 'infra1-seed'
+    const seedName2 = 'infra4-seed-without-secretRef'
     const soilName = 'soil-infra1'
     const kind = 'infra1'
     const region = 'foo-east'
@@ -79,7 +81,7 @@ describe('services', function () {
         if (namespace === 'garden' && name === soilName) {
           return
         }
-        if (namespace === 'garden' && name === seedName) {
+        if (namespace === 'garden' && (name === seedName || name === seedName2)) {
           return {
             kind: 'Shoot',
             metadata: { namespace, name },
@@ -599,6 +601,21 @@ describe('services', function () {
             progress: 50
           }
         }
+      }, {
+        kind: 'Shoot',
+        metadata: {
+          namespace: 'garden-foo',
+          name: 'dummyShoot'
+        },
+        spec: {
+          seedName: seedName2 // seed without spec.secretRef
+        },
+        status: {
+          technicalID: 'shoot--foo--baz',
+          lastOperation: {
+            progress: 50
+          }
+        }
       }]
 
       beforeEach(function () {
@@ -703,8 +720,28 @@ describe('services', function () {
         await pEvent(bootstrapper, 'empty')
         const stats = bootstrapper.getStats()
         expect(bootstrapper.isResourcePending(shootList[0])).to.be.true
+        expect(stats.total).to.equal(2)
+        expect(stats.successRate).to.equal(1)
+      })
+
+      it('should not bootstrap shoot cluster', async function () {
+        const bootstrap = {
+          disabled: false,
+          shootDisabled: false
+        }
+        createConfigStub({ bootstrap })
+
+        const infoSpy = sandbox.spy(logger, 'info')
+
+        const bootstrapper = new Bootstrapper()
+         // bootstrap dummyShoot whose seed does not have .spec.secretRef set
+        bootstrapper.bootstrapResource(shootList[2])
+        await pEvent(bootstrapper, 'empty')
+        const stats = bootstrapper.getStats()
+        expect(bootstrapper.isResourcePending(shootList[0])).to.be.false
         expect(stats.total).to.equal(1)
         expect(stats.successRate).to.equal(1)
+        expect(infoSpy).to.be.calledOnce
       })
     })
   })

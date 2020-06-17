@@ -25,7 +25,7 @@ const config = require('../lib/config')
 const watches = require('../lib/watches')
 const { cache } = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
-const journals = require('../lib/services/journals')
+const tickets = require('../lib/services/tickets')
 
 describe('watches', function () {
   /* eslint no-unused-expressions: 0 */
@@ -181,7 +181,7 @@ describe('watches', function () {
 
     let watchStub
     let errorSpy
-    let deleteJournalsStub
+    let deleteTicketsStub
     let bootstrapResourceStub
     let isResourcePendingStub
     let removePendingResourceStub
@@ -190,7 +190,7 @@ describe('watches', function () {
       shootsWithIssues = new Set()
       watchStub = sandbox.stub(shoots, 'watchListAllNamespaces').returns(emitter)
       errorSpy = sandbox.spy(logger, 'error')
-      deleteJournalsStub = sandbox.stub(journals, 'deleteJournals')
+      deleteTicketsStub = sandbox.stub(tickets, 'deleteTickets')
       bootstrapResourceStub = sandbox.stub(bootstrapper, 'bootstrapResource')
       isResourcePendingStub = sandbox.stub(bootstrapper, 'isResourcePending')
       removePendingResourceStub = sandbox.stub(bootstrapper, 'removePendingResource')
@@ -227,7 +227,7 @@ describe('watches', function () {
       expect(bootstrapResourceStub).to.be.calledTwice
       expect(isResourcePendingStub).to.be.calledTwice
       expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteJournalsStub).to.be.calledOnce
+      expect(deleteTicketsStub).to.be.calledOnce
 
       expect(fooRoom.events).to.be.empty
       expect(fooBarRoom.events).to.be.empty
@@ -286,7 +286,7 @@ describe('watches', function () {
       expect(bootstrapResourceStub).to.be.calledThrice
       expect(isResourcePendingStub).to.be.calledThrice
       expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteJournalsStub).to.be.calledOnce
+      expect(deleteTicketsStub).to.be.calledOnce
 
       expect(fooRoom.events).to.be.empty
       expect(fooBarRoom.events).to.be.empty
@@ -294,8 +294,8 @@ describe('watches', function () {
       expect(fooIssuesRoom.events).to.be.empty
     })
 
-    it('should delete journals for a deleted shoot', async function () {
-      deleteJournalsStub.withArgs(qualifiedName(foobaz)).throws(new Error('JournalError'))
+    it('should delete tickets for a deleted shoot', async function () {
+      deleteTicketsStub.withArgs(qualifiedName(foobaz)).throws(new Error('TicketError'))
       isResourcePendingStub.withArgs(foobar).returns(true)
       isResourcePendingStub.withArgs(foobaz).returns(false)
       removePendingResourceStub.withArgs(foobar)
@@ -325,7 +325,7 @@ describe('watches', function () {
       expect(errorSpy).to.be.calledOnce
       expect(isResourcePendingStub).to.be.calledTwice
       expect(removePendingResourceStub).to.be.calledOnce
-      expect(deleteJournalsStub).to.be.calledTwice
+      expect(deleteTicketsStub).to.be.calledTwice
 
       expect(fooRoom.events).to.be.empty
       expect(fooBarRoom.events).to.be.empty
@@ -334,7 +334,7 @@ describe('watches', function () {
     })
   })
 
-  describe('journals', function () {
+  describe('tickets', function () {
     const serviceUnavailable = new Error('Service Unavailable')
     serviceUnavailable.status = 503
 
@@ -378,12 +378,12 @@ describe('watches', function () {
 
     const io = {
       of (namespace) {
-        expect(namespace).to.equal('/journals')
+        expect(namespace).to.equal('/tickets')
         return nsp
       }
     }
 
-    const journalCache = {
+    const ticketCache = {
       onIssue (handler) {
         handler(issueEvent)
       },
@@ -403,33 +403,33 @@ describe('watches', function () {
       infoSpy = sandbox.spy(logger, 'info')
       warnSpy = sandbox.spy(logger, 'warn')
       errorSpy = sandbox.spy(logger, 'error')
-      cacheStub = sandbox.stub(cache, 'getJournalCache')
-      loadOpenIssuesStub = sandbox.stub(journals, 'loadOpenIssues')
+      cacheStub = sandbox.stub(cache, 'getTicketCache')
+      loadOpenIssuesStub = sandbox.stub(tickets, 'loadOpenIssues')
     })
 
     it('should log missing gitHub config', async function () {
       gitHubConfigStub.get(() => false)
-      watches.journals(io)
+      watches.tickets(io)
       expect(warnSpy).to.be.calledOnce
     })
 
-    it('should watch journals', async function () {
+    it('should watch tickets', async function () {
       gitHubConfigStub.get(() => true)
-      cacheStub.returns(journalCache)
+      cacheStub.returns(ticketCache)
       loadOpenIssuesStub.onCall(0).throws(serviceUnavailable)
-      const promise = watches.journals(io, { minTimeout: 1 })
+      const promise = watches.tickets(io, { minTimeout: 1 })
       expect(cacheStub).to.be.calledOnce
       await promise
       expect(loadOpenIssuesStub).to.be.calledTwice
       expect(infoSpy).to.be.calledTwice
     })
 
-    it('should fail to fetch journals', async function () {
+    it('should fail to fetch tickets', async function () {
       gitHubConfigStub.get(() => true)
-      cacheStub.returns(journalCache)
+      cacheStub.returns(ticketCache)
       loadOpenIssuesStub.throws(new Error('Unexpected'))
 
-      const promise = watches.journals(io)
+      const promise = watches.tickets(io)
       expect(cacheStub).to.be.calledOnce
       expect(loadOpenIssuesStub).to.be.calledOnce
       await promise

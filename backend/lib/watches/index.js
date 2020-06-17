@@ -18,4 +18,4 @@
 
 exports.seeds = require('./seeds')
 exports.shoots = require('./shoots')
-exports.journals = require('./journals')
+exports.tickets = require('./tickets')

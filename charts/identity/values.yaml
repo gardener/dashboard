@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: quay.io/dexidp/dex
-  tag: v2.15.0
+  tag: v2.24.0
   pullPolicy: IfNotPresent
 
 containerPort: 5556

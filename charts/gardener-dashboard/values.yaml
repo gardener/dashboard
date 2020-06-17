@@ -75,7 +75,9 @@ frontendConfig:
   - title: Issues
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
-  gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+  ticket:
+    gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+    hideClustersWithLabel: ignore # hides clusters with label on the 'ALL PROJECTS' page if the respective table option is enabled
   defaultHibernationSchedule:
     evaluation:
     - start: 00 17 * * 1,2,3,4,5
@@ -111,6 +113,40 @@ frontendConfig:
   # sla:
   #   title: SLAs
   #   description: https://foo.example.com/gardener-sla
+
+  # # accessRestriction is used to define the access restricion text, keys and value mappings
+  # accessRestriction:
+  #   noItemsText: No access restriction options available for region {region} and cloud profile {cloudProfile}
+  #   items:
+  #   - key: seed.gardener.cloud/eu-access
+  #     display:
+  #       visibleIf: true
+  #       # title: foo # optional title, if not defined key will be used
+  #       # description: bar # optional description displayed in a tooltip
+  #     input:
+  #       title: EU Access
+  #       description: |
+  #         This service is offered to you with our regular SLAs and 24x7 support for the control plane of the cluster. 24x7 support for cluster add-ons and nodes is only available if you meet the following conditions:
+  #       # inverted: false
+  #     options:
+  #     - key: support.gardener.cloud/eu-access-for-cluster-addons
+  #       display:
+  #         visibleIf: false
+  #         # title: bar # optional title, if not defined key will be used
+  #         # description: baz # optional description displayed in a tooltip
+  #       input:
+  #         title: No personal data is used as name or in the content of Gardener or Kubernetes resources (e.g. Gardener project name or Kubernetes namespace, configMap or secret in Gardener or Kubernetes)
+  #         description: |
+  #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all cluster add-ons such as DNS and certificates, Calico overlay network and network policies, kube-proxy and services, and everything else that would require direct inspection of your cluster through its API server
+  #         inverted: true
+  #     - key: support.gardener.cloud/eu-access-for-cluster-nodes
+  #       display:
+  #         visibleIf: false
+  #       input:
+  #         title: No personal data is stored in any Kubernetes volume except for container file system, emptyDirs, and persistentVolumes (in particular, not on hostPath volumes)
+  #         description: |
+  #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
+  #         inverted: true
 
 gitHub:
   apiUrl: https://api.foo-github.com

@@ -25,7 +25,7 @@ const kubernetesClient = require('../../lib/kubernetes-client')
 const io = require('../../lib/io')
 const watches = require('../../lib/watches')
 const cache = require('../../lib/cache')
-const { projects, shoots, authorization, journals } = require('../../lib/services')
+const { projects, shoots, authorization, tickets } = require('../../lib/services')
 
 module.exports = function ({ sandbox, auth }) {
   /* eslint no-unused-expressions: 0 */
@@ -39,7 +39,7 @@ module.exports = function ({ sandbox, auth }) {
   let ioServer
 
   const client = {}
-  const journalCache = {
+  const ticketCache = {
     issues: [],
     getIssues () {
       return this.issues
@@ -54,7 +54,7 @@ module.exports = function ({ sandbox, auth }) {
 
   function setupIoServer (server) {
     try {
-      const getJournalCacheStub = sandbox.stub(cache, 'getJournalCache').returns(journalCache)
+      const getTicketCacheStub = sandbox.stub(cache, 'getTicketCache').returns(ticketCache)
       const stubs = {}
       for (const key of Object.keys(watches)) {
         stubs[key] = sandbox.stub(watches, key)
@@ -65,7 +65,7 @@ module.exports = function ({ sandbox, auth }) {
         expect(stub.firstCall.args).to.have.length(1)
         expect(stub.firstCall.args[0]).to.be.equal(ioServer)
       }
-      expect(getJournalCacheStub).to.be.calledOnce
+      expect(getTicketCacheStub).to.be.calledOnce
       ioServer.attach(server)
     } finally {
       sandbox.restore()
@@ -223,7 +223,7 @@ module.exports = function ({ sandbox, auth }) {
     })
   })
 
-  describe('journals', function () {
+  describe('tickets', function () {
     const issues = [
       { id: 1, namespace: 'foo', name: 'bar' },
       { id: 2, namespace: 'foo', name: 'baz' },
@@ -256,28 +256,24 @@ module.exports = function ({ sandbox, auth }) {
     let getIssueCommentsStub
 
     beforeEach(async function () {
-      journalCache.issues = issues
-      getIssueCommentsStub = sandbox.stub(journals, 'getIssueComments')
+      ticketCache.issues = issues
+      getIssueCommentsStub = sandbox.stub(tickets, 'getIssueComments')
         .callsFake(({ number }) => filter(comments, ['issue', number]))
-      socket = await connect('journals')
+      socket = await connect('tickets')
       expect(socket.connected).to.be.true
       expect(createClientStub).to.be.calledOnce
       const bearer = await user.bearer
       expect(createClientStub).to.be.calledWith({ auth: { bearer } })
     })
 
-    it('should subscribe issues', async function () {
-      isAdminStub.callsFake(() => true)
+    it('should subscribe tickets', async function () {
       const actualIssues = await emitSubscribe('subscribeIssues')
-      expect(isAdminStub).to.be.calledOnce
       expect(actualIssues).to.eql(issues)
     })
 
-    it('should subscribe issues comments', async function () {
-      isAdminStub.callsFake(() => true)
+    it('should subscribe ticket comments', async function () {
       const metadata = { namespace: 'foo', name: 'bar' }
       const issueComments = await emitSubscribe('subscribeComments', metadata)
-      expect(isAdminStub).to.be.calledOnce
       const numbers = map(filter(issues, metadata), 'id')
       expect(getIssueCommentsStub).to.have.callCount(numbers.length)
       const predicate = ({ issue: id }) => includes(numbers, id)

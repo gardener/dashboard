@@ -24,8 +24,8 @@ const { createHmac, timingSafeEqual } = require('crypto')
 const config = require('../config')
 const logger = require('../logger')
 const { InternalServerError, Forbidden } = require('../errors')
-const { fromIssue, fromComment, loadIssueComments } = require('../services/journals')
-const { getJournalCache } = require('../cache')
+const { fromIssue, fromComment, loadIssueComments } = require('../services/tickets')
+const { getTicketCache } = require('../cache')
 
 // router
 const router = exports.router = express.Router()
@@ -91,7 +91,7 @@ function handleGithubEvent (req, res, next) {
 exports.handleGithubEvent = handleGithubEvent
 
 function handleIssue ({ action, issue }) {
-  const cache = getJournalCache()
+  const cache = getTicketCache()
   issue = fromIssue(issue)
 
   if (action === 'closed') {
@@ -123,7 +123,7 @@ function handleIssue ({ action, issue }) {
 exports.handleIssue = handleIssue
 
 function handleComment ({ action, issue, comment }) {
-  const cache = getJournalCache()
+  const cache = getTicketCache()
   const {
     metadata: { namespace, name, number: issueNumber } = {}
   } = issue = fromIssue(issue) || {}

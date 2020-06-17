@@ -28,8 +28,10 @@ import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
+import isEmpty from 'lodash/isEmpty'
 import some from 'lodash/some'
 import concat from 'lodash/concat'
+import compact from 'lodash/compact'
 import merge from 'lodash/merge'
 import difference from 'lodash/difference'
 import forEach from 'lodash/forEach'
@@ -41,7 +43,9 @@ import sortBy from 'lodash/sortBy'
 import lowerCase from 'lodash/lowerCase'
 import cloneDeep from 'lodash/cloneDeep'
 import max from 'lodash/max'
+import template from 'lodash/template'
 import toPairs from 'lodash/toPairs'
+import fromPairs from 'lodash/fromPairs'
 import isEqual from 'lodash/isEqual'
 import moment from 'moment-timezone'
 
@@ -51,7 +55,7 @@ import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
-import journals from './modules/journals'
+import tickets from './modules/tickets'
 import semver from 'semver'
 
 Vue.use(Vuex)
@@ -162,6 +166,95 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
     }
 
     return true
+  }
+}
+
+function mapOptionForInput (optionValue, shootResource) {
+  const key = get(optionValue, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = false
+  const inputInverted = get(optionValue, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['metadata', 'annotations', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  const option = {
+    value
+  }
+  return [key, option]
+}
+
+function mapAccessRestrictionForInput (accessRestrictionDefinition, shootResource) {
+  const key = get(accessRestrictionDefinition, 'key')
+  if (!key) {
+    return
+  }
+
+  const isSelectedByDefault = false
+  const inputInverted = get(accessRestrictionDefinition, 'input.inverted', false)
+  const defaultValue = inputInverted ? !isSelectedByDefault : isSelectedByDefault
+  const rawValue = get(shootResource, ['spec', 'seedSelector', 'matchLabels', key], `${defaultValue}`) === 'true'
+  const value = inputInverted ? !rawValue : rawValue
+
+  let optionsPair = map(get(accessRestrictionDefinition, 'options'), option => mapOptionForInput(option, shootResource))
+  optionsPair = compact(optionsPair)
+  const options = fromPairs(optionsPair)
+
+  const accessRestriction = {
+    value,
+    options
+  }
+  return [key, accessRestriction]
+}
+
+function mapOptionForDisplay ({ optionDefinition, option: { value } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    }
+  } = optionDefinition
+
+  const optionVisible = visibleIf === value
+  if (!optionVisible) {
+    return undefined // skip
+  }
+
+  return {
+    key,
+    title,
+    description
+  }
+}
+
+function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { value, options } }) {
+  const {
+    key,
+    display: {
+      visibleIf = false,
+      title = key,
+      description
+    },
+    options: optionDefinitions
+  } = definition
+
+  const accessRestrictionVisible = visibleIf === value
+  if (!accessRestrictionVisible) {
+    return undefined // skip
+  }
+
+  const optionsList = compact(map(optionDefinitions, optionDefinition => mapOptionForDisplay({ optionDefinition: optionDefinition, option: options[optionDefinition.key] })))
+
+  return {
+    key,
+    title,
+    description,
+    options: optionsList
   }
 }
 
@@ -289,6 +382,66 @@ const getters = {
         return map(get(find(cloudProfile.data.regions, { name: region }), 'zones'), 'name')
       }
       return []
+    }
+  },
+  accessRestrictionNoItemsTextForCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName: cloudProfile, region }) => {
+      const noItemsText = get(state, 'cfg.accessRestriction.noItemsText', 'No access restriction options available for region ${region}') // eslint-disable-line no-template-curly-in-string
+
+      const compiled = template(noItemsText)
+      return compiled({
+        region,
+        cloudProfile
+      })
+    }
+  },
+  accessRestrictionDefinitionsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      if (!cloudProfileName) {
+        return undefined
+      }
+      if (!region) {
+        return undefined
+      }
+
+      const labels = getters.labelsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      if (isEmpty(labels)) {
+        return undefined
+      }
+
+      const items = get(state, 'cfg.accessRestriction.items')
+      return filter(items, ({ key }) => {
+        if (!key) {
+          return false
+        }
+        return labels[key] === 'true'
+      })
+    }
+  },
+  accessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+
+      let accessRestrictionsMap = map(definitions, definition => mapAccessRestrictionForInput(definition, shootResource))
+      accessRestrictionsMap = compact(accessRestrictionsMap)
+      return fromPairs(accessRestrictionsMap)
+    }
+  },
+  selectedAccessRestrictionsForShootByCloudProfileNameAndRegion (state, getters) {
+    return ({ shootResource, cloudProfileName, region }) => {
+      const definitions = getters.accessRestrictionDefinitionsByCloudProfileNameAndRegion({ cloudProfileName, region })
+      const accessRestrictions = getters.accessRestrictionsForShootByCloudProfileNameAndRegion({ shootResource, cloudProfileName, region })
+
+      return compact(map(definitions, definition => mapAccessRestrictionForDisplay({ definition, accessRestriction: accessRestrictions[definition.key] })))
+    }
+  },
+  labelsByCloudProfileNameAndRegion (state, getters) {
+    return ({ cloudProfileName, region }) => {
+      const cloudProfile = getters.cloudProfileByName(cloudProfileName)
+      if (cloudProfile) {
+        return get(find(cloudProfile.data.regions, { name: region }), 'labels')
+      }
+      return {}
     }
   },
   defaultMachineImageForCloudProfileName (state, getters) {
@@ -495,24 +648,24 @@ const getters = {
       return getters['shoots/itemByNameAndNamespace']({ namespace, name })
     }
   },
-  journalsByNamespaceAndName (state, getters) {
+  ticketsByNamespaceAndName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/issues']({ namespace, name })
+      return getters['tickets/issues']({ namespace, name })
     }
   },
-  journalCommentsByIssueNumber (state, getters) {
+  ticketCommentsByIssueNumber (state, getters) {
     return ({ issueNumber }) => {
-      return getters['journals/comments']({ issueNumber })
+      return getters['tickets/comments']({ issueNumber })
     }
   },
-  lastUpdatedJournalByNameAndNamespace (state, getters) {
+  latestUpdatedTicketByNameAndNamespace (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/lastUpdated']({ namespace, name })
+      return getters['tickets/latestUpdated']({ namespace, name })
     }
   },
-  journalsLabels (state, getters) {
+  ticketsLabels (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/labels']({ namespace, name })
+      return getters['tickets/labels']({ namespace, name })
     }
   },
   kubernetesVersions (state, getters) {
@@ -549,8 +702,8 @@ const getters = {
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
   },
-  journalList (state) {
-    return state.journals.all
+  ticketList (state) {
+    return state.tickets.all
   },
   username (state) {
     const user = state.user
@@ -706,13 +859,13 @@ const actions = {
       })
   },
   clearIssues ({ dispatch, commit }) {
-    return dispatch('journals/clearIssues')
+    return dispatch('tickets/clearIssues')
       .catch(err => {
         dispatch('setError', err)
       })
   },
   clearComments ({ dispatch, commit }) {
-    return dispatch('journals/clearComments')
+    return dispatch('tickets/clearComments')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -747,13 +900,13 @@ const actions = {
   },
   subscribeComments ({ dispatch, commit }, { name, namespace }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalCommentsEmitter.subscribeComments({ name, namespace })
+      EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
       resolve()
     })
   },
   unsubscribeComments ({ dispatch, commit }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalCommentsEmitter.unsubscribe()
+      EmitterWrapper.ticketCommentsEmitter.unsubscribe()
       resolve()
     })
   },
@@ -1050,7 +1203,7 @@ const modules = {
   cloudProfiles,
   shoots,
   infrastructureSecrets,
-  journals
+  tickets
 }
 
 const store = new Vuex.Store({
@@ -1063,7 +1216,7 @@ const store = new Vuex.Store({
   plugins
 })
 
-const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper
+const { shootsEmitter, shootEmitter, ticketIssuesEmitter, ticketCommentsEmitter } = EmitterWrapper
 
 /* Shoots */
 function filterNamespacedEvents (namespacedEvents) {
@@ -1083,14 +1236,14 @@ shootEmitter.on('shoot', namespacedEvents => {
   })
 })
 
-/* Journal Issues */
-journalIssuesEmitter.on('issues', events => {
-  store.commit('journals/HANDLE_ISSUE_EVENTS', events)
+/* Ticket Issues */
+ticketIssuesEmitter.on('issues', events => {
+  store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
 })
 
-/* Journal Comments */
-journalCommentsEmitter.on('comments', events => {
-  store.commit('journals/HANDLE_COMMENTS_EVENTS', events)
+/* Ticket Comments */
+ticketCommentsEmitter.on('comments', events => {
+  store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
 })
 
 export default store
@@ -1101,5 +1254,6 @@ export {
   getters,
   mutations,
   modules,
-  plugins
+  plugins,
+  mapAccessRestrictionForInput
 }

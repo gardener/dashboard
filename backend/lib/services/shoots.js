@@ -330,6 +330,11 @@ exports.seedInfo = async function ({ user, namespace, name }) {
     return data
   }
 
+  if (!seed.spec.secretRef) {
+    logger.info(`Could not fetch info from seed. 'spec.secretRef' on the seed ${seed.metadata.name} is missing. In case a shoot is used as seed, add the flag \`with-secret-ref\` to the \`shoot.gardener.cloud/use-as-seed\` annotation`)
+    return data
+  }
+
   try {
     const seedClient = await client.createKubeconfigClient(seed.spec.secretRef)
     const seedShootNamespace = shoot.status.technicalID
