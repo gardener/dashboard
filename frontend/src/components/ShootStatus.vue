@@ -63,6 +63,7 @@ limitations under the License.
       :lastMessage="lastMessage"
       :errorDescriptions="errorDescriptions"
       :lastUpdateTime="shootLastOperation.lastUpdateTime"
+      :secretName="shootSecretBindingName"
     />
   </g-popper>
 </template>

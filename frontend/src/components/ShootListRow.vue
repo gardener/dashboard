@@ -81,7 +81,7 @@ limitations under the License.
       <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
-      <status-tags :conditions="shootConditions"></status-tags>
+      <status-tags :conditions="shootConditions" :secretName="shootSecretBindingName"></status-tags>
     </td>
     <td class="nowrap" v-if="this.headerVisible['journal']">
       <v-tooltip top>

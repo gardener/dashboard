@@ -60,6 +60,7 @@ limitations under the License.
         :errorDescriptions="errorDescriptions"
         :lastUpdateTime="tag.lastUpdateTime"
         :lastTransitionTime="tag.lastTransitionTime"
+        :secretName="secretName"
       />
     </g-popper>
   </div>
@@ -93,6 +94,9 @@ export default {
     condition: {
       type: Object,
       required: true
+    },
+    secretName: {
+      type: String
     },
     popperKey: {
       type: String,
@@ -181,11 +185,11 @@ export default {
       return `statusTag_${this.popperKey}`
     },
     tag () {
-      const { lastTransitionTime, lastUpdateTime, message, status, type, codes } = this.condition
+      const { lastTransitionTime, lastUpdateTime, message, status, type, codes, secretName } = this.condition
       const id = type
       const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
 
-      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status, codes }
+      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status, codes, secretName }
     },
     color () {
       if (this.isError) {

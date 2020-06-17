@@ -77,7 +77,7 @@ export default {
     },
     boundariesSelector: {
       type: String,
-      default: '.v-main_wrap'
+      default: '.v-main__wrap'
     }
   },
   computed: {

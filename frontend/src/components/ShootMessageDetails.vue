@@ -76,14 +76,17 @@ limitations under the License.
             <div v-for="(lastErrorDescription, index) in errorDescriptions" :key="index">
               <v-divider v-if="index > 0" class="my-2"></v-divider>
               <v-alert
-                v-for="({ description, userError }) in lastErrorDescription.errorCodeObjects" :key="description"
+                v-for="({ description, userError, infraAccountError }) in lastErrorDescription.errorCodeObjects" :key="description"
                 color="error"
                 dark
                 :icon="userError ? 'mdi-account-alert' : 'mdi-alert'"
                 :prominent="!!userError ? true : false"
               >
                 <h4 v-if="userError">Action required</h4>
-                <span class="wrap">{{description}}</span>
+                <span class="wrap">
+                  <span v-if="infraAccountError">There is a problem with your secret <code>{{secretName}}</code>:</span>
+                  {{description}}
+                </span>
               </v-alert>
               <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
             </div>
@@ -118,6 +121,9 @@ export default {
       type: String
     },
     lastTransitionTime: {
+      type: String
+    },
+    secretName: {
       type: String
     }
   },

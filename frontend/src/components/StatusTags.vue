@@ -21,7 +21,8 @@ limitations under the License.
       :condition="condition"
       :popper-key="condition.type"
       :key="condition.type"
-      :popperPlacement="popperPlacement">
+      :popperPlacement="popperPlacement"
+      :secretName="secretName">
     </status-tag>
   </div>
 </template>
@@ -38,6 +39,9 @@ export default {
   props: {
     conditions: {
       type: Array
+    },
+    secretName: {
+      type: String
     },
     popperPlacement: {
       type: String
