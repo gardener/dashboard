@@ -18,7 +18,7 @@ import { expect } from 'chai'
 import { mount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import { VContent } from 'vuetify/lib'
+import { VMain } from 'vuetify/lib'
 Vue.use(Vuetify)
 
 describe('GPopper.vue', function () {
@@ -28,11 +28,11 @@ describe('GPopper.vue', function () {
     vuetify = new Vuetify()
   })
 
-  describe('VContent', function () {
-    it('v-content__wrap class should exist', function () {
-      const wrapper = mount(VContent, { vuetify })
-      const element = wrapper.find('.v-content__wrap')
-      expect(element.constructor.name).to.be.eq('Wrapper') // if .v-content__wrap is not found the constructor name would be "ErrorWrapper"
+  describe('VMain', function () {
+    it('v-main__wrap class should exist', function () {
+      const wrapper = mount(VMain, { vuetify })
+      const element = wrapper.find('.v-main__wrap')
+      expect(element.constructor.name).to.be.eq('Wrapper') // if .v-main__wrap is not found the constructor name would be "ErrorWrapper"
     })
   })
 })

@@ -42,7 +42,8 @@ limitations under the License.
             <div class="font-weight-bold">{{chipTooltip.title}}</div>
             <div>Status: {{chipTooltip.status}}</div>
             <div v-for="({ shortDescription }) in chipTooltip.userErrorCodeObjects" :key="shortDescription">
-              <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
+              <v-icon class="mr-1" color="white" small>mdi-account-alert</v-icon>
+              <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
             </div>
             <template v-if="chipTooltip.description">
               <v-divider color="white"></v-divider>
@@ -135,7 +136,7 @@ export default {
         title: this.tag.name,
         status: this.chipStatus,
         description: this.tag.description,
-        userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.tag.codes), { userError: true })
       }
     },
     isError () {

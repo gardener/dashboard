@@ -44,8 +44,8 @@ limitations under the License.
             <span class="font-weight-bold">{{tooltip.title}}</span>
             <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
             <div v-for="({ shortDescription }) in tooltip.userErrorCodeObjects" :key="shortDescription">
-              <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
-              <span class="font-weight-bold error--text text--lighten-2">{{shortDescription}} - Action required</span>
+              <v-icon class="mr-1" color="white" small>mdi-account-alert</v-icon>
+              <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
             </div>
           </div>
         </v-tooltip>

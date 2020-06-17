@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <v-app>
-    <v-content>
+    <v-main>
       <v-container fluid class="fill-height align-stretch">
         <v-row>
           <v-col cols="5" class="d-flex flex-column">
@@ -54,7 +54,7 @@ limitations under the License.
           </v-col>
         </v-row>
       </v-container>
-    </v-content>
+    </v-main>
     <vue-snotify></vue-snotify>
     <v-dialog v-model="dialog" persistent max-width="480px">
       <v-card>

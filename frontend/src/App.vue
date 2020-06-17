@@ -35,7 +35,7 @@ export default {
 
 <style lang="scss">
   [data-app] {
-    .v-content > .container {
+    .v-main > .container {
       min-height: calc(100vh - 156px)
     }
   }
