@@ -81,7 +81,7 @@ limitations under the License.
       <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
-      <status-tags :conditions="shootConditions" :secretName="shootSecretBindingName"></status-tags>
+      <status-tags :shootItem="shootItem"></status-tags>
     </td>
     <td v-if="this.headerVisible['accessRestrictions']">
       <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>

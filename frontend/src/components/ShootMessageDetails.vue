@@ -84,7 +84,16 @@ limitations under the License.
               >
                 <h4 v-if="userError">Action required</h4>
                 <span class="wrap">
-                  <span v-if="infraAccountError">There is a problem with your secret <code>{{secretName}}</code>:</span>
+                  <span v-if="infraAccountError">There is a problem with your secret
+                    <code>
+                      <router-link v-if="canLinkToSecret"
+                        class="cyan--text text--darken-2"
+                        :to="{ name: 'Secret', params: { name: secretName, namespace: namespace } }"
+                      >
+                        <span>{{secretName}}</span>
+                      </router-link>
+                      <span v-else>{{secretName}}</span>
+                    </code>:</span>
                   {{description}}
                 </span>
               </v-alert>
@@ -125,6 +134,9 @@ export default {
     },
     secretName: {
       type: String
+    },
+    namespace: {
+      type: String
     }
   },
   data () {
@@ -136,6 +148,9 @@ export default {
   computed: {
     hasError () {
       return !isEmpty(this.errorDescriptions)
+    },
+    canLinkToSecret () {
+      return this.secretName && this.namespace
     }
   }
 }

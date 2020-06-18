@@ -22,7 +22,8 @@ limitations under the License.
       :popper-key="condition.type"
       :key="condition.type"
       :popperPlacement="popperPlacement"
-      :secretName="secretName">
+      :secretName="shootSecretBindingName"
+      :namespace="shootNamespace">
     </status-tag>
   </div>
 </template>
@@ -31,28 +32,27 @@ limitations under the License.
 import StatusTag from '@/components/StatusTag'
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     StatusTag
   },
   props: {
-    conditions: {
-      type: Array
-    },
-    secretName: {
-      type: String
+    shootItem: {
+      type: Object
     },
     popperPlacement: {
       type: String
     }
   },
+  mixins: [shootItem],
   computed: {
     filteredConditions () {
-      if (isEmpty(this.conditions)) {
+      if (isEmpty(this.shootConditions)) {
         return []
       }
-      return filter(this.conditions, condition => !!condition.lastTransitionTime)
+      return filter(this.shootConditions, condition => !!condition.lastTransitionTime)
     }
   }
 }

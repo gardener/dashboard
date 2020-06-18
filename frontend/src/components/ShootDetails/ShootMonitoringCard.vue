@@ -47,7 +47,7 @@ limitations under the License.
           <v-list-item-subtitle>Readiness</v-list-item-subtitle>
           <v-list-item-title class="d-flex align-center pt-1">
             <span v-if="!shootConditions.length">-</span>
-            <status-tags v-else :conditions="shootConditions" :secretName="shootSecretBindingName" popperPlacement="bottom"></status-tags>
+            <status-tags v-else :shootItem="shootItem" popperPlacement="bottom"></status-tags>
           </v-list-item-title>
         </v-list-item-content>
       </v-list-item>
