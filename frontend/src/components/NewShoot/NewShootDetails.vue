@@ -49,8 +49,8 @@ limitations under the License.
             <template v-slot:item="{ item }">
               <v-list-item-content>
                 <v-list-item-title>{{item.version}}</v-list-item-title>
-                <v-list-item-subtitle v-if="item.expirationDateString">
-                  <span>Expires: {{item.expirationDateString}}</span>
+                <v-list-item-subtitle v-if="versionItemDescription(item).length">
+                  {{versionItemDescription(item)}}
                 </v-list-item-subtitle>
               </v-list-item-content>
             </template>
@@ -83,9 +83,9 @@ import { mapGetters, mapState } from 'vuex'
 import { getValidationErrors, compileMarkdown, setDelayedInputFocus } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import head from 'lodash/head'
 import get from 'lodash/get'
 import find from 'lodash/find'
+import join from 'lodash/join'
 import semver from 'semver'
 
 const validationErrors = {
@@ -137,6 +137,7 @@ export default {
     ]),
     ...mapGetters([
       'sortedKubernetesVersions',
+      'defaultKubernetesVersionForCloudProfileName',
       'shootByNamespaceAndName',
       'projectList'
     ]),
@@ -217,7 +218,7 @@ export default {
       }
     },
     setDefaultKubernetesVersion () {
-      this.kubernetesVersion = get(head(this.sortedKubernetesVersionsList), 'version')
+      this.kubernetesVersion = get(this.defaultKubernetesVersionForCloudProfileName(this.cloudProfileName), 'version')
       this.onInputKubernetesVersion()
     },
     getDetailsData () {
@@ -237,6 +238,16 @@ export default {
       this.$refs.purpose.setPurpose(purpose)
 
       this.validateInput()
+    },
+    versionItemDescription (version) {
+      const itemDescription = []
+      if (version.classification) {
+        itemDescription.push(`Classification: ${version.classification}`)
+      }
+      if (version.expirationDate) {
+        itemDescription.push(`Expiration Date: ${version.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     }
   },
   mounted () {

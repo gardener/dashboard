@@ -20,7 +20,7 @@
         </v-list-item-action>
         <v-list-item-content>
           <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
-          <v-list-item-subtitle v-if="itemDescription(item).length > 0">
+          <v-list-item-subtitle v-if="itemDescription(item).length">
             {{itemDescription(item)}}
           </v-list-item-subtitle>
         </v-list-item-content>

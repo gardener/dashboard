@@ -33,8 +33,8 @@ limitations under the License.
         <v-list-item-content v-on="on">
           <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
           <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
-          <v-list-item-subtitle v-if="item.expirationDateString">
-            <span>Expires: {{item.expirationDateString}}</span>
+          <v-list-item-subtitle v-if="versionItemDescription(item).length">
+            {{versionItemDescription(item)}}
           </v-list-item-subtitle>
         </v-list-item-content>
       </template>
@@ -50,6 +50,7 @@ import flatMap from 'lodash/flatMap'
 import upperFirst from 'lodash/upperFirst'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import join from 'lodash/join'
 import semver from 'semver'
 
 export default {
@@ -70,13 +71,12 @@ export default {
   computed: {
     items () {
       const selectionItemsForType = (versions, type) => {
-        return map(versions, ({ version, expirationDateString }) => {
+        return map(versions, version => {
           return {
+            ...version,
             type,
-            version,
-            expirationDateString,
-            text: `${this.currentk8sVersion} → ${version}`,
-            notNextMinor: this.itemIsNotNextMinor(version, type)
+            text: `${this.currentk8sVersion} → ${version.version}`,
+            notNextMinor: this.itemIsNotNextMinor(version.version, type)
           }
         })
       }
@@ -165,6 +165,17 @@ export default {
         invalid = selectedItemMinorVersion - currentMinorVersion !== 1
       }
       return invalid
+    },
+    versionItemDescription (version) {
+      console.log(version)
+      const itemDescription = []
+      if (version.classification) {
+        itemDescription.push(`Classification: ${version.classification}`)
+      }
+      if (version.expirationDate) {
+        itemDescription.push(`Expiration Date: ${version.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     },
     reset () {
       this.selectedItem = undefined

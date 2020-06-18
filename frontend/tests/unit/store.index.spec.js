@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { getters } from '@/store'
+import { getters, firstItemMatchingVersionClassification } from '@/store'
 import find from 'lodash/find'
 import noop from 'lodash/noop'
 
@@ -106,7 +106,8 @@ describe('Store', function () {
       },
       {
         expirationDate: '2120-04-12T23:59:59Z', // not expired
-        version: '1.16.3'
+        version: '1.16.3',
+        classification: 'supported'
       },
       {
         expirationDate: '2019-03-15T23:59:59Z', // expired
@@ -146,6 +147,7 @@ describe('Store', function () {
     const kubernetesVersion = find(dashboardVersions, { version: '1.16.3' })
     expect(kubernetesVersion.expirationDate).to.equal('2120-04-12T23:59:59Z')
     expect(kubernetesVersion.expirationDateString).to.not.equal(undefined)
+    expect(kubernetesVersion.classification).to.equal('supported')
     expect(kubernetesVersion).to.equal(dashboardVersions[0]) // check sorting
   })
 
@@ -464,5 +466,32 @@ describe('Store', function () {
     dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
     expect(dashboardLoadBalancerProviderNames).to.have.length(1)
     expect(dashboardLoadBalancerProviderNames[0]).to.equal('other regional LB')
+  })
+
+  it('should select default item that matches version classification', function () {
+    const items = [
+      {
+        version: '1',
+        classification: 'deprecated'
+      },
+      {
+        version: '2'
+      },
+      {
+        version: '3',
+        classification: 'supported'
+      }
+    ]
+
+    let item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('3')
+
+    items.pop()
+    item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('2')
+
+    items.pop()
+    item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('1')
   })
 })

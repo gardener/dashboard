@@ -258,6 +258,22 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
   }
 }
 
+// Return first item with classification supported, if no item has classification supported
+// return first item with classifiction undefined, if no item matches these requirements,
+// return first item in list
+function firstItemMatchingVersionClassification (items) {
+  let defaultItem = find(items, { classification: 'supported' })
+  if (!defaultItem) {
+    defaultItem = find(items, machineImage => {
+      return machineImage.classification === undefined
+    })
+  }
+  if (!defaultItem) {
+    defaultItem = head(items)
+  }
+  return defaultItem
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -451,7 +467,7 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      const defaultMachineImage = head(machineImages)
+      const defaultMachineImage = firstItemMatchingVersionClassification(machineImages)
       return pick(defaultMachineImage, 'name', 'version')
     }
   },
@@ -701,6 +717,12 @@ const getters = {
         return semver.rcompare(a.version, b.version)
       })
       return kubernetsVersions
+    }
+  },
+  defaultKubernetesVersionForCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const k8sVersions = getters.sortedKubernetesVersions(cloudProfileName)
+      return firstItemMatchingVersionClassification(k8sVersions)
     }
   },
   isAdmin (state) {
@@ -1259,5 +1281,6 @@ export {
   mutations,
   modules,
   plugins,
-  mapAccessRestrictionForInput
+  mapAccessRestrictionForInput,
+  firstItemMatchingVersionClassification
 }
