@@ -36,18 +36,8 @@ limitations under the License.
         </v-toolbar>
         <v-card-text>
           <slot></slot>
-          <div v-if="!!time">
-            <div class="timestamp grey--text">
-              <div v-if="showPlaceholder" style="height: 22px;"></div>
-              <lazy-component @show="showPlaceholder=false">
-                <span v-if="!!time.caption">{{time.caption}}</span>
-                <time-string :dateTime="time.dateTime" :pointInTime="-1"></time-string>
-              </lazy-component>
-            </div>
-          </div>
         </v-card-text>
       </v-card>
-      <lazy-component @show="emitRendered()"></lazy-component>
     </div>
     <!-- Using old slot syntax. Corresponding issue: https://github.com/RobinCK/vue-popper/issues/88 -->
     <template slot="reference">
@@ -58,20 +48,12 @@ limitations under the License.
 
 <script>
 import Popper from 'vue-popperjs'
-import TimeString from '@/components/TimeString'
 import { closePopover } from '@/utils'
 import 'vue-popperjs/dist/vue-popper.css'
-import VueLazyload from 'vue-lazyload'
-import Vue from 'vue'
-
-Vue.use(VueLazyload, {
-  lazyComponent: true
-})
 
 export default {
   components: {
-    Popper,
-    TimeString
+    Popper
   },
   props: {
     popperKey: {
@@ -86,9 +68,6 @@ export default {
       type: String,
       required: true
     },
-    time: {
-      type: Object
-    },
     placement: {
       type: String,
       default: 'top'
@@ -98,12 +77,7 @@ export default {
     },
     boundariesSelector: {
       type: String,
-      default: '.v-content__wrap'
-    }
-  },
-  data () {
-    return {
-      showPlaceholder: true
+      default: '.v-main__wrap'
     }
   },
   computed: {
@@ -169,12 +143,9 @@ export default {
     background-color: transparent !important;
     -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
     box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
-  }
-
-  .timestamp {
-    text-align: right;
-    font-size: 90%;
-    margin-top: 1.2em;
+    max-width: 1000px;
+    max-height: 85vh;
+    overflow-y: scroll;
   }
 
   ::v-deep .v-toolbar__content {

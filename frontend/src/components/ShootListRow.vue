@@ -72,22 +72,16 @@ limitations under the License.
     <td class="text-left nowrap" v-if="this.headerVisible['lastOperation']">
       <div>
         <shoot-status
-         :operation="shootLastOperation"
-         :lastErrors="shootLastErrors"
          :popperKey="`${shootNamespace}/${shootName}`"
-         :isStatusHibernated="isShootStatusHibernated"
-         :isHibernationProgressing="isShootStatusHibernationProgressing"
-         :reconciliationDeactivated="isShootReconciliationDeactivated"
-         :shootDeleted="isTypeDelete">
+         :shootItem="shootItem">
         </shoot-status>
-        <retry-operation :shootItem="shootItem"></retry-operation>
       </div>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">
       <shoot-version :shoot-item="shootItem"></shoot-version>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
-      <status-tags :conditions="shootConditions"></status-tags>
+      <status-tags :shootItem="shootItem"></status-tags>
     </td>
     <td v-if="this.headerVisible['accessRestrictions']">
       <access-restriction-chips :selectedAccessRestrictions="shootSelectedAccessRestrictions"></access-restriction-chips>
@@ -140,7 +134,6 @@ import StatusTags from '@/components/StatusTags'
 import PurposeTag from '@/components/PurposeTag'
 import TimeString from '@/components/TimeString'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
-import RetryOperation from '@/components/RetryOperation'
 import TicketLabels from '@/components/ShootTickets/TicketLabels'
 import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
@@ -165,7 +158,6 @@ export default {
     TimeString,
     ShootVersion,
     TicketLabels,
-    RetryOperation,
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,

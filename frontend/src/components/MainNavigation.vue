@@ -19,7 +19,7 @@ limitations under the License.
       v-model="isActive"
       fixed
       app
-      :mobile-break-point="400"
+      :mobile-breakpoint="400"
       dark
     >
       <div class="teaser">
