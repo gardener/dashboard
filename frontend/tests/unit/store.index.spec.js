@@ -74,10 +74,10 @@ describe('Store', function () {
     }
 
     const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
-    expect(dashboardMachineImages).to.have.length(4)
+    expect(dashboardMachineImages).to.have.length(5)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
-    expect(expiredImage).to.equal(undefined)
+    expect(expiredImage.isExpired).to.equal(true)
 
     const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
     expect(invalidImage).to.equal(undefined)
@@ -92,7 +92,7 @@ describe('Store', function () {
     expect(suseImage.isSupported).to.equal(true)
     expect(suseImage.isDeprecated).to.equal(false)
     expect(suseImage.isPreview).to.equal(false)
-    expect(suseImage).to.equal(dashboardMachineImages[1]) // check sorting
+    expect(suseImage).to.equal(dashboardMachineImages[2]) // check sorting
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
     expect(fooImage.needsLicense).to.equal(false)
@@ -136,10 +136,10 @@ describe('Store', function () {
     }
 
     const dashboardVersions = getters.sortedKubernetesVersions({}, storeGetters)('foo')
-    expect(dashboardVersions).to.have.length(2)
+    expect(dashboardVersions).to.have.length(3)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
-    expect(expiredVersion).to.equal(undefined)
+    expect(expiredVersion.isExpired).to.equal(true)
 
     const invalidVersion = find(dashboardVersions, { version: '1.06.2' })
     expect(invalidVersion).to.equal(undefined)

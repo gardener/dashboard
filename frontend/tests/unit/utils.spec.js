@@ -15,7 +15,9 @@
 //
 
 import { expect } from 'chai'
-import { canI } from '@/utils'
+import utils from '@/utils'
+
+const { canI } = utils
 
 describe('utils', function () {
   describe('authorization', function () {
@@ -161,6 +163,59 @@ describe('utils', function () {
           }]
         }, 'get', 'group1', 'resource1')).to.be.false
       })
+    })
+  })
+  describe('#availableK8sUpdatesForShoot', function () {
+    const kubernetesVersions = [
+      {
+        classification: 'preview',
+        version: '2.0.0'
+      },
+      {
+        classification: 'supported',
+        version: '1.18.3'
+      },
+      {
+        expirationDate: '2020-01-31T23:59:59Z', // expired
+        isExpired: true, // need to set this manually, as version getter is mocked
+        version: '1.18.2'
+      },
+      {
+        classification: 'supported',
+        version: '1.17.7'
+      },
+      {
+        classification: 'supported',
+        version: '1.16.10'
+      },
+      {
+        classification: 'deprecated',
+        expirationDate: '2120-08-31T23:59:59Z',
+        version: '1.16.9'
+      },
+      {
+        version: '1.15.0'
+      }
+    ]
+
+    utils.store.getters = {
+      kubernetesVersions: () => {
+        return kubernetesVersions
+      }
+    }
+
+    it('should return available K8sUpdates for given version', function () {
+      const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
+      expect(availableK8sUpdates.minor[0]).to.equal(kubernetesVersions[1])
+      expect(availableK8sUpdates.patch[0]).to.equal(kubernetesVersions[4])
+      expect(availableK8sUpdates.major[0]).to.equal(kubernetesVersions[0])
+    })
+
+    it('should differentiate between patch/minor/major available K8sUpdates for given version, filter out expired', function () {
+      const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
+      expect(availableK8sUpdates.patch.length).to.equal(1)
+      expect(availableK8sUpdates.minor.length).to.equal(2)
+      expect(availableK8sUpdates.major.length).to.equal(1)
     })
   })
 })

@@ -300,10 +300,7 @@ export function isOwnSecretBinding (secret) {
 }
 
 const availableK8sUpdatesCache = {}
-export function availableK8sUpdatesForShoot (spec) {
-  const shootVersion = get(spec, 'kubernetes.version')
-  const cloudProfileName = spec.cloudProfileName
-
+export function availableK8sUpdatesForShoot (shootVersion, cloudProfileName) {
   let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)
   if (newerVersions !== undefined) {
     return newerVersions
@@ -313,6 +310,9 @@ export function availableK8sUpdatesForShoot (spec) {
 
     let newerVersion = false
     forEach(allVersions, version => {
+      if (version.isExpired) {
+        return true // continue
+      }
       if (semver.gt(version.version, shootVersion)) {
         newerVersion = true
         const diff = semver.diff(version.version, shootVersion)
@@ -703,4 +703,10 @@ export function targetText (target) {
     default:
       return undefined
   }
+}
+
+export default {
+  store,
+  canI,
+  availableK8sUpdatesForShoot
 }

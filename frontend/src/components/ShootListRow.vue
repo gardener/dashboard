@@ -31,6 +31,7 @@ limitations under the License.
         <v-col class="shrink" >
           <div class="d-flex flew-row">
             <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
+            <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
             <hibernation-schedule-warning
               v-if="isShootHasNoHibernationScheduleWarning"
               :name="shootName"
@@ -147,6 +148,7 @@ import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import ShootSeedName from '@/components/ShootSeedName'
+import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import {
@@ -172,7 +174,8 @@ export default {
     DeleteCluster,
     CopyBtn,
     ShootSeedName,
-    Vendor
+    Vendor,
+    VersionExpirationWarning
   },
   props: {
     shootItem: {

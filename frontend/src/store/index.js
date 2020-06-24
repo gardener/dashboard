@@ -359,9 +359,6 @@ const getters = {
 
       const mapMachineImages = (machineImage) => {
         const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
-          if (expirationDate && moment().isAfter(expirationDate)) {
-            return false
-          }
           if (!semver.valid(version)) {
             console.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
             return false
@@ -375,6 +372,7 @@ const getters = {
         return map(versions, ({ version, expirationDate, classification }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
           const name = machineImage.name
+
           return {
             key: name + '/' + version,
             name,
@@ -383,6 +381,7 @@ const getters = {
             isPreview: classification === 'preview',
             isSupported: classification === 'supported',
             isDeprecated: classification === 'deprecated',
+            isExpired: expirationDate && moment().isAfter(expirationDate),
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,
@@ -697,14 +696,16 @@ const getters = {
           console.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
           return false
         }
-        if (expirationDate && moment().isAfter(expirationDate)) {
-          return false
-        }
         return true
       })
       return map(validVersions, version => {
+        const classification = version.classification
         return {
           ...version,
+          isPreview: classification === 'preview',
+          isSupported: classification === 'supported',
+          isDeprecated: classification === 'deprecated',
+          isExpired: version.expirationDate && moment().isAfter(version.expirationDate),
           expirationDateString: getDateFormatted(version.expirationDate)
         }
       })

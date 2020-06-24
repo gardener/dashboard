@@ -86,6 +86,7 @@ import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/val
 import get from 'lodash/get'
 import find from 'lodash/find'
 import join from 'lodash/join'
+import filter from 'lodash/filter'
 import semver from 'semver'
 
 const validationErrors = {
@@ -142,7 +143,9 @@ export default {
       'projectList'
     ]),
     sortedKubernetesVersionsList () {
-      return this.sortedKubernetesVersions(this.cloudProfileName)
+      return filter(this.sortedKubernetesVersions(this.cloudProfileName), ({ isExpired }) => {
+        return !isExpired
+      })
     },
     versionHint () {
       if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {

@@ -16,7 +16,7 @@
 
 import { expect } from 'chai'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
-import store from '../../src/store'
+import store from '@/store'
 import moment from 'moment-timezone'
 
 const localTimezone = store.state.localTimezone

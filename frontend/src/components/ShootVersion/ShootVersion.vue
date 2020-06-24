@@ -153,7 +153,7 @@ export default {
       return this.confirmRequired ? this.shootName : undefined
     },
     availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(this.shootSpec)
+      return availableK8sUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {
