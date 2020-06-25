@@ -154,8 +154,8 @@ export default {
       return undefined
     },
     versionIsNotLatestPatch () {
-      return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
-        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
+      return !!find(this.sortedKubernetesVersionsList, ({ version, isPreview }) => {
+        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion) && !isPreview
       })
     },
     sla () {

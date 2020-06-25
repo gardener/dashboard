@@ -71,6 +71,13 @@ const sampleVersions = [
     version: '1.2.4'
   },
   {
+    version: '1.2.5',
+    isPreview: true // need to set this manually, as version getter is mocked
+  },
+  {
+    version: '1.3.4'
+  },
+  {
     version: '3.3.2'
   }
 ]
@@ -103,7 +110,7 @@ describe('NewShootDetails.vue', function () {
     expect(shootDetails.versionIsNotLatestPatch).to.be.false
   })
 
-  it('selected kubernetes version should be latest (one minor)', function () {
+  it('selected kubernetes version should be latest (one minor, one major, one preview update available)', function () {
     const shootDetails = createNewShootDetailsComponent(sampleVersions[2].version)
     expect(shootDetails.versionIsNotLatestPatch).to.be.false
   })
