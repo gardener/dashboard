@@ -85,7 +85,7 @@ limitations under the License.
       </div>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :shoot-item="shootItem"></shoot-version>
+      <shoot-version :shoot-item="shootItem" chip></shoot-version>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
       <status-tags :conditions="shootConditions"></status-tags>

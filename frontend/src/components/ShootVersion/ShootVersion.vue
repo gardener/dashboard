@@ -20,7 +20,7 @@ limitations under the License.
       <template v-slot:activator="{ on: tooltip }">
         <div v-on="tooltip">
           <v-btn
-            v-if="chipStyle"
+            v-if="chip"
             class="update_btn"
             :class="buttonInactive"
             small
@@ -117,9 +117,8 @@ export default {
     shootItem: {
       type: Object
     },
-    chipStyle: {
-      type: Boolean,
-      default: true
+    chip: {
+      type: Boolean
     }
   },
   data () {
