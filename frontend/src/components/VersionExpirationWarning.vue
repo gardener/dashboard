@@ -95,7 +95,7 @@ export default {
       }
       const expiredWorkerGroups = []
       const allMachineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
-      forEach(this.shootItem.spec.provider.workers, worker => {
+      forEach(this.shootWorkerGroups, worker => {
         const workerImage = get(worker, 'machine.image')
         const workerImageDetails = find(allMachineImages, workerImage)
         if (workerImageDetails.expirationDate) {
