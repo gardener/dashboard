@@ -347,7 +347,7 @@ exports.seedInfo = async function ({ user, namespace, name }) {
 }
 
 function assignComponentSecrets (client, data, namespace, name) {
-  const components = ['monitoring', 'logging']
+  const components = ['monitoring']
   return Promise.all(components.map(component => {
     const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
     return assignComponentSecret(client, data, component, namespace, ingressSecretName)

@@ -147,8 +147,6 @@ const actions = {
         info.prometheusUrl = `https://p-${baseHost}`
 
         info.alertmanagerUrl = `https://au-${baseHost}`
-
-        info.kibanaUrl = `https://k-${baseHost}`
       }
       commit('RECEIVE_INFO', { name, namespace, info })
       return info
