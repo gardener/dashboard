@@ -93,16 +93,16 @@ frontendConfig:
     issueDescriptionTemplate: |
       ## Which cluster is affected?
 
-      `Cluster Details Dashboard Link`: ${shootUrl}
-      `Operating System`:  ${os}
-      `Platform`:                  ${providerType}
+      `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
+      `Operating System`: ${machineImageNames}
+      `Platform`: ${providerType}
 
       ## What happened?
 
       ## What you expected to happen?
 
       ## When did it happen or started to happen?
-      `Timestamp`: ${dateTime}
+      `Timestamp`: ${utcDateTimeNow}
 
       ## How would we reproduce it?
 
