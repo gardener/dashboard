@@ -17,9 +17,9 @@ limitations under the License.
 <template>
   <g-popper
     v-if="k8sExpirationDate || expiredWorkerGroups.length"
-    :title="`Update Warnings for ${shootName}`"
-    toolbarColor="warning"
-    :popperKey="`version_warning${shootName}`"
+    :title="`Update Information for ${this.shootName}`"
+    :toolbarColor="overallStatusColor"
+    :popperKey="`version_warning_${shootName}`"
   >
     <template v-slot:popperRef>
       <div>
@@ -27,7 +27,7 @@ limitations under the License.
           <template v-slot:activator="{ on }">
             <v-icon v-on="on" :color="overallStatusColor" class="cursor-pointer">mdi-update</v-icon>
           </template>
-          <span>Version update warning</span>
+          <span>{{tooltip}}</span>
         </v-tooltip>
       </div>
     </template>
@@ -94,21 +94,13 @@ export default {
       'machineImagesByCloudProfileName'
     ]),
     k8sExpirationDate () {
-      // not expired
-      // expired
-      // - automatic update active, no warning as newer patch version available info?
-      // - automaic update not active or no newer patch -> expired warning, update will be enfored...
-      // - no update path available ->error
-
-      // return { expirationDate, isValidExpirationDate, isInfo, isWarning, isError}
-      // calc overall state, depeneding on prop flags
       if (this.onlyMachineImageWarnings) {
         return undefined
       }
 
       const allVersions = this.kubernetesVersions(this.shootCloudProfileName)
       const version = find(allVersions, { version: this.shootK8sVersion })
-      if (!version) {
+      if (!version || !version.expirationDate) {
         return undefined
       }
 
@@ -119,6 +111,10 @@ export default {
       const isError = !updatePathAvailable
       const isWarning = !isError && !k8sAutoPatch && patchAvailable
       const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
+
+      if (!isError && !isWarning && !isInfo) {
+        return undefined
+      }
       return {
         expirationDate: version.expirationDate,
         isValidTerminationDate: isValidTerminationDate(version.expirationDate),
@@ -128,14 +124,6 @@ export default {
       }
     },
     expiredWorkerGroups () {
-      // not expired
-      // expired
-      // - automatic update active, no warning as newer version available info?
-      // - automaic update not active or no newer version -> expired warning, update will be enfored...
-      // - no update path available ->error
-
-      // return { expirationDate, isValidExpirationDate, isInfo, isWarning, isError}
-      // calc overall state, depeneding on prop flags
       if (this.onlyK8sWarnings) {
         return []
       }
@@ -150,7 +138,8 @@ export default {
         const isError = !updateAvailable
         const isWarning = !imageAutoPatch && updateAvailable
         const isInfo = imageAutoPatch && updateAvailable
-        if (workerImageDetails.expirationDate) {
+        if (workerImageDetails.expirationDate &&
+          (isError || isWarning || isInfo)) {
           expiredWorkerGroups.push({
             ...workerImageDetails,
             workerName: worker.name,
@@ -162,13 +151,22 @@ export default {
       })
       return expiredWorkerGroups
     },
-    overallStatusColor () {
+    isOverallStatusWarning () {
       const isError = !!find([this.k8sExpirationDate, ...this.expiredWorkerGroups], { isError: true })
       const isWarning = !!find([this.k8sExpirationDate, ...this.expiredWorkerGroups], { isWarning: true })
-      if (isError || isWarning) {
+      return isError || isWarning
+    },
+    overallStatusColor () {
+      if (this.isOverallStatusWarning) {
         return 'warning'
       }
       return 'cyan darken-2'
+    },
+    tooltip () {
+      if (this.isOverallStatusWarning) {
+        return 'Version Update Warning'
+      }
+      return 'Version Update Information'
     }
   },
   methods: {
