@@ -45,7 +45,6 @@ import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
-import semver from 'semver'
 
 const validationErrors = {
   worker: {
@@ -126,7 +125,7 @@ export default {
       return 'default'
     },
     selectedImageIsNotLatest () {
-      return selectedImageIsNotLatest (this.machineImage, this.machineImages)
+      return selectedImageIsNotLatest(this.machineImage, this.machineImages)
     }
   },
   validations,

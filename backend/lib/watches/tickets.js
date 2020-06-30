@@ -19,24 +19,24 @@
 const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
-const journals = require('../services/journals')
-const { getJournalCache } = require('../cache')
+const tickets = require('../services/tickets')
+const { getTicketCache } = require('../cache')
 
 module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
-    logger.warn('Missing gitHub property in config for journals feature')
+    logger.warn('Missing gitHub property in config for tickets feature')
     return
   }
-  const nsp = io.of('/journals')
-  const journalCache = getJournalCache()
-  journalCache.onIssue(event => {
+  const nsp = io.of('/tickets')
+  const ticketCache = getTicketCache()
+  ticketCache.onIssue(event => {
     const room = 'issues'
     nsp.to(room).emit('events', {
       kind: 'issues',
       events: [event]
     })
   })
-  journalCache.onComment(event => {
+  ticketCache.onComment(event => {
     const { namespace, name } = event.object.metadata
     const room = `comments_${namespace}/${name}`
     nsp.to(room).emit('events', {
@@ -55,25 +55,25 @@ module.exports = (io, retryOptions = {}) => {
         if ([500, 502, 503, 504, 521, 522, 524].indexOf(err.status) === -1) {
           throw err
         }
-        logger.info(`Attempt ${err.attemptNumber} failed. Will retry to fetch journals`)
+        logger.info(`Attempt ${err.attemptNumber} failed. Will retry to fetch tickets`)
       }
     }
     try {
-      await pRetry(() => journals.loadOpenIssues(), options)
-      logger.info('successfully fetched journals')
+      await pRetry(() => tickets.loadOpenIssues(), options)
+      logger.info('successfully fetched tickets')
     } catch (err) {
-      logger.error('failed to fetch journals', err)
+      logger.error('failed to fetch tickets', err)
     }
   }
 
-  function pollJournals () {
+  function pollTickets () {
     return setInterval(async () => {
       await loadAllOpenIssues()
 
-      const issueNumbers = journalCache.getIssueNumbers()
+      const issueNumbers = ticketCache.getIssueNumbers()
       for (const number of issueNumbers) {
         try {
-          await journals.loadIssueComments({ number })
+          await tickets.loadIssueComments({ number })
         } catch (err) {
           logger.error('failed to fetch comments for reopened issue %s: %s', number, err)
         }
@@ -89,6 +89,6 @@ module.exports = (io, retryOptions = {}) => {
   if (!pollIntervalSeconds) {
     return loadAllOpenIssues()
   } else {
-    pollJournals()
+    pollTickets()
   }
 }

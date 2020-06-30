@@ -17,8 +17,8 @@
 'use strict'
 
 const {
-  deleteJournals
-} = require('../lib/services/journals')
+  deleteTickets
+} = require('../lib/services/tickets')
 const github = require('../lib/github')
 const logger = require('../lib/logger')
 const cache = require('../lib/cache')
@@ -32,7 +32,7 @@ describe('services', function () {
     sandbox.restore()
   })
 
-  describe('journals', function () {
+  describe('tickets', function () {
     let debugSpy
     let getIssueStub
     let removeIssueSpy
@@ -48,7 +48,7 @@ describe('services', function () {
       issue3
     ]
 
-    const journalCache = {
+    const ticketCache = {
       issues: [],
       getIssues () {
         return this.issues
@@ -67,14 +67,14 @@ describe('services', function () {
       createCommentStub = sandbox.stub(github, 'createComment')
       closeIssueStub = sandbox.stub(github, 'closeIssue')
       getIssueStub = sandbox.stub(github, 'getIssue')
-      sandbox.stub(cache, 'getJournalCache').returns(journalCache)
-      journalCache.issues = issues
-      removeIssueSpy = sandbox.spy(journalCache, 'removeIssue')
+      sandbox.stub(cache, 'getTicketCache').returns(ticketCache)
+      ticketCache.issues = issues
+      removeIssueSpy = sandbox.spy(ticketCache, 'removeIssue')
     })
 
-    describe('#deleteJournals', function () {
+    describe('#deleteTickets', function () {
       it('should not remove any issues', async function () {
-        await deleteJournals({ namespace: 'foo', name: 'foo' })
+        await deleteTickets({ namespace: 'foo', name: 'foo' })
         expect(debugSpy).to.not.be.called
         expect(createCommentStub).to.not.be.called
         expect(closeIssueStub).to.not.be.called
@@ -91,7 +91,7 @@ describe('services', function () {
         createCommentStub.withArgs({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
         closeIssueStub.withArgs({ number: issue1.id })
 
-        await deleteJournals({ namespace: 'foo', name: 'bar' })
+        await deleteTickets({ namespace: 'foo', name: 'bar' })
         expect(debugSpy).to.be.calledTwice
         expect(createCommentStub).to.be.calledWith({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
         expect(closeIssueStub).to.be.calledWith({ number: issue1.id })

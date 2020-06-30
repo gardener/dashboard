@@ -26,7 +26,7 @@ const kubernetesClient = require('./kubernetes-client')
 const watches = require('./watches')
 const cache = require('./cache')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
-const { projects, shoots, journals, authorization } = require('./services')
+const { projects, shoots, tickets, authorization } = require('./services')
 
 function socketAuthentication (nsp) {
   const authenticate = security.authenticateSocket(kubernetesClient)
@@ -245,10 +245,10 @@ function setupShootsNamespace (shootsNsp) {
   socketAuthentication(shootsNsp)
 }
 
-function setupJournalsNamespace (journalsNsp) {
-  const journalCache = cache.getJournalCache()
+function setupTicketsNamespace (ticketsNsp) {
+  const ticketCache = cache.getTicketCache()
 
-  journalsNsp.on('connection', socket => {
+  ticketsNsp.on('connection', socket => {
     logger.debug('Socket %s connected', socket.id)
 
     socket.on('disconnect', onDisconnect)
@@ -257,17 +257,11 @@ function setupJournalsNamespace (journalsNsp) {
 
       const kind = 'issues'
 
-      const user = getUserFromSocket(socket)
       try {
-        if (await authorization.isAdmin(user)) {
-          joinRoom(socket, 'issues')
+        joinRoom(socket, 'issues')
 
-          const batchEmitter = new EventsEmitter({ kind, socket })
-          batchEmitter.batchEmitObjectsAndFlush(journalCache.getIssues())
-        } else {
-          logger.warn('Socket %s: user %s tried to fetch journal but is no admin', socket.id, user.email)
-          socket.emit('subscription_error', { kind, code: 403, message: 'Forbidden' })
-        }
+        const batchEmitter = new EventsEmitter({ kind, socket })
+        batchEmitter.batchEmitObjectsAndFlush(ticketCache.getIssues())
       } catch (error) {
         logger.error('Socket %s: failed to fetch issues: %s', socket.id, error)
         socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch issues' })
@@ -279,28 +273,22 @@ function setupJournalsNamespace (journalsNsp) {
 
       const kind = 'comments'
 
-      const user = getUserFromSocket(socket)
       try {
-        if (await authorization.isAdmin(user)) {
-          const room = `comments_${namespace}/${name}`
-          joinRoom(socket, room)
+        const room = `comments_${namespace}/${name}`
+        joinRoom(socket, room)
 
-          const batchEmitter = new EventsEmitter({ kind, socket })
-          const numbers = journalCache.getIssueNumbersForNameAndNamespace({ name, namespace })
-          for (const number of numbers) {
-            try {
-              const comments = await journals.getIssueComments({ number })
-              batchEmitter.batchEmitObjects(comments)
-            } catch (err) {
-              logger.error('Socket %s: failed to fetch comments for %s/%s issue %s: %s', socket.id, namespace, name, number, err)
-              socket.emit('subscription_error', { kind, code: 500, message: `Failed to fetch comments for issue ${number}` })
-            }
+        const batchEmitter = new EventsEmitter({ kind, socket })
+        const numbers = ticketCache.getIssueNumbersForNameAndNamespace({ name, namespace })
+        for (const number of numbers) {
+          try {
+            const comments = await tickets.getIssueComments({ number })
+            batchEmitter.batchEmitObjects(comments)
+          } catch (err) {
+            logger.error('Socket %s: failed to fetch comments for %s/%s issue %s: %s', socket.id, namespace, name, number, err)
+            socket.emit('subscription_error', { kind, code: 500, message: `Failed to fetch comments for issue ${number}` })
           }
-          batchEmitter.flush()
-        } else {
-          logger.warn('Socket %s: user %s tried to fetch journal comments but is no admin', socket.id, user.email)
-          socket.emit('subscription_error', { kind, code: 403, message: 'Forbidden' })
         }
+        batchEmitter.flush()
       } catch (error) {
         logger.error('Socket %s: failed to fetch comments for %s/%s: %s', socket.id, namespace, name, error)
         socket.emit('subscription_error', { kind, code: 500, message: 'Failed to fetch comments' })
@@ -311,7 +299,7 @@ function setupJournalsNamespace (journalsNsp) {
       leaveCommentsRooms(socket)
     })
   })
-  socketAuthentication(journalsNsp)
+  socketAuthentication(ticketsNsp)
 }
 
 function init () {
@@ -322,7 +310,7 @@ function init () {
 
   // setup namespaces
   setupShootsNamespace(io.of('/shoots'))
-  setupJournalsNamespace(io.of('/journals'))
+  setupTicketsNamespace(io.of('/tickets'))
   // start watches
   for (const watch of Object.values(watches)) {
     watch(io)

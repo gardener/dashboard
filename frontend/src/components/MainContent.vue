@@ -15,12 +15,12 @@ limitations under the License.
 -->
 
 <template>
-  <v-content>
+  <v-main>
     <v-alert class="alertBanner" :type="alertBannerType" v-model="alertBannerVisible" dismissible>
       <div class="alertBannerMessage" v-html="alertBannerMessageCompiledMarkdown"></div>
     </v-alert>
     <router-view :key="key"></router-view>
-  </v-content>
+  </v-main>
 </template>
 
 <script>

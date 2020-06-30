@@ -55,7 +55,7 @@ import projects from './modules/projects'
 import draggable from './modules/draggable'
 import members from './modules/members'
 import infrastructureSecrets from './modules/infrastructureSecrets'
-import journals from './modules/journals'
+import tickets from './modules/tickets'
 import semver from 'semver'
 
 Vue.use(Vuex)
@@ -667,24 +667,24 @@ const getters = {
       return getters['shoots/itemByNameAndNamespace']({ namespace, name })
     }
   },
-  journalsByNamespaceAndName (state, getters) {
+  ticketsByNamespaceAndName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/issues']({ namespace, name })
+      return getters['tickets/issues']({ namespace, name })
     }
   },
-  journalCommentsByIssueNumber (state, getters) {
+  ticketCommentsByIssueNumber (state, getters) {
     return ({ issueNumber }) => {
-      return getters['journals/comments']({ issueNumber })
+      return getters['tickets/comments']({ issueNumber })
     }
   },
-  lastUpdatedJournalByNameAndNamespace (state, getters) {
+  latestUpdatedTicketByNameAndNamespace (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/lastUpdated']({ namespace, name })
+      return getters['tickets/latestUpdated']({ namespace, name })
     }
   },
-  journalsLabels (state, getters) {
+  ticketsLabels (state, getters) {
     return ({ namespace, name }) => {
-      return getters['journals/labels']({ namespace, name })
+      return getters['tickets/labels']({ namespace, name })
     }
   },
   kubernetesVersions (state, getters) {
@@ -729,8 +729,8 @@ const getters = {
   isAdmin (state) {
     return get(state.user, 'isAdmin', false)
   },
-  journalList (state) {
-    return state.journals.all
+  ticketList (state) {
+    return state.tickets.all
   },
   username (state) {
     const user = state.user
@@ -886,13 +886,13 @@ const actions = {
       })
   },
   clearIssues ({ dispatch, commit }) {
-    return dispatch('journals/clearIssues')
+    return dispatch('tickets/clearIssues')
       .catch(err => {
         dispatch('setError', err)
       })
   },
   clearComments ({ dispatch, commit }) {
-    return dispatch('journals/clearComments')
+    return dispatch('tickets/clearComments')
       .catch(err => {
         dispatch('setError', err)
       })
@@ -927,13 +927,13 @@ const actions = {
   },
   subscribeComments ({ dispatch, commit }, { name, namespace }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalCommentsEmitter.subscribeComments({ name, namespace })
+      EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
       resolve()
     })
   },
   unsubscribeComments ({ dispatch, commit }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.journalCommentsEmitter.unsubscribe()
+      EmitterWrapper.ticketCommentsEmitter.unsubscribe()
       resolve()
     })
   },
@@ -1230,7 +1230,7 @@ const modules = {
   cloudProfiles,
   shoots,
   infrastructureSecrets,
-  journals
+  tickets
 }
 
 const store = new Vuex.Store({
@@ -1243,7 +1243,7 @@ const store = new Vuex.Store({
   plugins
 })
 
-const { shootsEmitter, shootEmitter, journalIssuesEmitter, journalCommentsEmitter } = EmitterWrapper
+const { shootsEmitter, shootEmitter, ticketIssuesEmitter, ticketCommentsEmitter } = EmitterWrapper
 
 /* Shoots */
 function filterNamespacedEvents (namespacedEvents) {
@@ -1263,14 +1263,14 @@ shootEmitter.on('shoot', namespacedEvents => {
   })
 })
 
-/* Journal Issues */
-journalIssuesEmitter.on('issues', events => {
-  store.commit('journals/HANDLE_ISSUE_EVENTS', events)
+/* Ticket Issues */
+ticketIssuesEmitter.on('issues', events => {
+  store.commit('tickets/HANDLE_ISSUE_EVENTS', events)
 })
 
-/* Journal Comments */
-journalCommentsEmitter.on('comments', events => {
-  store.commit('journals/HANDLE_COMMENTS_EVENTS', events)
+/* Ticket Comments */
+ticketCommentsEmitter.on('comments', events => {
+  store.commit('tickets/HANDLE_COMMENTS_EVENTS', events)
 })
 
 export default store

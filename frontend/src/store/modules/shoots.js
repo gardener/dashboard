@@ -381,8 +381,8 @@ const getRawVal = (item, column) => {
       return `${get(spec, 'provider.type')} ${get(spec, 'region')}`
     case 'seed':
       return get(item, 'spec.seedName')
-    case 'journalLabels': {
-      const labels = store.getters.journalsLabels(metadata)
+    case 'ticketLabels': {
+      const labels = store.getters.ticketsLabels(metadata)
       return join(map(labels, 'name'), ' ')
     }
     default:
@@ -445,6 +445,10 @@ const getSortVal = (item, sortBy) => {
       const lastErrorTransitionTime = head(orderBy(map(errorConditions, 'lastTransitionTime')))
       return lastErrorTransitionTime
     }
+    case 'ticket': {
+      const { namespace, name } = item.metadata
+      return store.getters.latestUpdatedTicketByNameAndNamespace({ namespace, name })
+    }
     default:
       return toLower(value)
   }
@@ -458,6 +462,8 @@ const setSortedItems = (state, rootState) => {
   const sortBy = head(get(state, 'sortParams.sortBy'))
   const sortDesc = get(state, 'sortParams.sortDesc', [false])
   const sortOrder = head(sortDesc) ? 'desc' : 'asc'
+
+  let sortedShoots = shoots(state)
   if (sortBy) {
     const sortbyNameAsc = (a, b) => {
       if (getRawVal(a, 'name') > getRawVal(b, 'name')) {
@@ -468,46 +474,47 @@ const setSortedItems = (state, rootState) => {
       return 0
     }
     const inverse = sortOrder === 'desc' ? -1 : 1
-    if (sortBy === 'k8sVersion') {
-      const sortedShoots = shoots(state)
-      sortedShoots.sort((a, b) => {
-        const versionA = getRawVal(a, sortBy)
-        const versionB = getRawVal(b, sortBy)
+    switch (sortBy) {
+      case 'k8sVersion': {
+        sortedShoots.sort((a, b) => {
+          const versionA = getRawVal(a, sortBy)
+          const versionB = getRawVal(b, sortBy)
 
-        if (semver.gt(versionA, versionB)) {
-          return 1 * inverse
-        } else if (semver.lt(versionA, versionB)) {
-          return -1 * inverse
-        } else {
-          return sortbyNameAsc(a, b)
-        }
-      })
-      state.sortedShoots = sortedShoots
-    } else if (sortBy === 'readiness') {
-      const sortedShoots = shoots(state)
-      sortedShoots.sort((a, b) => {
-        const readinessA = getSortVal(a, sortBy)
-        const readinessB = getSortVal(b, sortBy)
+          if (semver.gt(versionA, versionB)) {
+            return 1 * inverse
+          } else if (semver.lt(versionA, versionB)) {
+            return -1 * inverse
+          } else {
+            return sortbyNameAsc(a, b)
+          }
+        })
+        break
+      }
+      case 'readiness': {
+        sortedShoots.sort((a, b) => {
+          const readinessA = getSortVal(a, sortBy)
+          const readinessB = getSortVal(b, sortBy)
 
-        if (readinessA === readinessB) {
-          return sortbyNameAsc(a, b)
-        } else if (!readinessA) {
-          return 1
-        } else if (!readinessB) {
-          return -1
-        } else if (readinessA > readinessB) {
-          return 1 * inverse
-        } else {
-          return -1 * inverse
-        }
-      })
-      state.sortedShoots = sortedShoots
-    } else {
-      state.sortedShoots = orderBy(shoots(state), [item => getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+          if (readinessA === readinessB) {
+            return sortbyNameAsc(a, b)
+          } else if (!readinessA) {
+            return 1
+          } else if (!readinessB) {
+            return -1
+          } else if (readinessA > readinessB) {
+            return 1 * inverse
+          } else {
+            return -1 * inverse
+          }
+        })
+        break
+      }
+      default: {
+        sortedShoots = orderBy(sortedShoots, [item => getSortVal(item, sortBy), 'metadata.name'], [sortOrder, 'asc'])
+      }
     }
-  } else {
-    state.sortedShoots = shoots(state)
   }
+  state.sortedShoots = sortedShoots
   setFilteredAndSortedItems(state, rootState)
 }
 
@@ -538,7 +545,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
         if (includes(getRawVal(item, 'k8sVersion'), value)) {
           return
         }
-        if (includes(getRawVal(item, 'journalLabels'), value)) {
+        if (includes(getRawVal(item, 'ticketLabels'), value)) {
           return
         }
         found = false
@@ -570,9 +577,23 @@ const setFilteredAndSortedItems = (state, rootState) => {
       }
       items = filter(items, predicate)
     }
-    if (get(state, 'shootListFilters.hasJournals', false)) {
+    if (get(state, 'shootListFilters.hideTicketsWithLabel', false)) {
       const predicate = item => {
-        return !(store.getters['journals/lastUpdated'](get(item, 'metadata', {})) !== undefined)
+        const hideClustersWithLabel = get(rootState.cfg, 'ticket.hideClustersWithLabel')
+        if (!hideClustersWithLabel) {
+          return true
+        }
+
+        const ticketsForCluster = store.getters['tickets/issues'](get(item, 'metadata', {}))
+        if (!ticketsForCluster.length) {
+          return true
+        }
+
+        const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
+          const labelNames = map(get(ticket, 'data.labels'), 'name')
+          return !includes(labelNames, hideClustersWithLabel)
+        })
+        return ticketsWithoutHideLabel.length > 0
       }
       items = filter(items, predicate)
     }
