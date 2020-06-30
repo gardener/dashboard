@@ -77,7 +77,8 @@ frontendConfig:
     url: https://github.com/gardener/gardener/issues
   ticket:
     gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
-    hideClustersWithLabel: ignore # hides clusters with label on the 'ALL PROJECTS' page if the respective table option is enabled
+    hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
+    - ignore
     # issueDescriptionTemplate variables:
     # - `${shootName}`: name of the shoot
     # - `${shootNamespace}`: namespace of the shoot

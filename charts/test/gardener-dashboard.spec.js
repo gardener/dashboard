@@ -324,7 +324,7 @@ describe('gardener-dashboard', function () {
             frontendConfig: {
               ticket: {
                 gitHubRepoUrl: 'https://github.com/gardener/tickets',
-                hideClustersWithLabel: 'ignore',
+                hideClustersWithLabels: ['ignore1', 'ignore2'],
                 issueDescriptionTemplate: 'issue description'
               }
             },
@@ -354,7 +354,7 @@ describe('gardener-dashboard', function () {
           } = config
           expect(ticket).to.eql({
             gitHubRepoUrl: 'https://github.com/gardener/tickets',
-            hideClustersWithLabel: 'ignore',
+            hideClustersWithLabels: ['ignore1', 'ignore2'],
             issueDescriptionTemplate: 'issue description'
           })
           expect(gitHub).to.eql({

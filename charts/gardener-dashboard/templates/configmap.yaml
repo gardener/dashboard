@@ -151,7 +151,12 @@ data:
 {{- end }}
 {{- if .Values.frontendConfig.ticket }}
       ticket:
-        hideClustersWithLabel: {{ .Values.frontendConfig.ticket.hideClustersWithLabel }}
+        {{- if .Values.frontendConfig.ticket.hideClustersWithLabels }}
+        hideClustersWithLabels:
+          {{- range .Values.frontendConfig.ticket.hideClustersWithLabels }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
         issueDescriptionTemplate: |-
 {{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
