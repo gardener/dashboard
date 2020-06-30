@@ -705,8 +705,37 @@ export function targetText (target) {
   }
 }
 
+export function k8sVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
+  const allVersions = store.getters.kubernetesVersions(cloudProfileName)
+  return !!find(allVersions, ({ version, isPreview }) => {
+    return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+  })
+}
+
+export function k8sVersionUpdatePathAvailable (kubernetesVersion, cloudProfileName) {
+  const allVersions = store.getters.kubernetesVersions(cloudProfileName)
+  if (k8sVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
+    return true
+  }
+  const versionMinorVersion = semver.minor(kubernetesVersion)
+  return !!find(allVersions, ({ version, isPreview }) => {
+    return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+  })
+}
+
+export function selectedImageIsNotLatest (machineImage, machineImages) {
+  const { version: testImageVersion, vendorName: testVendor } = machineImage
+
+  return !!find(machineImages, ({ version, vendorName, isPreview }) => {
+    return testVendor === vendorName && semver.gt(version, testImageVersion) && !isPreview
+  })
+}
+
 export default {
   store,
   canI,
-  availableK8sUpdatesForShoot
+  availableK8sUpdatesForShoot,
+  k8sVersionIsNotLatestPatch,
+  k8sVersionUpdatePathAvailable,
+  selectedImageIsNotLatest
 }

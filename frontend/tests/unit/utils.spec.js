@@ -17,7 +17,7 @@
 import { expect } from 'chai'
 import utils from '@/utils'
 
-const { canI } = utils
+const { canI, selectedImageIsNotLatest } = utils
 
 describe('utils', function () {
   describe('authorization', function () {
@@ -198,11 +198,13 @@ describe('utils', function () {
       }
     ]
 
-    utils.store.getters = {
-      kubernetesVersions: () => {
-        return kubernetesVersions
+    beforeEach(() => {
+      utils.store.getters = {
+        kubernetesVersions: () => {
+          return kubernetesVersions
+        }
       }
-    }
+    })
 
     it('should return available K8sUpdates for given version', function () {
       const availableK8sUpdates = utils.availableK8sUpdatesForShoot('1.16.9', 'foo')
@@ -216,6 +218,134 @@ describe('utils', function () {
       expect(availableK8sUpdates.patch.length).to.equal(1)
       expect(availableK8sUpdates.minor.length).to.equal(2)
       expect(availableK8sUpdates.major.length).to.equal(1)
+    })
+  })
+
+  describe('k8s update functions', function () {
+    const kubernetesVersions = [
+      {
+        version: '1.1.1'
+      },
+      {
+        version: '1.1.2'
+      },
+      {
+        version: '1.2.4'
+      },
+      {
+        version: '1.2.5',
+        isPreview: true // need to set this manually, as version getter is mocked
+      },
+      {
+        version: '1.3.4'
+      },
+      {
+        version: '1.3.5'
+      },
+      {
+        version: '1.4.0',
+        isPreview: true // need to set this manually, as version getter is mocked
+      },
+      {
+        version: '1.5.0'
+      },
+      {
+        version: '3.3.2'
+      }
+    ]
+
+    beforeEach(() => {
+      utils.store.getters = {
+        kubernetesVersions: () => {
+          return kubernetesVersions
+        }
+      }
+    })
+
+    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should be latest (multiple same minor)', function () {
+      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[1].version, 'foo')
+      expect(result).to.be.false
+    })
+
+    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should be latest (one minor, one major, one preview update available)', function () {
+      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[2].version, 'foo')
+      expect(result).to.be.false
+    })
+
+    it('#k8sVersionIsNotLatestPatch - selected kubernetes version should not be latest', function () {
+      const result = utils.k8sVersionIsNotLatestPatch(kubernetesVersions[0].version, 'foo')
+      expect(result).to.be.true
+    })
+
+    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should have update path (minor update available)', function () {
+      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[3].version, 'foo')
+      expect(result).to.be.true
+    })
+
+    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should have update path (patch update available)', function () {
+      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[4].version, 'foo')
+      expect(result).to.be.true
+    })
+
+    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should not have update path (minor update is preview)', function () {
+      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[5].version, 'foo')
+      expect(result).to.be.false
+    })
+
+    it('#k8sVersionUpdatePathAvailable - selected kubernetes version should not have update path (no next minor version update available)', function () {
+      const result = utils.k8sVersionUpdatePathAvailable(kubernetesVersions[7].version, 'foo')
+      expect(result).to.be.false
+    })
+  })
+
+  describe('machine image update function', function () {
+    const sampleMachineImages = [
+      {
+        name: 'FooImage',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.1.1'
+      },
+      {
+        name: 'FooImage2',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.2.2'
+      },
+      {
+        name: 'FooImage3',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.3.2'
+      },
+      {
+        name: 'FooImage4',
+        vendorName: 'Foo',
+        icon: 'icon',
+        version: '1.3.3',
+        isPreview: true
+      },
+      {
+        name: 'BarImage',
+        vendorName: 'Bar',
+        icon: 'icon',
+        version: '3.3.2'
+      }
+    ]
+
+    it('#selectedImageIsNotLatest - selected image should be latest (multiple exist, preview exists)', function () {
+      const result = selectedImageIsNotLatest(sampleMachineImages[2], sampleMachineImages)
+      expect(result).to.be.false
+    })
+
+    it('#selectedImageIsNotLatest - selected image should be latest (one exists)', function () {
+      const result = selectedImageIsNotLatest(sampleMachineImages[3], sampleMachineImages)
+      expect(result).to.be.false
+    })
+
+    it('#selectedImageIsNotLatest - selected image should not be latest', function () {
+      const result = selectedImageIsNotLatest(sampleMachineImages[1], sampleMachineImages)
+      expect(result).to.be.true
     })
   })
 })

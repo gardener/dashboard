@@ -25,21 +25,35 @@ limitations under the License.
       <div>
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-icon v-on="on" color="warning" class="cursor-pointer">mdi-update</v-icon>
+            <v-icon v-on="on" :color="overallStatusColor" class="cursor-pointer">mdi-update</v-icon>
           </template>
           <span>Version update warning</span>
         </v-tooltip>
       </div>
     </template>
     <ul class="update-warning-box">
-      <li v-if="k8sExpirationDate">Kubernetes version of this cluster is about to expire. The version update will be enforced <span class="font-weight-bold"><time-string :date-time="k8sExpirationDate"></time-string></span></li>
+      <template v-if="k8sExpirationDate">
+        <li v-if="isValidTerminationDate(k8sExpirationDate)">Kubernetes version of this cluster expires <span class="font-weight-bold"><time-string :date-time="k8sExpirationDate"></time-string></span>. Version update will be enforced after this date</li>
+        <li v-else>Kubernetes version of this cluster is expired. Version update will be enforced soon</li>
+      </template>
+
       <li v-for="({expirationDate, version, name, workerName, key}) in expiredWorkerGroups" :key="key">
-        Machine image
-        <span class="font-weight-bold">{{name}} | Version: {{version}}</span>
-        of worker group
-        <span class="font-weight-bold">{{workerName}}</span>
-        is about to expire. The version update will be enforced
-        <span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>
+        <span v-if="isValidTerminationDate(expirationDate)">
+          Machine image
+          <span class="font-weight-bold">{{name}} | Version: {{version}}</span>
+          of worker group
+          <span class="font-weight-bold">{{workerName}}</span>
+          expires
+          <span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>.
+          Version update will be enforced after this date
+        </span>
+        <span v-else>
+          Machine image
+          <span class="font-weight-bold">{{name}} | Version: {{version}}</span>
+          of worker group
+          <span class="font-weight-bold">{{workerName}}</span>
+          is expired. Version update will be enforced soon
+        </span>
       </li>
     </ul>
   </g-popper>
@@ -54,6 +68,7 @@ import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
+import { isValidTerminationDate, k8sVersionIsNotLatestPatch, k8sVersionUpdatePathAvailable, selectedImageIsNotLatest } from '@/utils'
 
 export default {
   name: 'VerisonUpdateWarning',
@@ -79,33 +94,94 @@ export default {
       'machineImagesByCloudProfileName'
     ]),
     k8sExpirationDate () {
+      // not expired
+      // expired
+      // - automatic update active, no warning as newer patch version available info?
+      // - automaic update not active or no newer patch -> expired warning, update will be enfored...
+      // - no update path available ->error
+
+      // return { expirationDate, isValidExpirationDate, isInfo, isWarning, isError}
+      // calc overall state, depeneding on prop flags
       if (this.onlyMachineImageWarnings) {
         return undefined
       }
       const allVersions = this.kubernetesVersions(this.shootCloudProfileName)
       const version = find(allVersions, { version: this.shootK8sVersion })
       if (version) {
-        return version.expirationDate
+        const patchAvailable = k8sVersionIsNotLatestPatch(this.shootK8sVersion, this.shootCloudProfileName)
+        const k8sAutoPatch = get(shootResource, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
+        const updatePathAvailable = k8sVersionUpdatePathAvailable(this.shootK8sVersion, this.shootCloudProfileName)
+
+        const isError = !updatePathAvailable
+        const isWarning = !isError && !k8sAutoPatch && patchAvailable
+        const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
+        return {
+          expirationDate: version.expirationDate,
+          isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+          isError: !updatePathAvailable,
+          isError,
+          isWarning,
+          isInfo
+        }
       }
-      return undefined
     },
     expiredWorkerGroups () {
+      // not expired
+      // expired
+      // - automatic update active, no warning as newer version available info?
+      // - automaic update not active or no newer version -> expired warning, update will be enfored...
+      // - no update path available ->error
+
+      // return { expirationDate, isValidExpirationDate, isInfo, isWarning, isError}
+      // calc overall state, depeneding on prop flags
       if (this.onlyK8sWarnings) {
         return []
       }
       const expiredWorkerGroups = []
       const allMachineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
+      const osUpdates = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', false)
       forEach(this.shootWorkerGroups, worker => {
         const workerImage = get(worker, 'machine.image')
         const workerImageDetails = find(allMachineImages, workerImage)
+
+        const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+        const imageAutoPatch = get(shootResource, 'spec.maintenance.autoUpdate.machineImageVersion', false)
+
+        const isError = !updateAvailable
+        const isWarning = !imageAutoPatch && updateAvailable
+        const isInfo = imageAutoPatch && updateAvailable
+        return {
+          expirationDate: version.expirationDate,
+          isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+          isError: !updatePathAvailable,
+          isError,
+          isWarning,
+          isInfo
+        }
         if (workerImageDetails.expirationDate) {
           expiredWorkerGroups.push({
             ...workerImageDetails,
-            workerName: worker.name
+            workerName: worker.name,
+            isError,
+            isWarning,
+            isInfo
           })
         }
       })
       return expiredWorkerGroups
+    },
+    overallStatusColor() {
+      const isError = !!find([k8sExpirationDate, ...this.expiredWorkerGroups], { isError: true })
+      const isWarning = !!find([k8sExpirationDate, ...this.expiredWorkerGroups], { isWarning: true })
+      if (isError || isWarning) {
+        return 'warning'
+      }
+      return 'cyan darken-2'
+    }
+  },
+  methods: {
+    isValidTerminationDate (terminationDate) {
+      return isValidTerminationDate(terminationDate)
     }
   }
 }

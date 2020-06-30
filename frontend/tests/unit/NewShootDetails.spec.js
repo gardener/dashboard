@@ -51,38 +51,12 @@ const store = new Vuex.Store({
     cfg: {}
   },
   getters: {
-    projectList: () => {
-      return projectList
-    },
-    shootByNamespaceAndName: () => {
-      return noop
-    }
+    projectList: () => projectList,
+    shootByNamespaceAndName: () => noop
   }
 })
 
-const sampleVersions = [
-  {
-    version: '1.1.1'
-  },
-  {
-    version: '1.1.2'
-  },
-  {
-    version: '1.2.4'
-  },
-  {
-    version: '1.2.5',
-    isPreview: true // need to set this manually, as version getter is mocked
-  },
-  {
-    version: '1.3.4'
-  },
-  {
-    version: '3.3.2'
-  }
-]
-
-function createNewShootDetailsComponent (kubernetesVersion) {
+function createNewShootDetailsComponent () {
   const propsData = {
     userInterActionBus: new EventEmitter()
   }
@@ -91,33 +65,16 @@ function createNewShootDetailsComponent (kubernetesVersion) {
     propsData,
     store,
     computed: {
-      sortedKubernetesVersionsList: () => sampleVersions
+      sortedKubernetesVersionsList: () => []
     }
   })
   const machineImageComponent = wrapper.find(NewShootDetails)
-  machineImageComponent.vm.setDetailsData({ kubernetesVersion })
-
   return machineImageComponent.vm
 }
 
 describe('NewShootDetails.vue', function () {
   beforeEach(() => {
     vuetify = new Vuetify()
-  })
-
-  it('selected kubernetes version should be latest (multiple same minor)', function () {
-    const shootDetails = createNewShootDetailsComponent(sampleVersions[1].version)
-    expect(shootDetails.versionIsNotLatestPatch).to.be.false
-  })
-
-  it('selected kubernetes version should be latest (one minor, one major, one preview update available)', function () {
-    const shootDetails = createNewShootDetailsComponent(sampleVersions[2].version)
-    expect(shootDetails.versionIsNotLatestPatch).to.be.false
-  })
-
-  it('selected kubernetes version should not be latest', function () {
-    const shootDetails = createNewShootDetailsComponent(sampleVersions[0].version)
-    expect(shootDetails.versionIsNotLatestPatch).to.be.true
   })
 
   it('maximum shoot name length should depend on project name', function () {

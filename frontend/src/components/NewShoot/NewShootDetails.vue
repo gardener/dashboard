@@ -80,14 +80,13 @@ limitations under the License.
 import HintColorizer from '@/components/HintColorizer'
 import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, compileMarkdown, setDelayedInputFocus } from '@/utils'
+import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
 import get from 'lodash/get'
 import find from 'lodash/find'
 import join from 'lodash/join'
 import filter from 'lodash/filter'
-import semver from 'semver'
 
 const validationErrors = {
   name: {
@@ -154,9 +153,7 @@ export default {
       return undefined
     },
     versionIsNotLatestPatch () {
-      return !!find(this.sortedKubernetesVersionsList, ({ version, isPreview }) => {
-        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion) && !isPreview
-      })
+      return k8sVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)
     },
     sla () {
       return this.cfg.sla || {}

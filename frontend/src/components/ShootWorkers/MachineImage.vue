@@ -39,7 +39,7 @@
 import VendorIcon from '@/components/VendorIcon'
 import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, selectedImageIsNotLatest } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
@@ -126,11 +126,7 @@ export default {
       return 'default'
     },
     selectedImageIsNotLatest () {
-      const { version: currentImageVersion, vendorName: currentVendor } = this.machineImage
-
-      return !!find(this.machineImages, ({ version, vendorName }) => {
-        return currentVendor === vendorName && semver.gt(version, currentImageVersion)
-      })
+      return selectedImageIsNotLatest (this.machineImage, this.machineImages)
     }
   },
   validations,

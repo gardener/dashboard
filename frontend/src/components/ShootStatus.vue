@@ -15,24 +15,24 @@ limitations under the License.
 -->
 
 <template>
-  <g-popper :title="statusTitle" :time="{ dateTime: operation.lastUpdateTime }" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
+  <g-popper :title="statusTitle" :toolbarColor="color" :popperKey="popperKeyWithType" :placement="popperPlacement">
     <template v-slot:popperRef>
-      <div class="shoot-status-div">
+      <div class="shoot-status-div d-flex flex-row">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="operation.progress" :color="color" :rotate="-90">
-                <v-icon v-if="isStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
+              <v-progress-circular v-if="showProgress" class="vertical-align-middle cursor-pointer" :size="27" :width="3" :value="shootLastOperation.progress" :color="color" :rotate="-90">
+                <v-icon v-if="isShootStatusHibernated" class="vertical-align-middle progress-icon" :color="color">mdi-sleep</v-icon>
                 <v-icon v-else-if="isUserError" class="vertical-align-middle progress-icon-user-error" color="error">mdi-account-alert</v-icon>
-                <v-icon v-else-if="shootDeleted" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
+                <v-icon v-else-if="isShootLastOperationTypeDelete" class="vertical-align-middle progress-icon" :color="color">mdi-delete</v-icon>
                 <v-icon v-else-if="isTypeCreate" class="vertical-align-middle progress-icon" :color="color">mdi-plus</v-icon>
                 <v-icon v-else-if="isTypeReconcile && !isError" class="vertical-align-middle progress-icon-check" :color="color">mdi-check</v-icon>
                 <span v-else-if="isError" class="vertical-align-middle error-exclamation-mark">!</span>
-                <template v-else>{{operation.progress}}</template>
+                <template v-else>{{shootLastOperation.progress}}</template>
               </v-progress-circular>
-              <v-icon v-else-if="isStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
-              <v-icon v-else-if="reconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
-              <v-icon v-else-if="isAborted && shootDeleted" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
+              <v-icon v-else-if="isShootStatusHibernated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-sleep</v-icon>
+              <v-icon v-else-if="isShootReconciliationDeactivated" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-block-helper</v-icon>
+              <v-icon v-else-if="isAborted && isShootLastOperationTypeDelete" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-delete</v-icon>
               <v-icon v-else-if="isAborted && isTypeCreate" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-plus</v-icon>
               <v-icon v-else-if="isUserError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-account-alert</v-icon>
               <v-icon v-else-if="isError" class="vertical-align-middle cursor-pointer status-icon" :color="color">mdi-alert-outline</v-icon>
@@ -40,76 +40,77 @@ limitations under the License.
               <v-icon v-else class="vertical-align-middle cursor-pointer status-icon-check" color="success">mdi-check-circle-outline</v-icon>
             </div>
           </template>
-          <div>{{ tooltipText }}</div>
+          <div>
+            <span class="font-weight-bold">{{tooltip.title}}</span>
+            <span v-if="tooltip.progress" class="ml-1">({{tooltip.progress}}%)</span>
+            <div v-for="({ shortDescription }) in tooltip.userErrorCodeObjects" :key="shortDescription">
+              <v-icon class="mr-2" color="red lighten-2" small>mdi-account-alert</v-icon>
+              <span class="font-weight-bold text--lighten-2">{{shortDescription}}</span>
+            </div>
+          </div>
         </v-tooltip>
+        <retry-operation :shootItem="shootItem"></retry-operation>
+        <span v-if="showStatusText" class="d-flex align-center ml-2">{{statusTitle}}</span>
       </div>
+      <template v-if="showStatusText">
+        <div v-for="({ description }) in tooltip.userErrorCodeObjects" :key="description">
+          <div class="font-weight-bold error--text">{{description}}</div>
+        </div>
+      </template>
     </template>
-    <ansi-text v-if="!!popperMessage" :text="popperMessage"></ansi-text>
-    <template v-if="lastErrorDescriptions.length">
-      <v-divider class="my-2"></v-divider>
-      <h4 class="error--text text-left">Last Errors</h4>
-      <div v-for="(lastErrorDescription, index) in lastErrorDescriptions" :key="index">
-        <template v-for="errorCodeDescription in lastErrorDescription.errorCodeDescriptions">
-          <h3 class="error--text text-left" :key="errorCodeDescription">{{errorCodeDescription}}</h3>
-        </template>
-        <ansi-text class="error--text" :text="lastErrorDescription.description"></ansi-text>
-      </div>
-    </template>
+    <shoot-message-details
+      :statusTitle="statusTitle"
+      :lastMessage="lastMessage"
+      :errorDescriptions="errorDescriptions"
+      :lastUpdateTime="shootLastOperation.lastUpdateTime"
+    />
   </g-popper>
 </template>
 
 <script>
 import GPopper from '@/components/GPopper'
-import AnsiText from '@/components/AnsiText'
-import get from 'lodash/get'
-import map from 'lodash/map'
+import ShootMessageDetails from '@/components/ShootMessageDetails'
+import RetryOperation from '@/components/RetryOperation'
 import join from 'lodash/join'
-import { isUserError, errorCodes, errorCodesFromArray } from '@/utils/errorCodes'
+import map from 'lodash/map'
+import filter from 'lodash/filter'
+import { isUserError, objectsFromErrorCodes, errorCodesFromArray } from '@/utils/errorCodes'
+import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
     GPopper,
-    AnsiText
+    ShootMessageDetails,
+    RetryOperation
   },
   props: {
-    operation: {
-      type: Object,
-      required: true
-    },
-    shootDeleted: {
-      type: Boolean,
-      required: true
-    },
-    lastErrors: {
-      type: Array,
-      required: false
+    shootItem: {
+      type: Object
     },
     popperKey: {
       type: String,
       required: true
     },
-    isStatusHibernated: {
-      type: Boolean,
-      default: false
-    },
-    isHibernationProgressing: {
-      type: Boolean,
-      default: false
-    },
-    reconciliationDeactivated: {
-      type: Boolean,
-      default: false
-    },
     popperPlacement: {
       type: String
+    },
+    showStatusText: {
+      type: Boolean,
+      default: false
     }
   },
+  data () {
+    return {
+      retryingOperation: false
+    }
+  },
+  mixins: [shootItem],
   computed: {
     showProgress () {
       return this.operationState === 'Processing'
     },
     isError () {
-      return this.operationState === 'Failed' || this.operationState === 'Error' || this.lastErrorDescriptions.length
+      return this.operationState === 'Failed' || this.operationState === 'Error' || this.shootLastErrors.length
     },
     isAborted () {
       return this.operationState === 'Aborted'
@@ -126,36 +127,24 @@ export default {
     isUserError () {
       return isUserError(this.allErrorCodes)
     },
-    lastErrorDescriptions () {
-      return map(this.lastErrors, lastError => ({
-        description: lastError.description,
-        errorCodeDescriptions: map(lastError.codes, code => get(errorCodes, [code, 'description'], code))
-      }))
-    },
     allErrorCodes () {
-      return errorCodesFromArray(this.lastErrors)
-    },
-    allErrorCodeShortDescriptions () {
-      return map(this.allErrorCodes, code => get(errorCodes, [code, 'shortDescription'], code))
-    },
-    errorCodeShortDescriptionsText () {
-      return join(this.allErrorCodeShortDescriptions, ', ')
+      return errorCodesFromArray(this.shootLastErrors)
     },
     popperKeyWithType () {
       return `shootStatus_${this.popperKey}`
     },
     statusTitle () {
       const statusTitle = []
-      if (this.isHibernationProgressing) {
-        if (this.isStatusHibernated) {
+      if (this.isShootStatusHibernationProgressing) {
+        if (this.isShootStatusHibernated) {
           statusTitle.push('Waking up')
         } else {
           statusTitle.push('Hibernating')
         }
-      } else if (this.isStatusHibernated) {
+      } else if (this.isShootStatusHibernated) {
         statusTitle.push('Hibernated')
       }
-      if (this.reconciliationDeactivated) {
+      if (this.isShootReconciliationDeactivated) {
         statusTitle.push('Reconciliation Deactivated')
       } else {
         statusTitle.push(`${this.operationType} ${this.operationState}`)
@@ -163,30 +152,18 @@ export default {
 
       return join(statusTitle, ', ')
     },
-    tooltipText () {
-      let tooltipText = this.statusTitle
-      if (this.showProgress) {
-        tooltipText = tooltipText.concat(` (${this.operation.progress}%)`)
+    tooltip () {
+      return {
+        title: this.statusTitle,
+        progress: this.showProgress ? this.shootLastOperation.progress : undefined,
+        userErrorCodeObjects: filter(objectsFromErrorCodes(this.allErrorCodes), { userError: true })
       }
-      if (this.isUserError) {
-        tooltipText = tooltipText.concat(`; ${this.errorCodeShortDescriptionsText}`)
-      }
-
-      return tooltipText
-    },
-    popperMessage () {
-      let message = this.operation.description
-      message = message || 'No description'
-      if (message === this.lastErrorDescription) {
-        return undefined
-      }
-      return message
     },
     operationType () {
-      return this.operation.type || 'Create'
+      return this.shootLastOperation.type || 'Create'
     },
     operationState () {
-      return this.operation.state || 'Pending'
+      return this.shootLastOperation.state || 'Pending'
     },
     color () {
       if (this.isAborted) {
@@ -196,25 +173,20 @@ export default {
       } else {
         return 'cyan darken-2'
       }
-    }
-  },
-  methods: {
-    emitExtendedTitle (statusTitle) {
-      // similar to tooltipText, except the progress is missing
-      let extendedTitle = statusTitle
-      if (this.isUserError) {
-        extendedTitle = `${extendedTitle}, ${this.errorCodeShortDescriptionsText}`
+    },
+    errorDescriptions () {
+      return map(this.shootLastErrors, lastError => ({
+        description: lastError.description,
+        errorCodeObjects: objectsFromErrorCodes(lastError.codes)
+      }))
+    },
+    lastMessage () {
+      let message = this.shootLastOperation.description
+      message = message || 'No description'
+      if (message === this.lastErrorDescription) {
+        return undefined
       }
-
-      this.$emit('titleChange', extendedTitle)
-    }
-  },
-  mounted () {
-    this.emitExtendedTitle(this.statusTitle)
-  },
-  watch: {
-    statusTitle (statusTitle) {
-      this.emitExtendedTitle(statusTitle)
+      return message
     }
   }
 }
@@ -272,6 +244,13 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
+  }
+
+  ::v-deep .v-card  {
+    .v-card__text {
+      padding: 0px;
+      text-align: left;
+    }
   }
 
 </style>
