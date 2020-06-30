@@ -78,6 +78,34 @@ frontendConfig:
   ticket:
     gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
     hideClustersWithLabel: ignore # hides clusters with label on the 'ALL PROJECTS' page if the respective table option is enabled
+    # issueDescriptionTemplate variables:
+    # - `${shootName}`: name of the shoot
+    # - `${shootNamespace}`: namespace of the shoot
+    # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
+    # - `${shootUrl}`: dashboard url of the shoot
+    # - `${providerType}`: shoot provider type
+    # - `${region}`: region of the shoot
+    # - `${machineImageNames}`: comma separated list of (unique) machine image names from the shoot workers
+    # - `${projectName}`: name of the project
+    # - `${utcDateTimeNow}`: current date-time in utc format
+    # - `${seedName}`: shoot's seed name
+    issueDescriptionTemplate: |
+      ## Which cluster is affected?
+
+      `Cluster Details Dashboard Link`: ${shootUrl}
+      `Operating System`:  ${os}
+      `Platform`:                  ${providerType}
+
+      ## What happened?
+
+      ## What you expected to happen?
+
+      ## When did it happen or started to happen?
+      `Timestamp`: ${dateTime}
+
+      ## How would we reproduce it?
+
+      ## Anything else we need to know?
   defaultHibernationSchedule:
     evaluation:
     - start: 00 17 * * 1,2,3,4,5
@@ -116,7 +144,7 @@ frontendConfig:
 
   # # accessRestriction is used to define the access restricion text, keys and value mappings
   # accessRestriction:
-  #   noItemsText: No access restriction options available for region {region} and cloud profile {cloudProfile}
+  #   noItemsText: No access restriction options available for region ${region} and cloud profile ${cloudProfile}
   #   items:
   #   - key: seed.gardener.cloud/eu-access
   #     display:

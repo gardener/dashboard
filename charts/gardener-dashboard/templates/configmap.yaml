@@ -153,6 +153,8 @@ data:
       ticket:
         hideClustersWithLabel: {{ .Values.frontendConfig.ticket.hideClustersWithLabel }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
+        issueDescriptionTemplate: |-
+{{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
 {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
