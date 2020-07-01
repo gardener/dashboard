@@ -44,8 +44,8 @@ module.exports = function ({ sandbox, auth }) {
     getIssues () {
       return this.issues
     },
-    getIssueNumbersForNameAndNamespace ({ namespace, name }) {
-      const issues = filter(this.issues, { namespace, name })
+    getIssueNumbersForNameAndProjectName ({ projectName, name }) {
+      const issues = filter(this.issues, { projectName, name })
       return map(issues, 'id')
     }
   }
@@ -119,11 +119,11 @@ module.exports = function ({ sandbox, auth }) {
     }
   })
 
+  const projectList = [
+    { metadata: { namespace: 'foo', name: 'foo' } },
+    { metadata: { namespace: 'bar', name: 'bar' } }
+  ]
   describe('shoots', function () {
-    const projectList = [
-      { metadata: { namespace: 'foo' } },
-      { metadata: { namespace: 'bar' } }
-    ]
 
     const shootList = [
       { metadata: { namespace: 'foo', name: 'foo' } },
@@ -254,8 +254,10 @@ module.exports = function ({ sandbox, auth }) {
     }
 
     let getIssueCommentsStub
+    let findProjectByNamespaceStub
 
     beforeEach(async function () {
+      findProjectByNamespaceStub = sandbox.stub(cache, 'findProjectByNamespace')
       ticketCache.issues = issues
       getIssueCommentsStub = sandbox.stub(tickets, 'getIssueComments')
         .callsFake(({ number }) => filter(comments, ['issue', number]))
@@ -272,9 +274,13 @@ module.exports = function ({ sandbox, auth }) {
     })
 
     it('should subscribe ticket comments', async function () {
-      const metadata = { namespace: 'foo', name: 'bar' }
-      const issueComments = await emitSubscribe('subscribeComments', metadata)
-      const numbers = map(filter(issues, metadata), 'id')
+      const name = 'bar'
+      const namespace = 'foo'
+      const projectName = 'foo'
+
+      findProjectByNamespaceStub.callsFake(namespace => find(projectList, ['metadata.namespace', namespace]))
+      const issueComments = await emitSubscribe('subscribeComments', { namespace, name })
+      const numbers = map(filter(issues, { projectName, name }), 'id')
       expect(getIssueCommentsStub).to.have.callCount(numbers.length)
       const predicate = ({ issue: id }) => includes(numbers, id)
       expect(issueComments).to.eql(filter(comments, predicate))
