@@ -167,7 +167,6 @@ export default {
       return invalid
     },
     versionItemDescription (version) {
-      console.log(version)
       const itemDescription = []
       if (version.classification) {
         itemDescription.push(`Classification: ${version.classification}`)

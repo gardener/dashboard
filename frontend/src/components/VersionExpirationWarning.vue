@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <g-popper
-    v-if="k8sExpirationDate || expiredWorkerGroups.length"
+    v-if="k8sExpiration || expiredWorkerGroups.length"
     :title="`Update Information for ${this.shootName}`"
     :toolbarColor="overallStatusColor"
     :popperKey="`version_warning_${shootName}`"
@@ -31,29 +31,30 @@ limitations under the License.
         </v-tooltip>
       </div>
     </template>
-    <ul class="update-warning-box">
-      <template v-if="k8sExpirationDate">
-        <li v-if="isValidTerminationDate(k8sExpirationDate)">Kubernetes version of this cluster expires <span class="font-weight-bold"><time-string :date-time="k8sExpirationDate"></time-string></span>. Version update will be enforced after this date</li>
-        <li v-else>Kubernetes version of this cluster is expired. Version update will be enforced soon</li>
+    <ul class="update-warning-box" :class="listClass">
+      <template v-if="k8sExpiration">
+        <li>
+          <span v-if="k8sExpiration.isValidTerminationDate">Kubernetes version of this cluster expires <span class="font-weight-bold"><time-string :date-time="k8sExpiration.expirationDate"></time-string></span>. </span>
+          <span v-else>Kubernetes version of this cluster is expired. </span>
+          <span v-if="k8sExpiration.isInfo">Version will be updated in the next maintenance window</span>
+          <template v-if="k8sExpiration.isWarning">
+            <span v-if="k8sExpiration.isValidTerminationDate">Version update will be enforced after this date</span>
+            <span v-else>Version update will be enforced soon</span>
+          </template>
+          <span v-if="k8sExpiration.isError">Version update not possible due to missing update path. Please contact your landscape administrator</span>
+        </li>
       </template>
 
-      <li v-for="({expirationDate, version, name, workerName, key}) in expiredWorkerGroups" :key="key">
-        <span v-if="isValidTerminationDate(expirationDate)">
-          Machine image
-          <span class="font-weight-bold">{{name}} | Version: {{version}}</span>
-          of worker group
-          <span class="font-weight-bold">{{workerName}}</span>
-          expires
-          <span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>.
-          Version update will be enforced after this date
-        </span>
-        <span v-else>
-          Machine image
-          <span class="font-weight-bold">{{name}} | Version: {{version}}</span>
-          of worker group
-          <span class="font-weight-bold">{{workerName}}</span>
-          is expired. Version update will be enforced soon
-        </span>
+      <li v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
+        <span>Machine image<span class="font-weight-bold">{{name}} | Version: {{version}}</span>of worker group<span class="font-weight-bold">{{workerName}}</span></span>
+        <span v-if="isValidTerminationDate">expires<span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>. </span>
+        <span v-else>is expired. </span>
+        <span v-if="isInfo">Version will be updated in the next maintenance window</span>
+        <template v-if="isWarning">
+          <span v-if="isValidTerminationDate">Machine Image update will be enforced after this date</span>
+            <span v-else>Machine Image update will be enforced soon</span>
+        </template>
+        <span v-if="isError">Machine Image update as no newer version is available. Please choose another operating system</span>
       </li>
     </ul>
   </g-popper>
@@ -93,7 +94,7 @@ export default {
       'kubernetesVersions',
       'machineImagesByCloudProfileName'
     ]),
-    k8sExpirationDate () {
+    k8sExpiration () {
       if (this.onlyMachineImageWarnings) {
         return undefined
       }
@@ -142,6 +143,7 @@ export default {
           (isError || isWarning || isInfo)) {
           expiredWorkerGroups.push({
             ...workerImageDetails,
+            isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
             workerName: worker.name,
             isError,
             isWarning,
@@ -152,8 +154,8 @@ export default {
       return expiredWorkerGroups
     },
     isOverallStatusWarning () {
-      const isError = !!find([this.k8sExpirationDate, ...this.expiredWorkerGroups], { isError: true })
-      const isWarning = !!find([this.k8sExpirationDate, ...this.expiredWorkerGroups], { isWarning: true })
+      const isError = !!find([this.k8sExpiration, ...this.expiredWorkerGroups], { isError: true })
+      const isWarning = !!find([this.k8sExpiration, ...this.expiredWorkerGroups], { isWarning: true })
       return isError || isWarning
     },
     overallStatusColor () {
@@ -161,6 +163,12 @@ export default {
         return 'warning'
       }
       return 'cyan darken-2'
+    },
+    listClass () {
+      if ((this.k8sExpiration && this.expiredWorkerGroups.length) || this.expiredWorkerGroups.length > 1) {
+        return ''
+      }
+      return 'no-list-style'
     },
     tooltip () {
       if (this.isOverallStatusWarning) {
@@ -186,6 +194,12 @@ export default {
   .update-warning-box {
     max-width: 800px;
     text-align: left;
+  }
+
+  .no-list-style {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
   }
 
 </style>
