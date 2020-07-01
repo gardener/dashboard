@@ -69,10 +69,10 @@ function init () {
     return _.map(getIssues(), 'metadata.number')
   }
 
-  function getIssueNumbersForNameAndNamespace ({ name, namespace }) {
+  function getIssueNumbersForNameAndProjectName ({ name, projectName }) {
     return _
       .chain(getIssues())
-      .filter(_.matches({ metadata: { name, namespace } }))
+      .filter(_.matches({ metadata: { name, projectName } }))
       .map('metadata.number')
       .value()
   }
@@ -151,7 +151,7 @@ function init () {
     getIssues,
     getCommentsForIssue,
     getIssueNumbers,
-    getIssueNumbersForNameAndNamespace,
+    getIssueNumbersForNameAndProjectName,
     addOrUpdateIssues,
     addOrUpdateIssue,
     addOrUpdateComment,

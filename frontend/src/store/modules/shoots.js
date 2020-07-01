@@ -584,7 +584,7 @@ const setFilteredAndSortedItems = (state, rootState) => {
           return true
         }
 
-        const ticketsForCluster = store.getters['tickets/issues'](get(item, 'metadata', {}))
+        const ticketsForCluster = store.getters.ticketsByNamespaceAndName(get(item, 'metadata', {}))
         if (!ticketsForCluster.length) {
           return true
         }

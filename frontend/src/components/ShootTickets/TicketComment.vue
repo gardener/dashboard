@@ -94,6 +94,30 @@ export default {
     word-wrap: break-word;
     /* does not work with firefox */
     word-break: break-word;
+
+    ::v-deep > h1 {
+      font-size: 28px;
+    }
+
+    ::v-deep > h2 {
+      font-size: 21px;
+    }
+
+    ::v-deep > h3 {
+      font-size: 17,5px;
+    }
+
+    ::v-deep > h4 {
+      font-size: 14px;
+    }
+
+    ::v-deep > h5 {
+      font-size: 12.25px;
+    }
+
+    ::v-deep > h6 {
+      font-size: 11.9px;
+    }
   }
 
   ::v-deep .flex {

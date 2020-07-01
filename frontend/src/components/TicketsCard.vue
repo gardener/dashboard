@@ -86,7 +86,7 @@ export default {
     createTicketLink () {
       const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
 
-      const dashboardShootLink = `**Shoot:** [${this.shootNamespace}/${this.shootName}](${url})`
+      const dashboardShootLink = `**Shoot:** [${this.shootProjectName}/${this.shootName}](${url})`
       const kind = `**Kind:** ${this.shootCloudProviderKind} / ${this.shootRegion}`
 
       const seedLinkOrName = this.canLinkToSeed ? `[${this.shootSeedName}](${window.location.origin}/namespace/garden/shoots/${this.shootSeedName})` : this.shootSeedName
@@ -99,7 +99,7 @@ export default {
       shootLastErrorDescriptions = join(shootLastErrorDescriptions, '\n')
       const lastError = `**Last Errors:** ${shootLastErrorDescriptions || '-'}`
 
-      const ticketTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
+      const ticketTitle = encodeURIComponent(`[${this.shootProjectName}/${this.shootName}]`)
       const body = encodeURIComponent(`
 ${dashboardShootLink}
 ${kind}

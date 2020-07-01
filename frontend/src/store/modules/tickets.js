@@ -27,8 +27,8 @@ import matchesProperty from 'lodash/matchesProperty'
 import orderBy from 'lodash/orderBy'
 import unionBy from 'lodash/unionBy'
 
-const eql = ({ namespace, name, state = undefined }) => {
-  const source = { metadata: { namespace } }
+const eql = ({ projectName, name, state = undefined }) => {
+  const source = { metadata: { projectName } }
   if (name) {
     source.metadata.name = name
   }
@@ -48,24 +48,24 @@ const state = {
   allComments: {}
 }
 
-const getOpenIssues = ({ state, name, namespace }) => {
-  return filter(state.all, eql({ name, namespace, state: 'open' }))
+const getOpenIssues = ({ state, name, projectName }) => {
+  return filter(state.all, eql({ name, projectName, state: 'open' }))
 }
 // getters
 const getters = {
   items: state => state.all,
-  issues: (state) => ({ name, namespace }) => {
-    return getOpenIssues({ state, name, namespace })
+  issues: (state) => ({ name, projectName }) => {
+    return getOpenIssues({ state, name, projectName })
   },
   comments: (state) => ({ issueNumber }) => {
     return state.allComments[issueNumber]
   },
-  latestUpdated: (state) => ({ name, namespace }) => {
-    const latestUpdatedIssue = head(getOpenIssues({ state, name, namespace }))
+  latestUpdated: (state) => ({ name, projectName }) => {
+    const latestUpdatedIssue = head(getOpenIssues({ state, name, projectName }))
     return get(latestUpdatedIssue, 'metadata.updated_at')
   },
-  labels: (state) => ({ name, namespace }) => {
-    const issues = getOpenIssues({ state, name, namespace })
+  labels: (state) => ({ name, projectName }) => {
+    const issues = getOpenIssues({ state, name, projectName })
     const labels = unionBy(flatMap(issues, issue => get(issue, 'data.labels')), 'id')
     return labels
   }
@@ -73,7 +73,7 @@ const getters = {
 
 // actions
 const actions = {
-  getCommentsList ({ commit, rootState }, { name, namespace }) {
+  getCommentsList ({ commit, rootState }, { name, projectName }) {
     return state.comments
   },
   clearIssues ({ commit, dispatch }) {

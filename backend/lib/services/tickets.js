@@ -31,7 +31,7 @@ function fromLabel (item) {
 
 function fromIssue (issue) {
   const labels = _.map(issue.labels, fromLabel)
-  const [, namespace, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
+  const [, projectName, name, ticketTitle] = /^\[([a-z0-9-]+)\/([a-z0-9-]+)\]\s*(.*)$/.exec(issue.title || '') || []
   return {
     kind: 'issue',
     metadata: _
@@ -44,7 +44,7 @@ function fromIssue (issue) {
         'state'
       ])
       .assign({
-        namespace,
+        projectName,
         name
       })
       .value(),
@@ -66,7 +66,7 @@ function fromIssue (issue) {
 }
 exports.fromIssue = fromIssue
 
-function fromComment (number, name, namespace, item) {
+function fromComment (number, name, projectName, item) {
   return {
     kind: 'comment',
     metadata: _
@@ -79,7 +79,7 @@ function fromComment (number, name, namespace, item) {
       .assign({
         number,
         name,
-        namespace
+        projectName
       })
       .value(),
     data: _.pick(item, [
@@ -92,10 +92,10 @@ function fromComment (number, name, namespace, item) {
 }
 exports.fromComment = fromComment
 
-async function getOpenIssues ({ name, namespace } = {}) {
+async function getOpenIssues ({ name, projectName } = {}) {
   let title
-  if (name && namespace) {
-    title = `[${namespace}/${name}]`
+  if (name && projectName) {
+    title = `[${projectName}/${name}]`
   }
   const githubIssues = await github.searchIssues({ state: 'open', title })
   return _.map(githubIssues, fromIssue)
@@ -134,22 +134,22 @@ async function finalizeIssue (number) {
   await github.closeIssue({ number })
 }
 
-function deleteTickets ({ name, namespace }) {
+function deleteTickets ({ name, projectName }) {
   const ticketCache = cache.getTicketCache()
-  const numbers = ticketCache.getIssueNumbersForNameAndNamespace({ name, namespace })
+  const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
   if (_.isEmpty(numbers)) {
     return Promise.resolve()
   }
-  logger.debug('Deleting ticket for shoot %s/%s. Affected issue numbers: %s', namespace, name, _.join(numbers, ', '))
+  logger.debug('Deleting ticket for shoot %s/%s. Affected issue numbers: %s', projectName, name, _.join(numbers, ', '))
   return Promise.all(_.map(numbers, finalizeIssue))
 }
 exports.deleteTickets = deleteTickets
 
 async function getIssueComments ({ number }) {
   const ticketCache = cache.getTicketCache()
-  const { metadata: { name, namespace } } = ticketCache.getIssue(number)
+  const { metadata: { name, projectName } } = ticketCache.getIssue(number)
   const githubComments = await github.getComments({ number })
-  return _.map(githubComments, githubComment => fromComment(number, name, namespace, githubComment))
+  return _.map(githubComments, githubComment => fromComment(number, name, projectName, githubComment))
 }
 exports.getIssueComments = getIssueComments
 
