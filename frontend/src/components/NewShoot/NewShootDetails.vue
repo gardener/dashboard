@@ -147,10 +147,21 @@ export default {
       })
     },
     versionHint () {
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
-        return 'If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates'
+      const version = find(this.sortedKubernetesVersionsList, { version: this.kubernetesVersion })
+      if (!version) {
+        return undefined
       }
-      return undefined
+      const hintText = []
+      if (version.expirationDate) {
+        hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
+      }
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+        hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
+      }
+      if (version.isPreview) {
+        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not yet recommended for production usage')
+      }
+      return join(hintText, ' / ')
     },
     versionIsNotLatestPatch () {
       return k8sVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)

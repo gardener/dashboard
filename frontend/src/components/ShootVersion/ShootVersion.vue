@@ -63,7 +63,7 @@ limitations under the License.
       <template v-slot:message>
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
-          :currentk8sVersion="shootK8sVersion"
+          :currentK8sVersion="kubernetesVersion"
           @selectedVersion="onSelectedVersion"
           @selectedVersionType="onSelectedVersionType"
           @selectedVersionInvalid="onSelectedVersionInvalid"
@@ -103,10 +103,11 @@ import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
 import GDialog from '@/components/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
-import get from 'lodash/get'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
+import get from 'lodash/get'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -134,8 +135,16 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'canPatchShoots'
+      'canPatchShoots',
+      'kubernetesVersions'
     ]),
+    kubernetesVersion () {
+      const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
+      if (!version) {
+        return {}
+      }
+      return version
+    },
     k8sPatchAvailable () {
       if (get(this.availableK8sUpdates, 'patch')) {
         return true

@@ -38,7 +38,7 @@ limitations under the License.
           <span v-else>Kubernetes version of this cluster is expired. </span>
           <span v-if="k8sExpiration.isInfo">Version will be updated in the next maintenance window</span>
           <template v-if="k8sExpiration.isWarning">
-            <span v-if="k8sExpiration.isValidTerminationDate">Version update will be enforced after this date</span>
+            <span v-if="k8sExpiration.isValidTerminationDate">Version update will be enforced after that date</span>
             <span v-else>Version update will be enforced soon</span>
           </template>
           <span v-if="k8sExpiration.isError">Version update not possible due to missing update path. Please contact your landscape administrator</span>
@@ -46,12 +46,12 @@ limitations under the License.
       </template>
 
       <li v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
-        <span>Machine image<span class="font-weight-bold">{{name}} | Version: {{version}}</span>of worker group<span class="font-weight-bold">{{workerName}}</span></span>
+        <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
         <span v-if="isValidTerminationDate">expires<span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>. </span>
         <span v-else>is expired. </span>
         <span v-if="isInfo">Version will be updated in the next maintenance window</span>
         <template v-if="isWarning">
-          <span v-if="isValidTerminationDate">Machine Image update will be enforced after this date</span>
+          <span v-if="isValidTerminationDate">Machine Image update will be enforced after that date</span>
             <span v-else>Machine Image update will be enforced soon</span>
         </template>
         <span v-if="isError">Machine Image update as no newer version is available. Please choose another operating system</span>

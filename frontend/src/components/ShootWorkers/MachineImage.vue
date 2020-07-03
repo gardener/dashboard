@@ -1,5 +1,5 @@
 <template>
-  <hint-colorizer :hintColor="hintColor">
+  <hint-colorizer hintColor="orange">
     <v-select
       color="cyan darken-2"
       item-color="cyan darken-2"
@@ -108,21 +108,13 @@ export default {
       if (this.machineImage.expirationDate) {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
-      if (this.updateOSMaintenance && (this.selectedImageIsNotLatest || this.machineImage.isDeprecated)) {
+      if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
         hintText.push('If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates')
       }
       if (this.machineImage.isPreview) {
         hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not yet recommended for production usage')
       }
       return join(hintText, ' / ')
-    },
-    hintColor () {
-      if (this.machineImage.needsLicense ||
-        (this.updateOSMaintenance && (this.selectedImageIsNotLatest || this.machineImage.isDeprecated)) ||
-        this.machineImage.isPreview) {
-        return 'orange'
-      }
-      return 'default'
     },
     selectedImageIsNotLatest () {
       return selectedImageIsNotLatest(this.machineImage, this.machineImages)
