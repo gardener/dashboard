@@ -72,7 +72,7 @@ describe('dockerfile', function () {
       .fromPairs()
       .value()
     const imageTag = buildStages.builder.getImageTag()
-    const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine$/.exec(imageTag) || []
+    const [, nodeRelease] = /^(\d+(?:\.\d+)?(?:\.\d+)?)-alpine/.exec(imageTag) || []
     expect(_.keys(activeNodeReleases), `Node release ${nodeRelease} is not in the range of active LTS releases`).to.include(nodeRelease)
     const endOfLife = activeNodeReleases[nodeRelease].endOfLife
     expect(endOfLife, `Node release ${nodeRelease} reached end of life. Update node base image in Dockerfile.`).to.be.above(new Date())
