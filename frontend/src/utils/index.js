@@ -614,7 +614,7 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
 export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
-  const zones = [sample(availableZones)]
+  const zones = availableZones.length ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
@@ -731,11 +731,66 @@ export function selectedImageIsNotLatest (machineImage, machineImages) {
   })
 }
 
+export function k8sExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
+  const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
+  const version = find(allVersions, { version: shootK8sVersion })
+  if (!version || !version.expirationDate) {
+    return undefined
+  }
+
+  const patchAvailable = k8sVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
+  const updatePathAvailable = k8sVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
+  const updateAvailable = !patchAvailable && updatePathAvailable
+
+  const isError = !updatePathAvailable
+  const isWarning = !isError && ((!k8sAutoPatch && patchAvailable) || updateAvailable)
+  const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
+
+  if (!isError && !isWarning && !isInfo) {
+    return undefined
+  }
+  return {
+    expirationDate: version.expirationDate,
+    isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+    isError,
+    isWarning,
+    isInfo
+  }
+}
+
+export function expiredWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
+  const expiredWorkerGroups = []
+  const allMachineImages = store.getters.machineImagesByCloudProfileName(shootCloudProfileName)
+  forEach(shootWorkerGroups, worker => {
+    const workerImage = get(worker, 'machine.image')
+    const workerImageDetails = find(allMachineImages, workerImage)
+    const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+
+    const isError = !updateAvailable
+    const isWarning = !imageAutoPatch && updateAvailable
+    const isInfo = imageAutoPatch && updateAvailable
+    if (workerImageDetails.expirationDate &&
+      (isError || isWarning || isInfo)) {
+      expiredWorkerGroups.push({
+        ...workerImageDetails,
+        isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
+        workerName: worker.name,
+        isError,
+        isWarning,
+        isInfo
+      })
+    }
+  })
+  return expiredWorkerGroups
+}
+
 export default {
   store,
   canI,
   availableK8sUpdatesForShoot,
   k8sVersionIsNotLatestPatch,
   k8sVersionUpdatePathAvailable,
-  selectedImageIsNotLatest
+  selectedImageIsNotLatest,
+  k8sExpirationForShoot,
+  expiredWorkerGroupsForShoot
 }

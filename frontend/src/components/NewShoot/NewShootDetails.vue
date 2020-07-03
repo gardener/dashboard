@@ -148,7 +148,7 @@ export default {
     },
     versionHint () {
       if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
-        return 'If you select a version which is not the latest patch version, you may want to disable automatic Kubernetes updates'
+        return 'If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates'
       }
       return undefined
     },

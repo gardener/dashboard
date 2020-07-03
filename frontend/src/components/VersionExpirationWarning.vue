@@ -65,11 +65,10 @@ limitations under the License.
 import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import find from 'lodash/find'
-import forEach from 'lodash/forEach'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
-import { isValidTerminationDate, k8sVersionIsNotLatestPatch, k8sVersionUpdatePathAvailable, selectedImageIsNotLatest } from '@/utils'
+import { k8sExpirationForShoot, expiredWorkerGroupsForShoot } from '@/utils'
 
 export default {
   name: 'VerisonUpdateWarning',
@@ -98,60 +97,15 @@ export default {
       if (this.onlyMachineImageWarnings) {
         return undefined
       }
-
-      const allVersions = this.kubernetesVersions(this.shootCloudProfileName)
-      const version = find(allVersions, { version: this.shootK8sVersion })
-      if (!version || !version.expirationDate) {
-        return undefined
-      }
-
-      const patchAvailable = k8sVersionIsNotLatestPatch(this.shootK8sVersion, this.shootCloudProfileName)
       const k8sAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-      const updatePathAvailable = k8sVersionUpdatePathAvailable(this.shootK8sVersion, this.shootCloudProfileName)
-
-      const isError = !updatePathAvailable
-      const isWarning = !isError && !k8sAutoPatch && patchAvailable
-      const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
-
-      if (!isError && !isWarning && !isInfo) {
-        return undefined
-      }
-      return {
-        expirationDate: version.expirationDate,
-        isValidTerminationDate: isValidTerminationDate(version.expirationDate),
-        isError,
-        isWarning,
-        isInfo
-      }
+      return k8sExpirationForShoot(this.shootK8sVersion, this.shootCloudProfileName, k8sAutoPatch)
     },
     expiredWorkerGroups () {
       if (this.onlyK8sWarnings) {
         return []
       }
-      const expiredWorkerGroups = []
-      const allMachineImages = this.machineImagesByCloudProfileName(this.shootCloudProfileName)
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-      forEach(this.shootWorkerGroups, worker => {
-        const workerImage = get(worker, 'machine.image')
-        const workerImageDetails = find(allMachineImages, workerImage)
-        const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
-
-        const isError = !updateAvailable
-        const isWarning = !imageAutoPatch && updateAvailable
-        const isInfo = imageAutoPatch && updateAvailable
-        if (workerImageDetails.expirationDate &&
-          (isError || isWarning || isInfo)) {
-          expiredWorkerGroups.push({
-            ...workerImageDetails,
-            isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
-            workerName: worker.name,
-            isError,
-            isWarning,
-            isInfo
-          })
-        }
-      })
-      return expiredWorkerGroups
+      return expiredWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
     },
     isOverallStatusWarning () {
       const isError = !!find([this.k8sExpiration, ...this.expiredWorkerGroups], { isError: true })
@@ -175,11 +129,6 @@ export default {
         return 'Version Update Warning'
       }
       return 'Version Update Information'
-    }
-  },
-  methods: {
-    isValidTerminationDate (terminationDate) {
-      return isValidTerminationDate(terminationDate)
     }
   }
 }

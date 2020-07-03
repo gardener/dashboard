@@ -44,10 +44,17 @@ limitations under the License.
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
+      <v-list-item v-if="selectable">
+        <v-list-item-action>
+          <v-icon>mdi-information-outline</v-icon>
+        </v-list-item-action>
+        <v-list-item-content>
+          <v-list-item-title >Automatic updates will not update to preview versions</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
       <v-list-item v-if="showNoUpdates">
         <v-list-item-action>
-          <v-checkbox v-if="selectable" color="cyan darken-2" v-model="k8sUpdates"></v-checkbox>
-          <v-icon v-else>mdi-close-circle-outline</v-icon>
+          <v-icon>mdi-close-circle-outline</v-icon>
         </v-list-item-action>
         <v-list-item-content>
           <v-list-item-title >Updates disabled</v-list-item-title>
