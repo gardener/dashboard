@@ -87,7 +87,6 @@ app.use(express.static(PUBLIC_DIRNAME))
 app.use(helmet.frameguard({
   action: 'deny'
 }))
-app.use(helmet.noCache())
 app.use(historyFallback(INDEX_FILENAME))
 
 app.use(notFound)

@@ -15,7 +15,7 @@
 #
 
 #### Builder ####
-FROM node:12-alpine as builder
+FROM node:14-alpine3.12 as builder
 
 WORKDIR /usr/src/app
 
@@ -33,7 +33,7 @@ RUN yarn --cwd=backend install --no-progress --production \
     && yarn --cwd=frontend build
 
 # Release
-FROM alpine:3.9 as release
+FROM alpine:3.12 as release
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \

@@ -30,6 +30,7 @@ import toLower from 'lodash/toLower'
 import padStart from 'lodash/padStart'
 import filter from 'lodash/filter'
 import includes from 'lodash/includes'
+import some from 'lodash/some'
 import split from 'lodash/split'
 import join from 'lodash/join'
 import set from 'lodash/set'
@@ -579,8 +580,8 @@ const setFilteredAndSortedItems = (state, rootState) => {
     }
     if (get(state, 'shootListFilters.hideTicketsWithLabel', false)) {
       const predicate = item => {
-        const hideClustersWithLabel = get(rootState.cfg, 'ticket.hideClustersWithLabel')
-        if (!hideClustersWithLabel) {
+        const hideClustersWithLabels = get(rootState.cfg, 'ticket.hideClustersWithLabels')
+        if (!hideClustersWithLabels) {
           return true
         }
 
@@ -591,7 +592,8 @@ const setFilteredAndSortedItems = (state, rootState) => {
 
         const ticketsWithoutHideLabel = filter(ticketsForCluster, ticket => {
           const labelNames = map(get(ticket, 'data.labels'), 'name')
-          return !includes(labelNames, hideClustersWithLabel)
+          const ticketHasHideLabel = some(hideClustersWithLabels, hideClustersWithLabel => includes(labelNames, hideClustersWithLabel))
+          return !ticketHasHideLabel
         })
         return ticketsWithoutHideLabel.length > 0
       }
