@@ -39,9 +39,9 @@ describe('services', function () {
     let createCommentStub
     let closeIssueStub
 
-    const issue1 = { id: 1, namespace: 'foo', name: 'bar' }
-    const issue2 = { id: 2, namespace: 'foo', name: 'baz' }
-    const issue3 = { id: 3, namespace: 'foo', name: 'bar', state: 'closed' }
+    const issue1 = { id: 1, projectName: 'foo', name: 'bar' }
+    const issue2 = { id: 2, projectName: 'foo', name: 'baz' }
+    const issue3 = { id: 3, projectName: 'foo', name: 'bar', state: 'closed' }
     const issues = [
       issue1,
       issue2,
@@ -53,8 +53,8 @@ describe('services', function () {
       getIssues () {
         return this.issues
       },
-      getIssueNumbersForNameAndNamespace ({ namespace, name }) {
-        const issues = filter(this.issues, { namespace, name })
+      getIssueNumbersForNameAndProjectName ({ projectName, name }) {
+        const issues = filter(this.issues, { projectName, name })
         return map(issues, 'id')
       },
       removeIssue ({ issue }) {
@@ -74,7 +74,7 @@ describe('services', function () {
 
     describe('#deleteTickets', function () {
       it('should not remove any issues', async function () {
-        await deleteTickets({ namespace: 'foo', name: 'foo' })
+        await deleteTickets({ projectName: 'foo', name: 'foo' })
         expect(debugSpy).to.not.be.called
         expect(createCommentStub).to.not.be.called
         expect(closeIssueStub).to.not.be.called
@@ -91,7 +91,7 @@ describe('services', function () {
         createCommentStub.withArgs({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
         closeIssueStub.withArgs({ number: issue1.id })
 
-        await deleteTickets({ namespace: 'foo', name: 'bar' })
+        await deleteTickets({ projectName: 'foo', name: 'bar' })
         expect(debugSpy).to.be.calledTwice
         expect(createCommentStub).to.be.calledWith({ number: issue1.id }, '_[Auto-closed due to Shoot deletion]_')
         expect(closeIssueStub).to.be.calledWith({ number: issue1.id })

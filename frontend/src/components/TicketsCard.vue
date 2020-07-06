@@ -102,7 +102,7 @@ export default {
       return imageNames.join(', ')
     },
     createTicketLink () {
-      const ticketTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
+      const ticketTitle = encodeURIComponent(`[${this.shootProjectName}/${this.shootName}]`)
       const body = encodeURIComponent(this.issueDescription)
 
       return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}`

@@ -19,7 +19,15 @@ import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
 
 import EmitterWrapper from '@/utils/Emitter'
-import { gravatarUrlGeneric, displayName, fullDisplayName, getDateFormatted, addKymaAddon, canI } from '@/utils'
+import {
+  gravatarUrlGeneric,
+  displayName,
+  fullDisplayName,
+  getDateFormatted,
+  addKymaAddon,
+  canI,
+  getProjectName
+} from '@/utils'
 import { getSubjectRules, getKubeconfigData } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
@@ -650,7 +658,8 @@ const getters = {
   },
   ticketsByNamespaceAndName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['tickets/issues']({ namespace, name })
+      const projectName = getProjectName({ namespace })
+      return getters['tickets/issues']({ projectName, name })
     }
   },
   ticketCommentsByIssueNumber (state, getters) {
@@ -660,12 +669,14 @@ const getters = {
   },
   latestUpdatedTicketByNameAndNamespace (state, getters) {
     return ({ namespace, name }) => {
-      return getters['tickets/latestUpdated']({ namespace, name })
+      const projectName = getProjectName({ namespace })
+      return getters['tickets/latestUpdated']({ projectName, name })
     }
   },
   ticketsLabels (state, getters) {
     return ({ namespace, name }) => {
-      return getters['tickets/labels']({ namespace, name })
+      const projectName = getProjectName({ namespace })
+      return getters['tickets/labels']({ projectName, name })
     }
   },
   kubernetesVersions (state, getters) {

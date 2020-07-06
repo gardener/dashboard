@@ -23,14 +23,14 @@ function timestamp (secondsFromNow = 0) {
   return new Date(Date.now() + secondsFromNow * 1000).toISOString().replace(/\.\d+Z$/, 'Z')
 }
 
-function createIssue ({ number, name = 'foo', namespace = 'test', updatedAt }) {
+function createIssue ({ number, name = 'foo', projectName = 'test', updatedAt }) {
   updatedAt = updatedAt || timestamp()
   return {
     metadata: {
       number,
       updated_at: updatedAt,
       name,
-      namespace
+      projectName
     }
   }
 }
@@ -196,9 +196,9 @@ describe('cache', function () {
       })
     })
 
-    describe('#getIssueNumbersForNameAndNamespace', function () {
-      it('should return the issueNumbers for name "foo" and namespace "test"', function () {
-        const numbers = cache.getIssueNumbersForNameAndNamespace({ namespace: 'test', name: 'foo' })
+    describe('#getIssueNumbersForNameAndProjectName', function () {
+      it('should return the issueNumbers for name "foo" and project "test"', function () {
+        const numbers = cache.getIssueNumbersForNameAndProjectName({ projectName: 'test', name: 'foo' })
         expect(numbers).to.eql([1, 2])
         expect(emitSpy).to.not.have.been.called
       })

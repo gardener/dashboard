@@ -333,8 +333,7 @@ export function getCreatedBy (metadata) {
   return get(metadata, ['annotations', 'gardener.cloud/created-by']) || get(metadata, ['annotations', 'garden.sapcloud.io/createdBy'])
 }
 
-export function getProjectName (metadata) {
-  const namespace = get(metadata, ['namespace'])
+export function getProjectName ({ namespace } = {}) {
   const projectList = store.getters.projectList
   const project = find(projectList, ['metadata.namespace', namespace])
   const projectName = get(project, 'metadata.name') || replace(namespace, /^garden-/, '')
