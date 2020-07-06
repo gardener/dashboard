@@ -165,7 +165,7 @@ export default {
         return 'You cannot upgrade your cluster more than one minor version at a time'
       }
       if (this.selectedItem.isPreview) {
-        return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not yet recommended for production usage'
+        return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
       }
       return undefined
     }
