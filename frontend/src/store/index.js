@@ -274,7 +274,7 @@ function firstItemMatchingVersionClassification (items) {
     return defaultItem
   }
 
-  defaultItem = head(items)
+  return head(items)
 }
 
 // getters
