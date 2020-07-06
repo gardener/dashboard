@@ -263,15 +263,18 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
 // return first item in list
 function firstItemMatchingVersionClassification (items) {
   let defaultItem = find(items, { classification: 'supported' })
-  if (!defaultItem) {
-    defaultItem = find(items, machineImage => {
-      return machineImage.classification === undefined
-    })
+  if (defaultItem) {
+    return defaultItem
   }
-  if (!defaultItem) {
-    defaultItem = head(items)
+  
+  defaultItem = find(items, machineImage => {
+    return machineImage.classification === undefined
+  })
+  if (defaultItem) {
+    return defaultItem
   }
-  return defaultItem
+  
+  defaultItem = head(items)
 }
 
 // getters
