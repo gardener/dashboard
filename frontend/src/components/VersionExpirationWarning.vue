@@ -64,11 +64,11 @@ limitations under the License.
 
 import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
-import find from 'lodash/find'
+import some from 'lodash/some'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
-import { k8sExpirationForShoot, expiredWorkerGroupsForShoot } from '@/utils'
+import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot } from '@/utils'
 
 export default {
   name: 'VerisonUpdateWarning',
@@ -98,18 +98,18 @@ export default {
         return undefined
       }
       const k8sAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
-      return k8sExpirationForShoot(this.shootK8sVersion, this.shootCloudProfileName, k8sAutoPatch)
+      return k8sVersionExpirationForShoot(this.shootK8sVersion, this.shootCloudProfileName, k8sAutoPatch)
     },
     expiredWorkerGroups () {
       if (this.onlyK8sWarnings) {
         return []
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-      return expiredWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
+      return expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
     },
     isOverallStatusWarning () {
-      const isError = !!find([this.k8sExpiration, ...this.expiredWorkerGroups], { isError: true })
-      const isWarning = !!find([this.k8sExpiration, ...this.expiredWorkerGroups], { isWarning: true })
+      const isError = some([this.k8sExpiration, ...this.expiredWorkerGroups], { isError: true })
+      const isWarning = some([this.k8sExpiration, ...this.expiredWorkerGroups], { isWarning: true })
       return isError || isWarning
     },
     overallStatusColor () {

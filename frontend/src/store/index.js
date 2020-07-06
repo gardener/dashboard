@@ -162,7 +162,7 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
     // Filter regions that are not defined in cloud profile
     const cloudProfile = getters.cloudProfileByName(cloudProfileName)
     if (cloudProfile) {
-      return !!find(cloudProfile.data.regions, ['name', region])
+      return some(cloudProfile.data.regions, ['name', region])
     }
 
     return true

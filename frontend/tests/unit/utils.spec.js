@@ -299,8 +299,8 @@ describe('utils', function () {
       expect(result).to.be.false
     })
 
-    it('#k8sExpirationForShoot - should be info level (patch avialable, auto update enabled))', function () {
-      const versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
+    it('#k8sVersionExpirationForShoot - should be info level (patch avialable, auto update enabled))', function () {
+      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[0].expirationDate,
         isValidTerminationDate: true,
@@ -310,8 +310,8 @@ describe('utils', function () {
       })
     })
 
-    it('#k8sExpirationForShoot - should be warning level (patch available, auto update disabled))', function () {
-      const versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
+    it('#k8sVersionExpirationForShoot - should be warning level (patch available, auto update disabled))', function () {
+      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[0].expirationDate,
         isValidTerminationDate: true,
@@ -321,8 +321,8 @@ describe('utils', function () {
       })
     })
 
-    it('#k8sExpirationForShoot - should be warning level (update available, auto update enabled / disabled))', function () {
-      let versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
+    it('#k8sVersionExpirationForShoot - should be warning level (update available, auto update enabled / disabled))', function () {
+      let versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[1].expirationDate,
         isValidTerminationDate: true,
@@ -331,7 +331,7 @@ describe('utils', function () {
         isInfo: false
       })
 
-      versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
+      versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[1].expirationDate,
         isValidTerminationDate: true,
@@ -341,8 +341,8 @@ describe('utils', function () {
       })
     })
 
-    it('#k8sExpirationForShoot - should be error level (no update path available))', function () {
-      const versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
+    it('#k8sVersionExpirationForShoot - should be error level (no update path available))', function () {
+      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[7].expirationDate,
         isValidTerminationDate: false,
@@ -352,8 +352,8 @@ describe('utils', function () {
       })
     })
 
-    it('#k8sExpirationForShoot - should be error level (version not expired))', function () {
-      const versionExpirationWarning = utils.k8sExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
+    it('#k8sVersionExpirationForShoot - should be error level (version not expired))', function () {
+      const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[8].version, 'foo', true)
       expect(versionExpirationWarning).to.be.undefined
     })
   })
@@ -432,9 +432,9 @@ describe('utils', function () {
       expect(result).to.be.true
     })
 
-    it('#expiredWorkerGroupsForShoot - one should be info level (update available, auto update enabled))', function () {
+    it('#expiringWorkerGroupsForShoot - one should be info level (update available, auto update enabled))', function () {
       const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1]])
-      const expiredWorkerGroups = utils.expiredWorkerGroupsForShoot(workers, 'foo', true)
+      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
       expect(expiredWorkerGroups).to.be.an.instanceof(Array)
       expect(expiredWorkerGroups).to.have.length(1)
       expect(expiredWorkerGroups[0]).to.eql({
@@ -447,9 +447,9 @@ describe('utils', function () {
       })
     })
 
-    it('#expiredWorkerGroupsForShoot - one should be warning level (update available, auto update disabled))', function () {
+    it('#expiringWorkerGroupsForShoot - one should be warning level (update available, auto update disabled))', function () {
       const workers = generateWorkerGroups([sampleMachineImages[0]])
-      const expiredWorkerGroups = utils.expiredWorkerGroupsForShoot(workers, 'foo', false)
+      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', false)
       expect(expiredWorkerGroups).to.be.an.instanceof(Array)
       expect(expiredWorkerGroups).to.have.length(1)
       expect(expiredWorkerGroups[0]).to.eql({
@@ -462,9 +462,9 @@ describe('utils', function () {
       })
     })
 
-    it('#expiredWorkerGroupsForShoot - one should be info level, two error (update available, auto update enabled))', function () {
+    it('#expiringWorkerGroupsForShoot - one should be info level, two error (update available, auto update enabled))', function () {
       const workers = generateWorkerGroups([sampleMachineImages[0], sampleMachineImages[1], sampleMachineImages[3], sampleMachineImages[4]])
-      const expiredWorkerGroups = utils.expiredWorkerGroupsForShoot(workers, 'foo', true)
+      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
       expect(expiredWorkerGroups).to.be.an.instanceof(Array)
       expect(expiredWorkerGroups).to.have.length(3)
       expect(expiredWorkerGroups[0]).to.eql({
@@ -494,9 +494,9 @@ describe('utils', function () {
       })
     })
 
-    it('#expiredWorkerGroupsForShoot - should be empty array (ignore versions without expiration date))', function () {
+    it('#expiringWorkerGroupsForShoot - should be empty array (ignore versions without expiration date))', function () {
       const workers = generateWorkerGroups([sampleMachineImages[1], sampleMachineImages[2]])
-      const expiredWorkerGroups = utils.expiredWorkerGroupsForShoot(workers, 'foo', true)
+      const expiredWorkerGroups = utils.expiringWorkerGroupsForShoot(workers, 'foo', true)
       expect(expiredWorkerGroups).to.be.an.instanceof(Array)
       expect(expiredWorkerGroups).to.have.length(0)
     })
