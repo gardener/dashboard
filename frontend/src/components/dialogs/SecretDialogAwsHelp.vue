@@ -101,7 +101,8 @@ export default {
               'iam:DeleteRolePolicy',
               'iam:DeleteInstanceProfile',
               'iam:PutRolePolicy',
-              'iam:PassRole'
+              'iam:PassRole',
+              'iam:UpdateAssumeRolePolicy'
             ],
             Effect: 'Allow',
             Resource: '*'
