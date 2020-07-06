@@ -266,14 +266,14 @@ function firstItemMatchingVersionClassification (items) {
   if (defaultItem) {
     return defaultItem
   }
-  
+
   defaultItem = find(items, machineImage => {
     return machineImage.classification === undefined
   })
   if (defaultItem) {
     return defaultItem
   }
-  
+
   defaultItem = head(items)
 }
 
