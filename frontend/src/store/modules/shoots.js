@@ -293,11 +293,11 @@ const actions = {
     const purpose = head(purposesForSecret(secret))
     set(shootResource, 'spec.purpose', purpose)
 
-    const kubernetesVersion = head(rootGetters.sortedKubernetesVersions(cloudProfileName))
+    const kubernetesVersion = rootGetters.defaultKubernetesVersionForCloudProfileName(cloudProfileName)
     set(shootResource, 'spec.kubernetes.version', kubernetesVersion.version)
 
     const allZones = rootGetters.zonesByCloudProfileNameAndRegion({ cloudProfileName, region })
-    const zones = [sample(allZones)]
+    const zones = allZones.length ? [sample(allZones)] : undefined
     const zonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(zones, infrastructureKind, allZones.length)
     if (zonesNetworkConfiguration) {
       set(shootResource, 'spec.provider.infrastructureConfig.networks.zones', zonesNetworkConfiguration)

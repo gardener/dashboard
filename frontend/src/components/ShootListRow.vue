@@ -31,6 +31,7 @@ limitations under the License.
         <v-col class="shrink" >
           <div class="d-flex flew-row">
             <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
+            <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
             <hibernation-schedule-warning
               v-if="isShootHasNoHibernationScheduleWarning"
               :name="shootName"
@@ -78,7 +79,7 @@ limitations under the License.
       </div>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['k8sVersion']">
-      <shoot-version :shoot-item="shootItem"></shoot-version>
+      <shoot-version :shoot-item="shootItem" chip></shoot-version>
     </td>
     <td class="nowrap text-center" v-if="this.headerVisible['readiness']">
       <status-tags :shootItem="shootItem"></status-tags>
@@ -140,6 +141,7 @@ import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
 import DeleteCluster from '@/components/DeleteCluster'
 import ShootSeedName from '@/components/ShootSeedName'
+import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import {
@@ -164,7 +166,8 @@ export default {
     DeleteCluster,
     CopyBtn,
     ShootSeedName,
-    Vendor
+    Vendor,
+    VersionExpirationWarning
   },
   props: {
     shootItem: {

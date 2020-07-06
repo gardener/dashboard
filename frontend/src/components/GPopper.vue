@@ -26,12 +26,12 @@ limitations under the License.
     @hide="onPopperHide"
     >
     <div class="popper">
-      <v-card>
+      <v-card class="inner-card">
         <v-toolbar ref="toolbar" :height="30" :color="toolbarColor" dark flat>
           <v-toolbar-title class="subtitle-1">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn small icon @click.native.stop="closePopover">
-            <v-icon class="subtitle-1">mdi-close</v-icon>
+            <v-icon color="white" class="subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
@@ -143,6 +143,9 @@ export default {
     background-color: transparent !important;
     -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
     box-shadow: 0 5px 5px -3px rgba(0,0,0,0.2), 0 8px 10px 1px rgba(0,0,0,0.14), 0 3px 14px 2px rgba(0,0,0,0.12);
+  }
+
+  .inner-card {
     max-width: 1000px;
     max-height: 85vh;
     overflow-y: scroll;

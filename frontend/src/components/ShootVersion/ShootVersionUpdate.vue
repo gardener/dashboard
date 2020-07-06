@@ -15,33 +15,39 @@ limitations under the License.
 -->
 
 <template>
-  <v-select
-    :items="items"
-    color="cyan darken-2"
-    item-color="cyan darken-2"
-    item-value="version"
-    v-model="selectedItem"
-    :label="label"
-    :hint="hint"
-    :error="isError"
-    return-object
-    placeholder="Please select version..."
-  >
-  <template v-slot:item="{ item }">
-    <v-tooltip top :disabled="!item.notNextMinor">
-      <template v-slot:activator="{ on }">
-        <v-list-item-content v-on="on">
-          <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
-          <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
-          <v-list-item-subtitle v-if="item.expirationDateString">
-            <span>Expires: {{item.expirationDateString}}</span>
-          </v-list-item-subtitle>
-        </v-list-item-content>
-      </template>
-      <span>You cannot upgrade your cluster more than one minor version at a time</span>
-    </v-tooltip>
-  </template>
-  </v-select>
+  <div>
+    <hint-colorizer hintColor="orange">
+      <v-select
+        :items="items"
+        color="cyan darken-2"
+        class="mb-2"
+        item-color="cyan darken-2"
+        item-value="version"
+        v-model="selectedItem"
+        :label="label"
+        :hint="hint"
+        :error="isError"
+        return-object
+        placeholder="Please select version..."
+      >
+        <template v-slot:item="{ item }">
+          <v-tooltip top :disabled="!item.notNextMinor">
+            <template v-slot:activator="{ on }">
+              <v-list-item-content v-on="on">
+                <v-list-item-title v-if="!item.notNextMinor">{{item.text}}</v-list-item-title>
+                <v-list-item-title v-else class="text--disabled">{{item.text}}</v-list-item-title>
+                <v-list-item-subtitle v-if="versionItemDescription(item).length">
+                  {{versionItemDescription(item)}}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </template>
+            <span>You cannot upgrade your cluster more than one minor version at a time</span>
+          </v-tooltip>
+        </template>
+      </v-select>
+    </hint-colorizer>
+    <v-alert type="warning" outlined v-if="currentK8sVersion.expirationDate && !selectedItem">Current Kubernetes version expires on: {{currentK8sVersion.expirationDateString}}. Kubernetes update will be enforced after that date.</v-alert>
+  </div>
 </template>
 
 <script>
@@ -50,33 +56,38 @@ import flatMap from 'lodash/flatMap'
 import upperFirst from 'lodash/upperFirst'
 import head from 'lodash/head'
 import get from 'lodash/get'
+import join from 'lodash/join'
 import semver from 'semver'
+import HintColorizer from '@/components/HintColorizer'
 
 export default {
+  name: 'shoot-version-update',
+  components: {
+    HintColorizer
+  },
   props: {
     availableK8sUpdates: {
       required: true
     },
-    currentk8sVersion: {
-      type: String
+    currentK8sVersion: {
+      type: Object
     }
   },
   data () {
     return {
       snackbar: false,
-      selectedItem: null
+      selectedItem: undefined
     }
   },
   computed: {
     items () {
       const selectionItemsForType = (versions, type) => {
-        return map(versions, ({ version, expirationDateString }) => {
+        return map(versions, version => {
           return {
+            ...version,
             type,
-            version,
-            expirationDateString,
-            text: `${this.currentk8sVersion} → ${version}`,
-            notNextMinor: this.itemIsNotNextMinor(version, type)
+            text: `${this.currentK8sVersion.version} → ${version.version}`,
+            notNextMinor: this.itemIsNotNextMinor(version.version, type)
           }
         })
       }
@@ -148,23 +159,39 @@ export default {
     },
     hint () {
       if (!this.selectedItem) {
-        return ''
+        return undefined
       }
-      return this.selectedMinorVersionIsNotNextMinor ? 'You cannot upgrade your cluster more than one minor version at a time' : ''
+      if (this.selectedMinorVersionIsNotNextMinor) {
+        return 'You cannot upgrade your cluster more than one minor version at a time'
+      }
+      if (this.selectedItem.isPreview) {
+        return 'Selected Version is a preview version. Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage'
+      }
+      return undefined
     }
   },
   methods: {
     itemIsNotNextMinor (version, type) {
-      if (!this.currentk8sVersion) {
+      if (!this.currentK8sVersion.version) {
         return false
       }
       let invalid = false
       if (version && type === 'minor') {
-        const currentMinorVersion = semver.minor(this.currentk8sVersion)
+        const currentMinorVersion = semver.minor(this.currentK8sVersion.version)
         const selectedItemMinorVersion = semver.minor(version)
         invalid = selectedItemMinorVersion - currentMinorVersion !== 1
       }
       return invalid
+    },
+    versionItemDescription (version) {
+      const itemDescription = []
+      if (version.classification) {
+        itemDescription.push(`Classification: ${version.classification}`)
+      }
+      if (version.expirationDate) {
+        itemDescription.push(`Expiration Date: ${version.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     },
     reset () {
       this.selectedItem = undefined

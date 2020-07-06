@@ -15,7 +15,7 @@
 //
 
 import { expect } from 'chai'
-import { getters } from '@/store'
+import { getters, firstItemMatchingVersionClassification } from '@/store'
 import find from 'lodash/find'
 import noop from 'lodash/noop'
 
@@ -25,7 +25,7 @@ describe('Store', function () {
   it('should transform machine images from cloud profile', function () {
     const cpMachineImages = [
       {
-        name: 'coreos',
+        name: 'garden-linux',
         versions: [
           {
             version: '2135.6.0'
@@ -40,7 +40,8 @@ describe('Store', function () {
           },
           {
             version: '15.1.20191027',
-            expirationDate: '2119-04-05T01:02:03Z' // not expired
+            expirationDate: '2119-04-05T01:02:03Z', // not expired
+            classification: 'supported'
           },
           {
             version: '15.1.20191127',
@@ -73,10 +74,10 @@ describe('Store', function () {
     }
 
     const dashboardMachineImages = getters.machineImagesByCloudProfileName({}, storeGetters)('foo')
-    expect(dashboardMachineImages).to.have.length(4)
+    expect(dashboardMachineImages).to.have.length(5)
 
     const expiredImage = find(dashboardMachineImages, { name: 'suse-chost', version: '15.1.20191127' })
-    expect(expiredImage).to.equal(undefined)
+    expect(expiredImage.isExpired).to.equal(true)
 
     const invalidImage = find(dashboardMachineImages, { name: 'foo', version: '1.02.3' })
     expect(invalidImage).to.equal(undefined)
@@ -87,10 +88,15 @@ describe('Store', function () {
     expect(suseImage.vendorName).to.equal('suse-chost')
     expect(suseImage.icon).to.equal('suse-chost')
     expect(suseImage.needsLicense).to.equal(true)
-    expect(suseImage).to.equal(dashboardMachineImages[1]) // check sorting
+    expect(suseImage.classification).to.equal('supported')
+    expect(suseImage.isSupported).to.equal(true)
+    expect(suseImage.isDeprecated).to.equal(false)
+    expect(suseImage.isPreview).to.equal(false)
+    expect(suseImage).to.equal(dashboardMachineImages[2]) // check sorting
 
     const fooImage = find(dashboardMachineImages, { name: 'foo', version: '1.2.3' })
     expect(fooImage.needsLicense).to.equal(false)
+    expect(fooImage.isSupported).to.equal(false)
   })
 
   it('should filter kubernetes versions from cloud profile', function () {
@@ -100,7 +106,8 @@ describe('Store', function () {
       },
       {
         expirationDate: '2120-04-12T23:59:59Z', // not expired
-        version: '1.16.3'
+        version: '1.16.3',
+        classification: 'supported'
       },
       {
         expirationDate: '2019-03-15T23:59:59Z', // expired
@@ -129,10 +136,10 @@ describe('Store', function () {
     }
 
     const dashboardVersions = getters.sortedKubernetesVersions({}, storeGetters)('foo')
-    expect(dashboardVersions).to.have.length(2)
+    expect(dashboardVersions).to.have.length(3)
 
     const expiredVersion = find(dashboardVersions, { version: '1.16.2' })
-    expect(expiredVersion).to.equal(undefined)
+    expect(expiredVersion.isExpired).to.equal(true)
 
     const invalidVersion = find(dashboardVersions, { version: '1.06.2' })
     expect(invalidVersion).to.equal(undefined)
@@ -140,6 +147,7 @@ describe('Store', function () {
     const kubernetesVersion = find(dashboardVersions, { version: '1.16.3' })
     expect(kubernetesVersion.expirationDate).to.equal('2120-04-12T23:59:59Z')
     expect(kubernetesVersion.expirationDateString).to.not.equal(undefined)
+    expect(kubernetesVersion.classification).to.equal('supported')
     expect(kubernetesVersion).to.equal(dashboardVersions[0]) // check sorting
   })
 
@@ -458,5 +466,32 @@ describe('Store', function () {
     dashboardLoadBalancerProviderNames = getters.loadBalancerProviderNamesByCloudProfileNameAndRegion({}, storeGetters)({ cloudProfileName, region })
     expect(dashboardLoadBalancerProviderNames).to.have.length(1)
     expect(dashboardLoadBalancerProviderNames[0]).to.equal('other regional LB')
+  })
+
+  it('should select default item that matches version classification', function () {
+    const items = [
+      {
+        version: '1',
+        classification: 'deprecated'
+      },
+      {
+        version: '2'
+      },
+      {
+        version: '3',
+        classification: 'supported'
+      }
+    ]
+
+    let item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('3')
+
+    items.pop()
+    item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('2')
+
+    items.pop()
+    item = firstItemMatchingVersionClassification(items)
+    expect(item.version).to.equal('1')
   })
 })

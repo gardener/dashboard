@@ -115,7 +115,7 @@ import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import isEmpty from 'lodash/isEmpty'
 import { mapGetters } from 'vuex'
-import find from 'lodash/find'
+import some from 'lodash/some'
 
 export default {
   components: {
@@ -200,7 +200,7 @@ export default {
       this.errorMessage = undefined
       this.detailedErrorMessage = undefined
       this.shootNodes = nodes
-      const currentNodeIsShootWorker = !!find(nodes, ['data.kubernetesHostname', currentNode])
+      const currentNodeIsShootWorker = some(nodes, ['data.kubernetesHostname', currentNode])
       if (!this.isAdmin) {
         this.selectedRunOnShootWorker = true
       } else {

@@ -34,6 +34,7 @@ import filter from 'lodash/filter'
 import forEach from 'lodash/forEach'
 import words from 'lodash/words'
 import find from 'lodash/find'
+import some from 'lodash/some'
 import isEmpty from 'lodash/isEmpty'
 import includes from 'lodash/includes'
 import startsWith from 'lodash/startsWith'
@@ -300,33 +301,27 @@ export function isOwnSecretBinding (secret) {
 }
 
 const availableK8sUpdatesCache = {}
-export function availableK8sUpdatesForShoot (spec) {
-  const shootVersion = get(spec, 'kubernetes.version')
-  const cloudProfileName = spec.cloudProfileName
-
+export function availableK8sUpdatesForShoot (shootVersion, cloudProfileName) {
   let newerVersions = get(availableK8sUpdatesCache, `${shootVersion}_${cloudProfileName}`)
   if (newerVersions !== undefined) {
     return newerVersions
-  } else {
-    newerVersions = {}
-    const allVersions = store.getters.kubernetesVersions(cloudProfileName)
-
-    let newerVersion = false
-    forEach(allVersions, ({ version, expirationDateString }) => {
-      if (semver.gt(version, shootVersion)) {
-        newerVersion = true
-        const diff = semver.diff(version, shootVersion)
-        if (!newerVersions[diff]) {
-          newerVersions[diff] = []
-        }
-        newerVersions[diff].push({ version, expirationDateString })
-      }
-    })
-    newerVersions = newerVersion ? newerVersions : null
-    availableK8sUpdatesCache[`${shootVersion}_${cloudProfileName}`] = newerVersions
-
-    return newerVersions
   }
+  newerVersions = {}
+  const allVersions = store.getters.kubernetesVersions(cloudProfileName)
+
+  const validVersions = filter(allVersions, ({ isExpired }) => !isExpired)
+  const newerVersionsForShoot = filter(validVersions, ({ version }) => semver.gt(version, shootVersion))
+  forEach(newerVersionsForShoot, version => {
+    const diff = semver.diff(version.version, shootVersion)
+    if (!newerVersions[diff]) {
+      newerVersions[diff] = []
+    }
+    newerVersions[diff].push(version)
+  })
+  newerVersions = newerVersionsForShoot.length ? newerVersions : null
+  availableK8sUpdatesCache[`${shootVersion}_${cloudProfileName}`] = newerVersions
+
+  return newerVersions
 }
 
 export function getCreatedBy (metadata) {
@@ -613,7 +608,7 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
 export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
-  const zones = [sample(availableZones)]
+  const zones = availableZones.length ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
@@ -702,4 +697,92 @@ export function targetText (target) {
     default:
       return undefined
   }
+}
+
+export function k8sVersionIsNotLatestPatch (kubernetesVersion, cloudProfileName) {
+  const allVersions = store.getters.kubernetesVersions(cloudProfileName)
+  return some(allVersions, ({ version, isPreview }) => {
+    return semver.diff(version, kubernetesVersion) === 'patch' && semver.gt(version, kubernetesVersion) && !isPreview
+  })
+}
+
+export function k8sVersionUpdatePathAvailable (kubernetesVersion, cloudProfileName) {
+  const allVersions = store.getters.kubernetesVersions(cloudProfileName)
+  if (k8sVersionIsNotLatestPatch(kubernetesVersion, cloudProfileName)) {
+    return true
+  }
+  const versionMinorVersion = semver.minor(kubernetesVersion)
+  return some(allVersions, ({ version, isPreview }) => {
+    return semver.minor(version) === versionMinorVersion + 1 && !isPreview
+  })
+}
+
+export function selectedImageIsNotLatest (machineImage, machineImages) {
+  const { version: testImageVersion, vendorName: testVendor } = machineImage
+
+  return some(machineImages, ({ version, vendorName, isPreview }) => {
+    return testVendor === vendorName && semver.gt(version, testImageVersion) && !isPreview
+  })
+}
+
+export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
+  const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
+  const version = find(allVersions, { version: shootK8sVersion })
+  if (!version || !version.expirationDate) {
+    return undefined
+  }
+
+  const patchAvailable = k8sVersionIsNotLatestPatch(shootK8sVersion, shootCloudProfileName)
+  const updatePathAvailable = k8sVersionUpdatePathAvailable(shootK8sVersion, shootCloudProfileName)
+  const updateAvailable = !patchAvailable && updatePathAvailable
+
+  const isError = !updatePathAvailable
+  const isWarning = !isError && ((!k8sAutoPatch && patchAvailable) || updateAvailable)
+  const isInfo = !isError && !isWarning && k8sAutoPatch && patchAvailable
+
+  if (!isError && !isWarning && !isInfo) {
+    return undefined
+  }
+  return {
+    expirationDate: version.expirationDate,
+    isValidTerminationDate: isValidTerminationDate(version.expirationDate),
+    isError,
+    isWarning,
+    isInfo
+  }
+}
+
+export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
+  const allMachineImages = store.getters.machineImagesByCloudProfileName(shootCloudProfileName)
+  const workerGroups = map(shootWorkerGroups, worker => {
+    const workerImage = get(worker, 'machine.image')
+    const workerImageDetails = find(allMachineImages, workerImage)
+    const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
+
+    const isError = !updateAvailable
+    const isWarning = !imageAutoPatch && updateAvailable
+    const isInfo = imageAutoPatch && updateAvailable
+    return {
+      ...workerImageDetails,
+      isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
+      workerName: worker.name,
+      isError,
+      isWarning,
+      isInfo
+    }
+  })
+  return filter(workerGroups, ({ expirationDate, isError, isWarning, isInfo }) => {
+    return expirationDate && (isError || isWarning || isInfo)
+  })
+}
+
+export default {
+  store,
+  canI,
+  availableK8sUpdatesForShoot,
+  k8sVersionIsNotLatestPatch,
+  k8sVersionUpdatePathAvailable,
+  selectedImageIsNotLatest,
+  k8sVersionExpirationForShoot,
+  expiringWorkerGroupsForShoot
 }

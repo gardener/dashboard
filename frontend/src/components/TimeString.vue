@@ -15,9 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <span>
-    {{timeString}}
-  </span>
+  <span>{{timeString}}</span>
 </template>
 
 <script>

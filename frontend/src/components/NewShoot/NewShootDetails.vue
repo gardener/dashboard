@@ -49,8 +49,8 @@ limitations under the License.
             <template v-slot:item="{ item }">
               <v-list-item-content>
                 <v-list-item-title>{{item.version}}</v-list-item-title>
-                <v-list-item-subtitle v-if="item.expirationDateString">
-                  <span>Expires: {{item.expirationDateString}}</span>
+                <v-list-item-subtitle v-if="versionItemDescription(item).length">
+                  {{versionItemDescription(item)}}
                 </v-list-item-subtitle>
               </v-list-item-content>
             </template>
@@ -80,13 +80,13 @@ limitations under the License.
 import HintColorizer from '@/components/HintColorizer'
 import Purpose from '@/components/Purpose'
 import { mapGetters, mapState } from 'vuex'
-import { getValidationErrors, compileMarkdown, setDelayedInputFocus } from '@/utils'
+import { getValidationErrors, compileMarkdown, setDelayedInputFocus, k8sVersionIsNotLatestPatch } from '@/utils'
 import { required, maxLength } from 'vuelidate/lib/validators'
 import { resourceName, noStartEndHyphen, noConsecutiveHyphen } from '@/utils/validators'
-import head from 'lodash/head'
 import get from 'lodash/get'
 import find from 'lodash/find'
-import semver from 'semver'
+import join from 'lodash/join'
+import filter from 'lodash/filter'
 
 const validationErrors = {
   name: {
@@ -137,22 +137,34 @@ export default {
     ]),
     ...mapGetters([
       'sortedKubernetesVersions',
+      'defaultKubernetesVersionForCloudProfileName',
       'shootByNamespaceAndName',
       'projectList'
     ]),
     sortedKubernetesVersionsList () {
-      return this.sortedKubernetesVersions(this.cloudProfileName)
+      return filter(this.sortedKubernetesVersions(this.cloudProfileName), ({ isExpired }) => {
+        return !isExpired
+      })
     },
     versionHint () {
-      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
-        return 'If you select a version which is not the latest patch version, you may want to disable automatic Kubernetes updates'
+      const version = find(this.sortedKubernetesVersionsList, { version: this.kubernetesVersion })
+      if (!version) {
+        return undefined
       }
-      return undefined
+      const hintText = []
+      if (version.expirationDate) {
+        hintText.push(`Kubernetes version expires on: ${version.expirationDateString}. Kubernetes update will be enforced after that date.`)
+      }
+      if (this.updateK8sMaintenance && this.versionIsNotLatestPatch) {
+        hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
+      }
+      if (version.isPreview) {
+        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
+      }
+      return join(hintText, ' / ')
     },
     versionIsNotLatestPatch () {
-      return !!find(this.sortedKubernetesVersionsList, ({ version }) => {
-        return semver.diff(version, this.kubernetesVersion) === 'patch' && semver.gt(version, this.kubernetesVersion)
-      })
+      return k8sVersionIsNotLatestPatch(this.kubernetesVersion, this.cloudProfileName)
     },
     sla () {
       return this.cfg.sla || {}
@@ -217,7 +229,7 @@ export default {
       }
     },
     setDefaultKubernetesVersion () {
-      this.kubernetesVersion = get(head(this.sortedKubernetesVersionsList), 'version')
+      this.kubernetesVersion = get(this.defaultKubernetesVersionForCloudProfileName(this.cloudProfileName), 'version')
       this.onInputKubernetesVersion()
     },
     getDetailsData () {
@@ -237,6 +249,16 @@ export default {
       this.$refs.purpose.setPurpose(purpose)
 
       this.validateInput()
+    },
+    versionItemDescription (version) {
+      const itemDescription = []
+      if (version.classification) {
+        itemDescription.push(`Classification: ${version.classification}`)
+      }
+      if (version.expirationDate) {
+        itemDescription.push(`Expiration Date: ${version.expirationDateString}`)
+      }
+      return join(itemDescription, ' | ')
     }
   },
   mounted () {

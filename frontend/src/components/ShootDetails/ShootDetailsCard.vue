@@ -71,8 +71,11 @@ limitations under the License.
             {{shootK8sVersion}}
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
-          <shoot-version :shoot-item="shootItem" :chip-style="false"></shoot-version>
+        <v-list-item-action class="mx-0">
+          <version-expiration-warning :shootItem="shootItem" onlyK8sWarnings></version-expiration-warning>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <shoot-version :shoot-item="shootItem"></shoot-version>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
@@ -88,11 +91,15 @@ limitations under the License.
             v-for="workerGroup in shootWorkerGroups"
             :workerGroup="workerGroup"
             :cloudProfileName="shootCloudProfileName"
+            :shootItem="shootItem"
             :key="workerGroup.name"
             ></worker-group>
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
+        <v-list-item-action class="mx-0">
+          <version-expiration-warning :shootItem="shootItem" onlyMachineImageWarnings></version-expiration-warning>
+        </v-list-item-action>
+        <v-list-item-action class="mx-0">
           <worker-configuration :shootItem="shootItem"></worker-configuration>
         </v-list-item-action>
       </v-list-item>
@@ -213,6 +220,7 @@ import WorkerConfiguration from '@/components/ShootWorkers/WorkerConfiguration'
 import AccessRestrictionsConfiguration from '@/components/ShootAccessRestrictions/AccessRestrictionsConfiguration'
 import PurposeConfiguration from '@/components/PurposeConfiguration'
 import ShootVersion from '@/components/ShootVersion/ShootVersion'
+import VersionExpirationWarning from '@/components/VersionExpirationWarning'
 import AddonConfiguration from '@/components/ShootAddons/AddonConfiguration'
 import CopyBtn from '@/components/CopyBtn'
 import filter from 'lodash/filter'
@@ -238,6 +246,7 @@ export default {
     PurposeConfiguration,
     AddonConfiguration,
     ShootVersion,
+    VersionExpirationWarning,
     CopyBtn
   },
   props: {

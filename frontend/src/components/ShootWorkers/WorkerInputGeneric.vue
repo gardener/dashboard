@@ -125,6 +125,7 @@ import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import isEmpty from 'lodash/isEmpty'
+import filter from 'lodash/filter'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -251,7 +252,9 @@ export default {
       return !isEmpty(this.volumeTypes)
     },
     machineImages () {
-      return this.machineImagesByCloudProfileName(this.cloudProfileName)
+      return filter(this.machineImagesByCloudProfileName(this.cloudProfileName), ({ isExpired }) => {
+        return !isExpired
+      })
     },
     minimumVolumeSize () {
       const minimumVolumeSize = this.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })

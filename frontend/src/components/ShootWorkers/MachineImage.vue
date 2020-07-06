@@ -1,5 +1,5 @@
 <template>
-  <hint-colorizer :hintColor="hintColor">
+  <hint-colorizer hintColor="orange">
     <v-select
       color="cyan darken-2"
       item-color="cyan darken-2"
@@ -20,7 +20,7 @@
         </v-list-item-action>
         <v-list-item-content>
           <v-list-item-title>Name: {{item.name}} | Version: {{item.version}}</v-list-item-title>
-          <v-list-item-subtitle v-if="itemDescription(item).length > 0">
+          <v-list-item-subtitle v-if="itemDescription(item).length">
             {{itemDescription(item)}}
           </v-list-item-subtitle>
         </v-list-item-content>
@@ -39,13 +39,12 @@
 import VendorIcon from '@/components/VendorIcon'
 import HintColorizer from '@/components/HintColorizer'
 import { required } from 'vuelidate/lib/validators'
-import { getValidationErrors } from '@/utils'
+import { getValidationErrors, selectedImageIsNotLatest } from '@/utils'
 import includes from 'lodash/includes'
 import map from 'lodash/map'
 import pick from 'lodash/pick'
 import find from 'lodash/find'
 import join from 'lodash/join'
-import semver from 'semver'
 
 const validationErrors = {
   worker: {
@@ -110,22 +109,15 @@ export default {
         hintText.push(`Image version expires on: ${this.machineImage.expirationDateString}. Image update will be enforced after that date.`)
       }
       if (this.updateOSMaintenance && this.selectedImageIsNotLatest) {
-        hintText.push('If you select a version which is not the latest, you should disable automatic operating system updates')
+        hintText.push('If you select a version which is not the latest (except for preview versions), you should disable automatic operating system updates')
+      }
+      if (this.machineImage.isPreview) {
+        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
       }
       return join(hintText, ' / ')
     },
-    hintColor () {
-      if (this.machineImage.needsLicense || (this.updateOSMaintenance && this.selectedImageIsNotLatest)) {
-        return 'orange'
-      }
-      return 'default'
-    },
     selectedImageIsNotLatest () {
-      const { version: currentImageVersion, vendorName: currentVendor } = this.machineImage
-
-      return !!find(this.machineImages, ({ version, vendorName }) => {
-        return currentVendor === vendorName && semver.gt(version, currentImageVersion)
-      })
+      return selectedImageIsNotLatest(this.machineImage, this.machineImages)
     }
   },
   validations,
@@ -146,6 +138,9 @@ export default {
     },
     itemDescription (machineImage) {
       const itemDescription = []
+      if (machineImage.classification) {
+        itemDescription.push(`Classification: ${machineImage.classification}`)
+      }
       if (machineImage.needsLicense) {
         itemDescription.push('Enterprise support license required')
       }

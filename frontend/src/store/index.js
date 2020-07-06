@@ -170,7 +170,7 @@ const isValidRegion = (getters, cloudProfileName, cloudProviderKind) => {
     // Filter regions that are not defined in cloud profile
     const cloudProfile = getters.cloudProfileByName(cloudProfileName)
     if (cloudProfile) {
-      return !!find(cloudProfile.data.regions, ['name', region])
+      return some(cloudProfile.data.regions, ['name', region])
     }
 
     return true
@@ -266,6 +266,25 @@ function mapAccessRestrictionForDisplay ({ definition, accessRestriction: { valu
   }
 }
 
+// Return first item with classification supported, if no item has classification supported
+// return first item with classifiction undefined, if no item matches these requirements,
+// return first item in list
+function firstItemMatchingVersionClassification (items) {
+  let defaultItem = find(items, { classification: 'supported' })
+  if (defaultItem) {
+    return defaultItem
+  }
+
+  defaultItem = find(items, machineImage => {
+    return machineImage.classification === undefined
+  })
+  if (defaultItem) {
+    return defaultItem
+  }
+
+  return head(items)
+}
+
 // getters
 const getters = {
   apiServerUrl (state) {
@@ -351,9 +370,6 @@ const getters = {
 
       const mapMachineImages = (machineImage) => {
         const versions = filter(machineImage.versions, ({ version, expirationDate }) => {
-          if (expirationDate && moment().isAfter(expirationDate)) {
-            return false
-          }
           if (!semver.valid(version)) {
             console.error(`Skipped machine image ${machineImage.name} as version ${version} is not a valid semver version`)
             return false
@@ -364,13 +380,19 @@ const getters = {
           return semver.rcompare(a.version, b.version)
         })
 
-        return map(versions, ({ version, expirationDate }) => {
+        return map(versions, ({ version, expirationDate, classification }) => {
           const vendorName = vendorNameFromImageName(machineImage.name)
           const name = machineImage.name
+
           return {
             key: name + '/' + version,
             name,
             version,
+            classification,
+            isPreview: classification === 'preview',
+            isSupported: classification === 'supported',
+            isDeprecated: classification === 'deprecated',
+            isExpired: expirationDate && moment().isAfter(expirationDate),
             expirationDate,
             expirationDateString: getDateFormatted(expirationDate),
             vendorName,
@@ -455,7 +477,7 @@ const getters = {
   defaultMachineImageForCloudProfileName (state, getters) {
     return (cloudProfileName) => {
       const machineImages = getters.machineImagesByCloudProfileName(cloudProfileName)
-      const defaultMachineImage = head(machineImages)
+      const defaultMachineImage = firstItemMatchingVersionClassification(machineImages)
       return pick(defaultMachineImage, 'name', 'version')
     }
   },
@@ -688,14 +710,16 @@ const getters = {
           console.error(`Skipped Kubernetes version ${version} as it is not a valid semver version`)
           return false
         }
-        if (expirationDate && moment().isAfter(expirationDate)) {
-          return false
-        }
         return true
       })
       return map(validVersions, version => {
+        const classification = version.classification
         return {
           ...version,
+          isPreview: classification === 'preview',
+          isSupported: classification === 'supported',
+          isDeprecated: classification === 'deprecated',
+          isExpired: version.expirationDate && moment().isAfter(version.expirationDate),
           expirationDateString: getDateFormatted(version.expirationDate)
         }
       })
@@ -708,6 +732,12 @@ const getters = {
         return semver.rcompare(a.version, b.version)
       })
       return kubernetsVersions
+    }
+  },
+  defaultKubernetesVersionForCloudProfileName (state, getters) {
+    return (cloudProfileName) => {
+      const k8sVersions = getters.sortedKubernetesVersions(cloudProfileName)
+      return firstItemMatchingVersionClassification(k8sVersions)
     }
   },
   isAdmin (state) {
@@ -1266,5 +1296,6 @@ export {
   mutations,
   modules,
   plugins,
-  mapAccessRestrictionForInput
+  mapAccessRestrictionForInput,
+  firstItemMatchingVersionClassification
 }

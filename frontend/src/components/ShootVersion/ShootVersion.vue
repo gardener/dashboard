@@ -20,7 +20,7 @@ limitations under the License.
       <template v-slot:activator="{ on: tooltip }">
         <div v-on="tooltip">
           <v-btn
-            v-if="chipStyle"
+            v-if="chip"
             class="update_btn"
             :class="buttonInactive"
             small
@@ -63,7 +63,7 @@ limitations under the License.
       <template v-slot:message>
         <shoot-version-update
           :availableK8sUpdates="availableK8sUpdates"
-          :currentk8sVersion="shootK8sVersion"
+          :currentK8sVersion="kubernetesVersion"
           @selectedVersion="onSelectedVersion"
           @selectedVersionType="onSelectedVersionType"
           @selectedVersionInvalid="onSelectedVersionInvalid"
@@ -103,10 +103,11 @@ import ShootVersionUpdate from '@/components/ShootVersion/ShootVersionUpdate'
 import GDialog from '@/components/dialogs/GDialog'
 import { updateShootVersion } from '@/utils/api'
 import { availableK8sUpdatesForShoot } from '@/utils'
-import get from 'lodash/get'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { mapGetters } from 'vuex'
+import get from 'lodash/get'
+import find from 'lodash/find'
 
 export default {
   components: {
@@ -117,9 +118,8 @@ export default {
     shootItem: {
       type: Object
     },
-    chipStyle: {
-      type: Boolean,
-      default: true
+    chip: {
+      type: Boolean
     }
   },
   data () {
@@ -135,8 +135,16 @@ export default {
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'canPatchShoots'
+      'canPatchShoots',
+      'kubernetesVersions'
     ]),
+    kubernetesVersion () {
+      const version = find(this.kubernetesVersions(this.shootCloudProfileName), { version: this.shootK8sVersion })
+      if (!version) {
+        return {}
+      }
+      return version
+    },
     k8sPatchAvailable () {
       if (get(this.availableK8sUpdates, 'patch')) {
         return true
@@ -153,7 +161,7 @@ export default {
       return this.confirmRequired ? this.shootName : undefined
     },
     availableK8sUpdates () {
-      return availableK8sUpdatesForShoot(this.shootSpec)
+      return availableK8sUpdatesForShoot(this.shootK8sVersion, this.shootCloudProfileName)
     },
     tooltipText () {
       if (this.k8sPatchAvailable) {
