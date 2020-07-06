@@ -47,7 +47,7 @@ limitations under the License.
 
       <li v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
         <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
-        <span v-if="isValidTerminationDate">expires<span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>. </span>
+        <span v-if="isValidTerminationDate">expires <span class="font-weight-bold"><time-string :date-time="expirationDate"></time-string></span>. </span>
         <span v-else>is expired. </span>
         <span v-if="isInfo">Version will be updated in the next maintenance window</span>
         <template v-if="isWarning">
