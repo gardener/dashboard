@@ -23,7 +23,7 @@ limitations under the License.
     :icon="icon"
     :confirmButtonText="confirmText"
     :confirmRequired="confirmRequired"
-    :disabled="!isHibernationPossible"
+    :disabled="!isHibernationPossible && !isShootSettingHibernated"
     maxWidth="600">
     <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
@@ -78,7 +78,7 @@ export default {
       }
     },
     caption () {
-      if (!this.isHibernationPossible) {
+      if (!this.isHibernationPossible && !this.isShootSettingHibernated) {
         return this.hibernationPossibleMessage
       }
       if (!this.isShootSettingHibernated) {
