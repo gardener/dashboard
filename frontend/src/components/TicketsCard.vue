@@ -43,17 +43,14 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
-import join from 'lodash/join'
 import map from 'lodash/map'
-import compact from 'lodash/compact'
+import template from 'lodash/template'
+import uniq from 'lodash/uniq'
 import { mapState } from 'vuex'
 import Ticket from '@/components/ShootTickets/Ticket'
 import { canLinkToSeed } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
-
-function code (value) {
-  return '` ' + value + ' `'
-}
+import moment from 'moment-timezone'
 
 export default {
   components: {
@@ -73,41 +70,40 @@ export default {
     ...mapState([
       'cfg'
     ]),
-    errorConditions () {
-      const errorConditions = map(this.shootConditions, ({ type, message }) => `**${type}:** ${code(message)}`)
-      return join(errorConditions, '\n')
-    },
     gitHubRepoUrl () {
       return get(this.cfg, 'ticket.gitHubRepoUrl')
+    },
+    issueDescription () {
+      const descriptionTemplate = get(this.cfg, 'ticket.issueDescriptionTemplate')
+      const compiled = template(descriptionTemplate)
+      return compiled({
+        shootName: this.shootName,
+        shootNamespace: this.shootNamespace,
+        shootCreatedAt: this.shootCreatedAt,
+        shootUrl: this.shootUrl,
+        providerType: this.shootCloudProviderKind,
+        region: this.shootRegion,
+        machineImageNames: this.shootMachineImageNames,
+        projectName: this.shootProjectName,
+        utcDateTimeNow: moment().utc().format(),
+        seedName: this.shootSeedName
+      })
     },
     canLinkToSeed () {
       return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
+    shootUrl () {
+      return `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
+    },
+    shootMachineImageNames () {
+      const workers = get(this.shootItem, 'spec.provider.workers')
+      let imageNames = map(workers, worker => get(worker, 'machine.image.name'))
+      imageNames = uniq(imageNames)
+      return imageNames.join(', ')
+    },
     createTicketLink () {
-      const url = `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
-
-      const dashboardShootLink = `**Shoot:** [${this.shootNamespace}/${this.shootName}](${url})`
-      const kind = `**Kind:** ${this.shootCloudProviderKind} / ${this.shootRegion}`
-
-      const seedLinkOrName = this.canLinkToSeed ? `[${this.shootSeedName}](${window.location.origin}/namespace/garden/shoots/${this.shootSeedName})` : this.shootSeedName
-      const seed = `**Seed:** ${seedLinkOrName}`
-
-      const createdAt = `**Created At:** ${this.shootCreatedAt}`
-      const lastOperation = `**Last Operation:** ${code(get(this.shootLastOperation, 'description', ''))}`
-      let shootLastErrorDescriptions = compact(map(this.shootLastErrors, 'description'))
-      shootLastErrorDescriptions = map(shootLastErrorDescriptions, code)
-      shootLastErrorDescriptions = join(shootLastErrorDescriptions, '\n')
-      const lastError = `**Last Errors:** ${shootLastErrorDescriptions || '-'}`
-
       const ticketTitle = encodeURIComponent(`[${this.shootNamespace}/${this.shootName}]`)
-      const body = encodeURIComponent(`
-${dashboardShootLink}
-${kind}
-${seed}
-${createdAt}
-${lastOperation}
-${lastError}
-${this.errorConditions}`)
+      const body = encodeURIComponent(this.issueDescription)
 
       return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}`
     }

@@ -118,12 +118,21 @@ limitations under the License.
                 @click.stop="toggleFilter('hideTicketsWithLabel')"
                 :disabled="filtersDisabled"
                 :class="disabledFilterClass"
-                v-if="!!gitHubRepoUrl">
+                v-if="!!gitHubRepoUrl && hideClustersWithLabels.length">
                 <v-list-item-action>
                   <v-icon :color="checkboxColor(isFilterActive('hideTicketsWithLabel'))" v-text="checkboxIcon(isFilterActive('hideTicketsWithLabel'))"/>
                 </v-list-item-action>
                 <v-list-item-content class="grey--text text--darken-2">
-                  <v-list-item-title>Hide clusters with <code class="code">{{hideClustersWithLabel}}</code> ticket label</v-list-item-title>
+                  <v-list-item-title>
+                    Hide clusters with
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <span v-on="on"><tt>configured</tt><v-icon small>mdi-help-circle-outline</v-icon></span>
+                      </template>
+                      <div v-for="label in hideClustersWithLabels" :key="label">- {{label}}</div>
+                    </v-tooltip>
+                    ticket labels
+                  </v-list-item-title>
                 </v-list-item-content>
               </v-list-item>
             </template>
@@ -405,7 +414,7 @@ export default {
           subtitle.push('Deactivated Reconciliation')
         }
         if (this.isFilterActive('hideTicketsWithLabel')) {
-          subtitle.push('Has Tickets')
+          subtitle.push('Tickets with Ignore Labels')
         }
       }
       return join(subtitle, ', ')
@@ -413,8 +422,8 @@ export default {
     gitHubRepoUrl () {
       return get(this.cfg, 'ticket.gitHubRepoUrl')
     },
-    hideClustersWithLabel () {
-      return get(this.cfg, 'ticket.hideClustersWithLabel')
+    hideClustersWithLabels () {
+      return get(this.cfg, 'ticket.hideClustersWithLabels', [])
     }
   },
   mounted () {
@@ -425,7 +434,7 @@ export default {
       progressing: true,
       userIssues: this.isAdmin,
       deactivatedReconciliation: this.isAdmin,
-      hideTicketsWithLabel: false
+      hideTicketsWithLabel: this.isAdmin
     })
   },
   beforeRouteEnter (to, from, next) {
@@ -485,10 +494,6 @@ export default {
 
   .v-input__slot {
     margin: 0px;
-  }
-
-  code {
-    box-shadow: none !important;
   }
 
 </style>
