@@ -31,7 +31,7 @@ limitations under the License.
           <v-toolbar-title class="subtitle-1">{{title}}</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-btn small icon @click.native.stop="closePopover">
-            <v-icon class="subtitle-1">mdi-close</v-icon>
+            <v-icon color="white" class="subtitle-1">mdi-close</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
