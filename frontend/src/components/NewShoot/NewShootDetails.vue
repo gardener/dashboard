@@ -159,7 +159,7 @@ export default {
         hintText.push('If you select a version which is not the latest patch version (except for preview versions), you should disable automatic Kubernetes updates')
       }
       if (version.isPreview) {
-        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not yet recommended for production usage')
+        hintText.push('Preview versions have not yet undergone thorough testing. There is a higher probability of undiscovered issues and are therefore not recommended for production usage')
       }
       return join(hintText, ' / ')
     },
