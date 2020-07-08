@@ -274,11 +274,11 @@ function setupTicketsNamespace (ticketsNsp) {
       const kind = 'comments'
 
       try {
-        const room = `comments_${namespace}/${name}`
+        const projectName = cache.findProjectByNamespace(namespace).metadata.name
+        const room = `comments_${projectName}/${name}`
         joinRoom(socket, room)
 
         const batchEmitter = new EventsEmitter({ kind, socket })
-        const projectName = cache.findProjectByNamespace(namespace).metadata.name
         const numbers = ticketCache.getIssueNumbersForNameAndProjectName({ name, projectName })
         for (const number of numbers) {
           try {

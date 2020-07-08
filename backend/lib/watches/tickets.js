@@ -37,8 +37,8 @@ module.exports = (io, retryOptions = {}) => {
     })
   })
   ticketCache.onComment(event => {
-    const { namespace, name } = event.object.metadata
-    const room = `comments_${namespace}/${name}`
+    const { projectName, name } = event.object.metadata
+    const room = `comments_${projectName}/${name}`
     nsp.to(room).emit('events', {
       kind: 'comments',
       events: [event]
