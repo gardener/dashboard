@@ -351,7 +351,7 @@ describe('watches', function () {
     const commentEvent = {
       object: {
         metadata: {
-          namespace: 'foo',
+          projectName: 'foo',
           name: 'bar'
         }
       }
