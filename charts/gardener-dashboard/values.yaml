@@ -75,38 +75,38 @@ frontendConfig:
   - title: Issues
     icon: bug_report
     url: https://github.com/gardener/gardener/issues
-  ticket:
-    gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
-    hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
-    - ignore
-    # issueDescriptionTemplate variables:
-    # - `${shootName}`: name of the shoot
-    # - `${shootNamespace}`: namespace of the shoot
-    # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
-    # - `${shootUrl}`: dashboard url of the shoot
-    # - `${providerType}`: shoot provider type
-    # - `${region}`: region of the shoot
-    # - `${machineImageNames}`: comma separated list of (unique) machine image names from the shoot workers
-    # - `${projectName}`: name of the project
-    # - `${utcDateTimeNow}`: current date-time in utc format
-    # - `${seedName}`: shoot's seed name
-    issueDescriptionTemplate: |
-      ## Which cluster is affected?
+  # ticket:
+  #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
+  #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
+  #   - ignore
+  #   # issueDescriptionTemplate variables:
+  #   # - `${shootName}`: name of the shoot
+  #   # - `${shootNamespace}`: namespace of the shoot
+  #   # - `${shootCreatedAt}`: creation timestamp of the shoot, format 'YYYY-MM-DD'
+  #   # - `${shootUrl}`: dashboard url of the shoot
+  #   # - `${providerType}`: shoot provider type
+  #   # - `${region}`: region of the shoot
+  #   # - `${machineImageNames}`: comma separated list of (unique) machine image names from the shoot workers
+  #   # - `${projectName}`: name of the project
+  #   # - `${utcDateTimeNow}`: current date-time in utc format
+  #   # - `${seedName}`: shoot's seed name
+  #   issueDescriptionTemplate: |
+  #     ## Which cluster is affected?
 
-      `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
-      `Operating System`: ${machineImageNames}
-      `Platform`: ${providerType}
+  #     `Cluster Details Dashboard Link`: [${projectName}/${shootName}](${shootUrl})
+  #     `Operating System`: ${machineImageNames}
+  #     `Platform`: ${providerType}
 
-      ## What happened?
+  #     ## What happened?
 
-      ## What you expected to happen?
+  #     ## What you expected to happen?
 
-      ## When did it happen or started to happen?
-      `Timestamp`: ${utcDateTimeNow}
+  #     ## When did it happen or started to happen?
+  #     `Timestamp`: ${utcDateTimeNow}
 
-      ## How would we reproduce it?
+  #     ## How would we reproduce it?
 
-      ## Anything else we need to know?
+  #     ## Anything else we need to know?
   defaultHibernationSchedule:
     evaluation:
     - start: 00 17 * * 1,2,3,4,5
@@ -177,15 +177,16 @@ frontendConfig:
   #           If you can't comply, only third-level/dev support at usual 8x5 working hours in EEA will be available to you for all node-related components such as Docker and Kubelet, the operating system, and everything else that would require direct inspection of your nodes through a privileged pod or SSH
   #         inverted: true
 
-gitHub:
-  apiUrl: https://api.foo-github.com
-  org: dummyorg
-  repository: dummyrepo
-  webhookSecret: foobar # optional if pollIntervalSeconds is defined
-  authentication:
-    username: dashboard
-    token: dummytoken
-  # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
+# # github configuration of the ticket feature
+# gitHub:
+#   apiUrl: https://api.foo-github.com
+#   org: dummyorg
+#   repository: dummyrepo
+#   webhookSecret: foobar # optional if pollIntervalSeconds is defined
+#   authentication:
+#     username: dashboard
+#     token: dummytoken
+#   # pollIntervalSeconds: 30 # only necessary when dashboard's webhook can't be reached by github and thus polling needs to be done
 
 livenessProbe:
   enabled: true
