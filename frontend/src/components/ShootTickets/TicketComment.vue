@@ -96,27 +96,33 @@ export default {
     word-break: break-word;
 
     ::v-deep > h1 {
-      font-size: 28px;
+      font-size: 21px;
+      font-weight: 600;
     }
 
     ::v-deep > h2 {
-      font-size: 21px;
+      font-size: 17.5px;
+      font-weight: 600;
     }
 
     ::v-deep > h3 {
-      font-size: 17,5px;
+      font-size: 14px;
+      font-weight: 600;
     }
 
     ::v-deep > h4 {
-      font-size: 14px;
+      font-size: 12.25px;
+      font-weight: 600;
     }
 
     ::v-deep > h5 {
-      font-size: 12.25px;
+      font-size: 11.9px;
+      font-weight: 600;
     }
 
     ::v-deep > h6 {
-      font-size: 11.9px;
+      font-size: 11.5px;
+      font-weight: 600;
     }
   }
 
