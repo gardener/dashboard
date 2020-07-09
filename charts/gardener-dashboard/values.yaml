@@ -79,6 +79,8 @@ frontendConfig:
   #   gitHubRepoUrl: https://foo-github.com/dummyorg/dummyrepo
   #   hideClustersWithLabels: # hides clusters with labels on the 'ALL PROJECTS' page if the respective table option is enabled
   #   - ignore
+  #   newTicketLabels: # these are the labels that are automatically preselected when creating a new ticket
+  #   - default-label
   #   # issueDescriptionTemplate variables:
   #   # - `${shootName}`: name of the shoot
   #   # - `${shootNamespace}`: namespace of the shoot

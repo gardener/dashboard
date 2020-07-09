@@ -157,6 +157,12 @@ data:
           - {{ . }}
           {{- end }}
         {{- end }}
+        {{- if .Values.frontendConfig.ticket.newTicketLabels }}
+        newTicketLabels:
+          {{- range .Values.frontendConfig.ticket.newTicketLabels }}
+          - {{ . }}
+          {{- end }}
+        {{- end }}
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
         issueDescriptionTemplate: |-
 {{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
