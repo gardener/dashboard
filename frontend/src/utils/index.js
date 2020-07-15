@@ -761,7 +761,7 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   }
 }
 
-export function expiringWorkerGroupsForShoot (shootItem, shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
+export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
   const allMachineImages = store.getters.machineImagesByCloudProfileName(shootCloudProfileName)
   const workerGroups = map(shootWorkerGroups, worker => {
     const workerImage = get(worker, 'machine.image')
@@ -775,6 +775,7 @@ export function expiringWorkerGroupsForShoot (shootItem, shootWorkerGroups, shoo
         isValidTerminationDate: false
       }
     }
+
     const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
 
     const isError = !updateAvailable

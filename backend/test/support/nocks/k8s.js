@@ -672,14 +672,11 @@ const stub = {
       })
       .reply(200, () => shoot)
   },
-  replaceWorkers ({ bearer, namespace, name, project, workers }) {
+  replaceWorkers ({ bearer, namespace, name, project }) {
     const shoot = getShoot({ name, project })
     return nockWithAuthorization(bearer)
       .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
-        const payload = _.head(body)
-        if (payload.op === 'replace' && payload.path === '/spec/provider/workers') {
-          shoot.spec.provider.workers = workers
-        }
+        shoot.spec.provider = body.spec.provider
         return true
       })
       .reply(200, () => shoot)

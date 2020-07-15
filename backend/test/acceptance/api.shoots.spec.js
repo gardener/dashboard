@@ -257,16 +257,24 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const worker = {
       name: 'worker-g5rk1'
     }
-    const workers = [worker]
-    k8s.stub.replaceWorkers({ bearer, namespace, name, project, workers })
+    const zonesNetworkConfiguration = {
+      workers: '10.250.0.0/20'
+     }
+    const data = {
+      workers: [worker],
+      network: {
+        zones: [zonesNetworkConfiguration]
+      }
+    }
+    k8s.stub.replaceWorkers({ bearer, namespace, name, project })
     const res = await agent
-      .put(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`)
+      .patch(`/api/namespaces/${namespace}/shoots/${name}/spec/provider`)
       .set('cookie', await user.cookie)
-      .send(workers)
+      .send(data)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.spec.provider.workers).to.eql(workers)
+    expect(res.body.spec.provider).to.eql(data)
   })
 
   it('should replace hibernation enabled', async function () {
