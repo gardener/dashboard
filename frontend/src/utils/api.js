@@ -136,10 +136,20 @@ export function updateShootHibernation ({ namespace, name, data }) {
   return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/hibernation/enabled`, data)
 }
 
-export function updateShootWorkers ({ namespace, name, data }) {
+export function updateShootWorkers ({ namespace, name, workers, zonesNetworkConfiguration }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  return updateResource(`/api/namespaces/${namespace}/shoots/${name}/spec/provider/workers`, data)
+  const data = {
+    workers
+  }
+  if (zonesNetworkConfiguration) {
+    data.infrastructureConfig = {
+      networks: {
+        zones: zonesNetworkConfiguration
+      }
+    }
+  }
+  return patchResource(`/api/namespaces/${namespace}/shoots/${name}/spec/provider`, data)
 }
 
 export function updateShootAddons ({ namespace, name, data }) {

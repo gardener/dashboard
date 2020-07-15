@@ -626,7 +626,8 @@ export function generateWorker (availableZones, cloudProfileName, region) {
       type: machineType,
       image: machineImage
     },
-    zones
+    zones,
+    isNewWorker: true
   }
   if (volumeType) {
     worker.volume = {
@@ -728,7 +729,15 @@ export function selectedImageIsNotLatest (machineImage, machineImages) {
 export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
   const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
   const version = find(allVersions, { version: shootK8sVersion })
-  if (!version || !version.expirationDate) {
+  if (!version) {
+    return {
+      version: shootK8sVersion,
+      expirationDate: 'Unknown',
+      isWarning: true,
+      isValidTerminationDate: false
+    }
+  }
+  if (!version.expirationDate) {
     return undefined
   }
 
@@ -752,11 +761,20 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   }
 }
 
-export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
+export function expiringWorkerGroupsForShoot (shootItem, shootWorkerGroups, shootCloudProfileName, imageAutoPatch) {
   const allMachineImages = store.getters.machineImagesByCloudProfileName(shootCloudProfileName)
   const workerGroups = map(shootWorkerGroups, worker => {
     const workerImage = get(worker, 'machine.image')
     const workerImageDetails = find(allMachineImages, workerImage)
+    if (!workerImageDetails) {
+      return {
+        ...workerImage,
+        expirationDate: 'Unknown',
+        isWarning: true,
+        workerName: worker.name,
+        isValidTerminationDate: false
+      }
+    }
     const updateAvailable = selectedImageIsNotLatest(workerImageDetails, allMachineImages)
 
     const isError = !updateAvailable

@@ -105,7 +105,7 @@ export default {
         return []
       }
       const imageAutoPatch = get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
-      return expiringWorkerGroupsForShoot(this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
+      return expiringWorkerGroupsForShoot(this.shootItem, this.shootWorkerGroups, this.shootCloudProfileName, imageAutoPatch)
     },
     isOverallStatusWarning () {
       const isError = some([this.k8sExpiration, ...this.expiredWorkerGroups], { isError: true })

@@ -26,9 +26,11 @@ limitations under the License.
         :availableZones="availableZones"
         :zonedCluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
+        :isNewWorker="isNewCluster || worker.isNewWorker"
+        :maxAdditionalZones="maxAdditionalZones"
         @valid="onWorkerValid">
         <template v-slot:action>
-          <v-btn v-show="index>0 || internalWorkers.length>1"
+          <v-btn v-show="index > 0 || internalWorkers.length > 1"
             small
             outlined
             icon
@@ -68,12 +70,14 @@ limitations under the License.
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
 import { generateWorker, isZonedCluster } from '@/utils'
+import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
 import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
+import sortBy from 'lodash/sortBy'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -95,7 +99,8 @@ export default {
       zonesNetworkConfiguration: undefined,
       zonedCluster: undefined,
       updateOSMaintenance: undefined,
-      isNewCluster: false
+      isNewCluster: false,
+      existingWorkerCIDR: undefined
     }
   },
   computed: {
@@ -110,15 +115,36 @@ export default {
     allZones () {
       return this.zonesByCloudProfileNameAndRegion({ cloudProfileName: this.cloudProfileName, region: this.region })
     },
+    currentZonesWithNetworkConfigInShoot () {
+      return map(this.currentZonesNetworkConfiguration, 'name')
+    },
+    currentFreeNetworks () {
+      return findFreeNetworks(this.currentZonesNetworkConfiguration, this.existingWorkerCIDR, this.cloudProviderKind, this.allZones.length)
+    },
     availableZones () {
       // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
-      // Can be removed when gardener supports to change network config afterwards
-      // --> Allow adding zones post-shoot creation PR: https://github.com/gardener/gardener/pull/1587
-      const zonesWithNetworkConfigInShoot = map(this.zonesNetworkConfiguration, 'name')
-      if (!isEmpty(zonesWithNetworkConfigInShoot)) {
-        return zonesWithNetworkConfigInShoot
+      // or that free networks are available to use more zones
+      if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
+        if (!this.currentFreeNetworks.length) {
+          return sortBy(this.currentZonesWithNetworkConfigInShoot)
+        }
       }
-      return this.allZones
+      return sortBy(this.allZones)
+    },
+    maxAdditionalZones () {
+      if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
+        if (this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length < this.allZones.length) {
+          return this.currentFreeNetworks.length
+        }
+      }
+      return 0 // no limit
+    },
+    cloudProviderKind () {
+      const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
+      return cloudProfile.metadata.cloudProviderKind
+    },
+    currentZonesNetworkConfiguration () {
+      return getZonesNetworkConfiguration(this.zonesNetworkConfiguration, this.internalWorkers, this.cloudProviderKind, this.allZones.length, this.existingWorkerCIDR)
     }
   },
   methods: {
@@ -172,9 +198,12 @@ export default {
     },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
-        return omit(internalWorker, ['id', 'valid'])
+        return omit(internalWorker, ['id', 'valid', 'isNewWorker'])
       })
       return workers
+    },
+    getZonesNetworkConfiguration () {
+      return this.currentZonesNetworkConfiguration
     },
     validateInput () {
       let valid = true
@@ -187,14 +216,15 @@ export default {
       this.valid = valid
       this.$emit('valid', this.valid)
     },
-    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, isNewCluster }) {
+    setWorkersData ({ workers, cloudProfileName, region, zonesNetworkConfiguration, updateOSMaintenance, zonedCluster, existingWorkerCIDR }) {
       this.cloudProfileName = cloudProfileName
       this.region = region
       this.zonesNetworkConfiguration = zonesNetworkConfiguration
       this.updateOSMaintenance = updateOSMaintenance
       this.setInternalWorkers(workers)
       this.zonedCluster = zonedCluster
-      this.isNewCluster = isNewCluster
+      this.isNewCluster = !existingWorkerCIDR
+      this.existingWorkerCIDR = existingWorkerCIDR
     }
   },
   mounted () {
@@ -202,13 +232,11 @@ export default {
       this.userInterActionBus.on('updateCloudProfileName', cloudProfileName => {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
-        const cloudProfile = this.cloudProfileByName(cloudProfileName)
         /*
-         * do not pass shootspec as we have it not available in this component and it is (currently) not required
-         * do dtermine isZoned for new clusters. This event handler is only be called for new clusters, as the
+         * do not pass shootspec as we have it not available in this component and it is (currently) not required to determined isZoned for new clusters. This event handler is only be called for new clusters, as the
          * userInterActionBus is onlyset for the create cluster use case
          */
-        this.zonedCluster = isZonedCluster({ cloudProviderKind: cloudProfile.metadata.cloudProviderKind, isNewCluster: this.isNewCluster })
+        this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
         this.setDefaultWorker()
       })
       this.userInterActionBus.on('updateRegion', region => {

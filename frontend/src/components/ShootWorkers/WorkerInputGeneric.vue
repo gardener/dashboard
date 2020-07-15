@@ -103,12 +103,14 @@ limitations under the License.
           color="cyan darken-2"
           item-color="cyan darken-2"
           label="Zone"
-          :items="availableZones"
+          :items="zoneItems"
           :error-messages="getErrorMessages('worker.zones')"
           v-model="worker.zones"
           @input="onInputZones"
           @blur="$v.worker.zones.$touch()"
           multiple
+          :hint="zoneHint"
+          persistent-hint
           ></v-select>
       </div>
     </div>
@@ -126,6 +128,8 @@ import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
+import map from 'lodash/map'
+import includes from 'lodash/includes'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -189,6 +193,12 @@ export default {
     },
     updateOSMaintenance: {
       type: Boolean
+    },
+    isNewWorker: {
+      type: Boolean
+    },
+    maxAdditionalZones: {
+      type: Number
     }
   },
   data () {
@@ -197,7 +207,8 @@ export default {
       valid: undefined,
       machineTypeValid: undefined,
       volumeTypeValid: true, // selection not shown in all cases, default to true
-      machineImageValid: undefined
+      machineImageValid: undefined,
+      immutableZones: undefined
     }
   },
   validations () {
@@ -293,6 +304,24 @@ export default {
           this.worker.maxSurge = maxSurge
         }
       }
+    },
+    zoneItems () {
+      return map(this.availableZones, zone => {
+        return {
+          text: zone,
+          value: zone,
+          disabled: includes(this.immutableZones, zone)
+        }
+      })
+    },
+    zoneHint () {
+      if (!this.maxAdditionalZones) {
+        return undefined
+      }
+      if (this.maxAdditionalZones === 1) {
+        return 'Your network configuration allows to add one more zone that is not already used by this cluster'
+      }
+      return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
     }
   },
   methods: {
@@ -361,6 +390,7 @@ export default {
   },
   mounted () {
     this.validateInput()
+    this.immutableZones = this.isNewWorker ? [] : this.worker.zones
   }
 }
 </script>
@@ -375,5 +405,9 @@ export default {
     max-width: 120px;
     flex: 1 1 auto;
     padding: 12px;
+  }
+
+  ::v-deep .v-list-item--disabled {
+    opacity:0.5;
   }
 </style>
