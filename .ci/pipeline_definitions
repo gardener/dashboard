@@ -34,7 +34,7 @@ dashboard:
           default_channel: 'internal_scp_workspace'
           channel_cfgs:
             internal_scp_workspace:
-              channel_name: 'k8s-garden-dashboard'
+              channel_name: 'C017DNNNENQ' # garden-dashboard channel
               slack_cfg_name: 'scp_workspace'
         component_descriptor: ~
         publish:
