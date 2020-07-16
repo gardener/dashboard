@@ -23,6 +23,7 @@ limitations under the License.
         :workers="internalWorkers"
         :cloudProfileName="cloudProfileName"
         :region="region"
+        :allZones="allZones"
         :availableZones="availableZones"
         :zonedCluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
@@ -137,7 +138,7 @@ export default {
           return this.currentFreeNetworks.length
         }
       }
-      return 0 // no limit
+      return -1 // no limit
     },
     cloudProviderKind () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)

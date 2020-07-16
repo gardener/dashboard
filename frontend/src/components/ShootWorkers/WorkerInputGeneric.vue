@@ -1,3 +1,4 @@
+
 <!--
 Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
@@ -185,6 +186,9 @@ export default {
     region: {
       type: String
     },
+    allZones: {
+      type: Array
+    },
     availableZones: {
       type: Array
     },
@@ -306,22 +310,24 @@ export default {
       }
     },
     zoneItems () {
-      return map(this.availableZones, zone => {
+      return map(this.allZones, zone => {
         return {
           text: zone,
           value: zone,
-          disabled: includes(this.immutableZones, zone)
+          disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
         }
       })
     },
     zoneHint () {
-      if (!this.maxAdditionalZones) {
-        return undefined
+      if (this.maxAdditionalZones === 0) {
+        return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
       }
       if (this.maxAdditionalZones === 1) {
         return 'Your network configuration allows to add one more zone that is not already used by this cluster'
+      } else if (this.maxAdditionalZones > 1) {
+        return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
       }
-      return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
+      return undefined
     }
   },
   methods: {
