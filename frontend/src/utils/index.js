@@ -653,6 +653,14 @@ export function isZonedCluster ({ cloudProviderKind, shootSpec, isNewCluster }) 
   }
 }
 
+export function cloudProviderSupportsAddingZonesAfterCration (cloudProviderKind) {
+  switch (cloudProviderKind) {
+    case 'alicloud':
+      return false
+  }
+  return true
+}
+
 export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'admin',

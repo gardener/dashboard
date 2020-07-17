@@ -70,7 +70,7 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { generateWorker, isZonedCluster } from '@/utils'
+import { generateWorker, isZonedCluster, cloudProviderSupportsAddingZonesAfterCration } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
@@ -120,9 +120,18 @@ export default {
       return map(this.currentZonesNetworkConfiguration, 'name')
     },
     currentFreeNetworks () {
+      if (this.isNewCluster) {
+        return this.allZones.length
+      }
+      if (!cloudProviderSupportsAddingZonesAfterCration(this.cloudProviderKind)) {
+        return 0
+      }
       return findFreeNetworks(this.currentZonesNetworkConfiguration, this.existingWorkerCIDR, this.cloudProviderKind, this.allZones.length)
     },
     availableZones () {
+      if (this.isNewCluster) {
+        return this.allZones
+      }
       // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
       // or that free networks are available to use more zones
       if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
@@ -133,6 +142,9 @@ export default {
       return sortBy(this.allZones)
     },
     maxAdditionalZones () {
+      if (!cloudProviderSupportsAddingZonesAfterCration(this.cloudProviderKind)) {
+        return -2 // not supported
+      }
       if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
         if (this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length < this.allZones.length) {
           return this.currentFreeNetworks.length
