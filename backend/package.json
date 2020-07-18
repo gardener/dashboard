@@ -41,7 +41,7 @@
     "jose": "^1.24.0",
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.14",
+    "lodash": "^4.17.19",
     "mixwith": "^0.1.1",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
