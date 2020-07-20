@@ -15,16 +15,16 @@ data:
     logLevel: {{ .Values.logLevel }}
     logFormat: text
     apiServerUrl: {{ .Values.apiServerUrl }}
-{{- if .Values.apiServerCaData }}
+    {{- if .Values.apiServerCaData }}
     apiServerCaData: {{ .Values.apiServerCaData }}
-{{- else if .Values.apiServerCa }}
+    {{- else if .Values.apiServerCa }}
     apiServerCaData: {{ b64enc .Values.apiServerCa }}
-{{- else if eq (default false .Values.apiServerSkipTlsVerify) true }}
+    {{- else if eq (default false .Values.apiServerSkipTlsVerify) true }}
     apiServerSkipTlsVerify: true
-{{- end }}
+    {{- end }}
     readinessProbe:
       periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
-{{- if .Values.gitHub }}
+    {{- if .Values.gitHub }}
     gitHub:
       apiUrl: {{ .Values.gitHub.apiUrl }}
       {{- if .Values.gitHub.ca }}
@@ -35,50 +35,56 @@ data:
       {{- if .Values.gitHub.pollIntervalSeconds }}
       pollIntervalSeconds: {{ .Values.gitHub.pollIntervalSeconds }}
       {{- end }}
-{{- end }}
-{{- if .Values.oidc }}
+    {{- end }}
+    {{- if .Values.oidc }}
     oidc:
       issuer: {{ required ".Values.oidc.issuerUrl is required" .Values.oidc.issuerUrl }}
-{{- if .Values.oidc.redirectUri }}
+      {{- if .Values.oidc.redirectUri }}
       redirect_uri: {{ .Values.oidc.redirectUri }}
-{{- else }}
+      {{- else }}
       redirect_uri: https://{{ first .Values.hosts }}/auth/callback
-{{- end }}
-{{- if .Values.oidc.scope }}
+      {{- end }}
+      {{- if .Values.oidc.scope }}
       scope: {{ .Values.oidc.scope }}
-{{- else }}
+      {{- else }}
       scope: "openid email profile groups audience:server:client_id:{{ .Values.oidc.clientId }} audience:server:client_id:kube-kubectl"
-{{- end }}
-{{- if hasKey .Values.oidc "rejectUnauthorized" }}
+      {{- end }}
+      {{- if hasKey .Values.oidc "rejectUnauthorized" }}
       rejectUnauthorized: {{ .Values.oidc.rejectUnauthorized }}
-{{- else }}
+      {{- else }}
       rejectUnauthorized: true
-{{- end }}
-{{- if .Values.oidc.ca }}
+      {{- end }}
+      {{- if .Values.oidc.ca }}
       ca: {{ toJson .Values.oidc.ca }}
-{{- end }}
-{{- if .Values.oidc.clockTolerance }}
+      {{- end }}
+      {{- if .Values.oidc.clockTolerance }}
       clockTolerance: {{ .Values.oidc.clockTolerance }}
-{{- end }}
-{{- if .Values.oidc.public }}
+      {{- end }}
+      {{- if .Values.oidc.public }}
       public:
         clientId: {{ .Values.oidc.public.clientId | default "kube-kubectl" }}
         clientSecret: {{ required ".Values.oidc.public.clientSecret" .Values.oidc.public.clientSecret }}
-{{- end }}
-{{- end }}
+      {{- end }}
+    {{- end }}
     {{- if .Values.terminal }}
     terminal:
-      containerImage: {{ .Values.terminal.containerImage }}
-      containerImageOperator: {{ .Values.terminal.containerImageOperator }}
-      {{- if .Values.terminal.containerImageDescriptions }}
-      containerImageDescriptions:
-      {{- range .Values.terminal.containerImageDescriptions }}
+      container:
+        image: {{ .Values.terminal.container.image }}
+      {{- if .Values.terminal.containerOperator }}
+      {{- if .Values.terminal.containerOperator.image }}
+      containerOperator:
+        image: {{ .Values.terminal.containerOperator.image }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.terminal.imageDescriptions }}
+      imageDescriptions:
+      {{- range .Values.terminal.imageDescriptions }}
       - image: {{ .image }}
         description: {{ .description }}
       {{- end }}
       {{- end }}
       gardenTerminalHost:
-{{- if .Values.terminal.gardenTerminalHost.secretRef }}
+        {{- if .Values.terminal.gardenTerminalHost.secretRef }}
         apiServerIngressHost: {{ .Values.terminal.gardenTerminalHost.apiServerIngressHost }}
         secretRef:
           namespace: {{ .Values.terminal.gardenTerminalHost.secretRef.namespace }}
@@ -86,15 +92,15 @@ data:
           labelSelector:
 {{ toYaml . | trim | indent 12 }}
           {{- end }}
-{{- end }}
-{{- if .Values.terminal.gardenTerminalHost.seedRef }}
+        {{- end }}
+        {{- if .Values.terminal.gardenTerminalHost.seedRef }}
         seedRef: {{ .Values.terminal.gardenTerminalHost.seedRef }}
-{{- end }}
-{{- if .Values.terminal.gardenTerminalHost.shootRef }}
+        {{- end }}
+        {{- if .Values.terminal.gardenTerminalHost.shootRef }}
         shootRef:
           name: {{ .Values.terminal.gardenTerminalHost.shootRef.name }}
           namespace: {{ .Values.terminal.gardenTerminalHost.shootRef.namespace }}
-{{- end }}
+        {{- end }}
       garden:
         operatorCredentials:
 {{ toYaml .Values.terminal.garden.operatorCredentials | trim | indent 10 }}
@@ -129,10 +135,10 @@ data:
       {{- end }}
     {{- end }}
     frontend:
-{{- if .Values.frontendConfig.landingPageUrl }}
+      {{- if .Values.frontendConfig.landingPageUrl }}
       landingPageUrl: {{ .Values.frontendConfig.landingPageUrl }}
-{{- end }}
-{{- if .Values.frontendConfig.helpMenuItems }}
+      {{- end }}
+      {{- if .Values.frontendConfig.helpMenuItems }}
       helpMenuItems:
       {{- range .Values.frontendConfig.helpMenuItems }}
       - title: {{ .title }}{{- if .icon }}
@@ -140,16 +146,16 @@ data:
         url: {{ .url }}{{- if .target }}
         target: {{ .target }}{{- end }}
       {{- end }}
-{{- end }}
-{{- if .Values.frontendConfig.externalTools }}
+      {{- end }}
+      {{- if .Values.frontendConfig.externalTools }}
       externalTools:
       {{- range .Values.frontendConfig.externalTools }}
       - title: {{ .title }}{{- if .icon }}
         icon: {{ .icon }}{{- end }}
         url: {{ .url }}
       {{- end }}
-{{- end }}
-{{- if .Values.frontendConfig.ticket }}
+      {{- end }}
+      {{- if .Values.frontendConfig.ticket }}
       ticket:
         {{- if .Values.frontendConfig.ticket.hideClustersWithLabels }}
         hideClustersWithLabels:
@@ -166,40 +172,67 @@ data:
         gitHubRepoUrl: {{ .Values.frontendConfig.ticket.gitHubRepoUrl }}
         issueDescriptionTemplate: |-
 {{ .Values.frontendConfig.ticket.issueDescriptionTemplate | trim | indent 10 }}
-{{- end }}
+      {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
-{{- if .Values.frontendConfig.terminal }}
-{{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
+        projectTerminalShortcutsEnabled: {{ .Values.frontendConfig.features.projectTerminalShortcutsEnabled | default false }}
+      {{- if .Values.frontendConfig.terminal }}
       terminal:
+        {{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
         heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
-{{- end }}
-{{- end }}
-{{- if .Values.frontendConfig.defaultHibernationSchedule }}
+        {{- end }}
+        {{- if .Values.frontendConfig.terminal.shortcuts }}
+        shortcuts:
+        {{- range .Values.frontendConfig.terminal.shortcuts }}
+        - title: {{ .title }}
+          description: {{ .description }}
+          target: {{ .target }}
+          {{- if .container }}
+          container:
+            {{- if .container.image }}
+            image: {{ .container.image }}
+            {{- end }}
+            {{- if .container.command }}
+            command:
+            {{- range .container.command }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- if .container.args }}
+            args:
+            {{- range .container.args }}
+            - {{ . }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:
 {{ toYaml .Values.frontendConfig.defaultHibernationSchedule | trim | indent 8 }}
-{{- end }}
-{{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
+      {{- end }}
+      {{- if .Values.frontendConfig.seedCandidateDeterminationStrategy }}
       seedCandidateDeterminationStrategy: {{ .Values.frontendConfig.seedCandidateDeterminationStrategy }}
-{{- end }}
-{{- if .Values.frontendConfig.alert }}
+      {{- end }}
+      {{- if .Values.frontendConfig.alert }}
       alert:
         type: {{ .Values.frontendConfig.alert.type }}
         message: {{ .Values.frontendConfig.alert.message }}
-{{- end }}
-{{- if .Values.frontendConfig.costObject }}
+      {{- end }}
+      {{- if .Values.frontendConfig.costObject }}
       costObject:
         title: {{ .Values.frontendConfig.costObject.title }}
         description: {{ .Values.frontendConfig.costObject.description }}
         regex: {{ .Values.frontendConfig.costObject.regex }}
         errorMessage: {{ .Values.frontendConfig.costObject.errorMessage }}
-{{- end }}
-{{- if .Values.frontendConfig.sla }}
+      {{- end }}
+      {{- if .Values.frontendConfig.sla }}
       sla:
         title: {{ .Values.frontendConfig.sla.title }}
         description: {{ .Values.frontendConfig.sla.description }}
-{{- end }}
-{{- if .Values.frontendConfig.accessRestriction }}
+      {{- end }}
+      {{- if .Values.frontendConfig.accessRestriction }}
       accessRestriction:
         {{- if  .Values.frontendConfig.accessRestriction.noItemsText }}
         noItemsText: |-
@@ -243,4 +276,4 @@ data:
           {{- end }}
           {{- end }}
         {{- end }}
-{{- end }}
+      {{- end }}

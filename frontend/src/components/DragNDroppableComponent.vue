@@ -22,7 +22,7 @@ limitations under the License.
       </div>
       <slot name="component"></slot>
     </div>
-    <positional-dropzone :uuid="uuid" v-if="!draggableValue.dragging" class="positional-dropzone full-height full-width"></positional-dropzone>
+    <positional-dropzone :uuid="uuid" v-if="!draggableValue.dragging"></positional-dropzone>
   </div>
 </template>
 
@@ -72,18 +72,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
   .full-height {
     height: 100%;
   }
 
   .full-width {
     width: 100%;
-  }
-
-  .positional-dropzone {
-    position: absolute;
-    left: 0;
-    top: 0;
   }
 </style>

@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-list>
+  <v-list key="accessCardList">
     <v-list-item v-show="!isAnyTileVisible">
       <v-list-item-icon>
         <v-icon color="cyan darken-2">mdi-alert-circle-outline</v-icon>
@@ -26,17 +26,28 @@ limitations under the License.
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
+
     <terminal-list-tile
       v-if="isTerminalTileVisible"
       :shoot-item=shootItem
       target="shoot"
       :description="shootTerminalDescription"
       :buttonDescription="shootTerminalButtonDescription"
-      :disabled="!isAdmin && isShootStatusHibernated"
+      :disabled="shootTerminalButtonDisabled"
       >
     </terminal-list-tile>
 
-    <v-divider v-if="isTerminalTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+    <v-divider v-if="isTerminalTileVisible && (isTerminalShortcutsTileVisible || isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
+
+    <terminal-shortcuts-tile
+      v-if="isTerminalShortcutsTileVisible"
+      :shootItem="shootItem"
+      @addTerminalShortcut="onAddTerminalShortcut"
+      popper-boundaries-selector="#accessCardList"
+      class="mt-3"
+    ></terminal-shortcuts-tile>
+
+    <v-divider v-if="isTerminalShortcutsTileVisible && (isDashboardTileVisible || isCredentialsTileVisible || isKubeconfigTileVisible || isGardenctlTileVisible)" inset></v-divider>
 
     <link-list-tile v-if="isDashboardTileVisible && !hasDashboardTokenAuth" icon="developer_board" appTitle="Dashboard" :url="dashboardUrl" :urlText="dashboardUrlText" :isShootStatusHibernated="isShootStatusHibernated"></link-list-tile>
 
@@ -141,6 +152,7 @@ import UsernamePassword from '@/components/UsernamePasswordListTile'
 import CopyBtn from '@/components/CopyBtn'
 import CodeBlock from '@/components/CodeBlock'
 import TerminalListTile from '@/components/TerminalListTile'
+import TerminalShortcutsTile from '@/components/ShootDetails/TerminalShortcutsTile'
 import GardenctlCommands from '@/components/ShootDetails/GardenctlCommands'
 import LinkListTile from '@/components/LinkListTile'
 import get from 'lodash/get'
@@ -156,11 +168,16 @@ export default {
     CopyBtn,
     TerminalListTile,
     LinkListTile,
-    GardenctlCommands
+    GardenctlCommands,
+    TerminalShortcutsTile
   },
   props: {
     shootItem: {
       type: Object
+    },
+    hideTerminalShortcuts: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -174,7 +191,8 @@ export default {
     ...mapGetters([
       'hasShootTerminalAccess',
       'isAdmin',
-      'hasControlPlaneTerminalAccess'
+      'hasControlPlaneTerminalAccess',
+      'isTerminalShortcutsFeatureEnabled'
     ]),
     ...mapState([
       'cfg'
@@ -224,8 +242,11 @@ export default {
     getQualifiedName () {
       return `kubeconfig--${this.shootProjectName}--${this.shootName}.yaml`
     },
+    shootTerminalButtonDisabled () {
+      return !this.isAdmin && this.isShootStatusHibernated
+    },
     shootTerminalButtonDescription () {
-      if (this.isShootStatusHibernated) {
+      if (this.shootTerminalButtonDisabled) {
         return 'Cluster is hibernated. Wake up cluster to open terminal.'
       }
       return this.shootTerminalDescription
@@ -251,6 +272,9 @@ export default {
     isTerminalTileVisible () {
       return !isEmpty(this.shootItem) && this.hasShootTerminalAccess
     },
+    isTerminalShortcutsTileVisible () {
+      return !isEmpty(this.shootItem) && this.isTerminalShortcutsFeatureEnabled && this.hasShootTerminalAccess && !this.hideTerminalShortcuts
+    },
     token () {
       return this.shootInfo.cluster_token || ''
     },
@@ -273,6 +297,9 @@ export default {
       if (kubeconfig) {
         download(kubeconfig, this.getQualifiedName, 'text/yaml')
       }
+    },
+    onAddTerminalShortcut (shortcut) {
+      this.$emit('addTerminalShortcut', shortcut)
     }
   },
   watch: {

@@ -379,6 +379,69 @@ describe('gardener-dashboard', function () {
           expect(decodeBase64(webhookSecret)).to.equal('webhookSecret')
         })
       })
+
+      describe('terminal', function () {
+        describe('shortcuts', function () {
+          it('should render the template', async function () {
+            const values = writeValues(filename, {
+              frontendConfig: {
+                terminal: {
+                  shortcuts: [
+                    {
+                      title: 'title',
+                      description: 'description',
+                      target: 'foo-target',
+                      container: {
+                        command: [
+                          'command'
+                        ],
+                        image: 'repo:tag',
+                        args: [
+                          'a',
+                          'b',
+                          'c'
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            })
+
+            const documents = await helmTemplate(template, filename)
+            const config = chain(documents)
+              .find(['metadata.name', name])
+              .get('data["config.yaml"]')
+              .thru(yaml.safeLoad)
+              .value()
+            const {
+              frontend: {
+                terminal: {
+                  shortcuts
+                }
+              },
+            } = config
+            expect(shortcuts).to.eql([
+              {
+                title: 'title',
+                description: 'description',
+                target: 'foo-target',
+                container: {
+                  image: 'repo:tag',
+                  command: [
+                    'command'
+                  ],
+                  args: [
+                    'a',
+                    'b',
+                    'c'
+                  ]
+                }
+              }
+            ])
+          })
+        })
+      })
     })
   })
 })

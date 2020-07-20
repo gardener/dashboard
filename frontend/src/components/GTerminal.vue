@@ -18,7 +18,7 @@ limitations under the License.
   <div v-resize="onResize" :class="backgroundClass" class="d-flex flex-column fill-height position-relative" :id="`boundary_${uuid}`">
     <v-snackbar
       v-model="snackbarTop"
-      :timeout="0"
+      :timeout="-1"
       :absolute="true"
       :top="true"
       multi-line
@@ -48,7 +48,7 @@ limitations under the License.
     </v-snackbar>
     <v-snackbar
       v-model="errorSnackbarBottom"
-      :timeout="0"
+      :timeout="-1"
       :absolute="true"
       :bottom="true"
       color="red"
@@ -58,10 +58,10 @@ limitations under the License.
         Close
       </v-btn>
     </v-snackbar>
-    <draggable-component :uuid="uuid">
+    <drag-n-droppable-component :uuid="uuid">
       <template v-slot:handle>
         <v-system-bar dark class="systemBarTop" :class="backgroundClass" @click.native="focus">
-          <v-btn :disabled="!isTerminalSessionCreated" icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag" @click="deleteTerminal">
+          <v-btn icon small color="grey lighten-1" class="text-none systemBarButton ml-1 mr-1 g-ignore-drag" @click="deleteTerminal">
             <v-icon class="mr-0" small>mdi-close</v-icon>
           </v-btn>
           <v-spacer></v-spacer>
@@ -70,13 +70,13 @@ limitations under the License.
           <v-spacer></v-spacer>
           <v-tooltip v-if="terminalSession.imageHelpText" top class="g-ignore-drag">
             <template v-slot:activator="{ on: tooltip }">
-              <!-- g-popper boundariesSelector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
+              <!-- g-popper boundaries-selector: The id must not start with a digit. QuerySelector method uses CSS3 selectors for querying the DOM and CSS3 doesn't support ID selectors that start with a digit -->
               <g-popper
                 :title="`${imageShortText} Help`"
-                toolbarColor="cyan darken-2"
-                :popperKey="`popper_${uuid}`"
+                toolbar-color="cyan darken-2"
+                :popper-key="`popper_${uuid}`"
                 placement="bottom"
-                :boundariesSelector="`#boundary_${uuid}`"
+                :boundaries-selector="`#boundary_${uuid}`"
               >
                 <span v-html="compiledImageHelpText"></span>
                 <template v-slot:popperRef>
@@ -174,7 +174,7 @@ limitations under the License.
                 <span>{{imageShortText}}</span>
               </v-btn>
             </template>
-            Image: {{terminalSession.image}}
+            Image: {{terminalSession.container.image}}
           </v-tooltip>
 
           <v-tooltip v-if="privilegedMode !== undefined && target === 'shoot'" top>
@@ -200,12 +200,11 @@ limitations under the License.
           </v-tooltip>
         </v-system-bar>
       </template>
-    </draggable-component>
+    </drag-n-droppable-component>
     <terminal-settings-dialog
       ref="settings"
       :target="target"
     ></terminal-settings-dialog>
-    <confirm-dialog ref="confirmDialog"></confirm-dialog>
   </div>
 </template>
 
@@ -213,6 +212,7 @@ limitations under the License.
 import { mapState, mapGetters } from 'vuex'
 import ora from 'ora'
 import get from 'lodash/get'
+import merge from 'lodash/merge'
 import assign from 'lodash/assign'
 import find from 'lodash/find'
 import head from 'lodash/head'
@@ -232,7 +232,7 @@ import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
 import { FocusAddon } from '@/lib/xterm-addon-focus'
 import GPopper from '@/components/GPopper'
 
-import DraggableComponent from '@/components/DraggableComponent'
+import DragNDroppableComponent from '@/components/DragNDroppableComponent'
 import { encodeBase64Url, targetText } from '@/utils'
 import {
   createTerminal,
@@ -241,7 +241,6 @@ import {
   heartbeat,
   terminalConfig
 } from '@/utils/api'
-import ConfirmDialog from '@/components/dialogs/ConfirmDialog'
 import TerminalSettingsDialog from '@/components/dialogs/TerminalSettingsDialog'
 import IconBase from '@/components/icons/IconBase'
 import Connected from '@/components/icons/Connected'
@@ -272,10 +271,12 @@ class TerminalSession {
   setInitialState () {
     this.connectionState = TerminalSession.DISCONNECTED
     this.node = undefined
-    this.privileged = undefined
     this.hostPID = undefined
     this.hostNetwork = undefined
-    this.image = undefined
+    this.container = {
+      privileged: undefined,
+      image: undefined
+    }
     this.detailedConnectionStateText = undefined
   }
 
@@ -298,8 +299,23 @@ class TerminalSession {
   }
 
   async createTerminal () {
-    const body = this.vm.selectedConfig
+    const container = {
+      image: get(this.vm.data, 'container.image'),
+      command: get(this.vm.data, 'container.command'),
+      args: get(this.vm.data, 'container.args'),
+      resources: get(this.vm.data, 'container.resources'),
+      privileged: get(this.vm.data, 'container.privileged')
+    }
+    const selectedConfigContainer = {
+      image: get(this.vm.selectedConfig, 'container.image'),
+      privileged: get(this.vm.selectedConfig, 'container.privileged')
+    }
+
+    const hostConfig = pick(this.vm.data, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
+    const selectedConfigHost = pick(this.vm.selectedConfig, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
+    const body = merge(hostConfig, selectedConfigHost)
     body.identifier = this.vm.uuid
+    body.container = merge(container, selectedConfigContainer)
 
     const { data } = await createTerminal({ ...this.terminalCoordinates, body })
     return data
@@ -348,6 +364,9 @@ class TerminalSession {
         return
       }
     } catch (err) {
+      if (this.cancelConnect) {
+        return
+      }
       console.error('failed to wait until pod is running', err)
       this.vm.showSnackbarTop('Could not connect to terminal', 'The detailed connection error can be found in the JavaScript console of your browser')
       this.setDisconnectedState()
@@ -430,8 +449,8 @@ class TerminalSession {
     const onPodStateChange = ({ type, object: pod }) => {
       const containers = get(pod, 'spec.containers')
       const terminalContainer = find(containers, ['name', containerName])
-      this.image = get(terminalContainer, 'image')
-      this.privileged = get(terminalContainer, 'securityContext.privileged', false)
+      this.container.image = get(terminalContainer, 'image')
+      this.container.privileged = get(terminalContainer, 'securityContext.privileged', false)
       this.hostPID = get(pod, 'spec.hostPID', false)
       this.hostNetwork = get(pod, 'spec.hostNetwork', false)
       this.node = get(pod, 'spec.nodeName')
@@ -596,7 +615,6 @@ function getDetailedConnectionStateText (terminalContainerStatus) {
 export default {
   name: 'g-terminal',
   components: {
-    ConfirmDialog,
     TerminalSettingsDialog,
     IconBase,
     Connected,
@@ -604,7 +622,7 @@ export default {
     GPopper,
     SplitVertically,
     SplitHorizontally,
-    DraggableComponent
+    DragNDroppableComponent
   },
   props: {
     uuid: {
@@ -632,7 +650,9 @@ export default {
       },
       connectionMenu: false,
       config: {
-        image: undefined,
+        container: {
+          image: undefined
+        },
         nodes: []
       },
       selectedConfig: {},
@@ -650,11 +670,14 @@ export default {
       'splitpaneResize'
     ]),
     terminalTitle () {
-      let title = this.targetText
+      const title = [this.targetText]
       if (this.name) {
-        title += ` - ${this.name}`
+        title.push(this.name)
       }
-      return title
+      if (this.data.title) {
+        title.push(this.data.title)
+      }
+      return title.join(' - ')
     },
     targetText () {
       return targetText(this.target) || 'UNKNOWN'
@@ -666,7 +689,7 @@ export default {
       return this.terminalSession && this.terminalSession.isCreated
     },
     defaultImage () {
-      return this.terminalSession.image || this.config.image
+      return this.terminalSession.container.image || this.config.container.image
     },
     defaultNode () {
       const defaultNode = find(this.config.nodes, ['data.kubernetesHostname', this.terminalSession.node])
@@ -700,7 +723,7 @@ export default {
       return this.privilegedMode ? 'Privileged' : 'Unprivileged'
     },
     imageShortText () {
-      const image = this.terminalSession.image || ''
+      const image = get(this.terminalSession, 'container.image', '')
       return image.substring(image.lastIndexOf('/') + 1)
     },
     compiledImageHelpText () {
@@ -728,25 +751,19 @@ export default {
       this.term.focus()
     },
     async deleteTerminal () {
-      if (!await this.confirmDelete()) {
+      if (!this.isTerminalSessionCreated) { // Either the terminal session is not yet established or there was an error
+        this.$emit('terminated')
         return
       }
 
       try {
         await this.terminalSession.deleteTerminal()
       } catch (err) {
-        this.showErrorSnackbarBottom(get(err, 'response.data.message', err.message))
+        // ignore error, the terminal will be cleaned up anyhow after the timeout
       }
       this.cancelConnectAndClose()
 
       this.$emit('terminated')
-    },
-    confirmDelete () {
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Terminate',
-        captionText: 'Confirm Termination',
-        messageHtml: 'Do you want to terminate this terminal session? This will clean up all related resources.<br/><br/><i class="grey--text text--darken-2">Terminal sessions are automatically cleaned up if you navigate away or close the browser window.</i>'
-      })
     },
     async configure (refName) {
       this.loading[refName] = true
@@ -762,7 +779,9 @@ export default {
       }
 
       const initialState = {
-        image: this.defaultImage,
+        container: {
+          image: this.defaultImage
+        },
         defaultNode: this.defaultNode,
         currentNode: this.terminalSession.node,
         privilegedMode: this.defaultPrivilegedMode,
@@ -894,7 +913,7 @@ export default {
     margin-left: 4px;
     margin-bottom: 0;
     margin-right: 0;
-    max-height: calc(100% - 50px);
+    max-height: calc(100% - 52px);
     /* Change stacking order so that PositionalDropzone is in front. See also https://philipwalton.com/articles/what-no-one-told-you-about-z-index/ */
     opacity: .99;
   }

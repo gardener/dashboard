@@ -541,10 +541,6 @@ export function compileMarkdown (text, linkColor = 'cyan darken-2', transformToE
   return documentFragmentToHtml(documentFragment)
 }
 
-export function shootAddonByName (name) {
-  return find(shootAddonList, ['name', name])
-}
-
 export function randomLocalMaintenanceBegin () {
   // randomize maintenance time window
   const hours = ['22', '23', '00', '01', '02', '03', '04', '05']

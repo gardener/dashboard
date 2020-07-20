@@ -102,6 +102,108 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     return watchStub
   }
 
+  it('should list the project terminal shortcuts', async function () {
+    const user = auth.createUser({ id, aud })
+    const bearer = await user.bearer
+
+    const shortcut1 = {
+      title: 'User created',
+      description: 'Using K9s to view the pods of the control plane for this cluster',
+      target: 'cp',
+      container: {
+        image: 'derailed/k9s:latest',
+        command: [
+          'bin/sh'
+        ],
+        args: [
+          '-c',
+          'sleep 1 && while true; do k9s --headless --command=pods; done'
+        ]
+      }
+    }
+    const shortcuts = [
+      shortcut1,
+      {
+        invalidShortcut: 'foo'
+      }
+    ]
+
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.listProjectTerminalShortcuts({ bearer, namespace, shortcuts })
+
+    const res = await agent
+      .post('/api/terminals')
+      .set('cookie', await user.cookie)
+      .send({
+        method: 'listProjectTerminalShortcuts',
+        params: {
+          coordinate: {
+            namespace
+          }
+        }
+      })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql([
+      shortcut1
+    ])
+  })
+
+  it('should return empty shortcut list for invalid shortcuts', async function () {
+    const user = auth.createUser({ id, aud })
+    const bearer = await user.bearer
+
+    const shortcuts = [{
+        invalidShortcut: 'foo'
+      }
+    ]
+
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.listProjectTerminalShortcuts({ bearer, namespace, shortcuts })
+
+
+    const res = await agent
+      .post('/api/terminals')
+      .set('cookie', await user.cookie)
+      .send({
+        method: 'listProjectTerminalShortcuts',
+        params: {
+          coordinate: {
+            namespace
+          }
+        }
+      })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql([])
+  })
+
+  it('should return empty shortcut list for non existing secret', async function () {
+    const user = auth.createUser({ id, aud })
+    const bearer = await user.bearer
+
+    common.stub.getCloudProfiles(sandbox)
+    k8s.stub.listProjectTerminalShortcuts({ bearer, namespace })
+
+    const res = await agent
+      .post('/api/terminals')
+      .set('cookie', await user.cookie)
+      .send({
+        method: 'listProjectTerminalShortcuts',
+        params: {
+          coordinate: {
+            namespace
+          }
+        }
+      })
+
+    expect(res).to.have.status(200)
+    expect(res).to.be.json
+    expect(res.body).to.eql([])
+  })
+
   describe('garden', function () {
     const target = 'garden'
     const name = 'term-garden-0815'
@@ -146,10 +248,10 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
 
-      const containerImage = 'fooImage:0.1.2'
+      const image = 'fooImage:0.1.2'
 
       common.stub.getCloudProfiles(sandbox)
-      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, containerImage })
+      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, target, seedName, hostNamespace, image })
 
       const res = await agent
         .post('/api/terminals')
@@ -269,7 +371,11 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
+      expect(res.body).to.eql({
+        container: {
+          image: 'dummyImage:1.0.0'
+        }
+      })
     })
 
     it('should keep a terminal resource alive', async function () {
@@ -386,7 +492,11 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
 
       expect(res).to.have.status(200)
       expect(res).to.be.json
-      expect(res.body).to.eql({ image: 'dummyImage:1.0.0' })
+      expect(res.body).to.eql({
+        container: {
+          image: 'dummyImage:1.0.0'
+        }
+      })
     })
 
     it('should keep a terminal resource alive', async function () {
@@ -461,14 +571,14 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       const user = auth.createUser({ id, aud })
       const bearer = await user.bearer
 
-      const containerImage = 'fooImage:0.1.2'
+      const image = 'fooImage:0.1.2'
       const preferredHost = 'shoot'
 
       const shootName = 'fooShoot'
       const kubeApiServer = common.getKubeApiServer(namespace, shootName, ingressDomain)
 
       common.stub.getCloudProfiles(sandbox)
-      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, shootName, target, hostNamespace, containerImage, preferredHost })
+      const scope = k8s.stub.reuseTerminal({ bearer, username, namespace, name, shootName, target, hostNamespace, image, preferredHost })
 
       const res = await agent
         .post('/api/terminals')
@@ -532,7 +642,9 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
       expect(res).to.have.status(200)
       expect(res).to.be.json
       expect(res.body).to.eql({
-        image: 'dummyImage:1.0.0',
+        container: {
+          image: 'dummyImage:1.0.0',
+        },
         nodes: [{
           data: {
             kubernetesHostname: 'hostname',

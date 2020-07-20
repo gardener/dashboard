@@ -27,8 +27,9 @@ oidc:
     clientId: kube-kubectl
     clientSecret: uenbng5TrDKpSK7EJMSe2bKF
 terminal:
-  containerImage: dummyImage:1.0.0
-  containerImageDescriptions:
+  container:
+    image: dummyImage:1.0.0
+  imageDescriptions:
   - image: /dummyImage:.*/
     description: Dummy Image Description
   - image: fooImage:0.1.2

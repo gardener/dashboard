@@ -14,81 +14,58 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-  <v-container fluid>
-    <v-row class="d-flex">
-      <v-col cols="12" md="6">
-        <shoot-details-card :shootItem="shootItem"></shoot-details-card>
-        <shoot-infrastructure-card :shootItem="shootItem" class="mt-4"></shoot-infrastructure-card>
-        <shoot-external-tools-card :shootItem="shootItem" class="mt-4"></shoot-external-tools-card>
-        <shoot-lifecycle-card ref="shootLifecycle" :shootItem="shootItem" class="mt-4"></shoot-lifecycle-card>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-card v-if="canGetSecrets" class="mb-4">
-          <v-toolbar flat dark dense color="cyan darken-2">
-            <v-toolbar-title class="subtitle-1">Access</v-toolbar-title>
-          </v-toolbar>
-          <shoot-access-card :shootItem="shootItem"></shoot-access-card>
-        </v-card>
-        <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-        <tickets-card :tickets="tickets" :shootItem="shootItem" class="mt-4"></tickets-card>
-      </v-col>
-    </v-row>
-  </v-container>
+  <terminal-splitpanes
+    ref="terminalSplitpanes"
+    :name="shootName"
+    :namespace="shootNamespace"
+  >
+    <template v-slot="{item}">
+      <shoot-details
+        style="overflow: auto; height: 100%"
+        :shootItem="shootItem"
+        @addTerminalShortcut="onAddTerminalShortcut"
+      ></shoot-details>
+      <positional-dropzone positional-dropzone :uuid="item.uuid"></positional-dropzone>
+    </template>
+  </terminal-splitpanes>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import TicketsCard from '@/components/TicketsCard'
-import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
-import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
-import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
-import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
-import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
-import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import get from 'lodash/get'
+import { mapGetters } from 'vuex'
+import ShootDetails from '@/components/ShootDetails/ShootDetails'
+import TerminalSplitpanes from '@/components/TerminalSplitpanes'
+import PositionalDropzone from '@/components/PositionalDropzone'
+import { PositionEnum } from '@/lib/g-symbol-tree'
 import { shootItem } from '@/mixins/shootItem'
 
-import 'codemirror/mode/yaml/yaml.js'
-
 export default {
-  name: 'shoot-item',
+  name: 'shoot-details-page',
   components: {
-    ShootDetailsCard,
-    ShootInfrastructureCard,
-    ShootLifecycleCard,
-    ShootAccessCard,
-    TicketsCard,
-    ShootMonitoringCard,
-    ShootExternalToolsCard
+    ShootDetails,
+    TerminalSplitpanes,
+    PositionalDropzone
   },
   mixins: [shootItem],
   computed: {
     ...mapGetters([
-      'shootByNamespaceAndName',
-      'ticketsByNamespaceAndName',
-      'canGetSecrets'
+      'shootByNamespaceAndName'
     ]),
     value () {
       return this.shootByNamespaceAndName(this.$route.params)
     },
-    info () {
-      return get(this, 'value.info', {})
-    },
-    seedInfo () {
-      return get(this, 'value.seedInfo', {})
-    },
     shootItem () {
       return get(this, 'value', {})
-    },
-    tickets () {
-      const params = this.$route.params
-      return this.ticketsByNamespaceAndName(params)
+    }
+  },
+  methods: {
+    onAddTerminalShortcut (shortcut) {
+      this.$refs.terminalSplitpanes.addShortcut({ position: PositionEnum.BOTTOM, shortcut })
     }
   },
   mounted () {
-    if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
-      this.$refs.shootLifecycle.showHibernationConfigurationDialog()
-    }
+    const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
+    this.$refs.terminalSplitpanes.load(addItemFn)
   }
 }
 </script>

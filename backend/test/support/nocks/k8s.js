@@ -918,6 +918,26 @@ const stub = {
     }
     return scope
   },
+  listProjectTerminalShortcuts ({ bearer, namespace, shortcuts }) {
+    const scope = nockWithAuthorization(bearer)
+    canGetSecretsInAllNamespaces(scope)
+
+    if (!shortcuts) {
+      return scope
+        .get(`/api/v1/namespaces/${namespace}/secrets/terminal.shortcuts`)
+        .reply(404)
+    }
+    const terminalShortcutsSecret = {
+      data: {
+        shortcuts: encodeBase64(yaml.safeDump(shortcuts))
+      }
+    }
+
+    scope
+      .get(`/api/v1/namespaces/${namespace}/secrets/terminal.shortcuts`)
+      .reply(200, terminalShortcutsSecret)
+    return scope
+  },
   createTerminal ({ bearer, username, namespace, target, shootName, seedName }) {
     const terminal = {
       metadata: {},
@@ -993,7 +1013,7 @@ const stub = {
       .reply(200, () => terminal)
     return scope
   },
-  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, containerImage, preferredHost = 'seed' }) {
+  reuseTerminal ({ bearer, username, namespace, name, target, shootName, seedName, hostNamespace, image, preferredHost = 'seed' }) {
     let terminal = {
       metadata: {
         namespace,
@@ -1007,7 +1027,9 @@ const stub = {
         host: {
           namespace: hostNamespace,
           pod: {
-            containerImage
+            container: {
+              image
+            }
           }
         }
       },

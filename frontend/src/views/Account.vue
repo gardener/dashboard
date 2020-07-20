@@ -267,7 +267,7 @@ export default {
       'isKubeconfigEnabled'
     ]),
     expansionPanelIcon () {
-      return this.expansionPanel ? 'expand_less' : 'expand_more'
+      return this.expansionPanel ? 'mdi-chevron-up' : 'mdi-chevron-down'
     },
     expansionPanelTooltip () {
       return this.expansionPanel ? 'Hide advanced options' : 'Show advanced options'

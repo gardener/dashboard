@@ -25,10 +25,13 @@ const { getSeed } = require('../lib/cache')
 const { Resources } = require('../lib/kubernetes-client')
 const { Forbidden } = require('../lib/errors')
 const logger = require('../lib/logger')
+const yaml = require('js-yaml')
+const { encodeBase64 } = require('../lib/utils')
 
 const {
   ensureTerminalAllowed,
-  findImageDescription
+  findImageDescription,
+  _fromShortcutSecretResource
 } = require('../lib/services/terminals')
 
 const {
@@ -749,6 +752,94 @@ describe('services', function () {
         expect(stats.successRate).to.equal(1)
         expect(infoSpy).to.be.calledOnce
       })
+    })
+
+    it('should pick only valid fields from shortcut resource', async function () {
+      let actualShortcuts = _fromShortcutSecretResource({
+        data: encodeBase64(yaml.safeDump({}))
+      })
+      expect(actualShortcuts).to.eql([])
+
+
+      actualShortcuts = _fromShortcutSecretResource({
+        data: {
+          shortcuts: undefined
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = _fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64('invalid')
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = _fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64(yaml.safeDump([
+            {
+              foo: 'bar'
+            }
+          ]))
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = _fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64(yaml.safeDump([
+            {}, // invalid object
+            {
+              description: 'invalid due to missing required keys'
+            },
+            {
+              title: 'invalid target',
+              target: 'foo'
+            },
+            {
+              title: 'minimalistic shortcut',
+              target: 'shoot'
+            },
+            {
+              title: 'title',
+              description: 'description',
+              target: 'shoot',
+              container: {
+                image: 'image',
+                command: ['command'],
+                args: ['args'],
+              },
+              shootSelector: {
+                matchLabels: {
+                  foo: 'bar'
+                }
+              },
+              foo: 'ignore'
+            }
+          ]))
+        }
+      })
+      expect(actualShortcuts).to.eql([{
+          title: 'minimalistic shortcut',
+          target: 'shoot'
+        },
+        {
+          title: 'title',
+          description: 'description',
+          target: 'shoot',
+          container: {
+            image: 'image',
+            command: ['command'],
+            args: ['args'],
+          },
+          shootSelector: {
+            matchLabels: {
+              foo: 'bar'
+            }
+          }
+        }
+      ])
     })
   })
 })

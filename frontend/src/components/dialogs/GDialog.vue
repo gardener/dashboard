@@ -163,9 +163,10 @@ export default {
     }
   },
   methods: {
-    confirmWithDialog () {
+    confirmWithDialog ({ onShowCallback, confirmCallback } = {}) {
       this.showDialog()
       this.userInput = ''
+      this.confirmCallback = confirmCallback
 
       // we must delay the "focus" handling because the dialog.open is animated
       // and the 'autofocus' property didn't work in this case.
@@ -173,6 +174,12 @@ export default {
         setDelayedInputFocus(this, 'deleteDialogInput')
       }
 
+      if (onShowCallback) {
+        this.$nextTick(() => {
+          // delay the callback to make sure that all components are loaded
+          onShowCallback()
+        })
+      }
       return new Promise(resolve => {
         this.resolve = resolve
       })
@@ -203,8 +210,17 @@ export default {
           return 'cyan--text text--darken-2'
       }
     },
-    resolveAction (value) {
+    async resolveAction (value) {
       if (isFunction(this.resolve)) {
+        if (value) {
+          if (this.confirmCallback) {
+            const confirmed = await this.confirmCallback()
+            if (!confirmed) {
+              // cancel resolve action
+              return
+            }
+          }
+        }
         const resolve = this.resolve
         this.resolve = undefined
         resolve(value)

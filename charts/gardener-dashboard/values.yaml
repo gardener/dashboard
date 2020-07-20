@@ -119,11 +119,26 @@ frontendConfig:
   seedCandidateDeterminationStrategy: SameRegion
   features:
     terminalEnabled: false
+    projectTerminalShortcutsEnabled: false
   # alert:
   #   type: error
   #   message: This is an **alert** banner
 
   # terminal:
+  #   shortcuts:
+  #   - title: "Watch Control Plane Pods"
+  #     description: Using kubectl to watch the pods of the control plane for this cluster
+  #     target: cp # possible values: "cp" (Control Plane), "shoot", "garden"
+  #     container:
+  #       image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+  #       # command: ~
+  #       args:
+  #       - watch
+  #       - kubectl
+  #       - get
+  #       - pods
+  #       - "-o"
+  #       - wide
   #   heartbeatIntervalSeconds: 60
 
   # # costObject is used for billing purposes and is assigned to the gardener project
@@ -199,9 +214,11 @@ readinessProbe:
   successThreshold: 1
 
 # terminal:
-#   containerImage: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
-#   containerImageOperator: ~ # if not defined, value of containerImage will be used
-#   containerImageDescriptions:
+#   container:
+#     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
+#   containerOperator:
+#     image: ~ # if not defined, value of terminal.container.image will be used
+#   imageDescriptions:
 #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster
