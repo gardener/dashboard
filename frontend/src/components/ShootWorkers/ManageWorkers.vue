@@ -142,15 +142,23 @@ export default {
       return sortBy(this.allZones)
     },
     maxAdditionalZones () {
+      let noLimit = true
+      let notSupported = false
+      let additionalZones = 0
       if (!cloudProviderSupportsAddingZonesAfterCration(this.cloudProviderKind)) {
-        return -2 // not supported
+        notSupported = true
       }
       if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
         if (this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length < this.allZones.length) {
-          return this.currentFreeNetworks.length
+          additionalZones = this.currentFreeNetworks.length
+          noLimit = false
         }
       }
-      return -1 // no limit
+      return {
+        noLimit,
+        notSupported,
+        additionalZones
+      }
     },
     cloudProviderKind () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)

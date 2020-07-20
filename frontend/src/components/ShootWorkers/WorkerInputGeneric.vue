@@ -202,7 +202,7 @@ export default {
       type: Boolean
     },
     maxAdditionalZones: {
-      type: Number
+      type: Object
     }
   },
   data () {
@@ -319,16 +319,22 @@ export default {
       })
     },
     zoneHint () {
-      if (this.maxAdditionalZones === -2) {
+      if (!this.maxAdditionalZones) {
+        return undefined
+      }
+      if (this.maxAdditionalZones.noLimit) {
+        return undefined
+      }
+      if (this.maxAdditionalZones.notSupported) {
         return 'This infrastructure does not support to add zones that are not already used by this cluster'
       }
-      if (this.maxAdditionalZones === 0) {
+      if (this.maxAdditionalZones.additionalZones === 0) {
         return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
       }
-      if (this.maxAdditionalZones === 1) {
+      if (this.maxAdditionalZones.additionalZones === 1) {
         return 'Your network configuration allows to add one more zone that is not already used by this cluster'
       }
-      if (this.maxAdditionalZones > 1) {
+      if (this.maxAdditionalZones.additionalZones > 1) {
         return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
       }
       return undefined
