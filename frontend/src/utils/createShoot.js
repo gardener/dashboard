@@ -252,7 +252,8 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
     const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
       return !some(existingZonesNetworkConfiguration, networkConfiguration)
     })
-    if (newZonesNetworkConfiguration && freeZoneNetworks && newZonesNetworkConfiguration.length - freeZoneNetworks.length === existingZonesNetworkConfiguration.length) {
+    const matchesExistingZoneNetworkSize = newZonesNetworkConfiguration.length - freeZoneNetworks.length === existingZonesNetworkConfiguration.length
+    if (newZonesNetworkConfiguration && freeZoneNetworks && matchesExistingZoneNetworkSize) {
       return freeZoneNetworks
     }
   }
@@ -260,26 +261,27 @@ export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR,
 }
 
 export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newWorkers, infrastructureKind, maxNumberOfZones, existingShootWorkerCIDR) {
-  const newZones = uniq(flatMap(newWorkers, 'zones'))
-  if (!newZones || !infrastructureKind || !maxNumberOfZones) {
+  const newUniqueZones = uniq(flatMap(newWorkers, 'zones'))
+  if (!newUniqueZones || !infrastructureKind || !maxNumberOfZones) {
     return undefined
   }
 
-  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newZones, infrastructureKind, maxNumberOfZones)
+  const defaultZonesNetworkConfiguration = getDefaultZonesNetworkConfiguration(newUniqueZones, infrastructureKind, maxNumberOfZones)
   if (!defaultZonesNetworkConfiguration) {
     return undefined
   }
 
-  const existingZonesNetworkConfiguration = compact(map(newZones, zone => {
+  const existingZonesNetworkConfiguration = compact(map(newUniqueZones, zone => {
     return find(oldZonesNetworkConfiguration, { name: zone })
   }))
 
   if (existingShootWorkerCIDR) {
     const freeZoneNetworks = findFreeNetworks(existingZonesNetworkConfiguration, existingShootWorkerCIDR, infrastructureKind, maxNumberOfZones)
-    if (existingZonesNetworkConfiguration.length + freeZoneNetworks.length < newZones.length) {
+    const availableNetworksLength = existingZonesNetworkConfiguration.length + freeZoneNetworks.length
+    if (availableNetworksLength < newUniqueZones.length) {
       return undefined
     }
-    return map(newZones, zone => {
+    return map(newUniqueZones, zone => {
       let zoneConfiguration = find(existingZonesNetworkConfiguration, { name: zone })
       if (zoneConfiguration) {
         return zoneConfiguration
@@ -292,7 +294,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     })
   }
 
-  if (existingZonesNetworkConfiguration.length !== newZones.length) {
+  if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {
     return defaultZonesNetworkConfiguration
   }
   return existingZonesNetworkConfiguration
