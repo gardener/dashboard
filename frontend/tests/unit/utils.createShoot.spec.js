@@ -140,6 +140,14 @@ describe('utils', function () {
         expect(freeNetworks).to.be.an.instanceof(Array)
         expect(freeNetworks).to.have.length(0)
       })
+
+      it('should return networks for all zones if existingZonesNetworkConfiguration is undefined', function () {
+        const workerCIDR = '10.251.0.0/16'
+
+        const freeNetworks = findFreeNetworks(undefined, workerCIDR, 'aws', 4)
+        expect(freeNetworks).to.be.an.instanceof(Array)
+        expect(freeNetworks).to.have.length(4)
+      })
     })
 
     describe('#getZonesNetworkConfiguration', function () {

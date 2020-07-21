@@ -70,7 +70,7 @@ limitations under the License.
 <script>
 import WorkerInputGeneric from '@/components/ShootWorkers/WorkerInputGeneric'
 import { mapGetters } from 'vuex'
-import { generateWorker, isZonedCluster, cloudProviderSupportsAddingZonesAfterCration } from '@/utils'
+import { generateWorker, isZonedCluster } from '@/utils'
 import { findFreeNetworks, getZonesNetworkConfiguration } from '@/utils/createShoot'
 import forEach from 'lodash/forEach'
 import find from 'lodash/find'
@@ -120,12 +120,6 @@ export default {
       return map(this.currentZonesNetworkConfiguration, 'name')
     },
     currentFreeNetworks () {
-      if (this.isNewCluster) {
-        return this.allZones.length
-      }
-      if (!cloudProviderSupportsAddingZonesAfterCration(this.cloudProviderKind)) {
-        return 0
-      }
       return findFreeNetworks(this.currentZonesNetworkConfiguration, this.existingWorkerCIDR, this.cloudProviderKind, this.allZones.length)
     },
     availableZones () {
@@ -134,31 +128,30 @@ export default {
       }
       // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
       // or that free networks are available to use more zones
-      if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
-        if (!this.currentFreeNetworks.length) {
-          return sortBy(this.currentZonesWithNetworkConfigInShoot)
-        }
+      const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
+      if (!clusterRequiresZoneNetworkConfiguration) {
+        return sortBy(this.allZones)
       }
-      return sortBy(this.allZones)
+
+      if (this.currentFreeNetworks.length) {
+        return sortBy(this.allZones)
+      }
+
+      return sortBy(this.currentZonesWithNetworkConfigInShoot)
     },
     maxAdditionalZones () {
-      let noLimit = true
-      let notSupported = false
-      let additionalZones = 0
-      if (!cloudProviderSupportsAddingZonesAfterCration(this.cloudProviderKind)) {
-        notSupported = true
+      if (this.isNewCluster) {
+        return -1 // not applicable - no limit
       }
-      if (!isEmpty(this.currentZonesWithNetworkConfigInShoot)) {
-        if (this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length < this.allZones.length) {
-          additionalZones = this.currentFreeNetworks.length
-          noLimit = false
-        }
+      const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
+      if (!clusterRequiresZoneNetworkConfiguration) {
+        return -1 // not applicable - no limit
       }
-      return {
-        noLimit,
-        notSupported,
-        additionalZones
+      const totalNumberOfPossibleZones = this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length
+      if (totalNumberOfPossibleZones >= this.allZones.length) {
+        return -1 // enough free networks - no limit
       }
+      return this.currentFreeNetworks.length
     },
     cloudProviderKind () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)

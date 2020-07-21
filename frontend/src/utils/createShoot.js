@@ -197,6 +197,9 @@ export function splitCIDR (cidrToSplitStr, numberOfNetworks) {
 }
 
 export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infrastructureKind, workerCIDR) {
+  if (!workerCIDR) {
+    workerCIDR = defaultWorkerCIDR
+  }
   switch (infrastructureKind) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
@@ -225,7 +228,7 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
 }
 
 export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, maxNumberOfZones) {
-  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, defaultWorkerCIDR)
+  const zoneConfigurations = getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind)
   if (!zoneConfigurations) {
     return undefined
   }
@@ -238,6 +241,12 @@ export function getDefaultZonesNetworkConfiguration (zones, infrastructureKind, 
 }
 
 export function findFreeNetworks (existingZonesNetworkConfiguration, workerCIDR, infrastructureKind, maxNumberOfZones) {
+  if (!workerCIDR) {
+    workerCIDR = defaultWorkerCIDR
+  }
+  if (!existingZonesNetworkConfiguration) {
+    return getDefaultNetworkConfigurationForAllZones(maxNumberOfZones, infrastructureKind, workerCIDR)
+  }
   for (let numberOfZones = maxNumberOfZones; numberOfZones >= existingZonesNetworkConfiguration.length; numberOfZones--) {
     const newZonesNetworkConfiguration = getDefaultNetworkConfigurationForAllZones(numberOfZones, infrastructureKind, workerCIDR)
     const freeZoneNetworks = filter(newZonesNetworkConfiguration, networkConfiguration => {
