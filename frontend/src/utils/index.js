@@ -732,7 +732,7 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   if (!version) {
     return {
       version: shootK8sVersion,
-      expirationDate: 'Unknown',
+      expirationDate: Date.now(),
       isWarning: true,
       isValidTerminationDate: false
     }
@@ -769,7 +769,7 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
     if (!workerImageDetails) {
       return {
         ...workerImage,
-        expirationDate: 'Unknown',
+        expirationDate: Date.now(),
         isWarning: true,
         workerName: worker.name,
         isValidTerminationDate: false
