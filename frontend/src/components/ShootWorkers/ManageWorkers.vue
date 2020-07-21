@@ -247,8 +247,8 @@ export default {
         this.internalWorkers = []
         this.cloudProfileName = cloudProfileName
         /*
-         * do not pass shootspec as we have it not available in this component and it is (currently) not required to determined isZoned for new clusters. This event handler is only be called for new clusters, as the
-         * userInterActionBus is onlyset for the create cluster use case
+         * do not pass shootspec as we do not have it available in this component and it is (currently) not required to determine isZoned for new clusters. This event handler is only called for new clusters, as the
+         * userInterActionBus is only set for the create cluster use case
          */
         this.zonedCluster = isZonedCluster({ cloudProviderKind: this.cloudProviderKind, isNewCluster: this.isNewCluster })
         this.setDefaultWorker()
