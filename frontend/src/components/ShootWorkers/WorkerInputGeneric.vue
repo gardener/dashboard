@@ -310,13 +310,11 @@ export default {
       }
     },
     zoneItems () {
-      return map(this.allZones, zone => {
-        return {
-          text: zone,
-          value: zone,
-          disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
-        }
-      })
+      return map(this.allZones, zone => ({
+        text: zone,
+        value: zone,
+        disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
+      }))
     },
     zoneHint () {
       if (!this.maxAdditionalZones) {
