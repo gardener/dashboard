@@ -48,7 +48,7 @@ export default {
       var crumbs = []
       const namespace = this.namespace
       if (/RouteNotFound$/.test(this.$route.name)) {
-        const text = get(this.$route, 'meta.breadcrumbText', 'Ohpss')
+        const text = get(this.$route, 'meta.breadcrumbText', 'Oops')
         crumbs.push({ text, currentRoute: true })
       } else {
         const matched = this.$route.matched

@@ -20,7 +20,7 @@ limitations under the License.
     <v-row align="center">
       <v-col>
         <h1>404</h1>
-        <h2>Look like you're lost</h2>
+        <h2>Looks like you're lost</h2>
         <p class="message">The page you are looking for is not available!</p>
         <v-btn dark color="cyan darken-2" @click="goBack">
           Get me out of here
