@@ -28,7 +28,7 @@ limitations under the License.
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text class="pa-3" :style="{'max-height': maxHeight}">
+      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard" @scroll="onContentScrolled()">
         <slot name="message">
           This is a generic dialog template.
         </slot>
@@ -44,6 +44,7 @@ limitations under the License.
           :color="textFieldColor">
         </v-text-field>
         <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
+        <div class="bottom-overlay" v-show="bottomOverlayVisible"></div>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
@@ -102,13 +103,17 @@ export default {
     maxHeight: {
       type: String,
       default: '50vh'
+    },
+    disableBottomOverlay: {
+      type: Boolean
     }
   },
   data () {
     return {
       userInput: '',
       visible: false,
-      resolve: noop
+      resolve: noop,
+      bottomOverlayVisible: true
     }
   },
   computed: {
@@ -174,6 +179,10 @@ export default {
     },
     showDialog () {
       this.visible = true
+      this.$nextTick(() => {
+        this.onContentScrolled()
+        this.showScrollBar()
+      })
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
@@ -202,6 +211,24 @@ export default {
         resolve(value)
       }
       this.visible = false
+    },
+    onContentScrolled () {
+      if (this.disableBottomOverlay) {
+        this.bottomOverlayVisible = false
+      } else if (!this.$refs.contentCard) {
+        this.bottomOverlayVisible = false
+      } else if (this.$refs.contentCard.clientHeight + this.$refs.contentCard.scrollTop < this.$refs.contentCard.scrollHeight - 1) {
+        this.bottomOverlayVisible = true
+      } else {
+        this.bottomOverlayVisible = false
+      }
+    },
+    showScrollBar () {
+      if (this.$refs.contentCard) {
+        const scrollTopVal = this.$refs.contentCard.scrollTop
+        this.$refs.contentCard.scrollTop = scrollTopVal + 10
+        this.$refs.contentCard.scrollTop = scrollTopVal - 10
+      }
     }
   }
 }
@@ -212,5 +239,15 @@ export default {
     code {
       box-shadow: none !important;
     }
+  }
+
+  .bottom-overlay {
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,1));
+    position: absolute;
+    pointer-events: none;
+    height: 50px;
+    bottom: 53px;
+    left: 10px;
+    right: 10px;
   }
 </style>
