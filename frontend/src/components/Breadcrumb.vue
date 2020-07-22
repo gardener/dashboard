@@ -20,7 +20,10 @@ limitations under the License.
       <v-icon large>chevron_right</v-icon>
     </template>
     <template v-slot:item="{ item }">
-      <router-link :to="item.to" :class="textClass(item)">
+      <span v-if="!item.to" :class="textClass(item)">
+        {{ item.text }}
+      </span>
+      <router-link v-else :to="item.to" :class="textClass(item)">
         {{ item.text }}
       </router-link>
     </template>
@@ -44,22 +47,27 @@ export default {
     breadcrumbItems () {
       var crumbs = []
       const namespace = this.namespace
-      const matched = this.$route.matched
-      matched.forEach((matchedRoute) => {
-        if (get(matchedRoute, 'meta.breadcrumbText')) {
-          let text
-          if (typeof matchedRoute.meta.breadcrumbText === 'function') {
-            text = matchedRoute.meta.breadcrumbText(this.$route)
-          } else {
-            text = matchedRoute.meta.breadcrumbText
+      if (/RouteNotFound$/.test(this.$route.name)) {
+        const text = get(this.$route, 'meta.breadcrumbText', 'Ohpss')
+        crumbs.push({ text, currentRoute: true })
+      } else {
+        const matched = this.$route.matched
+        matched.forEach((matchedRoute) => {
+          if (get(matchedRoute, 'meta.breadcrumbText')) {
+            let text
+            if (typeof matchedRoute.meta.breadcrumbText === 'function') {
+              text = matchedRoute.meta.breadcrumbText(this.$route)
+            } else {
+              text = matchedRoute.meta.breadcrumbText
+            }
+            const to = namespacedRoute(matchedRoute, namespace)
+            crumbs.push({ text, to })
           }
-          const to = namespacedRoute(matchedRoute, namespace)
-          crumbs.push({ text, to })
-        }
-      })
+        })
 
-      const lastItem = last(crumbs)
-      crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
+        const lastItem = last(crumbs)
+        crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
+      }
 
       return crumbs
     },

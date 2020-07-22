@@ -74,6 +74,7 @@ const state = {
   shoots: {},
   sortedShoots: [],
   filteredAndSortedShoots: [],
+  subscriptionError: undefined,
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
@@ -117,6 +118,9 @@ const actions = {
   clearAll ({ commit, dispatch }) {
     commit('CLEAR_ALL')
     return getters.items
+  },
+  setSubscriptionError ({ commit }, value) {
+    commit('SET_SUBSCRIPTION_ERROR', value)
   },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
@@ -623,6 +627,10 @@ const deleteItem = (state, deletedItem) => {
 
 // mutations
 const mutations = {
+  SET_SUBSCRIPTION_ERROR (state, error) {
+    console.error('Error', error)
+    state.subscriptionError = error
+  },
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem({ namespace, name })
     if (item !== undefined) {
@@ -689,6 +697,7 @@ const mutations = {
     state.shoots = {}
     state.sortedShoots = []
     state.filteredAndSortedShoots = []
+    state.subscriptionError = undefined
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
     state.shootListFilters = value

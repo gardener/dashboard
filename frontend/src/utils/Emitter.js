@@ -338,7 +338,7 @@ forEach([shootsConnector, ticketsConnector], connector => {
   socket.on('subscription_error', error => {
     const { kind, code, message } = error
     console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
-    store.dispatch('setError', error)
+    store.dispatch('setSubscriptionError', error)
   })
 })
 

@@ -1200,6 +1200,13 @@ const actions = {
     commit('SET_WEBSOCKETCONNECTIONERROR', null)
     return state.websocketConnectionError
   },
+  setSubscriptionError ({ dispatch }, value) {
+    const { kind, code, message } = value
+    if (kind === 'shoot') {
+      return dispatch('shoots/setSubscriptionError', { code, message })
+    }
+    return dispatch('setError', value)
+  },
   setError ({ commit }, value) {
     commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })
     return state.alert

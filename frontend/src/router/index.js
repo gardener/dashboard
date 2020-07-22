@@ -40,6 +40,8 @@ const Secrets = () => import('@/views/Secrets')
 const Members = () => import('@/views/Members')
 const Account = () => import('@/views/Account')
 const Administration = () => import('@/views/Administration')
+const ShootPlaceholder = () => import('@/views/ShootPlaceholder')
+const NotFound = () => import('@/views/NotFound')
 
 Vue.use(Router)
 
@@ -213,6 +215,10 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
+          path: 'namespace/:namespace',
+          redirect: 'namespace/:namespace/shoots'
+        },
+        {
           path: 'namespace/:namespace/shoots',
           component: PlaceholderComponent,
           meta: {
@@ -264,7 +270,7 @@ export default function createRouter ({ store, userManager }) {
             },
             {
               path: ':name',
-              component: PlaceholderComponent,
+              component: ShootPlaceholder,
               meta: {
                 namespaced: true,
                 projectScope: true,
@@ -281,6 +287,28 @@ export default function createRouter ({ store, userManager }) {
                     namespaced: true,
                     projectScope: true,
                     title: 'Cluster Details',
+                    tabs: shootItemTabs
+                  }
+                },
+                {
+                  path: ':name/yaml',
+                  name: 'ShootDetailsEditor',
+                  component: ShootDetailsEditor,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    breadcrumbText: routeParamName,
+                    tabs: shootItemTabs
+                  }
+                },
+                {
+                  path: ':name/hibernation',
+                  name: 'ShootItemHibernationSettings',
+                  component: ShootDetails,
+                  meta: {
+                    namespaced: true,
+                    projectScope: true,
+                    breadcrumbText: routeParamName,
                     tabs: shootItemTabs
                   }
                 },
@@ -302,28 +330,6 @@ export default function createRouter ({ store, userManager }) {
                   }
                 }
               ]
-            },
-            {
-              path: ':name/yaml',
-              name: 'ShootDetailsEditor',
-              component: ShootDetailsEditor,
-              meta: {
-                namespaced: true,
-                projectScope: true,
-                breadcrumbText: routeParamName,
-                tabs: shootItemTabs
-              }
-            },
-            {
-              path: ':name/hibernation',
-              name: 'ShootItemHibernationSettings',
-              component: ShootDetails,
-              meta: {
-                namespaced: true,
-                projectScope: true,
-                breadcrumbText: routeParamName,
-                tabs: shootItemTabs
-              }
             }
           ]
         },
@@ -398,6 +404,10 @@ export default function createRouter ({ store, userManager }) {
           }
         },
         {
+          path: 'namespace/:namespace/term',
+          redirect: 'namespace/:namespace/term/garden'
+        },
+        {
           path: 'namespace/:namespace/term/garden',
           name: 'GardenTerminal',
           component: ShootItemTerminal,
@@ -413,13 +423,40 @@ export default function createRouter ({ store, userManager }) {
               }
             }
           },
-          beforeEnter: (to, from, next) => {
+          beforeEnter (to, from, next) {
             if (hasGardenTerminalAccess()) {
               to.params.target = TargetEnum.GARDEN
               next()
             } else {
               next('/')
             }
+          }
+        },
+        {
+          path: 'namespace/:namespace/shoots/:name/*',
+          name: 'ShootRouteNotFound',
+          component: NotFound,
+          meta: {
+            namespaced: true,
+            breadcrumbText: 'Ohpss'
+          }
+        },
+        {
+          path: 'namespace/:namespace/*',
+          name: 'NamespacedRouteNotFound',
+          component: NotFound,
+          meta: {
+            namespaced: true,
+            breadcrumbText: 'Ohpss'
+          }
+        },
+        {
+          path: '*',
+          name: 'RouteNotFound',
+          component: NotFound,
+          meta: {
+            namespaced: false,
+            breadcrumbText: 'Ohpss'
           }
         }
       ]
