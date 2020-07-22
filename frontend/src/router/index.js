@@ -438,7 +438,7 @@ export default function createRouter ({ store, userManager }) {
           component: NotFound,
           meta: {
             namespaced: true,
-            breadcrumbText: 'Ohpss'
+            breadcrumbText: 'Oops …'
           }
         },
         {
@@ -447,7 +447,7 @@ export default function createRouter ({ store, userManager }) {
           component: NotFound,
           meta: {
             namespaced: true,
-            breadcrumbText: 'Ohpss'
+            breadcrumbText: 'Oops …'
           }
         },
         {
@@ -456,7 +456,7 @@ export default function createRouter ({ store, userManager }) {
           component: NotFound,
           meta: {
             namespaced: false,
-            breadcrumbText: 'Ohpss'
+            breadcrumbText: 'Oops …'
           }
         }
       ]

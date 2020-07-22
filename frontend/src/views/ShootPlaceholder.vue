@@ -37,6 +37,12 @@ import get from 'lodash/get'
 
 export default {
   name: 'shoot-placeholder',
+  data () {
+    return {
+      deleted: false,
+      modified: false
+    }
+  },
   computed: {
     item () {
       return this.$store.getters.shootByNamespaceAndName(this.$route.params)
@@ -45,7 +51,7 @@ export default {
       return get(this.$store.state.shoots, 'subscriptionError.message')
     },
     notFound () {
-      return !this.item && this.subscriptionErrorMessage === 'Failed to fetch cluster'
+      return !this.item && (this.subscriptionErrorMessage || this.deleted)
     },
     fallback () {
       const namespace = get(this.$route, 'params.namespace', this.$store.state.namespace)
@@ -54,6 +60,15 @@ export default {
         params: {
           namespace
         }
+      }
+    }
+  },
+  watch: {
+    item (newItem, oldItem) {
+      if (newItem) {
+        this.modified = true
+      } else if (oldItem) {
+        this.deleted = true
       }
     }
   },
