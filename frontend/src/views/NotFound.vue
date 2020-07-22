@@ -23,7 +23,7 @@ limitations under the License.
         <h2>Look like you're lost</h2>
         <p class="message">The page you are looking for is not available!</p>
         <v-btn dark color="cyan darken-2" @click="goBack">
-          Get me out of here!
+          Get me out of here
         </v-btn>
       </v-col>
     </v-row>
