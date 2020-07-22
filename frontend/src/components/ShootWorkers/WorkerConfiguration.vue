@@ -21,12 +21,14 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     maxWidth="760"
+    confirmRequired
     caption="Configure Workers">
     <template v-slot:actionComponent>
       <manage-workers
       ref="manageWorkers"
       @valid="onWorkersValid"
-     ></manage-workers>
+      ></manage-workers>
+      <v-alert type="warning" outlined class="mt-2">Please confirm changes to the worker groups as this may affect your workload</v-alert>
     </template>
   </action-icon-dialog>
 </template>
