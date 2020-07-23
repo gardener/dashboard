@@ -24,10 +24,12 @@ const {
   dashboardClient // privileged client for the garden cluster
 } = require('../kubernetes-client')
 const { bootstrapper } = require('../services/terminals')
+const cache = require('../cache')
 
 async function deleteTickets ({ namespace, name }) {
   try {
-    await tickets.deleteTickets({ namespace, name })
+    const projectName = cache.findProjectByNamespace(namespace).metadata.name
+    await tickets.deleteTickets({ projectName, name })
   } catch (error) {
     logger.error('failed to delete tickets for %s/%s: %s', namespace, name, error)
   }
