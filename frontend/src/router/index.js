@@ -291,7 +291,7 @@ export default function createRouter ({ store, userManager }) {
                   }
                 },
                 {
-                  path: ':name/yaml',
+                  path: 'yaml',
                   name: 'ShootDetailsEditor',
                   component: ShootDetailsEditor,
                   meta: {
@@ -302,7 +302,7 @@ export default function createRouter ({ store, userManager }) {
                   }
                 },
                 {
-                  path: ':name/hibernation',
+                  path: 'hibernation',
                   name: 'ShootItemHibernationSettings',
                   component: ShootDetails,
                   meta: {
