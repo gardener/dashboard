@@ -37,8 +37,18 @@ describe('watches', function () {
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
   const foobaz = { metadata: { namespace: 'foo', name: 'baz', uid: 5 } }
   const projectList = [
-    { metadata: { namespace: 'foo', name: 'foo' } },
-    { metadata: { namespace: 'bar', name: 'bar' } }
+    {
+      metadata: { name: 'foo' },
+      spec: {
+        namespace: 'foo'
+      }
+    },
+    {
+      metadata: { name: 'bar' },
+      spec: {
+        namespace: 'bar'
+      }
+    }
   ]
 
   let emitter
@@ -136,7 +146,7 @@ describe('watches', function () {
     }
 
     function qualifiedName ({ metadata: { namespace, name } }) {
-      const projectName = _.find(projectList, ['metadata.namespace', namespace]).metadata.name
+      const projectName = _.find(projectList, ['spec.namespace', namespace]).metadata.name
       return { projectName, name }
     }
 
@@ -200,12 +210,13 @@ describe('watches', function () {
       bootstrapResourceStub = sandbox.stub(bootstrapper, 'bootstrapResource')
       isResourcePendingStub = sandbox.stub(bootstrapper, 'isResourcePending')
       removePendingResourceStub = sandbox.stub(bootstrapper, 'removePendingResource')
-      findProjectByNamespaceStub = sandbox.stub(cache, 'findProjectByNamespace')
+      findProjectByNamespaceStub = sandbox
+        .stub(cache, 'findProjectByNamespace')
+        .callsFake(namespace => _.find(projectList, ['spec.namespace', namespace]))
     })
 
     it('should watch shoots without issues', async function () {
       isResourcePendingStub.withArgs(foobar).returns(true)
-      findProjectByNamespaceStub.callsFake(namespace => _.find(projectList, ['metadata.namespace', namespace]))
 
       watches.shoots(io)
 
@@ -248,7 +259,6 @@ describe('watches', function () {
       isResourcePendingStub.withArgs(foobar).returns(false)
       isResourcePendingStub.withArgs(foobazUnhealthy).returns(true)
       removePendingResourceStub.withArgs(foobazUnhealthy)
-      findProjectByNamespaceStub.callsFake(namespace => _.find(projectList, ['metadata.namespace', namespace]))
 
       watches.shoots(io, { shootsWithIssues })
 
@@ -309,7 +319,6 @@ describe('watches', function () {
       isResourcePendingStub.withArgs(foobar).returns(true)
       isResourcePendingStub.withArgs(foobaz).returns(false)
       removePendingResourceStub.withArgs(foobar)
-      findProjectByNamespaceStub.callsFake(namespace => _.find(projectList, ['metadata.namespace', namespace]))
 
       watches.shoots(io)
 
@@ -414,7 +423,7 @@ describe('watches', function () {
       infoSpy = sandbox.spy(logger, 'info')
       warnSpy = sandbox.spy(logger, 'warn')
       errorSpy = sandbox.spy(logger, 'error')
-      cacheStub = sandbox.stub(cache.cache, 'getTicketCache')
+      cacheStub = sandbox.stub(cache, 'getTicketCache')
       loadOpenIssuesStub = sandbox.stub(tickets, 'loadOpenIssues')
     })
 
