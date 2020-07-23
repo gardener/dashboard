@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/frontend",
-  "version": "1.43.1",
+  "version": "1.43.2",
   "description": "Gardener Dashboard Client",
   "license": "Apache-2.0",
   "repository": {
