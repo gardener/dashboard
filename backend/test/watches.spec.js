@@ -247,7 +247,7 @@ describe('watches', function () {
       expect(isResourcePendingStub).to.be.calledTwice
       expect(removePendingResourceStub).to.be.calledOnce
       expect(deleteTicketsStub).to.be.calledOnce
-      expect(findProjectByNamespaceStub).to.be.calledOnce
+      expect(findProjectByNamespaceStub).to.be.calledOnceWithExactly('foo')
 
       expect(fooRoom.events).to.be.empty
       expect(fooBarRoom.events).to.be.empty
