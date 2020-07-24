@@ -726,13 +726,14 @@ export function selectedImageIsNotLatest (machineImage, machineImages) {
   })
 }
 
+const UNKNOWN_EXPIRED_TIMESTAMP = '1970-01-01T00:00:00Z'
 export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfileName, k8sAutoPatch) {
   const allVersions = store.getters.kubernetesVersions(shootCloudProfileName)
   const version = find(allVersions, { version: shootK8sVersion })
   if (!version) {
     return {
       version: shootK8sVersion,
-      expirationDate: Date.now(),
+      expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
       isWarning: true,
       isValidTerminationDate: false
     }
@@ -769,7 +770,7 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
     if (!workerImageDetails) {
       return {
         ...workerImage,
-        expirationDate: Date.now(),
+        expirationDate: UNKNOWN_EXPIRED_TIMESTAMP,
         isWarning: true,
         workerName: worker.name,
         isValidTerminationDate: false
