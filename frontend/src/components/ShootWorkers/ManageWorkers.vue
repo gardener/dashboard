@@ -78,7 +78,6 @@ import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
-import sortBy from 'lodash/sortBy'
 const uuidv4 = require('uuid/v4')
 
 export default {
@@ -127,17 +126,17 @@ export default {
         return this.allZones
       }
       // Ensure that only zones can be selected, that have a network config in providerConfig (if required)
-      // or that free networks are available to use more zones
+      // or that free networks are available to select more zones
       const clusterRequiresZoneNetworkConfiguration = !isEmpty(this.currentZonesWithNetworkConfigInShoot)
       if (!clusterRequiresZoneNetworkConfiguration) {
-        return sortBy(this.allZones)
+        return this.allZones
       }
 
       if (this.currentFreeNetworks.length) {
-        return sortBy(this.allZones)
+        return this.allZones
       }
 
-      return sortBy(this.currentZonesWithNetworkConfigInShoot)
+      return this.currentZonesWithNetworkConfigInShoot
     },
     maxAdditionalZones () {
       if (this.isNewCluster) {
@@ -147,8 +146,8 @@ export default {
       if (!clusterRequiresZoneNetworkConfiguration) {
         return -1 // not applicable - no limit
       }
-      const totalNumberOfPossibleZones = this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length
-      if (totalNumberOfPossibleZones >= this.allZones.length) {
+      const totalNumberOfPossibleNetworkConfigurations = this.currentZonesWithNetworkConfigInShoot.length + this.currentFreeNetworks.length
+      if (totalNumberOfPossibleNetworkConfigurations >= this.allZones.length) {
         return -1 // enough free networks - no limit
       }
       return this.currentFreeNetworks.length

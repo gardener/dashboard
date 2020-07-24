@@ -131,6 +131,7 @@ import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
+import sortBy from 'lodash/sortBy'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -310,7 +311,8 @@ export default {
       }
     },
     zoneItems () {
-      return map(this.allZones, zone => ({
+      const sortedZones = sortBy(this.allZones)
+      return map(sortedZones, zone => ({
         text: zone,
         value: zone,
         disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
