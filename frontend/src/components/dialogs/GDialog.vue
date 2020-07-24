@@ -15,7 +15,7 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
+  <v-dialog v-model="visible" v-if="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
       <v-toolbar flat :class="titleColorClass">
         <v-toolbar-title class="dialog-title align-center justify-start">
@@ -180,6 +180,7 @@ export default {
     showDialog () {
       this.visible = true
       this.$nextTick(() => {
+        window.addEventListener('resize', this.onResize)
         this.onContentScrolled()
         this.showScrollBar()
       })
@@ -222,6 +223,9 @@ export default {
       } else {
         this.bottomOverlayVisible = false
       }
+    },
+    onResize () {
+      this.onContentScrolled()
     },
     showScrollBar () {
       if (this.$refs.contentCard) {
