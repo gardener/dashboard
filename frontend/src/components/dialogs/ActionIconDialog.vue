@@ -44,6 +44,7 @@ limitations under the License.
       :confirmValue="confirmValue"
       :confirmColor="dialogColor"
       :defaultColor="dialogColor"
+      :disableConfirmInputFocus="disableConfirmInputFocus"
       ref="gDialog"
     >
       <template v-slot:caption>{{caption}}</template>
@@ -121,6 +122,9 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    disableConfirmInputFocus: {
+      type: Boolean
     }
   },
   mixins: [shootItem],

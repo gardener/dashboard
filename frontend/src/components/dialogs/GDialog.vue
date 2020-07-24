@@ -102,6 +102,9 @@ export default {
     maxHeight: {
       type: String,
       default: '50vh'
+    },
+    disableConfirmInputFocus: {
+      type: Boolean
     }
   },
   data () {
@@ -163,7 +166,9 @@ export default {
 
       // we must delay the "focus" handling because the dialog.open is animated
       // and the 'autofocus' property didn't work in this case.
-      setDelayedInputFocus(this, 'deleteDialogInput')
+      if (!this.disableConfirmInputFocus) {
+        setDelayedInputFocus(this, 'deleteDialogInput')
+      }
 
       return new Promise(resolve => {
         this.resolve = resolve

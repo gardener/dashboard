@@ -22,7 +22,8 @@ limitations under the License.
     ref="actionDialog"
     maxWidth="760"
     confirmRequired
-    caption="Configure Workers">
+    caption="Configure Workers"
+    disable-confirm-input-focus>
     <template v-slot:actionComponent>
       <manage-workers
       ref="manageWorkers"
