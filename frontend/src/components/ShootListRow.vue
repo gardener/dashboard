@@ -29,7 +29,7 @@ limitations under the License.
           </router-link>
         </v-col>
         <v-col class="shrink" >
-          <div class="d-flex flew-row">
+          <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
             <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
             <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
             <hibernation-schedule-warning
