@@ -54,7 +54,7 @@ limitations under the License.
       </div>
       <template v-if="showStatusText">
         <div v-for="({ description }) in tooltip.userErrorCodeObjects" :key="description">
-          <div class="font-weight-bold error--text">{{description}}</div>
+          <div class="font-weight-bold error--text wrap">{{description}}</div>
         </div>
       </template>
     </template>
@@ -246,6 +246,10 @@ export default {
 
   .status-icon-check {
     font-size: 30px;
+  }
+
+  .wrap {
+    white-space: normal;
   }
 
   ::v-deep .v-card  {
