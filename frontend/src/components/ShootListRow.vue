@@ -23,7 +23,7 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
-        <v-col class="grow" >
+        <v-col class="grow pa-0 ma-0">
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
             {{ shootName }}
           </router-link>
