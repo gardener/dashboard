@@ -39,18 +39,6 @@ function getTypeName (apiVersion, kind) {
   return `${apiVersion}, Kind=${kind}`
 }
 
-async function closeOrTerminateSocket (socket, gracePeriodMilliseconds = 1000) {
-  if (!socket || socket.readyState === WebSocket.CLOSED) {
-    return
-  }
-  try {
-    socket.close(4006, 'Gracefully closing websocket')
-    await pEvent(socket, 'close', { timeout: gracePeriodMilliseconds })
-  } catch (err) {
-    socket.terminate()
-  }
-}
-
 class BackoffManager {
   constructor ({ min = 800, max = 15 * 1000, resetDuration = 60 * 1000, factor = 1.5, jitter = 0.1 } = {}) {
     this.min = min
@@ -133,6 +121,25 @@ class Reflector {
     return this.lastSyncResourceVersion
   }
 
+  async closeOrTerminateSocket () {
+    if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
+      logger.debug('Socket of %s has already been closed', this.expectedTypeName)
+      return
+    }
+    const timeout = this.gracePeriod.asMilliseconds()
+    try {
+      logger.debug('Closing socket of %s with timeout %d', this.expectedTypeName, timeout)
+      const socketClosed = pEvent(this.socket, 'close', { timeout })
+      this.socket.close(4006, 'Gracefully closing websocket')
+      await socketClosed
+      logger.debug('Closed socket of %s', this.expectedTypeName)
+    } catch (err) {
+      logger.debug('Terminating socket of %s', this.expectedTypeName)
+      this.socket.terminate()
+      logger.debug('Terminated socket of %s', this.expectedTypeName)
+    }
+  }
+
   stop () {
     this.stopRequested = true
     const agent = this.listWatcher.agent
@@ -140,22 +147,26 @@ class Reflector {
       agent.destroy()
     }
     this.backoffManager.clearTimeout()
-    return closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
+    return this.closeOrTerminateSocket()
   }
 
   async run () {
     logger.info('Starting reflector %s', this.expectedTypeName)
-    while (!this.stopRequested) {
-      try {
-        await this.listAndWatch()
-      } catch (err) {
-        logger.error('Failed to list and watch %s: %s', this.expectedTypeName, err)
+    try {
+      while (!this.stopRequested) {
+        try {
+          await this.listAndWatch()
+        } catch (err) {
+          logger.error('Failed to list and watch %s: %s', this.expectedTypeName, err)
+        }
+        if (this.stopRequested) {
+          break
+        }
+        logger.info('Restarting reflector %s', this.expectedTypeName)
+        await delay(this.backoffManager.duration())
       }
-      if (this.stopRequested) {
-        break
-      }
-      logger.info('Restarting reflector %s', this.expectedTypeName)
-      await delay(this.backoffManager.duration())
+    } finally {
+      logger.info('Stopped reflector %s', this.expectedTypeName)
     }
   }
 
@@ -173,6 +184,7 @@ class Reflector {
 
     let list
     try {
+      logger.info('Calling list %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
       list = await pager.list(options)
     } catch (err) {
       if (isExpiredError(err)) {
@@ -183,6 +195,7 @@ class Reflector {
         // resource version it is listing at is expired, so we need to fallback to resourceVersion="" in all
         // to recover and ensure the reflector makes forward progress.
         try {
+          logger.info('Falling back to full list %s', this.expectedTypeName)
           list = await pager.list({
             resourceVersion: this.relistResourceVersion
           })
@@ -202,6 +215,9 @@ class Reflector {
       resourceVersion,
       paginated: paginatedResult
     } = list.metadata
+
+    const lines = Array.isArray(list.items) ? list.items.length : 0
+    logger.info('List of %s successfully returned %d items (paginated=%s)', this.expectedTypeName, lines, paginatedResult)
 
     // We check if the list was paginated and if so set the paginatedResult based on that.
     // However, we want to do that only for the initial list (which is the only case
@@ -272,7 +288,9 @@ class Reflector {
           return
         }
       } finally {
-        await closeOrTerminateSocket(this.socket, this.gracePeriod.asMilliseconds())
+        logger.info('Trying to gracefully close socket of %s', this.expectedTypeName)
+        await this.closeOrTerminateSocket()
+        logger.info('Closed or terminated socket of %s', this.expectedTypeName)
       }
     }
   }
