@@ -208,7 +208,7 @@ export default {
     },
     updateElevation () {
       const contentCardRef = this.$refs.contentCard
-      if(contentCardRef) {
+      if (contentCardRef) {
         if (contentCardRef.scrollTop > 0) {
           this.topBarElevation = true
         } else {
@@ -239,7 +239,7 @@ export default {
         this.intervalId = setInterval(() => this.updateElevation(), 100)
         this.$nextTick(() => this.showScrollBar())
       } else {
-         clearInterval(this.intervalId)
+        clearInterval(this.intervalId)
       }
     }
   }
