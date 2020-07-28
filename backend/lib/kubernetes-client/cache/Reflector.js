@@ -129,9 +129,9 @@ class Reflector {
     const timeout = this.gracePeriod.asMilliseconds()
     try {
       logger.debug('Closing socket of %s with timeout %d', this.expectedTypeName, timeout)
-      const socketClosed = pEvent(this.socket, 'close', { timeout })
       this.socket.close(4006, 'Gracefully closing websocket')
-      await socketClosed
+      logger.debug('Closing socket of %s has been triggered', this.expectedTypeName)
+      await pEvent(this.socket, 'close', { timeout })
       logger.debug('Closed socket of %s', this.expectedTypeName)
     } catch (err) {
       logger.debug('Terminating socket of %s', this.expectedTypeName)

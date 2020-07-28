@@ -70,7 +70,7 @@ class Logger {
   }
 
   request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
-    if (!this.isDisabled(LEVELS.trace + 1)) {
+    if (!this.isDisabled(LEVELS.debug)) {
       const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
       const host = headers.host || url.host || '-'
       const path = url.path || (url.pathname + url.search)
@@ -83,9 +83,17 @@ class Logger {
     }
   }
 
-  response ({ id, statusCode, statusMessage = '', httpVersion = '1.1', headers, body }) {
-    if (!this.isDisabled(LEVELS.trace)) {
-      let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
+  response ({ id, url = {}, method, statusCode, statusMessage = '', httpVersion = '1.1', headers, duration, body }) {
+    if (!this.isDisabled(LEVELS.debug)) {
+      const path = url.path || (url.pathname + url.search)
+      let msg = ''
+      if (method && url) {
+        msg += `${method} ${path} `
+      }
+      msg += `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
+      if (duration) {
+        msg += ` ${duration}ms`
+      }
       if (body && statusCode >= 300) {
         msg += '\n' + this.inspect(body)
       }
