@@ -14,67 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-  <div class="fill-height">
-    <router-view v-if="!notFound"></router-view>
-    <v-container v-else
-      class="text-center fill-height">
-      <v-row align="center">
-        <v-col>
-          <h1>404</h1>
-          <h2>Cluster not found</h2>
-          <p class="message">The cluster you are looking for doesn't exist or an other error occured!</p>
-          <v-btn dark color="cyan darken-2" @click="goBack">
-            Back to cluster list
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
-  </div>
+  <v-container fluid class="fill-height text-center">
+    <v-row align="center">
+      <v-col>
+        <h1>404</h1>
+        <h2>Cluster not found</h2>
+        <p class="message">The cluster you are looking for doesn't exist or an other error occured!</p>
+        <v-btn dark color="cyan darken-2" @click="goBack">
+          Back to cluster list
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import get from 'lodash/get'
 
 export default {
-  name: 'shoot-placeholder',
-  data () {
-    return {
-      deleted: false,
-      modified: false
-    }
-  },
-  computed: {
-    item () {
-      return this.$store.getters.shootByNamespaceAndName(this.$route.params)
-    },
-    subscriptionErrorMessage () {
-      return get(this.$store.state.shoots, 'subscriptionError.message')
-    },
-    notFound () {
-      return !this.item && (this.subscriptionErrorMessage || this.deleted)
-    },
-    fallback () {
+  methods: {
+    goBack (fallback) {
       const namespace = get(this.$route, 'params.namespace', this.$store.state.namespace)
-      return {
+      this.$router.push({
         name: 'ShootList',
         params: {
           namespace
         }
-      }
-    }
-  },
-  watch: {
-    item (newItem, oldItem) {
-      if (newItem) {
-        this.modified = true
-      } else if (oldItem) {
-        this.deleted = true
-      }
-    }
-  },
-  methods: {
-    goBack (fallback) {
-      this.$router.push(this.fallback)
+      })
     }
   }
 }

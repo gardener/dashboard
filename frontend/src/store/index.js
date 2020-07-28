@@ -556,6 +556,9 @@ const getters = {
   namespaces (state) {
     return map(state.projects.all, 'metadata.namespace')
   },
+  defaultNamespace (state, getters) {
+    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.metadatanamespaces)
+  },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
@@ -968,9 +971,30 @@ const actions = {
   },
   subscribeShoot ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/clearAll')
-      .then(() => EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace }))
-      .catch(err => {
-        dispatch('setError', err)
+      .then(() => {
+        EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+        const key = `${name}_${namespace}`
+        return new Promise((resolve, reject) => {
+          const unsubscribe = store.subscribe(({ type, payload }, state) => {
+            switch (type) {
+              case 'shoots/SET_SUBSCRIPTION_ERROR': {
+                unsubscribe()
+                reject(new Error(get(payload, 'message', 'Shoot subscription failed')))
+                break
+              }
+              case 'shoots/SET_SUBSCRIPTION_DONE': {
+                unsubscribe()
+                console.log()
+                if (Reflect.has(state.shoots.shoots, key)) {
+                  resolve(state.shoots.shoots[key])
+                } else {
+                  reject(new Error('Shoot not found'))
+                }
+                break
+              }
+            }
+          })
+        })
       })
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {

@@ -15,72 +15,48 @@ limitations under the License.
  -->
 
 <template>
-  <v-container class="text-center fill-height">
-    <v-row align="center">
-      <v-col>
-        <h1>404</h1>
-        <h2>Looks like you're lost</h2>
-        <p class="message">The page you are looking for is not available!</p>
-        <v-btn dark color="cyan darken-2" @click="goBack">
-          Get me out of here
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-app>
+    <v-main>
+      <v-container class="text-center fill-height">
+        <v-row align="center">
+          <v-col>
+            <h1>5XX</h1>
+            <h2>Something unexpected happened</h2>
+            <p class="message">{{ message }}</p>
+            <v-btn dark color="cyan darken-2" @click="goBack">
+              Get me out of here
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
-import includes from 'lodash/includes'
-import head from 'lodash/head'
 
 export default {
-  name: 'not-found',
+  name: 'router-error',
   data () {
     return {
       fromRoute: undefined
     }
   },
   computed: {
-    ...mapState([
-      'namespace'
-    ]),
-    ...mapGetters([
-      'namespaces'
-    ]),
-    defaultNamespace () {
-      return this.namespace || includes(this.namespaces, 'garden') ? 'garden' : head(this.namespaces)
+    message () {
+      return get(this.$store, 'alert.message')
     },
-    fallback () {
-      const namespace = get(this.$route, 'params.namespace', this.defaultNamespace)
-      const name = get(this.$route, 'params.name')
-      if (namespace) {
-        if (name) {
-          return {
-            name: 'ShootItem',
-            params: {
-              namespace,
-              name
-            }
-          }
-        }
-        return {
-          name: 'ShootList',
-          params: {
-            namespace
-          }
-        }
-      }
-      return {
-        name: 'Home'
-      }
+    type () {
+      return get(this.$store, 'alert.type', 'Error').toUpperCase()
     }
   },
   methods: {
     goBack (fallback) {
       if (!get(this, 'fromRoute.name')) {
-        this.$router.push(this.fallback)
+        this.$router.push({
+          name: 'Home'
+        })
       } else {
         this.$router.back()
       }

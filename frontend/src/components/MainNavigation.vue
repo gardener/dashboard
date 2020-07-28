@@ -239,12 +239,6 @@ export default {
         this.$router.push(this.getProjectMenuTargetRoute(namespace))
       }
     },
-    routeMeta () {
-      return this.$route.meta || {}
-    },
-    namespaced () {
-      return !!this.routeMeta.namespaced
-    },
     hasNoProjects () {
       return !this.projectList.length
     },
@@ -345,20 +339,27 @@ export default {
       this.projectDialog = true
     },
     getProjectMenuTargetRoute (namespace) {
-      let name = routeName(this.$route)
-      const nsHasProjectScope = namespace !== this.allProjectsItem.metadata.namespace
-      const fallback = 'ShootList'
-      if (!nsHasProjectScope) {
-        const thisProjectScoped = this.routeMeta.projectScope
-        if (thisProjectScoped) {
-          name = fallback
+      const fallbackToShootList = route => {
+        if (namespace === '_all' && get(route, 'meta.projectScope') !== false) {
+          return true
         }
-      } else if (!isEmpty(this.$route, 'params.name')) {
-        name = fallback
-      } else if (get(this.$route, 'name') === 'GardenTerminal') {
-        name = fallback
+        if (!isEmpty(route, 'params.name')) {
+          return true
+        }
+        if (get(route, 'name') === 'GardenTerminal') {
+          return true
+        }
+        return false
       }
-      return !this.namespaced ? { name, query: { namespace } } : { name, params: { namespace } }
+      const route = {
+        name: fallbackToShootList(this.$route) ? 'ShootList' : routeName(this.$route)
+      }
+      if (get(this.$route, 'meta.namespaced') === false) {
+        route.query = { namespace }
+      } else {
+        route.params = { namespace }
+      }
+      return route
     },
     onInputProjectFilter () {
       this.highlightedProjectName = undefined

@@ -15,28 +15,24 @@ limitations under the License.
 -->
 
 <template>
-  <v-breadcrumbs :items="breadcrumbItems">
+  <v-breadcrumbs :items="breadcrumbItems" class="pl-0">
     <template v-slot:divider>
-      <v-icon large>chevron_right</v-icon>
+      <v-icon large>mdi-chevron-right</v-icon>
     </template>
     <template v-slot:item="{ item }">
-      <span v-if="!item.to" :class="textClass(item)">
-        {{ item.text }}
-      </span>
-      <router-link v-else :to="item.to" :class="textClass(item)">
+      <router-link v-if="item.to" :to="item.to" class="black--text text-decoration-none">
         {{ item.text }}
       </router-link>
+      <span v-else class="black--text text-h6">
+        {{ item.text }}
+      </span>
     </template>
   </v-breadcrumbs>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import { namespacedRoute } from '@/utils'
 import get from 'lodash/get'
-import last from 'lodash/last'
-import size from 'lodash/size'
-import assign from 'lodash/assign'
 
 export default {
   name: 'breadcrumb',
@@ -45,40 +41,11 @@ export default {
       'namespace'
     ]),
     breadcrumbItems () {
-      var crumbs = []
-      const namespace = this.namespace
-      if (/RouteNotFound$/.test(this.$route.name)) {
-        const text = get(this.$route, 'meta.breadcrumbText', 'Oops …')
-        crumbs.push({ text, currentRoute: true })
-      } else {
-        const matched = this.$route.matched
-        matched.forEach((matchedRoute) => {
-          if (get(matchedRoute, 'meta.breadcrumbText')) {
-            let text
-            if (typeof matchedRoute.meta.breadcrumbText === 'function') {
-              text = matchedRoute.meta.breadcrumbText(this.$route)
-            } else {
-              text = matchedRoute.meta.breadcrumbText
-            }
-            const to = namespacedRoute(matchedRoute, namespace)
-            crumbs.push({ text, to })
-          }
-        })
-
-        const lastItem = last(crumbs)
-        crumbs.splice(size(crumbs) - 1, 1, assign({}, lastItem, { currentRoute: true }))
+      const breadcrumbs = get(this.$route, 'meta.breadcrumbs', [])
+      if (typeof breadcrumbs === 'function') {
+        return breadcrumbs(this.$route)
       }
-
-      return crumbs
-    },
-    textClass () {
-      return (item) => {
-        if (item.currentRoute) {
-          return 'breadcrumb title'
-        } else {
-          return 'breadcrumb subtitle-1 pointer'
-        }
-      }
+      return breadcrumbs
     },
     routeParamName () {
       return get(this.$route.params, 'name')
@@ -86,20 +53,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-  .v-breadcrumbs {
-    padding-left: 0px;
-  }
-
-  .pointer {
-    cursor: pointer;
-  }
-
-  .breadcrumb {
-    color: black;
-    text-decoration:none;
-  }
-
-</style>

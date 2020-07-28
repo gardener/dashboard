@@ -229,19 +229,33 @@ export function gravatarUrl (value, image, size) {
 }
 
 export function routes (router, includeRoutesWithProjectScope) {
-  const hasChildren = route => route.children && route.children.length
-  const routes = router.options.routes
-  const defaultRoute = find(routes, hasChildren)
-  const hasMenu = route => route.meta && route.meta.menu && (includeRoutesWithProjectScope || (!includeRoutesWithProjectScope && !route.meta.projectScope))
-  return filter(defaultRoute.children, hasMenu)
+  const hasChildren = ({ children }) => {
+    return children && children.length
+  }
+  const hasMenu = ({ meta: { menu, projectScope } = {} }) => {
+    return menu && (includeRoutesWithProjectScope || !projectScope)
+  }
+  const traverseRoutes = routes => {
+    for (const route of routes) {
+      if (hasMenu(route)) {
+        menuRoutes.push(route)
+      } else if (hasChildren(route)) {
+        traverseRoutes(route.children)
+      }
+    }
+  }
+  const menuRoutes = []
+  traverseRoutes(router.options.routes)
+  return menuRoutes
 }
 
 export function namespacedRoute (route, namespace) {
-  const params = {
-    namespace: namespace
+  return {
+    name: routeName(route),
+    params: {
+      namespace
+    }
   }
-
-  return { name: routeName(route), params }
 }
 
 export function routeName (route) {

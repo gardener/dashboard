@@ -44,6 +44,7 @@ limitations under the License.
 
 <script>
 import { mapState, mapGetters } from 'vuex'
+import get from 'lodash/get'
 import isEmpty from 'lodash/isEmpty'
 import ProjectCreateDialog from '@/components/dialogs/ProjectDialog'
 
@@ -76,7 +77,7 @@ export default {
     }
   },
   mounted () {
-    if (this.$route.path === '/namespace/+') {
+    if (get(this.$route.query, 'projectDialog') === 'true') {
       this.projectDialog = true
     }
   }

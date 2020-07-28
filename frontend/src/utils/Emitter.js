@@ -191,16 +191,20 @@ class ShootSubscription extends AbstractSubscription {
 
     /* currently we only throttle NamespacedEvents (for shoots) as for this kind
     * we expect many events coming in in a short period of time */
-    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
+    // const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
 
     this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
-      if (kind === 'shoot') {
-        throttledNsEventEmitter.emit(kind, namespaces)
+      if (kind === 'shoot' && namespaces) {
+        const { namespace } = this.subscribedTo || {}
+        store.commit('shoots/HANDLE_EVENTS', {
+          rootState: store.state,
+          events: namespaces[namespace]
+        })
       }
     })
     this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
+      store.commit('shoots/SET_SUBSCRIPTION_DONE', true)
       const { name, namespace } = target
-      throttledNsEventEmitter.flush()
       const promises = []
       if (store.getters.canGetSecrets) {
         promises.push(store.dispatch('getShootInfo', { name, namespace }))
@@ -224,7 +228,7 @@ class ShootSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
-
+    store.commit('shoots/SET_SUBSCRIPTION_DONE', false)
     this.socket.emit('subscribeShoot', { namespace, name })
     return true
   }
