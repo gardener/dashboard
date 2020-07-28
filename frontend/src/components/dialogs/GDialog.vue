@@ -15,9 +15,9 @@ limitations under the License.
  -->
 
 <template>
-  <v-dialog v-model="visible" v-if="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
+  <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
-      <v-toolbar flat :class="titleColorClass">
+      <v-toolbar flat :class="[{ 'elevation-4': topBarElevation }, titleColorClass]">
         <v-toolbar-title class="dialog-title align-center justify-start">
           <slot name="caption">
             Confirm Dialog
@@ -28,7 +28,7 @@ limitations under the License.
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard" @scroll="onContentScrolled()">
+      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard">
         <slot name="message">
           This is a generic dialog template.
         </slot>
@@ -44,10 +44,9 @@ limitations under the License.
           :color="textFieldColor">
         </v-text-field>
         <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
-        <div class="bottom-overlay" v-show="bottomOverlayVisible"></div>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-actions>
+      <v-card-actions :class="{ 'elevation-4': bottomBarElevation }">
         <v-spacer></v-spacer>
         <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
         <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
@@ -103,9 +102,6 @@ export default {
     maxHeight: {
       type: String,
       default: '50vh'
-    },
-    disableBottomOverlay: {
-      type: Boolean
     }
   },
   data () {
@@ -113,7 +109,9 @@ export default {
       userInput: '',
       visible: false,
       resolve: noop,
-      bottomOverlayVisible: true
+      topBarElevation: false,
+      bottomBarElevation: false,
+      intervalId: undefined
     }
   },
   computed: {
@@ -179,11 +177,6 @@ export default {
     },
     showDialog () {
       this.visible = true
-      this.$nextTick(() => {
-        window.addEventListener('resize', this.onResize)
-        this.onContentScrolled()
-        this.showScrollBar()
-      })
     },
     titleColorClassForString (titleColorClass) {
       switch (titleColorClass) {
@@ -213,25 +206,40 @@ export default {
       }
       this.visible = false
     },
-    onContentScrolled () {
-      if (this.disableBottomOverlay) {
-        this.bottomOverlayVisible = false
-      } else if (!this.$refs.contentCard) {
-        this.bottomOverlayVisible = false
-      } else if (this.$refs.contentCard.clientHeight + this.$refs.contentCard.scrollTop < this.$refs.contentCard.scrollHeight - 1) {
-        this.bottomOverlayVisible = true
-      } else {
-        this.bottomOverlayVisible = false
+    updateElevation () {
+      const contentCardRef = this.$refs.contentCard
+      if(contentCardRef) {
+        if (contentCardRef.scrollTop > 0) {
+          this.topBarElevation = true
+        } else {
+          this.topBarElevation = false
+        }
+
+        if (contentCardRef.clientHeight + contentCardRef.scrollTop < contentCardRef.scrollHeight) {
+          this.bottomBarElevation = true
+        } else {
+          this.bottomBarElevation = false
+        }
       }
     },
-    onResize () {
-      this.onContentScrolled()
-    },
     showScrollBar () {
-      if (this.$refs.contentCard) {
-        const scrollTopVal = this.$refs.contentCard.scrollTop
-        this.$refs.contentCard.scrollTop = scrollTopVal + 10
-        this.$refs.contentCard.scrollTop = scrollTopVal - 10
+      const contentCardRef = this.$refs.contentCard
+      if (!contentCardRef || !contentCardRef.clientHeight) {
+        this.$nextTick(() => this.showScrollBar())
+        return
+      }
+      const scrollTopVal = contentCardRef.scrollTop
+      contentCardRef.scrollTop = scrollTopVal + 10
+      contentCardRef.scrollTop = scrollTopVal - 10
+    }
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+        this.intervalId = setInterval(() => this.updateElevation(), 100)
+        this.$nextTick(() => this.showScrollBar())
+      } else {
+         clearInterval(this.intervalId)
       }
     }
   }
@@ -243,15 +251,5 @@ export default {
     code {
       box-shadow: none !important;
     }
-  }
-
-  .bottom-overlay {
-    background-image: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,1));
-    position: absolute;
-    pointer-events: none;
-    height: 50px;
-    bottom: 53px;
-    left: 10px;
-    right: 10px;
   }
 </style>
