@@ -112,7 +112,7 @@ limitations under the License.
           ></v-select>
       </div>
     </div>
-    <div class="ml-4">
+    <div class="ml-4 mr-2">
       <slot name="action"></slot>
     </div>
   </div>
