@@ -108,8 +108,7 @@ export default {
     return {
       userInput: '',
       visible: false,
-      resolve: noop,
-      intervalId: undefined
+      resolve: noop
     }
   },
   computed: {
