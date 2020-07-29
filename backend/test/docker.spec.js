@@ -21,26 +21,26 @@ const path = require('path')
 const _ = require('lodash')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
-const got = require('got')
 const { DockerfileParser } = require('dockerfile-ast')
-const httpClient = got.extend({
+const { extend } = require('../lib/http-client')
+const client = extend({
   prefixUrl: 'https://raw.githubusercontent.com/nodejs/docker-node/master/',
   resolveBodyOnly: true,
   timeout: 3000
 })
 /* Nodejs release schedule (see https://nodejs.org/en/about/releases/) */
 const activeNodeReleases = {
-  '10': {
+  10: {
     initialRelease: new Date('2018-04-24T00:00:00Z'),
     activeLtsStart: new Date('2018-10-30T00:00:00Z'),
     endOfLife: new Date('2021-04-01T23:59:59Z')
   },
-  '12': {
+  12: {
     initialRelease: new Date('2019-04-23T00:00:00Z'),
     activeLtsStart: new Date('2019-10-22T00:00:00Z'),
     endOfLife: new Date('2022-04-01T23:59:59Z')
   },
-  '14': {
+  14: {
     initialRelease: new Date('2020-04-21T00:00:00Z'),
     activeLtsStart: new Date('2020-10-20T00:00:00Z'),
     endOfLife: new Date('2023-04-01T23:59:59Z')
@@ -48,7 +48,7 @@ const activeNodeReleases = {
 }
 
 async function getNodeDockerfile (nodeVersion, alpineVersion) {
-  const body = await httpClient.get(`${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
+  const body = await client.request(`${nodeVersion}/alpine${alpineVersion}/Dockerfile`)
   return DockerfileParser.parse(body)
 }
 

@@ -16,12 +16,13 @@
 
 'use strict'
 
-const Client = require('./Client')
+const HTTPClient = require('./HTTPClient')
 const HTTPError = require('./HTTPError')
 
 module.exports = {
   HTTPError,
+  HTTPClient,
   extend (options) {
-    return new Client(options)
+    return new HTTPClient(options)
   }
 }
