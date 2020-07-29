@@ -18,7 +18,7 @@
 
 const _ = require('lodash')
 const { isIP } = require('net')
-const { HTTPError } = require('got')
+const { HTTPError } = require('../http-client')
 const { isHttpError, setAuthorization } = require('./util')
 const debug = require('./debug')
 const resources = require('./resources')

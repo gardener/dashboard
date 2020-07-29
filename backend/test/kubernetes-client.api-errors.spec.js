@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { HTTPError } = require('got')
+const { HTTPError } = require('../lib/http-client')
 
 const ApiErrors = require('../lib/kubernetes-client/ApiErrors')
 

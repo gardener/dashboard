@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { HTTPError } = require('got')
+const { HTTPError } = require('../lib/http-client')
 const { createClient } = require('../lib/kubernetes-client')
 
 describe('kubernetes-client', function () {

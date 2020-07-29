@@ -83,14 +83,12 @@ class Logger {
     }
   }
 
-  response ({ id, url = {}, method, statusCode, statusMessage = '', httpVersion = '1.1', headers, duration, body }) {
+  response ({ id, url, method, statusCode, statusMessage = '', httpVersion = '1.1', headers, duration, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
-      const path = url.path || (url.pathname + url.search)
-      let msg = ''
+      let msg = `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (method && url) {
-        msg += `${method} ${path} `
+        msg += ` ${method} ${url.path || (url.pathname + url.search)}`
       }
-      msg += `HTTP/${httpVersion} ${statusCode} ${statusMessage} [${id}]`
       if (duration) {
         msg += ` ${duration}ms`
       }
