@@ -217,7 +217,7 @@ class Reflector {
     } = list.metadata
 
     const lines = Array.isArray(list.items) ? list.items.length : 0
-    logger.info('List of %s successfully returned %d items (paginated=%s)', this.expectedTypeName, lines, paginatedResult)
+    logger.info('List of %s successfully returned %d items (%s)', this.expectedTypeName, lines, paginatedResult ? 'paginated' : 'not paginated')
 
     // We check if the list was paginated and if so set the paginatedResult based on that.
     // However, we want to do that only for the initial list (which is the only case

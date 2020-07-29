@@ -50,7 +50,7 @@ class Client {
         options.https.key = key
       }
       if (cert) {
-        options.https.cert = cert
+        options.https.certificate = cert
       }
       if (ca) {
         options.https.certificateAuthority = ca
@@ -66,7 +66,7 @@ class Client {
     const {
       https: {
         key,
-        cert,
+        certificate,
         certificateAuthority,
         rejectUnauthorized
       } = {},
@@ -76,12 +76,12 @@ class Client {
       } = {},
       ...options
     } = this[request].defaults.options
-    if (key || cert || certificateAuthority || rejectUnauthorized === true) {
+    if (key || certificate || certificateAuthority || rejectUnauthorized === true) {
       if (key) {
         options.key = key
       }
-      if (cert) {
-        options.cert = cert
+      if (certificate) {
+        options.cert = certificate
       }
       if (certificateAuthority) {
         options.ca = certificateAuthority
@@ -98,6 +98,14 @@ class Client {
 
   request (url, options) {
     try {
+      if (options && options.agent) {
+        const agent = options.agent
+        if (agent instanceof https.Agent) {
+          options.agent = { https: agent }
+        } else if (options.agent instanceof http.Agent) {
+          options.agent = { http: agent }
+        }
+      }
       return this[request](url, options)
     } catch (err) {
       if (err instanceof got.HTTPError) {
