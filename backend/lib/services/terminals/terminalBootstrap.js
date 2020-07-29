@@ -19,6 +19,7 @@
 const Queue = require('better-queue')
 const _ = require('lodash')
 const net = require('net')
+const moment = require('moment')
 
 const logger = require('../../logger')
 const config = require('../../config')
@@ -53,39 +54,70 @@ const { getSeed } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
-class BootstrapPendingSet extends Set {
-  _keyForResource (resource) {
-    const kind = resource.kind
-    const { metadata: { name, namespace } } = resource
-    return `${kind}/${namespace}/${name}`
+class BootstrapSet extends Set {
+  static keyForResource () {
+    throw new Error('needs to be overwritten in subclass')
   }
 
   containsResource (resource) {
-    const key = this._keyForResource(resource)
+    const key = this.constructor.keyForResource(resource)
     return this.has(key)
   }
 
   removeResource (resource) {
-    const key = this._keyForResource(resource)
+    const key = this.constructor.keyForResource(resource)
     return this.delete(key)
   }
 
   addResource (resource) {
-    const key = this._keyForResource(resource)
+    const key = this.constructor.keyForResource(resource)
+    return this.addResourceWithKey(key)
+  }
+
+  addResourceWithKey (key) {
     this.add(key)
     return key
   }
 }
 
+class BootstrapPendingSet extends BootstrapSet {
+  static keyForResource (resource) {
+    const kind = resource.kind
+    const { metadata: { name, namespace } } = resource
+    return `${kind}/${namespace}/${name}`
+  }
+}
+
+class BootstrappedSet extends BootstrapSet {
+  static keyForResource (resource) {
+    const { metadata: { uid } } = resource
+    return uid
+  }
+}
+
+function taskIdForResource (resource) {
+  const { metadata: { uid } } = resource
+  return uid
+}
+
 class Handler {
-  constructor (fn, description) {
+  constructor ({ id, fn, description }) {
+    this.id = id
     this.fn = fn
-    this._run = () => fn()
+    this._run = session => fn(session)
     this._description = description
+    this.session = {
+      canceled: false
+    }
   }
 
   run () {
-    return this._run()
+    return this._run(this.session)
+  }
+
+  cancel () {
+    logger.debug(`Cancel called on Handler ${this.description}`)
+    this.session.canceled = true
   }
 
   get description () {
@@ -199,12 +231,11 @@ function replaceServiceKubeApiServer (client, { name = TERMINAL_KUBE_APISERVER, 
   return replaceResource(client.core.services, { namespace, name, body })
 }
 
-async function handleSeed (seed) {
-  const name = seed.metadata.name
+async function handleSeed ({ name }) {
   const namespace = 'garden'
 
   // get latest seed resource from cache
-  seed = getSeed(name)
+  const seed = getSeed(name)
 
   if (!_.isEmpty(seed.metadata.deletionTimestamp)) {
     logger.debug(`Seed ${name} is marked for deletion, bootstrapping aborted`)
@@ -222,8 +253,7 @@ async function handleSeed (seed) {
   }
 }
 
-async function handleShoot (shoot) {
-  const { metadata: { namespace, name } } = shoot
+async function handleShoot ({ name, namespace }) {
   logger.debug(`replacing shoot's apiserver ingress ${namespace}/${name} for webterminals`)
   // read the latest shoot resource version
   const latestShootResource = await dashboardClient['core.gardener.cloud'].shoots.get(namespace, name)
@@ -402,10 +432,11 @@ class Bootstrapper extends Queue {
   constructor () {
     super(Bootstrapper.process, Bootstrapper.options)
     this.bootstrapPending = new BootstrapPendingSet()
+    this.bootstrapped = new BootstrappedSet()
     this.requiredConfigExists = verifyRequiredConfigExists()
     if (this.isBootstrapKindAllowed('gardenTerminalHost')) {
       const description = 'garden host cluster'
-      const handler = new Handler(ensureTrustedCertForGardenTerminalHostApiServer, description)
+      const handler = new Handler({ id: 'gardenTerminalHost', fn: ensureTrustedCertForGardenTerminalHostApiServer, description })
       this.push(handler)
     }
   }
@@ -423,6 +454,42 @@ class Bootstrapper extends Queue {
     return true
   }
 
+  handleResourceEvent ({ type, object }) {
+    switch (type) {
+      case 'ADDED':
+        this.bootstrapResource(object)
+        break
+      case 'MODIFIED':
+        if (this.isResourcePending(object)) {
+          this.bootstrapResource(object)
+        }
+        break
+      case 'DELETED':
+        this.cancelTask(object)
+
+        if (this.isResourcePending(object)) {
+          this.removePendingResource(object)
+        }
+        if (this.isResourceBootstrapped(object)) {
+          this.removeBootstrappedResource(object)
+        }
+        break
+    }
+  }
+
+  cancelTask (resource) {
+    const taskId = taskIdForResource(resource)
+    this.cancel(taskId)
+  }
+
+  isResourceBootstrapped (resource) {
+    return this.bootstrapped.containsResource(resource)
+  }
+
+  removeBootstrappedResource (resource) {
+    return this.bootstrapped.removeResource(resource)
+  }
+
   isResourcePending (resource) {
     return this.bootstrapPending.containsResource(resource)
   }
@@ -432,7 +499,12 @@ class Bootstrapper extends Queue {
   }
 
   bootstrapResource (resource) {
-    const kind = resource.kind
+    const {
+      kind,
+      metadata: { namespace, name, uid }
+    } = resource
+    const description = `${kind} - ${namespace ? namespace + '/' : ''}${name} (${uid})`
+
     if (!this.isBootstrapKindAllowed(kind)) {
       return
     }
@@ -444,9 +516,12 @@ class Bootstrapper extends Queue {
 
     const isBootstrapDisabledForResource = _.get(resource, ['metadata', 'annotations', 'dashboard.gardener.cloud/terminal-bootstrap-disabled'], 'false') === 'true'
     if (isBootstrapDisabledForResource) {
-      const name = resource.metadata.name
-      const namespace = _.get(resource, 'metadata.namespace', '')
-      logger.debug(`terminal bootstrap disabled for ${kind} ${namespace}/${name}`)
+      logger.debug(`terminal bootstrap disabled for ${description}`)
+      return
+    }
+
+    if (this.bootstrapped.containsResource(resource)) {
+      logger.debug(`terminal bootstrap already executed for ${description}`)
       return
     }
 
@@ -455,8 +530,8 @@ class Bootstrapper extends Queue {
       if (this.bootstrapPending.containsResource(resource)) {
         return
       }
-      const key = this.bootstrapPending.addResource(resource)
-      logger.debug(`bootstrapping of ${key} postponed`)
+      this.bootstrapPending.addResource(resource)
+      logger.debug(`bootstrapping of ${description} postponed`)
       return
     }
 
@@ -464,35 +539,70 @@ class Bootstrapper extends Queue {
       this.bootstrapPending.removeResource(resource)
     }
 
-    const description = `${kind} - ${resource.metadata.name}`
-    const handler = new Handler(() => {
-      switch (kind) {
-        case 'Seed':
-          return handleSeed(resource)
-        case 'Shoot':
-          return handleShoot(resource)
-        default:
-          logger.error(`can't bootstrap unsupported kind ${kind}`)
-      }
-    }, description)
+    const key = BootstrappedSet.keyForResource(resource)
+    const taskId = taskIdForResource(resource)
+    const handler = new Handler({
+      id: taskId, // with the id we make sure that the task for one shoot is not added multiple times (e.g. on another ADDED event when the shoot watch is re-established)
+      fn: async session => {
+        if (session.canceled) {
+          logger.debug(`Canceling handler of ${description} as requested`)
+          return
+        }
+
+        switch (kind) {
+          case 'Seed': {
+            await handleSeed({ name })
+            break
+          }
+          case 'Shoot': {
+            await handleShoot({ name, namespace })
+            break
+          }
+          default: {
+            logger.error(`can't bootstrap unsupported kind ${kind}`)
+            return
+          }
+        }
+
+        if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
+          logger.debug(`Canceling handler of ${description} as requested after handling resource`)
+          return
+        }
+        logger.debug(`Successfully bootstrapped ${description}`)
+        this.bootstrapped.addResourceWithKey(key)
+      },
+      description
+    })
     this.push(handler)
   }
 
   static get options () {
-    return _
+    const defaultOptions = {
+      maxTimeout: moment.duration(10, 'minutes').asMilliseconds()
+    }
+    const configOptions = _
       .chain(config)
       .get('terminal.bootstrap.queueOptions', {})
       .cloneDeep()
       .value()
+    return _.assign(defaultOptions, configOptions)
   }
 
-  static async process (handler, cb) {
-    try {
-      await handler.run()
-      cb(null, null)
-    } catch (err) {
-      logger.error(`failed to bootstrap ${handler.description}`, err)
-      cb(err, null)
+  static process (handler, cb) {
+    (async () => {
+      try {
+        await handler.run()
+        cb(null, null)
+      } catch (err) {
+        logger.error(`failed to bootstrap ${handler.description}`, err)
+        cb(err, null)
+      }
+    })()
+    return {
+      cancel: function () {
+        logger.debug(`process cancel for ${handler.description}`)
+        handler.cancel()
+      }
     }
   }
 }

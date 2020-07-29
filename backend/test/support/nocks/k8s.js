@@ -392,6 +392,7 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
 function getShoot ({
   namespace,
   name,
+  uid,
   project,
   createdBy,
   purpose = 'foo-purpose',
@@ -403,8 +404,10 @@ function getShoot ({
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0'
 }) {
+  uid = uid || `${namespace}--${name}`
   const shoot = {
     metadata: {
+      uid,
       name,
       namespace,
       annotations: {}
