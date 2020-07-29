@@ -194,7 +194,7 @@ describe('services', function () {
         it('should not match', async function () {
           const containerImage = 'foo:bar'
 
-          let imageDescriptions = [{
+          const imageDescriptions = [{
             image: 'bar:foo',
             description: 'baz'
           }]
@@ -575,7 +575,8 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'bar'
+          name: 'bar',
+          uid: '1'
         },
         spec: {
           seedName
@@ -590,7 +591,8 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'baz'
+          name: 'baz',
+          uid: '2'
         },
         spec: {
           seedName
@@ -605,7 +607,8 @@ describe('services', function () {
         kind: 'Shoot',
         metadata: {
           namespace: 'garden-foo',
-          name: 'dummyShoot'
+          name: 'dummyShoot',
+          uid: '3'
         },
         spec: {
           seedName: seedName2 // seed without spec.secretRef
@@ -659,7 +662,7 @@ describe('services', function () {
         const seed = getSeed(seedName)
         createConfigStub({ bootstrap })
         const bootstrapper = new Bootstrapper()
-        bootstrapper.push(new Handler(() => {}, 'test'))
+        bootstrapper.push(new Handler({ fn: () => {}, description: 'test' }))
         bootstrapper.bootstrapResource(seed)
         bootstrapper.bootstrapResource(shootList[0])
         await pEvent(bootstrapper, 'empty')
@@ -722,6 +725,9 @@ describe('services', function () {
         expect(bootstrapper.isResourcePending(shootList[0])).to.be.true
         expect(stats.total).to.equal(2)
         expect(stats.successRate).to.equal(1)
+        expect(bootstrapper.bootstrapped.size).to.equal(2)
+        expect(bootstrapper.isResourceBootstrapped(shootList[1])).to.be.true
+        expect(bootstrapper.isResourceBootstrapped(shootList[2])).to.be.true
       })
 
       it('should not bootstrap shoot cluster', async function () {
@@ -734,7 +740,7 @@ describe('services', function () {
         const infoSpy = sandbox.spy(logger, 'info')
 
         const bootstrapper = new Bootstrapper()
-         // bootstrap dummyShoot whose seed does not have .spec.secretRef set
+        // bootstrap dummyShoot whose seed does not have .spec.secretRef set
         bootstrapper.bootstrapResource(shootList[2])
         await pEvent(bootstrapper, 'empty')
         const stats = bootstrapper.getStats()

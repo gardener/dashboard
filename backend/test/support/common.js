@@ -24,6 +24,7 @@ const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
 function getSeed ({
   name,
+  uid,
   region,
   kind,
   seedProtected = false,
@@ -31,10 +32,12 @@ function getSeed ({
   labels = {},
   withSecretRef = true
 }) {
+  uid = uid || `seed--${name}`
   const seed = {
     kind: 'Seed',
     metadata: {
       name,
+      uid,
       labels
     },
     spec: {

@@ -72,19 +72,10 @@ module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
       shootsWithIssues.delete(uid)
     }
 
+    bootstrapper.handleResourceEvent(event)
+
     switch (type) {
-      case 'ADDED':
-        bootstrapper.bootstrapResource(object)
-        break
-      case 'MODIFIED':
-        if (bootstrapper.isResourcePending(object)) {
-          bootstrapper.bootstrapResource(object)
-        }
-        break
       case 'DELETED':
-        if (bootstrapper.isResourcePending(object)) {
-          bootstrapper.removePendingResource(object)
-        }
         deleteTickets(object.metadata)
         break
     }
