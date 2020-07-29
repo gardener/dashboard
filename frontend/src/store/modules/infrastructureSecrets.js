@@ -20,8 +20,8 @@ import find from 'lodash/find'
 import matches from 'lodash/matches'
 import { getInfrastructureSecrets, updateInfrastructureSecret, createInfrastructureSecret, deleteInfrastructureSecret } from '@/utils/api'
 
-const eqlNameAndNamespace = ({ namespace, name }) => {
-  return matches({ metadata: { namespace, name } })
+const eqlBindingNameAndNamespace = ({ bindingNamespace, bindingName }) => {
+  return matches({ metadata: { bindingNamespace, bindingName } })
 }
 
 // initial state
@@ -31,8 +31,8 @@ const state = {
 
 // getters
 const getters = {
-  getInfrastructureSecretByName: (state) => ({ name, namespace }) => {
-    return find(state.all, eqlNameAndNamespace({ name, namespace }))
+  getInfrastructureSecretByBindingName: (state) => ({ name, namespace }) => {
+    return find(state.all, eqlBindingNameAndNamespace({ bindingName: name, bindingNamespace: namespace }))
   }
 }
 

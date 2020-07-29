@@ -525,9 +525,9 @@ const getters = {
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
   },
-  getInfrastructureSecretByName (state, getters) {
+  getInfrastructureSecretByBindingName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
+      return getters['infrastructureSecrets/getInfrastructureSecretByBindingName']({ namespace, name })
     }
   },
   namespaces (state) {
