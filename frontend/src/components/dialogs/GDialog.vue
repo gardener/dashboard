@@ -17,7 +17,7 @@ limitations under the License.
 <template>
   <v-dialog v-model="visible" scrollable persistent :max-width="maxWidth" @keydown.esc="resolveAction(false)">
     <v-card>
-      <v-toolbar flat :class="[{ 'elevation-4': topBarElevation }, titleColorClass]">
+      <v-toolbar flat :class="titleColorClass">
         <v-toolbar-title class="dialog-title align-center justify-start">
           <slot name="caption">
             Confirm Dialog
@@ -46,7 +46,7 @@ limitations under the License.
         <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
       </v-card-text>
       <v-divider></v-divider>
-      <v-card-actions :class="{ 'elevation-4': bottomBarElevation }">
+      <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
         <v-btn text @click="resolveAction(true)" :disabled="!valid" :class="textColorClass">{{confirmButtonText}}</v-btn>
@@ -109,8 +109,6 @@ export default {
       userInput: '',
       visible: false,
       resolve: noop,
-      topBarElevation: false,
-      bottomBarElevation: false,
       intervalId: undefined
     }
   },
@@ -206,22 +204,6 @@ export default {
       }
       this.visible = false
     },
-    updateElevation () {
-      const contentCardRef = this.$refs.contentCard
-      if (contentCardRef) {
-        if (contentCardRef.scrollTop > 0) {
-          this.topBarElevation = true
-        } else {
-          this.topBarElevation = false
-        }
-
-        if (contentCardRef.clientHeight + contentCardRef.scrollTop < contentCardRef.scrollHeight) {
-          this.bottomBarElevation = true
-        } else {
-          this.bottomBarElevation = false
-        }
-      }
-    },
     showScrollBar () {
       const contentCardRef = this.$refs.contentCard
       if (!contentCardRef || !contentCardRef.clientHeight) {
@@ -236,10 +218,7 @@ export default {
   watch: {
     visible (value) {
       if (value) {
-        this.intervalId = setInterval(() => this.updateElevation(), 100)
-        this.$nextTick(() => this.showScrollBar())
-      } else {
-        clearInterval(this.intervalId)
+        this.showScrollBar()
       }
     }
   }
