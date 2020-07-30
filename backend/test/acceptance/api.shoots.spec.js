@@ -24,6 +24,7 @@ const logger = require('../../lib/logger')
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const name = 'bar'
+  const uid = '123-456'
   const project = 'foo'
   const namespace = `garden-${project}`
   const username = `${name}@example.org`
@@ -84,14 +85,14 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return a shoot', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoot({ bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName: secret })
+    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, bindingName: secret })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, annotations })
+    expect(res.body.metadata).to.eql({ name, namespace, uid, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
