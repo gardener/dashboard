@@ -662,7 +662,7 @@ describe('services', function () {
         const seed = getSeed(seedName)
         createConfigStub({ bootstrap })
         const bootstrapper = new Bootstrapper()
-        bootstrapper.push(new Handler({ fn: () => {}, description: 'test' }))
+        bootstrapper.push(new Handler(() => {}, { description: 'test' }))
         bootstrapper.bootstrapResource(seed)
         bootstrapper.bootstrapResource(shootList[0])
         await pEvent(bootstrapper, 'empty')

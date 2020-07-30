@@ -54,11 +54,8 @@ const { getSeed } = require('../../cache')
 
 const TERMINAL_KUBE_APISERVER = 'dashboard-terminal-kube-apiserver'
 
+// acts as abstract class
 class BootstrapSet extends Set {
-  static keyForResource () {
-    throw new Error('needs to be overwritten in subclass')
-  }
-
   containsResource (resource) {
     const key = this.constructor.keyForResource(resource)
     return this.has(key)
@@ -80,15 +77,14 @@ class BootstrapSet extends Set {
   }
 }
 
-class BootstrapPendingSet extends BootstrapSet {
+class NamedKeyBootstrapSet extends BootstrapSet {
   static keyForResource (resource) {
-    const kind = resource.kind
-    const { metadata: { name, namespace } } = resource
+    const { kind, metadata: { name, namespace } } = resource
     return `${kind}/${namespace}/${name}`
   }
 }
 
-class BootstrappedSet extends BootstrapSet {
+class UidKeyBootstrapSet extends BootstrapSet {
   static keyForResource (resource) {
     const { metadata: { uid } } = resource
     return uid
@@ -101,10 +97,9 @@ function taskIdForResource (resource) {
 }
 
 class Handler {
-  constructor ({ id, fn, description }) {
+  constructor (fn, { id, description } = {}) {
+    this._run = fn
     this.id = id
-    this.fn = fn
-    this._run = session => fn(session)
     this._description = description
     this.session = {
       canceled: false
@@ -431,12 +426,15 @@ function verifyRequiredConfigExists () {
 class Bootstrapper extends Queue {
   constructor () {
     super(Bootstrapper.process, Bootstrapper.options)
-    this.bootstrapPending = new BootstrapPendingSet()
-    this.bootstrapped = new BootstrappedSet()
+    this.bootstrapPending = new NamedKeyBootstrapSet()
+    this.bootstrapped = new UidKeyBootstrapSet()
     this.requiredConfigExists = verifyRequiredConfigExists()
     if (this.isBootstrapKindAllowed('gardenTerminalHost')) {
       const description = 'garden host cluster'
-      const handler = new Handler({ id: 'gardenTerminalHost', fn: ensureTrustedCertForGardenTerminalHostApiServer, description })
+      const handler = new Handler(ensureTrustedCertForGardenTerminalHostApiServer, {
+        id: 'gardenTerminalHost',
+        description
+      })
       this.push(handler)
     }
   }
@@ -499,11 +497,10 @@ class Bootstrapper extends Queue {
   }
 
   bootstrapResource (resource) {
-    const {
-      kind,
-      metadata: { namespace, name, uid }
-    } = resource
-    const description = `${kind} - ${namespace ? namespace + '/' : ''}${name} (${uid})`
+    const { kind, metadata: { namespace, name, uid } } = resource
+
+    const qualifiedName = namespace ? namespace + '/' + name : name
+    const description = `${kind} - ${qualifiedName} (${uid})`
 
     if (!this.isBootstrapKindAllowed(kind)) {
       return
@@ -539,38 +536,38 @@ class Bootstrapper extends Queue {
       this.bootstrapPending.removeResource(resource)
     }
 
-    const key = BootstrappedSet.keyForResource(resource)
+    const key = UidKeyBootstrapSet.keyForResource(resource)
     const taskId = taskIdForResource(resource)
-    const handler = new Handler({
+    const fn = async session => {
+      if (session.canceled) {
+        logger.debug(`Canceling handler of ${description} as requested`)
+        return
+      }
+
+      switch (kind) {
+        case 'Seed': {
+          await handleSeed({ name })
+          break
+        }
+        case 'Shoot': {
+          await handleShoot({ name, namespace })
+          break
+        }
+        default: {
+          logger.error(`can't bootstrap unsupported kind ${kind}`)
+          return
+        }
+      }
+
+      if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
+        logger.debug(`Canceling handler of ${description} as requested after handling resource`)
+        return
+      }
+      logger.debug(`Successfully bootstrapped ${description}`)
+      this.bootstrapped.addResourceWithKey(key)
+    }
+    const handler = new Handler(fn, {
       id: taskId, // with the id we make sure that the task for one shoot is not added multiple times (e.g. on another ADDED event when the shoot watch is re-established)
-      fn: async session => {
-        if (session.canceled) {
-          logger.debug(`Canceling handler of ${description} as requested`)
-          return
-        }
-
-        switch (kind) {
-          case 'Seed': {
-            await handleSeed({ name })
-            break
-          }
-          case 'Shoot': {
-            await handleShoot({ name, namespace })
-            break
-          }
-          default: {
-            logger.error(`can't bootstrap unsupported kind ${kind}`)
-            return
-          }
-        }
-
-        if (session.canceled) { // do not add key to the bootstrapped set when the session is canceled (due to shoot deletion) to prevent leaking memory
-          logger.debug(`Canceling handler of ${description} as requested after handling resource`)
-          return
-        }
-        logger.debug(`Successfully bootstrapped ${description}`)
-        this.bootstrapped.addResourceWithKey(key)
-      },
       description
     })
     this.push(handler)
@@ -598,12 +595,7 @@ class Bootstrapper extends Queue {
         cb(err, null)
       }
     })()
-    return {
-      cancel: function () {
-        logger.debug(`process cancel for ${handler.description}`)
-        handler.cancel()
-      }
-    }
+    return handler // handler implements cancel function
   }
 }
 
