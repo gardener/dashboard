@@ -29,7 +29,7 @@ function afterResponse (response) {
   const requestOptions = get(request, 'options', {})
   const id = get(requestOptions, 'headers["x-request-id"]')
   const { url, method, [xRequestStart]: start } = requestOptions
-  const duration = Date.now() - start
+  const duration = start ? Date.now() - start : undefined
   logger.response({
     id,
     url,
