@@ -69,7 +69,7 @@ module.exports = function createServer (app) {
   server.startListening = async () => {
     const begin = Date.now()
     try {
-      await pTimeout(synchronizer(), 5 * 1000)
+      await pTimeout(synchronizer(), 15 * 1000)
       const synchronizationDuration = Date.now() - begin
       logger.debug('Initial cache synchronization succeeded after %d ms', synchronizationDuration)
     } catch (err) {

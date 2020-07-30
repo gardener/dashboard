@@ -17,7 +17,7 @@
 'use strict'
 
 const path = require('path')
-const { HTTPError } = require('got')
+const { HTTPError } = require('../http-client')
 
 const { encodeBase64 } = require('../utils')
 
