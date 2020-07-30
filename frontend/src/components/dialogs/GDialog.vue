@@ -203,10 +203,14 @@ export default {
       }
       this.visible = false
     },
-    showScrollBar () {
+    showScrollBar (retryCount = 0) {
+      if (retryCount > 10) {
+        // circuit breaker
+        return
+      }
       const contentCardRef = this.$refs.contentCard
       if (!contentCardRef || !contentCardRef.clientHeight) {
-        this.$nextTick(() => this.showScrollBar())
+        this.$nextTick(() => this.showScrollBar(retryCount + 1))
         return
       }
       const scrollTopVal = contentCardRef.scrollTop
