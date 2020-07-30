@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { HTTPError } = require('got')
+const { HTTPError } = require('../http-client')
 const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')

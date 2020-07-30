@@ -17,7 +17,7 @@
 'use strict'
 
 const { get, includes } = require('lodash')
-const { HTTPError } = require('got')
+const { HTTPError } = require('../http-client')
 const { TimeoutError } = require('p-timeout')
 
 const CONNECTION_ERROR_CODES = [

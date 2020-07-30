@@ -15,7 +15,7 @@
 //
 
 const _ = require('lodash')
-const { HTTPError } = require('got')
+const { HTTPError } = require('../http-client')
 const pEvent = require('p-event')
 const logger = require('../logger')
 const { Store } = require('../kubernetes-client/cache')

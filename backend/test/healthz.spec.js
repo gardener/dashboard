@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { HTTPError } = require('got')
+const { HTTPError } = require('../lib/http-client')
 const { healthCheck } = require('../lib/healthz')
 const { dashboardClient } = require('../lib/kubernetes-client')
 

@@ -16,7 +16,7 @@
 
 'use strict'
 
-const got = require('got')
+const httpClient = require('../http-client')
 const WebSocket = require('ws')
 const { http, ws } = require('./symbols')
 const { beforeConnect } = require('./debug')
@@ -29,7 +29,7 @@ class HttpClient {
     if (!Reflect.has(options, 'agent')) {
       options.agent = this.constructor.createAgent(prefixUrl)
     }
-    this[http.client] = got.extend({ prefixUrl, ...options })
+    this[http.client] = httpClient.extend({ prefixUrl, ...options })
   }
 
   get [http.agent] () {
@@ -41,7 +41,7 @@ class HttpClient {
       options.searchParams = searchParams
     }
     try {
-      return await this[http.client](url, options)
+      return await this[http.client].request(url, options)
     } catch (err) {
       throw patchHttpErrorMessage(err)
     }
