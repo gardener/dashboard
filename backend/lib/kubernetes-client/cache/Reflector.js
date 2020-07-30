@@ -126,15 +126,14 @@ class Reflector {
       logger.debug('Socket of %s has already been closed', this.expectedTypeName)
       return
     }
+    logger.debug('Trying to gracefully close socket of %s', this.expectedTypeName)
     const timeout = this.gracePeriod.asMilliseconds()
     try {
-      logger.debug('Closing socket of %s with timeout %d', this.expectedTypeName, timeout)
+      const closeSocketPromise = pEvent(this.socket, 'close', { timeout })
       this.socket.close(4006, 'Gracefully closing websocket')
-      logger.debug('Closing socket of %s has been triggered', this.expectedTypeName)
-      await pEvent(this.socket, 'close', { timeout })
+      await closeSocketPromise
       logger.debug('Closed socket of %s', this.expectedTypeName)
     } catch (err) {
-      logger.debug('Terminating socket of %s', this.expectedTypeName)
       this.socket.terminate()
       logger.debug('Terminated socket of %s', this.expectedTypeName)
     }
@@ -184,7 +183,7 @@ class Reflector {
 
     let list
     try {
-      logger.info('Calling list %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
+      logger.debug('List %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
       list = await pager.list(options)
     } catch (err) {
       if (isExpiredError(err)) {
@@ -195,7 +194,7 @@ class Reflector {
         // resource version it is listing at is expired, so we need to fallback to resourceVersion="" in all
         // to recover and ensure the reflector makes forward progress.
         try {
-          logger.info('Falling back to full list %s', this.expectedTypeName)
+          logger.debug('Falling back to full list %s', this.expectedTypeName)
           list = await pager.list({
             resourceVersion: this.relistResourceVersion
           })
@@ -217,7 +216,7 @@ class Reflector {
     } = list.metadata
 
     const lines = Array.isArray(list.items) ? list.items.length : 0
-    logger.info('List of %s successfully returned %d items (%s)', this.expectedTypeName, lines, paginatedResult ? 'paginated' : 'not paginated')
+    logger.debug('List of %s successfully returned %d items (%s)', this.expectedTypeName, lines, paginatedResult ? 'paginated' : 'not paginated')
 
     // We check if the list was paginated and if so set the paginatedResult based on that.
     // However, we want to do that only for the initial list (which is the only case
@@ -288,9 +287,7 @@ class Reflector {
           return
         }
       } finally {
-        logger.info('Trying to gracefully close socket of %s', this.expectedTypeName)
         await this.closeOrTerminateSocket()
-        logger.info('Closed or terminated socket of %s', this.expectedTypeName)
       }
     }
   }
