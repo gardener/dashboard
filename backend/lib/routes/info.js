@@ -17,7 +17,7 @@
 'use strict'
 
 const express = require('express')
-const got = require('got')
+const { extend } = require('../http-client')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
 const { dashboardClient, isHttpError } = require('../kubernetes-client')
@@ -43,12 +43,13 @@ async function fetchGardenerVersion () {
         caBundle
       }
     } = await dashboardClient['apiregistration.k8s.io'].apiservices.get('v1beta1.core.gardener.cloud')
-    const uri = `https://${service.name}.${service.namespace}/version`
-    const version = await got(uri, {
+    const client = extend({
+      prefixUrl: `https://${service.name}.${service.namespace}`,
       ca: decodeBase64(caBundle),
       resolveBodyOnly: true,
       responseType: 'json'
     })
+    const version = await client.request('version')
     return version
   } catch (err) {
     logger.warn(`Could not fetch gardener version. Error: ${err.message}`)
