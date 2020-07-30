@@ -70,6 +70,7 @@ export default function routes (context) {
   ]
 }
 
+/* Default Hierachy "/" */
 function defaultHierarchy (context, path) {
   const children = [
     homeRoute(context, ''),
@@ -92,6 +93,7 @@ function defaultHierarchy (context, path) {
   }
 }
 
+/* Project Hierachy "/namespace/:namespace" */
 function projectHierarchy (context, path) {
   return {
     path,
@@ -116,6 +118,7 @@ function projectHierarchy (context, path) {
   }
 }
 
+/* Shoot List Hierachy "/namespace/:namespace/shoots" */
 function shootListHierarchy (context, path) {
   return {
     path,
@@ -129,6 +132,7 @@ function shootListHierarchy (context, path) {
   }
 }
 
+/* Shoot Item Hierachy "/namespace/:namespace/shoots/:name" */
 function shootItemHierarchy (context, path) {
   return {
     path,
