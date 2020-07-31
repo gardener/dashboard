@@ -198,8 +198,9 @@ function homeRoute ({ getters }, path) {
       projectScope: false,
       breadcrumbs: homeBreadcrumbs
     },
-    beforeEach (to, from, next) {
+    beforeEnter (to, from, next) {
       const namespace = getters.defaultNamespace
+      console.log('beforeEnter', namespace)
       if (namespace) {
         return next({
           name: 'ShootList',
@@ -221,7 +222,7 @@ function accountRoute ({ state, getters }, path) {
       projectScope: false,
       breadcrumbs: accountBreadcrumbs
     },
-    beforeEach (to, from, next) {
+    beforeEnter (to, from, next) {
       const namespace = state.namespace || getters.defaultNamespace
       if (!to.query.namespace && namespace) {
         return next({

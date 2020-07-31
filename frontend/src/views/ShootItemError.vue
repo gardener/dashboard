@@ -17,12 +17,10 @@ limitations under the License.
   <v-container fluid class="fill-height text-center">
     <v-row align="center">
       <v-col>
-        <h1>404</h1>
-        <h2>Cluster not found</h2>
-        <p class="message">The cluster you are looking for doesn't exist or an other error occured!</p>
-        <v-btn dark color="cyan darken-2" @click="goBack">
-          Back to cluster list
-        </v-btn>
+        <h1>{{code}}</h1>
+        <h2>{{text}}</h2>
+        <p class="message">{{message}}</p>
+        <v-btn dark color="cyan darken-2" @click="goBack">{{buttonText}}</v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -32,6 +30,24 @@ limitations under the License.
 import get from 'lodash/get'
 
 export default {
+  props: {
+    code: {
+      type: [String, Number],
+      default: '404'
+    },
+    text: {
+      type: String,
+      default: 'Cluster not found'
+    },
+    message: {
+      type: String,
+      default: 'The cluster you are looking for doesn\'t exist or an other error occured!'
+    },
+    buttonText: {
+      type: String,
+      default: 'Back to cluster list'
+    }
+  },
   methods: {
     goBack (fallback) {
       const namespace = get(this.$route, 'params.namespace', this.$store.state.namespace)

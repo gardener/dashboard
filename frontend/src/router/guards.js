@@ -103,8 +103,7 @@ function ensureDataLoaded (store) {
       await Promise.all([
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
-        store.dispatch('fetchKubeconfigData'),
-        store.dispatch('unsubscribeComments')
+        store.dispatch('fetchKubeconfigData')
       ])
       const params = to.params || {}
       const query = to.query || {}
@@ -145,23 +144,6 @@ function ensureDataLoaded (store) {
         }
         case 'ShootList': {
           await store.dispatch('subscribeShoots', { name: params.name, namespace })
-          break
-        }
-        case 'ShootItem':
-        case 'ShootItemHibernationSettings': {
-          const promises = [
-            // store.dispatch('subscribeShoot', { name: params.name, namespace }),
-            store.dispatch('subscribeComments', { name: params.name, namespace })
-          ]
-          if (store.getters.canGetSecrets) {
-            promises.push(store.dispatch('fetchInfrastructureSecrets')) // Required for purpose configuration
-          }
-          await Promise.all(promises)
-          break
-        }
-        case 'ShootDetailsEditor':
-        case 'ShootItemTerminal': {
-          // await store.dispatch('subscribeShoot', { name: params.name, namespace })
           break
         }
         case 'Members':

@@ -18,13 +18,16 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
+import includes from 'lodash/includes'
+import { mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
-import ShootItemNotFound from '@/views/ShootItemNotFound'
+import ShootItemError from '@/views/ShootItemError'
 
 export default {
   components: {
     ShootItemLoading,
-    ShootItemNotFound
+    ShootItemError
   },
   data () {
     return {
@@ -33,6 +36,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'canGetSecrets'
+    ]),
     componentProperties () {
       switch (this.component) {
         default:
@@ -40,32 +46,55 @@ export default {
       }
     }
   },
-  watch: {
-    '$route.params' (params, oldParams) {
-      console.log(params, oldParams)
-      if (params.namespace !== oldParams.namespace || params.name !== oldParams.name) {
-        this.load(params)
-      }
-    }
-  },
-  mounted () {
-    this.load(this.$route.params)
-  },
   methods: {
-    async load ({ namespace, name }) {
+    ...mapActions([
+      'subscribeShoot',
+      'subscribeComments',
+      'unsubscribeComments',
+      'fetchInfrastructureSecrets'
+    ]),
+    subscribe ({ namespace, name }) {
+      return Promise.all([
+        this.subscribeShoot({ namespace, name }),
+        this.subscribeComments({ namespace, name })
+      ])
+    },
+    async load (to, from) {
       if (!this.loading) {
         this.loading = true
         this.component = 'shoot-item-loading'
         try {
-          await this.$store.dispatch('subscribeShoot', { namespace, name })
+          const promises = []
+          if (includes(['ShootItem', 'ShootItemHibernationSettings'], to.name) && this.canGetSecrets) {
+            promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
+          }
+          if (get(to, 'params.namespace') !== get(from, 'params.namespace') || get(to, 'params.name') !== get(from, 'params.name')) {
+            promises.push(this.subscribe(to.params))
+          }
+          await Promise.all(promises)
           this.component = 'router-view'
         } catch (err) {
-          this.component = 'shoot-item-not-found'
+          this.component = 'shoot-item-error'
         } finally {
           this.loading = false
         }
       }
     }
+  },
+  async beforeRouteLeave (to, from, next) {
+    try {
+      await this.unsubscribeComments()
+    } finally {
+      next()
+    }
+  },
+  watch: {
+    '$route' (to, from) {
+      this.load(to, from)
+    }
+  },
+  mounted () {
+    this.load(this.$route)
   }
 }
 </script>

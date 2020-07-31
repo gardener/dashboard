@@ -972,23 +972,22 @@ const actions = {
   subscribeShoot ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/clearAll')
       .then(() => {
-        EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
-        const key = `${name}_${namespace}`
         return new Promise((resolve, reject) => {
+          EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+          const key = `${name}_${namespace}`
           const unsubscribe = store.subscribe(({ type, payload }, state) => {
             switch (type) {
               case 'shoots/SET_SUBSCRIPTION_ERROR': {
                 unsubscribe()
-                reject(new Error(get(payload, 'message', 'Shoot subscription failed')))
+                reject(new Error(get(payload, 'message', 'Cluster subscription failed')))
                 break
               }
               case 'shoots/SET_SUBSCRIPTION_DONE': {
                 unsubscribe()
-                console.log()
                 if (Reflect.has(state.shoots.shoots, key)) {
                   resolve(state.shoots.shoots[key])
                 } else {
-                  reject(new Error('Shoot not found'))
+                  reject(new Error('Cluster not found'))
                 }
                 break
               }
@@ -1010,18 +1009,30 @@ const actions = {
       })
   },
   subscribeShoots ({ dispatch, commit, state }) {
-    return EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+    return new Promise((resolve, reject) => {
+      try {
+        EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+      } finally {
+        resolve()
+      }
+    })
   },
   subscribeComments ({ dispatch, commit }, { name, namespace }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
-      resolve()
+      try {
+        EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
+      } finally {
+        resolve()
+      }
     })
   },
   unsubscribeComments ({ dispatch, commit }) {
     return new Promise((resolve, reject) => {
-      EmitterWrapper.ticketCommentsEmitter.unsubscribe()
-      resolve()
+      try {
+        EmitterWrapper.ticketCommentsEmitter.unsubscribe()
+      } finally {
+        resolve()
+      }
     })
   },
   setSelectedShoot ({ dispatch }, metadata) {
