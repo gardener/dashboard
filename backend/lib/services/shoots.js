@@ -354,9 +354,9 @@ function assignComponentSecrets (client, data, namespace, name) {
   }))
 }
 
-function getSecret (client, { namespace, name }) {
+async function getSecret (client, { namespace, name }) {
   try {
-    return client.core.secrets.get(namespace, name)
+    return await client.core.secrets.get(namespace, name)
   } catch (err) {
     if (isHttpError(err, 404)) {
       return
