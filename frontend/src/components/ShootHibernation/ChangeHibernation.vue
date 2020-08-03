@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
@@ -24,7 +24,8 @@ limitations under the License.
     :confirmButtonText="confirmText"
     :confirmRequired="confirmRequired"
     :disabled="!isHibernationPossible && !isShootSettingHibernated"
-    maxWidth="600">
+    :buttonText="buttonText"
+     maxWidth="600">
     <template v-slot:actionComponent>
       <template v-if="!isShootSettingHibernated">
         This will scale the worker nodes of your cluster down to zero.<br /><br />
@@ -34,11 +35,11 @@ limitations under the License.
         This will wake up your cluster and scale the worker nodes up to their previous count.<br /><br />
       </template>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { updateShootHibernation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
@@ -46,11 +47,14 @@ import { SnotifyPosition } from 'vue-snotify'
 
 export default {
   components: {
-    ActionIconDialog
+    ActionButtonDialog
   },
   props: {
     shootItem: {
       type: Object
+    },
+    text: {
+      type: Boolean
     }
   },
   mixins: [shootItem],
@@ -77,15 +81,24 @@ export default {
         return 'mdi-play-circle-outline'
       }
     },
-    caption () {
-      if (!this.isHibernationPossible && !this.isShootSettingHibernated) {
-        return this.hibernationPossibleMessage
-      }
+    buttonTitle () {
       if (!this.isShootSettingHibernated) {
         return 'Hibernate Cluster'
       } else {
         return 'Wake up Cluster'
       }
+    },
+    caption () {
+      if (!this.isHibernationPossible && !this.isShootSettingHibernated) {
+        return this.hibernationPossibleMessage
+      }
+      return this.buttonTitle
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
     }
   },
   methods: {

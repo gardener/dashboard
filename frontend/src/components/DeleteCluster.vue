@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     @dialogOpened="onDeleteDialogOpened"
     ref="actionDialog"
@@ -25,6 +25,7 @@ limitations under the License.
     dialogColor="red"
     confirmButtonText="Delete"
     confirm-required
+    :buttonText="buttonText"
     :smallIcon="small"
     maxWidth="600"
   >
@@ -52,19 +53,19 @@ limitations under the License.
         </v-row>
       </p>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
 import AccountAvatar from '@/components/AccountAvatar'
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { mapActions } from 'vuex'
 import { errorDetailsFromError } from '@/utils/error'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     AccountAvatar
   },
   props: {
@@ -77,6 +78,9 @@ export default {
     },
     iconColor: {
       type: String
+    },
+    text: {
+      type: Boolean
     }
   },
   mixins: [shootItem],
@@ -94,7 +98,16 @@ export default {
     caption () {
       return this.isShootMarkedForDeletion
         ? 'Cluster already marked for deletion'
-        : 'Delete Cluster'
+        : this.buttonTitle
+    },
+    buttonTitle () {
+      return 'Delete Cluster'
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
     }
   },
   methods: {

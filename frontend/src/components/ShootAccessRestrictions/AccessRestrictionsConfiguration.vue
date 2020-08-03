@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :disabled="disabled"
     :tooltip="tooltip"
@@ -29,11 +29,11 @@ limitations under the License.
       >
       </access-restrictions>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import AccessRestrictions from '@/components/ShootAccessRestrictions/AccessRestrictions'
 import isEmpty from 'lodash/isEmpty'
 import cloneDeep from 'lodash/cloneDeep'
@@ -45,7 +45,7 @@ import { errorDetailsFromError } from '@/utils/error'
 export default {
   name: 'access-restriction-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     AccessRestrictions
   },
   props: {

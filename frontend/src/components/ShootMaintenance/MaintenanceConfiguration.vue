@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :valid="maintenanceTimeValid"
     @dialogOpened="onConfigurationDialogOpened"
@@ -31,11 +31,11 @@ limitations under the License.
         ref="maintenanceComponents"
       ></maintenance-components>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import MaintenanceTime from '@/components/ShootMaintenance/MaintenanceTime'
 import { updateShootMaintenance } from '@/utils/api'
@@ -47,7 +47,7 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   name: 'maintenance-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     MaintenanceComponents,
     MaintenanceTime
   },

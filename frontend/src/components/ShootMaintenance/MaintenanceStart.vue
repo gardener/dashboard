@@ -15,13 +15,14 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :loading="isMaintenanceToBeScheduled"
     @dialogOpened="startDialogVisible"
     ref="actionDialog"
     :caption="caption"
     icon="mdi-refresh"
+    :buttonText="buttonText"
     maxWidth="850"
     confirmButtonText="Trigger now">
     <template v-slot:actionComponent>
@@ -36,11 +37,11 @@ limitations under the License.
         ></maintenance-components>
       </v-row>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import MaintenanceComponents from '@/components/ShootMaintenance/MaintenanceComponents'
 import { addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -50,12 +51,15 @@ import { shootItem } from '@/mixins/shootItem'
 
 export default {
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     MaintenanceComponents
   },
   props: {
     shootItem: {
       type: Object
+    },
+    text: {
+      type: Boolean
     }
   },
   mixins: [shootItem],
@@ -72,13 +76,22 @@ export default {
       if (this.isMaintenanceToBeScheduled) {
         return 'Requesting to schedule cluster maintenance'
       }
-      return 'Schedule Maintenance'
+      return this.buttonTitle
     },
     updateKubernetesVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.kubernetesVersion', false)
     },
     updateOSVersion () {
       return get(this.shootItem, 'spec.maintenance.autoUpdate.machineImageVersion', false)
+    },
+    buttonTitle () {
+      return 'Schedule Maintenance'
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
     }
   },
   methods: {
