@@ -347,16 +347,16 @@ exports.seedInfo = async function ({ user, namespace, name }) {
 }
 
 function assignComponentSecrets (client, data, namespace, name) {
-  const components = ['monitoring', 'logging']
+  const components = ['monitoring']
   return Promise.all(components.map(component => {
     const ingressSecretName = name ? `${name}.${component}` : `${component}-ingress-credentials`
     return assignComponentSecret(client, data, component, namespace, ingressSecretName)
   }))
 }
 
-function getSecret (client, { namespace, name }) {
+async function getSecret (client, { namespace, name }) {
   try {
-    return client.core.secrets.get(namespace, name)
+    return await client.core.secrets.get(namespace, name)
   } catch (err) {
     if (isHttpError(err, 404)) {
       return

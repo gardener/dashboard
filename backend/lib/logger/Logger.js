@@ -92,7 +92,7 @@ class Logger {
       if (duration) {
         msg += ` ${duration}ms`
       }
-      if (body && statusCode >= 300) {
+      if (body && statusCode >= 300 && !this.isDisabled(LEVELS.trace)) {
         msg += '\n' + this.inspect(body)
       }
       this.console.log(this.ts + ' ' + chalk.black.bgBlue('res') + '  : ' + msg)

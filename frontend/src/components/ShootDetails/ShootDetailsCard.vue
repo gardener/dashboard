@@ -34,7 +34,7 @@ limitations under the License.
           <copy-btn :clipboard-text="shootName"></copy-btn>
         </v-list-item-action>
       </v-list-item>
-      <template v-if="expirationTimestamp">
+      <template v-if="expirationTimestamp && !isShootMarkedForDeletion">
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
@@ -71,7 +71,7 @@ limitations under the License.
             {{shootK8sVersion}}
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action class="mx-0">
+        <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
           <version-expiration-warning :shootItem="shootItem" onlyK8sWarnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">
@@ -96,7 +96,7 @@ limitations under the License.
             ></worker-group>
           </v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action class="mx-0">
+        <v-list-item-action class="mx-0" v-if="!isShootMarkedForDeletion">
           <version-expiration-warning :shootItem="shootItem" onlyMachineImageWarnings></version-expiration-warning>
         </v-list-item-action>
         <v-list-item-action class="mx-0">

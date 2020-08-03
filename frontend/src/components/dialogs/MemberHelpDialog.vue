@@ -26,14 +26,14 @@ limitations under the License.
           <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
           <p class="body-1">
             Adding users to your project allows you to collaborate across your team.
-            Project users have full access to all resources within your project.
+            Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
         <template v-if="isServiceDialog">
           <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
           <p class="body-1">
             Adding service accounts to your project allows you to automate processes in your project.
-            Service accounts have full access to all resources within your project.
+            Access to resources within your project can be configured by assigning roles.
           </p>
         </template>
       </v-card-text>

@@ -28,7 +28,7 @@ limitations under the License.
           <v-list-item-title>Hibernation</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center pt-1">
             <v-icon
-              v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing"
+              v-if="isShootHasNoHibernationScheduleWarning && !isShootStatusHibernationProgressing && !isShootMarkedForDeletion"
               small
               class="pr-1"
               color="cyan darken-2"
