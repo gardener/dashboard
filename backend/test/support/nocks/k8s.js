@@ -575,8 +575,6 @@ const stub = {
     region,
     monitoringUser,
     monitoringPassword,
-    loggingUser,
-    loggingPassword,
     seedSecretName,
     seedName
   }) {
@@ -606,12 +604,6 @@ const stub = {
         password: encodeBase64(monitoringPassword)
       }
     }
-    const loggingSecretResult = {
-      data: {
-        username: encodeBase64(loggingUser),
-        password: encodeBase64(loggingPassword)
-      }
-    }
 
     return [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -622,9 +614,7 @@ const stub = {
       .reply(200, () => seedSecretResult),
     nock(seedServerURL)
       .get(`/api/v1/namespaces/${technicalID}/secrets/monitoring-ingress-credentials`)
-      .reply(200, monitoringSecretResult)
-      .get(`/api/v1/namespaces/${technicalID}/secrets/logging-ingress-credentials`)
-      .reply(200, loggingSecretResult)]
+      .reply(200, monitoringSecretResult)]
   },
   getSeedInfoNoSecretRef ({
     bearer,

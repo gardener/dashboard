@@ -30,12 +30,6 @@ limitations under the License.
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-        <v-card v-if="isLoggingFeatureGateEnabled" class="mt-4">
-          <v-toolbar flat dark dense color="cyan darken-2">
-            <v-toolbar-title class="subtitle-1">Logging</v-toolbar-title>
-          </v-toolbar>
-          <shoot-logging :shootItem="shootItem"></shoot-logging>
-        </v-card>
         <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled" class="mt-4">
           <v-toolbar flat dark dense color="cyan darken-2">
             <v-toolbar-title class="subtitle-1">{{kymaTitle}}</v-toolbar-title>
@@ -54,7 +48,6 @@ import TicketsCard from '@/components/TicketsCard'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
 import ShootAddonKymaCard from '@/components/ShootDetails/ShootAddonKymaCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
-import ShootLogging from '@/components/ShootDetails/ShootLogging'
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
@@ -76,7 +69,6 @@ export default {
     ShootAddonKymaCard,
     TicketsCard,
     ShootMonitoringCard,
-    ShootLogging,
     ShootExternalToolsCard
   },
   mixins: [shootItem],
@@ -98,11 +90,6 @@ export default {
     },
     shootItem () {
       return get(this, 'value', {})
-    },
-    isLoggingFeatureGateEnabled () {
-      const userCredentialsAvailable = !!this.info.logging_username && !!this.info.logging_password
-      const adminCredentialsAvailable = !!this.seedInfo.logging_username && !!this.seedInfo.logging_password
-      return userCredentialsAvailable || adminCredentialsAvailable
     },
     tickets () {
       const params = this.$route.params

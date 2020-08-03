@@ -144,13 +144,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const monitoringUser = 'monitoringFoo'
     const monitoringPassword = 'monitoringFooPwd'
-    const loggingUser = 'loggingBar'
-    const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, seedSecretName, seedName })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
       .set('cookie', await user.cookie)
@@ -158,11 +156,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(1)
-    expect(_.keys(res.body).length).to.equal(4)
+    expect(_.keys(res.body).length).to.equal(2)
     expect(res.body.monitoring_username).to.eql(monitoringUser)
     expect(res.body.monitoring_password).to.eql(monitoringPassword)
-    expect(res.body.logging_username).to.eql(loggingUser)
-    expect(res.body.logging_password).to.eql(loggingPassword)
   })
 
   it('should not return shoot seed info when seed.spec.secretRef missing', async function () {
