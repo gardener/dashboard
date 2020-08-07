@@ -18,6 +18,7 @@
 
 const { NotFound } = require('../errors')
 const logger = require('../logger')
+const shoots = require('./shoots')
 const _ = require('lodash')
 const { getCloudProfiles, getVisibleAndNotProtectedSeeds } = require('../cache')
 
@@ -31,19 +32,22 @@ function fromResource ({ cloudProfile: { metadata, spec }, seeds }) {
   return { metadata, data }
 }
 
-function fromSeedResource ({ metadata, spec }) {
+function fromSeedResource ({ metadata, spec }, gardenShoots) {
   metadata = _.pick(metadata, ['name'])
   const provider = _.get(spec, 'provider')
   const volume = _.get(spec, 'volume')
   const data = { volume, ...provider }
-  return { metadata, data }
+  const canGetShootForSeed = _.some(gardenShoots, shoot => {
+    return shoot.metadata.name === metadata.name
+  })
+  return { metadata, data, canGetShootForSeed }
 }
 
 function emptyToUndefined (value) {
   return _.isEmpty(value) ? undefined : value
 }
 
-function assignSeedsToCloudProfileIteratee (seeds) {
+function assignSeedsToCloudProfileIteratee (seeds, gardenShoots) {
   return cloudProfileResource => {
     const providerType = cloudProfileResource.spec.type
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
@@ -52,7 +56,7 @@ function assignSeedsToCloudProfileIteratee (seeds) {
       .chain(seeds)
       .filter(['spec.provider.type', providerType])
       .filter({ metadata: { labels: matchLabels } })
-      .map(fromSeedResource)
+      .map(seed => fromSeedResource(seed, gardenShoots))
       .thru(emptyToUndefined)
       .value()
 
@@ -63,12 +67,13 @@ function assignSeedsToCloudProfileIteratee (seeds) {
   }
 }
 
-exports.list = function () {
+exports.list = async function ({ user }) {
   const cloudProfiles = getCloudProfiles()
   const seeds = getVisibleAndNotProtectedSeeds()
+  const { items: gardenShoots } = await shoots.list({ user, namespace: 'garden' })
   return _
     .chain(cloudProfiles)
-    .map(assignSeedsToCloudProfileIteratee(seeds))
+    .map(assignSeedsToCloudProfileIteratee(seeds, gardenShoots))
     .filter(cloudProfile => {
       if (!_.isEmpty(cloudProfile.data.seeds)) {
         return true
@@ -79,7 +84,7 @@ exports.list = function () {
     .value()
 }
 
-exports.read = function ({ name }) {
+exports.read = async function ({ name, user }) {
   const cloudProfiles = getCloudProfiles()
   const cloudProfileResource = _.find(cloudProfiles, ['metadata.name', name])
   if (!cloudProfileResource) {
@@ -87,7 +92,8 @@ exports.read = function ({ name }) {
   }
 
   const seeds = getVisibleAndNotProtectedSeeds()
-  const cloudProfile = assignSeedsToCloudProfileIteratee(seeds)(cloudProfileResource)
+  const { items: gardenShoots } = await shoots.list({ user, namespace: 'garden' })
+  const cloudProfile = assignSeedsToCloudProfileIteratee(seeds, gardenShoots)(cloudProfileResource)
   if (!cloudProfile.data.seeds) {
     throw new NotFound(`No matching seed for cloud profile with name ${name} found`)
   }

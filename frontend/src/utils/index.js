@@ -363,14 +363,25 @@ export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
 
-export function canLinkToSeed ({ namespace, seedName }) {
+export function canLinkToSeed ({ namespace, seedName, cloudProfileSeeds }) {
   /*
   * Soils cannot be linked currently as they have representation as "shoot".
   * Currently there is only the secret available.
   * If we are not in the garden namespace we expect a seed to be present
+  * Check if seed has shoot resource in garden namespace by evaluating flag
+  * in seed information attached to cloud profile. This check also guarantees
+  * that the user can access the (garden) namespace and shoot resource of the seed
   * TODO refactor once we have an owner ref on the shoot pointing to the seed
   */
-  return seedName && namespace !== 'garden'
+  if (!seedName || namespace === 'garden') {
+    return false
+  }
+
+  const shootResourceForSeed = some(cloudProfileSeeds, seed => {
+    return seed.metadata.name === seedName && seed.canGetShootForSeed
+  })
+
+  return shootResourceForSeed
 }
 
 export function shootHasIssue (shoot) {

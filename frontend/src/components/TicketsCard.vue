@@ -49,7 +49,6 @@ import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 import { mapState } from 'vuex'
 import Ticket from '@/components/ShootTickets/Ticket'
-import { canLinkToSeed } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import moment from 'moment-timezone'
 
@@ -92,9 +91,6 @@ export default {
         utcDateTimeNow: moment().utc().format(),
         seedName: this.shootSeedName
       })
-    },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
     },
     shootUrl () {
       return `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`

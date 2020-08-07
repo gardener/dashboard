@@ -164,8 +164,8 @@ async function getInfrastructureSecrets ({ secretBindings, cloudProfileList, sec
     .value()
 }
 
-function getCloudProviderKind (name) {
-  const cloudProfile = cloudprofiles.read({ name })
+async function getCloudProviderKind (name, user) {
+  const cloudProfile = await cloudprofiles.read({ name, user })
   return _.get(cloudProfile, 'metadata.cloudProviderKind')
 }
 
@@ -187,7 +187,7 @@ exports.list = async function ({ user, namespace }) {
   const client = user.client
 
   try {
-    const cloudProfileList = cloudprofiles.list()
+    const cloudProfileList = await cloudprofiles.list({ user })
     const [
       { items: secretList },
       { items: secretBindings }
@@ -216,7 +216,7 @@ exports.create = async function ({ user, namespace, body }) {
   const secretBinding = await client['core.gardener.cloud'].secretbindings.create(namespace, toSecretBindingResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const cloudProviderKind = getCloudProviderKind(cloudProfileName)
+  const cloudProviderKind = await getCloudProviderKind(cloudProfileName, user)
   const projectInfo = getProjectNameAndHasCostObject(namespace)
 
   return fromResource({
@@ -248,7 +248,7 @@ exports.patch = async function ({ user, namespace, bindingName, body }) {
   const secret = await client.core.secrets.mergePatch(namespace, secretName, toSecretResource(body))
 
   const cloudProfileName = _.get(body, 'metadata.cloudProfileName')
-  const cloudProviderKind = getCloudProviderKind(cloudProfileName)
+  const cloudProviderKind = await getCloudProviderKind(cloudProfileName, user)
   const projectInfo = getProjectNameAndHasCostObject(namespace)
 
   return fromResource({

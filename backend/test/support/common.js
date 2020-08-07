@@ -19,6 +19,7 @@ const _ = require('lodash')
 const { EventEmitter } = require('events')
 const fnv = require('fnv-plus')
 const { cache } = require('../../lib/cache')
+const { shoots } = require('../../lib/services')
 const createTicketCache = require('../../lib/cache/tickets')
 const WatchBuilder = require('../../lib/kubernetes-client/WatchBuilder')
 
@@ -141,12 +142,17 @@ const quotaList = [
 ]
 
 const stub = {
-  getCloudProfiles (sandbox) {
+  getCloudProfiles (sandbox, stubShoots = true) {
     const getCloudProfilesStub = sandbox.stub(cache, 'getCloudProfiles')
     getCloudProfilesStub.returns(cloudProfileList)
 
     const getSeedsStub = sandbox.stub(cache, 'getSeeds')
     getSeedsStub.returns(seedList)
+
+    if (stubShoots) {
+      const getShootsStub = sandbox.stub(shoots, 'list')
+      getShootsStub.returns([])
+    }
   },
   getQuotas (sandbox) {
     const getQuotasStub = sandbox.stub(cache, 'getQuotas')

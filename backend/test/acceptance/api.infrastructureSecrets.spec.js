@@ -126,7 +126,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   it('should delete an own infrastructure secret', async function () {
     const bearer = await user.bearer
     common.stub.getQuotas(sandbox)
-    common.stub.getCloudProfiles(sandbox)
+    common.stub.getCloudProfiles(sandbox, false)
     k8s.stub.deleteInfrastructureSecret({ bearer, namespace, project, name, bindingName, bindingNamespace: namespace, cloudProfileName, resourceVersion })
     const res = await agent
       .delete(`/api/namespaces/${namespace}/infrastructure-secrets/${bindingName}`)

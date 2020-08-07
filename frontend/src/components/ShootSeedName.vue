@@ -43,6 +43,7 @@ limitations under the License.
 
 <script>
 
+import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
 import { canLinkToSeed } from '@/utils'
 
@@ -53,9 +54,21 @@ export default {
     }
   },
   mixins: [shootItem],
+  computed: {
+    ...mapGetters([
+      'cloudProfileByName'
+    ]),
+    cloudProfileSeeds () {
+      const cloudProfile = this.cloudProfileByName(this.shootCloudProfileName)
+      if (!cloudProfile) {
+        return []
+      }
+      return cloudProfile.data.seeds
+    }
+  },
   methods: {
     canLinkToSeed (seedName) {
-      return canLinkToSeed({ namespace: this.shootNamespace, seedName })
+      return canLinkToSeed({ namespace: this.shootNamespace, seedName, cloudProfileSeeds: this.cloudProfileSeeds })
     }
   }
 }
