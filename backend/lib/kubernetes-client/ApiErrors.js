@@ -82,8 +82,21 @@ function isTimeoutError (err) {
   The apiserver will throw a TooLargeResourceVersionError in this case.
   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go#L338-L344
 */
-function isTooLargeResourceVersionError (err) {
+function hasStatusCauseResourceVersionTooLarge (err) {
+  for (const { reason, message } of get(err, 'details.causes', [])) {
+    if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
+      return true
+    }
+  }
+  return false
+}
+
+function isGatewayTimeout (err) {
   return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
+}
+
+function isTooLargeResourceVersionError (err) {
+  return hasStatusCauseResourceVersionTooLarge(err) || isGatewayTimeout(err)
 }
 
 function isConnectionRefused (err) {
@@ -92,11 +105,6 @@ function isConnectionRefused (err) {
 
 function getRetryAfterSeconds (err) {
   return get(err, 'details.retryAfterSeconds', 1)
-}
-
-function getCurrentResourceVersion (err) {
-  const [, resourceVersion = ''] = /current:\s*(\d+)/.exec(err.message) || []
-  return resourceVersion
 }
 
 module.exports = {
@@ -108,6 +116,5 @@ module.exports = {
   isTimeoutError,
   isTooLargeResourceVersionError,
   isConnectionRefused,
-  getRetryAfterSeconds,
-  getCurrentResourceVersion
+  getRetryAfterSeconds
 }

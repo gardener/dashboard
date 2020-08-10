@@ -27,7 +27,6 @@ const {
   isExpiredError,
   isConnectionRefused,
   isTooLargeResourceVersionError,
-  getCurrentResourceVersion,
   StatusError
 } = require('../ApiErrors')
 
@@ -84,7 +83,7 @@ class Reflector {
     this.heartbeatInterval = moment.duration(30, 'seconds')
     this.heartbeatIntervalId = undefined
     this.minWatchTimeout = moment.duration(50, 'minutes')
-    this.isLastSyncResourceVersionExpired = false
+    this.isLastSyncResourceVersionUnavailable = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
     this.socket = undefined
@@ -107,7 +106,7 @@ class Reflector {
   }
 
   get relistResourceVersion () {
-    if (this.isLastSyncResourceVersionExpired) {
+    if (this.isLastSyncResourceVersionUnavailable) {
       // Since this reflector makes paginated list requests, and all paginated list requests skip the watch cache
       // if the lastSyncResourceVersion is expired, we set ResourceVersion="" and list again to re-establish reflector
       // to the latest available ResourceVersion, using a consistent read from etcd.
@@ -186,8 +185,8 @@ class Reflector {
       logger.debug('List %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
       list = await pager.list(options)
     } catch (err) {
-      if (isExpiredError(err)) {
-        this.isLastSyncResourceVersionExpired = true
+      if (isExpiredError(err) || isTooLargeResourceVersionError(err)) {
+        this.isLastSyncResourceVersionUnavailable = true
         // Retry immediately if the resource version used to list is expired.
         // The pager already falls back to full list if paginated list calls fail due to an "Expired" error on
         // continuation pages, but the pager might not be enabled, or the full list might fail because the
@@ -202,9 +201,6 @@ class Reflector {
           logger.error('Failed to call full list %s: %s', this.expectedTypeName, err.message)
           return
         }
-      }
-      if (isTooLargeResourceVersionError(err)) {
-        this.lastSyncResourceVersion = getCurrentResourceVersion(err)
       }
       logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
       return
@@ -232,7 +228,7 @@ class Reflector {
       this.paginatedResult = true
     }
 
-    this.isLastSyncResourceVersionExpired = false
+    this.isLastSyncResourceVersionUnavailable = false
     this.store.replace(list.items)
     this.lastSyncResourceVersion = resourceVersion
     while (!this.stopRequested) {

@@ -305,9 +305,9 @@ describe('kubernetes-client', function () {
       })
 
       it('should return a resourceVersion for listing', async function () {
-        reflector.isLastSyncResourceVersionExpired = true
+        reflector.isLastSyncResourceVersionUnavailable = true
         expect(reflector.relistResourceVersion).to.equal('')
-        reflector.isLastSyncResourceVersionExpired = false
+        reflector.isLastSyncResourceVersionUnavailable = false
         expect(reflector.relistResourceVersion).to.equal('0')
         reflector.lastSyncResourceVersion = '1'
         expect(reflector.relistResourceVersion).to.equal('1')
