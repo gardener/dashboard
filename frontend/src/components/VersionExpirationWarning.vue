@@ -22,14 +22,14 @@ limitations under the License.
     :popperKey="`version_warning_${shootName}`"
   >
     <template v-slot:popperRef>
-      <div>
+      <v-btn icon>
         <v-tooltip top>
           <template v-slot:activator="{ on }">
-            <v-icon v-on="on" :color="overallStatusColor" class="cursor-pointer">mdi-update</v-icon>
+            <v-icon v-on="on" :color="overallStatusColor">mdi-update</v-icon>
           </template>
           <span>{{tooltip}}</span>
         </v-tooltip>
-      </div>
+      </v-btn>
     </template>
     <ul class="update-warning-box" :class="listClass">
       <template v-if="k8sExpiration">
@@ -135,10 +135,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-  .cursor-pointer {
-      cursor: pointer;
-  }
 
   .update-warning-box {
     max-width: 800px;

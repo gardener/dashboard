@@ -29,14 +29,14 @@ limitations under the License.
       </template>
     </div>
     <template v-slot:popperRef>
-      <div>
+      <v-btn icon>
         <v-tooltip top>
           <template v-slot:activator="{ on: tooltip }">
-            <v-icon v-on="tooltip" color="cyan darken-2" class="cursor-pointer">mdi-calendar-alert</v-icon>
+            <v-icon v-on="tooltip" color="cyan darken-2">mdi-calendar-alert</v-icon>
           </template>
           <span>No Hibernation Schedule</span>
         </v-tooltip>
-      </div>
+      </v-btn>
     </template>
   </g-popper>
 
@@ -74,9 +74,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .cursor-pointer {
-    cursor: pointer;
-  }
+
   .message {
     text-align: left;
     min-width: 250px;
@@ -84,4 +82,5 @@ export default {
     white-space: normal;
     overflow-y: auto;
   }
+
 </style>
