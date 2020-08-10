@@ -200,7 +200,7 @@ export default {
         return 'error'
       }
       if (this.isUnknown) {
-        return 'grey lighten-1'
+        return 'grey lighten'
       }
       if (this.isProgressing && this.isAdmin) {
         return 'blue darken-2'
