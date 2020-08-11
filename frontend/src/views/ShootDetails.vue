@@ -46,8 +46,6 @@ import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructu
 import ShootLifecycleCard from '@/components/ShootDetails/ShootLifecycleCard'
 import ShootExternalToolsCard from '@/components/ShootDetails/ShootExternalToolsCard'
 import get from 'lodash/get'
-import has from 'lodash/has'
-import { shootAddonByName } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 
 import 'codemirror/mode/yaml/yaml.js'
