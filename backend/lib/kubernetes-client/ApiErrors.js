@@ -26,11 +26,12 @@ const CONNECTION_ERROR_CODES = [
 ]
 
 class StatusError extends Error {
-  constructor ({ code, message, reason }) {
+  constructor ({ code, message, reason, details }) {
     super(message)
     this.name = this.constructor.name
     this.code = code
     this.reason = reason
+    this.details = details
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -45,16 +46,18 @@ class CacheExpiredError extends Error {
   }
 }
 
-function getValue (err, key) {
+function getValue (err, keyPath) {
   if (err instanceof StatusError) {
-    return get(err, key)
+    return get(err, keyPath)
   } else if (err instanceof HTTPError) {
-    const value = get(err, ['response', 'body', key])
-    switch (key) {
+    const value = get(err, 'response.body.' + keyPath)
+    switch (keyPath) {
       case 'code':
-        return value || get(err, ['response', 'statusCode'])
+        return value || get(err, 'response.statusCode')
       case 'reason':
-        return value || get(err, ['response', 'statusMessage'])
+        return value || get(err, 'response.statusMessage')
+      default:
+        return value
     }
   }
 }
@@ -83,9 +86,12 @@ function isTimeoutError (err) {
   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go#L338-L344
 */
 function hasStatusCauseResourceVersionTooLarge (err) {
-  for (const { reason, message } of get(err, 'details.causes', [])) {
-    if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
-      return true
+  const causes = getValue(err, 'details.causes')
+  if (Array.isArray(causes)) {
+    for (const { reason, message } of causes) {
+      if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
+        return true
+      }
     }
   }
   return false
@@ -103,10 +109,6 @@ function isConnectionRefused (err) {
   return includes(CONNECTION_ERROR_CODES, err.code) || isTimeoutError(err)
 }
 
-function getRetryAfterSeconds (err) {
-  return get(err, 'details.retryAfterSeconds', 1)
-}
-
 module.exports = {
   StatusError,
   CacheExpiredError,
@@ -115,6 +117,7 @@ module.exports = {
   isExpiredError,
   isTimeoutError,
   isTooLargeResourceVersionError,
-  isConnectionRefused,
-  getRetryAfterSeconds
+  isGatewayTimeout,
+  hasStatusCauseResourceVersionTooLarge,
+  isConnectionRefused
 }
