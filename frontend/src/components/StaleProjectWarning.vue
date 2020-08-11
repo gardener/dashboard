@@ -18,7 +18,7 @@ limitations under the License.
   <v-tooltip top v-if="staleSinceTimestamp">
     <template v-slot:activator="{ on }">
       <v-icon :small="small" v-on="on" color="warning" class="staleIcon" v-if="staleAutoDeleteTimestamp">mdi-alert-circle</v-icon>
-      <v-icon :small="small" v-on="on" color="teal" class="staleIcon" v-else>mdi-information</v-icon>
+      <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-else>mdi-information</v-icon>
     </template>
      <span v-if="staleAutoDeleteTimestamp">
       This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
@@ -44,6 +44,10 @@ export default {
     },
     small: {
       type: Boolean
+    },
+    color: {
+      type: String,
+      default: 'teal'
     }
   },
   computed: {
