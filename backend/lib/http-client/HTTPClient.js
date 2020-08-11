@@ -38,9 +38,9 @@ class HTTPClient {
     }
   }
 
-  request (url, options) {
+  async request (url, options) {
     try {
-      return this[request](url, this.constructor.normalizeOptions(options))
+      return await this[request](url, this.constructor.normalizeOptions(options))
     } catch (err) {
       if (err instanceof got.HTTPError) {
         throw new HTTPError(err.response)
