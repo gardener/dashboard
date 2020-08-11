@@ -17,8 +17,6 @@
 'use strict'
 
 const express = require('express')
-const _ = require('lodash')
-const config = require('../config')
 const { shoots } = require('../services')
 
 const router = module.exports = express.Router({
