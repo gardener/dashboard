@@ -30,12 +30,6 @@ limitations under the License.
           <shoot-access-card :shootItem="shootItem"></shoot-access-card>
         </v-card>
         <shoot-monitoring-card :shootItem="shootItem"></shoot-monitoring-card>
-        <v-card v-if="isKymaFeatureEnabled && isKymaAddonEnabled" class="mt-4">
-          <v-toolbar flat dark dense color="cyan darken-2">
-            <v-toolbar-title class="subtitle-1">{{kymaTitle}}</v-toolbar-title>
-          </v-toolbar>
-          <shoot-addon-kyma-card :shootItem="shootItem"></shoot-addon-kyma-card>
-        </v-card>
         <tickets-card :tickets="tickets" :shootItem="shootItem" class="mt-4"></tickets-card>
       </v-col>
     </v-row>
@@ -43,10 +37,9 @@ limitations under the License.
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters } from 'vuex'
 import TicketsCard from '@/components/TicketsCard'
 import ShootAccessCard from '@/components/ShootDetails/ShootAccessCard'
-import ShootAddonKymaCard from '@/components/ShootDetails/ShootAddonKymaCard'
 import ShootMonitoringCard from '@/components/ShootDetails/ShootMonitoringCard'
 import ShootDetailsCard from '@/components/ShootDetails/ShootDetailsCard'
 import ShootInfrastructureCard from '@/components/ShootDetails/ShootInfrastructureCard'
@@ -66,7 +59,6 @@ export default {
     ShootInfrastructureCard,
     ShootLifecycleCard,
     ShootAccessCard,
-    ShootAddonKymaCard,
     TicketsCard,
     ShootMonitoringCard,
     ShootExternalToolsCard
@@ -76,7 +68,6 @@ export default {
     ...mapGetters([
       'shootByNamespaceAndName',
       'ticketsByNamespaceAndName',
-      'isKymaFeatureEnabled',
       'canGetSecrets'
     ]),
     value () {
@@ -94,36 +85,11 @@ export default {
     tickets () {
       const params = this.$route.params
       return this.ticketsByNamespaceAndName(params)
-    },
-    isKymaAddonEnabled () {
-      return has(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
-    },
-    kymaTitle () {
-      const kymaAddon = shootAddonByName('kyma')
-      return get(kymaAddon, 'title')
-    }
-  },
-  methods: {
-    ...mapActions([
-      'getShootAddonKyma'
-    ]),
-    fetchKymaInfo () {
-      if (!this.isKymaFeatureEnabled || !this.isKymaAddonEnabled) {
-        return
-      }
-
-      this.getShootAddonKyma({ name: this.shootName, namespace: this.shootNamespace })
     }
   },
   mounted () {
     if (get(this.$route, 'name') === 'ShootItemHibernationSettings') {
       this.$refs.shootLifecycle.showHibernationConfigurationDialog()
-    }
-    this.fetchKymaInfo()
-  },
-  watch: {
-    isKymaAddonEnabled () {
-      this.fetchKymaInfo()
     }
   }
 }

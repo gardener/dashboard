@@ -119,20 +119,12 @@ frontendConfig:
   seedCandidateDeterminationStrategy: SameRegion
   features:
     terminalEnabled: false
-    kymaEnabled: false
   # alert:
   #   type: error
   #   message: This is an **alert** banner
 
   # terminal:
   #   heartbeatIntervalSeconds: 60
-
-  # kyma:
-  #   title: Kyma
-  #   description: |
-  #     Kyma is a platform for extending applications with serverless functions and microservices.
-  #     It provides a selection of cloud-native projects glued together to simplify the creation and management of extensions.
-  #   enabled: false
 
   # # costObject is used for billing purposes and is assigned to the gardener project
   # costObject:
