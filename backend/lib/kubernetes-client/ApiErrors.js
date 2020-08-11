@@ -26,11 +26,12 @@ const CONNECTION_ERROR_CODES = [
 ]
 
 class StatusError extends Error {
-  constructor ({ code, message, reason }) {
+  constructor ({ code, message, reason, details }) {
     super(message)
     this.name = this.constructor.name
     this.code = code
     this.reason = reason
+    this.details = details
     Error.captureStackTrace(this, this.constructor)
   }
 }
@@ -45,16 +46,18 @@ class CacheExpiredError extends Error {
   }
 }
 
-function getValue (err, key) {
+function getValue (err, keyPath) {
   if (err instanceof StatusError) {
-    return get(err, key)
+    return get(err, keyPath)
   } else if (err instanceof HTTPError) {
-    const value = get(err, ['response', 'body', key])
-    switch (key) {
+    const value = get(err, 'response.body.' + keyPath)
+    switch (keyPath) {
       case 'code':
-        return value || get(err, ['response', 'statusCode'])
+        return value || get(err, 'response.statusCode')
       case 'reason':
-        return value || get(err, ['response', 'statusMessage'])
+        return value || get(err, 'response.statusMessage')
+      default:
+        return value
     }
   }
 }
@@ -82,21 +85,28 @@ function isTimeoutError (err) {
   The apiserver will throw a TooLargeResourceVersionError in this case.
   https://github.com/kubernetes/kubernetes/blob/master/staging/src/k8s.io/apiserver/pkg/storage/cacher/watch_cache.go#L338-L344
 */
-function isTooLargeResourceVersionError (err) {
+function hasStatusCauseResourceVersionTooLarge (err) {
+  const causes = getValue(err, 'details.causes')
+  if (Array.isArray(causes)) {
+    for (const { reason, message } of causes) {
+      if (reason === 'ResourceVersionTooLarge' || message === 'Too large resource version') {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+function isGatewayTimeout (err) {
   return getValue(err, 'reason') === 'Timeout' && getValue(err, 'code') === 504
+}
+
+function isTooLargeResourceVersionError (err) {
+  return hasStatusCauseResourceVersionTooLarge(err) || isGatewayTimeout(err)
 }
 
 function isConnectionRefused (err) {
   return includes(CONNECTION_ERROR_CODES, err.code) || isTimeoutError(err)
-}
-
-function getRetryAfterSeconds (err) {
-  return get(err, 'details.retryAfterSeconds', 1)
-}
-
-function getCurrentResourceVersion (err) {
-  const [, resourceVersion = ''] = /current:\s*(\d+)/.exec(err.message) || []
-  return resourceVersion
 }
 
 module.exports = {
@@ -107,7 +117,7 @@ module.exports = {
   isExpiredError,
   isTimeoutError,
   isTooLargeResourceVersionError,
-  isConnectionRefused,
-  getRetryAfterSeconds,
-  getCurrentResourceVersion
+  isGatewayTimeout,
+  hasStatusCauseResourceVersionTooLarge,
+  isConnectionRefused
 }
