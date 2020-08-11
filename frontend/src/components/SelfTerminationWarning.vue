@@ -45,9 +45,6 @@ export default {
     },
     isSelfTerminationWarning () {
       return isSelfTerminationWarning(this.expirationTimestamp)
-    },
-    expirationAlertType () {
-      return this.isSelfTerminationWarning ? 'warning' : 'info'
     }
   }
 }

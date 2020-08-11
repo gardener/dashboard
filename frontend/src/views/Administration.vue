@@ -55,6 +55,37 @@ limitations under the License.
                     </v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
+                <template v-if="staleSinceTimestamp">
+                  <v-divider inset></v-divider>
+                  <v-list-item>
+                    <v-list-item-avatar>
+                      <v-icon :color="color">mdi-clock-outline</v-icon>
+                    </v-list-item-avatar>
+                    <v-list-item-content>
+                      <v-list-item-subtitle>Stale Project Information</v-list-item-subtitle>
+                      <v-list-item-title class="d-flex align-center pt-1">
+                        <v-icon
+                          v-if="!staleAutoDeleteTimestamp"
+                          :color="color"
+                          left
+                          size="18"
+                        >mdi-information</v-icon>
+                        <v-icon
+                          v-else
+                          color="warning"
+                          left
+                          size="18"
+                        >mdi-alert-circle</v-icon>
+                        <span v-if="staleAutoDeleteTimestamp">
+                          This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
+                        </span>
+                        <span v-else>
+                          This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
+                        </span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </template>
                 <v-divider inset/>
                 <v-list-item>
                   <v-list-item-avatar>
@@ -375,6 +406,12 @@ export default {
     },
     purpose () {
       return this.projectDetails.purpose
+    },
+    staleSinceTimestamp () {
+      return this.projectDetails.staleSinceTimestamp
+    },
+    staleAutoDeleteTimestamp () {
+      return this.projectDetails.staleAutoDeleteTimestamp
     },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0

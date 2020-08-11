@@ -58,6 +58,7 @@ limitations under the License.
             >
               <v-icon class="pr-6">mdi-grid-large</v-icon>
               <span class="ml-2">{{projectName}}</span>
+              <stale-project-warning :project="project" small></stale-project-warning>
               <v-spacer></v-spacer>
               <v-icon right>{{projectMenuIcon}}</v-icon>
             </v-btn>
@@ -106,6 +107,9 @@ limitations under the License.
                   <v-list-item-title class="project-name">{{project.metadata.name}}</v-list-item-title>
                   <v-list-item-subtitle class="project-owner">{{getProjectOwner(project)}}</v-list-item-subtitle>
                 </v-list-item-content>
+                <v-list-item-action>
+                  <stale-project-warning :project="project" small></stale-project-warning>
+                </v-list-item-action>
               </v-list-item>
             </v-list>
             <v-card-actions class="grey lighten-3">
@@ -181,12 +185,14 @@ import slice from 'lodash/slice'
 import last from 'lodash/last'
 import { emailToDisplayName, setDelayedInputFocus, routes, namespacedRoute, routeName } from '@/utils'
 import ProjectCreateDialog from '@/components/dialogs/ProjectDialog'
+import StaleProjectWarning from '@/components/StaleProjectWarning'
 
 const initialVisibleProjects = 10
 
 export default {
   components: {
-    ProjectCreateDialog
+    ProjectCreateDialog,
+    StaleProjectWarning
   },
   data () {
     return {
