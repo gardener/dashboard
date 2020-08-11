@@ -20,7 +20,6 @@ const got = require('got')
 const http = require('http')
 const https = require('https')
 const { extend, HTTPClient, HTTPError } = require('../lib/http-client')
-const { expect } = require('chai')
 
 describe('http-client', function () {
   /* eslint no-unused-expressions: 0 */
@@ -89,7 +88,9 @@ describe('http-client', function () {
             Object.defineProperty(err, 'response', {
               value: response
             })
-            throw err
+            return new Promise((resolve, reject) => {
+              process.nextTick(() => reject(err))
+            })
           }
         })
         const client = new HTTPClient({ prefixUrl })
@@ -107,7 +108,9 @@ describe('http-client', function () {
         extendStub.callsFake(options => {
           return url => {
             expect(url).to.equal('test')
-            throw error
+            return new Promise((resolve, reject) => {
+              process.nextTick(() => reject(error))
+            })
           }
         })
         const client = new HTTPClient({ prefixUrl })

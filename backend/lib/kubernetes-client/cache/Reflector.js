@@ -27,7 +27,6 @@ const {
   isExpiredError,
   isConnectionRefused,
   isTooLargeResourceVersionError,
-  getCurrentResourceVersion,
   StatusError
 } = require('../ApiErrors')
 
@@ -84,7 +83,7 @@ class Reflector {
     this.heartbeatInterval = moment.duration(30, 'seconds')
     this.heartbeatIntervalId = undefined
     this.minWatchTimeout = moment.duration(50, 'minutes')
-    this.isLastSyncResourceVersionExpired = false
+    this.isLastSyncResourceVersionUnavailable = false
     this.lastSyncResourceVersion = ''
     this.paginatedResult = false
     this.socket = undefined
@@ -107,7 +106,7 @@ class Reflector {
   }
 
   get relistResourceVersion () {
-    if (this.isLastSyncResourceVersionExpired) {
+    if (this.isLastSyncResourceVersionUnavailable) {
       // Since this reflector makes paginated list requests, and all paginated list requests skip the watch cache
       // if the lastSyncResourceVersion is expired, we set ResourceVersion="" and list again to re-establish reflector
       // to the latest available ResourceVersion, using a consistent read from etcd.
@@ -175,7 +174,23 @@ class Reflector {
       resourceVersion: this.relistResourceVersion
     }
 
-    if (!this.paginatedResult && options.resourceVersion !== '' && options.resourceVersion !== '0') {
+    if (this.paginatedResult) {
+      // We got a paginated result initially. Assume this resource and server honor
+      // paging requests (i.e. watch cache is probably disabled) and leave the default
+      // pager size set.
+    } else if (options.resourceVersion !== '' && options.resourceVersion !== '0') {
+      // User didn't explicitly request pagination.
+      //
+      // With ResourceVersion != "", we have a possibility to list from watch cache,
+      // but we do that (for ResourceVersion != "0") only if Limit is unset.
+      // To avoid thundering herd on etcd (e.g. on master upgrades), we explicitly
+      // switch off pagination to force listing from watch cache (if enabled).
+      // With the existing semantic of RV (result is at least as fresh as provided RV),
+      // this is correct and doesn't lead to going back in time.
+      //
+      // We also don't turn off pagination for ResourceVersion="0", since watch cache
+      // is ignoring Limit in that case anyway, and if watch cache is not enabled
+      // we don't introduce regression.
       pager.pageSize = 0
     }
 
@@ -186,13 +201,14 @@ class Reflector {
       logger.debug('List %s with resourceVersion %s', this.expectedTypeName, options.resourceVersion)
       list = await pager.list(options)
     } catch (err) {
-      if (isExpiredError(err)) {
-        this.isLastSyncResourceVersionExpired = true
-        // Retry immediately if the resource version used to list is expired.
+      if (isExpiredError(err) || isTooLargeResourceVersionError(err)) {
+        this.isLastSyncResourceVersionUnavailable = true
+        // Retry immediately if the resource version used to list is unavailable.
         // The pager already falls back to full list if paginated list calls fail due to an "Expired" error on
-        // continuation pages, but the pager might not be enabled, or the full list might fail because the
-        // resource version it is listing at is expired, so we need to fallback to resourceVersion="" in all
-        // to recover and ensure the reflector makes forward progress.
+        // continuation pages, but the pager might not be enabled, the full list might fail because the
+        // resource version it is listing at is expired or the cache may not yet be synced to the provided
+        // resource version. So we need to fallback to resourceVersion="" in all to recover and ensure
+        // the reflector makes forward progress.
         try {
           logger.debug('Falling back to full list %s', this.expectedTypeName)
           list = await pager.list({
@@ -202,9 +218,6 @@ class Reflector {
           logger.error('Failed to call full list %s: %s', this.expectedTypeName, err.message)
           return
         }
-      }
-      if (isTooLargeResourceVersionError(err)) {
-        this.lastSyncResourceVersion = getCurrentResourceVersion(err)
       }
       logger.error('Failed to call paginated list %s: %s', this.expectedTypeName, err.message)
       return
@@ -232,7 +245,7 @@ class Reflector {
       this.paginatedResult = true
     }
 
-    this.isLastSyncResourceVersionExpired = false
+    this.isLastSyncResourceVersionUnavailable = false
     this.store.replace(list.items)
     this.lastSyncResourceVersion = resourceVersion
     while (!this.stopRequested) {
@@ -277,7 +290,7 @@ class Reflector {
           await this.watchHandler(this.socket)
         } catch (err) {
           if (isExpiredError(err)) {
-            // Don't set LastSyncResourceVersionExpired - LIST call with ResourceVersion=RV already
+            // Don't set LastSyncResourceVersionUnavailable - LIST call with ResourceVersion=RV already
             // has a semantic that it returns data at least as fresh as provided RV.
             // So first try to LIST with setting RV to resource version of last observed object.
             logger.info('Watch of %s closed with: %s', this.expectedTypeName, err.message)
