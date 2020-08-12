@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-menu left v-model="actionMenu" absolute :close-on-content-click="false">
+  <v-menu :nudge-bottom="20" left v-model="actionMenu" absolute :close-on-content-click="false">
     <template v-slot:activator="{ on: menu }">
       <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
