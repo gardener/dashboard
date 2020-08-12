@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-menu :nudge-bottom="20" left v-model="actionMenu" absolute :close-on-content-click="false">
+  <v-menu :nudge-bottom="20" left v-model="actionMenu" absolute :close-on-content-click="false" v-if="canPatchShoots">
     <template v-slot:activator="{ on: menu }">
       <v-tooltip top>
         <template v-slot:activator="{ on: tooltip }">
@@ -42,19 +42,17 @@ limitations under the License.
           <reconcile-start :shootItem="shootItem" text></reconcile-start>
         </v-list-item-content>
       </v-list-item>
-      <template v-if="canPatchShoots">
-        <v-list-item>
-          <v-list-item-content>
-            <rotate-kubeconfig-start :shootItem="shootItem" text></rotate-kubeconfig-start>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item>
-          <v-list-item-content>
-              <delete-cluster :shootItem="shootItem" text></delete-cluster>
-          </v-list-item-content>
-        </v-list-item>
-      </template>
+      <v-list-item>
+        <v-list-item-content>
+          <rotate-kubeconfig-start :shootItem="shootItem" text></rotate-kubeconfig-start>
+        </v-list-item-content>
+      </v-list-item>
+      <v-divider></v-divider>
+      <v-list-item>
+        <v-list-item-content>
+            <delete-cluster :shootItem="shootItem" text></delete-cluster>
+        </v-list-item-content>
+      </v-list-item>
     </v-list>
   </v-menu>
 </template>

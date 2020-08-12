@@ -58,6 +58,7 @@ limitations under the License.
       <template v-slot:message><slot name="actionComponent"></slot></template>
     </g-dialog>
   </div>
+  <div v-else style="width: 36px"></div>
 </template>
 
 <script>
