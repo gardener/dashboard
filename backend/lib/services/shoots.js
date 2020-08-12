@@ -131,7 +131,7 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const { ...addons } = body
+  const addons = body
   const payload = {
     spec: {
       addons
