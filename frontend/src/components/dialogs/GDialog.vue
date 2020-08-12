@@ -204,7 +204,7 @@ export default {
       this.visible = false
     },
     showScrollBar (retryCount = 0) {
-      if (retryCount > 10) {
+      if (!this.visible || retryCount > 10) {
         // circuit breaker
         return
       }
