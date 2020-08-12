@@ -16,7 +16,6 @@
 
 'use strict'
 
-const { HTTPError } = require('../http-client')
 const { isHttpError } = require('../kubernetes-client')
 const kubeconfig = require('../kubernetes-config')
 const utils = require('../utils')
@@ -48,11 +47,8 @@ exports.create = async function ({ user, namespace, body }) {
   const annotations = {
     'gardener.cloud/created-by': username
   }
-  if (_.get(body, 'spec.addons.kyma.enabled', false)) {
-    annotations['experimental.addons.shoot.gardener.cloud/kyma'] = 'enabled'
-  }
+
   body = _.merge({}, body, { metadata: { namespace, annotations } })
-  _.unset(body, 'spec.addons.kyma')
   return client['core.gardener.cloud'].shoots.create(namespace, body)
 }
 
@@ -135,58 +131,14 @@ exports.replacePurpose = async function ({ user, namespace, name, body }) {
 
 exports.replaceAddons = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const { kyma = {}, ...addons } = body
+  const addons = body
   const payload = {
     spec: {
       addons
     }
   }
-  if (kyma.enabled) {
-    payload.metadata = {
-      annotations: {
-        'experimental.addons.shoot.gardener.cloud/kyma': 'enabled'
-      }
-    }
-  }
-  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
-}
 
-exports.kyma = async function ({ user, namespace, name }) {
-  const client = user.client
-  try {
-    const shootClient = await client.createKubeconfigClient({ namespace, name: `${name}.kubeconfig` })
-    const [{
-      data: {
-        'global.ingress.domainName': domain
-      }
-    }, {
-      data: {
-        email, password, username
-      }
-    }] = await Promise.all([
-      shootClient.core.configmaps.get('kyma-installer', 'net-global-overrides'),
-      shootClient.core.secrets.get('kyma-system', 'admin-user')
-    ])
-    return {
-      url: `https://console.${domain}`,
-      email: decodeBase64(email),
-      username: decodeBase64(username),
-      password: decodeBase64(password)
-    }
-  } catch (err) {
-    logger.error('Failed to fetch kyma addon info', err)
-    const statusCode = 404
-    let statusMessage
-    if (isHttpError(err, 404)) {
-      statusMessage = 'Kubeconfig for cluster does not exist'
-    } else if (/^ECONNRE/.test(err.code)) {
-      statusMessage = 'Connection to cluster could not be estalished'
-    } else {
-      statusMessage = 'Kyma not correctly installed in cluster'
-    }
-    const response = { statusCode, statusMessage }
-    throw new HTTPError(response)
-  }
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceWorkers = async function ({ user, namespace, name, body }) {

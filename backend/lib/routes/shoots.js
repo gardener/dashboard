@@ -17,8 +17,6 @@
 'use strict'
 
 const express = require('express')
-const _ = require('lodash')
-const config = require('../config')
 const { shoots } = require('../services')
 
 const router = module.exports = express.Router({
@@ -193,20 +191,6 @@ router.route('/:name/seed-info')
       next(err)
     }
   })
-
-if (_.get(config, 'frontend.features.kymaEnabled', false)) {
-  router.route('/:name/kyma')
-    .get(async (req, res, next) => {
-      try {
-        const user = req.user
-        const namespace = req.params.namespace
-        const name = req.params.name
-        res.send(await shoots.kyma({ user, namespace, name }))
-      } catch (err) {
-        next(err)
-      }
-    })
-}
 
 router.route('/:name/spec/purpose')
   .put(async (req, res, next) => {
