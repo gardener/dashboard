@@ -32,7 +32,6 @@
       v-model.number="workerIops"
       type="number"
       min="100"
-      :max="maxIops"
       label="IOPS">
     </v-text-field>
   </div>
@@ -42,7 +41,7 @@
 
 import { mapGetters } from 'vuex'
 import HintColorizer from '@/components/HintColorizer'
-import { required, requiredIf, minValue, maxValue } from 'vuelidate/lib/validators'
+import { required, requiredIf, minValue } from 'vuelidate/lib/validators'
 import { getValidationErrors } from '@/utils'
 import { getWorkerProviderConfig } from '@/utils/createShoot'
 import find from 'lodash/find'
