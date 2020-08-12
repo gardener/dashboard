@@ -169,16 +169,11 @@ data:
 {{- end }}
       features:
         terminalEnabled: {{ .Values.frontendConfig.features.terminalEnabled | default false }}
-        kymaEnabled: {{ .Values.frontendConfig.features.kymaEnabled | default false }}
 {{- if .Values.frontendConfig.terminal }}
 {{- if .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
       terminal:
         heartbeatIntervalSeconds: {{ .Values.frontendConfig.terminal.heartbeatIntervalSeconds }}
 {{- end }}
-{{- end }}
-{{- if .Values.frontendConfig.kyma }}
-      kyma:
-{{ toYaml .Values.frontendConfig.kyma | trim | indent 8 }}
 {{- end }}
 {{- if .Values.frontendConfig.defaultHibernationSchedule }}
       defaultHibernationSchedule:

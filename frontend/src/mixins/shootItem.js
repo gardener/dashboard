@@ -120,10 +120,6 @@ export const shootItem = {
     },
     shootAddons () {
       const addons = cloneDeep(get(this.shootSpec, 'addons', {}))
-      const kymaAddonEnabled = !!get(this.shootAnnotations, '["experimental.addons.shoot.gardener.cloud/kyma"]')
-      if (kymaAddonEnabled) {
-        addons.kyma = { enabled: true }
-      }
       return addons
     },
     shootRegion () {

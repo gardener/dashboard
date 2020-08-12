@@ -24,7 +24,6 @@ import {
   displayName,
   fullDisplayName,
   getDateFormatted,
-  addKymaAddon,
   canI,
   getProjectName
 } from '@/utils'
@@ -816,9 +815,6 @@ const getters = {
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
   },
-  isKymaFeatureEnabled (state, getters) {
-    return get(state, 'cfg.features.kymaEnabled', false)
-  },
   canCreateTerminals (state) {
     return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
   },
@@ -926,12 +922,6 @@ const actions = {
   },
   getShootSeedInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getSeedInfo', { name, namespace })
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -1067,10 +1057,6 @@ const actions = {
   },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
-
-    if (getters.isKymaFeatureEnabled) {
-      addKymaAddon(value.kyma)
-    }
 
     if (get(value, 'alert')) {
       commit('SET_ALERT_BANNER', get(value, 'alert'))

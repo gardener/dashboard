@@ -29,7 +29,7 @@ limitations under the License.
           @valid="onScheduleEventValid">
         </hibernation-schedule-event>
       </v-row>
-      <v-row v-if="!parseError" key="addSchedule" class="list-item pt-2">
+      <v-row v-if="!parseError" key="addSchedule" class="list-item">
         <v-col>
           <v-btn
             small
