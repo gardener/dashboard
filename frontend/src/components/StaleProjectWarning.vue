@@ -17,8 +17,8 @@ limitations under the License.
 <template>
   <v-tooltip top v-if="staleSinceTimestamp">
     <template v-slot:activator="{ on }">
-      <v-icon :small="small" v-on="on" color="warning" class="staleIcon" v-if="staleAutoDeleteTimestamp">mdi-alert-circle</v-icon>
-      <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-else>mdi-information</v-icon>
+      <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-if="staleAutoDeleteTimestamp">mdi-delete-clock</v-icon>
+      <v-icon :small="small" v-on="on" :color="color" class="staleIcon" v-else>mdi-clock-alert-outline</v-icon>
     </template>
      <span v-if="staleAutoDeleteTimestamp">
       This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
