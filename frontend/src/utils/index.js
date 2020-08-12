@@ -361,16 +361,6 @@ export function isShootStatusHibernated (status) {
   return get(status, 'hibernated', false)
 }
 
-export function canLinkToSeed ({ namespace, seedName }) {
-  /*
-  * Soils cannot be linked currently as they have representation as "shoot".
-  * Currently there is only the secret available.
-  * If we are not in the garden namespace we expect a seed to be present
-  * TODO refactor once we have an owner ref on the shoot pointing to the seed
-  */
-  return seedName && namespace !== 'garden'
-}
-
 export function shootHasIssue (shoot) {
   return get(shoot, ['metadata', 'labels', 'shoot.gardener.cloud/status'], 'healthy') !== 'healthy'
 }

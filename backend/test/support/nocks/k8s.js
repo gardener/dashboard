@@ -557,6 +557,12 @@ const stub = {
         allowed: true
       }
     }
+    const shootedSeedResult = {
+      metadata: {
+        name: seedName,
+        namespace: 'garden'
+      }
+    }
 
     return [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -564,7 +570,10 @@ const stub = {
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, () => kubecfgResult)
       .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
-      .reply(200, () => isAdminResult)]
+      .reply(200, () => isAdminResult)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
+      .reply(200, () => shootedSeedResult)
+    ]
   },
   getSeedInfo ({
     bearer,

@@ -131,8 +131,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(2)
-    expect(_.keys(res.body).length).to.equal(6)
+    expect(_.keys(res.body).length).to.equal(7)
     expect(res.body).to.have.own.property('kubeconfig')
+    expect(res.body.canLinkToSeed).to.equal(true)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
     expect(res.body.serverUrl).to.eql(shootServerUrl)
