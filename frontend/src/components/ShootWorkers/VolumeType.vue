@@ -26,9 +26,9 @@
       v-if="isAWS"
       class="ml-1"
       color="cyan darken-2"
-      :error-messages="getErrorMessages('internalIops')"
+      :error-messages="getErrorMessages('workerIops')"
       @input="onInputIops"
-      @blur="$v.internalIops.$touch()"
+      @blur="$v.workerIops.$touch()"
       v-model.number="workerIops"
       type="number"
       min="100"
@@ -70,7 +70,7 @@ export default {
   data () {
     return {
       valid: undefined,
-      internalIops: undefined
+      workerIops: undefined
     }
   },
   validations () {
@@ -89,12 +89,11 @@ export default {
             }
           }
         },
-        internalIops: {
+        workerIops: {
           required: requiredIf(() => {
             return this.isAWS && this.worker.volume.type === 'io1'
           }),
-          minValue: minValue(100),
-          maxValue: maxValue(this.maxIops)
+          minValue: minValue(100)
         }
       }
     },
@@ -107,10 +106,9 @@ export default {
             }
           }
         },
-        internalIops: {
+        workerIops: {
           required: 'IOPS is required for volumes of type io1',
-          minValue: 'Minimum IOPS is 100',
-          maxValue: `Maximum IOPS is ${this.maxIops}`
+          minValue: 'Minimum IOPS is 100'
         }
       }
     },
@@ -136,33 +134,6 @@ export default {
     isAWS () {
       const cloudProfile = this.cloudProfileByName(this.cloudProfileName)
       return get(cloudProfile, 'metadata.cloudProviderKind') === 'aws'
-    },
-    workerIops: {
-      get () {
-        return this.internalIops
-      },
-      set (value) {
-        this.internalIops = value
-        if (value > 0) {
-          if (!this.worker.providerConfig) {
-            this.worker.providerConfig = getWorkerProviderConfig('aws')
-          }
-          set(this.worker.providerConfig, 'volume.iops', parseInt(value))
-        } else {
-          unset(this.worker.providerConfig, 'volume.iops')
-        }
-      }
-    },
-    maxIops () {
-      switch (this.worker.volume.type) {
-        case 'gp2': {
-          return 10000
-        }
-        case 'io1': {
-          return 20000
-        }
-      }
-      return 0
     }
   },
   methods: {
@@ -174,8 +145,17 @@ export default {
       this.$emit('updateVolumeType')
       this.validateInput()
     },
-    onInputIops () {
-      this.$v.internalIops.$touch()
+    onInputIops (value) {
+      const iopsValue = parseInt(value)
+      if (value && iopsValue > 0) {
+        if (!this.worker.providerConfig) {
+          this.worker.providerConfig = getWorkerProviderConfig('aws')
+        }
+        set(this.worker.providerConfig, 'volume.iops', iopsValue)
+      } else {
+        unset(this.worker.providerConfig, 'volume.iops')
+      }
+      this.$v.workerIops.$touch()
       this.$emit('updateVolumeType')
       this.validateInput()
     },
@@ -187,7 +167,7 @@ export default {
     }
   },
   mounted () {
-    this.internalIops = get(this.worker, 'providerConfig.volume.iops')
+    this.workerIops = get(this.worker, 'providerConfig.volume.iops')
     this.$v.$touch()
     this.validateInput()
   }
