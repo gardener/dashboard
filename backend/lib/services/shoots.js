@@ -236,11 +236,10 @@ exports.info = async function ({ user, namespace, name }) {
         data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
       }
     }
-    if (seed) {
+    if (seed && namespace !== 'garden') {
       try {
         data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
       } catch (err) {
-        console.log(err)
         data.canLinkToSeed = false
       }
     }
