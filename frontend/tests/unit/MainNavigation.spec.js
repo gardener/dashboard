@@ -93,7 +93,7 @@ async function createMainNavigationComponent () {
       $router,
       $store
     },
-    stubs: ['ProjectCreateDialog', 'RouterLink']
+    stubs: ['ProjectCreateDialog', 'RouterLink', 'StaleProjectWarning']
   })
   wrapper.setData({ projectMenu: true })
 

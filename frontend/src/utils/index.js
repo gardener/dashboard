@@ -344,6 +344,8 @@ export function getProjectDetails (project) {
   const description = projectData.description || ''
   const createdBy = projectData.createdBy || ''
   const purpose = projectData.purpose || ''
+  const staleSinceTimestamp = projectData.staleSinceTimestamp
+  const staleAutoDeleteTimestamp = projectData.staleAutoDeleteTimestamp
 
   return {
     projectName,
@@ -353,7 +355,9 @@ export function getProjectDetails (project) {
     creationTimestamp,
     createdBy,
     description,
-    purpose
+    purpose,
+    staleSinceTimestamp,
+    staleAutoDeleteTimestamp
   }
 }
 

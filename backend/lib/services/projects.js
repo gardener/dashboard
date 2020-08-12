@@ -28,10 +28,11 @@ const cache = require('../cache')
 
 const PROJECT_INITIALIZATION_TIMEOUT = 30 * 1000
 
-function fromResource ({ metadata, spec = {} }) {
+function fromResource ({ metadata, spec = {}, status = {} }) {
   const role = 'project'
   const { name, resourceVersion, creationTimestamp, annotations } = metadata
   const { namespace, createdBy, owner, description, purpose } = spec
+  const { staleSinceTimestamp, staleAutoDeleteTimestamp } = status
   return {
     metadata: {
       name,
@@ -45,7 +46,9 @@ function fromResource ({ metadata, spec = {} }) {
       createdBy: fromSubject(createdBy),
       owner: fromSubject(owner),
       description,
-      purpose
+      purpose,
+      staleSinceTimestamp,
+      staleAutoDeleteTimestamp
     }
   }
 }
