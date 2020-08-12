@@ -29,7 +29,7 @@
       :error-messages="getErrorMessages('internalIops')"
       @input="onInputIops"
       @blur="$v.internalIops.$touch()"
-      v-model="workerIops"
+      v-model.number="workerIops"
       type="number"
       min="100"
       :max="maxIops"
