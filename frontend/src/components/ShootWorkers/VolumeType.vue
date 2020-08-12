@@ -90,7 +90,7 @@ export default {
           }
         },
         internalIops: {
-          required: requiredIf(function () {
+          required: requiredIf(() => {
             return this.isAWS && this.worker.volume.type === 'io1'
           }),
           minValue: minValue(100),
