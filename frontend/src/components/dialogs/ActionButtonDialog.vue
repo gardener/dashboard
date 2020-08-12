@@ -28,12 +28,13 @@ limitations under the License.
             :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
             @click="showDialog"
             :width="buttonWidth"
+            class="text-none pa-0"
           >
-            <div v-if="isTextButton" class="mr-3 d-fley flex-grow-1" style="text-align: left">
-              {{buttonText}}
-            </div>
             <div>
               <v-icon :medium="!smallIcon">{{icon}}</v-icon>
+            </div>
+            <div v-if="isTextButton" class="ml-3 d-flex flex-grow-1 button-text">
+              {{buttonText}}
             </div>
           </v-btn>
         </div>

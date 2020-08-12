@@ -27,7 +27,6 @@ limitations under the License.
       </v-tooltip>
     </template>
     <v-list subheader dense class="actionMenuItem" @click.native.capture="actionMenu=false">
-      <v-subheader>Cluster Actions</v-subheader>
       <v-list-item>
         <v-list-item-content>
           <change-hibernation :shootItem="shootItem" text></change-hibernation>
@@ -49,6 +48,7 @@ limitations under the License.
             <rotate-kubeconfig-start :shootItem="shootItem" text></rotate-kubeconfig-start>
           </v-list-item-content>
         </v-list-item>
+        <v-divider></v-divider>
         <v-list-item>
           <v-list-item-content>
               <delete-cluster :shootItem="shootItem" text></delete-cluster>
