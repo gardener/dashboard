@@ -16,7 +16,7 @@ limitations under the License.
 
 <template>
   <div>
-    <div class="subtitle-1 pt-4">{{title}}</div>
+    <div class="subtitle-1 pt-4 ml-3">{{title}}</div>
     <v-list class="pt-0" two-line>
       <v-list-item v-if="selectable || osUpdates">
         <v-list-item-action>

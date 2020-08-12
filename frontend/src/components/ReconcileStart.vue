@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :loading="isReconcileToBeScheduled"
     @dialogOpened="startDialogOpened"
@@ -23,6 +23,7 @@ limitations under the License.
     :caption="caption"
     icon="mdi-refresh"
     maxWidth="600"
+    :buttonText="buttonText"
     confirmButtonText="Trigger now">
     <template v-slot:actionComponent>
       <v-row >
@@ -32,11 +33,11 @@ limitations under the License.
         </v-col>
       </v-row>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
 import get from 'lodash/get'
@@ -45,11 +46,14 @@ import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
-    ActionIconDialog
+    ActionButtonDialog
   },
   props: {
     shootItem: {
       type: Object
+    },
+    text: {
+      type: Boolean
     }
   },
   data () {
@@ -69,7 +73,16 @@ export default {
       } else if (this.isShootReconciliationDeactivated) {
         return 'Reconciliation deactivated for this cluster'
       }
+      return this.buttonTitle
+    },
+    buttonTitle () {
       return 'Trigger Reconcile'
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
     }
   },
   methods: {

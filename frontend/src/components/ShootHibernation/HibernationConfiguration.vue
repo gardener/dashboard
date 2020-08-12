@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :valid="hibernationScheduleValid"
     @dialogOpened="onConfigurationDialogOpened"
@@ -29,11 +29,11 @@ limitations under the License.
         @valid="onHibernationScheduleValid"
       ></manage-hibernation-schedule>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageHibernationSchedule from '@/components/ShootHibernation/ManageHibernationSchedule'
 import { updateShootHibernationSchedules, addShootAnnotation } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -43,7 +43,7 @@ import { shootItem } from '@/mixins/shootItem'
 export default {
   name: 'hibernation-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     ManageHibernationSchedule
   },
   props: {

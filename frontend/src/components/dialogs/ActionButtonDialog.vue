@@ -16,23 +16,30 @@ limitations under the License.
 
 <template>
   <div v-if="canPatchShoots">
-    <v-tooltip top max-width="600px">
+    <v-tooltip top max-width="600px" :disabled="disableToolTip">
       <template v-slot:activator="{ on }">
         <div v-on="on">
           <v-btn
-            icon
+            :icon="isIconButton"
+            :text="isTextButton"
             :small="smallIcon"
             :color="iconColor"
             :loading="loading"
             :disabled="isShootMarkedForDeletion || isShootActionsDisabledForPurpose || disabled"
             @click="showDialog"
+            :width="buttonWidth"
+            class="text-none font-weight-regular pa-0"
           >
-            <v-icon :medium="!smallIcon">{{icon}}</v-icon>
+            <div>
+              <v-icon :medium="!smallIcon">{{icon}}</v-icon>
+            </div>
+            <div v-if="isTextButton" class="ml-3 d-flex flex-grow-1">
+              {{buttonText}}
+            </div>
           </v-btn>
         </div>
       </template>
-      <template v-if="tooltip">{{tooltip}}</template>
-      <template v-else>{{shootActionToolTip(caption)}}</template>
+      {{actionToolTip}}
     </v-tooltip>
     <g-dialog
       :confirmButtonText="confirmButtonText"
@@ -51,6 +58,7 @@ limitations under the License.
       <template v-slot:message><slot name="actionComponent"></slot></template>
     </g-dialog>
   </div>
+  <div v-else style="width: 36px"></div>
 </template>
 
 <script>
@@ -59,7 +67,7 @@ import { shootItem } from '@/mixins/shootItem'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: 'action-icon-dialog',
+  name: 'action-button-dialog',
   components: {
     GDialog
   },
@@ -104,8 +112,7 @@ export default {
       default: '50vh'
     },
     loading: {
-      type: Boolean,
-      default: false
+      type: Boolean
     },
     iconColor: {
       type: String
@@ -121,6 +128,9 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    buttonText: {
+      type: String
     }
   },
   mixins: [shootItem],
@@ -146,6 +156,27 @@ export default {
     },
     confirmValue () {
       return this.confirmRequired ? this.shootName : undefined
+    },
+    isIconButton () {
+      return !this.buttonText
+    },
+    isTextButton () {
+      return !!this.buttonText
+    },
+    buttonWidth () {
+      return this.buttonText ? '100%' : undefined
+    },
+    actionToolTip () {
+      if (this.tooltip) {
+        return this.tooltip
+      }
+      return this.shootActionToolTip(this.caption)
+    },
+    disableToolTip () {
+      if (this.buttonText === this.actionToolTip) {
+        return true
+      }
+      return false
     }
   },
   methods: {

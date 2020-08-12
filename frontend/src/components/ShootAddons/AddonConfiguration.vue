@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
@@ -29,11 +29,11 @@ limitations under the License.
         :isCreateMode="false"
        ></manage-shoot-addons>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -44,7 +44,7 @@ import cloneDeep from 'lodash/cloneDeep'
 export default {
   name: 'addon-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     ManageShootAddons
   },
   props: {

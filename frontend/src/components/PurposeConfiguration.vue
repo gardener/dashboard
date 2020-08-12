@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :valid="valid"
     @dialogOpened="onConfigurationDialogOpened"
@@ -30,11 +30,11 @@ limitations under the License.
         @valid="onPurposeValid">
       </purpose>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import Purpose from '@/components/Purpose'
 import { updateShootPurpose } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
@@ -45,7 +45,7 @@ import find from 'lodash/find'
 export default {
   name: 'purpose-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     Purpose
   },
   props: {
