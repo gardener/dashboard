@@ -257,3 +257,14 @@ export function getControlPlaneZone (workers, infrastructureKind, oldControlPlan
       return undefined
   }
 }
+
+export function getWorkerProviderConfig (infrastructureKind) {
+  switch (infrastructureKind) {
+    case 'aws': {
+      return {
+        apiVersion: 'aws.provider.extensions.gardener.cloud/v1alpha1',
+        kind: 'WorkerConfig'
+      }
+    }
+  }
+}

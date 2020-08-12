@@ -49,6 +49,7 @@ limitations under the License.
         <volume-type
         :volumeTypes="volumeTypes"
         :worker="worker"
+        :cloudProfileName="cloudProfileName"
         @updateVolumeType="onUpdateVolumeType"
         @valid="onVolumeTypeValid">
         </volume-type>
