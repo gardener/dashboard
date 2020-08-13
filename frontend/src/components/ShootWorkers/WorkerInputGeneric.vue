@@ -110,6 +110,9 @@ limitations under the License.
           @input="onInputZones"
           @blur="$v.worker.zones.$touch()"
           multiple
+          chips
+          deletable-chips
+          small-chips
           :hint="zoneHint"
           persistent-hint
           ></v-select>
@@ -416,5 +419,9 @@ export default {
 
   ::v-deep .v-list-item--disabled {
     opacity:0.5;
+  }
+
+  ::v-deep .v-chip--disabled {
+    opacity: 1;
   }
 </style>
