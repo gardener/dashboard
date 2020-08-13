@@ -34,9 +34,8 @@ limitations under the License.
         </slot>
         <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
       </v-card-text>
-      <v-divider></v-divider>
       <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
-        {{confirmMessage}}
+        <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
         <v-text-field
           @keyup.enter="okClicked()"
           ref="deleteDialogInput"
@@ -45,7 +44,9 @@ limitations under the License.
           :error="hasError && userInput.length > 0"
           v-model="userInput"
           type="text"
-          :color="textFieldColor">
+          filled
+          dense
+          color="grey darken-2">
         </v-text-field>
       </v-alert>
       <v-card-actions>
@@ -147,16 +148,9 @@ export default {
         this.$emit('update:detailedErrorMessage', value)
       }
     },
-    textFieldColor () {
-      let color = this.confirmValue ? this.confirmColor : this.defaultColor
-      if (color === 'red') {
-        color = 'black'
-      }
-      return `${color || 'cyan'} darken-2`
-    },
     confirmAlertColor () {
       const color = this.confirmValue ? this.confirmColor : this.defaultColor
-      return `${color || 'cyan'} lighten-2`
+      return `${color || 'cyan'} lighten-5`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
