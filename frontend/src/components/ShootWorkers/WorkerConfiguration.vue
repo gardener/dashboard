@@ -37,7 +37,7 @@ limitations under the License.
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
-import { updateShootWorkers } from '@/utils/api'
+import { patchShootProvider } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
