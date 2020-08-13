@@ -149,7 +149,7 @@ router.route('/:name/spec/provider')
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceProvider({ user, namespace, name, body }))
+      res.send(await shoots.patchProvider({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }
