@@ -264,7 +264,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
         zones: [zonesNetworkConfiguration]
       }
     }
-    k8s.stub.replaceWorkers({ bearer, namespace, name, project })
+    k8s.stub.patchProvider({ bearer, namespace, name, project })
     const res = await agent
       .patch(`/api/namespaces/${namespace}/shoots/${name}/spec/provider`)
       .set('cookie', await user.cookie)
