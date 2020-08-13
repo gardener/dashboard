@@ -141,7 +141,7 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceProvider = async function ({ user, namespace, name, body }) {
+exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
   const payload = {
     spec: {
