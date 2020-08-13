@@ -637,6 +637,10 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'viewer',
     displayName: 'Viewer'
+  },
+  {
+    name: 'uam',
+    displayName: 'UAM'
   }
 ]
 
