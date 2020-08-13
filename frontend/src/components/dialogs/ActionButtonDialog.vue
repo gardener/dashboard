@@ -49,6 +49,7 @@ limitations under the License.
       :max-width="maxWidth"
       :maxHeight="maxHeight"
       :confirmValue="confirmValue"
+      :confirmMessage="confirmMessage"
       :confirmColor="dialogColor"
       :defaultColor="dialogColor"
       :disableConfirmInputFocus="disableConfirmInputFocus"
@@ -99,6 +100,9 @@ export default {
     confirmRequired: {
       type: Boolean,
       default: false
+    },
+    confirmMessage: {
+      type: String
     },
     valid: {
       type: Boolean,

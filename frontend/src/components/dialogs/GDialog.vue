@@ -32,9 +32,13 @@ limitations under the License.
         <slot name="message">
           This is a generic dialog template.
         </slot>
+        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
+        {{confirmMessage}}
         <v-text-field
           @keyup.enter="okClicked()"
-          v-if="confirmValue && !confirmDisabled"
           ref="deleteDialogInput"
           :hint="hint"
           persistent-hint
@@ -43,9 +47,7 @@ limitations under the License.
           type="text"
           :color="textFieldColor">
         </v-text-field>
-        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
-      </v-card-text>
-      <v-divider></v-divider>
+      </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
@@ -73,6 +75,9 @@ export default {
     confirmDisabled: {
       type: Boolean,
       default: false
+    },
+    confirmMessage: {
+      type: String
     },
     errorMessage: {
       type: String
@@ -148,6 +153,10 @@ export default {
         color = 'black'
       }
       return `${color || 'cyan'} darken-2`
+    },
+    confirmAlertColor () {
+      const color = this.confirmValue ? this.confirmColor : this.defaultColor
+      return `${color || 'cyan'} lighten-2`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)

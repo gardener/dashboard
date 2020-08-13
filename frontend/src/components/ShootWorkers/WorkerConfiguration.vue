@@ -22,6 +22,7 @@ limitations under the License.
     ref="actionDialog"
     maxWidth="760"
     confirmRequired
+    confirmMessage="Please confirm changes to the worker groups as this may affect your workload"
     caption="Configure Workers"
     disable-confirm-input-focus>
     <template v-slot:actionComponent>
@@ -29,7 +30,6 @@ limitations under the License.
       ref="manageWorkers"
       @valid="onWorkersValid"
       ></manage-workers>
-      <v-alert type="warning" outlined class="mt-2">Please confirm changes to the worker groups as this may affect your workload</v-alert>
     </template>
   </action-button-dialog>
 </template>
