@@ -133,16 +133,6 @@ export function updateShootHibernation ({ namespace, name, data }) {
 export function patchShootProvider ({ namespace, name, data }) {
   namespace = encodeURIComponent(namespace)
   name = encodeURIComponent(name)
-  const data = {
-    workers
-  }
-  if (zonesNetworkConfiguration) {
-    data.infrastructureConfig = {
-      networks: {
-        zones: zonesNetworkConfiguration
-      }
-    }
-  }
   return patchResource(`/api/namespaces/${namespace}/shoots/${name}/spec/provider`, data)
 }
 
