@@ -73,8 +73,16 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
-        const zonesNetworkConfiguration = this.$refs.manageWorkers.getZonesNetworkConfiguration()
-        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, workers, zonesNetworkConfiguration })
+        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
+        const data = { workers }
+        if (zonesNetworkConfiguration) {
+          data.infrastructureConfig = {
+            networks: {
+              zones: zonesNetworkConfiguration
+            }
+          }
+        }
+        await patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         const errorDetails = errorDetailsFromError(err)
