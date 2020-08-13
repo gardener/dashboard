@@ -27,7 +27,7 @@ limitations under the License.
         :availableZones="availableZones"
         :zonedCluster="zonedCluster"
         :updateOSMaintenance="updateOSMaintenance"
-        :isNewWorker="isNewCluster || worker.isNewWorker"
+        :isNew="isNewCluster || worker.isNew"
         :maxAdditionalZones="maxAdditionalZones"
         @valid="onWorkerValid">
         <template v-slot:action>
@@ -211,12 +211,9 @@ export default {
     },
     getWorkers () {
       const workers = map(this.internalWorkers, internalWorker => {
-        return omit(internalWorker, ['id', 'valid', 'isNewWorker'])
+        return omit(internalWorker, ['id', 'valid', 'isNew'])
       })
       return workers
-    },
-    getZonesNetworkConfiguration () {
-      return this.currentZonesNetworkConfiguration
     },
     validateInput () {
       let valid = true

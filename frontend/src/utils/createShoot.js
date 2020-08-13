@@ -204,8 +204,8 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
   switch (infrastructureKind) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
-      return map(range(numberOfZones), zoneIndex => {
-        const bigNetWorks = splitCIDR(zoneNetworksAws[zoneIndex], 2)
+      return map(range(numberOfZones), index => {
+        const bigNetWorks = splitCIDR(zoneNetworksAws[index], 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
         const publicNetwork = smallNetworks[0]
@@ -219,9 +219,9 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
     }
     case 'alicloud': {
       const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
-      return map(range(numberOfZones), zoneIndex => {
+      return map(range(numberOfZones), index => {
         return {
-          workers: zoneNetworksAli[zoneIndex]
+          workers: zoneNetworksAli[index]
         }
       })
     }

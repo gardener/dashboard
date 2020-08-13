@@ -594,7 +594,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
       image: machineImage
     },
     zones,
-    isNewWorker: true
+    isNew: true
   }
   if (volumeType) {
     worker.volume = {

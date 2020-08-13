@@ -203,7 +203,7 @@ export default {
     updateOSMaintenance: {
       type: Boolean
     },
-    isNewWorker: {
+    isNew: {
       type: Boolean
     },
     maxAdditionalZones: {
@@ -401,7 +401,7 @@ export default {
   },
   mounted () {
     this.validateInput()
-    this.immutableZones = this.isNewWorker ? [] : this.worker.zones
+    this.immutableZones = this.isNew ? [] : this.worker.zones
   }
 }
 </script>
