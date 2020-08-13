@@ -384,7 +384,7 @@ export default function createRouter ({ store, userManager }) {
             title: 'Administration',
             menu: {
               title: 'Administration',
-              icon: 'mdi-settings'
+              icon: 'mdi-cog'
             },
             breadcrumbText: routeTitle
           }
