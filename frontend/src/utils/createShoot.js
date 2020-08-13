@@ -24,6 +24,7 @@ import some from 'lodash/some'
 import sample from 'lodash/sample'
 import includes from 'lodash/includes'
 import filter from 'lodash/filter'
+import range from 'lodash/range'
 
 const defaultWorkerCIDR = '10.250.0.0/16'
 
@@ -203,7 +204,7 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
   switch (infrastructureKind) {
     case 'aws': {
       const zoneNetworksAws = splitCIDR(workerCIDR, numberOfZones)
-      return map([...Array(numberOfZones).keys()], zoneIndex => {
+      return map(range(numberOfZones), zoneIndex => {
         const bigNetWorks = splitCIDR(zoneNetworksAws[zoneIndex], 2)
         const workerNetwork = bigNetWorks[0]
         const smallNetworks = splitCIDR(bigNetWorks[1], 2)
@@ -218,7 +219,7 @@ export function getDefaultNetworkConfigurationForAllZones (numberOfZones, infras
     }
     case 'alicloud': {
       const zoneNetworksAli = splitCIDR(workerCIDR, numberOfZones)
-      return map([...Array(numberOfZones).keys()], zoneIndex => {
+      return map(range(numberOfZones), zoneIndex => {
         return {
           workers: zoneNetworksAli[zoneIndex]
         }
