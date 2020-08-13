@@ -73,7 +73,7 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
-        const zonesNetworkConfiguration = this.$refs.manageWorkers.getZonesNetworkConfiguration()
+        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
         const data = { workers }
         if (zonesNetworkConfiguration) {
           data.infrastructureConfig = {
