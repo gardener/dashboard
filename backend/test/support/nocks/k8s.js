@@ -674,7 +674,7 @@ const stub = {
       })
       .reply(200, () => shoot)
   },
-  replaceWorkers ({ bearer, namespace, name, project }) {
+  patchProvider ({ bearer, namespace, name, project }) {
     const shoot = getShoot({ name, project })
     return nockWithAuthorization(bearer)
       .patch(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`, body => {
