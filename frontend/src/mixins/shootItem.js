@@ -153,6 +153,9 @@ export const shootItem = {
     seedShootIngressDomain () {
       return this.shootInfo.seedShootIngressDomain || ''
     },
+    canLinkToSeed () {
+      return get(this.shootItem, 'info.canLinkToSeed', false)
+    },
 
     isShootLastOperationTypeDelete () {
       return isTypeDelete(this.shootLastOperation)

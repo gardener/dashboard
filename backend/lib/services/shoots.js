@@ -223,7 +223,9 @@ exports.info = async function ({ user, namespace, name }) {
     })
   ])
 
-  const data = {}
+  const data = {
+    canLinkToSeed: false
+  }
   let seed
   if (shoot.spec.seedName) {
     seed = getSeed(getSeedNameFromShoot(shoot))
@@ -232,6 +234,13 @@ exports.info = async function ({ user, namespace, name }) {
       const ingressDomain = _.get(seed, 'spec.dns.ingressDomain')
       if (ingressDomain) {
         data.seedShootIngressDomain = `${prefix}.${ingressDomain}`
+      }
+    }
+    if (seed && namespace !== 'garden') {
+      try {
+        data.canLinkToSeed = !!(await client['core.gardener.cloud'].shoots.get('garden', seed.metadata.name))
+      } catch (err) {
+        data.canLinkToSeed = false
       }
     }
   }
