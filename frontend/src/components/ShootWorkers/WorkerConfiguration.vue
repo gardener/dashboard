@@ -21,12 +21,15 @@ limitations under the License.
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
     maxWidth="760"
-    caption="Configure Workers">
+    confirmRequired
+    confirmMessage="Please confirm changes to the worker groups as this may affect your workload"
+    caption="Configure Workers"
+    disable-confirm-input-focus>
     <template v-slot:actionComponent>
       <manage-workers
       ref="manageWorkers"
       @valid="onWorkersValid"
-     ></manage-workers>
+      ></manage-workers>
     </template>
   </action-button-dialog>
 </template>
@@ -34,7 +37,7 @@ limitations under the License.
 <script>
 import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
-import { updateShootWorkers } from '@/utils/api'
+import { patchShootProvider } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
 import { errorDetailsFromError } from '@/utils/error'
 import { isZonedCluster } from '@/utils'
@@ -70,7 +73,16 @@ export default {
     async updateConfiguration () {
       try {
         const workers = this.$refs.manageWorkers.getWorkers()
-        await updateShootWorkers({ namespace: this.shootNamespace, name: this.shootName, data: workers })
+        const zonesNetworkConfiguration = this.$refs.manageWorkers.currentZonesNetworkConfiguration
+        const data = { workers }
+        if (zonesNetworkConfiguration) {
+          data.infrastructureConfig = {
+            networks: {
+              zones: zonesNetworkConfiguration
+            }
+          }
+        }
+        await patchShootProvider({ namespace: this.shootNamespace, name: this.shootName, data })
       } catch (err) {
         const errorMessage = 'Could not save worker configuration'
         const errorDetails = errorDetailsFromError(err)
@@ -87,7 +99,8 @@ export default {
       const cloudProfileName = this.shootCloudProfileName
       const region = this.shootRegion
       const zonedCluster = isZonedCluster({ cloudProviderKind: this.shootCloudProviderKind, shootSpec: this.shootSpec })
-      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster })
+      const existingWorkerCIDR = get(this.shootItem, 'spec.networking.nodes')
+      this.$refs.manageWorkers.setWorkersData({ workers, cloudProfileName, region, zonesNetworkConfiguration, zonedCluster, existingWorkerCIDR })
     },
     onWorkersValid (value) {
       this.workersValid = value

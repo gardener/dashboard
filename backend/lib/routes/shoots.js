@@ -142,14 +142,14 @@ router.route('/:name/spec/addons')
     }
   })
 
-router.route('/:name/spec/provider/workers')
-  .put(async (req, res, next) => {
+router.route('/:name/spec/provider')
+  .patch(async (req, res, next) => {
     try {
       const user = req.user
       const namespace = req.params.namespace
       const name = req.params.name
       const body = req.body
-      res.send(await shoots.replaceWorkers({ user, namespace, name, body }))
+      res.send(await shoots.patchProvider({ user, namespace, name, body }))
     } catch (err) {
       next(err)
     }

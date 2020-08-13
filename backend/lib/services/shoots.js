@@ -141,15 +141,14 @@ exports.replaceAddons = async function ({ user, namespace, name, body }) {
   return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
-exports.replaceWorkers = async function ({ user, namespace, name, body }) {
+exports.patchProvider = async function ({ user, namespace, name, body }) {
   const client = user.client
-  const workers = body
-  const patchOperations = [{
-    op: 'replace',
-    path: '/spec/provider/workers',
-    value: workers
-  }]
-  return client['core.gardener.cloud'].shoots.jsonPatch(namespace, name, patchOperations)
+  const payload = {
+    spec: {
+      provider: body
+    }
+  }
+  return client['core.gardener.cloud'].shoots.mergePatch(namespace, name, payload)
 }
 
 exports.replaceMaintenance = async function ({ user, namespace, name, body }) {

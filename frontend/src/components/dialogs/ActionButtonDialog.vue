@@ -49,8 +49,10 @@ limitations under the License.
       :max-width="maxWidth"
       :maxHeight="maxHeight"
       :confirmValue="confirmValue"
+      :confirmMessage="confirmMessage"
       :confirmColor="dialogColor"
       :defaultColor="dialogColor"
+      :disableConfirmInputFocus="disableConfirmInputFocus"
       ref="gDialog"
     >
       <template v-slot:caption>{{caption}}</template>
@@ -99,6 +101,9 @@ export default {
       type: Boolean,
       default: false
     },
+    confirmMessage: {
+      type: String
+    },
     valid: {
       type: Boolean,
       default: true
@@ -128,6 +133,9 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    disableConfirmInputFocus: {
+      type: Boolean
     },
     buttonText: {
       type: String

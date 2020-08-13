@@ -32,20 +32,23 @@ limitations under the License.
         <slot name="message">
           This is a generic dialog template.
         </slot>
+        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
+      </v-card-text>
+      <v-alert tile :color="confirmAlertColor" v-if="confirmValue && !confirmDisabled">
+        <span class="text-body-2" v-if="!!confirmMessage">{{confirmMessage}}</span>
         <v-text-field
           @keyup.enter="okClicked()"
-          v-if="confirmValue && !confirmDisabled"
           ref="deleteDialogInput"
           :hint="hint"
           persistent-hint
           :error="hasError && userInput.length > 0"
           v-model="userInput"
           type="text"
-          :color="textFieldColor">
+          filled
+          dense
+          color="grey darken-2">
         </v-text-field>
-        <g-alert color="error" class="mt-4" :message.sync="message" :detailedMessage.sync="detailedMessage"></g-alert>
-      </v-card-text>
-      <v-divider></v-divider>
+      </v-alert>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn text @click="resolveAction(false)">{{cancelButtonText}}</v-btn>
@@ -73,6 +76,9 @@ export default {
     confirmDisabled: {
       type: Boolean,
       default: false
+    },
+    confirmMessage: {
+      type: String
     },
     errorMessage: {
       type: String
@@ -102,6 +108,9 @@ export default {
     maxHeight: {
       type: String,
       default: '50vh'
+    },
+    disableConfirmInputFocus: {
+      type: Boolean
     }
   },
   data () {
@@ -139,12 +148,9 @@ export default {
         this.$emit('update:detailedErrorMessage', value)
       }
     },
-    textFieldColor () {
-      let color = this.confirmValue ? this.confirmColor : this.defaultColor
-      if (color === 'red') {
-        color = 'black'
-      }
-      return `${color || 'cyan'} darken-2`
+    confirmAlertColor () {
+      const color = this.confirmValue ? this.confirmColor : this.defaultColor
+      return `${color || 'cyan'} lighten-5`
     },
     titleColorClass () {
       return this.confirmValue ? this.titleColorClassForString(this.confirmColor) : this.titleColorClassForString(this.defaultColor)
@@ -163,7 +169,9 @@ export default {
 
       // we must delay the "focus" handling because the dialog.open is animated
       // and the 'autofocus' property didn't work in this case.
-      setDelayedInputFocus(this, 'deleteDialogInput')
+      if (!this.disableConfirmInputFocus) {
+        setDelayedInputFocus(this, 'deleteDialogInput')
+      }
 
       return new Promise(resolve => {
         this.resolve = resolve

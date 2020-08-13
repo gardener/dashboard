@@ -1,3 +1,4 @@
+
 <!--
 Copyright (c) 2020 by SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 
@@ -104,12 +105,17 @@ limitations under the License.
           color="cyan darken-2"
           item-color="cyan darken-2"
           label="Zone"
-          :items="availableZones"
+          :items="zoneItems"
           :error-messages="getErrorMessages('worker.zones')"
           v-model="worker.zones"
           @input="onInputZones"
           @blur="$v.worker.zones.$touch()"
           multiple
+          chips
+          deletable-chips
+          small-chips
+          :hint="zoneHint"
+          persistent-hint
           ></v-select>
       </div>
     </div>
@@ -127,6 +133,9 @@ import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
+import map from 'lodash/map'
+import includes from 'lodash/includes'
+import sortBy from 'lodash/sortBy'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -182,6 +191,9 @@ export default {
     region: {
       type: String
     },
+    allZones: {
+      type: Array
+    },
     availableZones: {
       type: Array
     },
@@ -190,6 +202,12 @@ export default {
     },
     updateOSMaintenance: {
       type: Boolean
+    },
+    isNew: {
+      type: Boolean
+    },
+    maxAdditionalZones: {
+      type: Number
     }
   },
   data () {
@@ -198,7 +216,8 @@ export default {
       valid: undefined,
       machineTypeValid: undefined,
       volumeTypeValid: true, // selection not shown in all cases, default to true
-      machineImageValid: undefined
+      machineImageValid: undefined,
+      immutableZones: undefined
     }
   },
   validations () {
@@ -294,6 +313,26 @@ export default {
           this.worker.maxSurge = maxSurge
         }
       }
+    },
+    zoneItems () {
+      const sortedZones = sortBy(this.allZones)
+      return map(sortedZones, zone => ({
+        text: zone,
+        value: zone,
+        disabled: includes(this.immutableZones, zone) || !includes(this.availableZones, zone)
+      }))
+    },
+    zoneHint () {
+      if (this.maxAdditionalZones === 0) {
+        return 'Your network configuration does not allow to add more zones that are not already used by this cluster'
+      }
+      if (this.maxAdditionalZones === 1) {
+        return 'Your network configuration allows to add one more zone that is not already used by this cluster'
+      }
+      if (this.maxAdditionalZones > 1) {
+        return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
+      }
+      return undefined
     }
   },
   methods: {
@@ -362,6 +401,7 @@ export default {
   },
   mounted () {
     this.validateInput()
+    this.immutableZones = this.isNew ? [] : this.worker.zones
   }
 }
 </script>
@@ -376,5 +416,13 @@ export default {
     max-width: 120px;
     flex: 1 1 auto;
     padding: 12px;
+  }
+
+  ::v-deep .v-list-item--disabled {
+    opacity:0.5;
+  }
+
+  ::v-deep .v-chip--disabled {
+    opacity: 1;
   }
 </style>
