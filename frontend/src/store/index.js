@@ -837,6 +837,10 @@ const getters = {
     const name = getters.projectName
     return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'projects', name)
   },
+  canManageMembers (state, getters) {
+    const name = getters.projectName
+    return canI(state.subjectRules, 'manage-members', 'core.gardener.cloud', 'projects', name)
+  },
   canDeleteProject (state, getters) {
     const name = getters.projectName
     return canI(state.subjectRules, 'delete', 'core.gardener.cloud', 'projects', name)

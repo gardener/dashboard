@@ -37,7 +37,7 @@ limitations under the License.
           </v-chip>
         </div>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject" class="ml-1">
+      <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="onEdit">
@@ -47,7 +47,7 @@ limitations under the License.
           <span>Update User</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject" class="ml-1">
+      <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
@@ -104,7 +104,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'canPatchProject'
+      'canManageMembers'
     ])
   },
   methods: {

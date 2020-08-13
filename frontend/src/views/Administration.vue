@@ -84,7 +84,7 @@ limitations under the License.
                     <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-account
-                        :read-only="!canPatchProject"
+                        :read-only="!canManageMembers"
                         :color="color"
                         :value="technicalContact"
                         :items="userList"
@@ -329,6 +329,7 @@ export default {
       'projectList',
       'memberList',
       'canPatchProject',
+      'canManageMembers',
       'canDeleteProject',
       'projectFromProjectList',
       'costObjectSettings',
