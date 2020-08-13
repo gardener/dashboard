@@ -24,7 +24,6 @@ import {
   displayName,
   fullDisplayName,
   getDateFormatted,
-  addKymaAddon,
   canI,
   getProjectName
 } from '@/utils'
@@ -525,9 +524,9 @@ const getters = {
   infrastructureSecretList (state) {
     return state.infrastructureSecrets.all
   },
-  getInfrastructureSecretByName (state, getters) {
+  getInfrastructureSecretByBindingName (state, getters) {
     return ({ namespace, name }) => {
-      return getters['infrastructureSecrets/getInfrastructureSecretByName']({ namespace, name })
+      return getters['infrastructureSecrets/getInfrastructureSecretByBindingName']({ namespace, name })
     }
   },
   namespaces (state) {
@@ -816,9 +815,6 @@ const getters = {
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
   },
-  isKymaFeatureEnabled (state, getters) {
-    return get(state, 'cfg.features.kymaEnabled', false)
-  },
   canCreateTerminals (state) {
     return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
   },
@@ -840,6 +836,10 @@ const getters = {
   canPatchProject (state, getters) {
     const name = getters.projectName
     return canI(state.subjectRules, 'patch', 'core.gardener.cloud', 'projects', name)
+  },
+  canManageMembers (state, getters) {
+    const name = getters.projectName
+    return canI(state.subjectRules, 'manage-members', 'core.gardener.cloud', 'projects', name)
   },
   canDeleteProject (state, getters) {
     const name = getters.projectName
@@ -926,12 +926,6 @@ const actions = {
   },
   getShootSeedInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getSeedInfo', { name, namespace })
-      .catch(err => {
-        dispatch('setError', err)
-      })
-  },
-  getShootAddonKyma ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/getAddonKyma', { name, namespace })
       .catch(err => {
         dispatch('setError', err)
       })
@@ -1067,10 +1061,6 @@ const actions = {
   },
   setConfiguration ({ commit, getters }, value) {
     commit('SET_CONFIGURATION', value)
-
-    if (getters.isKymaFeatureEnabled) {
-      addKymaAddon(value.kyma)
-    }
 
     if (get(value, 'alert')) {
       commit('SET_ALERT_BANNER', get(value, 'alert'))

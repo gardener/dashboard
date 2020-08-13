@@ -23,7 +23,7 @@ const logger = require('../lib/logger')
 const { registerHandler } = require('../lib/watches/common')
 const config = require('../lib/config')
 const watches = require('../lib/watches')
-const { cache } = require('../lib/cache')
+const cache = require('../lib/cache')
 const { bootstrapper } = require('../lib/services/terminals')
 const tickets = require('../lib/services/tickets')
 
@@ -36,6 +36,20 @@ describe('watches', function () {
   const bar = { metadata: { name: 'bar', uid: 2 } }
   const foobar = { metadata: { namespace: 'foo', name: 'bar', uid: 4 } }
   const foobaz = { metadata: { namespace: 'foo', name: 'baz', uid: 5 } }
+  const projectList = [
+    {
+      metadata: { name: 'foo' },
+      spec: {
+        namespace: 'foo'
+      }
+    },
+    {
+      metadata: { name: 'bar' },
+      spec: {
+        namespace: 'bar'
+      }
+    }
+  ]
 
   let emitter
 
@@ -132,7 +146,8 @@ describe('watches', function () {
     }
 
     function qualifiedName ({ metadata: { namespace, name } }) {
-      return { namespace, name }
+      const projectName = _.find(projectList, ['spec.namespace', namespace]).metadata.name
+      return { projectName, name }
     }
 
     const foobarUnhealthy = _
@@ -185,6 +200,7 @@ describe('watches', function () {
     let bootstrapResourceStub
     let isResourcePendingStub
     let removePendingResourceStub
+    let findProjectByNamespaceStub
 
     beforeEach(function () {
       shootsWithIssues = new Set()
@@ -194,6 +210,9 @@ describe('watches', function () {
       bootstrapResourceStub = sandbox.stub(bootstrapper, 'bootstrapResource')
       isResourcePendingStub = sandbox.stub(bootstrapper, 'isResourcePending')
       removePendingResourceStub = sandbox.stub(bootstrapper, 'removePendingResource')
+      findProjectByNamespaceStub = sandbox
+        .stub(cache, 'findProjectByNamespace')
+        .callsFake(namespace => _.find(projectList, ['spec.namespace', namespace]))
     })
 
     it('should watch shoots without issues', async function () {
@@ -228,6 +247,7 @@ describe('watches', function () {
       expect(isResourcePendingStub).to.be.calledTwice
       expect(removePendingResourceStub).to.be.calledOnce
       expect(deleteTicketsStub).to.be.calledOnce
+      expect(findProjectByNamespaceStub).to.be.calledOnceWithExactly('foo')
 
       expect(fooRoom.events).to.be.empty
       expect(fooBarRoom.events).to.be.empty
@@ -351,7 +371,7 @@ describe('watches', function () {
     const commentEvent = {
       object: {
         metadata: {
-          namespace: 'foo',
+          projectName: 'foo',
           name: 'bar'
         }
       }

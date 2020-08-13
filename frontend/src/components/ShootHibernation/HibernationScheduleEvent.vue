@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <v-container  class="py-0 ma-0">
+  <v-container class="py-0 ma-2">
     <v-row align="center">
       <v-row >
         <v-col class="weekday-select">

@@ -24,6 +24,7 @@ const logger = require('../../lib/logger')
 module.exports = function ({ agent, sandbox, k8s, auth }) {
   /* eslint no-unused-expressions: 0 */
   const name = 'bar'
+  const uid = '123-456'
   const project = 'foo'
   const namespace = `garden-${project}`
   const username = `${name}@example.org`
@@ -84,14 +85,14 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
   it('should return a shoot', async function () {
     const bearer = await user.bearer
-    k8s.stub.getShoot({ bearer, namespace, name, createdBy, purpose, kind, profile, region, bindingName: secret })
+    k8s.stub.getShoot({ bearer, namespace, name, uid, createdBy, purpose, kind, profile, region, bindingName: secret })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}`)
       .set('cookie', await user.cookie)
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body.metadata).to.eql({ name, namespace, annotations })
+    expect(res.body.metadata).to.eql({ name, namespace, uid, annotations })
     expect(res.body.spec).to.eql(spec)
   })
 
@@ -130,8 +131,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(2)
-    expect(_.keys(res.body).length).to.equal(6)
+    expect(_.keys(res.body).length).to.equal(7)
     expect(res.body).to.have.own.property('kubeconfig')
+    expect(res.body.canLinkToSeed).to.equal(true)
     expect(res.body.cluster_username).to.eql(shootUser)
     expect(res.body.cluster_password).to.eql(shootPassword)
     expect(res.body.serverUrl).to.eql(shootServerUrl)
@@ -143,13 +145,11 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
     const monitoringUser = 'monitoringFoo'
     const monitoringPassword = 'monitoringFooPwd'
-    const loggingUser = 'loggingBar'
-    const loggingPassword = 'loggingBarPwd'
     const seedClusterName = `${region}.${kind}.example.org`
     const cleanKubeconfigSpy = sandbox.spy(kubeconfig, 'cleanKubeconfig')
 
     common.stub.getCloudProfiles(sandbox)
-    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, loggingUser, loggingPassword, seedSecretName, seedName })
+    k8s.stub.getSeedInfo({ bearer, namespace, name, project, kind, region, seedClusterName, monitoringUser, monitoringPassword, seedSecretName, seedName })
     const res = await agent
       .get(`/api/namespaces/${namespace}/shoots/${name}/seed-info`)
       .set('cookie', await user.cookie)
@@ -157,11 +157,9 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     expect(res).to.have.status(200)
     expect(res).to.be.json
     expect(cleanKubeconfigSpy).to.have.callCount(1)
-    expect(_.keys(res.body).length).to.equal(4)
+    expect(_.keys(res.body).length).to.equal(2)
     expect(res.body.monitoring_username).to.eql(monitoringUser)
     expect(res.body.monitoring_password).to.eql(monitoringPassword)
-    expect(res.body.logging_username).to.eql(loggingUser)
-    expect(res.body.logging_password).to.eql(loggingPassword)
   })
 
   it('should not return shoot seed info when seed.spec.secretRef missing', async function () {

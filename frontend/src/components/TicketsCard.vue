@@ -43,12 +43,12 @@ limitations under the License.
 
 <script>
 import get from 'lodash/get'
+import join from 'lodash/join'
 import map from 'lodash/map'
 import template from 'lodash/template'
 import uniq from 'lodash/uniq'
 import { mapState } from 'vuex'
 import Ticket from '@/components/ShootTickets/Ticket'
-import { canLinkToSeed } from '@/utils'
 import { shootItem } from '@/mixins/shootItem'
 import moment from 'moment-timezone'
 
@@ -73,6 +73,9 @@ export default {
     gitHubRepoUrl () {
       return get(this.cfg, 'ticket.gitHubRepoUrl')
     },
+    newTicketLabels () {
+      return get(this.cfg, 'ticket.newTicketLabels')
+    },
     issueDescription () {
       const descriptionTemplate = get(this.cfg, 'ticket.issueDescriptionTemplate')
       const compiled = template(descriptionTemplate)
@@ -89,9 +92,6 @@ export default {
         seedName: this.shootSeedName
       })
     },
-    canLinkToSeed () {
-      return canLinkToSeed({ namespace: this.shootNamespace, seedName: this.shootSeedName })
-    },
     shootUrl () {
       return `${window.location.origin}/namespace/${this.shootNamespace}/shoots/${this.shootName}`
     },
@@ -101,11 +101,15 @@ export default {
       imageNames = uniq(imageNames)
       return imageNames.join(', ')
     },
+    newTicketLabelsString () {
+      return join(this.newTicketLabels, ',')
+    },
     createTicketLink () {
       const ticketTitle = encodeURIComponent(`[${this.shootProjectName}/${this.shootName}]`)
       const body = encodeURIComponent(this.issueDescription)
+      const newTicketLabels = encodeURIComponent(this.newTicketLabelsString)
 
-      return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}`
+      return `${this.gitHubRepoUrl}/issues/new?title=${ticketTitle}&body=${body}&labels=${newTicketLabels}`
     }
   }
 }

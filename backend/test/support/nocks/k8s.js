@@ -392,6 +392,7 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
 function getShoot ({
   namespace,
   name,
+  uid,
   project,
   createdBy,
   purpose = 'foo-purpose',
@@ -403,8 +404,10 @@ function getShoot ({
   hibernation = { enabled: false },
   kubernetesVersion = '1.16.0'
 }) {
+  uid = uid || `${namespace}--${name}`
   const shoot = {
     metadata: {
+      uid,
       name,
       namespace,
       annotations: {}
@@ -554,6 +557,12 @@ const stub = {
         allowed: true
       }
     }
+    const shootedSeedResult = {
+      metadata: {
+        name: seedName,
+        namespace: 'garden'
+      }
+    }
 
     return [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -561,7 +570,10 @@ const stub = {
       .get(`/api/v1/namespaces/${namespace}/secrets/${name}.kubeconfig`)
       .reply(200, () => kubecfgResult)
       .post('/apis/authorization.k8s.io/v1/selfsubjectaccessreviews')
-      .reply(200, () => isAdminResult)]
+      .reply(200, () => isAdminResult)
+      .get(`/apis/core.gardener.cloud/v1beta1/namespaces/garden/shoots/${seedName}`)
+      .reply(200, () => shootedSeedResult)
+    ]
   },
   getSeedInfo ({
     bearer,
@@ -572,8 +584,6 @@ const stub = {
     region,
     monitoringUser,
     monitoringPassword,
-    loggingUser,
-    loggingPassword,
     seedSecretName,
     seedName
   }) {
@@ -603,12 +613,6 @@ const stub = {
         password: encodeBase64(monitoringPassword)
       }
     }
-    const loggingSecretResult = {
-      data: {
-        username: encodeBase64(loggingUser),
-        password: encodeBase64(loggingPassword)
-      }
-    }
 
     return [nockWithAuthorization(bearer)
       .get(`/apis/core.gardener.cloud/v1beta1/namespaces/${namespace}/shoots/${name}`)
@@ -619,9 +623,7 @@ const stub = {
       .reply(200, () => seedSecretResult),
     nock(seedServerURL)
       .get(`/api/v1/namespaces/${technicalID}/secrets/monitoring-ingress-credentials`)
-      .reply(200, monitoringSecretResult)
-      .get(`/api/v1/namespaces/${technicalID}/secrets/logging-ingress-credentials`)
-      .reply(200, loggingSecretResult)]
+      .reply(200, monitoringSecretResult)]
   },
   getSeedInfoNoSecretRef ({
     bearer,

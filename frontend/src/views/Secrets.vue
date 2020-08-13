@@ -187,6 +187,7 @@ limitations under the License.
 
 <script>
 import { mapGetters } from 'vuex'
+import { isOwnSecretBinding } from '@/utils'
 import get from 'lodash/get'
 import DeleteDialog from '@/components/dialogs/SecretDialogDelete'
 import SecretDialogWrapper from '@/components/dialogs/SecretDialogWrapper'
@@ -247,7 +248,7 @@ export default {
   computed: {
     ...mapGetters([
       'cloudProfilesByCloudProviderKind',
-      'getInfrastructureSecretByName'
+      'getInfrastructureSecretByBindingName'
     ]),
     backgroundForSelectedSecret () {
       const kind = get(this.selectedSecret, 'metadata.cloudProviderKind')
@@ -308,13 +309,14 @@ export default {
   },
   mounted () {
     this.floatingButton = true
-
-    if (get(this.$route.params, 'name')) {
-      const infrastructureSecret = this.getInfrastructureSecretByName(this.$route.params)
-      if (infrastructureSecret) {
-        this.onUpdate(infrastructureSecret)
-      }
+    if (!get(this.$route.params, 'name')) {
+      return
     }
+    const infrastructureSecret = this.getInfrastructureSecretByBindingName(this.$route.params)
+    if (!infrastructureSecret || !isOwnSecretBinding(infrastructureSecret)) {
+      return
+    }
+    this.onUpdate(infrastructureSecret)
   },
   created () {
     merge(this.initialDialogState, this.dialogState)

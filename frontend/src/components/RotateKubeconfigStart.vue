@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :loading="isActionToBeScheduled"
     @dialogOpened="startDialogOpened"
@@ -23,6 +23,7 @@ limitations under the License.
     :caption="caption"
     icon="mdi-refresh"
     maxWidth="600"
+    :buttonText="buttonText"
     :confirmRequired="true"
     confirmButtonText="Rotate">
     <template v-slot:actionComponent>
@@ -38,11 +39,11 @@ limitations under the License.
         </v-col>
       </v-row>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import { addShootAnnotation } from '@/utils/api'
 import { SnotifyPosition } from 'vue-snotify'
 import { shootItem } from '@/mixins/shootItem'
@@ -50,11 +51,14 @@ import { errorDetailsFromError } from '@/utils/error'
 
 export default {
   components: {
-    ActionIconDialog
+    ActionButtonDialog
   },
   props: {
     shootItem: {
       type: Object
+    },
+    text: {
+      type: Boolean
     }
   },
   data () {
@@ -71,7 +75,16 @@ export default {
       if (this.isActionToBeScheduled) {
         return 'Requesting to schedule kubeconfig credentials rotation'
       }
+      return this.buttonText
+    },
+    buttonTitle () {
       return 'Start Kubeconfig Rotation'
+    },
+    buttonText () {
+      if (!this.text) {
+        return
+      }
+      return this.buttonTitle
     }
   },
   methods: {

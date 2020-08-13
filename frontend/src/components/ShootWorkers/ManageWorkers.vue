@@ -42,7 +42,7 @@ limitations under the License.
         </template>
       </worker-input-generic>
     </v-row>
-    <v-row key="addWorker" class="list-item pt-2">
+    <v-row key="addWorker" class="list-item">
       <v-col>
         <v-btn
           :disabled="!(allMachineTypes.length > 0)"

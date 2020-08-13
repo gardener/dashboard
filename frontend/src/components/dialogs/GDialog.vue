@@ -28,7 +28,7 @@ limitations under the License.
           </template>
         </v-toolbar-title>
       </v-toolbar>
-      <v-card-text class="pa-3" :style="{'max-height': maxHeight}">
+      <v-card-text class="pa-3" :style="{'max-height': maxHeight}" ref="contentCard">
         <slot name="message">
           This is a generic dialog template.
         </slot>
@@ -207,6 +207,27 @@ export default {
         resolve(value)
       }
       this.visible = false
+    },
+    showScrollBar (retryCount = 0) {
+      if (!this.visible || retryCount > 10) {
+        // circuit breaker
+        return
+      }
+      const contentCardRef = this.$refs.contentCard
+      if (!contentCardRef || !contentCardRef.clientHeight) {
+        this.$nextTick(() => this.showScrollBar(retryCount + 1))
+        return
+      }
+      const scrollTopVal = contentCardRef.scrollTop
+      contentCardRef.scrollTop = scrollTopVal + 10
+      contentCardRef.scrollTop = scrollTopVal - 10
+    }
+  },
+  watch: {
+    visible (value) {
+      if (value) {
+        this.showScrollBar()
+      }
     }
   }
 }

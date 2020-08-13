@@ -21,13 +21,13 @@ limitations under the License.
         <div v-on="on">
           <template v-if="isControlPlaneMigrating">
             <v-progress-circular indeterminate size=12 width=2 color="cyan darken-2" class="mr-1"></v-progress-circular>
-            <router-link v-if="canLinkToSeed(shootStatusSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootStatusSeedName, namespace:'garden' } }">
+            <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootStatusSeedName, namespace:'garden' } }">
               <span>{{shootStatusSeedName}}</span>
             </router-link>
             <span v-else>{{shootSeedName}}</span>
             <v-icon small class="mx-1">mdi-arrow-right</v-icon>
           </template>
-          <router-link v-if="canLinkToSeed(shootSeedName)" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
+          <router-link v-if="canLinkToSeed" class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootSeedName, namespace:'garden' } }">
             <span>{{shootSeedName}}</span>
           </router-link>
           <span v-else>{{shootSeedName}}</span>
@@ -44,7 +44,6 @@ limitations under the License.
 <script>
 
 import { shootItem } from '@/mixins/shootItem'
-import { canLinkToSeed } from '@/utils'
 
 export default {
   props: {
@@ -52,11 +51,6 @@ export default {
       type: Object
     }
   },
-  mixins: [shootItem],
-  methods: {
-    canLinkToSeed (seedName) {
-      return canLinkToSeed({ namespace: this.shootNamespace, seedName })
-    }
-  }
+  mixins: [shootItem]
 }
 </script>

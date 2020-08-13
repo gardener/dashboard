@@ -27,18 +27,20 @@ limitations under the License.
         </v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-divider inset></v-divider>
-    <v-list-item v-if="!!lastMessage">
-      <v-list-item-icon>
-        <v-icon color="cyan darken-2">mdi-post-outline</v-icon>
-      </v-list-item-icon>
-      <v-list-item-content>
-        <v-list-item-subtitle>Last Message</v-list-item-subtitle>
-        <v-list-item-title class="d-flex align-center pt-1 message-block">
-          <ansi-text :text="lastMessage"></ansi-text>
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
+    <template v-if="!!lastMessage">
+      <v-divider inset></v-divider>
+      <v-list-item>
+        <v-list-item-icon>
+          <v-icon color="cyan darken-2">mdi-post-outline</v-icon>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle>Last Message</v-list-item-subtitle>
+          <v-list-item-title class="d-flex align-center pt-1 message-block">
+            <ansi-text :text="lastMessage"></ansi-text>
+          </v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+    </template>
     <v-divider inset></v-divider>
     <v-list-item>
       <v-list-item-icon>

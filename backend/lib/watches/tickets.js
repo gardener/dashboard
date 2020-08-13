@@ -20,7 +20,7 @@ const pRetry = require('p-retry')
 const logger = require('../logger')
 const config = require('../config')
 const tickets = require('../services/tickets')
-const { getTicketCache } = require('../cache')
+const cache = require('../cache')
 
 module.exports = (io, retryOptions = {}) => {
   if (!config.gitHub) {
@@ -28,7 +28,7 @@ module.exports = (io, retryOptions = {}) => {
     return
   }
   const nsp = io.of('/tickets')
-  const ticketCache = getTicketCache()
+  const ticketCache = cache.getTicketCache()
   ticketCache.onIssue(event => {
     const room = 'issues'
     nsp.to(room).emit('events', {
@@ -37,8 +37,8 @@ module.exports = (io, retryOptions = {}) => {
     })
   })
   ticketCache.onComment(event => {
-    const { namespace, name } = event.object.metadata
-    const room = `comments_${namespace}/${name}`
+    const { projectName, name } = event.object.metadata
+    const room = `comments_${projectName}/${name}`
     nsp.to(room).emit('events', {
       kind: 'comments',
       events: [event]

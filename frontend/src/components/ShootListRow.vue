@@ -23,13 +23,13 @@ limitations under the License.
     </td>
     <td class="nowrap" v-if="this.headerVisible['name']">
       <v-row align="center" class="pa-0 ma-0 fill-height flex-nowrap">
-        <v-col class="grow" >
+        <v-col class="grow pa-0 ma-0">
           <router-link class="cyan--text text--darken-2" :to="{ name: 'ShootItem', params: { name: shootName, namespace: shootNamespace } }">
             {{ shootName }}
           </router-link>
         </v-col>
         <v-col class="shrink" >
-          <div class="d-flex flew-row">
+          <div class="d-flex flew-row" v-if="!isShootMarkedForDeletion">
             <self-termination-warning :expirationTimestamp="shootExpirationTimestamp"></self-termination-warning>
             <version-expiration-warning :shootItem="shootItem"></version-expiration-warning>
             <hibernation-schedule-warning
@@ -119,7 +119,7 @@ limitations under the License.
           </template>
           <span>{{showClusterAccessActionTitle}}</span>
         </v-tooltip>
-        <delete-cluster v-if="canDeleteShoots" :shootItem="shootItem" small icon-color="red"></delete-cluster>
+        <shoot-list-row-actions :shootItem="shootItem"></shoot-list-row-actions>
       </v-row>
     </td>
   </tr>
@@ -139,9 +139,9 @@ import TicketLabels from '@/components/ShootTickets/TicketLabels'
 import CopyBtn from '@/components/CopyBtn'
 import SelfTerminationWarning from '@/components/SelfTerminationWarning'
 import HibernationScheduleWarning from '@/components/ShootHibernation/HibernationScheduleWarning'
-import DeleteCluster from '@/components/DeleteCluster'
 import ShootSeedName from '@/components/ShootSeedName'
 import VersionExpirationWarning from '@/components/VersionExpirationWarning'
+import ShootListRowActions from '@/components/ShootListRowActions'
 import forEach from 'lodash/forEach'
 import includes from 'lodash/includes'
 import {
@@ -163,11 +163,11 @@ export default {
     SelfTerminationWarning,
     HibernationScheduleWarning,
     AccountAvatar,
-    DeleteCluster,
     CopyBtn,
     ShootSeedName,
     Vendor,
-    VersionExpirationWarning
+    VersionExpirationWarning,
+    ShootListRowActions
   },
   props: {
     shootItem: {

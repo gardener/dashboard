@@ -125,9 +125,9 @@ exports.handleIssue = handleIssue
 function handleComment ({ action, issue, comment }) {
   const cache = getTicketCache()
   const {
-    metadata: { namespace, name, number: issueNumber } = {}
+    metadata: { projectName, name, number: issueNumber } = {}
   } = issue = fromIssue(issue) || {}
-  comment = fromComment(issueNumber, name, namespace, comment)
+  comment = fromComment(issueNumber, name, projectName, comment)
 
   if (!cache.getIssue(issueNumber)) {
     logger.debug('skipping github event issue_comment for issue number %s', issueNumber)

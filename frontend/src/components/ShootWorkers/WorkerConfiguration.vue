@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     :valid="workersValid"
     @dialogOpened="onConfigurationDialogOpened"
@@ -31,11 +31,11 @@ limitations under the License.
       ></manage-workers>
       <v-alert type="warning" outlined class="mt-2">Please confirm changes to the worker groups as this may affect your workload</v-alert>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageWorkers from '@/components/ShootWorkers/ManageWorkers'
 import { updateShootWorkers } from '@/utils/api'
 import { shootItem } from '@/mixins/shootItem'
@@ -47,7 +47,7 @@ import cloneDeep from 'lodash/cloneDeep'
 export default {
   name: 'worker-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     ManageWorkers
   },
   props: {

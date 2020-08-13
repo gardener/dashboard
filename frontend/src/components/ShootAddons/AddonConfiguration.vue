@@ -15,7 +15,7 @@ limitations under the License.
 -->
 
 <template>
-  <action-icon-dialog
+  <action-button-dialog
     :shootItem="shootItem"
     @dialogOpened="onConfigurationDialogOpened"
     ref="actionDialog"
@@ -29,12 +29,11 @@ limitations under the License.
         :isCreateMode="false"
        ></manage-shoot-addons>
     </template>
-  </action-icon-dialog>
+  </action-button-dialog>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import ActionIconDialog from '@/components/dialogs/ActionIconDialog'
+import ActionButtonDialog from '@/components/dialogs/ActionButtonDialog'
 import ManageShootAddons from '@/components/ShootAddons/ManageAddons'
 import { updateShootAddons } from '@/utils/api'
 import { errorDetailsFromError } from '@/utils/error'
@@ -45,7 +44,7 @@ import cloneDeep from 'lodash/cloneDeep'
 export default {
   name: 'addon-configuration',
   components: {
-    ActionIconDialog,
+    ActionButtonDialog,
     ManageShootAddons
   },
   props: {
@@ -54,11 +53,6 @@ export default {
     }
   },
   mixins: [shootItem],
-  computed: {
-    ...mapGetters([
-      'isKymaFeatureEnabled'
-    ])
-  },
   methods: {
     async onConfigurationDialogOpened () {
       this.reset()
@@ -81,10 +75,6 @@ export default {
     },
     reset () {
       const addons = cloneDeep(get(this.shootItem, 'spec.addons', {}))
-      if (this.isKymaFeatureEnabled) {
-        const kymaEnabled = !!get(this.shootItem, 'metadata.annotations["experimental.addons.shoot.gardener.cloud/kyma"]')
-        addons.kyma = { enabled: kymaEnabled }
-      }
       this.$refs.addons.updateAddons(addons)
     }
   }

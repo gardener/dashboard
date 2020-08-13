@@ -86,7 +86,7 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject" class="ml-1">
+      <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon @click.native.stop="onEdit">
@@ -96,7 +96,7 @@ limitations under the License.
           <span>Update Service Account</span>
         </v-tooltip>
       </v-list-item-action>
-      <v-list-item-action v-if="canPatchProject" class="ml-1">
+      <v-list-item-action v-if="canManageMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
@@ -162,7 +162,7 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'canPatchProject',
+      'canManageMembers',
       'canGetSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {

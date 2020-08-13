@@ -22,16 +22,23 @@ const x509 = require('x509.js')
 const jwt = require('jsonwebtoken')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
+const xRequestStart = Symbol('x-request-start')
 
 function afterResponse (response) {
   const { headers, httpVersion, statusCode, statusMessage, body, request } = response
-  const id = get(request, 'options.headers["x-request-id"]')
+  const requestOptions = get(request, 'options', {})
+  const id = get(requestOptions, 'headers["x-request-id"]')
+  const { url, method, [xRequestStart]: start } = requestOptions
+  const duration = start ? Date.now() - start : undefined
   logger.response({
     id,
+    url,
+    method,
     statusCode,
     statusMessage,
     httpVersion,
     headers: clone(headers),
+    duration,
     body
   })
   return response
@@ -89,6 +96,7 @@ function beforeConnect (url, options) {
 
 function beforeRequest (options) {
   const { url, method, headers, body } = options
+  options[xRequestStart] = Date.now()
   if (!('x-request-id' in headers)) {
     headers['x-request-id'] = uuidv1()
   }

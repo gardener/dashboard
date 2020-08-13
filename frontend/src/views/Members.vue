@@ -66,7 +66,7 @@ limitations under the License.
         <v-btn v-if="allEmails" icon :href="`mailto:${allEmails}`">
           <v-icon class="white--text">mdi-email-outline</v-icon>
         </v-btn>
-        <v-btn v-if="canPatchProject" icon @click.native.stop="openUserAddDialog">
+        <v-btn v-if="canManageMembers" icon @click.native.stop="openUserAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openUserHelpDialog">
@@ -78,7 +78,7 @@ limitations under the License.
         <div class="title grey--text text--darken-1 my-4">Add users to your project.</div>
         <p class="body-1">
           Adding users to your project allows you to collaborate across your team.
-          Project users have full access to all resources within your project.
+          Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
@@ -120,7 +120,7 @@ limitations under the License.
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-btn v-if="canPatchProject" icon @click.native.stop="openServiceAccountAddDialog">
+        <v-btn v-if="canManageMembers" icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
@@ -132,7 +132,7 @@ limitations under the License.
         <div class="title grey--text text--darken-1 my-4">Add service accounts to your project.</div>
         <p class="body-1">
           Adding service accounts to your project allows you to automate processes in your project.
-          Service accounts have full access to all resources within your project.
+          Access to resources within your project can be configured by assigning roles.
         </p>
       </v-card-text>
       <v-list two-line subheader v-else>
@@ -179,7 +179,7 @@ limitations under the License.
       </v-card>
     </v-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-    <v-fab-transition v-if="canPatchProject">
+    <v-fab-transition v-if="canManageMembers">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <template v-slot:activator>
           <v-btn v-model="fab" color="teal darken-2" dark fab>
@@ -266,7 +266,7 @@ export default {
     ...mapGetters([
       'memberList',
       'projectFromProjectList',
-      'canPatchProject',
+      'canManageMembers',
       'username',
       'isAdmin',
       'projectList'

@@ -97,9 +97,9 @@ export default {
       return this.shootsByInfrastructureSecret.length
     },
     shootsByInfrastructureSecret () {
-      const secretName = this.secret.metadata.name
+      const secretBindingName = this.secret.metadata.bindingName
       const predicate = item => {
-        return get(item, 'spec.secretBindingName') === secretName
+        return get(item, 'spec.secretBindingName') === secretBindingName
       }
       return filter(this.shootList, predicate)
     },
