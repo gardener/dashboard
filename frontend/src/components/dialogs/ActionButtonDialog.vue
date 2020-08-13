@@ -85,7 +85,7 @@ export default {
     },
     icon: {
       type: String,
-      default: 'mdi-settings-outline'
+      default: 'mdi-cog-outline'
     },
     caption: {
       type: String
