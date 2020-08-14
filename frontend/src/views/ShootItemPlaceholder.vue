@@ -18,7 +18,6 @@ limitations under the License.
 </template>
 
 <script>
-import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
@@ -53,23 +52,17 @@ export default {
       'unsubscribeComments',
       'fetchInfrastructureSecrets'
     ]),
-    subscribe ({ namespace, name }) {
-      return Promise.all([
-        this.subscribeShoot({ namespace, name }),
-        this.subscribeComments({ namespace, name })
-      ])
-    },
     async load (to, from) {
       if (!this.loading) {
         this.loading = true
         this.component = 'shoot-item-loading'
         try {
-          const promises = []
+          const promises = [
+            this.subscribeShoot(to.params),
+            this.subscribeComments(to.params)
+          ]
           if (includes(['ShootItem', 'ShootItemHibernationSettings'], to.name) && this.canGetSecrets) {
             promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
-          }
-          if (get(to, 'params.namespace') !== get(from, 'params.namespace') || get(to, 'params.name') !== get(from, 'params.name')) {
-            promises.push(this.subscribe(to.params))
           }
           await Promise.all(promises)
           this.component = 'router-view'

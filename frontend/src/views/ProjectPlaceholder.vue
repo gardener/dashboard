@@ -46,16 +46,6 @@ export default {
       }
     }
   },
-  watch: {
-    '$route.params.namespace' (namespace, oldNamespace) {
-      if (namespace !== oldNamespace) {
-        this.load(namespace)
-      }
-    }
-  },
-  mounted () {
-    this.load(this.$route.params.namespace)
-  },
   methods: {
     async load (namespace) {
       if (!this.loading) {
@@ -72,6 +62,16 @@ export default {
         }
       }
     }
+  },
+  watch: {
+    '$route.params.namespace' (namespace, oldNamespace) {
+      if (namespace !== oldNamespace) {
+        this.load(namespace)
+      }
+    }
+  },
+  mounted () {
+    this.load(this.$route.params.namespace)
   }
 }
 </script>

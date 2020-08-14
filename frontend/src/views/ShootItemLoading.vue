@@ -15,10 +15,10 @@ limitations under the License.
  -->
 <template>
   <v-container fluid class="fill-height text-center">
-    <v-row align="center" align-content="center" justify="center">
-        <v-card tile flat max-width="540">
-          <v-card-title class="text-subtitle-1 grey--text text--darken-2">
-            Loading your cluster
+    <v-row align="center" justify="center">
+        <v-card tile flat>
+          <v-card-title class="text-subtitle-1 grey--text text--darken-3">
+            Loading cluster {{$route.params.name}}
           </v-card-title>
           <v-card-text>
             <v-progress-linear
