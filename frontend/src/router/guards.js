@@ -15,7 +15,6 @@
 //
 
 import includes from 'lodash/includes'
-import head from 'lodash/head'
 import isEmpty from 'lodash/isEmpty'
 import { getPrivileges } from '@/utils/api'
 

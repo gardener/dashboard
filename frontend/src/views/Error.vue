@@ -20,8 +20,8 @@ limitations under the License.
       <v-container class="text-center fill-height">
         <v-row align="center">
           <v-col>
-            <h1>5XX</h1>
-            <h2>Something unexpected happened</h2>
+            <h1>500</h1>
+            <h2>Unexpected Error :(</h2>
             <p class="message">{{ message }}</p>
             <v-btn dark color="cyan darken-2" @click="goBack">
               Get me out of here
