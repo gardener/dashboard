@@ -75,6 +75,7 @@ function defaultHierarchy (context, path) {
   const children = [
     homeRoute(context, ''),
     accountRoute(context, 'account'),
+    projectsRoute(context, 'namespace'),
     projectHierarchy(context, 'namespace/:namespace'),
     {
       path: '*',
@@ -87,7 +88,7 @@ function defaultHierarchy (context, path) {
     }
   ]
   return {
-    path: '/',
+    path,
     component: Default,
     children
   }
@@ -200,7 +201,22 @@ function homeRoute ({ getters }, path) {
     },
     beforeEnter (to, from, next) {
       const namespace = getters.defaultNamespace
-      console.log('beforeEnter', namespace)
+      if (namespace) {
+        return next({
+          name: 'ShootList',
+          params: { namespace }
+        })
+      }
+      next()
+    }
+  }
+}
+
+function projectsRoute ({ state, getters }, path) {
+  return {
+    path,
+    beforeEnter (to, from, next) {
+      const namespace = state.namespace || getters.defaultNamespace
       if (namespace) {
         return next({
           name: 'ShootList',

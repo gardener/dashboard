@@ -103,21 +103,10 @@ function ensureDataLoaded (store) {
       await Promise.all([
         ensureProjectsLoaded(store),
         ensureCloudProfilesLoaded(store),
-        store.dispatch('fetchKubeconfigData')
+        ensureKubeconfigDataLoaded(store)
       ])
-      const params = to.params || {}
-      const query = to.query || {}
-      const namespaces = store.getters.namespaces
-      let namespace = params.namespace || query.namespace
-      if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
-        await store.dispatch('setNamespace', namespace)
-      }
 
-      if (!store.state.namespace) {
-        const namespaces = store.getters.namespaces
-        namespace = includes(namespaces, 'garden') ? 'garden' : head(namespaces)
-        await store.dispatch('setNamespace', namespace)
-      }
+      await setNamespace(store, to.params.namespace || to.query.namespace)
 
       switch (to.name) {
         case 'Secrets':
@@ -138,12 +127,12 @@ function ensureDataLoaded (store) {
           }
           await Promise.all(promises)
           if (from.name !== 'NewShoot' && from.name !== 'NewShootEditor') {
-            await store.dispatch('resetNewShootResource', { name: params.name, namespace })
+            await store.dispatch('resetNewShootResource')
           }
           break
         }
         case 'ShootList': {
-          await store.dispatch('subscribeShoots', { name: params.name, namespace })
+          await store.dispatch('subscribeShoots')
           break
         }
         case 'Members':
@@ -161,6 +150,12 @@ function ensureDataLoaded (store) {
     }
   }
 }
+function setNamespace (store, namespace) {
+  const namespaces = store.getters.namespaces
+  if (namespace !== store.state.namespace && (includes(namespaces, namespace) || namespace === '_all')) {
+    return store.dispatch('setNamespace', namespace)
+  }
+}
 
 function ensureProjectsLoaded (store) {
   if (isEmpty(store.getters.projectList)) {
@@ -171,5 +166,11 @@ function ensureProjectsLoaded (store) {
 function ensureCloudProfilesLoaded (store) {
   if (isEmpty(store.getters.cloudProfileList)) {
     return store.dispatch('fetchCloudProfiles')
+  }
+}
+
+function ensureKubeconfigDataLoaded (store) {
+  if (isEmpty(store.state.kubeconfigData)) {
+    return store.dispatch('fetchKubeconfigData')
   }
 }

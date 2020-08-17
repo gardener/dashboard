@@ -557,7 +557,7 @@ const getters = {
     return map(state.projects.all, 'metadata.namespace')
   },
   defaultNamespace (state, getters) {
-    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.metadatanamespaces)
+    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
   },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
@@ -1178,10 +1178,8 @@ const actions = {
     return state.subjectRules
   },
   async fetchKubeconfigData ({ commit }) {
-    if (!store.state.kubeconfigData) {
-      const { data } = await getKubeconfigData()
-      commit('SET_KUBECONFIG_DATA', data)
-    }
+    const { data } = await getKubeconfigData()
+    commit('SET_KUBECONFIG_DATA', data)
   },
   async fetchProjectTerminalShortcuts ({ commit }) {
     if (store.state.projectTerminalShortcuts && store.state.projectTerminalShortcuts.namespace === store.state.namespace) {

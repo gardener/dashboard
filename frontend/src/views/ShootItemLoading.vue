@@ -17,7 +17,7 @@ limitations under the License.
   <v-container fluid class="fill-height text-center">
     <v-row align="center" justify="center">
         <v-card tile flat>
-          <v-card-title class="text-subtitle-1 grey--text text--darken-3">
+          <v-card-title class="text-subtitle-1 grey--text text--darken-2">
             Loading cluster {{$route.params.name}}
           </v-card-title>
           <v-card-text>
