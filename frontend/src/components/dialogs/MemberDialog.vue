@@ -262,9 +262,9 @@ export default {
     async submitAddMember () {
       this.$v.$touch()
       if (this.valid) {
+        const name = this.memberName
+        const roles = this.internalRoles
         try {
-          const name = this.memberName
-          const roles = this.internalRoles
           await this.addMember({ name, roles })
           this.hide()
         } catch (err) {
