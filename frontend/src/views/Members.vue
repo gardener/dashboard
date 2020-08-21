@@ -120,7 +120,7 @@ limitations under the License.
           v-model="serviceAccountFilter"
           @keyup.esc="serviceAccountFilter=''"
         ></v-text-field>
-        <v-btn v-if="canManageMembers" icon @click.native.stop="openServiceAccountAddDialog">
+        <v-btn v-if="canManageServiceAccountMembers" icon @click.native.stop="openServiceAccountAddDialog">
           <v-icon class="white--text">add</v-icon>
         </v-btn>
         <v-btn icon @click.native.stop="openServiceAccountHelpDialog">
@@ -179,7 +179,7 @@ limitations under the License.
       </v-card>
     </v-dialog>
     <confirm-dialog ref="confirmDialog"></confirm-dialog>
-    <v-fab-transition v-if="canManageMembers">
+    <v-fab-transition v-if="canManageServiceAccountMembers || canManageMembers">
       <v-speed-dial v-model="fab" v-show="floatingButton" fixed bottom right direction="top" transition="slide-y-reverse-transition"  >
         <template v-slot:activator>
           <v-btn v-model="fab" color="teal darken-2" dark fab>
@@ -187,10 +187,10 @@ limitations under the License.
             <v-icon v-else>add</v-icon>
           </v-btn>
         </template>
-        <v-btn fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
+        <v-btn v-if="canManageServiceAccountMembers" fab small color="grey lighten-2" light @click="openServiceAccountAddDialog">
           <v-icon color="blue-grey darken-2">mdi-monitor</v-icon>
         </v-btn>
-        <v-btn fab small color="grey lighten-2" @click="openUserAddDialog">
+        <v-btn v-if="canManageMembers" fab small color="grey lighten-2" @click="openUserAddDialog">
           <v-icon color="green darken-2">person</v-icon>
         </v-btn>
       </v-speed-dial>
@@ -267,6 +267,7 @@ export default {
       'memberList',
       'projectFromProjectList',
       'canManageMembers',
+      'canManageServiceAccountMembers',
       'username',
       'isAdmin',
       'projectList'
