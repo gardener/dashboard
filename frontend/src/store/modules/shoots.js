@@ -243,12 +243,13 @@ const actions = {
 
     const allLoadBalancerClassNames = rootGetters.loadBalancerClassNamesByCloudProfileName(cloudProfileName)
     if (!isEmpty(allLoadBalancerClassNames)) {
-      const loadBalancerClassNames = [
-        includes(allLoadBalancerClassNames, 'default')
-          ? 'default'
-          : head(allLoadBalancerClassNames)
-      ]
-      set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClassNames)
+      const defaultLoadBalancerClassName = includes(allLoadBalancerClassNames, 'default')
+        ? 'default'
+        : head(allLoadBalancerClassNames)
+      const loadBalancerClasses = [{
+        name: defaultLoadBalancerClassName
+      }]
+      set(shootResource, 'spec.provider.controlPlaneConfig.loadBalancerClasses', loadBalancerClasses)
     }
 
     const partitionIDs = rootGetters.partitionIDsByCloudProfileNameAndRegion({ cloudProfileName, region })
