@@ -55,8 +55,9 @@ function errorToLocals (err, req) {
   const message = err.message
   let reason = err.reason || 'Internal Error'
   const name = err.name
+  const stack = err.stack
 
-  const error = req.app.get('env') === 'development' ? err : { name }
+  const error = req.app.get('env') === 'development' ? { name, stack } : { name }
   let status = 500
   if (isHttpError(err) && err.response) {
     status = err.response.statusCode
