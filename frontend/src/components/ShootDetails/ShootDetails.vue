@@ -82,7 +82,7 @@ export default {
       const namespace = this.shootNamespace
       const name = this.shootName
       return this.ticketsByNamespaceAndName({ name, namespace })
-    },
+    }
   },
   methods: {
     onAddTerminalShortcut (shortcut) {

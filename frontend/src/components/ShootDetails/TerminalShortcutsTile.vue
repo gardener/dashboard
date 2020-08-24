@@ -89,7 +89,7 @@ export default {
   },
   methods: {
     async onAddTerminalShortcut (shortcut) {
-      if (shortcut[Symbol.for('unverified')]) {
+      if (shortcut.unverified) {
         const confirmation = await this.$refs.unverified.promptForConfirmation()
         if (!confirmation) {
           return

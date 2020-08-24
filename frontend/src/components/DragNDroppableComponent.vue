@@ -15,8 +15,8 @@ limitations under the License.
  -->
 
 <template>
-  <div class="full-height">
-    <div v-g-draggable="draggableValue" :data-g-id="uuid" @dragStart="dragStart" @dragEnd="dragEnd" class="full-height full-width">
+  <div class="fill-height">
+    <div v-g-draggable="draggableValue" :data-g-id="uuid" @dragStart="dragStart" @dragEnd="dragEnd" class="fill-height full-width">
       <div ref="handle" :data-g-id="uuid">
         <slot name="handle"></slot>
       </div>
@@ -70,13 +70,3 @@ export default {
 }
 
 </script>
-
-<style lang="scss" scoped>
-  .full-height {
-    height: 100%;
-  }
-
-  .full-width {
-    width: 100%;
-  }
-</style>

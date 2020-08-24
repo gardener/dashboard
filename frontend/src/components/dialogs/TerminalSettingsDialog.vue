@@ -28,7 +28,7 @@ limitations under the License.
       <terminal-settings
         ref="settings"
         :target="target"
-        @input="selectedConfigChanged"
+        @selectedConfig="selectedConfigChanged"
         @validSettings="validSettingsChanged"
       ></terminal-settings>
     </template>
@@ -56,17 +56,20 @@ export default {
     }
   },
   methods: {
-    async promptForConfigurationChange (initialState) {
-      const confirmed = await this.$refs.gDialog.confirmWithDialog({
-        onShowCallback: () => {
+    promptForConfigurationChange (initialState) {
+      const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()
+      return new Promise((resolve, reject) => {
+        this.$nextTick(async () => {
+          // delay execution to make sure that all components (especially $refs.settings) are loaded (slot in g-dialog/v-dialog is lazy)
           this.initialize(initialState)
-        }
+          const confirmed = await confirmWithDialogPromise
+          if (confirmed) {
+            resolve(this.selectedConfig)
+          } else {
+            resolve(undefined)
+          }
+        })
       })
-      if (confirmed) {
-        return this.selectedConfig
-      } else {
-        return undefined
-      }
     },
     initialize (initialState) {
       this.$refs.settings.initialize(initialState)

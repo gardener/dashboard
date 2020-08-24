@@ -76,9 +76,9 @@ data:
         image: {{ .Values.terminal.containerOperator.image }}
       {{- end }}
       {{- end }}
-      {{- if .Values.terminal.imageDescriptions }}
-      imageDescriptions:
-      {{- range .Values.terminal.imageDescriptions }}
+      {{- if .Values.terminal.containerImageDescriptions }}
+      containerImageDescriptions:
+      {{- range .Values.terminal.containerImageDescriptions }}
       - image: {{ .image }}
         description: {{ .description }}
       {{- end }}

@@ -203,10 +203,10 @@ export default {
       defaultNode = defaultNode || get(head(nodes), 'data.kubernetesHostname')
       this.selectedNode = defaultNode
       this.shootNodes = nodes
-      const currentNodeIsShootWorker = some(nodes, ['data.kubernetesHostname', currentNode])
       if (!this.isAdmin) {
         this.selectedRunOnShootWorker = true
       } else {
+        const currentNodeIsShootWorker = some(nodes, ['data.kubernetesHostname', currentNode])
         this.selectedRunOnShootWorker = currentNodeIsShootWorker
       }
       this.selectedPrivilegedMode = privilegedMode
@@ -217,7 +217,7 @@ export default {
   },
   watch: {
     selectedConfig () {
-      this.$emit('input', this.selectedConfig)
+      this.$emit('selectedConfig', this.selectedConfig)
     },
     validSettings () {
       this.$emit('validSettings', this.validSettings)

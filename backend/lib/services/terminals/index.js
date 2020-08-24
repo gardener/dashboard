@@ -95,14 +95,14 @@ function toTerminalMetadata (terminal) {
 
 function imageHelpText (terminal) {
   const containerImage = _.get(terminal, 'spec.host.pod.container.image')
-  const imageDescriptions = getConfigValue('terminal.imageDescriptions', [])
+  const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
 
-  return findImageDescription(containerImage, imageDescriptions)
+  return findImageDescription(containerImage, containerImageDescriptions)
 }
 
-function findImageDescription (containerImage, imageDescriptions) {
+function findImageDescription (containerImage, containerImageDescriptions) {
   return _
-    .chain(imageDescriptions)
+    .chain(containerImageDescriptions)
     .find(({ image }) => {
       if (_.startsWith(image, '/') && _.endsWith(image, '/')) {
         image = image.substring(1, image.length - 1)
@@ -349,7 +349,7 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
 async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost }) {
   const client = user.client
   const isAdmin = user.isAdmin
-  const image = getContainerImage({ isAdmin, preferred: hostCluster.config.container.image })
+  const image = getContainerImage({ isAdmin, preferredImage: hostCluster.config.container.image })
   _.set(hostCluster, 'config.container.image', image)
 
   const podLabels = getPodLabels(target)
@@ -585,9 +585,9 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
 }
 exports.ensureTerminalAllowed = ensureTerminalAllowed
 
-function getContainerImage ({ isAdmin, preferred }) {
-  if (preferred) {
-    return preferred
+function getContainerImage ({ isAdmin, preferredImage }) {
+  if (preferredImage) {
+    return preferredImage
   }
 
   const containerImage = getConfigValue('terminal.container.image')
@@ -684,7 +684,7 @@ function fromShortcutSecretResource (secret) {
     .filter(shortcut => _.includes([TargetEnum.GARDEN, TargetEnum.CONTROL_PLANE, TargetEnum.SHOOT], shortcut.target))
     .value()
 }
-exports._fromShortcutSecretResource = fromShortcutSecretResource // for unit tests
+exports.fromShortcutSecretResource = fromShortcutSecretResource // for unit tests
 
 async function listShortcuts ({ user, namespace }) {
   const client = user.client

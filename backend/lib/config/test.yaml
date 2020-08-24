@@ -29,7 +29,7 @@ oidc:
 terminal:
   container:
     image: dummyImage:1.0.0
-  imageDescriptions:
+  containerImageDescriptions:
   - image: /dummyImage:.*/
     description: Dummy Image Description
   - image: fooImage:0.1.2

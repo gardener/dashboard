@@ -218,7 +218,7 @@ readinessProbe:
 #     image: eu.gcr.io/gardener-project/gardener/ops-toolbelt:latest
 #   containerOperator:
 #     image: ~ # if not defined, value of terminal.container.image will be used
-#   imageDescriptions:
+#   containerImageDescriptions:
 #   - image: /eu.gcr.io/gardener-project/gardener/ops-toolbelt:.*/ # regexp must start and end with '/', otherwise it's an exact match
 #     description: Run `ghelp` to get information about installed tools and packages
 #   gardenTerminalHost: # cluster that hosts the terminal pods for the (virtual) garden cluster

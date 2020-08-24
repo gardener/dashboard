@@ -107,17 +107,17 @@ module.exports = function info ({ agent, sandbox, k8s, auth }) {
     const bearer = await user.bearer
 
     const shortcut1 = {
-      title: 'User created',
-      description: 'Using K9s to view the pods of the control plane for this cluster',
+      title: 'Title',
+      description: 'Description',
       target: 'cp',
       container: {
-        image: 'derailed/k9s:latest',
+        image: 'foo:bar',
         command: [
-          'bin/sh'
+          'cmd'
         ],
         args: [
-          '-c',
-          'sleep 1 && while true; do k9s --headless --command=pods; done'
+          'a',
+          'b'
         ]
       }
     }

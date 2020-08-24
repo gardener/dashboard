@@ -21,7 +21,7 @@ limitations under the License.
         <terminal-shortcut
           :shootItem="shootItem"
           :shortcut="shortcut"
-          :key="`project-shortcut-${shortcutId(shortcut)}`"
+          :key="`project-shortcut-${shortcut.id}`"
           :popper-boundaries-selector="popperBoundariesSelector"
           @addTerminalShortcut="onAddTerminalShortcut"
         >
@@ -56,7 +56,7 @@ limitations under the License.
         <terminal-shortcut
           :shoot-item="shootItem"
           :shortcut="shortcut"
-          :key="`g-shortcut-${shortcutId(shortcut)}`"
+          :key="`g-shortcut-${shortcut.id}`"
           :popper-boundaries-selector="popperBoundariesSelector"
           @addTerminalShortcut="onAddTerminalShortcut"
         >
@@ -121,8 +121,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'projectTerminalShortcuts',
-      'terminalShortcuts'
+      'projectTerminalShortcutsByTargetsFilter',
+      'terminalShortcutsByTargetsFilter'
     ]),
     allPossibleTargets () {
       const targetsFilter = [TargetEnum.GARDEN]
@@ -132,20 +132,17 @@ export default {
       return targetsFilter
     },
     projectShortcuts () {
-      const shortcuts = this.projectTerminalShortcuts({ targetsFilter: this.allPossibleTargets })
+      const shortcuts = this.projectTerminalShortcutsByTargetsFilter(this.allPossibleTargets)
       return shootSelectorFilter(shortcuts, this.shootItem)
     },
     shortcuts () {
-      const shortcuts = this.terminalShortcuts({ targetsFilter: this.allPossibleTargets })
+      const shortcuts = this.terminalShortcutsByTargetsFilter(this.allPossibleTargets)
       return shootSelectorFilter(shortcuts, this.shootItem)
     }
   },
   methods: {
     onAddTerminalShortcut (shortcut) {
       this.$emit('addTerminalShortcut', shortcut)
-    },
-    shortcutId (shortcut) {
-      return shortcut[Symbol.for('id')]
     }
   }
 }

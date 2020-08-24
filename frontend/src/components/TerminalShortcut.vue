@@ -161,7 +161,7 @@ export default {
       })
     },
     isUnverified () {
-      return this.shortcut[Symbol.for('unverified')]
+      return !!this.shortcut.unverified
     }
   },
   methods: {

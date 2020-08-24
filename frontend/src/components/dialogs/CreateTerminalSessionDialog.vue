@@ -50,7 +50,7 @@ limitations under the License.
                   v-show="!!targetTab.selectedConfig"
                   ref="settings"
                   :target="targetTab.selectedTarget"
-                  v-model="targetTab.selectedConfig"
+                  @selectedConfig="selectedConfigChanged"
                   @validSettings="validSettingsChanged"
                 ></terminal-settings>
               </v-expansion-panel-content>
@@ -162,8 +162,8 @@ export default {
     async promptForSelections (initialState) {
       this.initialize(initialState)
       const confirmed = await this.$refs.gDialog.confirmWithDialog({
-        confirmCallback: async () => {
-          const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, [Symbol.for('unverified'), true])
+        confirmationInterceptor: async () => {
+          const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, ['unverified', true])
           if (isEmpty(unverifiedSelections)) {
             return true
           }
@@ -238,6 +238,9 @@ export default {
       } catch (err) {
         this.targetTab.initializedForTarget = undefined
       }
+    },
+    selectedConfigChanged (selectedConfig) {
+      this.targetTab.selectedConfig = selectedConfig
     },
     validSettingsChanged (validSettings) {
       this.targetTab.validSettings = validSettings

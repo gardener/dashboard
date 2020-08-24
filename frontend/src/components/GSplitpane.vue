@@ -22,7 +22,7 @@ limitations under the License.
     @pane-add="resize"
     @pane-remove="resize"
   >
-    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" style="position: relative">
+    <pane v-for="item in splitpaneTree.items" :key="item.uuid" min-size="2" class="position-relative">
       <g-splitpane v-if="hasChildren(item)" :splitpaneTree="item">
         <template v-slot="{item: childItem}">
           <slot :item="childItem"></slot>
@@ -77,6 +77,10 @@ export default {
 </script>
 
 <style lang="scss">
+  .position-relative {
+    position: relative;
+  }
+
   .splitpanes--vertical > .splitpanes__splitter {
     min-width: 2px !important;
     background-color: #000

@@ -121,8 +121,7 @@ export default {
   methods: {
     updateSplitpaneTree () {
       this.splitpaneTree = this.tree.toJSON(this.tree.root)
-
-      this.store()
+      this.saveSplitpaneTree()
     },
     addFromShortkey ({ srcKey: position = PositionEnum.RIGHT } = {}) {
       return this.add({ position })
@@ -208,7 +207,7 @@ export default {
 
       this.updateSplitpaneTree()
     },
-    store () {
+    saveSplitpaneTree () {
       const onySlotItemsInTree = every(this.tree.ids(), id => includes(this.slotItemUUIds, id))
       if (onySlotItemsInTree || this.tree.isEmpty()) {
         this.$localStorage.removeItem(this.storeKey)

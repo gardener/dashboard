@@ -129,6 +129,18 @@ const state = {
   }
 }
 
+class Shortcut {
+  constructor (shortcut, unverified = true) {
+    Object.assign(this, shortcut)
+    Object.defineProperty(this, 'id', {
+      value: hash(shortcut)
+    })
+    Object.defineProperty(this, 'unverified', {
+      value: unverified
+    })
+  }
+}
+
 const getFilterValue = (state) => {
   return state.namespace === '_all' && state.onlyShootsWithIssues ? 'issues' : null
 }
@@ -288,7 +300,7 @@ function firstItemMatchingVersionClassification (items) {
   return head(items)
 }
 
-function filterShortcuts ({ getters, shortcuts, targetsFilter }) {
+function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
   shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && getters.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
   shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && getters.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
   shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && getters.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
@@ -828,7 +840,7 @@ const getters = {
     return get(state, 'cfg.features.terminalEnabled', false)
   },
   isTerminalShortcutsFeatureEnabled (state, getters) {
-    return !isEmpty(getters.terminalShortcuts({})) || getters.isProjectTerminalShortcutsEnabled
+    return !isEmpty(getters.terminalShortcutsByTargetsFilter()) || getters.isProjectTerminalShortcutsEnabled
   },
   isProjectTerminalShortcutsEnabled (state, getters) {
     return get(state, 'cfg.features.projectTerminalShortcutsEnabled', false)
@@ -878,24 +890,23 @@ const getters = {
   splitpaneResize (state) {
     return state.splitpaneResize
   },
-  terminalShortcuts (state, getters) {
-    return ({ targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN] }) => {
+  terminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
       let shortcuts = get(state, 'cfg.terminal.shortcuts', [])
-      shortcuts = map(shortcuts, shortcut => ({ ...shortcut, [Symbol.for('id')]: hash(shortcut) }))
-      shortcuts = uniqBy(shortcuts, Symbol.for('id'))
-      return filterShortcuts({ getters, shortcuts, targetsFilter })
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, false))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
     }
   },
-  projectTerminalShortcuts (state, getters) {
-    return ({ targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN] }) => {
+  projectTerminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
       if (get(state, 'projectTerminalShortcuts.namespace') !== store.state.namespace) {
         return
       }
       let shortcuts = get(state, 'projectTerminalShortcuts.items', [])
-      shortcuts = filterShortcuts({ getters, shortcuts, targetsFilter })
-      shortcuts = map(shortcuts, shortcut => ({ ...shortcut, [Symbol.for('id')]: hash(shortcut) }))
-      shortcuts = uniqBy(shortcuts, Symbol.for('id'))
-      return map(shortcuts, shortcut => ({ ...shortcut, [Symbol.for('unverified')]: true }))
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, true))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
     }
   },
   isKubeconfigEnabled (state) {

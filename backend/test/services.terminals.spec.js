@@ -31,7 +31,7 @@ const { encodeBase64 } = require('../lib/utils')
 const {
   ensureTerminalAllowed,
   findImageDescription,
-  _fromShortcutSecretResource
+  fromShortcutSecretResource
 } = require('../lib/services/terminals')
 
 const {
@@ -161,47 +161,47 @@ describe('services', function () {
       describe('#findImageDescription', function () {
         it('should match regexp', async function () {
           const containerImage = 'foo:bar'
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: '/foo:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match regexp', async function () {
           const containerImage = 'foo:bar'
 
-          let imageDescriptions = [{
+          let containerImageDescriptions = [{
             image: '/dummy:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
 
-          imageDescriptions = [{
+          containerImageDescriptions = [{
             image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
         })
 
         it('should match exactly', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'foo:bar',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'bar:foo',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
 
           expect(findImageDescription('foo:bar', undefined)).to.be.undefined
           expect(findImageDescription('foo:bar', [])).to.be.undefined
@@ -754,28 +754,28 @@ describe('services', function () {
       })
     })
 
-    it('should pick only valid fields from shortcut resource', async function () {
-      let actualShortcuts = _fromShortcutSecretResource({
+    it('should pick only valid fields from shortcut resource', function () {
+      let actualShortcuts = fromShortcutSecretResource({
         data: encodeBase64(yaml.safeDump({}))
       })
       expect(actualShortcuts).to.eql([])
 
 
-      actualShortcuts = _fromShortcutSecretResource({
+      actualShortcuts = fromShortcutSecretResource({
         data: {
           shortcuts: undefined
         }
       })
       expect(actualShortcuts).to.eql([])
 
-      actualShortcuts = _fromShortcutSecretResource({
+      actualShortcuts = fromShortcutSecretResource({
         data: {
           shortcuts: encodeBase64('invalid')
         }
       })
       expect(actualShortcuts).to.eql([])
 
-      actualShortcuts = _fromShortcutSecretResource({
+      actualShortcuts = fromShortcutSecretResource({
         data: {
           shortcuts: encodeBase64(yaml.safeDump([
             {
@@ -786,7 +786,7 @@ describe('services', function () {
       })
       expect(actualShortcuts).to.eql([])
 
-      actualShortcuts = _fromShortcutSecretResource({
+      actualShortcuts = fromShortcutSecretResource({
         data: {
           shortcuts: encodeBase64(yaml.safeDump([
             {}, // invalid object
