@@ -66,7 +66,13 @@ limitations under the License.
                       <v-list-item-subtitle>Stale Project Information</v-list-item-subtitle>
                       <v-list-item-title class="d-flex align-center pt-1">
                         <span v-if="staleAutoDeleteTimestamp">
-                          This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project <span class="font-weight-bold"><time-string :date-time="staleAutoDeleteTimestamp"></time-string></span>
+                          This is a <span class="font-weight-bold">stale</span> project. Gardener will auto delete this project on
+                          <v-tooltip right>
+                            <template v-slot:activator="{ on }">
+                              <span class="font-weight-bold" v-on="on">{{staleAutoDeleteDate}}</span>
+                            </template>
+                            <time-string :date-time="staleAutoDeleteTimestamp"></time-string>
+                          </v-tooltip>
                         </span>
                         <span v-else>
                           This project is considered <span class="font-weight-bold">stale</span> since <span class="font-weight-bold"><time-string :date-time="staleSinceTimestamp" withoutPrefixOrSuffix></time-string></span>
@@ -276,7 +282,7 @@ import AccountAvatar from '@/components/AccountAvatar'
 import GDialog from '@/components/dialogs/GDialog'
 import TimeString from '@/components/TimeString'
 import { errorDetailsFromError } from '@/utils/error'
-import { compileMarkdown, getProjectDetails, textColor, isServiceAccount, gravatarUrlGeneric } from '@/utils'
+import { compileMarkdown, getProjectDetails, textColor, isServiceAccount, gravatarUrlGeneric, getDateFormatted } from '@/utils'
 import get from 'lodash/get'
 import set from 'lodash/set'
 import includes from 'lodash/includes'
@@ -402,6 +408,9 @@ export default {
     },
     staleAutoDeleteTimestamp () {
       return this.projectDetails.staleAutoDeleteTimestamp
+    },
+    staleAutoDeleteDate () {
+      return getDateFormatted(this.staleAutoDeleteTimestamp)
     },
     isDeleteButtonDisabled () {
       return this.shootList.length > 0

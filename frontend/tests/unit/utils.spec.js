@@ -303,6 +303,7 @@ describe('utils', function () {
       const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', true)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[0].expirationDate,
+        expirationDateString: utils.getDateFormatted(kubernetesVersions[0].expirationDate),
         isValidTerminationDate: true,
         isError: false,
         isWarning: false,
@@ -314,6 +315,7 @@ describe('utils', function () {
       const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[0].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[0].expirationDate,
+        expirationDateString: utils.getDateFormatted(kubernetesVersions[0].expirationDate),
         isValidTerminationDate: true,
         isError: false,
         isWarning: true,
@@ -325,6 +327,7 @@ describe('utils', function () {
       let versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', true)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[1].expirationDate,
+        expirationDateString: utils.getDateFormatted(kubernetesVersions[1].expirationDate),
         isValidTerminationDate: true,
         isError: false,
         isWarning: true,
@@ -334,6 +337,7 @@ describe('utils', function () {
       versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[1].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[1].expirationDate,
+        expirationDateString: utils.getDateFormatted(kubernetesVersions[1].expirationDate),
         isValidTerminationDate: true,
         isError: false,
         isWarning: true,
@@ -345,6 +349,7 @@ describe('utils', function () {
       const versionExpirationWarning = utils.k8sVersionExpirationForShoot(kubernetesVersions[7].version, 'foo', false)
       expect(versionExpirationWarning).to.eql({
         expirationDate: kubernetesVersions[7].expirationDate,
+        expirationDateString: utils.getDateFormatted(kubernetesVersions[7].expirationDate),
         isValidTerminationDate: false,
         isError: true,
         isWarning: false,
@@ -439,6 +444,7 @@ describe('utils', function () {
       expect(expiredWorkerGroups).to.have.length(1)
       expect(expiredWorkerGroups[0]).to.eql({
         ...sampleMachineImages[0],
+        expirationDateString: utils.getDateFormatted(sampleMachineImages[0].expirationDate),
         workerName: workers[0].name,
         isValidTerminationDate: true,
         isError: false,
@@ -454,6 +460,7 @@ describe('utils', function () {
       expect(expiredWorkerGroups).to.have.length(1)
       expect(expiredWorkerGroups[0]).to.eql({
         ...sampleMachineImages[0],
+        expirationDateString: utils.getDateFormatted(sampleMachineImages[0].expirationDate),
         workerName: workers[0].name,
         isValidTerminationDate: true,
         isError: false,
@@ -469,6 +476,7 @@ describe('utils', function () {
       expect(expiredWorkerGroups).to.have.length(3)
       expect(expiredWorkerGroups[0]).to.eql({
         ...sampleMachineImages[0],
+        expirationDateString: utils.getDateFormatted(sampleMachineImages[0].expirationDate),
         workerName: workers[0].name,
         isValidTerminationDate: true,
         isError: false,
@@ -477,6 +485,7 @@ describe('utils', function () {
       })
       expect(expiredWorkerGroups[1]).to.eql({
         ...sampleMachineImages[3],
+        expirationDateString: utils.getDateFormatted(sampleMachineImages[3].expirationDate),
         workerName: workers[2].name,
         isValidTerminationDate: true,
         isError: true,
@@ -486,6 +495,7 @@ describe('utils', function () {
       })
       expect(expiredWorkerGroups[2]).to.eql({
         ...sampleMachineImages[4],
+        expirationDateString: utils.getDateFormatted(sampleMachineImages[4].expirationDate),
         workerName: workers[3].name,
         isValidTerminationDate: false,
         isError: true,
