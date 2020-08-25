@@ -58,7 +58,7 @@ export default {
   methods: {
     promptForConfigurationChange (initialState) {
       const confirmWithDialogPromise = this.$refs.gDialog.confirmWithDialog()
-      return new Promise((resolve, reject) => {
+      return new Promise(resolve => {
         this.$nextTick(async () => {
           // delay execution to make sure that all components (especially $refs.settings) are loaded (slot in g-dialog/v-dialog is lazy)
           this.initialize(initialState)

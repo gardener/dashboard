@@ -14,26 +14,25 @@
 // limitations under the License.
 //
 
-const assign = require('lodash/assign')
-const find = require('lodash/find')
-const get = require('lodash/get')
-const head = require('lodash/head')
-const merge = require('lodash/merge')
-const intersection = require('lodash/intersection')
-const keys = require('lodash/keys')
-const includes = require('lodash/includes')
-const pick = require('lodash/pick')
-const pTimeout = require('p-timeout')
+import assign from 'lodash/assign'
+import find from 'lodash/find'
+import get from 'lodash/get'
+import head from 'lodash/head'
+import merge from 'lodash/merge'
+import intersection from 'lodash/intersection'
+import keys from 'lodash/keys'
+import includes from 'lodash/includes'
+import pick from 'lodash/pick'
+import pTimeout from 'p-timeout'
 
-const {
+import {
   createTerminal,
   fetchTerminalSession,
   deleteTerminal,
   heartbeat
-} = require('@/utils/api')
-
-const { K8sAttachAddon, WsReadyStateEnum } = require('@/lib/xterm-addon-k8s-attach')
-const { encodeBase64Url } = require('@/utils')
+} from '@/utils/api'
+import { K8sAttachAddon, WsReadyStateEnum } from '@/lib/xterm-addon-k8s-attach'
+import { encodeBase64Url } from '@/utils'
 
 const WsCloseEventEnum = {
   NORMAL_CLOUSURE: 1000
@@ -42,7 +41,7 @@ const WsCloseEventEnum = {
 const RETRY_TIMEOUT_SECONDS = 3
 const MAX_TRIES = 60 / RETRY_TIMEOUT_SECONDS
 
-class TerminalSession {
+export class TerminalSession {
   constructor (vm) {
     this.vm = vm
     this.cancelConnect = false
@@ -401,5 +400,3 @@ function getDetailedConnectionStateText (terminalContainerStatus) {
 
   return `${text}: ${reason}`
 }
-
-module.exports = { TerminalSession }

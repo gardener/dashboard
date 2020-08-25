@@ -161,15 +161,15 @@ export default {
   methods: {
     async promptForSelections (initialState) {
       this.initialize(initialState)
-      const confirmed = await this.$refs.gDialog.confirmWithDialog({
-        confirmationInterceptor: async () => {
+      const confirmed = await this.$refs.gDialog.confirmWithDialog(
+        async () => {
           const unverifiedSelections = filter(this.shortcutTab.selectedShortcuts, ['unverified', true])
           if (isEmpty(unverifiedSelections)) {
             return true
           }
           return await this.$refs.unverified.promptForConfirmation()
         }
-      })
+      )
       if (!confirmed) {
         return undefined
       }

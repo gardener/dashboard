@@ -163,7 +163,7 @@ export default {
     }
   },
   methods: {
-    confirmWithDialog ({ confirmationInterceptor } = {}) {
+    confirmWithDialog (confirmationInterceptor) {
       this.showDialog()
       this.userInput = ''
       this.confirmationInterceptor = confirmationInterceptor

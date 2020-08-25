@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-const WsReadyStateEnum = {
+export const WsReadyStateEnum = {
   CONNECTING: 0,
   OPEN: 1,
   CLOSING: 2,
@@ -34,7 +34,7 @@ const BufferEnum = {
   DATA_INDEX: 1
 }
 
-class K8sAttachAddon {
+export class K8sAttachAddon {
   constructor (socket, options = {}) {
     this._socket = socket
     // always set binary type to arraybuffer, we do not handle blobs
@@ -150,5 +150,3 @@ function addSocketListener (socket, type, handler) {
     }
   }
 }
-
-module.exports = { K8sAttachAddon, WsReadyStateEnum }
