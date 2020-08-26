@@ -81,7 +81,7 @@ describe('logger', function () {
   const statusMessage = 'Not found'
   const responseArgs = { id, statusCode, statusMessage, body }
 
-  beforeEach(() => {
+  beforeEach(function () {
     process.env = { ...ENV }
   })
 
