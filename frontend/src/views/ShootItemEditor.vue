@@ -57,7 +57,7 @@ export default {
     ShootEditor,
     ConfirmDialog
   },
-  name: 'shoot-details-editor',
+  name: 'shoot-item-editor',
   data () {
     const vm = this
     return {

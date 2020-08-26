@@ -44,8 +44,8 @@ const Home = () => import('@/views/Home')
 const NewShoot = () => import('@/views/NewShoot')
 const ShootList = () => import('@/views/ShootList')
 const ShootItemTerminal = () => import('@/views/ShootItemTerminal')
-const ShootDetails = () => import('@/views/ShootDetails')
-const ShootDetailsEditor = () => import('@/views/ShootDetailsEditor')
+const ShootItem = () => import('@/views/ShootItem')
+const ShootItemEditor = () => import('@/views/ShootItemEditor')
 const NewShootEditor = () => import('@/views/NewShootEditor')
 const Secrets = () => import('@/views/Secrets')
 const Members = () => import('@/views/Members')
@@ -295,7 +295,7 @@ function shootItemRoute (context, path) {
   return {
     path,
     name: 'ShootItem',
-    component: ShootDetails,
+    component: ShootItem,
     meta: {
       breadcrumbs: shootItemBreadcrumbs,
       tabs: shootItemTabs
@@ -306,8 +306,8 @@ function shootItemRoute (context, path) {
 function shootItemEditorRoute (context, path) {
   return {
     path,
-    name: 'ShootDetailsEditor',
-    component: ShootDetailsEditor,
+    name: 'ShootItemEditor',
+    component: ShootItemEditor,
     meta: {
       breadcrumbs: shootItemBreadcrumbs,
       tabs: shootItemTabs
@@ -319,7 +319,7 @@ function shootItemHibernationRoute (context, path) {
   return {
     path,
     name: 'ShootItemHibernationSettings',
-    component: ShootDetails,
+    component: ShootItem,
     meta: {
       breadcrumbs: shootItemBreadcrumbs,
       tabs: shootItemTabs

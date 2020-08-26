@@ -40,7 +40,7 @@ import { PositionEnum } from '@/lib/g-symbol-tree'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'shoot-details',
+  name: 'shoot-item',
   components: {
     ShootDetails,
     TerminalSplitpanes,
@@ -64,6 +64,7 @@ export default {
     }
   },
   mounted () {
+    console.log('terminalSplitpanes')
     const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
     this.$refs.terminalSplitpanes.load(addItemFn)
   }

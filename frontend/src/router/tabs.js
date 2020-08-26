@@ -39,7 +39,7 @@ export function shootItemTabs ({ params }) {
       title: 'YAML',
       get to () {
         return {
-          name: 'ShootDetailsEditor',
+          name: 'ShootItemEditor',
           params
         }
       }
