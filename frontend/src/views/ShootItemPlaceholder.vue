@@ -36,7 +36,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'canGetSecrets'
+      'canGetSecrets',
+      'canManageProjectTerminalShortcuts'
     ]),
     componentProperties () {
       switch (this.component) {
@@ -50,7 +51,8 @@ export default {
       'subscribeShoot',
       'subscribeComments',
       'unsubscribeComments',
-      'fetchInfrastructureSecrets'
+      'fetchInfrastructureSecrets',
+      'fetchProjectTerminalShortcuts'
     ]),
     async load (to, from) {
       if (!this.loading) {
@@ -63,6 +65,9 @@ export default {
           ]
           if (includes(['ShootItem', 'ShootItemHibernationSettings'], to.name) && this.canGetSecrets) {
             promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
+          }
+          if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], to.name) && this.canManageProjectTerminalShortcuts) {
+            promises.push(this.fetchProjectTerminalShortcuts())
           }
           await Promise.all(promises)
           this.component = 'router-view'

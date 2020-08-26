@@ -866,6 +866,9 @@ const getters = {
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
   },
+  canManageProjectTerminalShortcuts (state, getters) {
+    return getters.isProjectTerminalShortcutsEnabled && getters.canGetProjectTerminalShortcuts && getters.canCreateTerminals
+  },
   canCreateProject (state) {
     return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
   },
@@ -903,7 +906,7 @@ const getters = {
   },
   projectTerminalShortcutsByTargetsFilter (state, getters) {
     return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
-      if (get(state, 'projectTerminalShortcuts.namespace') !== store.state.namespace) {
+      if (get(state, 'projectTerminalShortcuts.namespace') !== state.namespace) {
         return
       }
       let shortcuts = get(state, 'projectTerminalShortcuts.items', [])
@@ -1181,15 +1184,15 @@ const actions = {
     const { data } = await getKubeconfigData()
     commit('SET_KUBECONFIG_DATA', data)
   },
-  async fetchProjectTerminalShortcuts ({ commit }) {
-    if (store.state.projectTerminalShortcuts && store.state.projectTerminalShortcuts.namespace === store.state.namespace) {
-      return
+  async fetchProjectTerminalShortcuts ({ commit, state }) {
+    const { namespace, projectTerminalShortcuts } = state
+    if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
+      const { data: items } = await listProjectTerminalShortcuts({ namespace })
+      commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+        namespace,
+        items
+      })
     }
-    const { data } = await listProjectTerminalShortcuts({ namespace: store.state.namespace })
-    commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
-      namespace: store.state.namespace,
-      items: data
-    })
   },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)

@@ -131,7 +131,13 @@ function ensureDataLoaded (store) {
           break
         }
         case 'ShootList': {
-          await store.dispatch('subscribeShoots')
+          const promises = [
+            store.dispatch('subscribeShoots'),
+          ]
+          if (store.getters.canManageProjectTerminalShortcuts) {
+            promises.push(store.dispatch('fetchProjectTerminalShortcuts'))
+          }
+          await Promise.all(promises)
           break
         }
         case 'Members':
