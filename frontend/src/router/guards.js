@@ -132,7 +132,7 @@ function ensureDataLoaded (store) {
         }
         case 'ShootList': {
           const promises = [
-            store.dispatch('subscribeShoots'),
+            store.dispatch('subscribeShoots')
           ]
           if (store.getters.canManageProjectTerminalShortcuts) {
             promises.push(store.dispatch('fetchProjectTerminalShortcuts'))

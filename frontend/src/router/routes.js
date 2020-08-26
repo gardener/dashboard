@@ -169,7 +169,7 @@ function shootItemHierarchy (context, path) {
 
 function loginRoute (context, path) {
   return {
-    path: '/login',
+    path,
     name: 'Login',
     component: Login,
     meta: {
@@ -180,7 +180,7 @@ function loginRoute (context, path) {
 
 function errorRoute (context, path) {
   return {
-    path: '/error',
+    path,
     name: 'Error',
     component: Error,
     meta: {

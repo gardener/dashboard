@@ -62,7 +62,7 @@ export function newShootTabs ({ params }) {
     {
       key: 'newShootYaml',
       title: 'YAML',
-      to () {
+      get to () {
         return {
           name: 'NewShootEditor',
           params

@@ -28,7 +28,6 @@ export default {
   },
   data () {
     return {
-      loading: false,
       component: undefined
     }
   },
@@ -47,19 +46,14 @@ export default {
     }
   },
   methods: {
-    async load (namespace) {
-      if (!this.loading) {
-        this.loading = true
-        this.component = 'router-view'
-        try {
-          if (!includes(this.namespaces, namespace) && namespace !== '_all') {
-            throw new Error('Invalid namespace')
-          }
-        } catch (err) {
-          this.component = 'project-not-found'
-        } finally {
-          this.loading = false
+    load (namespace) {
+      this.component = 'router-view'
+      try {
+        if (!includes(this.namespaces, namespace) && namespace !== '_all') {
+          throw new Error('Invalid namespace')
         }
+      } catch (err) {
+        this.component = 'project-not-found'
       }
     }
   },
