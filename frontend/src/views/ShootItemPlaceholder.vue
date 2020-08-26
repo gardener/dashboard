@@ -37,7 +37,7 @@ export default {
   computed: {
     ...mapGetters([
       'canGetSecrets',
-      'canManageProjectTerminalShortcuts'
+      'canUseProjectTerminalShortcuts'
     ]),
     componentProperties () {
       switch (this.component) {
@@ -66,7 +66,7 @@ export default {
           if (includes(['ShootItem', 'ShootItemHibernationSettings'], to.name) && this.canGetSecrets) {
             promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
           }
-          if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], to.name) && this.canManageProjectTerminalShortcuts) {
+          if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], to.name) && this.canUseProjectTerminalShortcuts) {
             promises.push(this.fetchProjectTerminalShortcuts())
           }
           await Promise.all(promises)

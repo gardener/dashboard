@@ -134,7 +134,7 @@ function ensureDataLoaded (store) {
           const promises = [
             store.dispatch('subscribeShoots')
           ]
-          if (store.getters.canManageProjectTerminalShortcuts) {
+          if (store.getters.canUseProjectTerminalShortcuts) {
             promises.push(store.dispatch('fetchProjectTerminalShortcuts'))
           }
           await Promise.all(promises)

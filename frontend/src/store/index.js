@@ -866,7 +866,7 @@ const getters = {
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
   },
-  canManageProjectTerminalShortcuts (state, getters) {
+  canUseProjectTerminalShortcuts (state, getters) {
     return getters.isProjectTerminalShortcutsEnabled && getters.canGetProjectTerminalShortcuts && getters.canCreateTerminals
   },
   canCreateProject (state) {
