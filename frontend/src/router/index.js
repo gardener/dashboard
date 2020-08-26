@@ -60,12 +60,20 @@ export default function createRouter ({ store, userManager }) {
     return store.getters.isTerminalEnabled
   }
 
+  function isProjectTerminalShortcutsEnabled () {
+    return store.getters.isProjectTerminalShortcutsEnabled
+  }
+
   function canCreateTerminals () {
     return store.getters.canCreateTerminals
   }
 
   function canGetSecrets () {
     return store.getters.canGetSecrets
+  }
+
+  function canGetProjectTerminalShortcuts () {
+    return store.getters.canGetProjectTerminalShortcuts && store.getters.canCreateTerminals
   }
 
   const mode = 'history'
@@ -563,7 +571,13 @@ export default function createRouter ({ store, userManager }) {
           break
         }
         case 'ShootList': {
-          await store.dispatch('subscribeShoots', { name: params.name, namespace })
+          const promises = [
+            store.dispatch('subscribeShoots', { name: params.name, namespace })
+          ]
+          if (isProjectTerminalShortcutsEnabled() && canGetProjectTerminalShortcuts()) {
+            promises.push(store.dispatch('fetchProjectTerminalShortcuts'))
+          }
+          await Promise.all(promises)
           break
         }
         case 'ShootItem':
@@ -575,12 +589,29 @@ export default function createRouter ({ store, userManager }) {
           if (canGetSecrets()) {
             promises.push(store.dispatch('fetchInfrastructureSecrets')) // Required for purpose configuration
           }
+          if (isProjectTerminalShortcutsEnabled() && canGetProjectTerminalShortcuts()) {
+            promises.push(store.dispatch('fetchProjectTerminalShortcuts'))
+          }
           await Promise.all(promises)
           break
         }
-        case 'ShootDetailsEditor':
+        case 'ShootDetailsEditor': {
+          const promises = [
+            store.dispatch('subscribeShoot', { name: params.name, namespace }),
+            store.dispatch('fetchInfrastructureSecrets')
+          ]
+          await Promise.all(promises)
+          break
+        }
         case 'ShootItemTerminal': {
-          await store.dispatch('subscribeShoot', { name: params.name, namespace })
+          const promises = [
+            store.dispatch('subscribeShoot', { name: params.name, namespace }),
+            store.dispatch('fetchInfrastructureSecrets')
+          ]
+          await Promise.all(promises)
+          if (isProjectTerminalShortcutsEnabled() && canGetProjectTerminalShortcuts()) {
+            promises.push(store.dispatch('fetchProjectTerminalShortcuts'))
+          }
           break
         }
         case 'Members':

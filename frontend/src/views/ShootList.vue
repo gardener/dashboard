@@ -167,7 +167,7 @@ limitations under the License.
               <v-icon>close</v-icon>
             </v-btn>
           </v-card-title>
-          <shoot-access-card ref="clusterAccess" :shootItem="selectedItem"></shoot-access-card>
+          <shoot-access-card ref="clusterAccess" :shoot-item="selectedItem" :hide-terminal-shortcuts="true"></shoot-access-card>
         </v-card>
       </v-dialog>
     </v-card>

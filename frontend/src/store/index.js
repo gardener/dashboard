@@ -17,6 +17,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import createLogger from 'vuex/dist/logger'
+import hash from 'object-hash'
 
 import EmitterWrapper from '@/utils/Emitter'
 import {
@@ -25,14 +26,16 @@ import {
   fullDisplayName,
   getDateFormatted,
   canI,
-  getProjectName
+  getProjectName,
+  TargetEnum
 } from '@/utils'
-import { getSubjectRules, getKubeconfigData } from '@/utils/api'
+import { getSubjectRules, getKubeconfigData, listProjectTerminalShortcuts } from '@/utils/api'
 import reduce from 'lodash/reduce'
 import map from 'lodash/map'
 import flatMap from 'lodash/flatMap'
 import filter from 'lodash/filter'
 import uniq from 'lodash/uniq'
+import uniqBy from 'lodash/uniqBy'
 import get from 'lodash/get'
 import includes from 'lodash/includes'
 import isEmpty from 'lodash/isEmpty'
@@ -100,6 +103,7 @@ const state = {
   focusedElementId: null,
   splitpaneResize: null,
   splitpaneLayouts: {},
+  projectTerminalShortcuts: null,
   conditionCache: {
     APIServerAvailable: {
       displayName: 'API Server',
@@ -122,6 +126,18 @@ const state = {
       shortName: 'SC',
       description: 'Indicates whether all system components in the kube-system namespace are up and running. Gardener manages these system components and should automatically take care that the components become healthy again.'
     }
+  }
+}
+
+class Shortcut {
+  constructor (shortcut, unverified = true) {
+    Object.assign(this, shortcut)
+    Object.defineProperty(this, 'id', {
+      value: hash(shortcut)
+    })
+    Object.defineProperty(this, 'unverified', {
+      value: unverified
+    })
   }
 }
 
@@ -282,6 +298,14 @@ function firstItemMatchingVersionClassification (items) {
   }
 
   return head(items)
+}
+
+function filterShortcuts ({ getters }, { shortcuts, targetsFilter }) {
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.CONTROL_PLANE && getters.hasControlPlaneTerminalAccess) || target !== TargetEnum.CONTROL_PLANE)
+  shortcuts = filter(shortcuts, ({ target }) => (target === TargetEnum.GARDEN && getters.hasGardenTerminalAccess) || target !== TargetEnum.GARDEN)
+  shortcuts = filter(shortcuts, ({ target }) => ((target === TargetEnum.SHOOT && getters.hasShootTerminalAccess) || target !== TargetEnum.SHOOT))
+  shortcuts = filter(shortcuts, ({ target }) => includes(targetsFilter, target))
+  return shortcuts
 }
 
 // getters
@@ -815,6 +839,12 @@ const getters = {
   isTerminalEnabled (state, getters) {
     return get(state, 'cfg.features.terminalEnabled', false)
   },
+  isTerminalShortcutsFeatureEnabled (state, getters) {
+    return !isEmpty(getters.terminalShortcutsByTargetsFilter()) || getters.isProjectTerminalShortcutsEnabled
+  },
+  isProjectTerminalShortcutsEnabled (state, getters) {
+    return get(state, 'cfg.features.projectTerminalShortcutsEnabled', false)
+  },
   canCreateTerminals (state) {
     return canI(state.subjectRules, 'create', 'dashboard.gardener.cloud', 'terminals')
   },
@@ -829,6 +859,9 @@ const getters = {
   },
   canGetSecrets (state) {
     return canI(state.subjectRules, 'list', '', 'secrets')
+  },
+  canGetProjectTerminalShortcuts (state, getters) {
+    return getters.canGetSecrets
   },
   canCreateProject (state) {
     return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
@@ -856,6 +889,25 @@ const getters = {
   },
   splitpaneResize (state) {
     return state.splitpaneResize
+  },
+  terminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
+      let shortcuts = get(state, 'cfg.terminal.shortcuts', [])
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, false))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
+    }
+  },
+  projectTerminalShortcutsByTargetsFilter (state, getters) {
+    return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
+      if (get(state, 'projectTerminalShortcuts.namespace') !== store.state.namespace) {
+        return
+      }
+      let shortcuts = get(state, 'projectTerminalShortcuts.items', [])
+      shortcuts = map(shortcuts, shortcut => new Shortcut(shortcut, true))
+      shortcuts = uniqBy(shortcuts, 'id')
+      return filterShortcuts({ getters }, { shortcuts, targetsFilter })
+    }
   },
   isKubeconfigEnabled (state) {
     return !!(get(state, 'kubeconfigData.oidc.clientId') && get(state, 'kubeconfigData.oidc.clientSecret'))
@@ -1096,6 +1148,16 @@ const actions = {
       commit('SET_KUBECONFIG_DATA', data)
     }
   },
+  async fetchProjectTerminalShortcuts ({ commit }) {
+    if (store.state.projectTerminalShortcuts && store.state.projectTerminalShortcuts.namespace === store.state.namespace) {
+      return
+    }
+    const { data } = await listProjectTerminalShortcuts({ namespace: store.state.namespace })
+    commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+      namespace: store.state.namespace,
+      items: data
+    })
+  },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)
     return state.onlyShootsWithIssues
@@ -1178,6 +1240,9 @@ const mutations = {
   },
   SET_KUBECONFIG_DATA (state, value) {
     state.kubeconfigData = value
+  },
+  SET_PROJECT_TERMINAL_SHORTCUTS (state, value) {
+    state.projectTerminalShortcuts = value
   },
   SET_ONLYSHOOTSWITHISSUES (state, value) {
     state.onlyShootsWithIssues = value

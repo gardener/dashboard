@@ -74,7 +74,6 @@ limitations under the License.
                   flat
                   single-line
                   hide-details
-                  full-width
                   color="grey darken-1"
                   prepend-icon="search"
                   class="pl-4 mt-0 pt-0 project-filter"

@@ -14,9 +14,9 @@
 // limitations under the License.
 //
 
-const { default: store } = require('../store')
+import store from '../store'
 
-class FocusAddon {
+export class FocusAddon {
   constructor (uuid) {
     this.uuid = uuid
   }
@@ -38,5 +38,3 @@ class FocusAddon {
 
   dispose () {}
 }
-
-module.exports = { FocusAddon }

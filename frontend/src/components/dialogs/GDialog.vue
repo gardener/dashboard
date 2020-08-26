@@ -163,9 +163,10 @@ export default {
     }
   },
   methods: {
-    confirmWithDialog () {
+    confirmWithDialog (confirmationInterceptor) {
       this.showDialog()
       this.userInput = ''
+      this.confirmationInterceptor = confirmationInterceptor
 
       // we must delay the "focus" handling because the dialog.open is animated
       // and the 'autofocus' property didn't work in this case.
@@ -203,8 +204,17 @@ export default {
           return 'cyan--text text--darken-2'
       }
     },
-    resolveAction (value) {
+    async resolveAction (value) {
       if (isFunction(this.resolve)) {
+        if (value) {
+          if (this.confirmationInterceptor) {
+            const confirmed = await this.confirmationInterceptor()
+            if (!confirmed) {
+              // cancel resolve action
+              return
+            }
+          }
+        }
         const resolve = this.resolve
         this.resolve = undefined
         resolve(value)

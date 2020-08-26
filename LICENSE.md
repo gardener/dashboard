@@ -435,6 +435,10 @@ Copyright (c) JS Foundation and other contributors\
 Copyright (c) 2011 Olivier Poitrey rs@dailymotion.com\
 [MIT License](https://github.com/rs/node-netmask/blob/master/README.md)
 
+- [object-hash](https://github.com/puleos/object-hash)\
+Copyright (c) 2014 object-hash contributors\
+[MIT License](https://github.com/puleos/object-hash/blob/master/LICENSE)
+
 - [semver](https://github.com/npm/node-semver)\
 Copyright (c) Isaac Z. Schlueter and Contributors\
 [ISC License](https://github.com/npm/node-semver/blob/master/LICENSE)

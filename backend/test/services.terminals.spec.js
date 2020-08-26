@@ -25,10 +25,13 @@ const { getSeed } = require('../lib/cache')
 const { Resources } = require('../lib/kubernetes-client')
 const { Forbidden } = require('../lib/errors')
 const logger = require('../lib/logger')
+const yaml = require('js-yaml')
+const { encodeBase64 } = require('../lib/utils')
 
 const {
   ensureTerminalAllowed,
-  findImageDescription
+  findImageDescription,
+  fromShortcutSecretResource
 } = require('../lib/services/terminals')
 
 const {
@@ -158,47 +161,47 @@ describe('services', function () {
       describe('#findImageDescription', function () {
         it('should match regexp', async function () {
           const containerImage = 'foo:bar'
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: '/foo:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match regexp', async function () {
           const containerImage = 'foo:bar'
 
-          let imageDescriptions = [{
+          let containerImageDescriptions = [{
             image: '/dummy:.*/',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
 
-          imageDescriptions = [{
+          containerImageDescriptions = [{
             image: 'foo:.*', // will not be recognized as regexp as it has to start and end with /
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
         })
 
         it('should match exactly', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'foo:bar',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.eq('baz')
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.eq('baz')
         })
 
         it('should not match', async function () {
           const containerImage = 'foo:bar'
 
-          const imageDescriptions = [{
+          const containerImageDescriptions = [{
             image: 'bar:foo',
             description: 'baz'
           }]
-          expect(findImageDescription(containerImage, imageDescriptions)).to.be.undefined
+          expect(findImageDescription(containerImage, containerImageDescriptions)).to.be.undefined
 
           expect(findImageDescription('foo:bar', undefined)).to.be.undefined
           expect(findImageDescription('foo:bar', [])).to.be.undefined
@@ -749,6 +752,94 @@ describe('services', function () {
         expect(stats.successRate).to.equal(1)
         expect(infoSpy).to.be.calledOnce
       })
+    })
+
+    it('should pick only valid fields from shortcut resource', function () {
+      let actualShortcuts = fromShortcutSecretResource({
+        data: encodeBase64(yaml.safeDump({}))
+      })
+      expect(actualShortcuts).to.eql([])
+
+
+      actualShortcuts = fromShortcutSecretResource({
+        data: {
+          shortcuts: undefined
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64('invalid')
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64(yaml.safeDump([
+            {
+              foo: 'bar'
+            }
+          ]))
+        }
+      })
+      expect(actualShortcuts).to.eql([])
+
+      actualShortcuts = fromShortcutSecretResource({
+        data: {
+          shortcuts: encodeBase64(yaml.safeDump([
+            {}, // invalid object
+            {
+              description: 'invalid due to missing required keys'
+            },
+            {
+              title: 'invalid target',
+              target: 'foo'
+            },
+            {
+              title: 'minimalistic shortcut',
+              target: 'shoot'
+            },
+            {
+              title: 'title',
+              description: 'description',
+              target: 'shoot',
+              container: {
+                image: 'image',
+                command: ['command'],
+                args: ['args'],
+              },
+              shootSelector: {
+                matchLabels: {
+                  foo: 'bar'
+                }
+              },
+              foo: 'ignore'
+            }
+          ]))
+        }
+      })
+      expect(actualShortcuts).to.eql([{
+          title: 'minimalistic shortcut',
+          target: 'shoot'
+        },
+        {
+          title: 'title',
+          description: 'description',
+          target: 'shoot',
+          container: {
+            image: 'image',
+            command: ['command'],
+            args: ['args'],
+          },
+          shootSelector: {
+            matchLabels: {
+              foo: 'bar'
+            }
+          }
+        }
+      ])
     })
   })
 })

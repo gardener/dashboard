@@ -19,6 +19,7 @@
 const _ = require('lodash')
 const assert = require('assert').strict
 const hash = require('object-hash')
+const yaml = require('js-yaml')
 
 const { isHttpError } = require('../../kubernetes-client')
 
@@ -81,6 +82,11 @@ exports.heartbeat = async function ({ user, body = {} }) {
   return heartbeatTerminalSession({ user, body })
 }
 
+exports.listProjectTerminalShortcuts = async function ({ user, body = {} }) {
+  const { coordinate: { namespace } } = body
+  return listShortcuts({ user, namespace })
+}
+
 function toTerminalMetadata (terminal) {
   const metadata = _.pick(terminal.metadata, ['name', 'namespace'])
   metadata.identifier = _.get(terminal, 'metadata.annotations["dashboard.gardener.cloud/identifier"]')
@@ -88,15 +94,15 @@ function toTerminalMetadata (terminal) {
 }
 
 function imageHelpText (terminal) {
-  const containerImage = terminal.spec.host.pod.containerImage
-  const imageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
+  const containerImage = _.get(terminal, 'spec.host.pod.container.image')
+  const containerImageDescriptions = getConfigValue('terminal.containerImageDescriptions', [])
 
-  return findImageDescription(containerImage, imageDescriptions)
+  return findImageDescription(containerImage, containerImageDescriptions)
 }
 
-function findImageDescription (containerImage, imageDescriptions) {
+function findImageDescription (containerImage, containerImageDescriptions) {
   return _
-    .chain(imageDescriptions)
+    .chain(containerImageDescriptions)
     .find(({ image }) => {
       if (_.startsWith(image, '/') && _.endsWith(image, '/')) {
         image = image.substring(1, image.length - 1)
@@ -251,7 +257,7 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
 
 async function getGardenTerminalHostCluster (client, { body }) {
   const hostCluster = {}
-  hostCluster.config = getImageConfigFromBody(body)
+  hostCluster.config = getContainerConfigFromBody(body)
 
   const [
     secretRef,
@@ -269,7 +275,7 @@ async function getGardenTerminalHostCluster (client, { body }) {
 
 async function getSeedHostCluster (client, { namespace, name, target, body, shootResource }) {
   const hostCluster = {}
-  hostCluster.config = getImageConfigFromBody(body)
+  hostCluster.config = getContainerConfigFromBody(body)
   if (!shootResource) {
     shootResource = await client.getShoot({ namespace, name })
   }
@@ -308,12 +314,16 @@ async function getShootHostCluster (client, { namespace, name, target, body, sho
   return hostCluster
 }
 
-function getImageConfigFromBody (body) {
-  return _.pick(body, ['containerImage'])
+function getContainerConfigFromBody ({ container }) {
+  return {
+    container: _.pick(container, ['image', 'command', 'args'])
+  }
 }
 
 function getConfigFromBody (body) {
-  return _.pick(body, ['node', 'containerImage', 'privileged', 'hostPID', 'hostNetwork'])
+  const config = _.pick(body, ['node', 'privileged', 'hostPID', 'hostNetwork', 'container'])
+  config.container = _.pick(config.container, ['image', 'command', 'args'])
+  return config
 }
 
 function getPreferredHost ({ user, body }) {
@@ -339,12 +349,12 @@ function getHostCluster ({ user, namespace, name, target, preferredHost, body, s
 async function createTerminal ({ user, namespace, target, hostCluster, targetCluster, identifier, preferredHost }) {
   const client = user.client
   const isAdmin = user.isAdmin
-
-  const containerImage = getContainerImage({ isAdmin, preferredContainerImage: hostCluster.containerImage })
+  const image = getContainerImage({ isAdmin, preferredImage: hostCluster.config.container.image })
+  _.set(hostCluster, 'config.container.image', image)
 
   const podLabels = getPodLabels(target)
 
-  const terminalHost = createHost({ namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, containerImage, podLabels, ...hostCluster.config })
+  const terminalHost = createHost({ ...hostCluster.config, namespace: hostCluster.namespace, secretRef: hostCluster.secretRef, podLabels })
   const terminalTarget = createTarget({ ...targetCluster })
 
   const labels = {
@@ -385,8 +395,14 @@ function getPodLabels (target) {
   return labels
 }
 
-function createHost ({ secretRef, namespace, containerImage, podLabels, node, privileged = false, hostPID = false, hostNetwork = false }) {
+function createHost ({ secretRef, namespace, container, podLabels, node, hostPID = false, hostNetwork = false }) {
   const temporaryNamespace = _.isEmpty(namespace)
+  const {
+    image,
+    command,
+    args,
+    privileged = false
+  } = container
   const host = {
     credentials: {
       secretRef
@@ -395,8 +411,12 @@ function createHost ({ secretRef, namespace, containerImage, podLabels, node, pr
     temporaryNamespace,
     pod: {
       labels: podLabels,
-      containerImage,
-      privileged,
+      container: {
+        image,
+        command,
+        args,
+        privileged
+      },
       hostPID,
       hostNetwork
     }
@@ -551,7 +571,7 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
   }
 
   // whitelist methods for terminal sessions for everybody
-  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat'], method)) {
+  if (_.includes(['list', 'fetch', 'config', 'remove', 'heartbeat', 'listProjectTerminalShortcuts'], method)) {
     return
   }
 
@@ -565,14 +585,14 @@ function ensureTerminalAllowed ({ method, isAdmin, body }) {
 }
 exports.ensureTerminalAllowed = ensureTerminalAllowed
 
-function getContainerImage ({ isAdmin, preferredContainerImage }) {
-  if (preferredContainerImage) {
-    return preferredContainerImage
+function getContainerImage ({ isAdmin, preferredImage }) {
+  if (preferredImage) {
+    return preferredImage
   }
 
-  const containerImage = getConfigValue('terminal.containerImage')
+  const containerImage = getConfigValue('terminal.container.image')
   if (isAdmin) {
-    return getConfigValue('terminal.containerImageOperator', containerImage)
+    return getConfigValue('terminal.containerOperator.image', containerImage)
   }
   return containerImage
 }
@@ -618,7 +638,9 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
   const isAdmin = user.isAdmin
 
   const config = {
-    image: getContainerImage({ isAdmin })
+    container: {
+      image: getContainerImage({ isAdmin })
+    }
   }
 
   if (target === TargetEnum.SHOOT) {
@@ -636,6 +658,47 @@ async function getTerminalConfig ({ user, namespace, name, target }) {
       .value()
   }
   return config
+}
+
+function pickShortcutValues (data) {
+  const shortcut = _.pick(data, [
+    'title',
+    'description',
+    'target',
+    'container.image',
+    'container.command',
+    'container.args',
+    'shootSelector.matchLabels'
+  ])
+  return shortcut
+}
+
+function fromShortcutSecretResource (secret) {
+  const shortcutsBase64 = _.get(secret, 'data.shortcuts')
+  const shortcuts = yaml.safeLoad(decodeBase64(shortcutsBase64))
+  return _
+    .chain(shortcuts)
+    .map(pickShortcutValues)
+    .filter(shortcut => !_.isEmpty(shortcut))
+    .filter(shortcut => !_.isEmpty(_.trim(shortcut.title)))
+    .filter(shortcut => _.includes([TargetEnum.GARDEN, TargetEnum.CONTROL_PLANE, TargetEnum.SHOOT], shortcut.target))
+    .value()
+}
+exports.fromShortcutSecretResource = fromShortcutSecretResource // for unit tests
+
+async function listShortcuts ({ user, namespace }) {
+  const client = user.client
+
+  try {
+    const shortcuts = await client.core.secrets.get(namespace, 'terminal.shortcuts')
+
+    return fromShortcutSecretResource(shortcuts)
+  } catch (err) {
+    if (isHttpError(err, 404)) {
+      return []
+    }
+    throw err
+  }
 }
 
 exports.bootstrapper = new Bootstrapper()

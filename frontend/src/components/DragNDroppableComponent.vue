@@ -15,14 +15,14 @@ limitations under the License.
  -->
 
 <template>
-  <div class="full-height">
-    <div v-g-draggable="draggableValue" :data-g-id="uuid" @dragStart="dragStart" @dragEnd="dragEnd" class="full-height full-width">
+  <div class="fill-height">
+    <div v-g-draggable="draggableValue" :data-g-id="uuid" @dragStart="dragStart" @dragEnd="dragEnd" class="fill-height full-width">
       <div ref="handle" :data-g-id="uuid">
         <slot name="handle"></slot>
       </div>
       <slot name="component"></slot>
     </div>
-    <positional-dropzone :uuid="uuid" v-if="!draggableValue.dragging" class="positional-dropzone full-height full-width"></positional-dropzone>
+    <positional-dropzone :uuid="uuid" v-if="!draggableValue.dragging"></positional-dropzone>
   </div>
 </template>
 
@@ -70,20 +70,3 @@ export default {
 }
 
 </script>
-
-<style lang="scss" scoped>
-
-  .full-height {
-    height: 100%;
-  }
-
-  .full-width {
-    width: 100%;
-  }
-
-  .positional-dropzone {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-</style>

@@ -302,3 +302,12 @@ function invokeTerminalMethod (method, body) {
     params: body
   })
 }
+
+/* Terminal Shortcuts */
+
+export function listProjectTerminalShortcuts ({ namespace, body = {} }) {
+  body.coordinate = {
+    namespace
+  }
+  return invokeTerminalMethod('listProjectTerminalShortcuts', body)
+}
