@@ -17,14 +17,16 @@
 'use strict'
 
 const path = require('path')
-const { HTTPError } = require('../http-client')
-
-const { encodeBase64 } = require('../utils')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 
 const PatchType = {
   MERGE: 'merge',
   STRATEGIC_MERGE: 'strategic-merge',
   JSON: 'json'
+}
+
+function encodeBase64 (value) {
+  return Buffer.from(value, 'utf8').toString('base64')
 }
 
 function setHeader (options, key, value) {

@@ -16,10 +16,10 @@
 
 'use strict'
 
-const httpClient = require('../http-client')
+const httpClient = require('@gardener-dashboard/http-client')
 const WebSocket = require('ws')
-const { http, ws } = require('./symbols')
 const { beforeConnect } = require('./debug')
+const { http, ws } = require('./symbols')
 const { patchHttpErrorMessage } = require('./util')
 const Agent = require('agentkeepalive')
 

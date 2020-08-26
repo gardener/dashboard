@@ -25,8 +25,8 @@ const HttpClient = require('./HttpClient')
 const { http } = require('./symbols')
 const { validateLabelValue } = require('./util')
 
-const logger = require('../logger')
-const { GatewayTimeout, InternalServerError } = require('../errors')
+const { globalLogger: logger } = require('@gardener-dashboard/logger')
+const { GatewayTimeout, InternalServerError } = require('http-errors')
 
 class WatchBuilder {
   constructor (resource, url, searchParams, name) {

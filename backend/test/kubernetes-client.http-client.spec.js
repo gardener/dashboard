@@ -21,11 +21,11 @@ const http = require('http')
 const express = require('express')
 const WebSocket = require('ws')
 
-const HttpClient = require('../lib/kubernetes-client/HttpClient')
+const HttpClient = require('@gardener-dashboard/kubernetes-client/lib/HttpClient')
 const {
   http: httpSymbols,
   ws: wsSymbols
-} = require('../lib/kubernetes-client/symbols')
+} = require('@gardener-dashboard/kubernetes-client/lib/symbols')
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */

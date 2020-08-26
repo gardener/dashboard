@@ -20,8 +20,8 @@ const EventEmitter = require('events')
 const pEvent = require('p-event')
 const moment = require('moment')
 
-const ApiErrors = require('../lib/kubernetes-client/ApiErrors')
-const { Reflector, Store, ListPager } = require('../lib/kubernetes-client/cache')
+const ApiErrors = require('@gardener-dashboard/kubernetes-client/lib/ApiErrors')
+const { Reflector, Store, ListPager } = require('@gardener-dashboard/kubernetes-client/lib/cache')
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
 describe('kubernetes-client', function () {

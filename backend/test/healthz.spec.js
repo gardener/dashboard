@@ -16,9 +16,9 @@
 
 'use strict'
 
-const { HTTPError } = require('../lib/http-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 const { healthCheck } = require('../lib/healthz')
-const { dashboardClient } = require('../lib/kubernetes-client')
+const { dashboardClient } = require('@gardener-dashboard/kubernetes-client')
 
 describe('healthz', function () {
   /* eslint no-unused-expressions: 0 */

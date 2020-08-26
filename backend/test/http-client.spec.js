@@ -19,7 +19,7 @@
 const got = require('got')
 const http = require('http')
 const https = require('https')
-const { extend, HTTPClient, HTTPError } = require('../lib/http-client')
+const { extend, HTTPClient, HTTPError } = require('@gardener-dashboard/http-client')
 
 describe('http-client', function () {
   /* eslint no-unused-expressions: 0 */

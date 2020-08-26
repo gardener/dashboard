@@ -16,7 +16,7 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const { Resources } = require('../kubernetes-client')
+const { Resources } = require('@gardener-dashboard/kubernetes-client')
 const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')

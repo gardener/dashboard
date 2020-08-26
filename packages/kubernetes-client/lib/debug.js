@@ -20,9 +20,12 @@ const { clone, split, first, get, set } = require('lodash')
 const uuidv1 = require('uuid/v1')
 const x509 = require('x509.js')
 const jwt = require('jsonwebtoken')
-const logger = require('../logger')
-const { decodeBase64 } = require('../utils')
+const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const xRequestStart = Symbol('x-request-start')
+
+function decodeBase64 (value) {
+  return Buffer.from(value, 'base64').toString('utf8')
+}
 
 function afterResponse (response) {
   const { headers, httpVersion, statusCode, statusMessage, body, request } = response

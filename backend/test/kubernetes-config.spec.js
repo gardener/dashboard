@@ -20,7 +20,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const yaml = require('js-yaml')
-const { load, dumpKubeconfig, fromKubeconfig } = require('../lib/kubernetes-config')
+const { load, dumpKubeconfig, fromKubeconfig } = require('@gardener-dashboard/kubernetes-config')
 
 describe('kubernetes-config', function () {
   const server = new URL('https://kubernetes:6443')

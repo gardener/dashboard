@@ -16,9 +16,9 @@
 
 'use strict'
 
-const { WatchBuilder } = require('../../lib/kubernetes-client')
-const { Terminal } = require('../../lib/kubernetes-client/resources/GardenerDashboard')
-const { ServiceAccount } = require('../../lib/kubernetes-client/resources/Core')
+const { WatchBuilder } = require('@gardener-dashboard/kubernetes-client')
+const { Terminal } = require('@gardener-dashboard/kubernetes-client/lib/resources/GardenerDashboard')
+const { ServiceAccount } = require('@gardener-dashboard/kubernetes-client/lib/resources/Core')
 const common = require('../support/common')
 const pEvent = require('p-event')
 

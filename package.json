@@ -2,6 +2,9 @@
   "name": "gardener-dashboard",
   "description": "Gardener Dashboard",
   "private": true,
+  "workspaces": [
+    "frontend", "backend", "packages/*"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -13,11 +16,21 @@
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
   "scripts": {
-    "postinstall": "yarn --cwd frontend install && yarn --cwd backend install",
-    "start": "yarn --cwd frontend build && yarn --cwd backend start",
-    "lint": "yarn --cwd backend lint && yarn --cwd frontend lint",
-    "test": "yarn --cwd backend test:coverage && yarn --cwd frontend test:unit",
-    "serve": "concurrently --raw --kill-others  --handle-input \"yarn --cwd backend serve\" \"yarn --cwd frontend serve\""
+    "frontend:install": "yarn workspace @gardener-dashboard/frontend install",
+    "frontend:build": "yarn workspace @gardener-dashboard/frontend build",
+    "frontend:lint": "yarn workspace @gardener-dashboard/frontend lint",
+    "frontend:test": "yarn workspace @gardener-dashboard/frontend test:unit",
+    "frontend:serve": "yarn workspace @gardener-dashboard/frontend serve",
+    "backend:install": "yarn workspace @gardener-dashboard/backend install",
+    "backend:start": "yarn workspace @gardener-dashboard/backend start",
+    "backend:lint": "yarn workspace @gardener-dashboard/backend lint",
+    "backend:test": "yarn workspace @gardener-dashboard/backend test:coverage",
+    "backend:serve": "yarn workspace @gardener-dashboard/backend serve",
+    "postinstall": "yarn frontend:install && yarn backend:install",
+    "start": "yarn frontend:build && yarn backend:start",
+    "lint": "yarn backend:lint && yarn frontend:lint",
+    "test": "yarn backend:test && frontend:test",
+    "serve": "concurrently --raw --kill-others  --handle-input \"yarn backend:serve\" \"yarn frontend:serve\""
   },
   "devDependencies": {
     "concurrently": "^5.0.0"

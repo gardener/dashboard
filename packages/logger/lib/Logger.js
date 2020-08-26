@@ -28,11 +28,23 @@ const LEVELS = {
 }
 
 class Logger {
-  constructor ({ logLevel = 'debug', logHttpRequestBody = false } = {}) {
-    this.logLevel = LEVELS[logLevel] || 3
-    this.logHttpRequestBody = logHttpRequestBody === true
+  constructor ({ logLevel = process.env.LOG_LEVEL, logHttpRequestBody = process.env.LOG_HTTP_REQUEST_BODY } = {}) {
+    this.logLevel = 2
+    this.setLogLevel(logLevel)
+    this.logHttpRequestBody = false
+    this.setLogHttpRequestBody(logHttpRequestBody)
     this.silent = /^test/.test(process.env.NODE_ENV)
     this.console = console
+  }
+
+  setLogLevel (value) {
+    if (Reflect.has(LEVELS, value)) {
+      this.logLevel = LEVELS[value]
+    }
+  }
+
+  setLogHttpRequestBody (value) {
+    this.logHttpRequestBody = /^true$/i.test(value)
   }
 
   inspect (obj) {

@@ -19,8 +19,8 @@
 const _ = require('lodash')
 const config = require('../config')
 const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
-const { isHttpError } = require('../kubernetes-client')
-const { dumpKubeconfig } = require('../kubernetes-config')
+const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
+const { dumpKubeconfig } = require('@gardener-dashboard/kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
 const cache = require('../cache')
 

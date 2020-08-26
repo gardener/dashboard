@@ -19,7 +19,7 @@
 const jwt = require('jsonwebtoken')
 
 const logger = require('../lib/logger')
-const { attach, beforeRequest, beforeRedirect, afterResponse } = require('../lib/kubernetes-client/debug')
+const { attach, beforeRequest, beforeRedirect, afterResponse } = require('@gardener-dashboard/kubernetes-client/lib/debug')
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */

@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const config = require('./config')
 const logger = require('./logger')
-const { isHttpError } = require('./kubernetes-client')
+const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
 const { NotFound, InternalServerError } = require('./errors')
 
 function frontendConfig (req, res, next) {

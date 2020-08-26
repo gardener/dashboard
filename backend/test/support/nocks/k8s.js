@@ -23,7 +23,7 @@ const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
-const { url, auth } = require('../../../lib/kubernetes-config').load()
+const { url, auth } = require('@gardener-dashboard/kubernetes-config').load()
 
 const quotas = [
   {

@@ -21,7 +21,7 @@ const assert = require('assert').strict
 const hash = require('object-hash')
 const yaml = require('js-yaml')
 
-const { isHttpError } = require('../../kubernetes-client')
+const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
 
 const {
   decodeBase64,

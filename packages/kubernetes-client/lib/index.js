@@ -22,7 +22,7 @@ const Client = require('./Client')
 const WatchBuilder = require('./WatchBuilder')
 const Store = require('./cache/Store')
 const { Resources } = require('./resources')
-const kubeconfig = require('../kubernetes-config')
+const kubeconfig = require('@gardener-dashboard/kubernetes-config')
 const { isHttpError } = util
 const config = kubeconfig.load(process.env)
 

@@ -8,11 +8,12 @@ coverage
 kubeconfig*
 
 # Ignore node_modules.
-/node_modules
+node_modules/
 
 # Ignore all tempfiles.
 /tmp
 npm-debug.log
+yarn-error.log
 
 # Ignore all files starting with "my"
 my*

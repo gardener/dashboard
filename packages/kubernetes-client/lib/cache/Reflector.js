@@ -21,7 +21,7 @@ const delay = require('delay')
 const WebSocket = require('ws')
 const pEvent = require('p-event')
 const moment = require('moment')
-const logger = require('../../logger')
+const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const ListPager = require('./ListPager')
 const {
   isExpiredError,

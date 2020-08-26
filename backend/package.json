@@ -24,6 +24,10 @@
     "test:coverage": "cross-env NODE_ENV=test nyc mocha"
   },
   "dependencies": {
+    "@gardener-dashboard/logger": "*",
+    "@gardener-dashboard/http-client": "*",
+    "@gardener-dashboard/kubernetes-config": "*",
+    "@gardener-dashboard/kubernetes-client": "*",
     "@godaddy/terminus": "^4.1.2",
     "@octokit/rest": "^16.28.1",
     "agentkeepalive": "^4.1.0",
@@ -38,6 +42,7 @@
     "fnv-plus": "^1.2.12",
     "got": "^11.5.1",
     "helmet": "^3.21.2",
+    "http2-wrapper": "^1.0.0-beta.5.2",
     "jose": "^1.24.0",
     "js-yaml": "^3.13.1",
     "jsonwebtoken": "^8.5.1",

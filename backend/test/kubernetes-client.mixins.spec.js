@@ -19,14 +19,14 @@
 const { camelCase } = require('lodash')
 const { Agent } = require('http')
 const { mix } = require('mixwith')
-const mixins = require('../lib/kubernetes-client/mixins')
-const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
-const { PatchType } = require('../lib/kubernetes-client/util')
-const { Reflector, Store } = require('../lib/kubernetes-client/cache')
+const mixins = require('@gardener-dashboard/kubernetes-client/lib/mixins')
+const WatchBuilder = require('@gardener-dashboard/kubernetes-client/lib/WatchBuilder')
+const { PatchType } = require('@gardener-dashboard/kubernetes-client/lib/util')
+const { Reflector, Store } = require('@gardener-dashboard/kubernetes-client/lib/cache')
 const {
   http: httpSymbols,
   ws: wsSymbols
-} = require('../lib/kubernetes-client/symbols')
+} = require('@gardener-dashboard/kubernetes-client/lib/symbols')
 const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Cacheable, Writable } = mixins
 
 describe('kubernetes-client', function () {

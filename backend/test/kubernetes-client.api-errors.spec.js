@@ -16,7 +16,7 @@
 
 'use strict'
 
-const { HTTPError } = require('../lib/http-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 
 const {
   StatusError,
@@ -26,7 +26,7 @@ const {
   isGone,
   isTooLargeResourceVersionError,
   isGatewayTimeout
-} = require('../lib/kubernetes-client/ApiErrors')
+} = require('@gardener-dashboard/kubernetes-client/lib/ApiErrors')
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */

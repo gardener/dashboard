@@ -22,7 +22,7 @@ const { shootHasIssue } = require('../utils')
 const { tickets } = require('../services')
 const {
   dashboardClient // privileged client for the garden cluster
-} = require('../kubernetes-client')
+} = require('@gardener-dashboard/kubernetes-client')
 const { bootstrapper } = require('../services/terminals')
 const cache = require('../cache')
 

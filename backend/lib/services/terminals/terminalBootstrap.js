@@ -28,7 +28,7 @@ const { NotImplemented } = require('../../errors')
 const {
   dashboardClient,
   isHttpError
-} = require('../../kubernetes-client')
+} = require('@gardener-dashboard/kubernetes-client')
 
 const {
   getConfigValue,

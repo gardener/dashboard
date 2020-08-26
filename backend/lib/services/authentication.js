@@ -22,7 +22,7 @@ const logger = require('../logger')
 const {
   dashboardClient,
   Resources
-} = require('../kubernetes-client')
+} = require('@gardener-dashboard/kubernetes-client')
 
 exports.isAuthenticated = async function ({ token } = {}) {
   const { apiVersion, kind } = Resources.TokenReview

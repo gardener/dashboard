@@ -21,9 +21,9 @@ const { mix } = require('mixwith')
 const pEvent = require('p-event')
 const http = require('http')
 
-const mixins = require('../lib/kubernetes-client/mixins')
-const WatchBuilder = require('../lib/kubernetes-client/WatchBuilder')
-const HttpClient = require('../lib/kubernetes-client/HttpClient')
+const mixins = require('@gardener-dashboard/kubernetes-client/lib/mixins')
+const WatchBuilder = require('@gardener-dashboard/kubernetes-client/lib/WatchBuilder')
+const HttpClient = require('@gardener-dashboard/kubernetes-client/lib/HttpClient')
 
 const { NamedGroup, ClusterScoped, V1, Observable } = mixins
 

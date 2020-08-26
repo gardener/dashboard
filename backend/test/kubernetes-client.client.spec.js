@@ -16,8 +16,8 @@
 
 'use strict'
 
-const { HTTPError } = require('../lib/http-client')
-const { createClient } = require('../lib/kubernetes-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
+const { createClient } = require('@gardener-dashboard/kubernetes-client')
 
 describe('kubernetes-client', function () {
   /* eslint no-unused-expressions: 0 */

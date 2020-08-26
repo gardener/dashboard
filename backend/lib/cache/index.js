@@ -15,11 +15,11 @@
 //
 
 const _ = require('lodash')
-const { HTTPError } = require('../http-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 const pEvent = require('p-event')
 const logger = require('../logger')
-const { Store } = require('../kubernetes-client/cache')
-const { CacheExpiredError } = require('../kubernetes-client/ApiErrors')
+const { Store } = require('@gardener-dashboard/kubernetes-client')
+const { CacheExpiredError } = require('@gardener-dashboard/kubernetes-client/lib/ApiErrors')
 const createTicketCache = require('./tickets')
 
 async function initializeStoreSynchronization (store, cachable) {

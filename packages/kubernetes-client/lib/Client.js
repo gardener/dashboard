@@ -18,14 +18,13 @@
 
 const _ = require('lodash')
 const { isIP } = require('net')
-const { HTTPError } = require('../http-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 const { isHttpError, setAuthorization } = require('./util')
 const debug = require('./debug')
 const resources = require('./resources')
 const nonResourceEndpoints = require('./nonResourceEndpoints')
 
-const { fromKubeconfig } = require('../kubernetes-config')
-const { decodeBase64 } = require('../utils')
+const { fromKubeconfig } = require('@gardener-dashboard/kubernetes-config/lib')
 
 const cluster = Symbol('cluster')
 

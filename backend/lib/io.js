@@ -22,8 +22,9 @@ const logger = require('./logger')
 const security = require('./security')
 const { Forbidden } = require('./errors')
 
-const kubernetesClient = require('./kubernetes-client')
-const { HTTPError } = require('./http-client')
+const kubernetesClient = require('@gardener-dashboard/kubernetes-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
+
 const watches = require('./watches')
 const cache = require('./cache')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')

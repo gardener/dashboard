@@ -16,8 +16,8 @@
 
 'use strict'
 
-const { isHttpError } = require('../kubernetes-client')
-const kubeconfig = require('../kubernetes-config')
+const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
+const kubeconfig = require('@gardener-dashboard/kubernetes-config')
 const utils = require('../utils')
 const { getSeed } = require('../cache')
 const authorization = require('./authorization')

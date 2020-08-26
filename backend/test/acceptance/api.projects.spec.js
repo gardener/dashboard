@@ -19,7 +19,7 @@
 const _ = require('lodash')
 const { createReconnectorStub } = require('../support/common')
 const services = require('../../lib/services')
-const { WatchBuilder } = require('../../lib/kubernetes-client')
+const { WatchBuilder } = require('@gardener-dashboard/kubernetes-client')
 const { cache } = require('../../lib/cache')
 
 module.exports = function ({ agent, sandbox, k8s, auth }) {

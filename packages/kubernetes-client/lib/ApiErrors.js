@@ -17,7 +17,7 @@
 'use strict'
 
 const { get, includes } = require('lodash')
-const { HTTPError } = require('../http-client')
+const { HTTPError } = require('@gardener-dashboard/http-client')
 const { TimeoutError } = require('p-timeout')
 
 const CONNECTION_ERROR_CODES = [
