@@ -23,6 +23,7 @@ const security = require('./security')
 const { Forbidden } = require('./errors')
 
 const kubernetesClient = require('./kubernetes-client')
+const { HTTPError } = require('./http-client')
 const watches = require('./watches')
 const cache = require('./cache')
 const { EventsEmitter, NamespacedBatchEmitter } = require('./utils/batchEmitter')
@@ -229,13 +230,18 @@ function setupShootsNamespace (shootsNsp) {
           const shoot = await shoots.read({ user, name, namespace })
           batchEmitter.batchEmitObjects([shoot], namespace)
         }
-      } catch (error) {
-        logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, error.code, error)
-        socket.emit('subscription_error', {
-          kind,
-          code: error.code,
-          message: 'Failed to fetch cluster'
-        })
+      } catch (err) {
+        let { code = 500, message = 'Failed to fetch cluster' } = err
+        if (err instanceof HTTPError) {
+          const response = err.response
+          code = response.statusCode
+          if (response.body) {
+            code = response.body.code
+            message = response.body.message
+          }
+        }
+        logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, code, message)
+        socket.emit('subscription_error', { kind, code, message })
       }
       batchEmitter.flush()
 
