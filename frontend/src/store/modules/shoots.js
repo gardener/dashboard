@@ -107,6 +107,9 @@ const getters = {
   },
   initialNewShootResource () {
     return state.initialNewShootResource
+  },
+  keyForItem () {
+    return keyForShoot
   }
 }
 

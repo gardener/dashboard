@@ -64,7 +64,6 @@ export default {
     }
   },
   mounted () {
-    console.log('terminalSplitpanes')
     const addItemFn = () => this.$refs.terminalSplitpanes.addSlotItem()
     this.$refs.terminalSplitpanes.load(addItemFn)
   }

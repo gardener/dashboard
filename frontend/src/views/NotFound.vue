@@ -32,8 +32,6 @@ limitations under the License.
 <script>
 import { mapState, mapGetters } from 'vuex'
 import get from 'lodash/get'
-import includes from 'lodash/includes'
-import head from 'lodash/head'
 
 export default {
   name: 'not-found',
@@ -47,11 +45,9 @@ export default {
       'namespace'
     ]),
     ...mapGetters([
-      'namespaces'
+      'namespaces',
+      'defaultNamespace'
     ]),
-    defaultNamespace () {
-      return this.namespace || includes(this.namespaces, 'garden') ? 'garden' : head(this.namespaces)
-    },
     fallback () {
       const namespace = get(this.$route, 'params.namespace', this.defaultNamespace)
       const name = get(this.$route, 'params.name')

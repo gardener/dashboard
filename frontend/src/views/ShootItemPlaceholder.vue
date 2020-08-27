@@ -54,28 +54,26 @@ export default {
       'fetchInfrastructureSecrets',
       'fetchProjectTerminalShortcuts'
     ]),
-    async load (to, from) {
-      if (!this.loading) {
-        this.loading = true
-        this.component = 'shoot-item-loading'
-        try {
-          const promises = [
-            this.subscribeShoot(to.params),
-            this.subscribeComments(to.params)
-          ]
-          if (includes(['ShootItem', 'ShootItemHibernationSettings'], to.name) && this.canGetSecrets) {
-            promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
-          }
-          if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], to.name) && this.canUseProjectTerminalShortcuts) {
-            promises.push(this.fetchProjectTerminalShortcuts())
-          }
-          await Promise.all(promises)
-          this.component = 'router-view'
-        } catch (err) {
-          this.component = 'shoot-item-error'
-        } finally {
-          this.loading = false
+    async load ({ name, params }) {
+      this.loading = true
+      this.component = 'shoot-item-loading'
+      try {
+        const promises = [
+          this.subscribeShoot(params),
+          this.subscribeComments(params)
+        ]
+        if (includes(['ShootItem', 'ShootItemHibernationSettings'], name) && this.canGetSecrets) {
+          promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
         }
+        if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], name) && this.canUseProjectTerminalShortcuts) {
+          promises.push(this.fetchProjectTerminalShortcuts())
+        }
+        await Promise.all(promises)
+        this.component = 'router-view'
+      } catch (err) {
+        this.component = 'shoot-item-error'
+      } finally {
+        this.loading = false
       }
     }
   },
@@ -87,8 +85,8 @@ export default {
     }
   },
   watch: {
-    '$route' (to, from) {
-      this.load(to, from)
+    '$route' (value) {
+      this.load(value)
     }
   },
   mounted () {

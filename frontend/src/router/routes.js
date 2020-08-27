@@ -243,7 +243,7 @@ function accountRoute ({ state, getters }, path) {
       if (!to.query.namespace && namespace) {
         return next({
           name: 'Account',
-          query: { namespace }
+          query: { namespace, ...to.query }
         })
       }
       next()

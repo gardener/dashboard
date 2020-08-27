@@ -972,32 +972,44 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoot ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/clearAll')
-      .then(() => {
-        return new Promise((resolve, reject) => {
-          EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
-          const key = `${name}_${namespace}`
-          const unsubscribe = store.subscribe(({ type, payload }, state) => {
-            switch (type) {
-              case 'shoots/SET_SUBSCRIPTION_ERROR': {
-                unsubscribe()
-                reject(new Error(get(payload, 'message', 'Cluster subscription failed')))
-                break
-              }
-              case 'shoots/SET_SUBSCRIPTION_DONE': {
-                unsubscribe()
-                if (Reflect.has(state.shoots.shoots, key)) {
-                  resolve(state.shoots.shoots[key])
-                } else {
-                  reject(new Error('Cluster not found'))
-                }
-                break
-              }
-            }
-          })
-        })
+  async subscribeShoot ({ dispatch, getters }, { name, namespace }) {
+    await dispatch('shoots/clearAll')
+    return new Promise((resolve, reject) => {
+      const done = (err, item) => {
+        unsubscribe()
+        clearTimeout(timeoutId)
+        if (err) {
+          reject(err)
+        } else {
+          resolve(item)
+        }
+      }
+      const handleSubscriptionError = mutation => {
+        const message = get(mutation.payload, 'message', 'Cluster subscription failed')
+        done(new Error(message))
+      }
+      const handleSubscriptionTimeout = () => {
+        done(new Error('Cluster subscription timed out'))
+      }
+      const handleSubscriptionDone = (mutation, state) => {
+        const key = getters['shoots/keyForItem']({ name, namespace })
+        if (Reflect.has(state.shoots.shoots, key)) {
+          done(null, state.shoots.shoots[key])
+        } else {
+          done(new Error('Cluster not found'))
+        }
+      }
+      const unsubscribe = store.subscribe((mutation, state) => {
+        switch (mutation.type) {
+          case 'shoots/SET_SUBSCRIPTION_ERROR':
+            return handleSubscriptionError(mutation, state)
+          case 'shoots/SET_SUBSCRIPTION_DONE':
+            return handleSubscriptionDone(mutation, state)
+        }
       })
+      const timeoutId = setTimeout(handleSubscriptionTimeout, 30 * 1000)
+      EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+    })
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
@@ -1011,32 +1023,20 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoots ({ dispatch, commit, state }) {
-    return new Promise((resolve, reject) => {
-      try {
-        EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
-      } finally {
-        resolve()
-      }
-    })
+  async subscribeShoots ({ dispatch, commit, state }) {
+    try {
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+    } catch (err) { /* ignore error */ }
   },
-  subscribeComments ({ dispatch, commit }, { name, namespace }) {
-    return new Promise((resolve, reject) => {
-      try {
-        EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
-      } finally {
-        resolve()
-      }
-    })
+  async subscribeComments ({ dispatch, commit }, { name, namespace }) {
+    try {
+      EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
+    } catch (err) { /* ignore error */ }
   },
-  unsubscribeComments ({ dispatch, commit }) {
-    return new Promise((resolve, reject) => {
-      try {
-        EmitterWrapper.ticketCommentsEmitter.unsubscribe()
-      } finally {
-        resolve()
-      }
-    })
+  async unsubscribeComments ({ dispatch, commit }) {
+    try {
+      EmitterWrapper.ticketCommentsEmitter.unsubscribe()
+    } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
