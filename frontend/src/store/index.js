@@ -1007,7 +1007,7 @@ const actions = {
             return handleSubscriptionDone(mutation, state)
         }
       })
-      const timeoutId = setTimeout(handleSubscriptionTimeout, 30 * 1000)
+      const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
       EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
     })
   },
@@ -1236,10 +1236,10 @@ const actions = {
     commit('SET_WEBSOCKETCONNECTIONERROR', null)
     return state.websocketConnectionError
   },
-  setSubscriptionError ({ dispatch }, value) {
+  setSubscriptionError ({ dispatch, commit }, value) {
     const { kind, code, message } = value
     if (kind === 'shoot') {
-      return dispatch('shoots/setSubscriptionError', { code, message })
+      return commit('shoots/SET_SUBSCRIPTION_ERROR', { code, message })
     }
     return dispatch('setError', value)
   },

@@ -123,9 +123,6 @@ const actions = {
     commit('CLEAR_ALL')
     return getters.items
   },
-  setSubscriptionError ({ commit }, value) {
-    commit('SET_SUBSCRIPTION_ERROR', value)
-  },
   create ({ dispatch, commit, rootState }, data) {
     const namespace = data.metadata.namespace || rootState.namespace
     return createShoot({ namespace, data })
