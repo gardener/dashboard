@@ -1017,6 +1017,21 @@ const actions = {
         rootState: state,
         events: [event]
       })
+      const fetchShootAndShootSeedInfo = async ({ metadata }) => {
+        const promises = []
+        if (store.getters.canGetSecrets) {
+          promises.push(store.dispatch('getShootInfo', metadata))
+        }
+        if (store.getters.isAdmin) {
+          promises.push(store.dispatch('getShootSeedInfo', metadata))
+        }
+        try {
+          await Promise.all(promises)
+        } catch (err) {
+          console.error('Failed to fetch shoot or shootSeed info:', err.message)
+        }
+      }
+      fetchShootAndShootSeedInfo(event.object)
     }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
