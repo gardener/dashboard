@@ -1184,7 +1184,7 @@ const actions = {
     const { data } = await getKubeconfigData()
     commit('SET_KUBECONFIG_DATA', data)
   },
-  async fetchProjectTerminalShortcuts ({ commit, state }) {
+  async ensureProjectTerminalShortcutsLoaded ({ commit, state }) {
     const { namespace, projectTerminalShortcuts } = state
     if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
       const { data: items } = await listProjectTerminalShortcuts({ namespace })

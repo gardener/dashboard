@@ -14,46 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-  <v-container fluid class="fill-height text-center">
-    <v-row align="center">
-      <v-col>
-        <h1>404</h1>
-        <h2>Project not found</h2>
-        <p class="message">The project you are looking for doesn't exist or an other error occured!</p>
-        <v-btn dark color="cyan darken-2" @click="goBack">
-          Get me out of here
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <g-error
+    code="404"
+    text="Project not found"
+    message="The project you are looking for doesn't exist or an other error occured!"
+    buttonText="Get me out of here"
+    @click="onClick"
+  ></g-error>
 </template>
 
 <script>
+import GError from '@/components/GError'
+
 export default {
+  components: {
+    GError
+  },
   methods: {
-    goBack (fallback) {
-      this.$router.push({
-        name: 'Home'
-      })
+    async onClick () {
+      try {
+        await this.$router.push({
+          name: 'Home'
+        })
+      } catch (err) { /* ignore error */ }
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  h1 {
-    font-size: 160px;
-    line-height: 160px;
-    font-weight: bold;
-    color: #515151;
-    margin-bottom: 0;
-  }
-  h2 {
-    font-size: 36px;
-    font-weight: 300;
-    color: #999999;
-  }
-  .message {
-    margin-bottom: 50px;
-  }
-</style>

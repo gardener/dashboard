@@ -21,6 +21,7 @@ import {
 
 import {
   homeBreadcrumbs,
+  newProjectBreadcrumbs,
   accountBreadcrumbs,
   shootListBreadcrumbs,
   shootItemBreadcrumbs,
@@ -76,6 +77,7 @@ function defaultHierarchy (context, path) {
     homeRoute(context, ''),
     accountRoute(context, 'account'),
     projectsRoute(context, 'namespace'),
+    newProjectRoute(context, 'namespace/+'),
     projectHierarchy(context, 'namespace/:namespace'),
     {
       path: '*',
@@ -206,6 +208,26 @@ function homeRoute ({ getters }, path) {
           name: 'ShootList',
           params: { namespace }
         })
+      }
+      next()
+    }
+  }
+}
+
+function newProjectRoute ({ state, getters, commit }, path) {
+  return {
+    path,
+    name: 'NewProject',
+    component: Home,
+    meta: {
+      namespaced: false,
+      projectScope: false,
+      breadcrumbs: newProjectBreadcrumbs
+    },
+    beforeEnter (to, from, next) {
+      const defaultNamespace = getters.defaultNamespace
+      if (!state.namespace && defaultNamespace) {
+        commit('SET_NAMESPACE', defaultNamespace)
       }
       next()
     }

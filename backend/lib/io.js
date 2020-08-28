@@ -234,11 +234,7 @@ function setupShootsNamespace (shootsNsp) {
         let { code = 500, message = 'Failed to fetch cluster' } = err
         if (err instanceof HTTPError) {
           const response = err.response
-          code = response.statusCode
-          if (response.body) {
-            code = response.body.code
-            message = response.body.message
-          }
+          code = _.get(response, 'body.code', response.statusCode)
         }
         logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, code, message)
         socket.emit('subscription_error', { kind, code, message })

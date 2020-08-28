@@ -25,6 +25,14 @@ export function homeBreadcrumbs () {
   ]
 }
 
+export function newProjectBreadcrumbs () {
+  return [
+    {
+      text: 'Create Project'
+    }
+  ]
+}
+
 export function accountBreadcrumbs () {
   return [
     {

@@ -188,11 +188,6 @@ class ShootsSubscription extends AbstractSubscription {
 class ShootSubscription extends AbstractSubscription {
   constructor (connector) {
     super(connector)
-
-    /* currently we only throttle NamespacedEvents (for shoots) as for this kind
-    * we expect many events coming in in a short period of time */
-    // const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
-
     this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
       if (kind === 'shoot' && namespaces) {
         const { namespace } = this.subscribedTo || {}

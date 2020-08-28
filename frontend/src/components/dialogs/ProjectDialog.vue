@@ -79,7 +79,7 @@ limitations under the License.
             <g-alert color="error" :message.sync="errorMessage" :detailedMessage.sync="detailedErrorMessage"></g-alert>
           </v-container>
         </form>
-        <v-snackbar :value="loading" bottom right absolute :timeout="0">
+        <v-snackbar :value="loading" bottom right absolute :timeout="-1">
           <span>Creating project ...</span>
         </v-snackbar>
       </v-card-text>

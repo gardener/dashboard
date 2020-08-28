@@ -52,7 +52,7 @@ export default {
       'subscribeComments',
       'unsubscribeComments',
       'fetchInfrastructureSecrets',
-      'fetchProjectTerminalShortcuts'
+      'ensureProjectTerminalShortcutsLoaded'
     ]),
     async load ({ name, params }) {
       this.loading = true
@@ -66,7 +66,7 @@ export default {
           promises.push(this.fetchInfrastructureSecrets()) // Required for purpose configuration
         }
         if (includes(['ShootItem', 'ShootItemHibernationSettings', 'ShootItemTerminal'], name) && this.canUseProjectTerminalShortcuts) {
-          promises.push(this.fetchProjectTerminalShortcuts())
+          promises.push(this.ensureProjectTerminalShortcutsLoaded())
         }
         await Promise.all(promises)
         this.component = 'router-view'

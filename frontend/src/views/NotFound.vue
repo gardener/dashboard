@@ -15,41 +15,27 @@ limitations under the License.
  -->
 
 <template>
-  <v-container class="text-center fill-height">
-    <v-row align="center">
-      <v-col>
-        <h1>404</h1>
-        <h2>Looks like you're lost</h2>
-        <p class="message">The page you are looking for is not available!</p>
-        <v-btn dark color="cyan darken-2" @click="goBack">
-          Get me out of here
-        </v-btn>
-      </v-col>
-    </v-row>
-  </v-container>
+  <g-error
+    code="404"
+    text="Looks like you're lost"
+    message="The page you are looking for is not available!"
+    buttonText="Get me out of here"
+    @click="onClick"
+  ></g-error>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import GError from '@/components/GError'
 import get from 'lodash/get'
 
 export default {
-  name: 'not-found',
-  data () {
-    return {
-      fromRoute: undefined
-    }
+  components: {
+    GError
   },
   computed: {
-    ...mapState([
-      'namespace'
-    ]),
-    ...mapGetters([
-      'namespaces',
-      'defaultNamespace'
-    ]),
-    fallback () {
-      const namespace = get(this.$route, 'params.namespace', this.defaultNamespace)
+    fallbackRoute () {
+      const defaultNamespace = this.$store.getters.defaultNamespace
+      const namespace = get(this.$route, 'params.namespace', defaultNamespace)
       const name = get(this.$route, 'params.name')
       if (namespace) {
         if (name) {
@@ -74,36 +60,15 @@ export default {
     }
   },
   methods: {
-    goBack (fallback) {
-      if (!get(this, 'fromRoute.name')) {
-        this.$router.push(this.fallback)
+    async onClick ({ name } = {}) {
+      if (!name) {
+        try {
+          await this.$router.push(this.fallbackRoute)
+        } catch (err) { /* ignore error */ }
       } else {
         this.$router.back()
       }
     }
-  },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.fromRoute = from
-    })
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  h1 {
-    font-size: 160px;
-    line-height: 160px;
-    font-weight: bold;
-    color: #515151;
-    margin-bottom: 0;
-  }
-  h2 {
-    font-size: 36px;
-    font-weight: 300;
-    color: #999999;
-  }
-  .message {
-    margin-bottom: 50px;
-  }
-</style>

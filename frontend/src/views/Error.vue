@@ -17,73 +17,32 @@ limitations under the License.
 <template>
   <v-app>
     <v-main>
-      <v-container class="text-center fill-height">
-        <v-row align="center">
-          <v-col>
-            <h1>500</h1>
-            <h2>Unexpected Error :(</h2>
-            <p class="message">{{ message }}</p>
-            <v-btn dark color="cyan darken-2" @click="goBack">
-              Get me out of here
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-container>
+      <g-error :message="message" @click="goHome"/>
     </v-main>
   </v-app>
 </template>
 
 <script>
+import GError from '@/components/GError'
 import get from 'lodash/get'
 
 export default {
-  name: 'router-error',
-  data () {
-    return {
-      fromRoute: undefined
-    }
+  components: {
+    GError
   },
   computed: {
     message () {
-      return get(this.$store, 'alert.message')
-    },
-    type () {
-      return get(this.$store, 'alert.type', 'Error').toUpperCase()
+      return get(this.$store.state, 'alert.message')
     }
   },
   methods: {
-    goBack (fallback) {
-      if (!get(this, 'fromRoute.name')) {
-        this.$router.push({
+    async goHome () {
+      try {
+        await this.$router.push({
           name: 'Home'
         })
-      } else {
-        this.$router.back()
-      }
+      } catch (err) { /* ignore error */ }
     }
-  },
-  beforeRouteEnter (to, from, next) {
-    next(vm => {
-      vm.fromRoute = from
-    })
   }
 }
 </script>
-
-<style lang="scss" scoped>
-  h1 {
-    font-size: 160px;
-    line-height: 160px;
-    font-weight: bold;
-    color: #515151;
-    margin-bottom: 0;
-  }
-  h2 {
-    font-size: 36px;
-    font-weight: 300;
-    color: #999999;
-  }
-  .message {
-    margin-bottom: 50px;
-  }
-</style>

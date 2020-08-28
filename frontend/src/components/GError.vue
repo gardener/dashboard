@@ -14,64 +14,66 @@ See the License for the specific language governing permissions and
 limitations under the License.
  -->
 <template>
-  <g-error
-    :code="code"
-    :text="text"
-    :message="message"
-    :buttonText="buttonText"
-    @click="onClick"
-  ></g-error>
+  <v-container fluid class="fill-height text-center">
+    <v-row align="center">
+      <v-col>
+        <h1>{{code}}</h1>
+        <h2>{{text}}</h2>
+        <p v-if="message">{{message}}</p>
+        <v-btn dark color="cyan darken-2" @click="onClick" class="mt-12">{{buttonText}}</v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-import GError from '@/components/GError'
-import get from 'lodash/get'
-
 export default {
-  components: {
-    GError
-  },
   props: {
     code: {
       type: [String, Number],
-      default: '404'
+      default: '500'
     },
     text: {
       type: String,
-      default: 'Cluster not found'
+      default: 'Unexpected Error :('
     },
     message: {
-      type: String,
-      default: 'The cluster you are looking for doesn\'t exist or an other error occured!'
+      type: String
     },
     buttonText: {
       type: String,
-      default: 'Back to cluster list'
+      default: 'Get me out of here'
     }
   },
-  computed: {
-    fallbackRoute () {
-      const defaultNamespace = this.$store.getters.defaultNamespace
-      const namespace = get(this.$route, 'params.namespace', defaultNamespace)
-      if (namespace) {
-        return {
-          name: 'ShootList',
-          params: {
-            namespace
-          }
-        }
-      }
-      return {
-        name: 'Home'
-      }
+  data () {
+    return {
+      fromRoute: undefined
     }
   },
   methods: {
-    async onClick () {
-      try {
-        this.$router.push(this.fallbackRoute)
-      } catch (err) { /* ignore error */ }
+    onClick () {
+      this.$emit('click', this.fromRoute)
     }
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.fromRoute = from
+    })
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  h1 {
+    font-size: 160px;
+    line-height: 160px;
+    font-weight: bold;
+    color: #515151;
+    margin-bottom: 0;
+  }
+  h2 {
+    font-size: 36px;
+    font-weight: 300;
+    color: #999999;
+  }
+</style>
