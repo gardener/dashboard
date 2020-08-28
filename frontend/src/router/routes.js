@@ -377,7 +377,7 @@ function secretListRoute ({ getters }, path) {
         title: 'Secrets',
         icon: 'mdi-key',
         get hidden () {
-          return getters.canGetSecrets
+          return !getters.canGetSecrets
         }
       },
       breadcrumbs: secretsBreadcrumbs
