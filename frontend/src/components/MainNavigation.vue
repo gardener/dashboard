@@ -58,7 +58,9 @@ limitations under the License.
             >
               <v-icon class="pr-6">mdi-grid-large</v-icon>
               <span class="ml-2">{{projectName}}</span>
-              <stale-project-warning :project="project" small color="white"></stale-project-warning>
+              <template v-if="project">
+                <stale-project-warning :project="project" small color="white"></stale-project-warning>
+              </template>
               <v-spacer></v-spacer>
               <v-icon right>{{projectMenuIcon}}</v-icon>
             </v-btn>
