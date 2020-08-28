@@ -26,8 +26,6 @@ const io = require('../../lib/io')
 const watches = require('../../lib/watches')
 const cache = require('../../lib/cache')
 const { projects, shoots, authorization, tickets } = require('../../lib/services')
-const { expect } = require('chai')
-const { resolve } = require('path')
 
 module.exports = function ({ sandbox, auth }) {
   /* eslint no-unused-expressions: 0 */
