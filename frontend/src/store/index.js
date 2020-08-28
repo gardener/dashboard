@@ -975,41 +975,49 @@ const actions = {
   async subscribeShoot ({ dispatch, getters }, { name, namespace }) {
     await dispatch('shoots/clearAll')
     return new Promise((resolve, reject) => {
-      const done = (err, item) => {
+      const done = err => {
         unsubscribe()
         clearTimeout(timeoutId)
         if (err) {
           reject(err)
         } else {
-          resolve(item)
+          resolve()
         }
-      }
-      const handleSubscriptionError = mutation => {
-        const message = get(mutation.payload, 'message', 'Cluster subscription failed')
-        done(new Error(message))
       }
       const handleSubscriptionTimeout = () => {
         done(new Error('Cluster subscription timed out'))
       }
-      const handleSubscriptionDone = (mutation, state) => {
-        const key = getters['shoots/keyForItem']({ name, namespace })
-        if (Reflect.has(state.shoots.shoots, key)) {
-          done(null, state.shoots.shoots[key])
+      const handleSubscriptionAcknowledgement = event => {
+        if (event.type === 'ERROR') {
+          const { message, code } = event.object
+          switch (code) {
+            case 404:
+              done(new Error('Cluster not found'))
+              break
+            default:
+              done(new Error(message))
+              break
+          }
         } else {
-          done(new Error('Cluster not found'))
+          done()
         }
       }
-      const unsubscribe = store.subscribe((mutation, state) => {
-        switch (mutation.type) {
-          case 'shoots/SET_SUBSCRIPTION_ERROR':
-            return handleSubscriptionError(mutation, state)
-          case 'shoots/SET_SUBSCRIPTION_DONE':
-            return handleSubscriptionDone(mutation, state)
+      const unsubscribe = store.subscribeAction(({ type, payload }, state) => {
+        if (type === 'subscribeShootAcknowledgement') {
+          handleSubscriptionAcknowledgement(payload)
         }
       })
       const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
       EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
     })
+  },
+  subscribeShootAcknowledgement ({ commit, state }, event) {
+    if (event.type !== 'ERROR') {
+      commit('shoots/HANDLE_EVENTS', {
+        rootState: state,
+        events: [event]
+      })
+    }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })

@@ -173,6 +173,31 @@ async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
   })
 }
 
+async function subscribeShoot (socket, { namespace, name}) {
+  leaveShootsAndShootRoom(socket)
+  
+  const kind = 'shoot'
+  const user = getUserFromSocket(socket)
+  const client = user.client
+  try {
+    const shoot = await client['core.gardener.cloud'].shoots.get(namespace, name)
+    joinRoom(socket, `shoot_${namespace}_${name}`)
+    return shoot
+  } catch (err) {
+    let { 
+      code = 500, 
+      reason = 'InternalServerError', 
+      message = 'Failed to fetch cluster' 
+    } = err
+    if (err instanceof HTTPError) {
+      code = _.get(err.response, 'body.code', err.response.statusCode)
+      reason = _.get(err.response, 'body.reason', err.response.statusMessage)
+    }
+    logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, code, message)
+    throw Object.assign(new Error(message), { code, reason })
+  }
+}
+
 function setupShootsNamespace (shootsNsp) {
   // handle socket connections
   shootsNsp.on('connection', socket => {
@@ -214,34 +239,26 @@ function setupShootsNamespace (shootsNsp) {
         })
       }
     })
-    socket.on('subscribeShoot', async ({ name, namespace }) => {
-      leaveShootsAndShootRoom(socket)
-
-      const kind = 'shoot'
-      const user = getUserFromSocket(socket)
-      const batchEmitter = new NamespacedBatchEmitter({ kind, socket, objectKeyPath: 'metadata.uid' })
+    socket.on('subscribeShoot', async ({ name, namespace }, callback) => {
       try {
-        const projectList = await projects.list({ user })
-        const project = _.find(projectList, ['metadata.namespace', namespace])
-        if (project) {
-          const room = `shoot_${namespace}_${name}`
-          joinRoom(socket, room)
-
-          const shoot = await shoots.read({ user, name, namespace })
-          batchEmitter.batchEmitObjects([shoot], namespace)
-        }
-      } catch (err) {
-        let { code = 500, message = 'Failed to fetch cluster' } = err
-        if (err instanceof HTTPError) {
-          const response = err.response
-          code = _.get(response, 'body.code', response.statusCode)
-        }
-        logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, code, message)
-        socket.emit('subscription_error', { kind, code, message })
+        const shoot = await subscribeShoot(socket, { name, namespace })
+        callback({ 
+          type: 'ADDED', 
+          object: shoot 
+        })
+      } catch ({ message, code, reason }) {
+        callback({ 
+          type: 'ERROR', 
+          object: {
+            kind: 'Status',
+            apiVersion: 'v1',
+            status: 'Failure',
+            message, 
+            code, 
+            reason
+          }
+        })
       }
-      batchEmitter.flush()
-
-      socket.emit('shootSubscriptionDone', { kind, target: { name, namespace } })
     })
   })
   socketAuthentication(shootsNsp)

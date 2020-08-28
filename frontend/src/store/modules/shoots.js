@@ -74,8 +74,6 @@ const state = {
   shoots: {},
   sortedShoots: [],
   filteredAndSortedShoots: [],
-  subscriptionError: undefined,
-  subscriptionDone: undefined,
   sortParams: undefined,
   searchValue: undefined,
   selection: undefined,
@@ -628,12 +626,6 @@ const deleteItem = (state, deletedItem) => {
 
 // mutations
 const mutations = {
-  SET_SUBSCRIPTION_ERROR (state, error) {
-    state.subscriptionError = error
-  },
-  SET_SUBSCRIPTION_DONE (state, value) {
-    state.subscriptionDone = value
-  },
   RECEIVE_INFO (state, { namespace, name, info }) {
     const item = findItem({ namespace, name })
     if (item !== undefined) {

@@ -186,35 +186,6 @@ class ShootsSubscription extends AbstractSubscription {
 }
 
 class ShootSubscription extends AbstractSubscription {
-  constructor (connector) {
-    super(connector)
-    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
-      if (kind === 'shoot' && namespaces) {
-        const { namespace } = this.subscribedTo || {}
-        store.commit('shoots/HANDLE_EVENTS', {
-          rootState: store.state,
-          events: namespaces[namespace]
-        })
-      }
-    })
-    this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
-      store.commit('shoots/SET_SUBSCRIPTION_DONE', true)
-      const { name, namespace } = target
-      const promises = []
-      if (store.getters.canGetSecrets) {
-        promises.push(store.dispatch('getShootInfo', { name, namespace }))
-      }
-      if (store.getters.isAdmin) {
-        promises.push(store.dispatch('getShootSeedInfo', { name, namespace }))
-      }
-      try {
-        await Promise.all(promises)
-      } catch (err) {
-        console.error('SubscribeShootDone error:', err.message)
-      }
-    })
-  }
-
   subscribeShoot ({ name, namespace }) {
     this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
@@ -223,8 +194,9 @@ class ShootSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
-    store.commit('shoots/SET_SUBSCRIPTION_DONE', false)
-    this.socket.emit('subscribeShoot', { namespace, name })
+    this.socket.emit('subscribeShoot', { namespace, name }, event => {
+      store.dispatch('subscribeShootAcknowledgement', event)
+    })
     return true
   }
 
