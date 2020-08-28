@@ -39,7 +39,7 @@ limitations under the License.
               <template v-slot:activator="{ on }">
                 <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate"></time-string></span>
               </template>
-              <span>{{k8sExpiration.expirationDateString}}</span>
+              <span>{{getDateFormatted(version.expirationDate)}}</span>
             </v-tooltip>
             <span>. </span>
           </span>
@@ -53,14 +53,14 @@ limitations under the License.
         </li>
       </template>
 
-      <li v-for="({expirationDate, expirationDateString, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
+      <li v-for="({expirationDate, isValidTerminationDate, version, name, workerName, key, isInfo, isWarning, isError}) in expiredWorkerGroups" :key="key">
         <span>Machine image <span class="font-weight-bold">{{name}} | Version: {{version}}</span> of worker group <span class="font-weight-bold">{{workerName}} </span></span>
         <span v-if="isValidTerminationDate">expires
           <v-tooltip right>
             <template v-slot:activator="{ on }">
               <span class="font-weight-bold" v-on="on"><time-string :date-time="expirationDate"></time-string></span>
             </template>
-            <span>{{expirationDateString}}</span>
+            <span>{{getDateFormatted(expirationDate)}}</span>
           </v-tooltip>
           <span>. </span>
         </span>
@@ -84,7 +84,7 @@ import some from 'lodash/some'
 import get from 'lodash/get'
 import { mapGetters } from 'vuex'
 import { shootItem } from '@/mixins/shootItem'
-import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot } from '@/utils'
+import { k8sVersionExpirationForShoot, expiringWorkerGroupsForShoot, getDateFormatted } from '@/utils'
 
 export default {
   name: 'VerisonUpdateWarning',
@@ -145,6 +145,11 @@ export default {
         return 'Version Update Warning'
       }
       return 'Version Update Information'
+    }
+  },
+  methods: {
+    getDateFormatted (date) {
+      return getDateFormatted(date)
     }
   }
 }

@@ -726,7 +726,6 @@ export function k8sVersionExpirationForShoot (shootK8sVersion, shootCloudProfile
   }
   return {
     expirationDate: version.expirationDate,
-    expirationDateString: getDateFormatted(version.expirationDate),
     isValidTerminationDate: isValidTerminationDate(version.expirationDate),
     isError,
     isWarning,
@@ -756,7 +755,6 @@ export function expiringWorkerGroupsForShoot (shootWorkerGroups, shootCloudProfi
     const isInfo = imageAutoPatch && updateAvailable
     return {
       ...workerImageDetails,
-      expirationDateString: getDateFormatted(workerImageDetails.expirationDate),
       isValidTerminationDate: isValidTerminationDate(workerImageDetails.expirationDate),
       workerName: worker.name,
       isError,
@@ -777,6 +775,5 @@ export default {
   k8sVersionUpdatePathAvailable,
   selectedImageIsNotLatest,
   k8sVersionExpirationForShoot,
-  expiringWorkerGroupsForShoot,
-  getDateFormatted
+  expiringWorkerGroupsForShoot
 }
