@@ -46,6 +46,13 @@ limitations under the License.
         @valid="onMachineImageValid">
         </machine-image>
       </div>
+      <div class="regularInput">
+        <container-runtime
+        :machineImageCri="machineImageCri"
+        :worker="worker"
+        @valid="onContainerRuntimeValid">
+        </container-runtime>
+      </div>
       <div v-if="volumeInCloudProfile" class="regularInput">
         <volume-type
         :volumeTypes="volumeTypes"
@@ -131,11 +138,13 @@ import SizeInput from '@/components/ShootWorkers/VolumeSizeInput'
 import MachineType from '@/components/ShootWorkers/MachineType'
 import VolumeType from '@/components/ShootWorkers/VolumeType'
 import MachineImage from '@/components/ShootWorkers/MachineImage'
+import ContainerRuntime from '@/components/ShootWorkers/ContainerRuntime'
 import isEmpty from 'lodash/isEmpty'
 import filter from 'lodash/filter'
 import map from 'lodash/map'
 import includes from 'lodash/includes'
 import sortBy from 'lodash/sortBy'
+import find from 'lodash/find'
 import { required, maxLength, minValue, requiredIf } from 'vuelidate/lib/validators'
 import { getValidationErrors, parseSize } from '@/utils'
 import { uniqueWorkerName, minVolumeSize, resourceName, noStartEndHyphen, numberOrPercentage } from '@/utils/validators'
@@ -174,7 +183,8 @@ export default {
     SizeInput,
     MachineType,
     VolumeType,
-    MachineImage
+    MachineImage,
+    ContainerRuntime
   },
   props: {
     worker: {
@@ -217,6 +227,7 @@ export default {
       machineTypeValid: undefined,
       volumeTypeValid: true, // selection not shown in all cases, default to true
       machineImageValid: undefined,
+      containerRuntimeValid: undefined,
       immutableZones: undefined
     }
   },
@@ -333,6 +344,12 @@ export default {
         return `Your network configuration allows to add ${this.maxAdditionalZones} more zones that are not already used by this cluster`
       }
       return undefined
+    },
+    selectedMachineImage () {
+      return find(this.machineImages, this.worker.machine.image)
+    },
+    machineImageCri () {
+      return this.selectedMachineImage.cri
     }
   },
   methods: {
@@ -391,8 +408,14 @@ export default {
         this.validateInput()
       }
     },
+    onContainerRuntimeValid ({ valid }) {
+      if (this.containerRuntimeValid !== valid) {
+        this.containerRuntimeValid = valid
+        this.validateInput()
+      }
+    },
     validateInput () {
-      const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid && this.machineImageValid
+      const valid = !this.$v.$invalid && this.machineTypeValid && this.volumeTypeValid && this.machineImageValid && this.containerRuntimeValid
       if (this.valid !== valid) {
         this.valid = valid
         this.$emit('valid', { id: this.worker.id, valid: this.valid })
