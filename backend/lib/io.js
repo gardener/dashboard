@@ -173,21 +173,20 @@ async function subscribeShootsAdmin ({ socket, user, namespaces, filter }) {
   })
 }
 
-async function subscribeShoot (socket, { namespace, name}) {
+async function subscribeShoot (socket, { namespace, name }) {
   leaveShootsAndShootRoom(socket)
-  
-  const kind = 'shoot'
+
   const user = getUserFromSocket(socket)
-  const client = user.client
   try {
-    const shoot = await client['core.gardener.cloud'].shoots.get(namespace, name)
-    joinRoom(socket, `shoot_${namespace}_${name}`)
+    const room = `shoot_${namespace}_${name}`
+    const shoot = await shoots.read({ user, namespace, name })
+    joinRoom(socket, room)
     return shoot
   } catch (err) {
-    let { 
-      code = 500, 
-      reason = 'InternalServerError', 
-      message = 'Failed to fetch cluster' 
+    let {
+      code = 500,
+      reason = 'InternalServerError',
+      message = 'Failed to fetch cluster'
     } = err
     if (err instanceof HTTPError) {
       code = _.get(err.response, 'body.code', err.response.statusCode)
@@ -239,22 +238,22 @@ function setupShootsNamespace (shootsNsp) {
         })
       }
     })
-    socket.on('subscribeShoot', async ({ name, namespace }, callback) => {
+    socket.on('subscribeShoot', async ({ name, namespace }, done) => {
       try {
         const shoot = await subscribeShoot(socket, { name, namespace })
-        callback({ 
-          type: 'ADDED', 
-          object: shoot 
+        done({
+          type: 'ADDED',
+          object: shoot
         })
       } catch ({ message, code, reason }) {
-        callback({ 
-          type: 'ERROR', 
+        done({
+          type: 'ERROR',
           object: {
             kind: 'Status',
             apiVersion: 'v1',
             status: 'Failure',
-            message, 
-            code, 
+            message,
+            code,
             reason
           }
         })
