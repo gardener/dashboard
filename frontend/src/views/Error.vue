@@ -41,7 +41,9 @@ export default {
         await this.$router.push({
           name: 'Home'
         })
-      } catch (err) { /* ignore error */ }
+      } catch (err) {
+        /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
+      }
     }
   }
 }
