@@ -31,7 +31,8 @@ export default {
   data () {
     return {
       loading: false,
-      component: undefined
+      component: undefined,
+      error: undefined
     }
   },
   computed: {
@@ -41,8 +42,13 @@ export default {
     ]),
     componentProperties () {
       switch (this.component) {
-        default:
+        case 'shoot-item-error': {
+          const { code, message: text } = this.error
+          return { code, text }
+        }
+        default: {
           return {}
+        }
       }
     }
   },
@@ -55,7 +61,7 @@ export default {
       'ensureProjectTerminalShortcutsLoaded'
     ]),
     async load ({ name, params }) {
-      this.loading = true
+      this.error = undefined
       this.component = 'shoot-item-loading'
       try {
         const promises = [
@@ -71,9 +77,8 @@ export default {
         await Promise.all(promises)
         this.component = 'router-view'
       } catch (err) {
+        this.error = err
         this.component = 'shoot-item-error'
-      } finally {
-        this.loading = false
       }
     }
   },

@@ -992,7 +992,7 @@ const actions = {
           const { message, code } = event.object
           switch (code) {
             case 404:
-              done(new Error('Cluster not found'))
+              done(new Error('Failed to fetch cluster'))
               break
             default:
               done(new Error(message))
