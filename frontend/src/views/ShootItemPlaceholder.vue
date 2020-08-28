@@ -18,6 +18,7 @@ limitations under the License.
 </template>
 
 <script>
+import get from 'lodash/get'
 import includes from 'lodash/includes'
 import { mapGetters, mapActions } from 'vuex'
 import ShootItemLoading from '@/views/ShootItemLoading'
@@ -50,6 +51,10 @@ export default {
           return {}
         }
       }
+    },
+    numberOfShoots () {
+      const shoots = get(this.$store.state, 'shoots.shoots')
+      return shoots ? Object.keys(shoots).length : -1
     }
   },
   methods: {
@@ -92,6 +97,11 @@ export default {
   watch: {
     '$route' (value) {
       this.load(value)
+    },
+    numberOfShoots (newValue, oldValue) {
+      if (this.component === 'router-view' && newValue === 0 && oldValue > 0) {
+        this.load(this.$route)
+      }
     }
   },
   mounted () {
