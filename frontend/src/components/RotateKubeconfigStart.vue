@@ -75,7 +75,7 @@ export default {
       if (this.isActionToBeScheduled) {
         return 'Requesting to schedule kubeconfig credentials rotation'
       }
-      return this.buttonText
+      return this.buttonTitle
     },
     buttonTitle () {
       return 'Start Kubeconfig Rotation'
@@ -84,7 +84,7 @@ export default {
       if (!this.text) {
         return
       }
-      return this.buttonTitle
+      return 'Rotate Kubeconfig'
     }
   },
   methods: {

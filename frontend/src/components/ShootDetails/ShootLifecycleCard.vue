@@ -87,12 +87,7 @@ limitations under the License.
         <v-divider inset></v-divider>
         <v-list-item>
           <v-list-item-icon>
-            <v-badge color="white" overlap bottom>
-              <template v-slot:badge>
-                <v-icon color="cyan darken-2">mdi-refresh</v-icon>
-              </template>
-              <v-icon color="cyan darken-2">mdi-file</v-icon>
-            </v-badge>
+            <v-icon color="cyan darken-2">mdi-file-refresh</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title>

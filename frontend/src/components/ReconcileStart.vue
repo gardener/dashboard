@@ -24,7 +24,8 @@ limitations under the License.
     icon="mdi-refresh"
     maxWidth="600"
     :buttonText="buttonText"
-    confirmButtonText="Trigger now">
+    confirmButtonText="Trigger now"
+    :disabled="isShootReconciliationDeactivated">
     <template v-slot:actionComponent>
       <v-row >
         <v-col>
