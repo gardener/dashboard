@@ -12,43 +12,38 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+ -->
 
 <template>
-  <v-breadcrumbs :items="breadcrumbItems" class="pl-0">
-    <template v-slot:divider>
-      <v-icon large>mdi-chevron-right</v-icon>
-    </template>
-    <template v-slot:item="{ item }">
-      <router-link v-if="item.to" :to="item.to" class="black--text text-decoration-none">
-        {{ item.text }}
-      </router-link>
-      <span v-else class="black--text text-h6">
-        {{ item.text }}
-      </span>
-    </template>
-  </v-breadcrumbs>
+  <v-app>
+    <v-main>
+      <g-error :message="message" @click="goHome"/>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import GError from '@/components/GError'
 import get from 'lodash/get'
 
 export default {
-  name: 'breadcrumb',
+  components: {
+    GError
+  },
   computed: {
-    ...mapState([
-      'namespace'
-    ]),
-    breadcrumbItems () {
-      const breadcrumbs = get(this.$route, 'meta.breadcrumbs', [])
-      if (typeof breadcrumbs === 'function') {
-        return breadcrumbs(this.$route)
+    message () {
+      return get(this.$store.state, 'alert.message')
+    }
+  },
+  methods: {
+    async goHome () {
+      try {
+        await this.$router.push({
+          name: 'Home'
+        })
+      } catch (err) {
+        /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
       }
-      return breadcrumbs
-    },
-    routeParamName () {
-      return get(this.$route.params, 'name')
     }
   }
 }

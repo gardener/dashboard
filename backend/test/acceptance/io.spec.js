@@ -124,7 +124,6 @@ module.exports = function ({ sandbox, auth }) {
     { metadata: { namespace: 'bar', name: 'bar' } }
   ]
   describe('shoots', function () {
-
     const shootList = [
       { metadata: { namespace: 'foo', name: 'foo' } },
       { metadata: { namespace: 'foo', name: 'bar' } },
@@ -215,11 +214,14 @@ module.exports = function ({ sandbox, auth }) {
         namespace: 'foo',
         name: 'bar'
       }
-      const shootsByNamespace = await emitSubscribe('subscribeShoot', metadata)
+      const event = await new Promise(resolve => socket.emit('subscribeShoot', metadata, resolve))
       expect(isAdminStub).to.not.be.called
-      expect(listProjectsStub).to.be.calledOnce
+      expect(readShootStub).to.be.calledOnce
       expect(listShootsStub).to.not.be.called
-      expect(shootsByNamespace).to.eql({ [metadata.namespace]: [find(shootList, { metadata })] })
+      expect(event).to.eql({
+        type: 'ADDED',
+        object: find(shootList, { metadata })
+      })
     })
   })
 

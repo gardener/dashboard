@@ -105,6 +105,9 @@ const getters = {
   },
   initialNewShootResource () {
     return state.initialNewShootResource
+  },
+  keyForItem () {
+    return keyForShoot
   }
 }
 
@@ -689,6 +692,8 @@ const mutations = {
     state.shoots = {}
     state.sortedShoots = []
     state.filteredAndSortedShoots = []
+    state.subscriptionError = undefined
+    state.subscriptionDone = undefined
   },
   SET_SHOOT_LIST_FILTERS (state, { rootState, value }) {
     state.shootListFilters = value

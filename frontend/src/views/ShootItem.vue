@@ -40,7 +40,7 @@ import { PositionEnum } from '@/lib/g-symbol-tree'
 import { shootItem } from '@/mixins/shootItem'
 
 export default {
-  name: 'shoot-details-page',
+  name: 'shoot-item',
   components: {
     ShootDetails,
     TerminalSplitpanes,

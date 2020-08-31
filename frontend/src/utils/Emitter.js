@@ -186,36 +186,6 @@ class ShootsSubscription extends AbstractSubscription {
 }
 
 class ShootSubscription extends AbstractSubscription {
-  constructor (connector) {
-    super(connector)
-
-    /* currently we only throttle NamespacedEvents (for shoots) as for this kind
-    * we expect many events coming in in a short period of time */
-    const throttledNsEventEmitter = new ThrottledNamespacedEventEmitter({ emitter: this, wait: 1000 })
-
-    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
-      if (kind === 'shoot') {
-        throttledNsEventEmitter.emit(kind, namespaces)
-      }
-    })
-    this.socket.on('shootSubscriptionDone', async ({ kind, target }) => {
-      const { name, namespace } = target
-      throttledNsEventEmitter.flush()
-      const promises = []
-      if (store.getters.canGetSecrets) {
-        promises.push(store.dispatch('getShootInfo', { name, namespace }))
-      }
-      if (store.getters.isAdmin) {
-        promises.push(store.dispatch('getShootSeedInfo', { name, namespace }))
-      }
-      try {
-        await Promise.all(promises)
-      } catch (err) {
-        console.error('SubscribeShootDone error:', err.message)
-      }
-    })
-  }
-
   subscribeShoot ({ name, namespace }) {
     this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
@@ -224,8 +194,9 @@ class ShootSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
-
-    this.socket.emit('subscribeShoot', { namespace, name })
+    this.socket.emit('subscribeShoot', { namespace, name }, event => {
+      store.dispatch('subscribeShootAcknowledgement', event)
+    })
     return true
   }
 
@@ -338,7 +309,7 @@ forEach([shootsConnector, ticketsConnector], connector => {
   socket.on('subscription_error', error => {
     const { kind, code, message } = error
     console.error(`socket ${socket.id} ${kind} subscription error: ${message} (${code})`)
-    store.dispatch('setError', error)
+    store.dispatch('setSubscriptionError', error)
   })
 })
 

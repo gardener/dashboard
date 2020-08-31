@@ -166,12 +166,12 @@ export default {
         this.token = undefined
         await this.$userManager.signinWithToken(token)
         this.dialog = false
-        await this.$router.push(this.redirectPath)
-      } catch (err) {
-        if (err === undefined) {
-          // If router.push is done in any beforeEach navigation hook, the initial navigation is aborted with err = undefined. We do this in ensureDataLoaded to navigate to the ShootList as default. This should not result in an error.
-          return
+        try {
+          await this.$router.push(this.redirectPath)
+        } catch (err) {
+          /* Catch and ignore navigation aborted errors. Redirection happens in navigation guards (see https://router.vuejs.org/guide/essentials/navigation.html#router-push-location-oncomplete-onabort). */
         }
+      } catch (err) {
         this.dialog = false
         this.showSnotifyLoginError(err.message)
       }

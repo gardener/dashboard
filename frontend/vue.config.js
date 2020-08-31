@@ -16,6 +16,10 @@ module.exports = {
   },
   configureWebpack (config) {
     config.externals = /^ws$/i
+    config.performance = {
+      maxAssetSize: 1048576,
+      maxEntrypointSize: 1048576
+    }
   },
   devServer: {
     proxy: {

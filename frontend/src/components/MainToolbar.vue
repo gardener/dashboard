@@ -122,7 +122,7 @@ limitations under the License.
     </div>
     <template v-if="tabs && tabs.length > 1" v-slot:extension>
       <v-tabs slider-color="grey darken-3" background-color="white" color="black">
-        <v-tab v-for="tab in tabs" :to="tab.to($route)" :key="tab.key" ripple>
+        <v-tab v-for="tab in tabs" :to="tab.to" :key="tab.key" ripple>
           {{tab.title}}
         </v-tab>
       </v-tabs>
@@ -160,6 +160,7 @@ export default {
   },
   computed: {
     ...mapState([
+      'namespace',
       'title',
       'sidebar',
       'user',
@@ -175,9 +176,9 @@ export default {
       return this.cfg.helpMenuItems || {}
     },
     tabs () {
-      const tabs = get(this.$route, 'meta.tabs', false)
+      const tabs = get(this.$route, 'meta.tabs')
       if (typeof tabs === 'function') {
-        return tabs()
+        return tabs(this.$route)
       }
       return tabs
     },
@@ -190,9 +191,13 @@ export default {
       }
     },
     accountLink () {
+      let query
+      if (this.namespace) {
+        query = { namespace: this.namespace }
+      }
       return {
         name: 'Account',
-        query: this.$route.query
+        query
       }
     }
   },

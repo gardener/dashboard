@@ -459,7 +459,8 @@ export default {
 
     const shootSchemaDefinition = await getShootSchemaDefinition()
     const shootProperties = get(shootSchemaDefinition, 'properties', {})
-    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, this.$instance.options.indentUnit)
+    const indentUnit = get(this.$instance, 'options.indentUnit', 2)
+    this.shootEditorCompletions = new ShootEditorCompletions(shootProperties, indentUnit)
   },
   watch: {
     canPatchShoots (value) {

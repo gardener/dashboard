@@ -556,6 +556,9 @@ const getters = {
   namespaces (state) {
     return map(state.projects.all, 'metadata.namespace')
   },
+  defaultNamespace (state, getters) {
+    return includes(getters.namespaces, 'garden') ? 'garden' : head(getters.namespaces)
+  },
   cloudProviderKindList (state) {
     return uniq(map(state.cloudProfiles.all, 'metadata.cloudProviderKind'))
   },
@@ -863,6 +866,9 @@ const getters = {
   canGetProjectTerminalShortcuts (state, getters) {
     return getters.canGetSecrets
   },
+  canUseProjectTerminalShortcuts (state, getters) {
+    return getters.isProjectTerminalShortcutsEnabled && getters.canGetProjectTerminalShortcuts && getters.canCreateTerminals
+  },
   canCreateProject (state) {
     return canI(state.subjectRules, 'create', 'core.gardener.cloud', 'projects')
   },
@@ -900,7 +906,7 @@ const getters = {
   },
   projectTerminalShortcutsByTargetsFilter (state, getters) {
     return (targetsFilter = [TargetEnum.SHOOT, TargetEnum.CONTROL_PLANE, TargetEnum.GARDEN]) => {
-      if (get(state, 'projectTerminalShortcuts.namespace') !== store.state.namespace) {
+      if (get(state, 'projectTerminalShortcuts.namespace') !== state.namespace) {
         return
       }
       let shortcuts = get(state, 'projectTerminalShortcuts.items', [])
@@ -966,12 +972,67 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoot ({ dispatch, commit }, { name, namespace }) {
-    return dispatch('shoots/clearAll')
-      .then(() => EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace }))
-      .catch(err => {
-        dispatch('setError', err)
+  async subscribeShoot ({ dispatch, getters }, { name, namespace }) {
+    await dispatch('shoots/clearAll')
+    return new Promise((resolve, reject) => {
+      const done = err => {
+        unsubscribe()
+        clearTimeout(timeoutId)
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      }
+      const handleSubscriptionTimeout = () => {
+        done(new Error('Cluster subscription timed out'))
+      }
+      const handleSubscriptionAcknowledgement = event => {
+        if (event.type === 'ERROR') {
+          const { message, code } = event.object
+          switch (code) {
+            case 404:
+              done(new Error('Failed to fetch cluster'))
+              break
+            default:
+              done(new Error(message))
+              break
+          }
+        } else {
+          done()
+        }
+      }
+      const unsubscribe = store.subscribeAction(({ type, payload }, state) => {
+        if (type === 'subscribeShootAcknowledgement') {
+          handleSubscriptionAcknowledgement(payload)
+        }
       })
+      const timeoutId = setTimeout(handleSubscriptionTimeout, 36 * 1000)
+      EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
+    })
+  },
+  subscribeShootAcknowledgement ({ commit, state }, event) {
+    if (event.type !== 'ERROR') {
+      commit('shoots/HANDLE_EVENTS', {
+        rootState: state,
+        events: [event]
+      })
+      const fetchShootAndShootSeedInfo = async ({ metadata }) => {
+        const promises = []
+        if (store.getters.canGetSecrets) {
+          promises.push(store.dispatch('getShootInfo', metadata))
+        }
+        if (store.getters.isAdmin) {
+          promises.push(store.dispatch('getShootSeedInfo', metadata))
+        }
+        try {
+          await Promise.all(promises)
+        } catch (err) {
+          console.error('Failed to fetch shoot or shootSeed info:', err.message)
+        }
+      }
+      fetchShootAndShootSeedInfo(event.object)
+    }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
     return dispatch('shoots/getInfo', { name, namespace })
@@ -985,20 +1046,20 @@ const actions = {
         dispatch('setError', err)
       })
   },
-  subscribeShoots ({ dispatch, commit, state }) {
-    return EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+  async subscribeShoots ({ dispatch, commit, state }) {
+    try {
+      EmitterWrapper.shootsEmitter.subscribeShoots({ namespace: state.namespace, filter: getFilterValue(state) })
+    } catch (err) { /* ignore error */ }
   },
-  subscribeComments ({ dispatch, commit }, { name, namespace }) {
-    return new Promise((resolve, reject) => {
+  async subscribeComments ({ dispatch, commit }, { name, namespace }) {
+    try {
       EmitterWrapper.ticketCommentsEmitter.subscribeComments({ name, namespace })
-      resolve()
-    })
+    } catch (err) { /* ignore error */ }
   },
-  unsubscribeComments ({ dispatch, commit }) {
-    return new Promise((resolve, reject) => {
+  async unsubscribeComments ({ dispatch, commit }) {
+    try {
       EmitterWrapper.ticketCommentsEmitter.unsubscribe()
-      resolve()
-    })
+    } catch (err) { /* ignore error */ }
   },
   setSelectedShoot ({ dispatch }, metadata) {
     return dispatch('shoots/setSelection', metadata)
@@ -1143,20 +1204,18 @@ const actions = {
     return state.subjectRules
   },
   async fetchKubeconfigData ({ commit }) {
-    if (!store.state.kubeconfigData) {
-      const { data } = await getKubeconfigData()
-      commit('SET_KUBECONFIG_DATA', data)
-    }
+    const { data } = await getKubeconfigData()
+    commit('SET_KUBECONFIG_DATA', data)
   },
-  async fetchProjectTerminalShortcuts ({ commit }) {
-    if (store.state.projectTerminalShortcuts && store.state.projectTerminalShortcuts.namespace === store.state.namespace) {
-      return
+  async ensureProjectTerminalShortcutsLoaded ({ commit, state }) {
+    const { namespace, projectTerminalShortcuts } = state
+    if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
+      const { data: items } = await listProjectTerminalShortcuts({ namespace })
+      commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+        namespace,
+        items
+      })
     }
-    const { data } = await listProjectTerminalShortcuts({ namespace: store.state.namespace })
-    commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
-      namespace: store.state.namespace,
-      items: data
-    })
   },
   setOnlyShootsWithIssues ({ commit }, value) {
     commit('SET_ONLYSHOOTSWITHISSUES', value)
@@ -1199,6 +1258,13 @@ const actions = {
   unsetWebsocketConnectionError ({ commit }) {
     commit('SET_WEBSOCKETCONNECTIONERROR', null)
     return state.websocketConnectionError
+  },
+  setSubscriptionError ({ dispatch, commit }, value) {
+    const { kind, code, message } = value
+    if (kind === 'shoot') {
+      return commit('shoots/SET_SUBSCRIPTION_ERROR', { code, message })
+    }
+    return dispatch('setError', value)
   },
   setError ({ commit }, value) {
     commit('SET_ALERT', { message: get(value, 'message', ''), type: 'error' })

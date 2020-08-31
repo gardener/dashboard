@@ -51,7 +51,7 @@ import { shootItem } from '@/mixins/shootItem'
 import 'codemirror/mode/yaml/yaml.js'
 
 export default {
-  name: 'shoot-item',
+  name: 'shoot-details',
   components: {
     ShootDetailsCard,
     ShootInfrastructureCard,
