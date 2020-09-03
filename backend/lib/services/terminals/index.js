@@ -198,7 +198,7 @@ function getShootResource ({ user, namespace, name, target }) {
   return client.getShoot({ namespace, name })
 }
 
-async function getTargetCluster ({ user, namespace, name, target, shootResource }) {
+async function getTargetCluster ({ user, namespace, name, target, preferredHost, shootResource }) {
   const client = user.client
   const isAdmin = user.isAdmin
 
@@ -207,7 +207,8 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
     namespace: undefined, // this is the namespace where the "access" service account will be created
     credentials: undefined,
     roleName: 'cluster-admin',
-    bindingKind: undefined
+    bindingKind: undefined,
+    apiServerServiceRef: undefined
   }
 
   switch (target) {
@@ -221,6 +222,14 @@ async function getTargetCluster ({ user, namespace, name, target, shootResource 
       break
     }
     case TargetEnum.SHOOT: {
+      targetCluster.apiServerServiceRef = {}
+      if (user.isAdmin && preferredHost === 'seed') { // admin only - host cluser is the seed
+        targetCluster.apiServerServiceRef.name = 'kube-apiserver'
+      } else {
+        targetCluster.apiServerServiceRef.name = 'kubernetes'
+        targetCluster.apiServerServiceRef.namespace = 'default'
+      }
+
       targetCluster.kubeconfigContextNamespace = 'default'
       targetCluster.namespace = undefined // this will create a temporary namespace
       targetCluster.credentials = {
@@ -429,11 +438,12 @@ function createHost ({ secretRef, namespace, container, podLabels, node, hostPID
   return host
 }
 
-function createTarget ({ kubeconfigContextNamespace, credentials, bindingKind, roleName = 'cluster-admin', namespace }) {
+function createTarget ({ kubeconfigContextNamespace, apiServerServiceRef, credentials, bindingKind, roleName = 'cluster-admin', namespace }) {
   const temporaryNamespace = _.isEmpty(namespace)
   return {
     credentials,
     kubeconfigContextNamespace,
+    apiServerServiceRef,
     bindingKind,
     roleName,
     namespace,
@@ -477,7 +487,7 @@ async function getOrCreateTerminalSession ({ user, namespace, name, target, body
     targetCluster
   ] = await Promise.all([
     getHostCluster({ user, namespace, name, target, preferredHost, body, shootResource }),
-    getTargetCluster({ user, namespace, name, target, shootResource })
+    getTargetCluster({ user, namespace, name, target, preferredHost, shootResource })
   ])
 
   if (hostCluster.isHostOrTargetHibernated) {
