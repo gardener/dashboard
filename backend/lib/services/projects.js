@@ -138,6 +138,14 @@ exports.list = async function ({ user, qs = {} }) {
     .gte(0)
     .value()
 
+  const isGroupMemberOf = project => !_
+    .chain(project)
+    .get('spec.members')
+    .filter(['kind', 'Group'])
+    .filter(({ name }) => _.includes(user.groups, name))
+    .isEmpty()
+    .value()
+
   const phases = _
     .chain(qs)
     .get('phase', 'Ready')
@@ -147,7 +155,7 @@ exports.list = async function ({ user, qs = {} }) {
   return _
     .chain(projects)
     .filter(project => {
-      if (!isAdmin && !isMemberOf(project)) {
+      if (!isAdmin && !(isMemberOf(project) || isGroupMemberOf(project))) {
         return false
       }
       if (!_.isEmpty(phases)) {

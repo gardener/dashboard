@@ -47,10 +47,18 @@ function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
     const providerType = cloudProfileResource.spec.type
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
+    const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [])
 
-    const seedsForCloudProfile = _
-      .chain(seeds)
-      .filter(['spec.provider.type', providerType])
+    let chain = _.chain(seeds)
+    if (_.isEmpty(providerTypes)) {
+      chain = chain.filter(['spec.provider.type', providerType])
+    } else {
+      chain = chain.filter(seed => {
+        const seedProviderType = _.get(seed, 'spec.provider.type')
+        return _.includes(providerTypes, seedProviderType)
+      })
+    }
+    const seedsForCloudProfile = chain
       .filter({ metadata: { labels: matchLabels } })
       .map(fromSeedResource)
       .thru(emptyToUndefined)
