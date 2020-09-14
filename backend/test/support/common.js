@@ -118,6 +118,7 @@ function getQuota ({ name, namespace = 'garden-trial', scope = { apiVersion: 'v1
 
 const cloudProfileList = [
   getCloudProfile('infra1-profileName', 'infra1'),
+  getCloudProfile('infra1-profileName2', 'infra1', { providerTypes: ['infra2', 'infra3']}),
   getCloudProfile('infra2-profileName', 'infra2'),
   getCloudProfile('infra3-profileName', 'infra3', { matchLabels: { foo: 'bar' } }),
   getCloudProfile('infra3-profileName2', 'infra3')
