@@ -155,7 +155,7 @@ exports.list = async function ({ user, qs = {} }) {
   return _
     .chain(projects)
     .filter(project => {
-      if (!isAdmin && !(isMemberOf(project) || isGroupMemberOf(project))) {
+      if (!isAdmin && !isMemberOf(project) && !isGroupMemberOf(project)) {
         return false
       }
       if (!_.isEmpty(phases)) {
