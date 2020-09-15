@@ -73,16 +73,23 @@ limitations under the License.
         class="ml-2"
       >
         <template v-slot:item="{ item }">
-          <v-list-item-content>
+          <v-list-item-content v-if="item !== autoSelectNodeItem">
             <v-list-item-title>{{item.data.kubernetesHostname}}</v-list-item-title>
             <v-list-item-subtitle>
               <span>Ready: {{item.data.readyStatus}} | Version: {{item.data.version}} | Created: <time-string :date-time="item.metadata.creationTimestamp" :pointInTime="-1"></time-string></span>
             </v-list-item-subtitle>
           </v-list-item-content>
+          <v-list-item-content v-else>
+            <v-list-item-title>Auto select node</v-list-item-title>
+            <v-list-item-subtitle>Let the kube-scheduler decide on which node the terminal pod will be scheduled</v-list-item-subtitle>
+          </v-list-item-content>
         </template>
         <template v-slot:selection="{ item }">
           <span :class="nodeTextColor" class="ml-2">
-          {{item.data.kubernetesHostname}} [{{item.data.version}}]
+            <template v-if="item !== autoSelectNodeItem">
+              {{item.data.kubernetesHostname}} [{{item.data.version}}]
+            </template>
+            <template v-else>Auto select node</template>
           </span>
         </template>
       </v-select>
@@ -128,6 +135,11 @@ export default {
   },
   data () {
     return {
+      autoSelectNodeItem: {
+        data: {
+          kubernetesHostname: -1 // node will be auto selected by the kube-scheduler. Value needs to be set to any value
+        }
+      },
       selectedRunOnShootWorkerInternal: false,
       selectedContainerImage: undefined,
       selectedNode: undefined,
@@ -180,11 +192,14 @@ export default {
       return this.selectedRunOnShootWorker ? 'black--text' : 'grey--text'
     },
     selectedConfig () {
+      const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname 
+        ? undefined 
+        : this.selectedNode
       const selectedConfig = {
         container: {
           image: this.selectedContainerImage
         },
-        node: this.selectedNode
+        node
       }
       if (this.selectedPrivilegedMode) {
         selectedConfig.container.privileged = true
@@ -198,11 +213,15 @@ export default {
     }
   },
   methods: {
-    initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes }) {
+    initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
       this.selectedContainerImage = container.image
-      defaultNode = defaultNode || get(head(nodes), 'data.kubernetesHostname')
+      if (!defaultNode) {
+        defaultNode = this.isAdmin 
+          ? get(head(nodes), 'data.kubernetesHostname') 
+          : this.autoSelectNodeItem.data.kubernetesHostname
+      }
       this.selectedNode = defaultNode
-      this.shootNodes = nodes
+      this.shootNodes = [this.autoSelectNodeItem, ...nodes]
       if (!this.isAdmin) {
         this.selectedRunOnShootWorker = true
       } else {
@@ -210,6 +229,10 @@ export default {
         this.selectedRunOnShootWorker = currentNodeIsShootWorker
       }
       this.selectedPrivilegedMode = privilegedMode
+
+      // in case "initialize" is called with the same parameters, selectedConfig does not change and hence the watch is not called. Make sure that selectedConfig is emitted in any case
+      this.$emit('selectedConfig', this.selectedConfig)
+      this.$emit('validSettings', this.validSettings)
     },
     getErrorMessages (field) {
       return getValidationErrors(this, field)

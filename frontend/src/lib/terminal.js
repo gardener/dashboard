@@ -102,7 +102,7 @@ export class TerminalSession {
 
     const hostConfig = pick(this.vm.data, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
     const selectedConfigHost = pick(this.vm.selectedConfig, ['node', 'hostPID', 'hostNetwork', 'preferredHost'])
-    const body = merge(hostConfig, selectedConfigHost)
+    const body = assign(hostConfig, selectedConfigHost) // node: undefined (auto select node) should overwrite the value from hostConfig, hence using lodash assign
     body.identifier = this.vm.uuid
     body.container = merge(container, selectedConfigContainer)
 
