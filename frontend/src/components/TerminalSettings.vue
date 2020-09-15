@@ -192,7 +192,9 @@ export default {
       return this.selectedRunOnShootWorker ? 'black--text' : 'grey--text'
     },
     selectedConfig () {
-      const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname ? undefined : this.selectedNode
+      const node = this.selectedNode === this.autoSelectNodeItem.data.kubernetesHostname 
+        ? undefined 
+        : this.selectedNode
       const selectedConfig = {
         container: {
           image: this.selectedContainerImage
@@ -214,7 +216,9 @@ export default {
     initialize ({ container = {}, defaultNode, currentNode, privilegedMode, nodes = [] }) {
       this.selectedContainerImage = container.image
       if (!defaultNode) {
-        defaultNode = this.isAdmin ? get(head(nodes), 'data.kubernetesHostname') : this.autoSelectNodeItem.data.kubernetesHostname
+        defaultNode = this.isAdmin 
+          ? get(head(nodes), 'data.kubernetesHostname') 
+          : this.autoSelectNodeItem.data.kubernetesHostname
       }
       this.selectedNode = defaultNode
       this.shootNodes = [this.autoSelectNodeItem, ...nodes]
