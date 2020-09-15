@@ -45,24 +45,17 @@ function emptyToUndefined (value) {
 
 function assignSeedsToCloudProfileIteratee (seeds) {
   return cloudProfileResource => {
-    function filterProviderType () {
-      if (!_.isEmpty(providerTypes)) {
-        return seed => {
-          const seedProviderType = _.get(seed, 'spec.provider.type')
-          return _.includes(providerTypes, seedProviderType)
-        }
-      }
-
-      return ['spec.provider.type', providerType]
+    function filterProviderType (seed) {
+      const seedProviderType = _.get(seed, 'spec.provider.type')
+      return _.includes(providerTypes, seedProviderType)
     }
-
     const providerType = cloudProfileResource.spec.type
     const matchLabels = _.get(cloudProfileResource, 'spec.seedSelector.matchLabels', {})
-    const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [])
+    const providerTypes = _.get(cloudProfileResource, 'spec.seedSelector.providerTypes', [providerType])
 
     const seedsForCloudProfile = _
       .chain(seeds)
-      .filter(filterProviderType())
+      .filter(filterProviderType)
       .filter({ metadata: { labels: matchLabels } })
       .map(fromSeedResource)
       .thru(emptyToUndefined)
