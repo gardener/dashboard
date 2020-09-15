@@ -989,15 +989,19 @@ const actions = {
       }
       const handleSubscriptionAcknowledgement = event => {
         if (event.type === 'ERROR') {
-          const { message, code } = event.object
-          switch (code) {
-            case 404:
-              done(new Error('Failed to fetch cluster'))
-              break
-            default:
-              done(new Error(message))
-              break
+          const { code, reason } = event.object
+          let text = reason
+          let message = event.object.message
+          if (code === 404) {
+            text = 'Cluster not found'
+            message = 'The cluster you are looking for doesn\'t exist!'
+          } else if (code === 403) {
+            text = 'Access to cluster denied'
+          } else if (code >= 500) {
+            text = 'Oops, something went wrong'
+            message = 'An unexpected error occurred. Please try again later.'
           }
+          done(Object.assign(new Error(message), { code, text }))
         } else {
           done()
         }

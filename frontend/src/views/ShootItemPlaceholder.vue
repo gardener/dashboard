@@ -33,7 +33,8 @@ export default {
     return {
       loading: false,
       component: undefined,
-      error: undefined
+      error: undefined,
+      unsubscribe: () => {}
     }
   },
   computed: {
@@ -44,17 +45,13 @@ export default {
     componentProperties () {
       switch (this.component) {
         case 'shoot-item-error': {
-          const { code, message: text } = this.error
-          return { code, text }
+          const { code, text, message } = this.error
+          return { code, text, message }
         }
         default: {
           return {}
         }
       }
-    },
-    numberOfShoots () {
-      const shoots = get(this.$store.state, 'shoots.shoots')
-      return shoots ? Object.keys(shoots).length : -1
     }
   },
   methods: {
@@ -65,6 +62,19 @@ export default {
       'fetchInfrastructureSecrets',
       'ensureProjectTerminalShortcutsLoaded'
     ]),
+    handleShootEvents (events) {
+      const { namespace, name } = get(this.$route, 'params', {})
+      for (const { type, object: { metadata = {} } } of events) {
+        if (type === 'DELETED' && metadata.namespace === namespace && metadata.name === name) {
+          this.error = Object.assign(new Error('The cluster you are looking for is no longer available!'), {
+            code: 410,
+            text: 'Cluster is gone'
+          })
+          this.component = 'shoot-item-error'
+          return
+        }
+      }
+    },
     async load ({ name, params }) {
       this.error = undefined
       this.component = 'shoot-item-loading'
@@ -97,15 +107,18 @@ export default {
   watch: {
     '$route' (value) {
       this.load(value)
-    },
-    numberOfShoots (newValue, oldValue) {
-      if (this.component === 'router-view' && newValue === 0 && oldValue > 0) {
-        this.load(this.$route)
-      }
     }
   },
   mounted () {
+    this.unsubscribe = this.$store.subscribe(({ type, payload }) => {
+      if (type === 'shoots/HANDLE_EVENTS') {
+        this.handleShootEvents(payload.events)
+      }
+    })
     this.load(this.$route)
+  },
+  beforeDestroy () {
+    this.unsubscribe()
   }
 }
 </script>
