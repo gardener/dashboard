@@ -128,15 +128,27 @@ exports.list = async function ({ user, qs = {} }) {
   const projects = cache.getProjects()
   const isAdmin = await authorization.isAdmin(user)
 
-  const isMemberOf = project => _
-    .chain(project)
-    .get('spec.members')
-    .findIndex({
-      kind: 'User',
-      name: user.id
-    })
-    .gte(0)
-    .value()
+  const isMemberOf = project => {
+    const hasGroupMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'Group'])
+      .map('name')
+      .intersection(user.groups)
+      .size()
+      .gt(0)
+      .value()
+
+    const hasUserMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'User'])
+      .map('name')
+      .includes(user.id)
+      .value()
+
+    return hasGroupMembership || hasUserMembership
+  }
 
   const phases = _
     .chain(qs)
