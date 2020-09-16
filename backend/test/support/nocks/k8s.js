@@ -49,14 +49,20 @@ const projectList = [
     owner: 'foo@example.org',
     members: [
       {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
         name: 'foo@example.org',
         roles: ['admin', 'owner']
       },
       {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
         name: 'bar@example.org',
         roles: ['admin']
       },
       {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
         roles: ['viewer']
       }
@@ -71,16 +77,46 @@ const projectList = [
     owner: 'bar@example.org',
     members: [
       {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
         name: 'foo@example.org',
         roles: ['admin', 'owner']
       },
       {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'User',
         name: 'system:serviceaccount:garden-foo:robot',
         roles: ['viewer', 'admin']
       }
     ],
     description: 'bar-description',
     purpose: 'bar-purpose'
+  }),
+  getProject({
+    name: 'GroupMember1',
+    createdBy: 'new@example.org',
+    owner: 'new@example.org',
+    members: [
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'Group',
+        name: 'group1',
+        roles: ['admin', 'owner']
+      }
+    ],
+  }),
+  getProject({
+    name: 'GroupMember2',
+    createdBy: 'new@example.org',
+    owner: 'new@example.org',
+    members: [
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'Group',
+        name: 'group2',
+        roles: ['admin', 'owner']
+      }
+    ],
   }),
   getProject({
     name: 'new',
@@ -344,6 +380,12 @@ function getInfrastructureSecret (namespace, name, profileName, data = {}) {
   }
 }
 
+function getRoles (member) {
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(member.roles)
+  _.assign(member, { role, roles })
+  return member
+}
+
 function getUser (member) {
   const name = member.name || member
   const user = {
@@ -351,10 +393,7 @@ function getUser (member) {
     kind: 'User',
     name
   }
-  if (member.roles) {
-    const { role, roles } = splitMemberRolesIntoRoleAndRoles(member.roles)
-    _.assign(user, { role, roles })
-  }
+
   return user
 }
 
@@ -362,9 +401,9 @@ function getProject ({ name, namespace, createdBy, owner, members = [], descript
   owner = owner || createdBy
   namespace = namespace || `garden-${name}`
   members = _
-    .chain(members)
-    .map(getUser)
-    .value()
+  .chain(members)
+  .map(getRoles)
+  .value()
   owner = getUser(owner)
   createdBy = getUser(createdBy)
   return {
@@ -1201,7 +1240,7 @@ const stub = {
       .reply(200, { items: [terminal1, terminal2] })
     return scope
   },
-  getProject ({ bearer, name, namespace, resourceVersion = 42, unauthorized = false }) {
+  getProject ({ bearer, name, resourceVersion = 42, unauthorized = false }) {
     let statusCode = 200
     let result = _
       .chain(projectList)

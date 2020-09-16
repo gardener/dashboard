@@ -32,7 +32,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
   const metadata = { name }
   const username = `${name}@example.org`
   const id = username
-  const user = auth.createUser({ id })
+  const user = auth.createUser({ id, groups: ['group1'] })
   const admin = auth.createUser({ id: 'admin@example.org' })
   const role = 'project'
   const owner = 'owner'
@@ -44,7 +44,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     cache.projects.replace(k8s.projectList)
   })
 
-  it('should return two projects', async function () {
+  it('should return three projects', async function () {
     const bearer = await user.bearer
     k8s.stub.getProjects({ bearer })
     const res = await agent
@@ -53,7 +53,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(2)
+    expect(res.body).to.have.length(3)
   })
 
   it('should return all projects', async function () {
@@ -65,7 +65,7 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
 
     expect(res).to.have.status(200)
     expect(res).to.be.json
-    expect(res.body).to.have.length(4)
+    expect(res.body).to.have.length(6)
   })
 
   it('should return the foo project', async function () {
@@ -104,7 +104,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     // watch project stub
     const project = k8s.getProject({
       name,
-      namespace,
       createdBy,
       owner,
       description,
@@ -152,7 +151,6 @@ module.exports = function ({ agent, sandbox, k8s, auth }) {
     // watch project stub
     const project = k8s.getProject({
       name,
-      namespace,
       createdBy,
       owner,
       description,
