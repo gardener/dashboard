@@ -28,7 +28,7 @@ limitations under the License.
               <v-chip
                 v-on="on"
                 small
-                class="my-0 ml-2"
+                class="my-0 ml-2 enablePointerEvents"
                 outlined
                 color="orange darken-2">
                 Unverified
