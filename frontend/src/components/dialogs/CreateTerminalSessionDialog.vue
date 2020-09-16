@@ -27,7 +27,7 @@ limitations under the License.
     <template v-slot:message>
       <v-tabs v-model="tab" color="cyan darken-2">
         <v-tab key="target-tab" href="#target-tab">Terminal</v-tab>
-        <v-tab key="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
+        <v-tab v-if="isTerminalShortcutsFeatureEnabled" key="shortcut-tab" href="#shortcut-tab">Terminal Shortcuts</v-tab>
       </v-tabs>
       <v-tabs-items v-model="tab">
         <v-tab-item key="target-tab" value="target-tab">
@@ -132,7 +132,8 @@ export default {
       'hasShootTerminalAccess',
       'hasGardenTerminalAccess',
       'isAdmin',
-      'shootByNamespaceAndName'
+      'shootByNamespaceAndName',
+      'isTerminalShortcutsFeatureEnabled'
     ]),
     shootItem () {
       return this.shootByNamespaceAndName({ name: this.name, namespace: this.namespace })
