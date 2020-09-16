@@ -128,23 +128,27 @@ exports.list = async function ({ user, qs = {} }) {
   const projects = cache.getProjects()
   const isAdmin = await authorization.isAdmin(user)
 
-  const isMemberOf = project => _
-    .chain(project)
-    .get('spec.members')
-    .findIndex({
-      kind: 'User',
-      name: user.id
-    })
-    .gte(0)
-    .value()
+  const isMemberOf = project => {
+    const hasGroupMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'Group'])
+      .map('name')
+      .intersection(user.groups)
+      .size()
+      .gt(0)
+      .value()
 
-  const isGroupMemberOf = project => !_
-    .chain(project)
-    .get('spec.members')
-    .filter(['kind', 'Group'])
-    .filter(({ name }) => _.includes(user.groups, name))
-    .isEmpty()
-    .value()
+    const hasUserMembership = _
+      .chain(project)
+      .get('spec.members')
+      .filter(['kind', 'User'])
+      .map('name')
+      .includes(user.id)
+      .value()
+
+    return hasGroupMembership || hasUserMembership
+  }
 
   const phases = _
     .chain(qs)
@@ -155,7 +159,7 @@ exports.list = async function ({ user, qs = {} }) {
   return _
     .chain(projects)
     .filter(project => {
-      if (!isAdmin && !isMemberOf(project) && !isGroupMemberOf(project)) {
+      if (!isAdmin && !isMemberOf(project)) {
         return false
       }
       if (!_.isEmpty(phases)) {
