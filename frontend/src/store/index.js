@@ -985,23 +985,25 @@ const actions = {
         }
       }
       const handleSubscriptionTimeout = () => {
-        done(new Error('Cluster subscription timed out'))
+        done(Object.assign(new Error('Cluster subscription timed out'), {
+          code: 504,
+          reason: 'Timeout'
+        }))
       }
       const handleSubscriptionAcknowledgement = event => {
         if (event.type === 'ERROR') {
-          const { code, reason } = event.object
-          let text = reason
-          let message = event.object.message
+          const code = event.object.code
+          let { reason, message } = event.object
           if (code === 404) {
-            text = 'Cluster not found'
-            message = 'The cluster you are looking for doesn\'t exist!'
+            reason = 'Cluster not found'
+            message = 'The cluster you are looking for doesn\'t exist'
           } else if (code === 403) {
-            text = 'Access to cluster denied'
+            reason = 'Access to cluster denied'
           } else if (code >= 500) {
-            text = 'Oops, something went wrong'
-            message = 'An unexpected error occurred. Please try again later.'
+            reason = 'Oops, something went wrong'
+            message = 'An unexpected error occurred. Please try again later'
           }
-          done(Object.assign(new Error(message), { code, text }))
+          done(Object.assign(new Error(message), { code, reason }))
         } else {
           done()
         }
@@ -1211,14 +1213,18 @@ const actions = {
     const { data } = await getKubeconfigData()
     commit('SET_KUBECONFIG_DATA', data)
   },
-  async ensureProjectTerminalShortcutsLoaded ({ commit, state }) {
+  async ensureProjectTerminalShortcutsLoaded ({ commit, dispatch, state }) {
     const { namespace, projectTerminalShortcuts } = state
     if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
-      const { data: items } = await listProjectTerminalShortcuts({ namespace })
-      commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
-        namespace,
-        items
-      })
+      try {
+        const { data: items } = await listProjectTerminalShortcuts({ namespace })
+        commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+          namespace,
+          items
+        })
+      } catch (err) {
+        dispatch('setError', err)
+      }
     }
   },
   setOnlyShootsWithIssues ({ commit }, value) {

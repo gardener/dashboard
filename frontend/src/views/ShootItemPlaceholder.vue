@@ -45,8 +45,12 @@ export default {
     componentProperties () {
       switch (this.component) {
         case 'shoot-item-error': {
-          const { code, text, message } = this.error
-          return { code, text, message }
+          const {
+            code = 500,
+            reason = 'Oops, something went wrong',
+            message = 'An unexpected error occurred. Please try again later'
+          } = this.error
+          return { code, text: reason, message }
         }
         default: {
           return {}
@@ -66,9 +70,9 @@ export default {
       const { namespace, name } = get(this.$route, 'params', {})
       for (const { type, object: { metadata = {} } } of events) {
         if (type === 'DELETED' && metadata.namespace === namespace && metadata.name === name) {
-          this.error = Object.assign(new Error('The cluster you are looking for is no longer available!'), {
+          this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
             code: 410,
-            text: 'Cluster is gone'
+            reason: 'Cluster is gone'
           })
           this.component = 'shoot-item-error'
           return
