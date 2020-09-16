@@ -23,11 +23,10 @@ limitations under the License.
       <v-list-item-content class="py-0">
         <v-list-item-title>
           {{shortcut.title}}
-          <v-tooltip top max-width="400px">
+          <v-tooltip v-if="isUnverified" top max-width="400px">
             <template v-slot:activator="{ on }">
               <v-chip
                 v-on="on"
-                v-if="isUnverified"
                 small
                 class="my-0 ml-2"
                 outlined
