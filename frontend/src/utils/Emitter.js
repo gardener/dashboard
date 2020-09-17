@@ -186,6 +186,16 @@ class ShootsSubscription extends AbstractSubscription {
 }
 
 class ShootSubscription extends AbstractSubscription {
+  constructor (connector) {
+    super(connector)
+
+    this.socket.on('namespacedEvents', ({ kind, namespaces }) => {
+      if (kind === 'shoot') {
+        this.emit(kind, namespaces)
+      }
+    })
+  }
+
   subscribeShoot ({ name, namespace }) {
     this.subscribeOnNextTrigger({ name, namespace })
     this.subscribe()
