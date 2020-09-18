@@ -57,7 +57,7 @@ limitations under the License.
               @keyup.enter="navigateToHighlightedProject"
             >
               <v-icon class="pr-6">mdi-grid-large</v-icon>
-              <span class="ml-2">{{projectName}}</span>
+              <span class="ml-2" :class="{ placeholder: !project }" >{{projectName}}</span>
               <template v-if="project">
                 <stale-project-warning :project="project" small color="white"></stale-project-warning>
               </template>
@@ -522,6 +522,12 @@ export default {
       font-weight: 700;
       font-size: 16px;
       background-color: rgba(0,0,0,0.1) !important;
+      .placeholder::before {
+        content: 'Project';
+        font-weight: 400;
+        color: hsla(0,0%,100%,.7);
+        text-transform: none;
+      }
     }
 
     .v-footer{

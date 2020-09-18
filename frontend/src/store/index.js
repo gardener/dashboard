@@ -985,19 +985,24 @@ const actions = {
         }
       }
       const handleSubscriptionTimeout = () => {
-        done(new Error('Cluster subscription timed out'))
+        done(Object.assign(new Error('Cluster subscription timed out'), {
+          code: 504,
+          reason: 'Timeout'
+        }))
       }
-      const handleSubscriptionAcknowledgement = event => {
-        if (event.type === 'ERROR') {
-          const { message, code } = event.object
-          switch (code) {
-            case 404:
-              done(new Error('Failed to fetch cluster'))
-              break
-            default:
-              done(new Error(message))
-              break
+      const handleSubscriptionAcknowledgement = object => {
+        if (object.kind === 'Status') {
+          let { code, reason, message } = object
+          if (code === 404) {
+            reason = 'Cluster not found'
+            message = 'The cluster you are looking for doesn\'t exist'
+          } else if (code === 403) {
+            reason = 'Access to cluster denied'
+          } else if (code >= 500) {
+            reason = 'Oops, something went wrong'
+            message = 'An unexpected error occurred. Please try again later'
           }
+          done(Object.assign(new Error(message), { code, reason }))
         } else {
           done()
         }
@@ -1011,11 +1016,14 @@ const actions = {
       EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
     })
   },
-  subscribeShootAcknowledgement ({ commit, state }, event) {
-    if (event.type !== 'ERROR') {
+  subscribeShootAcknowledgement ({ commit, state }, object) {
+    if (object.kind === 'Shoot') {
       commit('shoots/HANDLE_EVENTS', {
         rootState: state,
-        events: [event]
+        events: [{
+          type: 'ADDED',
+          object
+        }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata }) => {
         const promises = []
@@ -1031,7 +1039,7 @@ const actions = {
           console.error('Failed to fetch shoot or shootSeed info:', err.message)
         }
       }
-      fetchShootAndShootSeedInfo(event.object)
+      fetchShootAndShootSeedInfo(object)
     }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
@@ -1207,14 +1215,18 @@ const actions = {
     const { data } = await getKubeconfigData()
     commit('SET_KUBECONFIG_DATA', data)
   },
-  async ensureProjectTerminalShortcutsLoaded ({ commit, state }) {
+  async ensureProjectTerminalShortcutsLoaded ({ commit, dispatch, state }) {
     const { namespace, projectTerminalShortcuts } = state
     if (!projectTerminalShortcuts || projectTerminalShortcuts.namespace !== namespace) {
-      const { data: items } = await listProjectTerminalShortcuts({ namespace })
-      commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
-        namespace,
-        items
-      })
+      try {
+        const { data: items } = await listProjectTerminalShortcuts({ namespace })
+        commit('SET_PROJECT_TERMINAL_SHORTCUTS', {
+          namespace,
+          items
+        })
+      } catch (err) {
+        console.warn('Failed to list project terminal shortcuts:', err.message)
+      }
     }
   },
   setOnlyShootsWithIssues ({ commit }, value) {

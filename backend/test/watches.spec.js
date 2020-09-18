@@ -127,14 +127,15 @@ describe('watches', function () {
 
   describe('shoots', function () {
     class Room {
-      constructor (namespace, events) {
+      constructor (namespace, events, kind = 'shoots') {
+        this.kind = kind
         this.namespace = namespace
         this.events = events
       }
 
       emit (event, { kind, namespaces }) {
         expect(event).to.equal('namespacedEvents')
-        expect(kind).to.equal('shoots')
+        expect(kind).to.equal(this.kind)
         expect(namespaces[this.namespace]).to.have.length(1)
         const { objectKey, ...actualEvent } = namespaces[this.namespace][0]
         expect(objectKey).to.equal(actualEvent.object.metadata.uid)
@@ -232,9 +233,9 @@ describe('watches', function () {
         { type: 'ADDED', object: foobar },
         { type: 'MODIFIED', object: foobar },
         { type: 'DELETED', object: foobar }
-      ])
+      ], 'shoot')
 
-      fooBazRoom = new Room('foo', [])
+      fooBazRoom = new Room('foo', [], 'shoot')
 
       fooIssuesRoom = new Room('foo', [])
 
@@ -275,13 +276,13 @@ describe('watches', function () {
       fooBarRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
         { type: 'MODIFIED', object: foobar }
-      ])
+      ], 'shoot')
 
       fooBazRoom = new Room('foo', [
         { type: 'ADDED', object: foobazUnhealthy },
         { type: 'MODIFIED', object: foobazUnhealthy },
         { type: 'DELETED', object: foobazUnhealthy }
-      ])
+      ], 'shoot')
 
       fooIssuesRoom = new Room('foo', [
         { type: 'ADDED', object: foobarUnhealthy },
@@ -331,11 +332,11 @@ describe('watches', function () {
 
       fooBarRoom = new Room('foo', [
         { type: 'DELETED', object: foobar }
-      ])
+      ], 'shoot')
 
       fooBazRoom = new Room('foo', [
         { type: 'DELETED', object: foobaz }
-      ])
+      ], 'shoot')
 
       fooIssuesRoom = new Room('foo', [])
 
