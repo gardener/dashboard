@@ -204,8 +204,8 @@ class ShootSubscription extends AbstractSubscription {
   async _subscribe () {
     const { namespace, name } = this.subscribeTo
     // TODO clear shoot from store?
-    this.socket.emit('subscribeShoot', { namespace, name }, event => {
-      store.dispatch('subscribeShootAcknowledgement', event)
+    this.socket.emit('subscribeShoot', { namespace, name }, object => {
+      store.dispatch('subscribeShootAcknowledgement', object)
     })
     return true
   }

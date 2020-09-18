@@ -218,10 +218,7 @@ module.exports = function ({ sandbox, auth }) {
       expect(isAdminStub).to.not.be.called
       expect(readShootStub).to.be.calledOnce
       expect(listShootsStub).to.not.be.called
-      expect(event).to.eql({
-        type: 'ADDED',
-        object: find(shootList, { metadata })
-      })
+      expect(event).to.eql(find(shootList, { metadata }))
     })
   })
 

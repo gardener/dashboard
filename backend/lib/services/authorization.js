@@ -60,6 +60,18 @@ exports.canGetOpenAPI = function (user) {
   })
 }
 
+exports.canGetShoot = function (user, namespace, name) {
+  return hasAuthorization(user, {
+    resourceAttributes: {
+      verb: 'get',
+      group: 'core.gardener.cloud',
+      resource: 'shoots',
+      namespace,
+      name
+    }
+  })
+}
+
 /*
 SelfSubjectRulesReview should only be used to hide/show actions or views on the UI and not for authorization checks.
 */

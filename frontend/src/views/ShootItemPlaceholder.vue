@@ -69,13 +69,18 @@ export default {
     handleShootEvents (events) {
       const { namespace, name } = get(this.$route, 'params', {})
       for (const { type, object: { metadata = {} } } of events) {
-        if (type === 'DELETED' && metadata.namespace === namespace && metadata.name === name) {
-          this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
-            code: 410,
-            reason: 'Cluster is gone'
-          })
-          this.component = 'shoot-item-error'
-          return
+        if (metadata.namespace === namespace && metadata.name === name) {
+          if (type === 'DELETED') {
+            this.error = Object.assign(new Error('The cluster you are looking for is no longer available'), {
+              code: 410,
+              reason: 'Cluster is gone'
+            })
+            this.component = 'shoot-item-error'
+          } else if (type === 'ADDED' && includes([404, 410], get(this.error, 'code'))) {
+            this.error = undefined
+            this.component = 'router-view'
+          }
+          break
         }
       }
     },

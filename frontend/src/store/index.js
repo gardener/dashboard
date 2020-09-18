@@ -990,10 +990,9 @@ const actions = {
           reason: 'Timeout'
         }))
       }
-      const handleSubscriptionAcknowledgement = event => {
-        if (event.type === 'ERROR') {
-          const code = event.object.code
-          let { reason, message } = event.object
+      const handleSubscriptionAcknowledgement = object => {
+        if (object.kind === 'Status') {
+          let { code, reason, message } = object
           if (code === 404) {
             reason = 'Cluster not found'
             message = 'The cluster you are looking for doesn\'t exist'
@@ -1017,11 +1016,14 @@ const actions = {
       EmitterWrapper.shootEmitter.subscribeShoot({ name, namespace })
     })
   },
-  subscribeShootAcknowledgement ({ commit, state }, event) {
-    if (event.type !== 'ERROR') {
+  subscribeShootAcknowledgement ({ commit, state }, object) {
+    if (object.kind === 'Shoot') {
       commit('shoots/HANDLE_EVENTS', {
         rootState: state,
-        events: [event]
+        events: [{
+          type: 'ADDED',
+          object
+        }]
       })
       const fetchShootAndShootSeedInfo = async ({ metadata }) => {
         const promises = []
@@ -1037,7 +1039,7 @@ const actions = {
           console.error('Failed to fetch shoot or shootSeed info:', err.message)
         }
       }
-      fetchShootAndShootSeedInfo(event.object)
+      fetchShootAndShootSeedInfo(object)
     }
   },
   getShootInfo ({ dispatch, commit }, { name, namespace }) {
