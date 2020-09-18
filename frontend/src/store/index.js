@@ -1223,7 +1223,7 @@ const actions = {
           items
         })
       } catch (err) {
-        dispatch('setError', err)
+        console.warn('Failed to list project terminal shortcuts:', err.message)
       }
     }
   },
