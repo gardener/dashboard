@@ -87,17 +87,17 @@ limitations under the License.
                     <v-icon :color="color">mdi-account-cog-outline</v-icon>
                   </v-list-item-avatar>
                   <v-list-item-content>
-                    <v-list-item-subtitle>Technical Contact</v-list-item-subtitle>
+                    <v-list-item-subtitle>Owner</v-list-item-subtitle>
                     <v-list-item-title>
                       <editable-account
                         :read-only="!canManageMembers"
                         :color="color"
-                        :value="technicalContact"
+                        :value="owner"
                         :items="userList"
-                        :rules="[rules.technicalContact]"
-                        placeholder="Select the technical contact"
+                        :rules="[rules.owner]"
+                        placeholder="Select the owner"
                         no-data-text="No project member available"
-                        :save="updateTechnicalContact"
+                        :save="updateowner"
                       ></editable-account>
                     </v-list-item-title>
                   </v-list-item-content>
@@ -302,17 +302,17 @@ export default {
     return {
       color: 'blue-grey darken-2',
       edit: false,
-      editTechnicalContact: false,
-      technicalContactMessages: [],
+      editowner: false,
+      ownerMessages: [],
       errorMessage: undefined,
       detailedErrorMessage: undefined,
       rules: {
-        technicalContact: value => {
+        owner: value => {
           if (!value) {
-            return 'Technical Contact is required'
+            return 'Owner is required'
           }
           if (!includes(this.userList, value)) {
-            return 'Technical Contact must be a project member'
+            return 'Owner must be a project member'
           }
           return true
         },
@@ -354,8 +354,8 @@ export default {
           members.add(username)
         }
       }
-      if (this.technicalContact) {
-        members.add(this.technicalContact)
+      if (this.owner) {
+        members.add(this.owner)
       }
       return Array.from(members)
     },
@@ -379,11 +379,11 @@ export default {
     projectName () {
       return this.projectDetails.projectName
     },
-    technicalContact () {
-      return this.projectDetails.technicalContact
+    owner () {
+      return this.projectDetails.owner
     },
-    technicalContactAvatarUrl () {
-      return gravatarUrlGeneric(this.technicalContact, 48)
+    ownerAvatarUrl () {
+      return gravatarUrlGeneric(this.owner, 48)
     },
     costObject () {
       return this.projectDetails.costObject
@@ -433,13 +433,13 @@ export default {
       'patchProject',
       'deleteProject'
     ]),
-    onEditTechnicalContact () {
-      this.editTechnicalContact = !this.editTechnicalContact
-      if (this.editTechnicalContact) {
-        this.$nextTick(() => this.$refs.technicalContact.activateMenu())
+    onEditowner () {
+      this.editowner = !this.editowner
+      if (this.editowner) {
+        this.$nextTick(() => this.$refs.owner.activateMenu())
       }
     },
-    updateTechnicalContact (value) {
+    updateowner (value) {
       return this.updateProperty('owner', value)
     },
     updateDescription (value) {

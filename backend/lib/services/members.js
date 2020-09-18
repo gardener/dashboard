@@ -23,34 +23,59 @@ const { isHttpError } = require('../kubernetes-client')
 const { dumpKubeconfig } = require('../kubernetes-config')
 const { Conflict, NotFound } = require('../errors.js')
 const cache = require('../cache')
+const { uniq } = require('lodash')
 
-function toServiceAccountName ({ metadata: { name, namespace } }) {
+function toServiceAccountName (name, namespace) {
   return `system:serviceaccount:${namespace}:${name}`
+}
+
+function hasServiceAccountPrefix(name) {
+  return _.startsWith(name, 'system:serviceaccount:')
+}
+
+function prefixedServiceAccountToComponents (name) {
+  if (name) {
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+    return { serviceAccountNamespace, serviceAccountName }
+  }
+  return {}
+}
+
+function toUserName(name, namespace, kind) {
+  if (kind === 'ServiceAccount' && !hasServiceAccountPrefix(name)) {
+    return toServiceAccountName(name, namespace)
+  }
+  return name
 }
 
 function fromResource (project = {}, serviceAccounts = []) {
   const serviceAccountsMetadata = _
     .chain(serviceAccounts)
-    .map(serviceAccount => [
-      toServiceAccountName(serviceAccount),
-      {
-        createdBy: _.get(serviceAccount, ['metadata', 'annotations', 'garden.sapcloud.io/createdBy']),
-        creationTimestamp: serviceAccount.metadata.creationTimestamp
-      }
-    ])
-    .fromPairs()
-    .value()
-
-  return _
-    .chain(project)
-    .get('spec.members')
-    .filter(['kind', 'User'])
-    .map(({ name: username, role, roles }) => ({
-      username,
-      roles: joinMemberRoleAndRoles(role, roles),
-      ...serviceAccountsMetadata[username]
+    .map(({ metadata }) => ({
+        username: toServiceAccountName(metadata.name, metadata.namespace),
+        createdBy: _.get(metadata, ['annotations', 'garden.sapcloud.io/createdBy']),
+        creationTimestamp: metadata.creationTimestamp,
+        roles: []
     }))
     .value()
+
+  const members = _
+    .chain(project)
+    .get('spec.members')
+    .map(({ name, namespace, kind, role, roles }) => {
+      const username = toUserName(name, namespace, kind)
+      return {
+        username,
+        roles: joinMemberRoleAndRoles(role, roles),
+        ...serviceAccountsMetadata[username]
+      }
+    })
+    .value()
+
+  const noMemberServiceAccounts = _.differenceBy(serviceAccountsMetadata, members, 'username')
+
+  return [...members, ...noMemberServiceAccounts]
+
 }
 
 function readProject (client, namespace) {
@@ -87,17 +112,35 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
-  if (_.find(members, ['name', name])) {
-    throw new Conflict(`User '${name}' is already member of this project`)
-  }
+
+  // Gardener wants to have a role for backward compatibility...
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
-  members.push({
-    kind: 'User',
-    name,
-    apiGroup: 'rbac.authorization.k8s.io',
-    role,
-    roles
-  })
+
+  if (hasServiceAccountPrefix) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    if (_.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })) {
+      throw new Conflict(`ServiceAccount '${name}' is already member of this project`)
+    }
+    members.push({
+      kind: 'ServiceAccount',
+      name: serviceAccountName,
+      namespace: serviceAccountNamespace,
+      role,
+      roles
+    })
+  } else {
+    if (_.find(members, ['name', name])) {
+      throw new Conflict(`User '${name}' is already member of this project`)
+    }
+    members.push({
+      kind: 'User',
+      name,
+      apiGroup: 'rbac.authorization.k8s.io',
+      role,
+      roles
+    })
+  }
+
   const body = {
     spec: {
       members
@@ -111,11 +154,32 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
   const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
-  const member = _.find(members, ['name', name])
+
+  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
+
+  let member = _.find(members, { name, kind: 'User' })
+  if (hasServiceAccountPrefix) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    if (member) {
+      // Service Account set as User => remove
+      _.remove(members, member)
+    }
+    member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
+    if (!member) { // No a ServiceAccount member (yet) =>add
+      member = {
+        kind: 'ServiceAccount',
+        name: serviceAccountName,
+        namespace: serviceAccountNamespace,
+        role,
+        roles
+      }
+      members.push(member)
+    }
+  }
+
   if (!member) {
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
-  const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
   _.assign(member, { role, roles })
 
   const body = {
@@ -131,10 +195,25 @@ async function unsetProjectMember (client, { namespace, name }) {
   const project = await readProject(client, namespace)
   // get project members from project
   const members = [...project.spec.members]
-  if (!_.find(members, ['name', name])) {
+
+  const removedMember = false
+  let member = _.find(members, { name, kind: 'User' })
+  if (member) {
+    _.remove(members, member)
+    removedMember = true
+  }
+  if (hasServiceAccountPrefix) {
+    member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
+    if (member) {
+      _.remove(members, member)
+      removedMember = true
+    }
+  }
+  if (!removedMember) {
     return project
   }
-  _.remove(members, ['name', name])
+
+  _.remove(members, member)
   const body = {
     spec: {
       members
@@ -173,7 +252,7 @@ exports.get = async function ({ user, namespace, name }) {
   if (!member) {
     throw new NotFound(`User ${name} is not a member of project ${projectName}`)
   }
-  const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
   if (serviceAccountNamespace === namespace) {
     const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
     const server = config.apiServerUrl
@@ -207,7 +286,7 @@ exports.get = async function ({ user, namespace, name }) {
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const client = user.client
 
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
   if (serviceaccountNamespace === namespace) {
     await createServiceaccount(client, {
       namespace: serviceaccountNamespace,

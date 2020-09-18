@@ -16,34 +16,6 @@ limitations under the License.
 
 <template>
   <v-container fluid>
-    <v-card class="mr-extra">
-      <v-toolbar flat color="teal darken-2">
-        <v-icon class="white--text pr-2">mdi-account</v-icon>
-        <v-toolbar-title class="subtitle-1 white--text">
-          Technical Contact
-        </v-toolbar-title>
-      </v-toolbar>
-      <v-list v-if="!!technicalContact" two-line subheader>
-        <v-list-item>
-          <v-list-item-avatar>
-            <img :src="avatarUrl(technicalContact)" />
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title>{{displayName(technicalContact)}}</v-list-item-title>
-            <v-list-item-subtitle><a :href="'mailto:'+technicalContact" class="cyan--text text--darken-2">{{technicalContact}}</a></v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-      <v-list v-else two-line subheader>
-        <v-list-item avatar>
-          <v-list-item-content>
-            <v-list-item-title>This project has no technical contact configured.</v-list-item-title>
-            <v-list-item-subtitle>You can set a technical contact on the <router-link :to="{ name: 'Administration', params: { namespace:project.metadata.namespace } }">administration</router-link> page by selecting one of the users from the list below.</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-card>
-
     <v-card class="mr-extra mt-6">
       <v-toolbar flat color="green darken-2">
         <v-icon class="white--text pr-2">mdi-account-multiple</v-icon>
@@ -90,7 +62,7 @@ limitations under the License.
             :avatarUrl="user.avatarUrl"
             :displayName="user.displayName"
             :isEmail="user.isEmail"
-            :isTechnicalContact="user.isTechnicalContact"
+            :isowner="user.isowner"
             :roles="user.roles"
             :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
@@ -221,7 +193,7 @@ import {
   displayName,
   gravatarUrlGeneric,
   isEmail,
-  serviceAccountToDisplayName,
+  nameFromPrefixedServiceAccountName,
   isServiceAccount,
   getTimestampFormatted,
   MEMBER_ROLE_DESCRIPTORS,
@@ -278,8 +250,8 @@ export default {
     projectDetails () {
       return getProjectDetails(this.project)
     },
-    technicalContact () {
-      return this.projectDetails.technicalContact
+    owner () {
+      return this.projectDetails.owner
     },
     costObject () {
       return this.projectDetails.costObject
@@ -307,7 +279,7 @@ export default {
           avatarUrl: gravatarUrlGeneric(username),
           displayName: displayName(username),
           isEmail: isEmail(username),
-          isTechnicalContact: this.isTechnicalContact(username),
+          isowner: this.isowner(username),
           roleDisplayNames: this.sortedRoleDisplayNames(user.roles),
           isCurrentUser: this.isCurrentUser(username)
         }
@@ -341,13 +313,13 @@ export default {
         if (!this.serviceAccountFilter) {
           return true
         }
-        const name = serviceAccountToDisplayName(username)
+        const name = nameFromPrefixedServiceAccountName(username)
         return includes(toLower(name), toLower(this.serviceAccountFilter))
       }
       return sortBy(filter(this.serviceAccountList, predicate), 'displayName')
     },
     currentServiceAccountDisplayName () {
-      return serviceAccountToDisplayName(this.currentServiceAccountName)
+      return nameFromPrefixedServiceAccountName(this.currentServiceAccountName)
     }
   },
   methods: {
@@ -374,8 +346,8 @@ export default {
     openServiceAccountHelpDialog () {
       this.serviceAccountHelpDialog = true
     },
-    isTechnicalContact (username) {
-      return this.technicalContact === toLower(username)
+    isowner (username) {
+      return this.owner === toLower(username)
     },
     avatarUrl (username) {
       return gravatarUrlGeneric(username)
@@ -456,10 +428,10 @@ export default {
       forEach(roleNames, roleName => {
         const roleDescriptor = find(MEMBER_ROLE_DESCRIPTORS, { name: roleName })
         if (roleDescriptor) {
-          displayNames.push(roleDescriptor.displayName)
+          displayNames.push(roleDescriptor)
         }
       })
-      return displayNames.sort()
+      return sortBy(displayNames, 'displayName')
     },
     isCurrentUser (username) {
       return this.username === username

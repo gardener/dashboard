@@ -52,7 +52,7 @@ export function emailToDisplayName (value) {
   }
 }
 
-export function serviceAccountToDisplayName (serviceAccount) {
+export function nameFromPrefixedServiceAccountName (serviceAccount) {
   if (serviceAccount) {
     return last(split(serviceAccount, ':'))
   }
@@ -351,7 +351,7 @@ export function getProjectDetails (project) {
   const projectData = project.data || {}
   const projectMetadata = project.metadata || {}
   const projectName = projectMetadata.name || ''
-  const technicalContact = projectData.owner || ''
+  const owner = projectData.owner || ''
   const costObject = get(project, ['metadata', 'annotations', 'billing.gardener.cloud/costObject'])
   const creationTimestamp = projectMetadata.creationTimestamp
   const createdAt = getDateFormatted(creationTimestamp)
@@ -363,7 +363,7 @@ export function getProjectDetails (project) {
 
   return {
     projectName,
-    technicalContact,
+    owner,
     costObject,
     createdAt,
     creationTimestamp,
@@ -410,8 +410,22 @@ export function isServiceAccount (username) {
   return startsWith(username, 'system:serviceaccount:')
 }
 
-export function isServiceAccountFromNamespace (username, namespace) {
-  return startsWith(username, `system:serviceaccount:${namespace}:`)
+export function isForeignServiceAccount (serviceAccount, namespace) {
+  if (serviceAccount && namespace) {
+    const { serviceAccountNamespace } = prefixedServiceAccountToComponents(serviceAccount)
+    if (serviceAccountNamespace && serviceAccountNamespace !== namespace) {
+      return true
+    }
+  }
+  return false
+}
+
+export function prefixedServiceAccountToComponents (serviceAccount) {
+  if (serviceAccount) {
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(serviceAccount) || []
+    return { serviceAccountNamespace, serviceAccountName }
+  }
+  return {}
 }
 
 // expect colors to be in format <color> <optional:modifier>
@@ -642,6 +656,12 @@ export const MEMBER_ROLE_DESCRIPTORS = [
   {
     name: 'uam',
     displayName: 'UAM'
+  },
+  {
+    name: 'owner',
+    displayName: 'Owner',
+    notEditable: true,
+    tooltip: 'You can change the project owner on the administration page'
   }
 ]
 

@@ -61,9 +61,14 @@ limitations under the License.
       </v-list-item-content>
       <v-list-item-action class="ml-1">
         <div d-flex flex-row>
-          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="black" outlined>
-            {{roleName}}
-          </v-chip>
+           <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+            <template v-slot:activator="{ on }">
+              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+                {{displayName}}
+              </v-chip>
+            </template>
+            <span>{{tooltip}}</span>
+          </v-tooltip>
         </div>
       </v-list-item-action>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
@@ -116,7 +121,7 @@ import TimeString from '@/components/TimeString'
 import GPopper from '@/components/GPopper'
 import AccountAvatar from '@/components/AccountAvatar'
 import {
-  isServiceAccountFromNamespace
+  isForeignServiceAccount
 } from '@/utils'
 
 export default {
@@ -166,7 +171,7 @@ export default {
       'canGetSecrets'
     ]),
     isServiceAccountFromCurrentNamespace () {
-      return isServiceAccountFromNamespace(this.username, this.namespace)
+      return !isForeignServiceAccount(this.username, this.namespace)
     },
     createdByClasses () {
       return this.createdBy ? ['font-weight-bold'] : ['grey--text']

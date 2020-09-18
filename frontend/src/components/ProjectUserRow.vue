@@ -32,9 +32,14 @@ limitations under the License.
       </v-list-item-content>
       <v-list-item-action class="ml-1">
         <div d-flex flex-row>
-          <v-chip class="mr-3" v-for="roleName in roleDisplayNames" :key="roleName" small color="grey darken-4" outlined>
-            {{roleName}}
-          </v-chip>
+          <v-tooltip top v-for="{ displayName, notEditable, tooltip } in roleDisplayNames" :key="displayName" :disabled="!tooltip">
+            <template v-slot:activator="{ on }">
+              <v-chip v-on="on" class="mr-3" small :color="notEditable ? 'grey' : 'black'" outlined>
+                {{displayName}}
+              </v-chip>
+            </template>
+            <span>{{tooltip}}</span>
+          </v-tooltip>
         </div>
       </v-list-item-action>
       <v-list-item-action v-if="canManageMembers" class="ml-1">
@@ -51,12 +56,12 @@ limitations under the License.
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn :disabled="isTechnicalContact" icon color="red" @click.native.stop="onDelete">
+              <v-btn :disabled="isowner" icon color="red" @click.native.stop="onDelete">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </div>
           </template>
-          <span v-if="isTechnicalContact">This user is set as technical contact</span>
+          <span v-if="isowner">This user is set as owner</span>
           <span v-else>Delete User</span>
         </v-tooltip>
       </v-list-item-action>
@@ -86,7 +91,7 @@ export default {
       type: Boolean,
       required: true
     },
-    isTechnicalContact: {
+    isowner: {
       type: Boolean,
       required: true
     },

@@ -21,6 +21,7 @@ limitations under the License.
     :cancelButtonText="cancelButtonText"
     :max-width="maxWidth"
     :defaultColor="dialogColor"
+    :confirmValue="confirmValue"
     >
     <template v-slot:caption>{{captionText}}</template>
     <template v-slot:message>
@@ -44,17 +45,19 @@ export default {
       captionText: undefined,
       messageHtml: undefined,
       dialogColor: undefined,
-      maxWidth: undefined
+      maxWidth: undefined,
+      confirmValue: undefined
     }
   },
   methods: {
-    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth } = {}) {
+    waitForConfirmation ({ confirmButtonText, cancelButtonText, captionText, messageHtml, dialogColor, maxWidth, confirmValue } = {}) {
       this.confirmButtonText = confirmButtonText || 'Confirm'
       this.cancelButtonText = cancelButtonText || 'Cancel'
       this.captionText = captionText || 'Confirm'
       this.messageHtml = messageHtml
       this.dialogColor = dialogColor || 'orange'
       this.maxWidth = maxWidth || '400'
+      this.confirmValue = confirmValue
 
       return this.$refs.gDialog.confirmWithDialog()
     }
