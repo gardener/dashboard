@@ -585,7 +585,7 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
 export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
-  const zones = availableZones.length ? [sample(availableZones)] : undefined
+  const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
