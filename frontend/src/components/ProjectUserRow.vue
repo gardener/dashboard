@@ -49,7 +49,7 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Update User</span>
+          <span>Change user roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageMembers" class="ml-1">
@@ -57,12 +57,12 @@ limitations under the License.
           <template v-slot:activator="{ on }">
             <div v-on="on">
               <v-btn :disabled="isowner" icon color="red" @click.native.stop="onDelete">
-                <v-icon>mdi-delete</v-icon>
+                <v-icon>mdi-close</v-icon>
               </v-btn>
             </div>
           </template>
           <span v-if="isowner">This user is set as owner</span>
-          <span v-else>Delete User</span>
+          <span v-else>Remove user from project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>

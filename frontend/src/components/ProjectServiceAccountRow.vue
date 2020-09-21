@@ -98,17 +98,19 @@ limitations under the License.
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
           </template>
-          <span>Update Service Account</span>
+          <span>Change service account roles</span>
         </v-tooltip>
       </v-list-item-action>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn v-on="on" icon color="red" @click.native.stop="onDelete">
-              <v-icon>mdi-delete</v-icon>
+              <v-icon v-if="isServiceAccountFromCurrentNamespace">mdi-delete</v-icon>
+              <v-icon v-else>mdi-close</v-icon>
             </v-btn>
           </template>
-          <span>Delete Service Account</span>
+          <span v-if="isServiceAccountFromCurrentNamespace">Delete Service Account</span>
+          <span v-else>Remove service account from project</span>
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>

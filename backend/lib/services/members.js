@@ -26,6 +26,9 @@ const cache = require('../cache')
 const { uniq } = require('lodash')
 
 function toServiceAccountName (name, namespace) {
+  if (hasServiceAccountPrefix(name)) {
+    return name
+  }
   return `system:serviceaccount:${namespace}:${name}`
 }
 

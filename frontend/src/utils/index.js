@@ -428,6 +428,11 @@ export function prefixedServiceAccountToComponents (serviceAccount) {
   return {}
 }
 
+export function isPrefixedServiceAccount (serviceAccount) {
+  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(serviceAccount)
+  return serviceAccountNamespace && serviceAccountName
+}
+
 // expect colors to be in format <color> <optional:modifier>
 export function textColor (color) {
   const [colorStr, colorMod] = split(color, ' ')
