@@ -349,23 +349,7 @@ export default {
         try {
           const name = this.memberName
           const roles = [...this.internalRoles, ...this.unsupportedRoles]
-          if (this.isServiceDialog) {
-            if (!roles.length) {
-              await this.deleteMember({ name, kind: 'ServiceAccount' })
-            }
-            try {
-              await this.updateMember({ name, roles })
-            } catch (err) {
-              const errorDetails = errorDetailsFromError(err)
-              if (this.isServiceDialog && errorDetails.errorCode === 404) {
-                await this.addMember({ name, roles }) // Service Account may not be a member
-              } else {
-                throw err
-              }
-            }
-          } else {
-            await this.updateMember({ name, roles })
-          }
+          await this.updateMember({ name, roles })
 
           if (this.isCurrentUser && !this.isAdmin) {
             await this.refreshSubjectRules()

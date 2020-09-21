@@ -116,7 +116,7 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   // Gardener wants to have a role for backward compatibility...
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
-  if (hasServiceAccountPrefix) {
+  if (hasServiceAccountPrefix(name)) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     if (_.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })) {
       throw new Conflict(`ServiceAccount '${name}' is already member of this project`)
@@ -158,14 +158,17 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
   let member = _.find(members, { name, kind: 'User' })
-  if (hasServiceAccountPrefix) {
+  if (hasServiceAccountPrefix(name)) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     if (member) {
       // Service Account set as User => remove
       _.remove(members, member)
     }
     member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-    if (!member) { // No a ServiceAccount member (yet) =>add
+    if (member && !memberRoles.length) {
+      // Removed all roles from Service Account => delete from member list
+      _.remove(members, member)
+    } else if (!member) { // Not a ServiceAccount member (yet) =>add
       member = {
         kind: 'ServiceAccount',
         name: serviceAccountName,
@@ -196,13 +199,14 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project members from project
   const members = [...project.spec.members]
 
-  const removedMember = false
+  let removedMember = false
   let member = _.find(members, { name, kind: 'User' })
   if (member) {
     _.remove(members, member)
     removedMember = true
   }
-  if (hasServiceAccountPrefix) {
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
     if (member) {
       _.remove(members, member)
@@ -252,32 +256,34 @@ exports.get = async function ({ user, namespace, name }) {
   if (!member) {
     throw new NotFound(`User ${name} is not a member of project ${projectName}`)
   }
-  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-  if (serviceAccountNamespace === namespace) {
-    const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
-    const server = config.apiServerUrl
-    const secretName = _.first(serviceaccount.secrets).name
-    const secret = await client.core.secrets.get(namespace, secretName)
-    const token = decodeBase64(secret.data.token)
-    const caData = secret.data['ca.crt']
-    const clusterName = 'garden'
-    const contextName = `${clusterName}-${projectName}-${name}`
 
-    const kind = 'ServiceAccount'
-    const kubeconfig = dumpKubeconfig({
-      user: serviceAccountName,
-      context: contextName,
-      cluster: clusterName,
-      namespace: serviceAccountNamespace,
-      token,
-      server,
-      caData
-    })
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    if (serviceAccountNamespace === namespace) {
+      const serviceaccount = await client.core.serviceaccounts.get(namespace, serviceAccountName)
+      const server = config.apiServerUrl
+      const secretName = _.first(serviceaccount.secrets).name
+      const secret = await client.core.secrets.get(namespace, secretName)
+      const token = decodeBase64(secret.data.token)
+      const caData = secret.data['ca.crt']
+      const clusterName = 'garden'
+      const contextName = `${clusterName}-${projectName}-${name}`
 
-    return {
-      ...member,
-      kind,
-      kubeconfig
+      const kind = 'ServiceAccount'
+      const kubeconfig = dumpKubeconfig({
+        user: serviceAccountName,
+        context: contextName,
+        cluster: clusterName,
+        namespace: serviceAccountNamespace,
+        token,
+        server,
+        caData
+      })
+      return {
+        ...member,
+        kind,
+        kubeconfig
+      }
     }
   }
   return member
@@ -286,18 +292,28 @@ exports.get = async function ({ user, namespace, name }) {
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const client = user.client
 
-  const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-  if (serviceaccountNamespace === namespace) {
-    await createServiceaccount(client, {
-      namespace: serviceaccountNamespace,
-      name: serviceaccountName,
-      createdBy: user.id
-    })
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    if (serviceAccountNamespace === namespace) {
+      await createServiceaccount(client, {
+        namespace: serviceAccountNamespace,
+        name: serviceAccountName,
+        createdBy: user.id
+      })
+    }
   }
 
   // assign user to project
-  const project = await setProjectMember(client, { namespace, name, roles })
+  let project
+  if (roles.length) { // service account can be created without roles
+    project = await setProjectMember(client, { namespace, name, roles })
+  } else {
+    project = await readProject(client, namespace)
+  }
+
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+
+
   return fromResource(project, serviceAccounts)
 }
 
@@ -315,12 +331,15 @@ exports.remove = async function ({ user, namespace, name }) {
 
   // unassign user from project
   const project = await unsetProjectMember(client, { namespace, name })
-  const [, serviceaccountNamespace, serviceaccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
-  if (serviceaccountNamespace === namespace) {
-    await deleteServiceaccount(client, {
-      namespace,
-      name: serviceaccountName
-    })
+
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    if (serviceAccountNamespace === namespace) {
+      await deleteServiceaccount(client, {
+        namespace,
+        name: serviceAccountName
+      })
+    }
   }
 
   const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
