@@ -81,7 +81,7 @@ module.exports = function ({ agent, k8s, auth }) {
     const bearer = await user.bearer
     const name = 'baz@example.org'
     const roles = ['admin', 'owner']
-    k8s.stub.addMember({ bearer, namespace, name, roles })
+    k8s.stub.addMember({ bearer, namespace, name })
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
@@ -96,11 +96,11 @@ module.exports = function ({ agent, k8s, auth }) {
     const bearer = await user.bearer
     const name = 'foo@example.org'
     const roles = ['admin']
-    k8s.stub.addMember({ bearer, namespace, name, roles })
+    k8s.stub.addMember({ bearer, namespace, name })
     const res = await agent
       .post(`/api/namespaces/${namespace}/members`)
       .set('cookie', await user.cookie)
-      .send({ metadata, name })
+      .send({ metadata, name, roles })
     expect(res).to.have.status(409)
   })
 

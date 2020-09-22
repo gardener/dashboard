@@ -66,7 +66,7 @@ limitations under the License.
             :roles="user.roles"
             :roleDisplayNames="user.roleDisplayNames"
             :key="user.username"
-            @delete="onDelete"
+            @delete="onRemoveUser"
             @edit="onEditUser"
           ></project-user-row>
         </template>
@@ -120,10 +120,10 @@ limitations under the License.
             :created="serviceAccount.created"
             :roles="serviceAccount.roles"
             :roleDisplayNames="serviceAccount.roleDisplayNames"
-            :key="serviceAccount.username"
+            :key="`${serviceAccount.namespace}_${serviceAccount.username}`"
             @download="onDownload"
             @kubeconfig="onKubeconfig"
-            @delete="onDelete"
+            @delete="onDeleteServiceAccount"
             @edit="onEditServiceAccount"
           ></project-service-account-row>
         </template>
@@ -383,27 +383,11 @@ export default {
         this.kubeconfigDialog = true
       }
     },
-    confirmDelete (username) {
-      const memberName = escape(displayName(username))
-      const projectName = escape(this.projectDetails.projectName)
-      let messageHtml
-      if (this.isCurrentUser(username)) {
-        messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
-      } else {
-        messageHtml = `Do you want to delete the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
-      }
-      return this.$refs.confirmDialog.waitForConfirmation({
-        confirmButtonText: 'Delete',
-        captionText: 'Confirm Member Deletion',
-        messageHtml,
-        dialogColor: 'red'
-      })
-    },
-    async onDelete (username) {
-      const deletionConfirmed = await this.confirmDelete(username)
-      if (deletionConfirmed) {
-        await this.deleteMember(username)
-        if (this.isCurrentUser(username) && !this.isAdmin) {
+    async onRemoveUser (name) {
+      const removalConfirmed = await this.confirmRemoveUser(name)
+      if (removalConfirmed) {
+        await this.deleteMember(name)
+        if (this.isCurrentUser(name) && !this.isAdmin) {
           if (this.projectList.length > 0) {
             const p1 = this.projectList[0]
             this.$router.push({ name: 'ShootList', params: { namespace: p1.metadata.namespace } })
@@ -412,6 +396,39 @@ export default {
           }
         }
       }
+    },
+    confirmRemoveUser (name) {
+      const memberName = escape(displayName(name))
+      const projectName = escape(this.projectDetails.projectName)
+      let messageHtml
+      if (this.isCurrentUser(name)) {
+        messageHtml = `Do you want to remove <span class="red--text text--darken-2 font-weight-bold">yourself</span> from the project <i>${projectName}</i>?`
+      } else {
+        messageHtml = `Do you want to remove the member <i>${memberName}</i> from the project <i>${projectName}</i>?`
+      }
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Remove Member',
+        captionText: 'Confirm Remove Member',
+        messageHtml,
+        dialogColor: 'red'
+      })
+    },
+    async onDeleteServiceAccount (serviceAccountName) {
+      const deletionConfirmed = await this.confirmDeleteServiceAccount(serviceAccountName)
+      if (deletionConfirmed) {
+        await this.deleteMember(serviceAccountName)
+      }
+    },
+    confirmDeleteServiceAccount (serviceAccountName) {
+      const memberName = escape(displayName(serviceAccountName))
+      const messageHtml = `Do you want to delete the service account <i>${memberName}</i>?`
+      return this.$refs.confirmDialog.waitForConfirmation({
+        confirmButtonText: 'Delete',
+        captionText: 'Confirm Member Deletion',
+        messageHtml,
+        dialogColor: 'red',
+        confirmValue: memberName
+      })
     },
     onEditUser (username, roles) {
       this.updatedMemberName = username

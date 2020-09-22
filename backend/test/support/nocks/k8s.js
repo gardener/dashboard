@@ -1322,7 +1322,7 @@ const stub = {
     }
     return scope
   },
-  addMember ({ bearer, namespace, name: username, roles }) {
+  addMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
@@ -1344,7 +1344,7 @@ const stub = {
     }
     return scope
   },
-  updateMember ({ bearer, namespace, name: username, roles }) {
+  updateMember ({ bearer, namespace, name: username }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name

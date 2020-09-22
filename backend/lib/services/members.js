@@ -129,7 +129,7 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
   const member = memberFromMembers(members, name)
-  if (!member) {
+  if (member) {
     throw new Conflict(`'${name}' is already member of this project`)
   }
   if (hasServiceAccountPrefix(name)) {
