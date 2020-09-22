@@ -44,6 +44,15 @@ function prefixedServiceAccountToComponents (name) {
   return {}
 }
 
+function memberFromMembers(members, name) {
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    return _.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
+  } else {
+    return _.find(members, { name, kind: 'User' })
+  }
+}
+
 function toUserName(name, namespace, kind) {
   if (kind === 'ServiceAccount' && !hasServiceAccountPrefix(name)) {
     return toServiceAccountName(name, namespace)
@@ -119,11 +128,11 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
   // Gardener wants to have a role for backward compatibility...
   const { role, roles } = splitMemberRolesIntoRoleAndRoles(memberRoles)
 
+  const member = memberFromMembers(members, name)
+  if (!member) {
+    throw new Conflict(`'${name}' is already member of this project`)
+  }
   if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (_.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })) {
-      throw new Conflict(`ServiceAccount '${name}' is already member of this project`)
-    }
     members.push({
       kind: 'ServiceAccount',
       name: serviceAccountName,
@@ -132,9 +141,6 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
       roles
     })
   } else {
-    if (_.find(members, ['name', name])) {
-      throw new Conflict(`User '${name}' is already member of this project`)
-    }
     members.push({
       kind: 'User',
       name,
@@ -202,24 +208,10 @@ async function unsetProjectMember (client, { namespace, name }) {
   // get project members from project
   const members = [...project.spec.members]
 
-  let removedMember = false
-  let member = _.find(members, { name, kind: 'User' })
-  if (member) {
-    _.remove(members, member)
-    removedMember = true
-  }
-  if (hasServiceAccountPrefix(name)) {
-    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-    if (member) {
-      _.remove(members, member)
-      removedMember = true
-    }
-  }
-  if (!removedMember) {
+  const member = memberFromMembers(members, name)
+  if (!member) {
     return project
   }
-
   _.remove(members, member)
   const body = {
     spec: {
@@ -248,14 +240,22 @@ exports.get = async function ({ user, namespace, name }) {
 
   // get project
   const project = await readProject(client, namespace)
+  // get project members from project
+  const members = [...project.spec.members]
 
   const projectName = project.metadata.name
 
   // find member of project
-  const member = _.find(project.spec.members, {
-    name,
-    kind: 'User'
-  })
+  let member
+  if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
+    member =  _.find(members, { name, kind: 'User' }) || _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
+  } else{
+    member = _.find(members, {
+      name,
+      kind: 'User'
+    })
+  }
   if (!member) {
     throw new NotFound(`User ${name} is not a member of project ${projectName}`)
   }
