@@ -282,7 +282,7 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
     if (availableNetworksLength < newUniqueZones.length) {
       return undefined
     }
-    return map(newUniqueZones, zone => {
+    const newZonesNetworkConfiguration = map(newUniqueZones, zone => {
       let zoneConfiguration = find(existingZonesNetworkConfiguration, { name: zone })
       if (zoneConfiguration) {
         return zoneConfiguration
@@ -293,11 +293,15 @@ export function getZonesNetworkConfiguration (oldZonesNetworkConfiguration, newW
         ...zoneConfiguration
       }
     })
+
+    // order is important => keep oldZonesNetworkConfiguration order
+    return uniq([...oldZonesNetworkConfiguration, ...newZonesNetworkConfiguration])
   }
 
   if (existingZonesNetworkConfiguration.length !== newUniqueZones.length) {
     return defaultZonesNetworkConfiguration
   }
+
   return existingZonesNetworkConfiguration
 }
 

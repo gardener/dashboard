@@ -200,7 +200,7 @@ describe('utils', function () {
         expect(zonesNetworkConfiguration).to.have.length(2)
       })
 
-      it('should keep network config for if zones are the same', function () {
+      it('should keep network config if zones are the same', function () {
         const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, workers, 'aws', 3)
         expect(zonesNetworkConfiguration).to.be.an.instanceof(Array)
         expect(zonesNetworkConfiguration).to.have.length(2)
@@ -225,6 +225,21 @@ describe('utils', function () {
         expect(zonesNetworkConfiguration).to.be.an.instanceof(Array)
         expect(zonesNetworkConfiguration).to.have.length(2)
         expect(zonesNetworkConfiguration).to.not.eql(customZonesNetworkConfiguration)
+      })
+
+      it('should return existing unused zone network configurations', function () {
+        const oneZoneWorkers = [
+          {
+            zones: [
+              'barZone'
+            ]
+          }
+        ]
+
+        const zonesNetworkConfiguration = getZonesNetworkConfiguration(customZonesNetworkConfiguration, oneZoneWorkers, 'aws', 3, '10.250.0.0/16')
+        expect(zonesNetworkConfiguration).to.be.an.instanceof(Array)
+        expect(zonesNetworkConfiguration).to.have.length(2)
+        expect(zonesNetworkConfiguration).to.eql(customZonesNetworkConfiguration)
       })
 
       it('should extend network config for existing shoot if additional zones are added', function () {
