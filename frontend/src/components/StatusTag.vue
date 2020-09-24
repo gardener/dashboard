@@ -58,7 +58,6 @@ limitations under the License.
         :statusTitle="chipStatus"
         :lastMessage="nonErrorMessage"
         :errorDescriptions="errorDescriptions"
-        :lastUpdateTime="tag.lastUpdateTime"
         :lastTransitionTime="tag.lastTransitionTime"
         :secretName="secretName"
         :namespace="namespace"
