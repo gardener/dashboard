@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 SAP SE or an SAP affiliate company and Gardener contributors
+#
+# SPDX-License-Identifier: Apache-2.0
+
 repos:
 - repo: git@github.com:Yelp/detect-secrets
   rev: v0.12.5

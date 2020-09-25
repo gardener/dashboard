@@ -1,0 +1,46 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Gardener dashboard
+Upstream-Contact: The Gardener project <gardener@googlegroups.com>
+Source: https://github.com/gardener/dashboard
+
+# --------------------------------------------------
+# source code
+
+Files:
+  */.gitignore
+  */.helmignore
+  */.eslintignore
+  */yarn.lock
+  *.ico
+  *.json
+  *.png
+  *.sketch
+  *.svg
+  *.tpl
+  .github/
+  .gitignore
+  backend/.babelrc
+  backend/.nycrc
+  frontend/.browserslistrc
+  frontend/.editorconfig
+  frontend/.env
+  frontend/jest.config.js
+  .dockerignore
+  .editorconfig
+  .secrets.baseline
+  CODEOWNERS
+  VERSION
+  yarn.lock
+Copyright: 2017-2020 SAP SE or an SAP affiliate company and Gardener contributors
+License: Apache-2.0
+
+# --------------------------------------------------
+# documentation
+
+Files:
+  *.md
+Copyright: 2017-2020 SAP SE or an SAP affiliate company and Gardener contributors
+License: CC-BY-4.0
+
+# --------------------------------------------------
+# source dependencies
