@@ -592,7 +592,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
   const volumeType = get(head(volumeTypesForZone), 'name')
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
-  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('35Gi') ? '35Gi' : minVolumeSize
   const worker = {
     id,
     name,
