@@ -497,8 +497,8 @@ export const shootAddonList = [
   },
   {
     name: 'nginxIngress',
-    title: 'Nginx Ingress',
-    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
+    title: 'Demo App',
+    description: 'Demo App for Teched 2020 DEV269 workshop exercise',
     visible: true,
     enabled: false
   }
