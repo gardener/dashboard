@@ -597,7 +597,7 @@ export function generateWorker (availableZones, cloudProfileName, region) {
     id,
     name,
     minimum: 1,
-    maximum: 2,
+    maximum: 1,
     maxSurge: 1,
     machine: {
       type: machineType,
