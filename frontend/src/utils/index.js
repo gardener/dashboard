@@ -233,7 +233,7 @@ export function routes (router, includeRoutesWithProjectScope) {
     return children && children.length
   }
   const hasMenu = ({ meta: { menu, projectScope } = {} }) => {
-    return menu && (includeRoutesWithProjectScope || !projectScope)
+    return menu && (includeRoutesWithProjectScope || projectScope === false)
   }
   const traverseRoutes = routes => {
     for (const route of routes) {
