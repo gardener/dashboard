@@ -58,7 +58,7 @@ module.exports = (io, { shootsWithIssues = new Set() } = {}) => {
 
     const namespacedEvents = toNamespacedEvents(event)
     nsp.to(`shoots_${namespace}`).emit('namespacedEvents', namespacedEvents)
-    nsp.to(`shoot_${namespace}_${name}`).emit('namespacedEvents', namespacedEvents)
+    nsp.to(`shoot_${namespace}_${name}`).emit('namespacedEvents', { ...namespacedEvents, kind: 'shoot' })
 
     if (shootHasIssue(object)) {
       nsp.to(`shoots_${namespace}_issues`).emit('namespacedEvents', namespacedEvents)

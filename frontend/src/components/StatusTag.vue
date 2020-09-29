@@ -58,7 +58,6 @@ limitations under the License.
         :statusTitle="chipStatus"
         :lastMessage="nonErrorMessage"
         :errorDescriptions="errorDescriptions"
-        :lastUpdateTime="tag.lastUpdateTime"
         :lastTransitionTime="tag.lastTransitionTime"
         :secretName="secretName"
         :namespace="namespace"
@@ -189,11 +188,11 @@ export default {
       return `statusTag_${this.popperKey}`
     },
     tag () {
-      const { lastTransitionTime, lastUpdateTime, message, status, type, codes } = this.condition
+      const { lastTransitionTime, message, status, type, codes } = this.condition
       const id = type
       const { displayName: name, shortName, description } = this.conditionMetadataFromType(type)
 
-      return { id, name, shortName, description, message, lastTransitionTime, lastUpdateTime, status, codes }
+      return { id, name, shortName, description, message, lastTransitionTime, status, codes }
     },
     color () {
       if (this.isError) {

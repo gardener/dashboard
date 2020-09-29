@@ -177,23 +177,42 @@ async function subscribeShoot (socket, { namespace, name }) {
   leaveShootsAndShootRoom(socket)
 
   const user = getUserFromSocket(socket)
+  const room = `shoot_${namespace}_${name}`
+
   try {
-    const room = `shoot_${namespace}_${name}`
-    const shoot = await shoots.read({ user, namespace, name })
+    const object = await shoots.read({ user, namespace, name })
     joinRoom(socket, room)
-    return shoot
+    return object
   } catch (err) {
     let {
       code = 500,
       reason = 'InternalServerError',
+      status = 'Failure',
       message = 'Failed to fetch cluster'
     } = err
     if (err instanceof HTTPError) {
       code = _.get(err.response, 'body.code', err.response.statusCode)
       reason = _.get(err.response, 'body.reason', err.response.statusMessage)
+      if (code === 404) {
+        try {
+          const allowed = await authorization.canGetShoot(user, namespace, name)
+          if (allowed) {
+            status = 'Success'
+            joinRoom(socket, room)
+          }
+        } catch (err) {
+          logger.error('Socket %s: get permission to read shoot failed:  %s', socket.id, err)
+        }
+      }
     }
-    logger.error('Socket %s: failed to subscribe to shoot: (%s)', socket.id, code, message)
-    throw Object.assign(new Error(message), { code, reason })
+    return {
+      kind: 'Status',
+      apiVersion: 'v1',
+      status,
+      message,
+      code,
+      reason
+    }
   }
 }
 
@@ -239,25 +258,12 @@ function setupShootsNamespace (shootsNsp) {
       }
     })
     socket.on('subscribeShoot', async ({ name, namespace }, done) => {
-      try {
-        const shoot = await subscribeShoot(socket, { name, namespace })
-        done({
-          type: 'ADDED',
-          object: shoot
-        })
-      } catch ({ message, code, reason }) {
-        done({
-          type: 'ERROR',
-          object: {
-            kind: 'Status',
-            apiVersion: 'v1',
-            status: 'Failure',
-            message,
-            code,
-            reason
-          }
-        })
+      const object = await subscribeShoot(socket, { name, namespace })
+      if (object.kind === 'Status' && object.status === 'Failure') {
+        const { code, message } = object
+        logger.error('Socket %s: failed to subscribe to shoot: (%d) %s', socket.id, code, message)
       }
+      done(object)
     })
   })
   socketAuthentication(shootsNsp)

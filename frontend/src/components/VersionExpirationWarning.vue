@@ -39,7 +39,7 @@ limitations under the License.
               <template v-slot:activator="{ on }">
                 <span class="font-weight-bold" v-on="on"><time-string :date-time="k8sExpiration.expirationDate"></time-string></span>
               </template>
-              <span>{{getDateFormatted(version.expirationDate)}}</span>
+              <span>{{getDateFormatted(k8sExpiration.expirationDate)}}</span>
             </v-tooltip>
             <span>. </span>
           </span>

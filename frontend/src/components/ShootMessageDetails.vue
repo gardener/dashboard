@@ -42,7 +42,7 @@ limitations under the License.
       </v-list-item>
     </template>
     <v-divider inset></v-divider>
-    <v-list-item>
+    <v-list-item v-if="lastUpdateTime">
       <v-list-item-icon>
         <v-icon color="cyan darken-2">mdi-clock-outline</v-icon>
       </v-list-item-icon>
@@ -139,12 +139,6 @@ export default {
     },
     namespace: {
       type: String
-    }
-  },
-  data () {
-    return {
-      showLastUpdateTimePlaceholder: true,
-      showLastTransitionTimePlaceholder: true
     }
   },
   computed: {

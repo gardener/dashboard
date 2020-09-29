@@ -516,8 +516,8 @@ export const shootAddonList = [
   },
   {
     name: 'nginxIngress',
-    title: 'Nginx Ingress',
-    description: 'Default ingress-controller with static configuration and conservatively sized (cannot be changed). Therefore, it is not recommended for production clusters. We recommend alternatively to install an ingress-controller of your liking, which you can freely configure, program, and scale to your production needs.',
+    title: 'Demo App',
+    description: 'Demo App for Teched 2020 DEV269 workshop exercise',
     visible: true,
     enabled: false
   }
@@ -604,19 +604,19 @@ export function utcMaintenanceWindowFromLocalBegin ({ localBegin, timezone }) {
 export function generateWorker (availableZones, cloudProfileName, region) {
   const id = uuidv4()
   const name = `worker-${shortRandomString(5)}`
-  const zones = availableZones.length ? [sample(availableZones)] : undefined
+  const zones = !isEmpty(availableZones) ? [sample(availableZones)] : undefined
   const machineTypesForZone = store.getters.machineTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const machineType = get(head(machineTypesForZone), 'name')
   const volumeTypesForZone = store.getters.volumeTypesByCloudProfileNameAndRegionAndZones({ cloudProfileName, region, zones })
   const volumeType = get(head(volumeTypesForZone), 'name')
   const machineImage = store.getters.defaultMachineImageForCloudProfileName(cloudProfileName)
   const minVolumeSize = store.getters.minimumVolumeSizeByCloudProfileNameAndRegion({ cloudProfileName, region })
-  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('50Gi') ? '50Gi' : minVolumeSize
+  const defaultVolumeSize = parseSize(minVolumeSize) <= parseSize('35Gi') ? '35Gi' : minVolumeSize
   const worker = {
     id,
     name,
     minimum: 1,
-    maximum: 2,
+    maximum: 1,
     maxSurge: 1,
     machine: {
       type: machineType,

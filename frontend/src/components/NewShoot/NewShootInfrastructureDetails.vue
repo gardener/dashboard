@@ -430,8 +430,10 @@ export default {
     regionsWithoutSeed () {
       return this.regionsWithoutSeedByCloudProfileName(this.cloudProfileName)
     },
+    showAllRegions () {
+      return this.cfg.seedCandidateDeterminationStrategy && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
+    },
     regionItems () {
-      const showAllRegions = !isEmpty(this.cfg.seedCandidateDeterminationStrategy) && this.cfg.seedCandidateDeterminationStrategy !== 'SameRegion'
       const regionItems = []
       if (!isEmpty(this.regionsWithSeed)) {
         regionItems.push({ header: 'Recommended Regions (API servers in same region)' })
@@ -439,7 +441,7 @@ export default {
       forEach(this.regionsWithSeed, region => {
         regionItems.push({ text: region })
       })
-      if (showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
+      if (this.showAllRegions && !isEmpty(this.regionsWithoutSeed)) {
         regionItems.push({ header: 'Supported Regions (API servers in another region)' })
         forEach(this.regionsWithoutSeed, region => {
           regionItems.push({ text: region })
@@ -511,6 +513,9 @@ export default {
       this.secret = head(this.infrastructureSecretsByProfileName)
       this.onInputSecret()
       this.region = head(this.regionsWithSeed)
+      if (!this.region && this.showAllRegions) {
+        this.region = head(this.regionsWithoutSeed)
+      }
       this.onInputRegion()
       this.loadBalancerProviderName = head(this.allLoadBalancerProviderNames)
       this.onInputLoadBalancerProviderName()
