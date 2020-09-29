@@ -181,7 +181,7 @@ export default {
       return project.metadata.name
     },
     maxShootNameLength () {
-      return 19 - this.projectName.length
+      return 21 - this.projectName.length
     },
     validators () {
       return {

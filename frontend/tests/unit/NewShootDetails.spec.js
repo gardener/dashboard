@@ -79,6 +79,6 @@ describe('NewShootDetails.vue', function () {
 
   it('maximum shoot name length should depend on project name', function () {
     const shootDetails = createNewShootDetailsComponent()
-    expect(shootDetails.maxShootNameLength).to.equal(16)
+    expect(shootDetails.maxShootNameLength).to.equal(18)
   })
 })
