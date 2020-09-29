@@ -23,6 +23,7 @@ const yaml = require('js-yaml')
 const { encodeBase64, getSeedNameFromShoot, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../../../lib/utils')
 const hash = require('object-hash')
 const jwt = require('jsonwebtoken')
+const { find } = require('lodash')
 const { url, auth } = require('../../../lib/kubernetes-config').load()
 
 const quotas = [
@@ -181,6 +182,7 @@ const infrastructureSecretList = [
 
 const serviceAccountList = [
   getServiceAccount('garden-foo', 'robot'),
+  getServiceAccount('garden-foo', 'robot-nomember'),
   getServiceAccount('garden-bar', 'robot')
 ]
 
@@ -356,7 +358,12 @@ function readProject (namespace) {
 }
 
 function readProjectMembers (namespace) {
-  return getProjectMembers(readProject(namespace))
+  const members = getProjectMembers(readProject(namespace))
+  const serviceAccounts = _.chain(serviceAccountList)
+    .filter(['metadata.namespace', namespace])
+    .map(({metadata}) => ({ username: `system:serviceaccount:${metadata.namespace}:${metadata.name}`, roles: [] }))
+    .value()
+  return _.uniqBy([...members, ...serviceAccounts], 'username')
 }
 
 function getProjectMembers (project) {
@@ -507,6 +514,14 @@ function getServiceAccountsForNamespace (scope, namespace, additionalServiceAcco
   scope
     .get(`/api/v1/namespaces/${namespace}/serviceaccounts`)
     .reply(200, () => ({ items }))
+}
+
+function prefixedServiceAccountToComponents (name) {
+  if (name) {
+    const [, serviceAccountNamespace, serviceAccountName] = /^system:serviceaccount:([^:]+):([^:]+)$/.exec(name) || []
+    return { serviceAccountNamespace, serviceAccountName }
+  }
+  return {}
 }
 
 function authorizationHeader (bearer) {
@@ -1322,29 +1337,38 @@ const stub = {
     }
     return scope
   },
-  addMember ({ bearer, namespace, name: username }) {
+  addMember ({ bearer, namespace, name: username, roles }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
 
     const scope = nockWithAuthorization(bearer)
+
+    getServiceAccountsForNamespace(scope, namespace)
+
+    const { serviceAccountNamespace, serviceAccountName  } = prefixedServiceAccountToComponents(username)
+    if (serviceAccountName &&
+      serviceAccountNamespace === namespace &&
+      !_.find(serviceAccountList, { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })) {
+      scope
+      .post(`/api/v1/namespaces/${namespace}/serviceaccounts`)
+      .reply(200)
+    }
+
+    scope
       .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
-    if (!_.find(project.spec.members, ['name', username])) {
+    if (!_.find(project.spec.members, ['name', username]) && roles.length) {
       scope
-        .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
-          if (!_.find(body.spec.members, ['name', username])) {
-            return false
-          }
-          newProject.spec.members = body.spec.members
-          return true
-        })
-        .reply(200, () => newProject)
-      getServiceAccountsForNamespace(scope, namespace)
+      .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
+        newProject.spec.members = body.spec.members
+        return true
+      })
+      .reply(200, () => newProject)
     }
     return scope
   },
-  updateMember ({ bearer, namespace, name: username }) {
+  updateMember ({ bearer, namespace, name: username, roles }) {
     const project = readProject(namespace)
     const newProject = _.cloneDeep(project)
     const name = project.metadata.name
@@ -1353,10 +1377,10 @@ const stub = {
       .get(`/apis/core.gardener.cloud/v1beta1/projects/${name}`)
       .reply(200, () => project)
     const existingMember = _.find(project.spec.members, ['name', username])
-    if (existingMember) {
+    if (existingMember || roles.length) {
       scope
         .patch(`/apis/core.gardener.cloud/v1beta1/projects/${name}`, body => {
-          _.assign(newProject.spec.members, body.spec.members)
+          newProject.spec.members = body.spec.members
           return true
         })
         .reply(200, () => newProject)

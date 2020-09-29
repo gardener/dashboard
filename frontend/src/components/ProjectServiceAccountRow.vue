@@ -81,6 +81,7 @@ limitations under the License.
           <span>Download Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
+      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="isServiceAccountFromCurrentNamespace && canGetSecrets" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -91,6 +92,7 @@ limitations under the License.
           <span>Show Kubeconfig</span>
         </v-tooltip>
       </v-list-item-action>
+      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -101,6 +103,7 @@ limitations under the License.
           <span>Change service account roles</span>
         </v-tooltip>
       </v-list-item-action>
+      <div v-else class="ma-5"></div>
       <v-list-item-action v-if="canManageServiceAccountMembers" class="ml-1">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -113,6 +116,7 @@ limitations under the License.
           <span v-else>Remove service account from project</span>
         </v-tooltip>
       </v-list-item-action>
+      <div v-else class="ma-5"></div>
     </v-list-item>
   </div>
 </template>

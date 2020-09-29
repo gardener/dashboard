@@ -133,6 +133,7 @@ async function setProjectMember (client, { namespace, name, roles: memberRoles }
     throw new Conflict(`'${name}' is already member of this project`)
   }
   if (hasServiceAccountPrefix(name)) {
+    const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
     members.push({
       kind: 'ServiceAccount',
       name: serviceAccountName,
@@ -174,10 +175,12 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
       _.remove(members, member)
     }
     member = _.find(members, { name: serviceAccountName, namespace: serviceAccountNamespace, kind: 'ServiceAccount' })
-    if (member && !memberRoles.length) {
-      // Removed all roles from Service Account => delete from member list
-      _.remove(members, member)
-    } else if (!member) { // Not a ServiceAccount member (yet) =>add
+    if (member) {
+      if (!memberRoles.length) {
+        // Removed all roles from Service Account => delete from member list
+        _.remove(members, member)
+      }
+    } else if (!member && memberRoles.length) { // Not a ServiceAccount member (yet) =>add
       member = {
         kind: 'ServiceAccount',
         name: serviceAccountName,
@@ -187,18 +190,17 @@ async function updateProjectMemberRoles (client, { namespace, name, roles: membe
       }
       members.push(member)
     }
-  }
-
-  if (!member) {
+  } else if (!member) {
     throw new NotFound(`User '${name}' is not a member of this project`)
   }
-  _.assign(member, { role, roles })
+ _.assign(member, { role, roles })
 
   const body = {
     spec: {
       members
     }
   }
+
   return client['core.gardener.cloud'].projects.mergePatch(project.metadata.name, body)
 }
 
@@ -295,9 +297,11 @@ exports.get = async function ({ user, namespace, name }) {
 exports.create = async function ({ user, namespace, body: { name, roles } }) {
   const client = user.client
 
+  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
+
   if (hasServiceAccountPrefix(name)) {
     const { serviceAccountNamespace, serviceAccountName } = prefixedServiceAccountToComponents(name)
-    if (serviceAccountNamespace === namespace) {
+    if (serviceAccountNamespace === namespace && !_.find(serviceAccounts, { metadata: { namespace: serviceAccountNamespace, name: serviceAccountName } })) {
       await createServiceaccount(client, {
         namespace: serviceAccountNamespace,
         name: serviceAccountName,
@@ -313,9 +317,6 @@ exports.create = async function ({ user, namespace, body: { name, roles } }) {
   } else {
     project = await readProject(client, namespace)
   }
-
-  const { items: serviceAccounts } = await client.core.serviceaccounts.list(namespace)
-
 
   return fromResource(project, serviceAccounts)
 }
