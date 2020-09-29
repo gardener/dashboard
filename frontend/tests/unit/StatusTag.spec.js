@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -48,12 +47,12 @@ function createStatusTagComponent (conditionType) {
     store,
     propsData
   })
-  const statustagComponent = wrapper.find(StatusTag)
+  const statustagComponent = wrapper.findComponent(StatusTag)
   return statustagComponent.vm.tag
 }
 
-describe('StatusTag.vue', function () {
-  beforeEach(function () {
+describe('StatusTag.vue', () => {
+  beforeEach(() => {
     const cfg = {
       knownConditions: {
         ControlPlaneHealthy: {
@@ -71,60 +70,60 @@ describe('StatusTag.vue', function () {
     return store.dispatch('setConfiguration', cfg)
   })
 
-  it('should generate condition object for simple condition type', function () {
+  it('should generate condition object for simple condition type', () => {
     const statusTag = createStatusTagComponent('SampleConditionAvailability')
 
-    expect(statusTag.shortName).to.equal('SC')
-    expect(statusTag.name).to.equal('Sample Condition')
-    expect(statusTag.description).to.equal(undefined)
+    expect(statusTag.shortName).toBe('SC')
+    expect(statusTag.name).toBe('Sample Condition')
+    expect(statusTag.description).toBeUndefined()
   })
 
-  it('should generate condition object for long condition type', function () {
+  it('should generate condition object for long condition type', () => {
     const statusTag = createStatusTagComponent('ExtraLongSampleTESTConditionAvailable')
 
-    expect(statusTag.shortName).to.equal('ELSTC')
-    expect(statusTag.name).to.equal('Extra Long Sample Test Condition')
-    expect(statusTag.description).to.equal(undefined)
+    expect(statusTag.shortName).toBe('ELSTC')
+    expect(statusTag.name).toBe('Extra Long Sample Test Condition')
+    expect(statusTag.description).toBeUndefined()
   })
 
-  it('should generate condition object for single condition type', function () {
+  it('should generate condition object for single condition type', () => {
     const statusTag = createStatusTagComponent('Singlecondition')
 
-    expect(statusTag.shortName).to.equal('S')
-    expect(statusTag.name).to.equal('Singlecondition')
-    expect(statusTag.description).to.equal(undefined)
+    expect(statusTag.shortName).toBe('S')
+    expect(statusTag.name).toBe('Singlecondition')
+    expect(statusTag.description).toBeUndefined()
   })
 
-  it('should cache generated condition object for unknown condition type', function () {
-    expect(store.state.conditionCache.UnknownCondition).to.equal(undefined)
+  it('should cache generated condition object for unknown condition type', () => {
+    expect(store.state.conditionCache.UnknownCondition).toBeUndefined()
 
     const statusTag = createStatusTagComponent('UnknownCondition')
-    expect(statusTag.shortName).to.equal('UC')
+    expect(statusTag.shortName).toBe('UC')
 
-    expect(store.state.conditionCache.UnknownCondition.shortName).to.equal('UC')
+    expect(store.state.conditionCache.UnknownCondition.shortName).toBe('UC')
   })
 
-  it('should return condition object for known condition types', function () {
+  it('should return condition object for known condition types', () => {
     const statusTag = createStatusTagComponent('APIServerAvailable')
 
-    expect(statusTag.shortName).to.equal('API')
-    expect(statusTag.name).to.equal('API Server')
-    expect(statusTag.description).to.not.be.empty
+    expect(statusTag.shortName).toBe('API')
+    expect(statusTag.name).toBe('API Server')
+    expect(statusTag.description).not.toHaveLength(0)
   })
 
-  it('should return condition object for condition types loaded from config', function () {
+  it('should return condition object for condition types loaded from config', () => {
     const statusTag = createStatusTagComponent('ConditionFromConfigAvailability')
 
-    expect(statusTag.shortName).to.equal('CC')
-    expect(statusTag.name).to.equal('Config Condition')
-    expect(statusTag.description).to.equal('Config Condition Description')
+    expect(statusTag.shortName).toBe('CC')
+    expect(statusTag.name).toBe('Config Condition')
+    expect(statusTag.description).toBe('Config Condition Description')
   })
 
-  it('should return overwritten known condition with values from config', function () {
+  it('should return overwritten known condition with values from config', () => {
     const statusTag = createStatusTagComponent('ControlPlaneHealthy')
 
-    expect(statusTag.shortName).to.equal('CPO')
-    expect(statusTag.name).to.equal('Control Plane Overwritten')
-    expect(statusTag.description).to.equal('Overwritten Description')
+    expect(statusTag.shortName).toBe('CPO')
+    expect(statusTag.name).toBe('Control Plane Overwritten')
+    expect(statusTag.description).toBe('Overwritten Description')
   })
 })

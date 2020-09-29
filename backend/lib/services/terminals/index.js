@@ -21,7 +21,8 @@ const assert = require('assert').strict
 const hash = require('object-hash')
 const yaml = require('js-yaml')
 
-const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
+const { Forbidden, UnprocessableEntity } = require('http-errors')
+const { isHttpError } = require('@gardener-dashboard/request')
 
 const {
   decodeBase64,
@@ -46,7 +47,6 @@ const {
 } = require('./terminalBootstrap')
 
 const { getSeed } = require('../../cache')
-const { Forbidden, UnprocessableEntity } = require('../../errors')
 const logger = require('../../logger')
 
 const TERMINAL_CONTAINER_NAME = 'terminal'

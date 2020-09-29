@@ -1,9 +1,19 @@
 # Ignore everything
 **
 
+# include yarn
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+!package.json
+!yarn.lock
+!.yarnrc.yml
+!.pnp.js
+
 # include backend files and folders
 !backend/package.json
-!backend/yarn.lock
 !backend/.mocharc.yaml
 !backend/.babelrc
 !backend/.eslintrc.js
@@ -16,7 +26,6 @@
 
 # include frontend folder
 !frontend/package.json
-!frontend/yarn.lock
 !frontend/.browserslistrc
 !frontend/.editorconfig
 !frontend/.env
@@ -27,9 +36,21 @@
 !frontend/src
 !frontend/tests
 
+# include packages
+!packages/kube-client/lib
+!packages/kube-client/__tests__
+!packages/kube-client/package.json
+!packages/kube-config/lib
+!packages/kube-config/__tests__
+!packages/kube-config/package.json
+!packages/logger/lib
+!packages/logger/__tests__
+!packages/logger/package.json
+!packages/request/lib
+!packages/request/__tests__
+!packages/request/package.json
+
 # include metadata files
-!package.json
-!yarn.lock
 !LICENSE.md
 !NOTICE.md
 !VERSION

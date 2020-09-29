@@ -100,17 +100,12 @@ module.exports = function ({ agent, sandbox, github }) {
       const body = JSON.stringify({action: 'opened', issue: githubIssue})
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
       expect(issues).to.have.length(4)
@@ -126,17 +121,12 @@ module.exports = function ({ agent, sandbox, github }) {
       const body = JSON.stringify({action: 'edited', issue: githubIssue})
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
       expect(issues).to.have.length(3)
@@ -151,17 +141,12 @@ module.exports = function ({ agent, sandbox, github }) {
       const body = JSON.stringify({action: 'closed', issue: githubIssue})
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
       expect(issues).to.have.length(2)
@@ -177,17 +162,12 @@ module.exports = function ({ agent, sandbox, github }) {
       let issueEvent
       cache.emitter.once('issue', event => { issueEvent = event })
       const commentEventPromise = new CacheEvent({cache, type: 'comment', id: 1}).startWaiting()
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       const issues = cache.getIssues()
       expect(issues).to.have.length(4)
@@ -235,17 +215,12 @@ module.exports = function ({ agent, sandbox, github }) {
       cache.emitter.once('issue', event => { issueEvent = event })
       let commentEvent
       cache.emitter.once('comment', event => { commentEvent = event })
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()
@@ -269,17 +244,12 @@ module.exports = function ({ agent, sandbox, github }) {
       cache.emitter.once('issue', event => { issueEvent = event })
       let commentEvent
       cache.emitter.once('comment', event => { commentEvent = event })
-      let res
-      try {
-        res = await agent
-          .post('/webhook')
-          .set('x-github-event', githubEvent)
-          .set('x-hub-signature', createHubSignature(webhookSecret, body))
-          .type('application/json')
-          .send(body)
-      } catch (err) {
-        res = err.response
-      }
+      const res = await agent
+        .post('/webhook')
+        .set('x-github-event', githubEvent)
+        .set('x-hub-signature', createHubSignature(webhookSecret, body))
+        .type('application/json')
+        .send(body)
       expect(res).to.have.status(200)
       // issues
       const issues = cache.getIssues()

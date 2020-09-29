@@ -16,8 +16,8 @@
 
 const _ = require('lodash')
 const logger = require('../logger')
-const { Resources } = require('@gardener-dashboard/kubernetes-client')
-const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('../errors')
+const { Resources } = require('@gardener-dashboard/kube-client')
+const { UnprocessableEntity, PreconditionFailed, MethodNotAllowed } = require('http-errors')
 const { format: fmt } = require('util')
 const { decodeBase64, encodeBase64 } = require('../utils')
 const whitelistedPropertyKeys = ['accessKeyID', 'subscriptionID', 'project', 'domainName', 'tenantName', 'authUrl', 'vsphereUsername', 'nsxtUsername']

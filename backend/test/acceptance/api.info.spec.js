@@ -31,7 +31,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(403)
     expect(res).to.be.json
-    expect(res.body.error).to.have.property('name').that.is.equal('Forbidden')
+    expect(res.body.reason).to.equal('Forbidden')
+    expect(res.body.details).to.have.property('name').that.is.equal('ForbiddenError')
     expect(res.body.message).to.include('CSRF protection')
   })
 
@@ -41,7 +42,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.error).to.have.property('name').that.is.equal('Unauthorized')
+    expect(res.body.reason).to.equal('Unauthorized')
+    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
     expect(res.body.message).to.include('authorization token')
   })
 
@@ -53,7 +55,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.error).to.have.property('name').that.is.equal('Unauthorized')
+    expect(res.body.reason).to.equal('Unauthorized')
+    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
     expect(res.body.message).to.include('invalid signature')
   })
 
@@ -65,7 +68,8 @@ module.exports = function info ({ agent, k8s, auth }) {
 
     expect(res).to.have.status(401)
     expect(res).to.be.json
-    expect(res.body.error).to.have.property('name').that.is.equal('Unauthorized')
+    expect(res.body.reason).to.equal('Unauthorized')
+    expect(res.body.details).to.have.property('name').that.is.equal('UnauthorizedError')
     expect(res.body.message).to.include('audience invalid')
   })
 

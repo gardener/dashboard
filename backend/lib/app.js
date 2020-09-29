@@ -82,7 +82,10 @@ app.use(helmet.referrerPolicy({
   policy: 'same-origin'
 }))
 
-app.use(express.static(PUBLIC_DIRNAME))
+const staticRouter = express.Router()
+staticRouter.use(express.static(PUBLIC_DIRNAME))
+staticRouter.use(notFound)
+app.use('/static', staticRouter)
 
 app.use(helmet.frameguard({
   action: 'deny'

@@ -21,16 +21,11 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN yarn --cwd=backend install --no-progress --production \
-    && cp -R backend/node_modules backend/production_node_modules \
-    && yarn --cwd=backend install --no-progress \
-    && yarn --cwd=backend lint \
-    && yarn --cwd=backend test:coverage \
-    && yarn --cwd=backend sync-version \
-    && yarn --cwd=frontend install --no-progress \
-    && yarn --cwd=frontend lint \
-    && yarn --cwd=frontend test:unit \
-    && yarn --cwd=frontend build
+RUN yarn install \
+    && yarn lint \
+    && yarn test \
+    && yarn build \
+    && yarn workspaces focus --production @gardener-dashboard/backend
 
 # Release
 FROM alpine:3.12 as release
@@ -48,9 +43,9 @@ ENV PORT $PORT
 
 COPY --from=builder /usr/local/bin/node /usr/local/bin/
 
-COPY --from=builder /usr/src/app/backend/package.json /usr/src/app/backend/server.js ./
+COPY --from=builder /usr/src/app/.yarn ./.yarn/
+COPY --from=builder /usr/src/app/.pnp.js  /usr/src/app/backend/package.json /usr/src/app/backend/server.js ./
 COPY --from=builder /usr/src/app/backend/lib ./lib/
-COPY --from=builder /usr/src/app/backend/production_node_modules ./node_modules/
 
 COPY --from=builder /usr/src/app/frontend/dist ./public/
 
@@ -60,4 +55,4 @@ EXPOSE $PORT
 
 VOLUME ["/home/node"]
 
-ENTRYPOINT [ "/sbin/tini", "--", "node", "server.js" ]
+ENTRYPOINT [ "/sbin/tini", "--", "node", "--require", "/usr/src/app/.pnp.js", "server.js" ]

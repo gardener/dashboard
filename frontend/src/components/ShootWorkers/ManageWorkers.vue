@@ -78,7 +78,7 @@ import map from 'lodash/map'
 import omit from 'lodash/omit'
 import assign from 'lodash/assign'
 import isEmpty from 'lodash/isEmpty'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export default {
   name: 'manage-workers',

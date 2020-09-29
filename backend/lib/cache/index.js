@@ -15,11 +15,11 @@
 //
 
 const _ = require('lodash')
-const { HTTPError } = require('@gardener-dashboard/http-client')
+const { NotFound } = require('http-errors')
 const pEvent = require('p-event')
 const logger = require('../logger')
-const { Store } = require('@gardener-dashboard/kubernetes-client')
-const { CacheExpiredError } = require('@gardener-dashboard/kubernetes-client/lib/ApiErrors')
+const { Store } = require('@gardener-dashboard/kube-client')
+const { CacheExpiredError } = require('@gardener-dashboard/kube-client/lib/ApiErrors')
 const createTicketCache = require('./tickets')
 
 async function initializeStoreSynchronization (store, cachable) {
@@ -126,10 +126,7 @@ module.exports = {
   findProjectByNamespace (namespace) {
     const project = cache.projects.find(['spec.namespace', namespace])
     if (!project) {
-      throw new HTTPError({
-        statusCode: 404,
-        statusMessage: `Namespace '${namespace}' is not related to a gardener project`
-      })
+      throw new NotFound(`Namespace '${namespace}' is not related to a gardener project`)
     }
     return project
   },

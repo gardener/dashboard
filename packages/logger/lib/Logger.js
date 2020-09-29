@@ -73,9 +73,9 @@ class Logger {
 
   connect ({ url, user, headers }) {
     if (!this.isDisabled(LEVELS.trace + 1)) {
-      const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
-      const host = headers.host || url.host || '-'
-      const path = url.path || (url.pathname + url.search)
+      const ident = this.constructor.getIdentity(user)
+      const host = this.constructor.getHost(url, headers)
+      const path = this.constructor.getPath(url)
       const msg = `CONNECT ${path} ${ident} ${host}`
       this.console.log(this.ts + ' ' + chalk.black.bgMagenta('ws') + '   : ' + msg)
     }
@@ -83,9 +83,9 @@ class Logger {
 
   request ({ id, url, method, httpVersion = '1.1', user, headers, body }) {
     if (!this.isDisabled(LEVELS.debug)) {
-      const ident = user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
-      const host = headers.host || url.host || '-'
-      const path = url.path || (url.pathname + url.search)
+      const ident = this.constructor.getIdentity(user)
+      const host = this.constructor.getHost(url, headers)
+      const path = this.constructor.getPath(url)
       id = id || headers['x-request-id']
       let msg = `${method} ${path} HTTP/${httpVersion} [${id}] ${ident} ${host}`
       if (this.logHttpRequestBody && body) {
@@ -151,6 +151,18 @@ class Logger {
     if (!this.isDisabled(LEVELS.error)) {
       this.console.error(this.ts + ' ' + chalk.red('error') + ': ' + msg, ...args)
     }
+  }
+
+  static getIdentity (user) {
+    return user && typeof user === 'object' ? `${user.type}=${user.id}` : '-'
+  }
+
+  static getHost (url, headers) {
+    return headers.host || url.host || '-'
+  }
+
+  static getPath (url) {
+    return url.path || (url.pathname + url.search)
   }
 }
 

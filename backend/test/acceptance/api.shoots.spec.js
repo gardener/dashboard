@@ -17,7 +17,7 @@
 'use strict'
 
 const common = require('../support/common')
-const kubeconfig = require('@gardener-dashboard/kubernetes-config')
+const kubeconfig = require('@gardener-dashboard/kube-config')
 const _ = require('lodash')
 const logger = require('../../lib/logger')
 

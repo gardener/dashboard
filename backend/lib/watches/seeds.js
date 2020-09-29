@@ -20,7 +20,7 @@ const { registerHandler } = require('./common')
 const { bootstrapper } = require('../services/terminals')
 const {
   dashboardClient // privileged client for the garden cluster
-} = require('@gardener-dashboard/kubernetes-client')
+} = require('@gardener-dashboard/kube-client')
 
 module.exports = io => {
   const emitter = dashboardClient['core.gardener.cloud'].seeds.watchList()

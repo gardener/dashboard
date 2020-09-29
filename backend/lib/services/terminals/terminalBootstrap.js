@@ -23,12 +23,10 @@ const moment = require('moment')
 
 const logger = require('../../logger')
 const config = require('../../config')
-const { NotImplemented } = require('../../errors')
+const { NotImplemented } = require('http-errors')
 
-const {
-  dashboardClient,
-  isHttpError
-} = require('@gardener-dashboard/kubernetes-client')
+const { isHttpError } = require('@gardener-dashboard/request')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 
 const {
   getConfigValue,

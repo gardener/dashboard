@@ -21,7 +21,7 @@ const http = require('http')
 const pEvent = require('p-event')
 const { filter, map, pick, groupBy, find, includes } = require('lodash')
 
-const kubernetesClient = require('@gardener-dashboard/kubernetes-client')
+const kubernetesClient = require('@gardener-dashboard/kube-client')
 const io = require('../../lib/io')
 const watches = require('../../lib/watches')
 const cache = require('../../lib/cache')

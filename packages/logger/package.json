@@ -25,7 +25,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "jest": "^26.4.2"
+    "jest": "^26.4.2",
+    "jest-date-mock": "^1.0.8"
   },
   "eslintConfig": {
     "env": {
@@ -53,12 +54,15 @@
     "coverageDirectory": "coverage",
     "coverageProvider": "v8",
     "testEnvironment": "node",
+    "setupFiles": [
+      "jest-date-mock"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 90,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "functions": 100,
+        "lines": 97,
+        "statements": 97
       }
     }
   }

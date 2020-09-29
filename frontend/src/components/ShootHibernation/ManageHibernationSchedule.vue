@@ -89,7 +89,7 @@ import isEmpty from 'lodash/isEmpty'
 import { purposeRequiresHibernationSchedule } from '@/utils'
 import { parsedScheduleEventsFromCrontabBlock, crontabFromParsedScheduleEvents } from '@/utils/hibernationSchedule'
 import { mapState } from 'vuex'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 export default {
   name: 'hibernation-schedule',

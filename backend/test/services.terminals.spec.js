@@ -22,8 +22,8 @@ const { AssertionError } = require('assert').strict
 const common = require('./support/common')
 const config = require('../lib/config')
 const { getSeed } = require('../lib/cache')
-const { Resources } = require('@gardener-dashboard/kubernetes-client')
-const { Forbidden } = require('../lib/errors')
+const { Resources } = require('@gardener-dashboard/kube-client')
+const { Forbidden } = require('http-errors')
 const logger = require('../lib/logger')
 const yaml = require('js-yaml')
 const { encodeBase64 } = require('../lib/utils')
@@ -53,7 +53,7 @@ const {
 
 const {
   dashboardClient
-} = require('@gardener-dashboard/kubernetes-client')
+} = require('@gardener-dashboard/kube-client')
 
 describe('services', function () {
   /* eslint no-unused-expressions: 0 */

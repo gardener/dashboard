@@ -18,7 +18,7 @@
 
 const EventEmitter = require('events')
 const _ = require('lodash')
-const { dashboardClient } = require('@gardener-dashboard/kubernetes-client')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const logger = require('../lib/logger')
 const { registerHandler } = require('../lib/watches/common')
 const config = require('../lib/config')

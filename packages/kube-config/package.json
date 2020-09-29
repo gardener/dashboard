@@ -1,0 +1,65 @@
+{
+  "name": "@gardener-dashboard/kube-config",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kubernetes Config",
+  "main": "lib/index.js",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/gardener/dashboard/tree/master/packages/kube-config"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js .",
+    "test": "jest",
+    "test:coverage": "jest --collect-coverage"
+  },
+  "dependencies": {
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "eslint": "^7.7.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^26.4.2"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2020": true,
+      "node": true,
+      "jest/globals": true
+    },
+    "plugins": [
+      "jest"
+    ],
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {},
+    "parserOptions": {
+      "ecmaVersion": 11
+    },
+    "rules": {}
+  },
+  "jest": {
+    "restoreMocks": true,
+    "coverageDirectory": "coverage",
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 95,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  }
+}

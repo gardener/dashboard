@@ -17,10 +17,11 @@
 'use strict'
 
 const express = require('express')
-const { extend } = require('@gardener-dashboard/http-client')
+const { extend } = require('@gardener-dashboard/request')
 const logger = require('../logger')
 const { decodeBase64 } = require('../utils')
-const { dashboardClient, isHttpError } = require('@gardener-dashboard/kubernetes-client')
+const { isHttpError } = require('@gardener-dashboard/request')
+const { dashboardClient } = require('@gardener-dashboard/kube-client')
 const { version } = require('../../package')
 
 const router = module.exports = express.Router()

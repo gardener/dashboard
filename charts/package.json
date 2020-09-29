@@ -1,6 +1,6 @@
 {
   "name": "@gardener-dashboard/charts",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Gardener Dashboard Charts",
   "license": "Apache-2.0",
   "repository": {
@@ -14,70 +14,50 @@
   ],
   "private": true,
   "scripts": {
-    "lint": "eslint --ext .js test",
-    "test": "cross-env NODE_ENV=test mocha"
+    "lint": "eslint --ext .js .",
+    "test": "jest"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "chai": "^4.1.2",
-    "cross-env": "^7.0.0",
-    "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-friendly-formatter": "^4.0.1",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-mocha": "^6.2.2",
-    "eslint-plugin-node": "^11.0.0",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
+  "dependencies": {
     "js-yaml": "^3.13.1",
-    "lodash": "^4.17.15",
-    "mocha": "^7"
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "eslint": "^7.7.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^26.4.2"
   },
   "eslintConfig": {
-    "root": true,
     "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2020": true,
       "node": true,
-      "mocha": true,
-      "es6": true
+      "jest/globals": true
     },
-    "extends": "standard",
-    "parserOptions": {
-      "ecmaVersion": 2018
-    },
-    "rules": {
-      "arrow-parens": 0,
-      "generator-star-spacing": 0,
-      "quote-props": [
-        "error",
-        "as-needed"
-      ]
-    },
-    "globals": {
-      "describe": true,
-      "it": true,
-      "before": true,
-      "after": true,
-      "beforeEach": true,
-      "afterEach": true,
-      "expect": true,
-      "helmTemplate": true
-    }
-  },
-  "mocha": {
-    "require": "test/support",
-    "check-leaks": true,
-    "diff": true,
-    "extension": [
-      "js"
+    "plugins": [
+      "jest"
     ],
-    "package": "./package.json",
-    "reporter": "spec",
-    "slow": 75,
-    "timeout": 2000,
-    "ui": "bdd"
+    "extends": [
+      "standard",
+      "plugin:jest/recommended"
+    ],
+    "globals": {
+      "helmTemplate": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 11
+    },
+    "rules": {}
   },
-  "engines": {
-    "node": ">= 12.3.1",
-    "yarn": ">= 1.16.0"
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ]
   }
 }

@@ -1,0 +1,33 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.validate": [
+    "vue",
+    "javascript",
+    "javascriptreact"
+  ],
+  "eslint.alwaysShowStatus": true,
+  "eslint.codeActionsOnSave.mode": "problems",
+  "eslint.debug": true,
+  "eslint.packageManager": "yarn",
+  "eslint.workingDirectories": [
+    {
+      "directory": "./frontend/"
+    },
+    {
+      "directory": "./backend/"
+    },
+    {
+      "directory": "./charts/"
+    },
+    {
+      "pattern": "./packages/*/"
+    }
+  ],
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "eslint.nodePath": ".yarn/sdks"
+}

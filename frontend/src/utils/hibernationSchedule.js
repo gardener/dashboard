@@ -26,7 +26,7 @@ import range from 'lodash/range'
 import toUpper from 'lodash/toUpper'
 import moment from 'moment-timezone'
 import store from '../store'
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 const scheduleCrontabRegex = /^(\d{0,2})\s(\d{0,2})\s\*\s\*\s(([0-7,*-]*|MON|TUE|WED|THU|FRI|SAT|SUN)+)$/
 

@@ -19,9 +19,9 @@
 const _ = require('lodash')
 const config = require('../config')
 const { decodeBase64, joinMemberRoleAndRoles, splitMemberRolesIntoRoleAndRoles } = require('../utils')
-const { isHttpError } = require('@gardener-dashboard/kubernetes-client')
-const { dumpKubeconfig } = require('@gardener-dashboard/kubernetes-config')
-const { Conflict, NotFound } = require('../errors.js')
+const { isHttpError } = require('@gardener-dashboard/request')
+const { dumpKubeconfig } = require('@gardener-dashboard/kube-config')
+const { Conflict, NotFound } = require('http-errors')
 const cache = require('../cache')
 
 function toServiceAccountName ({ metadata: { name, namespace } }) {

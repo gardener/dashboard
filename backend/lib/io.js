@@ -20,10 +20,10 @@ const _ = require('lodash')
 const socketIO = require('socket.io')
 const logger = require('./logger')
 const security = require('./security')
-const { Forbidden } = require('./errors')
+const { Forbidden, isHttpError } = require('http-errors')
+const { STATUS_CODES } = require('http')
 
-const kubernetesClient = require('@gardener-dashboard/kubernetes-client')
-const { HTTPError } = require('@gardener-dashboard/http-client')
+const kubernetesClient = require('@gardener-dashboard/kube-client')
 
 const watches = require('./watches')
 const cache = require('./cache')
@@ -191,9 +191,9 @@ async function subscribeShoot (socket, { namespace, name }) {
       status = 'Failure',
       message = 'Failed to fetch cluster'
     } = err
-    if (err instanceof HTTPError) {
-      code = _.get(err.response, 'body.code', err.response.statusCode)
-      reason = _.get(err.response, 'body.reason', err.response.statusMessage)
+    if (isHttpError(err)) {
+      code = err.statusCode
+      reason = STATUS_CODES[code]
       if (code === 404) {
         try {
           const allowed = await authorization.canGetShoot(user, namespace, name)
