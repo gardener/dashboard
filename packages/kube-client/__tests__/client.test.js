@@ -17,10 +17,10 @@
 'use strict'
 
 const { NotFound } = require('http-errors')
-const { createClient } = require('..')
+const { createClient } = require('../lib')
 
-describe('kube-client', function () {
-  describe('Client', function () {
+describe('kube-client', () => {
+  describe('Client', () => {
     const bearer = 'bearer'
     const namespace = 'namespace'
     const name = 'name'
@@ -28,17 +28,17 @@ describe('kube-client', function () {
     let testClient
     let getSecretStub
 
-    beforeEach(function () {
+    beforeEach(() => {
       testClient = createClient({ auth: { bearer } })
       getSecretStub = jest.spyOn(testClient.core.secrets, 'get')
     })
 
-    it('should create a client', function () {
+    it('should create a client', () => {
       expect(testClient.constructor.name).toBe('Client')
       expect(testClient.cluster.server.hostname).toBe('kubernetes')
     })
 
-    it('should read a kubeconfig from a secret', async function () {
+    it('should read a kubeconfig from a secret', async () => {
       getSecretStub.mockReturnValue({
         data: {
           kubeconfig: Buffer.from('foo').toString('base64')
@@ -49,7 +49,7 @@ describe('kube-client', function () {
       expect(kubeconfig).toBe('foo')
     })
 
-    it('should not find a kubeconfig in the secret', async function () {
+    it('should not find a kubeconfig in the secret', async () => {
       getSecretStub.mockReturnValue({
         data: {}
       })

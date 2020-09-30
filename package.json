@@ -18,13 +18,6 @@
     "Koser, Holger <holger.koser@sap.com>",
     "Sutter, Peter <peter.sutter@sap.com>"
   ],
-  "scripts": {
-    "build": "yarn workspace @gardener-dashboard/frontend build",
-    "start": "yarn build && yarn workspace @gardener-dashboard/backend start",
-    "lint": "yarn workspaces foreach --all run lint",
-    "test": "yarn workspaces foreach --all run test",
-    "test:coverage": "yarn workspaces foreach --all run test:coverage"
-  },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",

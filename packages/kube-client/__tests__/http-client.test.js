@@ -27,8 +27,8 @@ const {
   ws: wsSymbols
 } = require('../lib/symbols')
 
-describe('kube-client', function () {
-  describe('HttpClient', function () {
+describe('kube-client', () => {
+  describe('HttpClient', () => {
     let server
     let wss
     let origin
@@ -59,7 +59,7 @@ describe('kube-client', function () {
       }
     }
 
-    beforeEach(async function () {
+    beforeEach(async () => {
       server = http.createServer(app)
       wss = new WebSocket.Server({ server, path: '/echo' })
       wss.on('connection', socket => {
@@ -73,13 +73,13 @@ describe('kube-client', function () {
       origin = `http://${address}:${port}`
     })
 
-    afterEach(function () {
+    afterEach(() => {
       wss.close()
       server.close()
       client[httpSymbols.agent].destroy()
     })
 
-    it('should assert "beforeRequest" hook parameters', async function () {
+    it('should assert "beforeRequest" hook parameters', async () => {
       client = new TestClient(origin, {
         headers: {
           foo: 'bar'
@@ -100,7 +100,7 @@ describe('kube-client', function () {
       expect(body).toBe('bar')
     })
 
-    it('should open a websocket echo socket', async function () {
+    it('should open a websocket echo socket', async () => {
       client = new TestClient(origin)
       const echoSocket = client.echo()
       await pEvent(echoSocket, 'open')

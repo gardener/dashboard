@@ -21,7 +21,7 @@
     "lint": "eslint --ext .js server.js lib",
     "sync-version": "bin/sync-version",
     "test": "mocha",
-    "test:coverage": "nyc mocha"
+    "test-coverage": "nyc mocha"
   },
   "dependencies": {
     "@gardener-dashboard/kube-client": "workspace:*",

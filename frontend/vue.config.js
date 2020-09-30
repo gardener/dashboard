@@ -17,8 +17,14 @@ module.exports = {
   configureWebpack (config) {
     config.externals = /^ws$/i
     config.performance = {
-      maxAssetSize: 1048576,
+      maxAssetSize: 1572864,
       maxEntrypointSize: 1048576
+    }
+    for (const plugin of config.plugins) {
+      if (plugin.constructor.name === 'MiniCssExtractPlugin') {
+        plugin.options.ignoreOrder = true
+        break
+      }
     }
   },
   devServer: {

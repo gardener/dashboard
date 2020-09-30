@@ -29,8 +29,8 @@ const {
 } = require('../lib/symbols')
 const { V1, V1Alpha1, V1Beta1, CoreGroup, NamedGroup, NamespaceScoped, ClusterScoped, Readable, Observable, Cacheable, Writable } = mixins
 
-describe('kube-client', function () {
-  describe('mixins', function () {
+describe('kube-client', () => {
+  describe('mixins', () => {
     const testStore = new Store()
     const testOptions = {
       foo: 'bar'
@@ -102,12 +102,12 @@ describe('kube-client', function () {
       createReconnectorStub = jest.spyOn(WatchBuilder, 'create').mockReturnValue(testReconnector)
     }
 
-    describe('Version', function () {
+    describe('Version', () => {
       class V1Object extends V1(Object) {}
       class V1Alpha1Object extends V1Alpha1(Object) {}
       class V1Beta1Object extends V1Beta1(Object) {}
 
-      it('should check that Version mixins do not occur in the inheritance hierarchy', function () {
+      it('should check that Version mixins do not occur in the inheritance hierarchy', () => {
         expect(new V1Object()).toHaveProperty('constructor.version', 'v1')
         expect(() => new V1Object() instanceof V1).toThrowError(TypeError)
         expect(new V1Alpha1Object()).toHaveProperty('constructor.version', 'v1alpha1')
@@ -117,20 +117,20 @@ describe('kube-client', function () {
       })
     })
 
-    describe('ApiGroup', function () {
+    describe('ApiGroup', () => {
       class CoreGroupObject extends CoreGroup(Object) {}
       class NamedGroupObject extends NamedGroup(Object) {}
 
-      it('should check that ApiGroup mixins do not occur in the inheritance hierarchy', function () {
+      it('should check that ApiGroup mixins do not occur in the inheritance hierarchy', () => {
         expect(() => new CoreGroupObject() instanceof CoreGroup).toThrowError(TypeError)
         expect(() => new NamedGroupObject() instanceof NamedGroup).toThrowError(TypeError)
       })
     })
 
-    describe('ClusterScoped', function () {
+    describe('ClusterScoped', () => {
       class TestObject extends mix(TestClient).with(ClusterScoped, Readable, Cacheable, Observable, Writable) {}
 
-      it('should check that declared mixins do occur in the inheritance hierarchy', function () {
+      it('should check that declared mixins do occur in the inheritance hierarchy', () => {
         const testObject = new TestObject()
         expect(testObject).toHaveProperty('constructor.scope', 'Cluster')
         expect(testObject).toBeInstanceOf(ClusterScoped)
@@ -140,8 +140,8 @@ describe('kube-client', function () {
         expect(testObject).toBeInstanceOf(Writable)
       })
 
-      describe('Readable', function () {
-        it('should get a resource', function () {
+      describe('Readable', () => {
+        it('should get a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.get('name', {})
           expect(url).toBe('dummies/name')
@@ -149,7 +149,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource', function () {
+        it('should list a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.list({})
           expect(url).toBe('dummies')
@@ -157,7 +157,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should watch a resource', function () {
+        it('should watch a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.get('name', { watch: true })
           expect(url).toBe('dummies')
@@ -165,7 +165,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('watch=true&fieldSelector=metadata.name%3Dname')
         })
 
-        it('should watch a list of resources', function () {
+        it('should watch a list of resources', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.list({ watch: true })
           expect(url).toBe('dummies')
@@ -174,10 +174,10 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Cachable', function () {
+      describe('Cachable', () => {
         beforeEach(beforeEachCachableTest)
 
-        it('should sync a list of resources', function () {
+        it('should sync a list of resources', () => {
           const testObject = new TestObject()
           const reflector = testObject.syncList(testStore)
           expect(createReflectorStub).toHaveBeenCalledTimes(1)
@@ -207,10 +207,10 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Observable', function () {
+      describe('Observable', () => {
         beforeEach(beforeEachObservableTest)
 
-        it('should watch a resource', function () {
+        it('should watch a resource', () => {
           const testObject = new TestObject()
           const reconnector = testObject.watch('name', testOptions)
           expect(createReconnectorStub).toHaveBeenCalledTimes(1)
@@ -222,7 +222,7 @@ describe('kube-client', function () {
           expect(reconnector).toBe(testReconnector)
         })
 
-        it('should watch a list of resources', function () {
+        it('should watch a list of resources', () => {
           const testObject = new TestObject()
           const reconnector = testObject.watchList(testOptions)
           expect(createReconnectorStub).toHaveBeenCalledTimes(1)
@@ -234,7 +234,7 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Writable', function () {
+      describe('Writable', () => {
         function patchMethodTest (patchType, testBody) {
           const testObject = new TestObject()
           const patchMethod = camelCase(patchType) + 'Patch'
@@ -247,7 +247,7 @@ describe('kube-client', function () {
           expect(json).toBe(testBody)
         }
 
-        it('should create a resource', function () {
+        it('should create a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
           const [url, { method, searchParams, json }] = testObject.create(testBody, testOptions)
@@ -257,7 +257,7 @@ describe('kube-client', function () {
           expect(json).toBe(testBody)
         })
 
-        it('should update a resource', function () {
+        it('should update a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
           const [url, { method, searchParams, json }] = testObject.update('name', testBody, testOptions)
@@ -268,21 +268,21 @@ describe('kube-client', function () {
         })
 
         // eslint-disable-next-line jest/expect-expect
-        it('should merge patch a resource', function () {
+        it('should merge patch a resource', () => {
           patchMethodTest(PatchType.MERGE, { bar: 'foo' })
         })
 
         // eslint-disable-next-line jest/expect-expect
-        it('should strategic merge patch a resource', function () {
+        it('should strategic merge patch a resource', () => {
           patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
         })
 
         // eslint-disable-next-line jest/expect-expect
-        it('should json patch a resource', function () {
+        it('should json patch a resource', () => {
           patchMethodTest(PatchType.JSON, ['foo'])
         })
 
-        it('should delete a resource', function () {
+        it('should delete a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.delete('name', testOptions)
           expect(url).toBe('dummies/name')
@@ -290,7 +290,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('foo=bar')
         })
 
-        it('should delete multiple resources', function () {
+        it('should delete multiple resources', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.deleteCollection(testOptions)
           expect(url).toBe('dummies')
@@ -300,10 +300,10 @@ describe('kube-client', function () {
       })
     })
 
-    describe('NamespaceScoped', function () {
+    describe('NamespaceScoped', () => {
       class TestObject extends mix(TestClient).with(NamespaceScoped, Readable, Cacheable, Observable, Writable) {}
 
-      it('should check that declared mixins do occur in the inheritance hierarchy', function () {
+      it('should check that declared mixins do occur in the inheritance hierarchy', () => {
         const testObject = new TestObject()
         expect(testObject).toHaveProperty('constructor.scope', 'Namespaced')
         expect(testObject).toBeInstanceOf(NamespaceScoped)
@@ -313,8 +313,8 @@ describe('kube-client', function () {
         expect(testObject).toBeInstanceOf(Writable)
       })
 
-      describe('Readable', function () {
-        it('should get a resource', function () {
+      describe('Readable', () => {
+        it('should get a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.get('namespace', 'name', {})
           expect(url).toBe('namespaces/namespace/dummies/name')
@@ -322,7 +322,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource', function () {
+        it('should list a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.list('namespace', {})
           expect(url).toBe('namespaces/namespace/dummies')
@@ -330,7 +330,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should list a resource across all namespaces', function () {
+        it('should list a resource across all namespaces', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.listAllNamespaces({})
           expect(url).toBe('dummies')
@@ -338,7 +338,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('')
         })
 
-        it('should watch a resource', function () {
+        it('should watch a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.get('namespace', 'name', { watch: true })
           expect(url).toBe('namespaces/namespace/dummies')
@@ -346,7 +346,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('watch=true&fieldSelector=metadata.name%3Dname')
         })
 
-        it('should watch a list of resources', function () {
+        it('should watch a list of resources', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.list('namespace', { watch: true })
           expect(url).toBe('namespaces/namespace/dummies')
@@ -354,7 +354,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('watch=true')
         })
 
-        it('should watch a list of resources across all namespaces', function () {
+        it('should watch a list of resources across all namespaces', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.listAllNamespaces({ watch: true })
           expect(url).toBe('dummies')
@@ -363,10 +363,10 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Cachable', function () {
+      describe('Cachable', () => {
         beforeEach(beforeEachCachableTest)
 
-        it('should sync a list of resources', function () {
+        it('should sync a list of resources', () => {
           const testObject = new TestObject()
           const reflector = testObject.syncList('namesace', testStore)
           expect(createReflectorStub).toHaveBeenCalledTimes(1)
@@ -397,7 +397,7 @@ describe('kube-client', function () {
           expect(reflector).toBe(testReflector)
         })
 
-        it('should sync a list of resources across all namespaces', function () {
+        it('should sync a list of resources across all namespaces', () => {
           const testObject = new TestObject()
           const reflector = testObject.syncListAllNamespaces(testStore)
           expect(createReflectorStub).toHaveBeenCalledTimes(1)
@@ -427,10 +427,10 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Observable', function () {
+      describe('Observable', () => {
         beforeEach(beforeEachObservableTest)
 
-        it('should watch a resource', function () {
+        it('should watch a resource', () => {
           const testObject = new TestObject()
           const reconnector = testObject.watch('namespace', 'name', testOptions)
           expect(createReconnectorStub).toHaveBeenCalledTimes(1)
@@ -442,7 +442,7 @@ describe('kube-client', function () {
           expect(reconnector).toBe(testReconnector)
         })
 
-        it('should watch a list of resources', function () {
+        it('should watch a list of resources', () => {
           const testObject = new TestObject()
           const reconnector = testObject.watchList('namespace', testOptions)
           expect(createReconnectorStub).toHaveBeenCalledTimes(1)
@@ -453,7 +453,7 @@ describe('kube-client', function () {
           expect(reconnector).toBe(testReconnector)
         })
 
-        it('should watch a list of resources across all namespaces', function () {
+        it('should watch a list of resources across all namespaces', () => {
           const testObject = new TestObject()
           const reconnector = testObject.watchListAllNamespaces(testOptions)
           expect(createReconnectorStub).toHaveBeenCalledTimes(1)
@@ -465,7 +465,7 @@ describe('kube-client', function () {
         })
       })
 
-      describe('Writable', function () {
+      describe('Writable', () => {
         function patchMethodTest (patchType, testBody) {
           const testObject = new TestObject()
           const patchMethod = camelCase(patchType) + 'Patch'
@@ -478,7 +478,7 @@ describe('kube-client', function () {
           expect(json).toBe(testBody)
         }
 
-        it('should create a resource', function () {
+        it('should create a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
           const [url, { method, searchParams, json }] = testObject.create('namespace', testBody, testOptions)
@@ -488,7 +488,7 @@ describe('kube-client', function () {
           expect(json).toBe(testBody)
         })
 
-        it('should update a resource', function () {
+        it('should update a resource', () => {
           const testObject = new TestObject()
           const testBody = { bar: 'foo' }
           const [url, { method, searchParams, json }] = testObject.update('namespace', 'name', testBody, testOptions)
@@ -498,22 +498,22 @@ describe('kube-client', function () {
           expect(json).toBe(testBody)
         })
 
-        it('should merge patch a resource', function () {
+        it('should merge patch a resource', () => {
           expect.hasAssertions()
           patchMethodTest(PatchType.MERGE, { bar: 'foo' })
         })
 
-        it('should strategic merge patch a resource', function () {
+        it('should strategic merge patch a resource', () => {
           expect.hasAssertions()
           patchMethodTest(PatchType.STRATEGIC_MERGE, { bar: 'foo' })
         })
 
-        it('should json patch a resource', function () {
+        it('should json patch a resource', () => {
           expect.hasAssertions()
           patchMethodTest(PatchType.JSON, ['foo'])
         })
 
-        it('should delete a resource', function () {
+        it('should delete a resource', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.delete('namespace', 'name', testOptions)
           expect(url).toBe('namespaces/namespace/dummies/name')
@@ -521,7 +521,7 @@ describe('kube-client', function () {
           expect(searchParams.toString()).toBe('foo=bar')
         })
 
-        it('should delete multiple resources', function () {
+        it('should delete multiple resources', () => {
           const testObject = new TestObject()
           const [url, { method, searchParams }] = testObject.deleteCollection('namespace', testOptions)
           expect(url).toBe('namespaces/namespace/dummies')

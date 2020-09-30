@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "jest",
-    "test:coverage": "jest --collect-coverage"
+    "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
     "got": "^11.5.2",
@@ -51,6 +51,7 @@
   },
   "jest": {
     "restoreMocks": true,
+    "verbose": true,
     "coverageDirectory": "coverage",
     "testEnvironment": "node",
     "coverageThreshold": {

@@ -16,11 +16,10 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --no-unsafe-inline",
     "lint": "vue-cli-service lint",
-    "frontend:lint": "yarn lint",
     "test": "vue-cli-service test:unit",
-    "test:coverage": "yarn test"
+    "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",

@@ -22,7 +22,7 @@ const os = require('os')
 const yaml = require('js-yaml')
 const { load, dumpKubeconfig, fromKubeconfig, getInCluster } = require('../lib')
 
-describe('kube-config', function () {
+describe('kube-config', () => {
   const server = new URL('https://kubernetes:6443')
   const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmdhcmRlbjpkZWZhdWx0In0.-4rSuvvj5BStN6DwnmLAaRVbgpl5iCn2hG0pcqx0NPw'
   const ca = 'ca'
@@ -36,11 +36,11 @@ describe('kube-config', function () {
   const password = 'secret'
   const currentContext = 'default'
 
-  beforeEach(function () {
+  beforeEach(() => {
     jest.spyOn(fs, 'readFileSync')
   })
 
-  it('should return the test config', function () {
+  it('should return the test config', () => {
     const config = load()
     expect(config).toEqual({
       url: server.origin,
@@ -50,7 +50,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return the in cluster config', function () {
+  it('should return the in cluster config', () => {
     fs.readFileSync
       .mockReturnValueOnce(token)
       .mockReturnValueOnce(ca)
@@ -72,7 +72,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return the config from KUBECONFIG environment variable', function () {
+  it('should return the config from KUBECONFIG environment variable', () => {
     const kubeconfig = dumpKubeconfig({
       user,
       namespace,
@@ -95,7 +95,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return the config from the users homedir', function () {
+  it('should return the config from the users homedir', () => {
     const defaultKubeconfigPath = path.join(os.homedir(), '.kube', 'config')
     const kubeconfig = yaml.safeDump({
       apiVersion: 'v1',
@@ -148,7 +148,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return a clean config', function () {
+  it('should return a clean config', () => {
     const kubeconfig = yaml.safeDump({
       apiVersion: 'v1',
       kind: 'Config',
@@ -188,7 +188,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return a config with token', function () {
+  it('should return a config with token', () => {
     const kubeconfig = {
       contexts: [{
         name: currentContext,
@@ -211,7 +211,7 @@ describe('kube-config', function () {
     })
   })
 
-  it('should return a config with username and password', function () {
+  it('should return a config with username and password', () => {
     const kubeconfig = {
       contexts: [{
         name: currentContext,
@@ -238,11 +238,11 @@ describe('kube-config', function () {
     })
   })
 
-  it('should fail to parse the kubeconfig', function () {
+  it('should fail to parse the kubeconfig', () => {
     expect(() => fromKubeconfig()).toThrow(TypeError)
   })
 
-  it('should fail to load in cluster config', function () {
+  it('should fail to load in cluster config', () => {
     fs.readFileSync
       .mockReturnValueOnce(token)
       .mockReturnValue()

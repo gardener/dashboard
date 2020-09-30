@@ -21,7 +21,7 @@ const HttpClient = require('../lib/HttpClient')
 const { assign } = require('../lib/nonResourceEndpoints')
 const { http: httpSymbol } = require('../lib/symbols')
 
-describe('http-client', function () {
+describe('http-client', () => {
   class EchoClient {
     constructor (options) {
       this.options = options
@@ -36,7 +36,7 @@ describe('http-client', function () {
   let extendStub
   let endpoints
 
-  beforeEach(function () {
+  beforeEach(() => {
     // eslint-disable-next-line no-unused-vars
     extendStub = jest
       .spyOn(request, 'extend')
@@ -46,7 +46,7 @@ describe('http-client', function () {
     endpoints = assign({}, options)
   })
 
-  it('should assign all non resource endpoints', function () {
+  it('should assign all non resource endpoints', () => {
     expect(Object.keys(endpoints)).toHaveLength(2)
     expect(endpoints.healthz).toBeInstanceOf(HttpClient)
     expect(endpoints.healthz[httpSymbol.client].options).toEqual({
@@ -61,14 +61,14 @@ describe('http-client', function () {
     })
   })
 
-  describe('healthz', function () {
-    it('should fetch the healthz endpoint', async function () {
+  describe('healthz', () => {
+    it('should fetch the healthz endpoint', async () => {
       await expect(endpoints.healthz.get()).resolves.toEqual(['healthz', { method: 'get' }])
     })
   })
 
-  describe('openapi', function () {
-    it('should fetch the openapi/v2 endpoint', async function () {
+  describe('openapi', () => {
+    it('should fetch the openapi/v2 endpoint', async () => {
       await expect(endpoints.openapi.get()).resolves.toEqual(['openapi/v2', { method: 'get' }])
     })
   })

@@ -21,8 +21,8 @@ const jwt = require('jsonwebtoken')
 const { globalLogger: logger } = require('@gardener-dashboard/logger')
 const { attach, beforeRequest, beforeRedirect, afterResponse } = require('../lib/debug')
 
-describe('kube-client', function () {
-  describe('debug', function () {
+describe('kube-client', () => {
+  describe('debug', () => {
     const uuidRegEx = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
     const url = new URL('https://kubernetes/foo/bar')
     const method = 'GET'
@@ -67,13 +67,13 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
     let requestStub
     let responseStub
 
-    beforeEach(function () {
+    beforeEach(() => {
       isDisabledStub = jest.spyOn(logger, 'isDisabled').mockReturnValue(false)
       requestStub = jest.spyOn(logger, 'request').mockImplementation(() => {})
       responseStub = jest.spyOn(logger, 'response').mockImplementation(() => {})
     })
 
-    it('should attach debug hooks', function () {
+    it('should attach debug hooks', () => {
       const { hooks } = attach({})
       expect(isDisabledStub).toHaveBeenCalledTimes(1)
       expect(hooks.beforeRequest[0]).toBe(beforeRequest)
@@ -81,7 +81,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(hooks.beforeRedirect[0]).toBe(beforeRedirect)
     })
 
-    it('should log a http request', function () {
+    it('should log a http request', () => {
       const options = { url, method, headers: { foo: 'bar' }, body }
 
       beforeRequest(options)
@@ -95,7 +95,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(args.headers['x-request-id']).toMatch(uuidRegEx)
     })
 
-    it('should log the different types of users', function () {
+    it('should log the different types of users', () => {
       for (const key of ['user', 'email', 'sub', 'bearer', 'cn']) {
         requestStub.mockClear()
         const authorization = user.authorization(key)
@@ -111,7 +111,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       }
     })
 
-    it('should log a http response', function () {
+    it('should log a http response', () => {
       const xRequestId = '42'
       const request = { options: { headers: { 'x-request-id': xRequestId } } }
       const headers = { foo: 'bar' }
@@ -128,7 +128,7 @@ xrfonUDHQfXphOlk7VDCmkmXK0rEQUcA4wOgJgq84Tr9rHAcYGMvOZ/B6Gs+DmyI
       expect(args.body).toBe(body)
     })
 
-    it('should log a http redirect', function () {
+    it('should log a http redirect', () => {
       const xRequestId = '42'
       const request = { options: { headers: { 'x-request-id': xRequestId } } }
       const headers = { foo: 'bar' }

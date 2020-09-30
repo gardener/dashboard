@@ -22,9 +22,7 @@ const https = require('https')
 const createError = require('http-errors')
 const { HttpClient, extend, isHttpError, createHttpError } = require('../lib')
 
-describe('http-client', function () {
-  /* eslint no-unused-expressions: 0 */
-
+describe('request', function () {
   const prefixUrl = 'http://foo.bar/baz'
   let extendStub
 
@@ -34,14 +32,6 @@ describe('http-client', function () {
       .mockImplementation(options => {
         return { defaults: { options } }
       })
-  })
-
-  describe('#extend', function () {
-    it('should create a http client', function () {
-      const client = extend({ prefixUrl })
-      expect(client).toBeInstanceOf(HttpClient)
-      expect(extendStub).toHaveBeenCalledTimes(1)
-    })
   })
 
   describe('HttpClient', function () {
@@ -228,6 +218,14 @@ describe('http-client', function () {
         })
         expect(options.agent).toBe(httpsAgent)
       })
+    })
+  })
+
+  describe('#extend', function () {
+    it('should create a http client', function () {
+      const client = extend({ prefixUrl })
+      expect(client).toBeInstanceOf(HttpClient)
+      expect(extendStub).toHaveBeenCalledTimes(1)
     })
   })
 

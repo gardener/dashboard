@@ -28,13 +28,13 @@ const {
   isGatewayTimeout
 } = require('../lib/ApiErrors')
 
-describe('kube-client', function () {
-  describe('ApiErrors', function () {
+describe('kube-client', () => {
+  describe('ApiErrors', () => {
     const code = 'code'
     const message = 'message'
     const reason = 'reason'
 
-    it('should create a StatusError instance', function () {
+    it('should create a StatusError instance', () => {
       const statusError = new StatusError({ code, message, reason })
       expect(statusError).toBeInstanceOf(Error)
       expect(statusError).toHaveProperty('stack')
@@ -43,7 +43,7 @@ describe('kube-client', function () {
       expect(statusError.reason).toBe(reason)
     })
 
-    it('should create a CacheExpiredError instance', function () {
+    it('should create a CacheExpiredError instance', () => {
       const error = new CacheExpiredError('Cache expired')
       expect(error).toBeInstanceOf(Error)
       expect(error).toHaveProperty('stack')
@@ -52,7 +52,7 @@ describe('kube-client', function () {
       expect(error.reason).toBe('Expired')
     })
 
-    it('should check if a status error has code "Gone"', function () {
+    it('should check if a status error has code "Gone"', () => {
       const code = 410
       let error = new StatusError({ code })
       expect(isGone(error)).toBe(true)
@@ -62,7 +62,7 @@ describe('kube-client', function () {
       expect(isExpiredError(error)).toBe(true)
     })
 
-    it('should check if a status error has reason "Expired"', function () {
+    it('should check if a status error has reason "Expired"', () => {
       const reason = 'Expired'
       let error = new StatusError({ reason })
       expect(isResourceExpired(error)).toBe(true)
@@ -76,13 +76,13 @@ describe('kube-client', function () {
       expect(isExpiredError(error)).toBe(true)
     })
 
-    it('should only consider StatusError or HttpError instances', function () {
+    it('should only consider StatusError or HttpError instances', () => {
       const error = new Error()
       error.reason = 'Expired'
       expect(isExpiredError(error)).toBe(false)
     })
 
-    it('should handle "Resource version too large" errors correctly', function () {
+    it('should handle "Resource version too large" errors correctly', () => {
       const code = 504
       const reason = 'Timeout'
       let error = createHttpError({

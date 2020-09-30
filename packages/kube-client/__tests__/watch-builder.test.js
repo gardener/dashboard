@@ -27,9 +27,9 @@ const HttpClient = require('../lib/HttpClient')
 
 const { NamedGroup, ClusterScoped, V1, Observable } = mixins
 
-describe('kube-client', function () {
-  describe('WatchBuilder', function () {
-    describe('#create', function () {
+describe('kube-client', () => {
+  describe('WatchBuilder', () => {
+    describe('#create', () => {
       const url = 'https://kubernetes:443'
 
       async function consume (emitter, event, options) {
@@ -106,7 +106,7 @@ describe('kube-client', function () {
       let bar
       let reconnector
 
-      beforeEach(function () {
+      beforeEach(() => {
         searchParams = new URLSearchParams()
         bar = new Bar({ url })
         Object.assign(options, {
@@ -121,13 +121,13 @@ describe('kube-client', function () {
           })
       })
 
-      afterEach(function () {
+      afterEach(() => {
         if (reconnector) {
           reconnector.disconnect()
         }
       })
 
-      it('should consume three events', async function () {
+      it('should consume three events', async () => {
         reconnector = bar.watchList()
         expect(createWebSocketStub).toHaveBeenCalledTimes(1)
         const [url] = createWebSocketStub.mock.calls[0]
@@ -148,7 +148,7 @@ describe('kube-client', function () {
         expect(reconnector.connected).toBe(false)
       })
 
-      it('should start the heartbeat', async function () {
+      it('should start the heartbeat', async () => {
         reconnector = bar.watch('baz')
         expect(createWebSocketStub).toHaveBeenCalledTimes(1)
         const [url] = createWebSocketStub.mock.calls[0]
@@ -162,7 +162,7 @@ describe('kube-client', function () {
         expect(reconnector.connected).toBe(false)
       })
 
-      it('should automatically reconnect an unresponsive connection', async function () {
+      it('should automatically reconnect an unresponsive connection', async () => {
         options.pongDelay = 10
         searchParams.set('fieldSelector', 'foo=bar')
         reconnector = WatchBuilder.create(bar, Bar.names.plural, searchParams, 'baz', { initialDelay: 3 })
@@ -180,7 +180,7 @@ describe('kube-client', function () {
         expect(reconnector.connected).toBe(false)
       })
 
-      it('should automatically reconnect a broken connection', async function () {
+      it('should automatically reconnect a broken connection', async () => {
         reconnector = WatchBuilder.create(bar, Bar.names.plural, searchParams, 'baz', { initialDelay: 3 })
         await pEvent(reconnector, 'connect')
         expect(reconnector.connected).toBe(true)
@@ -195,8 +195,8 @@ describe('kube-client', function () {
       })
     })
 
-    describe('#createWebSocket', function () {
-      it('should create a WebSocket instance', function () {
+    describe('#createWebSocket', () => {
+      it('should create a WebSocket instance', () => {
         const req = new EventEmitter()
         const getStub = jest.spyOn(http, 'get').mockReturnValue(req)
         WatchBuilder.createWebSocket('http://kubernetes:8080')
@@ -204,7 +204,7 @@ describe('kube-client', function () {
       })
     })
 
-    describe('#waitFor', function () {
+    describe('#waitFor', () => {
       class Watch extends EventEmitter {
         constructor () {
           super()
@@ -220,7 +220,7 @@ describe('kube-client', function () {
 
       const baz = { name: 'baz' }
 
-      it('should assign the waitFor method', async function () {
+      it('should assign the waitFor method', async () => {
         const watch = new Watch()
         WatchBuilder.setWaitFor(watch)
         expect(typeof watch.waitFor).toBe('function')

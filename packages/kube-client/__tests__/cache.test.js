@@ -24,8 +24,8 @@ const ApiErrors = require('../lib/ApiErrors')
 const { Reflector, Store, ListPager } = require('../lib/cache')
 const nextTick = () => new Promise(resolve => process.nextTick(resolve))
 
-describe('kube-client', function () {
-  describe('cache', function () {
+describe('kube-client', () => {
+  describe('cache', () => {
     let map
     let store
     let listWatcher
@@ -161,21 +161,21 @@ describe('kube-client', function () {
       }
     }
 
-    beforeEach(function () {
+    beforeEach(() => {
       map = new Map()
       store = new Store(map, { timeout: 1 })
       listWatcher = new TestListWatcher()
       destroyAgentSpy = jest.spyOn(listWatcher.agent, 'destroy')
     })
 
-    describe('Store', function () {
+    describe('Store', () => {
       let clearSpy
 
-      beforeEach(function () {
+      beforeEach(() => {
         clearSpy = jest.spyOn(store, 'clear')
       })
 
-      it('should add, update and delete elements', async function () {
+      it('should add, update and delete elements', async () => {
         expect(store).toBeInstanceOf(Store)
         expect(store.isFresh).toBe(false)
 
@@ -212,8 +212,8 @@ describe('kube-client', function () {
       })
     })
 
-    describe('ListPager', function () {
-      it('should return a list of paginated results', async function () {
+    describe('ListPager', () => {
+      it('should return a list of paginated results', async () => {
         const listPager = ListPager.create(listWatcher, { pageSize: 1 })
         expect(listPager).toBeInstanceOf(ListPager)
         expect(listPager.pageSize).toBe(1)
@@ -228,7 +228,7 @@ describe('kube-client', function () {
         expect(items).toEqual([a, b])
       })
 
-      it('should return a full list', async function () {
+      it('should return a full list', async () => {
         const listPager = ListPager.create(listWatcher, { pageSize: 2 })
         expect(listPager).toBeInstanceOf(ListPager)
         expect(listPager.pageSize).toBe(2)
@@ -242,7 +242,7 @@ describe('kube-client', function () {
         expect(items).toEqual([a, b])
       })
 
-      it('should throw an "Expired" error for the second page', async function () {
+      it('should throw an "Expired" error for the second page', async () => {
         listWatcher.expiredErrorForToken = 'b'
         const listPager = ListPager.create(listWatcher, { pageSize: 1, fullListIfExpired: false })
         expect.assertions(6)
@@ -267,41 +267,41 @@ describe('kube-client', function () {
       })
     })
 
-    describe('Reflector', function () {
+    describe('Reflector', () => {
       let reflector
 
-      beforeEach(function () {
+      beforeEach(() => {
         reflector = Reflector.create(listWatcher, store)
         reflector.period = moment.duration(1)
         reflector.backoffManager.min = 1
         reflector.backoffManager.max = 10
       })
 
-      afterEach(async function () {
+      afterEach(async () => {
         await reflector.stop()
       })
 
-      it('should destroy the agent on stop', async function () {
+      it('should destroy the agent on stop', async () => {
         await reflector.stop()
         expect(destroyAgentSpy).toHaveBeenCalledTimes(1)
       })
 
-      it('should have property apiVersion', async function () {
+      it('should have property apiVersion', async () => {
         expect(reflector.apiVersion).toBe('v1')
         listWatcher.group = 'test'
       })
 
-      it('should have property kind', async function () {
+      it('should have property kind', async () => {
         expect(reflector.kind).toBe('Dummy')
       })
 
-      it('should have property expectedTypeName', async function () {
+      it('should have property expectedTypeName', async () => {
         expect(reflector.expectedTypeName).toBe('v1, Kind=Dummy')
         listWatcher.group = 'test'
         expect(reflector.expectedTypeName).toBe('test/v1, Kind=Dummy')
       })
 
-      it('should return a resourceVersion for listing', async function () {
+      it('should return a resourceVersion for listing', async () => {
         reflector.isLastSyncResourceVersionUnavailable = true
         expect(reflector.relistResourceVersion).toBe('')
         reflector.isLastSyncResourceVersionUnavailable = false
@@ -310,8 +310,8 @@ describe('kube-client', function () {
         expect(reflector.relistResourceVersion).toBe('1')
       })
 
-      describe('#heartbeat', function () {
-        it('should start the heartbeat', async function () {
+      describe('#heartbeat', () => {
+        it('should start the heartbeat', async () => {
           reflector.heartbeatInterval = moment.duration(1)
           const socket = new TestSocket({ maxPingPongCount: 3 })
           await reflector.heartbeat(socket)
@@ -319,8 +319,8 @@ describe('kube-client', function () {
         })
       })
 
-      describe('#watchHandler', function () {
-        it('should handle watch events', async function () {
+      describe('#watchHandler', () => {
+        it('should handle watch events', async () => {
           const error = { code: 410, reason: 'Expired' }
           const socket = new EventEmitter()
 
@@ -356,7 +356,7 @@ describe('kube-client', function () {
         })
       })
 
-      describe('#listAndWatch', function () {
+      describe('#listAndWatch', () => {
         const expiredError = new ApiErrors.StatusError({ code: 410, reason: 'Expired' })
         const connectionRefusedError = new Error('Connection refused')
         connectionRefusedError.code = 'ECONNREFUSED'
@@ -373,7 +373,7 @@ describe('kube-client', function () {
         let terminateSpy
         let closeStub
 
-        beforeEach(function () {
+        beforeEach(() => {
           reflector.period = moment.duration(1)
           reflector.gracePeriod = moment.duration(1)
           reflector.minWatchTimeout = moment.duration(30, 'seconds')
@@ -395,7 +395,7 @@ describe('kube-client', function () {
           watchHandlerStub = jest.spyOn(reflector, 'watchHandler')
         })
 
-        it('should list and fail', async function () {
+        it('should list and fail', async () => {
           listStub.mockImplementationOnce(() => {
             throw unexpectedError
           })
@@ -406,7 +406,7 @@ describe('kube-client', function () {
           expect(listOptions).toEqual({ resourceVersion: '0' })
         })
 
-        it('should list, fall back to resourceVersion="" and fail', async function () {
+        it('should list, fall back to resourceVersion="" and fail', async () => {
           listStub.mockImplementationOnce(() => {
             throw expiredError
           })
@@ -422,7 +422,7 @@ describe('kube-client', function () {
           expect(listOptions).toEqual({ resourceVersion: '' })
         })
 
-        it('should list, retry to start watching and fail', async function () {
+        it('should list, retry to start watching and fail', async () => {
           listStub.mockImplementation(async () => {
             return {
               metadata: {
@@ -470,7 +470,7 @@ describe('kube-client', function () {
           expect(store.listKeys()).toEqual(['a', 'b'])
         })
 
-        it('should list, start watching and exit', async function () {
+        it('should list, start watching and exit', async () => {
           listStub.mockImplementation(async () => {
             return {
               metadata: {
@@ -503,7 +503,7 @@ describe('kube-client', function () {
           expect(terminateSpy).not.toHaveBeenCalled()
         })
 
-        it('should list, watch and fail', async function () {
+        it('should list, watch and fail', async () => {
           listStub.mockImplementation(async () => {
             return {
               metadata: {
@@ -534,8 +534,8 @@ describe('kube-client', function () {
         })
       })
 
-      describe('#run', function () {
-        it('should run list and watch until stopped', async function () {
+      describe('#run', () => {
+        it('should run list and watch until stopped', async () => {
           const listAndWatchStub = jest.spyOn(reflector, 'listAndWatch')
           listAndWatchStub.mockImplementationOnce(() => {
             throw new Error('foo')
@@ -552,7 +552,7 @@ describe('kube-client', function () {
           destroyAgentSpy.mockClear()
         })
 
-        it('should run a reflector', async function () {
+        it('should run a reflector', async () => {
           expect(reflector).toBeInstanceOf(Reflector)
           reflector.run()
           await pEvent(store, 'fresh')

@@ -12,7 +12,7 @@
   "scripts": {
     "lint": "eslint --ext .js .",
     "test": "jest",
-    "test:coverage": "jest --collect-coverage"
+    "test-coverage": "yarn test --coverage"
   },
   "dependencies": {
     "chalk": "^3.0.0"
@@ -51,18 +51,18 @@
   },
   "jest": {
     "restoreMocks": true,
+    "verbose": true,
     "coverageDirectory": "coverage",
-    "coverageProvider": "v8",
     "testEnvironment": "node",
     "setupFiles": [
       "jest-date-mock"
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
+        "branches": 68,
         "functions": 100,
-        "lines": 97,
-        "statements": 97
+        "lines": 96,
+        "statements": 96
       }
     }
   }
